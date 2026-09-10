@@ -52,6 +52,7 @@
       :port-disabled="isLinked"
       :protocol-disabled="isLinked || !!disableFields?.protocol"
       :cluster-id="clusterId"
+      :is-distributed-inference="isDistributedInference"
     />
 
     <runai-folding-sub-section label="Image pull" aid="image-pull-policy-sub-section">
@@ -198,6 +199,10 @@ export default defineComponent({
       default: false,
     },
     supportingServingPortAccess: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
+    isDistributedInference: {
       type: Boolean as PropType<boolean>,
       default: false,
     },

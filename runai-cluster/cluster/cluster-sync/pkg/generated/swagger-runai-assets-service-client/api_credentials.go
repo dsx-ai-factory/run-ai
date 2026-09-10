@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -294,6 +296,7 @@ func (a *CredentialsApiService) CreateAccessKey(ctx context.Context) ApiCreateAc
 }
 
 // Execute executes the request
+//
 //	@return AccessKey
 func (a *CredentialsApiService) CreateAccessKeyExecute(r ApiCreateAccessKeyRequest) (*AccessKey, *http.Response, error) {
 	var (
@@ -443,6 +446,7 @@ func (a *CredentialsApiService) CreateDockerRegistry(ctx context.Context) ApiCre
 }
 
 // Execute executes the request
+//
 //	@return DockerRegistry
 func (a *CredentialsApiService) CreateDockerRegistryExecute(r ApiCreateDockerRegistryRequest) (*DockerRegistry, *http.Response, error) {
 	var (
@@ -592,6 +596,7 @@ func (a *CredentialsApiService) CreatePassword(ctx context.Context) ApiCreatePas
 }
 
 // Execute executes the request
+//
 //	@return Password
 func (a *CredentialsApiService) CreatePasswordExecute(r ApiCreatePasswordRequest) (*Password, *http.Response, error) {
 	var (
@@ -738,6 +743,7 @@ func (a *CredentialsApiService) DeleteAccessKey(ctx context.Context, assetId str
 }
 
 // Execute executes the request
+//
 //	@return HttpResponse
 func (a *CredentialsApiService) DeleteAccessKeyExecute(r ApiDeleteAccessKeyRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -903,6 +909,7 @@ func (a *CredentialsApiService) DeleteDockerRegistry(ctx context.Context, assetI
 }
 
 // Execute executes the request
+//
 //	@return HttpResponse
 func (a *CredentialsApiService) DeleteDockerRegistryExecute(r ApiDeleteDockerRegistryRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -1068,6 +1075,7 @@ func (a *CredentialsApiService) DeletePassword(ctx context.Context, assetId stri
 }
 
 // Execute executes the request
+//
 //	@return HttpResponse
 func (a *CredentialsApiService) DeletePasswordExecute(r ApiDeletePasswordRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -1240,6 +1248,7 @@ func (a *CredentialsApiService) GetAccessKeyById(ctx context.Context, assetId st
 }
 
 // Execute executes the request
+//
 //	@return AccessKey
 func (a *CredentialsApiService) GetAccessKeyByIdExecute(r ApiGetAccessKeyByIdRequest) (*AccessKey, *http.Response, error) {
 	var (
@@ -1405,6 +1414,7 @@ func (a *CredentialsApiService) GetDockerRegistryById(ctx context.Context, asset
 }
 
 // Execute executes the request
+//
 //	@return DockerRegistry
 func (a *CredentialsApiService) GetDockerRegistryByIdExecute(r ApiGetDockerRegistryByIdRequest) (*DockerRegistry, *http.Response, error) {
 	var (
@@ -1570,6 +1580,7 @@ func (a *CredentialsApiService) GetPasswordById(ctx context.Context, assetId str
 }
 
 // Execute executes the request
+//
 //	@return Password
 func (a *CredentialsApiService) GetPasswordByIdExecute(r ApiGetPasswordByIdRequest) (*Password, *http.Response, error) {
 	var (
@@ -1767,6 +1778,7 @@ func (a *CredentialsApiService) ListAccessKeys(ctx context.Context) ApiListAcces
 }
 
 // Execute executes the request
+//
 //	@return AccessKeyListResponse
 func (a *CredentialsApiService) ListAccessKeysExecute(r ApiListAccessKeysRequest) (*AccessKeyListResponse, *http.Response, error) {
 	var (
@@ -1965,6 +1977,7 @@ func (a *CredentialsApiService) ListCredentialsAssets(ctx context.Context) ApiLi
 }
 
 // Execute executes the request
+//
 //	@return CredentialsListResponse
 func (a *CredentialsApiService) ListCredentialsAssetsExecute(r ApiListCredentialsAssetsRequest) (*CredentialsListResponse, *http.Response, error) {
 	var (
@@ -2153,6 +2166,7 @@ func (a *CredentialsApiService) ListDockerRegistries(ctx context.Context) ApiLis
 }
 
 // Execute executes the request
+//
 //	@return DockerRegistryListResponse
 func (a *CredentialsApiService) ListDockerRegistriesExecute(r ApiListDockerRegistriesRequest) (*DockerRegistryListResponse, *http.Response, error) {
 	var (
@@ -2351,6 +2365,7 @@ func (a *CredentialsApiService) ListPasswords(ctx context.Context) ApiListPasswo
 }
 
 // Execute executes the request
+//
 //	@return PasswordListResponse
 func (a *CredentialsApiService) ListPasswordsExecute(r ApiListPasswordsRequest) (*PasswordListResponse, *http.Response, error) {
 	var (
@@ -2516,6 +2531,7 @@ func (a *CredentialsApiService) UpdateAccessKey(ctx context.Context, assetId str
 }
 
 // Execute executes the request
+//
 //	@return AccessKey
 func (a *CredentialsApiService) UpdateAccessKeyExecute(r ApiUpdateAccessKeyRequest) (*AccessKey, *http.Response, error) {
 	var (
@@ -2682,6 +2698,7 @@ func (a *CredentialsApiService) UpdateDockerRegistry(ctx context.Context, assetI
 }
 
 // Execute executes the request
+//
 //	@return DockerRegistry
 func (a *CredentialsApiService) UpdateDockerRegistryExecute(r ApiUpdateDockerRegistryRequest) (*DockerRegistry, *http.Response, error) {
 	var (
@@ -2848,6 +2865,7 @@ func (a *CredentialsApiService) UpdatePassword(ctx context.Context, assetId stri
 }
 
 // Execute executes the request
+//
 //	@return Password
 func (a *CredentialsApiService) UpdatePasswordExecute(r ApiUpdatePasswordRequest) (*Password, *http.Response, error) {
 	var (

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,11 +18,11 @@ import (
 
 // AutoScalingRules struct for AutoScalingRules
 type AutoScalingRules struct {
-	MinReplicas NullableIntegerRules `json:"minReplicas,omitempty"`
-	MaxReplicas NullableIntegerRules `json:"maxReplicas,omitempty"`
-	Metric NullableAutoScalingMetricRules `json:"metric,omitempty"`
-	MetricThreshold NullableIntegerRules `json:"metricThreshold,omitempty"`
-	ScaleToZeroRetentionSeconds NullableIntegerRules `json:"scaleToZeroRetentionSeconds,omitempty"`
+	MinReplicas                 NullableIntegerRules           `json:"minReplicas,omitempty"`
+	MaxReplicas                 NullableIntegerRules           `json:"maxReplicas,omitempty"`
+	Metric                      NullableAutoScalingMetricRules `json:"metric,omitempty"`
+	MetricThreshold             NullableIntegerRules           `json:"metricThreshold,omitempty"`
+	ScaleToZeroRetentionSeconds NullableIntegerRules           `json:"scaleToZeroRetentionSeconds,omitempty"`
 }
 
 // NewAutoScalingRules instantiates a new AutoScalingRules object
@@ -72,6 +74,7 @@ func (o *AutoScalingRules) HasMinReplicas() bool {
 func (o *AutoScalingRules) SetMinReplicas(v IntegerRules) {
 	o.MinReplicas.Set(&v)
 }
+
 // SetMinReplicasNil sets the value for MinReplicas to be an explicit nil
 func (o *AutoScalingRules) SetMinReplicasNil() {
 	o.MinReplicas.Set(nil)
@@ -114,6 +117,7 @@ func (o *AutoScalingRules) HasMaxReplicas() bool {
 func (o *AutoScalingRules) SetMaxReplicas(v IntegerRules) {
 	o.MaxReplicas.Set(&v)
 }
+
 // SetMaxReplicasNil sets the value for MaxReplicas to be an explicit nil
 func (o *AutoScalingRules) SetMaxReplicasNil() {
 	o.MaxReplicas.Set(nil)
@@ -156,6 +160,7 @@ func (o *AutoScalingRules) HasMetric() bool {
 func (o *AutoScalingRules) SetMetric(v AutoScalingMetricRules) {
 	o.Metric.Set(&v)
 }
+
 // SetMetricNil sets the value for Metric to be an explicit nil
 func (o *AutoScalingRules) SetMetricNil() {
 	o.Metric.Set(nil)
@@ -198,6 +203,7 @@ func (o *AutoScalingRules) HasMetricThreshold() bool {
 func (o *AutoScalingRules) SetMetricThreshold(v IntegerRules) {
 	o.MetricThreshold.Set(&v)
 }
+
 // SetMetricThresholdNil sets the value for MetricThreshold to be an explicit nil
 func (o *AutoScalingRules) SetMetricThresholdNil() {
 	o.MetricThreshold.Set(nil)
@@ -240,6 +246,7 @@ func (o *AutoScalingRules) HasScaleToZeroRetentionSeconds() bool {
 func (o *AutoScalingRules) SetScaleToZeroRetentionSeconds(v IntegerRules) {
 	o.ScaleToZeroRetentionSeconds.Set(&v)
 }
+
 // SetScaleToZeroRetentionSecondsNil sets the value for ScaleToZeroRetentionSeconds to be an explicit nil
 func (o *AutoScalingRules) SetScaleToZeroRetentionSecondsNil() {
 	o.ScaleToZeroRetentionSeconds.Set(nil)
@@ -305,5 +312,3 @@ func (v *NullableAutoScalingRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

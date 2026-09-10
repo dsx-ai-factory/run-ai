@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 // TrainingsApiService TrainingsApi service
 type TrainingsApiService service
 
 type ApiDeleteTrainingRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TrainingsApiService
-	clusterId string
-	id string
+	clusterId  string
+	id         string
 }
 
 func (r ApiDeleteTrainingRequest) Execute() (*http.Response, error) {
@@ -37,26 +38,26 @@ func (r ApiDeleteTrainingRequest) Execute() (*http.Response, error) {
 /*
 DeleteTraining Delete a training
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @param id
- @return ApiDeleteTrainingRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@param id
+	@return ApiDeleteTrainingRequest
 */
 func (a *TrainingsApiService) DeleteTraining(ctx context.Context, clusterId string, id string) ApiDeleteTrainingRequest {
 	return ApiDeleteTrainingRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
-		id: id,
+		ctx:        ctx,
+		clusterId:  clusterId,
+		id:         id,
 	}
 }
 
 // Execute executes the request
 func (a *TrainingsApiService) DeleteTrainingExecute(r ApiDeleteTrainingRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrainingsApiService.DeleteTraining")
@@ -157,9 +158,9 @@ func (a *TrainingsApiService) DeleteTrainingExecute(r ApiDeleteTrainingRequest) 
 }
 
 type ApiSyncTrainingsStatusRequest struct {
-	ctx context.Context
-	ApiService *TrainingsApiService
-	clusterId string
+	ctx            context.Context
+	ApiService     *TrainingsApiService
+	clusterId      string
 	workloadStatus *[]WorkloadStatus
 }
 
@@ -177,25 +178,24 @@ SyncTrainingsStatus Sync trainings status
 
 Sync the status of all trainings from k8s cluster to Run:AI control plane
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @return ApiSyncTrainingsStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@return ApiSyncTrainingsStatusRequest
 */
 func (a *TrainingsApiService) SyncTrainingsStatus(ctx context.Context, clusterId string) ApiSyncTrainingsStatusRequest {
 	return ApiSyncTrainingsStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *TrainingsApiService) SyncTrainingsStatusExecute(r ApiSyncTrainingsStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrainingsApiService.SyncTrainingsStatus")
@@ -261,13 +261,13 @@ func (a *TrainingsApiService) SyncTrainingsStatusExecute(r ApiSyncTrainingsStatu
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -275,9 +275,9 @@ func (a *TrainingsApiService) SyncTrainingsStatusExecute(r ApiSyncTrainingsStatu
 }
 
 type ApiUpdateTrainingStatusRequest struct {
-	ctx context.Context
-	ApiService *TrainingsApiService
-	clusterId string
+	ctx            context.Context
+	ApiService     *TrainingsApiService
+	clusterId      string
 	workloadStatus *WorkloadStatus
 }
 
@@ -293,24 +293,24 @@ func (r ApiUpdateTrainingStatusRequest) Execute() (*http.Response, error) {
 /*
 UpdateTrainingStatus Update training status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @return ApiUpdateTrainingStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@return ApiUpdateTrainingStatusRequest
 */
 func (a *TrainingsApiService) UpdateTrainingStatus(ctx context.Context, clusterId string) ApiUpdateTrainingStatusRequest {
 	return ApiUpdateTrainingStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *TrainingsApiService) UpdateTrainingStatusExecute(r ApiUpdateTrainingStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrainingsApiService.UpdateTrainingStatus")

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -33,7 +35,7 @@ type PodGroup struct {
 	ImageName string `json:"imageName"`
 	// The phase of the pod group.
 	PodGroupPhase *string `json:"podGroupPhase,omitempty"`
-	JobPhase string `json:"jobPhase"`
+	JobPhase      string  `json:"jobPhase"`
 	// The owner of the pod group.
 	WorkloadUser string `json:"workloadUser"`
 	// The project that the pod group belongs to.
@@ -47,29 +49,29 @@ type PodGroup struct {
 	// Specifies the maximum number of pods the workload is able run at any given time.
 	Parallelism int32 `json:"parallelism"`
 	// Specifies the number of successfully finished pods the created workload should be run with.
-	Completions int32 `json:"completions"`
-	CurrentRequestedGpus float32 `json:"currentRequestedGpus"`
-	TotalRequestedGpus float32 `json:"totalRequestedGpus"`
-	RequestedGpusPerPodgroup float32 `json:"requestedGpusPerPodgroup"`
+	Completions                    int32   `json:"completions"`
+	CurrentRequestedGpus           float32 `json:"currentRequestedGpus"`
+	TotalRequestedGpus             float32 `json:"totalRequestedGpus"`
+	RequestedGpusPerPodgroup       float32 `json:"requestedGpusPerPodgroup"`
 	RequestedGpusMemoryPerPodgroup float32 `json:"requestedGpusMemoryPerPodgroup"`
 	// Specifies the Parent Workload Name
-	ParentWorkloadName string `json:"parentWorkloadName"`
-	CurrentAllocatedGpus *float32 `json:"currentAllocatedGpus,omitempty"`
-	CurrentAllocatedGpusMemory *float32 `json:"currentAllocatedGpusMemory,omitempty"`
-	TotalRequestedCpu *float32 `json:"totalRequestedCpu,omitempty"`
-	TotalRequestedMemory *float32 `json:"totalRequestedMemory,omitempty"`
-	TotalLimitCpu *float32 `json:"totalLimitCpu,omitempty"`
-	TotalLimitMemory *float32 `json:"totalLimitMemory,omitempty"`
-	CliCommand *string `json:"cliCommand,omitempty"`
-	RequestedMigDevices *string `json:"requestedMigDevices,omitempty"`
-	DynamicData map[string]interface{} `json:"dynamicData,omitempty"`
-	ExistsInCluster *bool `json:"existsInCluster,omitempty"`
+	ParentWorkloadName         string                 `json:"parentWorkloadName"`
+	CurrentAllocatedGpus       *float32               `json:"currentAllocatedGpus,omitempty"`
+	CurrentAllocatedGpusMemory *float32               `json:"currentAllocatedGpusMemory,omitempty"`
+	TotalRequestedCpu          *float32               `json:"totalRequestedCpu,omitempty"`
+	TotalRequestedMemory       *float32               `json:"totalRequestedMemory,omitempty"`
+	TotalLimitCpu              *float32               `json:"totalLimitCpu,omitempty"`
+	TotalLimitMemory           *float32               `json:"totalLimitMemory,omitempty"`
+	CliCommand                 *string                `json:"cliCommand,omitempty"`
+	RequestedMigDevices        *string                `json:"requestedMigDevices,omitempty"`
+	DynamicData                map[string]interface{} `json:"dynamicData,omitempty"`
+	ExistsInCluster            *bool                  `json:"existsInCluster,omitempty"`
 	// Describe the content of jobUrl field, values may be (tensorboard , jupyter or '')
 	JobUrlType *string `json:"jobUrlType,omitempty"`
 	// If true, it indicates that the pod group runs jupyter notebook.
 	// Deprecated
-	IsJupyter *bool `json:"isJupyter,omitempty"`
-	JobUrl *string `json:"jobUrl,omitempty"`
+	IsJupyter *bool   `json:"isJupyter,omitempty"`
+	JobUrl    *string `json:"jobUrl,omitempty"`
 	// this attribute is obsolete, use workloadId instead.
 	WorkspaceId *string `json:"workspaceId,omitempty"`
 	// reference to the workspace which was used for the creation of the job.
@@ -1343,5 +1345,3 @@ func (v *NullablePodGroup) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

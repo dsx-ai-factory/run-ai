@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -17,8 +19,8 @@ import (
 
 // GetPermittedScopesRequest struct for GetPermittedScopesRequest
 type GetPermittedScopesRequest struct {
-	ResourceType ResourceType `json:"resourceType"`
-	Action NullableString `json:"action,omitempty"`
+	ResourceType ResourceType   `json:"resourceType"`
+	Action       NullableString `json:"action,omitempty"`
 }
 
 // NewGetPermittedScopesRequest instantiates a new GetPermittedScopesRequest object
@@ -95,6 +97,7 @@ func (o *GetPermittedScopesRequest) HasAction() bool {
 func (o *GetPermittedScopesRequest) SetAction(v string) {
 	o.Action.Set(&v)
 }
+
 // SetActionNil sets the value for Action to be an explicit nil
 func (o *GetPermittedScopesRequest) SetActionNil() {
 	o.Action.Set(nil)
@@ -151,5 +154,3 @@ func (v *NullableGetPermittedScopesRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

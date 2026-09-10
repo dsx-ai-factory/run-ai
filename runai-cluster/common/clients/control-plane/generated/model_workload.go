@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -18,48 +20,48 @@ import (
 // Workload struct for Workload
 type Workload struct {
 	// The id of the tenant.
-	TenantId int32 `json:"tenantId"`
-	RunningPods int32 `json:"runningPods"`
-	PhaseUpdatedAt time.Time `json:"phaseUpdatedAt"`
-	K8sPhaseUpdatedAt time.Time `json:"k8sPhaseUpdatedAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Source Source `json:"source"`
-	DeletedAt NullableTime `json:"deletedAt"`
-	Type string `json:"type"`
-	Name string `json:"name"`
-	Id string `json:"id"`
-	PriorityClassName string `json:"priorityClassName"`
-	SubmittedBy *string `json:"submittedBy,omitempty"`
+	TenantId          int32        `json:"tenantId"`
+	RunningPods       int32        `json:"runningPods"`
+	PhaseUpdatedAt    time.Time    `json:"phaseUpdatedAt"`
+	K8sPhaseUpdatedAt time.Time    `json:"k8sPhaseUpdatedAt"`
+	UpdatedAt         time.Time    `json:"updatedAt"`
+	Source            Source       `json:"source"`
+	DeletedAt         NullableTime `json:"deletedAt"`
+	Type              string       `json:"type"`
+	Name              string       `json:"name"`
+	Id                string       `json:"id"`
+	PriorityClassName string       `json:"priorityClassName"`
+	SubmittedBy       *string      `json:"submittedBy,omitempty"`
 	// The id of the cluster.
-	ClusterId string `json:"clusterId"`
-	ProjectName string `json:"projectName"`
-	ProjectId string `json:"projectId"`
-	DepartmentName string `json:"departmentName"`
-	DepartmentId string `json:"departmentId"`
-	Namespace string `json:"namespace"`
-	CreatedAt time.Time `json:"createdAt"`
-	WorkloadRequestedResources NullableWorkloadRequestResources `json:"workloadRequestedResources,omitempty"`
-	PodsRequestedResources NullableWorkloadRequestResources `json:"podsRequestedResources,omitempty"`
-	AllocatedResources NullableWorkloadAllocatedResources `json:"allocatedResources,omitempty"`
-	ActionsSupport *ActionsSupport `json:"actionsSupport,omitempty"`
-	Phase Phase `json:"phase"`
-	Conditions []Condition `json:"conditions"`
-	PhaseMessage *string `json:"phaseMessage,omitempty"`
-	K8sPhase string `json:"k8sPhase"`
-	RequestedPods *RequestedPods `json:"requestedPods,omitempty"`
-	RequestedNodePools []string `json:"requestedNodePools,omitempty"`
-	CurrentNodePools []string `json:"currentNodePools,omitempty"`
-	CompletedAt NullableTime `json:"completedAt,omitempty"`
-	Images []string `json:"images,omitempty"`
-	ChildrenIds []WorkloadChildrenIdsInner `json:"childrenIds,omitempty"`
-	Urls []string `json:"urls,omitempty"`
-	Datasources []Datasource `json:"datasources,omitempty"`
-	Environments []Environment `json:"environments,omitempty"`
-	ExternalConnections []Connection1 `json:"externalConnections,omitempty"`
-	DistributedFramework *string `json:"distributedFramework,omitempty"`
-	AdditionalFields map[string]interface{} `json:"additionalFields,omitempty"`
-	Preemptible NullableBool `json:"preemptible,omitempty"`
-	FullySaasWorkload *bool `json:"fullySaasWorkload,omitempty"`
+	ClusterId                  string                             `json:"clusterId"`
+	ProjectName                string                             `json:"projectName"`
+	ProjectId                  string                             `json:"projectId"`
+	DepartmentName             string                             `json:"departmentName"`
+	DepartmentId               string                             `json:"departmentId"`
+	Namespace                  string                             `json:"namespace"`
+	CreatedAt                  time.Time                          `json:"createdAt"`
+	WorkloadRequestedResources NullableWorkloadRequestResources   `json:"workloadRequestedResources,omitempty"`
+	PodsRequestedResources     NullableWorkloadRequestResources   `json:"podsRequestedResources,omitempty"`
+	AllocatedResources         NullableWorkloadAllocatedResources `json:"allocatedResources,omitempty"`
+	ActionsSupport             *ActionsSupport                    `json:"actionsSupport,omitempty"`
+	Phase                      Phase                              `json:"phase"`
+	Conditions                 []Condition                        `json:"conditions"`
+	PhaseMessage               *string                            `json:"phaseMessage,omitempty"`
+	K8sPhase                   string                             `json:"k8sPhase"`
+	RequestedPods              *RequestedPods                     `json:"requestedPods,omitempty"`
+	RequestedNodePools         []string                           `json:"requestedNodePools,omitempty"`
+	CurrentNodePools           []string                           `json:"currentNodePools,omitempty"`
+	CompletedAt                NullableTime                       `json:"completedAt,omitempty"`
+	Images                     []string                           `json:"images,omitempty"`
+	ChildrenIds                []WorkloadChildrenIdsInner         `json:"childrenIds,omitempty"`
+	Urls                       []string                           `json:"urls,omitempty"`
+	Datasources                []Datasource                       `json:"datasources,omitempty"`
+	Environments               []Environment                      `json:"environments,omitempty"`
+	ExternalConnections        []Connection1                      `json:"externalConnections,omitempty"`
+	DistributedFramework       *string                            `json:"distributedFramework,omitempty"`
+	AdditionalFields           map[string]interface{}             `json:"additionalFields,omitempty"`
+	Preemptible                NullableBool                       `json:"preemptible,omitempty"`
+	FullySaasWorkload          *bool                              `json:"fullySaasWorkload,omitempty"`
 }
 
 // NewWorkload instantiates a new Workload object
@@ -598,6 +600,7 @@ func (o *Workload) HasWorkloadRequestedResources() bool {
 func (o *Workload) SetWorkloadRequestedResources(v WorkloadRequestResources) {
 	o.WorkloadRequestedResources.Set(&v)
 }
+
 // SetWorkloadRequestedResourcesNil sets the value for WorkloadRequestedResources to be an explicit nil
 func (o *Workload) SetWorkloadRequestedResourcesNil() {
 	o.WorkloadRequestedResources.Set(nil)
@@ -640,6 +643,7 @@ func (o *Workload) HasPodsRequestedResources() bool {
 func (o *Workload) SetPodsRequestedResources(v WorkloadRequestResources) {
 	o.PodsRequestedResources.Set(&v)
 }
+
 // SetPodsRequestedResourcesNil sets the value for PodsRequestedResources to be an explicit nil
 func (o *Workload) SetPodsRequestedResourcesNil() {
 	o.PodsRequestedResources.Set(nil)
@@ -682,6 +686,7 @@ func (o *Workload) HasAllocatedResources() bool {
 func (o *Workload) SetAllocatedResources(v WorkloadAllocatedResources) {
 	o.AllocatedResources.Set(&v)
 }
+
 // SetAllocatedResourcesNil sets the value for AllocatedResources to be an explicit nil
 func (o *Workload) SetAllocatedResourcesNil() {
 	o.AllocatedResources.Set(nil)
@@ -956,6 +961,7 @@ func (o *Workload) HasCompletedAt() bool {
 func (o *Workload) SetCompletedAt(v time.Time) {
 	o.CompletedAt.Set(&v)
 }
+
 // SetCompletedAtNil sets the value for CompletedAt to be an explicit nil
 func (o *Workload) SetCompletedAtNil() {
 	o.CompletedAt.Set(nil)
@@ -1254,6 +1260,7 @@ func (o *Workload) HasPreemptible() bool {
 func (o *Workload) SetPreemptible(v bool) {
 	o.Preemptible.Set(&v)
 }
+
 // SetPreemptibleNil sets the value for Preemptible to be an explicit nil
 func (o *Workload) SetPreemptibleNil() {
 	o.Preemptible.Set(nil)
@@ -1459,5 +1466,3 @@ func (v *NullableWorkload) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

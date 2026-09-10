@@ -160,7 +160,6 @@ var (
 			Name: TestQueueName,
 			Labels: map[string]string{
 				clustercommonconstants.RunaiProjectLabel: TestProjectName,
-				"runai/queue":                            TestProjectName,
 			},
 		},
 	}
@@ -174,7 +173,6 @@ var (
 			Name: TestQueueName2,
 			Labels: map[string]string{
 				clustercommonconstants.RunaiProjectLabel: TestProjectName,
-				"runai/queue":                            TestProjectName,
 				v1alpha1.NodePoolNameLabel:               TestNodePoolName2,
 			},
 		},

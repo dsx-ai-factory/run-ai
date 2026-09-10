@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -19,12 +21,11 @@ import (
 	"net/url"
 )
 
-
 // PermissionsApiService PermissionsApi service
 type PermissionsApiService service
 
 type ApiGetPermissionsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PermissionsApiService
 }
 
@@ -35,24 +36,25 @@ func (r ApiGetPermissionsRequest) Execute() ([]Permission, *http.Response, error
 /*
 GetPermissions Get user permissions summary.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetPermissionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetPermissionsRequest
 */
 func (a *PermissionsApiService) GetPermissions(ctx context.Context) ApiGetPermissionsRequest {
 	return ApiGetPermissionsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Permission
+//
+//	@return []Permission
 func (a *PermissionsApiService) GetPermissionsExecute(r ApiGetPermissionsRequest) ([]Permission, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Permission
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Permission
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PermissionsApiService.GetPermissions")
@@ -150,8 +152,8 @@ func (a *PermissionsApiService) GetPermissionsExecute(r ApiGetPermissionsRequest
 }
 
 type ApiGetPermittedScopesRequest struct {
-	ctx context.Context
-	ApiService *PermissionsApiService
+	ctx                       context.Context
+	ApiService                *PermissionsApiService
 	getPermittedScopesRequest *GetPermittedScopesRequest
 }
 
@@ -168,24 +170,25 @@ func (r ApiGetPermittedScopesRequest) Execute() (*PermittedScopesActions, *http.
 /*
 GetPermittedScopes Calculate user permitted scopes for an action on a resource.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetPermittedScopesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetPermittedScopesRequest
 */
 func (a *PermissionsApiService) GetPermittedScopes(ctx context.Context) ApiGetPermittedScopesRequest {
 	return ApiGetPermittedScopesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return PermittedScopesActions
+//
+//	@return PermittedScopesActions
 func (a *PermissionsApiService) GetPermittedScopesExecute(r ApiGetPermittedScopesRequest) (*PermittedScopesActions, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PermittedScopesActions
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PermittedScopesActions
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PermissionsApiService.GetPermittedScopes")

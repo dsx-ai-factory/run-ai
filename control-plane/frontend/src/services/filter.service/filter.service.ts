@@ -23,6 +23,7 @@ import {
   type IPaginationFilter,
   type IAdvancedFilterModel,
   type IEnumBasedFilterModel,
+  type IEnumBasedFilterSelectOption,
   type IDateFilterModel,
   EDateFilterOperator,
   type INumericFilterModel,
@@ -344,10 +345,14 @@ function _mapEnumBasedFilterToFilterParams(filter: IEnumBasedFilterModel): strin
     return _mapSubjectTypeFilterToFilterParams(filter);
   }
 
-  const excludedValues: ISelectOption[] = filter.selectOptions.filter(
-    (option: ISelectOption) => !filter.selectedValues.includes(option.value as string),
+  const excludedOptions: IEnumBasedFilterSelectOption[] = filter.selectOptions.filter(
+    (option: IEnumBasedFilterSelectOption) => !filter.selectedValues.includes(option.value as string),
   );
-  return excludedValues.map((option: ISelectOption) => `${filter.name}${EFilterOperator.NotEquals}${option.value}`);
+  return excludedOptions.flatMap((option: IEnumBasedFilterSelectOption) =>
+    (option.matchValues ?? [String(option.value)]).map(
+      (value: string) => `${filter.name}${EFilterOperator.NotEquals}${value}`,
+    ),
+  );
 }
 
 function _mapSubjectTypeFilterToFilterParams(filter: IEnumBasedFilterModel): string[] {

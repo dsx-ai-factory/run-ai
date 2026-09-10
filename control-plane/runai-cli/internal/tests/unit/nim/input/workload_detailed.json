@@ -44,7 +44,7 @@
     "default"
   ],
   "images": [
-    "gcr.io/run-ai-lab/nim-cpu:latest"
+    "nvcr.io/nim/meta/llama3-8b-instruct"
   ],
   "environments": [
     {

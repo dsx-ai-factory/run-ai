@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,8 +19,8 @@ import (
 // NonInferenceStorageFieldsRules struct for NonInferenceStorageFieldsRules
 type NonInferenceStorageFieldsRules struct {
 	HostPath NullableHostPathsRules `json:"hostPath,omitempty"`
-	Nfs NullableNfssRules `json:"nfs,omitempty"`
-	S3 NullableS3sRules `json:"s3,omitempty"`
+	Nfs      NullableNfssRules      `json:"nfs,omitempty"`
+	S3       NullableS3sRules       `json:"s3,omitempty"`
 }
 
 // NewNonInferenceStorageFieldsRules instantiates a new NonInferenceStorageFieldsRules object
@@ -70,6 +72,7 @@ func (o *NonInferenceStorageFieldsRules) HasHostPath() bool {
 func (o *NonInferenceStorageFieldsRules) SetHostPath(v HostPathsRules) {
 	o.HostPath.Set(&v)
 }
+
 // SetHostPathNil sets the value for HostPath to be an explicit nil
 func (o *NonInferenceStorageFieldsRules) SetHostPathNil() {
 	o.HostPath.Set(nil)
@@ -112,6 +115,7 @@ func (o *NonInferenceStorageFieldsRules) HasNfs() bool {
 func (o *NonInferenceStorageFieldsRules) SetNfs(v NfssRules) {
 	o.Nfs.Set(&v)
 }
+
 // SetNfsNil sets the value for Nfs to be an explicit nil
 func (o *NonInferenceStorageFieldsRules) SetNfsNil() {
 	o.Nfs.Set(nil)
@@ -154,6 +158,7 @@ func (o *NonInferenceStorageFieldsRules) HasS3() bool {
 func (o *NonInferenceStorageFieldsRules) SetS3(v S3sRules) {
 	o.S3.Set(&v)
 }
+
 // SetS3Nil sets the value for S3 to be an explicit nil
 func (o *NonInferenceStorageFieldsRules) SetS3Nil() {
 	o.S3.Set(nil)
@@ -213,5 +218,3 @@ func (v *NullableNonInferenceStorageFieldsRules) UnmarshalJSON(src []byte) error
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

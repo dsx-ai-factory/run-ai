@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -90,6 +92,7 @@ func (a *InferenceApiService) CreateInference(ctx context.Context) ApiCreateInfe
 }
 
 // Execute executes the request
+//
 //	@return Inference
 func (a *InferenceApiService) CreateInferenceExecute(r ApiCreateInferenceRequest) (*Inference, *http.Response, error) {
 	var (
@@ -233,6 +236,7 @@ func (a *InferenceApiService) GetInferenceById(ctx context.Context, id string) A
 }
 
 // Execute executes the request
+//
 //	@return Inference
 func (a *InferenceApiService) GetInferenceByIdExecute(r ApiGetInferenceByIdRequest) (*Inference, *http.Response, error) {
 	var (

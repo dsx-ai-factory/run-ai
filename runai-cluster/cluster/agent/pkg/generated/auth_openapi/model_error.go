@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -17,8 +19,8 @@ import (
 
 // Error struct for Error
 type Error struct {
-	Code int32 `json:"code"`
-	Message string `json:"message"`
+	Code    int32   `json:"code"`
+	Message string  `json:"message"`
 	Details *string `json:"details,omitempty"`
 }
 
@@ -170,5 +172,3 @@ func (v *NullableError) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Workloads V2 Service
 
@@ -105,8 +107,10 @@ func (a *NVIDIANIMAPIService) CreateNimService(ctx context.Context) ApiCreateNim
 }
 
 // Execute executes the request
-//  @return NimServiceResponse
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
+//
+//	@return NimServiceResponse
+//
+// /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NVIDIANIMAPIService) CreateNimServiceExecute(r ApiCreateNimServiceRequest) (*NimServiceResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
@@ -280,8 +284,10 @@ func (a *NVIDIANIMAPIService) GetNimServiceById(ctx context.Context, workloadV2I
 }
 
 // Execute executes the request
-//  @return NimServiceResponse
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
+//
+//	@return NimServiceResponse
+//
+// /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NVIDIANIMAPIService) GetNimServiceByIdExecute(r ApiGetNimServiceByIdRequest) (*NimServiceResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
@@ -445,8 +451,10 @@ func (a *NVIDIANIMAPIService) UpdateNimServiceSpec(ctx context.Context, workload
 }
 
 // Execute executes the request
-//  @return NimServiceResponse
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
+//
+//	@return NimServiceResponse
+//
+// /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NVIDIANIMAPIService) UpdateNimServiceSpecExecute(r ApiUpdateNimServiceSpecRequest) (*NimServiceResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPatch

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -21,11 +23,11 @@ var _ MappedNullable = &NotificationKind{}
 
 // NotificationKind struct for NotificationKind
 type NotificationKind struct {
-	Origin string `json:"origin"`
-	Category string `json:"category"`
-	Type string `json:"type"`
+	Origin      string `json:"origin"`
+	Category    string `json:"category"`
+	Type        string `json:"type"`
 	Description string `json:"description"`
-	Template string `json:"template"`
+	Template    string `json:"template"`
 }
 
 type _NotificationKind NotificationKind
@@ -173,7 +175,7 @@ func (o *NotificationKind) SetTemplate(v string) {
 }
 
 func (o NotificationKind) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -207,10 +209,10 @@ func (o *NotificationKind) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -266,5 +268,3 @@ func (v *NullableNotificationKind) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

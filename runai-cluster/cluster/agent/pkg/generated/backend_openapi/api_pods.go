@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 // PodsApiService PodsApi service
 type PodsApiService service
 
 type ApiCreatePodsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodsApiService
-	uuid string
-	pod *[]Pod
+	uuid       string
+	pod        *[]Pod
 }
 
 func (r ApiCreatePodsRequest) Pod(pod []Pod) ApiCreatePodsRequest {
@@ -42,26 +43,27 @@ func (r ApiCreatePodsRequest) Execute() ([]Pod, *http.Response, error) {
 /*
 CreatePods create pods
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiCreatePodsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiCreatePodsRequest
 */
 func (a *PodsApiService) CreatePods(ctx context.Context, uuid string) ApiCreatePodsRequest {
 	return ApiCreatePodsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []Pod
+//
+//	@return []Pod
 func (a *PodsApiService) CreatePodsExecute(r ApiCreatePodsRequest) ([]Pod, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Pod
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Pod
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodsApiService.CreatePods")
@@ -140,13 +142,13 @@ func (a *PodsApiService) CreatePodsExecute(r ApiCreatePodsRequest) ([]Pod, *http
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -163,10 +165,10 @@ func (a *PodsApiService) CreatePodsExecute(r ApiCreatePodsRequest) ([]Pod, *http
 }
 
 type ApiDeletePodRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodsApiService
-	uuid string
-	podId string
+	uuid       string
+	podId      string
 }
 
 func (r ApiDeletePodRequest) Execute() (string, *http.Response, error) {
@@ -176,28 +178,29 @@ func (r ApiDeletePodRequest) Execute() (string, *http.Response, error) {
 /*
 DeletePod Delete a pod by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param podId Unique identifier of the pod.
- @return ApiDeletePodRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param podId Unique identifier of the pod.
+	@return ApiDeletePodRequest
 */
 func (a *PodsApiService) DeletePod(ctx context.Context, uuid string, podId string) ApiDeletePodRequest {
 	return ApiDeletePodRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
-		podId: podId,
+		ctx:        ctx,
+		uuid:       uuid,
+		podId:      podId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *PodsApiService) DeletePodExecute(r ApiDeletePodRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodsApiService.DeletePod")
@@ -307,9 +310,9 @@ func (a *PodsApiService) DeletePodExecute(r ApiDeletePodRequest) (string, *http.
 }
 
 type ApiGetPodsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodsApiService
-	uuid string
+	uuid       string
 }
 
 func (r ApiGetPodsRequest) Execute() ([]Pod, *http.Response, error) {
@@ -319,26 +322,27 @@ func (r ApiGetPodsRequest) Execute() ([]Pod, *http.Response, error) {
 /*
 GetPods get all pods from a specific cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiGetPodsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiGetPodsRequest
 */
 func (a *PodsApiService) GetPods(ctx context.Context, uuid string) ApiGetPodsRequest {
 	return ApiGetPodsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []Pod
+//
+//	@return []Pod
 func (a *PodsApiService) GetPodsExecute(r ApiGetPodsRequest) ([]Pod, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Pod
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Pod
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodsApiService.GetPods")
@@ -412,13 +416,13 @@ func (a *PodsApiService) GetPodsExecute(r ApiGetPodsRequest) ([]Pod, *http.Respo
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -435,10 +439,10 @@ func (a *PodsApiService) GetPodsExecute(r ApiGetPodsRequest) ([]Pod, *http.Respo
 }
 
 type ApiSyncPodsDataRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodsApiService
-	uuid string
-	pod *[]Pod
+	uuid       string
+	pod        *[]Pod
 }
 
 func (r ApiSyncPodsDataRequest) Pod(pod []Pod) ApiSyncPodsDataRequest {
@@ -453,17 +457,17 @@ func (r ApiSyncPodsDataRequest) Execute() (*http.Response, error) {
 /*
 SyncPodsData Sync All cluster pods data to DB
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiSyncPodsDataRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiSyncPodsDataRequest
 
 Deprecated
 */
 func (a *PodsApiService) SyncPodsData(ctx context.Context, uuid string) ApiSyncPodsDataRequest {
 	return ApiSyncPodsDataRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
@@ -471,9 +475,9 @@ func (a *PodsApiService) SyncPodsData(ctx context.Context, uuid string) ApiSyncP
 // Deprecated
 func (a *PodsApiService) SyncPodsDataExecute(r ApiSyncPodsDataRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodsApiService.SyncPodsData")
@@ -578,11 +582,11 @@ func (a *PodsApiService) SyncPodsDataExecute(r ApiSyncPodsDataRequest) (*http.Re
 }
 
 type ApiUpdatePodRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodsApiService
-	uuid string
-	podId string
-	pod *Pod
+	uuid       string
+	podId      string
+	pod        *Pod
 }
 
 func (r ApiUpdatePodRequest) Pod(pod Pod) ApiUpdatePodRequest {
@@ -597,26 +601,26 @@ func (r ApiUpdatePodRequest) Execute() (*http.Response, error) {
 /*
 UpdatePod Update a pod by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param podId Unique identifier of the pod.
- @return ApiUpdatePodRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param podId Unique identifier of the pod.
+	@return ApiUpdatePodRequest
 */
 func (a *PodsApiService) UpdatePod(ctx context.Context, uuid string, podId string) ApiUpdatePodRequest {
 	return ApiUpdatePodRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
-		podId: podId,
+		ctx:        ctx,
+		uuid:       uuid,
+		podId:      podId,
 	}
 }
 
 // Execute executes the request
 func (a *PodsApiService) UpdatePodExecute(r ApiUpdatePodRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodsApiService.UpdatePod")
@@ -722,10 +726,10 @@ func (a *PodsApiService) UpdatePodExecute(r ApiUpdatePodRequest) (*http.Response
 }
 
 type ApiUpdatePodsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodsApiService
-	uuid string
-	podsSync *PodsSync
+	uuid       string
+	podsSync   *PodsSync
 }
 
 func (r ApiUpdatePodsRequest) PodsSync(podsSync PodsSync) ApiUpdatePodsRequest {
@@ -740,26 +744,27 @@ func (r ApiUpdatePodsRequest) Execute() (*IdsResponse, *http.Response, error) {
 /*
 UpdatePods Sync all pods in a namespace to DB
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiUpdatePodsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiUpdatePodsRequest
 */
 func (a *PodsApiService) UpdatePods(ctx context.Context, uuid string) ApiUpdatePodsRequest {
 	return ApiUpdatePodsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return IdsResponse
+//
+//	@return IdsResponse
 func (a *PodsApiService) UpdatePodsExecute(r ApiUpdatePodsRequest) (*IdsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *IdsResponse
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *IdsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodsApiService.UpdatePods")

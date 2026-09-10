@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,16 +21,15 @@ import (
 	"strings"
 )
 
-
 type RegistryApi interface {
 
 	/*
-	CreateRegistry Create a registry asset.
+		CreateRegistry Create a registry asset.
 
-	Use to create a registry asset containing a registry base url and credentials.
+		Use to create a registry asset containing a registry base url and credentials.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RegistryApiCreateRegistryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return RegistryApiCreateRegistryRequest
 	*/
 	CreateRegistry(ctx context.Context) RegistryApiCreateRegistryRequest
 
@@ -37,13 +38,13 @@ type RegistryApi interface {
 	CreateRegistryExecute(r RegistryApiCreateRegistryRequest) (*Registry, *http.Response, error)
 
 	/*
-	DeleteRegistry Delete a registry asset.
+		DeleteRegistry Delete a registry asset.
 
-	Use to delete a registry asset containing registry base url and credentials by id.
+		Use to delete a registry asset containing registry base url and credentials by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param assetId Unique identifier of the asset.
-	@return RegistryApiDeleteRegistryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param assetId Unique identifier of the asset.
+		@return RegistryApiDeleteRegistryRequest
 	*/
 	DeleteRegistry(ctx context.Context, assetId string) RegistryApiDeleteRegistryRequest
 
@@ -51,13 +52,13 @@ type RegistryApi interface {
 	DeleteRegistryExecute(r RegistryApiDeleteRegistryRequest) (*http.Response, error)
 
 	/*
-	GetRegistryById Get a registry.
+		GetRegistryById Get a registry.
 
-	Retrieve a registry asset by id.
+		Retrieve a registry asset by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param assetId Unique identifier of the asset.
-	@return RegistryApiGetRegistryByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param assetId Unique identifier of the asset.
+		@return RegistryApiGetRegistryByIdRequest
 	*/
 	GetRegistryById(ctx context.Context, assetId string) RegistryApiGetRegistryByIdRequest
 
@@ -66,13 +67,13 @@ type RegistryApi interface {
 	GetRegistryByIdExecute(r RegistryApiGetRegistryByIdRequest) (*Registry, *http.Response, error)
 
 	/*
-	GetRepositories Get the repositories in the registry.
+		GetRepositories Get the repositories in the registry.
 
-	Retrieve a list of repositories from a registry asset.
+		Retrieve a list of repositories from a registry asset.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param assetId Unique identifier of the asset.
-	@return RegistryApiGetRepositoriesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param assetId Unique identifier of the asset.
+		@return RegistryApiGetRepositoriesRequest
 	*/
 	GetRepositories(ctx context.Context, assetId string) RegistryApiGetRepositoriesRequest
 
@@ -81,13 +82,13 @@ type RegistryApi interface {
 	GetRepositoriesExecute(r RegistryApiGetRepositoriesRequest) (*Repositories, *http.Response, error)
 
 	/*
-	GetRepositoryTags Get the repositories tags in the registry.
+		GetRepositoryTags Get the repositories tags in the registry.
 
-	Retrieve a list of repository tags from a repository asset.
+		Retrieve a list of repository tags from a repository asset.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param assetId Unique identifier of the asset.
-	@return RegistryApiGetRepositoryTagsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param assetId Unique identifier of the asset.
+		@return RegistryApiGetRepositoryTagsRequest
 	*/
 	GetRepositoryTags(ctx context.Context, assetId string) RegistryApiGetRepositoryTagsRequest
 
@@ -96,12 +97,12 @@ type RegistryApi interface {
 	GetRepositoryTagsExecute(r RegistryApiGetRepositoryTagsRequest) (*RepositoryTags, *http.Response, error)
 
 	/*
-	ListRegistries Get registries.
+		ListRegistries Get registries.
 
-	Retrieve a list of registries assets.
+		Retrieve a list of registries assets.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RegistryApiListRegistriesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return RegistryApiListRegistriesRequest
 	*/
 	ListRegistries(ctx context.Context) RegistryApiListRegistriesRequest
 
@@ -110,13 +111,13 @@ type RegistryApi interface {
 	ListRegistriesExecute(r RegistryApiListRegistriesRequest) (*RegistryListResponse, *http.Response, error)
 
 	/*
-	UpdateRegistry Update a registry asset.
+		UpdateRegistry Update a registry asset.
 
-	Use to update a registry asset containing registry base url and credentials by id.
+		Use to update a registry asset containing registry base url and credentials by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param assetId Unique identifier of the asset.
-	@return RegistryApiUpdateRegistryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param assetId Unique identifier of the asset.
+		@return RegistryApiUpdateRegistryRequest
 	*/
 	UpdateRegistry(ctx context.Context, assetId string) RegistryApiUpdateRegistryRequest
 
@@ -129,8 +130,8 @@ type RegistryApi interface {
 type RegistryApiService service
 
 type RegistryApiCreateRegistryRequest struct {
-	ctx context.Context
-	ApiService RegistryApi
+	ctx                     context.Context
+	ApiService              RegistryApi
 	registryCreationRequest *RegistryCreationRequest
 }
 
@@ -148,24 +149,25 @@ CreateRegistry Create a registry asset.
 
 Use to create a registry asset containing a registry base url and credentials.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return RegistryApiCreateRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RegistryApiCreateRegistryRequest
 */
 func (a *RegistryApiService) CreateRegistry(ctx context.Context) RegistryApiCreateRegistryRequest {
 	return RegistryApiCreateRegistryRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Registry
+//
+//	@return Registry
 func (a *RegistryApiService) CreateRegistryExecute(r RegistryApiCreateRegistryRequest) (*Registry, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Registry
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Registry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegistryApiService.CreateRegistry")
@@ -288,9 +290,9 @@ func (a *RegistryApiService) CreateRegistryExecute(r RegistryApiCreateRegistryRe
 }
 
 type RegistryApiDeleteRegistryRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService RegistryApi
-	assetId string
+	assetId    string
 }
 
 func (r RegistryApiDeleteRegistryRequest) Execute() (*http.Response, error) {
@@ -302,24 +304,24 @@ DeleteRegistry Delete a registry asset.
 
 Use to delete a registry asset containing registry base url and credentials by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param assetId Unique identifier of the asset.
- @return RegistryApiDeleteRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param assetId Unique identifier of the asset.
+	@return RegistryApiDeleteRegistryRequest
 */
 func (a *RegistryApiService) DeleteRegistry(ctx context.Context, assetId string) RegistryApiDeleteRegistryRequest {
 	return RegistryApiDeleteRegistryRequest{
 		ApiService: a,
-		ctx: ctx,
-		assetId: assetId,
+		ctx:        ctx,
+		assetId:    assetId,
 	}
 }
 
 // Execute executes the request
 func (a *RegistryApiService) DeleteRegistryExecute(r RegistryApiDeleteRegistryRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegistryApiService.DeleteRegistry")
@@ -432,9 +434,9 @@ func (a *RegistryApiService) DeleteRegistryExecute(r RegistryApiDeleteRegistryRe
 }
 
 type RegistryApiGetRegistryByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService RegistryApi
-	assetId string
+	assetId    string
 }
 
 func (r RegistryApiGetRegistryByIdRequest) Execute() (*Registry, *http.Response, error) {
@@ -446,26 +448,27 @@ GetRegistryById Get a registry.
 
 Retrieve a registry asset by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param assetId Unique identifier of the asset.
- @return RegistryApiGetRegistryByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param assetId Unique identifier of the asset.
+	@return RegistryApiGetRegistryByIdRequest
 */
 func (a *RegistryApiService) GetRegistryById(ctx context.Context, assetId string) RegistryApiGetRegistryByIdRequest {
 	return RegistryApiGetRegistryByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		assetId: assetId,
+		ctx:        ctx,
+		assetId:    assetId,
 	}
 }
 
 // Execute executes the request
-//  @return Registry
+//
+//	@return Registry
 func (a *RegistryApiService) GetRegistryByIdExecute(r RegistryApiGetRegistryByIdRequest) (*Registry, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Registry
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Registry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegistryApiService.GetRegistryById")
@@ -577,9 +580,9 @@ func (a *RegistryApiService) GetRegistryByIdExecute(r RegistryApiGetRegistryById
 }
 
 type RegistryApiGetRepositoriesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService RegistryApi
-	assetId string
+	assetId    string
 	searchName *string
 }
 
@@ -598,26 +601,27 @@ GetRepositories Get the repositories in the registry.
 
 Retrieve a list of repositories from a registry asset.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param assetId Unique identifier of the asset.
- @return RegistryApiGetRepositoriesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param assetId Unique identifier of the asset.
+	@return RegistryApiGetRepositoriesRequest
 */
 func (a *RegistryApiService) GetRepositories(ctx context.Context, assetId string) RegistryApiGetRepositoriesRequest {
 	return RegistryApiGetRepositoriesRequest{
 		ApiService: a,
-		ctx: ctx,
-		assetId: assetId,
+		ctx:        ctx,
+		assetId:    assetId,
 	}
 }
 
 // Execute executes the request
-//  @return Repositories
+//
+//	@return Repositories
 func (a *RegistryApiService) GetRepositoriesExecute(r RegistryApiGetRepositoriesRequest) (*Repositories, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Repositories
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Repositories
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegistryApiService.GetRepositories")
@@ -742,9 +746,9 @@ func (a *RegistryApiService) GetRepositoriesExecute(r RegistryApiGetRepositories
 }
 
 type RegistryApiGetRepositoryTagsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService RegistryApi
-	assetId string
+	assetId    string
 	repository *string
 	searchName *string
 }
@@ -770,26 +774,27 @@ GetRepositoryTags Get the repositories tags in the registry.
 
 Retrieve a list of repository tags from a repository asset.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param assetId Unique identifier of the asset.
- @return RegistryApiGetRepositoryTagsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param assetId Unique identifier of the asset.
+	@return RegistryApiGetRepositoryTagsRequest
 */
 func (a *RegistryApiService) GetRepositoryTags(ctx context.Context, assetId string) RegistryApiGetRepositoryTagsRequest {
 	return RegistryApiGetRepositoryTagsRequest{
 		ApiService: a,
-		ctx: ctx,
-		assetId: assetId,
+		ctx:        ctx,
+		assetId:    assetId,
 	}
 }
 
 // Execute executes the request
-//  @return RepositoryTags
+//
+//	@return RepositoryTags
 func (a *RegistryApiService) GetRepositoryTagsExecute(r RegistryApiGetRepositoryTagsRequest) (*RepositoryTags, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *RepositoryTags
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *RepositoryTags
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegistryApiService.GetRepositoryTags")
@@ -918,9 +923,9 @@ func (a *RegistryApiService) GetRepositoryTagsExecute(r RegistryApiGetRepository
 }
 
 type RegistryApiListRegistriesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService RegistryApi
-	name *string
+	name       *string
 }
 
 // Filter results by name.
@@ -938,24 +943,25 @@ ListRegistries Get registries.
 
 Retrieve a list of registries assets.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return RegistryApiListRegistriesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RegistryApiListRegistriesRequest
 */
 func (a *RegistryApiService) ListRegistries(ctx context.Context) RegistryApiListRegistriesRequest {
 	return RegistryApiListRegistriesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return RegistryListResponse
+//
+//	@return RegistryListResponse
 func (a *RegistryApiService) ListRegistriesExecute(r RegistryApiListRegistriesRequest) (*RegistryListResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *RegistryListResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *RegistryListResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegistryApiService.ListRegistries")
@@ -1056,9 +1062,9 @@ func (a *RegistryApiService) ListRegistriesExecute(r RegistryApiListRegistriesRe
 }
 
 type RegistryApiUpdateRegistryRequest struct {
-	ctx context.Context
-	ApiService RegistryApi
-	assetId string
+	ctx                   context.Context
+	ApiService            RegistryApi
+	assetId               string
 	registryUpdateRequest *RegistryUpdateRequest
 }
 
@@ -1076,26 +1082,27 @@ UpdateRegistry Update a registry asset.
 
 Use to update a registry asset containing registry base url and credentials by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param assetId Unique identifier of the asset.
- @return RegistryApiUpdateRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param assetId Unique identifier of the asset.
+	@return RegistryApiUpdateRegistryRequest
 */
 func (a *RegistryApiService) UpdateRegistry(ctx context.Context, assetId string) RegistryApiUpdateRegistryRequest {
 	return RegistryApiUpdateRegistryRequest{
 		ApiService: a,
-		ctx: ctx,
-		assetId: assetId,
+		ctx:        ctx,
+		assetId:    assetId,
 	}
 }
 
 // Execute executes the request
-//  @return Registry
+//
+//	@return Registry
 func (a *RegistryApiService) UpdateRegistryExecute(r RegistryApiUpdateRegistryRequest) (*Registry, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Registry
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Registry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegistryApiService.UpdateRegistry")

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments 
+The aggregated API of Run:AI backend projects and departments
 
 API version: 1.5.1
 */
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 // DepartmentsApiService DepartmentsApi service
 type DepartmentsApiService service
 
 type ApiV1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutRequest struct {
-	ctx context.Context
-	ApiService *DepartmentsApiService
-	clusterId string
-	departmentId int32
+	ctx                     context.Context
+	ApiService              *DepartmentsApiService
+	clusterId               string
+	departmentId            int32
 	departmentAccessControl *DepartmentAccessControl
 }
 
@@ -45,28 +46,29 @@ V1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPut Set the department
 
 Set the department admins. This endpoint requires EDITOR role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @param departmentId The unique id identifying the department.
- @return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@param departmentId The unique id identifying the department.
+	@return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutRequest
 */
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPut(ctx context.Context, clusterId string, departmentId int32) ApiV1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutRequest {
 	return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterId:    clusterId,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return DepartmentAccessControl
+//
+//	@return DepartmentAccessControl
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutExecute(r ApiV1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutRequest) (*DepartmentAccessControl, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DepartmentAccessControl
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DepartmentAccessControl
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DepartmentsApiService.V1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPut")
@@ -171,10 +173,10 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdAcc
 }
 
 type ApiV1K8sClustersClusterIdDepartmentsDepartmentIdDeleteRequest struct {
-	ctx context.Context
-	ApiService *DepartmentsApiService
-	clusterId string
-	departmentId int32
+	ctx                context.Context
+	ApiService         *DepartmentsApiService
+	clusterId          string
+	departmentId       int32
 	excludePermissions *bool
 }
 
@@ -193,28 +195,29 @@ V1K8sClustersClusterIdDepartmentsDepartmentIdDelete Delete a department.
 
 Delete a department from the cluster. This endpoint requires EDITOR role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @param departmentId The unique id identifying the department.
- @return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdDeleteRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@param departmentId The unique id identifying the department.
+	@return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdDeleteRequest
 */
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdDelete(ctx context.Context, clusterId string, departmentId int32) ApiV1K8sClustersClusterIdDepartmentsDepartmentIdDeleteRequest {
 	return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdDeleteRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterId:    clusterId,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return Department
+//
+//	@return Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdDeleteExecute(r ApiV1K8sClustersClusterIdDepartmentsDepartmentIdDeleteRequest) (*Department, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Department
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Department
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DepartmentsApiService.V1K8sClustersClusterIdDepartmentsDepartmentIdDelete")
@@ -288,10 +291,10 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdDel
 }
 
 type ApiV1K8sClustersClusterIdDepartmentsDepartmentIdGetRequest struct {
-	ctx context.Context
-	ApiService *DepartmentsApiService
-	clusterId string
-	departmentId int32
+	ctx                context.Context
+	ApiService         *DepartmentsApiService
+	clusterId          string
+	departmentId       int32
 	excludePermissions *bool
 }
 
@@ -310,28 +313,29 @@ V1K8sClustersClusterIdDepartmentsDepartmentIdGet Get a department.
 
 Get a specific department by the ID.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @param departmentId The unique id identifying the department.
- @return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@param departmentId The unique id identifying the department.
+	@return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdGetRequest
 */
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdGet(ctx context.Context, clusterId string, departmentId int32) ApiV1K8sClustersClusterIdDepartmentsDepartmentIdGetRequest {
 	return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdGetRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterId:    clusterId,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return Department
+//
+//	@return Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdGetExecute(r ApiV1K8sClustersClusterIdDepartmentsDepartmentIdGetRequest) (*Department, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Department
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Department
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DepartmentsApiService.V1K8sClustersClusterIdDepartmentsDepartmentIdGet")
@@ -405,11 +409,11 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdGet
 }
 
 type ApiV1K8sClustersClusterIdDepartmentsDepartmentIdPutRequest struct {
-	ctx context.Context
-	ApiService *DepartmentsApiService
-	clusterId string
-	departmentId int32
-	department *Department
+	ctx                context.Context
+	ApiService         *DepartmentsApiService
+	clusterId          string
+	departmentId       int32
+	department         *Department
 	excludePermissions *bool
 }
 
@@ -433,28 +437,29 @@ V1K8sClustersClusterIdDepartmentsDepartmentIdPut Update a department.
 
 Update a department in the cluster. This endpoint requires EDITOR role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @param departmentId The unique id identifying the department.
- @return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdPutRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@param departmentId The unique id identifying the department.
+	@return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdPutRequest
 */
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdPut(ctx context.Context, clusterId string, departmentId int32) ApiV1K8sClustersClusterIdDepartmentsDepartmentIdPutRequest {
 	return ApiV1K8sClustersClusterIdDepartmentsDepartmentIdPutRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterId:    clusterId,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return Department
+//
+//	@return Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdPutExecute(r ApiV1K8sClustersClusterIdDepartmentsDepartmentIdPutRequest) (*Department, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Department
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Department
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DepartmentsApiService.V1K8sClustersClusterIdDepartmentsDepartmentIdPut")
@@ -533,11 +538,11 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdPut
 }
 
 type ApiV1K8sClustersClusterIdDepartmentsGetRequest struct {
-	ctx context.Context
-	ApiService *DepartmentsApiService
-	clusterId string
+	ctx                context.Context
+	ApiService         *DepartmentsApiService
+	clusterId          string
 	excludePermissions *bool
-	memoryUnitMb *bool
+	memoryUnitMb       *bool
 }
 
 // filter permissions
@@ -561,26 +566,27 @@ V1K8sClustersClusterIdDepartmentsGet Get all departments.
 
 Get list of all the department in the cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @return ApiV1K8sClustersClusterIdDepartmentsGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@return ApiV1K8sClustersClusterIdDepartmentsGetRequest
 */
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsGet(ctx context.Context, clusterId string) ApiV1K8sClustersClusterIdDepartmentsGetRequest {
 	return ApiV1K8sClustersClusterIdDepartmentsGetRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
-//  @return []Department
+//
+//	@return []Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsGetExecute(r ApiV1K8sClustersClusterIdDepartmentsGetRequest) ([]Department, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Department
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Department
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DepartmentsApiService.V1K8sClustersClusterIdDepartmentsGet")
@@ -656,11 +662,11 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsGetExecute(r Ap
 }
 
 type ApiV1K8sClustersClusterIdDepartmentsPostRequest struct {
-	ctx context.Context
-	ApiService *DepartmentsApiService
-	clusterId string
+	ctx                             context.Context
+	ApiService                      *DepartmentsApiService
+	clusterId                       string
 	departmentUserDefinedProperties *DepartmentUserDefinedProperties
-	excludePermissions *bool
+	excludePermissions              *bool
 }
 
 func (r ApiV1K8sClustersClusterIdDepartmentsPostRequest) DepartmentUserDefinedProperties(departmentUserDefinedProperties DepartmentUserDefinedProperties) ApiV1K8sClustersClusterIdDepartmentsPostRequest {
@@ -683,26 +689,27 @@ V1K8sClustersClusterIdDepartmentsPost Create a new department.
 
 Create a new department in the cluster. This endpoint requires EDITOR role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @return ApiV1K8sClustersClusterIdDepartmentsPostRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@return ApiV1K8sClustersClusterIdDepartmentsPostRequest
 */
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsPost(ctx context.Context, clusterId string) ApiV1K8sClustersClusterIdDepartmentsPostRequest {
 	return ApiV1K8sClustersClusterIdDepartmentsPostRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
-//  @return Department
+//
+//	@return Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsPostExecute(r ApiV1K8sClustersClusterIdDepartmentsPostRequest) (*Department, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Department
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Department
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DepartmentsApiService.V1K8sClustersClusterIdDepartmentsPost")

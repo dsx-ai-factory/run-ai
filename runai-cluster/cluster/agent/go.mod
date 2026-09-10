@@ -254,7 +254,6 @@ replace (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../../control-plane/cluster-service/pkg/client
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies => ../../../control-plane/workloads-and-policies
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client => ../../../runai-clients/assets-service-client
-	github.com/dsx-ai-factory/run-ai/runai-clients/backend-api-client => ../../../runai-clients/backend-api-client
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client => ../../../runai-clients/k8s-objects-tracker-client
 	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../../runai-clients/org-unit-service-client
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client => ../../../runai-clients/policy-service-client

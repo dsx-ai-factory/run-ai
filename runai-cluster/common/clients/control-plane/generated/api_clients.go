@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 type ClientsApi interface {
 
 	/*
-	CreateInternalClient create internal client
+		CreateInternalClient create internal client
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ClientsApiCreateInternalClientRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ClientsApiCreateInternalClientRequest
 	*/
 	CreateInternalClient(ctx context.Context) ClientsApiCreateInternalClientRequest
 
@@ -35,11 +36,11 @@ type ClientsApi interface {
 	CreateInternalClientExecute(r ClientsApiCreateInternalClientRequest) (*CreateInternalClient201Response, *http.Response, error)
 
 	/*
-	DeleteClient delete client
+		DeleteClient delete client
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id ID of the client
-	@return ClientsApiDeleteClientRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id ID of the client
+		@return ClientsApiDeleteClientRequest
 	*/
 	DeleteClient(ctx context.Context, id string) ClientsApiDeleteClientRequest
 
@@ -47,10 +48,10 @@ type ClientsApi interface {
 	DeleteClientExecute(r ClientsApiDeleteClientRequest) (*http.Response, error)
 
 	/*
-	GetAllClients get all clients
+		GetAllClients get all clients
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ClientsApiGetAllClientsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ClientsApiGetAllClientsRequest
 	*/
 	GetAllClients(ctx context.Context) ClientsApiGetAllClientsRequest
 
@@ -59,11 +60,11 @@ type ClientsApi interface {
 	GetAllClientsExecute(r ClientsApiGetAllClientsRequest) ([]Client, *http.Response, error)
 
 	/*
-	GetClientSecret get client secret
+		GetClientSecret get client secret
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id The client \"id\" to retrieve
-	@return ClientsApiGetClientSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id The client \"id\" to retrieve
+		@return ClientsApiGetClientSecretRequest
 	*/
 	GetClientSecret(ctx context.Context, id string) ClientsApiGetClientSecretRequest
 
@@ -72,11 +73,11 @@ type ClientsApi interface {
 	GetClientSecretExecute(r ClientsApiGetClientSecretRequest) (*GetClientSecret200Response, *http.Response, error)
 
 	/*
-	UpdateRedirectUris update client redirect uris by id
+		UpdateRedirectUris update client redirect uris by id
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id The client \"id\" to retrieve
-	@return ClientsApiUpdateRedirectUrisRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id The client \"id\" to retrieve
+		@return ClientsApiUpdateRedirectUrisRequest
 	*/
 	UpdateRedirectUris(ctx context.Context, id string) ClientsApiUpdateRedirectUrisRequest
 
@@ -88,8 +89,8 @@ type ClientsApi interface {
 type ClientsApiService service
 
 type ClientsApiCreateInternalClientRequest struct {
-	ctx context.Context
-	ApiService ClientsApi
+	ctx                   context.Context
+	ApiService            ClientsApi
 	clientCreationRequest *ClientCreationRequest
 }
 
@@ -106,24 +107,25 @@ func (r ClientsApiCreateInternalClientRequest) Execute() (*CreateInternalClient2
 /*
 CreateInternalClient create internal client
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ClientsApiCreateInternalClientRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ClientsApiCreateInternalClientRequest
 */
 func (a *ClientsApiService) CreateInternalClient(ctx context.Context) ClientsApiCreateInternalClientRequest {
 	return ClientsApiCreateInternalClientRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return CreateInternalClient201Response
+//
+//	@return CreateInternalClient201Response
 func (a *ClientsApiService) CreateInternalClientExecute(r ClientsApiCreateInternalClientRequest) (*CreateInternalClient201Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CreateInternalClient201Response
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CreateInternalClient201Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClientsApiService.CreateInternalClient")
@@ -266,9 +268,9 @@ func (a *ClientsApiService) CreateInternalClientExecute(r ClientsApiCreateIntern
 }
 
 type ClientsApiDeleteClientRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ClientsApi
-	id string
+	id         string
 }
 
 func (r ClientsApiDeleteClientRequest) Execute() (*http.Response, error) {
@@ -278,24 +280,24 @@ func (r ClientsApiDeleteClientRequest) Execute() (*http.Response, error) {
 /*
 DeleteClient delete client
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param id ID of the client
- @return ClientsApiDeleteClientRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id ID of the client
+	@return ClientsApiDeleteClientRequest
 */
 func (a *ClientsApiService) DeleteClient(ctx context.Context, id string) ClientsApiDeleteClientRequest {
 	return ClientsApiDeleteClientRequest{
 		ApiService: a,
-		ctx: ctx,
-		id: id,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
 // Execute executes the request
 func (a *ClientsApiService) DeleteClientExecute(r ClientsApiDeleteClientRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClientsApiService.DeleteClient")
@@ -415,9 +417,9 @@ func (a *ClientsApiService) DeleteClientExecute(r ClientsApiDeleteClientRequest)
 }
 
 type ClientsApiGetAllClientsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ClientsApi
-	filter *string
+	filter     *string
 }
 
 // Filter results by client attribute.
@@ -433,24 +435,25 @@ func (r ClientsApiGetAllClientsRequest) Execute() ([]Client, *http.Response, err
 /*
 GetAllClients get all clients
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ClientsApiGetAllClientsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ClientsApiGetAllClientsRequest
 */
 func (a *ClientsApiService) GetAllClients(ctx context.Context) ClientsApiGetAllClientsRequest {
 	return ClientsApiGetAllClientsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Client
+//
+//	@return []Client
 func (a *ClientsApiService) GetAllClientsExecute(r ClientsApiGetAllClientsRequest) ([]Client, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Client
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Client
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClientsApiService.GetAllClients")
@@ -581,9 +584,9 @@ func (a *ClientsApiService) GetAllClientsExecute(r ClientsApiGetAllClientsReques
 }
 
 type ClientsApiGetClientSecretRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ClientsApi
-	id string
+	id         string
 }
 
 func (r ClientsApiGetClientSecretRequest) Execute() (*GetClientSecret200Response, *http.Response, error) {
@@ -593,26 +596,27 @@ func (r ClientsApiGetClientSecretRequest) Execute() (*GetClientSecret200Response
 /*
 GetClientSecret get client secret
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param id The client \"id\" to retrieve
- @return ClientsApiGetClientSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id The client \"id\" to retrieve
+	@return ClientsApiGetClientSecretRequest
 */
 func (a *ClientsApiService) GetClientSecret(ctx context.Context, id string) ClientsApiGetClientSecretRequest {
 	return ClientsApiGetClientSecretRequest{
 		ApiService: a,
-		ctx: ctx,
-		id: id,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
 // Execute executes the request
-//  @return GetClientSecret200Response
+//
+//	@return GetClientSecret200Response
 func (a *ClientsApiService) GetClientSecretExecute(r ClientsApiGetClientSecretRequest) (*GetClientSecret200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetClientSecret200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetClientSecret200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClientsApiService.GetClientSecret")
@@ -741,9 +745,9 @@ func (a *ClientsApiService) GetClientSecretExecute(r ClientsApiGetClientSecretRe
 }
 
 type ClientsApiUpdateRedirectUrisRequest struct {
-	ctx context.Context
-	ApiService ClientsApi
-	id string
+	ctx                             context.Context
+	ApiService                      ClientsApi
+	id                              string
 	clientRedirectUrisUpdateRequest *ClientRedirectUrisUpdateRequest
 }
 
@@ -760,24 +764,24 @@ func (r ClientsApiUpdateRedirectUrisRequest) Execute() (*http.Response, error) {
 /*
 UpdateRedirectUris update client redirect uris by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param id The client \"id\" to retrieve
- @return ClientsApiUpdateRedirectUrisRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id The client \"id\" to retrieve
+	@return ClientsApiUpdateRedirectUrisRequest
 */
 func (a *ClientsApiService) UpdateRedirectUris(ctx context.Context, id string) ClientsApiUpdateRedirectUrisRequest {
 	return ClientsApiUpdateRedirectUrisRequest{
 		ApiService: a,
-		ctx: ctx,
-		id: id,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
 // Execute executes the request
 func (a *ClientsApiService) UpdateRedirectUrisExecute(r ClientsApiUpdateRedirectUrisRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClientsApiService.UpdateRedirectUris")

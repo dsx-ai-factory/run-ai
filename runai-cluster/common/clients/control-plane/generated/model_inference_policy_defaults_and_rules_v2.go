@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,7 +19,7 @@ import (
 // InferencePolicyDefaultsAndRulesV2 struct for InferencePolicyDefaultsAndRulesV2
 type InferencePolicyDefaultsAndRulesV2 struct {
 	Defaults NullableInferencePolicyDefaultsAndRulesV2Defaults `json:"defaults,omitempty"`
-	Rules NullableInferencePolicyDefaultsAndRulesV2Rules `json:"rules,omitempty"`
+	Rules    NullableInferencePolicyDefaultsAndRulesV2Rules    `json:"rules,omitempty"`
 	// a list of datasource assets to import into the policy. these datasources will be included in any workload that will be created in the scope of the policy.
 	ImposedAssets []string `json:"imposedAssets,omitempty"`
 }
@@ -71,6 +73,7 @@ func (o *InferencePolicyDefaultsAndRulesV2) HasDefaults() bool {
 func (o *InferencePolicyDefaultsAndRulesV2) SetDefaults(v InferencePolicyDefaultsAndRulesV2Defaults) {
 	o.Defaults.Set(&v)
 }
+
 // SetDefaultsNil sets the value for Defaults to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2) SetDefaultsNil() {
 	o.Defaults.Set(nil)
@@ -113,6 +116,7 @@ func (o *InferencePolicyDefaultsAndRulesV2) HasRules() bool {
 func (o *InferencePolicyDefaultsAndRulesV2) SetRules(v InferencePolicyDefaultsAndRulesV2Rules) {
 	o.Rules.Set(&v)
 }
+
 // SetRulesNil sets the value for Rules to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2) SetRulesNil() {
 	o.Rules.Set(nil)
@@ -205,5 +209,3 @@ func (v *NullableInferencePolicyDefaultsAndRulesV2) UnmarshalJSON(src []byte) er
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,12 +18,12 @@ import (
 
 // TenantCreationRequest struct for TenantCreationRequest
 type TenantCreationRequest struct {
-	Name string `json:"name"`
-	Email string `json:"email"`
-	Password *string `json:"password,omitempty"`
-	ContractType *string `json:"contractType,omitempty"`
-	Role NullableRoles1 `json:"role,omitempty"`
-	MetricStore NullableTenantCreationRequestMetricStore `json:"metricStore,omitempty"`
+	Name         string                                   `json:"name"`
+	Email        string                                   `json:"email"`
+	Password     *string                                  `json:"password,omitempty"`
+	ContractType *string                                  `json:"contractType,omitempty"`
+	Role         NullableRoles1                           `json:"role,omitempty"`
+	MetricStore  NullableTenantCreationRequestMetricStore `json:"metricStore,omitempty"`
 }
 
 // NewTenantCreationRequest instantiates a new TenantCreationRequest object
@@ -187,6 +189,7 @@ func (o *TenantCreationRequest) HasRole() bool {
 func (o *TenantCreationRequest) SetRole(v Roles1) {
 	o.Role.Set(&v)
 }
+
 // SetRoleNil sets the value for Role to be an explicit nil
 func (o *TenantCreationRequest) SetRoleNil() {
 	o.Role.Set(nil)
@@ -229,6 +232,7 @@ func (o *TenantCreationRequest) HasMetricStore() bool {
 func (o *TenantCreationRequest) SetMetricStore(v TenantCreationRequestMetricStore) {
 	o.MetricStore.Set(&v)
 }
+
 // SetMetricStoreNil sets the value for MetricStore to be an explicit nil
 func (o *TenantCreationRequest) SetMetricStoreNil() {
 	o.MetricStore.Set(nil)
@@ -297,5 +301,3 @@ func (v *NullableTenantCreationRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

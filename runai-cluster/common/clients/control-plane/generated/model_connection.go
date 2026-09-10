@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,7 +21,7 @@ type Connection struct {
 	// A unique name of this connection. This name correlates between the connection information specified at the environment asset, to the information about the connection as specified in SpecificEnv for a specific workspace.
 	Name string `json:"name"`
 	// Internal tools (isExternal=false) are tools that run as part of the container. External tools (isExternal=true) run outside the container, typically in the cloud.
-	IsExternal *bool `json:"isExternal,omitempty"`
+	IsExternal       *bool                    `json:"isExternal,omitempty"`
 	InternalToolInfo NullableInternalToolInfo `json:"internalToolInfo,omitempty"`
 	ExternalToolInfo NullableExternalToolInfo `json:"externalToolInfo,omitempty"`
 }
@@ -134,6 +136,7 @@ func (o *Connection) HasInternalToolInfo() bool {
 func (o *Connection) SetInternalToolInfo(v InternalToolInfo) {
 	o.InternalToolInfo.Set(&v)
 }
+
 // SetInternalToolInfoNil sets the value for InternalToolInfo to be an explicit nil
 func (o *Connection) SetInternalToolInfoNil() {
 	o.InternalToolInfo.Set(nil)
@@ -176,6 +179,7 @@ func (o *Connection) HasExternalToolInfo() bool {
 func (o *Connection) SetExternalToolInfo(v ExternalToolInfo) {
 	o.ExternalToolInfo.Set(&v)
 }
+
 // SetExternalToolInfoNil sets the value for ExternalToolInfo to be an explicit nil
 func (o *Connection) SetExternalToolInfoNil() {
 	o.ExternalToolInfo.Set(nil)
@@ -238,5 +242,3 @@ func (v *NullableConnection) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -12,6 +12,33 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 2. **Discuss an idea before you build it.** For non-trivial changes, open a feature issue first so the design can be agreed on before you write code. For support and usage questions, open an issue.
 3. **Implement a fix or feature.** Pick up an issue labelled `good first issue` or `help wanted`, comment to claim it, then follow the workflow below.
 
+### How issue priority is decided
+
+Maintainers communicate priority through the **Priority field** on the issue,
+not through a custom label — so the field is the single place to look, and it
+stays accurate when an issue moves between projects and milestones.
+
+Priority is set during triage (a maintainer responsibility, see
+[`MAINTAINERS.md`](MAINTAINERS.md)) and weighs:
+
+- **Severity and blast radius** — does it break a supported release, cause data
+  loss, or degrade scheduling for every tenant, versus affecting one optional
+  path?
+- **Whether a workaround exists**, and how costly that workaround is.
+- **Affected versions** — regressions on a currently supported release
+  (see [`SUPPORT.md`](SUPPORT.md)) outrank issues on end-of-life branches,
+  which are not accepted at all except for critical security issues.
+- **Breadth of impact** — how many users or clusters hit it.
+- **Cost and risk of the fix**, weighed against the above.
+
+**If you think an issue is mis-prioritised, say so in a comment on that issue.**
+Context that changes the calculus is the most useful thing you can add: your
+NVIDIA Run:ai and Kubernetes versions, how many clusters or users are affected,
+whether you have a workaround and what it costs you, and a reproduction if the
+issue lacks one. Maintainers re-triage on new information — a clear impact
+report is far more effective than a "+1". Priority is a maintainer decision and
+is not guaranteed to change, but the reasoning will be stated on the issue.
+
 ---
 
 ## Getting started
@@ -66,6 +93,64 @@ We split CI into two layers:
 - **Layer 2 — full build and end-to-end tests, has secrets.** This is the pipeline that produces the required `Validate Successful Run` status check, and it only runs after a maintainer reviews your PR and types `/ok-to-test` in a comment. End-to-end tests take 30–90 minutes. A failed Layer 2 run blocks merge — for everyone, including internal contributors. If a maintainer hasn't reviewed your PR within a few business days and you'd like the full pipeline to run, feel free to ping in the PR.
 
 If a Layer 2 step fails, the workflow logs from `runai-actions` (the private repository where the full pipeline lives) are not directly visible to external contributors. Look at the PR labels (`pipeline/build-failed`, `pipeline/e2e-failed`, `pipeline/jira-failed`) for a hint about which stage broke, and a maintainer will help you triage from there.
+
+### Running the checks locally
+
+Layer 1 is the part you can fully reproduce on your machine, and doing so before you push is the fastest way to a green PR. There is deliberately **no single repo-wide gate command**: this is a monorepo of independent modules, the root `Makefile` targets are placeholders, and Layer 2 (full build and end-to-end tests) needs secrets and a cluster, so it cannot run locally at all.
+
+Run the checks matching what you changed — these mirror the corresponding jobs in [`.github/workflows/pr-checks.yaml`](.github/workflows/pr-checks.yaml), at the versions CI pins:
+
+| You changed | Run | Mirrors CI job |
+|---|---|---|
+| Go code | `cd <module> && go build ./... && go test ./... && gofmt -l .`<br>`golangci-lint run` (v2.9.0) | `go-lint`, `govulncheck` |
+| Python | `ruff check <files>` (0.15.15) | `py-lint` |
+| JS/TS | `npx eslint <files>` | `js-lint` |
+| Helm charts | `helm dependency update control-plane/control-plane-chart`<br>`helm lint control-plane/control-plane-chart`<br>`helm template control-plane/control-plane-chart > /dev/null` | `helm` |
+| GitHub Actions workflows | `actionlint` | `actionlint.yaml` |
+| `CODEOWNERS` | `make validate` | `validate-codeowners` |
+| `docs/` or `fern/` | `fern docs dev` | `fern-docs-ci.yaml` |
+
+Each service directory also has its own Makefile with `build`, `test`, `lint`, and `validate` targets scoped to that service — use those when working inside a single component.
+
+---
+
+## Extending the project
+
+Most new capability lands through one of these extension points rather than by
+modifying core services. Follow the existing implementations in each directory
+— they are the reference for structure, naming, and tests.
+
+- **New workload type.** NVIDIA Run:ai interprets workloads declaratively
+  through Karta CRs. Adding support for a new Kubernetes workload kind means
+  adding its interpretation rather than writing a bespoke controller. See
+  [`docs/developer/crds.md`](docs/developer/crds.md) and the `karta` chart
+  dependency in [`runai-cluster/cluster/runai-chart`](runai-cluster/cluster/runai-chart).
+
+- **New anyworkload-controller plugin.** Behaviour attached to a workload's
+  lifecycle is implemented as a plugin under
+  [`runai-cluster/cluster/anyworkload-controller/plugins/`](runai-cluster/cluster/anyworkload-controller/plugins).
+  Use `networking`, `personalcreds`, or `restartrules` as templates: implement
+  the hook interfaces your feature needs, add a `New(ctx, deps)` builder, and
+  register it in `cmd/main.go`.
+
+- **New cluster service or controller.** Add a directory under
+  [`runai-cluster/cluster/`](runai-cluster/cluster) with an
+  `artifact-metadata.json`, a Makefile including the shared
+  `build/makefile/*.mk`, and a `README.md` plus `CLAUDE.md`. Wire its RBAC and
+  deployment into [`runai-cluster/cluster/runai-chart`](runai-cluster/cluster/runai-chart).
+
+- **New control-plane service.** Same shape under
+  [`control-plane/`](control-plane), wired into
+  [`control-plane/control-plane-chart`](control-plane/control-plane-chart).
+  Generated API clients live in [`runai-clients/`](runai-clients).
+
+- **New MCP tool.** Exposing an operation to AI assistants is done in
+  [`runai-mcp-server/`](runai-mcp-server).
+
+Start with an issue describing the extension point you intend to use, so
+maintainers can confirm the approach before you invest in the implementation.
+See [`docs/developer/architecture.md`](docs/developer/architecture.md) for how
+the pieces fit together.
 
 ---
 
@@ -170,6 +255,42 @@ A `dco` check runs on every fork PR and lists any unsigned commits inline.
 Write clear, present-tense messages explaining **why** the change is needed, not just what it does. A good PR title is a single sentence under ~70 characters.
 
 We do not enforce Conventional Commits format. Release notes are generated from PR titles and labels via GitHub's auto-generated release notes — clear titles make better release notes.
+
+---
+
+## Community standards
+
+Participation in this project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+### Reporting a Code of Conduct concern
+
+Report unacceptable behaviour to **<GitHub_Conduct@nvidia.com>**. Reports are handled privately, and community leaders are obligated to respect the privacy and security of the reporter.
+
+### What to expect after you report
+
+- **Acknowledgement:** within 3 business days of your report
+- **Initial assessment:** within 10 business days, including whether the report falls within the scope of this Code of Conduct
+- **Status updates:** at least every 14 days while the report is open
+- **Outcome:** communicated to the reporter once the review concludes
+
+Where a report is escalated to NVIDIA internal processes, resolution may take longer than the timelines above. You will be told if that happens.
+
+Actions taken follow the four-tier Enforcement Guidelines in [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md#enforcement-guidelines) — correction, warning, temporary ban, permanent ban.
+
+### What is out of scope
+
+The Code of Conduct governs conduct in this project's community spaces (see [Scope](CODE_OF_CONDUCT.md#scope)). The following are **not** handled through the Code of Conduct process — please use the route listed instead:
+
+| Out of scope | Use instead |
+|---|---|
+| Software defects, crashes, or unexpected behaviour | [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) |
+| Security vulnerabilities | [`SECURITY.md`](SECURITY.md) — do not open a public issue |
+| Disagreement with a technical or design decision, or with a maintainer's review | Discuss on the issue or pull request; see [Code review](#code-review) |
+| A maintainer declining, deprioritising, or closing your contribution | Not misconduct on its own — see [How issue priority is decided](#how-issue-priority-is-decided) |
+| Commercial, licensing, or support-contract disputes | Contact NVIDIA via [SUPPORT.md](SUPPORT.md) |
+| Conduct in venues unrelated to this project, where no one is representing the project | Outside this project's remit |
+
+Reports made in bad faith — for example to retaliate against, harass, or silence another participant — are themselves a Code of Conduct violation.
 
 ---
 

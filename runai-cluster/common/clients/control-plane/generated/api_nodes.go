@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,18 +21,17 @@ import (
 	"strings"
 )
 
-
 type NodesApi interface {
 
 	/*
-	DeleteNode Delete a node from a cluster.
+		DeleteNode Delete a node from a cluster.
 
-	Delete a node that doesn't exist in the Kubernetes cluster.
+		Delete a node that doesn't exist in the Kubernetes cluster.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param nodeName The node name.
-	@return NodesApiDeleteNodeRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param nodeName The node name.
+		@return NodesApiDeleteNodeRequest
 	*/
 	DeleteNode(ctx context.Context, clusterUuid string, nodeName string) NodesApiDeleteNodeRequest
 
@@ -38,12 +39,12 @@ type NodesApi interface {
 	DeleteNodeExecute(r NodesApiDeleteNodeRequest) (*http.Response, error)
 
 	/*
-	GetNodeTelemetry Get node telemetry data.
+		GetNodeTelemetry Get node telemetry data.
 
-	Retrieve node telemetry data for use in analysis applications.
+		Retrieve node telemetry data for use in analysis applications.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return NodesApiGetNodeTelemetryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return NodesApiGetNodeTelemetryRequest
 	*/
 	GetNodeTelemetry(ctx context.Context) NodesApiGetNodeTelemetryRequest
 
@@ -52,13 +53,13 @@ type NodesApi interface {
 	GetNodeTelemetryExecute(r NodesApiGetNodeTelemetryRequest) (*TelemetryResponse, *http.Response, error)
 
 	/*
-	GetNodes Get a list of nodes.
+		GetNodes Get a list of nodes.
 
-	Retrieve a list of nodes from the Kubernetes cluster.
+		Retrieve a list of nodes from the Kubernetes cluster.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return NodesApiGetNodesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return NodesApiGetNodesRequest
 	*/
 	GetNodes(ctx context.Context, clusterUuid string) NodesApiGetNodesRequest
 
@@ -67,13 +68,13 @@ type NodesApi interface {
 	GetNodesExecute(r NodesApiGetNodesRequest) (*Nodes, *http.Response, error)
 
 	/*
-	SyncNodes Sync the nodes in the cluster.
+		SyncNodes Sync the nodes in the cluster.
 
-	Use to sync the nodes in the cluster
+		Use to sync the nodes in the cluster
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return NodesApiSyncNodesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return NodesApiSyncNodesRequest
 	*/
 	SyncNodes(ctx context.Context, clusterUuid string) NodesApiSyncNodesRequest
 
@@ -81,14 +82,14 @@ type NodesApi interface {
 	SyncNodesExecute(r NodesApiSyncNodesRequest) (*http.Response, error)
 
 	/*
-	UpsertNode Update node details.
+		UpsertNode Update node details.
 
-	Use to update the details of a node in a Kubernetes cluster by Universally Unique Identifier (UUID).
+		Use to update the details of a node in a Kubernetes cluster by Universally Unique Identifier (UUID).
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param nodeName The node name.
-	@return NodesApiUpsertNodeRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param nodeName The node name.
+		@return NodesApiUpsertNodeRequest
 	*/
 	UpsertNode(ctx context.Context, clusterUuid string, nodeName string) NodesApiUpsertNodeRequest
 
@@ -100,10 +101,10 @@ type NodesApi interface {
 type NodesApiService service
 
 type NodesApiDeleteNodeRequest struct {
-	ctx context.Context
-	ApiService NodesApi
+	ctx         context.Context
+	ApiService  NodesApi
 	clusterUuid string
-	nodeName string
+	nodeName    string
 }
 
 func (r NodesApiDeleteNodeRequest) Execute() (*http.Response, error) {
@@ -115,26 +116,26 @@ DeleteNode Delete a node from a cluster.
 
 Delete a node that doesn't exist in the Kubernetes cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param nodeName The node name.
- @return NodesApiDeleteNodeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param nodeName The node name.
+	@return NodesApiDeleteNodeRequest
 */
 func (a *NodesApiService) DeleteNode(ctx context.Context, clusterUuid string, nodeName string) NodesApiDeleteNodeRequest {
 	return NodesApiDeleteNodeRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		nodeName: nodeName,
+		nodeName:    nodeName,
 	}
 }
 
 // Execute executes the request
 func (a *NodesApiService) DeleteNodeExecute(r NodesApiDeleteNodeRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesApiService.DeleteNode")
@@ -238,12 +239,12 @@ func (a *NodesApiService) DeleteNodeExecute(r NodesApiDeleteNodeRequest) (*http.
 }
 
 type NodesApiGetNodeTelemetryRequest struct {
-	ctx context.Context
-	ApiService NodesApi
+	ctx           context.Context
+	ApiService    NodesApi
 	telemetryType *NodeTelemetryType
-	clusterId *string
-	nodepoolName *string
-	groupBy *[]string
+	clusterId     *string
+	nodepoolName  *string
+	groupBy       *[]string
 }
 
 // specifies what data to request
@@ -279,24 +280,25 @@ GetNodeTelemetry Get node telemetry data.
 
 Retrieve node telemetry data for use in analysis applications.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return NodesApiGetNodeTelemetryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return NodesApiGetNodeTelemetryRequest
 */
 func (a *NodesApiService) GetNodeTelemetry(ctx context.Context) NodesApiGetNodeTelemetryRequest {
 	return NodesApiGetNodeTelemetryRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TelemetryResponse
+//
+//	@return TelemetryResponse
 func (a *NodesApiService) GetNodeTelemetryExecute(r NodesApiGetNodeTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TelemetryResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TelemetryResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesApiService.GetNodeTelemetry")
@@ -437,10 +439,10 @@ func (a *NodesApiService) GetNodeTelemetryExecute(r NodesApiGetNodeTelemetryRequ
 }
 
 type NodesApiGetNodesRequest struct {
-	ctx context.Context
-	ApiService NodesApi
+	ctx         context.Context
+	ApiService  NodesApi
 	clusterUuid string
-	nodeName *string
+	nodeName    *string
 }
 
 // The node name.
@@ -458,26 +460,27 @@ GetNodes Get a list of nodes.
 
 Retrieve a list of nodes from the Kubernetes cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return NodesApiGetNodesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return NodesApiGetNodesRequest
 */
 func (a *NodesApiService) GetNodes(ctx context.Context, clusterUuid string) NodesApiGetNodesRequest {
 	return NodesApiGetNodesRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return Nodes
+//
+//	@return Nodes
 func (a *NodesApiService) GetNodesExecute(r NodesApiGetNodesRequest) (*Nodes, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Nodes
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Nodes
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesApiService.GetNodes")
@@ -602,9 +605,9 @@ func (a *NodesApiService) GetNodesExecute(r NodesApiGetNodesRequest) (*Nodes, *h
 }
 
 type NodesApiSyncNodesRequest struct {
-	ctx context.Context
-	ApiService NodesApi
-	clusterUuid string
+	ctx              context.Context
+	ApiService       NodesApi
+	clusterUuid      string
 	nodesSyncRequest *NodesSyncRequest
 }
 
@@ -623,14 +626,14 @@ SyncNodes Sync the nodes in the cluster.
 
 Use to sync the nodes in the cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return NodesApiSyncNodesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return NodesApiSyncNodesRequest
 */
 func (a *NodesApiService) SyncNodes(ctx context.Context, clusterUuid string) NodesApiSyncNodesRequest {
 	return NodesApiSyncNodesRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
@@ -638,9 +641,9 @@ func (a *NodesApiService) SyncNodes(ctx context.Context, clusterUuid string) Nod
 // Execute executes the request
 func (a *NodesApiService) SyncNodesExecute(r NodesApiSyncNodesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesApiService.SyncNodes")
@@ -758,11 +761,11 @@ func (a *NodesApiService) SyncNodesExecute(r NodesApiSyncNodesRequest) (*http.Re
 }
 
 type NodesApiUpsertNodeRequest struct {
-	ctx context.Context
-	ApiService NodesApi
+	ctx         context.Context
+	ApiService  NodesApi
 	clusterUuid string
-	nodeName string
-	nodeInfo *NodeInfo
+	nodeName    string
+	nodeInfo    *NodeInfo
 }
 
 // The node info in the cluster.
@@ -780,26 +783,26 @@ UpsertNode Update node details.
 
 Use to update the details of a node in a Kubernetes cluster by Universally Unique Identifier (UUID).
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param nodeName The node name.
- @return NodesApiUpsertNodeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param nodeName The node name.
+	@return NodesApiUpsertNodeRequest
 */
 func (a *NodesApiService) UpsertNode(ctx context.Context, clusterUuid string, nodeName string) NodesApiUpsertNodeRequest {
 	return NodesApiUpsertNodeRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		nodeName: nodeName,
+		nodeName:    nodeName,
 	}
 }
 
 // Execute executes the request
 func (a *NodesApiService) UpsertNodeExecute(r NodesApiUpsertNodeRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesApiService.UpsertNode")

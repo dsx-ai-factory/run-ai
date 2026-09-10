@@ -1,8 +1,3 @@
-/*
- * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 // Package gojsonq provides a simple, elegant and fast ODM like API to access/query JSON document.
 //
 // JSON document can be read from file, string or io.Reader.

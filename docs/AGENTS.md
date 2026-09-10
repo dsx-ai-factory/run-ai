@@ -42,7 +42,7 @@ Use this table to determine the documentation action before starting work.
 |---|---|---|
 | New UI resource (object with add/edit/delete/metrics) | Load `docs/.agents/skills/runai-docs-ui-how-to/SKILL.md` | — |
 | New quick start (single feature or workload type walkthrough) | Load `docs/.agents/skills/runai-docs-quickstart/SKILL.md` | `docs/workloads-in-nvidia-run-ai/using-training/quick-starts/standard-training-quickstart.md` |
-| New feature guide (scheduler feature, GPU optimization, topology, NUMA) | Load `docs/.agents/skills/runai-docs-feature-guide/SKILL.md` | `docs/platform-management/aiinitiatives/resources/topology-aware-scheduling.md` |
+| New feature guide (scheduler feature, GPU optimization, topology, NUMA) | Load `docs/.agents/skills/runai-docs-feature-guide/SKILL.md` | `docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md` |
 | New CLI flag or command | Do not edit — CLI reference is auto-generated. Add `<!-- TODO: CLI ref update needed -->` to the related page and flag for engineering. | — |
 | New or changed API endpoint or field | Do not edit — REST API reference is auto-generated. Flag for engineering. | — |
 | New or changed MCP server tool | Load `docs/.agents/skills/update-mcp-server-docs/SKILL.md` | `docs/installation-and-configuration/mcp-server.md` |

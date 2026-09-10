@@ -117,6 +117,7 @@ export interface IInferenceSubmitFormFeatures {
   showRequestTimeout: boolean;
   supportPriorityClass: boolean;
   supportPreemptibility: boolean;
+  supportSemiPreemptibility?: boolean;
 }
 
 export interface IInferenceSubmitFormUIState {

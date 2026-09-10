@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -81,6 +83,7 @@ func (o *S3Instance) HasName() bool {
 func (o *S3Instance) SetName(v string) {
 	o.Name.Set(&v)
 }
+
 // SetNameNil sets the value for Name to be an explicit nil
 func (o *S3Instance) SetNameNil() {
 	o.Name.Set(nil)
@@ -123,6 +126,7 @@ func (o *S3Instance) HasBucket() bool {
 func (o *S3Instance) SetBucket(v string) {
 	o.Bucket.Set(&v)
 }
+
 // SetBucketNil sets the value for Bucket to be an explicit nil
 func (o *S3Instance) SetBucketNil() {
 	o.Bucket.Set(nil)
@@ -165,6 +169,7 @@ func (o *S3Instance) HasPath() bool {
 func (o *S3Instance) SetPath(v string) {
 	o.Path.Set(&v)
 }
+
 // SetPathNil sets the value for Path to be an explicit nil
 func (o *S3Instance) SetPathNil() {
 	o.Path.Set(nil)
@@ -207,6 +212,7 @@ func (o *S3Instance) HasUrl() bool {
 func (o *S3Instance) SetUrl(v string) {
 	o.Url.Set(&v)
 }
+
 // SetUrlNil sets the value for Url to be an explicit nil
 func (o *S3Instance) SetUrlNil() {
 	o.Url.Set(nil)
@@ -249,6 +255,7 @@ func (o *S3Instance) HasAccessKeySecret() bool {
 func (o *S3Instance) SetAccessKeySecret(v string) {
 	o.AccessKeySecret.Set(&v)
 }
+
 // SetAccessKeySecretNil sets the value for AccessKeySecret to be an explicit nil
 func (o *S3Instance) SetAccessKeySecretNil() {
 	o.AccessKeySecret.Set(nil)
@@ -291,6 +298,7 @@ func (o *S3Instance) HasSecretKeyOfAccessKeyId() bool {
 func (o *S3Instance) SetSecretKeyOfAccessKeyId(v string) {
 	o.SecretKeyOfAccessKeyId.Set(&v)
 }
+
 // SetSecretKeyOfAccessKeyIdNil sets the value for SecretKeyOfAccessKeyId to be an explicit nil
 func (o *S3Instance) SetSecretKeyOfAccessKeyIdNil() {
 	o.SecretKeyOfAccessKeyId.Set(nil)
@@ -333,6 +341,7 @@ func (o *S3Instance) HasSecretKeyOfSecretKey() bool {
 func (o *S3Instance) SetSecretKeyOfSecretKey(v string) {
 	o.SecretKeyOfSecretKey.Set(&v)
 }
+
 // SetSecretKeyOfSecretKeyNil sets the value for SecretKeyOfSecretKey to be an explicit nil
 func (o *S3Instance) SetSecretKeyOfSecretKeyNil() {
 	o.SecretKeyOfSecretKey.Set(nil)
@@ -404,5 +413,3 @@ func (v *NullableS3Instance) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

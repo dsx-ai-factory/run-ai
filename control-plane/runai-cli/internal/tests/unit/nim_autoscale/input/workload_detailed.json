@@ -12,7 +12,7 @@
   "submittedBy": "test@example.com",
   "priorityClassName": "very-high",
   "priority": 150,
-  "images": ["gcr.io/run-ai-lab/nim-cpu:latest"],
+  "images": ["nvcr.io/nim/meta/llama3-8b-instruct"],
   "runningPods": 1,
   "requestedPods": {
     "number": 1

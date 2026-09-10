@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -33,7 +35,7 @@ type PodGroup struct {
 	ImageName string `json:"imageName"`
 	// The phase of the pod group.
 	PodGroupPhase *string `json:"podGroupPhase,omitempty"`
-	JobPhase string `json:"jobPhase"`
+	JobPhase      string  `json:"jobPhase"`
 	// The owner of the pod group.
 	WorkloadUser string `json:"workloadUser"`
 	// The project that the pod group belongs to.
@@ -47,29 +49,29 @@ type PodGroup struct {
 	// Specifies the maximum number of pods the workload is able run at any given time.
 	Parallelism int32 `json:"parallelism"`
 	// Specifies the number of successfully finished pods the created workload should be run with.
-	Completions int32 `json:"completions"`
-	CurrentRequestedGpus float32 `json:"currentRequestedGpus"`
-	TotalRequestedGpus float32 `json:"totalRequestedGpus"`
-	RequestedGpusPerPodgroup float32 `json:"requestedGpusPerPodgroup"`
+	Completions                    int32   `json:"completions"`
+	CurrentRequestedGpus           float32 `json:"currentRequestedGpus"`
+	TotalRequestedGpus             float32 `json:"totalRequestedGpus"`
+	RequestedGpusPerPodgroup       float32 `json:"requestedGpusPerPodgroup"`
 	RequestedGpusMemoryPerPodgroup float32 `json:"requestedGpusMemoryPerPodgroup"`
 	// Specifies the Parent Workload Name
-	ParentWorkloadName string `json:"parentWorkloadName"`
-	CurrentAllocatedGpus *float32 `json:"currentAllocatedGpus,omitempty"`
-	CurrentAllocatedGpusMemory *float32 `json:"currentAllocatedGpusMemory,omitempty"`
-	TotalRequestedCpu *float32 `json:"totalRequestedCpu,omitempty"`
-	TotalRequestedMemory *float32 `json:"totalRequestedMemory,omitempty"`
-	TotalLimitCpu *float32 `json:"totalLimitCpu,omitempty"`
-	TotalLimitMemory *float32 `json:"totalLimitMemory,omitempty"`
-	CliCommand *string `json:"cliCommand,omitempty"`
-	RequestedMigDevices *string `json:"requestedMigDevices,omitempty"`
-	DynamicData map[string]interface{} `json:"dynamicData,omitempty"`
-	ExistsInCluster *bool `json:"existsInCluster,omitempty"`
+	ParentWorkloadName         string                 `json:"parentWorkloadName"`
+	CurrentAllocatedGpus       *float32               `json:"currentAllocatedGpus,omitempty"`
+	CurrentAllocatedGpusMemory *float32               `json:"currentAllocatedGpusMemory,omitempty"`
+	TotalRequestedCpu          *float32               `json:"totalRequestedCpu,omitempty"`
+	TotalRequestedMemory       *float32               `json:"totalRequestedMemory,omitempty"`
+	TotalLimitCpu              *float32               `json:"totalLimitCpu,omitempty"`
+	TotalLimitMemory           *float32               `json:"totalLimitMemory,omitempty"`
+	CliCommand                 *string                `json:"cliCommand,omitempty"`
+	RequestedMigDevices        *string                `json:"requestedMigDevices,omitempty"`
+	DynamicData                map[string]interface{} `json:"dynamicData,omitempty"`
+	ExistsInCluster            *bool                  `json:"existsInCluster,omitempty"`
 	// Describe the content of jobUrl field, values may be (tensorboard , jupyter or '')
 	JobUrlType *string `json:"jobUrlType,omitempty"`
 	// If true, it indicates that the pod group runs jupyter notebook.
 	// Deprecated
-	IsJupyter *bool `json:"isJupyter,omitempty"`
-	JobUrl *string `json:"jobUrl,omitempty"`
+	IsJupyter *bool   `json:"isJupyter,omitempty"`
+	JobUrl    *string `json:"jobUrl,omitempty"`
 	// this attribute is obsolete, use workloadId instead.
 	WorkspaceId *string `json:"workspaceId,omitempty"`
 	// reference to the workspace which was used for the creation of the job.
@@ -1343,5 +1345,3 @@ func (v *NullablePodGroup) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,17 +21,16 @@ import (
 	"strings"
 )
 
-
 type JobsApi interface {
 
 	/*
-	GetClusterJobsCount Return the number all Jobs in the cluster. Deprecated - please use api/v1/workloads/count instead
+		GetClusterJobsCount Return the number all Jobs in the cluster. Deprecated - please use api/v1/workloads/count instead
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return JobsApiGetClusterJobsCountRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return JobsApiGetClusterJobsCountRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetClusterJobsCount(ctx context.Context, uuid string) JobsApiGetClusterJobsCountRequest
 
@@ -39,14 +40,14 @@ type JobsApi interface {
 	GetClusterJobsCountExecute(r JobsApiGetClusterJobsCountRequest) (float32, *http.Response, error)
 
 	/*
-	GetPodsByJobId Get all pods that are associated for a specific job. Deprecated - please use api/v1/workloads/{workloadId}/pods instead
+		GetPodsByJobId Get all pods that are associated for a specific job. Deprecated - please use api/v1/workloads/{workloadId}/pods instead
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param jobId Unique identifier of the job (UUID)
-	@param uuid Unique identifier of the cluster
-	@return JobsApiGetPodsByJobIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param jobId Unique identifier of the job (UUID)
+		@param uuid Unique identifier of the cluster
+		@return JobsApiGetPodsByJobIdRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetPodsByJobId(ctx context.Context, jobId string, uuid string) JobsApiGetPodsByJobIdRequest
 
@@ -56,13 +57,13 @@ type JobsApi interface {
 	GetPodsByJobIdExecute(r JobsApiGetPodsByJobIdRequest) ([]Pod, *http.Response, error)
 
 	/*
-	ListJobs List all Jobs in the cluster. Deprecated - please use api/v1/workloads instead
+		ListJobs List all Jobs in the cluster. Deprecated - please use api/v1/workloads instead
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return JobsApiListJobsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return JobsApiListJobsRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ListJobs(ctx context.Context, uuid string) JobsApiListJobsRequest
 
@@ -76,11 +77,11 @@ type JobsApi interface {
 type JobsApiService service
 
 type JobsApiGetClusterJobsCountRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService JobsApi
-	uuid string
-	nodeId *string
-	filter *string
+	uuid       string
+	nodeId     *string
+	filter     *string
 }
 
 // Unique identifier of the node.
@@ -101,29 +102,31 @@ func (r JobsApiGetClusterJobsCountRequest) Execute() (float32, *http.Response, e
 /*
 GetClusterJobsCount Return the number all Jobs in the cluster. Deprecated - please use api/v1/workloads/count instead
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return JobsApiGetClusterJobsCountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return JobsApiGetClusterJobsCountRequest
 
 Deprecated
 */
 func (a *JobsApiService) GetClusterJobsCount(ctx context.Context, uuid string) JobsApiGetClusterJobsCountRequest {
 	return JobsApiGetClusterJobsCountRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return float32
+//
+//	@return float32
+//
 // Deprecated
 func (a *JobsApiService) GetClusterJobsCountExecute(r JobsApiGetClusterJobsCountRequest) (float32, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  float32
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue float32
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsApiService.GetClusterJobsCount")
@@ -228,16 +231,16 @@ func (a *JobsApiService) GetClusterJobsCountExecute(r JobsApiGetClusterJobsCount
 }
 
 type JobsApiGetPodsByJobIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService JobsApi
-	jobId string
-	uuid string
-	id *string
-	podId *string
+	jobId      string
+	uuid       string
+	id         *string
+	podId      *string
 	podGroupId *string
-	nodeID *string
-	name *string
-	status *string
+	nodeID     *string
+	name       *string
+	status     *string
 }
 
 // id
@@ -283,31 +286,33 @@ func (r JobsApiGetPodsByJobIdRequest) Execute() ([]Pod, *http.Response, error) {
 /*
 GetPodsByJobId Get all pods that are associated for a specific job. Deprecated - please use api/v1/workloads/{workloadId}/pods instead
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param jobId Unique identifier of the job (UUID)
- @param uuid Unique identifier of the cluster
- @return JobsApiGetPodsByJobIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param jobId Unique identifier of the job (UUID)
+	@param uuid Unique identifier of the cluster
+	@return JobsApiGetPodsByJobIdRequest
 
 Deprecated
 */
 func (a *JobsApiService) GetPodsByJobId(ctx context.Context, jobId string, uuid string) JobsApiGetPodsByJobIdRequest {
 	return JobsApiGetPodsByJobIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		jobId: jobId,
-		uuid: uuid,
+		ctx:        ctx,
+		jobId:      jobId,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []Pod
+//
+//	@return []Pod
+//
 // Deprecated
 func (a *JobsApiService) GetPodsByJobIdExecute(r JobsApiGetPodsByJobIdRequest) ([]Pod, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Pod
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Pod
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsApiService.GetPodsByJobId")
@@ -390,13 +395,13 @@ func (a *JobsApiService) GetPodsByJobIdExecute(r JobsApiGetPodsByJobIdRequest) (
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -413,15 +418,15 @@ func (a *JobsApiService) GetPodsByJobIdExecute(r JobsApiGetPodsByJobIdRequest) (
 }
 
 type JobsApiListJobsRequest struct {
-	ctx context.Context
-	ApiService JobsApi
-	uuid string
-	nodeId *string
-	filter *string
-	sortBy *string
-	sortDirection *string
-	from *float32
-	limit *float32
+	ctx            context.Context
+	ApiService     JobsApi
+	uuid           string
+	nodeId         *string
+	filter         *string
+	sortBy         *string
+	sortDirection  *string
+	from           *float32
+	limit          *float32
 	includeDeleted *bool
 }
 
@@ -472,29 +477,31 @@ func (r JobsApiListJobsRequest) Execute() ([]DisplayedJob, *http.Response, error
 /*
 ListJobs List all Jobs in the cluster. Deprecated - please use api/v1/workloads instead
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return JobsApiListJobsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return JobsApiListJobsRequest
 
 Deprecated
 */
 func (a *JobsApiService) ListJobs(ctx context.Context, uuid string) JobsApiListJobsRequest {
 	return JobsApiListJobsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []DisplayedJob
+//
+//	@return []DisplayedJob
+//
 // Deprecated
 func (a *JobsApiService) ListJobsExecute(r JobsApiListJobsRequest) ([]DisplayedJob, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []DisplayedJob
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []DisplayedJob
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsApiService.ListJobs")

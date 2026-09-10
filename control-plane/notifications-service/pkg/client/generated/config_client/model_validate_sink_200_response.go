@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -19,7 +21,7 @@ var _ MappedNullable = &ValidateSink200Response{}
 
 // ValidateSink200Response struct for ValidateSink200Response
 type ValidateSink200Response struct {
-	ErrorCode *int32 `json:"error_code,omitempty"`
+	ErrorCode    *int32  `json:"error_code,omitempty"`
 	ErrorMessage *string `json:"error_message,omitempty"`
 }
 
@@ -105,7 +107,7 @@ func (o *ValidateSink200Response) SetErrorMessage(v string) {
 }
 
 func (o ValidateSink200Response) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +160,3 @@ func (v *NullableValidateSink200Response) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

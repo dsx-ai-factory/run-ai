@@ -621,7 +621,7 @@ export const llmWorkload: Workload = {
     max: 1,
   },
   requestedNodePools: ["default"],
-  images: ["runai.jfrog.io/core-llm/runai-vllm:v0.5.5-0.5.0"],
+  images: ["runai-vllm:v0.5.5-0.5.0"],
   urls: ["http://hugging-face.runai-p100.svc.cluster.local"],
   environments: [
     {

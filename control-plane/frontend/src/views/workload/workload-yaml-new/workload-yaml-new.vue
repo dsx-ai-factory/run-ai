@@ -134,6 +134,7 @@ import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes
 import {
   MIN_CLUSTER_VERSION_FOR_YAML_SUBMISSION,
   MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY,
+  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
 } from "@/common/version.constant";
 
 const WorkloadYamlNew = defineComponent({
@@ -254,6 +255,10 @@ const WorkloadYamlNew = defineComponent({
         currProject: this.selectedProject || undefined,
         selectedNodePoolsResources: this.selectedProjectNodePools,
         totalGpuRequest: this.extractedGpuRequest,
+        supportSemiPreemptibility: this.clusterStore.isClusterVersionSufficient(
+          this.selectedClusterId,
+          MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
+        ),
       };
     },
     // Extract GPU request from YAML

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,17 +21,16 @@ import (
 	"strings"
 )
 
-
 type PolicyApi interface {
 
 	/*
-	AssetChangedHook Asset changed hook for asset service
+		AssetChangedHook Asset changed hook for asset service
 
-	Hook for asset service to report a change in spec of a given asset
+		Hook for asset service to report a change in spec of a given asset
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param assetId Unique identifier of the asset.
-	@return PolicyApiAssetChangedHookRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param assetId Unique identifier of the asset.
+		@return PolicyApiAssetChangedHookRequest
 	*/
 	AssetChangedHook(ctx context.Context, assetId string) PolicyApiAssetChangedHookRequest
 
@@ -37,12 +38,12 @@ type PolicyApi interface {
 	AssetChangedHookExecute(r PolicyApiAssetChangedHookRequest) (*http.Response, error)
 
 	/*
-	DeleteDistributedPolicy Delete a distributed policy.
+		DeleteDistributedPolicy Delete a distributed policy.
 
-	Use to delete a distributed policy for a given organizational unit.
+		Use to delete a distributed policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiDeleteDistributedPolicyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiDeleteDistributedPolicyRequest
 	*/
 	DeleteDistributedPolicy(ctx context.Context) PolicyApiDeleteDistributedPolicyRequest
 
@@ -50,12 +51,12 @@ type PolicyApi interface {
 	DeleteDistributedPolicyExecute(r PolicyApiDeleteDistributedPolicyRequest) (*http.Response, error)
 
 	/*
-	DeleteInferencePolicy Delete an inference policy.
+		DeleteInferencePolicy Delete an inference policy.
 
-	Use to delete an inference policy for a given organizational unit.
+		Use to delete an inference policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiDeleteInferencePolicyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiDeleteInferencePolicyRequest
 	*/
 	DeleteInferencePolicy(ctx context.Context) PolicyApiDeleteInferencePolicyRequest
 
@@ -63,12 +64,12 @@ type PolicyApi interface {
 	DeleteInferencePolicyExecute(r PolicyApiDeleteInferencePolicyRequest) (*http.Response, error)
 
 	/*
-	DeleteTrainingPolicy Delete a training policy.
+		DeleteTrainingPolicy Delete a training policy.
 
-	Use to delete a training policy for a given organizational unit.
+		Use to delete a training policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiDeleteTrainingPolicyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiDeleteTrainingPolicyRequest
 	*/
 	DeleteTrainingPolicy(ctx context.Context) PolicyApiDeleteTrainingPolicyRequest
 
@@ -76,12 +77,12 @@ type PolicyApi interface {
 	DeleteTrainingPolicyExecute(r PolicyApiDeleteTrainingPolicyRequest) (*http.Response, error)
 
 	/*
-	DeleteWorkspacePolicy Delete a workspace policy.
+		DeleteWorkspacePolicy Delete a workspace policy.
 
-	Use to delete a workspace policy for a given organizational unit.
+		Use to delete a workspace policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiDeleteWorkspacePolicyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiDeleteWorkspacePolicyRequest
 	*/
 	DeleteWorkspacePolicy(ctx context.Context) PolicyApiDeleteWorkspacePolicyRequest
 
@@ -89,12 +90,12 @@ type PolicyApi interface {
 	DeleteWorkspacePolicyExecute(r PolicyApiDeleteWorkspacePolicyRequest) (*http.Response, error)
 
 	/*
-	GetDistributedPolicyV2 Get a distributed policy.
+		GetDistributedPolicyV2 Get a distributed policy.
 
-	Retrieve the details of a distributed policy for a given organizational unit.
+		Retrieve the details of a distributed policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiGetDistributedPolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiGetDistributedPolicyV2Request
 	*/
 	GetDistributedPolicyV2(ctx context.Context) PolicyApiGetDistributedPolicyV2Request
 
@@ -103,12 +104,12 @@ type PolicyApi interface {
 	GetDistributedPolicyV2Execute(r PolicyApiGetDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error)
 
 	/*
-	GetInferencePolicyV2 Get an inference policy.
+		GetInferencePolicyV2 Get an inference policy.
 
-	Retrieve the details of an inference policy for a given organizational unit.
+		Retrieve the details of an inference policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiGetInferencePolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiGetInferencePolicyV2Request
 	*/
 	GetInferencePolicyV2(ctx context.Context) PolicyApiGetInferencePolicyV2Request
 
@@ -117,12 +118,12 @@ type PolicyApi interface {
 	GetInferencePolicyV2Execute(r PolicyApiGetInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error)
 
 	/*
-	GetTrainingPolicyV2 Get a training policy.
+		GetTrainingPolicyV2 Get a training policy.
 
-	Retrieve the details of an training policy for a given organizational unit.
+		Retrieve the details of an training policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiGetTrainingPolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiGetTrainingPolicyV2Request
 	*/
 	GetTrainingPolicyV2(ctx context.Context) PolicyApiGetTrainingPolicyV2Request
 
@@ -131,12 +132,12 @@ type PolicyApi interface {
 	GetTrainingPolicyV2Execute(r PolicyApiGetTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error)
 
 	/*
-	GetWorkspacePolicyV2 Get a workspace policy.
+		GetWorkspacePolicyV2 Get a workspace policy.
 
-	Retrieve the details of a workspace policy for a given organizational unit.
+		Retrieve the details of a workspace policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiGetWorkspacePolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiGetWorkspacePolicyV2Request
 	*/
 	GetWorkspacePolicyV2(ctx context.Context) PolicyApiGetWorkspacePolicyV2Request
 
@@ -145,12 +146,12 @@ type PolicyApi interface {
 	GetWorkspacePolicyV2Execute(r PolicyApiGetWorkspacePolicyV2Request) (*WorkspacePolicyV2, *http.Response, error)
 
 	/*
-	ListPolicies List policies
+		ListPolicies List policies
 
-	Retrieve a list of all the applied policies.
+		Retrieve a list of all the applied policies.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiListPoliciesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiListPoliciesRequest
 	*/
 	ListPolicies(ctx context.Context) PolicyApiListPoliciesRequest
 
@@ -159,12 +160,12 @@ type PolicyApi interface {
 	ListPoliciesExecute(r PolicyApiListPoliciesRequest) (*PolicyListResponse, *http.Response, error)
 
 	/*
-	OverwriteDistributedPolicyV2 Overwrite a distributed policy.
+		OverwriteDistributedPolicyV2 Overwrite a distributed policy.
 
-	Use to apply a distributed policy for a given organizational unit.
+		Use to apply a distributed policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiOverwriteDistributedPolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiOverwriteDistributedPolicyV2Request
 	*/
 	OverwriteDistributedPolicyV2(ctx context.Context) PolicyApiOverwriteDistributedPolicyV2Request
 
@@ -173,12 +174,12 @@ type PolicyApi interface {
 	OverwriteDistributedPolicyV2Execute(r PolicyApiOverwriteDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error)
 
 	/*
-	OverwriteInferencePolicyV2 Overwrite an inference policy.
+		OverwriteInferencePolicyV2 Overwrite an inference policy.
 
-	Use to apply an inference policy for a given organizational unit.
+		Use to apply an inference policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiOverwriteInferencePolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiOverwriteInferencePolicyV2Request
 	*/
 	OverwriteInferencePolicyV2(ctx context.Context) PolicyApiOverwriteInferencePolicyV2Request
 
@@ -187,12 +188,12 @@ type PolicyApi interface {
 	OverwriteInferencePolicyV2Execute(r PolicyApiOverwriteInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error)
 
 	/*
-	OverwriteTrainingPolicyV2 Overwrite a training policy.
+		OverwriteTrainingPolicyV2 Overwrite a training policy.
 
-	Use to apply a training policy for a given organizational unit.
+		Use to apply a training policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiOverwriteTrainingPolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiOverwriteTrainingPolicyV2Request
 	*/
 	OverwriteTrainingPolicyV2(ctx context.Context) PolicyApiOverwriteTrainingPolicyV2Request
 
@@ -201,12 +202,12 @@ type PolicyApi interface {
 	OverwriteTrainingPolicyV2Execute(r PolicyApiOverwriteTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error)
 
 	/*
-	OverwriteWorkspacePolicyV2 Overwrite a workspace policy.
+		OverwriteWorkspacePolicyV2 Overwrite a workspace policy.
 
-	Ue to apply a workspace policy for a given organizational unit.
+		Ue to apply a workspace policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiOverwriteWorkspacePolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiOverwriteWorkspacePolicyV2Request
 	*/
 	OverwriteWorkspacePolicyV2(ctx context.Context) PolicyApiOverwriteWorkspacePolicyV2Request
 
@@ -215,12 +216,12 @@ type PolicyApi interface {
 	OverwriteWorkspacePolicyV2Execute(r PolicyApiOverwriteWorkspacePolicyV2Request) (*WorkspacePolicyV2, *http.Response, error)
 
 	/*
-	UpdateDistributedPolicyV2 Update a distributed policy.
+		UpdateDistributedPolicyV2 Update a distributed policy.
 
-	Use to apply changes to distributed policy for a given organizational unit.
+		Use to apply changes to distributed policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiUpdateDistributedPolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiUpdateDistributedPolicyV2Request
 	*/
 	UpdateDistributedPolicyV2(ctx context.Context) PolicyApiUpdateDistributedPolicyV2Request
 
@@ -229,12 +230,12 @@ type PolicyApi interface {
 	UpdateDistributedPolicyV2Execute(r PolicyApiUpdateDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error)
 
 	/*
-	UpdateInferencePolicyV2 Update an inference policy.
+		UpdateInferencePolicyV2 Update an inference policy.
 
-	Use to apply changes to inference policy for a given organizational unit.
+		Use to apply changes to inference policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiUpdateInferencePolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiUpdateInferencePolicyV2Request
 	*/
 	UpdateInferencePolicyV2(ctx context.Context) PolicyApiUpdateInferencePolicyV2Request
 
@@ -243,12 +244,12 @@ type PolicyApi interface {
 	UpdateInferencePolicyV2Execute(r PolicyApiUpdateInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error)
 
 	/*
-	UpdateTrainingPolicyV2 Update a training policy.
+		UpdateTrainingPolicyV2 Update a training policy.
 
-	Use to apply changes to training policy for a given organizational unit.
+		Use to apply changes to training policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiUpdateTrainingPolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiUpdateTrainingPolicyV2Request
 	*/
 	UpdateTrainingPolicyV2(ctx context.Context) PolicyApiUpdateTrainingPolicyV2Request
 
@@ -257,12 +258,12 @@ type PolicyApi interface {
 	UpdateTrainingPolicyV2Execute(r PolicyApiUpdateTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error)
 
 	/*
-	UpdateWorkspacePolicyV2 Update a workspace policy.
+		UpdateWorkspacePolicyV2 Update a workspace policy.
 
-	Use to apply changes to workspace policy for a given organizational unit.
+		Use to apply changes to workspace policy for a given organizational unit.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PolicyApiUpdateWorkspacePolicyV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PolicyApiUpdateWorkspacePolicyV2Request
 	*/
 	UpdateWorkspacePolicyV2(ctx context.Context) PolicyApiUpdateWorkspacePolicyV2Request
 
@@ -275,9 +276,9 @@ type PolicyApi interface {
 type PolicyApiService service
 
 type PolicyApiAssetChangedHookRequest struct {
-	ctx context.Context
-	ApiService PolicyApi
-	assetId string
+	ctx                     context.Context
+	ApiService              PolicyApi
+	assetId                 string
 	assetChangeNotification *AssetChangeNotification
 }
 
@@ -295,24 +296,24 @@ AssetChangedHook Asset changed hook for asset service
 
 Hook for asset service to report a change in spec of a given asset
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param assetId Unique identifier of the asset.
- @return PolicyApiAssetChangedHookRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param assetId Unique identifier of the asset.
+	@return PolicyApiAssetChangedHookRequest
 */
 func (a *PolicyApiService) AssetChangedHook(ctx context.Context, assetId string) PolicyApiAssetChangedHookRequest {
 	return PolicyApiAssetChangedHookRequest{
 		ApiService: a,
-		ctx: ctx,
-		assetId: assetId,
+		ctx:        ctx,
+		assetId:    assetId,
 	}
 }
 
 // Execute executes the request
 func (a *PolicyApiService) AssetChangedHookExecute(r PolicyApiAssetChangedHookRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.AssetChangedHook")
@@ -417,12 +418,12 @@ func (a *PolicyApiService) AssetChangedHookExecute(r PolicyApiAssetChangedHookRe
 }
 
 type PolicyApiDeleteDistributedPolicyRequest struct {
-	ctx context.Context
-	ApiService PolicyApi
-	scope *string
+	ctx          context.Context
+	ApiService   PolicyApi
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // The scope that the policy relates to.
@@ -458,22 +459,22 @@ DeleteDistributedPolicy Delete a distributed policy.
 
 Use to delete a distributed policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiDeleteDistributedPolicyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiDeleteDistributedPolicyRequest
 */
 func (a *PolicyApiService) DeleteDistributedPolicy(ctx context.Context) PolicyApiDeleteDistributedPolicyRequest {
 	return PolicyApiDeleteDistributedPolicyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *PolicyApiService) DeleteDistributedPolicyExecute(r PolicyApiDeleteDistributedPolicyRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.DeleteDistributedPolicy")
@@ -595,12 +596,12 @@ func (a *PolicyApiService) DeleteDistributedPolicyExecute(r PolicyApiDeleteDistr
 }
 
 type PolicyApiDeleteInferencePolicyRequest struct {
-	ctx context.Context
-	ApiService PolicyApi
-	scope *string
+	ctx          context.Context
+	ApiService   PolicyApi
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // The scope that the policy relates to.
@@ -636,22 +637,22 @@ DeleteInferencePolicy Delete an inference policy.
 
 Use to delete an inference policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiDeleteInferencePolicyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiDeleteInferencePolicyRequest
 */
 func (a *PolicyApiService) DeleteInferencePolicy(ctx context.Context) PolicyApiDeleteInferencePolicyRequest {
 	return PolicyApiDeleteInferencePolicyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *PolicyApiService) DeleteInferencePolicyExecute(r PolicyApiDeleteInferencePolicyRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.DeleteInferencePolicy")
@@ -773,12 +774,12 @@ func (a *PolicyApiService) DeleteInferencePolicyExecute(r PolicyApiDeleteInferen
 }
 
 type PolicyApiDeleteTrainingPolicyRequest struct {
-	ctx context.Context
-	ApiService PolicyApi
-	scope *string
+	ctx          context.Context
+	ApiService   PolicyApi
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // The scope that the policy relates to.
@@ -814,22 +815,22 @@ DeleteTrainingPolicy Delete a training policy.
 
 Use to delete a training policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiDeleteTrainingPolicyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiDeleteTrainingPolicyRequest
 */
 func (a *PolicyApiService) DeleteTrainingPolicy(ctx context.Context) PolicyApiDeleteTrainingPolicyRequest {
 	return PolicyApiDeleteTrainingPolicyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *PolicyApiService) DeleteTrainingPolicyExecute(r PolicyApiDeleteTrainingPolicyRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.DeleteTrainingPolicy")
@@ -951,12 +952,12 @@ func (a *PolicyApiService) DeleteTrainingPolicyExecute(r PolicyApiDeleteTraining
 }
 
 type PolicyApiDeleteWorkspacePolicyRequest struct {
-	ctx context.Context
-	ApiService PolicyApi
-	scope *string
+	ctx          context.Context
+	ApiService   PolicyApi
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // The scope that the policy relates to.
@@ -992,22 +993,22 @@ DeleteWorkspacePolicy Delete a workspace policy.
 
 Use to delete a workspace policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiDeleteWorkspacePolicyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiDeleteWorkspacePolicyRequest
 */
 func (a *PolicyApiService) DeleteWorkspacePolicy(ctx context.Context) PolicyApiDeleteWorkspacePolicyRequest {
 	return PolicyApiDeleteWorkspacePolicyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *PolicyApiService) DeleteWorkspacePolicyExecute(r PolicyApiDeleteWorkspacePolicyRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.DeleteWorkspacePolicy")
@@ -1129,12 +1130,12 @@ func (a *PolicyApiService) DeleteWorkspacePolicyExecute(r PolicyApiDeleteWorkspa
 }
 
 type PolicyApiGetDistributedPolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	scope *string
+	ctx          context.Context
+	ApiService   PolicyApi
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // The scope that the policy relates to.
@@ -1170,24 +1171,25 @@ GetDistributedPolicyV2 Get a distributed policy.
 
 Retrieve the details of a distributed policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiGetDistributedPolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiGetDistributedPolicyV2Request
 */
 func (a *PolicyApiService) GetDistributedPolicyV2(ctx context.Context) PolicyApiGetDistributedPolicyV2Request {
 	return PolicyApiGetDistributedPolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return DistributedPolicyV2
+//
+//	@return DistributedPolicyV2
 func (a *PolicyApiService) GetDistributedPolicyV2Execute(r PolicyApiGetDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DistributedPolicyV2
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DistributedPolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.GetDistributedPolicyV2")
@@ -1318,12 +1320,12 @@ func (a *PolicyApiService) GetDistributedPolicyV2Execute(r PolicyApiGetDistribut
 }
 
 type PolicyApiGetInferencePolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	scope *string
+	ctx          context.Context
+	ApiService   PolicyApi
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // The scope that the policy relates to.
@@ -1359,24 +1361,25 @@ GetInferencePolicyV2 Get an inference policy.
 
 Retrieve the details of an inference policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiGetInferencePolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiGetInferencePolicyV2Request
 */
 func (a *PolicyApiService) GetInferencePolicyV2(ctx context.Context) PolicyApiGetInferencePolicyV2Request {
 	return PolicyApiGetInferencePolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return InferencePolicyV2
+//
+//	@return InferencePolicyV2
 func (a *PolicyApiService) GetInferencePolicyV2Execute(r PolicyApiGetInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *InferencePolicyV2
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *InferencePolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.GetInferencePolicyV2")
@@ -1507,12 +1510,12 @@ func (a *PolicyApiService) GetInferencePolicyV2Execute(r PolicyApiGetInferencePo
 }
 
 type PolicyApiGetTrainingPolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	scope *string
+	ctx          context.Context
+	ApiService   PolicyApi
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // The scope that the policy relates to.
@@ -1548,24 +1551,25 @@ GetTrainingPolicyV2 Get a training policy.
 
 Retrieve the details of an training policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiGetTrainingPolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiGetTrainingPolicyV2Request
 */
 func (a *PolicyApiService) GetTrainingPolicyV2(ctx context.Context) PolicyApiGetTrainingPolicyV2Request {
 	return PolicyApiGetTrainingPolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TrainingPolicyV2
+//
+//	@return TrainingPolicyV2
 func (a *PolicyApiService) GetTrainingPolicyV2Execute(r PolicyApiGetTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TrainingPolicyV2
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TrainingPolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.GetTrainingPolicyV2")
@@ -1696,12 +1700,12 @@ func (a *PolicyApiService) GetTrainingPolicyV2Execute(r PolicyApiGetTrainingPoli
 }
 
 type PolicyApiGetWorkspacePolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	scope *string
+	ctx          context.Context
+	ApiService   PolicyApi
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // The scope that the policy relates to.
@@ -1737,24 +1741,25 @@ GetWorkspacePolicyV2 Get a workspace policy.
 
 Retrieve the details of a workspace policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiGetWorkspacePolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiGetWorkspacePolicyV2Request
 */
 func (a *PolicyApiService) GetWorkspacePolicyV2(ctx context.Context) PolicyApiGetWorkspacePolicyV2Request {
 	return PolicyApiGetWorkspacePolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return WorkspacePolicyV2
+//
+//	@return WorkspacePolicyV2
 func (a *PolicyApiService) GetWorkspacePolicyV2Execute(r PolicyApiGetWorkspacePolicyV2Request) (*WorkspacePolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WorkspacePolicyV2
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkspacePolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.GetWorkspacePolicyV2")
@@ -1885,13 +1890,13 @@ func (a *PolicyApiService) GetWorkspacePolicyV2Execute(r PolicyApiGetWorkspacePo
 }
 
 type PolicyApiListPoliciesRequest struct {
-	ctx context.Context
-	ApiService PolicyApi
+	ctx          context.Context
+	ApiService   PolicyApi
 	workloadType *string
-	scope *string
+	scope        *string
 	departmentId *string
-	projectId *string
-	clusterId *string
+	projectId    *string
+	clusterId    *string
 }
 
 // Policy for a specific workload type.
@@ -1933,24 +1938,25 @@ ListPolicies List policies
 
 Retrieve a list of all the applied policies.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiListPoliciesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiListPoliciesRequest
 */
 func (a *PolicyApiService) ListPolicies(ctx context.Context) PolicyApiListPoliciesRequest {
 	return PolicyApiListPoliciesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return PolicyListResponse
+//
+//	@return PolicyListResponse
 func (a *PolicyApiService) ListPoliciesExecute(r PolicyApiListPoliciesRequest) (*PolicyListResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PolicyListResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PolicyListResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.ListPolicies")
@@ -2063,9 +2069,9 @@ func (a *PolicyApiService) ListPoliciesExecute(r PolicyApiListPoliciesRequest) (
 }
 
 type PolicyApiOverwriteDistributedPolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	validateOnly *bool
+	ctx                                 context.Context
+	ApiService                          PolicyApi
+	validateOnly                        *bool
 	distributedPolicyOverwriteRequestV2 *DistributedPolicyOverwriteRequestV2
 }
 
@@ -2089,24 +2095,25 @@ OverwriteDistributedPolicyV2 Overwrite a distributed policy.
 
 Use to apply a distributed policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiOverwriteDistributedPolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiOverwriteDistributedPolicyV2Request
 */
 func (a *PolicyApiService) OverwriteDistributedPolicyV2(ctx context.Context) PolicyApiOverwriteDistributedPolicyV2Request {
 	return PolicyApiOverwriteDistributedPolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return DistributedPolicyV2
+//
+//	@return DistributedPolicyV2
 func (a *PolicyApiService) OverwriteDistributedPolicyV2Execute(r PolicyApiOverwriteDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DistributedPolicyV2
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DistributedPolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.OverwriteDistributedPolicyV2")
@@ -2219,9 +2226,9 @@ func (a *PolicyApiService) OverwriteDistributedPolicyV2Execute(r PolicyApiOverwr
 }
 
 type PolicyApiOverwriteInferencePolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	validateOnly *bool
+	ctx                               context.Context
+	ApiService                        PolicyApi
+	validateOnly                      *bool
 	inferencePolicyOverwriteRequestV2 *InferencePolicyOverwriteRequestV2
 }
 
@@ -2245,24 +2252,25 @@ OverwriteInferencePolicyV2 Overwrite an inference policy.
 
 Use to apply an inference policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiOverwriteInferencePolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiOverwriteInferencePolicyV2Request
 */
 func (a *PolicyApiService) OverwriteInferencePolicyV2(ctx context.Context) PolicyApiOverwriteInferencePolicyV2Request {
 	return PolicyApiOverwriteInferencePolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return InferencePolicyV2
+//
+//	@return InferencePolicyV2
 func (a *PolicyApiService) OverwriteInferencePolicyV2Execute(r PolicyApiOverwriteInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *InferencePolicyV2
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *InferencePolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.OverwriteInferencePolicyV2")
@@ -2375,9 +2383,9 @@ func (a *PolicyApiService) OverwriteInferencePolicyV2Execute(r PolicyApiOverwrit
 }
 
 type PolicyApiOverwriteTrainingPolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	validateOnly *bool
+	ctx                              context.Context
+	ApiService                       PolicyApi
+	validateOnly                     *bool
 	trainingPolicyOverwriteRequestV2 *TrainingPolicyOverwriteRequestV2
 }
 
@@ -2401,24 +2409,25 @@ OverwriteTrainingPolicyV2 Overwrite a training policy.
 
 Use to apply a training policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiOverwriteTrainingPolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiOverwriteTrainingPolicyV2Request
 */
 func (a *PolicyApiService) OverwriteTrainingPolicyV2(ctx context.Context) PolicyApiOverwriteTrainingPolicyV2Request {
 	return PolicyApiOverwriteTrainingPolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TrainingPolicyV2
+//
+//	@return TrainingPolicyV2
 func (a *PolicyApiService) OverwriteTrainingPolicyV2Execute(r PolicyApiOverwriteTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TrainingPolicyV2
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TrainingPolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.OverwriteTrainingPolicyV2")
@@ -2531,9 +2540,9 @@ func (a *PolicyApiService) OverwriteTrainingPolicyV2Execute(r PolicyApiOverwrite
 }
 
 type PolicyApiOverwriteWorkspacePolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	validateOnly *bool
+	ctx                               context.Context
+	ApiService                        PolicyApi
+	validateOnly                      *bool
 	workspacePolicyOverwriteRequestV2 *WorkspacePolicyOverwriteRequestV2
 }
 
@@ -2557,24 +2566,25 @@ OverwriteWorkspacePolicyV2 Overwrite a workspace policy.
 
 Ue to apply a workspace policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiOverwriteWorkspacePolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiOverwriteWorkspacePolicyV2Request
 */
 func (a *PolicyApiService) OverwriteWorkspacePolicyV2(ctx context.Context) PolicyApiOverwriteWorkspacePolicyV2Request {
 	return PolicyApiOverwriteWorkspacePolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return WorkspacePolicyV2
+//
+//	@return WorkspacePolicyV2
 func (a *PolicyApiService) OverwriteWorkspacePolicyV2Execute(r PolicyApiOverwriteWorkspacePolicyV2Request) (*WorkspacePolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WorkspacePolicyV2
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkspacePolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.OverwriteWorkspacePolicyV2")
@@ -2687,9 +2697,9 @@ func (a *PolicyApiService) OverwriteWorkspacePolicyV2Execute(r PolicyApiOverwrit
 }
 
 type PolicyApiUpdateDistributedPolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	validateOnly *bool
+	ctx                              context.Context
+	ApiService                       PolicyApi
+	validateOnly                     *bool
 	distributedPolicyChangeRequestV2 *DistributedPolicyChangeRequestV2
 }
 
@@ -2713,24 +2723,25 @@ UpdateDistributedPolicyV2 Update a distributed policy.
 
 Use to apply changes to distributed policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiUpdateDistributedPolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiUpdateDistributedPolicyV2Request
 */
 func (a *PolicyApiService) UpdateDistributedPolicyV2(ctx context.Context) PolicyApiUpdateDistributedPolicyV2Request {
 	return PolicyApiUpdateDistributedPolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return DistributedPolicyV2
+//
+//	@return DistributedPolicyV2
 func (a *PolicyApiService) UpdateDistributedPolicyV2Execute(r PolicyApiUpdateDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DistributedPolicyV2
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DistributedPolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.UpdateDistributedPolicyV2")
@@ -2843,9 +2854,9 @@ func (a *PolicyApiService) UpdateDistributedPolicyV2Execute(r PolicyApiUpdateDis
 }
 
 type PolicyApiUpdateInferencePolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	validateOnly *bool
+	ctx                            context.Context
+	ApiService                     PolicyApi
+	validateOnly                   *bool
 	inferencePolicyChangeRequestV2 *InferencePolicyChangeRequestV2
 }
 
@@ -2869,24 +2880,25 @@ UpdateInferencePolicyV2 Update an inference policy.
 
 Use to apply changes to inference policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiUpdateInferencePolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiUpdateInferencePolicyV2Request
 */
 func (a *PolicyApiService) UpdateInferencePolicyV2(ctx context.Context) PolicyApiUpdateInferencePolicyV2Request {
 	return PolicyApiUpdateInferencePolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return InferencePolicyV2
+//
+//	@return InferencePolicyV2
 func (a *PolicyApiService) UpdateInferencePolicyV2Execute(r PolicyApiUpdateInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *InferencePolicyV2
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *InferencePolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.UpdateInferencePolicyV2")
@@ -2999,9 +3011,9 @@ func (a *PolicyApiService) UpdateInferencePolicyV2Execute(r PolicyApiUpdateInfer
 }
 
 type PolicyApiUpdateTrainingPolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	validateOnly *bool
+	ctx                           context.Context
+	ApiService                    PolicyApi
+	validateOnly                  *bool
 	trainingPolicyChangeRequestV2 *TrainingPolicyChangeRequestV2
 }
 
@@ -3025,24 +3037,25 @@ UpdateTrainingPolicyV2 Update a training policy.
 
 Use to apply changes to training policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiUpdateTrainingPolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiUpdateTrainingPolicyV2Request
 */
 func (a *PolicyApiService) UpdateTrainingPolicyV2(ctx context.Context) PolicyApiUpdateTrainingPolicyV2Request {
 	return PolicyApiUpdateTrainingPolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TrainingPolicyV2
+//
+//	@return TrainingPolicyV2
 func (a *PolicyApiService) UpdateTrainingPolicyV2Execute(r PolicyApiUpdateTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TrainingPolicyV2
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TrainingPolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.UpdateTrainingPolicyV2")
@@ -3155,9 +3168,9 @@ func (a *PolicyApiService) UpdateTrainingPolicyV2Execute(r PolicyApiUpdateTraini
 }
 
 type PolicyApiUpdateWorkspacePolicyV2Request struct {
-	ctx context.Context
-	ApiService PolicyApi
-	validateOnly *bool
+	ctx                            context.Context
+	ApiService                     PolicyApi
+	validateOnly                   *bool
 	workspacePolicyChangeRequestV2 *WorkspacePolicyChangeRequestV2
 }
 
@@ -3181,24 +3194,25 @@ UpdateWorkspacePolicyV2 Update a workspace policy.
 
 Use to apply changes to workspace policy for a given organizational unit.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PolicyApiUpdateWorkspacePolicyV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PolicyApiUpdateWorkspacePolicyV2Request
 */
 func (a *PolicyApiService) UpdateWorkspacePolicyV2(ctx context.Context) PolicyApiUpdateWorkspacePolicyV2Request {
 	return PolicyApiUpdateWorkspacePolicyV2Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return WorkspacePolicyV2
+//
+//	@return WorkspacePolicyV2
 func (a *PolicyApiService) UpdateWorkspacePolicyV2Execute(r PolicyApiUpdateWorkspacePolicyV2Request) (*WorkspacePolicyV2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WorkspacePolicyV2
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkspacePolicyV2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PolicyApiService.UpdateWorkspacePolicyV2")

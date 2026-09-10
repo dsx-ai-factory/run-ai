@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/google/uuid"
 
@@ -43,7 +44,10 @@ const (
 	maxConcurrentAuditWriters = 8
 )
 
-var auditWriterSlots = make(chan struct{}, maxConcurrentAuditWriters)
+var (
+	auditWriterSlots = make(chan struct{}, maxConcurrentAuditWriters)
+	auditWriters     sync.WaitGroup
+)
 
 type ReportsApiService struct {
 	MetricsClient metrics_client.MetricsClientContract
@@ -477,13 +481,21 @@ func writeAuditLogsAsync(ctx context.Context, auditLogs []*audit.AuditLog) {
 	detachedCtx := context.WithoutCancel(ctx)
 	select {
 	case auditWriterSlots <- struct{}{}:
+		auditWriters.Add(1)
 		go func() {
+			defer auditWriters.Done()
 			defer func() { <-auditWriterSlots }()
 			writeAuditLogs(detachedCtx, auditLogs)
 		}()
 	default:
 		writeAuditLogs(detachedCtx, auditLogs)
 	}
+}
+
+// WaitForAuditWrites blocks until the background audit writers have finished, so a
+// caller can swap the audit writer without racing one that is still running.
+func WaitForAuditWrites() {
+	auditWriters.Wait()
 }
 
 func writeAuditLogs(ctx context.Context, auditLogs []*audit.AuditLog) {

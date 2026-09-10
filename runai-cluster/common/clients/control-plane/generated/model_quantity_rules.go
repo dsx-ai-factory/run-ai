@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -76,6 +78,7 @@ func (o *QuantityRules) HasSourceOfRule() bool {
 func (o *QuantityRules) SetSourceOfRule(v SourceOfRule) {
 	o.SourceOfRule.Set(&v)
 }
+
 // SetSourceOfRuleNil sets the value for SourceOfRule to be an explicit nil
 func (o *QuantityRules) SetSourceOfRuleNil() {
 	o.SourceOfRule.Set(nil)
@@ -118,6 +121,7 @@ func (o *QuantityRules) HasRequired() bool {
 func (o *QuantityRules) SetRequired(v bool) {
 	o.Required.Set(&v)
 }
+
 // SetRequiredNil sets the value for Required to be an explicit nil
 func (o *QuantityRules) SetRequiredNil() {
 	o.Required.Set(nil)
@@ -160,6 +164,7 @@ func (o *QuantityRules) HasCanEdit() bool {
 func (o *QuantityRules) SetCanEdit(v bool) {
 	o.CanEdit.Set(&v)
 }
+
 // SetCanEditNil sets the value for CanEdit to be an explicit nil
 func (o *QuantityRules) SetCanEditNil() {
 	o.CanEdit.Set(nil)
@@ -202,6 +207,7 @@ func (o *QuantityRules) HasMin() bool {
 func (o *QuantityRules) SetMin(v string) {
 	o.Min.Set(&v)
 }
+
 // SetMinNil sets the value for Min to be an explicit nil
 func (o *QuantityRules) SetMinNil() {
 	o.Min.Set(nil)
@@ -244,6 +250,7 @@ func (o *QuantityRules) HasMax() bool {
 func (o *QuantityRules) SetMax(v string) {
 	o.Max.Set(&v)
 }
+
 // SetMaxNil sets the value for Max to be an explicit nil
 func (o *QuantityRules) SetMaxNil() {
 	o.Max.Set(nil)
@@ -309,5 +316,3 @@ func (v *NullableQuantityRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -21,7 +23,7 @@ type AssetMeta struct {
 	Name string `json:"name"`
 	// The description of the asset.
 	Description NullableString `json:"description,omitempty"`
-	Scope Scope `json:"scope"`
+	Scope       Scope          `json:"scope"`
 	// The id of the cluster.
 	ClusterId NullableString `json:"clusterId,omitempty"`
 	// The id of the department. Must be specified for department scoped assets.
@@ -29,10 +31,10 @@ type AssetMeta struct {
 	// The id of the project. Must be specified for project scoped assets.
 	ProjectId NullableInt32 `json:"projectId,omitempty"`
 	// The asset will be deleted automatically. This is intended for internal use.
-	AutoDelete NullableBool `json:"autoDelete,omitempty"`
+	AutoDelete             NullableBool                   `json:"autoDelete,omitempty"`
 	WorkloadSupportedTypes NullableWorkloadSupportedTypes `json:"workloadSupportedTypes,omitempty"`
 	// Unique identifier of the asset.
-	Id string `json:"id"`
+	Id   string    `json:"id"`
 	Kind AssetKind `json:"kind"`
 	// The id of the tenant.
 	TenantId NullableInt32 `json:"tenantId,omitempty"`
@@ -133,6 +135,7 @@ func (o *AssetMeta) HasDescription() bool {
 func (o *AssetMeta) SetDescription(v string) {
 	o.Description.Set(&v)
 }
+
 // SetDescriptionNil sets the value for Description to be an explicit nil
 func (o *AssetMeta) SetDescriptionNil() {
 	o.Description.Set(nil)
@@ -199,6 +202,7 @@ func (o *AssetMeta) HasClusterId() bool {
 func (o *AssetMeta) SetClusterId(v string) {
 	o.ClusterId.Set(&v)
 }
+
 // SetClusterIdNil sets the value for ClusterId to be an explicit nil
 func (o *AssetMeta) SetClusterIdNil() {
 	o.ClusterId.Set(nil)
@@ -241,6 +245,7 @@ func (o *AssetMeta) HasDepartmentId() bool {
 func (o *AssetMeta) SetDepartmentId(v string) {
 	o.DepartmentId.Set(&v)
 }
+
 // SetDepartmentIdNil sets the value for DepartmentId to be an explicit nil
 func (o *AssetMeta) SetDepartmentIdNil() {
 	o.DepartmentId.Set(nil)
@@ -283,6 +288,7 @@ func (o *AssetMeta) HasProjectId() bool {
 func (o *AssetMeta) SetProjectId(v int32) {
 	o.ProjectId.Set(&v)
 }
+
 // SetProjectIdNil sets the value for ProjectId to be an explicit nil
 func (o *AssetMeta) SetProjectIdNil() {
 	o.ProjectId.Set(nil)
@@ -325,6 +331,7 @@ func (o *AssetMeta) HasAutoDelete() bool {
 func (o *AssetMeta) SetAutoDelete(v bool) {
 	o.AutoDelete.Set(&v)
 }
+
 // SetAutoDeleteNil sets the value for AutoDelete to be an explicit nil
 func (o *AssetMeta) SetAutoDeleteNil() {
 	o.AutoDelete.Set(nil)
@@ -367,6 +374,7 @@ func (o *AssetMeta) HasWorkloadSupportedTypes() bool {
 func (o *AssetMeta) SetWorkloadSupportedTypes(v WorkloadSupportedTypes) {
 	o.WorkloadSupportedTypes.Set(&v)
 }
+
 // SetWorkloadSupportedTypesNil sets the value for WorkloadSupportedTypes to be an explicit nil
 func (o *AssetMeta) SetWorkloadSupportedTypesNil() {
 	o.WorkloadSupportedTypes.Set(nil)
@@ -457,6 +465,7 @@ func (o *AssetMeta) HasTenantId() bool {
 func (o *AssetMeta) SetTenantId(v int32) {
 	o.TenantId.Set(&v)
 }
+
 // SetTenantIdNil sets the value for TenantId to be an explicit nil
 func (o *AssetMeta) SetTenantIdNil() {
 	o.TenantId.Set(nil)
@@ -595,6 +604,7 @@ func (o *AssetMeta) HasProjectName() bool {
 func (o *AssetMeta) SetProjectName(v string) {
 	o.ProjectName.Set(&v)
 }
+
 // SetProjectNameNil sets the value for ProjectName to be an explicit nil
 func (o *AssetMeta) SetProjectNameNil() {
 	o.ProjectName.Set(nil)
@@ -693,5 +703,3 @@ func (v *NullableAssetMeta) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

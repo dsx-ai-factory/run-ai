@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,14 +18,14 @@ import (
 
 // CommonSecurityFlatFieldsRules struct for CommonSecurityFlatFieldsRules
 type CommonSecurityFlatFieldsRules struct {
-	UidGidSource NullableUidGidSourceRules `json:"uidGidSource,omitempty"`
-	Capabilities NullableArrayRules `json:"capabilities,omitempty"`
-	SeccompProfileType NullableSeccompProfileTypeRules `json:"seccompProfileType,omitempty"`
-	RunAsNonRoot NullableBooleanRules `json:"runAsNonRoot,omitempty"`
-	ReadOnlyRootFilesystem NullableBooleanRules `json:"readOnlyRootFilesystem,omitempty"`
-	RunAsUid NullableIntegerRulesOptional `json:"runAsUid,omitempty"`
-	RunAsGid NullableIntegerRulesOptional `json:"runAsGid,omitempty"`
-	SupplementalGroups NullableStringRules `json:"supplementalGroups,omitempty"`
+	UidGidSource           NullableUidGidSourceRules       `json:"uidGidSource,omitempty"`
+	Capabilities           NullableArrayRules              `json:"capabilities,omitempty"`
+	SeccompProfileType     NullableSeccompProfileTypeRules `json:"seccompProfileType,omitempty"`
+	RunAsNonRoot           NullableBooleanRules            `json:"runAsNonRoot,omitempty"`
+	ReadOnlyRootFilesystem NullableBooleanRules            `json:"readOnlyRootFilesystem,omitempty"`
+	RunAsUid               NullableIntegerRulesOptional    `json:"runAsUid,omitempty"`
+	RunAsGid               NullableIntegerRulesOptional    `json:"runAsGid,omitempty"`
+	SupplementalGroups     NullableStringRules             `json:"supplementalGroups,omitempty"`
 }
 
 // NewCommonSecurityFlatFieldsRules instantiates a new CommonSecurityFlatFieldsRules object
@@ -75,6 +77,7 @@ func (o *CommonSecurityFlatFieldsRules) HasUidGidSource() bool {
 func (o *CommonSecurityFlatFieldsRules) SetUidGidSource(v UidGidSourceRules) {
 	o.UidGidSource.Set(&v)
 }
+
 // SetUidGidSourceNil sets the value for UidGidSource to be an explicit nil
 func (o *CommonSecurityFlatFieldsRules) SetUidGidSourceNil() {
 	o.UidGidSource.Set(nil)
@@ -117,6 +120,7 @@ func (o *CommonSecurityFlatFieldsRules) HasCapabilities() bool {
 func (o *CommonSecurityFlatFieldsRules) SetCapabilities(v ArrayRules) {
 	o.Capabilities.Set(&v)
 }
+
 // SetCapabilitiesNil sets the value for Capabilities to be an explicit nil
 func (o *CommonSecurityFlatFieldsRules) SetCapabilitiesNil() {
 	o.Capabilities.Set(nil)
@@ -159,6 +163,7 @@ func (o *CommonSecurityFlatFieldsRules) HasSeccompProfileType() bool {
 func (o *CommonSecurityFlatFieldsRules) SetSeccompProfileType(v SeccompProfileTypeRules) {
 	o.SeccompProfileType.Set(&v)
 }
+
 // SetSeccompProfileTypeNil sets the value for SeccompProfileType to be an explicit nil
 func (o *CommonSecurityFlatFieldsRules) SetSeccompProfileTypeNil() {
 	o.SeccompProfileType.Set(nil)
@@ -201,6 +206,7 @@ func (o *CommonSecurityFlatFieldsRules) HasRunAsNonRoot() bool {
 func (o *CommonSecurityFlatFieldsRules) SetRunAsNonRoot(v BooleanRules) {
 	o.RunAsNonRoot.Set(&v)
 }
+
 // SetRunAsNonRootNil sets the value for RunAsNonRoot to be an explicit nil
 func (o *CommonSecurityFlatFieldsRules) SetRunAsNonRootNil() {
 	o.RunAsNonRoot.Set(nil)
@@ -243,6 +249,7 @@ func (o *CommonSecurityFlatFieldsRules) HasReadOnlyRootFilesystem() bool {
 func (o *CommonSecurityFlatFieldsRules) SetReadOnlyRootFilesystem(v BooleanRules) {
 	o.ReadOnlyRootFilesystem.Set(&v)
 }
+
 // SetReadOnlyRootFilesystemNil sets the value for ReadOnlyRootFilesystem to be an explicit nil
 func (o *CommonSecurityFlatFieldsRules) SetReadOnlyRootFilesystemNil() {
 	o.ReadOnlyRootFilesystem.Set(nil)
@@ -285,6 +292,7 @@ func (o *CommonSecurityFlatFieldsRules) HasRunAsUid() bool {
 func (o *CommonSecurityFlatFieldsRules) SetRunAsUid(v IntegerRulesOptional) {
 	o.RunAsUid.Set(&v)
 }
+
 // SetRunAsUidNil sets the value for RunAsUid to be an explicit nil
 func (o *CommonSecurityFlatFieldsRules) SetRunAsUidNil() {
 	o.RunAsUid.Set(nil)
@@ -327,6 +335,7 @@ func (o *CommonSecurityFlatFieldsRules) HasRunAsGid() bool {
 func (o *CommonSecurityFlatFieldsRules) SetRunAsGid(v IntegerRulesOptional) {
 	o.RunAsGid.Set(&v)
 }
+
 // SetRunAsGidNil sets the value for RunAsGid to be an explicit nil
 func (o *CommonSecurityFlatFieldsRules) SetRunAsGidNil() {
 	o.RunAsGid.Set(nil)
@@ -369,6 +378,7 @@ func (o *CommonSecurityFlatFieldsRules) HasSupplementalGroups() bool {
 func (o *CommonSecurityFlatFieldsRules) SetSupplementalGroups(v StringRules) {
 	o.SupplementalGroups.Set(&v)
 }
+
 // SetSupplementalGroupsNil sets the value for SupplementalGroups to be an explicit nil
 func (o *CommonSecurityFlatFieldsRules) SetSupplementalGroupsNil() {
 	o.SupplementalGroups.Set(nil)
@@ -443,5 +453,3 @@ func (v *NullableCommonSecurityFlatFieldsRules) UnmarshalJSON(src []byte) error 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

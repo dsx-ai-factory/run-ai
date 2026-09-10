@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -83,6 +85,7 @@ func (o *GitInstance) HasName() bool {
 func (o *GitInstance) SetName(v string) {
 	o.Name.Set(&v)
 }
+
 // SetNameNil sets the value for Name to be an explicit nil
 func (o *GitInstance) SetNameNil() {
 	o.Name.Set(nil)
@@ -125,6 +128,7 @@ func (o *GitInstance) HasRepository() bool {
 func (o *GitInstance) SetRepository(v string) {
 	o.Repository.Set(&v)
 }
+
 // SetRepositoryNil sets the value for Repository to be an explicit nil
 func (o *GitInstance) SetRepositoryNil() {
 	o.Repository.Set(nil)
@@ -167,6 +171,7 @@ func (o *GitInstance) HasBranch() bool {
 func (o *GitInstance) SetBranch(v string) {
 	o.Branch.Set(&v)
 }
+
 // SetBranchNil sets the value for Branch to be an explicit nil
 func (o *GitInstance) SetBranchNil() {
 	o.Branch.Set(nil)
@@ -209,6 +214,7 @@ func (o *GitInstance) HasRevision() bool {
 func (o *GitInstance) SetRevision(v string) {
 	o.Revision.Set(&v)
 }
+
 // SetRevisionNil sets the value for Revision to be an explicit nil
 func (o *GitInstance) SetRevisionNil() {
 	o.Revision.Set(nil)
@@ -251,6 +257,7 @@ func (o *GitInstance) HasPath() bool {
 func (o *GitInstance) SetPath(v string) {
 	o.Path.Set(&v)
 }
+
 // SetPathNil sets the value for Path to be an explicit nil
 func (o *GitInstance) SetPathNil() {
 	o.Path.Set(nil)
@@ -293,6 +300,7 @@ func (o *GitInstance) HasPasswordSecret() bool {
 func (o *GitInstance) SetPasswordSecret(v string) {
 	o.PasswordSecret.Set(&v)
 }
+
 // SetPasswordSecretNil sets the value for PasswordSecret to be an explicit nil
 func (o *GitInstance) SetPasswordSecretNil() {
 	o.PasswordSecret.Set(nil)
@@ -335,6 +343,7 @@ func (o *GitInstance) HasSecretKeyOfUser() bool {
 func (o *GitInstance) SetSecretKeyOfUser(v string) {
 	o.SecretKeyOfUser.Set(&v)
 }
+
 // SetSecretKeyOfUserNil sets the value for SecretKeyOfUser to be an explicit nil
 func (o *GitInstance) SetSecretKeyOfUserNil() {
 	o.SecretKeyOfUser.Set(nil)
@@ -377,6 +386,7 @@ func (o *GitInstance) HasSecretKeyOfPassword() bool {
 func (o *GitInstance) SetSecretKeyOfPassword(v string) {
 	o.SecretKeyOfPassword.Set(&v)
 }
+
 // SetSecretKeyOfPasswordNil sets the value for SecretKeyOfPassword to be an explicit nil
 func (o *GitInstance) SetSecretKeyOfPasswordNil() {
 	o.SecretKeyOfPassword.Set(nil)
@@ -451,5 +461,3 @@ func (v *NullableGitInstance) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 // WorkloadHistoryApiService WorkloadHistoryApi service
 type WorkloadHistoryApiService service
 
 type ApiGetWorkloadHistoryRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *WorkloadHistoryApiService
-	uuid string
-	jobId string
+	uuid       string
+	jobId      string
 }
 
 func (r ApiGetWorkloadHistoryRequest) Execute() (*WorkloadHistoryResponse, *http.Response, error) {
@@ -37,28 +38,29 @@ func (r ApiGetWorkloadHistoryRequest) Execute() (*WorkloadHistoryResponse, *http
 /*
 GetWorkloadHistory list workload history
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param jobId Unique identifier of the job
- @return ApiGetWorkloadHistoryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param jobId Unique identifier of the job
+	@return ApiGetWorkloadHistoryRequest
 */
 func (a *WorkloadHistoryApiService) GetWorkloadHistory(ctx context.Context, uuid string, jobId string) ApiGetWorkloadHistoryRequest {
 	return ApiGetWorkloadHistoryRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
-		jobId: jobId,
+		ctx:        ctx,
+		uuid:       uuid,
+		jobId:      jobId,
 	}
 }
 
 // Execute executes the request
-//  @return WorkloadHistoryResponse
+//
+//	@return WorkloadHistoryResponse
 func (a *WorkloadHistoryApiService) GetWorkloadHistoryExecute(r ApiGetWorkloadHistoryRequest) (*WorkloadHistoryResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WorkloadHistoryResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkloadHistoryResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadHistoryApiService.GetWorkloadHistory")
@@ -143,13 +145,13 @@ func (a *WorkloadHistoryApiService) GetWorkloadHistoryExecute(r ApiGetWorkloadHi
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

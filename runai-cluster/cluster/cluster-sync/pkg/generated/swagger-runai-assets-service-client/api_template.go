@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -134,6 +136,7 @@ func (a *TemplateApiService) CreateTemplate(ctx context.Context) ApiCreateTempla
 }
 
 // Execute executes the request
+//
 //	@return WorkloadTemplate
 func (a *TemplateApiService) CreateTemplateExecute(r ApiCreateTemplateRequest) (*WorkloadTemplate, *http.Response, error) {
 	var (
@@ -287,6 +290,7 @@ func (a *TemplateApiService) DeleteTemplateById(ctx context.Context, assetId str
 }
 
 // Execute executes the request
+//
 //	@return HttpResponse
 func (a *TemplateApiService) DeleteTemplateByIdExecute(r ApiDeleteTemplateByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -432,6 +436,7 @@ func (a *TemplateApiService) GetTemplateById(ctx context.Context, assetId string
 }
 
 // Execute executes the request
+//
 //	@return WorkloadTemplate
 func (a *TemplateApiService) GetTemplateByIdExecute(r ApiGetTemplateByIdRequest) (*WorkloadTemplate, *http.Response, error) {
 	var (
@@ -637,6 +642,7 @@ func (a *TemplateApiService) ListTemplates(ctx context.Context) ApiListTemplates
 }
 
 // Execute executes the request
+//
 //	@return WorkloadTemplateListResponse
 func (a *TemplateApiService) ListTemplatesExecute(r ApiListTemplatesRequest) (*WorkloadTemplateListResponse, *http.Response, error) {
 	var (
@@ -801,6 +807,7 @@ func (a *TemplateApiService) UpdateTemplate(ctx context.Context, assetId string)
 }
 
 // Execute executes the request
+//
 //	@return WorkloadTemplate
 func (a *TemplateApiService) UpdateTemplateExecute(r ApiUpdateTemplateRequest) (*WorkloadTemplate, *http.Response, error) {
 	var (

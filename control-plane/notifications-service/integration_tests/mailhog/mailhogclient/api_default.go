@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 MailHog API
 
@@ -60,6 +62,7 @@ func (a *DefaultAPIService) ApiV2MessagesGet(ctx context.Context) ApiApiV2Messag
 }
 
 // Execute executes the request
+//
 //	@return Messages
 func (a *DefaultAPIService) ApiV2MessagesGetExecute(r ApiApiV2MessagesGetRequest) (*Messages, *http.Response, error) {
 	var (
@@ -201,6 +204,7 @@ func (a *DefaultAPIService) ApiV2SearchGet(ctx context.Context) ApiApiV2SearchGe
 }
 
 // Execute executes the request
+//
 //	@return Messages1
 func (a *DefaultAPIService) ApiV2SearchGetExecute(r ApiApiV2SearchGetRequest) (*Messages1, *http.Response, error) {
 	var (

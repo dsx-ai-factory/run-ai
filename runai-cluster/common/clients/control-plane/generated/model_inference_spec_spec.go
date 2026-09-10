@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -21,17 +23,17 @@ type InferenceSpecSpec struct {
 	// Arguments to the command that the container running the workspace executes.
 	Args NullableString `json:"args,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workspace.
-	Image NullableString `json:"image,omitempty"`
+	Image           NullableString          `json:"image,omitempty"`
 	ImagePullPolicy NullableImagePullPolicy `json:"imagePullPolicy,omitempty"`
 	// Container's working directory. If not specified, the container runtime default will be used. This may be configured in the container image.
 	WorkingDir NullableString `json:"workingDir,omitempty"`
 	// When set to `true`, creates a home directory for the container.
-	CreateHomeDir NullableBool `json:"createHomeDir,omitempty"`
-	Probes NullableProbes `json:"probes,omitempty"`
+	CreateHomeDir NullableBool   `json:"createHomeDir,omitempty"`
+	Probes        NullableProbes `json:"probes,omitempty"`
 	// Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docs.run.ai/admin/admin-ui-setup/project-setup).
 	NodeType NullableString `json:"nodeType,omitempty"`
 	// A prioritized list of node pools for the scheduler to run the workspace on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
-	NodePools []string `json:"nodePools,omitempty"`
+	NodePools   []string            `json:"nodePools,omitempty"`
 	PodAffinity NullablePodAffinity `json:"podAffinity,omitempty"`
 	// Set of environment variables to populate into the container running the workspace.
 	EnvironmentVariables []EnvironmentVariable `json:"environmentVariables,omitempty"`
@@ -46,12 +48,12 @@ type InferenceSpecSpec struct {
 	// Set of container ports that the workload exposes via URLs.
 	ExposedUrls []ExposedUrl `json:"exposedUrls,omitempty"`
 	// Set of URLs that are related to the workload.
-	RelatedUrls []RelatedUrl `json:"relatedUrls,omitempty"`
-	Compute NullableComputeFields `json:"compute,omitempty"`
-	Storage NullableCommonStorageFields `json:"storage,omitempty"`
-	Security NullableCommonSecurityFlatFields `json:"security,omitempty"`
-	ServingPort NullableServingPort `json:"servingPort,omitempty"`
-	Autoscaling NullableAutoScaling `json:"autoscaling,omitempty"`
+	RelatedUrls []RelatedUrl                     `json:"relatedUrls,omitempty"`
+	Compute     NullableComputeFields            `json:"compute,omitempty"`
+	Storage     NullableCommonStorageFields      `json:"storage,omitempty"`
+	Security    NullableCommonSecurityFlatFields `json:"security,omitempty"`
+	ServingPort NullableServingPort              `json:"servingPort,omitempty"`
+	Autoscaling NullableAutoScaling              `json:"autoscaling,omitempty"`
 }
 
 // NewInferenceSpecSpec instantiates a new InferenceSpecSpec object
@@ -103,6 +105,7 @@ func (o *InferenceSpecSpec) HasCommand() bool {
 func (o *InferenceSpecSpec) SetCommand(v string) {
 	o.Command.Set(&v)
 }
+
 // SetCommandNil sets the value for Command to be an explicit nil
 func (o *InferenceSpecSpec) SetCommandNil() {
 	o.Command.Set(nil)
@@ -145,6 +148,7 @@ func (o *InferenceSpecSpec) HasArgs() bool {
 func (o *InferenceSpecSpec) SetArgs(v string) {
 	o.Args.Set(&v)
 }
+
 // SetArgsNil sets the value for Args to be an explicit nil
 func (o *InferenceSpecSpec) SetArgsNil() {
 	o.Args.Set(nil)
@@ -187,6 +191,7 @@ func (o *InferenceSpecSpec) HasImage() bool {
 func (o *InferenceSpecSpec) SetImage(v string) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *InferenceSpecSpec) SetImageNil() {
 	o.Image.Set(nil)
@@ -229,6 +234,7 @@ func (o *InferenceSpecSpec) HasImagePullPolicy() bool {
 func (o *InferenceSpecSpec) SetImagePullPolicy(v ImagePullPolicy) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *InferenceSpecSpec) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -271,6 +277,7 @@ func (o *InferenceSpecSpec) HasWorkingDir() bool {
 func (o *InferenceSpecSpec) SetWorkingDir(v string) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *InferenceSpecSpec) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -313,6 +320,7 @@ func (o *InferenceSpecSpec) HasCreateHomeDir() bool {
 func (o *InferenceSpecSpec) SetCreateHomeDir(v bool) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *InferenceSpecSpec) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -355,6 +363,7 @@ func (o *InferenceSpecSpec) HasProbes() bool {
 func (o *InferenceSpecSpec) SetProbes(v Probes) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *InferenceSpecSpec) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -397,6 +406,7 @@ func (o *InferenceSpecSpec) HasNodeType() bool {
 func (o *InferenceSpecSpec) SetNodeType(v string) {
 	o.NodeType.Set(&v)
 }
+
 // SetNodeTypeNil sets the value for NodeType to be an explicit nil
 func (o *InferenceSpecSpec) SetNodeTypeNil() {
 	o.NodeType.Set(nil)
@@ -472,6 +482,7 @@ func (o *InferenceSpecSpec) HasPodAffinity() bool {
 func (o *InferenceSpecSpec) SetPodAffinity(v PodAffinity) {
 	o.PodAffinity.Set(&v)
 }
+
 // SetPodAffinityNil sets the value for PodAffinity to be an explicit nil
 func (o *InferenceSpecSpec) SetPodAffinityNil() {
 	o.PodAffinity.Set(nil)
@@ -745,6 +756,7 @@ func (o *InferenceSpecSpec) HasCompute() bool {
 func (o *InferenceSpecSpec) SetCompute(v ComputeFields) {
 	o.Compute.Set(&v)
 }
+
 // SetComputeNil sets the value for Compute to be an explicit nil
 func (o *InferenceSpecSpec) SetComputeNil() {
 	o.Compute.Set(nil)
@@ -787,6 +799,7 @@ func (o *InferenceSpecSpec) HasStorage() bool {
 func (o *InferenceSpecSpec) SetStorage(v CommonStorageFields) {
 	o.Storage.Set(&v)
 }
+
 // SetStorageNil sets the value for Storage to be an explicit nil
 func (o *InferenceSpecSpec) SetStorageNil() {
 	o.Storage.Set(nil)
@@ -829,6 +842,7 @@ func (o *InferenceSpecSpec) HasSecurity() bool {
 func (o *InferenceSpecSpec) SetSecurity(v CommonSecurityFlatFields) {
 	o.Security.Set(&v)
 }
+
 // SetSecurityNil sets the value for Security to be an explicit nil
 func (o *InferenceSpecSpec) SetSecurityNil() {
 	o.Security.Set(nil)
@@ -871,6 +885,7 @@ func (o *InferenceSpecSpec) HasServingPort() bool {
 func (o *InferenceSpecSpec) SetServingPort(v ServingPort) {
 	o.ServingPort.Set(&v)
 }
+
 // SetServingPortNil sets the value for ServingPort to be an explicit nil
 func (o *InferenceSpecSpec) SetServingPortNil() {
 	o.ServingPort.Set(nil)
@@ -913,6 +928,7 @@ func (o *InferenceSpecSpec) HasAutoscaling() bool {
 func (o *InferenceSpecSpec) SetAutoscaling(v AutoScaling) {
 	o.Autoscaling.Set(&v)
 }
+
 // SetAutoscalingNil sets the value for Autoscaling to be an explicit nil
 func (o *InferenceSpecSpec) SetAutoscalingNil() {
 	o.Autoscaling.Set(nil)
@@ -1029,5 +1045,3 @@ func (v *NullableInferenceSpecSpec) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -98,10 +98,10 @@ func buildRayJobChildComponents() []kartav1alpha1.ComponentDefinition {
 			},
 			OwnerRef: ptr.To("rayjob"),
 			SpecDefinition: &kartav1alpha1.SpecDefinition{
-				PodTemplateSpecPath: ptr.To(".spec.rayClusterSpec.workerGroupSpecs[].template"),
+				PodTemplateSpecPath: ptr.To(".spec.rayClusterSpec.workerGroupSpecs[]?.template"),
 			},
 			ScaleDefinition: &kartav1alpha1.ScaleDefinition{
-				ReplicasPath: ptr.To(".spec.rayClusterSpec.workerGroupSpecs[].replicas // 1"),
+				ReplicasPath: ptr.To(".spec.rayClusterSpec.workerGroupSpecs[]? | (.replicas // 1)"),
 			},
 			PodSelector: &kartav1alpha1.PodSelector{
 				ComponentTypeSelector: &kartav1alpha1.ComponentTypeSelector{
@@ -112,7 +112,7 @@ func buildRayJobChildComponents() []kartav1alpha1.ComponentDefinition {
 					IdPath: ".metadata.labels[\"ray.io/group\"]",
 				},
 			},
-			InstanceIdPath: ptr.To(".spec.workerGroupSpecs[].groupName"),
+			InstanceIdPath: ptr.To(".spec.rayClusterSpec.workerGroupSpecs[]?.groupName"),
 		},
 	}
 }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -17,10 +19,10 @@ import (
 
 // BackendEvaluationRequest struct for BackendEvaluationRequest
 type BackendEvaluationRequest struct {
-	ResourceId NullableString `json:"resourceId,omitempty"`
-	ResourceType ResourceType `json:"resourceType"`
-	RequestAction Action `json:"requestAction"`
-	ExpectedToAllow NullableBool `json:"expectedToAllow,omitempty"`
+	ResourceId      NullableString `json:"resourceId,omitempty"`
+	ResourceType    ResourceType   `json:"resourceType"`
+	RequestAction   Action         `json:"requestAction"`
+	ExpectedToAllow NullableBool   `json:"expectedToAllow,omitempty"`
 }
 
 // NewBackendEvaluationRequest instantiates a new BackendEvaluationRequest object
@@ -74,6 +76,7 @@ func (o *BackendEvaluationRequest) HasResourceId() bool {
 func (o *BackendEvaluationRequest) SetResourceId(v string) {
 	o.ResourceId.Set(&v)
 }
+
 // SetResourceIdNil sets the value for ResourceId to be an explicit nil
 func (o *BackendEvaluationRequest) SetResourceIdNil() {
 	o.ResourceId.Set(nil)
@@ -164,6 +167,7 @@ func (o *BackendEvaluationRequest) HasExpectedToAllow() bool {
 func (o *BackendEvaluationRequest) SetExpectedToAllow(v bool) {
 	o.ExpectedToAllow.Set(&v)
 }
+
 // SetExpectedToAllowNil sets the value for ExpectedToAllow to be an explicit nil
 func (o *BackendEvaluationRequest) SetExpectedToAllowNil() {
 	o.ExpectedToAllow.Set(nil)
@@ -226,5 +230,3 @@ func (v *NullableBackendEvaluationRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

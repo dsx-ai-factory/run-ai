@@ -44,7 +44,7 @@ func (c *DistributedInferenceWorkloadController) Reconcile(ctx context.Context, 
 	DistributedInferenceWorkload := &dinfw.DistributedInferenceWorkload{}
 	isObjectFound, err := utils.GetObjectForRequest(ctx, req, "DistributedInferenceWorkload", DistributedInferenceWorkload, c.client)
 	if err != nil {
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	} else if !isObjectFound || !DistributedInferenceWorkload.DeletionTimestamp.IsZero() {
 		metrics.ResetWorkloadMetrics(req.Name, req.Namespace, metrics.DistributedInferenceSource)
 		return ctrl.Result{Requeue: false}, nil
@@ -54,7 +54,7 @@ func (c *DistributedInferenceWorkloadController) Reconcile(ctx context.Context, 
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for distributed inference workload %s/%s, error: %s",
 			DistributedInferenceWorkload.Namespace, DistributedInferenceWorkload.Name, err.Error())
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
 }

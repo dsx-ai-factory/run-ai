@@ -161,6 +161,9 @@ interface IFilterColumnModel {
 export interface IEnumBasedFilterSelectOption extends ISelectOption {
   hidden?: boolean;
   value: string | boolean;
+  // Backend values this option stands for, when several of them render as one
+  // label in the grid and so have to filter as a single choice.
+  matchValues?: string[];
 }
 
 export interface IEnumBasedFilterModel extends IFilterColumnModel {

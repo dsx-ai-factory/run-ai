@@ -32,7 +32,7 @@ flatWorkloads:
         toolName: exposed-url-custom
         toolType: tensorboard
         url: https://custom-url.com
-      image: gcr.io/run-ai-demo/jupyter-tensorboard-new
+      image: quay.io/jupyter/scipy-notebook
       imagePullPolicy: IfNotPresent
       ports:
       - container: 8003

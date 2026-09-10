@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,20 +21,19 @@ import (
 	"strings"
 )
 
-
 type PVCsApi interface {
 
 	/*
-	CreateClusterWidePvcV1 upload the name of cluster-wide pvc to the control plane
+		CreateClusterWidePvcV1 upload the name of cluster-wide pvc to the control plane
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param pvcName The pvc name.
-	@return PVCsApiCreateClusterWidePvcV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param pvcName The pvc name.
+		@return PVCsApiCreateClusterWidePvcV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	CreateClusterWidePvcV1(ctx context.Context, clusterUuid string, pvcName string) PVCsApiCreateClusterWidePvcV1Request
 
@@ -42,12 +43,12 @@ type PVCsApi interface {
 	CreateClusterWidePvcV1Execute(r PVCsApiCreateClusterWidePvcV1Request) (string, *http.Response, error)
 
 	/*
-	CreateClusterWidePvcV2 upload the details of cluster-wide pvc to the control plane
+		CreateClusterWidePvcV2 upload the details of cluster-wide pvc to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param pvcName The pvc name.
-	@return PVCsApiCreateClusterWidePvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param pvcName The pvc name.
+		@return PVCsApiCreateClusterWidePvcV2Request
 	*/
 	CreateClusterWidePvcV2(ctx context.Context, clusterUuid string, pvcName string) PVCsApiCreateClusterWidePvcV2Request
 
@@ -56,17 +57,17 @@ type PVCsApi interface {
 	CreateClusterWidePvcV2Execute(r PVCsApiCreateClusterWidePvcV2Request) (*PVC1, *http.Response, error)
 
 	/*
-	CreateDepartmentWidePvcV1 upload the name of department-wide pvc to the control plane
+		CreateDepartmentWidePvcV1 upload the name of department-wide pvc to the control plane
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param pvcName The pvc name.
-	@return PVCsApiCreateDepartmentWidePvcV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param pvcName The pvc name.
+		@return PVCsApiCreateDepartmentWidePvcV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	CreateDepartmentWidePvcV1(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiCreateDepartmentWidePvcV1Request
 
@@ -76,13 +77,13 @@ type PVCsApi interface {
 	CreateDepartmentWidePvcV1Execute(r PVCsApiCreateDepartmentWidePvcV1Request) (string, *http.Response, error)
 
 	/*
-	CreateDepartmentWidePvcV2 upload the details of department-wide pvc to the control plane
+		CreateDepartmentWidePvcV2 upload the details of department-wide pvc to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param pvcName The pvc name.
-	@return PVCsApiCreateDepartmentWidePvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param pvcName The pvc name.
+		@return PVCsApiCreateDepartmentWidePvcV2Request
 	*/
 	CreateDepartmentWidePvcV2(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiCreateDepartmentWidePvcV2Request
 
@@ -91,13 +92,13 @@ type PVCsApi interface {
 	CreateDepartmentWidePvcV2Execute(r PVCsApiCreateDepartmentWidePvcV2Request) (*PVC1, *http.Response, error)
 
 	/*
-	CreateDepartmentsWidePvcV2 upload the details of department-wide pvc to the control plane
+		CreateDepartmentsWidePvcV2 upload the details of department-wide pvc to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param pvcName The pvc name.
-	@return PVCsApiCreateDepartmentsWidePvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param pvcName The pvc name.
+		@return PVCsApiCreateDepartmentsWidePvcV2Request
 	*/
 	CreateDepartmentsWidePvcV2(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiCreateDepartmentsWidePvcV2Request
 
@@ -106,17 +107,17 @@ type PVCsApi interface {
 	CreateDepartmentsWidePvcV2Execute(r PVCsApiCreateDepartmentsWidePvcV2Request) (*PVC1, *http.Response, error)
 
 	/*
-	CreateProjectPvcV1 upload the name of project pvc to the control plane
+		CreateProjectPvcV1 upload the name of project pvc to the control plane
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param pvcName The pvc name.
-	@return PVCsApiCreateProjectPvcV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param pvcName The pvc name.
+		@return PVCsApiCreateProjectPvcV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	CreateProjectPvcV1(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiCreateProjectPvcV1Request
 
@@ -126,13 +127,13 @@ type PVCsApi interface {
 	CreateProjectPvcV1Execute(r PVCsApiCreateProjectPvcV1Request) (string, *http.Response, error)
 
 	/*
-	CreateProjectPvcV2 upload the details of project pvc to the control plane
+		CreateProjectPvcV2 upload the details of project pvc to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param pvcName The pvc name.
-	@return PVCsApiCreateProjectPvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param pvcName The pvc name.
+		@return PVCsApiCreateProjectPvcV2Request
 	*/
 	CreateProjectPvcV2(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiCreateProjectPvcV2Request
 
@@ -141,13 +142,13 @@ type PVCsApi interface {
 	CreateProjectPvcV2Execute(r PVCsApiCreateProjectPvcV2Request) (*PVC1, *http.Response, error)
 
 	/*
-	CreateProjectsPvcV2 upload the details of project pvc to the control plane
+		CreateProjectsPvcV2 upload the details of project pvc to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param pvcName The pvc name.
-	@return PVCsApiCreateProjectsPvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param pvcName The pvc name.
+		@return PVCsApiCreateProjectsPvcV2Request
 	*/
 	CreateProjectsPvcV2(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiCreateProjectsPvcV2Request
 
@@ -156,16 +157,16 @@ type PVCsApi interface {
 	CreateProjectsPvcV2Execute(r PVCsApiCreateProjectsPvcV2Request) (*PVC1, *http.Response, error)
 
 	/*
-	DeleteClusterWidePvcV1 delete cluster-wide PVC
+		DeleteClusterWidePvcV1 delete cluster-wide PVC
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param pvcName The pvc name.
-	@return PVCsApiDeleteClusterWidePvcV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param pvcName The pvc name.
+		@return PVCsApiDeleteClusterWidePvcV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteClusterWidePvcV1(ctx context.Context, clusterUuid string, pvcName string) PVCsApiDeleteClusterWidePvcV1Request
 
@@ -174,12 +175,12 @@ type PVCsApi interface {
 	DeleteClusterWidePvcV1Execute(r PVCsApiDeleteClusterWidePvcV1Request) (*http.Response, error)
 
 	/*
-	DeleteClusterWidePvcV2 delete cluster-wide PVC
+		DeleteClusterWidePvcV2 delete cluster-wide PVC
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param pvcName The pvc name.
-	@return PVCsApiDeleteClusterWidePvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param pvcName The pvc name.
+		@return PVCsApiDeleteClusterWidePvcV2Request
 	*/
 	DeleteClusterWidePvcV2(ctx context.Context, clusterUuid string, pvcName string) PVCsApiDeleteClusterWidePvcV2Request
 
@@ -187,17 +188,17 @@ type PVCsApi interface {
 	DeleteClusterWidePvcV2Execute(r PVCsApiDeleteClusterWidePvcV2Request) (*http.Response, error)
 
 	/*
-	DeleteDepartmentWidePvcV1 delete department-wide PVC
+		DeleteDepartmentWidePvcV1 delete department-wide PVC
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param pvcName The pvc name.
-	@return PVCsApiDeleteDepartmentWidePvcV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param pvcName The pvc name.
+		@return PVCsApiDeleteDepartmentWidePvcV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteDepartmentWidePvcV1(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiDeleteDepartmentWidePvcV1Request
 
@@ -206,13 +207,13 @@ type PVCsApi interface {
 	DeleteDepartmentWidePvcV1Execute(r PVCsApiDeleteDepartmentWidePvcV1Request) (*http.Response, error)
 
 	/*
-	DeleteDepartmentWidePvcV2 delete department-wide PVC
+		DeleteDepartmentWidePvcV2 delete department-wide PVC
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param pvcName The pvc name.
-	@return PVCsApiDeleteDepartmentWidePvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param pvcName The pvc name.
+		@return PVCsApiDeleteDepartmentWidePvcV2Request
 	*/
 	DeleteDepartmentWidePvcV2(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiDeleteDepartmentWidePvcV2Request
 
@@ -220,13 +221,13 @@ type PVCsApi interface {
 	DeleteDepartmentWidePvcV2Execute(r PVCsApiDeleteDepartmentWidePvcV2Request) (*http.Response, error)
 
 	/*
-	DeleteDepartmentsWidePvcV2 delete department-wide PVC
+		DeleteDepartmentsWidePvcV2 delete department-wide PVC
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param pvcName The pvc name.
-	@return PVCsApiDeleteDepartmentsWidePvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param pvcName The pvc name.
+		@return PVCsApiDeleteDepartmentsWidePvcV2Request
 	*/
 	DeleteDepartmentsWidePvcV2(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiDeleteDepartmentsWidePvcV2Request
 
@@ -234,17 +235,17 @@ type PVCsApi interface {
 	DeleteDepartmentsWidePvcV2Execute(r PVCsApiDeleteDepartmentsWidePvcV2Request) (*http.Response, error)
 
 	/*
-	DeleteProjectPvcV1 delete project PVC
+		DeleteProjectPvcV1 delete project PVC
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param pvcName The pvc name.
-	@return PVCsApiDeleteProjectPvcV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param pvcName The pvc name.
+		@return PVCsApiDeleteProjectPvcV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteProjectPvcV1(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiDeleteProjectPvcV1Request
 
@@ -253,13 +254,13 @@ type PVCsApi interface {
 	DeleteProjectPvcV1Execute(r PVCsApiDeleteProjectPvcV1Request) (*http.Response, error)
 
 	/*
-	DeleteProjectPvcV2 delete project PVC
+		DeleteProjectPvcV2 delete project PVC
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param pvcName The pvc name.
-	@return PVCsApiDeleteProjectPvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param pvcName The pvc name.
+		@return PVCsApiDeleteProjectPvcV2Request
 	*/
 	DeleteProjectPvcV2(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiDeleteProjectPvcV2Request
 
@@ -267,13 +268,13 @@ type PVCsApi interface {
 	DeleteProjectPvcV2Execute(r PVCsApiDeleteProjectPvcV2Request) (*http.Response, error)
 
 	/*
-	DeleteProjectsPvcV2 delete project PVC
+		DeleteProjectsPvcV2 delete project PVC
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param pvcName The pvc name.
-	@return PVCsApiDeleteProjectsPvcV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param pvcName The pvc name.
+		@return PVCsApiDeleteProjectsPvcV2Request
 	*/
 	DeleteProjectsPvcV2(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiDeleteProjectsPvcV2Request
 
@@ -281,10 +282,10 @@ type PVCsApi interface {
 	DeleteProjectsPvcV2Execute(r PVCsApiDeleteProjectsPvcV2Request) (*http.Response, error)
 
 	/*
-	ListPvcs list details of pvcs
+		ListPvcs list details of pvcs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PVCsApiListPvcsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PVCsApiListPvcsRequest
 	*/
 	ListPvcs(ctx context.Context) PVCsApiListPvcsRequest
 
@@ -293,14 +294,14 @@ type PVCsApi interface {
 	ListPvcsExecute(r PVCsApiListPvcsRequest) (*PVCListResponse1, *http.Response, error)
 
 	/*
-	ObsoleteCreatePvc upload the details of PVC to the control plane
+		ObsoleteCreatePvc upload the details of PVC to the control plane
 
-	this API is used by cluster versions < 2.15
+		this API is used by cluster versions < 2.15
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return PVCsApiObsoleteCreatePvcRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return PVCsApiObsoleteCreatePvcRequest
 	*/
 	ObsoleteCreatePvc(ctx context.Context, clusterUuid string, namespace string) PVCsApiObsoleteCreatePvcRequest
 
@@ -309,15 +310,15 @@ type PVCsApi interface {
 	ObsoleteCreatePvcExecute(r PVCsApiObsoleteCreatePvcRequest) (*SinglePVC, *http.Response, error)
 
 	/*
-	ObsoleteDeletePvc delete PVC
+		ObsoleteDeletePvc delete PVC
 
-	this API is used by cluster versions < 2.15
+		this API is used by cluster versions < 2.15
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param pvcName The pvc name.
-	@return PVCsApiObsoleteDeletePvcRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param pvcName The pvc name.
+		@return PVCsApiObsoleteDeletePvcRequest
 	*/
 	ObsoleteDeletePvc(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiObsoleteDeletePvcRequest
 
@@ -325,14 +326,14 @@ type PVCsApi interface {
 	ObsoleteDeletePvcExecute(r PVCsApiObsoleteDeletePvcRequest) (*http.Response, error)
 
 	/*
-	ObsoleteSyncPvc upload the details of PVCs to the control plane
+		ObsoleteSyncPvc upload the details of PVCs to the control plane
 
-	this API is used by cluster versions < 2.15
+		this API is used by cluster versions < 2.15
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return PVCsApiObsoleteSyncPvcRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return PVCsApiObsoleteSyncPvcRequest
 	*/
 	ObsoleteSyncPvc(ctx context.Context, clusterUuid string, namespace string) PVCsApiObsoleteSyncPvcRequest
 
@@ -341,15 +342,15 @@ type PVCsApi interface {
 	ObsoleteSyncPvcExecute(r PVCsApiObsoleteSyncPvcRequest) ([]SinglePVC, *http.Response, error)
 
 	/*
-	SyncClusterWidePvcNamesV1 sync the names of cluster-wide pvcs to the control plane.
+		SyncClusterWidePvcNamesV1 sync the names of cluster-wide pvcs to the control plane.
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return PVCsApiSyncClusterWidePvcNamesV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return PVCsApiSyncClusterWidePvcNamesV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	SyncClusterWidePvcNamesV1(ctx context.Context, clusterUuid string) PVCsApiSyncClusterWidePvcNamesV1Request
 
@@ -359,11 +360,11 @@ type PVCsApi interface {
 	SyncClusterWidePvcNamesV1Execute(r PVCsApiSyncClusterWidePvcNamesV1Request) (*PVCNames, *http.Response, error)
 
 	/*
-	SyncClusterWidePvcsV2 sync the details of cluster-wide pvcs to the control plane
+		SyncClusterWidePvcsV2 sync the details of cluster-wide pvcs to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return PVCsApiSyncClusterWidePvcsV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return PVCsApiSyncClusterWidePvcsV2Request
 	*/
 	SyncClusterWidePvcsV2(ctx context.Context, clusterUuid string) PVCsApiSyncClusterWidePvcsV2Request
 
@@ -372,16 +373,16 @@ type PVCsApi interface {
 	SyncClusterWidePvcsV2Execute(r PVCsApiSyncClusterWidePvcsV2Request) (*PVCs1, *http.Response, error)
 
 	/*
-	SyncDepartmentWidePvcNamesV1 sync the names of department-wide pvcs to the control plane
+		SyncDepartmentWidePvcNamesV1 sync the names of department-wide pvcs to the control plane
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@return PVCsApiSyncDepartmentWidePvcNamesV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@return PVCsApiSyncDepartmentWidePvcNamesV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	SyncDepartmentWidePvcNamesV1(ctx context.Context, clusterUuid string, departmentId string) PVCsApiSyncDepartmentWidePvcNamesV1Request
 
@@ -391,12 +392,12 @@ type PVCsApi interface {
 	SyncDepartmentWidePvcNamesV1Execute(r PVCsApiSyncDepartmentWidePvcNamesV1Request) (*PVCNames, *http.Response, error)
 
 	/*
-	SyncDepartmentWidePvcsV2 sync the details of department-wide pvcs to the control plane
+		SyncDepartmentWidePvcsV2 sync the details of department-wide pvcs to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@return PVCsApiSyncDepartmentWidePvcsV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@return PVCsApiSyncDepartmentWidePvcsV2Request
 	*/
 	SyncDepartmentWidePvcsV2(ctx context.Context, clusterUuid string, departmentId string) PVCsApiSyncDepartmentWidePvcsV2Request
 
@@ -405,12 +406,12 @@ type PVCsApi interface {
 	SyncDepartmentWidePvcsV2Execute(r PVCsApiSyncDepartmentWidePvcsV2Request) (*PVCs1, *http.Response, error)
 
 	/*
-	SyncDepartmentsWidePvcsV2 sync the details of department-wide pvcs to the control plane
+		SyncDepartmentsWidePvcsV2 sync the details of department-wide pvcs to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@return PVCsApiSyncDepartmentsWidePvcsV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@return PVCsApiSyncDepartmentsWidePvcsV2Request
 	*/
 	SyncDepartmentsWidePvcsV2(ctx context.Context, clusterUuid string, departmentId string) PVCsApiSyncDepartmentsWidePvcsV2Request
 
@@ -419,16 +420,16 @@ type PVCsApi interface {
 	SyncDepartmentsWidePvcsV2Execute(r PVCsApiSyncDepartmentsWidePvcsV2Request) (*PVCs1, *http.Response, error)
 
 	/*
-	SyncProjectPvcNamesV1 sync the names of project pvcs to the control plane
+		SyncProjectPvcNamesV1 sync the names of project pvcs to the control plane
 
-	this API is used by cluster versions < 2.17
+		this API is used by cluster versions < 2.17
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return PVCsApiSyncProjectPvcNamesV1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return PVCsApiSyncProjectPvcNamesV1Request
 
-	Deprecated
+		Deprecated
 	*/
 	SyncProjectPvcNamesV1(ctx context.Context, clusterUuid string, namespace string) PVCsApiSyncProjectPvcNamesV1Request
 
@@ -438,12 +439,12 @@ type PVCsApi interface {
 	SyncProjectPvcNamesV1Execute(r PVCsApiSyncProjectPvcNamesV1Request) (*PVCNames, *http.Response, error)
 
 	/*
-	SyncProjectPvcsV2 sync the details of project pvcs to the control plane
+		SyncProjectPvcsV2 sync the details of project pvcs to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return PVCsApiSyncProjectPvcsV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return PVCsApiSyncProjectPvcsV2Request
 	*/
 	SyncProjectPvcsV2(ctx context.Context, clusterUuid string, namespace string) PVCsApiSyncProjectPvcsV2Request
 
@@ -452,12 +453,12 @@ type PVCsApi interface {
 	SyncProjectPvcsV2Execute(r PVCsApiSyncProjectPvcsV2Request) (*PVCs1, *http.Response, error)
 
 	/*
-	SyncProjectsPvcsV2 sync the details of project pvcs to the control plane
+		SyncProjectsPvcsV2 sync the details of project pvcs to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return PVCsApiSyncProjectsPvcsV2Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return PVCsApiSyncProjectsPvcsV2Request
 	*/
 	SyncProjectsPvcsV2(ctx context.Context, clusterUuid string, namespace string) PVCsApiSyncProjectsPvcsV2Request
 
@@ -470,11 +471,11 @@ type PVCsApi interface {
 type PVCsApiService service
 
 type PVCsApiCreateClusterWidePvcV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	pvcName string
-	body *interface{}
+	pvcName     string
+	body        *interface{}
 }
 
 func (r PVCsApiCreateClusterWidePvcV1Request) Body(body interface{}) PVCsApiCreateClusterWidePvcV1Request {
@@ -491,31 +492,33 @@ CreateClusterWidePvcV1 upload the name of cluster-wide pvc to the control plane
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param pvcName The pvc name.
- @return PVCsApiCreateClusterWidePvcV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param pvcName The pvc name.
+	@return PVCsApiCreateClusterWidePvcV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) CreateClusterWidePvcV1(ctx context.Context, clusterUuid string, pvcName string) PVCsApiCreateClusterWidePvcV1Request {
 	return PVCsApiCreateClusterWidePvcV1Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		pvcName: pvcName,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
+//
 // Deprecated
 func (a *PVCsApiService) CreateClusterWidePvcV1Execute(r PVCsApiCreateClusterWidePvcV1Request) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.CreateClusterWidePvcV1")
@@ -630,10 +633,10 @@ func (a *PVCsApiService) CreateClusterWidePvcV1Execute(r PVCsApiCreateClusterWid
 }
 
 type PVCsApiCreateClusterWidePvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
-	pvcName string
+	ctx                 context.Context
+	ApiService          PVCsApi
+	clusterUuid         string
+	pvcName             string
 	pVCCreationRequest1 *PVCCreationRequest1
 }
 
@@ -649,28 +652,29 @@ func (r PVCsApiCreateClusterWidePvcV2Request) Execute() (*PVC1, *http.Response, 
 /*
 CreateClusterWidePvcV2 upload the details of cluster-wide pvc to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param pvcName The pvc name.
- @return PVCsApiCreateClusterWidePvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param pvcName The pvc name.
+	@return PVCsApiCreateClusterWidePvcV2Request
 */
 func (a *PVCsApiService) CreateClusterWidePvcV2(ctx context.Context, clusterUuid string, pvcName string) PVCsApiCreateClusterWidePvcV2Request {
 	return PVCsApiCreateClusterWidePvcV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		pvcName: pvcName,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
-//  @return PVC1
+//
+//	@return PVC1
 func (a *PVCsApiService) CreateClusterWidePvcV2Execute(r PVCsApiCreateClusterWidePvcV2Request) (*PVC1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVC1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVC1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.CreateClusterWidePvcV2")
@@ -785,12 +789,12 @@ func (a *PVCsApiService) CreateClusterWidePvcV2Execute(r PVCsApiCreateClusterWid
 }
 
 type PVCsApiCreateDepartmentWidePvcV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   PVCsApi
+	clusterUuid  string
 	departmentId string
-	pvcName string
-	body *interface{}
+	pvcName      string
+	body         *interface{}
 }
 
 func (r PVCsApiCreateDepartmentWidePvcV1Request) Body(body interface{}) PVCsApiCreateDepartmentWidePvcV1Request {
@@ -807,33 +811,35 @@ CreateDepartmentWidePvcV1 upload the name of department-wide pvc to the control 
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param pvcName The pvc name.
- @return PVCsApiCreateDepartmentWidePvcV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param pvcName The pvc name.
+	@return PVCsApiCreateDepartmentWidePvcV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) CreateDepartmentWidePvcV1(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiCreateDepartmentWidePvcV1Request {
 	return PVCsApiCreateDepartmentWidePvcV1Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		pvcName: pvcName,
+		pvcName:      pvcName,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
+//
 // Deprecated
 func (a *PVCsApiService) CreateDepartmentWidePvcV1Execute(r PVCsApiCreateDepartmentWidePvcV1Request) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.CreateDepartmentWidePvcV1")
@@ -952,11 +958,11 @@ func (a *PVCsApiService) CreateDepartmentWidePvcV1Execute(r PVCsApiCreateDepartm
 }
 
 type PVCsApiCreateDepartmentWidePvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
-	departmentId string
-	pvcName string
+	ctx                 context.Context
+	ApiService          PVCsApi
+	clusterUuid         string
+	departmentId        string
+	pvcName             string
 	pVCCreationRequest1 *PVCCreationRequest1
 }
 
@@ -972,30 +978,31 @@ func (r PVCsApiCreateDepartmentWidePvcV2Request) Execute() (*PVC1, *http.Respons
 /*
 CreateDepartmentWidePvcV2 upload the details of department-wide pvc to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param pvcName The pvc name.
- @return PVCsApiCreateDepartmentWidePvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param pvcName The pvc name.
+	@return PVCsApiCreateDepartmentWidePvcV2Request
 */
 func (a *PVCsApiService) CreateDepartmentWidePvcV2(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiCreateDepartmentWidePvcV2Request {
 	return PVCsApiCreateDepartmentWidePvcV2Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		pvcName: pvcName,
+		pvcName:      pvcName,
 	}
 }
 
 // Execute executes the request
-//  @return PVC1
+//
+//	@return PVC1
 func (a *PVCsApiService) CreateDepartmentWidePvcV2Execute(r PVCsApiCreateDepartmentWidePvcV2Request) (*PVC1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVC1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVC1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.CreateDepartmentWidePvcV2")
@@ -1114,11 +1121,11 @@ func (a *PVCsApiService) CreateDepartmentWidePvcV2Execute(r PVCsApiCreateDepartm
 }
 
 type PVCsApiCreateDepartmentsWidePvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
-	departmentId string
-	pvcName string
+	ctx                 context.Context
+	ApiService          PVCsApi
+	clusterUuid         string
+	departmentId        string
+	pvcName             string
 	pVCCreationRequest1 *PVCCreationRequest1
 }
 
@@ -1134,30 +1141,31 @@ func (r PVCsApiCreateDepartmentsWidePvcV2Request) Execute() (*PVC1, *http.Respon
 /*
 CreateDepartmentsWidePvcV2 upload the details of department-wide pvc to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param pvcName The pvc name.
- @return PVCsApiCreateDepartmentsWidePvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param pvcName The pvc name.
+	@return PVCsApiCreateDepartmentsWidePvcV2Request
 */
 func (a *PVCsApiService) CreateDepartmentsWidePvcV2(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiCreateDepartmentsWidePvcV2Request {
 	return PVCsApiCreateDepartmentsWidePvcV2Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		pvcName: pvcName,
+		pvcName:      pvcName,
 	}
 }
 
 // Execute executes the request
-//  @return PVC1
+//
+//	@return PVC1
 func (a *PVCsApiService) CreateDepartmentsWidePvcV2Execute(r PVCsApiCreateDepartmentsWidePvcV2Request) (*PVC1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVC1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVC1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.CreateDepartmentsWidePvcV2")
@@ -1286,12 +1294,12 @@ func (a *PVCsApiService) CreateDepartmentsWidePvcV2Execute(r PVCsApiCreateDepart
 }
 
 type PVCsApiCreateProjectPvcV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	pvcName string
-	body *interface{}
+	namespace   string
+	pvcName     string
+	body        *interface{}
 }
 
 func (r PVCsApiCreateProjectPvcV1Request) Body(body interface{}) PVCsApiCreateProjectPvcV1Request {
@@ -1308,33 +1316,35 @@ CreateProjectPvcV1 upload the name of project pvc to the control plane
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param pvcName The pvc name.
- @return PVCsApiCreateProjectPvcV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param pvcName The pvc name.
+	@return PVCsApiCreateProjectPvcV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) CreateProjectPvcV1(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiCreateProjectPvcV1Request {
 	return PVCsApiCreateProjectPvcV1Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		pvcName: pvcName,
+		namespace:   namespace,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
+//
 // Deprecated
 func (a *PVCsApiService) CreateProjectPvcV1Execute(r PVCsApiCreateProjectPvcV1Request) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.CreateProjectPvcV1")
@@ -1453,11 +1463,11 @@ func (a *PVCsApiService) CreateProjectPvcV1Execute(r PVCsApiCreateProjectPvcV1Re
 }
 
 type PVCsApiCreateProjectPvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
-	namespace string
-	pvcName string
+	ctx                 context.Context
+	ApiService          PVCsApi
+	clusterUuid         string
+	namespace           string
+	pvcName             string
 	pVCCreationRequest1 *PVCCreationRequest1
 }
 
@@ -1473,30 +1483,31 @@ func (r PVCsApiCreateProjectPvcV2Request) Execute() (*PVC1, *http.Response, erro
 /*
 CreateProjectPvcV2 upload the details of project pvc to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param pvcName The pvc name.
- @return PVCsApiCreateProjectPvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param pvcName The pvc name.
+	@return PVCsApiCreateProjectPvcV2Request
 */
 func (a *PVCsApiService) CreateProjectPvcV2(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiCreateProjectPvcV2Request {
 	return PVCsApiCreateProjectPvcV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		pvcName: pvcName,
+		namespace:   namespace,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
-//  @return PVC1
+//
+//	@return PVC1
 func (a *PVCsApiService) CreateProjectPvcV2Execute(r PVCsApiCreateProjectPvcV2Request) (*PVC1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVC1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVC1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.CreateProjectPvcV2")
@@ -1615,11 +1626,11 @@ func (a *PVCsApiService) CreateProjectPvcV2Execute(r PVCsApiCreateProjectPvcV2Re
 }
 
 type PVCsApiCreateProjectsPvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
-	namespace string
-	pvcName string
+	ctx                 context.Context
+	ApiService          PVCsApi
+	clusterUuid         string
+	namespace           string
+	pvcName             string
 	pVCCreationRequest1 *PVCCreationRequest1
 }
 
@@ -1635,30 +1646,31 @@ func (r PVCsApiCreateProjectsPvcV2Request) Execute() (*PVC1, *http.Response, err
 /*
 CreateProjectsPvcV2 upload the details of project pvc to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param pvcName The pvc name.
- @return PVCsApiCreateProjectsPvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param pvcName The pvc name.
+	@return PVCsApiCreateProjectsPvcV2Request
 */
 func (a *PVCsApiService) CreateProjectsPvcV2(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiCreateProjectsPvcV2Request {
 	return PVCsApiCreateProjectsPvcV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		pvcName: pvcName,
+		namespace:   namespace,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
-//  @return PVC1
+//
+//	@return PVC1
 func (a *PVCsApiService) CreateProjectsPvcV2Execute(r PVCsApiCreateProjectsPvcV2Request) (*PVC1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVC1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVC1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.CreateProjectsPvcV2")
@@ -1787,10 +1799,10 @@ func (a *PVCsApiService) CreateProjectsPvcV2Execute(r PVCsApiCreateProjectsPvcV2
 }
 
 type PVCsApiDeleteClusterWidePvcV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	pvcName string
+	pvcName     string
 }
 
 func (r PVCsApiDeleteClusterWidePvcV1Request) Execute() (*http.Response, error) {
@@ -1802,19 +1814,19 @@ DeleteClusterWidePvcV1 delete cluster-wide PVC
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param pvcName The pvc name.
- @return PVCsApiDeleteClusterWidePvcV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param pvcName The pvc name.
+	@return PVCsApiDeleteClusterWidePvcV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) DeleteClusterWidePvcV1(ctx context.Context, clusterUuid string, pvcName string) PVCsApiDeleteClusterWidePvcV1Request {
 	return PVCsApiDeleteClusterWidePvcV1Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		pvcName: pvcName,
+		pvcName:     pvcName,
 	}
 }
 
@@ -1822,9 +1834,9 @@ func (a *PVCsApiService) DeleteClusterWidePvcV1(ctx context.Context, clusterUuid
 // Deprecated
 func (a *PVCsApiService) DeleteClusterWidePvcV1Execute(r PVCsApiDeleteClusterWidePvcV1Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.DeleteClusterWidePvcV1")
@@ -1938,10 +1950,10 @@ func (a *PVCsApiService) DeleteClusterWidePvcV1Execute(r PVCsApiDeleteClusterWid
 }
 
 type PVCsApiDeleteClusterWidePvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	pvcName string
+	pvcName     string
 }
 
 func (r PVCsApiDeleteClusterWidePvcV2Request) Execute() (*http.Response, error) {
@@ -1951,26 +1963,26 @@ func (r PVCsApiDeleteClusterWidePvcV2Request) Execute() (*http.Response, error) 
 /*
 DeleteClusterWidePvcV2 delete cluster-wide PVC
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param pvcName The pvc name.
- @return PVCsApiDeleteClusterWidePvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param pvcName The pvc name.
+	@return PVCsApiDeleteClusterWidePvcV2Request
 */
 func (a *PVCsApiService) DeleteClusterWidePvcV2(ctx context.Context, clusterUuid string, pvcName string) PVCsApiDeleteClusterWidePvcV2Request {
 	return PVCsApiDeleteClusterWidePvcV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		pvcName: pvcName,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
 func (a *PVCsApiService) DeleteClusterWidePvcV2Execute(r PVCsApiDeleteClusterWidePvcV2Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.DeleteClusterWidePvcV2")
@@ -2084,11 +2096,11 @@ func (a *PVCsApiService) DeleteClusterWidePvcV2Execute(r PVCsApiDeleteClusterWid
 }
 
 type PVCsApiDeleteDepartmentWidePvcV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   PVCsApi
+	clusterUuid  string
 	departmentId string
-	pvcName string
+	pvcName      string
 }
 
 func (r PVCsApiDeleteDepartmentWidePvcV1Request) Execute() (*http.Response, error) {
@@ -2100,21 +2112,21 @@ DeleteDepartmentWidePvcV1 delete department-wide PVC
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param pvcName The pvc name.
- @return PVCsApiDeleteDepartmentWidePvcV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param pvcName The pvc name.
+	@return PVCsApiDeleteDepartmentWidePvcV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) DeleteDepartmentWidePvcV1(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiDeleteDepartmentWidePvcV1Request {
 	return PVCsApiDeleteDepartmentWidePvcV1Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		pvcName: pvcName,
+		pvcName:      pvcName,
 	}
 }
 
@@ -2122,9 +2134,9 @@ func (a *PVCsApiService) DeleteDepartmentWidePvcV1(ctx context.Context, clusterU
 // Deprecated
 func (a *PVCsApiService) DeleteDepartmentWidePvcV1Execute(r PVCsApiDeleteDepartmentWidePvcV1Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.DeleteDepartmentWidePvcV1")
@@ -2239,11 +2251,11 @@ func (a *PVCsApiService) DeleteDepartmentWidePvcV1Execute(r PVCsApiDeleteDepartm
 }
 
 type PVCsApiDeleteDepartmentWidePvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   PVCsApi
+	clusterUuid  string
 	departmentId string
-	pvcName string
+	pvcName      string
 }
 
 func (r PVCsApiDeleteDepartmentWidePvcV2Request) Execute() (*http.Response, error) {
@@ -2253,28 +2265,28 @@ func (r PVCsApiDeleteDepartmentWidePvcV2Request) Execute() (*http.Response, erro
 /*
 DeleteDepartmentWidePvcV2 delete department-wide PVC
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param pvcName The pvc name.
- @return PVCsApiDeleteDepartmentWidePvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param pvcName The pvc name.
+	@return PVCsApiDeleteDepartmentWidePvcV2Request
 */
 func (a *PVCsApiService) DeleteDepartmentWidePvcV2(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiDeleteDepartmentWidePvcV2Request {
 	return PVCsApiDeleteDepartmentWidePvcV2Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		pvcName: pvcName,
+		pvcName:      pvcName,
 	}
 }
 
 // Execute executes the request
 func (a *PVCsApiService) DeleteDepartmentWidePvcV2Execute(r PVCsApiDeleteDepartmentWidePvcV2Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.DeleteDepartmentWidePvcV2")
@@ -2389,11 +2401,11 @@ func (a *PVCsApiService) DeleteDepartmentWidePvcV2Execute(r PVCsApiDeleteDepartm
 }
 
 type PVCsApiDeleteDepartmentsWidePvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   PVCsApi
+	clusterUuid  string
 	departmentId string
-	pvcName string
+	pvcName      string
 }
 
 func (r PVCsApiDeleteDepartmentsWidePvcV2Request) Execute() (*http.Response, error) {
@@ -2403,28 +2415,28 @@ func (r PVCsApiDeleteDepartmentsWidePvcV2Request) Execute() (*http.Response, err
 /*
 DeleteDepartmentsWidePvcV2 delete department-wide PVC
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param pvcName The pvc name.
- @return PVCsApiDeleteDepartmentsWidePvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param pvcName The pvc name.
+	@return PVCsApiDeleteDepartmentsWidePvcV2Request
 */
 func (a *PVCsApiService) DeleteDepartmentsWidePvcV2(ctx context.Context, clusterUuid string, departmentId string, pvcName string) PVCsApiDeleteDepartmentsWidePvcV2Request {
 	return PVCsApiDeleteDepartmentsWidePvcV2Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		pvcName: pvcName,
+		pvcName:      pvcName,
 	}
 }
 
 // Execute executes the request
 func (a *PVCsApiService) DeleteDepartmentsWidePvcV2Execute(r PVCsApiDeleteDepartmentsWidePvcV2Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.DeleteDepartmentsWidePvcV2")
@@ -2549,11 +2561,11 @@ func (a *PVCsApiService) DeleteDepartmentsWidePvcV2Execute(r PVCsApiDeleteDepart
 }
 
 type PVCsApiDeleteProjectPvcV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	pvcName string
+	namespace   string
+	pvcName     string
 }
 
 func (r PVCsApiDeleteProjectPvcV1Request) Execute() (*http.Response, error) {
@@ -2565,21 +2577,21 @@ DeleteProjectPvcV1 delete project PVC
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param pvcName The pvc name.
- @return PVCsApiDeleteProjectPvcV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param pvcName The pvc name.
+	@return PVCsApiDeleteProjectPvcV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) DeleteProjectPvcV1(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiDeleteProjectPvcV1Request {
 	return PVCsApiDeleteProjectPvcV1Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		pvcName: pvcName,
+		namespace:   namespace,
+		pvcName:     pvcName,
 	}
 }
 
@@ -2587,9 +2599,9 @@ func (a *PVCsApiService) DeleteProjectPvcV1(ctx context.Context, clusterUuid str
 // Deprecated
 func (a *PVCsApiService) DeleteProjectPvcV1Execute(r PVCsApiDeleteProjectPvcV1Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.DeleteProjectPvcV1")
@@ -2704,11 +2716,11 @@ func (a *PVCsApiService) DeleteProjectPvcV1Execute(r PVCsApiDeleteProjectPvcV1Re
 }
 
 type PVCsApiDeleteProjectPvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	pvcName string
+	namespace   string
+	pvcName     string
 }
 
 func (r PVCsApiDeleteProjectPvcV2Request) Execute() (*http.Response, error) {
@@ -2718,28 +2730,28 @@ func (r PVCsApiDeleteProjectPvcV2Request) Execute() (*http.Response, error) {
 /*
 DeleteProjectPvcV2 delete project PVC
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param pvcName The pvc name.
- @return PVCsApiDeleteProjectPvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param pvcName The pvc name.
+	@return PVCsApiDeleteProjectPvcV2Request
 */
 func (a *PVCsApiService) DeleteProjectPvcV2(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiDeleteProjectPvcV2Request {
 	return PVCsApiDeleteProjectPvcV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		pvcName: pvcName,
+		namespace:   namespace,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
 func (a *PVCsApiService) DeleteProjectPvcV2Execute(r PVCsApiDeleteProjectPvcV2Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.DeleteProjectPvcV2")
@@ -2854,11 +2866,11 @@ func (a *PVCsApiService) DeleteProjectPvcV2Execute(r PVCsApiDeleteProjectPvcV2Re
 }
 
 type PVCsApiDeleteProjectsPvcV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	pvcName string
+	namespace   string
+	pvcName     string
 }
 
 func (r PVCsApiDeleteProjectsPvcV2Request) Execute() (*http.Response, error) {
@@ -2868,28 +2880,28 @@ func (r PVCsApiDeleteProjectsPvcV2Request) Execute() (*http.Response, error) {
 /*
 DeleteProjectsPvcV2 delete project PVC
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param pvcName The pvc name.
- @return PVCsApiDeleteProjectsPvcV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param pvcName The pvc name.
+	@return PVCsApiDeleteProjectsPvcV2Request
 */
 func (a *PVCsApiService) DeleteProjectsPvcV2(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiDeleteProjectsPvcV2Request {
 	return PVCsApiDeleteProjectsPvcV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		pvcName: pvcName,
+		namespace:   namespace,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
 func (a *PVCsApiService) DeleteProjectsPvcV2Execute(r PVCsApiDeleteProjectsPvcV2Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.DeleteProjectsPvcV2")
@@ -3014,13 +3026,13 @@ func (a *PVCsApiService) DeleteProjectsPvcV2Execute(r PVCsApiDeleteProjectsPvcV2
 }
 
 type PVCsApiListPvcsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService PVCsApi
-	scopeType *string
-	scopeId *string
-	name *string
-	clusterId *string
-	origin *string
+	scopeType  *string
+	scopeId    *string
+	name       *string
+	clusterId  *string
+	origin     *string
 }
 
 // The type of resource we want to filter by.
@@ -3060,24 +3072,25 @@ func (r PVCsApiListPvcsRequest) Execute() (*PVCListResponse1, *http.Response, er
 /*
 ListPvcs list details of pvcs
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PVCsApiListPvcsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PVCsApiListPvcsRequest
 */
 func (a *PVCsApiService) ListPvcs(ctx context.Context) PVCsApiListPvcsRequest {
 	return PVCsApiListPvcsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return PVCListResponse1
+//
+//	@return PVCListResponse1
 func (a *PVCsApiService) ListPvcsExecute(r PVCsApiListPvcsRequest) (*PVCListResponse1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCListResponse1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCListResponse1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.ListPvcs")
@@ -3210,11 +3223,11 @@ func (a *PVCsApiService) ListPvcsExecute(r PVCsApiListPvcsRequest) (*PVCListResp
 }
 
 type PVCsApiObsoleteCreatePvcRequest struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	singlePVC *SinglePVC
+	namespace   string
+	singlePVC   *SinglePVC
 }
 
 func (r PVCsApiObsoleteCreatePvcRequest) SinglePVC(singlePVC SinglePVC) PVCsApiObsoleteCreatePvcRequest {
@@ -3231,28 +3244,29 @@ ObsoleteCreatePvc upload the details of PVC to the control plane
 
 this API is used by cluster versions < 2.15
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return PVCsApiObsoleteCreatePvcRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return PVCsApiObsoleteCreatePvcRequest
 */
 func (a *PVCsApiService) ObsoleteCreatePvc(ctx context.Context, clusterUuid string, namespace string) PVCsApiObsoleteCreatePvcRequest {
 	return PVCsApiObsoleteCreatePvcRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return SinglePVC
+//
+//	@return SinglePVC
 func (a *PVCsApiService) ObsoleteCreatePvcExecute(r PVCsApiObsoleteCreatePvcRequest) (*SinglePVC, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SinglePVC
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SinglePVC
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.ObsoleteCreatePvc")
@@ -3370,11 +3384,11 @@ func (a *PVCsApiService) ObsoleteCreatePvcExecute(r PVCsApiObsoleteCreatePvcRequ
 }
 
 type PVCsApiObsoleteDeletePvcRequest struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	pvcName string
+	namespace   string
+	pvcName     string
 }
 
 func (r PVCsApiObsoleteDeletePvcRequest) Execute() (*http.Response, error) {
@@ -3386,28 +3400,28 @@ ObsoleteDeletePvc delete PVC
 
 this API is used by cluster versions < 2.15
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param pvcName The pvc name.
- @return PVCsApiObsoleteDeletePvcRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param pvcName The pvc name.
+	@return PVCsApiObsoleteDeletePvcRequest
 */
 func (a *PVCsApiService) ObsoleteDeletePvc(ctx context.Context, clusterUuid string, namespace string, pvcName string) PVCsApiObsoleteDeletePvcRequest {
 	return PVCsApiObsoleteDeletePvcRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		pvcName: pvcName,
+		namespace:   namespace,
+		pvcName:     pvcName,
 	}
 }
 
 // Execute executes the request
 func (a *PVCsApiService) ObsoleteDeletePvcExecute(r PVCsApiObsoleteDeletePvcRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.ObsoleteDeletePvc")
@@ -3522,11 +3536,11 @@ func (a *PVCsApiService) ObsoleteDeletePvcExecute(r PVCsApiObsoleteDeletePvcRequ
 }
 
 type PVCsApiObsoleteSyncPvcRequest struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	singlePVC *[]SinglePVC
+	namespace   string
+	singlePVC   *[]SinglePVC
 }
 
 func (r PVCsApiObsoleteSyncPvcRequest) SinglePVC(singlePVC []SinglePVC) PVCsApiObsoleteSyncPvcRequest {
@@ -3543,28 +3557,29 @@ ObsoleteSyncPvc upload the details of PVCs to the control plane
 
 this API is used by cluster versions < 2.15
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return PVCsApiObsoleteSyncPvcRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return PVCsApiObsoleteSyncPvcRequest
 */
 func (a *PVCsApiService) ObsoleteSyncPvc(ctx context.Context, clusterUuid string, namespace string) PVCsApiObsoleteSyncPvcRequest {
 	return PVCsApiObsoleteSyncPvcRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return []SinglePVC
+//
+//	@return []SinglePVC
 func (a *PVCsApiService) ObsoleteSyncPvcExecute(r PVCsApiObsoleteSyncPvcRequest) ([]SinglePVC, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []SinglePVC
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []SinglePVC
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.ObsoleteSyncPvc")
@@ -3682,10 +3697,10 @@ func (a *PVCsApiService) ObsoleteSyncPvcExecute(r PVCsApiObsoleteSyncPvcRequest)
 }
 
 type PVCsApiSyncClusterWidePvcNamesV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	pVCNames *PVCNames
+	pVCNames    *PVCNames
 }
 
 func (r PVCsApiSyncClusterWidePvcNamesV1Request) PVCNames(pVCNames PVCNames) PVCsApiSyncClusterWidePvcNamesV1Request {
@@ -3702,29 +3717,31 @@ SyncClusterWidePvcNamesV1 sync the names of cluster-wide pvcs to the control pla
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return PVCsApiSyncClusterWidePvcNamesV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return PVCsApiSyncClusterWidePvcNamesV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) SyncClusterWidePvcNamesV1(ctx context.Context, clusterUuid string) PVCsApiSyncClusterWidePvcNamesV1Request {
 	return PVCsApiSyncClusterWidePvcNamesV1Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return PVCNames
+//
+//	@return PVCNames
+//
 // Deprecated
 func (a *PVCsApiService) SyncClusterWidePvcNamesV1Execute(r PVCsApiSyncClusterWidePvcNamesV1Request) (*PVCNames, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCNames
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCNames
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.SyncClusterWidePvcNamesV1")
@@ -3841,10 +3858,10 @@ func (a *PVCsApiService) SyncClusterWidePvcNamesV1Execute(r PVCsApiSyncClusterWi
 }
 
 type PVCsApiSyncClusterWidePvcsV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	pVCs1 *PVCs1
+	pVCs1       *PVCs1
 }
 
 func (r PVCsApiSyncClusterWidePvcsV2Request) PVCs1(pVCs1 PVCs1) PVCsApiSyncClusterWidePvcsV2Request {
@@ -3859,26 +3876,27 @@ func (r PVCsApiSyncClusterWidePvcsV2Request) Execute() (*PVCs1, *http.Response, 
 /*
 SyncClusterWidePvcsV2 sync the details of cluster-wide pvcs to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return PVCsApiSyncClusterWidePvcsV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return PVCsApiSyncClusterWidePvcsV2Request
 */
 func (a *PVCsApiService) SyncClusterWidePvcsV2(ctx context.Context, clusterUuid string) PVCsApiSyncClusterWidePvcsV2Request {
 	return PVCsApiSyncClusterWidePvcsV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return PVCs1
+//
+//	@return PVCs1
 func (a *PVCsApiService) SyncClusterWidePvcsV2Execute(r PVCsApiSyncClusterWidePvcsV2Request) (*PVCs1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCs1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCs1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.SyncClusterWidePvcsV2")
@@ -3995,11 +4013,11 @@ func (a *PVCsApiService) SyncClusterWidePvcsV2Execute(r PVCsApiSyncClusterWidePv
 }
 
 type PVCsApiSyncDepartmentWidePvcNamesV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   PVCsApi
+	clusterUuid  string
 	departmentId string
-	pVCNames *PVCNames
+	pVCNames     *PVCNames
 }
 
 func (r PVCsApiSyncDepartmentWidePvcNamesV1Request) PVCNames(pVCNames PVCNames) PVCsApiSyncDepartmentWidePvcNamesV1Request {
@@ -4016,31 +4034,33 @@ SyncDepartmentWidePvcNamesV1 sync the names of department-wide pvcs to the contr
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @return PVCsApiSyncDepartmentWidePvcNamesV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@return PVCsApiSyncDepartmentWidePvcNamesV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) SyncDepartmentWidePvcNamesV1(ctx context.Context, clusterUuid string, departmentId string) PVCsApiSyncDepartmentWidePvcNamesV1Request {
 	return PVCsApiSyncDepartmentWidePvcNamesV1Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return PVCNames
+//
+//	@return PVCNames
+//
 // Deprecated
 func (a *PVCsApiService) SyncDepartmentWidePvcNamesV1Execute(r PVCsApiSyncDepartmentWidePvcNamesV1Request) (*PVCNames, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCNames
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCNames
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.SyncDepartmentWidePvcNamesV1")
@@ -4158,11 +4178,11 @@ func (a *PVCsApiService) SyncDepartmentWidePvcNamesV1Execute(r PVCsApiSyncDepart
 }
 
 type PVCsApiSyncDepartmentWidePvcsV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   PVCsApi
+	clusterUuid  string
 	departmentId string
-	pVCs1 *PVCs1
+	pVCs1        *PVCs1
 }
 
 func (r PVCsApiSyncDepartmentWidePvcsV2Request) PVCs1(pVCs1 PVCs1) PVCsApiSyncDepartmentWidePvcsV2Request {
@@ -4177,28 +4197,29 @@ func (r PVCsApiSyncDepartmentWidePvcsV2Request) Execute() (*PVCs1, *http.Respons
 /*
 SyncDepartmentWidePvcsV2 sync the details of department-wide pvcs to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @return PVCsApiSyncDepartmentWidePvcsV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@return PVCsApiSyncDepartmentWidePvcsV2Request
 */
 func (a *PVCsApiService) SyncDepartmentWidePvcsV2(ctx context.Context, clusterUuid string, departmentId string) PVCsApiSyncDepartmentWidePvcsV2Request {
 	return PVCsApiSyncDepartmentWidePvcsV2Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return PVCs1
+//
+//	@return PVCs1
 func (a *PVCsApiService) SyncDepartmentWidePvcsV2Execute(r PVCsApiSyncDepartmentWidePvcsV2Request) (*PVCs1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCs1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCs1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.SyncDepartmentWidePvcsV2")
@@ -4316,11 +4337,11 @@ func (a *PVCsApiService) SyncDepartmentWidePvcsV2Execute(r PVCsApiSyncDepartment
 }
 
 type PVCsApiSyncDepartmentsWidePvcsV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   PVCsApi
+	clusterUuid  string
 	departmentId string
-	pVCs1 *PVCs1
+	pVCs1        *PVCs1
 }
 
 func (r PVCsApiSyncDepartmentsWidePvcsV2Request) PVCs1(pVCs1 PVCs1) PVCsApiSyncDepartmentsWidePvcsV2Request {
@@ -4335,28 +4356,29 @@ func (r PVCsApiSyncDepartmentsWidePvcsV2Request) Execute() (*PVCs1, *http.Respon
 /*
 SyncDepartmentsWidePvcsV2 sync the details of department-wide pvcs to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @return PVCsApiSyncDepartmentsWidePvcsV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@return PVCsApiSyncDepartmentsWidePvcsV2Request
 */
 func (a *PVCsApiService) SyncDepartmentsWidePvcsV2(ctx context.Context, clusterUuid string, departmentId string) PVCsApiSyncDepartmentsWidePvcsV2Request {
 	return PVCsApiSyncDepartmentsWidePvcsV2Request{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return PVCs1
+//
+//	@return PVCs1
 func (a *PVCsApiService) SyncDepartmentsWidePvcsV2Execute(r PVCsApiSyncDepartmentsWidePvcsV2Request) (*PVCs1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCs1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCs1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.SyncDepartmentsWidePvcsV2")
@@ -4484,11 +4506,11 @@ func (a *PVCsApiService) SyncDepartmentsWidePvcsV2Execute(r PVCsApiSyncDepartmen
 }
 
 type PVCsApiSyncProjectPvcNamesV1Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	pVCNames *PVCNames
+	namespace   string
+	pVCNames    *PVCNames
 }
 
 func (r PVCsApiSyncProjectPvcNamesV1Request) PVCNames(pVCNames PVCNames) PVCsApiSyncProjectPvcNamesV1Request {
@@ -4505,31 +4527,33 @@ SyncProjectPvcNamesV1 sync the names of project pvcs to the control plane
 
 this API is used by cluster versions < 2.17
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return PVCsApiSyncProjectPvcNamesV1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return PVCsApiSyncProjectPvcNamesV1Request
 
 Deprecated
 */
 func (a *PVCsApiService) SyncProjectPvcNamesV1(ctx context.Context, clusterUuid string, namespace string) PVCsApiSyncProjectPvcNamesV1Request {
 	return PVCsApiSyncProjectPvcNamesV1Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return PVCNames
+//
+//	@return PVCNames
+//
 // Deprecated
 func (a *PVCsApiService) SyncProjectPvcNamesV1Execute(r PVCsApiSyncProjectPvcNamesV1Request) (*PVCNames, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCNames
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCNames
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.SyncProjectPvcNamesV1")
@@ -4647,11 +4671,11 @@ func (a *PVCsApiService) SyncProjectPvcNamesV1Execute(r PVCsApiSyncProjectPvcNam
 }
 
 type PVCsApiSyncProjectPvcsV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	pVCs1 *PVCs1
+	namespace   string
+	pVCs1       *PVCs1
 }
 
 func (r PVCsApiSyncProjectPvcsV2Request) PVCs1(pVCs1 PVCs1) PVCsApiSyncProjectPvcsV2Request {
@@ -4666,28 +4690,29 @@ func (r PVCsApiSyncProjectPvcsV2Request) Execute() (*PVCs1, *http.Response, erro
 /*
 SyncProjectPvcsV2 sync the details of project pvcs to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return PVCsApiSyncProjectPvcsV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return PVCsApiSyncProjectPvcsV2Request
 */
 func (a *PVCsApiService) SyncProjectPvcsV2(ctx context.Context, clusterUuid string, namespace string) PVCsApiSyncProjectPvcsV2Request {
 	return PVCsApiSyncProjectPvcsV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return PVCs1
+//
+//	@return PVCs1
 func (a *PVCsApiService) SyncProjectPvcsV2Execute(r PVCsApiSyncProjectPvcsV2Request) (*PVCs1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCs1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCs1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.SyncProjectPvcsV2")
@@ -4805,11 +4830,11 @@ func (a *PVCsApiService) SyncProjectPvcsV2Execute(r PVCsApiSyncProjectPvcsV2Requ
 }
 
 type PVCsApiSyncProjectsPvcsV2Request struct {
-	ctx context.Context
-	ApiService PVCsApi
+	ctx         context.Context
+	ApiService  PVCsApi
 	clusterUuid string
-	namespace string
-	pVCs1 *PVCs1
+	namespace   string
+	pVCs1       *PVCs1
 }
 
 func (r PVCsApiSyncProjectsPvcsV2Request) PVCs1(pVCs1 PVCs1) PVCsApiSyncProjectsPvcsV2Request {
@@ -4824,28 +4849,29 @@ func (r PVCsApiSyncProjectsPvcsV2Request) Execute() (*PVCs1, *http.Response, err
 /*
 SyncProjectsPvcsV2 sync the details of project pvcs to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return PVCsApiSyncProjectsPvcsV2Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return PVCsApiSyncProjectsPvcsV2Request
 */
 func (a *PVCsApiService) SyncProjectsPvcsV2(ctx context.Context, clusterUuid string, namespace string) PVCsApiSyncProjectsPvcsV2Request {
 	return PVCsApiSyncProjectsPvcsV2Request{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return PVCs1
+//
+//	@return PVCs1
 func (a *PVCsApiService) SyncProjectsPvcsV2Execute(r PVCsApiSyncProjectsPvcsV2Request) (*PVCs1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PVCs1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PVCs1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PVCsApiService.SyncProjectsPvcsV2")

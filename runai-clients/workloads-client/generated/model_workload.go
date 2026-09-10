@@ -71,6 +71,7 @@ type Workload struct {
 	DistributedFramework *string                `json:"distributedFramework,omitempty"`
 	AdditionalFields     map[string]interface{} `json:"additionalFields,omitempty"`
 	Preemptible          NullableBool           `json:"preemptible,omitempty"`
+	Preemptibility       NullableString         `json:"preemptibility,omitempty"`
 	FullySaasWorkload    *bool                  `json:"fullySaasWorkload,omitempty"`
 	EnvironmentVariables *map[string]string     `json:"environmentVariables,omitempty"`
 	Command              *string                `json:"command,omitempty"`
@@ -1368,6 +1369,49 @@ func (o *Workload) UnsetPreemptible() {
 	o.Preemptible.Unset()
 }
 
+// GetPreemptibility returns the Preemptibility field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *Workload) GetPreemptibility() string {
+	if o == nil || IsNil(o.Preemptibility.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.Preemptibility.Get()
+}
+
+// GetPreemptibilityOk returns a tuple with the Preemptibility field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Workload) GetPreemptibilityOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Preemptibility.Get(), o.Preemptibility.IsSet()
+}
+
+// HasPreemptibility returns a boolean if a field has been set.
+func (o *Workload) HasPreemptibility() bool {
+	if o != nil && o.Preemptibility.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetPreemptibility gets a reference to the given NullableString and assigns it to the Preemptibility field.
+func (o *Workload) SetPreemptibility(v string) {
+	o.Preemptibility.Set(&v)
+}
+
+// SetPreemptibilityNil sets the value for Preemptibility to be an explicit nil
+func (o *Workload) SetPreemptibilityNil() {
+	o.Preemptibility.Set(nil)
+}
+
+// UnsetPreemptibility ensures that no value is present for Preemptibility, not even an explicit nil
+func (o *Workload) UnsetPreemptibility() {
+	o.Preemptibility.Unset()
+}
+
 // GetFullySaasWorkload returns the FullySaasWorkload field value if set, zero value otherwise.
 func (o *Workload) GetFullySaasWorkload() bool {
 	if o == nil || IsNil(o.FullySaasWorkload) {
@@ -2126,6 +2170,9 @@ func (o Workload) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Preemptible.IsSet() {
 		toSerialize["preemptible"] = o.Preemptible.Get()
+	}
+	if o.Preemptibility.IsSet() {
+		toSerialize["preemptibility"] = o.Preemptibility.Get()
 	}
 	if !IsNil(o.FullySaasWorkload) {
 		toSerialize["fullySaasWorkload"] = o.FullySaasWorkload

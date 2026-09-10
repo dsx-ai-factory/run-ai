@@ -17,10 +17,8 @@ import (
 )
 
 const (
-	RequeueTimeout = time.Second * 2
-
 	RateLimiterBaseDelay = time.Second
-	RateLimiterMaxDelay  = time.Second * 10
+	RateLimiterMaxDelay  = time.Second * 30
 )
 
 type Reconciler interface {

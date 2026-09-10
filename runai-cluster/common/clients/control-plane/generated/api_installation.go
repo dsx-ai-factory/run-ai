@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 type InstallationApi interface {
 
 	/*
-	ClusterInstallationUrl Get cluster installation url
+		ClusterInstallationUrl Get cluster installation url
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return InstallationApiClusterInstallationUrlRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return InstallationApiClusterInstallationUrlRequest
 	*/
 	ClusterInstallationUrl(ctx context.Context, clusterUuid string) InstallationApiClusterInstallationUrlRequest
 
@@ -36,11 +37,11 @@ type InstallationApi interface {
 	ClusterInstallationUrlExecute(r InstallationApiClusterInstallationUrlRequest) (*ClusterInstallationResponse, *http.Response, error)
 
 	/*
-	MapClusterUrl Map target url to cluster url
+		MapClusterUrl Map target url to cluster url
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return InstallationApiMapClusterUrlRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return InstallationApiMapClusterUrlRequest
 	*/
 	MapClusterUrl(ctx context.Context, clusterUuid string) InstallationApiMapClusterUrlRequest
 
@@ -53,8 +54,8 @@ type InstallationApi interface {
 type InstallationApiService service
 
 type InstallationApiClusterInstallationUrlRequest struct {
-	ctx context.Context
-	ApiService InstallationApi
+	ctx         context.Context
+	ApiService  InstallationApi
 	clusterUuid string
 }
 
@@ -65,26 +66,27 @@ func (r InstallationApiClusterInstallationUrlRequest) Execute() (*ClusterInstall
 /*
 ClusterInstallationUrl Get cluster installation url
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return InstallationApiClusterInstallationUrlRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return InstallationApiClusterInstallationUrlRequest
 */
 func (a *InstallationApiService) ClusterInstallationUrl(ctx context.Context, clusterUuid string) InstallationApiClusterInstallationUrlRequest {
 	return InstallationApiClusterInstallationUrlRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return ClusterInstallationResponse
+//
+//	@return ClusterInstallationResponse
 func (a *InstallationApiService) ClusterInstallationUrlExecute(r InstallationApiClusterInstallationUrlRequest) (*ClusterInstallationResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ClusterInstallationResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ClusterInstallationResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InstallationApiService.ClusterInstallationUrl")
@@ -216,9 +218,9 @@ func (a *InstallationApiService) ClusterInstallationUrlExecute(r InstallationApi
 }
 
 type InstallationApiMapClusterUrlRequest struct {
-	ctx context.Context
-	ApiService InstallationApi
-	clusterUuid string
+	ctx               context.Context
+	ApiService        InstallationApi
+	clusterUuid       string
 	clusterUrlRequest *ClusterUrlRequest
 }
 
@@ -234,26 +236,27 @@ func (r InstallationApiMapClusterUrlRequest) Execute() (*ClusterUrlResponse, *ht
 /*
 MapClusterUrl Map target url to cluster url
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return InstallationApiMapClusterUrlRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return InstallationApiMapClusterUrlRequest
 */
 func (a *InstallationApiService) MapClusterUrl(ctx context.Context, clusterUuid string) InstallationApiMapClusterUrlRequest {
 	return InstallationApiMapClusterUrlRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return ClusterUrlResponse
+//
+//	@return ClusterUrlResponse
 func (a *InstallationApiService) MapClusterUrlExecute(r InstallationApiMapClusterUrlRequest) (*ClusterUrlResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ClusterUrlResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ClusterUrlResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InstallationApiService.MapClusterUrl")

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -18,22 +20,22 @@ import (
 
 // InternalDatavolume struct for InternalDatavolume
 type InternalDatavolume struct {
-	Id string `json:"id"`
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
-	CreatedBy *string `json:"createdBy,omitempty"`
-	UpdatedBy *string `json:"updatedBy,omitempty"`
-	Name string `json:"name"`
-	Scope ScopeType `json:"scope"`
-	DepartmentId *string `json:"departmentId,omitempty"`
+	Id           string     `json:"id"`
+	CreatedAt    *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt    *time.Time `json:"updatedAt,omitempty"`
+	CreatedBy    *string    `json:"createdBy,omitempty"`
+	UpdatedBy    *string    `json:"updatedBy,omitempty"`
+	Name         string     `json:"name"`
+	Scope        ScopeType  `json:"scope"`
+	DepartmentId *string    `json:"departmentId,omitempty"`
 	// The id of the cluster.
-	ClusterId *string `json:"clusterId,omitempty"`
+	ClusterId   *string `json:"clusterId,omitempty"`
 	Description *string `json:"description,omitempty"`
 	// The name of the PVC that the datavolume is based on
 	OriginPvcName string `json:"originPvcName"`
 	// Will be returned only if the user has the required permissions to view those scopes
-	SharedScopes []SharedScope `json:"sharedScopes,omitempty"`
-	Status DatavolumeStatus `json:"status"`
+	SharedScopes []SharedScope    `json:"sharedScopes,omitempty"`
+	Status       DatavolumeStatus `json:"status"`
 }
 
 // NewInternalDatavolume instantiates a new InternalDatavolume object
@@ -513,5 +515,3 @@ func (v *NullableInternalDatavolume) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
