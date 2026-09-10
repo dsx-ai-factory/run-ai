@@ -18,7 +18,7 @@ When a doc needs to show a credential-shaped value (a token, a password, a
 connection string), use an obviously-fake placeholder (e.g. `<your-api-key>`
 or `sk-...redacted...`), not a plausible-looking fabricated one. If you
 discover a secret already committed, do not open a public PR referencing it:
-report it per [`SECURITY.md`](SECURITY.md) instead, since removing it from a
+report it per [Security](SECURITY.md) instead, since removing it from a
 file doesn't remove it from git history.
 
 ## Verify Before Opening a PR
@@ -64,7 +64,7 @@ These apply monorepo-wide; a service's own `CLAUDE.md` wins where it differs.
 - **Match the surrounding code.** Mirror the file's existing naming, comment
   density, error-handling style, and test idiom rather than importing
   conventions from elsewhere.
-- **Go** - Standard `gofmt` formatting, no exceptions. Wrap errors with
+- **Go.** Standard `gofmt` formatting, no exceptions. Wrap errors with
   `fmt.Errorf("...: %w", err)`; never discard an error silently. Controller
   and webhook tests in this repo use Ginkgo/Gomega; follow the existing suite
   structure in the package you are editing.

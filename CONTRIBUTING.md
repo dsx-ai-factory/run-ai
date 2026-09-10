@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing. This guide covers how to file issues, propose changes, and submit pull requests.
 
-By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). To report a security vulnerability, follow the private process in [`SECURITY.md`](SECURITY.md) — **do not open a public issue**.
+By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). To report a security vulnerability, follow the private process in [Security](SECURITY.md): **do not open a public issue**.
 
 ---
 
@@ -16,11 +16,11 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 
 Maintainers communicate priority through the **Priority field** on the issue, not through a custom label, so the field is the single place to look, and it stays accurate when an issue moves between projects and milestones.
 
-Priority is set by maintainers during triage (see [`MAINTAINERS.md`](MAINTAINERS.md)) and weighs:
+Priority is set by maintainers during triage (see [Maintainers](MAINTAINERS.md)) and weighs:
 
 - **Severity and blast radius** - Does it break a supported release, cause data loss, or degrade scheduling for every tenant, versus affecting one optional path?
 - **Whether a workaround exists** - And how costly that workaround is.
-- **Affected versions** - Regressions on a currently supported release (see [`SUPPORT.md`](SUPPORT.md)) outrank issues on end-of-life branches, which are not accepted at all except for critical security issues.
+- **Affected versions** - Regressions on a currently supported release (see [Support](SUPPORT.md)) outrank issues on end-of-life branches, which are not accepted at all except for critical security issues.
 - **Breadth of impact** - How many users or clusters hit it.
 - **Cost and risk of the fix** - Weighed against the above.
 
@@ -37,7 +37,7 @@ Priority is set by maintainers during triage (see [`MAINTAINERS.md`](MAINTAINERS
    cd run-ai
    ```
 
-2. **Build.** Uses Go modules — no private dependencies, so it's fork-safe.
+2. **Build.** Uses Go modules; no private dependencies, so it's fork-safe.
 
    ```bash
    make build
@@ -68,7 +68,7 @@ git remote add origin https://github.com/<your-username>/run-ai.git
 
 ### Step 2: Create a Branch
 
-Branch from `main`, or from the live release branch you are targeting — see [Branching Policy](#branching-policy). There's no enforced naming scheme, but a descriptive prefix helps. A few real examples from this repo:
+Branch from `main`, or from the live release branch you are targeting (see [Branching Policy](#branching-policy)). There's no enforced naming scheme, but a descriptive prefix helps. A few real examples from this repo:
 
 ```
 docs/onboarding-fixes
@@ -77,13 +77,13 @@ fix/airgap-registry-secret-upgrade
 
 ### Step 3: Make Your Changes
 
-- **One concern per PR.** Don't bundle unrelated fixes or refactors together — reviewers can approve a focused change much faster than a mixed one.
+- **One concern per PR.** Don't bundle unrelated fixes or refactors together; reviewers can approve a focused change much faster than a mixed one.
 - **Add tests for new behavior.** Tests live alongside the code they cover, inside the service you're changing.
-- **Update docs if user-facing.** Documentation source lives under [`docs/`](docs/) — see [Documentation Contributions](#documentation-contributions) below.
+- **Update docs if user-facing.** Documentation source lives under [`docs/`](docs/); see [Documentation Contributions](#documentation-contributions) below.
 
 ### Step 4: Test Locally
 
-Run the changed service's own Makefile targets before opening the PR — this mirrors what CI's `pr-fast.yaml` runs against your diff:
+Run the changed service's own Makefile targets before opening the PR: this mirrors what CI's `pr-fast.yaml` runs against your diff:
 
 ```bash
 cd control-plane/assets-service   # whichever service(s) you touched
@@ -111,18 +111,18 @@ git push origin your-branch-name
 
 ### Step 7: Wait for CI
 
-CI runs automatically once your PR is open — Layer 1 runs immediately, Layer 2 (the full build and end-to-end pipeline) starts once a maintainer types `/ok-to-test`. See [CI for Contributors](#ci-for-contributors--what-runs-and-when) below for what each layer covers.
+CI runs automatically once your PR is open: Layer 1 runs immediately, Layer 2 (the full build and end-to-end pipeline) starts once a maintainer types `/ok-to-test`. See [CI for Contributors](#ci-for-contributors--what-runs-and-when) below for what each layer covers.
 
 ### Step 8: Address Review Feedback
 
-A maintainer approval plus a green `Validate Successful Run` status are both required for merge — see [Code Review](#code-review) for how reviewers get assigned.
+A maintainer approval plus a green `Validate Successful Run` status are both required for merge; see [Code Review](#code-review) for how reviewers get assigned.
 
 ---
 
 ## Documentation Contributions
 
 - Documentation source lives under [`docs/`](docs/), published via the Fern navigation config in [`fern/`](fern/).
-- Read [`docs/AGENTS.md`](docs/AGENTS.md) before editing, creating, or reviewing any page.
+- Read [Documentation Agent Guide](docs/AGENTS.md) before editing, creating, or reviewing any page.
 - Run `fern docs dev` before opening the PR, and `fern check` too if you changed an OpenAPI spec.
 
 ---
@@ -140,24 +140,24 @@ Run:ai accepts pull requests targeting `main` or the live release branch (today:
 
 We split CI into two layers:
 
-- **Layer 1 — fast, automatic, no secrets.**
+- **Layer 1: Fast, automatic, no secrets.**
   - Runs on every fork PR as soon as it is opened: DCO check, lint (Go, Helm, CODEOWNERS, workflows), CodeQL diff scan, govulncheck.
   - These checks post results back to your PR within a few minutes.
-  - They are informational — they help you fix obvious issues before a maintainer looks at the PR, but they do not block merge by themselves.
-- **Layer 2 — full build and end-to-end tests, has secrets.**
+  - They are informational: they help you fix obvious issues before a maintainer looks at the PR, but they do not block merge by themselves.
+- **Layer 2: Full build and end-to-end tests, has secrets.**
   - This is the pipeline that produces the required `Validate Successful Run` status check, and it only runs after a maintainer reviews your PR and types `/ok-to-test` in a comment.
   - End-to-end tests take 30–90 minutes.
-  - A failed Layer 2 run blocks merge — for everyone, including maintainers.
+  - A failed Layer 2 run blocks merge for everyone, including maintainers.
   - If a maintainer hasn't reviewed your PR within a few business days and you'd like the full pipeline to run, feel free to ping in the PR.
-- **If Layer 2 fails — logs aren't directly visible.**
+- **If Layer 2 fails, logs aren't directly visible.**
   - Look at the PR labels (`pipeline/build-failed`, `pipeline/e2e-failed`, `pipeline/jira-failed`) for a hint about which stage broke.
   - A maintainer will help you triage from there.
 
-### Running the checks locally
+### Running the Checks Locally
 
 Layer 1 is the part you can fully reproduce on your machine, and doing so before you push is the fastest way to a green PR. There is deliberately **no single repo-wide gate command**: this is a monorepo of independent modules, the root `Makefile` targets are placeholders, and Layer 2 (full build and end-to-end tests) needs secrets and a cluster, so it cannot run locally at all.
 
-Run the checks matching what you changed — these mirror the corresponding jobs in [`.github/workflows/pr-checks.yaml`](.github/workflows/pr-checks.yaml), at the versions CI pins:
+Run the checks matching what you changed, mirroring the corresponding jobs in [`.github/workflows/pr-checks.yaml`](.github/workflows/pr-checks.yaml), at the versions CI pins:
 
 | You changed | Run | Mirrors CI job |
 |---|---|---|
@@ -169,47 +169,25 @@ Run the checks matching what you changed — these mirror the corresponding jobs
 | `CODEOWNERS` | `make validate` | `validate-codeowners` |
 | `docs/` or `fern/` | `fern docs dev` | `fern-docs-ci.yaml` |
 
-Each service directory also has its own Makefile with `build`, `test`, `lint`, and `validate` targets scoped to that service — use those when working inside a single component.
+Each service directory also has its own Makefile with `build`, `test`, `lint`, and `validate` targets scoped to that service; use those when working inside a single component.
 
 ---
 
-## Extending the project
+## Extending the Project
 
-Most new capability lands through one of these extension points rather than by
-modifying core services. Follow the existing implementations in each directory
-— they are the reference for structure, naming, and tests.
+Most new capability lands through one of these extension points rather than by modifying core services. Follow the existing implementations in each directory; they are the reference for structure, naming, and tests.
 
-- **New workload type.** NVIDIA Run:ai interprets workloads declaratively
-  through Karta CRs. Adding support for a new Kubernetes workload kind means
-  adding its interpretation rather than writing a bespoke controller. See
-  [`docs/developer/crds.md`](docs/developer/crds.md) and the `karta` chart
-  dependency in [`runai-cluster/cluster/runai-chart`](runai-cluster/cluster/runai-chart).
+- **New workload type** - NVIDIA Run:ai interprets workloads declaratively through Karta CRs. Adding support for a new Kubernetes workload kind means adding its interpretation rather than writing a bespoke controller. See [NVIDIA Run:ai CRD Reference](docs/developer/crds.md) and the `karta` chart dependency in [`runai-cluster/cluster/runai-chart`](runai-cluster/cluster/runai-chart).
 
-- **New anyworkload-controller plugin.** Behaviour attached to a workload's
-  lifecycle is implemented as a plugin under
-  [`runai-cluster/cluster/anyworkload-controller/plugins/`](runai-cluster/cluster/anyworkload-controller/plugins).
-  Use `networking`, `personalcreds`, or `restartrules` as templates: implement
-  the hook interfaces your feature needs, add a `New(ctx, deps)` builder, and
-  register it in `cmd/main.go`.
+- **New anyworkload-controller plugin** - Behaviour attached to a workload's lifecycle is implemented as a plugin under [`runai-cluster/cluster/anyworkload-controller/plugins/`](runai-cluster/cluster/anyworkload-controller/plugins). Use `networking`, `personalcreds`, or `restartrules` as templates: implement the hook interfaces your feature needs, add a `New(ctx, deps)` builder, and register it in `cmd/main.go`.
 
-- **New cluster service or controller.** Add a directory under
-  [`runai-cluster/cluster/`](runai-cluster/cluster) with an
-  `artifact-metadata.json`, a Makefile including the shared
-  `build/makefile/*.mk`, and a `README.md` plus `CLAUDE.md`. Wire its RBAC and
-  deployment into [`runai-cluster/cluster/runai-chart`](runai-cluster/cluster/runai-chart).
+- **New cluster service or controller** - Add a directory under [`runai-cluster/cluster/`](runai-cluster/cluster) with an `artifact-metadata.json`, a Makefile including the shared `build/makefile/*.mk`, and a `README.md` plus `CLAUDE.md`. Wire its RBAC and deployment into [`runai-cluster/cluster/runai-chart`](runai-cluster/cluster/runai-chart).
 
-- **New control-plane service.** Same shape under
-  [`control-plane/`](control-plane), wired into
-  [`control-plane/control-plane-chart`](control-plane/control-plane-chart).
-  Generated API clients live in [`runai-clients/`](runai-clients).
+- **New control-plane service** - Same shape under [`control-plane/`](control-plane), wired into [`control-plane/control-plane-chart`](control-plane/control-plane-chart). Generated API clients live in [`runai-clients/`](runai-clients).
 
-- **New MCP tool.** Exposing an operation to AI assistants is done in
-  [`runai-mcp-server/`](runai-mcp-server).
+- **New MCP tool** - Exposing an operation to AI assistants is done in [`runai-mcp-server/`](runai-mcp-server).
 
-Start with an issue describing the extension point you intend to use, so
-maintainers can confirm the approach before you invest in the implementation.
-See [`docs/developer/architecture.md`](docs/developer/architecture.md) for how
-the pieces fit together.
+Start with an issue describing the extension point you intend to use, so maintainers can confirm the approach before you invest in the implementation. See [Architecture and Components](docs/developer/architecture.md) for how the pieces fit together.
 
 ---
 
@@ -217,27 +195,18 @@ the pieces fit together.
 
 - Branch protection requires **at least one approval** and a green `Validate Successful Run` check before merge.
 - `CODEOWNERS` files at the root and under `.github/` and `docs/` automatically request review from the right team for each affected path.
-- For non-trivial changes, expect more than one reviewer to weigh in — this is a team norm, not a tool gate. Be patient and responsive.
+- For non-trivial changes, expect more than one reviewer to weigh in: this is a team norm, not a tool gate. Be patient and responsive.
 
 ---
 
-## AI-assisted contributions
+## AI-Assisted Contributions
 
-Using AI coding assistants (e.g. Claude Code, GitHub Copilot) to help write a
-contribution is fine — the same review bar applies regardless of how the
-change was produced:
+Using AI coding assistants (e.g. Claude Code, GitHub Copilot) to help write a contribution is fine: the same review bar applies regardless of how the change was produced.
 
-- You are responsible for every line you submit. Read and understand the
-  diff before opening a PR; don't submit AI output you haven't verified.
-- The DCO sign-off (below) still certifies that you have the right to submit
-  the change under this project's license, exactly as it would for
-  hand-written code.
-- Don't paste proprietary, confidential, or export-controlled material into
-  third-party AI tools as part of preparing a contribution.
-- PRs that are largely unreviewed AI output — inconsistent with the
-  surrounding code, containing invented APIs, or with commit messages that
-  don't reflect the actual change — will be asked to be revised or closed,
-  same as any other low-quality submission.
+- You are responsible for every line you submit. Read and understand the diff before opening a PR; don't submit AI output you haven't verified.
+- The DCO sign-off (below) still certifies that you have the right to submit the change under this project's license, exactly as it would for hand-written code.
+- Don't paste proprietary, confidential, or export-controlled material into third-party AI tools as part of preparing a contribution.
+- PRs that are largely unreviewed AI output (inconsistent with the surrounding code, containing invented APIs, or with commit messages that don't reflect the actual change) will be asked to be revised or closed, same as any other low-quality submission.
 
 ---
 
@@ -311,7 +280,7 @@ A `dco` check runs on every fork PR and lists any unsigned commits inline.
 
 Write clear, present-tense messages explaining **why** the change is needed, not just what the change does. A good PR title is a single sentence under ~70 characters.
 
-We do not enforce Conventional Commits format. Release notes are generated automatically from PR titles and labels — clear titles make better release notes.
+We do not enforce Conventional Commits format. Release notes are generated automatically from PR titles and labels; clear titles make better release notes.
 
 ---
 
@@ -332,7 +301,7 @@ Report unacceptable behaviour to **<GitHub_Conduct@nvidia.com>**. Reports are ha
 
 Where a report is escalated to NVIDIA internal processes, resolution may take longer than the timelines above. You will be told if that happens.
 
-Actions taken follow the four-tier Enforcement Guidelines in [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md#enforcement-guidelines): correction, warning, temporary ban, permanent ban.
+Actions taken follow the four-tier Enforcement Guidelines in [Code of Conduct](CODE_OF_CONDUCT.md#enforcement-guidelines): correction, warning, temporary ban, permanent ban.
 
 ### What Is Out of Scope
 
@@ -341,10 +310,10 @@ The Code of Conduct governs conduct in this project's community spaces (see [Sco
 | Out of scope | Use instead |
 |---|---|
 | Software defects, crashes, or unexpected behaviour | [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) |
-| Security vulnerabilities | [`SECURITY.md`](SECURITY.md) - do not open a public issue |
+| Security vulnerabilities | [Security](SECURITY.md) - do not open a public issue |
 | Disagreement with a technical or design decision, or with a maintainer's review | Discuss on the issue or pull request; see [Code review](#code-review) |
 | A maintainer declining, deprioritising, or closing your contribution | Not misconduct on its own - see [How Issue Priority Is Decided](#how-issue-priority-is-decided) |
-| Commercial, licensing, or support-contract disputes | Contact NVIDIA via [SUPPORT.md](SUPPORT.md) |
+| Commercial, licensing, or support-contract disputes | Contact NVIDIA via [Support](SUPPORT.md) |
 | Conduct in venues unrelated to this project, where no one is representing the project | Outside this project's remit |
 
 Reports made in bad faith, for example to retaliate against, harass, or silence another participant, are themselves a Code of Conduct violation.
@@ -354,7 +323,7 @@ Reports made in bad faith, for example to retaliate against, harass, or silence 
 ## Getting Help
 
 - [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) - Bugs, feature requests, documentation issues, usage questions
-- [SECURITY.md](SECURITY.md) - Private vulnerability reports
-- [SUPPORT.md](SUPPORT.md) - Which versions are supported
+- [Security](SECURITY.md) - Private vulnerability reports
+- [Support](SUPPORT.md) - Which versions are supported
 
 Thank you for contributing.
