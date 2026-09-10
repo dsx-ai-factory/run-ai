@@ -15,7 +15,7 @@ const (
 	FailMsg  = "{{.Framework}} submission failed"
 
 	BaseExampleMsg = `# Submit the workload
-runai submit-dist {{.Framework}} <workload-name> -p <project-name> -i runai.jfrog.io/demo/quickstart-demo
+runai submit-dist {{.Framework}} <workload-name> -p <project-name> -i ubuntu
 
 # Submit the workload with arguments
 runai submit-dist {{.Framework}} <workload-name> -p <project-name> -i ubuntu -- ls -la

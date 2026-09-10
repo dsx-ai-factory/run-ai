@@ -101,6 +101,7 @@ func (backendClient *BackendClient) HandleHttpResponse(res *http.Response, err e
 func GetBackendOpenapiClient(basePath string, options *Options) *backend_openapi.APIClient {
 	apiConfiguration := backend_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = backend_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -112,6 +113,7 @@ func GetBackendOpenapiClient(basePath string, options *Options) *backend_openapi
 func GetPoliciesOpenapiClient(basePath string, options *Options) policy_client.IPolicyExternalClient {
 	apiConfiguration := policy_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = policy_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -122,6 +124,7 @@ func GetPoliciesOpenapiClient(basePath string, options *Options) policy_client.I
 func GetOrgUnitsOpenapiClient(basePath string, options *Options) org_unit_client.IOrgUnitExternalClient {
 	apiConfiguration := org_unit_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = org_unit_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -132,6 +135,7 @@ func GetOrgUnitsOpenapiClient(basePath string, options *Options) org_unit_client
 func GetAssetsOpenapiClient(basePath string, options *Options) assets_client.IAssetsExternalClient {
 	apiConfiguration := assets_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = assets_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -143,6 +147,7 @@ func GetAssetsOpenapiClient(basePath string, options *Options) assets_client.IAs
 func GetWorkloadOpenapiClient(basePath string, options *Options) *workloads_openapi.APIClient {
 	apiConfiguration := workloads_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = workloads_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -154,6 +159,7 @@ func GetWorkloadOpenapiClient(basePath string, options *Options) *workloads_open
 func GetWorkloadsMgrOpenapiClient(basePath string, options *Options) *workloadsMgrApi.APIClient {
 	apiConfiguration := workloadsMgrApi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = workloadsMgrApi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -165,6 +171,7 @@ func GetWorkloadsMgrOpenapiClient(basePath string, options *Options) *workloadsM
 func GetClusterServiceOpenapiClient(basePath string, options *Options) cluster_service_client.IClusterExternalClient {
 	apiConfiguration := cluster_service_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = cluster_service_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -175,6 +182,7 @@ func GetClusterServiceOpenapiClient(basePath string, options *Options) cluster_s
 func GetProjectsOpenapiClient(basePath string, options *Options) *projects_openapi.APIClient {
 	apiConfiguration := projects_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = projects_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -186,6 +194,7 @@ func GetProjectsOpenapiClient(basePath string, options *Options) *projects_opena
 func GetAuthOpenapiClient(basePath string, options *Options) auth_client.IAuthorizationExternalClient {
 	apiConfiguration := auth_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = auth_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient
@@ -197,6 +206,7 @@ func GetAuthOpenapiClient(basePath string, options *Options) auth_client.IAuthor
 func GetDatavolumesOpenapiClient(basePath string, options *Options) *datavolumes_openapi.APIClient {
 	apiConfiguration := datavolumes_openapi.NewConfiguration()
 	apiConfiguration.Host = GetHostFromDomain(basePath)
+	apiConfiguration.Servers = datavolumes_openapi.ServerConfigurations{{URL: basePath}}
 	apiConfiguration.Debug = options.UseDebugLogLevel
 	if options.HttpClient != nil {
 		apiConfiguration.HTTPClient = options.HttpClient

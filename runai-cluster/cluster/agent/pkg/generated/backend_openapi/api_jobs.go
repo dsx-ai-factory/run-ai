@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -19,15 +19,16 @@ import (
 	"strings"
 )
 
+
 // JobsApiService JobsApi service
 type JobsApiService service
 
 type ApiGetClusterJobsCountRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *JobsApiService
-	uuid       string
-	nodeId     *string
-	filter     *string
+	uuid string
+	nodeId *string
+	filter *string
 }
 
 // Unique identifier of the node.
@@ -48,26 +49,26 @@ func (r ApiGetClusterJobsCountRequest) Execute() (float32, *http.Response, error
 /*
 GetClusterJobsCount Return the number all Jobs in the cluster
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return ApiGetClusterJobsCountRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param uuid Unique identifier of the cluster
+ @return ApiGetClusterJobsCountRequest
 */
 func (a *JobsApiService) GetClusterJobsCount(ctx context.Context, uuid string) ApiGetClusterJobsCountRequest {
 	return ApiGetClusterJobsCountRequest{
 		ApiService: a,
-		ctx:        ctx,
-		uuid:       uuid,
+		ctx: ctx,
+		uuid: uuid,
 	}
 }
 
 // Execute executes the request
-//	@return float32
+//  @return float32
 func (a *JobsApiService) GetClusterJobsCountExecute(r ApiGetClusterJobsCountRequest) (float32, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue float32
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  float32
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsApiService.GetClusterJobsCount")
@@ -172,16 +173,16 @@ func (a *JobsApiService) GetClusterJobsCountExecute(r ApiGetClusterJobsCountRequ
 }
 
 type ApiGetPodsByJobIdRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *JobsApiService
-	jobId      string
-	uuid       string
-	id         *string
-	podId      *string
+	jobId string
+	uuid string
+	id *string
+	podId *string
 	podGroupId *string
-	nodeID     *string
-	name       *string
-	status     *string
+	nodeID *string
+	name *string
+	status *string
 }
 
 // id
@@ -227,28 +228,28 @@ func (r ApiGetPodsByJobIdRequest) Execute() ([]Pod, *http.Response, error) {
 /*
 GetPodsByJobId Get all pods that are assoiciated for a specific job
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param jobId Unique identifier of the job (UUID)
-	@param uuid Unique identifier of the cluster
-	@return ApiGetPodsByJobIdRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param jobId Unique identifier of the job (UUID)
+ @param uuid Unique identifier of the cluster
+ @return ApiGetPodsByJobIdRequest
 */
 func (a *JobsApiService) GetPodsByJobId(ctx context.Context, jobId string, uuid string) ApiGetPodsByJobIdRequest {
 	return ApiGetPodsByJobIdRequest{
 		ApiService: a,
-		ctx:        ctx,
-		jobId:      jobId,
-		uuid:       uuid,
+		ctx: ctx,
+		jobId: jobId,
+		uuid: uuid,
 	}
 }
 
 // Execute executes the request
-//	@return []Pod
+//  @return []Pod
 func (a *JobsApiService) GetPodsByJobIdExecute(r ApiGetPodsByJobIdRequest) ([]Pod, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []Pod
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []Pod
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsApiService.GetPodsByJobId")
@@ -331,13 +332,13 @@ func (a *JobsApiService) GetPodsByJobIdExecute(r ApiGetPodsByJobIdRequest) ([]Po
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		var v Error
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		newErr.model = v
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -354,15 +355,15 @@ func (a *JobsApiService) GetPodsByJobIdExecute(r ApiGetPodsByJobIdRequest) ([]Po
 }
 
 type ApiListJobsRequest struct {
-	ctx            context.Context
-	ApiService     *JobsApiService
-	uuid           string
-	nodeId         *string
-	filter         *string
-	sortBy         *string
-	sortDirection  *string
-	from           *float32
-	limit          *float32
+	ctx context.Context
+	ApiService *JobsApiService
+	uuid string
+	nodeId *string
+	filter *string
+	sortBy *string
+	sortDirection *string
+	from *float32
+	limit *float32
 	includeDeleted *bool
 }
 
@@ -413,26 +414,26 @@ func (r ApiListJobsRequest) Execute() ([]DisplayedJob, *http.Response, error) {
 /*
 ListJobs List all Jobs in the cluster
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return ApiListJobsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param uuid Unique identifier of the cluster
+ @return ApiListJobsRequest
 */
 func (a *JobsApiService) ListJobs(ctx context.Context, uuid string) ApiListJobsRequest {
 	return ApiListJobsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		uuid:       uuid,
+		ctx: ctx,
+		uuid: uuid,
 	}
 }
 
 // Execute executes the request
-//	@return []DisplayedJob
+//  @return []DisplayedJob
 func (a *JobsApiService) ListJobsExecute(r ApiListJobsRequest) ([]DisplayedJob, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []DisplayedJob
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []DisplayedJob
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsApiService.ListJobs")

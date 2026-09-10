@@ -92,6 +92,7 @@ generate-mockgen: install-requirements
 	mockgen -source=internal/logs/service.go -destination=internal/autogenerate/mocks/logs/service.go -package=mocks
 	mockgen -source=internal/authz/authorizers/authorizer.go -destination=internal/autogenerate/mocks/authz/authorizers/authorizer.go -package=authz
 	mockgen -source=internal/workload/middleware.go -destination=internal/autogenerate/mocks/workload/locator.go -package=workload
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh internal/autogenerate/mocks
 
 generate-openapi:
 	@bash scripts/generate_openapi.sh

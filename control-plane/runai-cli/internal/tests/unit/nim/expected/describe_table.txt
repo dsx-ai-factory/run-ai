@@ -7,11 +7,11 @@ Created At:                         2025-12-15T08:58:24Z
 Updated At:                         2025-12-15T09:07:57Z
 Project:                            test-nim
 Department:                         default
-Submitted By:                       test@run.ai
+Submitted By:                       test@example.com
 Priority:                           very-high (150)
 Category:                           Deploy
 Preemptible:                        false
-Image:                              gcr.io/run-ai-lab/nim-cpu:latest
+Image:                              nvcr.io/nim/meta/llama3-8b-instruct
 Labels:                             [app:nim-service,
                                      env:production]
 Annotations:                        [runai-submit-command:runai inference nim submit my-nim-service -p test-nim]

@@ -1333,6 +1333,40 @@ describe("workload-hybrid.util", () => {
 
       expect(result.spec.preemptibility).toBe("preemptible");
     });
+
+    it("should omit semi-preemptibility before cluster version 3.0", () => {
+      const result = workloadHybridUtil.setDistributedUIDefaults(
+        {
+          ...mockUIModel,
+          spec: {
+            ...mockUIModel.spec,
+            preemptibility: "semi-preemptible",
+          },
+        },
+        false,
+        null,
+        "2.99",
+      );
+
+      expect(result.spec.preemptibility).toBeUndefined();
+    });
+
+    it("should preserve semi-preemptibility from cluster version 3.0", () => {
+      const result = workloadHybridUtil.setDistributedUIDefaults(
+        {
+          ...mockUIModel,
+          spec: {
+            ...mockUIModel.spec,
+            preemptibility: "semi-preemptible",
+          },
+        },
+        false,
+        null,
+        "3.0",
+      );
+
+      expect(result.spec.preemptibility).toBe("semi-preemptible");
+    });
   });
 
   describe("setDistributedUIDefaults", () => {

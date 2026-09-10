@@ -10,7 +10,7 @@ runai inference standard update [WORKLOAD_NAME] [flags]
 
 ```
 # Update a workload with a new image
-runai inference update <workload-name> -p <project-name> -i runai.jfrog.io/demo/quickstart-demo
+runai inference update <workload-name> -p <project-name> -i ubuntu
 
 # Update a workload with a new autoscaling configuration
 runai inference update <workload-name> -p <project-name> --max-replicas=5 --min-replicas=3 --metric=concurrency --metric-threshold=10

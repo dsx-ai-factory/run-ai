@@ -17,7 +17,7 @@ import (
 
 // GetDatavolumes200Response struct for GetDatavolumes200Response
 type GetDatavolumes200Response struct {
-	Next        *int32                     `json:"next,omitempty"`
+	Next *int32 `json:"next,omitempty"`
 	Datavolumes []DatavolumeNoSharedScopes `json:"datavolumes"`
 }
 
@@ -141,3 +141,5 @@ func (v *NullableGetDatavolumes200Response) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

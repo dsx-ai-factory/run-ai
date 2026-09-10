@@ -131,7 +131,7 @@ var ComposerTests = append([]TableEntry{
 		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
 		specFname:     "basic",
 		expectedFname: "basic_ws_email_requester",
-		requester:     "test@run.ai",
+		requester:     "test@example.com",
 	}),
 
 	Entry("backoffLimit", ComposerTest{
@@ -700,7 +700,7 @@ func RunComposerTest(testDetails ComposerTest, basePath string) {
 	}
 	clusterSubdomain := testDetails.clusterSubdomain
 	jobSpecComposer.WithClusterStorageConfig(
-		testClusterStorageConfigWithOpts("https://test.run.ai", clusterSubdomain, clusterOpts))
+		testClusterStorageConfigWithOpts("https://mock-q7z3k.example.com", clusterSubdomain, clusterOpts))
 
 	actualResults.BatchJobTarget = NewMinimalBatchJobTarget()
 
@@ -822,7 +822,7 @@ var _ = Describe("native Job composer template variable expansion", func() {
 		Expect(composer_v2.SetClusterDependentOptions(ctx, &options, caps)).To(Succeed())
 
 		iwTwComposer := NewInterTrainJobComposer(workloadType, workloadName, projectName, "runai-test", "tester", nil, options, nil)
-		iwTwComposer.WithClusterStorageConfig(testClusterStorageConfig("https://test.run.ai", false))
+		iwTwComposer.WithClusterStorageConfig(testClusterStorageConfig("https://mock-q7z3k.example.com", false))
 
 		target := NewMinimalBatchJobTarget()
 		Expect(iwTwComposer.Compose(ctx, convutils.Ref(spec), target)()).To(BeNil())

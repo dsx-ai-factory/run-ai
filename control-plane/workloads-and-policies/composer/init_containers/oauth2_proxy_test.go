@@ -59,7 +59,7 @@ var oauth2ParityEnvVars = []string{
 const (
 	oauth2ParityProject       = "team-a"
 	oauth2ParityWorkload      = "my-workload"
-	oauth2ParityClusterDomain = "https://test.run.ai"
+	oauth2ParityClusterDomain = "https://mock-q7z3k.example.com"
 	oauth2ParityImage         = "test.registry/oauth2-proxy:parity"
 )
 
@@ -309,7 +309,7 @@ var _ = Describe("BuildOAuth2ProxyContainers", func() {
 
 	It("should derive a path-based redirect url when the item has no url", func() {
 		info := &composer.ExposedUrlInfo{
-			Config:       oauth2ParityConfig("https://test.run.ai", false),
+			Config:       oauth2ParityConfig("https://mock-q7z3k.example.com", false),
 			WorkloadName: "my-workload",
 			ProjectName:  "team-a",
 			Items:        map[string]*composer.ExposedUrlInfoItem{"url-0": {Nick: "url-0", ContainerPort: convutils.Ref(int32(8080)), OAuthPort: convutils.Ref(int32(4180))}},
@@ -320,15 +320,15 @@ var _ = Describe("BuildOAuth2ProxyContainers", func() {
 		Expect(containers).To(HaveLen(1))
 		Expect(containers[0].Env[0].Value).To(Equal("/team-a/my-workload"))
 		Expect(containers[0].Args).To(ContainElements(
-			"--redirect-url=https://test.run.ai/team-a/my-workload/oauth2/callback",
+			"--redirect-url=https://mock-q7z3k.example.com/team-a/my-workload/oauth2/callback",
 			"--proxy-prefix=/team-a/my-workload/oauth2",
-			"--whitelist-domain=test.run.ai",
+			"--whitelist-domain=mock-q7z3k.example.com",
 		))
 	})
 
 	It("should derive a subdomain redirect url when the item has no url and subdomain routing is on", func() {
 		info := &composer.ExposedUrlInfo{
-			Config:       oauth2ParityConfig("https://test.run.ai", true),
+			Config:       oauth2ParityConfig("https://mock-q7z3k.example.com", true),
 			WorkloadName: "my-workload",
 			ProjectName:  "team-a",
 			Items:        map[string]*composer.ExposedUrlInfoItem{"url-0": {Nick: "url-0", ContainerPort: convutils.Ref(int32(8080)), OAuthPort: convutils.Ref(int32(4180))}},
@@ -339,9 +339,9 @@ var _ = Describe("BuildOAuth2ProxyContainers", func() {
 		Expect(containers).To(HaveLen(1))
 		Expect(containers[0].Env[0].Value).To(Equal("/"))
 		Expect(containers[0].Args).To(ContainElements(
-			"--redirect-url=https://team-a-my-workload.test.run.ai/oauth2/callback",
+			"--redirect-url=https://team-a-my-workload.mock-q7z3k.example.com/oauth2/callback",
 			"--proxy-prefix=/oauth2",
-			"--whitelist-domain=team-a-my-workload.test.run.ai",
+			"--whitelist-domain=team-a-my-workload.mock-q7z3k.example.com",
 		))
 	})
 
@@ -413,7 +413,7 @@ var _ = Describe("BuildOAuth2ProxyContainers", func() {
 
 	It("should suffix only the second of two auto-generated urls", func() {
 		info := &composer.ExposedUrlInfo{
-			Config:       oauth2ParityConfig("https://test.run.ai", false),
+			Config:       oauth2ParityConfig("https://mock-q7z3k.example.com", false),
 			WorkloadName: "my-workload",
 			ProjectName:  "team-a",
 			Items: map[string]*composer.ExposedUrlInfoItem{
@@ -435,7 +435,7 @@ var _ = Describe("BuildOAuth2ProxyContainers", func() {
 		// the workload is jupyter/tensorboard. This keeps the OAuth2 proxy-prefix
 		// aligned with the Ingress path that the user actually hits.
 		info := &composer.ExposedUrlInfo{
-			Config:                 oauth2ParityConfig("https://test.run.ai", false),
+			Config:                 oauth2ParityConfig("https://mock-q7z3k.example.com", false),
 			WorkloadName:           "my-workload",
 			ProjectName:            "team-a",
 			IsJupyterOrTensorboard: true,

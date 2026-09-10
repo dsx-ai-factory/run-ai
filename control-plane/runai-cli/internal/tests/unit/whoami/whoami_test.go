@@ -28,7 +28,7 @@ func TestJobs(t *testing.T) {
 
 const (
 	TestFilePath = "whoami"
-	claimsOutput = "User test@run.ai logged in with ID 58bbf46a-1245-4862-a2fd-27a5e52028b7\n"
+	claimsOutput = "User test@example.com logged in with ID 58bbf46a-1245-4862-a2fd-27a5e52028b7\n"
 )
 
 var _ = Describe("Whoami Test", Ordered, func() {

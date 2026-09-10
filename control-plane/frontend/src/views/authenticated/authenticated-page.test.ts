@@ -55,13 +55,6 @@ vi.mock("@/utils/storage.util", () => ({
   },
 }));
 
-// Mock utils that may cause issues
-vi.mock("@/utils/infra.util/infra.util", () => ({
-  getEnvType: vi.fn().mockReturnValue("DEV"),
-  EnvType: { DEV: "DEV", PROD: "PROD" },
-  isSaas: vi.fn().mockReturnValue(false),
-}));
-
 vi.mock("@/utils/error-alert.util", () => ({
   ErrorAlert: vi.fn(),
 }));

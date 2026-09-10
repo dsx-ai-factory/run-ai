@@ -87,6 +87,10 @@ rules:
   - apiGroups: ["run.ai"]
     resources: ["trainingworkloads", "interactiveworkloads", "distributedworkloads"]
     verbs: ["get", "list", "patch"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["mutatingwebhookconfigurations"]
+    resourceNames: ["runai-pod-controller-mutation"]
+    verbs: ["get", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

@@ -256,6 +256,10 @@ func (fc *FieldsComposer) ComposeGpuRequestsAndLimits(_ context.Context, devices
 
 		*sizingInfo = gpuSizing
 
+		if gpuSizing.IsGpuRequested() {
+			fc.GpuRequested = true
+		}
+
 		return setter(&gpuSizing, target, cookie)
 	}
 }

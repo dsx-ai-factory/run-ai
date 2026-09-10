@@ -1,11 +1,116 @@
 # AGENTS.md
 
-This repository is the NVIDIA Run:ai monorepo — product source code and
+This repository is the NVIDIA Run:ai monorepo: product source code and
 documentation together. This file covers documentation-specific guidance
 only.
 
-For contribution mechanics — cloning, the pull request workflow, DCO sign-off,
-branching, and code review — see `CONTRIBUTING.md`.
+For contribution mechanics (cloning, the pull request workflow, DCO sign-off,
+branching, and code review), see `CONTRIBUTING.md`. For coding conventions
+across the rest of the monorepo (services, Helm chart, CLI, etc.), see
+`CLAUDE.md` at the repository root and the per-service `CLAUDE.md` files it
+indexes.
+
+## Secrets and Credentials
+
+Never commit secrets, API keys, tokens, or credentials, real or
+placeholder-looking-real, to this repository, including in `docs/` examples.
+When a doc needs to show a credential-shaped value (a token, a password, a
+connection string), use an obviously-fake placeholder (e.g. `<your-api-key>`
+or `sk-...redacted...`), not a plausible-looking fabricated one. If you
+discover a secret already committed, do not open a public PR referencing it:
+report it per [`SECURITY.md`](SECURITY.md) instead, since removing it from a
+file doesn't remove it from git history.
+
+## Verify Before Opening a PR
+
+Run these from the repository root before submitting. There is no single
+repo-wide gate command: the root `Makefile` targets are placeholders, and the
+full pipeline runs remotely and reports back on the PR as the
+`Validate Successful Run` check. Run the checks that match what you changed:
+
+```bash
+# Go: per module you touched (each service directory is its own module)
+cd <service-dir> && go build ./... && go test ./... && gofmt -l .
+golangci-lint run            # CI pins v2.9.0; matches the go-lint job
+
+# Python
+ruff check <changed-files>   # CI pins ruff 0.15.15
+
+# JS/TS: from the package directory
+npx eslint <changed-files>
+
+# Helm chart changes
+helm dependency update control-plane/control-plane-chart
+helm lint control-plane/control-plane-chart
+helm template control-plane/control-plane-chart > /dev/null
+
+# GitHub Actions workflow changes
+actionlint
+
+# CODEOWNERS changes
+make validate
+
+# Docs (docs/ or fern/)
+fern docs dev
+```
+
+Every commit must be signed off (`git commit -s`): the DCO check gates fork
+PRs. See `CONTRIBUTING.md`.
+
+## Coding Conventions
+
+These apply monorepo-wide; a service's own `CLAUDE.md` wins where it differs.
+
+- **Match the surrounding code.** Mirror the file's existing naming, comment
+  density, error-handling style, and test idiom rather than importing
+  conventions from elsewhere.
+- **Go** - Standard `gofmt` formatting, no exceptions. Wrap errors with
+  `fmt.Errorf("...: %w", err)`; never discard an error silently. Controller
+  and webhook tests in this repo use Ginkgo/Gomega; follow the existing suite
+  structure in the package you are editing.
+- **Every source file carries the SPDX header** used across the repo:
+  `SPDX-FileCopyrightText` and `SPDX-License-Identifier: Apache-2.0`.
+- **Comments explain why, not what.** Do not add comments that restate the
+  code, and do not leave commented-out code behind.
+- **No new dependencies without a reason.** Prefer the standard library or an
+  already-vendored package; a new module in `go.mod` needs justification in the
+  PR description.
+
+### Preferred and Deprecated Patterns
+
+```go
+// Preferred: error is wrapped with context the caller can act on.
+if err := r.Get(ctx, key, &workload); err != nil {
+    return fmt.Errorf("get workload %s: %w", key, err)
+}
+
+// Deprecated: the original error is destroyed, so callers cannot use
+// errors.Is/As and the log loses the cause.
+if err := r.Get(ctx, key, &workload); err != nil {
+    return errors.New("failed to get workload")
+}
+```
+
+```go
+// Preferred: table-driven test, each case named and independently reported.
+for _, tc := range []struct {
+    name string
+    in   string
+    want bool
+}{
+    {name: "empty input", in: "", want: false},
+    {name: "valid name", in: "runai-workload", want: true},
+} {
+    t.Run(tc.name, func(t *testing.T) { ... })
+}
+
+// Deprecated: a single test with several unnamed assertions. The first
+// failure hides the rest and the output does not say which case broke.
+func TestValidate(t *testing.T) {
+    assert(validate(""))
+    assert(validate("runai-workload"))
+}
+```
 
 ## Products in Scope
 

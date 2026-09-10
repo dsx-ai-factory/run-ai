@@ -112,7 +112,7 @@ export const environments: Array<EnvironmentAsset> = [
           value: "./",
         },
       ],
-      image: "gcr.io/run-ai-demo/jupyter-tensorboard",
+      image: "quay.io/jupyter/scipy-notebook",
       imagePullPolicy: "IfNotPresent",
       connections: [
         {

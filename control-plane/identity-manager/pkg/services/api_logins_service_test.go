@@ -16,7 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/utils"
 )
 
-const appURL = "https://app.run.ai"
+const appURL = "https://mock-q7z3k.example.com"
 
 func initLoginsServiceTest() (*LoginsApiService, context.Context) {
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, "runai")

@@ -19,11 +19,12 @@ import (
 	"net/url"
 )
 
+
 // HealthApiService HealthApi service
 type HealthApiService service
 
 type ApiHealthRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *HealthApiService
 }
 
@@ -34,22 +35,22 @@ func (r ApiHealthRequest) Execute() (*http.Response, error) {
 /*
 Health health check
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiHealthRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiHealthRequest
 */
 func (a *HealthApiService) Health(ctx context.Context) ApiHealthRequest {
 	return ApiHealthRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *HealthApiService) HealthExecute(r ApiHealthRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "HealthApiService.Health")

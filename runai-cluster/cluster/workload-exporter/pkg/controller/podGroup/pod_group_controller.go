@@ -48,7 +48,7 @@ func (c *PodGroupController) Reconcile(ctx context.Context, req ctrl.Request) (c
 	podGroup := &kaiv2alpha2.PodGroup{}
 	isObjectFound, err := utils.GetObjectForRequest(ctx, req, "PodGroup", podGroup, c.client)
 	if err != nil {
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	} else if !isObjectFound {
 		metrics.ResetPodGroupMetrics(req.Name, req.Namespace)
 		return ctrl.Result{Requeue: false}, nil
@@ -57,7 +57,7 @@ func (c *PodGroupController) Reconcile(ctx context.Context, req ctrl.Request) (c
 	err = metrics.SetPodGroupMetrics(ctx, podGroup, c.client)
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for PodGroup %s/%s, error: %s", podGroup.Namespace, podGroup.Name, err.Error())
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
 }

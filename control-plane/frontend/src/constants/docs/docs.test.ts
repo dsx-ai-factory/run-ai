@@ -57,8 +57,9 @@ describe("documentation URL resolution", () => {
     );
   });
 
-  it("resolves existing links independently of their product path", () => {
-    const description = "Read <a href='https://run-ai-docs.nvidia.com/saas/platform-management/reports'>the docs</a>.";
+  it("resolves existing links without a version path", () => {
+    const description =
+      "Read <a href='https://run-ai-docs.nvidia.com/self-hosted/platform-management/reports'>the docs</a>.";
 
     expect(resolveDocsLinksInHtml(description)).toBe(
       "Read <a href='https://docs.example.test/product/2.26/platform-management/reports'>the docs</a>.",

@@ -56,7 +56,7 @@ func (c *PodController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	pod := &corev1.Pod{}
 	isObjectFound, err := utils.GetObjectForRequest(ctx, req, "pod", pod, c.client)
 	if err != nil {
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	} else if !isObjectFound {
 		metrics.ResetPodMetrics(req.Name, req.Namespace)
 		return ctrl.Result{Requeue: false}, nil
@@ -65,7 +65,7 @@ func (c *PodController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 	err = metrics.SetPodMetrics(ctx, pod, c.client)
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for pod %s/%s, error: %s", pod.Namespace, pod.Name, err.Error())
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
 }

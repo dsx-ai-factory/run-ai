@@ -48,7 +48,7 @@ func GetProjectNameForPodGroup(ctx context.Context, podGroup *kaiv2alpha2.PodGro
 
 	projectName := getProjectNameOfQueueFromLabels(queue.Labels)
 	if projectName == "" {
-		return "", fmt.Errorf("could not find %s label on queue %s", constants.RunaiQueueLabel, queue.Name)
+		return "", fmt.Errorf("could not find %s label on queue %s", constants.RunaiProjectLabel, queue.Name)
 	}
 	return projectName, nil
 }
@@ -68,7 +68,7 @@ func getQueue(ctx context.Context, queueName string, readerClient client.Reader)
 }
 
 func getProjectNameOfQueueFromLabels(labels map[string]string) string {
-	if projectName, found := labels[constants.RunaiQueueLabel]; found {
+	if projectName, found := labels[constants.RunaiProjectLabel]; found {
 		return projectName
 	}
 	return ""

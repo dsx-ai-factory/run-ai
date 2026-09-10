@@ -44,7 +44,7 @@ func (c *DistributedWorkloadController) Reconcile(ctx context.Context, req ctrl.
 	distributedWorkload := &diwv2a1.DistributedWorkload{}
 	isObjectFound, err := utils.GetObjectForRequest(ctx, req, "distributedworkload", distributedWorkload, c.client)
 	if err != nil {
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	} else if !isObjectFound || !distributedWorkload.DeletionTimestamp.IsZero() {
 		metrics.ResetWorkloadMetrics(req.Name, req.Namespace, metrics.DistributedSource)
 		return ctrl.Result{Requeue: false}, nil
@@ -54,7 +54,7 @@ func (c *DistributedWorkloadController) Reconcile(ctx context.Context, req ctrl.
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for distributed workload %s/%s, error: %s",
 			distributedWorkload.Namespace, distributedWorkload.Name, err.Error())
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
 }

@@ -13,10 +13,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 )
 
-// mnnvlGoldenBaseInput is a minimal valid distributed-inference spec reused
-// by every MNNVL entry so the goldens differ only in the resolved MNNVL
-// plugin mode.
-const mnnvlGoldenBaseInput = "dinfw_serving_port_basic"
+// mnnvlGoldenBaseInput is a minimal valid distributed-inference spec that
+// requests no GPU. mnnvlGoldenGpuInput is the same spec with a leader GPU
+// request. MNNVL entries pick the fixture matching the scenario so the
+// GPU request lives in the spec rather than being injected by the harness.
+const (
+	mnnvlGoldenBaseInput = "dinfw_serving_port_basic"
+	mnnvlGoldenGpuInput  = "dinfw_serving_port_gpu"
+)
 
 // mnnvlTestClusterConfig returns a cluster storage config that carries only
 // the `dinfGPUNetworkAcceleration` flag. MNNVL entries use this instead of
@@ -24,7 +28,7 @@ const mnnvlGoldenBaseInput = "dinfw_serving_port_basic"
 // the MNNVL plugin resolution and not the ambient OAuth/proxy config.
 func mnnvlTestClusterConfig(dinfEnabled bool) composer.ClusterStorageConfig {
 	cluster := clusterApi.NewDisplayedCluster("cluster-a", 1, "cluster-a", time.Time{})
-	cluster.SetDomain("https://test.run.ai")
+	cluster.SetDomain("https://mock-q7z3k.example.com")
 	reported := clusterApi.ClusterReportedConfig{}
 	reported.SetDinfGPUNetworkAcceleration(dinfEnabled)
 	status := clusterApi.ClusterDisplayedStatus{}
@@ -35,21 +39,29 @@ func mnnvlTestClusterConfig(dinfEnabled bool) composer.ClusterStorageConfig {
 
 // mnnvlTests exercises MNNVL plugin resolution: the mode is taken from the
 // leader's run.ai/MNNVL label when present, otherwise defaulted from the
-// cluster's dinfGPUNetworkAcceleration flag. Every entry uses
-// mnnvlGoldenBaseInput so the goldens differ only in the resolved mode.
+// cluster's dinfGPUNetworkAcceleration flag -- but only for workloads that
+// request GPU. Every entry uses mnnvlGoldenBaseInput so the goldens differ
+// only in the resolved mode (and the injected leader GPU request, when set).
 // These entries flow through the same `ComposerTests` DescribeTable as the
 // main golden cases.
 var mnnvlTests = []TableEntry{
 	// Cluster-driven defaults (dinfGPUNetworkAcceleration=true on the
-	// cluster): absent label -> Required; explicit None overrides the
-	// cluster default.
-	Entry("mnnvl cluster acceleration on defaults to Required", ComposerTest{
+	// cluster): a GPU-requesting workload with no label -> Required; an
+	// explicit None label overrides the cluster default.
+	Entry("mnnvl cluster acceleration on with gpu defaults to Required", ComposerTest{
+		input:         mnnvlGoldenGpuInput,
+		expected:      "mnnvl_cluster_on_gpu_default_required",
+		clusterConfig: mnnvlTestClusterConfig(true),
+	}),
+	// A workload that requests no GPU never inherits the cluster default,
+	// even when dinfGPUNetworkAcceleration is on -> None.
+	Entry("mnnvl cluster acceleration on without gpu defaults to None", ComposerTest{
 		input:         mnnvlGoldenBaseInput,
-		expected:      "mnnvl_cluster_on_default_required",
+		expected:      "mnnvl_cluster_on_no_gpu_none",
 		clusterConfig: mnnvlTestClusterConfig(true),
 	}),
 	Entry("mnnvl explicit None label overrides cluster on", ComposerTest{
-		input:         mnnvlGoldenBaseInput,
+		input:         mnnvlGoldenGpuInput,
 		expected:      "mnnvl_label_none_overrides_cluster_on",
 		clusterConfig: mnnvlTestClusterConfig(true),
 		mnnvlLabel:    "None",

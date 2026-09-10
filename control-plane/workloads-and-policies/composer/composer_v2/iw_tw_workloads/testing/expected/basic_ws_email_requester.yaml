@@ -6,7 +6,7 @@ BatchJobTarget:
     metadata:
       annotations:
         run.ai/auto-delete-after-completion-sec: "864000"
-        run.ai/submitted-by: test@run.ai
+        run.ai/submitted-by: test@example.com
       labels:
         app: job
         createdBy: Job
@@ -25,7 +25,7 @@ BatchJobTarget:
           annotations:
             gpu-fraction: "0.5"
             gpu-fraction-num-devices: "1"
-            user: test@run.ai
+            user: test@example.com
           labels:
             app: job
             createdBy: Job

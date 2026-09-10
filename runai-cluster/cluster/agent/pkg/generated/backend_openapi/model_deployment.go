@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -17,22 +17,22 @@ import (
 
 // Deployment struct for Deployment
 type Deployment struct {
-	ClusterUuid           string                `json:"clusterUuid"`
-	Id                    string                `json:"id"`
-	Name                  string                `json:"name"`
-	Namespace             string                `json:"namespace"`
-	Project               *string               `json:"project,omitempty"`
-	Owners                []Owner               `json:"owners"`
-	CreatedAt             *time.Time            `json:"createdAt,omitempty"`
-	Replicas              int32                 `json:"replicas"`
-	Template              PodTemplate           `json:"template"`
-	SchedulerName         string                `json:"schedulerName"`
-	Username              *string               `json:"username,omitempty"`
-	ServiceId             *string               `json:"serviceId,omitempty"`
-	RevisionId            *string               `json:"revisionId,omitempty"`
-	InferenceworkloadName *string               `json:"inferenceworkloadName,omitempty"`
-	Conditions            []DeploymentCondition `json:"conditions,omitempty"`
-	NodePool              *string               `json:"nodePool,omitempty"`
+	ClusterUuid string `json:"clusterUuid"`
+	Id string `json:"id"`
+	Name string `json:"name"`
+	Namespace string `json:"namespace"`
+	Project *string `json:"project,omitempty"`
+	Owners []Owner `json:"owners"`
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	Replicas int32 `json:"replicas"`
+	Template PodTemplate `json:"template"`
+	SchedulerName string `json:"schedulerName"`
+	Username *string `json:"username,omitempty"`
+	ServiceId *string `json:"serviceId,omitempty"`
+	RevisionId *string `json:"revisionId,omitempty"`
+	InferenceworkloadName *string `json:"inferenceworkloadName,omitempty"`
+	Conditions []DeploymentCondition `json:"conditions,omitempty"`
+	NodePool *string `json:"nodePool,omitempty"`
 }
 
 // NewDeployment instantiates a new Deployment object
@@ -596,3 +596,5 @@ func (v *NullableDeployment) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
