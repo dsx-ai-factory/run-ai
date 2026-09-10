@@ -364,15 +364,15 @@ Images are pushed to the local `kind-registry` container and referenced as `loca
 The script fetches these subcharts automatically, but if the fetch failed it falls back to an empty placeholder and the scheduler silently deploys nothing. Look for this in the output:
 
 ```
-[warn]   Could not fetch kai-scheduler@v0.16.8 — installing an EMPTY placeholder.
+[warn]   Could not fetch kai-scheduler@<version> — installing an EMPTY placeholder.
 ```
 
-Confirm by size — a real chart is tens of KB, a placeholder a few hundred bytes:
+The version comes from `Chart.yaml`, so it moves as that pin moves. Confirm by size — a real chart is tens of KB, a placeholder a few hundred bytes:
 
 ```bash
 ls -l runai-cluster/cluster/runai-chart/charts/*.tgz
-# kai-scheduler-v0.16.8.tgz   ~84 KB   real
-# karta-0.2.3.tgz             ~13 KB   real
+# kai-scheduler-v<version>.tgz   ~84 KB   real
+# karta-<version>.tgz            ~13 KB   real
 ```
 
 Fix by fetching manually, then redeploying just the chart:
