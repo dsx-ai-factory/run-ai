@@ -33,7 +33,9 @@ func TestGetControlPlaneVersionUsesSSLCAPath(t *testing.T) {
 	}
 
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		fmt.Fprint(w, `{"version":"3.0.0"}`)
+		if _, err := fmt.Fprint(w, `{"version":"3.0.0"}`); err != nil {
+			t.Error(err)
+		}
 	}))
 	defer server.Close()
 
