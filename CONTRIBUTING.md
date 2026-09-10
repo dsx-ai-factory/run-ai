@@ -20,7 +20,7 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 
    ```bash
    git clone https://github.com/dsx-ai-factory/run-ai.git
-   cd runai
+   cd run-ai
    ```
 
 2. **Build.** Uses Go modules — no private dependencies, so it's fork-safe.
@@ -78,7 +78,7 @@ make build test lint
 
 ### Step 5: Sign Off Your Commits
 
-Every commit needs a DCO sign-off (fork PRs only; internal Run:ai contributors are not DCO-checked — see [DCO](#developer-certificate-of-origin-dco)):
+Every commit needs a DCO sign-off (see [DCO](#developer-certificate-of-origin-dco)):
 
 ```bash
 git commit -s -m "Fix node-pool selector when foo is bar"
@@ -97,7 +97,7 @@ git push origin your-branch-name
 
 ### Step 7: Wait for CI
 
-CI runs automatically once your PR is open — Layer 1 runs immediately, Layer 2 (the full build and end-to-end pipeline) starts once a maintainer types `/ok-to-test`. See [CI for External Contributors](#ci-for-external-contributors--what-runs-and-when) below for what each layer covers.
+CI runs automatically once your PR is open — Layer 1 runs immediately, Layer 2 (the full build and end-to-end pipeline) starts once a maintainer types `/ok-to-test`. See [CI for Contributors](#ci-for-contributors--what-runs-and-when) below for what each layer covers.
 
 ### Step 8: Address Review Feedback
 
@@ -123,7 +123,7 @@ Run:ai accepts pull requests targeting `main` or the live release branch (today:
 
 ---
 
-## CI for External Contributors — What Runs and When
+## CI for Contributors — What Runs and When
 
 We split CI into two layers:
 
@@ -134,10 +134,9 @@ We split CI into two layers:
 - **Layer 2 — full build and end-to-end tests, has secrets.**
   - This is the pipeline that produces the required `Validate Successful Run` status check, and it only runs after a maintainer reviews your PR and types `/ok-to-test` in a comment.
   - End-to-end tests take 30–90 minutes.
-  - A failed Layer 2 run blocks merge — for everyone, including internal contributors.
+  - A failed Layer 2 run blocks merge — for everyone, including maintainers.
   - If a maintainer hasn't reviewed your PR within a few business days and you'd like the full pipeline to run, feel free to ping in the PR.
 - **If Layer 2 fails — logs aren't directly visible.**
-  - The workflow logs from `runai-actions` (the private repository where the full pipeline lives) are not directly visible to external contributors.
   - Look at the PR labels (`pipeline/build-failed`, `pipeline/e2e-failed`, `pipeline/jira-failed`) for a hint about which stage broke.
   - A maintainer will help you triage from there.
 
@@ -214,8 +213,6 @@ git push --force-with-lease
 ```
 
 A `dco` check runs on every fork PR and lists any unsigned commits inline.
-
-**Internal contributors** - The DCO check does not run on commits authored from `@run.ai` and `@nvidia.com` accounts. Internal contributions are governed by the existing employee IP agreement.
 
 ---
 

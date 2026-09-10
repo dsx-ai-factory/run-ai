@@ -25,13 +25,13 @@ local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine
    ./local-dev.sh
    ```
 
-2. **Add the domain to `/etc/hosts`.** `runai.local` does not exist on the real internet — this tells your machine to resolve it to `127.0.0.1` (itself) instead of failing a DNS lookup.
+2. **The domain is added to `/etc/hosts` automatically.** `runai.local` does not exist on the real internet, so the script resolves it to `127.0.0.1` (itself) for you, prompting for `sudo` if needed. To do it yourself instead:
 
    ```bash
    sudo sh -c 'echo "127.0.0.1 runai.local" >> /etc/hosts'
    ```
 
-3. **Open `https://runai.local`** and log in with `admin@run.ai` / `Admin@1234!`.
+3. **Open `https://runai.local`** and log in with the credentials printed at the end of the run.
 
 First run takes a while — it compiles ~50 Go services inside Docker containers. Subsequent runs with `--skip-build` are much faster.
 
@@ -99,6 +99,12 @@ The same build pattern applies to the cluster-side controllers and operators. `r
 - Runs `helm dep build` (uses pre-committed subchart tarballs in `charts/`).
 - Installs the chart with `global.image.registry=localhost:5001/runai-local` and `imagePullPolicy=IfNotPresent` — the latter keeps Kubernetes from reaching out to an external registry.
 
+### Provision Cluster Credentials
+
+- Waits for the Keycloak realm to be ready, then registers the cluster with the control plane via its REST API (reusing the existing registration if one already exists for the cluster name).
+- Fetches the installer client secret for the newly registered cluster.
+- Feeds both the cluster UID and the client secret into the `runai-cluster` Helm install in the next phase (`controlPlane.clientSecret`, `cluster.uid`).
+
 ### Deploy — runai-cluster
 
 Installs the cluster chart with `global.image.registry=localhost:5001/runai-local`. `imagePullPolicy=IfNotPresent` keeps Kubernetes from reaching out to an external registry.
@@ -107,7 +113,6 @@ The runai-cluster chart configures these scheduling subcharts:
 
 | Subchart | Setting | Notes |
 |---|---|---|
-| `runai-engine` | `enabled=false` | Legacy engine — superseded by KAI Scheduler and no longer a chart dependency |
 | `kai-scheduler` | `enabled=true` | CNCF-donated AI-aware GPU scheduler — applies fair-share, preemption, bin-packing, and multi-node placement rules. The engine underlying the Run:ai Scheduler. |
 | `karta` | `enabled=true` | CRD-based resource abstraction layer with a standard schema for describing any Kubernetes workload type, so controllers can extract pod specs and status without per-type logic. |
 
@@ -168,7 +173,6 @@ Names and versions are read from `Chart.yaml`, so bumping a dependency cannot le
 | `RUNAI_ADMIN_PASSWORD` | Same as `--admin-password` |
 | `PARALLEL_JOBS` | Same as `--parallel` |
 | `KIND_CLUSTER` | Kind cluster name (default: `runai-local`) |
-| `RUNAI_CLUSTER_UID` | Fixed cluster UUID for the runai-cluster chart (auto-generated if unset) |
 
 ---
 
@@ -183,8 +187,8 @@ docker buildx build --build-arg TARGETARCH=amd64 --platform linux/amd64 \
   --provenance=false --load -t runai-local/assets-service:0.0.0 .
 kind load docker-image runai-local/assets-service:0.0.0 --name runai-local
 
-helm upgrade runai-cp ./control-plane/control-plane-chart \
-  -n runai --reuse-values
+helm upgrade runai-backend ./control-plane/control-plane-chart \
+  -n runai-backend --reuse-values
 ```
 
 ### Iterate on the Cluster Chart Only (Images Already Loaded)
@@ -210,6 +214,11 @@ helm upgrade runai-cp ./control-plane/control-plane-chart \
 
 ```bash
 ./local-dev.sh --domain mydev.example.com
+```
+
+The script adds `mydev.example.com` to `/etc/hosts` automatically. To do it yourself instead:
+
+```bash
 sudo sh -c 'echo "127.0.0.1 mydev.example.com" >> /etc/hosts'
 ```
 
@@ -219,19 +228,6 @@ sudo sh -c 'echo "127.0.0.1 mydev.example.com" >> /etc/hosts'
 PARALLEL_JOBS=8 ./local-dev.sh
 ```
 
----
-
-## Connecting the Cluster
-
-After the control plane is up, connect the cluster through the CP UI (`https://runai.local`) to get a `clientSecret` and `clusterUID`. Then upgrade the cluster chart:
-
-```bash
-helm upgrade runai-cluster ./runai-cluster/cluster/runai-chart \
-  -n runai \
-  --set controlPlane.clientSecret=<SECRET> \
-  --set cluster.uid=<UID> \
-  --reuse-values
-```
 
 ---
 
