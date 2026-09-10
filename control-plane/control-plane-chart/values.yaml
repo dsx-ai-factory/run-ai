@@ -1667,7 +1667,7 @@ thanos:
     name: thanos-querier
     extraEnvVars:
       - name: GODEBUG
-        value: '{{- $fipsMode := .Values.global.fipsMode | default "off" -}}{{- if kindIs "bool" $fipsMode -}}{{- $fipsMode = ternary "on" "off" $fipsMode -}}{{- end -}}fips140={{ $fipsMode }}'
+        value: fips140={{ .Values.global.fipsMode | default "off" }}
     replicaLabel:
       - prometheus_replica
       - tenant_id
@@ -1733,7 +1733,7 @@ thanos:
     name: thanos-receive
     extraEnvVars:
       - name: GODEBUG
-        value: '{{- $fipsMode := .Values.global.fipsMode | default "off" -}}{{- if kindIs "bool" $fipsMode -}}{{- $fipsMode = ternary "on" "off" $fipsMode -}}{{- end -}}fips140={{ $fipsMode }}'
+        value: fips140={{ .Values.global.fipsMode | default "off" }}
     serviceAccount:
       name: runai-backend-thanos-receive
       automountServiceAccountToken: false
@@ -1803,7 +1803,7 @@ nats:
   extraEnvVarsSecret: "runai-backend-gen-cache-pubsub"
   extraEnvVars:
     - name: GODEBUG
-      value: '{{- $fipsMode := .Values.global.fipsMode | default "off" -}}{{- if kindIs "bool" $fipsMode -}}{{- $fipsMode = ternary "on" "off" $fipsMode -}}{{- end -}}fips140={{ $fipsMode }}'
+      value: fips140={{ .Values.global.fipsMode | default "off" }}
   jetstream:
     enabled: true
   replicaCount: 3
