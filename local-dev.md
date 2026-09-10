@@ -235,19 +235,23 @@ PARALLEL_JOBS=8 ./local-dev.sh
 
 The CA cert is at `.local-dev/certs/ca.crt`.
 
-**macOS:**
+### macOS
+
 ```bash
 sudo security add-trusted-cert -d -r trustRoot \
   -k /Library/Keychains/System.keychain .local-dev/certs/ca.crt
 ```
 
-**Linux:**
+### Linux
+
 ```bash
 sudo cp .local-dev/certs/ca.crt /usr/local/share/ca-certificates/runai-local.crt
 sudo update-ca-certificates
 ```
 
-**Chrome/Firefox on Linux:** Import `.local-dev/certs/ca.crt` via `chrome://settings/certificates` or the Firefox certificate manager.
+### Chrome/Firefox on Linux
+
+Import `.local-dev/certs/ca.crt` via `chrome://settings/certificates` or the Firefox certificate manager.
 
 ---
 
@@ -263,7 +267,9 @@ podman machine ssh "df -h /"
 
 ### Recover from a Full Disk
 
-When the Podman VM disk fills up, builds fail with `no space left on device` and even `podman system prune` cannot run (it needs space to write temp files). Fix:
+When the Podman VM disk fills up, builds fail with `no space left on device` and even `podman system prune` cannot run (it needs space to write temp files).
+
+**Fix:**
 
 ```bash
 # Step 1: free enough space for Podman to operate
@@ -287,7 +293,7 @@ podman machine set --rootful   # required by kind on macOS
 podman machine start
 ```
 
-`--rootful` is mandatory — kind needs it to create containers with elevated privileges. local-dev.sh will error if the machine is in rootless mode.
+`--rootful` is mandatory: kind needs it to create containers with elevated privileges. local-dev.sh will error if the machine is in rootless mode.
 
 ---
 
@@ -317,7 +323,7 @@ kubectl rollout restart deployment ingress-nginx-controller -n ingress-nginx
 
 ### SSL Handshake Timeouts / Slow Responses
 
-If `curl https://<domain>/_version` times out at the SSL handshake stage (`time_appconnect: 0`) but TCP connects instantly, the likely cause is **Cisco AnyConnect** (or similar corporate VPN with a socket-level kernel extension). AnyConnect's `acsockext` system extension intercepts all TCP connections — including loopback — and routes them through a low-MTU inspection tunnel, which fragments TLS certificate exchanges.
+If `curl https://<domain>/_version` times out at the SSL handshake stage (`time_appconnect: 0`) but TCP connects instantly, the likely cause is **Cisco AnyConnect** (or similar corporate VPN with a socket-level kernel extension). AnyConnect's `acsockext` system extension intercepts all TCP connections, including loopback, and routes them through a low-MTU inspection tunnel, which fragments TLS certificate exchanges.
 
 To confirm: disconnect from AnyConnect and retry. If it responds instantly, AnyConnect is the cause.
 
@@ -338,11 +344,11 @@ ls .local-dev/logs/*.log | xargs grep -l "Error\|FAIL"
 
 If a Go build fails with a module download error and the repo is still private, check that `GITHUB_TOKEN` is set and that `git config --list` shows the `github.com` URL substitution.
 
-If `docker buildx build` fails with `no such file: bin/service-amd64`, the `build-go-amd` step did not produce a binary — check the log file for the compile error.
+If `docker buildx build` fails with `no such file: bin/service-amd64`, the `build-go-amd` step did not produce a binary. Check the log file for the compile error.
 
-If a service log shows `unknown flag: --platform` followed by the top-level `docker` usage — right after a *successful* `build-go-amd` — the `docker buildx` plugin is missing, so the Docker CLI fell back to the root command. This hits every service, not just the one you happened to read. Docker Desktop bundles buildx; Ubuntu's `docker.io` package does not. Install `docker-buildx-plugin` from Docker's official repo and verify with `docker buildx version`.
+If a service log shows `unknown flag: --platform` followed by the top-level `docker` usage, right after a *successful* `build-go-amd`, the `docker buildx` plugin is missing, so the Docker CLI fell back to the root command. This hits every service, not just the one you happened to read. Docker Desktop bundles buildx; Ubuntu's `docker.io` package does not. Install `docker-buildx-plugin` from Docker's official repo and verify with `docker buildx version`.
 
-If `kind load docker-image` is slow, note that images are loaded into all 5 nodes (1 control-plane + 4 workers). With many services this is expected — it only runs once per build.
+If `kind load docker-image` is slow, note that images are loaded into all 5 nodes (1 control-plane + 4 workers). With many services this is expected: it only runs once per build.
 
 ---
 
@@ -367,7 +373,7 @@ The script fetches these subcharts automatically, but if the fetch failed it fal
 [warn]   Could not fetch kai-scheduler@<version> — installing an EMPTY placeholder.
 ```
 
-The version comes from `Chart.yaml`, so it moves as that pin moves. Confirm by size — a real chart is tens of KB, a placeholder a few hundred bytes:
+The version comes from `Chart.yaml`, so it moves as that pin moves. Confirm by size: a real chart is tens of KB, a placeholder a few hundred bytes:
 
 ```bash
 ls -l runai-cluster/cluster/runai-chart/charts/*.tgz
@@ -382,7 +388,15 @@ helm dependency build runai-cluster/cluster/runai-chart
 ./local-dev.sh --skip-build --skip-cluster
 ```
 
-With the real charts you should see `kai-operator`, `kai-admission`, `kai-binder`, `kai-podgrouper`, `kai-queuecontroller`, `kai-node-scale-adjuster` and `karta-operator`:
+With the real charts you should see these pods:
+
+- `kai-operator`
+- `kai-admission`
+- `kai-binder`
+- `kai-podgrouper`
+- `kai-queuecontroller`
+- `kai-node-scale-adjuster`
+- `karta-operator`
 
 ```bash
 kubectl get pods -n runai | grep -E 'kai|karta'
@@ -392,8 +406,7 @@ Historically this was a hard failure rather than a fallback: the placeholder ver
 
 ### Go Build Failures After an OSS Re-Export
 
-**Applies only to OSS export repos** (those with a `.oss-export-id` file), not to
-the monorepo itself. Three different-looking errors share one cause:
+**Applies only to OSS export repos** (those with a `.oss-export-id` file), not to the monorepo itself. Three different-looking errors share one cause:
 
 ```
 verifying <module>@v1.0.0: checksum mismatch
@@ -408,29 +421,20 @@ generated/api_service_accounts.go:132:80: undefined: InstallerBootstrapResponse
 gojsonq/runai.go:5:2: could not import math (open : no such file or directory)
 ```
 
-Each export re-points every version tag at a fresh commit. Go assumes
-`module@version` is immutable and caches it forever, so a machine that built a
-previous export keeps serving that export's content. Nothing is actually wrong
-with the repo — the second and third errors are especially misleading, since the
-symbol and the stdlib package are both perfectly present.
+Each export re-points every version tag at a fresh commit. Go assumes `module@version` is immutable and caches it forever, so a machine that built a previous export keeps serving that export's content. Nothing is actually wrong with the repo: the second and third errors are especially misleading, since the symbol and the stdlib package are both perfectly present.
 
-`local-dev.sh` heals this automatically: it compares `.oss-export-id` against a
-marker in the module cache and evicts the affected caches when they differ. You
-should not normally have to do anything.
+`local-dev.sh` heals this automatically: it compares `.oss-export-id` against a marker in the module cache and evicts the affected caches when they differ. You should not normally have to do anything.
 
-If you hit it anyway — an older checkout, or a cache cleared out from under the
-marker — purge by hand. **All three locations matter**; clearing only one or two
-leaves the build broken with no hint as to why:
+If you hit it anyway (an older checkout, or a cache cleared out from under the marker), purge by hand. **All three locations matter**; clearing only one or two leaves the build broken with no hint as to why.
 
-Run from the repo root — it derives the module namespace itself, so there is
-nothing to substitute:
+Run from the repo root: it derives the module namespace itself, so there is nothing to substitute:
 
 ```bash
 GP=~/.cache/go-build-docker-gopath/pkg/mod
 PREFIX=$(awk '/^module /{print $2; exit}' "$(ls runai-common-packages/*/go.mod | head -1)" | cut -d/ -f1-3)
 echo "purging $PREFIX"
 
-# 1. git clone cache — Go builds module zips from here, and it holds the OLD
+# 1. git clone cache: Go builds module zips from here, and it holds the OLD
 #    tag -> sha map, so it serves stale content even when everything else is clean
 for d in "$GP"/cache/vcs/*/; do
   git -C "$d" config --get-regexp '^remote\..*\.url$' 2>/dev/null | grep -qi "${PREFIX##*/}" \
@@ -441,12 +445,11 @@ done
 chmod -R u+w "$GP/$PREFIX" "$GP/cache/download/$PREFIX" 2>/dev/null
 rm -rf "$GP/$PREFIX" "$GP/cache/download/$PREFIX"
 
-# 3. build cache — per-module file index, also keyed by module@version
+# 3. build cache: per-module file index, also keyed by module@version
 rm -rf ~/.cache/go-build-docker-gocache
 ```
 
-On `permission denied`, delete as container-root instead — build steps sometimes
-write as root:
+On `permission denied`, delete as container-root instead; build steps sometimes write as root:
 
 ```bash
 docker run --rm -v ~/.cache:/c busybox sh -c '
@@ -455,9 +458,7 @@ docker run --rm -v ~/.cache:/c busybox sh -c '
 
 Expect the next build to be slow; every cache is cold.
 
-Also make sure the checkout is current — a `go.sum` from an older export describes
-content the tags no longer serve. `local-dev.sh` warns when you are behind, but it
-will not move your HEAD:
+Make sure the checkout is current: a `go.sum` from an older export describes content the tags no longer serve. `local-dev.sh` warns when you are behind, but it will not move your HEAD:
 
 ```bash
 git pull --ff-only
@@ -471,4 +472,4 @@ git pull --ff-only
 ./local-dev.sh --teardown
 ```
 
-Deletes the Kind cluster and the `kind-registry` container. Files in `.local-dev/` are left in place — remove manually if needed.
+Deletes the Kind cluster and the `kind-registry` container. Files in `.local-dev/` are left in place; remove manually if needed.
