@@ -12,5 +12,3 @@ Releases are tagged `Ma.Mi.Pa`, following semantic versioning:
 - **`Pa`** (patch, e.g. `3.0.3`) - Fixes only, no new features and no breaking changes, cut from the corresponding `Ma.Mi` release branch.
 
 For example: `3.0.0` is the first release on the `3.0` release branch and may include new features or breaking changes (documented in its release notes); `3.0.1` is a patch cut from that same `3.0` branch containing fixes only, with no new features and no breaking changes relative to `3.0.0`.
-
-See [Support, Lifecycle, and Deprecation Policy](docs/about-enterprise/product-support-policy.md) for how long each `Ma.Mi` version receives patches.
