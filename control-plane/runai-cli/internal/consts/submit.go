@@ -140,7 +140,7 @@ const (
 	AttributeUsageBackoffLimit   = "Number of times to retry a failed job before marking it as failed."
 	AttributeUsagePreemptible    = "Allow the workload to be scheduled above guaranteed quota and reclaimed at any time."
 	AttributeUsagePreemptibility = "Specify whether the workload can be preempted by higher-priority workloads. " +
-		"Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type."
+		"Valid values: preemptible, semi-preemptible, non-preemptible. Overrides the default preemptibility for the workload type."
 	AttributeUsageCompletions        = "Use --runs instead. Number of completions required for the job."
 	AttributeUsageRuns               = "Number of successful runs required for this workload to be considered completed."
 	AttributeUsageParallelism        = "Maximum number of pods to run in parallel for this job."

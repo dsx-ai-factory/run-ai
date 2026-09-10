@@ -12,6 +12,7 @@
     "submittedBy": "test@example.com",
     "priority": "very-high (150)",
     "category": "Deploy",
+    "preemptibility": "non-preemptible",
     "environmentVariables": {
       "MODEL_NAME": "llama-2-7b",
       "NIM_MODE": "inference"

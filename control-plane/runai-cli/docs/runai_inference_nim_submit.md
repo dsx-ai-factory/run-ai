@@ -65,7 +65,7 @@ runai inference nim submit <workload-name> -p <project-name> -i nvcr.io/nim/meta
       --model-new-pvc string                Create and mount a new PVC for the model store. Format: [claimname=CLAIM_NAME],size=SIZE,[storageclass=STORAGE_CLASS],[accessmode-rwo|accessmode-rwm|accessmode-rom],[ro]
       --model-nim-cache string              NIM Cache configuration. Format: name=CACHE_NAME,[profile=PROFILE]
       --ngc-auth-secret string              Name of the secret containing NGC API key
-      --preemptibility preemptibility       Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
+      --preemptibility preemptibility       Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, semi-preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
       --priority string                     Sets the workload’s scheduling priority. Valid values: very-low, low, medium-low, medium, medium-high, high, very-high. 
                                             Overrides the default priority for the workload type. Changing priority does not update preemptibility automatically.
   -p, --project string                      Specify the project for the command to use. Defaults to the project set in the context, if any. Use 'runai project set <project>' to set the default.
