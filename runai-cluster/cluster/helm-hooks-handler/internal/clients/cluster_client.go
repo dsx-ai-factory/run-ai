@@ -11,7 +11,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net/http"
-	"os"
 
 	clusterclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
 	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client"
@@ -20,12 +19,8 @@ import (
 
 const defaultControlPlaneClientID = "runai-internal.installer"
 
-func ConfigureDefaultHTTPTransport(caPath string) error {
+func ConfigureDefaultHTTPTransport(ca []byte) error {
 	roots, err := x509.SystemCertPool()
-	if err != nil {
-		return err
-	}
-	ca, err := os.ReadFile(caPath)
 	if err != nil {
 		return err
 	}

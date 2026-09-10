@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/helm-hooks-handler/internal/clients"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/helm-hooks-handler/internal/hooks/factory"
@@ -39,7 +40,11 @@ func main() {
 	})))
 	opts := util.SetOptions()
 	if opts.CustomCaEnabled {
-		if err := clients.ConfigureDefaultHTTPTransport(customCAPath); err != nil {
+		ca, err := os.ReadFile(customCAPath)
+		if err != nil {
+			log.Fatalf("failed to read custom CA: %v", err)
+		}
+		if err := clients.ConfigureDefaultHTTPTransport(ca); err != nil {
 			log.Fatalf("failed to configure custom CA: %v", err)
 		}
 	}
