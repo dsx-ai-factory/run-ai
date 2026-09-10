@@ -26,7 +26,7 @@
           :loading="loadingTableData"
           @update-filters="setFilterBy"
           @clear-filters="clearFilters"
-          :top-rows="pinnedRows"
+          :top-row="lastCreatedEntity"
           selection="multiple"
           :get-row-key="getRowKey"
           sticky-columns
@@ -200,7 +200,6 @@ export default defineComponent({
       // holding the dialog open for the refresh that follows.
       closeDeleteModal();
       notifyBulkFailures(response, namesById);
-      pinEntities(response.accepted);
       // The deletion is already accepted past this point, so a failed refresh must not
       // read as a failed delete. Polling refreshes again anyway.
       await refreshList().catch(() => undefined);
@@ -248,8 +247,6 @@ export default defineComponent({
       initTableFilter,
       refreshList,
       selectedRow,
-      pinnedRows,
-      pinEntities,
     } = useTableDataAdvancedFilters<IReportTable>(listReports, columns, EAdvancedIndexPages.REPORT, getReportById);
 
     return {
@@ -267,7 +264,6 @@ export default defineComponent({
       lastCreatedEntity,
       loadingError,
       getRowKey,
-      pinnedRows,
       isBulkDelete,
       bulkDeleteTitle,
       bulkDeleteConfirmLabel,
