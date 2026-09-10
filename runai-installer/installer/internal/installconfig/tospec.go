@@ -24,7 +24,6 @@ type RunOptions struct {
 	EventsFile    string
 	StatusFile    string // accepted; status writer deferred (TODO)
 	OnFailure     spec.FailurePolicy
-	Kubeconfig    string // accepted; override plumbing deferred (TODO)
 	Env           spec.Env
 	Registry      *spec.Registry
 	// DevMode relaxes input validation (e.g. allows an out-of-matrix Run:ai
