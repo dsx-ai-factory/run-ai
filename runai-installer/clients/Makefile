@@ -56,7 +56,7 @@ help: ## Display this help
 ##@ Generation
 
 .PHONY: generate
-generate: check-specs generate-auth generate-cluster generate-orgunit format-code ## Generate all clients (filters x-internal)
+generate: check-specs generate-auth generate-cluster generate-orgunit format-code spdx-header ## Generate all clients (filters x-internal)
 	@echo ""
 	@echo "=========================================="
 	@echo "Run:ai API client generation complete!"
@@ -119,6 +119,12 @@ generate-orgunit: ## Generate org-unit service client
 	@rm -rf runai/orgunit/test runai/orgunit/.openapi-generator runai/orgunit/api
 	@rm -f runai/orgunit/go.mod runai/orgunit/go.sum
 	@echo "OrgUnit client generated"
+
+.PHONY: spdx-header
+spdx-header: ## Inject NVIDIA SPDX headers into the generated clients (openapi-generator emits none)
+	@echo ""
+	@echo "Stamping SPDX headers on generated clients..."
+	@sh hack/spdx-header.sh runai
 
 .PHONY: format-code
 format-code: ## Format generated Go code

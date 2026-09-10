@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -195,6 +197,7 @@ func (a *AccessRulesAPIService) AccessRulesBatch(ctx context.Context) AccessRule
 }
 
 // Execute executes the request
+//
 //	@return AccessRuleDeletionBatchResponse
 func (a *AccessRulesAPIService) AccessRulesBatchExecute(r AccessRulesAPIAccessRulesBatchRequest) (*AccessRuleDeletionBatchResponse, *http.Response, error) {
 	var (
@@ -356,6 +359,7 @@ func (a *AccessRulesAPIService) AccessRulesBatchCreate(ctx context.Context) Acce
 }
 
 // Execute executes the request
+//
 //	@return AccessRulesBatchCreateResponse
 func (a *AccessRulesAPIService) AccessRulesBatchCreateExecute(r AccessRulesAPIAccessRulesBatchCreateRequest) (*AccessRulesBatchCreateResponse, *http.Response, error) {
 	var (
@@ -532,6 +536,7 @@ func (a *AccessRulesAPIService) CountAccessRules(ctx context.Context) AccessRule
 }
 
 // Execute executes the request
+//
 //	@return CountAccessRules200Response
 func (a *AccessRulesAPIService) CountAccessRulesExecute(r AccessRulesAPICountAccessRulesRequest) (*CountAccessRules200Response, *http.Response, error) {
 	var (
@@ -704,6 +709,7 @@ func (a *AccessRulesAPIService) CreateAccessRule(ctx context.Context) AccessRule
 }
 
 // Execute executes the request
+//
 //	@return AccessRule
 func (a *AccessRulesAPIService) CreateAccessRuleExecute(r AccessRulesAPICreateAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
@@ -1025,6 +1031,7 @@ func (a *AccessRulesAPIService) GetAccessRule(ctx context.Context, accessRuleId 
 }
 
 // Execute executes the request
+//
 //	@return AccessRuleById
 func (a *AccessRulesAPIService) GetAccessRuleExecute(r AccessRulesAPIGetAccessRuleRequest) (*AccessRuleById, *http.Response, error) {
 	var (
@@ -1290,6 +1297,7 @@ func (a *AccessRulesAPIService) GetAccessRules(ctx context.Context) AccessRulesA
 }
 
 // Execute executes the request
+//
 //	@return GetAccessRules200Response
 func (a *AccessRulesAPIService) GetAccessRulesExecute(r AccessRulesAPIGetAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error) {
 	var (
@@ -1514,6 +1522,7 @@ func (a *AccessRulesAPIService) GetAccessRulesSync(ctx context.Context) AccessRu
 }
 
 // Execute executes the request
+//
 //	@return GetAccessRulesSync200Response
 func (a *AccessRulesAPIService) GetAccessRulesSyncExecute(r AccessRulesAPIGetAccessRulesSyncRequest) (*GetAccessRulesSync200Response, *http.Response, error) {
 	var (

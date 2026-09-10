@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 ClusterService
 
@@ -39,17 +41,17 @@ type ClustersAPI interface {
 	CreateClusterExecute(r ClustersAPICreateClusterRequest) (*DisplayedCluster, *http.Response, error)
 
 	/*
-		DeleteCluster Delete a cluster by id.
+			DeleteCluster Delete a cluster by id.
 
-		Use to delete a cluster by Universally Unique Identifier (UUID).
-	Will return 202 for success if this api was called on a cluster that its version is >=2.20,
-	and force query param is false or not provided.
-	Will return 204 for success if force query param is true, or if cluster is in a version < 2.20
+			Use to delete a cluster by Universally Unique Identifier (UUID).
+		Will return 202 for success if this api was called on a cluster that its version is >=2.20,
+		and force query param is false or not provided.
+		Will return 204 for success if force query param is true, or if cluster is in a version < 2.20
 
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-		@return ClustersAPIDeleteClusterRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+			@return ClustersAPIDeleteClusterRequest
 	*/
 	DeleteCluster(ctx context.Context, clusterUuid string) ClustersAPIDeleteClusterRequest
 
@@ -86,15 +88,15 @@ type ClustersAPI interface {
 	GetClusterByUuidExecute(r ClustersAPIGetClusterByUuidRequest) (*DisplayedCluster, *http.Response, error)
 
 	/*
-		GetClusterInstallInfoByUuid Retrieve the installation instructions of a cluster by ID.
+			GetClusterInstallInfoByUuid Retrieve the installation instructions of a cluster by ID.
 
-		Use to retrieve installation instruction for a cluster by Universally Unique Identifier (UUID).
-	Supports clusters version 2.15 or above.
+			Use to retrieve installation instruction for a cluster by Universally Unique Identifier (UUID).
+		Supports clusters version 2.15 or above.
 
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-		@return ClustersAPIGetClusterInstallInfoByUuidRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+			@return ClustersAPIGetClusterInstallInfoByUuidRequest
 	*/
 	GetClusterInstallInfoByUuid(ctx context.Context, clusterUuid string) ClustersAPIGetClusterInstallInfoByUuidRequest
 
@@ -310,6 +312,7 @@ func (a *ClustersAPIService) CreateCluster(ctx context.Context) ClustersAPICreat
 }
 
 // Execute executes the request
+//
 //	@return DisplayedCluster
 func (a *ClustersAPIService) CreateClusterExecute(r ClustersAPICreateClusterRequest) (*DisplayedCluster, *http.Response, error) {
 	var (
@@ -481,6 +484,7 @@ func (a *ClustersAPIService) DeleteCluster(ctx context.Context, clusterUuid stri
 }
 
 // Execute executes the request
+//
 //	@return HttpResponse
 func (a *ClustersAPIService) DeleteClusterExecute(r ClustersAPIDeleteClusterRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -634,6 +638,7 @@ func (a *ClustersAPIService) GetClusterAncestors(ctx context.Context, clusterUui
 }
 
 // Execute executes the request
+//
 //	@return Ancestors
 func (a *ClustersAPIService) GetClusterAncestorsExecute(r ClustersAPIGetClusterAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -779,6 +784,7 @@ func (a *ClustersAPIService) GetClusterByUuid(ctx context.Context, clusterUuid s
 }
 
 // Execute executes the request
+//
 //	@return DisplayedCluster
 func (a *ClustersAPIService) GetClusterByUuidExecute(r ClustersAPIGetClusterByUuidRequest) (*DisplayedCluster, *http.Response, error) {
 	var (
@@ -960,6 +966,7 @@ func (a *ClustersAPIService) GetClusterInstallInfoByUuid(ctx context.Context, cl
 }
 
 // Execute executes the request
+//
 //	@return ClusterInstallationInfoResponse
 func (a *ClustersAPIService) GetClusterInstallInfoByUuidExecute(r ClustersAPIGetClusterInstallInfoByUuidRequest) (*ClusterInstallationInfoResponse, *http.Response, error) {
 	var (
@@ -1169,6 +1176,7 @@ func (a *ClustersAPIService) GetClusterMetrics(ctx context.Context, clusterUuid 
 }
 
 // Execute executes the request
+//
 //	@return GroupedMetricsResponse
 func (a *ClustersAPIService) GetClusterMetricsExecute(r ClustersAPIGetClusterMetricsRequest) (*GroupedMetricsResponse, *http.Response, error) {
 	var (
@@ -1375,6 +1383,7 @@ func (a *ClustersAPIService) GetClusterMinimalDataById(ctx context.Context, clus
 }
 
 // Execute executes the request
+//
 //	@return ClustersMinimalData
 func (a *ClustersAPIService) GetClusterMinimalDataByIdExecute(r ClustersAPIGetClusterMinimalDataByIdRequest) (*ClustersMinimalData, *http.Response, error) {
 	var (
@@ -1513,6 +1522,7 @@ func (a *ClustersAPIService) GetClusterName(ctx context.Context, clusterUuid str
 }
 
 // Execute executes the request
+//
 //	@return GetClusterName200Response
 func (a *ClustersAPIService) GetClusterNameExecute(r ClustersAPIGetClusterNameRequest) (*GetClusterName200Response, *http.Response, error) {
 	var (
@@ -1651,6 +1661,7 @@ func (a *ClustersAPIService) GetClusterUrl(ctx context.Context, clusterUuid stri
 }
 
 // Execute executes the request
+//
 //	@return GetClusterUrl200Response
 func (a *ClustersAPIService) GetClusterUrlExecute(r ClustersAPIGetClusterUrlRequest) (*GetClusterUrl200Response, *http.Response, error) {
 	var (
@@ -1786,6 +1797,7 @@ func (a *ClustersAPIService) GetClusterVersions(ctx context.Context) ClustersAPI
 }
 
 // Execute executes the request
+//
 //	@return map[string]string
 func (a *ClustersAPIService) GetClusterVersionsExecute(r ClustersAPIGetClusterVersionsRequest) (map[string]string, *http.Response, error) {
 	var (
@@ -1960,6 +1972,7 @@ func (a *ClustersAPIService) GetClusters(ctx context.Context) ClustersAPIGetClus
 }
 
 // Execute executes the request
+//
 //	@return []DisplayedCluster
 func (a *ClustersAPIService) GetClustersExecute(r ClustersAPIGetClustersRequest) ([]DisplayedCluster, *http.Response, error) {
 	var (
@@ -2140,6 +2153,7 @@ func (a *ClustersAPIService) GetClustersCount(ctx context.Context) ClustersAPIGe
 }
 
 // Execute executes the request
+//
 //	@return []ClustersCount
 func (a *ClustersAPIService) GetClustersCountExecute(r ClustersAPIGetClustersCountRequest) ([]ClustersCount, *http.Response, error) {
 	var (
@@ -2317,6 +2331,7 @@ func (a *ClustersAPIService) GetClustersMinimalData(ctx context.Context) Cluster
 }
 
 // Execute executes the request
+//
 //	@return GetClustersMinimalData200Response
 func (a *ClustersAPIService) GetClustersMinimalDataExecute(r ClustersAPIGetClustersMinimalDataRequest) (*GetClustersMinimalData200Response, *http.Response, error) {
 	var (
@@ -2455,6 +2470,7 @@ func (a *ClustersAPIService) GetInternalClusters(ctx context.Context) ClustersAP
 }
 
 // Execute executes the request
+//
 //	@return []DisplayedCluster
 func (a *ClustersAPIService) GetInternalClustersExecute(r ClustersAPIGetInternalClustersRequest) ([]DisplayedCluster, *http.Response, error) {
 	var (
