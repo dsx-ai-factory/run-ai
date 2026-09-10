@@ -233,8 +233,9 @@ func (pe *PodGroupExporter) GetTopOwnerMetadata() (*TopOwnerMetadata, error) {
 		pe.podGroup.Namespace, pe.podGroup.Name)
 }
 
-// The MIG devices annotation is optional, so its absence is reported through the
-// returned bool rather than as an error.
+// GetRequestedMigDevices returns the pod group's parsed MIG devices annotation. The
+// annotation is optional, so its absence is reported through the returned bool rather
+// than as an error.
 func (pe *PodGroupExporter) GetRequestedMigDevices() (map[string]int64, bool, error) {
 	valString, found := pe.podGroup.Annotations[requestedMigDevicesAnnotation]
 	if !found {
