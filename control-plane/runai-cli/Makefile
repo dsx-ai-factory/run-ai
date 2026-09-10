@@ -214,6 +214,7 @@ generate-mockgen: install-requirements
 	$(MOCKGEN_BIN) -source=internal/diagnostics/filter/namespaces_filter.go -destination=$(MOCKS_DIR)/diagnostics/filter/namespaces_filter.go -package=mocks
 	$(MOCKGEN_BIN) -source=internal/diagnostics/collect_logs.go -destination=$(MOCKS_DIR)/diagnostics/collect_logs.go -package=mocks
 	$(MOCKGEN_BIN) -source=internal/diagnostics/collector/collector.go -destination=$(MOCKS_DIR)/diagnostics/collector/collector.go -package=mocks
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh $(MOCKS_DIR)
 
 # Here we can add the automatic solution for some to the linter issues.
 .PHONY: linter-fixes

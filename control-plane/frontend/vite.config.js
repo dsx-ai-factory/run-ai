@@ -17,7 +17,6 @@ import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
-const environment = process.env.ENVIRONMENT;
 const env_port = process.env.RUN_AI_FRONTEND_PORT;
 const env_host = process.env.RUN_AI_FRONTEND_HOST;
 
@@ -29,8 +28,6 @@ const backendProxy = {
   target,
   headers: env_host ? { Host: env_host } : undefined,
 };
-
-console.log("Build environment: ", environment);
 
 const monacoPrefix = `monaco-editor/esm/vs`;
 

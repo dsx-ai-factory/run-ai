@@ -1,4 +1,4 @@
-suite: Test anyworkload-controller networking cleanup RBAC
+suite: Test anyworkload-controller networking RBAC
 
 templates:
   - templates/clusterroles/anyworkload-controller.yaml
@@ -60,3 +60,15 @@ tests:
       - equal:
           path: rules[?(@.resources[0]=="httproutes")].verbs
           value: ["get", "list", "watch", "create", "update", "patch"]
+
+  - it: grants read access to Knative ownership chain resources
+    documentSelector:
+      path: rules[0].resources[0]
+      value: namespaces
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["serving.knative.dev"]
+            resources: ["revisions", "configurations"]
+            verbs: ["get", "list", "watch"]

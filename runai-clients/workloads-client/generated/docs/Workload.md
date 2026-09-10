@@ -46,6 +46,7 @@ Name | Type | Description | Notes
 **DistributedFramework** | Pointer to **string** |  | [optional] 
 **AdditionalFields** | Pointer to **map[string]interface{}** |  | [optional] 
 **Preemptible** | Pointer to **NullableBool** |  | [optional] 
+**Preemptibility** | Pointer to **NullableString** |  | [optional] 
 **FullySaasWorkload** | Pointer to **bool** |  | [optional] 
 **EnvironmentVariables** | Pointer to **map[string]string** |  | [optional] 
 **Command** | Pointer to **string** |  | [optional] 
@@ -1094,6 +1095,41 @@ HasPreemptible returns a boolean if a field has been set.
 `func (o *Workload) UnsetPreemptible()`
 
 UnsetPreemptible ensures that no value is present for Preemptible, not even an explicit nil
+### GetPreemptibility
+
+`func (o *Workload) GetPreemptibility() string`
+
+GetPreemptibility returns the Preemptibility field if non-nil, zero value otherwise.
+
+### GetPreemptibilityOk
+
+`func (o *Workload) GetPreemptibilityOk() (*string, bool)`
+
+GetPreemptibilityOk returns a tuple with the Preemptibility field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPreemptibility
+
+`func (o *Workload) SetPreemptibility(v string)`
+
+SetPreemptibility sets Preemptibility field to given value.
+
+### HasPreemptibility
+
+`func (o *Workload) HasPreemptibility() bool`
+
+HasPreemptibility returns a boolean if a field has been set.
+
+### SetPreemptibilityNil
+
+`func (o *Workload) SetPreemptibilityNil(b bool)`
+
+ SetPreemptibilityNil sets the value for Preemptibility to be an explicit nil
+
+### UnsetPreemptibility
+`func (o *Workload) UnsetPreemptibility()`
+
+UnsetPreemptibility ensures that no value is present for Preemptibility, not even an explicit nil
 ### GetFullySaasWorkload
 
 `func (o *Workload) GetFullySaasWorkload() bool`

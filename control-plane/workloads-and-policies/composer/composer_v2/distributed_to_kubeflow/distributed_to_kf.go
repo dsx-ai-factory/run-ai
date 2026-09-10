@@ -378,8 +378,6 @@ func (dkc *DistributedToKubeflowComposer) Compose(ctx context.Context, src *work
 			dkc.fc.CopyString(topologyName, &target.ObjectMeta.Annotations, composer.StringToMapString, topology.KAITopologyAnnotationKey),
 			dkc.fc.CopyString(topologyPreferred, &target.ObjectMeta.Annotations, composer.StringToMapString, topology.KAITopologyAnnotationPreferredKey),
 			dkc.fc.CopyString(topologyRequired, &target.ObjectMeta.Annotations, composer.StringToMapString, topology.KAITopologyAnnotationRequiredKey),
-
-			dkc.fc.ComposeMNNVL(src.Spec.Labels, dkc.defaultMNNVLMode(), &target.Config, composer.MNNVLToWorkloadRunner, nil),
 		)
 
 		if runner.Error() != nil {
@@ -437,12 +435,21 @@ func (dkc *DistributedToKubeflowComposer) Compose(ctx context.Context, src *work
 			}
 		}
 
+		// Composed after the replica passes so fc.GpuRequested reflects the
+		// worker (and master) compute sections before MNNVL defaulting runs.
+		runner.Run(dkc.fc.ComposeMNNVL(src.Spec.Labels, dkc.defaultMNNVLMode(), &target.Config, composer.MNNVLToWorkloadRunner, nil))
+
 		return runner.Error()
 	}
 }
 
-// defaultMNNVLMode derives the MNNVL default for distributed-training workloads
+// defaultMNNVLMode derives the MNNVL default for distributed-training workloads.
+// A workload that requests no GPU always defaults to unset (no MNNVL) regardless
+// of the cluster flag; fc.GpuRequested is set while composing the replica compute.
 func (dkc *DistributedToKubeflowComposer) defaultMNNVLMode() string {
+	if !dkc.fc.GpuRequested {
+		return ""
+	}
 	config := dkc.fc.ClusterStorageConfig
 	if config == nil {
 		config = composer.DefaultClusterStorageConfig()

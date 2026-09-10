@@ -140,7 +140,11 @@ import { credentialService } from "@/services/control-plane/credential.service/c
 import { useDataSourceStore } from "@/stores/data-source.store";
 import type { TDataSourceKinds } from "@/models/data-source.model";
 import { useWorkloadStore } from "@/stores/workload.store";
-import { MIN_CLUSTER_VERSION_CLEAN_POD_POLICY, MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY } from "@/common/version.constant";
+import {
+  MIN_CLUSTER_VERSION_CLEAN_POD_POLICY,
+  MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY,
+  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
+} from "@/common/version.constant";
 import { scopeUtil } from "@/utils/scope.util";
 import type { IScopeModel } from "@/models/global.model";
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
@@ -389,6 +393,10 @@ const TemplateDistributedHybrid = defineComponent({
         totalGpuRequest: totalGpuRequest,
         workloadPriorities: this.workloadPriorities,
         supportPriorityClass: this.supportPriorityClass,
+        supportSemiPreemptibility: this.clusterStore.isClusterVersionSufficient(
+          this.workerContext.hybridWorkloadModel.value.clusterId || "",
+          MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
+        ),
       };
     },
     isWorkerSelectedAssetsLinked(): boolean {
