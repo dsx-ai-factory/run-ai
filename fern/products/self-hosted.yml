@@ -225,9 +225,14 @@ navigation:
         - page: Using GB200 NVL72 and Multi-Node NVLink Domains
           slug: using-gb200
           path: ../../docs/platform-management/aiinitiatives/resources/using-gb200.md
-        - page: Accelerating Workloads with Network Topology-Aware Scheduling
+        - section: Accelerating Workloads with Network Topology-Aware Scheduling
           slug: topology-aware-scheduling
-          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling.md
+          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md
+          contents:
+          - page: Workload-Based Topology Placement
+            path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/workload-level-topology.md
+          - page: Segment-Based Topology Placement
+            path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md
         - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
           path: ../../docs/platform-management/aiinitiatives/resources/enabling-spectrum-x-networking-for-nvidia-run-ai-workloads.md
         - page: Configuring NUMA-Aware Scheduling

@@ -25,10 +25,12 @@ You can configure an SMTP server to send email notifications from the system. Th
 6. Define email information
    * **From email address** - Enter the address to appear in the “From” field of notifications (e.g., `runai@company.com`)
    * **From display name** - Enter the sender display name (e.g., `Run:ai Notification`)
-7. Click **VERIFY**
-   * The system checks connectivity and credentials
+7. (Optional) Set a recipient email address to verify connectivity
+   * **Email address** - Enter a recipient address to confirm the SMTP server accepts mail for it. No message is sent to this address; it is used only for verification.
+8. Click **VERIFY**
+   * The system checks connectivity and credentials, and, if a recipient address was provided, confirms the server accepts that recipient
    * If verification fails, correct the values and retry
-8. Click **SAVE** to apply
+9. Click **SAVE** to apply
 
 ## Slack Notifications
 

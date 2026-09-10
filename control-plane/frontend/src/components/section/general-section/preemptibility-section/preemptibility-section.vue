@@ -44,7 +44,7 @@ import { NotificationAlertBar, ENotificationBarVariant } from "@/components/comm
 import type { PreemptibilityRules, PreemptibilityOptionsOptionsInner } from "@/swagger-models/workloads-client";
 import type { ISelectOption } from "@/models/global.model";
 import type { IGenericSelectPolicyRules } from "@/models/policy.model";
-import { workloadPreemptibilityOptions, Preemptibility } from "@/models/workload.model";
+import { getWorkloadPreemptibilityOptions, Preemptibility } from "@/models/workload.model";
 
 export default defineComponent({
   name: "preemptibility-section",
@@ -60,6 +60,10 @@ export default defineComponent({
       required: true,
     },
     disabled: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
+    supportSemiPreemptibility: {
       type: Boolean as PropType<boolean>,
       default: false,
     },
@@ -87,7 +91,7 @@ export default defineComponent({
 
   computed: {
     preemptibilityOptions(): ISelectOption[] {
-      return workloadPreemptibilityOptions.map((option) => {
+      return getWorkloadPreemptibilityOptions(this.supportSemiPreemptibility).map((option) => {
         const policyOption = this.policyRules?.options?.find(
           (pOption: PreemptibilityOptionsOptionsInner) => pOption.value === option.value,
         );

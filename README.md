@@ -45,6 +45,20 @@ At a high level:
 | **Monitoring and observability**  | Provides visibility into clusters, nodes, GPUs, workloads, resource utilization, and platform activity.                                     |
 | **Multiple interfaces**           | Supports NVIDIA Run:ai operations through the web UI, CLI, and REST API.                                                                     |
 
+## How NVIDIA Run:ai relates to other tools
+
+NVIDIA Run:ai is a scheduling and orchestration layer on top of Kubernetes — it does not replace Kubernetes, a container runtime, or a CI/CD system.
+
+| Layer | Tools | How NVIDIA Run:ai relates |
+|---|---|---|
+| Cluster orchestration | Kubernetes, OpenShift | NVIDIA Run:ai runs **on** these. It extends the cluster with GPU-aware scheduling rather than replacing native scheduling. |
+| Schedulers | Default `kube-scheduler`, Volcano, Kueue | NVIDIA Run:ai ships the [KAI scheduler](https://github.com/kai-scheduler/kai-scheduler) and adds fair-share, preemption, fractional GPUs, and quota hierarchies across departments and projects. |
+| GPU enablement | NVIDIA GPU Operator, Network Operator | Complementary — these expose and configure GPUs on nodes; NVIDIA Run:ai decides which workloads get them and for how long. |
+| ML platforms and pipelines | Kubeflow, Ray, Argo Workflows, Slurm | Complementary for the Kubernetes-based ones: they submit workloads, NVIDIA Run:ai schedules and governs the GPU capacity those workloads consume. Slurm is an alternative for HPC-style batch on bare metal. |
+| Workload types | Training Operator, LeaderWorkerSet, Knative, KServe | NVIDIA Run:ai integrates with these to manage workspaces, training, distributed training, and inference as first-class workloads. |
+
+If you need GPU sharing, quota enforcement, and multi-tenant governance across teams sharing one Kubernetes GPU estate, that is the gap NVIDIA Run:ai fills. If you only need to run a single team's jobs on dedicated GPUs, native Kubernetes scheduling may be sufficient.
+
 ## Repository Map
 
 | Component                       | Path                                                                                                                                                                                                                                                                                  | Description                                                                                                       |
@@ -94,9 +108,31 @@ Choose an installation method based on how you want to manage the deployment:
 
 To build and run NVIDIA Run:ai locally for development, see [Usage](#usage).
 
+### Distribution channels
+
+Released NVIDIA Run:ai container images and Helm charts are published to the NVIDIA NGC container registry under `nvcr.io/nvidia/runai` — this is the registry the installer and Helm charts pull from by default. Source releases and their notes are on the [GitHub Releases page](https://github.com/dsx-ai-factory/run-ai/releases); see [`RELEASE.md`](RELEASE.md) for how releases are cut and versioned.
+
 ## Contributing
 
 Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development workflow, branch and PR policy, and CI expectations, and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for community guidelines.
+
+## Roadmap
+
+NVIDIA Run:ai does not publish a long-range feature roadmap in this repository. What is planned and in progress is tracked in the open:
+
+- **[Open issues](https://github.com/dsx-ai-factory/run-ai/issues)** - Planned work, accepted feature requests, and known gaps. Issues are triaged and labelled by maintainers.
+- **[Releases](https://github.com/dsx-ai-factory/run-ai/releases)** - What actually shipped in each version, with notes generated from the merged pull requests on that release branch.
+- **[`SUPPORT.md`](SUPPORT.md)** - Which versions are currently supported and when each moves to end of life.
+
+Release cadence, branch naming, and who cuts a release are documented in [`RELEASE.md`](RELEASE.md).
+
+**Known limitations:** the root `Makefile` targets are placeholders — real build, test, and lint targets live in each service directory (see [Building individual services](#building-individual-services)). The full CI gate runs remotely and is reported back on pull requests as the `Validate Successful Run` check.
+
+## Community
+
+- **[GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues)** - Bug reports, feature requests, documentation issues, and usage questions. This is the project's primary discussion forum; start here.
+- **[Documentation](docs/)** - In-repo developer and product documentation, including the [Architecture Overview](docs/developer/architecture.md) and [Service Reference](docs/developer/services.md).
+- **[SUPPORT.md](SUPPORT.md)** - Supported versions and where to get help, including commercial support.
 
 ## Security & Support
 
@@ -106,6 +142,8 @@ Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for 
 ## License
 
 Licensed under the Apache License, Version 2.0 — see [`LICENSE`](LICENSE). Third-party attributions are listed in [`NOTICE`](NOTICE) and in the per-component `NOTICE` files.
+
+**Trademark notice:** Apache 2.0 applies to the software code in this repository. It does not grant permission to use NVIDIA or Run:ai trademarks, logos, product names, fonts, artwork, or other brand assets. Please see [`TRADEMARKS.md`](TRADEMARKS.md) for details.
 
 ### Nested and third-party licenses
 

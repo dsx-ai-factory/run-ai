@@ -98,9 +98,6 @@ npm run test:unit:prod   # Vitest (single run)
 npm run lint             # ESLint (auto-fix) + prettier
 ```
 
-Environment-specific dev modes are available: `npm run dev:staging`,
-`dev:cluster`, `dev:prod`, `dev:test`, `dev:airgapped`.
-
 ### Runtime image (Dockerfile)
 
 The multi-stage Dockerfile produces a hardened static-serving image:
@@ -143,12 +140,11 @@ breaks the local deploy. Image ref: `runai-local/frontend:0.0.0`.
 ## Configuration
 
 The frontend is a static bundle; there are no server-side environment variables
-to configure at runtime. Build-time behaviour is selected by Vite **mode**
-(`--mode staging|cluster|prod|testing|airgapped`, see the `dev:*` npm scripts)
-and by `ENVIRONMENT` (`prod` by default), which the Makefile passes into the
-build container. Deployment-resolved, browser-safe runtime settings are fetched
-by the app at boot from the BFF service's unauthenticated
-`GET /api/v1/boot-config` endpoint rather than baked into the bundle.
+to configure at runtime. The local Vite server accepts `RUN_AI_BACKEND_URL`,
+`RUN_AI_FRONTEND_PORT`, and `RUN_AI_FRONTEND_HOST` for backend proxying.
+Deployment-resolved, browser-safe runtime settings are fetched by the app at
+boot from the BFF service's unauthenticated `GET /api/v1/boot-config` endpoint
+rather than baked into the bundle.
 
 ## OpenAPI models
 

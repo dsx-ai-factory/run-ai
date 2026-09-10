@@ -136,6 +136,7 @@ func (WorkloadView) FilterFieldsToColumn() queryapi.APIFieldsMapping {
 		"category":                queryapi.NewFieldMapping("category"),
 		"priority":                queryapi.NewFieldMapping("priority"),
 		"priorityClassName":       queryapi.NewFieldMapping("priority_class_name"),
+		"preemptibility":          queryapi.NewFieldMapping("preemptibility"),
 		"guaranteedRuntimeEndsAt": queryapi.NewFieldMapping("guaranteed_runtime_ends_at"),
 		"aiApplicationId":         queryapi.NewFieldMapping("application_id"),
 		"aiApplicationName":       queryapi.NewFieldMapping("application_name"),
