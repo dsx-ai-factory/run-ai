@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: runai-operator
+  namespace: runai
 spec:
   replicas: {{ $runai_operator.replicas }}
   selector:

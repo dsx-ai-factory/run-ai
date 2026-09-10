@@ -143,6 +143,8 @@ Release cadence, branch naming, and who cuts a release are documented in [`RELEA
 
 Licensed under the Apache License, Version 2.0 — see [`LICENSE`](LICENSE). Third-party attributions are listed in [`NOTICE`](NOTICE) and in the per-component `NOTICE` files.
 
+**Trademark notice:** Apache 2.0 applies to the software code in this repository. It does not grant permission to use NVIDIA or Run:ai trademarks, logos, product names, fonts, artwork, or other brand assets. Please see [`TRADEMARKS.md`](TRADEMARKS.md) for details.
+
 ### Nested and third-party licenses
 
 Some subdirectories contain vendored third-party code or bundled assets under their own license. Each is listed below with its license and the path to that license file:

@@ -16,7 +16,7 @@ const (
 	NoResultsMsg   = "No workloads found"
 	SearchableMsg  = "failed to search for requested workload"
 	BaseExampleMsg = `# Update a workload with a new image
-runai {{.CommandType}} update <workload-name> -p <project-name> -i runai.jfrog.io/demo/quickstart-demo
+runai {{.CommandType}} update <workload-name> -p <project-name> -i ubuntu
 
 # Update a workload with a new autoscaling configuration
 runai {{.CommandType}} update <workload-name> -p <project-name> --max-replicas=5 --min-replicas=3 --metric=concurrency --metric-threshold=10
