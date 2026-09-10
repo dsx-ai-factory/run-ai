@@ -14,6 +14,14 @@ auth_url="{{ or .AuthURL "${RUNAI_AUTH_URL}" }}"
 upgrade_mode=false
 validate_old_version=true
 curl_max_time=""
+configured_shell=""
+shell_config_file=""
+shell_configuration_supported=false
+shell_config_file_available=false
+path_configured=false
+autocomplete_configured=false
+path_configuration_failed=false
+autocomplete_configuration_failed=false
 
 # Define colors
 RED='\033[0;31m'
@@ -139,6 +147,26 @@ configRunaiServers() {
    echo "Configuration completed."
  }
 
+detectShell() {
+  configured_shell="${SHELL:-}"
+  configured_shell="${configured_shell##*/}"
+
+  case "${configured_shell}" in
+    bash)
+      shell_config_file="${HOME}/.bashrc"
+      shell_configuration_supported=true
+      ;;
+    zsh)
+      shell_config_file="${HOME}/.zshrc"
+      shell_configuration_supported=true
+      ;;
+    *)
+      shell_config_file=""
+      shell_configuration_supported=false
+      ;;
+  esac
+}
+
 autocomplete() {
   logQuestion "Configure auto-completion? (Y/n): "
   read -r answer
@@ -153,25 +181,13 @@ autocomplete() {
     return
   fi
 
-  autocompleteSet=false
-
-  if [ -f "${HOME}/.bashrc" ]; then
-    grep -q "${soft_link_path} completion bash" ${HOME}/.bashrc || {
-      echo "source <(${soft_link_path} completion bash)" >> ${HOME}/.bashrc
-    }
-    autocompleteSet=true
-  fi
-
-  if [ -f "${HOME}/.zshrc" ]; then
-    grep -q "${soft_link_path} completion zsh" ${HOME}/.zshrc || {
-      echo "source <(${soft_link_path} completion zsh)" >> ${HOME}/.zshrc
-    }
-    autocompleteSet=true
-  fi
-
-  if [ "$autocompleteSet" = "false" ]; then
-    logWarning "Does not support auto-completion for this shell; supported shells are bash and zsh"
-    return
+  completion_command="source <(${soft_link_path} completion ${configured_shell})"
+  if grep -q "${soft_link_path} completion ${configured_shell}" "${shell_config_file}"; then
+    autocomplete_configured=true
+  elif echo "${completion_command}" >> "${shell_config_file}"; then
+    autocomplete_configured=true
+  else
+    autocomplete_configuration_failed=true
   fi
 }
 
@@ -191,22 +207,51 @@ addCliToPath() {
     return
   fi
 
-  addedToPath=false
+  path_export="export PATH=\$PATH:${install_path}"
+  if grep -q "${install_path}" "${shell_config_file}"; then
+    path_configured=true
+  elif echo "${path_export}" >> "${shell_config_file}"; then
+    path_configured=true
+  else
+    path_configuration_failed=true
+  fi
+}
 
-  if [ -f "${HOME}/.bashrc" ]; then
-    grep -q "${install_path}" ~/.bashrc || {
-      echo "export PATH=\$PATH:${install_path}" >> ~/.bashrc
-    }
-    addedToPath=true
-  fi
-  if [ -f "${HOME}/.zshrc" ]; then
-    grep -q "${install_path}" ~/.zshrc || {
-      echo "export PATH=\$PATH:${install_path}" >> ~/.zshrc
-    }
-    addedToPath=true
-  fi
-  if [ "$addedToPath" = "false" ]; then
+configureShell() {
+  detectShell
+
+  if [ "${shell_configuration_supported}" = false ]; then
     logWarning "Does not support adding the CLI to the PATH variable for this shell; supported shells are bash and zsh"
+    return
+  fi
+
+  if [ ! -f "${shell_config_file}" ]; then
+    return
+  fi
+
+  shell_config_file_available=true
+  addCliToPath
+  autocomplete
+}
+
+printShellConfigurationSummary() {
+  if [ "${shell_configuration_supported}" = false ] || [ "${shell_config_file_available}" = false ]; then
+    echo "Add '${install_path}' to PATH in your shell's startup file."
+    echo "Auto-completion was not configured."
+  else
+    if [ "${path_configured}" = true ] || [ "${autocomplete_configured}" = true ]; then
+      echo "To apply shell changes, run 'source ${shell_config_file}'."
+    fi
+    if [ "${path_configuration_failed}" = true ]; then
+      echo "Add '${install_path}' to PATH in your shell's startup file."
+    fi
+    if [ "${autocomplete_configuration_failed}" = true ]; then
+      echo "Auto-completion was not configured."
+    fi
+    if [ "${path_configured}" = false ] && [ "${autocomplete_configured}" = false ] &&
+       [ "${path_configuration_failed}" = false ] && [ "${autocomplete_configuration_failed}" = false ]; then
+      echo "Shell configuration was skipped."
+    fi
   fi
 }
 
@@ -372,14 +417,13 @@ echo
 
 if [ "${upgrade_mode}" = false ]; then
   echo "## Configuring..."
-  addCliToPath
-  autocomplete
+  configureShell
   configRunaiServers
   echo
   echo "## Finished!"
   echo
   echo "Run:ai CLI installed successfully."
-  echo "To apply changes, run 'source ~/.zshrc' (or '~/.bashrc') or open a new terminal."
+  printShellConfigurationSummary
   echo
 else
   echo "Upgrade mode enabled; skipped configurations steps"

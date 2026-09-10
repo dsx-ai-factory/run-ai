@@ -119,6 +119,7 @@ func (Workload) filterableColumns() map[string]bool {
 		"phaseUpdatedAt":          true,
 		"priority":                true,
 		"priorityClassName":       true,
+		"preemptibility":          true,
 		"guaranteedRuntimeEndsAt": true,
 	}
 }

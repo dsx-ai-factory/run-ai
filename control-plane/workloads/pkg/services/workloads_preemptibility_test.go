@@ -120,5 +120,50 @@ var _ = Describe("Workloads Preemptibility tests", Ordered, func() {
 			Expect(dbWorkload.Preemptibility).ToNot(BeNil())
 			Expect(*dbWorkload.Preemptibility).To(Equal(string(api.WORKLOADTYPEPREEMPTIBILITY_NON_PREEMPTIBLE)))
 		})
+
+		It("should return, filter, and sort workloads by preemptibility", func() {
+			preemptibilityValues := []api.WorkloadTypePreemptibility{
+				api.WORKLOADTYPEPREEMPTIBILITY_PREEMPTIBLE,
+				api.WORKLOADTYPEPREEMPTIBILITY_SEMI_PREEMPTIBLE,
+				api.WORKLOADTYPEPREEMPTIBILITY_NON_PREEMPTIBLE,
+			}
+			workloads := make([]api.WorkloadSyncFields, 0, len(preemptibilityValues))
+			for _, preemptibility := range preemptibilityValues {
+				workload := SetupBaseWorkload(uuid.NewString(), DefaultProjectId, testing.ClusterUuid1)
+				workload.Preemptibility = ptr.To(string(preemptibility))
+				workloads = append(workloads, workload)
+			}
+
+			apiResponse, err := workloadsService.SyncWorkloads(ctx, []string{}, api.WorkloadsSyncRequest{
+				ProjectId: DefaultProjectId,
+				Workloads: workloads,
+			})
+			Expect(err).To(BeNil())
+			Expect(apiResponse.Code).To(Equal(http.StatusNoContent))
+			waitForGetWorkloadsLength(ctx, workloadsService, len(workloads), []string{})
+
+			filteredWorkloads := testWorkloadsFilter(
+				ctx,
+				workloadsService,
+				"preemptibility",
+				[]string{"preemptibility==semi-preemptible"},
+				1,
+			).Workloads
+			Expect(filteredWorkloads).To(HaveLen(1))
+			Expect(filteredWorkloads[0].Preemptibility).ToNot(BeNil())
+			Expect(*filteredWorkloads[0].Preemptibility).To(Equal("semi-preemptible"))
+
+			apiResponse, err = workloadsService.GetWorkloads(ctx, false, 0, 0, "asc", "preemptibility", []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			sortedWorkloads := httpResponseBodyToWorkloadsResponse(apiResponse).Workloads
+			Expect(sortedWorkloads).To(HaveLen(3))
+			Expect(sortedWorkloads[0].Preemptibility).ToNot(BeNil())
+			Expect(sortedWorkloads[1].Preemptibility).ToNot(BeNil())
+			Expect(sortedWorkloads[2].Preemptibility).ToNot(BeNil())
+			Expect(*sortedWorkloads[0].Preemptibility).To(Equal("non-preemptible"))
+			Expect(*sortedWorkloads[1].Preemptibility).To(Equal("preemptible"))
+			Expect(*sortedWorkloads[2].Preemptibility).To(Equal("semi-preemptible"))
+		})
 	})
 })

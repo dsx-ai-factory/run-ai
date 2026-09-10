@@ -5,4 +5,4 @@ description: Sort results by a parameter.
 schema:
   ## can not reference '../../schemas/Workloads/WorkloadSortFilterFields.yaml' since it fail the build
   type: string
-  enum: [ type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, distributedFramework, allocatedGPU, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName ]
+  enum: [ type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, distributedFramework, allocatedGPU, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, preemptibility, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName ]

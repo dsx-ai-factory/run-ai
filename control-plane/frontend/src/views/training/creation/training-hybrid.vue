@@ -162,6 +162,7 @@ import {
   MIN_CLUSTER_VERSION_FOR_USER_CREDENTIALS,
   MIN_CLUSTER_VERSION_FOR_TOLERATIONS,
   MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY,
+  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
 } from "@/common/version.constant";
 import type { TDataSourceKinds } from "@/models/data-source.model";
 import type { IAssetsFilter } from "@/models/filter.model";
@@ -462,6 +463,10 @@ const TrainingHybrid = defineComponent({
         totalGpuRequest: totalGpuRequest,
         workloadPriorities: this.workloadPriorities,
         supportPriorityClass: this.supportPriorityClass,
+        supportSemiPreemptibility: this.clusterStore.isClusterVersionSufficient(
+          this.trainingModel.clusterId,
+          MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
+        ),
       };
     },
   },

@@ -45,6 +45,7 @@ const (
 	WORKLOADSORTFILTERFIELDS_CATEGORY                   WorkloadSortFilterFields = "category"
 	WORKLOADSORTFILTERFIELDS_PRIORITY                   WorkloadSortFilterFields = "priority"
 	WORKLOADSORTFILTERFIELDS_PRIORITY_CLASS_NAME        WorkloadSortFilterFields = "priorityClassName"
+	WORKLOADSORTFILTERFIELDS_PREEMPTIBILITY             WorkloadSortFilterFields = "preemptibility"
 	WORKLOADSORTFILTERFIELDS_GUARANTEED_RUNTIME_ENDS_AT WorkloadSortFilterFields = "guaranteedRuntimeEndsAt"
 	WORKLOADSORTFILTERFIELDS_AI_APPLICATION_ID          WorkloadSortFilterFields = "aiApplicationId"
 	WORKLOADSORTFILTERFIELDS_AI_APPLICATION_NAME        WorkloadSortFilterFields = "aiApplicationName"
@@ -74,6 +75,7 @@ var AllowedWorkloadSortFilterFieldsEnumValues = []WorkloadSortFilterFields{
 	"category",
 	"priority",
 	"priorityClassName",
+	"preemptibility",
 	"guaranteedRuntimeEndsAt",
 	"aiApplicationId",
 	"aiApplicationName",

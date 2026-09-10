@@ -20,9 +20,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/common"
 )
 
-const workloadSortFieldOptions = "type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, nodePoolName, distributedFramework, allocatedGPU, allocatedGpu, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName" //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+const workloadSortFieldOptions = "type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, nodePoolName, distributedFramework, allocatedGPU, allocatedGpu, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, preemptibility, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName" //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 
-const workloadFilterFieldOptions = "type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, distributedFramework, allocatedGPU, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName" //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+const workloadFilterFieldOptions = "type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, distributedFramework, allocatedGPU, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, preemptibility, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName" //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 
 var workloadSortFields = map[string]struct{}{
 	"type": {}, "name": {}, "clusterId": {}, "projectId": {}, "projectName": {},
@@ -30,8 +30,9 @@ var workloadSortFields = map[string]struct{}{
 	"submittedBy": {}, "phase": {}, "completedAt": {}, "nodepool": {},
 	"distributedFramework": {}, "allocatedGPU": {}, "idleAllocatedGpus": {},
 	"phaseUpdatedAt": {}, "category": {}, "priority": {}, "totalPendingTimeSeconds": {},
-	"totalRunningTimeSeconds": {}, "priorityClassName": {}, "guaranteedRuntimeEndsAt": {},
-	"aiApplicationId": {}, "aiApplicationName": {},
+	"totalRunningTimeSeconds": {}, "priorityClassName": {}, "preemptibility": {},
+	"guaranteedRuntimeEndsAt": {},
+	"aiApplicationId":         {}, "aiApplicationName": {},
 	// MCP-facing aliases for API spellings that differ from returned/input field names.
 	"nodePoolName": {}, "allocatedGpu": {},
 }
@@ -44,7 +45,7 @@ var workloadFilterKinds = map[string]string{
 	"distributedFramework": "string", "allocatedGPU": "number", "idleAllocatedGpus": "number",
 	"phaseUpdatedAt": "timestamp", "category": "string", "priority": "integer",
 	"totalPendingTimeSeconds": "integer", "totalRunningTimeSeconds": "integer",
-	"priorityClassName": "string", "guaranteedRuntimeEndsAt": "timestamp",
+	"priorityClassName": "string", "preemptibility": "string", "guaranteedRuntimeEndsAt": "timestamp",
 	"aiApplicationId": "string", "aiApplicationName": "string",
 }
 
@@ -87,7 +88,7 @@ func (c workloadFilterComparison) validate(field, kind string) error {
 }
 
 type apiWorkloadFilter struct {
-	Field    string `json:"field"    jsonschema:"API field to filter. One of: type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, distributedFramework, allocatedGPU, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Field    string `json:"field"    jsonschema:"API field to filter. One of: type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, distributedFramework, allocatedGPU, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, preemptibility, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	Operator string `json:"operator" jsonschema:"Comparison operator. String fields support ==, !=, <=, >=, =@, !@, =^, and =$. Numeric and timestamp fields support ==, !=, <, <=, >, and >=."`
 	Value    string `json:"value"    jsonschema:"Comparison value. Timestamp fields require RFC3339; numeric fields require finite non-negative values."`
 }
@@ -129,7 +130,7 @@ type listWorkloadsInput struct {
 	DeletedOnly             bool                      `json:"deletedOnly,omitempty"         jsonschema:"Return only deleted workloads. Use for requests to list deleted workloads."`
 	DeletedAfter            string                    `json:"deletedAfter,omitempty"        jsonschema:"Return workloads deleted at or after this RFC3339 timestamp. For 'deleted in the last X hours', compute the current time minus X hours and pass that cutoff. This automatically selects only deleted workloads; deletedOnly does not also need to be set."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	Search                  string                    `json:"search,omitempty"              jsonschema:"Free-text workload search passed to the List Workloads API."`
-	SortBy                  string                    `json:"sortBy,omitempty"              jsonschema:"Field used to sort results. Defaults to phaseUpdatedAt. One of: type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, nodePoolName, distributedFramework, allocatedGPU, allocatedGpu, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	SortBy                  string                    `json:"sortBy,omitempty"              jsonschema:"Field used to sort results. Defaults to phaseUpdatedAt. One of: type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, nodePoolName, distributedFramework, allocatedGPU, allocatedGpu, idleAllocatedGpus, phaseUpdatedAt, category, priority, totalPendingTimeSeconds, totalRunningTimeSeconds, priorityClassName, preemptibility, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	SortOrder               string                    `json:"sortOrder,omitempty"           jsonschema:"Sort direction: asc or desc. Defaults to desc."`
 	FilterBy                []apiWorkloadFilter       `json:"filterBy,omitempty"            jsonschema:"Additional typed List Workloads API filters. Use this for operators or fields not covered by the convenience inputs. All filters are ANDed. A deletedAt filter automatically selects only deleted workloads."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	ProjectName             *workloadFilterComparison `json:"projectName,omitempty" jsonschema:"Filter by project name with a string comparison."`

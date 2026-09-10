@@ -892,7 +892,13 @@ rules:
       - projects/finalizers
       - projects/status
     verbs:
-      - '*'
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
   - apiGroups:
       - kai.resources
     resources:
@@ -938,7 +944,13 @@ rules:
       - departments
       - departments/finalizers
     verbs:
-      - '*'
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
   - apiGroups:
       - ""
     resources:

@@ -47,6 +47,8 @@
 
 * `PRIORITY_CLASS_NAME` (value: `"priorityClassName"`)
 
+* `PREEMPTIBILITY` (value: `"preemptibility"`)
+
 * `GUARANTEED_RUNTIME_ENDS_AT` (value: `"guaranteedRuntimeEndsAt"`)
 
 * `AI_APPLICATION_ID` (value: `"aiApplicationId"`)
