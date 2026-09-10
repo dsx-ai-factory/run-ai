@@ -1,8 +1,16 @@
 # Support, Lifecycle, and Deprecation Policy
 
-## Commercial Offering
+<Note>
 
-This page defines the support tiers, version lifecycle, and deprecation policy for the commercial NVIDIA Run:ai self-hosted offering.
+**Applies to the Support-entitled Release only**
+
+This policy applies to the NVIDIA Run:ai Support-entitled Release. It does not apply to NVIDIA Run:ai OSS, which carries no support tiers, coverage windows, or SLA.
+
+</Note>
+
+## Scope
+
+This page defines the support tiers, version lifecycle, and deprecation policy for the NVIDIA Run:ai Support-entitled Release.
 
 Support periods and coverage are governed by the applicable NVIDIA licensing agreement. This page describes the standard policy.
 
@@ -56,16 +64,20 @@ Deprecation is the formal, advance signal that a feature, API, CLI command, conf
 
 ### Deprecation Window
 
-A deprecated capability remains available for at least two subsequent releases from the date of the deprecation notice. It is removed no earlier than the end of that window, and removal is always announced in the [Deprecation Notifications](../getting-started/whats-new/deprecation-notifications.md) of the version that removes it.
+A deprecated capability remains available for at least two subsequent releases from the date of the deprecation notice. It is removed no earlier than the end of that window, and removal is always announced in the [Deprecation Notifications](whats-new/deprecation-notifications.md) of the version that removes it.
 
 ### What Is Announced, and Where
 
-- Deprecations are always announced in [Deprecation Notifications](../getting-started/whats-new/deprecation-notifications.md) for the release that introduces the deprecation.
+- Deprecations are always announced in [Deprecation Notifications](whats-new/deprecation-notifications.md) for the release that introduces the deprecation.
 - Each deprecation states what is deprecated, the reason, the earliest release in which it may be removed, and the recommended migration path or replacement.
 - Existing deployments continue to function throughout the deprecation window. Deprecation is a signal to migrate, not an immediate loss of function.
 
 ### Breaking Changes
 
-A breaking change is a change to a public API endpoint or parameter that requires customer action to preserve existing behavior after upgrade - that is, the removal or incompatible change of a public API endpoint or a request or response parameter. Breaking changes are introduced only at a major or minor (Ma.Mi) release, never in a patch (Pa) release, and are always called out in that release's [Deprecation Notifications](../getting-started/whats-new/deprecation-notifications.md).
+A breaking change is a change to a public API endpoint or parameter that requires customer action to preserve existing behavior after upgrade - that is, the removal or incompatible change of a public API endpoint or a request or response parameter. Breaking changes are introduced only at a major or minor (Ma.Mi) release, never in a patch (Pa) release, and are always called out in that release's [Deprecation Notifications](whats-new/deprecation-notifications.md).
 
 This policy page defines how deprecation works; it does not maintain a running inventory of deprecated items.
+
+## Contact Support
+
+Support is available through the [NVIDIA Enterprise Support portal](https://enterprise-support.nvidia.com) for organizations with an active NVIDIA Run:ai Support-entitled Release agreement. Open a ticket there for issues covered under your support agreement.
