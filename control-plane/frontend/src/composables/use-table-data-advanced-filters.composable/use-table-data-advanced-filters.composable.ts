@@ -49,6 +49,9 @@ export function useTableDataAdvancedFilters<T>(
   const decelerateRefreshRateTimeoutId: Ref<null | number> = ref(null);
   const lastCreatedEntity: Ref<null | T> = ref(null);
   const pinnedEntityIds: Ref<Set<string>> = ref(new Set());
+  // Kept outside tableData: a pinned row stops matching the active filter the moment it
+  // starts deleting, and it has to stay on screen rather than silently disappear.
+  const pinnedEntities: Ref<Map<string, T>> = ref(new Map()) as Ref<Map<string, T>>;
   const isFirstLoad = ref(true);
   const clusterId = computed(() => clusterStore.selectedClusterId);
   const selectedRows: Ref<T[]> = ref([]);
@@ -103,11 +106,34 @@ export function useTableDataAdvancedFilters<T>(
     }
   };
 
+  const updatePinnedEntities = async (refreshedList: T[]) => {
+    if (!pinnedEntityIds.value.size) return;
+
+    const refreshed = new Map<string, T>();
+    for (const id of pinnedEntityIds.value) {
+      const matchedEntity = refreshedList.find((entity: T) => tableDataIndex.getEntityId(entity) === id);
+      if (matchedEntity !== undefined) {
+        refreshed.set(id, matchedEntity);
+        continue;
+      }
+      if (!getEntityById) continue;
+      try {
+        const fetchedEntity = await getEntityById(id);
+        if (fetchedEntity) refreshed.set(id, fetchedEntity);
+      } catch {
+        // gone from the backend, so it should stop being pinned
+      }
+    }
+    pinnedEntityIds.value = new Set(refreshed.keys());
+    pinnedEntities.value = refreshed;
+  };
+
   const refreshList = async (withLoading = false, externalLastCreatedId?: string, softLoad = false) => {
     if (withLoading) loadingTableData.value = true;
     const refreshedList: T[] = await listEntities(softLoad);
 
     await updateLastCreatedEntity(refreshedList, externalLastCreatedId);
+    await updatePinnedEntities(refreshedList);
 
     tableData.value = refreshedList;
     if (withLoading) loadingTableData.value = false;
@@ -239,6 +265,7 @@ export function useTableDataAdvancedFilters<T>(
     if ($route.query.createdEntityId) delete $route.query.createdEntityId;
     lastCreatedEntity.value = null;
     pinnedEntityIds.value = new Set();
+    pinnedEntities.value = new Map();
   };
 
   const clearRefreshInterval = () => {
@@ -294,11 +321,19 @@ export function useTableDataAdvancedFilters<T>(
    */
   const pinEntities = (entityIds: string[]) => {
     pinnedEntityIds.value = new Set([...pinnedEntityIds.value, ...entityIds]);
+
+    // Seed from what is on screen so the rows stay visible until the next refresh.
+    const seeded = new Map(pinnedEntities.value);
+    for (const entity of tableData.value) {
+      const id = tableDataIndex.getEntityId(entity);
+      if (pinnedEntityIds.value.has(id)) seeded.set(id, entity);
+    }
+    pinnedEntities.value = seeded;
   };
 
   const pinnedRows: ComputedRef<T[]> = computed(() => [
     ...(lastCreatedEntity.value && !isPinned(lastCreatedEntity.value) ? [lastCreatedEntity.value] : []),
-    ...tableData.value.filter(isPinned),
+    ...pinnedEntities.value.values(),
   ]);
 
   const saveFiltersToStorage = () => {

@@ -50,7 +50,7 @@
         :columns="cols"
         :row="pinnedRow"
         :name-column-icon="getRowIcon(pinnedRow)"
-        :is-selected="isPinnedRowSelected(pinnedRow)"
+        :is-selected="selectedRowKeys.has(getRowKey(pinnedRow))"
         :is-selectable="!disableSelection"
         @checkbox-clicked="
           isSingleSelect
@@ -59,7 +59,7 @@
                 key: getRowKey(pinnedRow),
                 row: pinnedRow,
                 rowIndex: pinnedPosition,
-                selected: isPinnedRowSelected(pinnedRow),
+                selected: selectedRowKeys.has(getRowKey(pinnedRow)),
               })
         "
         @row-clicked="onRowClicked($event, pinnedRow, pinnedPosition)"
@@ -242,6 +242,9 @@ export default defineComponent({
     pinnedRowKeys(): Set<string | number> {
       return new Set(this.pinnedRows.map((row) => this.getRowKey(row)));
     },
+    selectedRowKeys(): Set<string | number> {
+      return new Set((this.selected ?? []).map((row: TableRow) => this.getRowKey(row)));
+    },
     // Pinned rows render above the body and are skipped by it, so the raw rows order
     // is not what the user sees. Shift-range selection has to walk this order instead.
     visibleRows(): TableRow[] {
@@ -270,10 +273,6 @@ export default defineComponent({
   methods: {
     isPinned(row: TableRow): boolean {
       return this.pinnedRowKeys.has(this.getRowKey(row));
-    },
-    isPinnedRowSelected(row: TableRow): boolean {
-      const key = this.getRowKey(row);
-      return !!this.selected?.find((currRow) => this.getRowKey(currRow) === key);
     },
     visibleIndex(rowIndex: number): number {
       return this.bodyVisibleIndexes[rowIndex] ?? rowIndex;

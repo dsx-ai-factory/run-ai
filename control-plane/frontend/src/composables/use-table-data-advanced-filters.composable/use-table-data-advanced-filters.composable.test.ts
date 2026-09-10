@@ -44,7 +44,10 @@ const reports: IReportTable[] = [
 
 type PinningApi = ReturnType<typeof useTableDataAdvancedFilters<IReportTable>>;
 
-function mountComposable(rows: IReportTable[] = reports): PinningApi {
+function mountComposable(
+  rows: IReportTable[] = reports,
+  getEntityById?: (id: string) => Promise<IReportTable>,
+): PinningApi {
   const loadList = vi.fn().mockResolvedValue(rows);
   let api: PinningApi | null = null;
 
@@ -54,6 +57,7 @@ function mountComposable(rows: IReportTable[] = reports): PinningApi {
         loadList,
         computed(() => reportIndexColumns),
         EAdvancedIndexPages.REPORT,
+        getEntityById,
       );
       return () => null;
     },
@@ -138,5 +142,68 @@ describe("useTableDataAdvancedFilters - pinned rows", () => {
     await api.setFilterBy({ sortBy: "name" });
 
     expect(api.pinnedRows.value).toEqual([]);
+  });
+
+  it("keeps a pinned row that the active filter no longer returns", async () => {
+    // A report leaves the filtered list the moment it starts deleting. It has to stay
+    // pinned and visible, not vanish while the delete is still running.
+    const deleting = { ...makeReport("id-2", "report-two"), status: "Deleting" } as IReportTable;
+    const loadList = vi
+      .fn()
+      .mockResolvedValueOnce(reports)
+      .mockResolvedValue(reports.filter((row: IReportTable) => row.id !== "id-2"));
+    const getEntityById = vi.fn().mockResolvedValue(deleting);
+
+    let api: PinningApi | null = null;
+    const Host = defineComponent({
+      setup() {
+        api = useTableDataAdvancedFilters<IReportTable>(
+          loadList,
+          computed(() => reportIndexColumns),
+          EAdvancedIndexPages.REPORT,
+          getEntityById,
+        );
+        return () => null;
+      },
+    });
+    mount(Host, { global: { plugins: [createTestingPinia({ createSpy: vi.fn })] } });
+    const pinning = api as unknown as PinningApi;
+
+    await pinning.refreshList();
+    pinning.pinEntities(["id-2"]);
+    await pinning.refreshList();
+
+    expect(pinning.tableData.value.map((row: IReportTable) => row.id)).not.toContain("id-2");
+    expect(pinning.pinnedRows.value.map((row: IReportTable) => row.id)).toEqual(["id-2"]);
+    expect(getEntityById).toHaveBeenCalledWith("id-2");
+  });
+
+  it("unpins a row once the backend no longer has it", async () => {
+    const loadList = vi
+      .fn()
+      .mockResolvedValueOnce(reports)
+      .mockResolvedValue(reports.filter((row: IReportTable) => row.id !== "id-2"));
+    const getEntityById = vi.fn().mockRejectedValue(new Error("not found"));
+
+    let api: PinningApi | null = null;
+    const Host = defineComponent({
+      setup() {
+        api = useTableDataAdvancedFilters<IReportTable>(
+          loadList,
+          computed(() => reportIndexColumns),
+          EAdvancedIndexPages.REPORT,
+          getEntityById,
+        );
+        return () => null;
+      },
+    });
+    mount(Host, { global: { plugins: [createTestingPinia({ createSpy: vi.fn })] } });
+    const pinning = api as unknown as PinningApi;
+
+    await pinning.refreshList();
+    pinning.pinEntities(["id-2"]);
+    await pinning.refreshList();
+
+    expect(pinning.pinnedRows.value).toEqual([]);
   });
 });
