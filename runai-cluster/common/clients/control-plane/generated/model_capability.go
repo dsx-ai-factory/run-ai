@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,44 +22,44 @@ type Capability string
 
 // List of Capability
 const (
-	CAPABILITY_AUDIT_CONTROL Capability = "AUDIT_CONTROL"
-	CAPABILITY_AUDIT_READ Capability = "AUDIT_READ"
-	CAPABILITY_AUDIT_WRITE Capability = "AUDIT_WRITE"
-	CAPABILITY_BLOCK_SUSPEND Capability = "BLOCK_SUSPEND"
-	CAPABILITY_CHOWN Capability = "CHOWN"
-	CAPABILITY_DAC_OVERRIDE Capability = "DAC_OVERRIDE"
-	CAPABILITY_DAC_READ_SEARCH Capability = "DAC_READ_SEARCH"
-	CAPABILITY_FOWNER Capability = "FOWNER"
-	CAPABILITY_FSETID Capability = "FSETID"
-	CAPABILITY_IPC_LOCK Capability = "IPC_LOCK"
-	CAPABILITY_IPC_OWNER Capability = "IPC_OWNER"
-	CAPABILITY_KILL Capability = "KILL"
-	CAPABILITY_LEASE Capability = "LEASE"
-	CAPABILITY_LINUX_IMMUTABLE Capability = "LINUX_IMMUTABLE"
-	CAPABILITY_MAC_ADMIN Capability = "MAC_ADMIN"
-	CAPABILITY_MAC_OVERRIDE Capability = "MAC_OVERRIDE"
-	CAPABILITY_MKNOD Capability = "MKNOD"
-	CAPABILITY_NET_ADMIN Capability = "NET_ADMIN"
+	CAPABILITY_AUDIT_CONTROL    Capability = "AUDIT_CONTROL"
+	CAPABILITY_AUDIT_READ       Capability = "AUDIT_READ"
+	CAPABILITY_AUDIT_WRITE      Capability = "AUDIT_WRITE"
+	CAPABILITY_BLOCK_SUSPEND    Capability = "BLOCK_SUSPEND"
+	CAPABILITY_CHOWN            Capability = "CHOWN"
+	CAPABILITY_DAC_OVERRIDE     Capability = "DAC_OVERRIDE"
+	CAPABILITY_DAC_READ_SEARCH  Capability = "DAC_READ_SEARCH"
+	CAPABILITY_FOWNER           Capability = "FOWNER"
+	CAPABILITY_FSETID           Capability = "FSETID"
+	CAPABILITY_IPC_LOCK         Capability = "IPC_LOCK"
+	CAPABILITY_IPC_OWNER        Capability = "IPC_OWNER"
+	CAPABILITY_KILL             Capability = "KILL"
+	CAPABILITY_LEASE            Capability = "LEASE"
+	CAPABILITY_LINUX_IMMUTABLE  Capability = "LINUX_IMMUTABLE"
+	CAPABILITY_MAC_ADMIN        Capability = "MAC_ADMIN"
+	CAPABILITY_MAC_OVERRIDE     Capability = "MAC_OVERRIDE"
+	CAPABILITY_MKNOD            Capability = "MKNOD"
+	CAPABILITY_NET_ADMIN        Capability = "NET_ADMIN"
 	CAPABILITY_NET_BIND_SERVICE Capability = "NET_BIND_SERVICE"
-	CAPABILITY_NET_BROADCAST Capability = "NET_BROADCAST"
-	CAPABILITY_NET_RAW Capability = "NET_RAW"
-	CAPABILITY_SETGID Capability = "SETGID"
-	CAPABILITY_SETFCAP Capability = "SETFCAP"
-	CAPABILITY_SETPCAP Capability = "SETPCAP"
-	CAPABILITY_SETUID Capability = "SETUID"
-	CAPABILITY_SYS_ADMIN Capability = "SYS_ADMIN"
-	CAPABILITY_SYS_BOOT Capability = "SYS_BOOT"
-	CAPABILITY_SYS_CHROOT Capability = "SYS_CHROOT"
-	CAPABILITY_SYS_MODULE Capability = "SYS_MODULE"
-	CAPABILITY_SYS_NICE Capability = "SYS_NICE"
-	CAPABILITY_SYS_PACCT Capability = "SYS_PACCT"
-	CAPABILITY_SYS_PTRACE Capability = "SYS_PTRACE"
-	CAPABILITY_SYS_RAWIO Capability = "SYS_RAWIO"
-	CAPABILITY_SYS_RESOURCE Capability = "SYS_RESOURCE"
-	CAPABILITY_SYS_TIME Capability = "SYS_TIME"
-	CAPABILITY_SYS_TTY_CONFIG Capability = "SYS_TTY_CONFIG"
-	CAPABILITY_SYSLOG Capability = "SYSLOG"
-	CAPABILITY_WAKE_ALARM Capability = "WAKE_ALARM"
+	CAPABILITY_NET_BROADCAST    Capability = "NET_BROADCAST"
+	CAPABILITY_NET_RAW          Capability = "NET_RAW"
+	CAPABILITY_SETGID           Capability = "SETGID"
+	CAPABILITY_SETFCAP          Capability = "SETFCAP"
+	CAPABILITY_SETPCAP          Capability = "SETPCAP"
+	CAPABILITY_SETUID           Capability = "SETUID"
+	CAPABILITY_SYS_ADMIN        Capability = "SYS_ADMIN"
+	CAPABILITY_SYS_BOOT         Capability = "SYS_BOOT"
+	CAPABILITY_SYS_CHROOT       Capability = "SYS_CHROOT"
+	CAPABILITY_SYS_MODULE       Capability = "SYS_MODULE"
+	CAPABILITY_SYS_NICE         Capability = "SYS_NICE"
+	CAPABILITY_SYS_PACCT        Capability = "SYS_PACCT"
+	CAPABILITY_SYS_PTRACE       Capability = "SYS_PTRACE"
+	CAPABILITY_SYS_RAWIO        Capability = "SYS_RAWIO"
+	CAPABILITY_SYS_RESOURCE     Capability = "SYS_RESOURCE"
+	CAPABILITY_SYS_TIME         Capability = "SYS_TIME"
+	CAPABILITY_SYS_TTY_CONFIG   Capability = "SYS_TTY_CONFIG"
+	CAPABILITY_SYSLOG           Capability = "SYSLOG"
+	CAPABILITY_WAKE_ALARM       Capability = "WAKE_ALARM"
 )
 
 // All allowed values of Capability enum
@@ -180,4 +182,3 @@ func (v *NullableCapability) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

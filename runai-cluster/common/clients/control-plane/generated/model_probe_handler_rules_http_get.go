@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,10 +18,10 @@ import (
 
 // ProbeHandlerRulesHttpGet struct for ProbeHandlerRulesHttpGet
 type ProbeHandlerRulesHttpGet struct {
-	Path NullableStringRules `json:"path,omitempty"`
-	Port NullableIntegerRules `json:"port,omitempty"`
-	Host NullableStringRules `json:"host,omitempty"`
-	Scheme NullableStringRules `json:"scheme,omitempty"`
+	Path   NullableStringRules  `json:"path,omitempty"`
+	Port   NullableIntegerRules `json:"port,omitempty"`
+	Host   NullableStringRules  `json:"host,omitempty"`
+	Scheme NullableStringRules  `json:"scheme,omitempty"`
 }
 
 // NewProbeHandlerRulesHttpGet instantiates a new ProbeHandlerRulesHttpGet object
@@ -71,6 +73,7 @@ func (o *ProbeHandlerRulesHttpGet) HasPath() bool {
 func (o *ProbeHandlerRulesHttpGet) SetPath(v StringRules) {
 	o.Path.Set(&v)
 }
+
 // SetPathNil sets the value for Path to be an explicit nil
 func (o *ProbeHandlerRulesHttpGet) SetPathNil() {
 	o.Path.Set(nil)
@@ -113,6 +116,7 @@ func (o *ProbeHandlerRulesHttpGet) HasPort() bool {
 func (o *ProbeHandlerRulesHttpGet) SetPort(v IntegerRules) {
 	o.Port.Set(&v)
 }
+
 // SetPortNil sets the value for Port to be an explicit nil
 func (o *ProbeHandlerRulesHttpGet) SetPortNil() {
 	o.Port.Set(nil)
@@ -155,6 +159,7 @@ func (o *ProbeHandlerRulesHttpGet) HasHost() bool {
 func (o *ProbeHandlerRulesHttpGet) SetHost(v StringRules) {
 	o.Host.Set(&v)
 }
+
 // SetHostNil sets the value for Host to be an explicit nil
 func (o *ProbeHandlerRulesHttpGet) SetHostNil() {
 	o.Host.Set(nil)
@@ -197,6 +202,7 @@ func (o *ProbeHandlerRulesHttpGet) HasScheme() bool {
 func (o *ProbeHandlerRulesHttpGet) SetScheme(v StringRules) {
 	o.Scheme.Set(&v)
 }
+
 // SetSchemeNil sets the value for Scheme to be an explicit nil
 func (o *ProbeHandlerRulesHttpGet) SetSchemeNil() {
 	o.Scheme.Set(nil)
@@ -259,5 +265,3 @@ func (v *NullableProbeHandlerRulesHttpGet) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

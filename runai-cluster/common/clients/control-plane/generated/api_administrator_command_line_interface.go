@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,17 +22,16 @@ import (
 	"strings"
 )
 
-
 type AdministratorCommandLineInterfaceApi interface {
 
 	/*
-	GetAdminCLIRelease Get Administrator Command Line Interface release.
+		GetAdminCLIRelease Get Administrator Command Line Interface release.
 
-	Retrieve the Administrator Command Line Interface version.
+		Retrieve the Administrator Command Line Interface version.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param os The operating system
-	@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param os The operating system
+		@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest
 	*/
 	GetAdminCLIRelease(ctx context.Context, os string) AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest
 
@@ -39,14 +40,14 @@ type AdministratorCommandLineInterfaceApi interface {
 	GetAdminCLIReleaseExecute(r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest) (**os.File, *http.Response, error)
 
 	/*
-	GetAdminCLIReleaseByVersion Get Administrator Command Line Interface release by version.
+		GetAdminCLIReleaseByVersion Get Administrator Command Line Interface release by version.
 
-	Retrieve the Administrator Command Line Interface release by version.
+		Retrieve the Administrator Command Line Interface release by version.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param os The operating system
-	@param version run:ai version (semantic version)
-	@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param os The operating system
+		@param version run:ai version (semantic version)
+		@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest
 	*/
 	GetAdminCLIReleaseByVersion(ctx context.Context, os string, version string) AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest
 
@@ -55,14 +56,14 @@ type AdministratorCommandLineInterfaceApi interface {
 	GetAdminCLIReleaseByVersionExecute(r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest) (**os.File, *http.Response, error)
 
 	/*
-	GetAdminCLIReleaseByVersionChecksum Get Administrator Command Line Interface release checksums.
+		GetAdminCLIReleaseByVersionChecksum Get Administrator Command Line Interface release checksums.
 
-	Retrieve the checksums of the Administrator Command Line Interface release.
+		Retrieve the checksums of the Administrator Command Line Interface release.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param os The operating system
-	@param version run:ai version (semantic version)
-	@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param os The operating system
+		@param version run:ai version (semantic version)
+		@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest
 	*/
 	GetAdminCLIReleaseByVersionChecksum(ctx context.Context, os string, version string) AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest
 
@@ -71,13 +72,13 @@ type AdministratorCommandLineInterfaceApi interface {
 	GetAdminCLIReleaseByVersionChecksumExecute(r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest) (*ChecksumResponse, *http.Response, error)
 
 	/*
-	GetAdminCLIReleaseChecksum Get Administrator Command Line Interface release details.
+		GetAdminCLIReleaseChecksum Get Administrator Command Line Interface release details.
 
-	Retrieve the details of the Administrator Command Line Interface release.
+		Retrieve the details of the Administrator Command Line Interface release.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param os The operating system
-	@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param os The operating system
+		@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest
 	*/
 	GetAdminCLIReleaseChecksum(ctx context.Context, os string) AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest
 
@@ -90,9 +91,9 @@ type AdministratorCommandLineInterfaceApi interface {
 type AdministratorCommandLineInterfaceApiService service
 
 type AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService AdministratorCommandLineInterfaceApi
-	os string
+	os         string
 }
 
 func (r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest) Execute() (**os.File, *http.Response, error) {
@@ -104,26 +105,27 @@ GetAdminCLIRelease Get Administrator Command Line Interface release.
 
 Retrieve the Administrator Command Line Interface version.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param os The operating system
- @return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param os The operating system
+	@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest
 */
 func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIRelease(ctx context.Context, os string) AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest {
 	return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest{
 		ApiService: a,
-		ctx: ctx,
-		os: os,
+		ctx:        ctx,
+		os:         os,
 	}
 }
 
 // Execute executes the request
-//  @return *os.File
+//
+//	@return *os.File
 func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseExecute(r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseRequest) (**os.File, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  **os.File
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue **os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdministratorCommandLineInterfaceApiService.GetAdminCLIRelease")
@@ -222,10 +224,10 @@ func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseExecute(
 }
 
 type AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService AdministratorCommandLineInterfaceApi
-	os string
-	version string
+	os         string
+	version    string
 }
 
 func (r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest) Execute() (**os.File, *http.Response, error) {
@@ -237,28 +239,29 @@ GetAdminCLIReleaseByVersion Get Administrator Command Line Interface release by 
 
 Retrieve the Administrator Command Line Interface release by version.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param os The operating system
- @param version run:ai version (semantic version)
- @return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param os The operating system
+	@param version run:ai version (semantic version)
+	@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest
 */
 func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseByVersion(ctx context.Context, os string, version string) AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest {
 	return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest{
 		ApiService: a,
-		ctx: ctx,
-		os: os,
-		version: version,
+		ctx:        ctx,
+		os:         os,
+		version:    version,
 	}
 }
 
 // Execute executes the request
-//  @return *os.File
+//
+//	@return *os.File
 func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseByVersionExecute(r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionRequest) (**os.File, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  **os.File
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue **os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdministratorCommandLineInterfaceApiService.GetAdminCLIReleaseByVersion")
@@ -358,10 +361,10 @@ func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseByVersio
 }
 
 type AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService AdministratorCommandLineInterfaceApi
-	os string
-	version string
+	os         string
+	version    string
 }
 
 func (r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest) Execute() (*ChecksumResponse, *http.Response, error) {
@@ -373,28 +376,29 @@ GetAdminCLIReleaseByVersionChecksum Get Administrator Command Line Interface rel
 
 Retrieve the checksums of the Administrator Command Line Interface release.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param os The operating system
- @param version run:ai version (semantic version)
- @return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param os The operating system
+	@param version run:ai version (semantic version)
+	@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest
 */
 func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseByVersionChecksum(ctx context.Context, os string, version string) AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest {
 	return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest{
 		ApiService: a,
-		ctx: ctx,
-		os: os,
-		version: version,
+		ctx:        ctx,
+		os:         os,
+		version:    version,
 	}
 }
 
 // Execute executes the request
-//  @return ChecksumResponse
+//
+//	@return ChecksumResponse
 func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseByVersionChecksumExecute(r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseByVersionChecksumRequest) (*ChecksumResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ChecksumResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ChecksumResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdministratorCommandLineInterfaceApiService.GetAdminCLIReleaseByVersionChecksum")
@@ -494,9 +498,9 @@ func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseByVersio
 }
 
 type AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService AdministratorCommandLineInterfaceApi
-	os string
+	os         string
 }
 
 func (r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest) Execute() (*ChecksumResponse, *http.Response, error) {
@@ -508,26 +512,27 @@ GetAdminCLIReleaseChecksum Get Administrator Command Line Interface release deta
 
 Retrieve the details of the Administrator Command Line Interface release.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param os The operating system
- @return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param os The operating system
+	@return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest
 */
 func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseChecksum(ctx context.Context, os string) AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest {
 	return AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest{
 		ApiService: a,
-		ctx: ctx,
-		os: os,
+		ctx:        ctx,
+		os:         os,
 	}
 }
 
 // Execute executes the request
-//  @return ChecksumResponse
+//
+//	@return ChecksumResponse
 func (a *AdministratorCommandLineInterfaceApiService) GetAdminCLIReleaseChecksumExecute(r AdministratorCommandLineInterfaceApiGetAdminCLIReleaseChecksumRequest) (*ChecksumResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ChecksumResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ChecksumResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdministratorCommandLineInterfaceApiService.GetAdminCLIReleaseChecksum")

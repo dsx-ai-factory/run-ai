@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 K8sObjectTracker
 
@@ -512,7 +514,9 @@ func (a *PVCsAPIService) CreateClusterWidePvcV1(ctx context.Context, clusterUuid
 }
 
 // Execute executes the request
+//
 //	@return string
+//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) CreateClusterWidePvcV1Execute(r ApiCreateClusterWidePvcV1Request) (string, *http.Response, error) {
@@ -674,7 +678,9 @@ func (a *PVCsAPIService) CreateClusterWidePvcV2(ctx context.Context, clusterUuid
 }
 
 // Execute executes the request
+//
 //	@return PVC
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) CreateClusterWidePvcV2Execute(r ApiCreateClusterWidePvcV2Request) (*PVC, *http.Response, error) {
 	var (
@@ -842,7 +848,9 @@ func (a *PVCsAPIService) CreateDepartmentWidePvcV1(ctx context.Context, clusterU
 }
 
 // Execute executes the request
+//
 //	@return string
+//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) CreateDepartmentWidePvcV1Execute(r ApiCreateDepartmentWidePvcV1Request) (string, *http.Response, error) {
@@ -1008,7 +1016,9 @@ func (a *PVCsAPIService) CreateDepartmentWidePvcV2(ctx context.Context, clusterU
 }
 
 // Execute executes the request
+//
 //	@return PVC
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) CreateDepartmentWidePvcV2Execute(r ApiCreateDepartmentWidePvcV2Request) (*PVC, *http.Response, error) {
 	var (
@@ -1176,7 +1186,9 @@ func (a *PVCsAPIService) CreateDepartmentsWidePvcV2(ctx context.Context, cluster
 }
 
 // Execute executes the request
+//
 //	@return PVC
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) CreateDepartmentsWidePvcV2Execute(r ApiCreateDepartmentsWidePvcV2Request) (*PVC, *http.Response, error) {
 	var (
@@ -1359,7 +1371,9 @@ func (a *PVCsAPIService) CreateProjectPvcV1(ctx context.Context, clusterUuid str
 }
 
 // Execute executes the request
+//
 //	@return string
+//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) CreateProjectPvcV1Execute(r ApiCreateProjectPvcV1Request) (string, *http.Response, error) {
@@ -1525,7 +1539,9 @@ func (a *PVCsAPIService) CreateProjectPvcV2(ctx context.Context, clusterUuid str
 }
 
 // Execute executes the request
+//
 //	@return PVC
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) CreateProjectPvcV2Execute(r ApiCreateProjectPvcV2Request) (*PVC, *http.Response, error) {
 	var (
@@ -1693,7 +1709,9 @@ func (a *PVCsAPIService) CreateProjectsPvcV2(ctx context.Context, clusterUuid st
 }
 
 // Execute executes the request
+//
 //	@return PVC
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) CreateProjectsPvcV2Execute(r ApiCreateProjectsPvcV2Request) (*PVC, *http.Response, error) {
 	var (
@@ -3177,7 +3195,9 @@ func (a *PVCsAPIService) ListPvcs(ctx context.Context) ApiListPvcsRequest {
 }
 
 // Execute executes the request
+//
 //	@return PVCListResponse
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) ListPvcsExecute(r ApiListPvcsRequest) (*PVCListResponse, *http.Response, error) {
 	var (
@@ -3359,7 +3379,9 @@ func (a *PVCsAPIService) ObsoleteCreatePvc(ctx context.Context, clusterUuid stri
 }
 
 // Execute executes the request
+//
 //	@return SinglePVC
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) ObsoleteCreatePvcExecute(r ApiObsoleteCreatePvcRequest) (*SinglePVC, *http.Response, error) {
 	var (
@@ -3684,7 +3706,9 @@ func (a *PVCsAPIService) ObsoleteSyncPvc(ctx context.Context, clusterUuid string
 }
 
 // Execute executes the request
+//
 //	@return []SinglePVC
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) ObsoleteSyncPvcExecute(r ApiObsoleteSyncPvcRequest) ([]SinglePVC, *http.Response, error) {
 	var (
@@ -3849,7 +3873,9 @@ func (a *PVCsAPIService) SyncClusterWidePvcNamesV1(ctx context.Context, clusterU
 }
 
 // Execute executes the request
+//
 //	@return PVCNames
+//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) SyncClusterWidePvcNamesV1Execute(r ApiSyncClusterWidePvcNamesV1Request) (*PVCNames, *http.Response, error) {
@@ -4010,7 +4036,9 @@ func (a *PVCsAPIService) SyncClusterWidePvcsV2(ctx context.Context, clusterUuid 
 }
 
 // Execute executes the request
+//
 //	@return PVCs
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) SyncClusterWidePvcsV2Execute(r ApiSyncClusterWidePvcsV2Request) (*PVCs, *http.Response, error) {
 	var (
@@ -4177,7 +4205,9 @@ func (a *PVCsAPIService) SyncDepartmentWidePvcNamesV1(ctx context.Context, clust
 }
 
 // Execute executes the request
+//
 //	@return PVCNames
+//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) SyncDepartmentWidePvcNamesV1Execute(r ApiSyncDepartmentWidePvcNamesV1Request) (*PVCNames, *http.Response, error) {
@@ -4342,7 +4372,9 @@ func (a *PVCsAPIService) SyncDepartmentWidePvcsV2(ctx context.Context, clusterUu
 }
 
 // Execute executes the request
+//
 //	@return PVCs
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) SyncDepartmentWidePvcsV2Execute(r ApiSyncDepartmentWidePvcsV2Request) (*PVCs, *http.Response, error) {
 	var (
@@ -4506,7 +4538,9 @@ func (a *PVCsAPIService) SyncDepartmentsWidePvcsV2(ctx context.Context, clusterU
 }
 
 // Execute executes the request
+//
 //	@return PVCs
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) SyncDepartmentsWidePvcsV2Execute(r ApiSyncDepartmentsWidePvcsV2Request) (*PVCs, *http.Response, error) {
 	var (
@@ -4685,7 +4719,9 @@ func (a *PVCsAPIService) SyncProjectPvcNamesV1(ctx context.Context, clusterUuid 
 }
 
 // Execute executes the request
+//
 //	@return PVCNames
+//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) SyncProjectPvcNamesV1Execute(r ApiSyncProjectPvcNamesV1Request) (*PVCNames, *http.Response, error) {
@@ -4850,7 +4886,9 @@ func (a *PVCsAPIService) SyncProjectPvcsV2(ctx context.Context, clusterUuid stri
 }
 
 // Execute executes the request
+//
 //	@return PVCs
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) SyncProjectPvcsV2Execute(r ApiSyncProjectPvcsV2Request) (*PVCs, *http.Response, error) {
 	var (
@@ -5014,7 +5052,9 @@ func (a *PVCsAPIService) SyncProjectsPvcsV2(ctx context.Context, clusterUuid str
 }
 
 // Execute executes the request
+//
 //	@return PVCs
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCsAPIService) SyncProjectsPvcsV2Execute(r ApiSyncProjectsPvcsV2Request) (*PVCs, *http.Response, error) {
 	var (

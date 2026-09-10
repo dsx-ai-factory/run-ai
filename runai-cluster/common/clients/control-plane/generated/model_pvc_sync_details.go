@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,8 +21,8 @@ type PVCSyncDetails struct {
 	// Size is the size of the PVC.
 	Size string `json:"size"`
 	// StorageClass is the name of the StorageClass required by the claim. If not specified, the default StorageClass will be used.
-	StorageClass string `json:"storageClass"`
-	AccessModes NullablePvcAccessModes `json:"accessModes,omitempty"`
+	StorageClass string                 `json:"storageClass"`
+	AccessModes  NullablePvcAccessModes `json:"accessModes,omitempty"`
 	// The volume mode required by the claim, either Filesystem (default) or Block.
 	VolumeMode NullableString `json:"volumeMode,omitempty"`
 	// Whether to assume that the PVC exists. If set to true, PVC is assumed to exist. If set to false, the PVC will be create if it does not exist.
@@ -139,6 +141,7 @@ func (o *PVCSyncDetails) HasAccessModes() bool {
 func (o *PVCSyncDetails) SetAccessModes(v PvcAccessModes) {
 	o.AccessModes.Set(&v)
 }
+
 // SetAccessModesNil sets the value for AccessModes to be an explicit nil
 func (o *PVCSyncDetails) SetAccessModesNil() {
 	o.AccessModes.Set(nil)
@@ -181,6 +184,7 @@ func (o *PVCSyncDetails) HasVolumeMode() bool {
 func (o *PVCSyncDetails) SetVolumeMode(v string) {
 	o.VolumeMode.Set(&v)
 }
+
 // SetVolumeModeNil sets the value for VolumeMode to be an explicit nil
 func (o *PVCSyncDetails) SetVolumeModeNil() {
 	o.VolumeMode.Set(nil)
@@ -223,6 +227,7 @@ func (o *PVCSyncDetails) HasExistingPvc() bool {
 func (o *PVCSyncDetails) SetExistingPvc(v bool) {
 	o.ExistingPvc.Set(&v)
 }
+
 // SetExistingPvcNil sets the value for ExistingPvc to be an explicit nil
 func (o *PVCSyncDetails) SetExistingPvcNil() {
 	o.ExistingPvc.Set(nil)
@@ -289,6 +294,7 @@ func (o *PVCSyncDetails) HasReadOnly() bool {
 func (o *PVCSyncDetails) SetReadOnly(v bool) {
 	o.ReadOnly.Set(&v)
 }
+
 // SetReadOnlyNil sets the value for ReadOnly to be an explicit nil
 func (o *PVCSyncDetails) SetReadOnlyNil() {
 	o.ReadOnly.Set(nil)
@@ -360,5 +366,3 @@ func (v *NullablePVCSyncDetails) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

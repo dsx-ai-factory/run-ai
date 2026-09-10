@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,7 +22,7 @@ type DistributedFrameworkRules struct {
 	// Whether the field is mandatory, default to false.
 	Required NullableBool `json:"required,omitempty"`
 	// Whether the value of the field is editable, default to true
-	CanEdit NullableBool `json:"canEdit,omitempty"`
+	CanEdit NullableBool                              `json:"canEdit,omitempty"`
 	Options []DistributedFrameworkOptionsOptionsInner `json:"options,omitempty"`
 }
 
@@ -73,6 +75,7 @@ func (o *DistributedFrameworkRules) HasSourceOfRule() bool {
 func (o *DistributedFrameworkRules) SetSourceOfRule(v SourceOfRule) {
 	o.SourceOfRule.Set(&v)
 }
+
 // SetSourceOfRuleNil sets the value for SourceOfRule to be an explicit nil
 func (o *DistributedFrameworkRules) SetSourceOfRuleNil() {
 	o.SourceOfRule.Set(nil)
@@ -115,6 +118,7 @@ func (o *DistributedFrameworkRules) HasRequired() bool {
 func (o *DistributedFrameworkRules) SetRequired(v bool) {
 	o.Required.Set(&v)
 }
+
 // SetRequiredNil sets the value for Required to be an explicit nil
 func (o *DistributedFrameworkRules) SetRequiredNil() {
 	o.Required.Set(nil)
@@ -157,6 +161,7 @@ func (o *DistributedFrameworkRules) HasCanEdit() bool {
 func (o *DistributedFrameworkRules) SetCanEdit(v bool) {
 	o.CanEdit.Set(&v)
 }
+
 // SetCanEditNil sets the value for CanEdit to be an explicit nil
 func (o *DistributedFrameworkRules) SetCanEditNil() {
 	o.CanEdit.Set(nil)
@@ -252,5 +257,3 @@ func (v *NullableDistributedFrameworkRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -73,6 +75,7 @@ func (o *CommonSecurityOverridable) HasRunAsUid() bool {
 func (o *CommonSecurityOverridable) SetRunAsUid(v int64) {
 	o.RunAsUid.Set(&v)
 }
+
 // SetRunAsUidNil sets the value for RunAsUid to be an explicit nil
 func (o *CommonSecurityOverridable) SetRunAsUidNil() {
 	o.RunAsUid.Set(nil)
@@ -115,6 +118,7 @@ func (o *CommonSecurityOverridable) HasRunAsGid() bool {
 func (o *CommonSecurityOverridable) SetRunAsGid(v int64) {
 	o.RunAsGid.Set(&v)
 }
+
 // SetRunAsGidNil sets the value for RunAsGid to be an explicit nil
 func (o *CommonSecurityOverridable) SetRunAsGidNil() {
 	o.RunAsGid.Set(nil)
@@ -157,6 +161,7 @@ func (o *CommonSecurityOverridable) HasSupplementalGroups() bool {
 func (o *CommonSecurityOverridable) SetSupplementalGroups(v string) {
 	o.SupplementalGroups.Set(&v)
 }
+
 // SetSupplementalGroupsNil sets the value for SupplementalGroups to be an explicit nil
 func (o *CommonSecurityOverridable) SetSupplementalGroupsNil() {
 	o.SupplementalGroups.Set(nil)
@@ -216,5 +221,3 @@ func (v *NullableCommonSecurityOverridable) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

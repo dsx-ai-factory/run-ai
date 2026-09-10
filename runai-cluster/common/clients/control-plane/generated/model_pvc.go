@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -25,7 +27,7 @@ type Pvc struct {
 	// Permit only read access to PVC.
 	ReadOnly NullableBool `json:"readOnly,omitempty"`
 	// Use `true` to set PVC to ephemeral. If set to `true`, the PVC will be deleted when the workspace is stopped.
-	Ephemeral NullableBool `json:"ephemeral,omitempty"`
+	Ephemeral NullableBool      `json:"ephemeral,omitempty"`
 	ClaimInfo NullableClaimInfo `json:"claimInfo,omitempty"`
 }
 
@@ -90,6 +92,7 @@ func (o *Pvc) HasExistingPvc() bool {
 func (o *Pvc) SetExistingPvc(v bool) {
 	o.ExistingPvc.Set(&v)
 }
+
 // SetExistingPvcNil sets the value for ExistingPvc to be an explicit nil
 func (o *Pvc) SetExistingPvcNil() {
 	o.ExistingPvc.Set(nil)
@@ -132,6 +135,7 @@ func (o *Pvc) HasClaimName() bool {
 func (o *Pvc) SetClaimName(v string) {
 	o.ClaimName.Set(&v)
 }
+
 // SetClaimNameNil sets the value for ClaimName to be an explicit nil
 func (o *Pvc) SetClaimNameNil() {
 	o.ClaimName.Set(nil)
@@ -174,6 +178,7 @@ func (o *Pvc) HasPath() bool {
 func (o *Pvc) SetPath(v string) {
 	o.Path.Set(&v)
 }
+
 // SetPathNil sets the value for Path to be an explicit nil
 func (o *Pvc) SetPathNil() {
 	o.Path.Set(nil)
@@ -216,6 +221,7 @@ func (o *Pvc) HasReadOnly() bool {
 func (o *Pvc) SetReadOnly(v bool) {
 	o.ReadOnly.Set(&v)
 }
+
 // SetReadOnlyNil sets the value for ReadOnly to be an explicit nil
 func (o *Pvc) SetReadOnlyNil() {
 	o.ReadOnly.Set(nil)
@@ -258,6 +264,7 @@ func (o *Pvc) HasEphemeral() bool {
 func (o *Pvc) SetEphemeral(v bool) {
 	o.Ephemeral.Set(&v)
 }
+
 // SetEphemeralNil sets the value for Ephemeral to be an explicit nil
 func (o *Pvc) SetEphemeralNil() {
 	o.Ephemeral.Set(nil)
@@ -300,6 +307,7 @@ func (o *Pvc) HasClaimInfo() bool {
 func (o *Pvc) SetClaimInfo(v ClaimInfo) {
 	o.ClaimInfo.Set(&v)
 }
+
 // SetClaimInfoNil sets the value for ClaimInfo to be an explicit nil
 func (o *Pvc) SetClaimInfoNil() {
 	o.ClaimInfo.Set(nil)
@@ -368,5 +376,3 @@ func (v *NullablePvc) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

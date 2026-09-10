@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,14 +22,13 @@ import (
 	"strings"
 )
 
-
 type InternalApi interface {
 
 	/*
-	CreateInternalAccessRule Create internal access rule with out privileged escalation validation.
+		CreateInternalAccessRule Create internal access rule with out privileged escalation validation.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InternalApiCreateInternalAccessRuleRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return InternalApiCreateInternalAccessRuleRequest
 	*/
 	CreateInternalAccessRule(ctx context.Context) InternalApiCreateInternalAccessRuleRequest
 
@@ -36,10 +37,10 @@ type InternalApi interface {
 	CreateInternalAccessRuleExecute(r InternalApiCreateInternalAccessRuleRequest) (*AccessRule, *http.Response, error)
 
 	/*
-	DeleteScopeAccessRules Delete access rules that assigned to the requested scope resource
+		DeleteScopeAccessRules Delete access rules that assigned to the requested scope resource
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InternalApiDeleteScopeAccessRulesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return InternalApiDeleteScopeAccessRulesRequest
 	*/
 	DeleteScopeAccessRules(ctx context.Context) InternalApiDeleteScopeAccessRulesRequest
 
@@ -47,10 +48,10 @@ type InternalApi interface {
 	DeleteScopeAccessRulesExecute(r InternalApiDeleteScopeAccessRulesRequest) (*http.Response, error)
 
 	/*
-	DeleteSubjectAccessRules Delete access rules that assigned to the requested subject.
+		DeleteSubjectAccessRules Delete access rules that assigned to the requested subject.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InternalApiDeleteSubjectAccessRulesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return InternalApiDeleteSubjectAccessRulesRequest
 	*/
 	DeleteSubjectAccessRules(ctx context.Context) InternalApiDeleteSubjectAccessRulesRequest
 
@@ -58,10 +59,10 @@ type InternalApi interface {
 	DeleteSubjectAccessRulesExecute(r InternalApiDeleteSubjectAccessRulesRequest) (*http.Response, error)
 
 	/*
-	EvaluatePermission Evaluate user permission to the requested resource. The returned permitted scopes are the scopes that the action on the resource is permitted, with OR between the multiple scopes.
+		EvaluatePermission Evaluate user permission to the requested resource. The returned permitted scopes are the scopes that the action on the resource is permitted, with OR between the multiple scopes.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InternalApiEvaluatePermissionRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return InternalApiEvaluatePermissionRequest
 	*/
 	EvaluatePermission(ctx context.Context) InternalApiEvaluatePermissionRequest
 
@@ -70,10 +71,10 @@ type InternalApi interface {
 	EvaluatePermissionExecute(r InternalApiEvaluatePermissionRequest) (*PermittedScopes, *http.Response, error)
 
 	/*
-	GetClustersHistories List cluster histories.
+		GetClustersHistories List cluster histories.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InternalApiGetClustersHistoriesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return InternalApiGetClustersHistoriesRequest
 	*/
 	GetClustersHistories(ctx context.Context) InternalApiGetClustersHistoriesRequest
 
@@ -82,10 +83,10 @@ type InternalApi interface {
 	GetClustersHistoriesExecute(r InternalApiGetClustersHistoriesRequest) ([]ClusterHistory, *http.Response, error)
 
 	/*
-	GetScopeAccessRules Get access rules that assigned to the requested scope resource
+		GetScopeAccessRules Get access rules that assigned to the requested scope resource
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InternalApiGetScopeAccessRulesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return InternalApiGetScopeAccessRulesRequest
 	*/
 	GetScopeAccessRules(ctx context.Context) InternalApiGetScopeAccessRulesRequest
 
@@ -94,10 +95,10 @@ type InternalApi interface {
 	GetScopeAccessRulesExecute(r InternalApiGetScopeAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error)
 
 	/*
-	GetSubjectAccessRules List specific subject access rules.
+		GetSubjectAccessRules List specific subject access rules.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InternalApiGetSubjectAccessRulesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return InternalApiGetSubjectAccessRulesRequest
 	*/
 	GetSubjectAccessRules(ctx context.Context) InternalApiGetSubjectAccessRulesRequest
 
@@ -106,11 +107,11 @@ type InternalApi interface {
 	GetSubjectAccessRulesExecute(r InternalApiGetSubjectAccessRulesRequest) ([]AccessRule, *http.Response, error)
 
 	/*
-	SetClusterAccessControl Set the cluster access control.
+		SetClusterAccessControl Set the cluster access control.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return InternalApiSetClusterAccessControlRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return InternalApiSetClusterAccessControlRequest
 	*/
 	SetClusterAccessControl(ctx context.Context, clusterUuid string) InternalApiSetClusterAccessControlRequest
 
@@ -118,10 +119,10 @@ type InternalApi interface {
 	SetClusterAccessControlExecute(r InternalApiSetClusterAccessControlRequest) (*http.Response, error)
 
 	/*
-	UpdateScopeAccessRules Update access rules that assigned to the requested scope resource
+		UpdateScopeAccessRules Update access rules that assigned to the requested scope resource
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InternalApiUpdateScopeAccessRulesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return InternalApiUpdateScopeAccessRulesRequest
 	*/
 	UpdateScopeAccessRules(ctx context.Context) InternalApiUpdateScopeAccessRulesRequest
 
@@ -133,8 +134,8 @@ type InternalApi interface {
 type InternalApiService service
 
 type InternalApiCreateInternalAccessRuleRequest struct {
-	ctx context.Context
-	ApiService InternalApi
+	ctx                             context.Context
+	ApiService                      InternalApi
 	internalCreateAccessRuleRequest *InternalCreateAccessRuleRequest
 }
 
@@ -151,24 +152,25 @@ func (r InternalApiCreateInternalAccessRuleRequest) Execute() (*AccessRule, *htt
 /*
 CreateInternalAccessRule Create internal access rule with out privileged escalation validation.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return InternalApiCreateInternalAccessRuleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InternalApiCreateInternalAccessRuleRequest
 */
 func (a *InternalApiService) CreateInternalAccessRule(ctx context.Context) InternalApiCreateInternalAccessRuleRequest {
 	return InternalApiCreateInternalAccessRuleRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return AccessRule
+//
+//	@return AccessRule
 func (a *InternalApiService) CreateInternalAccessRuleExecute(r InternalApiCreateInternalAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *AccessRule
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AccessRule
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.CreateInternalAccessRule")
@@ -261,12 +263,12 @@ func (a *InternalApiService) CreateInternalAccessRuleExecute(r InternalApiCreate
 }
 
 type InternalApiDeleteScopeAccessRulesRequest struct {
-	ctx context.Context
-	ApiService InternalApi
-	scopeType *string
-	scopeId *string
+	ctx         context.Context
+	ApiService  InternalApi
+	scopeType   *string
+	scopeId     *string
 	lastUpdated *string
-	roles *string
+	roles       *string
 }
 
 // The resource scope type to filter by.
@@ -300,22 +302,22 @@ func (r InternalApiDeleteScopeAccessRulesRequest) Execute() (*http.Response, err
 /*
 DeleteScopeAccessRules Delete access rules that assigned to the requested scope resource
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return InternalApiDeleteScopeAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InternalApiDeleteScopeAccessRulesRequest
 */
 func (a *InternalApiService) DeleteScopeAccessRules(ctx context.Context) InternalApiDeleteScopeAccessRulesRequest {
 	return InternalApiDeleteScopeAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *InternalApiService) DeleteScopeAccessRulesExecute(r InternalApiDeleteScopeAccessRulesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.DeleteScopeAccessRules")
@@ -408,12 +410,12 @@ func (a *InternalApiService) DeleteScopeAccessRulesExecute(r InternalApiDeleteSc
 }
 
 type InternalApiDeleteSubjectAccessRulesRequest struct {
-	ctx context.Context
-	ApiService InternalApi
+	ctx         context.Context
+	ApiService  InternalApi
 	subjectType *string
-	subjectId *string
+	subjectId   *string
 	lastUpdated *string
-	roles *string
+	roles       *string
 }
 
 // The type of resource we want to filter by.
@@ -447,22 +449,22 @@ func (r InternalApiDeleteSubjectAccessRulesRequest) Execute() (*http.Response, e
 /*
 DeleteSubjectAccessRules Delete access rules that assigned to the requested subject.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return InternalApiDeleteSubjectAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InternalApiDeleteSubjectAccessRulesRequest
 */
 func (a *InternalApiService) DeleteSubjectAccessRules(ctx context.Context) InternalApiDeleteSubjectAccessRulesRequest {
 	return InternalApiDeleteSubjectAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *InternalApiService) DeleteSubjectAccessRulesExecute(r InternalApiDeleteSubjectAccessRulesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.DeleteSubjectAccessRules")
@@ -555,8 +557,8 @@ func (a *InternalApiService) DeleteSubjectAccessRulesExecute(r InternalApiDelete
 }
 
 type InternalApiEvaluatePermissionRequest struct {
-	ctx context.Context
-	ApiService InternalApi
+	ctx                      context.Context
+	ApiService               InternalApi
 	backendEvaluationRequest *BackendEvaluationRequest
 }
 
@@ -573,24 +575,25 @@ func (r InternalApiEvaluatePermissionRequest) Execute() (*PermittedScopes, *http
 /*
 EvaluatePermission Evaluate user permission to the requested resource. The returned permitted scopes are the scopes that the action on the resource is permitted, with OR between the multiple scopes.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return InternalApiEvaluatePermissionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InternalApiEvaluatePermissionRequest
 */
 func (a *InternalApiService) EvaluatePermission(ctx context.Context) InternalApiEvaluatePermissionRequest {
 	return InternalApiEvaluatePermissionRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return PermittedScopes
+//
+//	@return PermittedScopes
 func (a *InternalApiService) EvaluatePermissionExecute(r InternalApiEvaluatePermissionRequest) (*PermittedScopes, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PermittedScopes
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PermittedScopes
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.EvaluatePermission")
@@ -693,9 +696,9 @@ func (a *InternalApiService) EvaluatePermissionExecute(r InternalApiEvaluatePerm
 }
 
 type InternalApiGetClustersHistoriesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService InternalApi
-	clusterId *[]string
+	clusterId  *[]string
 }
 
 // The clusters Ids of the current request.
@@ -711,24 +714,25 @@ func (r InternalApiGetClustersHistoriesRequest) Execute() ([]ClusterHistory, *ht
 /*
 GetClustersHistories List cluster histories.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return InternalApiGetClustersHistoriesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InternalApiGetClustersHistoriesRequest
 */
 func (a *InternalApiService) GetClustersHistories(ctx context.Context) InternalApiGetClustersHistoriesRequest {
 	return InternalApiGetClustersHistoriesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []ClusterHistory
+//
+//	@return []ClusterHistory
 func (a *InternalApiService) GetClustersHistoriesExecute(r InternalApiGetClustersHistoriesRequest) ([]ClusterHistory, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []ClusterHistory
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []ClusterHistory
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.GetClustersHistories")
@@ -843,12 +847,12 @@ func (a *InternalApiService) GetClustersHistoriesExecute(r InternalApiGetCluster
 }
 
 type InternalApiGetScopeAccessRulesRequest struct {
-	ctx context.Context
-	ApiService InternalApi
-	clusterId *string
-	roles *string
+	ctx           context.Context
+	ApiService    InternalApi
+	clusterId     *string
+	roles         *string
 	departmentIds *string
-	projectIds *string
+	projectIds    *string
 }
 
 // Filter using the Universally Unique Identifier (UUID) of the cluster.
@@ -882,24 +886,25 @@ func (r InternalApiGetScopeAccessRulesRequest) Execute() (*GetAccessRules200Resp
 /*
 GetScopeAccessRules Get access rules that assigned to the requested scope resource
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return InternalApiGetScopeAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InternalApiGetScopeAccessRulesRequest
 */
 func (a *InternalApiService) GetScopeAccessRules(ctx context.Context) InternalApiGetScopeAccessRulesRequest {
 	return InternalApiGetScopeAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GetAccessRules200Response
+//
+//	@return GetAccessRules200Response
 func (a *InternalApiService) GetScopeAccessRulesExecute(r InternalApiGetScopeAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetAccessRules200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetAccessRules200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.GetScopeAccessRules")
@@ -999,10 +1004,10 @@ func (a *InternalApiService) GetScopeAccessRulesExecute(r InternalApiGetScopeAcc
 }
 
 type InternalApiGetSubjectAccessRulesRequest struct {
-	ctx context.Context
-	ApiService InternalApi
+	ctx         context.Context
+	ApiService  InternalApi
 	subjectType *string
-	subjectIds *[]string
+	subjectIds  *[]string
 }
 
 // The type of resource we want to filter by.
@@ -1024,24 +1029,25 @@ func (r InternalApiGetSubjectAccessRulesRequest) Execute() ([]AccessRule, *http.
 /*
 GetSubjectAccessRules List specific subject access rules.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return InternalApiGetSubjectAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InternalApiGetSubjectAccessRulesRequest
 */
 func (a *InternalApiService) GetSubjectAccessRules(ctx context.Context) InternalApiGetSubjectAccessRulesRequest {
 	return InternalApiGetSubjectAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []AccessRule
+//
+//	@return []AccessRule
 func (a *InternalApiService) GetSubjectAccessRulesExecute(r InternalApiGetSubjectAccessRulesRequest) ([]AccessRule, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []AccessRule
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []AccessRule
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.GetSubjectAccessRules")
@@ -1136,8 +1142,8 @@ func (a *InternalApiService) GetSubjectAccessRulesExecute(r InternalApiGetSubjec
 }
 
 type InternalApiSetClusterAccessControlRequest struct {
-	ctx context.Context
-	ApiService InternalApi
+	ctx         context.Context
+	ApiService  InternalApi
 	clusterUuid string
 }
 
@@ -1148,14 +1154,14 @@ func (r InternalApiSetClusterAccessControlRequest) Execute() (*http.Response, er
 /*
 SetClusterAccessControl Set the cluster access control.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return InternalApiSetClusterAccessControlRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return InternalApiSetClusterAccessControlRequest
 */
 func (a *InternalApiService) SetClusterAccessControl(ctx context.Context, clusterUuid string) InternalApiSetClusterAccessControlRequest {
 	return InternalApiSetClusterAccessControlRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
@@ -1163,9 +1169,9 @@ func (a *InternalApiService) SetClusterAccessControl(ctx context.Context, cluste
 // Execute executes the request
 func (a *InternalApiService) SetClusterAccessControlExecute(r InternalApiSetClusterAccessControlRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.SetClusterAccessControl")
@@ -1258,10 +1264,10 @@ func (a *InternalApiService) SetClusterAccessControlExecute(r InternalApiSetClus
 }
 
 type InternalApiUpdateScopeAccessRulesRequest struct {
-	ctx context.Context
-	ApiService InternalApi
-	scopeType *string
-	scopeId *string
+	ctx                           context.Context
+	ApiService                    InternalApi
+	scopeType                     *string
+	scopeId                       *string
 	updateScopeAccessRulesRequest *UpdateScopeAccessRulesRequest
 }
 
@@ -1290,22 +1296,22 @@ func (r InternalApiUpdateScopeAccessRulesRequest) Execute() (*http.Response, err
 /*
 UpdateScopeAccessRules Update access rules that assigned to the requested scope resource
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return InternalApiUpdateScopeAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InternalApiUpdateScopeAccessRulesRequest
 */
 func (a *InternalApiService) UpdateScopeAccessRules(ctx context.Context) InternalApiUpdateScopeAccessRulesRequest {
 	return InternalApiUpdateScopeAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *InternalApiService) UpdateScopeAccessRulesExecute(r InternalApiUpdateScopeAccessRulesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.UpdateScopeAccessRules")

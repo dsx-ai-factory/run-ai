@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -134,6 +136,7 @@ func (a *ComputeApiService) CreateComputeAsset(ctx context.Context) ApiCreateCom
 }
 
 // Execute executes the request
+//
 //	@return ComputeAsset
 func (a *ComputeApiService) CreateComputeAssetExecute(r ApiCreateComputeAssetRequest) (*ComputeAsset, *http.Response, error) {
 	var (
@@ -287,6 +290,7 @@ func (a *ComputeApiService) DeleteComputeAssetById(ctx context.Context, assetId 
 }
 
 // Execute executes the request
+//
 //	@return HttpResponse
 func (a *ComputeApiService) DeleteComputeAssetByIdExecute(r ApiDeleteComputeAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -453,6 +457,7 @@ func (a *ComputeApiService) GetComputeAssetById(ctx context.Context, assetId str
 }
 
 // Execute executes the request
+//
 //	@return ComputeAsset
 func (a *ComputeApiService) GetComputeAssetByIdExecute(r ApiGetComputeAssetByIdRequest) (*ComputeAsset, *http.Response, error) {
 	var (
@@ -660,6 +665,7 @@ func (a *ComputeApiService) ListComputeAssets(ctx context.Context) ApiListComput
 }
 
 // Execute executes the request
+//
 //	@return ComputeListResponse
 func (a *ComputeApiService) ListComputeAssetsExecute(r ApiListComputeAssetsRequest) (*ComputeListResponse, *http.Response, error) {
 	var (
@@ -821,6 +827,7 @@ func (a *ComputeApiService) UpdateComputeAssetById(ctx context.Context, assetId 
 }
 
 // Execute executes the request
+//
 //	@return ComputeAsset
 func (a *ComputeApiService) UpdateComputeAssetByIdExecute(r ApiUpdateComputeAssetByIdRequest) (*ComputeAsset, *http.Response, error) {
 	var (

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments 
+The aggregated API of Run:AI backend projects and departments
 
 API version: 1.5.1
 */
@@ -17,10 +19,10 @@ import (
 // NodePoolQuotaStatus struct for NodePoolQuotaStatus
 type NodePoolQuotaStatus struct {
 	// the node pool name which the current quota status refers to
-	NodePoolName *string `json:"nodePoolName,omitempty"`
-	Allocated *QuotaStatusResourceList `json:"allocated,omitempty"`
+	NodePoolName            *string                  `json:"nodePoolName,omitempty"`
+	Allocated               *QuotaStatusResourceList `json:"allocated,omitempty"`
 	AllocatedNonPreemptible *QuotaStatusResourceList `json:"allocatedNonPreemptible,omitempty"`
-	Requested *QuotaStatusResourceList `json:"requested,omitempty"`
+	Requested               *QuotaStatusResourceList `json:"requested,omitempty"`
 }
 
 // NewNodePoolQuotaStatus instantiates a new NodePoolQuotaStatus object
@@ -220,5 +222,3 @@ func (v *NullableNodePoolQuotaStatus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

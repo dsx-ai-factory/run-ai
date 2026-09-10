@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,18 +22,17 @@ import (
 	"strings"
 )
 
-
 type ApplicationsApi interface {
 
 	/*
-	CreateApplication Create a new app.
+		CreateApplication Create a new app.
 
-	Create a new app and assign it with a client secret. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps.
+		Create a new app and assign it with a client secret. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApplicationsApiCreateApplicationRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApplicationsApiCreateApplicationRequest
 
-	Deprecated
+		Deprecated
 	*/
 	CreateApplication(ctx context.Context) ApplicationsApiCreateApplicationRequest
 
@@ -41,12 +42,12 @@ type ApplicationsApi interface {
 	CreateApplicationExecute(r ApplicationsApiCreateApplicationRequest) (*App, *http.Response, error)
 
 	/*
-	CreateApplication_0 Create an application.
+		CreateApplication_0 Create an application.
 
-	Used to create an application.
+		Used to create an application.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApplicationsApiCreateApplication_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApplicationsApiCreateApplication_0Request
 	*/
 	CreateApplication_1(ctx context.Context) ApplicationsApiCreateApplication_0Request
 
@@ -55,15 +56,15 @@ type ApplicationsApi interface {
 	CreateApplication_1Execute(r ApplicationsApiCreateApplication_0Request) (*ApplicationPostResponse, *http.Response, error)
 
 	/*
-	DeleteApplicationById Delete a App.
+		DeleteApplicationById Delete a App.
 
-	Delete the given app from the tenant. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
+		Delete the given app from the tenant. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clientId
-	@return ApplicationsApiDeleteApplicationByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clientId
+		@return ApplicationsApiDeleteApplicationByIdRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteApplicationById(ctx context.Context, clientId string) ApplicationsApiDeleteApplicationByIdRequest
 
@@ -72,13 +73,13 @@ type ApplicationsApi interface {
 	DeleteApplicationByIdExecute(r ApplicationsApiDeleteApplicationByIdRequest) (*http.Response, error)
 
 	/*
-	DeleteApplicationById_0 Delete an application by id.
+		DeleteApplicationById_0 Delete an application by id.
 
-	Use to delete an application by id.
+		Use to delete an application by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param appId The application id to retrieve
-	@return ApplicationsApiDeleteApplicationById_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param appId The application id to retrieve
+		@return ApplicationsApiDeleteApplicationById_0Request
 	*/
 	DeleteApplicationById_2(ctx context.Context, appId string) ApplicationsApiDeleteApplicationById_0Request
 
@@ -86,15 +87,15 @@ type ApplicationsApi interface {
 	DeleteApplicationById_2Execute(r ApplicationsApiDeleteApplicationById_0Request) (*http.Response, error)
 
 	/*
-	GetApplicationById Get app details.
+		GetApplicationById Get app details.
 
-	Get the details of a given app. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
+		Get the details of a given app. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clientId
-	@return ApplicationsApiGetApplicationByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clientId
+		@return ApplicationsApiGetApplicationByIdRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetApplicationById(ctx context.Context, clientId string) ApplicationsApiGetApplicationByIdRequest
 
@@ -104,13 +105,13 @@ type ApplicationsApi interface {
 	GetApplicationByIdExecute(r ApplicationsApiGetApplicationByIdRequest) (*App, *http.Response, error)
 
 	/*
-	GetApplicationById_0 Get application by id.
+		GetApplicationById_0 Get application by id.
 
-	Retrieve the details of an application by id.
+		Retrieve the details of an application by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param appId The application id to retrieve
-	@return ApplicationsApiGetApplicationById_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param appId The application id to retrieve
+		@return ApplicationsApiGetApplicationById_0Request
 	*/
 	GetApplicationById_3(ctx context.Context, appId string) ApplicationsApiGetApplicationById_0Request
 
@@ -119,14 +120,14 @@ type ApplicationsApi interface {
 	GetApplicationById_3Execute(r ApplicationsApiGetApplicationById_0Request) (*Application, *http.Response, error)
 
 	/*
-	GetApplications Get Apps list.
+		GetApplications Get Apps list.
 
-	Return the list of apps of the tenant. Deprecated in favor of the new endpoint api/v1/apps.
+		Return the list of apps of the tenant. Deprecated in favor of the new endpoint api/v1/apps.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApplicationsApiGetApplicationsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApplicationsApiGetApplicationsRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetApplications(ctx context.Context) ApplicationsApiGetApplicationsRequest
 
@@ -136,12 +137,12 @@ type ApplicationsApi interface {
 	GetApplicationsExecute(r ApplicationsApiGetApplicationsRequest) ([]App, *http.Response, error)
 
 	/*
-	GetApplications_0 Get a list of applications.
+		GetApplications_0 Get a list of applications.
 
-	Retrieve a list of applications.
+		Retrieve a list of applications.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApplicationsApiGetApplications_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApplicationsApiGetApplications_0Request
 	*/
 	GetApplications_4(ctx context.Context) ApplicationsApiGetApplications_0Request
 
@@ -150,12 +151,12 @@ type ApplicationsApi interface {
 	GetApplications_4Execute(r ApplicationsApiGetApplications_0Request) ([]Application, *http.Response, error)
 
 	/*
-	GetInstallerApp Get a list of installer applications.
+		GetInstallerApp Get a list of installer applications.
 
-	Retrieve a list of installer applications.
+		Retrieve a list of installer applications.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApplicationsApiGetInstallerAppRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApplicationsApiGetInstallerAppRequest
 	*/
 	GetInstallerApp(ctx context.Context) ApplicationsApiGetInstallerAppRequest
 
@@ -164,13 +165,13 @@ type ApplicationsApi interface {
 	GetInstallerAppExecute(r ApplicationsApiGetInstallerAppRequest) (*ApplicationPostResponse, *http.Response, error)
 
 	/*
-	RegenerateApplicationSecret Regenerate an application secret.
+		RegenerateApplicationSecret Regenerate an application secret.
 
-	Use to regenerate the application secret by id.
+		Use to regenerate the application secret by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param appId The application id to retrieve
-	@return ApplicationsApiRegenerateApplicationSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param appId The application id to retrieve
+		@return ApplicationsApiRegenerateApplicationSecretRequest
 	*/
 	RegenerateApplicationSecret(ctx context.Context, appId string) ApplicationsApiRegenerateApplicationSecretRequest
 
@@ -179,15 +180,15 @@ type ApplicationsApi interface {
 	RegenerateApplicationSecretExecute(r ApplicationsApiRegenerateApplicationSecretRequest) (*RegenerateApplicationSecret200Response, *http.Response, error)
 
 	/*
-	ResetAppSecret Re-generate secret of application.
+		ResetAppSecret Re-generate secret of application.
 
-	Generate a new secret for a given application. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}/secret.
+		Generate a new secret for a given application. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}/secret.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clientId
-	@return ApplicationsApiResetAppSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clientId
+		@return ApplicationsApiResetAppSecretRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ResetAppSecret(ctx context.Context, clientId string) ApplicationsApiResetAppSecretRequest
 
@@ -197,15 +198,15 @@ type ApplicationsApi interface {
 	ResetAppSecretExecute(r ApplicationsApiResetAppSecretRequest) (*App, *http.Response, error)
 
 	/*
-	UpdateApplicationById Update app details.
+		UpdateApplicationById Update app details.
 
-	Update the details of a given app. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
+		Update the details of a given app. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clientId
-	@return ApplicationsApiUpdateApplicationByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clientId
+		@return ApplicationsApiUpdateApplicationByIdRequest
 
-	Deprecated
+		Deprecated
 	*/
 	UpdateApplicationById(ctx context.Context, clientId string) ApplicationsApiUpdateApplicationByIdRequest
 
@@ -215,13 +216,13 @@ type ApplicationsApi interface {
 	UpdateApplicationByIdExecute(r ApplicationsApiUpdateApplicationByIdRequest) (*App, *http.Response, error)
 
 	/*
-	UpdateApplicationById_0 Update application details by id.
+		UpdateApplicationById_0 Update application details by id.
 
-	Use to update the details of an application by id.
+		Use to update the details of an application by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param appId The application id to retrieve
-	@return ApplicationsApiUpdateApplicationById_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param appId The application id to retrieve
+		@return ApplicationsApiUpdateApplicationById_0Request
 	*/
 	UpdateApplicationById_5(ctx context.Context, appId string) ApplicationsApiUpdateApplicationById_0Request
 
@@ -233,9 +234,9 @@ type ApplicationsApi interface {
 type ApplicationsApiService service
 
 type ApplicationsApiCreateApplicationRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
-	app *App
+	app        *App
 }
 
 func (r ApplicationsApiCreateApplicationRequest) App(app App) ApplicationsApiCreateApplicationRequest {
@@ -252,27 +253,29 @@ CreateApplication Create a new app.
 
 Create a new app and assign it with a client secret. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApplicationsApiCreateApplicationRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApplicationsApiCreateApplicationRequest
 
 Deprecated
 */
 func (a *ApplicationsApiService) CreateApplication(ctx context.Context) ApplicationsApiCreateApplicationRequest {
 	return ApplicationsApiCreateApplicationRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return App
+//
+//	@return App
+//
 // Deprecated
 func (a *ApplicationsApiService) CreateApplicationExecute(r ApplicationsApiCreateApplicationRequest) (*App, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *App
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *App
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.CreateApplication")
@@ -395,8 +398,8 @@ func (a *ApplicationsApiService) CreateApplicationExecute(r ApplicationsApiCreat
 }
 
 type ApplicationsApiCreateApplication_0Request struct {
-	ctx context.Context
-	ApiService ApplicationsApi
+	ctx                        context.Context
+	ApiService                 ApplicationsApi
 	applicationCreationRequest *ApplicationCreationRequest
 }
 
@@ -415,24 +418,25 @@ CreateApplication_0 Create an application.
 
 Used to create an application.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApplicationsApiCreateApplication_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApplicationsApiCreateApplication_0Request
 */
 func (a *ApplicationsApiService) CreateApplication_1(ctx context.Context) ApplicationsApiCreateApplication_0Request {
 	return ApplicationsApiCreateApplication_0Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ApplicationPostResponse
+//
+//	@return ApplicationPostResponse
 func (a *ApplicationsApiService) CreateApplication_1Execute(r ApplicationsApiCreateApplication_0Request) (*ApplicationPostResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ApplicationPostResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ApplicationPostResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.CreateApplication_1")
@@ -575,9 +579,9 @@ func (a *ApplicationsApiService) CreateApplication_1Execute(r ApplicationsApiCre
 }
 
 type ApplicationsApiDeleteApplicationByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
-	clientId string
+	clientId   string
 }
 
 func (r ApplicationsApiDeleteApplicationByIdRequest) Execute() (*http.Response, error) {
@@ -589,17 +593,17 @@ DeleteApplicationById Delete a App.
 
 Delete the given app from the tenant. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clientId
- @return ApplicationsApiDeleteApplicationByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clientId
+	@return ApplicationsApiDeleteApplicationByIdRequest
 
 Deprecated
 */
 func (a *ApplicationsApiService) DeleteApplicationById(ctx context.Context, clientId string) ApplicationsApiDeleteApplicationByIdRequest {
 	return ApplicationsApiDeleteApplicationByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		clientId: clientId,
+		ctx:        ctx,
+		clientId:   clientId,
 	}
 }
 
@@ -607,9 +611,9 @@ func (a *ApplicationsApiService) DeleteApplicationById(ctx context.Context, clie
 // Deprecated
 func (a *ApplicationsApiService) DeleteApplicationByIdExecute(r ApplicationsApiDeleteApplicationByIdRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.DeleteApplicationById")
@@ -729,9 +733,9 @@ func (a *ApplicationsApiService) DeleteApplicationByIdExecute(r ApplicationsApiD
 }
 
 type ApplicationsApiDeleteApplicationById_0Request struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
-	appId string
+	appId      string
 }
 
 func (r ApplicationsApiDeleteApplicationById_0Request) Execute() (*http.Response, error) {
@@ -743,24 +747,24 @@ DeleteApplicationById_0 Delete an application by id.
 
 Use to delete an application by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param appId The application id to retrieve
- @return ApplicationsApiDeleteApplicationById_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param appId The application id to retrieve
+	@return ApplicationsApiDeleteApplicationById_0Request
 */
 func (a *ApplicationsApiService) DeleteApplicationById_2(ctx context.Context, appId string) ApplicationsApiDeleteApplicationById_0Request {
 	return ApplicationsApiDeleteApplicationById_0Request{
 		ApiService: a,
-		ctx: ctx,
-		appId: appId,
+		ctx:        ctx,
+		appId:      appId,
 	}
 }
 
 // Execute executes the request
 func (a *ApplicationsApiService) DeleteApplicationById_2Execute(r ApplicationsApiDeleteApplicationById_0Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.DeleteApplicationById_2")
@@ -880,9 +884,9 @@ func (a *ApplicationsApiService) DeleteApplicationById_2Execute(r ApplicationsAp
 }
 
 type ApplicationsApiGetApplicationByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
-	clientId string
+	clientId   string
 }
 
 func (r ApplicationsApiGetApplicationByIdRequest) Execute() (*App, *http.Response, error) {
@@ -894,29 +898,31 @@ GetApplicationById Get app details.
 
 Get the details of a given app. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clientId
- @return ApplicationsApiGetApplicationByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clientId
+	@return ApplicationsApiGetApplicationByIdRequest
 
 Deprecated
 */
 func (a *ApplicationsApiService) GetApplicationById(ctx context.Context, clientId string) ApplicationsApiGetApplicationByIdRequest {
 	return ApplicationsApiGetApplicationByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		clientId: clientId,
+		ctx:        ctx,
+		clientId:   clientId,
 	}
 }
 
 // Execute executes the request
-//  @return App
+//
+//	@return App
+//
 // Deprecated
 func (a *ApplicationsApiService) GetApplicationByIdExecute(r ApplicationsApiGetApplicationByIdRequest) (*App, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *App
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *App
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.GetApplicationById")
@@ -1045,9 +1051,9 @@ func (a *ApplicationsApiService) GetApplicationByIdExecute(r ApplicationsApiGetA
 }
 
 type ApplicationsApiGetApplicationById_0Request struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
-	appId string
+	appId      string
 }
 
 func (r ApplicationsApiGetApplicationById_0Request) Execute() (*Application, *http.Response, error) {
@@ -1059,26 +1065,27 @@ GetApplicationById_0 Get application by id.
 
 Retrieve the details of an application by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param appId The application id to retrieve
- @return ApplicationsApiGetApplicationById_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param appId The application id to retrieve
+	@return ApplicationsApiGetApplicationById_0Request
 */
 func (a *ApplicationsApiService) GetApplicationById_3(ctx context.Context, appId string) ApplicationsApiGetApplicationById_0Request {
 	return ApplicationsApiGetApplicationById_0Request{
 		ApiService: a,
-		ctx: ctx,
-		appId: appId,
+		ctx:        ctx,
+		appId:      appId,
 	}
 }
 
 // Execute executes the request
-//  @return Application
+//
+//	@return Application
 func (a *ApplicationsApiService) GetApplicationById_3Execute(r ApplicationsApiGetApplicationById_0Request) (*Application, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Application
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Application
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.GetApplicationById_3")
@@ -1207,9 +1214,9 @@ func (a *ApplicationsApiService) GetApplicationById_3Execute(r ApplicationsApiGe
 }
 
 type ApplicationsApiGetApplicationsRequest struct {
-	ctx context.Context
-	ApiService ApplicationsApi
-	roles *[]Role
+	ctx             context.Context
+	ApiService      ApplicationsApi
+	roles           *[]Role
 	onlyCreatedByMe *bool
 }
 
@@ -1234,27 +1241,29 @@ GetApplications Get Apps list.
 
 Return the list of apps of the tenant. Deprecated in favor of the new endpoint api/v1/apps.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApplicationsApiGetApplicationsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApplicationsApiGetApplicationsRequest
 
 Deprecated
 */
 func (a *ApplicationsApiService) GetApplications(ctx context.Context) ApplicationsApiGetApplicationsRequest {
 	return ApplicationsApiGetApplicationsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []App
+//
+//	@return []App
+//
 // Deprecated
 func (a *ApplicationsApiService) GetApplicationsExecute(r ApplicationsApiGetApplicationsRequest) ([]App, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []App
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []App
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.GetApplications")
@@ -1386,7 +1395,7 @@ func (a *ApplicationsApiService) GetApplicationsExecute(r ApplicationsApiGetAppl
 }
 
 type ApplicationsApiGetApplications_0Request struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
 }
 
@@ -1399,24 +1408,25 @@ GetApplications_0 Get a list of applications.
 
 Retrieve a list of applications.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApplicationsApiGetApplications_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApplicationsApiGetApplications_0Request
 */
 func (a *ApplicationsApiService) GetApplications_4(ctx context.Context) ApplicationsApiGetApplications_0Request {
 	return ApplicationsApiGetApplications_0Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Application
+//
+//	@return []Application
 func (a *ApplicationsApiService) GetApplications_4Execute(r ApplicationsApiGetApplications_0Request) ([]Application, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Application
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Application
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.GetApplications_4")
@@ -1544,7 +1554,7 @@ func (a *ApplicationsApiService) GetApplications_4Execute(r ApplicationsApiGetAp
 }
 
 type ApplicationsApiGetInstallerAppRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
 }
 
@@ -1557,24 +1567,25 @@ GetInstallerApp Get a list of installer applications.
 
 Retrieve a list of installer applications.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApplicationsApiGetInstallerAppRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApplicationsApiGetInstallerAppRequest
 */
 func (a *ApplicationsApiService) GetInstallerApp(ctx context.Context) ApplicationsApiGetInstallerAppRequest {
 	return ApplicationsApiGetInstallerAppRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ApplicationPostResponse
+//
+//	@return ApplicationPostResponse
 func (a *ApplicationsApiService) GetInstallerAppExecute(r ApplicationsApiGetInstallerAppRequest) (*ApplicationPostResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ApplicationPostResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ApplicationPostResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.GetInstallerApp")
@@ -1692,9 +1703,9 @@ func (a *ApplicationsApiService) GetInstallerAppExecute(r ApplicationsApiGetInst
 }
 
 type ApplicationsApiRegenerateApplicationSecretRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
-	appId string
+	appId      string
 }
 
 func (r ApplicationsApiRegenerateApplicationSecretRequest) Execute() (*RegenerateApplicationSecret200Response, *http.Response, error) {
@@ -1706,26 +1717,27 @@ RegenerateApplicationSecret Regenerate an application secret.
 
 Use to regenerate the application secret by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param appId The application id to retrieve
- @return ApplicationsApiRegenerateApplicationSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param appId The application id to retrieve
+	@return ApplicationsApiRegenerateApplicationSecretRequest
 */
 func (a *ApplicationsApiService) RegenerateApplicationSecret(ctx context.Context, appId string) ApplicationsApiRegenerateApplicationSecretRequest {
 	return ApplicationsApiRegenerateApplicationSecretRequest{
 		ApiService: a,
-		ctx: ctx,
-		appId: appId,
+		ctx:        ctx,
+		appId:      appId,
 	}
 }
 
 // Execute executes the request
-//  @return RegenerateApplicationSecret200Response
+//
+//	@return RegenerateApplicationSecret200Response
 func (a *ApplicationsApiService) RegenerateApplicationSecretExecute(r ApplicationsApiRegenerateApplicationSecretRequest) (*RegenerateApplicationSecret200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *RegenerateApplicationSecret200Response
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *RegenerateApplicationSecret200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.RegenerateApplicationSecret")
@@ -1854,9 +1866,9 @@ func (a *ApplicationsApiService) RegenerateApplicationSecretExecute(r Applicatio
 }
 
 type ApplicationsApiResetAppSecretRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
-	clientId string
+	clientId   string
 }
 
 func (r ApplicationsApiResetAppSecretRequest) Execute() (*App, *http.Response, error) {
@@ -1868,29 +1880,31 @@ ResetAppSecret Re-generate secret of application.
 
 Generate a new secret for a given application. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}/secret.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clientId
- @return ApplicationsApiResetAppSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clientId
+	@return ApplicationsApiResetAppSecretRequest
 
 Deprecated
 */
 func (a *ApplicationsApiService) ResetAppSecret(ctx context.Context, clientId string) ApplicationsApiResetAppSecretRequest {
 	return ApplicationsApiResetAppSecretRequest{
 		ApiService: a,
-		ctx: ctx,
-		clientId: clientId,
+		ctx:        ctx,
+		clientId:   clientId,
 	}
 }
 
 // Execute executes the request
-//  @return App
+//
+//	@return App
+//
 // Deprecated
 func (a *ApplicationsApiService) ResetAppSecretExecute(r ApplicationsApiResetAppSecretRequest) (*App, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *App
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *App
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.ResetAppSecret")
@@ -2019,10 +2033,10 @@ func (a *ApplicationsApiService) ResetAppSecretExecute(r ApplicationsApiResetApp
 }
 
 type ApplicationsApiUpdateApplicationByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ApplicationsApi
-	clientId string
-	app *App
+	clientId   string
+	app        *App
 }
 
 func (r ApplicationsApiUpdateApplicationByIdRequest) App(app App) ApplicationsApiUpdateApplicationByIdRequest {
@@ -2039,29 +2053,31 @@ UpdateApplicationById Update app details.
 
 Update the details of a given app. This endpoint requires ADMIN role. Deprecated in favor of the new endpoint api/v1/apps/{clientId}.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clientId
- @return ApplicationsApiUpdateApplicationByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clientId
+	@return ApplicationsApiUpdateApplicationByIdRequest
 
 Deprecated
 */
 func (a *ApplicationsApiService) UpdateApplicationById(ctx context.Context, clientId string) ApplicationsApiUpdateApplicationByIdRequest {
 	return ApplicationsApiUpdateApplicationByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		clientId: clientId,
+		ctx:        ctx,
+		clientId:   clientId,
 	}
 }
 
 // Execute executes the request
-//  @return App
+//
+//	@return App
+//
 // Deprecated
 func (a *ApplicationsApiService) UpdateApplicationByIdExecute(r ApplicationsApiUpdateApplicationByIdRequest) (*App, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *App
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *App
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.UpdateApplicationById")
@@ -2195,9 +2211,9 @@ func (a *ApplicationsApiService) UpdateApplicationByIdExecute(r ApplicationsApiU
 }
 
 type ApplicationsApiUpdateApplicationById_0Request struct {
-	ctx context.Context
-	ApiService ApplicationsApi
-	appId string
+	ctx                     context.Context
+	ApiService              ApplicationsApi
+	appId                   string
 	applicationPatchRequest *ApplicationPatchRequest
 }
 
@@ -2216,24 +2232,24 @@ UpdateApplicationById_0 Update application details by id.
 
 Use to update the details of an application by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param appId The application id to retrieve
- @return ApplicationsApiUpdateApplicationById_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param appId The application id to retrieve
+	@return ApplicationsApiUpdateApplicationById_0Request
 */
 func (a *ApplicationsApiService) UpdateApplicationById_5(ctx context.Context, appId string) ApplicationsApiUpdateApplicationById_0Request {
 	return ApplicationsApiUpdateApplicationById_0Request{
 		ApiService: a,
-		ctx: ctx,
-		appId: appId,
+		ctx:        ctx,
+		appId:      appId,
 	}
 }
 
 // Execute executes the request
 func (a *ApplicationsApiService) UpdateApplicationById_5Execute(r ApplicationsApiUpdateApplicationById_0Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPatch
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApplicationsApiService.UpdateApplicationById_5")

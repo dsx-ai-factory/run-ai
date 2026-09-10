@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -21,7 +23,7 @@ type ProbeHandlerHttpGet struct {
 	// Number of the port to access on the container.
 	Port NullableInt32 `json:"port,omitempty"`
 	// Host name to connect to, defaults to the pod IP.
-	Host NullableString `json:"host,omitempty"`
+	Host   NullableString             `json:"host,omitempty"`
 	Scheme NullableProbeHandlerScheme `json:"scheme,omitempty"`
 }
 
@@ -74,6 +76,7 @@ func (o *ProbeHandlerHttpGet) HasPath() bool {
 func (o *ProbeHandlerHttpGet) SetPath(v string) {
 	o.Path.Set(&v)
 }
+
 // SetPathNil sets the value for Path to be an explicit nil
 func (o *ProbeHandlerHttpGet) SetPathNil() {
 	o.Path.Set(nil)
@@ -116,6 +119,7 @@ func (o *ProbeHandlerHttpGet) HasPort() bool {
 func (o *ProbeHandlerHttpGet) SetPort(v int32) {
 	o.Port.Set(&v)
 }
+
 // SetPortNil sets the value for Port to be an explicit nil
 func (o *ProbeHandlerHttpGet) SetPortNil() {
 	o.Port.Set(nil)
@@ -158,6 +162,7 @@ func (o *ProbeHandlerHttpGet) HasHost() bool {
 func (o *ProbeHandlerHttpGet) SetHost(v string) {
 	o.Host.Set(&v)
 }
+
 // SetHostNil sets the value for Host to be an explicit nil
 func (o *ProbeHandlerHttpGet) SetHostNil() {
 	o.Host.Set(nil)
@@ -200,6 +205,7 @@ func (o *ProbeHandlerHttpGet) HasScheme() bool {
 func (o *ProbeHandlerHttpGet) SetScheme(v ProbeHandlerScheme) {
 	o.Scheme.Set(&v)
 }
+
 // SetSchemeNil sets the value for Scheme to be an explicit nil
 func (o *ProbeHandlerHttpGet) SetSchemeNil() {
 	o.Scheme.Set(nil)
@@ -262,5 +268,3 @@ func (v *NullableProbeHandlerHttpGet) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

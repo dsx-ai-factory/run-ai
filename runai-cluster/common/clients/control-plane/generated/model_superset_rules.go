@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,36 +18,36 @@ import (
 
 // SupersetRules struct for SupersetRules
 type SupersetRules struct {
-	Command NullableStringRules `json:"command,omitempty"`
-	Args NullableStringRules `json:"args,omitempty"`
-	Image NullableStringRules `json:"image,omitempty"`
-	ImagePullPolicy NullableImagePullPolicyRules `json:"imagePullPolicy,omitempty"`
-	WorkingDir NullableStringRules `json:"workingDir,omitempty"`
-	CreateHomeDir NullableBooleanRules `json:"createHomeDir,omitempty"`
-	Probes NullableProbesRules `json:"probes,omitempty"`
-	NodeType NullableStringRules `json:"nodeType,omitempty"`
-	NodePools NullableArrayRules `json:"nodePools,omitempty"`
-	PodAffinity NullablePodAffinityRules `json:"podAffinity,omitempty"`
-	EnvironmentVariables NullableInstancesRules `json:"environmentVariables,omitempty"`
-	Annotations NullableInstancesRules `json:"annotations,omitempty"`
-	Labels NullableInstancesRules `json:"labels,omitempty"`
-	Tolerations NullableInstancesRules `json:"tolerations,omitempty"`
-	TerminateAfterPreemption NullableBooleanRules `json:"terminateAfterPreemption,omitempty"`
-	AutoDeletionTimeAfterCompletionSeconds NullableIntegerRules `json:"autoDeletionTimeAfterCompletionSeconds,omitempty"`
-	BackoffLimit NullableIntegerRules `json:"backoffLimit,omitempty"`
-	Ports NullablePortsRules `json:"ports,omitempty"`
-	ExposedUrls NullableExposedUrlsRules `json:"exposedUrls,omitempty"`
-	RelatedUrls NullableRelatedUrlsRules `json:"relatedUrls,omitempty"`
-	PriorityClass NullablePriorityClassRules `json:"priorityClass,omitempty"`
-	Completions NullableIntegerRules `json:"completions,omitempty"`
-	Parallelism NullableIntegerRules `json:"parallelism,omitempty"`
-	NumWorkers NullableIntegerRules `json:"numWorkers,omitempty"`
-	DistributedFramework NullableDistributedFrameworkRules `json:"distributedFramework,omitempty"`
-	ServingPort NullableServingPortRules `json:"servingPort,omitempty"`
-	Autoscaling NullableAutoScalingRules `json:"autoscaling,omitempty"`
-	Security NullableSecurityFlatFieldsRules `json:"security,omitempty"`
-	Compute NullableComputeFieldsRules `json:"compute,omitempty"`
-	Storage NullableStorageFieldsRules `json:"storage,omitempty"`
+	Command                                NullableStringRules               `json:"command,omitempty"`
+	Args                                   NullableStringRules               `json:"args,omitempty"`
+	Image                                  NullableStringRules               `json:"image,omitempty"`
+	ImagePullPolicy                        NullableImagePullPolicyRules      `json:"imagePullPolicy,omitempty"`
+	WorkingDir                             NullableStringRules               `json:"workingDir,omitempty"`
+	CreateHomeDir                          NullableBooleanRules              `json:"createHomeDir,omitempty"`
+	Probes                                 NullableProbesRules               `json:"probes,omitempty"`
+	NodeType                               NullableStringRules               `json:"nodeType,omitempty"`
+	NodePools                              NullableArrayRules                `json:"nodePools,omitempty"`
+	PodAffinity                            NullablePodAffinityRules          `json:"podAffinity,omitempty"`
+	EnvironmentVariables                   NullableInstancesRules            `json:"environmentVariables,omitempty"`
+	Annotations                            NullableInstancesRules            `json:"annotations,omitempty"`
+	Labels                                 NullableInstancesRules            `json:"labels,omitempty"`
+	Tolerations                            NullableInstancesRules            `json:"tolerations,omitempty"`
+	TerminateAfterPreemption               NullableBooleanRules              `json:"terminateAfterPreemption,omitempty"`
+	AutoDeletionTimeAfterCompletionSeconds NullableIntegerRules              `json:"autoDeletionTimeAfterCompletionSeconds,omitempty"`
+	BackoffLimit                           NullableIntegerRules              `json:"backoffLimit,omitempty"`
+	Ports                                  NullablePortsRules                `json:"ports,omitempty"`
+	ExposedUrls                            NullableExposedUrlsRules          `json:"exposedUrls,omitempty"`
+	RelatedUrls                            NullableRelatedUrlsRules          `json:"relatedUrls,omitempty"`
+	PriorityClass                          NullablePriorityClassRules        `json:"priorityClass,omitempty"`
+	Completions                            NullableIntegerRules              `json:"completions,omitempty"`
+	Parallelism                            NullableIntegerRules              `json:"parallelism,omitempty"`
+	NumWorkers                             NullableIntegerRules              `json:"numWorkers,omitempty"`
+	DistributedFramework                   NullableDistributedFrameworkRules `json:"distributedFramework,omitempty"`
+	ServingPort                            NullableServingPortRules          `json:"servingPort,omitempty"`
+	Autoscaling                            NullableAutoScalingRules          `json:"autoscaling,omitempty"`
+	Security                               NullableSecurityFlatFieldsRules   `json:"security,omitempty"`
+	Compute                                NullableComputeFieldsRules        `json:"compute,omitempty"`
+	Storage                                NullableStorageFieldsRules        `json:"storage,omitempty"`
 }
 
 // NewSupersetRules instantiates a new SupersetRules object
@@ -97,6 +99,7 @@ func (o *SupersetRules) HasCommand() bool {
 func (o *SupersetRules) SetCommand(v StringRules) {
 	o.Command.Set(&v)
 }
+
 // SetCommandNil sets the value for Command to be an explicit nil
 func (o *SupersetRules) SetCommandNil() {
 	o.Command.Set(nil)
@@ -139,6 +142,7 @@ func (o *SupersetRules) HasArgs() bool {
 func (o *SupersetRules) SetArgs(v StringRules) {
 	o.Args.Set(&v)
 }
+
 // SetArgsNil sets the value for Args to be an explicit nil
 func (o *SupersetRules) SetArgsNil() {
 	o.Args.Set(nil)
@@ -181,6 +185,7 @@ func (o *SupersetRules) HasImage() bool {
 func (o *SupersetRules) SetImage(v StringRules) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *SupersetRules) SetImageNil() {
 	o.Image.Set(nil)
@@ -223,6 +228,7 @@ func (o *SupersetRules) HasImagePullPolicy() bool {
 func (o *SupersetRules) SetImagePullPolicy(v ImagePullPolicyRules) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *SupersetRules) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -265,6 +271,7 @@ func (o *SupersetRules) HasWorkingDir() bool {
 func (o *SupersetRules) SetWorkingDir(v StringRules) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *SupersetRules) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -307,6 +314,7 @@ func (o *SupersetRules) HasCreateHomeDir() bool {
 func (o *SupersetRules) SetCreateHomeDir(v BooleanRules) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *SupersetRules) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -349,6 +357,7 @@ func (o *SupersetRules) HasProbes() bool {
 func (o *SupersetRules) SetProbes(v ProbesRules) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *SupersetRules) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -391,6 +400,7 @@ func (o *SupersetRules) HasNodeType() bool {
 func (o *SupersetRules) SetNodeType(v StringRules) {
 	o.NodeType.Set(&v)
 }
+
 // SetNodeTypeNil sets the value for NodeType to be an explicit nil
 func (o *SupersetRules) SetNodeTypeNil() {
 	o.NodeType.Set(nil)
@@ -433,6 +443,7 @@ func (o *SupersetRules) HasNodePools() bool {
 func (o *SupersetRules) SetNodePools(v ArrayRules) {
 	o.NodePools.Set(&v)
 }
+
 // SetNodePoolsNil sets the value for NodePools to be an explicit nil
 func (o *SupersetRules) SetNodePoolsNil() {
 	o.NodePools.Set(nil)
@@ -475,6 +486,7 @@ func (o *SupersetRules) HasPodAffinity() bool {
 func (o *SupersetRules) SetPodAffinity(v PodAffinityRules) {
 	o.PodAffinity.Set(&v)
 }
+
 // SetPodAffinityNil sets the value for PodAffinity to be an explicit nil
 func (o *SupersetRules) SetPodAffinityNil() {
 	o.PodAffinity.Set(nil)
@@ -517,6 +529,7 @@ func (o *SupersetRules) HasEnvironmentVariables() bool {
 func (o *SupersetRules) SetEnvironmentVariables(v InstancesRules) {
 	o.EnvironmentVariables.Set(&v)
 }
+
 // SetEnvironmentVariablesNil sets the value for EnvironmentVariables to be an explicit nil
 func (o *SupersetRules) SetEnvironmentVariablesNil() {
 	o.EnvironmentVariables.Set(nil)
@@ -559,6 +572,7 @@ func (o *SupersetRules) HasAnnotations() bool {
 func (o *SupersetRules) SetAnnotations(v InstancesRules) {
 	o.Annotations.Set(&v)
 }
+
 // SetAnnotationsNil sets the value for Annotations to be an explicit nil
 func (o *SupersetRules) SetAnnotationsNil() {
 	o.Annotations.Set(nil)
@@ -601,6 +615,7 @@ func (o *SupersetRules) HasLabels() bool {
 func (o *SupersetRules) SetLabels(v InstancesRules) {
 	o.Labels.Set(&v)
 }
+
 // SetLabelsNil sets the value for Labels to be an explicit nil
 func (o *SupersetRules) SetLabelsNil() {
 	o.Labels.Set(nil)
@@ -643,6 +658,7 @@ func (o *SupersetRules) HasTolerations() bool {
 func (o *SupersetRules) SetTolerations(v InstancesRules) {
 	o.Tolerations.Set(&v)
 }
+
 // SetTolerationsNil sets the value for Tolerations to be an explicit nil
 func (o *SupersetRules) SetTolerationsNil() {
 	o.Tolerations.Set(nil)
@@ -685,6 +701,7 @@ func (o *SupersetRules) HasTerminateAfterPreemption() bool {
 func (o *SupersetRules) SetTerminateAfterPreemption(v BooleanRules) {
 	o.TerminateAfterPreemption.Set(&v)
 }
+
 // SetTerminateAfterPreemptionNil sets the value for TerminateAfterPreemption to be an explicit nil
 func (o *SupersetRules) SetTerminateAfterPreemptionNil() {
 	o.TerminateAfterPreemption.Set(nil)
@@ -727,6 +744,7 @@ func (o *SupersetRules) HasAutoDeletionTimeAfterCompletionSeconds() bool {
 func (o *SupersetRules) SetAutoDeletionTimeAfterCompletionSeconds(v IntegerRules) {
 	o.AutoDeletionTimeAfterCompletionSeconds.Set(&v)
 }
+
 // SetAutoDeletionTimeAfterCompletionSecondsNil sets the value for AutoDeletionTimeAfterCompletionSeconds to be an explicit nil
 func (o *SupersetRules) SetAutoDeletionTimeAfterCompletionSecondsNil() {
 	o.AutoDeletionTimeAfterCompletionSeconds.Set(nil)
@@ -769,6 +787,7 @@ func (o *SupersetRules) HasBackoffLimit() bool {
 func (o *SupersetRules) SetBackoffLimit(v IntegerRules) {
 	o.BackoffLimit.Set(&v)
 }
+
 // SetBackoffLimitNil sets the value for BackoffLimit to be an explicit nil
 func (o *SupersetRules) SetBackoffLimitNil() {
 	o.BackoffLimit.Set(nil)
@@ -811,6 +830,7 @@ func (o *SupersetRules) HasPorts() bool {
 func (o *SupersetRules) SetPorts(v PortsRules) {
 	o.Ports.Set(&v)
 }
+
 // SetPortsNil sets the value for Ports to be an explicit nil
 func (o *SupersetRules) SetPortsNil() {
 	o.Ports.Set(nil)
@@ -853,6 +873,7 @@ func (o *SupersetRules) HasExposedUrls() bool {
 func (o *SupersetRules) SetExposedUrls(v ExposedUrlsRules) {
 	o.ExposedUrls.Set(&v)
 }
+
 // SetExposedUrlsNil sets the value for ExposedUrls to be an explicit nil
 func (o *SupersetRules) SetExposedUrlsNil() {
 	o.ExposedUrls.Set(nil)
@@ -895,6 +916,7 @@ func (o *SupersetRules) HasRelatedUrls() bool {
 func (o *SupersetRules) SetRelatedUrls(v RelatedUrlsRules) {
 	o.RelatedUrls.Set(&v)
 }
+
 // SetRelatedUrlsNil sets the value for RelatedUrls to be an explicit nil
 func (o *SupersetRules) SetRelatedUrlsNil() {
 	o.RelatedUrls.Set(nil)
@@ -937,6 +959,7 @@ func (o *SupersetRules) HasPriorityClass() bool {
 func (o *SupersetRules) SetPriorityClass(v PriorityClassRules) {
 	o.PriorityClass.Set(&v)
 }
+
 // SetPriorityClassNil sets the value for PriorityClass to be an explicit nil
 func (o *SupersetRules) SetPriorityClassNil() {
 	o.PriorityClass.Set(nil)
@@ -979,6 +1002,7 @@ func (o *SupersetRules) HasCompletions() bool {
 func (o *SupersetRules) SetCompletions(v IntegerRules) {
 	o.Completions.Set(&v)
 }
+
 // SetCompletionsNil sets the value for Completions to be an explicit nil
 func (o *SupersetRules) SetCompletionsNil() {
 	o.Completions.Set(nil)
@@ -1021,6 +1045,7 @@ func (o *SupersetRules) HasParallelism() bool {
 func (o *SupersetRules) SetParallelism(v IntegerRules) {
 	o.Parallelism.Set(&v)
 }
+
 // SetParallelismNil sets the value for Parallelism to be an explicit nil
 func (o *SupersetRules) SetParallelismNil() {
 	o.Parallelism.Set(nil)
@@ -1063,6 +1088,7 @@ func (o *SupersetRules) HasNumWorkers() bool {
 func (o *SupersetRules) SetNumWorkers(v IntegerRules) {
 	o.NumWorkers.Set(&v)
 }
+
 // SetNumWorkersNil sets the value for NumWorkers to be an explicit nil
 func (o *SupersetRules) SetNumWorkersNil() {
 	o.NumWorkers.Set(nil)
@@ -1105,6 +1131,7 @@ func (o *SupersetRules) HasDistributedFramework() bool {
 func (o *SupersetRules) SetDistributedFramework(v DistributedFrameworkRules) {
 	o.DistributedFramework.Set(&v)
 }
+
 // SetDistributedFrameworkNil sets the value for DistributedFramework to be an explicit nil
 func (o *SupersetRules) SetDistributedFrameworkNil() {
 	o.DistributedFramework.Set(nil)
@@ -1147,6 +1174,7 @@ func (o *SupersetRules) HasServingPort() bool {
 func (o *SupersetRules) SetServingPort(v ServingPortRules) {
 	o.ServingPort.Set(&v)
 }
+
 // SetServingPortNil sets the value for ServingPort to be an explicit nil
 func (o *SupersetRules) SetServingPortNil() {
 	o.ServingPort.Set(nil)
@@ -1189,6 +1217,7 @@ func (o *SupersetRules) HasAutoscaling() bool {
 func (o *SupersetRules) SetAutoscaling(v AutoScalingRules) {
 	o.Autoscaling.Set(&v)
 }
+
 // SetAutoscalingNil sets the value for Autoscaling to be an explicit nil
 func (o *SupersetRules) SetAutoscalingNil() {
 	o.Autoscaling.Set(nil)
@@ -1231,6 +1260,7 @@ func (o *SupersetRules) HasSecurity() bool {
 func (o *SupersetRules) SetSecurity(v SecurityFlatFieldsRules) {
 	o.Security.Set(&v)
 }
+
 // SetSecurityNil sets the value for Security to be an explicit nil
 func (o *SupersetRules) SetSecurityNil() {
 	o.Security.Set(nil)
@@ -1273,6 +1303,7 @@ func (o *SupersetRules) HasCompute() bool {
 func (o *SupersetRules) SetCompute(v ComputeFieldsRules) {
 	o.Compute.Set(&v)
 }
+
 // SetComputeNil sets the value for Compute to be an explicit nil
 func (o *SupersetRules) SetComputeNil() {
 	o.Compute.Set(nil)
@@ -1315,6 +1346,7 @@ func (o *SupersetRules) HasStorage() bool {
 func (o *SupersetRules) SetStorage(v StorageFieldsRules) {
 	o.Storage.Set(&v)
 }
+
 // SetStorageNil sets the value for Storage to be an explicit nil
 func (o *SupersetRules) SetStorageNil() {
 	o.Storage.Set(nil)
@@ -1455,5 +1487,3 @@ func (v *NullableSupersetRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

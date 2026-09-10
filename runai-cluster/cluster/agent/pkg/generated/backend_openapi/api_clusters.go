@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,13 +21,12 @@ import (
 	"strings"
 )
 
-
 // ClustersApiService ClustersApi service
 type ClustersApiService service
 
 type ApiCreateClusterRequest struct {
-	ctx context.Context
-	ApiService *ClustersApiService
+	ctx           context.Context
+	ApiService    *ClustersApiService
 	createCluster *CreateCluster
 }
 
@@ -43,24 +44,25 @@ CreateCluster Create a cluster
 
 Create a new cluster for the tenant. This endpoint requires ADMIN role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateClusterRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateClusterRequest
 */
 func (a *ClustersApiService) CreateCluster(ctx context.Context) ApiCreateClusterRequest {
 	return ApiCreateClusterRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Cluster
+//
+//	@return Cluster
 func (a *ClustersApiService) CreateClusterExecute(r ApiCreateClusterRequest) (*Cluster, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Cluster
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Cluster
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.CreateCluster")
@@ -143,10 +145,10 @@ func (a *ClustersApiService) CreateClusterExecute(r ApiCreateClusterRequest) (*C
 }
 
 type ApiUpdateClusterRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ClustersApiService
-	uuid string
-	cluster *Cluster
+	uuid       string
+	cluster    *Cluster
 }
 
 func (r ApiUpdateClusterRequest) Cluster(cluster Cluster) ApiUpdateClusterRequest {
@@ -163,26 +165,27 @@ UpdateCluster Update a Cluster by Id
 
 Update the details of a given cluster. This endpoint requires ADMIN role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster.
- @return ApiUpdateClusterRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster.
+	@return ApiUpdateClusterRequest
 */
 func (a *ClustersApiService) UpdateCluster(ctx context.Context, uuid string) ApiUpdateClusterRequest {
 	return ApiUpdateClusterRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return Cluster
+//
+//	@return Cluster
 func (a *ClustersApiService) UpdateClusterExecute(r ApiUpdateClusterRequest) (*Cluster, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Cluster
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Cluster
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.UpdateCluster")
@@ -276,9 +279,9 @@ func (a *ClustersApiService) UpdateClusterExecute(r ApiUpdateClusterRequest) (*C
 }
 
 type ApiUpdateClusterInfoRequest struct {
-	ctx context.Context
-	ApiService *ClustersApiService
-	uuid string
+	ctx         context.Context
+	ApiService  *ClustersApiService
+	uuid        string
 	clusterInfo *ClusterInfo
 }
 
@@ -294,24 +297,24 @@ func (r ApiUpdateClusterInfoRequest) Execute() (*http.Response, error) {
 /*
 UpdateClusterInfo Send cluster-info. This endpoint is reserved for internal run:ai purposes.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiUpdateClusterInfoRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiUpdateClusterInfoRequest
 */
 func (a *ClustersApiService) UpdateClusterInfo(ctx context.Context, uuid string) ApiUpdateClusterInfoRequest {
 	return ApiUpdateClusterInfoRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
 func (a *ClustersApiService) UpdateClusterInfoExecute(r ApiUpdateClusterInfoRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.UpdateClusterInfo")
@@ -390,13 +393,13 @@ func (a *ClustersApiService) UpdateClusterInfoExecute(r ApiUpdateClusterInfoRequ
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -404,9 +407,9 @@ func (a *ClustersApiService) UpdateClusterInfoExecute(r ApiUpdateClusterInfoRequ
 }
 
 type ApiUpdateClusterLivenessRequest struct {
-	ctx context.Context
-	ApiService *ClustersApiService
-	uuid string
+	ctx                          context.Context
+	ApiService                   *ClustersApiService
+	uuid                         string
 	updateClusterLivenessRequest *UpdateClusterLivenessRequest
 }
 
@@ -422,24 +425,24 @@ func (r ApiUpdateClusterLivenessRequest) Execute() (*http.Response, error) {
 /*
 UpdateClusterLiveness Update liveness status for a specific cluster. This endpoint is reserved for internal run:ai purposes.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiUpdateClusterLivenessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiUpdateClusterLivenessRequest
 */
 func (a *ClustersApiService) UpdateClusterLiveness(ctx context.Context, uuid string) ApiUpdateClusterLivenessRequest {
 	return ApiUpdateClusterLivenessRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
 func (a *ClustersApiService) UpdateClusterLivenessExecute(r ApiUpdateClusterLivenessRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.UpdateClusterLiveness")
@@ -518,13 +521,13 @@ func (a *ClustersApiService) UpdateClusterLivenessExecute(r ApiUpdateClusterLive
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -532,8 +535,8 @@ func (a *ClustersApiService) UpdateClusterLivenessExecute(r ApiUpdateClusterLive
 }
 
 type ApiV1K8sClustersClusterUuidConfigControlPlaneGetRequest struct {
-	ctx context.Context
-	ApiService *ClustersApiService
+	ctx         context.Context
+	ApiService  *ClustersApiService
 	clusterUuid string
 }
 
@@ -546,26 +549,27 @@ V1K8sClustersClusterUuidConfigControlPlaneGet Returns cluster's control plane co
 
 Retrieve the control plane configuration of a given cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid Unique identifier of the cluster.
- @return ApiV1K8sClustersClusterUuidConfigControlPlaneGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid Unique identifier of the cluster.
+	@return ApiV1K8sClustersClusterUuidConfigControlPlaneGetRequest
 */
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigControlPlaneGet(ctx context.Context, clusterUuid string) ApiV1K8sClustersClusterUuidConfigControlPlaneGetRequest {
 	return ApiV1K8sClustersClusterUuidConfigControlPlaneGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return ClusterControlPlaneConfig
+//
+//	@return ClusterControlPlaneConfig
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigControlPlaneGetExecute(r ApiV1K8sClustersClusterUuidConfigControlPlaneGetRequest) (*ClusterControlPlaneConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ClusterControlPlaneConfig
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ClusterControlPlaneConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.V1K8sClustersClusterUuidConfigControlPlaneGet")
@@ -654,8 +658,8 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidConfigControlPlaneGetExecut
 }
 
 type ApiV1K8sClustersClusterUuidConfigCustomGetRequest struct {
-	ctx context.Context
-	ApiService *ClustersApiService
+	ctx         context.Context
+	ApiService  *ClustersApiService
 	clusterUuid string
 }
 
@@ -668,26 +672,27 @@ V1K8sClustersClusterUuidConfigCustomGet Returns custom cluster configuration
 
 Retrieve custom configuration of a given cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid Unique identifier of the cluster.
- @return ApiV1K8sClustersClusterUuidConfigCustomGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid Unique identifier of the cluster.
+	@return ApiV1K8sClustersClusterUuidConfigCustomGetRequest
 */
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomGet(ctx context.Context, clusterUuid string) ApiV1K8sClustersClusterUuidConfigCustomGetRequest {
 	return ApiV1K8sClustersClusterUuidConfigCustomGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return ClusterCustomConfig
+//
+//	@return ClusterCustomConfig
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomGetExecute(r ApiV1K8sClustersClusterUuidConfigCustomGetRequest) (*ClusterCustomConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ClusterCustomConfig
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ClusterCustomConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.V1K8sClustersClusterUuidConfigCustomGet")
@@ -776,9 +781,9 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomGetExecute(r Ap
 }
 
 type ApiV1K8sClustersClusterUuidConfigCustomPostRequest struct {
-	ctx context.Context
-	ApiService *ClustersApiService
-	clusterUuid string
+	ctx                 context.Context
+	ApiService          *ClustersApiService
+	clusterUuid         string
 	clusterCustomConfig *ClusterCustomConfig
 }
 
@@ -796,26 +801,27 @@ V1K8sClustersClusterUuidConfigCustomPost Update custom cluster configuration
 
 Update custom configuration of a given cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid Unique identifier of the cluster.
- @return ApiV1K8sClustersClusterUuidConfigCustomPostRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid Unique identifier of the cluster.
+	@return ApiV1K8sClustersClusterUuidConfigCustomPostRequest
 */
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomPost(ctx context.Context, clusterUuid string) ApiV1K8sClustersClusterUuidConfigCustomPostRequest {
 	return ApiV1K8sClustersClusterUuidConfigCustomPostRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return ClusterCustomConfig
+//
+//	@return ClusterCustomConfig
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomPostExecute(r ApiV1K8sClustersClusterUuidConfigCustomPostRequest) (*ClusterCustomConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ClusterCustomConfig
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ClusterCustomConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.V1K8sClustersClusterUuidConfigCustomPost")
@@ -909,10 +915,10 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomPostExecute(r A
 }
 
 type ApiV1K8sClustersClusterUuidConfigGetRequest struct {
-	ctx context.Context
-	ApiService *ClustersApiService
-	clusterUuid string
-	clusterDomain *string
+	ctx            context.Context
+	ApiService     *ClustersApiService
+	clusterUuid    string
+	clusterDomain  *string
 	clusterVersion *string
 }
 
@@ -937,26 +943,27 @@ V1K8sClustersClusterUuidConfigGet Returns cluster configuration
 
 Retrieve the configuration of a given cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid Unique identifier of the cluster.
- @return ApiV1K8sClustersClusterUuidConfigGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid Unique identifier of the cluster.
+	@return ApiV1K8sClustersClusterUuidConfigGetRequest
 */
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigGet(ctx context.Context, clusterUuid string) ApiV1K8sClustersClusterUuidConfigGetRequest {
 	return ApiV1K8sClustersClusterUuidConfigGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigGetExecute(r ApiV1K8sClustersClusterUuidConfigGetRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.V1K8sClustersClusterUuidConfigGet")
@@ -1051,12 +1058,12 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidConfigGetExecute(r ApiV1K8s
 }
 
 type ApiV1K8sClustersClusterUuidInstallfileGetRequest struct {
-	ctx context.Context
-	ApiService *ClustersApiService
+	ctx         context.Context
+	ApiService  *ClustersApiService
 	clusterUuid string
-	cloud *string
-	clusterip *string
-	format *string
+	cloud       *string
+	clusterip   *string
+	format      *string
 }
 
 // Cloud type identifier.
@@ -1086,26 +1093,27 @@ V1K8sClustersClusterUuidInstallfileGet Returns cluster installation file by Id
 
 Retrieve the installation values file of a given cluster by ID.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid Unique identifier of the cluster.
- @return ApiV1K8sClustersClusterUuidInstallfileGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid Unique identifier of the cluster.
+	@return ApiV1K8sClustersClusterUuidInstallfileGetRequest
 */
 func (a *ClustersApiService) V1K8sClustersClusterUuidInstallfileGet(ctx context.Context, clusterUuid string) ApiV1K8sClustersClusterUuidInstallfileGetRequest {
 	return ApiV1K8sClustersClusterUuidInstallfileGetRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *ClustersApiService) V1K8sClustersClusterUuidInstallfileGetExecute(r ApiV1K8sClustersClusterUuidInstallfileGetRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.V1K8sClustersClusterUuidInstallfileGet")
@@ -1203,7 +1211,7 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidInstallfileGetExecute(r Api
 }
 
 type ApiV1K8sClustersGetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ClustersApiService
 }
 
@@ -1216,24 +1224,25 @@ V1K8sClustersGet List clusters.
 
 Get a list of all the clusters of the tenant.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiV1K8sClustersGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiV1K8sClustersGetRequest
 */
 func (a *ClustersApiService) V1K8sClustersGet(ctx context.Context) ApiV1K8sClustersGetRequest {
 	return ApiV1K8sClustersGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Cluster
+//
+//	@return []Cluster
 func (a *ClustersApiService) V1K8sClustersGetExecute(r ApiV1K8sClustersGetRequest) ([]Cluster, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Cluster
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Cluster
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.V1K8sClustersGet")
@@ -1311,9 +1320,9 @@ func (a *ClustersApiService) V1K8sClustersGetExecute(r ApiV1K8sClustersGetReques
 }
 
 type ApiV1K8sClustersUuidDeleteRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ClustersApiService
-	uuid string
+	uuid       string
 }
 
 func (r ApiV1K8sClustersUuidDeleteRequest) Execute() (*V1K8sClustersUuidDelete200Response, *http.Response, error) {
@@ -1325,26 +1334,27 @@ V1K8sClustersUuidDelete Delete a Cluster
 
 Delete a Cluster by Cluster ID. This endpoint requires ADMIN role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster.
- @return ApiV1K8sClustersUuidDeleteRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster.
+	@return ApiV1K8sClustersUuidDeleteRequest
 */
 func (a *ClustersApiService) V1K8sClustersUuidDelete(ctx context.Context, uuid string) ApiV1K8sClustersUuidDeleteRequest {
 	return ApiV1K8sClustersUuidDeleteRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return V1K8sClustersUuidDelete200Response
+//
+//	@return V1K8sClustersUuidDelete200Response
 func (a *ClustersApiService) V1K8sClustersUuidDeleteExecute(r ApiV1K8sClustersUuidDeleteRequest) (*V1K8sClustersUuidDelete200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1K8sClustersUuidDelete200Response
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1K8sClustersUuidDelete200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.V1K8sClustersUuidDelete")
@@ -1433,9 +1443,9 @@ func (a *ClustersApiService) V1K8sClustersUuidDeleteExecute(r ApiV1K8sClustersUu
 }
 
 type ApiV1K8sClustersUuidGetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ClustersApiService
-	uuid string
+	uuid       string
 }
 
 func (r ApiV1K8sClustersUuidGetRequest) Execute() (*Cluster, *http.Response, error) {
@@ -1447,26 +1457,27 @@ V1K8sClustersUuidGet Get cluster by id
 
 Retrieve a cluster given a cluster id. This endpoint requires ADMIN role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster.
- @return ApiV1K8sClustersUuidGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster.
+	@return ApiV1K8sClustersUuidGetRequest
 */
 func (a *ClustersApiService) V1K8sClustersUuidGet(ctx context.Context, uuid string) ApiV1K8sClustersUuidGetRequest {
 	return ApiV1K8sClustersUuidGetRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return Cluster
+//
+//	@return Cluster
 func (a *ClustersApiService) V1K8sClustersUuidGetExecute(r ApiV1K8sClustersUuidGetRequest) (*Cluster, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Cluster
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Cluster
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersApiService.V1K8sClustersUuidGet")

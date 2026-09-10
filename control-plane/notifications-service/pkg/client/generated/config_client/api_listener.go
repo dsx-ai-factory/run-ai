@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -19,13 +21,12 @@ import (
 	"strings"
 )
 
-
 // ListenerAPIService ListenerAPI service
 type ListenerAPIService service
 
 type ApiCreateListenerRequest struct {
-	ctx context.Context
-	ApiService *ListenerAPIService
+	ctx          context.Context
+	ApiService   *ListenerAPIService
 	listenerData *ListenerData
 }
 
@@ -43,24 +44,25 @@ CreateListener Method for CreateListener
 
 Creates a listener config
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateListenerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateListenerRequest
 */
 func (a *ListenerAPIService) CreateListener(ctx context.Context) ApiCreateListenerRequest {
 	return ApiCreateListenerRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *ListenerAPIService) CreateListenerExecute(r ApiCreateListenerRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ListenerAPIService.CreateListener")
@@ -125,8 +127,8 @@ func (a *ListenerAPIService) CreateListenerExecute(r ApiCreateListenerRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 409 {
@@ -136,8 +138,8 @@ func (a *ListenerAPIService) CreateListenerExecute(r ApiCreateListenerRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -147,8 +149,8 @@ func (a *ListenerAPIService) CreateListenerExecute(r ApiCreateListenerRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -166,7 +168,7 @@ func (a *ListenerAPIService) CreateListenerExecute(r ApiCreateListenerRequest) (
 }
 
 type ApiDeleteListenerRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ListenerAPIService
 	listenerId string
 }
@@ -180,26 +182,27 @@ DeleteListener Method for DeleteListener
 
 Deletes a listener
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param listenerId ID of relevant listener to delete
- @return ApiDeleteListenerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param listenerId ID of relevant listener to delete
+	@return ApiDeleteListenerRequest
 */
 func (a *ListenerAPIService) DeleteListener(ctx context.Context, listenerId string) ApiDeleteListenerRequest {
 	return ApiDeleteListenerRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		listenerId: listenerId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *ListenerAPIService) DeleteListenerExecute(r ApiDeleteListenerRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ListenerAPIService.DeleteListener")
@@ -260,8 +263,8 @@ func (a *ListenerAPIService) DeleteListenerExecute(r ApiDeleteListenerRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -271,8 +274,8 @@ func (a *ListenerAPIService) DeleteListenerExecute(r ApiDeleteListenerRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -290,7 +293,7 @@ func (a *ListenerAPIService) DeleteListenerExecute(r ApiDeleteListenerRequest) (
 }
 
 type ApiGetListenerRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ListenerAPIService
 	listenerId string
 }
@@ -304,26 +307,27 @@ GetListener Method for GetListener
 
 Get a listener
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param listenerId ID of relevant listener to retrieve
- @return ApiGetListenerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param listenerId ID of relevant listener to retrieve
+	@return ApiGetListenerRequest
 */
 func (a *ListenerAPIService) GetListener(ctx context.Context, listenerId string) ApiGetListenerRequest {
 	return ApiGetListenerRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		listenerId: listenerId,
 	}
 }
 
 // Execute executes the request
-//  @return ListenerData
+//
+//	@return ListenerData
 func (a *ListenerAPIService) GetListenerExecute(r ApiGetListenerRequest) (*ListenerData, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ListenerData
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ListenerData
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ListenerAPIService.GetListener")
@@ -384,8 +388,8 @@ func (a *ListenerAPIService) GetListenerExecute(r ApiGetListenerRequest) (*Liste
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -395,8 +399,8 @@ func (a *ListenerAPIService) GetListenerExecute(r ApiGetListenerRequest) (*Liste
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -414,9 +418,9 @@ func (a *ListenerAPIService) GetListenerExecute(r ApiGetListenerRequest) (*Liste
 }
 
 type ApiUpdateListenerRequest struct {
-	ctx context.Context
-	ApiService *ListenerAPIService
-	listenerId string
+	ctx                   context.Context
+	ApiService            *ListenerAPIService
+	listenerId            string
 	listenerDataForUpdate *ListenerDataForUpdate
 }
 
@@ -434,26 +438,27 @@ UpdateListener Method for UpdateListener
 
 Updates a listener config
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param listenerId ID of relevant listener to update
- @return ApiUpdateListenerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param listenerId ID of relevant listener to update
+	@return ApiUpdateListenerRequest
 */
 func (a *ListenerAPIService) UpdateListener(ctx context.Context, listenerId string) ApiUpdateListenerRequest {
 	return ApiUpdateListenerRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		listenerId: listenerId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *ListenerAPIService) UpdateListenerExecute(r ApiUpdateListenerRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ListenerAPIService.UpdateListener")
@@ -519,8 +524,8 @@ func (a *ListenerAPIService) UpdateListenerExecute(r ApiUpdateListenerRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
@@ -530,8 +535,8 @@ func (a *ListenerAPIService) UpdateListenerExecute(r ApiUpdateListenerRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -541,8 +546,8 @@ func (a *ListenerAPIService) UpdateListenerExecute(r ApiUpdateListenerRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

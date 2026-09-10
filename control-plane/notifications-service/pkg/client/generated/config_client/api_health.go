@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -18,12 +20,11 @@ import (
 	"net/url"
 )
 
-
 // HealthAPIService HealthAPI service
 type HealthAPIService service
 
 type ApiHealthRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *HealthAPIService
 }
 
@@ -36,24 +37,25 @@ Health Method for Health
 
 Get health state
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiHealthRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiHealthRequest
 */
 func (a *HealthAPIService) Health(ctx context.Context) ApiHealthRequest {
 	return ApiHealthRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *HealthAPIService) HealthExecute(r ApiHealthRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "HealthAPIService.Health")

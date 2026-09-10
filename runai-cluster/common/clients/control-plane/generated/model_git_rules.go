@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,9 +19,9 @@ import (
 // GitRules struct for GitRules
 type GitRules struct {
 	Repository NullableStringRules `json:"repository,omitempty"`
-	Branch NullableStringRules `json:"branch,omitempty"`
-	Revision NullableStringRules `json:"revision,omitempty"`
-	Path NullableStringRules `json:"path,omitempty"`
+	Branch     NullableStringRules `json:"branch,omitempty"`
+	Revision   NullableStringRules `json:"revision,omitempty"`
+	Path       NullableStringRules `json:"path,omitempty"`
 }
 
 // NewGitRules instantiates a new GitRules object
@@ -71,6 +73,7 @@ func (o *GitRules) HasRepository() bool {
 func (o *GitRules) SetRepository(v StringRules) {
 	o.Repository.Set(&v)
 }
+
 // SetRepositoryNil sets the value for Repository to be an explicit nil
 func (o *GitRules) SetRepositoryNil() {
 	o.Repository.Set(nil)
@@ -113,6 +116,7 @@ func (o *GitRules) HasBranch() bool {
 func (o *GitRules) SetBranch(v StringRules) {
 	o.Branch.Set(&v)
 }
+
 // SetBranchNil sets the value for Branch to be an explicit nil
 func (o *GitRules) SetBranchNil() {
 	o.Branch.Set(nil)
@@ -155,6 +159,7 @@ func (o *GitRules) HasRevision() bool {
 func (o *GitRules) SetRevision(v StringRules) {
 	o.Revision.Set(&v)
 }
+
 // SetRevisionNil sets the value for Revision to be an explicit nil
 func (o *GitRules) SetRevisionNil() {
 	o.Revision.Set(nil)
@@ -197,6 +202,7 @@ func (o *GitRules) HasPath() bool {
 func (o *GitRules) SetPath(v StringRules) {
 	o.Path.Set(&v)
 }
+
 // SetPathNil sets the value for Path to be an explicit nil
 func (o *GitRules) SetPathNil() {
 	o.Path.Set(nil)
@@ -259,5 +265,3 @@ func (v *NullableGitRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

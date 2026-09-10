@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -18,20 +20,19 @@ import (
 	"net/url"
 )
 
-
 type TokensApi interface {
 
 	/*
-	AppToken get application token
+			AppToken get application token
 
-	Retrieve access token for an application.
-The application token is retrieved from the authorization server.
+			Retrieve access token for an application.
+		The application token is retrieved from the authorization server.
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TokensApiAppTokenRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@return TokensApiAppTokenRequest
 
-	Deprecated
+			Deprecated
 	*/
 	AppToken(ctx context.Context) TokensApiAppTokenRequest
 
@@ -41,16 +42,16 @@ The application token is retrieved from the authorization server.
 	AppTokenExecute(r TokensApiAppTokenRequest) (*AppTokenResponse, *http.Response, error)
 
 	/*
-	ExchangeCodeForToken exchange code for token
+			ExchangeCodeForToken exchange code for token
 
-	Exchanges an authorization code for an access token.
-The authorization code is retrieved from the authorization server.
+			Exchanges an authorization code for an access token.
+		The authorization code is retrieved from the authorization server.
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TokensApiExchangeCodeForTokenRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@return TokensApiExchangeCodeForTokenRequest
 
-	Deprecated
+			Deprecated
 	*/
 	ExchangeCodeForToken(ctx context.Context) TokensApiExchangeCodeForTokenRequest
 
@@ -60,12 +61,12 @@ The authorization code is retrieved from the authorization server.
 	ExchangeCodeForTokenExecute(r TokensApiExchangeCodeForTokenRequest) (*TokenResponse, *http.Response, error)
 
 	/*
-	GrantToken Create an application token.
+		GrantToken Create an application token.
 
-	Use to create application tokens. Select a token using the `grant_type` parameter.
+		Use to create application tokens. Select a token using the `grant_type` parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TokensApiGrantTokenRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TokensApiGrantTokenRequest
 	*/
 	GrantToken(ctx context.Context) TokensApiGrantTokenRequest
 
@@ -74,16 +75,16 @@ The authorization code is retrieved from the authorization server.
 	GrantTokenExecute(r TokensApiGrantTokenRequest) (*TokenResponse, *http.Response, error)
 
 	/*
-	RefreshToken refresh token
+			RefreshToken refresh token
 
-	Refreshes an user tokens.
-The refresh token is retrieved from the authorization server.
+			Refreshes an user tokens.
+		The refresh token is retrieved from the authorization server.
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TokensApiRefreshTokenRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@return TokensApiRefreshTokenRequest
 
-	Deprecated
+			Deprecated
 	*/
 	RefreshToken(ctx context.Context) TokensApiRefreshTokenRequest
 
@@ -97,8 +98,8 @@ The refresh token is retrieved from the authorization server.
 type TokensApiService service
 
 type TokensApiAppTokenRequest struct {
-	ctx context.Context
-	ApiService TokensApi
+	ctx             context.Context
+	ApiService      TokensApi
 	appTokenRequest *AppTokenRequest
 }
 
@@ -117,28 +118,29 @@ AppToken get application token
 Retrieve access token for an application.
 The application token is retrieved from the authorization server.
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TokensApiAppTokenRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TokensApiAppTokenRequest
 
 Deprecated
 */
 func (a *TokensApiService) AppToken(ctx context.Context) TokensApiAppTokenRequest {
 	return TokensApiAppTokenRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return AppTokenResponse
+//
+//	@return AppTokenResponse
+//
 // Deprecated
 func (a *TokensApiService) AppTokenExecute(r TokensApiAppTokenRequest) (*AppTokenResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *AppTokenResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AppTokenResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TokensApiService.AppToken")
@@ -238,10 +240,10 @@ func (a *TokensApiService) AppTokenExecute(r TokensApiAppTokenRequest) (*AppToke
 }
 
 type TokensApiExchangeCodeForTokenRequest struct {
-	ctx context.Context
-	ApiService TokensApi
+	ctx         context.Context
+	ApiService  TokensApi
 	redirectUri *string
-	code *string
+	code        *string
 }
 
 // The redirect uri to redirect to after the authorization server completes the authorization flow
@@ -266,28 +268,29 @@ ExchangeCodeForToken exchange code for token
 Exchanges an authorization code for an access token.
 The authorization code is retrieved from the authorization server.
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TokensApiExchangeCodeForTokenRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TokensApiExchangeCodeForTokenRequest
 
 Deprecated
 */
 func (a *TokensApiService) ExchangeCodeForToken(ctx context.Context) TokensApiExchangeCodeForTokenRequest {
 	return TokensApiExchangeCodeForTokenRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TokenResponse
+//
+//	@return TokenResponse
+//
 // Deprecated
 func (a *TokensApiService) ExchangeCodeForTokenExecute(r TokensApiExchangeCodeForTokenRequest) (*TokenResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TokenResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TokenResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TokensApiService.ExchangeCodeForToken")
@@ -393,9 +396,9 @@ func (a *TokensApiService) ExchangeCodeForTokenExecute(r TokensApiExchangeCodeFo
 }
 
 type TokensApiGrantTokenRequest struct {
-	ctx context.Context
-	ApiService TokensApi
-	userAgent *string
+	ctx          context.Context
+	ApiService   TokensApi
+	userAgent    *string
 	tokenRequest *TokenRequest
 }
 
@@ -418,24 +421,25 @@ GrantToken Create an application token.
 
 Use to create application tokens. Select a token using the `grant_type` parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TokensApiGrantTokenRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TokensApiGrantTokenRequest
 */
 func (a *TokensApiService) GrantToken(ctx context.Context) TokensApiGrantTokenRequest {
 	return TokensApiGrantTokenRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TokenResponse
+//
+//	@return TokenResponse
 func (a *TokensApiService) GrantTokenExecute(r TokensApiGrantTokenRequest) (*TokenResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TokenResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TokenResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TokensApiService.GrantToken")
@@ -538,8 +542,8 @@ func (a *TokensApiService) GrantTokenExecute(r TokensApiGrantTokenRequest) (*Tok
 }
 
 type TokensApiRefreshTokenRequest struct {
-	ctx context.Context
-	ApiService TokensApi
+	ctx          context.Context
+	ApiService   TokensApi
 	refreshToken *string
 }
 
@@ -559,28 +563,29 @@ RefreshToken refresh token
 Refreshes an user tokens.
 The refresh token is retrieved from the authorization server.
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TokensApiRefreshTokenRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TokensApiRefreshTokenRequest
 
 Deprecated
 */
 func (a *TokensApiService) RefreshToken(ctx context.Context) TokensApiRefreshTokenRequest {
 	return TokensApiRefreshTokenRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TokenResponse
+//
+//	@return TokenResponse
+//
 // Deprecated
 func (a *TokensApiService) RefreshTokenExecute(r TokensApiRefreshTokenRequest) (*TokenResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TokenResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TokenResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TokensApiService.RefreshToken")

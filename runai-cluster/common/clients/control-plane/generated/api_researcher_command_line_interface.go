@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,19 +22,18 @@ import (
 	"strings"
 )
 
-
 type ResearcherCommandLineInterfaceApi interface {
 
 	/*
-	GetBinary Download RunAI Researcher command line binary [Experimental]
+		GetBinary Download RunAI Researcher command line binary [Experimental]
 
-	This endpoint returns a binary file that run the Run:AI CLI.
+		This endpoint returns a binary file that run the Run:AI CLI.
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param operatingSystem The operating system name.
-	@param architecture The architecture type.
-	@return ResearcherCommandLineInterfaceApiGetBinaryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param operatingSystem The operating system name.
+		@param architecture The architecture type.
+		@return ResearcherCommandLineInterfaceApiGetBinaryRequest
 	*/
 	GetBinary(ctx context.Context, operatingSystem string, architecture string) ResearcherCommandLineInterfaceApiGetBinaryRequest
 
@@ -41,13 +42,13 @@ type ResearcherCommandLineInterfaceApi interface {
 	GetBinaryExecute(r ResearcherCommandLineInterfaceApiGetBinaryRequest) (**os.File, *http.Response, error)
 
 	/*
-	GetInstallerUnix Download Unix installer script [Experimental]
+		GetInstallerUnix Download Unix installer script [Experimental]
 
-	This endpoint returns a unix script that can be used to install the Run:AI CLI.
+		This endpoint returns a unix script that can be used to install the Run:AI CLI.
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ResearcherCommandLineInterfaceApiGetInstallerUnixRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ResearcherCommandLineInterfaceApiGetInstallerUnixRequest
 	*/
 	GetInstallerUnix(ctx context.Context) ResearcherCommandLineInterfaceApiGetInstallerUnixRequest
 
@@ -56,13 +57,13 @@ type ResearcherCommandLineInterfaceApi interface {
 	GetInstallerUnixExecute(r ResearcherCommandLineInterfaceApiGetInstallerUnixRequest) (string, *http.Response, error)
 
 	/*
-	GetInstallerUnixCommands Get Unix installer script commands [Experimental]
+		GetInstallerUnixCommands Get Unix installer script commands [Experimental]
 
-	This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+		This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest
 	*/
 	GetInstallerUnixCommands(ctx context.Context) ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest
 
@@ -75,13 +76,13 @@ type ResearcherCommandLineInterfaceApi interface {
 	GetInstallerWindowsExecute(r ResearcherCommandLineInterfaceApiGetInstallerWindowsRequest) (**os.File, *http.Response, error)
 
 	/*
-	GetInstallerWindowsCommands Get Windows MSI installer script commands [Experimental]
+		GetInstallerWindowsCommands Get Windows MSI installer script commands [Experimental]
 
-	This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+		This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest
 	*/
 	GetInstallerWindowsCommands(ctx context.Context) ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest
 
@@ -90,14 +91,14 @@ type ResearcherCommandLineInterfaceApi interface {
 	GetInstallerWindowsCommandsExecute(r ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest) (*Command, *http.Response, error)
 
 	/*
-	GetManualDocument Get CLI document by name [Experimental]
+		GetManualDocument Get CLI document by name [Experimental]
 
-	This endpoint returns a document of help for the Run:AI CLI.
+		This endpoint returns a document of help for the Run:AI CLI.
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param documentName The manual document name.
-	@return ResearcherCommandLineInterfaceApiGetManualDocumentRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param documentName The manual document name.
+		@return ResearcherCommandLineInterfaceApiGetManualDocumentRequest
 	*/
 	GetManualDocument(ctx context.Context, documentName string) ResearcherCommandLineInterfaceApiGetManualDocumentRequest
 
@@ -106,13 +107,13 @@ type ResearcherCommandLineInterfaceApi interface {
 	GetManualDocumentExecute(r ResearcherCommandLineInterfaceApiGetManualDocumentRequest) (string, *http.Response, error)
 
 	/*
-	GetVersion Get CLI latest version [Experimental]
+		GetVersion Get CLI latest version [Experimental]
 
-	This endpoint returns the latest version of the Run:AI CLI and if need to upgrade
+		This endpoint returns the latest version of the Run:AI CLI and if need to upgrade
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ResearcherCommandLineInterfaceApiGetVersionRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ResearcherCommandLineInterfaceApiGetVersionRequest
 	*/
 	GetVersion(ctx context.Context) ResearcherCommandLineInterfaceApiGetVersionRequest
 
@@ -125,10 +126,10 @@ type ResearcherCommandLineInterfaceApi interface {
 type ResearcherCommandLineInterfaceApiService service
 
 type ResearcherCommandLineInterfaceApiGetBinaryRequest struct {
-	ctx context.Context
-	ApiService ResearcherCommandLineInterfaceApi
+	ctx             context.Context
+	ApiService      ResearcherCommandLineInterfaceApi
 	operatingSystem string
-	architecture string
+	architecture    string
 }
 
 func (r ResearcherCommandLineInterfaceApiGetBinaryRequest) Execute() (**os.File, *http.Response, error) {
@@ -140,29 +141,29 @@ GetBinary Download RunAI Researcher command line binary [Experimental]
 
 This endpoint returns a binary file that run the Run:AI CLI.
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param operatingSystem The operating system name.
- @param architecture The architecture type.
- @return ResearcherCommandLineInterfaceApiGetBinaryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param operatingSystem The operating system name.
+	@param architecture The architecture type.
+	@return ResearcherCommandLineInterfaceApiGetBinaryRequest
 */
 func (a *ResearcherCommandLineInterfaceApiService) GetBinary(ctx context.Context, operatingSystem string, architecture string) ResearcherCommandLineInterfaceApiGetBinaryRequest {
 	return ResearcherCommandLineInterfaceApiGetBinaryRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:      a,
+		ctx:             ctx,
 		operatingSystem: operatingSystem,
-		architecture: architecture,
+		architecture:    architecture,
 	}
 }
 
 // Execute executes the request
-//  @return *os.File
+//
+//	@return *os.File
 func (a *ResearcherCommandLineInterfaceApiService) GetBinaryExecute(r ResearcherCommandLineInterfaceApiGetBinaryRequest) (**os.File, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  **os.File
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue **os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResearcherCommandLineInterfaceApiService.GetBinary")
@@ -278,7 +279,7 @@ func (a *ResearcherCommandLineInterfaceApiService) GetBinaryExecute(r Researcher
 }
 
 type ResearcherCommandLineInterfaceApiGetInstallerUnixRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ResearcherCommandLineInterfaceApi
 }
 
@@ -291,25 +292,25 @@ GetInstallerUnix Download Unix installer script [Experimental]
 
 This endpoint returns a unix script that can be used to install the Run:AI CLI.
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ResearcherCommandLineInterfaceApiGetInstallerUnixRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ResearcherCommandLineInterfaceApiGetInstallerUnixRequest
 */
 func (a *ResearcherCommandLineInterfaceApiService) GetInstallerUnix(ctx context.Context) ResearcherCommandLineInterfaceApiGetInstallerUnixRequest {
 	return ResearcherCommandLineInterfaceApiGetInstallerUnixRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *ResearcherCommandLineInterfaceApiService) GetInstallerUnixExecute(r ResearcherCommandLineInterfaceApiGetInstallerUnixRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResearcherCommandLineInterfaceApiService.GetInstallerUnix")
@@ -427,7 +428,7 @@ func (a *ResearcherCommandLineInterfaceApiService) GetInstallerUnixExecute(r Res
 }
 
 type ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ResearcherCommandLineInterfaceApi
 }
 
@@ -440,25 +441,25 @@ GetInstallerUnixCommands Get Unix installer script commands [Experimental]
 
 This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest
 */
 func (a *ResearcherCommandLineInterfaceApiService) GetInstallerUnixCommands(ctx context.Context) ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest {
 	return ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Command
+//
+//	@return Command
 func (a *ResearcherCommandLineInterfaceApiService) GetInstallerUnixCommandsExecute(r ResearcherCommandLineInterfaceApiGetInstallerUnixCommandsRequest) (*Command, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Command
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Command
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResearcherCommandLineInterfaceApiService.GetInstallerUnixCommands")
@@ -576,7 +577,7 @@ func (a *ResearcherCommandLineInterfaceApiService) GetInstallerUnixCommandsExecu
 }
 
 type ResearcherCommandLineInterfaceApiGetInstallerWindowsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ResearcherCommandLineInterfaceApi
 }
 
@@ -585,13 +586,14 @@ func (r ResearcherCommandLineInterfaceApiGetInstallerWindowsRequest) Execute() (
 }
 
 // Execute executes the request
-//  @return *os.File
+//
+//	@return *os.File
 func (a *ResearcherCommandLineInterfaceApiService) GetInstallerWindowsExecute(r ResearcherCommandLineInterfaceApiGetInstallerWindowsRequest) (**os.File, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  **os.File
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue **os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResearcherCommandLineInterfaceApiService.GetInstallerWindows")
@@ -709,7 +711,7 @@ func (a *ResearcherCommandLineInterfaceApiService) GetInstallerWindowsExecute(r 
 }
 
 type ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ResearcherCommandLineInterfaceApi
 }
 
@@ -722,25 +724,25 @@ GetInstallerWindowsCommands Get Windows MSI installer script commands [Experimen
 
 This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest
 */
 func (a *ResearcherCommandLineInterfaceApiService) GetInstallerWindowsCommands(ctx context.Context) ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest {
 	return ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Command
+//
+//	@return Command
 func (a *ResearcherCommandLineInterfaceApiService) GetInstallerWindowsCommandsExecute(r ResearcherCommandLineInterfaceApiGetInstallerWindowsCommandsRequest) (*Command, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Command
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Command
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResearcherCommandLineInterfaceApiService.GetInstallerWindowsCommands")
@@ -858,8 +860,8 @@ func (a *ResearcherCommandLineInterfaceApiService) GetInstallerWindowsCommandsEx
 }
 
 type ResearcherCommandLineInterfaceApiGetManualDocumentRequest struct {
-	ctx context.Context
-	ApiService ResearcherCommandLineInterfaceApi
+	ctx          context.Context
+	ApiService   ResearcherCommandLineInterfaceApi
 	documentName string
 }
 
@@ -872,27 +874,27 @@ GetManualDocument Get CLI document by name [Experimental]
 
 This endpoint returns a document of help for the Run:AI CLI.
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param documentName The manual document name.
- @return ResearcherCommandLineInterfaceApiGetManualDocumentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param documentName The manual document name.
+	@return ResearcherCommandLineInterfaceApiGetManualDocumentRequest
 */
 func (a *ResearcherCommandLineInterfaceApiService) GetManualDocument(ctx context.Context, documentName string) ResearcherCommandLineInterfaceApiGetManualDocumentRequest {
 	return ResearcherCommandLineInterfaceApiGetManualDocumentRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		documentName: documentName,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *ResearcherCommandLineInterfaceApiService) GetManualDocumentExecute(r ResearcherCommandLineInterfaceApiGetManualDocumentRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResearcherCommandLineInterfaceApiService.GetManualDocument")
@@ -1004,7 +1006,7 @@ func (a *ResearcherCommandLineInterfaceApiService) GetManualDocumentExecute(r Re
 }
 
 type ResearcherCommandLineInterfaceApiGetVersionRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ResearcherCommandLineInterfaceApi
 }
 
@@ -1017,25 +1019,25 @@ GetVersion Get CLI latest version [Experimental]
 
 This endpoint returns the latest version of the Run:AI CLI and if need to upgrade
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ResearcherCommandLineInterfaceApiGetVersionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ResearcherCommandLineInterfaceApiGetVersionRequest
 */
 func (a *ResearcherCommandLineInterfaceApiService) GetVersion(ctx context.Context) ResearcherCommandLineInterfaceApiGetVersionRequest {
 	return ResearcherCommandLineInterfaceApiGetVersionRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Version
+//
+//	@return Version
 func (a *ResearcherCommandLineInterfaceApiService) GetVersionExecute(r ResearcherCommandLineInterfaceApiGetVersionRequest) (*Version, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Version
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Version
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResearcherCommandLineInterfaceApiService.GetVersion")

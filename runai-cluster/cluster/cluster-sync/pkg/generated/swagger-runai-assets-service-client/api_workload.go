@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -277,6 +279,7 @@ func (a *WorkloadApiService) CountWorkloads(ctx context.Context) ApiCountWorkloa
 }
 
 // Execute executes the request
+//
 //	@return AssetCountResponse
 func (a *WorkloadApiService) CountWorkloadsExecute(r ApiCountWorkloadsRequest) (*AssetCountResponse, *http.Response, error) {
 	var (

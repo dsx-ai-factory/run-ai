@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -19,17 +21,16 @@ import (
 	"net/url"
 )
 
-
 // InternalApiService InternalApi service
 type InternalApiService service
 
 type ApiDeleteScopeAccessRulesRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
-	scopeType *string
-	scopeId *string
+	ctx         context.Context
+	ApiService  *InternalApiService
+	scopeType   *string
+	scopeId     *string
 	lastUpdated *string
-	roles *string
+	roles       *string
 }
 
 // The type of resource we want to filter by.
@@ -63,22 +64,22 @@ func (r ApiDeleteScopeAccessRulesRequest) Execute() (*http.Response, error) {
 /*
 DeleteScopeAccessRules Delete access rules that assigned to the requested scope resource
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiDeleteScopeAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiDeleteScopeAccessRulesRequest
 */
 func (a *InternalApiService) DeleteScopeAccessRules(ctx context.Context) ApiDeleteScopeAccessRulesRequest {
 	return ApiDeleteScopeAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *InternalApiService) DeleteScopeAccessRulesExecute(r ApiDeleteScopeAccessRulesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.DeleteScopeAccessRules")
@@ -171,12 +172,12 @@ func (a *InternalApiService) DeleteScopeAccessRulesExecute(r ApiDeleteScopeAcces
 }
 
 type ApiDeleteSubjectAccessRulesRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
+	ctx         context.Context
+	ApiService  *InternalApiService
 	subjectType *string
-	subjectId *string
+	subjectId   *string
 	lastUpdated *string
-	roles *string
+	roles       *string
 }
 
 // The type of resource we want to filter by.
@@ -210,22 +211,22 @@ func (r ApiDeleteSubjectAccessRulesRequest) Execute() (*http.Response, error) {
 /*
 DeleteSubjectAccessRules Delete access rules that assigned to the requested subject.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiDeleteSubjectAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiDeleteSubjectAccessRulesRequest
 */
 func (a *InternalApiService) DeleteSubjectAccessRules(ctx context.Context) ApiDeleteSubjectAccessRulesRequest {
 	return ApiDeleteSubjectAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *InternalApiService) DeleteSubjectAccessRulesExecute(r ApiDeleteSubjectAccessRulesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.DeleteSubjectAccessRules")
@@ -318,8 +319,8 @@ func (a *InternalApiService) DeleteSubjectAccessRulesExecute(r ApiDeleteSubjectA
 }
 
 type ApiEvaluatePermissionRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
+	ctx                      context.Context
+	ApiService               *InternalApiService
 	backendEvaluationRequest *BackendEvaluationRequest
 }
 
@@ -336,24 +337,25 @@ func (r ApiEvaluatePermissionRequest) Execute() (*PermittedScopes, *http.Respons
 /*
 EvaluatePermission Evaluate user permission to the requested resource. The returned permitted scopes are the scopes that the action on the resource is permitted, with OR between the multiple scopes.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiEvaluatePermissionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiEvaluatePermissionRequest
 */
 func (a *InternalApiService) EvaluatePermission(ctx context.Context) ApiEvaluatePermissionRequest {
 	return ApiEvaluatePermissionRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return PermittedScopes
+//
+//	@return PermittedScopes
 func (a *InternalApiService) EvaluatePermissionExecute(r ApiEvaluatePermissionRequest) (*PermittedScopes, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PermittedScopes
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PermittedScopes
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.EvaluatePermission")
@@ -456,12 +458,12 @@ func (a *InternalApiService) EvaluatePermissionExecute(r ApiEvaluatePermissionRe
 }
 
 type ApiGetScopeAccessRulesRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
-	clusterId *string
-	roles *string
+	ctx           context.Context
+	ApiService    *InternalApiService
+	clusterId     *string
+	roles         *string
 	departmentIds *string
-	projectIds *string
+	projectIds    *string
 }
 
 // The cluster id to filter the response for.
@@ -495,24 +497,25 @@ func (r ApiGetScopeAccessRulesRequest) Execute() (*GetAccessRules200Response, *h
 /*
 GetScopeAccessRules Get access rules that assigned to the requested scope resource
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetScopeAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetScopeAccessRulesRequest
 */
 func (a *InternalApiService) GetScopeAccessRules(ctx context.Context) ApiGetScopeAccessRulesRequest {
 	return ApiGetScopeAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GetAccessRules200Response
+//
+//	@return GetAccessRules200Response
 func (a *InternalApiService) GetScopeAccessRulesExecute(r ApiGetScopeAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetAccessRules200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetAccessRules200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.GetScopeAccessRules")
@@ -612,10 +615,10 @@ func (a *InternalApiService) GetScopeAccessRulesExecute(r ApiGetScopeAccessRules
 }
 
 type ApiGetSubjectAccessRulesRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
+	ctx         context.Context
+	ApiService  *InternalApiService
 	subjectType *string
-	subjectIds *[]string
+	subjectIds  *[]string
 }
 
 // The type of resource we want to filter by.
@@ -637,24 +640,25 @@ func (r ApiGetSubjectAccessRulesRequest) Execute() ([]AccessRule, *http.Response
 /*
 GetSubjectAccessRules List specific subject access rules.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetSubjectAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetSubjectAccessRulesRequest
 */
 func (a *InternalApiService) GetSubjectAccessRules(ctx context.Context) ApiGetSubjectAccessRulesRequest {
 	return ApiGetSubjectAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []AccessRule
+//
+//	@return []AccessRule
 func (a *InternalApiService) GetSubjectAccessRulesExecute(r ApiGetSubjectAccessRulesRequest) ([]AccessRule, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []AccessRule
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []AccessRule
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.GetSubjectAccessRules")
@@ -749,8 +753,8 @@ func (a *InternalApiService) GetSubjectAccessRulesExecute(r ApiGetSubjectAccessR
 }
 
 type ApiSetAdminUserRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
+	ctx                             context.Context
+	ApiService                      *InternalApiService
 	internalCreateAccessRuleRequest *InternalCreateAccessRuleRequest
 }
 
@@ -767,24 +771,25 @@ func (r ApiSetAdminUserRequest) Execute() (*AccessRule, *http.Response, error) {
 /*
 SetAdminUser Sets user as an admin user.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetAdminUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSetAdminUserRequest
 */
 func (a *InternalApiService) SetAdminUser(ctx context.Context) ApiSetAdminUserRequest {
 	return ApiSetAdminUserRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return AccessRule
+//
+//	@return AccessRule
 func (a *InternalApiService) SetAdminUserExecute(r ApiSetAdminUserRequest) (*AccessRule, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *AccessRule
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AccessRule
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.SetAdminUser")
@@ -877,8 +882,8 @@ func (a *InternalApiService) SetAdminUserExecute(r ApiSetAdminUserRequest) (*Acc
 }
 
 type ApiSetClusterAppRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
+	ctx                             context.Context
+	ApiService                      *InternalApiService
 	internalCreateAccessRuleRequest *InternalCreateAccessRuleRequest
 }
 
@@ -895,24 +900,25 @@ func (r ApiSetClusterAppRequest) Execute() (*AccessRule, *http.Response, error) 
 /*
 SetClusterApp Create an access rule with a cluster app role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetClusterAppRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSetClusterAppRequest
 */
 func (a *InternalApiService) SetClusterApp(ctx context.Context) ApiSetClusterAppRequest {
 	return ApiSetClusterAppRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return AccessRule
+//
+//	@return AccessRule
 func (a *InternalApiService) SetClusterAppExecute(r ApiSetClusterAppRequest) (*AccessRule, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *AccessRule
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AccessRule
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.SetClusterApp")
@@ -1005,9 +1011,9 @@ func (a *InternalApiService) SetClusterAppExecute(r ApiSetClusterAppRequest) (*A
 }
 
 type ApiSetInstallerAppRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
-	xRunaiTenantId *int32
+	ctx                             context.Context
+	ApiService                      *InternalApiService
+	xRunaiTenantId                  *int32
 	internalCreateAccessRuleRequest *InternalCreateAccessRuleRequest
 }
 
@@ -1030,24 +1036,25 @@ func (r ApiSetInstallerAppRequest) Execute() (*AccessRule, *http.Response, error
 /*
 SetInstallerApp Create an access rule with an installer app role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSetInstallerAppRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSetInstallerAppRequest
 */
 func (a *InternalApiService) SetInstallerApp(ctx context.Context) ApiSetInstallerAppRequest {
 	return ApiSetInstallerAppRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return AccessRule
+//
+//	@return AccessRule
 func (a *InternalApiService) SetInstallerAppExecute(r ApiSetInstallerAppRequest) (*AccessRule, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *AccessRule
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AccessRule
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.SetInstallerApp")
@@ -1147,10 +1154,10 @@ func (a *InternalApiService) SetInstallerAppExecute(r ApiSetInstallerAppRequest)
 }
 
 type ApiUpdateScopeAccessRulesRequest struct {
-	ctx context.Context
-	ApiService *InternalApiService
-	scopeType *string
-	scopeId *string
+	ctx                           context.Context
+	ApiService                    *InternalApiService
+	scopeType                     *string
+	scopeId                       *string
 	updateScopeAccessRulesRequest *UpdateScopeAccessRulesRequest
 }
 
@@ -1179,22 +1186,22 @@ func (r ApiUpdateScopeAccessRulesRequest) Execute() (*http.Response, error) {
 /*
 UpdateScopeAccessRules Update access rules that assigned to the requested scope resource
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiUpdateScopeAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiUpdateScopeAccessRulesRequest
 */
 func (a *InternalApiService) UpdateScopeAccessRules(ctx context.Context) ApiUpdateScopeAccessRulesRequest {
 	return ApiUpdateScopeAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *InternalApiService) UpdateScopeAccessRulesExecute(r ApiUpdateScopeAccessRulesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InternalApiService.UpdateScopeAccessRules")

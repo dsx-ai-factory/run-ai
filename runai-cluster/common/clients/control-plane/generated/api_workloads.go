@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,16 +22,15 @@ import (
 	"time"
 )
 
-
 type WorkloadsApi interface {
 
 	/*
-	CountWorkloads Count workloads.
+		CountWorkloads Count workloads.
 
-	Retrieve the number of workloads.
+		Retrieve the number of workloads.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WorkloadsApiCountWorkloadsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WorkloadsApiCountWorkloadsRequest
 	*/
 	CountWorkloads(ctx context.Context) WorkloadsApiCountWorkloadsRequest
 
@@ -38,11 +39,11 @@ type WorkloadsApi interface {
 	CountWorkloadsExecute(r WorkloadsApiCountWorkloadsRequest) (*CountAccessRules200Response, *http.Response, error)
 
 	/*
-	DeleteWorkload Delete the workload as is does not exist in the cluster anymore.
+		DeleteWorkload Delete the workload as is does not exist in the cluster anymore.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return WorkloadsApiDeleteWorkloadRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return WorkloadsApiDeleteWorkloadRequest
 	*/
 	DeleteWorkload(ctx context.Context, workloadId string) WorkloadsApiDeleteWorkloadRequest
 
@@ -50,13 +51,13 @@ type WorkloadsApi interface {
 	DeleteWorkloadExecute(r WorkloadsApiDeleteWorkloadRequest) (*http.Response, error)
 
 	/*
-	GetWorkload Get a workload.
+		GetWorkload Get a workload.
 
-	Retrieve workload data using a `workloadId`.
+		Retrieve workload data using a `workloadId`.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return WorkloadsApiGetWorkloadRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return WorkloadsApiGetWorkloadRequest
 	*/
 	GetWorkload(ctx context.Context, workloadId string) WorkloadsApiGetWorkloadRequest
 
@@ -65,11 +66,11 @@ type WorkloadsApi interface {
 	GetWorkloadExecute(r WorkloadsApiGetWorkloadRequest) (*Workload, *http.Response, error)
 
 	/*
-	GetWorkloadAncestors Get the workload ancestors.
+		GetWorkloadAncestors Get the workload ancestors.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return WorkloadsApiGetWorkloadAncestorsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return WorkloadsApiGetWorkloadAncestorsRequest
 	*/
 	GetWorkloadAncestors(ctx context.Context, workloadId string) WorkloadsApiGetWorkloadAncestorsRequest
 
@@ -78,13 +79,13 @@ type WorkloadsApi interface {
 	GetWorkloadAncestorsExecute(r WorkloadsApiGetWorkloadAncestorsRequest) (*Ancestors, *http.Response, error)
 
 	/*
-	GetWorkloadMetrics Get workload metrics data. [Experimental]
+		GetWorkloadMetrics Get workload metrics data. [Experimental]
 
-	Retrieves workloads data metrics from the metrics database. Use in reporting and analysis tools.
+		Retrieves workloads data metrics from the metrics database. Use in reporting and analysis tools.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return WorkloadsApiGetWorkloadMetricsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return WorkloadsApiGetWorkloadMetricsRequest
 	*/
 	GetWorkloadMetrics(ctx context.Context, workloadId string) WorkloadsApiGetWorkloadMetricsRequest
 
@@ -93,12 +94,12 @@ type WorkloadsApi interface {
 	GetWorkloadMetricsExecute(r WorkloadsApiGetWorkloadMetricsRequest) (*MetricsResponse, *http.Response, error)
 
 	/*
-	GetWorkloads List workloads.
+		GetWorkloads List workloads.
 
-	Retrieve a list of active workloads with details.
+		Retrieve a list of active workloads with details.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WorkloadsApiGetWorkloadsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WorkloadsApiGetWorkloadsRequest
 	*/
 	GetWorkloads(ctx context.Context) WorkloadsApiGetWorkloadsRequest
 
@@ -107,12 +108,12 @@ type WorkloadsApi interface {
 	GetWorkloadsExecute(r WorkloadsApiGetWorkloadsRequest) (*GetWorkloads200Response, *http.Response, error)
 
 	/*
-	GetWorkloadsTelemetry Get the workloads telemetry. [Experimental]
+		GetWorkloadsTelemetry Get the workloads telemetry. [Experimental]
 
-	Retrieves workload data by telemetry type.
+		Retrieves workload data by telemetry type.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WorkloadsApiGetWorkloadsTelemetryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WorkloadsApiGetWorkloadsTelemetryRequest
 	*/
 	GetWorkloadsTelemetry(ctx context.Context) WorkloadsApiGetWorkloadsTelemetryRequest
 
@@ -121,10 +122,10 @@ type WorkloadsApi interface {
 	GetWorkloadsTelemetryExecute(r WorkloadsApiGetWorkloadsTelemetryRequest) (*TelemetryResponse, *http.Response, error)
 
 	/*
-	InternalCreateWorkload Create a workload by the control plane.
+		InternalCreateWorkload Create a workload by the control plane.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WorkloadsApiInternalCreateWorkloadRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WorkloadsApiInternalCreateWorkloadRequest
 	*/
 	InternalCreateWorkload(ctx context.Context) WorkloadsApiInternalCreateWorkloadRequest
 
@@ -133,10 +134,10 @@ type WorkloadsApi interface {
 	InternalCreateWorkloadExecute(r WorkloadsApiInternalCreateWorkloadRequest) (*Workload, *http.Response, error)
 
 	/*
-	InternalSyncWorkloads Sync workloads.
+		InternalSyncWorkloads Sync workloads.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WorkloadsApiInternalSyncWorkloadsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WorkloadsApiInternalSyncWorkloadsRequest
 	*/
 	InternalSyncWorkloads(ctx context.Context) WorkloadsApiInternalSyncWorkloadsRequest
 
@@ -144,11 +145,11 @@ type WorkloadsApi interface {
 	InternalSyncWorkloadsExecute(r WorkloadsApiInternalSyncWorkloadsRequest) (*http.Response, error)
 
 	/*
-	PatchWorkloadPhase patch the workload phase from the client.
+		PatchWorkloadPhase patch the workload phase from the client.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return WorkloadsApiPatchWorkloadPhaseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return WorkloadsApiPatchWorkloadPhaseRequest
 	*/
 	PatchWorkloadPhase(ctx context.Context, workloadId string) WorkloadsApiPatchWorkloadPhaseRequest
 
@@ -156,10 +157,10 @@ type WorkloadsApi interface {
 	PatchWorkloadPhaseExecute(r WorkloadsApiPatchWorkloadPhaseRequest) (*http.Response, error)
 
 	/*
-	SyncWorkloads Sync workloads.
+		SyncWorkloads Sync workloads.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WorkloadsApiSyncWorkloadsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WorkloadsApiSyncWorkloadsRequest
 	*/
 	SyncWorkloads(ctx context.Context) WorkloadsApiSyncWorkloadsRequest
 
@@ -167,11 +168,11 @@ type WorkloadsApi interface {
 	SyncWorkloadsExecute(r WorkloadsApiSyncWorkloadsRequest) (*http.Response, error)
 
 	/*
-	UpsertWorkload Upsert the workload info from the cluster.
+		UpsertWorkload Upsert the workload info from the cluster.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return WorkloadsApiUpsertWorkloadRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return WorkloadsApiUpsertWorkloadRequest
 	*/
 	UpsertWorkload(ctx context.Context, workloadId string) WorkloadsApiUpsertWorkloadRequest
 
@@ -183,10 +184,10 @@ type WorkloadsApi interface {
 type WorkloadsApiService service
 
 type WorkloadsApiCountWorkloadsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService WorkloadsApi
-	deleted *bool
-	filterBy *[]string
+	deleted    *bool
+	filterBy   *[]string
 }
 
 // Return only deleted resources when &#x60;true&#x60;.
@@ -210,24 +211,25 @@ CountWorkloads Count workloads.
 
 Retrieve the number of workloads.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WorkloadsApiCountWorkloadsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WorkloadsApiCountWorkloadsRequest
 */
 func (a *WorkloadsApiService) CountWorkloads(ctx context.Context) WorkloadsApiCountWorkloadsRequest {
 	return WorkloadsApiCountWorkloadsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return CountAccessRules200Response
+//
+//	@return CountAccessRules200Response
 func (a *WorkloadsApiService) CountWorkloadsExecute(r WorkloadsApiCountWorkloadsRequest) (*CountAccessRules200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CountAccessRules200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CountAccessRules200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.CountWorkloads")
@@ -341,7 +343,7 @@ func (a *WorkloadsApiService) CountWorkloadsExecute(r WorkloadsApiCountWorkloads
 }
 
 type WorkloadsApiDeleteWorkloadRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService WorkloadsApi
 	workloadId string
 }
@@ -353,14 +355,14 @@ func (r WorkloadsApiDeleteWorkloadRequest) Execute() (*http.Response, error) {
 /*
 DeleteWorkload Delete the workload as is does not exist in the cluster anymore.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return WorkloadsApiDeleteWorkloadRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return WorkloadsApiDeleteWorkloadRequest
 */
 func (a *WorkloadsApiService) DeleteWorkload(ctx context.Context, workloadId string) WorkloadsApiDeleteWorkloadRequest {
 	return WorkloadsApiDeleteWorkloadRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
@@ -368,9 +370,9 @@ func (a *WorkloadsApiService) DeleteWorkload(ctx context.Context, workloadId str
 // Execute executes the request
 func (a *WorkloadsApiService) DeleteWorkloadExecute(r WorkloadsApiDeleteWorkloadRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.DeleteWorkload")
@@ -470,7 +472,7 @@ func (a *WorkloadsApiService) DeleteWorkloadExecute(r WorkloadsApiDeleteWorkload
 }
 
 type WorkloadsApiGetWorkloadRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService WorkloadsApi
 	workloadId string
 }
@@ -484,26 +486,27 @@ GetWorkload Get a workload.
 
 Retrieve workload data using a `workloadId`.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return WorkloadsApiGetWorkloadRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return WorkloadsApiGetWorkloadRequest
 */
 func (a *WorkloadsApiService) GetWorkload(ctx context.Context, workloadId string) WorkloadsApiGetWorkloadRequest {
 	return WorkloadsApiGetWorkloadRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
 
 // Execute executes the request
-//  @return Workload
+//
+//	@return Workload
 func (a *WorkloadsApiService) GetWorkloadExecute(r WorkloadsApiGetWorkloadRequest) (*Workload, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Workload
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Workload
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.GetWorkload")
@@ -622,7 +625,7 @@ func (a *WorkloadsApiService) GetWorkloadExecute(r WorkloadsApiGetWorkloadReques
 }
 
 type WorkloadsApiGetWorkloadAncestorsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService WorkloadsApi
 	workloadId string
 }
@@ -634,26 +637,27 @@ func (r WorkloadsApiGetWorkloadAncestorsRequest) Execute() (*Ancestors, *http.Re
 /*
 GetWorkloadAncestors Get the workload ancestors.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return WorkloadsApiGetWorkloadAncestorsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return WorkloadsApiGetWorkloadAncestorsRequest
 */
 func (a *WorkloadsApiService) GetWorkloadAncestors(ctx context.Context, workloadId string) WorkloadsApiGetWorkloadAncestorsRequest {
 	return WorkloadsApiGetWorkloadAncestorsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
 
 // Execute executes the request
-//  @return Ancestors
+//
+//	@return Ancestors
 func (a *WorkloadsApiService) GetWorkloadAncestorsExecute(r WorkloadsApiGetWorkloadAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Ancestors
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Ancestors
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.GetWorkloadAncestors")
@@ -752,12 +756,12 @@ func (a *WorkloadsApiService) GetWorkloadAncestorsExecute(r WorkloadsApiGetWorkl
 }
 
 type WorkloadsApiGetWorkloadMetricsRequest struct {
-	ctx context.Context
-	ApiService WorkloadsApi
-	workloadId string
-	metricType *[]WorkloadMetricType
-	start *time.Time
-	end *time.Time
+	ctx             context.Context
+	ApiService      WorkloadsApi
+	workloadId      string
+	metricType      *[]WorkloadMetricType
+	start           *time.Time
+	end             *time.Time
 	numberOfSamples *int32
 }
 
@@ -794,26 +798,27 @@ GetWorkloadMetrics Get workload metrics data. [Experimental]
 
 Retrieves workloads data metrics from the metrics database. Use in reporting and analysis tools.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return WorkloadsApiGetWorkloadMetricsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return WorkloadsApiGetWorkloadMetricsRequest
 */
 func (a *WorkloadsApiService) GetWorkloadMetrics(ctx context.Context, workloadId string) WorkloadsApiGetWorkloadMetricsRequest {
 	return WorkloadsApiGetWorkloadMetricsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
 
 // Execute executes the request
-//  @return MetricsResponse
+//
+//	@return MetricsResponse
 func (a *WorkloadsApiService) GetWorkloadMetricsExecute(r WorkloadsApiGetWorkloadMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MetricsResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MetricsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.GetWorkloadMetrics")
@@ -957,14 +962,14 @@ func (a *WorkloadsApiService) GetWorkloadMetricsExecute(r WorkloadsApiGetWorkloa
 }
 
 type WorkloadsApiGetWorkloadsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService WorkloadsApi
-	deleted *bool
-	offset *int32
-	limit *int32
-	sortOrder *string
-	sortBy *string
-	filterBy *[]string
+	deleted    *bool
+	offset     *int32
+	limit      *int32
+	sortOrder  *string
+	sortBy     *string
+	filterBy   *[]string
 }
 
 // Return only deleted resources when &#x60;true&#x60;.
@@ -1012,24 +1017,25 @@ GetWorkloads List workloads.
 
 Retrieve a list of active workloads with details.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WorkloadsApiGetWorkloadsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WorkloadsApiGetWorkloadsRequest
 */
 func (a *WorkloadsApiService) GetWorkloads(ctx context.Context) WorkloadsApiGetWorkloadsRequest {
 	return WorkloadsApiGetWorkloadsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GetWorkloads200Response
+//
+//	@return GetWorkloads200Response
 func (a *WorkloadsApiService) GetWorkloadsExecute(r WorkloadsApiGetWorkloadsRequest) (*GetWorkloads200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetWorkloads200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetWorkloads200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.GetWorkloads")
@@ -1155,13 +1161,13 @@ func (a *WorkloadsApiService) GetWorkloadsExecute(r WorkloadsApiGetWorkloadsRequ
 }
 
 type WorkloadsApiGetWorkloadsTelemetryRequest struct {
-	ctx context.Context
-	ApiService WorkloadsApi
+	ctx           context.Context
+	ApiService    WorkloadsApi
 	telemetryType *WorkloadTelemetryType
-	clusterId *string
-	nodepoolName *string
-	departmentId *string
-	groupBy *[]string
+	clusterId     *string
+	nodepoolName  *string
+	departmentId  *string
+	groupBy       *[]string
 }
 
 // Specifies the telemetry type.
@@ -1203,24 +1209,25 @@ GetWorkloadsTelemetry Get the workloads telemetry. [Experimental]
 
 Retrieves workload data by telemetry type.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WorkloadsApiGetWorkloadsTelemetryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WorkloadsApiGetWorkloadsTelemetryRequest
 */
 func (a *WorkloadsApiService) GetWorkloadsTelemetry(ctx context.Context) WorkloadsApiGetWorkloadsTelemetryRequest {
 	return WorkloadsApiGetWorkloadsTelemetryRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TelemetryResponse
+//
+//	@return TelemetryResponse
 func (a *WorkloadsApiService) GetWorkloadsTelemetryExecute(r WorkloadsApiGetWorkloadsTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TelemetryResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TelemetryResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.GetWorkloadsTelemetry")
@@ -1364,8 +1371,8 @@ func (a *WorkloadsApiService) GetWorkloadsTelemetryExecute(r WorkloadsApiGetWork
 }
 
 type WorkloadsApiInternalCreateWorkloadRequest struct {
-	ctx context.Context
-	ApiService WorkloadsApi
+	ctx                    context.Context
+	ApiService             WorkloadsApi
 	workloadCreationFields *WorkloadCreationFields
 }
 
@@ -1382,24 +1389,25 @@ func (r WorkloadsApiInternalCreateWorkloadRequest) Execute() (*Workload, *http.R
 /*
 InternalCreateWorkload Create a workload by the control plane.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WorkloadsApiInternalCreateWorkloadRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WorkloadsApiInternalCreateWorkloadRequest
 */
 func (a *WorkloadsApiService) InternalCreateWorkload(ctx context.Context) WorkloadsApiInternalCreateWorkloadRequest {
 	return WorkloadsApiInternalCreateWorkloadRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Workload
+//
+//	@return Workload
 func (a *WorkloadsApiService) InternalCreateWorkloadExecute(r WorkloadsApiInternalCreateWorkloadRequest) (*Workload, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Workload
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Workload
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.InternalCreateWorkload")
@@ -1512,9 +1520,9 @@ func (a *WorkloadsApiService) InternalCreateWorkloadExecute(r WorkloadsApiIntern
 }
 
 type WorkloadsApiInternalSyncWorkloadsRequest struct {
-	ctx context.Context
-	ApiService WorkloadsApi
-	filterBy *[]string
+	ctx                          context.Context
+	ApiService                   WorkloadsApi
+	filterBy                     *[]string
 	internalWorkloadsSyncRequest *InternalWorkloadsSyncRequest
 }
 
@@ -1537,22 +1545,22 @@ func (r WorkloadsApiInternalSyncWorkloadsRequest) Execute() (*http.Response, err
 /*
 InternalSyncWorkloads Sync workloads.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WorkloadsApiInternalSyncWorkloadsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WorkloadsApiInternalSyncWorkloadsRequest
 */
 func (a *WorkloadsApiService) InternalSyncWorkloads(ctx context.Context) WorkloadsApiInternalSyncWorkloadsRequest {
 	return WorkloadsApiInternalSyncWorkloadsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *WorkloadsApiService) InternalSyncWorkloadsExecute(r WorkloadsApiInternalSyncWorkloadsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.InternalSyncWorkloads")
@@ -1666,9 +1674,9 @@ func (a *WorkloadsApiService) InternalSyncWorkloadsExecute(r WorkloadsApiInterna
 }
 
 type WorkloadsApiPatchWorkloadPhaseRequest struct {
-	ctx context.Context
-	ApiService WorkloadsApi
-	workloadId string
+	ctx                 context.Context
+	ApiService          WorkloadsApi
+	workloadId          string
 	workloadPatchFields *WorkloadPatchFields
 }
 
@@ -1685,14 +1693,14 @@ func (r WorkloadsApiPatchWorkloadPhaseRequest) Execute() (*http.Response, error)
 /*
 PatchWorkloadPhase patch the workload phase from the client.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return WorkloadsApiPatchWorkloadPhaseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return WorkloadsApiPatchWorkloadPhaseRequest
 */
 func (a *WorkloadsApiService) PatchWorkloadPhase(ctx context.Context, workloadId string) WorkloadsApiPatchWorkloadPhaseRequest {
 	return WorkloadsApiPatchWorkloadPhaseRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
@@ -1700,9 +1708,9 @@ func (a *WorkloadsApiService) PatchWorkloadPhase(ctx context.Context, workloadId
 // Execute executes the request
 func (a *WorkloadsApiService) PatchWorkloadPhaseExecute(r WorkloadsApiPatchWorkloadPhaseRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPatch
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.PatchWorkloadPhase")
@@ -1827,9 +1835,9 @@ func (a *WorkloadsApiService) PatchWorkloadPhaseExecute(r WorkloadsApiPatchWorkl
 }
 
 type WorkloadsApiSyncWorkloadsRequest struct {
-	ctx context.Context
-	ApiService WorkloadsApi
-	filterBy *[]string
+	ctx                  context.Context
+	ApiService           WorkloadsApi
+	filterBy             *[]string
 	workloadsSyncRequest *WorkloadsSyncRequest
 }
 
@@ -1852,22 +1860,22 @@ func (r WorkloadsApiSyncWorkloadsRequest) Execute() (*http.Response, error) {
 /*
 SyncWorkloads Sync workloads.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WorkloadsApiSyncWorkloadsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WorkloadsApiSyncWorkloadsRequest
 */
 func (a *WorkloadsApiService) SyncWorkloads(ctx context.Context) WorkloadsApiSyncWorkloadsRequest {
 	return WorkloadsApiSyncWorkloadsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *WorkloadsApiService) SyncWorkloadsExecute(r WorkloadsApiSyncWorkloadsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.SyncWorkloads")
@@ -1981,9 +1989,9 @@ func (a *WorkloadsApiService) SyncWorkloadsExecute(r WorkloadsApiSyncWorkloadsRe
 }
 
 type WorkloadsApiUpsertWorkloadRequest struct {
-	ctx context.Context
-	ApiService WorkloadsApi
-	workloadId string
+	ctx                context.Context
+	ApiService         WorkloadsApi
+	workloadId         string
 	workloadSyncFields *WorkloadSyncFields
 }
 
@@ -2000,14 +2008,14 @@ func (r WorkloadsApiUpsertWorkloadRequest) Execute() (*http.Response, error) {
 /*
 UpsertWorkload Upsert the workload info from the cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return WorkloadsApiUpsertWorkloadRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return WorkloadsApiUpsertWorkloadRequest
 */
 func (a *WorkloadsApiService) UpsertWorkload(ctx context.Context, workloadId string) WorkloadsApiUpsertWorkloadRequest {
 	return WorkloadsApiUpsertWorkloadRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
@@ -2015,9 +2023,9 @@ func (a *WorkloadsApiService) UpsertWorkload(ctx context.Context, workloadId str
 // Execute executes the request
 func (a *WorkloadsApiService) UpsertWorkloadExecute(r WorkloadsApiUpsertWorkloadRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsApiService.UpsertWorkload")

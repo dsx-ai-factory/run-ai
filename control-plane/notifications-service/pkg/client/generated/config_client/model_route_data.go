@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -21,8 +23,8 @@ var _ MappedNullable = &RouteData{}
 
 // RouteData struct for RouteData
 type RouteData struct {
-	TenantId string `json:"tenant_id"`
-	RouteId string `json:"route_id"`
+	TenantId    string                 `json:"tenant_id"`
+	RouteId     string                 `json:"route_id"`
 	RouteConfig map[string]interface{} `json:"route_config"`
 }
 
@@ -121,7 +123,7 @@ func (o *RouteData) SetRouteConfig(v map[string]interface{}) {
 }
 
 func (o RouteData) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -151,10 +153,10 @@ func (o *RouteData) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -210,5 +212,3 @@ func (v *NullableRouteData) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

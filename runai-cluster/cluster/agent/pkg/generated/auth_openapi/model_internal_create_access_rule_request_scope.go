@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -17,9 +19,9 @@ import (
 
 // InternalCreateAccessRuleRequestScope struct for InternalCreateAccessRuleRequestScope
 type InternalCreateAccessRuleRequestScope struct {
-	Id string `json:"id"`
+	Id   string    `json:"id"`
 	Type ScopeType `json:"type"`
-	Name *string `json:"name,omitempty"`
+	Name *string   `json:"name,omitempty"`
 }
 
 // NewInternalCreateAccessRuleRequestScope instantiates a new InternalCreateAccessRuleRequestScope object
@@ -170,5 +172,3 @@ func (v *NullableInternalCreateAccessRuleRequestScope) UnmarshalJSON(src []byte)
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

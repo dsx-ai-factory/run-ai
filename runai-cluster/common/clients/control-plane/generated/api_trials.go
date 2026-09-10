@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 type TrialsApi interface {
 
 	/*
-	CreateTrial Create new trial
+		CreateTrial Create new trial
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TrialsApiCreateTrialRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TrialsApiCreateTrialRequest
 	*/
 	CreateTrial(ctx context.Context) TrialsApiCreateTrialRequest
 
@@ -35,10 +36,10 @@ type TrialsApi interface {
 	CreateTrialExecute(r TrialsApiCreateTrialRequest) (*TrialCreationResponse, *http.Response, error)
 
 	/*
-	GetTrialState get trials state
+		GetTrialState get trials state
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TrialsApiGetTrialStateRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TrialsApiGetTrialStateRequest
 	*/
 	GetTrialState(ctx context.Context) TrialsApiGetTrialStateRequest
 
@@ -47,11 +48,11 @@ type TrialsApi interface {
 	GetTrialStateExecute(r TrialsApiGetTrialStateRequest) ([]TrialState, *http.Response, error)
 
 	/*
-	ResendEmail Resend a trial email
+		ResendEmail Resend a trial email
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param trialId The id of the trial
-	@return TrialsApiResendEmailRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param trialId The id of the trial
+		@return TrialsApiResendEmailRequest
 	*/
 	ResendEmail(ctx context.Context, trialId string) TrialsApiResendEmailRequest
 
@@ -63,8 +64,8 @@ type TrialsApi interface {
 type TrialsApiService service
 
 type TrialsApiCreateTrialRequest struct {
-	ctx context.Context
-	ApiService TrialsApi
+	ctx                  context.Context
+	ApiService           TrialsApi
 	trialCreationRequest *TrialCreationRequest
 }
 
@@ -81,24 +82,25 @@ func (r TrialsApiCreateTrialRequest) Execute() (*TrialCreationResponse, *http.Re
 /*
 CreateTrial Create new trial
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrialsApiCreateTrialRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TrialsApiCreateTrialRequest
 */
 func (a *TrialsApiService) CreateTrial(ctx context.Context) TrialsApiCreateTrialRequest {
 	return TrialsApiCreateTrialRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TrialCreationResponse
+//
+//	@return TrialCreationResponse
 func (a *TrialsApiService) CreateTrialExecute(r TrialsApiCreateTrialRequest) (*TrialCreationResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TrialCreationResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TrialCreationResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrialsApiService.CreateTrial")
@@ -211,7 +213,7 @@ func (a *TrialsApiService) CreateTrialExecute(r TrialsApiCreateTrialRequest) (*T
 }
 
 type TrialsApiGetTrialStateRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TrialsApi
 }
 
@@ -222,24 +224,25 @@ func (r TrialsApiGetTrialStateRequest) Execute() ([]TrialState, *http.Response, 
 /*
 GetTrialState get trials state
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TrialsApiGetTrialStateRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TrialsApiGetTrialStateRequest
 */
 func (a *TrialsApiService) GetTrialState(ctx context.Context) TrialsApiGetTrialStateRequest {
 	return TrialsApiGetTrialStateRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []TrialState
+//
+//	@return []TrialState
 func (a *TrialsApiService) GetTrialStateExecute(r TrialsApiGetTrialStateRequest) ([]TrialState, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []TrialState
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []TrialState
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrialsApiService.GetTrialState")
@@ -337,9 +340,9 @@ func (a *TrialsApiService) GetTrialStateExecute(r TrialsApiGetTrialStateRequest)
 }
 
 type TrialsApiResendEmailRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TrialsApi
-	trialId string
+	trialId    string
 }
 
 func (r TrialsApiResendEmailRequest) Execute() (*http.Response, error) {
@@ -349,24 +352,24 @@ func (r TrialsApiResendEmailRequest) Execute() (*http.Response, error) {
 /*
 ResendEmail Resend a trial email
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param trialId The id of the trial
- @return TrialsApiResendEmailRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param trialId The id of the trial
+	@return TrialsApiResendEmailRequest
 */
 func (a *TrialsApiService) ResendEmail(ctx context.Context, trialId string) TrialsApiResendEmailRequest {
 	return TrialsApiResendEmailRequest{
 		ApiService: a,
-		ctx: ctx,
-		trialId: trialId,
+		ctx:        ctx,
+		trialId:    trialId,
 	}
 }
 
 // Execute executes the request
 func (a *TrialsApiService) ResendEmailExecute(r TrialsApiResendEmailRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TrialsApiService.ResendEmail")

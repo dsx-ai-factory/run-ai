@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,35 +19,35 @@ import (
 
 // WorkloadSyncFields struct for WorkloadSyncFields
 type WorkloadSyncFields struct {
-	Type string `json:"type"`
-	Name string `json:"name"`
-	Id string `json:"id"`
-	SubmittedBy *string `json:"submittedBy,omitempty"`
-	PriorityClassName string `json:"priorityClassName"`
+	Type              string  `json:"type"`
+	Name              string  `json:"name"`
+	Id                string  `json:"id"`
+	SubmittedBy       *string `json:"submittedBy,omitempty"`
+	PriorityClassName string  `json:"priorityClassName"`
 	// The id of the cluster.
-	ClusterId string `json:"clusterId"`
-	ProjectName string `json:"projectName"`
-	ProjectId string `json:"projectId"`
-	DepartmentName string `json:"departmentName"`
-	DepartmentId string `json:"departmentId"`
-	Namespace string `json:"namespace"`
-	CreatedAt time.Time `json:"createdAt"`
-	RequestedResources NullableWorkloadRequestResources `json:"requestedResources,omitempty"`
-	ActionsSupport *ActionsSupport `json:"actionsSupport,omitempty"`
-	Phase Phase `json:"phase"`
-	Source Source `json:"source"`
-	Conditions []Condition `json:"conditions,omitempty"`
-	PhaseMessage *string `json:"phaseMessage,omitempty"`
-	K8sPhase string `json:"k8sPhase"`
-	RequestedPods *RequestedPods `json:"requestedPods,omitempty"`
-	RequestedNodePools []string `json:"requestedNodePools,omitempty"`
-	Images []string `json:"images,omitempty"`
-	DistributedFramework *string `json:"distributedFramework,omitempty"`
-	ChildrenIds []WorkloadChildrenIdsInner `json:"childrenIds,omitempty"`
-	Urls []string `json:"urls,omitempty"`
-	AdditionalFields *string `json:"additionalFields,omitempty"`
-	Priority NullableInt32 `json:"priority,omitempty"`
-	FullySaasWorkload *bool `json:"fullySaasWorkload,omitempty"`
+	ClusterId            string                           `json:"clusterId"`
+	ProjectName          string                           `json:"projectName"`
+	ProjectId            string                           `json:"projectId"`
+	DepartmentName       string                           `json:"departmentName"`
+	DepartmentId         string                           `json:"departmentId"`
+	Namespace            string                           `json:"namespace"`
+	CreatedAt            time.Time                        `json:"createdAt"`
+	RequestedResources   NullableWorkloadRequestResources `json:"requestedResources,omitempty"`
+	ActionsSupport       *ActionsSupport                  `json:"actionsSupport,omitempty"`
+	Phase                Phase                            `json:"phase"`
+	Source               Source                           `json:"source"`
+	Conditions           []Condition                      `json:"conditions,omitempty"`
+	PhaseMessage         *string                          `json:"phaseMessage,omitempty"`
+	K8sPhase             string                           `json:"k8sPhase"`
+	RequestedPods        *RequestedPods                   `json:"requestedPods,omitempty"`
+	RequestedNodePools   []string                         `json:"requestedNodePools,omitempty"`
+	Images               []string                         `json:"images,omitempty"`
+	DistributedFramework *string                          `json:"distributedFramework,omitempty"`
+	ChildrenIds          []WorkloadChildrenIdsInner       `json:"childrenIds,omitempty"`
+	Urls                 []string                         `json:"urls,omitempty"`
+	AdditionalFields     *string                          `json:"additionalFields,omitempty"`
+	Priority             NullableInt32                    `json:"priority,omitempty"`
+	FullySaasWorkload    *bool                            `json:"fullySaasWorkload,omitempty"`
 }
 
 // NewWorkloadSyncFields instantiates a new WorkloadSyncFields object
@@ -407,6 +409,7 @@ func (o *WorkloadSyncFields) HasRequestedResources() bool {
 func (o *WorkloadSyncFields) SetRequestedResources(v WorkloadRequestResources) {
 	o.RequestedResources.Set(&v)
 }
+
 // SetRequestedResourcesNil sets the value for RequestedResources to be an explicit nil
 func (o *WorkloadSyncFields) SetRequestedResourcesNil() {
 	o.RequestedResources.Set(nil)
@@ -841,6 +844,7 @@ func (o *WorkloadSyncFields) HasPriority() bool {
 func (o *WorkloadSyncFields) SetPriority(v int32) {
 	o.Priority.Set(&v)
 }
+
 // SetPriorityNil sets the value for Priority to be an explicit nil
 func (o *WorkloadSyncFields) SetPriorityNil() {
 	o.Priority.Set(nil)
@@ -1007,5 +1011,3 @@ func (v *NullableWorkloadSyncFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

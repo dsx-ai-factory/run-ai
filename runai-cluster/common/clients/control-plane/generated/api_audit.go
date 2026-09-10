@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,16 +21,15 @@ import (
 	"time"
 )
 
-
 type AuditApi interface {
 
 	/*
-	GetAuditLogs Get audit logs.
+		GetAuditLogs Get audit logs.
 
-	Retrieve audit logs using the query parameters.
+		Retrieve audit logs using the query parameters.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return AuditApiGetAuditLogsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return AuditApiGetAuditLogsRequest
 	*/
 	GetAuditLogs(ctx context.Context) AuditApiGetAuditLogsRequest
 
@@ -41,21 +42,21 @@ type AuditApi interface {
 type AuditApiService service
 
 type AuditApiGetAuditLogsRequest struct {
-	ctx context.Context
-	ApiService AuditApi
-	start *time.Time
-	end *time.Time
+	ctx         context.Context
+	ApiService  AuditApi
+	start       *time.Time
+	end         *time.Time
 	clusterUuid *string
-	action *string
-	sourceType *string
-	sourceId *string
-	sourceName *string
-	entityType *string
-	entityId *string
-	limit *int32
-	offset *int32
-	success *string
-	download *string
+	action      *string
+	sourceType  *string
+	sourceId    *string
+	sourceName  *string
+	entityType  *string
+	entityId    *string
+	limit       *int32
+	offset      *int32
+	success     *string
+	download    *string
 }
 
 // Starting date for audit logs retrieval. format yyyy-MM-dd for date yyyy-MM-ddTHH:mm:ss for date-time.
@@ -145,24 +146,25 @@ GetAuditLogs Get audit logs.
 
 Retrieve audit logs using the query parameters.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return AuditApiGetAuditLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return AuditApiGetAuditLogsRequest
 */
 func (a *AuditApiService) GetAuditLogs(ctx context.Context) AuditApiGetAuditLogsRequest {
 	return AuditApiGetAuditLogsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []AuditLogRecord
+//
+//	@return []AuditLogRecord
 func (a *AuditApiService) GetAuditLogsExecute(r AuditApiGetAuditLogsRequest) ([]AuditLogRecord, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []AuditLogRecord
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []AuditLogRecord
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuditApiService.GetAuditLogs")

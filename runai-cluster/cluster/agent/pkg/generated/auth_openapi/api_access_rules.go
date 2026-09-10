@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -20,13 +22,12 @@ import (
 	"strings"
 )
 
-
 // AccessRulesApiService AccessRulesApi service
 type AccessRulesApiService service
 
 type ApiCreateAccessRuleRequest struct {
-	ctx context.Context
-	ApiService *AccessRulesApiService
+	ctx                      context.Context
+	ApiService               *AccessRulesApiService
 	accessRuleCreationFields *AccessRuleCreationFields
 }
 
@@ -43,24 +44,25 @@ func (r ApiCreateAccessRuleRequest) Execute() (*AccessRule, *http.Response, erro
 /*
 CreateAccessRule Create an access rule. Bind a predefined role to a subject (user, group or app) in some scope.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateAccessRuleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateAccessRuleRequest
 */
 func (a *AccessRulesApiService) CreateAccessRule(ctx context.Context) ApiCreateAccessRuleRequest {
 	return ApiCreateAccessRuleRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return AccessRule
+//
+//	@return AccessRule
 func (a *AccessRulesApiService) CreateAccessRuleExecute(r ApiCreateAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *AccessRule
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AccessRule
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccessRulesApiService.CreateAccessRule")
@@ -193,8 +195,8 @@ func (a *AccessRulesApiService) CreateAccessRuleExecute(r ApiCreateAccessRuleReq
 }
 
 type ApiDeleteAccessRuleRequest struct {
-	ctx context.Context
-	ApiService *AccessRulesApiService
+	ctx          context.Context
+	ApiService   *AccessRulesApiService
 	accessRuleId int32
 }
 
@@ -205,14 +207,14 @@ func (r ApiDeleteAccessRuleRequest) Execute() (*http.Response, error) {
 /*
 DeleteAccessRule Delete access rule. This operation will delete the subject permissions that assigned to it by this access rule.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param accessRuleId The id of the access rule to retrieve
- @return ApiDeleteAccessRuleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param accessRuleId The id of the access rule to retrieve
+	@return ApiDeleteAccessRuleRequest
 */
 func (a *AccessRulesApiService) DeleteAccessRule(ctx context.Context, accessRuleId int32) ApiDeleteAccessRuleRequest {
 	return ApiDeleteAccessRuleRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		accessRuleId: accessRuleId,
 	}
 }
@@ -220,9 +222,9 @@ func (a *AccessRulesApiService) DeleteAccessRule(ctx context.Context, accessRule
 // Execute executes the request
 func (a *AccessRulesApiService) DeleteAccessRuleExecute(r ApiDeleteAccessRuleRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccessRulesApiService.DeleteAccessRule")
@@ -335,8 +337,8 @@ func (a *AccessRulesApiService) DeleteAccessRuleExecute(r ApiDeleteAccessRuleReq
 }
 
 type ApiGetAccessRuleRequest struct {
-	ctx context.Context
-	ApiService *AccessRulesApiService
+	ctx          context.Context
+	ApiService   *AccessRulesApiService
 	accessRuleId int32
 }
 
@@ -347,26 +349,27 @@ func (r ApiGetAccessRuleRequest) Execute() (*AccessRule, *http.Response, error) 
 /*
 GetAccessRule Get access rule.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param accessRuleId The id of the access rule to retrieve
- @return ApiGetAccessRuleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param accessRuleId The id of the access rule to retrieve
+	@return ApiGetAccessRuleRequest
 */
 func (a *AccessRulesApiService) GetAccessRule(ctx context.Context, accessRuleId int32) ApiGetAccessRuleRequest {
 	return ApiGetAccessRuleRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		accessRuleId: accessRuleId,
 	}
 }
 
 // Execute executes the request
-//  @return AccessRule
+//
+//	@return AccessRule
 func (a *AccessRulesApiService) GetAccessRuleExecute(r ApiGetAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *AccessRule
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AccessRule
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccessRulesApiService.GetAccessRule")
@@ -488,19 +491,19 @@ func (a *AccessRulesApiService) GetAccessRuleExecute(r ApiGetAccessRuleRequest) 
 }
 
 type ApiGetAccessRulesRequest struct {
-	ctx context.Context
-	ApiService *AccessRulesApiService
-	subjectType *string
+	ctx             context.Context
+	ApiService      *AccessRulesApiService
+	subjectType     *string
 	subjectIdFilter *string
-	subjectIds *[]string
-	limit *int32
-	offset *int32
-	lastUpdated *string
-	includeDeleted *bool
-	clusterId *string
-	scopeType *string
-	scopeId *string
-	roleId *int32
+	subjectIds      *[]string
+	limit           *int32
+	offset          *int32
+	lastUpdated     *string
+	includeDeleted  *bool
+	clusterId       *string
+	scopeType       *string
+	scopeId         *string
+	roleId          *int32
 }
 
 // The type of resource we want to filter by.
@@ -576,24 +579,25 @@ func (r ApiGetAccessRulesRequest) Execute() (*GetAccessRules200Response, *http.R
 /*
 GetAccessRules List access rules.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetAccessRulesRequest
 */
 func (a *AccessRulesApiService) GetAccessRules(ctx context.Context) ApiGetAccessRulesRequest {
 	return ApiGetAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GetAccessRules200Response
+//
+//	@return GetAccessRules200Response
 func (a *AccessRulesApiService) GetAccessRulesExecute(r ApiGetAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetAccessRules200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetAccessRules200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccessRulesApiService.GetAccessRules")
@@ -734,9 +738,9 @@ func (a *AccessRulesApiService) GetAccessRulesExecute(r ApiGetAccessRulesRequest
 }
 
 type ApiSyncAccessRulesRequest struct {
-	ctx context.Context
-	ApiService *AccessRulesApiService
-	clusterId string
+	ctx               context.Context
+	ApiService        *AccessRulesApiService
+	clusterId         string
 	accessRuleForSync *[]AccessRuleForSync
 }
 
@@ -755,24 +759,24 @@ SyncAccessRules Sync the statuses of the access rules in the cluster.
 
 Sync all Access Rules statuses from k8s cluster to Run:AI backend
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The clusterId of the current status update
- @return ApiSyncAccessRulesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The clusterId of the current status update
+	@return ApiSyncAccessRulesRequest
 */
 func (a *AccessRulesApiService) SyncAccessRules(ctx context.Context, clusterId string) ApiSyncAccessRulesRequest {
 	return ApiSyncAccessRulesRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *AccessRulesApiService) SyncAccessRulesExecute(r ApiSyncAccessRulesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccessRulesApiService.SyncAccessRules")
@@ -894,10 +898,10 @@ func (a *AccessRulesApiService) SyncAccessRulesExecute(r ApiSyncAccessRulesReque
 }
 
 type ApiUpdateAccessRuleStatusRequest struct {
-	ctx context.Context
-	ApiService *AccessRulesApiService
-	accessRuleId int32
-	clusterId string
+	ctx                     context.Context
+	ApiService              *AccessRulesApiService
+	accessRuleId            int32
+	clusterId               string
 	accessRuleStatusRequest *AccessRuleStatusRequest
 }
 
@@ -914,26 +918,26 @@ func (r ApiUpdateAccessRuleStatusRequest) Execute() (*http.Response, error) {
 /*
 UpdateAccessRuleStatus Update the status of the access rule in the cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param accessRuleId The id of the access rule to retrieve
- @param clusterId The clusterId of the current status update
- @return ApiUpdateAccessRuleStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param accessRuleId The id of the access rule to retrieve
+	@param clusterId The clusterId of the current status update
+	@return ApiUpdateAccessRuleStatusRequest
 */
 func (a *AccessRulesApiService) UpdateAccessRuleStatus(ctx context.Context, accessRuleId int32, clusterId string) ApiUpdateAccessRuleStatusRequest {
 	return ApiUpdateAccessRuleStatusRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		accessRuleId: accessRuleId,
-		clusterId: clusterId,
+		clusterId:    clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *AccessRulesApiService) UpdateAccessRuleStatusExecute(r ApiUpdateAccessRuleStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AccessRulesApiService.UpdateAccessRuleStatus")

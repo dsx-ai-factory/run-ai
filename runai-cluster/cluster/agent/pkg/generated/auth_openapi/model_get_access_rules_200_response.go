@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -17,9 +19,9 @@ import (
 
 // GetAccessRules200Response struct for GetAccessRules200Response
 type GetAccessRules200Response struct {
-	TotalRecords int32 `json:"totalRecords"`
-	DisplayRecords int32 `json:"displayRecords"`
-	AccessRules []AccessRule `json:"accessRules"`
+	TotalRecords   int32        `json:"totalRecords"`
+	DisplayRecords int32        `json:"displayRecords"`
+	AccessRules    []AccessRule `json:"accessRules"`
 }
 
 // NewGetAccessRules200Response instantiates a new GetAccessRules200Response object
@@ -163,5 +165,3 @@ func (v *NullableGetAccessRules200Response) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

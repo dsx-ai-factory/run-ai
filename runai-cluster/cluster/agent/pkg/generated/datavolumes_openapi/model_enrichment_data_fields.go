@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -17,7 +19,7 @@ import (
 
 // EnrichmentDataFields struct for EnrichmentDataFields
 type EnrichmentDataFields struct {
-	ProjectName string `json:"projectName"`
+	ProjectName  string  `json:"projectName"`
 	DepartmentId *string `json:"departmentId,omitempty"`
 	// The id of the cluster.
 	ClusterId *string `json:"clusterId,omitempty"`
@@ -178,5 +180,3 @@ func (v *NullableEnrichmentDataFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

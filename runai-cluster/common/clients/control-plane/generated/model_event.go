@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,16 +18,16 @@ import (
 
 // Event struct for Event
 type Event struct {
-	Uid *string `json:"uid,omitempty"`
-	Type *string `json:"type,omitempty"`
-	Message *string `json:"message,omitempty"`
-	Reason *string `json:"reason,omitempty"`
-	CreationTimestamp *float32 `json:"creationTimestamp,omitempty"`
-	SourceComponent *string `json:"sourceComponent,omitempty"`
-	InvolvedObjUID *string `json:"involvedObjUID,omitempty"`
-	InvolvedObjKind *string `json:"involvedObjKind,omitempty"`
-	InvolvedObjName *string `json:"involvedObjName,omitempty"`
-	InvolvedObjNamespace *string `json:"involvedObjNamespace,omitempty"`
+	Uid                  *string  `json:"uid,omitempty"`
+	Type                 *string  `json:"type,omitempty"`
+	Message              *string  `json:"message,omitempty"`
+	Reason               *string  `json:"reason,omitempty"`
+	CreationTimestamp    *float32 `json:"creationTimestamp,omitempty"`
+	SourceComponent      *string  `json:"sourceComponent,omitempty"`
+	InvolvedObjUID       *string  `json:"involvedObjUID,omitempty"`
+	InvolvedObjKind      *string  `json:"involvedObjKind,omitempty"`
+	InvolvedObjName      *string  `json:"involvedObjName,omitempty"`
+	InvolvedObjNamespace *string  `json:"involvedObjNamespace,omitempty"`
 }
 
 // NewEvent instantiates a new Event object
@@ -435,5 +437,3 @@ func (v *NullableEvent) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

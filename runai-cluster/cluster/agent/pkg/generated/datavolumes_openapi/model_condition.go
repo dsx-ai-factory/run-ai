@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -193,6 +195,7 @@ func (o *Condition) HasLastTransitionTime() bool {
 func (o *Condition) SetLastTransitionTime(v time.Time) {
 	o.LastTransitionTime.Set(&v)
 }
+
 // SetLastTransitionTimeNil sets the value for LastTransitionTime to be an explicit nil
 func (o *Condition) SetLastTransitionTimeNil() {
 	o.LastTransitionTime.Set(nil)
@@ -258,5 +261,3 @@ func (v *NullableCondition) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

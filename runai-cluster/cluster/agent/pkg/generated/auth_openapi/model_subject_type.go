@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -16,15 +18,15 @@ import (
 	"fmt"
 )
 
-// SubjectType Subject type enum for access rules.  Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts. 
+// SubjectType Subject type enum for access rules.  Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
 type SubjectType string
 
 // List of SubjectType
 const (
-	SUBJECTTYPE_USER SubjectType = "user"
-	SUBJECTTYPE_APP SubjectType = "app"
+	SUBJECTTYPE_USER            SubjectType = "user"
+	SUBJECTTYPE_APP             SubjectType = "app"
 	SUBJECTTYPE_SERVICE_ACCOUNT SubjectType = "service-account"
-	SUBJECTTYPE_GROUP SubjectType = "group"
+	SUBJECTTYPE_GROUP           SubjectType = "group"
 )
 
 // All allowed values of SubjectType enum
@@ -113,4 +115,3 @@ func (v *NullableSubjectType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

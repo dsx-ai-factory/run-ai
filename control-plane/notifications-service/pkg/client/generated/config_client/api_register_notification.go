@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -18,13 +20,12 @@ import (
 	"net/url"
 )
 
-
 // RegisterNotificationAPIService RegisterNotificationAPI service
 type RegisterNotificationAPIService service
 
 type ApiCreateNotificationKindRequest struct {
-	ctx context.Context
-	ApiService *RegisterNotificationAPIService
+	ctx              context.Context
+	ApiService       *RegisterNotificationAPIService
 	notificationKind *NotificationKind
 }
 
@@ -42,24 +43,25 @@ CreateNotificationKind Method for CreateNotificationKind
 
 create a new notification kind
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateNotificationKindRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateNotificationKindRequest
 */
 func (a *RegisterNotificationAPIService) CreateNotificationKind(ctx context.Context) ApiCreateNotificationKindRequest {
 	return ApiCreateNotificationKindRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *RegisterNotificationAPIService) CreateNotificationKindExecute(r ApiCreateNotificationKindRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegisterNotificationAPIService.CreateNotificationKind")
@@ -124,8 +126,8 @@ func (a *RegisterNotificationAPIService) CreateNotificationKindExecute(r ApiCrea
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -135,8 +137,8 @@ func (a *RegisterNotificationAPIService) CreateNotificationKindExecute(r ApiCrea
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -154,10 +156,10 @@ func (a *RegisterNotificationAPIService) CreateNotificationKindExecute(r ApiCrea
 }
 
 type ApiDeleteNotificationKindRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *RegisterNotificationAPIService
-	category *string
-	type_ *string
+	category   *string
+	type_      *string
 }
 
 func (r ApiDeleteNotificationKindRequest) Category(category string) ApiDeleteNotificationKindRequest {
@@ -179,24 +181,25 @@ DeleteNotificationKind Method for DeleteNotificationKind
 
 delete a notification kind
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiDeleteNotificationKindRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiDeleteNotificationKindRequest
 */
 func (a *RegisterNotificationAPIService) DeleteNotificationKind(ctx context.Context) ApiDeleteNotificationKindRequest {
 	return ApiDeleteNotificationKindRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *RegisterNotificationAPIService) DeleteNotificationKindExecute(r ApiDeleteNotificationKindRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegisterNotificationAPIService.DeleteNotificationKind")
@@ -264,8 +267,8 @@ func (a *RegisterNotificationAPIService) DeleteNotificationKindExecute(r ApiDele
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -275,8 +278,8 @@ func (a *RegisterNotificationAPIService) DeleteNotificationKindExecute(r ApiDele
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -294,11 +297,11 @@ func (a *RegisterNotificationAPIService) DeleteNotificationKindExecute(r ApiDele
 }
 
 type ApiGetNotificationKindsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *RegisterNotificationAPIService
-	origin *string
-	category *string
-	type_ *string
+	origin     *string
+	category   *string
+	type_      *string
 }
 
 func (r ApiGetNotificationKindsRequest) Origin(origin string) ApiGetNotificationKindsRequest {
@@ -325,24 +328,25 @@ GetNotificationKinds Method for GetNotificationKinds
 
 get notification kinds
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetNotificationKindsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetNotificationKindsRequest
 */
 func (a *RegisterNotificationAPIService) GetNotificationKinds(ctx context.Context) ApiGetNotificationKindsRequest {
 	return ApiGetNotificationKindsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []NotificationKind
+//
+//	@return []NotificationKind
 func (a *RegisterNotificationAPIService) GetNotificationKindsExecute(r ApiGetNotificationKindsRequest) ([]NotificationKind, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []NotificationKind
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []NotificationKind
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegisterNotificationAPIService.GetNotificationKinds")
@@ -411,8 +415,8 @@ func (a *RegisterNotificationAPIService) GetNotificationKindsExecute(r ApiGetNot
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -430,8 +434,8 @@ func (a *RegisterNotificationAPIService) GetNotificationKindsExecute(r ApiGetNot
 }
 
 type ApiUpdateNotificationKindRequest struct {
-	ctx context.Context
-	ApiService *RegisterNotificationAPIService
+	ctx              context.Context
+	ApiService       *RegisterNotificationAPIService
 	notificationKind *NotificationKind
 }
 
@@ -449,24 +453,25 @@ UpdateNotificationKind Method for UpdateNotificationKind
 
 update a notification kind
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiUpdateNotificationKindRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiUpdateNotificationKindRequest
 */
 func (a *RegisterNotificationAPIService) UpdateNotificationKind(ctx context.Context) ApiUpdateNotificationKindRequest {
 	return ApiUpdateNotificationKindRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *RegisterNotificationAPIService) UpdateNotificationKindExecute(r ApiUpdateNotificationKindRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegisterNotificationAPIService.UpdateNotificationKind")
@@ -531,8 +536,8 @@ func (a *RegisterNotificationAPIService) UpdateNotificationKindExecute(r ApiUpda
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -542,8 +547,8 @@ func (a *RegisterNotificationAPIService) UpdateNotificationKindExecute(r ApiUpda
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

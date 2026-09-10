@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -25,8 +27,8 @@ type Probe struct {
 	// Minimum consecutive successes for the probe to be considered successful after having failed.
 	SuccessThreshold NullableInt32 `json:"successThreshold,omitempty"`
 	// When a probe fails, the number of times to try before giving up.
-	FailureThreshold NullableInt32 `json:"failureThreshold,omitempty"`
-	Handler NullableProbeHandler `json:"handler,omitempty"`
+	FailureThreshold NullableInt32        `json:"failureThreshold,omitempty"`
+	Handler          NullableProbeHandler `json:"handler,omitempty"`
 }
 
 // NewProbe instantiates a new Probe object
@@ -78,6 +80,7 @@ func (o *Probe) HasInitialDelaySeconds() bool {
 func (o *Probe) SetInitialDelaySeconds(v int32) {
 	o.InitialDelaySeconds.Set(&v)
 }
+
 // SetInitialDelaySecondsNil sets the value for InitialDelaySeconds to be an explicit nil
 func (o *Probe) SetInitialDelaySecondsNil() {
 	o.InitialDelaySeconds.Set(nil)
@@ -120,6 +123,7 @@ func (o *Probe) HasPeriodSeconds() bool {
 func (o *Probe) SetPeriodSeconds(v int32) {
 	o.PeriodSeconds.Set(&v)
 }
+
 // SetPeriodSecondsNil sets the value for PeriodSeconds to be an explicit nil
 func (o *Probe) SetPeriodSecondsNil() {
 	o.PeriodSeconds.Set(nil)
@@ -162,6 +166,7 @@ func (o *Probe) HasTimeoutSeconds() bool {
 func (o *Probe) SetTimeoutSeconds(v int32) {
 	o.TimeoutSeconds.Set(&v)
 }
+
 // SetTimeoutSecondsNil sets the value for TimeoutSeconds to be an explicit nil
 func (o *Probe) SetTimeoutSecondsNil() {
 	o.TimeoutSeconds.Set(nil)
@@ -204,6 +209,7 @@ func (o *Probe) HasSuccessThreshold() bool {
 func (o *Probe) SetSuccessThreshold(v int32) {
 	o.SuccessThreshold.Set(&v)
 }
+
 // SetSuccessThresholdNil sets the value for SuccessThreshold to be an explicit nil
 func (o *Probe) SetSuccessThresholdNil() {
 	o.SuccessThreshold.Set(nil)
@@ -246,6 +252,7 @@ func (o *Probe) HasFailureThreshold() bool {
 func (o *Probe) SetFailureThreshold(v int32) {
 	o.FailureThreshold.Set(&v)
 }
+
 // SetFailureThresholdNil sets the value for FailureThreshold to be an explicit nil
 func (o *Probe) SetFailureThresholdNil() {
 	o.FailureThreshold.Set(nil)
@@ -288,6 +295,7 @@ func (o *Probe) HasHandler() bool {
 func (o *Probe) SetHandler(v ProbeHandler) {
 	o.Handler.Set(&v)
 }
+
 // SetHandlerNil sets the value for Handler to be an explicit nil
 func (o *Probe) SetHandlerNil() {
 	o.Handler.Set(nil)
@@ -356,5 +364,3 @@ func (v *NullableProbe) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

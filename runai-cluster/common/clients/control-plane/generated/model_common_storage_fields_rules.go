@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,11 +18,11 @@ import (
 
 // CommonStorageFieldsRules struct for CommonStorageFieldsRules
 type CommonStorageFieldsRules struct {
-	DataVolume NullableDataVolumesRules `json:"dataVolume,omitempty"`
-	Pvc NullablePvcsRules `json:"pvc,omitempty"`
-	Git NullableGitsRules `json:"git,omitempty"`
-	ConfigMapVolume NullableConfigMapsRules `json:"configMapVolume,omitempty"`
-	SecretVolume NullableSecretsRules `json:"secretVolume,omitempty"`
+	DataVolume      NullableDataVolumesRules `json:"dataVolume,omitempty"`
+	Pvc             NullablePvcsRules        `json:"pvc,omitempty"`
+	Git             NullableGitsRules        `json:"git,omitempty"`
+	ConfigMapVolume NullableConfigMapsRules  `json:"configMapVolume,omitempty"`
+	SecretVolume    NullableSecretsRules     `json:"secretVolume,omitempty"`
 }
 
 // NewCommonStorageFieldsRules instantiates a new CommonStorageFieldsRules object
@@ -72,6 +74,7 @@ func (o *CommonStorageFieldsRules) HasDataVolume() bool {
 func (o *CommonStorageFieldsRules) SetDataVolume(v DataVolumesRules) {
 	o.DataVolume.Set(&v)
 }
+
 // SetDataVolumeNil sets the value for DataVolume to be an explicit nil
 func (o *CommonStorageFieldsRules) SetDataVolumeNil() {
 	o.DataVolume.Set(nil)
@@ -114,6 +117,7 @@ func (o *CommonStorageFieldsRules) HasPvc() bool {
 func (o *CommonStorageFieldsRules) SetPvc(v PvcsRules) {
 	o.Pvc.Set(&v)
 }
+
 // SetPvcNil sets the value for Pvc to be an explicit nil
 func (o *CommonStorageFieldsRules) SetPvcNil() {
 	o.Pvc.Set(nil)
@@ -156,6 +160,7 @@ func (o *CommonStorageFieldsRules) HasGit() bool {
 func (o *CommonStorageFieldsRules) SetGit(v GitsRules) {
 	o.Git.Set(&v)
 }
+
 // SetGitNil sets the value for Git to be an explicit nil
 func (o *CommonStorageFieldsRules) SetGitNil() {
 	o.Git.Set(nil)
@@ -198,6 +203,7 @@ func (o *CommonStorageFieldsRules) HasConfigMapVolume() bool {
 func (o *CommonStorageFieldsRules) SetConfigMapVolume(v ConfigMapsRules) {
 	o.ConfigMapVolume.Set(&v)
 }
+
 // SetConfigMapVolumeNil sets the value for ConfigMapVolume to be an explicit nil
 func (o *CommonStorageFieldsRules) SetConfigMapVolumeNil() {
 	o.ConfigMapVolume.Set(nil)
@@ -240,6 +246,7 @@ func (o *CommonStorageFieldsRules) HasSecretVolume() bool {
 func (o *CommonStorageFieldsRules) SetSecretVolume(v SecretsRules) {
 	o.SecretVolume.Set(&v)
 }
+
 // SetSecretVolumeNil sets the value for SecretVolume to be an explicit nil
 func (o *CommonStorageFieldsRules) SetSecretVolumeNil() {
 	o.SecretVolume.Set(nil)
@@ -305,5 +312,3 @@ func (v *NullableCommonStorageFieldsRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

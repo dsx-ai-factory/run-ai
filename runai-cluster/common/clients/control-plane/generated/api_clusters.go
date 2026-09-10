@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
@@ -97,15 +99,15 @@ type ClustersApi interface {
 	GetClusterByUuidExecute(r ClustersApiGetClusterByUuidRequest) (*DisplayedCluster, *http.Response, error)
 
 	/*
-		GetClusterInstallInfoByUuid Retrieve the installation instructions of a cluster by ID.
+			GetClusterInstallInfoByUuid Retrieve the installation instructions of a cluster by ID.
 
-		Use to retrieve installation instruction for a cluster by Universally Unique Identifier (UUID).
-	Supports clusters version 2.15 or above.
+			Use to retrieve installation instruction for a cluster by Universally Unique Identifier (UUID).
+		Supports clusters version 2.15 or above.
 
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-		@return ClustersApiGetClusterInstallInfoByUuidRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+			@return ClustersApiGetClusterInstallInfoByUuidRequest
 	*/
 	GetClusterInstallInfoByUuid(ctx context.Context, clusterUuid string) ClustersApiGetClusterInstallInfoByUuidRequest
 
@@ -190,15 +192,15 @@ type ClustersApi interface {
 	GetClustersExecute(r ClustersApiGetClustersRequest) ([]DisplayedCluster, *http.Response, error)
 
 	/*
-		GetInstallFile Get cluster installation file by id.
+			GetInstallFile Get cluster installation file by id.
 
-		Retrieve the installation values file of a cluster by Retrieve the installation values file of a given cluster by ID.
-	Supports clusters 2.13 and lower.
+			Retrieve the installation values file of a cluster by Retrieve the installation values file of a given cluster by ID.
+		Supports clusters 2.13 and lower.
 
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid Unique identifier of the cluster.
-		@return ClustersApiGetInstallFileRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@param clusterUuid Unique identifier of the cluster.
+			@return ClustersApiGetInstallFileRequest
 	*/
 	GetInstallFile(ctx context.Context, clusterUuid string) ClustersApiGetInstallFileRequest
 

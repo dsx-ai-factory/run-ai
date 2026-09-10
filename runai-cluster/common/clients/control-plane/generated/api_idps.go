@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 type IdpsApi interface {
 
 	/*
-	CreateIdp configure external idp
+		CreateIdp configure external idp
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return IdpsApiCreateIdpRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return IdpsApiCreateIdpRequest
 	*/
 	CreateIdp(ctx context.Context) IdpsApiCreateIdpRequest
 
@@ -35,11 +36,11 @@ type IdpsApi interface {
 	CreateIdpExecute(r IdpsApiCreateIdpRequest) (*IdpPostResponse, *http.Response, error)
 
 	/*
-	DeleteIdp delete external idp
+		DeleteIdp delete external idp
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param idp The alias of the idp
-	@return IdpsApiDeleteIdpRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param idp The alias of the idp
+		@return IdpsApiDeleteIdpRequest
 	*/
 	DeleteIdp(ctx context.Context, idp string) IdpsApiDeleteIdpRequest
 
@@ -47,11 +48,11 @@ type IdpsApi interface {
 	DeleteIdpExecute(r IdpsApiDeleteIdpRequest) (*http.Response, error)
 
 	/*
-	GetIdp get external idp
+		GetIdp get external idp
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param idp The alias of the idp
-	@return IdpsApiGetIdpRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param idp The alias of the idp
+		@return IdpsApiGetIdpRequest
 	*/
 	GetIdp(ctx context.Context, idp string) IdpsApiGetIdpRequest
 
@@ -60,11 +61,11 @@ type IdpsApi interface {
 	GetIdpExecute(r IdpsApiGetIdpRequest) (*Idp1, *http.Response, error)
 
 	/*
-	GetIdpMappers get idp mappers
+		GetIdpMappers get idp mappers
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param idp The alias of the idp
-	@return IdpsApiGetIdpMappersRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param idp The alias of the idp
+		@return IdpsApiGetIdpMappersRequest
 	*/
 	GetIdpMappers(ctx context.Context, idp string) IdpsApiGetIdpMappersRequest
 
@@ -73,11 +74,11 @@ type IdpsApi interface {
 	GetIdpMappersExecute(r IdpsApiGetIdpMappersRequest) (*Mappers, *http.Response, error)
 
 	/*
-	GetIdpResources get idp resources
+		GetIdpResources get idp resources
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param idp The alias of the idp
-	@return IdpsApiGetIdpResourcesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param idp The alias of the idp
+		@return IdpsApiGetIdpResourcesRequest
 	*/
 	GetIdpResources(ctx context.Context, idp string) IdpsApiGetIdpResourcesRequest
 
@@ -86,10 +87,10 @@ type IdpsApi interface {
 	GetIdpResourcesExecute(r IdpsApiGetIdpResourcesRequest) (*IdpResources, *http.Response, error)
 
 	/*
-	GetIdps get external idps
+		GetIdps get external idps
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return IdpsApiGetIdpsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return IdpsApiGetIdpsRequest
 	*/
 	GetIdps(ctx context.Context) IdpsApiGetIdpsRequest
 
@@ -98,11 +99,11 @@ type IdpsApi interface {
 	GetIdpsExecute(r IdpsApiGetIdpsRequest) ([]Idp1, *http.Response, error)
 
 	/*
-	UpdateIdp Update external idp
+		UpdateIdp Update external idp
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param idp The alias of the idp
-	@return IdpsApiUpdateIdpRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param idp The alias of the idp
+		@return IdpsApiUpdateIdpRequest
 	*/
 	UpdateIdp(ctx context.Context, idp string) IdpsApiUpdateIdpRequest
 
@@ -110,11 +111,11 @@ type IdpsApi interface {
 	UpdateIdpExecute(r IdpsApiUpdateIdpRequest) (*http.Response, error)
 
 	/*
-	UpdateIdpMappers update idp mappers
+		UpdateIdpMappers update idp mappers
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param idp The alias of the idp
-	@return IdpsApiUpdateIdpMappersRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param idp The alias of the idp
+		@return IdpsApiUpdateIdpMappersRequest
 	*/
 	UpdateIdpMappers(ctx context.Context, idp string) IdpsApiUpdateIdpMappersRequest
 
@@ -126,8 +127,8 @@ type IdpsApi interface {
 type IdpsApiService service
 
 type IdpsApiCreateIdpRequest struct {
-	ctx context.Context
-	ApiService IdpsApi
+	ctx                context.Context
+	ApiService         IdpsApi
 	idpCreationRequest *IdpCreationRequest
 }
 
@@ -144,24 +145,25 @@ func (r IdpsApiCreateIdpRequest) Execute() (*IdpPostResponse, *http.Response, er
 /*
 CreateIdp configure external idp
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return IdpsApiCreateIdpRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return IdpsApiCreateIdpRequest
 */
 func (a *IdpsApiService) CreateIdp(ctx context.Context) IdpsApiCreateIdpRequest {
 	return IdpsApiCreateIdpRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return IdpPostResponse
+//
+//	@return IdpPostResponse
 func (a *IdpsApiService) CreateIdpExecute(r IdpsApiCreateIdpRequest) (*IdpPostResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *IdpPostResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *IdpPostResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IdpsApiService.CreateIdp")
@@ -304,9 +306,9 @@ func (a *IdpsApiService) CreateIdpExecute(r IdpsApiCreateIdpRequest) (*IdpPostRe
 }
 
 type IdpsApiDeleteIdpRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService IdpsApi
-	idp string
+	idp        string
 }
 
 func (r IdpsApiDeleteIdpRequest) Execute() (*http.Response, error) {
@@ -316,24 +318,24 @@ func (r IdpsApiDeleteIdpRequest) Execute() (*http.Response, error) {
 /*
 DeleteIdp delete external idp
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param idp The alias of the idp
- @return IdpsApiDeleteIdpRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param idp The alias of the idp
+	@return IdpsApiDeleteIdpRequest
 */
 func (a *IdpsApiService) DeleteIdp(ctx context.Context, idp string) IdpsApiDeleteIdpRequest {
 	return IdpsApiDeleteIdpRequest{
 		ApiService: a,
-		ctx: ctx,
-		idp: idp,
+		ctx:        ctx,
+		idp:        idp,
 	}
 }
 
 // Execute executes the request
 func (a *IdpsApiService) DeleteIdpExecute(r IdpsApiDeleteIdpRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IdpsApiService.DeleteIdp")
@@ -443,9 +445,9 @@ func (a *IdpsApiService) DeleteIdpExecute(r IdpsApiDeleteIdpRequest) (*http.Resp
 }
 
 type IdpsApiGetIdpRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService IdpsApi
-	idp string
+	idp        string
 }
 
 func (r IdpsApiGetIdpRequest) Execute() (*Idp1, *http.Response, error) {
@@ -455,26 +457,27 @@ func (r IdpsApiGetIdpRequest) Execute() (*Idp1, *http.Response, error) {
 /*
 GetIdp get external idp
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param idp The alias of the idp
- @return IdpsApiGetIdpRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param idp The alias of the idp
+	@return IdpsApiGetIdpRequest
 */
 func (a *IdpsApiService) GetIdp(ctx context.Context, idp string) IdpsApiGetIdpRequest {
 	return IdpsApiGetIdpRequest{
 		ApiService: a,
-		ctx: ctx,
-		idp: idp,
+		ctx:        ctx,
+		idp:        idp,
 	}
 }
 
 // Execute executes the request
-//  @return Idp1
+//
+//	@return Idp1
 func (a *IdpsApiService) GetIdpExecute(r IdpsApiGetIdpRequest) (*Idp1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Idp1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Idp1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IdpsApiService.GetIdp")
@@ -593,9 +596,9 @@ func (a *IdpsApiService) GetIdpExecute(r IdpsApiGetIdpRequest) (*Idp1, *http.Res
 }
 
 type IdpsApiGetIdpMappersRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService IdpsApi
-	idp string
+	idp        string
 }
 
 func (r IdpsApiGetIdpMappersRequest) Execute() (*Mappers, *http.Response, error) {
@@ -605,26 +608,27 @@ func (r IdpsApiGetIdpMappersRequest) Execute() (*Mappers, *http.Response, error)
 /*
 GetIdpMappers get idp mappers
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param idp The alias of the idp
- @return IdpsApiGetIdpMappersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param idp The alias of the idp
+	@return IdpsApiGetIdpMappersRequest
 */
 func (a *IdpsApiService) GetIdpMappers(ctx context.Context, idp string) IdpsApiGetIdpMappersRequest {
 	return IdpsApiGetIdpMappersRequest{
 		ApiService: a,
-		ctx: ctx,
-		idp: idp,
+		ctx:        ctx,
+		idp:        idp,
 	}
 }
 
 // Execute executes the request
-//  @return Mappers
+//
+//	@return Mappers
 func (a *IdpsApiService) GetIdpMappersExecute(r IdpsApiGetIdpMappersRequest) (*Mappers, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Mappers
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Mappers
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IdpsApiService.GetIdpMappers")
@@ -743,9 +747,9 @@ func (a *IdpsApiService) GetIdpMappersExecute(r IdpsApiGetIdpMappersRequest) (*M
 }
 
 type IdpsApiGetIdpResourcesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService IdpsApi
-	idp string
+	idp        string
 }
 
 func (r IdpsApiGetIdpResourcesRequest) Execute() (*IdpResources, *http.Response, error) {
@@ -755,26 +759,27 @@ func (r IdpsApiGetIdpResourcesRequest) Execute() (*IdpResources, *http.Response,
 /*
 GetIdpResources get idp resources
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param idp The alias of the idp
- @return IdpsApiGetIdpResourcesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param idp The alias of the idp
+	@return IdpsApiGetIdpResourcesRequest
 */
 func (a *IdpsApiService) GetIdpResources(ctx context.Context, idp string) IdpsApiGetIdpResourcesRequest {
 	return IdpsApiGetIdpResourcesRequest{
 		ApiService: a,
-		ctx: ctx,
-		idp: idp,
+		ctx:        ctx,
+		idp:        idp,
 	}
 }
 
 // Execute executes the request
-//  @return IdpResources
+//
+//	@return IdpResources
 func (a *IdpsApiService) GetIdpResourcesExecute(r IdpsApiGetIdpResourcesRequest) (*IdpResources, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *IdpResources
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *IdpResources
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IdpsApiService.GetIdpResources")
@@ -893,7 +898,7 @@ func (a *IdpsApiService) GetIdpResourcesExecute(r IdpsApiGetIdpResourcesRequest)
 }
 
 type IdpsApiGetIdpsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService IdpsApi
 }
 
@@ -904,24 +909,25 @@ func (r IdpsApiGetIdpsRequest) Execute() ([]Idp1, *http.Response, error) {
 /*
 GetIdps get external idps
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return IdpsApiGetIdpsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return IdpsApiGetIdpsRequest
 */
 func (a *IdpsApiService) GetIdps(ctx context.Context) IdpsApiGetIdpsRequest {
 	return IdpsApiGetIdpsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Idp1
+//
+//	@return []Idp1
 func (a *IdpsApiService) GetIdpsExecute(r IdpsApiGetIdpsRequest) ([]Idp1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Idp1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Idp1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IdpsApiService.GetIdps")
@@ -1029,9 +1035,9 @@ func (a *IdpsApiService) GetIdpsExecute(r IdpsApiGetIdpsRequest) ([]Idp1, *http.
 }
 
 type IdpsApiUpdateIdpRequest struct {
-	ctx context.Context
-	ApiService IdpsApi
-	idp string
+	ctx                context.Context
+	ApiService         IdpsApi
+	idp                string
 	idpCreationRequest *IdpCreationRequest
 }
 
@@ -1048,24 +1054,24 @@ func (r IdpsApiUpdateIdpRequest) Execute() (*http.Response, error) {
 /*
 UpdateIdp Update external idp
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param idp The alias of the idp
- @return IdpsApiUpdateIdpRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param idp The alias of the idp
+	@return IdpsApiUpdateIdpRequest
 */
 func (a *IdpsApiService) UpdateIdp(ctx context.Context, idp string) IdpsApiUpdateIdpRequest {
 	return IdpsApiUpdateIdpRequest{
 		ApiService: a,
-		ctx: ctx,
-		idp: idp,
+		ctx:        ctx,
+		idp:        idp,
 	}
 }
 
 // Execute executes the request
 func (a *IdpsApiService) UpdateIdpExecute(r IdpsApiUpdateIdpRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IdpsApiService.UpdateIdp")
@@ -1190,10 +1196,10 @@ func (a *IdpsApiService) UpdateIdpExecute(r IdpsApiUpdateIdpRequest) (*http.Resp
 }
 
 type IdpsApiUpdateIdpMappersRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService IdpsApi
-	idp string
-	mappers *Mappers
+	idp        string
+	mappers    *Mappers
 }
 
 // map of our mappers and their source in the external idp
@@ -1209,24 +1215,24 @@ func (r IdpsApiUpdateIdpMappersRequest) Execute() (*http.Response, error) {
 /*
 UpdateIdpMappers update idp mappers
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param idp The alias of the idp
- @return IdpsApiUpdateIdpMappersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param idp The alias of the idp
+	@return IdpsApiUpdateIdpMappersRequest
 */
 func (a *IdpsApiService) UpdateIdpMappers(ctx context.Context, idp string) IdpsApiUpdateIdpMappersRequest {
 	return IdpsApiUpdateIdpMappersRequest{
 		ApiService: a,
-		ctx: ctx,
-		idp: idp,
+		ctx:        ctx,
+		idp:        idp,
 	}
 }
 
 // Execute executes the request
 func (a *IdpsApiService) UpdateIdpMappersExecute(r IdpsApiUpdateIdpMappersRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "IdpsApiService.UpdateIdpMappers")

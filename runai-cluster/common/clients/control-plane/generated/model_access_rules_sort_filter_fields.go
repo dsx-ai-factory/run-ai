@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,16 +22,16 @@ type AccessRulesSortFilterFields string
 
 // List of AccessRulesSortFilterFields
 const (
-	ACCESSRULESSORTFILTERFIELDS_SUBJECT_ID AccessRulesSortFilterFields = "subjectId"
+	ACCESSRULESSORTFILTERFIELDS_SUBJECT_ID   AccessRulesSortFilterFields = "subjectId"
 	ACCESSRULESSORTFILTERFIELDS_SUBJECT_TYPE AccessRulesSortFilterFields = "subjectType"
-	ACCESSRULESSORTFILTERFIELDS_ROLE_ID AccessRulesSortFilterFields = "roleId"
-	ACCESSRULESSORTFILTERFIELDS_SCOPE_ID AccessRulesSortFilterFields = "scopeId"
-	ACCESSRULESSORTFILTERFIELDS_SCOPE_TYPE AccessRulesSortFilterFields = "scopeType"
-	ACCESSRULESSORTFILTERFIELDS_ROLE_NAME AccessRulesSortFilterFields = "roleName"
-	ACCESSRULESSORTFILTERFIELDS_SCOPE_NAME AccessRulesSortFilterFields = "scopeName"
-	ACCESSRULESSORTFILTERFIELDS_CREATED_AT AccessRulesSortFilterFields = "createdAt"
-	ACCESSRULESSORTFILTERFIELDS_DELETED_AT AccessRulesSortFilterFields = "deletedAt"
-	ACCESSRULESSORTFILTERFIELDS_CREATED_BY AccessRulesSortFilterFields = "createdBy"
+	ACCESSRULESSORTFILTERFIELDS_ROLE_ID      AccessRulesSortFilterFields = "roleId"
+	ACCESSRULESSORTFILTERFIELDS_SCOPE_ID     AccessRulesSortFilterFields = "scopeId"
+	ACCESSRULESSORTFILTERFIELDS_SCOPE_TYPE   AccessRulesSortFilterFields = "scopeType"
+	ACCESSRULESSORTFILTERFIELDS_ROLE_NAME    AccessRulesSortFilterFields = "roleName"
+	ACCESSRULESSORTFILTERFIELDS_SCOPE_NAME   AccessRulesSortFilterFields = "scopeName"
+	ACCESSRULESSORTFILTERFIELDS_CREATED_AT   AccessRulesSortFilterFields = "createdAt"
+	ACCESSRULESSORTFILTERFIELDS_DELETED_AT   AccessRulesSortFilterFields = "deletedAt"
+	ACCESSRULESSORTFILTERFIELDS_CREATED_BY   AccessRulesSortFilterFields = "createdBy"
 )
 
 // All allowed values of AccessRulesSortFilterFields enum
@@ -124,4 +126,3 @@ func (v *NullableAccessRulesSortFilterFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

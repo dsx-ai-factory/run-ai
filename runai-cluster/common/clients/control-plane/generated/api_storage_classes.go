@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,17 +21,16 @@ import (
 	"strings"
 )
 
-
 type StorageClassesApi interface {
 
 	/*
-	CreateStorageClass Create a storageClass.
+		CreateStorageClass Create a storageClass.
 
-	Use to create a storageClass object in a cluster using the cluster's Universally Unique Identifier (UUID).
+		Use to create a storageClass object in a cluster using the cluster's Universally Unique Identifier (UUID).
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return StorageClassesApiCreateStorageClassRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return StorageClassesApiCreateStorageClassRequest
 	*/
 	CreateStorageClass(ctx context.Context, uuid string) StorageClassesApiCreateStorageClassRequest
 
@@ -38,14 +39,14 @@ type StorageClassesApi interface {
 	CreateStorageClassExecute(r StorageClassesApiCreateStorageClassRequest) (*StorageClass, *http.Response, error)
 
 	/*
-	DeleteStorageClass Delete a storageClass.
+		DeleteStorageClass Delete a storageClass.
 
-	Use to delete a storageClass by Universally Unique Identifier (UUID).
+		Use to delete a storageClass by Universally Unique Identifier (UUID).
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@param storageClassName Unique identifier of the storageClass
-	@return StorageClassesApiDeleteStorageClassRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@param storageClassName Unique identifier of the storageClass
+		@return StorageClassesApiDeleteStorageClassRequest
 	*/
 	DeleteStorageClass(ctx context.Context, uuid string, storageClassName string) StorageClassesApiDeleteStorageClassRequest
 
@@ -53,13 +54,13 @@ type StorageClassesApi interface {
 	DeleteStorageClassExecute(r StorageClassesApiDeleteStorageClassRequest) (*http.Response, error)
 
 	/*
-	GetStorageClasses Get all storageClasses from a cluster.
+		GetStorageClasses Get all storageClasses from a cluster.
 
-	Retrieve a list of storageClass names by Universally Unique Identifier (UUID) of the cluster.
+		Retrieve a list of storageClass names by Universally Unique Identifier (UUID) of the cluster.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return StorageClassesApiGetStorageClassesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return StorageClassesApiGetStorageClassesRequest
 	*/
 	GetStorageClasses(ctx context.Context, uuid string) StorageClassesApiGetStorageClassesRequest
 
@@ -68,13 +69,13 @@ type StorageClassesApi interface {
 	GetStorageClassesExecute(r StorageClassesApiGetStorageClassesRequest) ([]StorageClass, *http.Response, error)
 
 	/*
-	SyncStorageClass Sync storageClass to a cluster.
+		SyncStorageClass Sync storageClass to a cluster.
 
-	Use to sync the storageClass to a cluster.
+		Use to sync the storageClass to a cluster.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return StorageClassesApiSyncStorageClassRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return StorageClassesApiSyncStorageClassRequest
 	*/
 	SyncStorageClass(ctx context.Context, uuid string) StorageClassesApiSyncStorageClassRequest
 
@@ -83,14 +84,14 @@ type StorageClassesApi interface {
 	SyncStorageClassExecute(r StorageClassesApiSyncStorageClassRequest) (*StorageClass, *http.Response, error)
 
 	/*
-	UpdateStorageClass Update a storageClass.
+		UpdateStorageClass Update a storageClass.
 
-	Use to update the details of a storageClass.
+		Use to update the details of a storageClass.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@param storageClassName Unique identifier of the storageClass
-	@return StorageClassesApiUpdateStorageClassRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@param storageClassName Unique identifier of the storageClass
+		@return StorageClassesApiUpdateStorageClassRequest
 	*/
 	UpdateStorageClass(ctx context.Context, uuid string, storageClassName string) StorageClassesApiUpdateStorageClassRequest
 
@@ -103,9 +104,9 @@ type StorageClassesApi interface {
 type StorageClassesApiService service
 
 type StorageClassesApiCreateStorageClassRequest struct {
-	ctx context.Context
-	ApiService StorageClassesApi
-	uuid string
+	ctx          context.Context
+	ApiService   StorageClassesApi
+	uuid         string
 	storageClass *StorageClass
 }
 
@@ -123,26 +124,27 @@ CreateStorageClass Create a storageClass.
 
 Use to create a storageClass object in a cluster using the cluster's Universally Unique Identifier (UUID).
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return StorageClassesApiCreateStorageClassRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return StorageClassesApiCreateStorageClassRequest
 */
 func (a *StorageClassesApiService) CreateStorageClass(ctx context.Context, uuid string) StorageClassesApiCreateStorageClassRequest {
 	return StorageClassesApiCreateStorageClassRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return StorageClass
+//
+//	@return StorageClass
 func (a *StorageClassesApiService) CreateStorageClassExecute(r StorageClassesApiCreateStorageClassRequest) (*StorageClass, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *StorageClass
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *StorageClass
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.CreateStorageClass")
@@ -231,13 +233,13 @@ func (a *StorageClassesApiService) CreateStorageClassExecute(r StorageClassesApi
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -254,9 +256,9 @@ func (a *StorageClassesApiService) CreateStorageClassExecute(r StorageClassesApi
 }
 
 type StorageClassesApiDeleteStorageClassRequest struct {
-	ctx context.Context
-	ApiService StorageClassesApi
-	uuid string
+	ctx              context.Context
+	ApiService       StorageClassesApi
+	uuid             string
 	storageClassName string
 }
 
@@ -269,16 +271,16 @@ DeleteStorageClass Delete a storageClass.
 
 Use to delete a storageClass by Universally Unique Identifier (UUID).
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param storageClassName Unique identifier of the storageClass
- @return StorageClassesApiDeleteStorageClassRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param storageClassName Unique identifier of the storageClass
+	@return StorageClassesApiDeleteStorageClassRequest
 */
 func (a *StorageClassesApiService) DeleteStorageClass(ctx context.Context, uuid string, storageClassName string) StorageClassesApiDeleteStorageClassRequest {
 	return StorageClassesApiDeleteStorageClassRequest{
-		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ApiService:       a,
+		ctx:              ctx,
+		uuid:             uuid,
 		storageClassName: storageClassName,
 	}
 }
@@ -286,9 +288,9 @@ func (a *StorageClassesApiService) DeleteStorageClass(ctx context.Context, uuid 
 // Execute executes the request
 func (a *StorageClassesApiService) DeleteStorageClassExecute(r StorageClassesApiDeleteStorageClassRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.DeleteStorageClass")
@@ -363,13 +365,13 @@ func (a *StorageClassesApiService) DeleteStorageClassExecute(r StorageClassesApi
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -377,9 +379,9 @@ func (a *StorageClassesApiService) DeleteStorageClassExecute(r StorageClassesApi
 }
 
 type StorageClassesApiGetStorageClassesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService StorageClassesApi
-	uuid string
+	uuid       string
 }
 
 func (r StorageClassesApiGetStorageClassesRequest) Execute() ([]StorageClass, *http.Response, error) {
@@ -391,26 +393,27 @@ GetStorageClasses Get all storageClasses from a cluster.
 
 Retrieve a list of storageClass names by Universally Unique Identifier (UUID) of the cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return StorageClassesApiGetStorageClassesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return StorageClassesApiGetStorageClassesRequest
 */
 func (a *StorageClassesApiService) GetStorageClasses(ctx context.Context, uuid string) StorageClassesApiGetStorageClassesRequest {
 	return StorageClassesApiGetStorageClassesRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []StorageClass
+//
+//	@return []StorageClass
 func (a *StorageClassesApiService) GetStorageClassesExecute(r StorageClassesApiGetStorageClassesRequest) ([]StorageClass, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []StorageClass
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []StorageClass
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.GetStorageClasses")
@@ -484,13 +487,13 @@ func (a *StorageClassesApiService) GetStorageClassesExecute(r StorageClassesApiG
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -507,9 +510,9 @@ func (a *StorageClassesApiService) GetStorageClassesExecute(r StorageClassesApiG
 }
 
 type StorageClassesApiSyncStorageClassRequest struct {
-	ctx context.Context
-	ApiService StorageClassesApi
-	uuid string
+	ctx          context.Context
+	ApiService   StorageClassesApi
+	uuid         string
 	storageClass *[]StorageClass
 }
 
@@ -527,26 +530,27 @@ SyncStorageClass Sync storageClass to a cluster.
 
 Use to sync the storageClass to a cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return StorageClassesApiSyncStorageClassRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return StorageClassesApiSyncStorageClassRequest
 */
 func (a *StorageClassesApiService) SyncStorageClass(ctx context.Context, uuid string) StorageClassesApiSyncStorageClassRequest {
 	return StorageClassesApiSyncStorageClassRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return StorageClass
+//
+//	@return StorageClass
 func (a *StorageClassesApiService) SyncStorageClassExecute(r StorageClassesApiSyncStorageClassRequest) (*StorageClass, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *StorageClass
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *StorageClass
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.SyncStorageClass")
@@ -635,13 +639,13 @@ func (a *StorageClassesApiService) SyncStorageClassExecute(r StorageClassesApiSy
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -658,11 +662,11 @@ func (a *StorageClassesApiService) SyncStorageClassExecute(r StorageClassesApiSy
 }
 
 type StorageClassesApiUpdateStorageClassRequest struct {
-	ctx context.Context
-	ApiService StorageClassesApi
-	uuid string
+	ctx              context.Context
+	ApiService       StorageClassesApi
+	uuid             string
 	storageClassName string
-	storageClass *StorageClass
+	storageClass     *StorageClass
 }
 
 func (r StorageClassesApiUpdateStorageClassRequest) StorageClass(storageClass StorageClass) StorageClassesApiUpdateStorageClassRequest {
@@ -679,28 +683,29 @@ UpdateStorageClass Update a storageClass.
 
 Use to update the details of a storageClass.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param storageClassName Unique identifier of the storageClass
- @return StorageClassesApiUpdateStorageClassRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param storageClassName Unique identifier of the storageClass
+	@return StorageClassesApiUpdateStorageClassRequest
 */
 func (a *StorageClassesApiService) UpdateStorageClass(ctx context.Context, uuid string, storageClassName string) StorageClassesApiUpdateStorageClassRequest {
 	return StorageClassesApiUpdateStorageClassRequest{
-		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ApiService:       a,
+		ctx:              ctx,
+		uuid:             uuid,
 		storageClassName: storageClassName,
 	}
 }
 
 // Execute executes the request
-//  @return []StorageClass
+//
+//	@return []StorageClass
 func (a *StorageClassesApiService) UpdateStorageClassExecute(r StorageClassesApiUpdateStorageClassRequest) ([]StorageClass, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []StorageClass
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []StorageClass
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.UpdateStorageClass")
@@ -780,13 +785,13 @@ func (a *StorageClassesApiService) UpdateStorageClassExecute(r StorageClassesApi
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

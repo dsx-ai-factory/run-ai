@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,8 +19,8 @@ import (
 // UserCreationRequest struct for UserCreationRequest
 type UserCreationRequest struct {
 	// Email address of the user.
-	Email string `json:"email"`
-	Roles []Role `json:"roles"`
+	Email      string          `json:"email"`
+	Roles      []Role          `json:"roles"`
 	EntityType *AuthEntityType `json:"entityType,omitempty"`
 	// The id of the tenant.
 	TenantId *int32 `json:"tenantId,omitempty"`
@@ -26,9 +28,9 @@ type UserCreationRequest struct {
 	Password string `json:"password"`
 	// True if the user is requested to change his password upon next login.
 	NeedToChangePassword *bool `json:"needToChangePassword,omitempty"`
-	PermitAllClusters *bool `json:"permitAllClusters,omitempty"`
+	PermitAllClusters    *bool `json:"permitAllClusters,omitempty"`
 	// Unique identifier of the user
-	UserId *string `json:"userId,omitempty"`
+	UserId            *string  `json:"userId,omitempty"`
 	PermittedClusters []string `json:"permittedClusters,omitempty"`
 }
 
@@ -383,5 +385,3 @@ func (v *NullableUserCreationRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

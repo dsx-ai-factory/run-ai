@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -16,7 +18,7 @@ import (
 
 // CreateCluster struct for CreateCluster
 type CreateCluster struct {
-	Name string `json:"name"`
+	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 }
 
@@ -140,5 +142,3 @@ func (v *NullableCreateCluster) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
