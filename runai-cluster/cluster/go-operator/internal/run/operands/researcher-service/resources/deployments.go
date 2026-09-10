@@ -45,6 +45,15 @@ func (d *DeploymentResource) OperandName() string {
 }
 
 func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) {
+	if !d.Enabled() {
+		return &appsv1.Deployment{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      DeploymentName,
+				Namespace: d.runaiConfig.GetNamespace(),
+			},
+		}, nil
+	}
+
 	controlPlane := d.runaiConfig.Spec.Internal.Global.ControlPlane
 	replicas := d.runaiConfig.Spec.ResearcherService.Replicas
 
@@ -197,5 +206,5 @@ func (d *DeploymentResource) Status(ctx context.Context) error {
 }
 
 func (d *DeploymentResource) Enabled() bool {
-	return true
+	return componentEnabled
 }

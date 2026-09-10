@@ -12,6 +12,7 @@ import (
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,6 +38,15 @@ func (s *ServiceResource) OperandName() string {
 
 func (s *ServiceResource) Object(ctx context.Context) (client.Object, error) {
 	namespace := s.runaiConfig.Namespace
+
+	if !s.Enabled() {
+		return &v1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      DeploymentName,
+				Namespace: namespace,
+			},
+		}, nil
+	}
 
 	service := &v1.Service{}
 
@@ -101,5 +111,5 @@ func (s *ServiceResource) Status(ctx context.Context) error {
 }
 
 func (s *ServiceResource) Enabled() bool {
-	return true
+	return componentEnabled
 }
