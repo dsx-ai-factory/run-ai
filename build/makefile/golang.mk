@@ -40,7 +40,6 @@ GINKGO_LOCAL_RUN_ID:=$(shell printf '%s' $$$$)
 GINKGO_CONTAINER_NAME?=runai-local-${GINKGO_LOCAL_RUN_ID}-${SERVICE_NAME}-test
 endif
 GINKGO_DOCKER_RUN_ARGS=--name=${GINKGO_CONTAINER_NAME}
-GINKGO_CONTAINER_CLEANUP_COMMAND=docker rm -f ${GINKGO_CONTAINER_NAME} >/dev/null 2>&1 || true
 
 # Extra flags passed to `go test` (e.g. -short, -count=1, -tags=...).
 GO_TEST_FLAGS?=-short
@@ -179,16 +178,8 @@ test-ginkgo-privileged: git-config-command gocache go-list
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Running gikngo unit-tests for ${SERVICE_NAME}" ${BASE_CONSOLE}
 	@ ${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} Using privileged container, use with caution!" ${BASE_CONSOLE}
 	@ cleanup_ginkgo_container() { \
-		${GINKGO_CONTAINER_CLEANUP_COMMAND}; \
-		remaining=10; \
-		while [ "$$remaining" -gt 0 ]; do \
-			if ! docker container inspect "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1; then \
-				return 0; \
-			fi; \
-			remaining=$$((remaining - 1)); \
-			sleep 1; \
-		done; \
-		! docker container inspect "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1; \
+		docker rm -f "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1 || \
+			! docker container inspect "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1; \
 	}; \
 	handle_signal() { \
 		trap - EXIT INT TERM; \
@@ -217,6 +208,7 @@ test-ginkgo-privileged: git-config-command gocache go-list
 	cleanup_status=$$?; \
 	if [ "$$test_status" -ne 0 ] || [ "$$cleanup_status" -ne 0 ]; then \
 		${FAILURE_MESSAGE_HANDLER}; \
+		exit 1; \
 	fi
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: test-ginkgo-privileged
