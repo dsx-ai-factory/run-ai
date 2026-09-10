@@ -10,6 +10,9 @@ import DOCS from "@/constants/docs";
 vi.mock("@/constants/docs", () => ({
   default: { SUPPORT: { URL: "", LABEL: "Run:ai support" } },
 }));
+
+// DOCS is declared `as const`, so the mock has to be reached through a mutable view.
+const docsSupport = DOCS.SUPPORT as { URL: string; LABEL: string };
 import { ReportStatus } from "@/swagger-models/org-unit-service-client";
 
 describe("reportBulkDeleteCopy", () => {
@@ -57,18 +60,18 @@ describe("isReportDeletionInProgress", () => {
 
 describe("reportBulkDeleteCopy.requestFailure", () => {
   afterEach(() => {
-    DOCS.SUPPORT.URL = "";
+    docsSupport.URL = "";
   });
 
   it("points at support when a support URL is configured", () => {
-    DOCS.SUPPORT.URL = "https://support.example.com";
+    docsSupport.URL = "https://support.example.com";
     expect(reportBulkDeleteCopy.requestFailure()).toBe(
       "Reports couldn't be deleted. Try again. If the issue persists, contact Run:ai support.",
     );
   });
 
   it("omits the support sentence when no URL is configured", () => {
-    DOCS.SUPPORT.URL = "";
+    docsSupport.URL = "";
     expect(reportBulkDeleteCopy.requestFailure()).toBe("Reports couldn't be deleted. Try again.");
   });
 });

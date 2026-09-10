@@ -13,7 +13,7 @@ import { reportIndexColumns, type IReportTable } from "@/table-models/report.tab
 import type { IFilterBy } from "@/models/filter.model";
 import { ReportStatus } from "@/swagger-models/org-unit-service-client";
 
-function mountActions(selectedRowsAmount: number, status = ReportStatus.Ready) {
+function mountActions(selectedRowsAmount: number, status: ReportStatus = ReportStatus.Ready) {
   return mount(ReportPageActions, {
     global: {
       plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
