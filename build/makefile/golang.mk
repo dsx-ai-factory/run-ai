@@ -177,34 +177,39 @@ test-ginkgo-privileged: DOCKER_RUN_ARGS=${GINKGO_DOCKER_RUN_ARGS}
 test-ginkgo-privileged: git-config-command gocache go-list
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Running gikngo unit-tests for ${SERVICE_NAME}" ${BASE_CONSOLE}
 	@ ${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} Using privileged container, use with caution!" ${BASE_CONSOLE}
-	@ cleanup_ginkgo_container() { \
+	@ remove_ginkgo_container() { \
 		container_ids=$$(docker container ls --all --quiet --filter "name=^/${GINKGO_CONTAINER_NAME}$$") || return $$?; \
 		[ -z "$$container_ids" ] || docker rm -f "${GINKGO_CONTAINER_NAME}" >/dev/null; \
 	}; \
-	handle_signal() { \
+	teardown_ginkgo_run() { \
 		trap - EXIT INT TERM; \
-		cleanup_ginkgo_container; \
+		remove_ginkgo_container; \
+	}; \
+	stop_ginkgo_client() { \
 		if [ -n "$${docker_pid:-}" ]; then \
 			kill -TERM "$$docker_pid" >/dev/null 2>&1 || true; \
 			wait "$$docker_pid" >/dev/null 2>&1 || true; \
 		fi; \
+	}; \
+	handle_signal() { \
+		teardown_ginkgo_run; \
+		stop_ginkgo_client; \
 		exit "$$1"; \
 	}; \
-	cleanup_ginkgo_container; \
+	remove_ginkgo_container; \
 	cleanup_status=$$?; \
 	if [ "$$cleanup_status" -ne 0 ]; then \
 		${FAILURE_MESSAGE_HANDLER}; \
 		exit 1; \
 	fi; \
-	trap 'cleanup_ginkgo_container' EXIT; \
+	trap 'teardown_ginkgo_run' EXIT; \
 	trap 'handle_signal 130' INT; \
 	trap 'handle_signal 143' TERM; \
 	${DOCKER_GINKGO_COMMAND_PRIVILEGED} & \
 	docker_pid=$$!; \
 	wait "$$docker_pid"; \
 	test_status=$$?; \
-	trap - EXIT INT TERM; \
-	cleanup_ginkgo_container; \
+	teardown_ginkgo_run; \
 	cleanup_status=$$?; \
 	if [ "$$test_status" -ne 0 ] || [ "$$cleanup_status" -ne 0 ]; then \
 		${FAILURE_MESSAGE_HANDLER}; \
