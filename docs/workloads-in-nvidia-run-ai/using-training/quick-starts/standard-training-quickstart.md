@@ -63,7 +63,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 8.  Click **CONTINUE**
 
     In the next step:
-9. Under **Environment**, enter the **Image URL** - `runai.jfrog.io/demo/quickstart`
+9. Under **Environment**, enter the **Image URL** - `nvcr.io/nvidia/pytorch:25.06-py3`
 10. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘one-gpu’** compute resource for your workload.
     * If ‘one-gpu’ is not displayed, follow the below steps to create a one-time compute resource configuration:
       * Set **GPU devices** per pod - 1
@@ -89,7 +89,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
     * Click **+NEW ENVIRONMENT**
     * Enter quick-start as the **name** for the environment. The name must be unique.
-    * Enter `runai.jfrog.io/demo/quickstart` as the **Image URL**
+    * Enter `nvcr.io/nvidia/pytorch:25.06-py3` as the **Image URL**
     * Click **CREATE ENVIRONMENT**
 
     The newly created environment will be selected automatically
@@ -114,7 +114,7 @@ Copy the following command to your terminal. Make sure to update the below with 
 
 ```sh
 runai project set "project-name"
-runai training submit "workload-name" -i runai.jfrog.io/demo/quickstart -g 1
+runai training submit "workload-name" -i nvcr.io/nvidia/pytorch:25.06-py3 -g 1
 ```
 
 </Tab>
@@ -132,7 +132,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/training' \
     "projectId": "<PROJECT-ID>", 
     "clusterId": "<CLUSTER-UUID>", 
     "spec": {
-        "image": "runai.jfrog.io/demo/quickstart", 
+        "image": "nvcr.io/nvidia/pytorch:25.06-py3",
         "compute": { 
             "gpuDevicesRequest": 1
         } 

@@ -31,11 +31,11 @@ var _ = Describe("common image parse", func() {
 	})
 
 	It("parse image string 2", func(ctx context.Context) {
-		imageStr := "gcr.io/run-ai-lab/init-ca-base:0.0.0-1000157.v217-run-19582-4d6ccce"
+		imageStr := "registry.example.com/init-ca-base:0.0.0-1000157.v217-run-19582-4d6ccce"
 		imageObj, err := imageparser.ParseImageString(imageStr)
 		Expect(err).To(BeNil())
-		Expect(*imageObj.Registry).To(Equal("gcr.io"))
-		Expect(*imageObj.Name).To(Equal("run-ai-lab/init-ca-base"))
+		Expect(*imageObj.Registry).To(Equal("registry.example.com"))
+		Expect(*imageObj.Name).To(Equal("init-ca-base"))
 		Expect(*imageObj.Tag).To(Equal("0.0.0-1000157.v217-run-19582-4d6ccce"))
 		Expect(imageObj.PullPolicy).To(Equal(v1.PullAlways))
 	})
