@@ -178,8 +178,8 @@ test-ginkgo-privileged: git-config-command gocache go-list
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Running gikngo unit-tests for ${SERVICE_NAME}" ${BASE_CONSOLE}
 	@ ${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} Using privileged container, use with caution!" ${BASE_CONSOLE}
 	@ cleanup_ginkgo_container() { \
-		docker rm -f "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1 || \
-			! docker container inspect "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1; \
+		container_ids=$$(docker container ls --all --quiet --filter "name=^/${GINKGO_CONTAINER_NAME}$$") || return $$?; \
+		[ -z "$$container_ids" ] || docker rm -f "${GINKGO_CONTAINER_NAME}" >/dev/null; \
 	}; \
 	handle_signal() { \
 		trap - EXIT INT TERM; \
