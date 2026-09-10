@@ -202,6 +202,7 @@ generate-integration-test-smtp-openapi-client:
 		rm -rf ./git_push.sh  ./test ./go.mod ./go.sum  ./.travis.yml ./.openapi-generator* ./.gitignore && \
 		go mod tidy && \
 		go fmt ./...
+	sh "$(shell git rev-parse --show-toplevel)/build/makefile/scripts/spdx-header-openapi.sh" integration_tests/mailhog/mailhogclient
 
 INTEG_TESTS_PACKAGE=./integration_tests/tests/
 
