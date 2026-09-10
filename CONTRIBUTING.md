@@ -119,7 +119,6 @@ Run:ai accepts pull requests targeting `main` or the live release branch (today:
 
 - **Main-first is preferred** - Open your PR against `main` so the fix flows to the supported release via the `backport/release-3.0` label that a maintainer applies after merge, rather than landing only on `main` and getting forgotten on the release branch.
 - **Direct release-branch PRs are accepted** - When you can only reproduce or test on the version you're running, open the PR against `release-3.0`; during review, a maintainer will help you decide whether the fix should also be cherry-picked to `main`.
-- **How backports work** - When a maintainer applies the `backport/release-3.0` label to your merged PR, an automated workflow opens a follow-up PR cherry-picking the merge commit onto the release branch. If the cherry-pick conflicts, the bot leaves a `needs-manual-backport/release-3.0` label and a maintainer takes it from there. You don't need to open backport PRs yourself.
 
 ---
 
