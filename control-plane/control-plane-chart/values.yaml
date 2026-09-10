@@ -1359,6 +1359,11 @@ keycloakx:
         capabilities:
           drop:
             - ALL
+    {{- $fipsMode := .Values.global.fipsMode | default "off" }}
+    {{- if kindIs "bool" $fipsMode }}
+    {{- $fipsMode = ternary "on" "off" $fipsMode }}
+    {{- end }}
+    {{- if ne $fipsMode "off" }}
     - name: keycloak-copy-fips-providers
       image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
       imagePullPolicy: IfNotPresent
@@ -1388,6 +1393,7 @@ keycloakx:
         capabilities:
           drop:
             - ALL
+    {{- end }}
     - name: keycloak-copy-extensions
       image: {{ .Values.global.image.registry }}/keycloak-extensions:{{ .Values.global.image.tag }}
       imagePullPolicy: IfNotPresent
@@ -1661,7 +1667,7 @@ thanos:
     name: thanos-querier
     extraEnvVars:
       - name: GODEBUG
-        value: fips140={{ .Values.global.fipsMode | default "off" }}
+        value: '{{- $fipsMode := .Values.global.fipsMode | default "off" -}}{{- if kindIs "bool" $fipsMode -}}{{- $fipsMode = ternary "on" "off" $fipsMode -}}{{- end -}}fips140={{ $fipsMode }}'
     replicaLabel:
       - prometheus_replica
       - tenant_id
@@ -1727,7 +1733,7 @@ thanos:
     name: thanos-receive
     extraEnvVars:
       - name: GODEBUG
-        value: fips140={{ .Values.global.fipsMode | default "off" }}
+        value: '{{- $fipsMode := .Values.global.fipsMode | default "off" -}}{{- if kindIs "bool" $fipsMode -}}{{- $fipsMode = ternary "on" "off" $fipsMode -}}{{- end -}}fips140={{ $fipsMode }}'
     serviceAccount:
       name: runai-backend-thanos-receive
       automountServiceAccountToken: false
@@ -1797,7 +1803,7 @@ nats:
   extraEnvVarsSecret: "runai-backend-gen-cache-pubsub"
   extraEnvVars:
     - name: GODEBUG
-      value: fips140={{ .Values.global.fipsMode | default "off" }}
+      value: '{{- $fipsMode := .Values.global.fipsMode | default "off" -}}{{- if kindIs "bool" $fipsMode -}}{{- $fipsMode = ternary "on" "off" $fipsMode -}}{{- end -}}fips140={{ $fipsMode }}'
   jetstream:
     enabled: true
   replicaCount: 3
