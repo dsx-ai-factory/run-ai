@@ -8,8 +8,6 @@ properties:
     uniqueItems: true
     minItems: 1
     maxItems: 100
-    # barak:todo Sherin to supply the customer-facing wording, including that the ids
-    # must be unique and that the request is rejected otherwise.
     description: Array of report IDs to delete.
     items:
       type: string

@@ -19,8 +19,6 @@ properties:
       format: uuid
   failed:
     type: array
-    # barak:todo Sherin to supply the customer-facing wording, including the codes a
-    # caller has to handle: 404 not found, 403 not permitted, 102 still processing.
     description: Reports that could not be deleted, with per-report error details.
     items:
       $ref: "../../../../../infra/openapi/docs/schemas/batch/BatchResponseFailureItem.yaml"

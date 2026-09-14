@@ -2,10 +2,6 @@ post:
   summary: Delete multiple reports in batch.
   operationId: batch_delete_reports
   x-service: org-unit-service
-  # barak:todo Sherin to supply the customer-facing wording for this operation and the
-  # docs page, now that the endpoint is published. It has to say that a 202 means the
-  # reports were accepted rather than deleted, and that a report being generated cannot
-  # be deleted until it finishes.
   description: Deletes multiple reports in a single request. Returns per-report outcomes; deletion is processed asynchronously on the metrics side.
   x-authorize:
     resource-type: project
@@ -23,7 +19,6 @@ post:
           $ref: "../../schemas/batch/BatchDeleteReportsRequest.yaml"
   responses:
     202:
-      # barak:todo Sherin to supply the customer-facing wording for the accepted response.
       description: Batch delete accepted. Check accepted and failed lists for per-report outcomes.
       content:
         application/json:
