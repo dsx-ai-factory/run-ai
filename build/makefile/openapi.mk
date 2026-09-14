@@ -195,8 +195,14 @@ openapi-generate-code-client-go-raw: git-config-command
 .PHONY: openapi-generate-code-client-go-raw
 
 openapi-fix-client-go:
-	@${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Deleting ${OPENAPI_CLIENT_NAME_GO} tests folder" ${BASE_CONSOLE}
-	@${DOCKER_GO_COMMAND} /bin/sh -c 'cd ${OPENAPI_GENERATOR_CLIENT_CODE_PATH} && (rm -rf test || echo "no test folder")' || ${FAILURE_MESSAGE_HANDLER}
+	@${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Deleting ${OPENAPI_CLIENT_NAME_GO} tests folder and unused generator scaffolding" ${BASE_CONSOLE}
+	@# git_push.sh is openapi-generator scaffolding we never use. Dropping it here
+	@# - the same cleanup control-plane/notifications-service already does - keeps
+	@# it out of the tree entirely, so it neither ships nor shows up in the
+	@# regenerate-and-diff check further down this file. This target runs on both
+	@# the real output path and the temp path used by
+	@# openapi-check-client-code-uptodate-go, so both sides stay consistent.
+	@${DOCKER_GO_COMMAND} /bin/sh -c 'cd ${OPENAPI_GENERATOR_CLIENT_CODE_PATH} && (rm -rf test || echo "no test folder") && rm -f git_push.sh' || ${FAILURE_MESSAGE_HANDLER}
 
 	@${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Handling go.mod and go.sum for ${OPENAPI_CLIENT_NAME_GO}" ${BASE_CONSOLE}
 	@${DOCKER_GO_COMMAND} /bin/sh -c '\
