@@ -24,7 +24,7 @@ jobs:
   make:
     name: Make
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
     defaults:
       run:
         working-directory: scale-load/flowmark
@@ -38,7 +38,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Allow Go to fetch modules from this repository
-        if: github.event.pull_request.head.repo.full_name == github.repository
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
