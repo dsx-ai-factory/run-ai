@@ -29,11 +29,17 @@ func main() {
 func run() error {
 	scenariosDir := flag.String("scenarios", "./scenarios", "directory with scenario yaml files")
 	outputDir := flag.String("output", "./out", "directory for results.json")
-	kubeconfig := flag.String("kubeconfig", "", "path to kubeconfig (reserved for future suites)")
-	cpURL := flag.String("cp-url", "", "control plane URL (reserved for future suites)")
+	kubeconfig := flag.String("kubeconfig", "", "path to kubeconfig of the cluster under test")
+	cpURL := flag.String("cp-url", "", "control plane URL (credentials via FLOWMARK_CP_* env vars)")
 	flag.Parse()
 
-	env := core.Env{KubeconfigPath: *kubeconfig, ControlPlaneURL: *cpURL}
+	env := core.Env{
+		KubeconfigPath:  *kubeconfig,
+		ControlPlaneURL: *cpURL,
+		Username:        os.Getenv("FLOWMARK_CP_USER"),
+		Password:        os.Getenv("FLOWMARK_CP_PASSWORD"),
+		Token:           os.Getenv("FLOWMARK_CP_TOKEN"),
+	}
 	registry := buildRegistry(selfcheck.Suite{})
 
 	results, runErr := runner.Run(context.Background(), env, *scenariosDir, registry)
