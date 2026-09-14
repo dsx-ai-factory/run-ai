@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 /* eslint-env node */
 /**
  * Runs ESLint once on all source files and enforces three checks from the

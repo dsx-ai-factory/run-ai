@@ -1,3 +1,7 @@
+{{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
 {{- define "control-plane.image-pull-secret.name"  -}}
 {{- $imagePullSecret := .Values.global.imagePullSecrets | default list | first -}}
 {{- if $imagePullSecret -}}

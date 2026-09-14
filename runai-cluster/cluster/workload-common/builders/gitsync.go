@@ -163,6 +163,13 @@ func GetGitSyncInitContainersWithError(_ context.Context, containerFields *field
 			Value: "/tmp",
 		})
 
+		if godebug := config.GetGodebug(); godebug != "" {
+			envs = append(envs, corev1.EnvVar{
+				Name:  config.EnvVarGodebug,
+				Value: godebug,
+			})
+		}
+
 		sshAuthentication := isGitSSHAuthenticationSelected(&params)
 		if sshAuthentication {
 			envs = append(envs, sshGitSyncEnvs...)

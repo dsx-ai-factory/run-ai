@@ -25,6 +25,13 @@ invalid scenarios or scenario files, or a failure writing the results.
 
 `./bin/flowmark --help` lists all flags.
 
+Suites that talk to a Run:ai environment take the cluster from
+`--kubeconfig`, the control plane from `--cp-url`, and credentials from
+environment variables: `FLOWMARK_CP_USER` and `FLOWMARK_CP_PASSWORD`, or
+a pre-issued `FLOWMARK_CP_TOKEN`. Credentials are never accepted as
+flags and never appear in output. The selfcheck scenario needs none of
+these.
+
 ## Scenarios
 
 A scenario is a yaml file: a `suite` key naming a registered suite, plus
