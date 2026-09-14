@@ -1383,9 +1383,7 @@ keycloakx:
         allowPrivilegeEscalation: false
         readOnlyRootFilesystem: true
         runAsNonRoot: true
-        {{- if ne .Values.global.config.kubernetesDistribution "openshift" }}
         runAsUser: 65532
-        {{- end }}
         seccompProfile:
           type: RuntimeDefault
         capabilities:
