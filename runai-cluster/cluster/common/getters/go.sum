@@ -116,6 +116,8 @@ github.com/kai-scheduler/KAI-scheduler v0.16.9 h1:3dZQKb2VhmjYlBoQuyAEX1OHk74xOE
 github.com/kai-scheduler/KAI-scheduler v0.16.9/go.mod h1:WEjSN/1YUK7yk+yeEuqSLo10g4ZTPl8OCbaB478FEZM=
 github.com/kai-scheduler/kai-resource-management-api v0.1.1 h1:WYkFliFWWTrL5tJh/zK1mcRHsn/45J7LBlwJWhbIhro=
 github.com/kai-scheduler/kai-resource-management-api v0.1.1/go.mod h1:z6EpbG08naJ9h1WQw98CRO/VS65diHbG/s+p/mZAu9k=
+github.com/kai-scheduler/kai-resource-management-api v0.1.2 h1:GO9vtD649lAVCd1JODuEb+JYGYlq03CJlTHPvpX+0kE=
+github.com/kai-scheduler/kai-resource-management-api v0.1.2/go.mod h1:z6EpbG08naJ9h1WQw98CRO/VS65diHbG/s+p/mZAu9k=
 github.com/klauspost/compress v1.18.2 h1:iiPHWW0YrcFgpBYhsA6D1+fqHssJscY/Tm/y2Uqnapk=
 github.com/klauspost/compress v1.18.2/go.mod h1:R0h/fSBs8DE4ENlcrlib3PsXS61voFxhIs2DeRhCvJ4=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
