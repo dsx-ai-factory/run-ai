@@ -484,6 +484,18 @@ func (h *ExternalWorkloadHandler) getOwnerReferences(object client.Object) []met
 		}
 	}
 
+	// the runner outlives the children it recreates, so it owns the external workload
+	if runnerRef := workloadRunnerOwnerRef(object); runnerRef != nil {
+		return []metav1.OwnerReference{
+			{
+				APIVersion: runnerRef.APIVersion,
+				Kind:       runnerRef.Kind,
+				Name:       runnerRef.Name,
+				UID:        runnerRef.UID,
+			},
+		}
+	}
+
 	// default owner reference - the object itself
 	return []metav1.OwnerReference{
 		{
@@ -553,8 +565,10 @@ func (h *ExternalWorkloadHandler) updateSpecIfNeeded(ctx context.Context,
 	labelsChanged := !maps.Equal(originalExternalWorkload.Labels, externalWorkloadToUpdate.Labels)
 	// Annotations carry the ewi-status handshake; without this they only persist when spec/labels also change.
 	annotationsChanged := !maps.Equal(originalExternalWorkload.Annotations, externalWorkloadToUpdate.Annotations)
+	ownerRefsChanged := !reflect.DeepEqual(originalExternalWorkload.OwnerReferences,
+		externalWorkloadToUpdate.OwnerReferences)
 
-	if specChanged || labelsChanged || annotationsChanged {
+	if specChanged || labelsChanged || annotationsChanged || ownerRefsChanged {
 		return h.updateExternalWorkload(ctx, externalWorkloadToUpdate)
 	}
 	return nil
@@ -700,13 +714,23 @@ func (h *ExternalWorkloadHandler) setWorkloadCategory(ctx context.Context, objec
 }
 
 func setWorkloadRunnerLabel(object client.Object, externalWorkload *v1alpha1.ExternalWorkload) {
-	for _, ownerRef := range object.GetOwnerReferences() {
-		if ownerRef.Kind == dromosv1alpha1.WorkloadRunnerKind &&
-			ownerRef.APIVersion == v1alpha1.SchemeGroupVersion.String() {
-			addToLabels(externalWorkload, commonconstants.WorkloadRunnerNameLabel, ownerRef.Name)
-			return
+	runnerRef := workloadRunnerOwnerRef(object)
+	if runnerRef == nil {
+		return
+	}
+	addToLabels(externalWorkload, commonconstants.WorkloadRunnerNameLabel, runnerRef.Name)
+	addToLabels(externalWorkload, commonconstants.WorkloadRunnerUidLabel, string(runnerRef.UID))
+}
+
+func workloadRunnerOwnerRef(object client.Object) *metav1.OwnerReference {
+	ownerRefs := object.GetOwnerReferences()
+	for i := range ownerRefs {
+		if ownerRefs[i].Kind == dromosv1alpha1.WorkloadRunnerKind &&
+			ownerRefs[i].APIVersion == v1alpha1.SchemeGroupVersion.String() {
+			return &ownerRefs[i]
 		}
 	}
+	return nil
 }
 
 func addToLabels(object client.Object, label, value string) {
