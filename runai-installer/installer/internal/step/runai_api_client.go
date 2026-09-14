@@ -8,7 +8,7 @@ package step
 import (
 	"context"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 )
 
 type RunAIAPIClient interface {

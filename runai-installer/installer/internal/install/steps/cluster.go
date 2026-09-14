@@ -10,8 +10,8 @@ import (
 	"errors"
 	"fmt"
 
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	runaiclients "github.com/dsx-ai-factory/run-ai/runai-installer/clients/pkg/clients"
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/config"
 	configinputs "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/inputs"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
