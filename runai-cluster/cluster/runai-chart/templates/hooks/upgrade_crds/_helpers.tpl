@@ -1,3 +1,7 @@
+{{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
 {{- define "crdUpgrader.image" -}}
     {{- $globalRegistry := .Values.global.image.registry -}}
     {{- $crdUpgraderImage := .Values.crdUpgrader.image -}}
