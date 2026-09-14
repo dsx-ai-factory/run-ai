@@ -50,7 +50,7 @@ Day 2 covers the ongoing operational tasks described in [Operations](operations/
 
 Upgrades and troubleshooting are lifecycle events that can occur at any phase and are not bound to a specific day.
 
-* To upgrade NVIDIA Run:ai, see [Upgrade](upgrade/helm.md)
+* To upgrade NVIDIA Run:ai, see [Upgrade](upgrade/upgrade.md)
 * To investigate deployment issues, see [Troubleshooting](troubleshooting/what-gets-deployed.md)
 
 ## Understanding Installation

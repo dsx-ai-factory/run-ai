@@ -508,6 +508,29 @@ helm upgrade runai-backend -n runai-backend runai-backend/control-plane \
 3. Click **DONE**
 4. Once installation is complete, validate the cluster is **Connected** and listed with the new cluster version (see the [cluster troubleshooting scenarios](../operations/clusters.md#troubleshooting-scenarios)). Once you have done this, the cluster is upgraded and the workloads in this cluster will now use HAProxy instead of NGINX.
 
+## Post-Upgrade Recovery for Affected Workloads
+
+Workloads submitted before upgrading to NVIDIA Run:ai 3.0 through a legacy workload type - Workspace, Training, Distributed Training, Inference, or Distributed Inference - continue running after the upgrade, but lose some capabilities until they are recreated through the Workloads V2 submission path:
+
+| Capability | Status after upgrade |
+| --- | --- |
+| Suspend / Resume | Broken |
+| Error handling / auto-restart | Broken. A workload backed by a third-party controller, such as Knative, keeps running, but NVIDIA Run:ai no longer tracks its status |
+| Fractional GPU support | Broken. Can silently fall back to CPU-only if the CUDA driver was not updated during the upgrade |
+| Events / status visibility | Partially broken. Pods are still detected and their status is still updated |
+| Update (modify spec in place) | Unaffected for single-node workloads. Broken for multi-node workloads |
+| Duplicate, metrics and monitoring, log streaming, port forwarding, CLI operations (`runai get`/`describe`/`logs`), delete | Unaffected |
+
+<Info>
+
+**Note**
+
+Resolving affected workloads is not mandatory immediately after the upgrade. Each workload owner can recreate their own affected workloads at their own pace.
+
+</Info>
+
+To restore full functionality for an affected workload, recreate it through the Workloads V2 submission path. For the full procedure, see [Recovering Affected Workloads After Upgrade](recovering-affected-workloads.md).
+
 ## Troubleshooting
 
 If you encounter an issue with the cluster upgrade, use the troubleshooting scenarios below.

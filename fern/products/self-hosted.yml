@@ -165,7 +165,9 @@ navigation:
     - section: Upgrade
       contents:
       - page: Upgrade via Helm
-        path: ../../docs/installation-and-configuration/upgrade/helm.md
+        path: ../../docs/installation-and-configuration/upgrade/upgrade.md
+      - page: Recovering Affected Workloads After Upgrade
+        path: ../../docs/installation-and-configuration/upgrade/recovering-affected-workloads.md
     - section: Troubleshooting
       slug: troubleshoot
       contents:
