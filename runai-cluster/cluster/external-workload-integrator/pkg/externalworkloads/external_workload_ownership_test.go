@@ -225,7 +225,7 @@ var _ = Describe("ExternalWorkloadHandler.getOrRebindExternalWorkloadOfObject", 
 		stored := storedExternalWorkload(ctx, c)
 		Expect(stored.Spec.OriginalWorkloadUID).To(Equal(newChildUID))
 		Expect(stored.UID).To(Equal(testEwUID), "external workload identity must survive the restart")
-		Expect(stored.Spec.CreationTimestamp.Time.UTC()).To(Equal(originalCreation.Time.UTC()),
+		Expect(stored.Spec.CreationTimestamp.UTC()).To(Equal(originalCreation.UTC()),
 			"the original submission time must be preserved across restarts")
 		Expect(stored.Annotations).To(
 			HaveKeyWithValue(commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload, testWorkload))
