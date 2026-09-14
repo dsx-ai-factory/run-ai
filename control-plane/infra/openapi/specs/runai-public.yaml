@@ -1734,6 +1734,37 @@ paths:
           $ref: '#/components/responses/401Unauthorized'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/org-unit/reports/batch-delete:
+    post:
+      summary: Delete multiple reports in batch.
+      operationId: batch_delete_reports
+      description: Deletes multiple reports in a single request. Returns per-report outcomes; deletion is processed asynchronously on the metrics side.
+      tags:
+        - Reports
+      requestBody:
+        description: Batch of report IDs to delete.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDeleteReportsRequest'
+      responses:
+        '202':
+          description: Batch delete accepted. Check accepted and failed lists for per-report outcomes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchDeleteReportsResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/org-unit/reports/{reportId}:
     get:
       summary: Get report
@@ -15454,6 +15485,25 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Report'
+    BatchDeleteReportsRequest:
+      type: object
+      description: Batch of report IDs to delete.
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          uniqueItems: true
+          minItems: 1
+          maxItems: 100
+          description: Array of report IDs to delete.
+          items:
+            type: string
+            format: uuid
+      example:
+        ids:
+          - 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          - 8a7f3bcd-1234-5678-abcd-ef0123456789
     ErrorCode:
       type: integer
       format: int32
@@ -15475,6 +15525,54 @@ components:
           $ref: '#/components/schemas/ErrorCode'
         message:
           $ref: '#/components/schemas/ErrorMessage'
+    BatchDeleteReportsResponse:
+      type: object
+      required:
+        - id
+        - accepted
+        - failed
+        - totalRequested
+        - totalAccepted
+        - totalFailed
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique ID of the batch operation.
+        accepted:
+          type: array
+          description: IDs of reports accepted for deletion.
+          items:
+            type: string
+            format: uuid
+        failed:
+          type: array
+          description: Reports that could not be deleted, with per-report error details.
+          items:
+            $ref: '#/components/schemas/BatchResponseFailureItem'
+        totalRequested:
+          type: integer
+          description: Total number of items requested in the batch.
+        totalAccepted:
+          type: integer
+          description: Number of items accepted for deletion.
+        totalFailed:
+          type: integer
+          description: Number of items that failed.
+      example:
+        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+        accepted:
+          - 8a7f3bcd-1234-5678-abcd-ef0123456789
+        failed:
+          - id: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+            code: 404
+            message: report not found
+          - id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+            code: 403
+            message: user is not the report creator nor has tenant level delete project permissions
+        totalRequested: 3
+        totalAccepted: 1
+        totalFailed: 2
     DepartmentFilterSortFields:
       type: string
       enum:
