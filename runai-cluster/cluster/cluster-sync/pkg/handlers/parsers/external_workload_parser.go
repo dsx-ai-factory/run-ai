@@ -116,6 +116,10 @@ func (p *WorkloadParser) distributedFrameworkForExternalWorkload(workload *v1alp
 		return ""
 	}
 
+	if framework := distributedFrameworkFromKind(workload.Spec.OriginalWorkloadKind); framework != "" {
+		return framework
+	}
+
 	if framework := distributedFrameworkFromKind(workload.Spec.Type); framework != "" {
 		return framework
 	}

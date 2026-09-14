@@ -672,6 +672,7 @@ func (h *ExternalWorkloadHandler) parseObjectToExternalWorkload(ctx context.Cont
 	// Group or Version.
 	externalWorkload.Spec.Group = gvk.Group
 	externalWorkload.Spec.Version = gvk.Version
+	externalWorkload.Spec.OriginalWorkloadKind = gvk.Kind
 
 	gvkHandler, found := h.supportedGVKsHandlers[gvk]
 	if !found {
@@ -1113,6 +1114,7 @@ func equalExternalWorkloadSpec(left, right *v1alpha1.ExternalWorkloadSpec) bool 
 	return left.ImageName == right.ImageName &&
 		left.Group == right.Group &&
 		left.Version == right.Version &&
+		left.OriginalWorkloadKind == right.OriginalWorkloadKind &&
 		reflect.DeepEqual(left.RequestedNodePools, right.RequestedNodePools) &&
 		reflect.DeepEqual(left.RequestedPods, right.RequestedPods) &&
 		reflect.DeepEqual(left.PriorityClassName, right.PriorityClassName) &&

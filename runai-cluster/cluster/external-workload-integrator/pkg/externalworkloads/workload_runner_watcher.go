@@ -100,7 +100,7 @@ func enqueueWorkloadsForWorkloadRunner(ctx context.Context, cachedClient client.
 				continue
 			}
 			var ok bool
-			gvk, ok = gvkFromExternalWorkloadOwner(ew)
+			gvk, ok = resolveChildGVK(ew)
 			if !ok {
 				continue
 			}
