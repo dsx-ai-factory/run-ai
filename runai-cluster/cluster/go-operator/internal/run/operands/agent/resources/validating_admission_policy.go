@@ -59,6 +59,8 @@ func AssetIdentityAdmissionPolicyDefinitions(runaiConfig *runv1.RunaiConfig) []a
 						Expression: `request.userInfo.username.startsWith("system:serviceaccount:") || ` +
 							`variables.allowedPatterns.exists(pattern, request.userInfo.username.contains(pattern))`,
 						Message: "username is not permitted to do any action on " + asset.kind + " with the run.ai/asset label",
+						MessageExpression: `"username " + request.userInfo.username + ` +
+							strconv.Quote(" is not permitted to do any action on "+asset.kind+" with the run.ai/asset label"),
 					}},
 				},
 			},

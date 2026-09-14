@@ -116,7 +116,7 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 					if identity.allowed {
 						require.NoError(t, err)
 					} else {
-						requireAssetDenial(t, err)
+						requireAssetDenial(t, err, identity.username, kind)
 						require.NoError(t, writer.Create(ctx, obj))
 					}
 					obj.SetAnnotations(map[string]string{"updated": "true"})
@@ -124,13 +124,13 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 					if identity.allowed {
 						require.NoError(t, err)
 					} else {
-						requireAssetDenial(t, err)
+						requireAssetDenial(t, err, identity.username, kind)
 					}
 					err = requester.Delete(ctx, obj)
 					if identity.allowed {
 						require.NoError(t, err)
 					} else {
-						requireAssetDenial(t, err)
+						requireAssetDenial(t, err, identity.username, kind)
 						require.NoError(t, writer.Delete(ctx, obj))
 					}
 				})
@@ -143,12 +143,12 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 				obj.SetAnnotations(map[string]string{"updated": "true"})
 				require.NoError(t, denied.Update(ctx, obj))
 				obj.SetLabels(map[string]string{constants.RunaiAssetLabel: ""})
-				requireAssetDenial(t, denied.Update(ctx, obj))
+				requireAssetDenial(t, denied.Update(ctx, obj), "alice", kind)
 				require.NoError(t, writer.Update(ctx, obj))
 				// The old labeled object must also match when the new object
 				// tries to remove the label.
 				obj.SetLabels(nil)
-				requireAssetDenial(t, denied.Update(ctx, obj))
+				requireAssetDenial(t, denied.Update(ctx, obj), "alice", kind)
 				require.NoError(t, writer.Update(ctx, obj))
 				require.NoError(t, denied.Delete(ctx, obj))
 			})
@@ -158,7 +158,7 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 				require.NoError(t, writer.Create(ctx, obj))
 				base := obj.DeepCopyObject().(client.Object)
 				obj.SetAnnotations(map[string]string{"patched": "true"})
-				requireAssetDenial(t, denied.Patch(ctx, obj, client.MergeFrom(base)))
+				requireAssetDenial(t, denied.Patch(ctx, obj, client.MergeFrom(base)), "alice", kind)
 				require.NoError(t, writer.Patch(ctx, obj, client.MergeFrom(base)))
 				require.NoError(t, writer.Delete(ctx, obj))
 			})
@@ -191,11 +191,16 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 	}
 }
 
-func requireAssetDenial(t *testing.T, err error) {
+func requireAssetDenial(t *testing.T, err error, username, kind string) {
 	t.Helper()
 	require.True(t, apierrors.IsForbidden(err), "expected admission Forbidden, got %v", err)
-	require.Contains(t, err.Error(), "with the run.ai/asset label")
-	require.Contains(t, err.Error(), "runai-")
+	resourceKind, policy := "Secret", "runai-secret-identity"
+	if kind == "pvc" {
+		resourceKind, policy = "PersistentVolumeClaim", "runai-pvc-identity"
+	}
+	// Preserve the legacy webhook message consumed by the E2E denial tests.
+	require.Contains(t, err.Error(), fmt.Sprintf("username %s is not permitted to do any action on %s with the run.ai/asset label", username, resourceKind))
+	require.Contains(t, err.Error(), policy)
 }
 
 func assetImpersonatedClient(t *testing.T, config *rest.Config, scheme *k8sruntime.Scheme, username string) client.Client {
