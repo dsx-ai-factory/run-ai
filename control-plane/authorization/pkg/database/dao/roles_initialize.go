@@ -48,7 +48,6 @@ var (
 		static_roles.SystemAdmin,
 		static_roles.IntegrationMetricsCollector,
 		static_roles.DepartmentAdminLegacy,
-		static_roles.DepartmentAdminDgxcLegacy,
 		static_roles.Editor,
 		static_roles.Viewer,
 		static_roles.DepartmentViewer,
@@ -62,8 +61,6 @@ var (
 		static_roles.DataAndStorageAdmin,
 		static_roles.ProjectAdmin,
 		static_roles.DepartmentAdmin,
-		static_roles.DepartmentAdminDgxc,
-		static_roles.CloudOperatorDgxc,
 	}
 	CspRoleChange = map[string]map[string]string{
 		static_roles.SystemAdmin.Name: {
@@ -95,10 +92,6 @@ func InitStaticLegacyRoles() {
 	migrateDeprecatedRoleNames()
 	logging.Infof("Initializing static legacy roles")
 	initializerDao := RoleDaoInitializer{}
-	dgxcRoles := []models.Role{
-		static_roles.ApplicationAdmin,
-		static_roles.CloudSupport,
-	}
 
 	for _, role := range LegacyRoles {
 		var added bool
@@ -106,7 +99,7 @@ func InitStaticLegacyRoles() {
 			role.Permissions = updateCSPPermissions(role.Permissions)
 		}
 
-		dgxcRoles, added = addToDGXCRolesIfNeeded(dgxcRoles, &role)
+		added = addToDGXCRolesIfNeeded(&role)
 		if added {
 			role.RoleType = models.NonDGXC
 		} else {
@@ -142,10 +135,6 @@ func updatePermissionSetsWithIds(role models.Role) []models.PermissionSet {
 
 func InitStaticRoles() {
 	migrateDeprecatedRoleNames()
-	dgxcRoles := []models.Role{
-		static_roles.ApplicationAdmin,
-		static_roles.CloudSupport,
-	}
 	logging.Infof("Initializing static roles")
 	initializerDao := RoleDaoInitializer{}
 	InitPermissionSetsMap(&MapStaticPermissionSetNameToId)
@@ -164,16 +153,6 @@ func InitStaticRoles() {
 		id, err := initializerDao.DbUpsertRole(context.Background(), role)
 		if err != nil {
 			logging.Warnf("Error in initializing role %s. err: %+v", role.Name, err)
-		}
-		MapStaticRoleNameToRoleId[role.Name] = id
-	}
-	for _, role := range dgxcRoles {
-		newPermissionSet := updatePermissionSetsWithIds(role)
-		role.PermissionSets = &newPermissionSet
-
-		id, err := initializerDao.DbUpsertRole(context.Background(), role)
-		if err != nil {
-			logging.Warnf("Error in initializing dgxc role %s. err: %+v", role.Name, err)
 		}
 		MapStaticRoleNameToRoleId[role.Name] = id
 	}
@@ -196,7 +175,7 @@ func getCspPermissionSets(original *[]models.PermissionSet, changeMap map[string
 	return newPermissionSets
 }
 
-func addToDGXCRolesIfNeeded(roles []models.Role, role *models.Role) ([]models.Role, bool) {
+func addToDGXCRolesIfNeeded(role *models.Role) bool {
 	role.RoleType = models.ALL
 	dgxcRole := models.Role{
 		ScopeType: models.ROLE_SCOPE_SYSTEM,
@@ -224,11 +203,9 @@ func addToDGXCRolesIfNeeded(roles []models.Role, role *models.Role) ([]models.Ro
 		if role.ShowForDGXC {
 			dgxcRole.InternalOnly = false
 		}
-
-		roles = append(roles, dgxcRole)
 	}
 
-	return roles, role.RoleType == models.NonDGXC
+	return role.RoleType == models.NonDGXC
 }
 
 func updateCSPPermissions(permissions []*models.Permission) []*models.Permission {

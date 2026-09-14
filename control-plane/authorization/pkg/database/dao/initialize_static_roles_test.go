@@ -341,8 +341,6 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 			allRoles = append(allRoles, LegacyRoles...)
 			allRoles = append(allRoles, RolesMigrated...)
 			allRoles = append(allRoles, RolesNew...)
-			allRoles = append(allRoles, static_roles.ApplicationAdmin)
-			allRoles = append(allRoles, static_roles.CloudSupport)
 			// Include commented-out roles that might be enabled later
 			allRoles = append(allRoles, static_roles.AiPractitioner)
 			allRoles = append(allRoles, static_roles.DataAndStorageAdmin)
