@@ -14,12 +14,39 @@ import (
 	. "github.com/onsi/gomega"
 	"gotest.tools/assert"
 	registrations "k8s.io/api/admissionregistration/v1"
+	k8serr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils/pkg/certificates"
 )
+
+func TestUpgradeRemovesRetiredAssetWebhookAndPreservesProjectWebhook(t *testing.T) {
+	for _, oldVersion := range []string{"previous-version", ""} {
+		t.Run("old-version-"+oldVersion, func(t *testing.T) {
+			ctx := context.Background()
+			client := fake.NewSimpleClientset(
+				&registrations.ValidatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{
+					Name: "runai-secret-pvc-validation", Labels: map[string]string{"app": "runai", deployVersionLabelName: oldVersion},
+				}},
+				&registrations.ValidatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{
+					Name: projectControllerWebhookName, Labels: map[string]string{"app": "runai", deployVersionLabelName: oldVersion},
+				}, Webhooks: []registrations.ValidatingWebhook{{Name: "project.runai.svc"}}},
+			)
+			project := &registrations.ValidatingWebhookConfiguration{
+				ObjectMeta: metav1.ObjectMeta{Name: projectControllerWebhookName, Labels: map[string]string{deployVersionLabelName: deployVersionExample}},
+				Webhooks:   []registrations.ValidatingWebhook{{Name: "project.runai.svc", ClientConfig: registrations.WebhookClientConfig{CABundle: cabundleexample}}},
+			}
+			assert.NilError(t, createOrUpdateWebhooks(ctx, client, []*registrations.ValidatingWebhookConfiguration{project}, nil))
+			assert.NilError(t, deleteOldWebhooks(ctx, client, deployVersionExample))
+			_, err := client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Get(ctx, "runai-secret-pvc-validation", metav1.GetOptions{})
+			assert.Assert(t, k8serr.IsNotFound(err))
+			_, err = client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Get(ctx, projectControllerWebhookName, metav1.GetOptions{})
+			assert.NilError(t, err)
+		})
+	}
+}
 
 func TestFilterOwnershipWebhooksForServedLegacyResources(t *testing.T) {
 	client := fake.NewSimpleClientset()
@@ -354,10 +381,6 @@ func TestCertificateChoice(t *testing.T) {
 		},
 		{
 			webhookName:    "runai-project-validation",
-			expectedChoice: agentCert.CaBundle,
-		},
-		{
-			webhookName:    "runai-secret-pvc-validation",
 			expectedChoice: agentCert.CaBundle,
 		},
 		{

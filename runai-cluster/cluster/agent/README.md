@@ -18,7 +18,7 @@ The service is responsible for:
 
 - **Syncing backend state into the cluster** — on a configurable interval (`AGENT_SYNC_INTERVAL_MILLIS`), each registered handler (`pkg/handlers/*_handler.go`) fetches its resource from the backend and reconciles the corresponding cluster objects. Handlers are registered in `handlerInitFuncs` in `pkg/runai_agent.go`.
 - **Authenticating to the backend** — exchanges `CLIENT_NAME` / `CLIENT_SECRET` for a token via the identity manager and calls the Run.ai API at `ENDPOINT` on behalf of cluster `CLUSTER_ID`.
-- **Serving validating webhooks** — a controller-runtime TLS webhook server (cert from `CERT_DIR`, port `WEBHOOK_PORT`) registers `/validate-project` and `/validate-secrets-pvc` admission handlers; `ALLOWED_SERVICE_ACCOUNTS` gates which service accounts may perform project/department operations.
+- **Serving validating webhooks** — a controller-runtime TLS webhook server (cert from `CERT_DIR`, port `WEBHOOK_PORT`) registers the `/validate-project` admission handler; Secret/PVC identity validation is enforced by operator-managed CEL admission policies; `ALLOWED_SERVICE_ACCOUNTS` gates which service accounts may perform project/department operations.
 - **Optional policy sync** — when `POLICY_SYNC_ENABLED` is set, interactive/training policy handlers are added to the handler set.
 - **KAI integration** — optionally syncs node pools and org units to the KAI scheduler CRDs (`ENABLE_KAI_NODEPOOL_CRD`).
 - **Exposing metrics** — Prometheus metrics on `METRICS_PORT`/`METRICS_PATH`; supports leader election (`LEADER_ELECT`).
