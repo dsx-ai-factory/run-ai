@@ -124,7 +124,8 @@ test-asset-admission-docker: git-config-command gocache
 test-asset-admission:
 	@assets="$${KUBEBUILDER_ASSETS:-}"; \
 	if [ -z "$$assets" ]; then \
-		assets="$$(go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION) use 1.33.0 -p path)"; \
+		assets_dir="$$(mktemp -d)"; \
+		assets="$$(go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION) --bin-dir "$$assets_dir" use 1.33.0 -p path)"; \
 	fi; \
 	test -x "$$assets/kube-apiserver" && test -x "$$assets/etcd"; \
 	KUBEBUILDER_ASSETS="$$assets" go test ./internal/run/operands/agent/resources \
