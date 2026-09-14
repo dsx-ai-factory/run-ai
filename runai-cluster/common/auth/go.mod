@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/common/auth
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/coreos/go-oidc/v3 v3.11.0

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/secret-generator
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8

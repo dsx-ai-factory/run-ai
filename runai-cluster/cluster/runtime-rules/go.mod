@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
@@ -215,7 +215,6 @@ require (
 )
 
 replace (
-
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/extensions => ../common/extensions
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../common/runaipublic

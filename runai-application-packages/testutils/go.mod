@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/google/go-cmp v0.7.0

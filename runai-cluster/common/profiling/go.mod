@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/gin-contrib/pprof v1.4.0

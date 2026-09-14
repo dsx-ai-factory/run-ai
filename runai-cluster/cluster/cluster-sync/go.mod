@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/antihax/optional v1.0.0
@@ -334,7 +334,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client => 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client => ../../../runai-clients/datavolumes-service-client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../../runai-clients/org-unit-service-client
-
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client => ../../../runai-clients/workloads-manager-client
 

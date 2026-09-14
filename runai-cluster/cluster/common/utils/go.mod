@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/hashicorp/go-version v1.7.0

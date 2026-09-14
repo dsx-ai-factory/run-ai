@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/pod-group-assigner
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20250505080723-345f0486489e // indirect

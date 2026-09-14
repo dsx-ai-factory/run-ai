@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/assets-service
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
