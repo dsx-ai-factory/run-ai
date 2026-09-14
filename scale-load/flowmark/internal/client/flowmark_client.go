@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -38,16 +39,17 @@ type Clients struct {
 }
 
 func New(ctx context.Context, env core.Env) (*Clients, error) {
-	baseURL, err := controlPlaneURL(env.ControlPlaneURL)
+	base, err := controlPlaneURL(env.ControlPlaneURL)
 	if err != nil {
 		return nil, err
 	}
 
-	source, err := credentials(ctx, env, baseURL)
+	source, err := credentials(ctx, env, base)
 	if err != nil {
 		return nil, err
 	}
 	httpClient := oauth2.NewClient(ctx, source)
+	baseURL := base.String()
 
 	kube, err := newKubeClient(env.KubeconfigPath)
 	if err != nil {
@@ -71,17 +73,29 @@ func New(ctx context.Context, env core.Env) (*Clients, error) {
 	}, nil
 }
 
-func controlPlaneURL(raw string) (string, error) {
+func controlPlaneURL(raw string) (*url.URL, error) {
 	if raw == "" {
-		return "", errors.New("control plane URL is empty (set --cp-url)")
+		return nil, errors.New("control plane URL is empty (set --cp-url)")
 	}
-	if !strings.HasPrefix(raw, "https://") {
-		return "", fmt.Errorf("control plane URL %q must start with https://", raw)
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return nil, fmt.Errorf("control plane URL %q: %w", raw, err)
 	}
-	return strings.TrimRight(raw, "/"), nil
+	if parsed.Scheme != "https" {
+		return nil, fmt.Errorf("control plane URL %q must use https", raw)
+	}
+	if parsed.Host == "" {
+		return nil, fmt.Errorf("control plane URL %q has no host", raw)
+	}
+	if parsed.User != nil || parsed.RawQuery != "" || parsed.ForceQuery || parsed.Fragment != "" {
+		return nil, fmt.Errorf("control plane URL %q must not contain credentials, a query or a fragment", raw)
+	}
+	parsed.Path = strings.TrimRight(parsed.Path, "/")
+	parsed.RawPath = ""
+	return parsed, nil
 }
 
-func credentials(ctx context.Context, env core.Env, baseURL string) (oauth2.TokenSource, error) {
+func credentials(ctx context.Context, env core.Env, base *url.URL) (oauth2.TokenSource, error) {
 	if env.Token != "" {
 		return oauth2.StaticTokenSource(&oauth2.Token{AccessToken: env.Token}), nil
 	}
@@ -89,8 +103,13 @@ func credentials(ctx context.Context, env core.Env, baseURL string) (oauth2.Toke
 		return nil, errors.New("missing control plane credentials: provide username and password, or a token")
 	}
 
-	loginClient := &http.Client{Timeout: loginTimeout}
-	return newTokenSource(ctx, loginClient, baseURL+loginPath, env.Username, env.Password), nil
+	loginClient := &http.Client{
+		Timeout: loginTimeout,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	return newTokenSource(ctx, loginClient, base.JoinPath(loginPath).String(), env.Username, env.Password), nil
 }
 
 func newKubeClient(path string) (k8sclient.Client, error) {

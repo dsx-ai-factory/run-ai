@@ -11,12 +11,15 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
+
+	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
 )
 
 type fakeIDM struct {
@@ -132,6 +135,34 @@ func TestRejectedLoginNamesTheStep(t *testing.T) {
 	}
 }
 
+func TestLoginDoesNotFollowRedirects(t *testing.T) {
+	leaked := 0
+	target := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { leaked++ }))
+	t.Cleanup(target.Close)
+	redirecting := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL+loginPath, http.StatusTemporaryRedirect)
+	}))
+	t.Cleanup(redirecting.Close)
+
+	base, err := url.Parse(redirecting.URL)
+	if err != nil {
+		t.Fatalf("parsing test server URL: %v", err)
+	}
+	env := core.Env{ControlPlaneURL: redirecting.URL, Username: "user@test", Password: "secret"}
+	source, err := credentials(context.Background(), env, base)
+	if err != nil {
+		t.Fatalf("credentials: %v", err)
+	}
+
+	_, err = source.Token()
+	if err == nil || !strings.Contains(err.Error(), "307") {
+		t.Fatalf("expected login to fail on redirect, got: %v", err)
+	}
+	if leaked != 0 {
+		t.Fatalf("credentials were sent to the redirect target %d time(s)", leaked)
+	}
+}
+
 func TestControlPlaneURL(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -140,10 +171,15 @@ func TestControlPlaneURL(t *testing.T) {
 		wantErr string
 	}{
 		{name: "empty", in: "", wantErr: "--cp-url"},
-		{name: "no scheme", in: "cp.runailabs.com", wantErr: "https://"},
-		{name: "plain http rejected", in: "http://cp.runailabs.com", wantErr: "https://"},
+		{name: "no scheme", in: "cp.runailabs.com", wantErr: "must use https"},
+		{name: "plain http rejected", in: "http://cp.runailabs.com", wantErr: "must use https"},
+		{name: "no host", in: "https://", wantErr: "no host"},
+		{name: "embedded credentials rejected", in: "https://user:pw@cp.runailabs.com", wantErr: "must not contain"},
+		{name: "query rejected", in: "https://cp.runailabs.com?debug=1", wantErr: "must not contain"},
+		{name: "fragment rejected", in: "https://cp.runailabs.com#top", wantErr: "must not contain"},
 		{name: "https", in: "https://cp.runailabs.com", want: "https://cp.runailabs.com"},
 		{name: "trailing slash trimmed", in: "https://cp.local/", want: "https://cp.local"},
+		{name: "path prefix kept", in: "https://cp.local/runai/", want: "https://cp.local/runai"},
 	}
 
 	for _, tc := range cases {
@@ -158,8 +194,11 @@ func TestControlPlaneURL(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
-			if got != tc.want {
-				t.Fatalf("got %q, want %q", got, tc.want)
+			if got.String() != tc.want {
+				t.Fatalf("got %q, want %q", got.String(), tc.want)
+			}
+			if login := got.JoinPath(loginPath).String(); login != tc.want+loginPath {
+				t.Fatalf("login endpoint %q, want %q", login, tc.want+loginPath)
 			}
 		})
 	}
