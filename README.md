@@ -155,7 +155,7 @@ Some subdirectories contain vendored third-party code or bundled assets under th
 
 | Subdirectory | License | License file |
 |--------------|---------|--------------|
-| `skills/` | Apache-2.0 | [`skills/LICENSE`](skills/LICENSE) |
+| `skills/` | Apache-2.0 AND CC-BY-4.0 | [`skills/LICENSE`](skills/LICENSE) |
 | `runai-cluster/cluster/goofys/` | Apache-2.0 | [`runai-cluster/cluster/goofys/LICENSE.md`](runai-cluster/cluster/goofys/LICENSE.md) (attributions in the adjacent `NOTICE`) |
 | `control-plane/assets-service/third_party/go_acc/` | Apache-2.0 | [`.../go_acc/LICENSE`](control-plane/assets-service/third_party/go_acc/LICENSE) |
 | `control-plane/workloads-and-policies/third_party/kserve/` | Apache-2.0 | [`.../kserve/LICENSE`](control-plane/workloads-and-policies/third_party/kserve/LICENSE) |
