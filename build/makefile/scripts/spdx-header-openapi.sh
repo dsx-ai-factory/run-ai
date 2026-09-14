@@ -9,10 +9,16 @@
 # matching the already-headered clients (runai-clients/cli-exposer-client/generated).
 #   sh spdx-header-openapi.sh <dir>   # default <dir> = .
 set -eu
+#
+# NOT stamped: the generator's ancillary scaffolding (git_push.sh, .travis.yml,
+# openapi.yaml specs). Those are exempt, and stamping them breaks the
+# regen-diff gate in openapi.mk (openapi-check-client-code-uptodate-go
+# regenerates into a tmp dir WITHOUT running this script, then `diff -r -w -B`
+# — git_push.sh is not in its --exclude list, so a stamped copy can never
+# converge with the bare regen output).
+set -eu
 H1='// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.'
 H2='// SPDX-License-Identifier: Apache-2.0'
-SH1='# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.'
-SH2='# SPDX-License-Identifier: Apache-2.0'
 root="${1:-.}"
 
 # Stamp openapi-generator Go client files
@@ -29,16 +35,4 @@ find "$root" -type f -name '*.go' 2>/dev/null | grep -vE '/vendor/|/third_party/
 	head -n 3 "$f" | grep -q 'SPDX-FileCopyrightText' && continue
 	tmp="${f}.spdxtmp.$$"
 	{ printf '%s\n%s\n' "$H1" "$H2"; cat "$f"; } > "$tmp" && mv "$tmp" "$f"
-done
-
-# Stamp openapi-generator git_push.sh scaffolding scripts (shebang-aware)
-find "$root" -type f -name 'git_push.sh' 2>/dev/null | grep -vE '/vendor/|/third_party/' | while IFS= read -r f; do
-	head -n 5 "$f" | grep -q 'SPDX-FileCopyrightText' && continue
-	head -n 5 "$f" | grep -qE 'wing328|openapi-petstore|help\.github\.com/articles/adding-an-existing' || continue
-	tmp="${f}.spdxtmp.$$"
-	shebang=$(head -1 "$f")
-	case "$shebang" in
-		'#!'*) { printf '%s\n' "$shebang"; printf '%s\n%s\n' "$SH1" "$SH2"; tail -n +2 "$f"; } > "$tmp" && mv "$tmp" "$f" ;;
-		*)     { printf '%s\n%s\n' "$SH1" "$SH2"; cat "$f"; } > "$tmp" && mv "$tmp" "$f" ;;
-	esac
 done
