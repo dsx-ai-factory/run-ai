@@ -31,8 +31,9 @@ Modifications
 
 The vendored Go sources are unmodified.
 
-The Makefile in this directory currently carries an NVIDIA SPDX header. Its
-content builds the go-acc binary itself (build.darwin / build.amd64) and
-references none of this repository's build infrastructure, which is consistent
-with it being the upstream go-acc Makefile rather than NVIDIA-authored glue.
-That header is under review; if it is upstream, it will be removed.
+The Makefile and this NOTICE are NVIDIA-authored additions and are not part of
+the upstream distribution; the Makefile correctly carries an NVIDIA SPDX header.
+Upstream ory/go-acc has never shipped a Makefile at any tagged release, so there
+is no upstream file being displaced. This repository does not build the vendored
+copy - build/makefile/golang.mk installs go-acc from its module path - so the
+Makefile here is a standalone cross-compile convenience.

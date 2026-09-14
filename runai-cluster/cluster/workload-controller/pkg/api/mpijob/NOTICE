@@ -38,6 +38,8 @@ code, and carries an NVIDIA SPDX header:
 
     v1alpha2/groupversion_info.go
 
-All other Go sources in this directory are upstream or are mechanically derived
-from upstream types (zz_generated.deepcopy.go) and carry the Kubeflow
-attribution.
+All other Go sources in this directory are upstream, or are mechanically derived
+from upstream types. Most carry the Kubeflow attribution in-file; the exception
+is v2beta1/zz_generated.deepcopy.go, which is controller-gen output carrying no
+copyright line of its own. It inherits the provenance of the v2beta1 types it is
+generated from, which are Kubeflow's.
