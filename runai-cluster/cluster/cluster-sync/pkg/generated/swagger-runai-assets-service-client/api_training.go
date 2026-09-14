@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -130,7 +132,9 @@ func (a *TrainingApiService) CountTrainings(ctx context.Context) ApiCountTrainin
 }
 
 // Execute executes the request
+//
 //	@return AssetCountResponse
+//
 // Deprecated
 func (a *TrainingApiService) CountTrainingsExecute(r ApiCountTrainingsRequest) (*AssetCountResponse, *http.Response, error) {
 	var (
@@ -271,6 +275,7 @@ func (a *TrainingApiService) CreateTraining(ctx context.Context) ApiCreateTraini
 }
 
 // Execute executes the request
+//
 //	@return Training
 func (a *TrainingApiService) CreateTrainingExecute(r ApiCreateTrainingRequest) (*Training, *http.Response, error) {
 	var (
@@ -414,6 +419,7 @@ func (a *TrainingApiService) GetTrainingById(ctx context.Context, id string) Api
 }
 
 // Execute executes the request
+//
 //	@return Training
 func (a *TrainingApiService) GetTrainingByIdExecute(r ApiGetTrainingByIdRequest) (*Training, *http.Response, error) {
 	var (
@@ -597,6 +603,7 @@ func (a *TrainingApiService) ListTrainings(ctx context.Context, clusterUuid stri
 }
 
 // Execute executes the request
+//
 //	@return TrainingListResponse
 func (a *TrainingApiService) ListTrainingsExecute(r ApiListTrainingsRequest) (*TrainingListResponse, *http.Response, error) {
 	var (

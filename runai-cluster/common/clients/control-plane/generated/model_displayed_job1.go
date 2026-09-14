@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -24,8 +26,8 @@ type DisplayedJob1 struct {
 	JobName *string `json:"jobName,omitempty"`
 	JobType *string `json:"jobType,omitempty"`
 	// The id of the cluster.
-	ClusterId *string `json:"clusterId,omitempty"`
-	Status *string `json:"status,omitempty"`
+	ClusterId     *string `json:"clusterId,omitempty"`
+	Status        *string `json:"status,omitempty"`
 	StatusTooltip *string `json:"statusTooltip,omitempty"`
 	// The name of the image executed by the pod.
 	ImageName *string `json:"imageName,omitempty"`
@@ -38,37 +40,37 @@ type DisplayedJob1 struct {
 	// Creation time of the job.
 	CreationTime *string `json:"creationTime,omitempty"`
 	// Completion time of the job.
-	CompletionTime *string `json:"completionTime,omitempty"`
-	TotalRuntime *string `json:"totalRuntime,omitempty"`
-	TotalWaitTime *string `json:"totalWaitTime,omitempty"`
-	LastStatusUpdateTime *float32 `json:"lastStatusUpdateTime,omitempty"`
-	MsSinceLastStatusUpdate *float32 `json:"msSinceLastStatusUpdate,omitempty"`
-	Pending *float32 `json:"pending,omitempty"`
-	Running *float32 `json:"running,omitempty"`
-	Parallelism *float32 `json:"parallelism,omitempty"`
-	Completions *float32 `json:"completions,omitempty"`
-	Failed *float32 `json:"failed,omitempty"`
-	Succeeded *float32 `json:"succeeded,omitempty"`
-	CurrentAllocatedGPUs *float32 `json:"currentAllocatedGPUs,omitempty"`
-	CurrentAllocatedGPUsMemory *float32 `json:"currentAllocatedGPUsMemory,omitempty"`
-	CurrentRequestedGPUs *float32 `json:"currentRequestedGPUs,omitempty"`
-	TotalRequestedGPUs *float32 `json:"totalRequestedGPUs,omitempty"`
-	RequestedGPUsPerPodGroup *float32 `json:"requestedGPUsPerPodGroup,omitempty"`
+	CompletionTime                 *string  `json:"completionTime,omitempty"`
+	TotalRuntime                   *string  `json:"totalRuntime,omitempty"`
+	TotalWaitTime                  *string  `json:"totalWaitTime,omitempty"`
+	LastStatusUpdateTime           *float32 `json:"lastStatusUpdateTime,omitempty"`
+	MsSinceLastStatusUpdate        *float32 `json:"msSinceLastStatusUpdate,omitempty"`
+	Pending                        *float32 `json:"pending,omitempty"`
+	Running                        *float32 `json:"running,omitempty"`
+	Parallelism                    *float32 `json:"parallelism,omitempty"`
+	Completions                    *float32 `json:"completions,omitempty"`
+	Failed                         *float32 `json:"failed,omitempty"`
+	Succeeded                      *float32 `json:"succeeded,omitempty"`
+	CurrentAllocatedGPUs           *float32 `json:"currentAllocatedGPUs,omitempty"`
+	CurrentAllocatedGPUsMemory     *float32 `json:"currentAllocatedGPUsMemory,omitempty"`
+	CurrentRequestedGPUs           *float32 `json:"currentRequestedGPUs,omitempty"`
+	TotalRequestedGPUs             *float32 `json:"totalRequestedGPUs,omitempty"`
+	RequestedGPUsPerPodGroup       *float32 `json:"requestedGPUsPerPodGroup,omitempty"`
 	RequestedGPUsMemoryPerPodGroup *float32 `json:"requestedGPUsMemoryPerPodGroup,omitempty"`
-	ParentWorkloadName *string `json:"parentWorkloadName,omitempty"`
-	TotalRequestedMemory *float32 `json:"totalRequestedMemory,omitempty"`
-	TotalRequestedCPU *float32 `json:"totalRequestedCPU,omitempty"`
-	TotalLimitCPU *float32 `json:"totalLimitCPU,omitempty"`
-	TotalLimitMemory *float32 `json:"totalLimitMemory,omitempty"`
+	ParentWorkloadName             *string  `json:"parentWorkloadName,omitempty"`
+	TotalRequestedMemory           *float32 `json:"totalRequestedMemory,omitempty"`
+	TotalRequestedCPU              *float32 `json:"totalRequestedCPU,omitempty"`
+	TotalLimitCPU                  *float32 `json:"totalLimitCPU,omitempty"`
+	TotalLimitMemory               *float32 `json:"totalLimitMemory,omitempty"`
 	// Specifies the kind of k8s resource that owns the pod group.
-	WorkloadKind *float32 `json:"workloadKind,omitempty"`
-	CliCommand *string `json:"cliCommand,omitempty"`
-	RequestedMigDevices *string `json:"requestedMigDevices,omitempty"`
-	DynamicData map[string]interface{} `json:"dynamicData,omitempty"`
-	ExistsInCluster *bool `json:"existsInCluster,omitempty"`
+	WorkloadKind        *float32               `json:"workloadKind,omitempty"`
+	CliCommand          *string                `json:"cliCommand,omitempty"`
+	RequestedMigDevices *string                `json:"requestedMigDevices,omitempty"`
+	DynamicData         map[string]interface{} `json:"dynamicData,omitempty"`
+	ExistsInCluster     *bool                  `json:"existsInCluster,omitempty"`
 	// If true, it indicates that the pod group runs jupyter notebook.
-	IsJupyter *bool `json:"isJupyter,omitempty"`
-	JobUrl *string `json:"jobUrl,omitempty"`
+	IsJupyter *bool   `json:"isJupyter,omitempty"`
+	JobUrl    *string `json:"jobUrl,omitempty"`
 	// The node pool of the job.
 	NodePool *string `json:"nodePool,omitempty"`
 }
@@ -1604,5 +1606,3 @@ func (v *NullableDisplayedJob1) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

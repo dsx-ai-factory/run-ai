@@ -145,6 +145,16 @@ func httpResponseBodyToNodes(httpResponse api.ImplResponse) *[]api.Node {
 	return &nodes.Nodes
 }
 
+func httpResponseBodyToNodeExtended(httpResponse api.ImplResponse) *api.NodeExtended {
+	bytes, err := json.Marshal(httpResponse.Body)
+	Expect(err).To(BeNil())
+
+	node := &api.NodeExtended{}
+	err = json.Unmarshal(bytes, node)
+	Expect(err).To(BeNil())
+	return node
+}
+
 func httpResponseBodyToNode(httpResponse api.ImplResponse) *api.Node {
 	bytes, err := json.Marshal(httpResponse.Body)
 	Expect(err).To(BeNil())

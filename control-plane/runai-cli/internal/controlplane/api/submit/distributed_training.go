@@ -15,7 +15,7 @@ import (
 // DistributedTraining holds configuration for distributed training workloads
 type DistributedTraining struct {
 	NoMaster               bool
-	Workers                int32
+	Workers                openapi.NullableInt32
 	SegmentSize            openapi.NullableInt32
 	MinReplica             int32
 	MaxReplica             int32
@@ -42,7 +42,7 @@ func DistributedFlagSet(flagsDistributed *pflag.FlagSet, specDistributed *Distri
 }
 
 func DistributedCommonFlagSet(flagsDistributed *pflag.FlagSet, specDistributed *DistributedTraining) {
-	flagsDistributed.Int32Var(&specDistributed.Workers, consts.AttributeNameWorkers, 0, consts.AttributeUsageWorkers)
+	flagsDistributed.Var(cli.NewNullableNonNegativeInt32Flag(&specDistributed.Workers), consts.AttributeNameWorkers, consts.AttributeUsageWorkers)
 	flagsDistributed.StringVar(&specDistributed.CleanPodPolicy, consts.AttributeNameCleanPodPolicy, "", consts.AttributeUsageCleanPodPolicy)
 }
 

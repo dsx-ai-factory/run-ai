@@ -78,7 +78,7 @@ The cluster is displayed in the table with the status **Waiting to connect**. On
 
 ## Managing Network Topologies
 
-Network topologies optimize placement and accelerate distributed workloads by keeping pods on nodes that are as close to each other as possible in the network. For more details, see [Accelerating workloads with network topology-aware scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling.md).
+Network topologies optimize placement and accelerate distributed workloads by keeping pods on nodes that are as close to each other as possible in the network. For more details, see [Accelerating workloads with network topology-aware scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md).
 
 To add topologies that represent the cluster's network:
 

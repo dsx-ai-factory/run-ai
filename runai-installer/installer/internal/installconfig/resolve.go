@@ -36,7 +36,7 @@ func ResolveRegistry(cfg *Config, jfrogTokenPath, ngcTokenPath string) (*spec.Re
 		if ngcTokenPath != "" {
 			typ, path = spec.RegistryTypeNGC, ngcTokenPath
 		}
-		token, err := readSecretFile(path)
+		token, err := readSecretFile(path, "registry secret")
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func resolveRegistryFromConfig(r *Registry) (*spec.Registry, error) {
 			return nil, err
 		}
 		if r.TokenPath != "" {
-			if out.Token, err = readSecretFile(r.TokenPath); err != nil {
+			if out.Token, err = readSecretFile(r.TokenPath, "registry secret"); err != nil {
 				return nil, err
 			}
 		} else {
@@ -89,7 +89,7 @@ func resolveRegistryFromConfig(r *Registry) (*spec.Registry, error) {
 	case authBasic:
 		out.Username = r.Username
 		if r.PasswordPath != "" {
-			if out.Password, err = readSecretFile(r.PasswordPath); err != nil {
+			if out.Password, err = readSecretFile(r.PasswordPath, "registry secret"); err != nil {
 				return nil, err
 			}
 		} else {
@@ -147,14 +147,32 @@ func validateRegistryType(t spec.RegistryType) error {
 	return fmt.Errorf("unknown registry type: %q", t)
 }
 
-func readSecretFile(path string) (string, error) {
+func ResolveClusterCredentials(cfg *Config) error {
+	if cfg == nil || cfg.Cluster == nil {
+		return nil
+	}
+	c := cfg.Cluster
+	if c.BootstrapTokenPath != "" && c.ClientSecretPath != "" {
+		return errors.New("cluster: bootstrapTokenPath and clientSecretPath are mutually exclusive")
+	}
+	var err error
+	if c.BootstrapTokenPath != "" {
+		c.bootstrapToken, err = readSecretFile(c.BootstrapTokenPath, "cluster bootstrap token")
+	}
+	if c.ClientSecretPath != "" {
+		c.clientSecret, err = readSecretFile(c.ClientSecretPath, "cluster client secret")
+	}
+	return err
+}
+
+func readSecretFile(path, name string) (string, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return "", fmt.Errorf("read registry secret %q: %w", path, err)
+		return "", fmt.Errorf("read %s %q: %w", name, path, err)
 	}
 	secret := strings.TrimSpace(string(b))
 	if secret == "" {
-		return "", fmt.Errorf("registry secret file %q is empty", path)
+		return "", fmt.Errorf("%s file %q is empty", name, path)
 	}
 	return secret, nil
 }

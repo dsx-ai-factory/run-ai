@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 WorkloadsService
 
@@ -254,6 +256,7 @@ func (a *PodsApiService) GetWorkloadPods(ctx context.Context, workloadId string)
 }
 
 // Execute executes the request
+//
 //	@return GetWorkloadPods200Response
 func (a *PodsApiService) GetWorkloadPodsExecute(r ApiGetWorkloadPodsRequest) (*GetWorkloadPods200Response, *http.Response, error) {
 	var (

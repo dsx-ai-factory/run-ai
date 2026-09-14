@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -134,6 +136,7 @@ func (a *HostPathApiService) CreateHostPath(ctx context.Context) ApiCreateHostPa
 }
 
 // Execute executes the request
+//
 //	@return HostPathAsset
 func (a *HostPathApiService) CreateHostPathExecute(r ApiCreateHostPathRequest) (*HostPathAsset, *http.Response, error) {
 	var (
@@ -280,6 +283,7 @@ func (a *HostPathApiService) DeleteHostPathById(ctx context.Context, assetId str
 }
 
 // Execute executes the request
+//
 //	@return HttpResponse
 func (a *HostPathApiService) DeleteHostPathByIdExecute(r ApiDeleteHostPathByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -466,6 +470,7 @@ func (a *HostPathApiService) GetHostPathById(ctx context.Context, assetId string
 }
 
 // Execute executes the request
+//
 //	@return HostPathAsset
 func (a *HostPathApiService) GetHostPathByIdExecute(r ApiGetHostPathByIdRequest) (*HostPathAsset, *http.Response, error) {
 	var (
@@ -683,6 +688,7 @@ func (a *HostPathApiService) ListHostPathAssets(ctx context.Context) ApiListHost
 }
 
 // Execute executes the request
+//
 //	@return HostPathListResponse
 func (a *HostPathApiService) ListHostPathAssetsExecute(r ApiListHostPathAssetsRequest) (*HostPathListResponse, *http.Response, error) {
 	var (
@@ -854,6 +860,7 @@ func (a *HostPathApiService) UpdateHostPathById(ctx context.Context, assetId str
 }
 
 // Execute executes the request
+//
 //	@return HostPathAsset
 func (a *HostPathApiService) UpdateHostPathByIdExecute(r ApiUpdateHostPathByIdRequest) (*HostPathAsset, *http.Response, error) {
 	var (

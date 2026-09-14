@@ -13,7 +13,7 @@
       "id": "a22ecd44-f863-444d-b69d-0cc0d26bbc55",
       "priority": 150,
       "priorityClassName": "very-high",
-      "submittedBy": "test@run.ai",
+      "submittedBy": "test@example.com",
       "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
       "projectName": "test-nim",
       "projectId": "4500011",
@@ -46,7 +46,7 @@
         "default"
       ],
       "images": [
-        "gcr.io/run-ai-lab/nim-cpu:latest"
+        "nvcr.io/nim/meta/llama3-8b-instruct"
       ],
       "environments": [],
       "additionalFields": {},

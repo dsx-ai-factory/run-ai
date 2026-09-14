@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,16 +21,15 @@ import (
 	"strings"
 )
 
-
 type SecretsApi interface {
 
 	/*
-	CreateClusterWideSecret upload the details of cluster-wide secret to the control plane
+		CreateClusterWideSecret upload the details of cluster-wide secret to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param secretName The secret name.
-	@return SecretsApiCreateClusterWideSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param secretName The secret name.
+		@return SecretsApiCreateClusterWideSecretRequest
 	*/
 	CreateClusterWideSecret(ctx context.Context, clusterUuid string, secretName string) SecretsApiCreateClusterWideSecretRequest
 
@@ -37,13 +38,13 @@ type SecretsApi interface {
 	CreateClusterWideSecretExecute(r SecretsApiCreateClusterWideSecretRequest) (*SecretCreationRequest, *http.Response, error)
 
 	/*
-	CreateDepartmentWideSecret upload the details of department-wide secret to the control plane
+		CreateDepartmentWideSecret upload the details of department-wide secret to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param secretName The secret name.
-	@return SecretsApiCreateDepartmentWideSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param secretName The secret name.
+		@return SecretsApiCreateDepartmentWideSecretRequest
 	*/
 	CreateDepartmentWideSecret(ctx context.Context, clusterUuid string, departmentId string, secretName string) SecretsApiCreateDepartmentWideSecretRequest
 
@@ -52,13 +53,13 @@ type SecretsApi interface {
 	CreateDepartmentWideSecretExecute(r SecretsApiCreateDepartmentWideSecretRequest) (*Secret3, *http.Response, error)
 
 	/*
-	CreateDepartmentsWideSecret upload the details of department-wide secret to the control plane
+		CreateDepartmentsWideSecret upload the details of department-wide secret to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param secretName The secret name.
-	@return SecretsApiCreateDepartmentsWideSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param secretName The secret name.
+		@return SecretsApiCreateDepartmentsWideSecretRequest
 	*/
 	CreateDepartmentsWideSecret(ctx context.Context, clusterUuid string, departmentId string, secretName string) SecretsApiCreateDepartmentsWideSecretRequest
 
@@ -67,13 +68,13 @@ type SecretsApi interface {
 	CreateDepartmentsWideSecretExecute(r SecretsApiCreateDepartmentsWideSecretRequest) (*Secret3, *http.Response, error)
 
 	/*
-	CreateProjectSecret upload the details of project-wide secret to the control plane
+		CreateProjectSecret upload the details of project-wide secret to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param secretName The secret name.
-	@return SecretsApiCreateProjectSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param secretName The secret name.
+		@return SecretsApiCreateProjectSecretRequest
 	*/
 	CreateProjectSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiCreateProjectSecretRequest
 
@@ -82,13 +83,13 @@ type SecretsApi interface {
 	CreateProjectSecretExecute(r SecretsApiCreateProjectSecretRequest) (*Secret3, *http.Response, error)
 
 	/*
-	CreateProjectsSecret upload the details of project-wide secret to the control plane
+		CreateProjectsSecret upload the details of project-wide secret to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param secretName The secret name.
-	@return SecretsApiCreateProjectsSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param secretName The secret name.
+		@return SecretsApiCreateProjectsSecretRequest
 	*/
 	CreateProjectsSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiCreateProjectsSecretRequest
 
@@ -97,12 +98,12 @@ type SecretsApi interface {
 	CreateProjectsSecretExecute(r SecretsApiCreateProjectsSecretRequest) (*Secret3, *http.Response, error)
 
 	/*
-	DeleteClusterWideSecret delete cluster-wide secret
+		DeleteClusterWideSecret delete cluster-wide secret
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param secretName The secret name.
-	@return SecretsApiDeleteClusterWideSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param secretName The secret name.
+		@return SecretsApiDeleteClusterWideSecretRequest
 	*/
 	DeleteClusterWideSecret(ctx context.Context, clusterUuid string, secretName string) SecretsApiDeleteClusterWideSecretRequest
 
@@ -110,13 +111,13 @@ type SecretsApi interface {
 	DeleteClusterWideSecretExecute(r SecretsApiDeleteClusterWideSecretRequest) (*http.Response, error)
 
 	/*
-	DeleteDepartmentWideSecret delete department-wide secret
+		DeleteDepartmentWideSecret delete department-wide secret
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param secretName The secret name.
-	@return SecretsApiDeleteDepartmentWideSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param secretName The secret name.
+		@return SecretsApiDeleteDepartmentWideSecretRequest
 	*/
 	DeleteDepartmentWideSecret(ctx context.Context, clusterUuid string, departmentId string, secretName string) SecretsApiDeleteDepartmentWideSecretRequest
 
@@ -124,13 +125,13 @@ type SecretsApi interface {
 	DeleteDepartmentWideSecretExecute(r SecretsApiDeleteDepartmentWideSecretRequest) (*http.Response, error)
 
 	/*
-	DeleteDepartmentsWideSecret delete department-wide secret
+		DeleteDepartmentsWideSecret delete department-wide secret
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@param secretName The secret name.
-	@return SecretsApiDeleteDepartmentsWideSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@param secretName The secret name.
+		@return SecretsApiDeleteDepartmentsWideSecretRequest
 	*/
 	DeleteDepartmentsWideSecret(ctx context.Context, clusterUuid string, departmentId string, secretName string) SecretsApiDeleteDepartmentsWideSecretRequest
 
@@ -138,13 +139,13 @@ type SecretsApi interface {
 	DeleteDepartmentsWideSecretExecute(r SecretsApiDeleteDepartmentsWideSecretRequest) (*http.Response, error)
 
 	/*
-	DeleteProjectSecret delete project secret
+		DeleteProjectSecret delete project secret
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param secretName The secret name.
-	@return SecretsApiDeleteProjectSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param secretName The secret name.
+		@return SecretsApiDeleteProjectSecretRequest
 	*/
 	DeleteProjectSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiDeleteProjectSecretRequest
 
@@ -152,13 +153,13 @@ type SecretsApi interface {
 	DeleteProjectSecretExecute(r SecretsApiDeleteProjectSecretRequest) (*http.Response, error)
 
 	/*
-	DeleteProjectsSecret delete project secret
+		DeleteProjectsSecret delete project secret
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param secretName The secret name.
-	@return SecretsApiDeleteProjectsSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param secretName The secret name.
+		@return SecretsApiDeleteProjectsSecretRequest
 	*/
 	DeleteProjectsSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiDeleteProjectsSecretRequest
 
@@ -166,10 +167,10 @@ type SecretsApi interface {
 	DeleteProjectsSecretExecute(r SecretsApiDeleteProjectsSecretRequest) (*http.Response, error)
 
 	/*
-	ListSecrets list details of secrets
+		ListSecrets list details of secrets
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SecretsApiListSecretsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return SecretsApiListSecretsRequest
 	*/
 	ListSecrets(ctx context.Context) SecretsApiListSecretsRequest
 
@@ -178,14 +179,14 @@ type SecretsApi interface {
 	ListSecretsExecute(r SecretsApiListSecretsRequest) (*SecretListResponse, *http.Response, error)
 
 	/*
-	ObsoleteCreateSecret upload the details of a secret to the control plane
+		ObsoleteCreateSecret upload the details of a secret to the control plane
 
-	this API is used by cluster versions < 2.15
+		this API is used by cluster versions < 2.15
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return SecretsApiObsoleteCreateSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return SecretsApiObsoleteCreateSecretRequest
 	*/
 	ObsoleteCreateSecret(ctx context.Context, clusterUuid string, namespace string) SecretsApiObsoleteCreateSecretRequest
 
@@ -194,15 +195,15 @@ type SecretsApi interface {
 	ObsoleteCreateSecretExecute(r SecretsApiObsoleteCreateSecretRequest) (*SingleSecret, *http.Response, error)
 
 	/*
-	ObsoleteDeleteSecret delete secret
+		ObsoleteDeleteSecret delete secret
 
-	this API is used by cluster versions < 2.15
+		this API is used by cluster versions < 2.15
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@param secretName The secret name.
-	@return SecretsApiObsoleteDeleteSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@param secretName The secret name.
+		@return SecretsApiObsoleteDeleteSecretRequest
 	*/
 	ObsoleteDeleteSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiObsoleteDeleteSecretRequest
 
@@ -210,14 +211,14 @@ type SecretsApi interface {
 	ObsoleteDeleteSecretExecute(r SecretsApiObsoleteDeleteSecretRequest) (*http.Response, error)
 
 	/*
-	ObsoleteSyncSecret upload the details of secrets to the control plane
+		ObsoleteSyncSecret upload the details of secrets to the control plane
 
-	this API is used by cluster versions < 2.15
+		this API is used by cluster versions < 2.15
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return SecretsApiObsoleteSyncSecretRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return SecretsApiObsoleteSyncSecretRequest
 	*/
 	ObsoleteSyncSecret(ctx context.Context, clusterUuid string, namespace string) SecretsApiObsoleteSyncSecretRequest
 
@@ -226,11 +227,11 @@ type SecretsApi interface {
 	ObsoleteSyncSecretExecute(r SecretsApiObsoleteSyncSecretRequest) ([]SingleSecret, *http.Response, error)
 
 	/*
-	SyncClusterWideSecrets sync the details of cluster-wide secrets to the control plane
+		SyncClusterWideSecrets sync the details of cluster-wide secrets to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return SecretsApiSyncClusterWideSecretsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return SecretsApiSyncClusterWideSecretsRequest
 	*/
 	SyncClusterWideSecrets(ctx context.Context, clusterUuid string) SecretsApiSyncClusterWideSecretsRequest
 
@@ -239,12 +240,12 @@ type SecretsApi interface {
 	SyncClusterWideSecretsExecute(r SecretsApiSyncClusterWideSecretsRequest) (*Secrets1, *http.Response, error)
 
 	/*
-	SyncDepartmentWideSecrets sync the details of department-wide secrets to the control plane
+		SyncDepartmentWideSecrets sync the details of department-wide secrets to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@return SecretsApiSyncDepartmentWideSecretsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@return SecretsApiSyncDepartmentWideSecretsRequest
 	*/
 	SyncDepartmentWideSecrets(ctx context.Context, clusterUuid string, departmentId string) SecretsApiSyncDepartmentWideSecretsRequest
 
@@ -253,12 +254,12 @@ type SecretsApi interface {
 	SyncDepartmentWideSecretsExecute(r SecretsApiSyncDepartmentWideSecretsRequest) (*Secrets1, *http.Response, error)
 
 	/*
-	SyncDepartmentsWideSecrets sync the details of department-wide secrets to the control plane
+		SyncDepartmentsWideSecrets sync the details of department-wide secrets to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@return SecretsApiSyncDepartmentsWideSecretsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param departmentId The id of the department.
+		@return SecretsApiSyncDepartmentsWideSecretsRequest
 	*/
 	SyncDepartmentsWideSecrets(ctx context.Context, clusterUuid string, departmentId string) SecretsApiSyncDepartmentsWideSecretsRequest
 
@@ -267,12 +268,12 @@ type SecretsApi interface {
 	SyncDepartmentsWideSecretsExecute(r SecretsApiSyncDepartmentsWideSecretsRequest) (*Secrets1, *http.Response, error)
 
 	/*
-	SyncProjectSecrets sync the details of project secrets to the control plane
+		SyncProjectSecrets sync the details of project secrets to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return SecretsApiSyncProjectSecretsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return SecretsApiSyncProjectSecretsRequest
 	*/
 	SyncProjectSecrets(ctx context.Context, clusterUuid string, namespace string) SecretsApiSyncProjectSecretsRequest
 
@@ -281,12 +282,12 @@ type SecretsApi interface {
 	SyncProjectSecretsExecute(r SecretsApiSyncProjectSecretsRequest) (*Secrets1, *http.Response, error)
 
 	/*
-	SyncProjectsSecrets sync the details of project secrets to the control plane
+		SyncProjectsSecrets sync the details of project secrets to the control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return SecretsApiSyncProjectsSecretsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@param namespace The namespace of the project.
+		@return SecretsApiSyncProjectsSecretsRequest
 	*/
 	SyncProjectsSecrets(ctx context.Context, clusterUuid string, namespace string) SecretsApiSyncProjectsSecretsRequest
 
@@ -299,10 +300,10 @@ type SecretsApi interface {
 type SecretsApiService service
 
 type SecretsApiCreateClusterWideSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
-	secretName string
+	ctx                   context.Context
+	ApiService            SecretsApi
+	clusterUuid           string
+	secretName            string
 	secretCreationRequest *SecretCreationRequest
 }
 
@@ -318,28 +319,29 @@ func (r SecretsApiCreateClusterWideSecretRequest) Execute() (*SecretCreationRequ
 /*
 CreateClusterWideSecret upload the details of cluster-wide secret to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param secretName The secret name.
- @return SecretsApiCreateClusterWideSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param secretName The secret name.
+	@return SecretsApiCreateClusterWideSecretRequest
 */
 func (a *SecretsApiService) CreateClusterWideSecret(ctx context.Context, clusterUuid string, secretName string) SecretsApiCreateClusterWideSecretRequest {
 	return SecretsApiCreateClusterWideSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		secretName: secretName,
+		secretName:  secretName,
 	}
 }
 
 // Execute executes the request
-//  @return SecretCreationRequest
+//
+//	@return SecretCreationRequest
 func (a *SecretsApiService) CreateClusterWideSecretExecute(r SecretsApiCreateClusterWideSecretRequest) (*SecretCreationRequest, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SecretCreationRequest
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SecretCreationRequest
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.CreateClusterWideSecret")
@@ -457,11 +459,11 @@ func (a *SecretsApiService) CreateClusterWideSecretExecute(r SecretsApiCreateClu
 }
 
 type SecretsApiCreateDepartmentWideSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
-	departmentId string
-	secretName string
+	ctx                   context.Context
+	ApiService            SecretsApi
+	clusterUuid           string
+	departmentId          string
+	secretName            string
 	secretCreationRequest *SecretCreationRequest
 }
 
@@ -477,30 +479,31 @@ func (r SecretsApiCreateDepartmentWideSecretRequest) Execute() (*Secret3, *http.
 /*
 CreateDepartmentWideSecret upload the details of department-wide secret to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param secretName The secret name.
- @return SecretsApiCreateDepartmentWideSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param secretName The secret name.
+	@return SecretsApiCreateDepartmentWideSecretRequest
 */
 func (a *SecretsApiService) CreateDepartmentWideSecret(ctx context.Context, clusterUuid string, departmentId string, secretName string) SecretsApiCreateDepartmentWideSecretRequest {
 	return SecretsApiCreateDepartmentWideSecretRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		secretName: secretName,
+		secretName:   secretName,
 	}
 }
 
 // Execute executes the request
-//  @return Secret3
+//
+//	@return Secret3
 func (a *SecretsApiService) CreateDepartmentWideSecretExecute(r SecretsApiCreateDepartmentWideSecretRequest) (*Secret3, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secret3
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secret3
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.CreateDepartmentWideSecret")
@@ -619,11 +622,11 @@ func (a *SecretsApiService) CreateDepartmentWideSecretExecute(r SecretsApiCreate
 }
 
 type SecretsApiCreateDepartmentsWideSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
-	departmentId string
-	secretName string
+	ctx                   context.Context
+	ApiService            SecretsApi
+	clusterUuid           string
+	departmentId          string
+	secretName            string
 	secretCreationRequest *SecretCreationRequest
 }
 
@@ -639,30 +642,31 @@ func (r SecretsApiCreateDepartmentsWideSecretRequest) Execute() (*Secret3, *http
 /*
 CreateDepartmentsWideSecret upload the details of department-wide secret to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param secretName The secret name.
- @return SecretsApiCreateDepartmentsWideSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param secretName The secret name.
+	@return SecretsApiCreateDepartmentsWideSecretRequest
 */
 func (a *SecretsApiService) CreateDepartmentsWideSecret(ctx context.Context, clusterUuid string, departmentId string, secretName string) SecretsApiCreateDepartmentsWideSecretRequest {
 	return SecretsApiCreateDepartmentsWideSecretRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		secretName: secretName,
+		secretName:   secretName,
 	}
 }
 
 // Execute executes the request
-//  @return Secret3
+//
+//	@return Secret3
 func (a *SecretsApiService) CreateDepartmentsWideSecretExecute(r SecretsApiCreateDepartmentsWideSecretRequest) (*Secret3, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secret3
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secret3
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.CreateDepartmentsWideSecret")
@@ -791,11 +795,11 @@ func (a *SecretsApiService) CreateDepartmentsWideSecretExecute(r SecretsApiCreat
 }
 
 type SecretsApiCreateProjectSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
-	namespace string
-	secretName string
+	ctx                   context.Context
+	ApiService            SecretsApi
+	clusterUuid           string
+	namespace             string
+	secretName            string
 	secretCreationRequest *SecretCreationRequest
 }
 
@@ -811,30 +815,31 @@ func (r SecretsApiCreateProjectSecretRequest) Execute() (*Secret3, *http.Respons
 /*
 CreateProjectSecret upload the details of project-wide secret to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param secretName The secret name.
- @return SecretsApiCreateProjectSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param secretName The secret name.
+	@return SecretsApiCreateProjectSecretRequest
 */
 func (a *SecretsApiService) CreateProjectSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiCreateProjectSecretRequest {
 	return SecretsApiCreateProjectSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		secretName: secretName,
+		namespace:   namespace,
+		secretName:  secretName,
 	}
 }
 
 // Execute executes the request
-//  @return Secret3
+//
+//	@return Secret3
 func (a *SecretsApiService) CreateProjectSecretExecute(r SecretsApiCreateProjectSecretRequest) (*Secret3, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secret3
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secret3
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.CreateProjectSecret")
@@ -953,11 +958,11 @@ func (a *SecretsApiService) CreateProjectSecretExecute(r SecretsApiCreateProject
 }
 
 type SecretsApiCreateProjectsSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
-	namespace string
-	secretName string
+	ctx                   context.Context
+	ApiService            SecretsApi
+	clusterUuid           string
+	namespace             string
+	secretName            string
 	secretCreationRequest *SecretCreationRequest
 }
 
@@ -973,30 +978,31 @@ func (r SecretsApiCreateProjectsSecretRequest) Execute() (*Secret3, *http.Respon
 /*
 CreateProjectsSecret upload the details of project-wide secret to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param secretName The secret name.
- @return SecretsApiCreateProjectsSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param secretName The secret name.
+	@return SecretsApiCreateProjectsSecretRequest
 */
 func (a *SecretsApiService) CreateProjectsSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiCreateProjectsSecretRequest {
 	return SecretsApiCreateProjectsSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		secretName: secretName,
+		namespace:   namespace,
+		secretName:  secretName,
 	}
 }
 
 // Execute executes the request
-//  @return Secret3
+//
+//	@return Secret3
 func (a *SecretsApiService) CreateProjectsSecretExecute(r SecretsApiCreateProjectsSecretRequest) (*Secret3, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secret3
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secret3
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.CreateProjectsSecret")
@@ -1125,10 +1131,10 @@ func (a *SecretsApiService) CreateProjectsSecretExecute(r SecretsApiCreateProjec
 }
 
 type SecretsApiDeleteClusterWideSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
+	ctx         context.Context
+	ApiService  SecretsApi
 	clusterUuid string
-	secretName string
+	secretName  string
 }
 
 func (r SecretsApiDeleteClusterWideSecretRequest) Execute() (*http.Response, error) {
@@ -1138,26 +1144,26 @@ func (r SecretsApiDeleteClusterWideSecretRequest) Execute() (*http.Response, err
 /*
 DeleteClusterWideSecret delete cluster-wide secret
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param secretName The secret name.
- @return SecretsApiDeleteClusterWideSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param secretName The secret name.
+	@return SecretsApiDeleteClusterWideSecretRequest
 */
 func (a *SecretsApiService) DeleteClusterWideSecret(ctx context.Context, clusterUuid string, secretName string) SecretsApiDeleteClusterWideSecretRequest {
 	return SecretsApiDeleteClusterWideSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		secretName: secretName,
+		secretName:  secretName,
 	}
 }
 
 // Execute executes the request
 func (a *SecretsApiService) DeleteClusterWideSecretExecute(r SecretsApiDeleteClusterWideSecretRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.DeleteClusterWideSecret")
@@ -1271,11 +1277,11 @@ func (a *SecretsApiService) DeleteClusterWideSecretExecute(r SecretsApiDeleteClu
 }
 
 type SecretsApiDeleteDepartmentWideSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   SecretsApi
+	clusterUuid  string
 	departmentId string
-	secretName string
+	secretName   string
 }
 
 func (r SecretsApiDeleteDepartmentWideSecretRequest) Execute() (*http.Response, error) {
@@ -1285,28 +1291,28 @@ func (r SecretsApiDeleteDepartmentWideSecretRequest) Execute() (*http.Response, 
 /*
 DeleteDepartmentWideSecret delete department-wide secret
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param secretName The secret name.
- @return SecretsApiDeleteDepartmentWideSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param secretName The secret name.
+	@return SecretsApiDeleteDepartmentWideSecretRequest
 */
 func (a *SecretsApiService) DeleteDepartmentWideSecret(ctx context.Context, clusterUuid string, departmentId string, secretName string) SecretsApiDeleteDepartmentWideSecretRequest {
 	return SecretsApiDeleteDepartmentWideSecretRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		secretName: secretName,
+		secretName:   secretName,
 	}
 }
 
 // Execute executes the request
 func (a *SecretsApiService) DeleteDepartmentWideSecretExecute(r SecretsApiDeleteDepartmentWideSecretRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.DeleteDepartmentWideSecret")
@@ -1421,11 +1427,11 @@ func (a *SecretsApiService) DeleteDepartmentWideSecretExecute(r SecretsApiDelete
 }
 
 type SecretsApiDeleteDepartmentsWideSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   SecretsApi
+	clusterUuid  string
 	departmentId string
-	secretName string
+	secretName   string
 }
 
 func (r SecretsApiDeleteDepartmentsWideSecretRequest) Execute() (*http.Response, error) {
@@ -1435,28 +1441,28 @@ func (r SecretsApiDeleteDepartmentsWideSecretRequest) Execute() (*http.Response,
 /*
 DeleteDepartmentsWideSecret delete department-wide secret
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @param secretName The secret name.
- @return SecretsApiDeleteDepartmentsWideSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@param secretName The secret name.
+	@return SecretsApiDeleteDepartmentsWideSecretRequest
 */
 func (a *SecretsApiService) DeleteDepartmentsWideSecret(ctx context.Context, clusterUuid string, departmentId string, secretName string) SecretsApiDeleteDepartmentsWideSecretRequest {
 	return SecretsApiDeleteDepartmentsWideSecretRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
-		secretName: secretName,
+		secretName:   secretName,
 	}
 }
 
 // Execute executes the request
 func (a *SecretsApiService) DeleteDepartmentsWideSecretExecute(r SecretsApiDeleteDepartmentsWideSecretRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.DeleteDepartmentsWideSecret")
@@ -1581,11 +1587,11 @@ func (a *SecretsApiService) DeleteDepartmentsWideSecretExecute(r SecretsApiDelet
 }
 
 type SecretsApiDeleteProjectSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
+	ctx         context.Context
+	ApiService  SecretsApi
 	clusterUuid string
-	namespace string
-	secretName string
+	namespace   string
+	secretName  string
 }
 
 func (r SecretsApiDeleteProjectSecretRequest) Execute() (*http.Response, error) {
@@ -1595,28 +1601,28 @@ func (r SecretsApiDeleteProjectSecretRequest) Execute() (*http.Response, error) 
 /*
 DeleteProjectSecret delete project secret
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param secretName The secret name.
- @return SecretsApiDeleteProjectSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param secretName The secret name.
+	@return SecretsApiDeleteProjectSecretRequest
 */
 func (a *SecretsApiService) DeleteProjectSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiDeleteProjectSecretRequest {
 	return SecretsApiDeleteProjectSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		secretName: secretName,
+		namespace:   namespace,
+		secretName:  secretName,
 	}
 }
 
 // Execute executes the request
 func (a *SecretsApiService) DeleteProjectSecretExecute(r SecretsApiDeleteProjectSecretRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.DeleteProjectSecret")
@@ -1731,11 +1737,11 @@ func (a *SecretsApiService) DeleteProjectSecretExecute(r SecretsApiDeleteProject
 }
 
 type SecretsApiDeleteProjectsSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
+	ctx         context.Context
+	ApiService  SecretsApi
 	clusterUuid string
-	namespace string
-	secretName string
+	namespace   string
+	secretName  string
 }
 
 func (r SecretsApiDeleteProjectsSecretRequest) Execute() (*http.Response, error) {
@@ -1745,28 +1751,28 @@ func (r SecretsApiDeleteProjectsSecretRequest) Execute() (*http.Response, error)
 /*
 DeleteProjectsSecret delete project secret
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param secretName The secret name.
- @return SecretsApiDeleteProjectsSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param secretName The secret name.
+	@return SecretsApiDeleteProjectsSecretRequest
 */
 func (a *SecretsApiService) DeleteProjectsSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiDeleteProjectsSecretRequest {
 	return SecretsApiDeleteProjectsSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		secretName: secretName,
+		namespace:   namespace,
+		secretName:  secretName,
 	}
 }
 
 // Execute executes the request
 func (a *SecretsApiService) DeleteProjectsSecretExecute(r SecretsApiDeleteProjectsSecretRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.DeleteProjectsSecret")
@@ -1891,14 +1897,14 @@ func (a *SecretsApiService) DeleteProjectsSecretExecute(r SecretsApiDeleteProjec
 }
 
 type SecretsApiListSecretsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService SecretsApi
-	scopeType *string
-	scopeId *string
-	name *string
+	scopeType  *string
+	scopeId    *string
+	name       *string
 	secretType *string
-	clusterId *string
-	origin *string
+	clusterId  *string
+	origin     *string
 }
 
 // The type of resource we want to filter by.
@@ -1944,24 +1950,25 @@ func (r SecretsApiListSecretsRequest) Execute() (*SecretListResponse, *http.Resp
 /*
 ListSecrets list details of secrets
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return SecretsApiListSecretsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SecretsApiListSecretsRequest
 */
 func (a *SecretsApiService) ListSecrets(ctx context.Context) SecretsApiListSecretsRequest {
 	return SecretsApiListSecretsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return SecretListResponse
+//
+//	@return SecretListResponse
 func (a *SecretsApiService) ListSecretsExecute(r SecretsApiListSecretsRequest) (*SecretListResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SecretListResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SecretListResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.ListSecrets")
@@ -2097,10 +2104,10 @@ func (a *SecretsApiService) ListSecretsExecute(r SecretsApiListSecretsRequest) (
 }
 
 type SecretsApiObsoleteCreateSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
-	namespace string
+	ctx          context.Context
+	ApiService   SecretsApi
+	clusterUuid  string
+	namespace    string
 	singleSecret *SingleSecret
 }
 
@@ -2118,28 +2125,29 @@ ObsoleteCreateSecret upload the details of a secret to the control plane
 
 this API is used by cluster versions < 2.15
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return SecretsApiObsoleteCreateSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return SecretsApiObsoleteCreateSecretRequest
 */
 func (a *SecretsApiService) ObsoleteCreateSecret(ctx context.Context, clusterUuid string, namespace string) SecretsApiObsoleteCreateSecretRequest {
 	return SecretsApiObsoleteCreateSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return SingleSecret
+//
+//	@return SingleSecret
 func (a *SecretsApiService) ObsoleteCreateSecretExecute(r SecretsApiObsoleteCreateSecretRequest) (*SingleSecret, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SingleSecret
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SingleSecret
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.ObsoleteCreateSecret")
@@ -2257,11 +2265,11 @@ func (a *SecretsApiService) ObsoleteCreateSecretExecute(r SecretsApiObsoleteCrea
 }
 
 type SecretsApiObsoleteDeleteSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
+	ctx         context.Context
+	ApiService  SecretsApi
 	clusterUuid string
-	namespace string
-	secretName string
+	namespace   string
+	secretName  string
 }
 
 func (r SecretsApiObsoleteDeleteSecretRequest) Execute() (*http.Response, error) {
@@ -2273,28 +2281,28 @@ ObsoleteDeleteSecret delete secret
 
 this API is used by cluster versions < 2.15
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @param secretName The secret name.
- @return SecretsApiObsoleteDeleteSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@param secretName The secret name.
+	@return SecretsApiObsoleteDeleteSecretRequest
 */
 func (a *SecretsApiService) ObsoleteDeleteSecret(ctx context.Context, clusterUuid string, namespace string, secretName string) SecretsApiObsoleteDeleteSecretRequest {
 	return SecretsApiObsoleteDeleteSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
-		secretName: secretName,
+		namespace:   namespace,
+		secretName:  secretName,
 	}
 }
 
 // Execute executes the request
 func (a *SecretsApiService) ObsoleteDeleteSecretExecute(r SecretsApiObsoleteDeleteSecretRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.ObsoleteDeleteSecret")
@@ -2409,10 +2417,10 @@ func (a *SecretsApiService) ObsoleteDeleteSecretExecute(r SecretsApiObsoleteDele
 }
 
 type SecretsApiObsoleteSyncSecretRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
-	namespace string
+	ctx          context.Context
+	ApiService   SecretsApi
+	clusterUuid  string
+	namespace    string
 	singleSecret *[]SingleSecret
 }
 
@@ -2430,28 +2438,29 @@ ObsoleteSyncSecret upload the details of secrets to the control plane
 
 this API is used by cluster versions < 2.15
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return SecretsApiObsoleteSyncSecretRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return SecretsApiObsoleteSyncSecretRequest
 */
 func (a *SecretsApiService) ObsoleteSyncSecret(ctx context.Context, clusterUuid string, namespace string) SecretsApiObsoleteSyncSecretRequest {
 	return SecretsApiObsoleteSyncSecretRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return []SingleSecret
+//
+//	@return []SingleSecret
 func (a *SecretsApiService) ObsoleteSyncSecretExecute(r SecretsApiObsoleteSyncSecretRequest) ([]SingleSecret, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []SingleSecret
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []SingleSecret
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.ObsoleteSyncSecret")
@@ -2569,10 +2578,10 @@ func (a *SecretsApiService) ObsoleteSyncSecretExecute(r SecretsApiObsoleteSyncSe
 }
 
 type SecretsApiSyncClusterWideSecretsRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
+	ctx         context.Context
+	ApiService  SecretsApi
 	clusterUuid string
-	secrets1 *Secrets1
+	secrets1    *Secrets1
 }
 
 func (r SecretsApiSyncClusterWideSecretsRequest) Secrets1(secrets1 Secrets1) SecretsApiSyncClusterWideSecretsRequest {
@@ -2587,26 +2596,27 @@ func (r SecretsApiSyncClusterWideSecretsRequest) Execute() (*Secrets1, *http.Res
 /*
 SyncClusterWideSecrets sync the details of cluster-wide secrets to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return SecretsApiSyncClusterWideSecretsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return SecretsApiSyncClusterWideSecretsRequest
 */
 func (a *SecretsApiService) SyncClusterWideSecrets(ctx context.Context, clusterUuid string) SecretsApiSyncClusterWideSecretsRequest {
 	return SecretsApiSyncClusterWideSecretsRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return Secrets1
+//
+//	@return Secrets1
 func (a *SecretsApiService) SyncClusterWideSecretsExecute(r SecretsApiSyncClusterWideSecretsRequest) (*Secrets1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secrets1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secrets1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.SyncClusterWideSecrets")
@@ -2723,11 +2733,11 @@ func (a *SecretsApiService) SyncClusterWideSecretsExecute(r SecretsApiSyncCluste
 }
 
 type SecretsApiSyncDepartmentWideSecretsRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   SecretsApi
+	clusterUuid  string
 	departmentId string
-	secrets1 *Secrets1
+	secrets1     *Secrets1
 }
 
 func (r SecretsApiSyncDepartmentWideSecretsRequest) Secrets1(secrets1 Secrets1) SecretsApiSyncDepartmentWideSecretsRequest {
@@ -2742,28 +2752,29 @@ func (r SecretsApiSyncDepartmentWideSecretsRequest) Execute() (*Secrets1, *http.
 /*
 SyncDepartmentWideSecrets sync the details of department-wide secrets to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @return SecretsApiSyncDepartmentWideSecretsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@return SecretsApiSyncDepartmentWideSecretsRequest
 */
 func (a *SecretsApiService) SyncDepartmentWideSecrets(ctx context.Context, clusterUuid string, departmentId string) SecretsApiSyncDepartmentWideSecretsRequest {
 	return SecretsApiSyncDepartmentWideSecretsRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return Secrets1
+//
+//	@return Secrets1
 func (a *SecretsApiService) SyncDepartmentWideSecretsExecute(r SecretsApiSyncDepartmentWideSecretsRequest) (*Secrets1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secrets1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secrets1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.SyncDepartmentWideSecrets")
@@ -2881,11 +2892,11 @@ func (a *SecretsApiService) SyncDepartmentWideSecretsExecute(r SecretsApiSyncDep
 }
 
 type SecretsApiSyncDepartmentsWideSecretsRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
-	clusterUuid string
+	ctx          context.Context
+	ApiService   SecretsApi
+	clusterUuid  string
 	departmentId string
-	secrets1 *Secrets1
+	secrets1     *Secrets1
 }
 
 func (r SecretsApiSyncDepartmentsWideSecretsRequest) Secrets1(secrets1 Secrets1) SecretsApiSyncDepartmentsWideSecretsRequest {
@@ -2900,28 +2911,29 @@ func (r SecretsApiSyncDepartmentsWideSecretsRequest) Execute() (*Secrets1, *http
 /*
 SyncDepartmentsWideSecrets sync the details of department-wide secrets to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param departmentId The id of the department.
- @return SecretsApiSyncDepartmentsWideSecretsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param departmentId The id of the department.
+	@return SecretsApiSyncDepartmentsWideSecretsRequest
 */
 func (a *SecretsApiService) SyncDepartmentsWideSecrets(ctx context.Context, clusterUuid string, departmentId string) SecretsApiSyncDepartmentsWideSecretsRequest {
 	return SecretsApiSyncDepartmentsWideSecretsRequest{
-		ApiService: a,
-		ctx: ctx,
-		clusterUuid: clusterUuid,
+		ApiService:   a,
+		ctx:          ctx,
+		clusterUuid:  clusterUuid,
 		departmentId: departmentId,
 	}
 }
 
 // Execute executes the request
-//  @return Secrets1
+//
+//	@return Secrets1
 func (a *SecretsApiService) SyncDepartmentsWideSecretsExecute(r SecretsApiSyncDepartmentsWideSecretsRequest) (*Secrets1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secrets1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secrets1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.SyncDepartmentsWideSecrets")
@@ -3049,11 +3061,11 @@ func (a *SecretsApiService) SyncDepartmentsWideSecretsExecute(r SecretsApiSyncDe
 }
 
 type SecretsApiSyncProjectSecretsRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
+	ctx         context.Context
+	ApiService  SecretsApi
 	clusterUuid string
-	namespace string
-	secrets1 *Secrets1
+	namespace   string
+	secrets1    *Secrets1
 }
 
 func (r SecretsApiSyncProjectSecretsRequest) Secrets1(secrets1 Secrets1) SecretsApiSyncProjectSecretsRequest {
@@ -3068,28 +3080,29 @@ func (r SecretsApiSyncProjectSecretsRequest) Execute() (*Secrets1, *http.Respons
 /*
 SyncProjectSecrets sync the details of project secrets to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return SecretsApiSyncProjectSecretsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return SecretsApiSyncProjectSecretsRequest
 */
 func (a *SecretsApiService) SyncProjectSecrets(ctx context.Context, clusterUuid string, namespace string) SecretsApiSyncProjectSecretsRequest {
 	return SecretsApiSyncProjectSecretsRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return Secrets1
+//
+//	@return Secrets1
 func (a *SecretsApiService) SyncProjectSecretsExecute(r SecretsApiSyncProjectSecretsRequest) (*Secrets1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secrets1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secrets1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.SyncProjectSecrets")
@@ -3207,11 +3220,11 @@ func (a *SecretsApiService) SyncProjectSecretsExecute(r SecretsApiSyncProjectSec
 }
 
 type SecretsApiSyncProjectsSecretsRequest struct {
-	ctx context.Context
-	ApiService SecretsApi
+	ctx         context.Context
+	ApiService  SecretsApi
 	clusterUuid string
-	namespace string
-	secrets1 *Secrets1
+	namespace   string
+	secrets1    *Secrets1
 }
 
 func (r SecretsApiSyncProjectsSecretsRequest) Secrets1(secrets1 Secrets1) SecretsApiSyncProjectsSecretsRequest {
@@ -3226,28 +3239,29 @@ func (r SecretsApiSyncProjectsSecretsRequest) Execute() (*Secrets1, *http.Respon
 /*
 SyncProjectsSecrets sync the details of project secrets to the control plane
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @param namespace The namespace of the project.
- @return SecretsApiSyncProjectsSecretsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@param namespace The namespace of the project.
+	@return SecretsApiSyncProjectsSecretsRequest
 */
 func (a *SecretsApiService) SyncProjectsSecrets(ctx context.Context, clusterUuid string, namespace string) SecretsApiSyncProjectsSecretsRequest {
 	return SecretsApiSyncProjectsSecretsRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
-		namespace: namespace,
+		namespace:   namespace,
 	}
 }
 
 // Execute executes the request
-//  @return Secrets1
+//
+//	@return Secrets1
 func (a *SecretsApiService) SyncProjectsSecretsExecute(r SecretsApiSyncProjectsSecretsRequest) (*Secrets1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Secrets1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Secrets1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsApiService.SyncProjectsSecrets")

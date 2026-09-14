@@ -27,6 +27,7 @@ import {
   type ProjectUpdateRequest,
   type Report,
   type ReportRequestFields,
+  type BatchDeleteReportsResponse,
   type RankingMetricType,
   type RankingOrderType,
   type ProjectGetRanking,
@@ -77,6 +78,7 @@ export const orgUnitService = {
   isReportNameUnique,
   createReport,
   deleteReport,
+  batchDeleteReports,
   downloadReport,
   getProjectsRanking,
   getDepartmentsRanking,
@@ -568,6 +570,19 @@ async function createReport(reportRequestFields: ReportRequestFields): Promise<R
 async function deleteReport(reportId: string): Promise<void> {
   try {
     await orgUnitServiceApi.reportsApi.deleteReportById(reportId);
+  } catch (err: unknown) {
+    throw httpService.handleHttpError(err);
+  }
+}
+
+async function batchDeleteReports(reportIds: string[]): Promise<BatchDeleteReportsResponse> {
+  try {
+    // The generated client types `ids` as Set<string> because the spec marks it
+    // uniqueItems, but a Set serializes to {} - the wire format is a JSON array.
+    // Deduping preserves that intent; the backend rejects duplicates with a 400.
+    const ids = [...new Set(reportIds)] as unknown as Set<string>;
+    const response = await orgUnitServiceApi.reportsApi.batchDeleteReports({ ids });
+    return response.data;
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -205,6 +207,7 @@ func (a *RolesAPIService) CreateRole(ctx context.Context) RolesAPICreateRoleRequ
 }
 
 // Execute executes the request
+//
 //	@return Role
 func (a *RolesAPIService) CreateRoleExecute(r RolesAPICreateRoleRequest) (*Role, *http.Response, error) {
 	var (
@@ -526,6 +529,7 @@ func (a *RolesAPIService) GetRole(ctx context.Context, roleIdPath int32) RolesAP
 }
 
 // Execute executes the request
+//
 //	@return Role
 func (a *RolesAPIService) GetRoleExecute(r RolesAPIGetRoleRequest) (*Role, *http.Response, error) {
 	var (
@@ -699,7 +703,9 @@ func (a *RolesAPIService) GetRoleV1(ctx context.Context, roleIdPath int32) Roles
 }
 
 // Execute executes the request
+//
 //	@return RoleV1
+//
 // Deprecated
 func (a *RolesAPIService) GetRoleV1Execute(r RolesAPIGetRoleV1Request) (*RoleV1, *http.Response, error) {
 	var (
@@ -916,6 +922,7 @@ func (a *RolesAPIService) GetRoles(ctx context.Context) RolesAPIGetRolesRequest 
 }
 
 // Execute executes the request
+//
 //	@return GetRoles200Response
 func (a *RolesAPIService) GetRolesExecute(r RolesAPIGetRolesRequest) (*GetRoles200Response, *http.Response, error) {
 	var (
@@ -1107,7 +1114,9 @@ func (a *RolesAPIService) GetRolesV1(ctx context.Context) RolesAPIGetRolesV1Requ
 }
 
 // Execute executes the request
+//
 //	@return []RoleV1
+//
 // Deprecated
 func (a *RolesAPIService) GetRolesV1Execute(r RolesAPIGetRolesV1Request) ([]RoleV1, *http.Response, error) {
 	var (
@@ -1787,6 +1796,7 @@ func (a *RolesAPIService) UpdateRole(ctx context.Context, roleIdPath int32) Role
 }
 
 // Execute executes the request
+//
 //	@return Role
 func (a *RolesAPIService) UpdateRoleExecute(r RolesAPIUpdateRoleRequest) (*Role, *http.Response, error) {
 	var (

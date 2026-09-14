@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Notify API
 
@@ -18,13 +20,12 @@ import (
 	"net/url"
 )
 
-
 // NotifyAPIService NotifyAPI service
 type NotifyAPIService service
 
 type ApiNotifyRequest struct {
-	ctx context.Context
-	ApiService *NotifyAPIService
+	ctx          context.Context
+	ApiService   *NotifyAPIService
 	notification *Notification
 }
 
@@ -42,24 +43,25 @@ Notify Method for Notify
 
 creates an event to be notify
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiNotifyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiNotifyRequest
 */
 func (a *NotifyAPIService) Notify(ctx context.Context) ApiNotifyRequest {
 	return ApiNotifyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *NotifyAPIService) NotifyExecute(r ApiNotifyRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NotifyAPIService.Notify")
@@ -124,8 +126,8 @@ func (a *NotifyAPIService) NotifyExecute(r ApiNotifyRequest) (string, *http.Resp
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 429 {
@@ -135,8 +137,8 @@ func (a *NotifyAPIService) NotifyExecute(r ApiNotifyRequest) (string, *http.Resp
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -154,8 +156,8 @@ func (a *NotifyAPIService) NotifyExecute(r ApiNotifyRequest) (string, *http.Resp
 }
 
 type ApiNotifyBatchRequest struct {
-	ctx context.Context
-	ApiService *NotifyAPIService
+	ctx          context.Context
+	ApiService   *NotifyAPIService
 	notification *[]Notification
 }
 
@@ -173,24 +175,25 @@ NotifyBatch Method for NotifyBatch
 
 creates a batch of events to be notified
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiNotifyBatchRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiNotifyBatchRequest
 */
 func (a *NotifyAPIService) NotifyBatch(ctx context.Context) ApiNotifyBatchRequest {
 	return ApiNotifyBatchRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return NotifyBatch200Response
+//
+//	@return NotifyBatch200Response
 func (a *NotifyAPIService) NotifyBatchExecute(r ApiNotifyBatchRequest) (*NotifyBatch200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *NotifyBatch200Response
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *NotifyBatch200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NotifyAPIService.NotifyBatch")
@@ -255,8 +258,8 @@ func (a *NotifyAPIService) NotifyBatchExecute(r ApiNotifyBatchRequest) (*NotifyB
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 429 {
@@ -266,8 +269,8 @@ func (a *NotifyAPIService) NotifyBatchExecute(r ApiNotifyBatchRequest) (*NotifyB
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,16 +18,16 @@ import (
 
 // CommonFlatFieldsRules struct for CommonFlatFieldsRules
 type CommonFlatFieldsRules struct {
-	Command NullableStringRules `json:"command,omitempty"`
-	Args NullableStringRules `json:"args,omitempty"`
-	Image NullableStringRules `json:"image,omitempty"`
+	Command         NullableStringRules          `json:"command,omitempty"`
+	Args            NullableStringRules          `json:"args,omitempty"`
+	Image           NullableStringRules          `json:"image,omitempty"`
 	ImagePullPolicy NullableImagePullPolicyRules `json:"imagePullPolicy,omitempty"`
-	WorkingDir NullableStringRules `json:"workingDir,omitempty"`
-	CreateHomeDir NullableBooleanRules `json:"createHomeDir,omitempty"`
-	Probes NullableProbesRules `json:"probes,omitempty"`
-	NodeType NullableStringRules `json:"nodeType,omitempty"`
-	NodePools NullableArrayRules `json:"nodePools,omitempty"`
-	PodAffinity NullablePodAffinityRules `json:"podAffinity,omitempty"`
+	WorkingDir      NullableStringRules          `json:"workingDir,omitempty"`
+	CreateHomeDir   NullableBooleanRules         `json:"createHomeDir,omitempty"`
+	Probes          NullableProbesRules          `json:"probes,omitempty"`
+	NodeType        NullableStringRules          `json:"nodeType,omitempty"`
+	NodePools       NullableArrayRules           `json:"nodePools,omitempty"`
+	PodAffinity     NullablePodAffinityRules     `json:"podAffinity,omitempty"`
 }
 
 // NewCommonFlatFieldsRules instantiates a new CommonFlatFieldsRules object
@@ -77,6 +79,7 @@ func (o *CommonFlatFieldsRules) HasCommand() bool {
 func (o *CommonFlatFieldsRules) SetCommand(v StringRules) {
 	o.Command.Set(&v)
 }
+
 // SetCommandNil sets the value for Command to be an explicit nil
 func (o *CommonFlatFieldsRules) SetCommandNil() {
 	o.Command.Set(nil)
@@ -119,6 +122,7 @@ func (o *CommonFlatFieldsRules) HasArgs() bool {
 func (o *CommonFlatFieldsRules) SetArgs(v StringRules) {
 	o.Args.Set(&v)
 }
+
 // SetArgsNil sets the value for Args to be an explicit nil
 func (o *CommonFlatFieldsRules) SetArgsNil() {
 	o.Args.Set(nil)
@@ -161,6 +165,7 @@ func (o *CommonFlatFieldsRules) HasImage() bool {
 func (o *CommonFlatFieldsRules) SetImage(v StringRules) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *CommonFlatFieldsRules) SetImageNil() {
 	o.Image.Set(nil)
@@ -203,6 +208,7 @@ func (o *CommonFlatFieldsRules) HasImagePullPolicy() bool {
 func (o *CommonFlatFieldsRules) SetImagePullPolicy(v ImagePullPolicyRules) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *CommonFlatFieldsRules) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -245,6 +251,7 @@ func (o *CommonFlatFieldsRules) HasWorkingDir() bool {
 func (o *CommonFlatFieldsRules) SetWorkingDir(v StringRules) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *CommonFlatFieldsRules) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -287,6 +294,7 @@ func (o *CommonFlatFieldsRules) HasCreateHomeDir() bool {
 func (o *CommonFlatFieldsRules) SetCreateHomeDir(v BooleanRules) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *CommonFlatFieldsRules) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -329,6 +337,7 @@ func (o *CommonFlatFieldsRules) HasProbes() bool {
 func (o *CommonFlatFieldsRules) SetProbes(v ProbesRules) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *CommonFlatFieldsRules) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -371,6 +380,7 @@ func (o *CommonFlatFieldsRules) HasNodeType() bool {
 func (o *CommonFlatFieldsRules) SetNodeType(v StringRules) {
 	o.NodeType.Set(&v)
 }
+
 // SetNodeTypeNil sets the value for NodeType to be an explicit nil
 func (o *CommonFlatFieldsRules) SetNodeTypeNil() {
 	o.NodeType.Set(nil)
@@ -413,6 +423,7 @@ func (o *CommonFlatFieldsRules) HasNodePools() bool {
 func (o *CommonFlatFieldsRules) SetNodePools(v ArrayRules) {
 	o.NodePools.Set(&v)
 }
+
 // SetNodePoolsNil sets the value for NodePools to be an explicit nil
 func (o *CommonFlatFieldsRules) SetNodePoolsNil() {
 	o.NodePools.Set(nil)
@@ -455,6 +466,7 @@ func (o *CommonFlatFieldsRules) HasPodAffinity() bool {
 func (o *CommonFlatFieldsRules) SetPodAffinity(v PodAffinityRules) {
 	o.PodAffinity.Set(&v)
 }
+
 // SetPodAffinityNil sets the value for PodAffinity to be an explicit nil
 func (o *CommonFlatFieldsRules) SetPodAffinityNil() {
 	o.PodAffinity.Set(nil)
@@ -535,5 +547,3 @@ func (v *NullableCommonFlatFieldsRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,3 +1,7 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 // rename: "yourObject" to the name of your object
 // rename: "YourObject" to the name of your object (capital letter)
 // rename: "objectapiversion" to your object's api version (for example, v1alpha1)

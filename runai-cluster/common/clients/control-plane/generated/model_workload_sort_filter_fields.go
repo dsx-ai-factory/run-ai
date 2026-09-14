@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,20 +22,20 @@ type WorkloadSortFilterFields string
 
 // List of WorkloadSortFilterFields
 const (
-	WORKLOADSORTFILTERFIELDS_TYPE WorkloadSortFilterFields = "type"
-	WORKLOADSORTFILTERFIELDS_NAME WorkloadSortFilterFields = "name"
-	WORKLOADSORTFILTERFIELDS_CLUSTER_ID WorkloadSortFilterFields = "clusterId"
-	WORKLOADSORTFILTERFIELDS_PROJECT_ID WorkloadSortFilterFields = "projectId"
-	WORKLOADSORTFILTERFIELDS_PROJECT_NAME WorkloadSortFilterFields = "projectName"
-	WORKLOADSORTFILTERFIELDS_DEPARTMENT_ID WorkloadSortFilterFields = "departmentId"
+	WORKLOADSORTFILTERFIELDS_TYPE            WorkloadSortFilterFields = "type"
+	WORKLOADSORTFILTERFIELDS_NAME            WorkloadSortFilterFields = "name"
+	WORKLOADSORTFILTERFIELDS_CLUSTER_ID      WorkloadSortFilterFields = "clusterId"
+	WORKLOADSORTFILTERFIELDS_PROJECT_ID      WorkloadSortFilterFields = "projectId"
+	WORKLOADSORTFILTERFIELDS_PROJECT_NAME    WorkloadSortFilterFields = "projectName"
+	WORKLOADSORTFILTERFIELDS_DEPARTMENT_ID   WorkloadSortFilterFields = "departmentId"
 	WORKLOADSORTFILTERFIELDS_DEPARTMENT_NAME WorkloadSortFilterFields = "departmentName"
-	WORKLOADSORTFILTERFIELDS_CREATED_AT WorkloadSortFilterFields = "createdAt"
-	WORKLOADSORTFILTERFIELDS_DELETED_AT WorkloadSortFilterFields = "deletedAt"
-	WORKLOADSORTFILTERFIELDS_SUBMITTED_BY WorkloadSortFilterFields = "submittedBy"
-	WORKLOADSORTFILTERFIELDS_PHASE WorkloadSortFilterFields = "phase"
-	WORKLOADSORTFILTERFIELDS_COMPLETED_AT WorkloadSortFilterFields = "completedAt"
-	WORKLOADSORTFILTERFIELDS_NODEPOOL WorkloadSortFilterFields = "nodepool"
-	WORKLOADSORTFILTERFIELDS_ALLOCATED_GPU WorkloadSortFilterFields = "allocatedGPU"
+	WORKLOADSORTFILTERFIELDS_CREATED_AT      WorkloadSortFilterFields = "createdAt"
+	WORKLOADSORTFILTERFIELDS_DELETED_AT      WorkloadSortFilterFields = "deletedAt"
+	WORKLOADSORTFILTERFIELDS_SUBMITTED_BY    WorkloadSortFilterFields = "submittedBy"
+	WORKLOADSORTFILTERFIELDS_PHASE           WorkloadSortFilterFields = "phase"
+	WORKLOADSORTFILTERFIELDS_COMPLETED_AT    WorkloadSortFilterFields = "completedAt"
+	WORKLOADSORTFILTERFIELDS_NODEPOOL        WorkloadSortFilterFields = "nodepool"
+	WORKLOADSORTFILTERFIELDS_ALLOCATED_GPU   WorkloadSortFilterFields = "allocatedGPU"
 )
 
 // All allowed values of WorkloadSortFilterFields enum
@@ -132,4 +134,3 @@ func (v *NullableWorkloadSortFilterFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

@@ -110,13 +110,13 @@ func inferenceOAuth2ContractConfig() composer.ClusterStorageConfig {
 	reported.SetRunaiOauth2ProxyWorkloadAuthSecretName("runai-auth-secret")
 	reported.SetRunaiOauth2ProxySessionStoreType("redis")
 	reported.SetRunaiOauth2ProxyRedisFQDN("redis.runai-backend.svc.cluster.local")
-	reported.SetRunaiOauth2ProxyOidcIssuerUrl("https://test.run.ai/auth/realms/runai")
+	reported.SetRunaiOauth2ProxyOidcIssuerUrl("https://test.example.com/auth/realms/runai")
 	reported.SetSubdomainEnabled(true)
 
 	status := clustersApi.ClusterDisplayedStatus{}
 	status.SetConfig(reported)
 	cluster := clustersApi.DisplayedCluster{}
 	cluster.Status.Set(&status)
-	cluster.SetDomain("https://test.run.ai")
+	cluster.SetDomain("https://test.example.com")
 	return composer.NewClusterStorageConfigFromCluster(&cluster)
 }

@@ -1,3 +1,5 @@
+<#-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved. -->
+<#-- SPDX-License-Identifier: Apache-2.0 -->
 <#import "template.ftl" as layout>
 <#assign isExpiredCodeMessage = message.summary?? && message.summary == msg("expiredActionTokenNoSessionMessage")>
 <@layout.registrationLayout displayMessage=false; section>

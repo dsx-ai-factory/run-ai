@@ -71,6 +71,7 @@
             :support-user-credentials="supportUserCredentials"
             supporting-serving-port
             supporting-serving-port-access
+            is-distributed-inference
             :support-image-pull-secrets="features.supportImagePullSecrets"
             :required-fields="{ image: !uiState.isWorkloadTemplate, port: !uiState.isWorkloadTemplate }"
             @load-section-templates="hybridContext.displayEnvironmentsList"

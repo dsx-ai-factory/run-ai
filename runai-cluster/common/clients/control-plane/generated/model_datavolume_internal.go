@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,26 +19,26 @@ import (
 
 // DatavolumeInternal struct for DatavolumeInternal
 type DatavolumeInternal struct {
-	Id string `json:"id"`
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
-	CreatedBy *string `json:"createdBy,omitempty"`
-	UpdatedBy *string `json:"updatedBy,omitempty"`
-	Name string `json:"name"`
-	Description *string `json:"description,omitempty"`
+	Id          string     `json:"id"`
+	CreatedAt   *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt   *time.Time `json:"updatedAt,omitempty"`
+	CreatedBy   *string    `json:"createdBy,omitempty"`
+	UpdatedBy   *string    `json:"updatedBy,omitempty"`
+	Name        string     `json:"name"`
+	Description *string    `json:"description,omitempty"`
 	// The name of the PVC that the datavolume is based on
 	OriginPvcName string `json:"originPvcName"`
 	// The ID of the project that in its namespace the origin pvc is located
 	ProjectId string `json:"projectId"`
 	// If true, the original storage volume will be deleted together with the datavolume
-	ShouldDeleteOriginalVolume *bool `json:"shouldDeleteOriginalVolume,omitempty"`
-	ProjectName string `json:"projectName"`
-	DepartmentId *string `json:"departmentId,omitempty"`
+	ShouldDeleteOriginalVolume *bool   `json:"shouldDeleteOriginalVolume,omitempty"`
+	ProjectName                string  `json:"projectName"`
+	DepartmentId               *string `json:"departmentId,omitempty"`
 	// The id of the cluster.
 	ClusterId *string `json:"clusterId,omitempty"`
 	// Will be returned only if the user has the required permissions to view those scopes
-	SharedScopes []SharedScope `json:"sharedScopes,omitempty"`
-	Phase *DatavolumePhase `json:"phase,omitempty"`
+	SharedScopes []SharedScope    `json:"sharedScopes,omitempty"`
+	Phase        *DatavolumePhase `json:"phase,omitempty"`
 }
 
 // NewDatavolumeInternal instantiates a new DatavolumeInternal object
@@ -590,5 +592,3 @@ func (v *NullableDatavolumeInternal) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

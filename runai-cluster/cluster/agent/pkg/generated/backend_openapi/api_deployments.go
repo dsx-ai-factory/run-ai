@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
@@ -299,6 +301,7 @@ func (a *DeploymentsApiService) GetDeployment(ctx context.Context, uuid string, 
 }
 
 // Execute executes the request
+//
 //	@return Deployment
 func (a *DeploymentsApiService) GetDeploymentExecute(r ApiGetDeploymentRequest) (*Deployment, *http.Response, error) {
 	var (
@@ -430,6 +433,7 @@ func (a *DeploymentsApiService) GetDeployments(ctx context.Context, uuid string)
 }
 
 // Execute executes the request
+//
 //	@return []Deployment
 func (a *DeploymentsApiService) GetDeploymentsExecute(r ApiGetDeploymentsRequest) ([]Deployment, *http.Response, error) {
 	var (
@@ -558,6 +562,7 @@ func (a *DeploymentsApiService) GetDeploymentsCount(ctx context.Context, uuid st
 }
 
 // Execute executes the request
+//
 //	@return float32
 func (a *DeploymentsApiService) GetDeploymentsCountExecute(r ApiGetDeploymentsCountRequest) (float32, *http.Response, error) {
 	var (
@@ -686,6 +691,7 @@ func (a *DeploymentsApiService) GetDeploymentsHistory(ctx context.Context, uuid 
 }
 
 // Execute executes the request
+//
 //	@return []Deployment
 func (a *DeploymentsApiService) GetDeploymentsHistoryExecute(r ApiGetDeploymentsHistoryRequest) ([]Deployment, *http.Response, error) {
 	var (
@@ -814,6 +820,7 @@ func (a *DeploymentsApiService) GetDeploymentsHistoryCount(ctx context.Context, 
 }
 
 // Execute executes the request
+//
 //	@return float32
 func (a *DeploymentsApiService) GetDeploymentsHistoryCountExecute(r ApiGetDeploymentsHistoryCountRequest) (float32, *http.Response, error) {
 	var (
@@ -945,6 +952,7 @@ func (a *DeploymentsApiService) GetPodsByDeploymentId(ctx context.Context, uuid 
 }
 
 // Execute executes the request
+//
 //	@return []Pod
 func (a *DeploymentsApiService) GetPodsByDeploymentIdExecute(r ApiGetPodsByDeploymentIdRequest) ([]Pod, *http.Response, error) {
 	var (
@@ -1348,6 +1356,7 @@ func (a *DeploymentsApiService) UpdateDeployments(ctx context.Context, uuid stri
 }
 
 // Execute executes the request
+//
 //	@return IdsResponse
 func (a *DeploymentsApiService) UpdateDeploymentsExecute(r ApiUpdateDeploymentsRequest) (*IdsResponse, *http.Response, error) {
 	var (

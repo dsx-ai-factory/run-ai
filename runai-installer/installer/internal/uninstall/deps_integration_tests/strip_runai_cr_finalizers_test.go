@@ -42,7 +42,7 @@ import (
 const (
 	testGroup     = "run.ai"
 	testVersion   = "v1alpha1"
-	testFinalizer = "test.run.ai/hold"
+	testFinalizer = "test.example.com/hold"
 
 	clusterCRDName  = "testwidgets.run.ai"
 	clusterResource = "testwidgets"

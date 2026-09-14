@@ -39,6 +39,105 @@ func TestValidate_Install_ClusterOnly(t *testing.T) {
 	require.NoError(t, s.Validate())
 }
 
+func TestValidate_Install_ExternalControlPlane(t *testing.T) {
+	s := validInstallSpec()
+	s.InstallMode = InstallModeClusterOnly
+	s.ControlPlane = nil
+	s.Cluster = &Cluster{
+		Name:            "cluster01",
+		Domain:          "cluster.example.com",
+		ControlPlaneURL: "https://cp.example.com",
+		UID:             "cluster-uid",
+		BootstrapToken:  "bootstrap-token",
+	}
+
+	require.NoError(t, s.Validate())
+	assert.True(t, s.Cluster.UsesExternalControlPlane())
+}
+
+func TestValidate_Install_ExternalControlPlaneClientSecret(t *testing.T) {
+	s := validInstallSpec()
+	s.InstallMode = InstallModeClusterOnly
+	s.ControlPlane = nil
+	s.Cluster = &Cluster{
+		Name:            "cluster01",
+		Domain:          "cluster.example.com",
+		ControlPlaneURL: "https://cp.example.com",
+		UID:             "cluster-uid",
+		ClientSecret:    "client-secret",
+	}
+
+	require.NoError(t, s.Validate())
+}
+
+func TestValidate_Install_ExternalControlPlaneInvalid(t *testing.T) {
+	cases := []struct {
+		name   string
+		mutate func(*Spec)
+		match  string
+	}{
+		{
+			name: "missing URL",
+			mutate: func(s *Spec) {
+				s.Cluster.ControlPlaneURL = ""
+			},
+			match: "controlPlaneUrl",
+		},
+		{
+			name: "missing domain",
+			mutate: func(s *Spec) {
+				s.Cluster.Domain = ""
+			},
+			match: "cluster.domain",
+		},
+		{
+			name: "missing UID",
+			mutate: func(s *Spec) {
+				s.Cluster.UID = ""
+			},
+			match: "cluster.uid",
+		},
+		{
+			name: "multiple credentials",
+			mutate: func(s *Spec) {
+				s.Cluster.ClientSecret = "client-secret"
+			},
+			match: "exactly one",
+		},
+		{
+			name: "invalid URL",
+			mutate: func(s *Spec) {
+				s.Cluster.ControlPlaneURL = "cp.example.com"
+			},
+			match: "HTTPS URL",
+		},
+		{
+			name: "full installation",
+			mutate: func(s *Spec) {
+				s.InstallMode = InstallModeFull
+			},
+			match: "runai_cluster_only",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			s := validInstallSpec()
+			s.InstallMode = InstallModeClusterOnly
+			s.ControlPlane = nil
+			s.Cluster = &Cluster{
+				Name:            "cluster01",
+				Domain:          "cluster.example.com",
+				ControlPlaneURL: "https://cp.example.com",
+				UID:             "cluster-uid",
+				BootstrapToken:  "bootstrap-token",
+			}
+			tc.mutate(s)
+			require.ErrorContains(t, s.Validate(), tc.match)
+		})
+	}
+}
+
 func TestValidate_Install_SelfSignedTLS(t *testing.T) {
 	s := validInstallSpec()
 	s.SelfSignedTLS = &SelfSignedTLS{Enabled: true}

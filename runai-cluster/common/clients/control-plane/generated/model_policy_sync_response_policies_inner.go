@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,10 +18,10 @@ import (
 
 // PolicySyncResponsePoliciesInner struct for PolicySyncResponsePoliciesInner
 type PolicySyncResponsePoliciesInner struct {
-	Meta PolicyCreationFields `json:"meta"`
-	Effective NullableSupersetPolicy `json:"effective,omitempty"`
+	Meta        PolicyCreationFields                        `json:"meta"`
+	Effective   NullableSupersetPolicy                      `json:"effective,omitempty"`
 	Distributed NullableDistributedPolicyDefaultsAndRulesV2 `json:"distributed,omitempty"`
-	IsDeleted NullableBool `json:"isDeleted,omitempty"`
+	IsDeleted   NullableBool                                `json:"isDeleted,omitempty"`
 	// number which uniquely identifies each update.
 	UpdateCounter *int64 `json:"updateCounter,omitempty"`
 }
@@ -98,6 +100,7 @@ func (o *PolicySyncResponsePoliciesInner) HasEffective() bool {
 func (o *PolicySyncResponsePoliciesInner) SetEffective(v SupersetPolicy) {
 	o.Effective.Set(&v)
 }
+
 // SetEffectiveNil sets the value for Effective to be an explicit nil
 func (o *PolicySyncResponsePoliciesInner) SetEffectiveNil() {
 	o.Effective.Set(nil)
@@ -140,6 +143,7 @@ func (o *PolicySyncResponsePoliciesInner) HasDistributed() bool {
 func (o *PolicySyncResponsePoliciesInner) SetDistributed(v DistributedPolicyDefaultsAndRulesV2) {
 	o.Distributed.Set(&v)
 }
+
 // SetDistributedNil sets the value for Distributed to be an explicit nil
 func (o *PolicySyncResponsePoliciesInner) SetDistributedNil() {
 	o.Distributed.Set(nil)
@@ -182,6 +186,7 @@ func (o *PolicySyncResponsePoliciesInner) HasIsDeleted() bool {
 func (o *PolicySyncResponsePoliciesInner) SetIsDeleted(v bool) {
 	o.IsDeleted.Set(&v)
 }
+
 // SetIsDeletedNil sets the value for IsDeleted to be an explicit nil
 func (o *PolicySyncResponsePoliciesInner) SetIsDeletedNil() {
 	o.IsDeleted.Set(nil)
@@ -279,5 +284,3 @@ func (v *NullablePolicySyncResponsePoliciesInner) UnmarshalJSON(src []byte) erro
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

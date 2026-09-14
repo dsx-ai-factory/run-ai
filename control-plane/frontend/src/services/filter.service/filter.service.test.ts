@@ -217,6 +217,50 @@ describe("FilterService", () => {
       expect(filteredDepartments.length).toEqual(0);
     });
   });
+  describe("FilterService::enum filter options with matchValues", () => {
+    function buildStatusFilter(selectedValues: string[]): IFilterBy {
+      return {
+        page: 1,
+        rowsPerPage: 20,
+        displayedColumns: ["status"],
+        advancedFilters: [
+          {
+            name: "status",
+            label: "Status",
+            type: EColumnFilterType.EnumBased,
+            inputType: "checkbox",
+            selectedValues,
+            selectOptions: [
+              { label: "Ready", value: "Ready" },
+              { label: "Failed", value: "Failed" },
+              { label: "Deleting", value: "Deleting", matchValues: ["Deleting", "PendingDelete"] },
+            ],
+          },
+        ],
+      } as IFilterBy;
+    }
+
+    // Deleting and PendingDelete render as one label in the grid, so selecting that
+    // option must not exclude PendingDelete rows the user can plainly see.
+    it("keeps every value an option stands for when that option is selected", () => {
+      const result = filterService.mapColumnsFilterToFilterParams(buildStatusFilter(["Deleting"]));
+
+      expect(result.filterBy).toEqual(["status!=Ready", "status!=Failed"]);
+    });
+
+    it("excludes every value an option stands for when that option is not selected", () => {
+      const result = filterService.mapColumnsFilterToFilterParams(buildStatusFilter(["Ready"]));
+
+      expect(result.filterBy).toEqual(["status!=Failed", "status!=Deleting", "status!=PendingDelete"]);
+    });
+
+    it("falls back to the option value when it stands for nothing else", () => {
+      const result = filterService.mapColumnsFilterToFilterParams(buildStatusFilter(["Ready", "Deleting"]));
+
+      expect(result.filterBy).toEqual(["status!=Failed"]);
+    });
+  });
+
   describe("FilterService::mapColumnsFilterToFilterParams", () => {
     describe("mapColumnsFilterToFilterParams", () => {
       it("should map column filters to filter params correctly", () => {

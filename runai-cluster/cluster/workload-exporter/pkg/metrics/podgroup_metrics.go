@@ -34,6 +34,13 @@ func SetPodGroupMetrics(ctx context.Context, podGroup *kaiv2alpha2.PodGroup, rea
 	name := podGroup.Name
 	namespace := podGroup.Namespace
 
+	requestedMigDevices, err := getRequestedMigDevices(podGroup)
+	if err != nil {
+		// MIG devices annotation is optional - only set if present
+		log.Debug().Msgf("No MIG devices for pod group %s/%s: %v", namespace, name, err)
+		return nil
+	}
+
 	topOwnerMetadata, err := data.GetTopOwnerMetadata(podGroup)
 	if err != nil {
 		return fmt.Errorf("could not find top owner for pod group %s/%s, error: %w", namespace, name, err)
@@ -48,13 +55,6 @@ func SetPodGroupMetrics(ctx context.Context, podGroup *kaiv2alpha2.PodGroup, rea
 	workloadType := data.GetWorkloadTypeFromPodGroup(ctx, podGroup, readerClient)
 	// PodGroupUID is expected to be the jobUID
 	uid := topOwnerMetadata.UID
-
-	requestedMigDevices, err := getRequestedMigDevices(podGroup)
-	if err != nil {
-		// MIG devices annotation is optional - only set if present
-		log.Debug().Msgf("No MIG devices for pod group %s/%s: %v", namespace, name, err)
-		return nil
-	}
 
 	ResetPodGroupMetrics(name, namespace)
 

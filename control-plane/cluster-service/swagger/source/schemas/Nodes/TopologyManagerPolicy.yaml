@@ -1,10 +1,9 @@
 type: string
-x-internal: true
 enum:
   - none
   - best-effort
   - restricted
   - single-numa-node
 nullable: true
-description: The node's Kubelet Topology Manager policy; null when NUMA-aware scheduling is disabled.
+description: The Kubernetes topology manager policy configured on the node, controlling how NUMA-aligned resource allocation is enforced. For more details, see [Kubernetes topology manager policies](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/#topology-manager-policies).
 x-schema-name: TopologyManagerPolicy

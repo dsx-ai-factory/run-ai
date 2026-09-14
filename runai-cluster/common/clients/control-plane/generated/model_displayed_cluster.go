@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,15 +21,15 @@ import (
 type DisplayedCluster struct {
 	Uuid string `json:"uuid"`
 	// The id of the tenant.
-	TenantId int32 `json:"tenantId"`
-	Name string `json:"name"`
-	CreatedAt time.Time `json:"createdAt"`
-	Domain NullableString `json:"domain,omitempty"`
-	Version NullableString `json:"version,omitempty"`
-	Status NullableClusterDisplayedStatus `json:"status,omitempty"`
-	UpdatedAt NullableTime `json:"updatedAt,omitempty"`
-	DeletedAt NullableTime `json:"deletedAt,omitempty"`
-	LastLiveness NullableTime `json:"lastLiveness,omitempty"`
+	TenantId     int32                          `json:"tenantId"`
+	Name         string                         `json:"name"`
+	CreatedAt    time.Time                      `json:"createdAt"`
+	Domain       NullableString                 `json:"domain,omitempty"`
+	Version      NullableString                 `json:"version,omitempty"`
+	Status       NullableClusterDisplayedStatus `json:"status,omitempty"`
+	UpdatedAt    NullableTime                   `json:"updatedAt,omitempty"`
+	DeletedAt    NullableTime                   `json:"deletedAt,omitempty"`
+	LastLiveness NullableTime                   `json:"lastLiveness,omitempty"`
 }
 
 // NewDisplayedCluster instantiates a new DisplayedCluster object
@@ -179,6 +181,7 @@ func (o *DisplayedCluster) HasDomain() bool {
 func (o *DisplayedCluster) SetDomain(v string) {
 	o.Domain.Set(&v)
 }
+
 // SetDomainNil sets the value for Domain to be an explicit nil
 func (o *DisplayedCluster) SetDomainNil() {
 	o.Domain.Set(nil)
@@ -221,6 +224,7 @@ func (o *DisplayedCluster) HasVersion() bool {
 func (o *DisplayedCluster) SetVersion(v string) {
 	o.Version.Set(&v)
 }
+
 // SetVersionNil sets the value for Version to be an explicit nil
 func (o *DisplayedCluster) SetVersionNil() {
 	o.Version.Set(nil)
@@ -263,6 +267,7 @@ func (o *DisplayedCluster) HasStatus() bool {
 func (o *DisplayedCluster) SetStatus(v ClusterDisplayedStatus) {
 	o.Status.Set(&v)
 }
+
 // SetStatusNil sets the value for Status to be an explicit nil
 func (o *DisplayedCluster) SetStatusNil() {
 	o.Status.Set(nil)
@@ -305,6 +310,7 @@ func (o *DisplayedCluster) HasUpdatedAt() bool {
 func (o *DisplayedCluster) SetUpdatedAt(v time.Time) {
 	o.UpdatedAt.Set(&v)
 }
+
 // SetUpdatedAtNil sets the value for UpdatedAt to be an explicit nil
 func (o *DisplayedCluster) SetUpdatedAtNil() {
 	o.UpdatedAt.Set(nil)
@@ -347,6 +353,7 @@ func (o *DisplayedCluster) HasDeletedAt() bool {
 func (o *DisplayedCluster) SetDeletedAt(v time.Time) {
 	o.DeletedAt.Set(&v)
 }
+
 // SetDeletedAtNil sets the value for DeletedAt to be an explicit nil
 func (o *DisplayedCluster) SetDeletedAtNil() {
 	o.DeletedAt.Set(nil)
@@ -389,6 +396,7 @@ func (o *DisplayedCluster) HasLastLiveness() bool {
 func (o *DisplayedCluster) SetLastLiveness(v time.Time) {
 	o.LastLiveness.Set(&v)
 }
+
 // SetLastLivenessNil sets the value for LastLiveness to be an explicit nil
 func (o *DisplayedCluster) SetLastLivenessNil() {
 	o.LastLiveness.Set(nil)
@@ -469,5 +477,3 @@ func (v *NullableDisplayedCluster) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

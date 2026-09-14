@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,9 +18,9 @@ import (
 
 // CommonSecurityOverridableRules Security related fields. When used in assets context, those are environment asset fields that can be override in the submit workload request.
 type CommonSecurityOverridableRules struct {
-	RunAsUid NullableIntegerRulesOptional `json:"runAsUid,omitempty"`
-	RunAsGid NullableIntegerRulesOptional `json:"runAsGid,omitempty"`
-	SupplementalGroups NullableStringRules `json:"supplementalGroups,omitempty"`
+	RunAsUid           NullableIntegerRulesOptional `json:"runAsUid,omitempty"`
+	RunAsGid           NullableIntegerRulesOptional `json:"runAsGid,omitempty"`
+	SupplementalGroups NullableStringRules          `json:"supplementalGroups,omitempty"`
 }
 
 // NewCommonSecurityOverridableRules instantiates a new CommonSecurityOverridableRules object
@@ -70,6 +72,7 @@ func (o *CommonSecurityOverridableRules) HasRunAsUid() bool {
 func (o *CommonSecurityOverridableRules) SetRunAsUid(v IntegerRulesOptional) {
 	o.RunAsUid.Set(&v)
 }
+
 // SetRunAsUidNil sets the value for RunAsUid to be an explicit nil
 func (o *CommonSecurityOverridableRules) SetRunAsUidNil() {
 	o.RunAsUid.Set(nil)
@@ -112,6 +115,7 @@ func (o *CommonSecurityOverridableRules) HasRunAsGid() bool {
 func (o *CommonSecurityOverridableRules) SetRunAsGid(v IntegerRulesOptional) {
 	o.RunAsGid.Set(&v)
 }
+
 // SetRunAsGidNil sets the value for RunAsGid to be an explicit nil
 func (o *CommonSecurityOverridableRules) SetRunAsGidNil() {
 	o.RunAsGid.Set(nil)
@@ -154,6 +158,7 @@ func (o *CommonSecurityOverridableRules) HasSupplementalGroups() bool {
 func (o *CommonSecurityOverridableRules) SetSupplementalGroups(v StringRules) {
 	o.SupplementalGroups.Set(&v)
 }
+
 // SetSupplementalGroupsNil sets the value for SupplementalGroups to be an explicit nil
 func (o *CommonSecurityOverridableRules) SetSupplementalGroupsNil() {
 	o.SupplementalGroups.Set(nil)
@@ -213,5 +218,3 @@ func (v *NullableCommonSecurityOverridableRules) UnmarshalJSON(src []byte) error
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

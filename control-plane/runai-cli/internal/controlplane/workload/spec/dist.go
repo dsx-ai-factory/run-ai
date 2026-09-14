@@ -470,6 +470,11 @@ func uniqueMasterSpecRequired(gf *GeneralFlags) bool {
 }
 
 func uniqueWorkerSpecRequired(gf *GeneralFlags) bool {
+	if gf.DistributedInference.WorkerPreferredPodTopology != "" ||
+		gf.DistributedInference.WorkerRequiredPodTopology != "" {
+		return true
+	}
+
 	if gf.Container.WorkerImage != "" ||
 		gf.Container.WorkerImagePullPolicy != "" ||
 		gf.Container.WorkerCommand != "" ||

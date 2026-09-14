@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 ClusterService
 
@@ -21,19 +23,19 @@ var _ MappedNullable = &NumaNodeDetails{}
 
 // NumaNodeDetails struct for NumaNodeDetails
 type NumaNodeDetails struct {
-	// The NUMA node zone name reported by NodeResourceTopology.
+	// The identifier of the NUMA node (for example, node-0).
 	Name string `json:"name"`
-	// Total CPU in cores available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+	// Total CPU cores on this NUMA node that are available for allocation.
 	TotalCpuCores float64 `json:"totalCpuCores"`
-	// Allocated CPU in cores, calculated as allocatable minus available.
+	// CPU cores currently allocated to workloads on this NUMA node.
 	AllocatedCpuCores float64 `json:"allocatedCpuCores"`
-	// Total CPU memory in bytes available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+	// Total CPU memory on this NUMA node that is available for allocation.
 	TotalCpuMemoryBytes int64 `json:"totalCpuMemoryBytes"`
-	// Allocated memory in bytes, calculated as allocatable minus available.
+	// CPU memory currently allocated to workloads on this NUMA node, in bytes.
 	AllocatedCpuMemoryBytes int64 `json:"allocatedCpuMemoryBytes"`
-	// Total GPUs available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+	// Total GPU devices on this NUMA node that are available for allocation.
 	TotalGpus int32 `json:"totalGpus"`
-	// Allocated GPUs, calculated as allocatable minus available.
+	// GPU devices currently allocated to workloads on this NUMA node.
 	AllocatedGpus int32 `json:"allocatedGpus"`
 }
 

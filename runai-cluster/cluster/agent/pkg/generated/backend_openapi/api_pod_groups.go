@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
@@ -604,6 +606,7 @@ func (a *PodGroupsApiService) UpdatePodGroups(ctx context.Context, uuid string) 
 }
 
 // Execute executes the request
+//
 //	@return IdsResponse
 func (a *PodGroupsApiService) UpdatePodGroupsExecute(r ApiUpdatePodGroupsRequest) (*IdsResponse, *http.Response, error) {
 	var (

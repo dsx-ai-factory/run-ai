@@ -44,7 +44,7 @@ func (c *InteractiveWorkloadController) Reconcile(ctx context.Context, req ctrl.
 	interactiveWorkload := &iwv2a1.InteractiveWorkload{}
 	isObjectFound, err := utils.GetObjectForRequest(ctx, req, "interactiveworkload", interactiveWorkload, c.client)
 	if err != nil {
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	} else if !isObjectFound || !interactiveWorkload.DeletionTimestamp.IsZero() {
 		metrics.ResetWorkloadMetrics(req.Name, req.Namespace, metrics.InteractiveSource)
 		return ctrl.Result{Requeue: false}, nil
@@ -54,7 +54,7 @@ func (c *InteractiveWorkloadController) Reconcile(ctx context.Context, req ctrl.
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for interactive workload %s/%s, error: %s",
 			interactiveWorkload.Namespace, interactiveWorkload.Name, err.Error())
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
 }

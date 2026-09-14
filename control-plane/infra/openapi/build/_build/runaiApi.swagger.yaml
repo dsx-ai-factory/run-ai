@@ -1074,6 +1074,32 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/nodes/{nodeId}:
+    get:
+      summary: Get a node by ID.
+      description: Retrieve a node by its id.
+      operationId: get_node
+      tags:
+        - Nodes
+      parameters:
+        - $ref: '#/components/parameters/NodeId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeExtended'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/nodes/count:
     get:
       summary: Count tenant nodes
@@ -1706,6 +1732,37 @@ paths:
                     example: true
         '401':
           $ref: '#/components/responses/401Unauthorized'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/org-unit/reports/batch-delete:
+    post:
+      summary: Delete multiple reports in batch.
+      operationId: batch_delete_reports
+      description: Deletes multiple reports in a single request. Returns per-report outcomes; deletion is processed asynchronously on the metrics side.
+      tags:
+        - Reports
+      requestBody:
+        description: Batch of report IDs to delete.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDeleteReportsRequest'
+      responses:
+        '202':
+          description: Batch delete accepted. Check accepted and failed lists for per-report outcomes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchDeleteReportsResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/org-unit/reports/{reportId}:
@@ -13514,7 +13571,7 @@ components:
           type: string
           nullable: true
           description: the absolute OIDC issuer URL oauth2-proxy uses to discover the OpenID provider
-          example: https://app.run.ai/auth/realms/runai
+          example: http://localhost:8080/auth/realms/runai
         customCAGit:
           $ref: '#/components/schemas/ClusterReportedCustomCA'
         customCAS3:
@@ -13799,6 +13856,24 @@ components:
         $ref: '#/components/schemas/NetworkTopologyLabel'
       description: A list of Kubernetes node label key/value pairs that represent the node’s position in the cluster’s network topology (for example, region, zone, block, rack, or hostname). The topology is attached to the node pool on which the workload runs. The label order represents the hierarchy, from farthest (first) to closest (last). These labels are used by the NVIDIA Run:ai Scheduler when making placement decisions.
       nullable: true
+    TopologyManagerPolicy:
+      type: string
+      enum:
+        - none
+        - best-effort
+        - restricted
+        - single-numa-node
+      nullable: true
+      description: The Kubernetes topology manager policy configured on the node, controlling how NUMA-aligned resource allocation is enforced. For more details, see [Kubernetes topology manager policies](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/#topology-manager-policies).
+      x-schema-name: TopologyManagerPolicy
+    NumaInfo:
+      type: object
+      nullable: true
+      description: NUMA configuration and per-NUMA-node resource data for the node.
+      properties:
+        topologyManagerPolicy:
+          $ref: '#/components/schemas/TopologyManagerPolicy'
+      x-schema-name: NumaInfo
     NodeInfo:
       type: object
       required:
@@ -13843,6 +13918,8 @@ components:
           nullable: true
         networkTopologyLabels:
           $ref: '#/components/schemas/NetworkTopologyLabelsOptional'
+        numa:
+          $ref: '#/components/schemas/NumaInfo'
       x-schema-name: NodeInfo
     NodeAdditionalFields:
       type: object
@@ -13864,6 +13941,60 @@ components:
             nodeInfo:
               $ref: '#/components/schemas/NodeInfo'
       x-schema-name: NodeForSync
+    NumaNodeDetails:
+      type: object
+      required:
+        - name
+        - totalCpuCores
+        - allocatedCpuCores
+        - totalCpuMemoryBytes
+        - allocatedCpuMemoryBytes
+        - totalGpus
+        - allocatedGpus
+      properties:
+        name:
+          type: string
+          description: The identifier of the NUMA node (for example, node-0).
+          example: node-0
+        totalCpuCores:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.001
+          description: Total CPU cores on this NUMA node that are available for allocation.
+          example: 63.5
+        allocatedCpuCores:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.001
+          description: CPU cores currently allocated to workloads on this NUMA node.
+          example: 8.5
+        totalCpuMemoryBytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total CPU memory on this NUMA node that is available for allocation.
+          example: 270582939648
+        allocatedCpuMemoryBytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: CPU memory currently allocated to workloads on this NUMA node, in bytes.
+          example: 34359738368
+        totalGpus:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Total GPU devices on this NUMA node that are available for allocation.
+          example: 4
+        allocatedGpus:
+          type: integer
+          format: int32
+          minimum: 0
+          description: GPU devices currently allocated to workloads on this NUMA node.
+          example: 2
+      x-schema-name: NumaNodeDetails
     ClusterCreationRequest:
       type: object
       required:
@@ -14829,6 +14960,28 @@ components:
           items:
             $ref: '#/components/schemas/Node'
       x-schema-name: Nodes
+    NumaInfoExtended:
+      allOf:
+        - $ref: '#/components/schemas/NumaInfo'
+        - type: object
+          required:
+            - nodes
+          properties:
+            nodes:
+              type: array
+              description: The list of NUMA nodes on the physical machine and their resource availability.
+              items:
+                $ref: '#/components/schemas/NumaNodeDetails'
+      description: NUMA configuration and per-NUMA-node resource data for the node.
+      x-schema-name: NumaInfoExtended
+    NodeExtended:
+      allOf:
+        - $ref: '#/components/schemas/Node'
+        - type: object
+          properties:
+            numa:
+              $ref: '#/components/schemas/NumaInfoExtended'
+      x-schema-name: NodeExtended
     NodeTelemetryType:
       type: string
       enum:
@@ -15332,6 +15485,25 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Report'
+    BatchDeleteReportsRequest:
+      type: object
+      description: Batch of report IDs to delete.
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          uniqueItems: true
+          minItems: 1
+          maxItems: 100
+          description: Array of report IDs to delete.
+          items:
+            type: string
+            format: uuid
+      example:
+        ids:
+          - 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          - 8a7f3bcd-1234-5678-abcd-ef0123456789
     ErrorCode:
       type: integer
       format: int32
@@ -15353,6 +15525,54 @@ components:
           $ref: '#/components/schemas/ErrorCode'
         message:
           $ref: '#/components/schemas/ErrorMessage'
+    BatchDeleteReportsResponse:
+      type: object
+      required:
+        - id
+        - accepted
+        - failed
+        - totalRequested
+        - totalAccepted
+        - totalFailed
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique ID of the batch operation.
+        accepted:
+          type: array
+          description: IDs of reports accepted for deletion.
+          items:
+            type: string
+            format: uuid
+        failed:
+          type: array
+          description: Reports that could not be deleted, with per-report error details.
+          items:
+            $ref: '#/components/schemas/BatchResponseFailureItem'
+        totalRequested:
+          type: integer
+          description: Total number of items requested in the batch.
+        totalAccepted:
+          type: integer
+          description: Number of items accepted for deletion.
+        totalFailed:
+          type: integer
+          description: Number of items that failed.
+      example:
+        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+        accepted:
+          - 8a7f3bcd-1234-5678-abcd-ef0123456789
+        failed:
+          - id: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+            code: 404
+            message: report not found
+          - id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+            code: 403
+            message: user is not the report creator nor has tenant level delete project permissions
+        totalRequested: 3
+        totalAccepted: 1
+        totalFailed: 2
     DepartmentFilterSortFields:
       type: string
       enum:
@@ -29581,6 +29801,10 @@ components:
         preemptible:
           type: boolean
           nullable: true
+        preemptibility:
+          type: string
+          example: non-preemptible
+          nullable: true
         environmentVariables:
           type: object
           additionalProperties:
@@ -29655,6 +29879,17 @@ components:
       enum:
         - PROJECT
         - DEPARTMENT
+    WorkloadElementTopology:
+      type: object
+      description: |
+        The element's network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy.
+      nullable: true
+      properties:
+        name:
+          type: string
+          description: The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
+        actualPlacement:
+          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElement:
       type: object
       required:
@@ -29686,6 +29921,8 @@ components:
           format: date-time
           example: '2022-01-01T03:49:52.531Z'
           description: The timestamp when the structure element was created.
+        topology:
+          $ref: '#/components/schemas/WorkloadElementTopology'
         kubernetesRef:
           type: object
           nullable: true
@@ -32569,17 +32806,6 @@ components:
             A flat list of structure elements for this workload, ordered by hierarchy level. This page may contain fewer elements than are stored in the database — use the "next" field to retrieve additional pages. Use the /elements/count endpoint to retrieve total and stored counts.
           items:
             $ref: '#/components/schemas/WorkloadElement'
-    WorkloadElementTopology:
-      type: object
-      description: |
-        The element's network topology. Returned only when the element's running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn't support topology, or there are no running pods to place yet).
-      nullable: true
-      properties:
-        name:
-          type: string
-          description: The name of the network topology associated with the element — either inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
-        actualPlacement:
-          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElementResponse:
       allOf:
         - $ref: '#/components/schemas/WorkloadElement'
@@ -32592,8 +32818,6 @@ components:
               $ref: '#/components/schemas/WorkloadRequestResources'
             allocatedResources:
               $ref: '#/components/schemas/WorkloadAllocatedResources'
-            topology:
-              $ref: '#/components/schemas/WorkloadElementTopology'
     ElementMetricType:
       type: string
       description: Specify which metric data to request for an element.
@@ -36515,7 +36739,7 @@ components:
         maxItems: 10
         items:
           type: string
-          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
         example:
           - name!=some-workload-name
           - allocatedGPU>=2
@@ -36557,6 +36781,7 @@ components:
           - totalPendingTimeSeconds
           - totalRunningTimeSeconds
           - priorityClassName
+          - preemptibility
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName

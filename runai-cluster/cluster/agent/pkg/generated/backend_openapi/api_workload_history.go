@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
@@ -51,6 +53,7 @@ func (a *WorkloadHistoryApiService) GetWorkloadHistory(ctx context.Context, uuid
 }
 
 // Execute executes the request
+//
 //	@return WorkloadHistoryResponse
 func (a *WorkloadHistoryApiService) GetWorkloadHistoryExecute(r ApiGetWorkloadHistoryRequest) (*WorkloadHistoryResponse, *http.Response, error) {
 	var (

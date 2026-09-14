@@ -144,6 +144,7 @@ import { useImagePullSecrets } from "@/composables/use-image-pull-secrets.compos
 import { WorkloadCreationDrawerEntities } from "@/models/workload-creation-drawer-model";
 import {
   MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY,
+  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
   MIN_CLUSTER_VERSION_FOR_TERMINATION_GRACE_PERIOD,
 } from "@/common/version.constant";
 import type {
@@ -375,6 +376,10 @@ const DistributedHybrid = defineComponent({
         totalGpuRequest: totalGpuRequest,
         workloadPriorities: this.workloadPriorities,
         supportPriorityClass: this.supportPriorityClass,
+        supportSemiPreemptibility: this.clusterStore.isClusterVersionSufficient(
+          this.workerContext.hybridWorkloadModel.value.clusterId,
+          MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
+        ),
       };
     },
     isClusterSupportTerminationGracePeriod(): boolean {

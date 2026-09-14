@@ -3,6 +3,7 @@
 
 GINKGO_PROCS?=4
 GINKGO_COMPILERS?=4
+GINKGO_TIMEOUT?=9m
 
 include ../../build/makefile/control-plane.mk
 include ../../build/makefile/index.mk
@@ -22,7 +23,7 @@ SHARED_PACKAGES_PATH_ABS=control-plane/cluster-service/pkg
 
 ##@ Basic Commands
 
-test: test-ginkgo ## Run unit-tests.
+test: test-ginkgo ## Run unit tests.
 .PHONY: test
 
 lint: lint-go ## Run linter.

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,9 +19,9 @@ import (
 // CommonItemizedFieldsRules struct for CommonItemizedFieldsRules
 type CommonItemizedFieldsRules struct {
 	EnvironmentVariables NullableInstancesRules `json:"environmentVariables,omitempty"`
-	Annotations NullableInstancesRules `json:"annotations,omitempty"`
-	Labels NullableInstancesRules `json:"labels,omitempty"`
-	Tolerations NullableInstancesRules `json:"tolerations,omitempty"`
+	Annotations          NullableInstancesRules `json:"annotations,omitempty"`
+	Labels               NullableInstancesRules `json:"labels,omitempty"`
+	Tolerations          NullableInstancesRules `json:"tolerations,omitempty"`
 }
 
 // NewCommonItemizedFieldsRules instantiates a new CommonItemizedFieldsRules object
@@ -71,6 +73,7 @@ func (o *CommonItemizedFieldsRules) HasEnvironmentVariables() bool {
 func (o *CommonItemizedFieldsRules) SetEnvironmentVariables(v InstancesRules) {
 	o.EnvironmentVariables.Set(&v)
 }
+
 // SetEnvironmentVariablesNil sets the value for EnvironmentVariables to be an explicit nil
 func (o *CommonItemizedFieldsRules) SetEnvironmentVariablesNil() {
 	o.EnvironmentVariables.Set(nil)
@@ -113,6 +116,7 @@ func (o *CommonItemizedFieldsRules) HasAnnotations() bool {
 func (o *CommonItemizedFieldsRules) SetAnnotations(v InstancesRules) {
 	o.Annotations.Set(&v)
 }
+
 // SetAnnotationsNil sets the value for Annotations to be an explicit nil
 func (o *CommonItemizedFieldsRules) SetAnnotationsNil() {
 	o.Annotations.Set(nil)
@@ -155,6 +159,7 @@ func (o *CommonItemizedFieldsRules) HasLabels() bool {
 func (o *CommonItemizedFieldsRules) SetLabels(v InstancesRules) {
 	o.Labels.Set(&v)
 }
+
 // SetLabelsNil sets the value for Labels to be an explicit nil
 func (o *CommonItemizedFieldsRules) SetLabelsNil() {
 	o.Labels.Set(nil)
@@ -197,6 +202,7 @@ func (o *CommonItemizedFieldsRules) HasTolerations() bool {
 func (o *CommonItemizedFieldsRules) SetTolerations(v InstancesRules) {
 	o.Tolerations.Set(&v)
 }
+
 // SetTolerationsNil sets the value for Tolerations to be an explicit nil
 func (o *CommonItemizedFieldsRules) SetTolerationsNil() {
 	o.Tolerations.Set(nil)
@@ -259,5 +265,3 @@ func (v *NullableCommonItemizedFieldsRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

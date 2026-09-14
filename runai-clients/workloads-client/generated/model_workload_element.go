@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 WorkloadsService
 
@@ -37,6 +39,7 @@ type WorkloadElement struct {
 	ReplicaKey NullableString `json:"replicaKey,omitempty"`
 	// The timestamp when the structure element was created.
 	CreatedAt     *time.Time                           `json:"createdAt,omitempty"`
+	Topology      NullableWorkloadElementTopology      `json:"topology,omitempty"`
 	KubernetesRef NullableWorkloadElementKubernetesRef `json:"kubernetesRef,omitempty"`
 }
 
@@ -295,6 +298,49 @@ func (o *WorkloadElement) SetCreatedAt(v time.Time) {
 	o.CreatedAt = &v
 }
 
+// GetTopology returns the Topology field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkloadElement) GetTopology() WorkloadElementTopology {
+	if o == nil || IsNil(o.Topology.Get()) {
+		var ret WorkloadElementTopology
+		return ret
+	}
+	return *o.Topology.Get()
+}
+
+// GetTopologyOk returns a tuple with the Topology field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkloadElement) GetTopologyOk() (*WorkloadElementTopology, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Topology.Get(), o.Topology.IsSet()
+}
+
+// HasTopology returns a boolean if a field has been set.
+func (o *WorkloadElement) HasTopology() bool {
+	if o != nil && o.Topology.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetTopology gets a reference to the given NullableWorkloadElementTopology and assigns it to the Topology field.
+func (o *WorkloadElement) SetTopology(v WorkloadElementTopology) {
+	o.Topology.Set(&v)
+}
+
+// SetTopologyNil sets the value for Topology to be an explicit nil
+func (o *WorkloadElement) SetTopologyNil() {
+	o.Topology.Set(nil)
+}
+
+// UnsetTopology ensures that no value is present for Topology, not even an explicit nil
+func (o *WorkloadElement) UnsetTopology() {
+	o.Topology.Unset()
+}
+
 // GetKubernetesRef returns the KubernetesRef field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *WorkloadElement) GetKubernetesRef() WorkloadElementKubernetesRef {
 	if o == nil || IsNil(o.KubernetesRef.Get()) {
@@ -362,6 +408,9 @@ func (o WorkloadElement) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.CreatedAt) {
 		toSerialize["createdAt"] = o.CreatedAt
+	}
+	if o.Topology.IsSet() {
+		toSerialize["topology"] = o.Topology.Get()
 	}
 	if o.KubernetesRef.IsSet() {
 		toSerialize["kubernetesRef"] = o.KubernetesRef.Get()

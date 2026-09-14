@@ -8,9 +8,6 @@ info:
   title: Org unit
   version: "1.0"
 servers:
-- url: https://app.run.ai
-- url: https://staging.run.ai
-- url: https://test.run.ai
 - url: http://localhost:8080
 security:
 - bearerAuth: []
@@ -1556,7 +1553,6 @@ paths:
         action: delete
       x-audit: true
       x-test-coverage: control-plane/org-unit-service/pkg/test/reports_batch_api_test.go
-    x-internal: true
   /api/v1/org-unit/reports/{reportId}:
     delete:
       operationId: delete_report_by_id

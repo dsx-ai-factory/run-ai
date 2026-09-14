@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,28 +18,28 @@ import (
 
 // InferencePolicyRulesV2 struct for InferencePolicyRulesV2
 type InferencePolicyRulesV2 struct {
-	Command NullableStringRules `json:"command,omitempty"`
-	Args NullableStringRules `json:"args,omitempty"`
-	Image NullableStringRules `json:"image,omitempty"`
-	ImagePullPolicy NullableImagePullPolicyRules `json:"imagePullPolicy,omitempty"`
-	WorkingDir NullableStringRules `json:"workingDir,omitempty"`
-	CreateHomeDir NullableBooleanRules `json:"createHomeDir,omitempty"`
-	Probes NullableProbesRules `json:"probes,omitempty"`
-	NodeType NullableStringRules `json:"nodeType,omitempty"`
-	NodePools NullableArrayRules `json:"nodePools,omitempty"`
-	PodAffinity NullablePodAffinityRules `json:"podAffinity,omitempty"`
-	EnvironmentVariables NullableInstancesRules `json:"environmentVariables,omitempty"`
-	Annotations NullableInstancesRules `json:"annotations,omitempty"`
-	Labels NullableInstancesRules `json:"labels,omitempty"`
-	Tolerations NullableInstancesRules `json:"tolerations,omitempty"`
-	Ports NullablePortsRules `json:"ports,omitempty"`
-	ExposedUrls NullableExposedUrlsRules `json:"exposedUrls,omitempty"`
-	RelatedUrls NullableRelatedUrlsRules `json:"relatedUrls,omitempty"`
-	Compute NullableComputeFieldsRules `json:"compute,omitempty"`
-	Security NullableCommonSecurityFlatFieldsRules `json:"security,omitempty"`
-	Storage NullableCommonStorageFieldsRules `json:"storage,omitempty"`
-	ServingPort NullableServingPortRules `json:"servingPort,omitempty"`
-	Autoscaling NullableAutoScalingRules `json:"autoscaling,omitempty"`
+	Command              NullableStringRules                   `json:"command,omitempty"`
+	Args                 NullableStringRules                   `json:"args,omitempty"`
+	Image                NullableStringRules                   `json:"image,omitempty"`
+	ImagePullPolicy      NullableImagePullPolicyRules          `json:"imagePullPolicy,omitempty"`
+	WorkingDir           NullableStringRules                   `json:"workingDir,omitempty"`
+	CreateHomeDir        NullableBooleanRules                  `json:"createHomeDir,omitempty"`
+	Probes               NullableProbesRules                   `json:"probes,omitempty"`
+	NodeType             NullableStringRules                   `json:"nodeType,omitempty"`
+	NodePools            NullableArrayRules                    `json:"nodePools,omitempty"`
+	PodAffinity          NullablePodAffinityRules              `json:"podAffinity,omitempty"`
+	EnvironmentVariables NullableInstancesRules                `json:"environmentVariables,omitempty"`
+	Annotations          NullableInstancesRules                `json:"annotations,omitempty"`
+	Labels               NullableInstancesRules                `json:"labels,omitempty"`
+	Tolerations          NullableInstancesRules                `json:"tolerations,omitempty"`
+	Ports                NullablePortsRules                    `json:"ports,omitempty"`
+	ExposedUrls          NullableExposedUrlsRules              `json:"exposedUrls,omitempty"`
+	RelatedUrls          NullableRelatedUrlsRules              `json:"relatedUrls,omitempty"`
+	Compute              NullableComputeFieldsRules            `json:"compute,omitempty"`
+	Security             NullableCommonSecurityFlatFieldsRules `json:"security,omitempty"`
+	Storage              NullableCommonStorageFieldsRules      `json:"storage,omitempty"`
+	ServingPort          NullableServingPortRules              `json:"servingPort,omitempty"`
+	Autoscaling          NullableAutoScalingRules              `json:"autoscaling,omitempty"`
 }
 
 // NewInferencePolicyRulesV2 instantiates a new InferencePolicyRulesV2 object
@@ -89,6 +91,7 @@ func (o *InferencePolicyRulesV2) HasCommand() bool {
 func (o *InferencePolicyRulesV2) SetCommand(v StringRules) {
 	o.Command.Set(&v)
 }
+
 // SetCommandNil sets the value for Command to be an explicit nil
 func (o *InferencePolicyRulesV2) SetCommandNil() {
 	o.Command.Set(nil)
@@ -131,6 +134,7 @@ func (o *InferencePolicyRulesV2) HasArgs() bool {
 func (o *InferencePolicyRulesV2) SetArgs(v StringRules) {
 	o.Args.Set(&v)
 }
+
 // SetArgsNil sets the value for Args to be an explicit nil
 func (o *InferencePolicyRulesV2) SetArgsNil() {
 	o.Args.Set(nil)
@@ -173,6 +177,7 @@ func (o *InferencePolicyRulesV2) HasImage() bool {
 func (o *InferencePolicyRulesV2) SetImage(v StringRules) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *InferencePolicyRulesV2) SetImageNil() {
 	o.Image.Set(nil)
@@ -215,6 +220,7 @@ func (o *InferencePolicyRulesV2) HasImagePullPolicy() bool {
 func (o *InferencePolicyRulesV2) SetImagePullPolicy(v ImagePullPolicyRules) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *InferencePolicyRulesV2) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -257,6 +263,7 @@ func (o *InferencePolicyRulesV2) HasWorkingDir() bool {
 func (o *InferencePolicyRulesV2) SetWorkingDir(v StringRules) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *InferencePolicyRulesV2) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -299,6 +306,7 @@ func (o *InferencePolicyRulesV2) HasCreateHomeDir() bool {
 func (o *InferencePolicyRulesV2) SetCreateHomeDir(v BooleanRules) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *InferencePolicyRulesV2) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -341,6 +349,7 @@ func (o *InferencePolicyRulesV2) HasProbes() bool {
 func (o *InferencePolicyRulesV2) SetProbes(v ProbesRules) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *InferencePolicyRulesV2) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -383,6 +392,7 @@ func (o *InferencePolicyRulesV2) HasNodeType() bool {
 func (o *InferencePolicyRulesV2) SetNodeType(v StringRules) {
 	o.NodeType.Set(&v)
 }
+
 // SetNodeTypeNil sets the value for NodeType to be an explicit nil
 func (o *InferencePolicyRulesV2) SetNodeTypeNil() {
 	o.NodeType.Set(nil)
@@ -425,6 +435,7 @@ func (o *InferencePolicyRulesV2) HasNodePools() bool {
 func (o *InferencePolicyRulesV2) SetNodePools(v ArrayRules) {
 	o.NodePools.Set(&v)
 }
+
 // SetNodePoolsNil sets the value for NodePools to be an explicit nil
 func (o *InferencePolicyRulesV2) SetNodePoolsNil() {
 	o.NodePools.Set(nil)
@@ -467,6 +478,7 @@ func (o *InferencePolicyRulesV2) HasPodAffinity() bool {
 func (o *InferencePolicyRulesV2) SetPodAffinity(v PodAffinityRules) {
 	o.PodAffinity.Set(&v)
 }
+
 // SetPodAffinityNil sets the value for PodAffinity to be an explicit nil
 func (o *InferencePolicyRulesV2) SetPodAffinityNil() {
 	o.PodAffinity.Set(nil)
@@ -509,6 +521,7 @@ func (o *InferencePolicyRulesV2) HasEnvironmentVariables() bool {
 func (o *InferencePolicyRulesV2) SetEnvironmentVariables(v InstancesRules) {
 	o.EnvironmentVariables.Set(&v)
 }
+
 // SetEnvironmentVariablesNil sets the value for EnvironmentVariables to be an explicit nil
 func (o *InferencePolicyRulesV2) SetEnvironmentVariablesNil() {
 	o.EnvironmentVariables.Set(nil)
@@ -551,6 +564,7 @@ func (o *InferencePolicyRulesV2) HasAnnotations() bool {
 func (o *InferencePolicyRulesV2) SetAnnotations(v InstancesRules) {
 	o.Annotations.Set(&v)
 }
+
 // SetAnnotationsNil sets the value for Annotations to be an explicit nil
 func (o *InferencePolicyRulesV2) SetAnnotationsNil() {
 	o.Annotations.Set(nil)
@@ -593,6 +607,7 @@ func (o *InferencePolicyRulesV2) HasLabels() bool {
 func (o *InferencePolicyRulesV2) SetLabels(v InstancesRules) {
 	o.Labels.Set(&v)
 }
+
 // SetLabelsNil sets the value for Labels to be an explicit nil
 func (o *InferencePolicyRulesV2) SetLabelsNil() {
 	o.Labels.Set(nil)
@@ -635,6 +650,7 @@ func (o *InferencePolicyRulesV2) HasTolerations() bool {
 func (o *InferencePolicyRulesV2) SetTolerations(v InstancesRules) {
 	o.Tolerations.Set(&v)
 }
+
 // SetTolerationsNil sets the value for Tolerations to be an explicit nil
 func (o *InferencePolicyRulesV2) SetTolerationsNil() {
 	o.Tolerations.Set(nil)
@@ -677,6 +693,7 @@ func (o *InferencePolicyRulesV2) HasPorts() bool {
 func (o *InferencePolicyRulesV2) SetPorts(v PortsRules) {
 	o.Ports.Set(&v)
 }
+
 // SetPortsNil sets the value for Ports to be an explicit nil
 func (o *InferencePolicyRulesV2) SetPortsNil() {
 	o.Ports.Set(nil)
@@ -719,6 +736,7 @@ func (o *InferencePolicyRulesV2) HasExposedUrls() bool {
 func (o *InferencePolicyRulesV2) SetExposedUrls(v ExposedUrlsRules) {
 	o.ExposedUrls.Set(&v)
 }
+
 // SetExposedUrlsNil sets the value for ExposedUrls to be an explicit nil
 func (o *InferencePolicyRulesV2) SetExposedUrlsNil() {
 	o.ExposedUrls.Set(nil)
@@ -761,6 +779,7 @@ func (o *InferencePolicyRulesV2) HasRelatedUrls() bool {
 func (o *InferencePolicyRulesV2) SetRelatedUrls(v RelatedUrlsRules) {
 	o.RelatedUrls.Set(&v)
 }
+
 // SetRelatedUrlsNil sets the value for RelatedUrls to be an explicit nil
 func (o *InferencePolicyRulesV2) SetRelatedUrlsNil() {
 	o.RelatedUrls.Set(nil)
@@ -803,6 +822,7 @@ func (o *InferencePolicyRulesV2) HasCompute() bool {
 func (o *InferencePolicyRulesV2) SetCompute(v ComputeFieldsRules) {
 	o.Compute.Set(&v)
 }
+
 // SetComputeNil sets the value for Compute to be an explicit nil
 func (o *InferencePolicyRulesV2) SetComputeNil() {
 	o.Compute.Set(nil)
@@ -845,6 +865,7 @@ func (o *InferencePolicyRulesV2) HasSecurity() bool {
 func (o *InferencePolicyRulesV2) SetSecurity(v CommonSecurityFlatFieldsRules) {
 	o.Security.Set(&v)
 }
+
 // SetSecurityNil sets the value for Security to be an explicit nil
 func (o *InferencePolicyRulesV2) SetSecurityNil() {
 	o.Security.Set(nil)
@@ -887,6 +908,7 @@ func (o *InferencePolicyRulesV2) HasStorage() bool {
 func (o *InferencePolicyRulesV2) SetStorage(v CommonStorageFieldsRules) {
 	o.Storage.Set(&v)
 }
+
 // SetStorageNil sets the value for Storage to be an explicit nil
 func (o *InferencePolicyRulesV2) SetStorageNil() {
 	o.Storage.Set(nil)
@@ -929,6 +951,7 @@ func (o *InferencePolicyRulesV2) HasServingPort() bool {
 func (o *InferencePolicyRulesV2) SetServingPort(v ServingPortRules) {
 	o.ServingPort.Set(&v)
 }
+
 // SetServingPortNil sets the value for ServingPort to be an explicit nil
 func (o *InferencePolicyRulesV2) SetServingPortNil() {
 	o.ServingPort.Set(nil)
@@ -971,6 +994,7 @@ func (o *InferencePolicyRulesV2) HasAutoscaling() bool {
 func (o *InferencePolicyRulesV2) SetAutoscaling(v AutoScalingRules) {
 	o.Autoscaling.Set(&v)
 }
+
 // SetAutoscalingNil sets the value for Autoscaling to be an explicit nil
 func (o *InferencePolicyRulesV2) SetAutoscalingNil() {
 	o.Autoscaling.Set(nil)
@@ -1087,5 +1111,3 @@ func (v *NullableInferencePolicyRulesV2) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

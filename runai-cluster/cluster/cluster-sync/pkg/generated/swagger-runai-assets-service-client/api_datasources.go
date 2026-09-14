@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -248,6 +250,7 @@ func (a *DatasourcesApiService) ListDatasourceAssets(ctx context.Context) ApiLis
 }
 
 // Execute executes the request
+//
 //	@return DatasourceListResponse
 func (a *DatasourcesApiService) ListDatasourceAssetsExecute(r ApiListDatasourceAssetsRequest) (*DatasourceListResponse, *http.Response, error) {
 	var (

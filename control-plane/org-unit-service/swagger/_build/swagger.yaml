@@ -8,9 +8,6 @@ info:
     url: https://www.run.ai/
     email: support@run.ai
 servers:
-  - url: https://app.run.ai
-  - url: https://staging.run.ai
-  - url: https://test.run.ai
   - url: http://localhost:8080
 security:
   - bearerAuth: []
@@ -680,11 +677,9 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/org-unit/reports/batch-delete:
-    x-internal: true
     post:
       summary: Delete multiple reports in batch.
       operationId: batch_delete_reports
-      x-internal: true
       x-service: org-unit-service
       description: Deletes multiple reports in a single request. Returns per-report outcomes; deletion is processed asynchronously on the metrics side.
       x-authorize:

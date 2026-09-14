@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -18,16 +20,15 @@ import (
 	"net/url"
 )
 
-
 type PermissionsApi interface {
 
 	/*
-	GetPermissions Get a summary of user permissions.
+		GetPermissions Get a summary of user permissions.
 
-	Retrieve a summary of user permissions.
+		Retrieve a summary of user permissions.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PermissionsApiGetPermissionsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PermissionsApiGetPermissionsRequest
 	*/
 	GetPermissions(ctx context.Context) PermissionsApiGetPermissionsRequest
 
@@ -36,12 +37,12 @@ type PermissionsApi interface {
 	GetPermissionsExecute(r PermissionsApiGetPermissionsRequest) ([]Permission, *http.Response, error)
 
 	/*
-	GetPermittedScopes Calculate permitted scopes.
+		GetPermittedScopes Calculate permitted scopes.
 
-	Use to calculate user permitted scopes for an action on a resource.
+		Use to calculate user permitted scopes for an action on a resource.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PermissionsApiGetPermittedScopesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return PermissionsApiGetPermittedScopesRequest
 	*/
 	GetPermittedScopes(ctx context.Context) PermissionsApiGetPermittedScopesRequest
 
@@ -54,7 +55,7 @@ type PermissionsApi interface {
 type PermissionsApiService service
 
 type PermissionsApiGetPermissionsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService PermissionsApi
 }
 
@@ -67,24 +68,25 @@ GetPermissions Get a summary of user permissions.
 
 Retrieve a summary of user permissions.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PermissionsApiGetPermissionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PermissionsApiGetPermissionsRequest
 */
 func (a *PermissionsApiService) GetPermissions(ctx context.Context) PermissionsApiGetPermissionsRequest {
 	return PermissionsApiGetPermissionsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Permission
+//
+//	@return []Permission
 func (a *PermissionsApiService) GetPermissionsExecute(r PermissionsApiGetPermissionsRequest) ([]Permission, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Permission
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Permission
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PermissionsApiService.GetPermissions")
@@ -182,8 +184,8 @@ func (a *PermissionsApiService) GetPermissionsExecute(r PermissionsApiGetPermiss
 }
 
 type PermissionsApiGetPermittedScopesRequest struct {
-	ctx context.Context
-	ApiService PermissionsApi
+	ctx                       context.Context
+	ApiService                PermissionsApi
 	getPermittedScopesRequest *GetPermittedScopesRequest
 }
 
@@ -202,24 +204,25 @@ GetPermittedScopes Calculate permitted scopes.
 
 Use to calculate user permitted scopes for an action on a resource.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return PermissionsApiGetPermittedScopesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PermissionsApiGetPermittedScopesRequest
 */
 func (a *PermissionsApiService) GetPermittedScopes(ctx context.Context) PermissionsApiGetPermittedScopesRequest {
 	return PermissionsApiGetPermittedScopesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return PermittedScopesActions
+//
+//	@return PermittedScopesActions
 func (a *PermissionsApiService) GetPermittedScopesExecute(r PermissionsApiGetPermittedScopesRequest) (*PermittedScopesActions, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PermittedScopesActions
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PermittedScopesActions
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PermissionsApiService.GetPermittedScopes")

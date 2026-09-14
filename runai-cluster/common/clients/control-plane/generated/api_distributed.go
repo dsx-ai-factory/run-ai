@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,16 +21,15 @@ import (
 	"strings"
 )
 
-
 type DistributedApi interface {
 
 	/*
-	CreateDistributed Create a distributed training. [Experimental]
+		CreateDistributed Create a distributed training. [Experimental]
 
-	Use to create a distributed training.
+		Use to create a distributed training.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DistributedApiCreateDistributedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return DistributedApiCreateDistributedRequest
 	*/
 	CreateDistributed(ctx context.Context) DistributedApiCreateDistributedRequest
 
@@ -37,13 +38,13 @@ type DistributedApi interface {
 	CreateDistributedExecute(r DistributedApiCreateDistributedRequest) (*DistributedWorkload, *http.Response, error)
 
 	/*
-	DeleteDistributed Delete a distributed training by id. [Experimental]
+		DeleteDistributed Delete a distributed training by id. [Experimental]
 
-	Use to delete a distributed training by workload id.
+		Use to delete a distributed training by workload id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return DistributedApiDeleteDistributedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return DistributedApiDeleteDistributedRequest
 	*/
 	DeleteDistributed(ctx context.Context, workloadId string) DistributedApiDeleteDistributedRequest
 
@@ -51,13 +52,13 @@ type DistributedApi interface {
 	DeleteDistributedExecute(r DistributedApiDeleteDistributedRequest) (*http.Response, error)
 
 	/*
-	GetDistributed Get distributed training's data. [Experimental]
+		GetDistributed Get distributed training's data. [Experimental]
 
-	Retrieve the details of a distributed training by workload id.
+		Retrieve the details of a distributed training by workload id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return DistributedApiGetDistributedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return DistributedApiGetDistributedRequest
 	*/
 	GetDistributed(ctx context.Context, workloadId string) DistributedApiGetDistributedRequest
 
@@ -66,12 +67,12 @@ type DistributedApi interface {
 	GetDistributedExecute(r DistributedApiGetDistributedRequest) (*DistributedWorkload, *http.Response, error)
 
 	/*
-	ListDistributedUpdates Get distributed training updates.
+		ListDistributedUpdates Get distributed training updates.
 
-	Retrieve distributed training updates based on an update counter.
+		Retrieve distributed training updates based on an update counter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DistributedApiListDistributedUpdatesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return DistributedApiListDistributedUpdatesRequest
 	*/
 	ListDistributedUpdates(ctx context.Context) DistributedApiListDistributedUpdatesRequest
 
@@ -80,12 +81,12 @@ type DistributedApi interface {
 	ListDistributedUpdatesExecute(r DistributedApiListDistributedUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error)
 
 	/*
-	RequestDistributedUpdates Request distributed training updates
+		RequestDistributedUpdates Request distributed training updates
 
-	Retrieve distributed trainings that were updated in the control plane, and reports about success/failures in applying previous updates at the cluster
+		Retrieve distributed trainings that were updated in the control plane, and reports about success/failures in applying previous updates at the cluster
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DistributedApiRequestDistributedUpdatesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return DistributedApiRequestDistributedUpdatesRequest
 	*/
 	RequestDistributedUpdates(ctx context.Context) DistributedApiRequestDistributedUpdatesRequest
 
@@ -98,8 +99,8 @@ type DistributedApi interface {
 type DistributedApiService service
 
 type DistributedApiCreateDistributedRequest struct {
-	ctx context.Context
-	ApiService DistributedApi
+	ctx                        context.Context
+	ApiService                 DistributedApi
 	distributedCreationRequest *DistributedCreationRequest
 }
 
@@ -117,24 +118,25 @@ CreateDistributed Create a distributed training. [Experimental]
 
 Use to create a distributed training.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return DistributedApiCreateDistributedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DistributedApiCreateDistributedRequest
 */
 func (a *DistributedApiService) CreateDistributed(ctx context.Context) DistributedApiCreateDistributedRequest {
 	return DistributedApiCreateDistributedRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return DistributedWorkload
+//
+//	@return DistributedWorkload
 func (a *DistributedApiService) CreateDistributedExecute(r DistributedApiCreateDistributedRequest) (*DistributedWorkload, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DistributedWorkload
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DistributedWorkload
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DistributedApiService.CreateDistributed")
@@ -244,7 +246,7 @@ func (a *DistributedApiService) CreateDistributedExecute(r DistributedApiCreateD
 }
 
 type DistributedApiDeleteDistributedRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DistributedApi
 	workloadId string
 }
@@ -258,14 +260,14 @@ DeleteDistributed Delete a distributed training by id. [Experimental]
 
 Use to delete a distributed training by workload id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return DistributedApiDeleteDistributedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return DistributedApiDeleteDistributedRequest
 */
 func (a *DistributedApiService) DeleteDistributed(ctx context.Context, workloadId string) DistributedApiDeleteDistributedRequest {
 	return DistributedApiDeleteDistributedRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
@@ -273,9 +275,9 @@ func (a *DistributedApiService) DeleteDistributed(ctx context.Context, workloadI
 // Execute executes the request
 func (a *DistributedApiService) DeleteDistributedExecute(r DistributedApiDeleteDistributedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DistributedApiService.DeleteDistributed")
@@ -385,7 +387,7 @@ func (a *DistributedApiService) DeleteDistributedExecute(r DistributedApiDeleteD
 }
 
 type DistributedApiGetDistributedRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DistributedApi
 	workloadId string
 }
@@ -399,26 +401,27 @@ GetDistributed Get distributed training's data. [Experimental]
 
 Retrieve the details of a distributed training by workload id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return DistributedApiGetDistributedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return DistributedApiGetDistributedRequest
 */
 func (a *DistributedApiService) GetDistributed(ctx context.Context, workloadId string) DistributedApiGetDistributedRequest {
 	return DistributedApiGetDistributedRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
 
 // Execute executes the request
-//  @return DistributedWorkload
+//
+//	@return DistributedWorkload
 func (a *DistributedApiService) GetDistributedExecute(r DistributedApiGetDistributedRequest) (*DistributedWorkload, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DistributedWorkload
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DistributedWorkload
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DistributedApiService.GetDistributed")
@@ -537,10 +540,10 @@ func (a *DistributedApiService) GetDistributedExecute(r DistributedApiGetDistrib
 }
 
 type DistributedApiListDistributedUpdatesRequest struct {
-	ctx context.Context
-	ApiService DistributedApi
+	ctx          context.Context
+	ApiService   DistributedApi
 	updatesAfter *int64
-	clusterId *string
+	clusterId    *string
 }
 
 // list only data with update counter greater than the provided value. for example updatesAfter&#x3D;5 should fetch data with updates counter 6 and above.
@@ -564,24 +567,25 @@ ListDistributedUpdates Get distributed training updates.
 
 Retrieve distributed training updates based on an update counter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return DistributedApiListDistributedUpdatesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DistributedApiListDistributedUpdatesRequest
 */
 func (a *DistributedApiService) ListDistributedUpdates(ctx context.Context) DistributedApiListDistributedUpdatesRequest {
 	return DistributedApiListDistributedUpdatesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return WorkloadsSyncResponse
+//
+//	@return WorkloadsSyncResponse
 func (a *DistributedApiService) ListDistributedUpdatesExecute(r DistributedApiListDistributedUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WorkloadsSyncResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkloadsSyncResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DistributedApiService.ListDistributedUpdates")
@@ -707,10 +711,10 @@ func (a *DistributedApiService) ListDistributedUpdatesExecute(r DistributedApiLi
 }
 
 type DistributedApiRequestDistributedUpdatesRequest struct {
-	ctx context.Context
-	ApiService DistributedApi
-	updatesAfter *int64
-	clusterId *string
+	ctx               context.Context
+	ApiService        DistributedApi
+	updatesAfter      *int64
+	clusterId         *string
 	clusterSyncReport *ClusterSyncReport
 }
 
@@ -740,24 +744,25 @@ RequestDistributedUpdates Request distributed training updates
 
 Retrieve distributed trainings that were updated in the control plane, and reports about success/failures in applying previous updates at the cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return DistributedApiRequestDistributedUpdatesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DistributedApiRequestDistributedUpdatesRequest
 */
 func (a *DistributedApiService) RequestDistributedUpdates(ctx context.Context) DistributedApiRequestDistributedUpdatesRequest {
 	return DistributedApiRequestDistributedUpdatesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return WorkloadsSyncResponse
+//
+//	@return WorkloadsSyncResponse
 func (a *DistributedApiService) RequestDistributedUpdatesExecute(r DistributedApiRequestDistributedUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WorkloadsSyncResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkloadsSyncResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DistributedApiService.RequestDistributedUpdates")

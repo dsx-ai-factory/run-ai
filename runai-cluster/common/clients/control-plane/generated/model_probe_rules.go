@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,12 +18,12 @@ import (
 
 // ProbeRules struct for ProbeRules
 type ProbeRules struct {
-	InitialDelaySeconds NullableIntegerRules `json:"initialDelaySeconds,omitempty"`
-	PeriodSeconds NullableIntegerRules `json:"periodSeconds,omitempty"`
-	TimeoutSeconds NullableIntegerRules `json:"timeoutSeconds,omitempty"`
-	SuccessThreshold NullableIntegerRules `json:"successThreshold,omitempty"`
-	FailureThreshold NullableIntegerRules `json:"failureThreshold,omitempty"`
-	Handler NullableProbeHandlerRules `json:"handler,omitempty"`
+	InitialDelaySeconds NullableIntegerRules      `json:"initialDelaySeconds,omitempty"`
+	PeriodSeconds       NullableIntegerRules      `json:"periodSeconds,omitempty"`
+	TimeoutSeconds      NullableIntegerRules      `json:"timeoutSeconds,omitempty"`
+	SuccessThreshold    NullableIntegerRules      `json:"successThreshold,omitempty"`
+	FailureThreshold    NullableIntegerRules      `json:"failureThreshold,omitempty"`
+	Handler             NullableProbeHandlerRules `json:"handler,omitempty"`
 }
 
 // NewProbeRules instantiates a new ProbeRules object
@@ -73,6 +75,7 @@ func (o *ProbeRules) HasInitialDelaySeconds() bool {
 func (o *ProbeRules) SetInitialDelaySeconds(v IntegerRules) {
 	o.InitialDelaySeconds.Set(&v)
 }
+
 // SetInitialDelaySecondsNil sets the value for InitialDelaySeconds to be an explicit nil
 func (o *ProbeRules) SetInitialDelaySecondsNil() {
 	o.InitialDelaySeconds.Set(nil)
@@ -115,6 +118,7 @@ func (o *ProbeRules) HasPeriodSeconds() bool {
 func (o *ProbeRules) SetPeriodSeconds(v IntegerRules) {
 	o.PeriodSeconds.Set(&v)
 }
+
 // SetPeriodSecondsNil sets the value for PeriodSeconds to be an explicit nil
 func (o *ProbeRules) SetPeriodSecondsNil() {
 	o.PeriodSeconds.Set(nil)
@@ -157,6 +161,7 @@ func (o *ProbeRules) HasTimeoutSeconds() bool {
 func (o *ProbeRules) SetTimeoutSeconds(v IntegerRules) {
 	o.TimeoutSeconds.Set(&v)
 }
+
 // SetTimeoutSecondsNil sets the value for TimeoutSeconds to be an explicit nil
 func (o *ProbeRules) SetTimeoutSecondsNil() {
 	o.TimeoutSeconds.Set(nil)
@@ -199,6 +204,7 @@ func (o *ProbeRules) HasSuccessThreshold() bool {
 func (o *ProbeRules) SetSuccessThreshold(v IntegerRules) {
 	o.SuccessThreshold.Set(&v)
 }
+
 // SetSuccessThresholdNil sets the value for SuccessThreshold to be an explicit nil
 func (o *ProbeRules) SetSuccessThresholdNil() {
 	o.SuccessThreshold.Set(nil)
@@ -241,6 +247,7 @@ func (o *ProbeRules) HasFailureThreshold() bool {
 func (o *ProbeRules) SetFailureThreshold(v IntegerRules) {
 	o.FailureThreshold.Set(&v)
 }
+
 // SetFailureThresholdNil sets the value for FailureThreshold to be an explicit nil
 func (o *ProbeRules) SetFailureThresholdNil() {
 	o.FailureThreshold.Set(nil)
@@ -283,6 +290,7 @@ func (o *ProbeRules) HasHandler() bool {
 func (o *ProbeRules) SetHandler(v ProbeHandlerRules) {
 	o.Handler.Set(&v)
 }
+
 // SetHandlerNil sets the value for Handler to be an explicit nil
 func (o *ProbeRules) SetHandlerNil() {
 	o.Handler.Set(nil)
@@ -351,5 +359,3 @@ func (v *NullableProbeRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

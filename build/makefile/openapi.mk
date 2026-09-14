@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # Uses general.mk file from infra/makefile
 ####generators docs:  https://github.com/OpenAPITools/openapi-generator/tree/master/docs/generators
 

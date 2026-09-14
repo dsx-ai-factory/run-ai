@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,12 +19,12 @@ import (
 // Toleration Toleration details.
 type Toleration struct {
 	// The name of the toleration. (mandatory)
-	Name NullableString `json:"name,omitempty"`
+	Name     NullableString             `json:"name,omitempty"`
 	Operator NullableTolerationOperator `json:"operator,omitempty"`
 	// The taint key that the toleration applies to. (mandatory)
 	Key NullableString `json:"key,omitempty"`
 	// The taint value the toleration matches to. Mandatory if operator is Exists, forbidden otherwise.
-	Value NullableString `json:"value,omitempty"`
+	Value  NullableString           `json:"value,omitempty"`
 	Effect NullableTolerationEffect `json:"effect,omitempty"`
 	// The period of time the toleration tolerates the taint. Valid only if effect is NoExecute. taint.
 	Seconds NullableInt32 `json:"seconds,omitempty"`
@@ -77,6 +79,7 @@ func (o *Toleration) HasName() bool {
 func (o *Toleration) SetName(v string) {
 	o.Name.Set(&v)
 }
+
 // SetNameNil sets the value for Name to be an explicit nil
 func (o *Toleration) SetNameNil() {
 	o.Name.Set(nil)
@@ -119,6 +122,7 @@ func (o *Toleration) HasOperator() bool {
 func (o *Toleration) SetOperator(v TolerationOperator) {
 	o.Operator.Set(&v)
 }
+
 // SetOperatorNil sets the value for Operator to be an explicit nil
 func (o *Toleration) SetOperatorNil() {
 	o.Operator.Set(nil)
@@ -161,6 +165,7 @@ func (o *Toleration) HasKey() bool {
 func (o *Toleration) SetKey(v string) {
 	o.Key.Set(&v)
 }
+
 // SetKeyNil sets the value for Key to be an explicit nil
 func (o *Toleration) SetKeyNil() {
 	o.Key.Set(nil)
@@ -203,6 +208,7 @@ func (o *Toleration) HasValue() bool {
 func (o *Toleration) SetValue(v string) {
 	o.Value.Set(&v)
 }
+
 // SetValueNil sets the value for Value to be an explicit nil
 func (o *Toleration) SetValueNil() {
 	o.Value.Set(nil)
@@ -245,6 +251,7 @@ func (o *Toleration) HasEffect() bool {
 func (o *Toleration) SetEffect(v TolerationEffect) {
 	o.Effect.Set(&v)
 }
+
 // SetEffectNil sets the value for Effect to be an explicit nil
 func (o *Toleration) SetEffectNil() {
 	o.Effect.Set(nil)
@@ -287,6 +294,7 @@ func (o *Toleration) HasSeconds() bool {
 func (o *Toleration) SetSeconds(v int32) {
 	o.Seconds.Set(&v)
 }
+
 // SetSecondsNil sets the value for Seconds to be an explicit nil
 func (o *Toleration) SetSecondsNil() {
 	o.Seconds.Set(nil)
@@ -355,5 +363,3 @@ func (v *NullableToleration) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

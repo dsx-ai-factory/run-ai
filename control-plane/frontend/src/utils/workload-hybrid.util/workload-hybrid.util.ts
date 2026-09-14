@@ -91,21 +91,22 @@ import type {
 import { UidGidSource, AuthorizationType } from "@/swagger-models/workloads-client";
 import { fallbackDefaultIfNullOrUndefined, makeId, omit } from "../common.util";
 import { policyUtil } from "../policy.util/policy.util";
-import type {
-  IUIConfigMapInstance,
-  IUIDataVolumeInstance,
-  IUIEmptyDirInstance,
-  IUIEnvironmentFields,
-  IUIGitInstance,
-  IUIHostPathInstance,
-  IUINfsInstance,
-  IUIPvcInstance,
-  IUIS3Instance,
-  IUISecretVolumeInstance,
-  IUIStorageFields,
-  IUISuperWorkloadCreationRequest,
-  IUISuperWorkloadSpec,
-  TUIStorageInstance,
+import {
+  Preemptibility,
+  type IUIConfigMapInstance,
+  type IUIDataVolumeInstance,
+  type IUIEmptyDirInstance,
+  type IUIEnvironmentFields,
+  type IUIGitInstance,
+  type IUIHostPathInstance,
+  type IUINfsInstance,
+  type IUIPvcInstance,
+  type IUIS3Instance,
+  type IUISecretVolumeInstance,
+  type IUIStorageFields,
+  type IUISuperWorkloadCreationRequest,
+  type IUISuperWorkloadSpec,
+  type TUIStorageInstance,
 } from "@/models/workload.model";
 import { isNullOrUndefined } from "../common.util";
 import { UI_EMPTY_DIR_KIND, UI_VOLUME_KIND } from "@/models/data-source.model";
@@ -116,6 +117,7 @@ import { EAccessOptions } from "@/components/environment/connection-access/conne
 import {
   MIN_CLUSTER_VERSION_FOR_COMPLETIONS_AND_PARALLELISM,
   MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY,
+  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
   MIN_CLUSTER_VERSION_FOR_TERMINATION_GRACE_PERIOD,
 } from "@/common/version.constant";
 import { isNewerVersion } from "@/utils/version.util/version.util";
@@ -1667,6 +1669,7 @@ function getUIDefaultsByClusterVersion(clusterVersion: string, uiModelSpec: IUIS
 
   const supportRunsAndParallelism = isNewerVersion(clusterVersion, MIN_CLUSTER_VERSION_FOR_COMPLETIONS_AND_PARALLELISM);
   const supportPreemptibility = isNewerVersion(clusterVersion, MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY);
+  const supportSemiPreemptibility = isNewerVersion(clusterVersion, MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY);
   const supportTerminationGracePeriod = isNewerVersion(clusterVersion, MIN_CLUSTER_VERSION_FOR_TERMINATION_GRACE_PERIOD);
 
   return {
@@ -1682,7 +1685,11 @@ function getUIDefaultsByClusterVersion(clusterVersion: string, uiModelSpec: IUIS
           DEFAULT_VALUES.TERMINATION_GRACE_PERIOD_SECONDS,
         )
       : null,
-    preemptibility: supportPreemptibility ? uiModelSpec.preemptibility : undefined,
+    preemptibility:
+      supportPreemptibility &&
+      (uiModelSpec.preemptibility !== Preemptibility.SemiPreemptible || supportSemiPreemptibility)
+        ? uiModelSpec.preemptibility
+        : undefined,
   };
 }
 

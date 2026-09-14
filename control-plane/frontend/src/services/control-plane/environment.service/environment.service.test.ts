@@ -38,7 +38,7 @@ const environments = {
             value: "123344",
           },
         ],
-        image: "gcr.io/run-ai-demo/pycharm-demo",
+        image: "ubuntu",
         connections: [
           {
             name: "pycharmExternal",

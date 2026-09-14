@@ -8,9 +8,6 @@ info:
   title: WorkloadsService
   version: "1.0"
 servers:
-- url: https://app.run.ai
-- url: https://staging.run.ai
-- url: https://test.run.ai
 - url: http://localhost:8080
 security:
 - bearerAuth: []
@@ -172,7 +169,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -637,6 +634,7 @@ paths:
           - totalPendingTimeSeconds
           - totalRunningTimeSeconds
           - priorityClassName
+          - preemptibility
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName
@@ -657,7 +655,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -742,7 +740,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -1282,7 +1280,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -13165,7 +13163,7 @@ components:
         - allocatedGPU>=2
         - createdAt>=2021-01-01T00:00:00Z
         items:
-          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
           type: string
         maxItems: 10
         type: array
@@ -13278,6 +13276,7 @@ components:
         - totalPendingTimeSeconds
         - totalRunningTimeSeconds
         - priorityClassName
+        - preemptibility
         - guaranteedRuntimeEndsAt
         - aiApplicationId
         - aiApplicationName
@@ -15617,6 +15616,7 @@ components:
         priorityClassName: high-priority
         source: CLI
         type: runai-job
+        preemptibility: non-preemptible
         createdAt: 2022-01-01T03:49:52.531Z
         nodeAffinities:
         - specName: worker
@@ -16312,6 +16312,10 @@ components:
         preemptible:
           nullable: true
           type: boolean
+        preemptibility:
+          example: non-preemptible
+          nullable: true
+          type: string
         fullySaasWorkload:
           type: boolean
           x-internal: true
@@ -16556,10 +16560,49 @@ components:
       - nodePool
       - reason
       type: object
+    WorkloadElementTopology:
+      description: |
+        The element's network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy.
+      example:
+        preferredPlacement: preferredPlacement
+        name: name
+        requiredPlacement: requiredPlacement
+        actualPlacement:
+          level: level
+          value: value
+      nullable: true
+      properties:
+        name:
+          description: "The name of the network topology associated with the element\
+            \ — either as requested via constraints, or inherited from the workload's\
+            \ topology constraints, or inferred from the nodepools the element's running\
+            \ pods are scheduled on."
+          type: string
+        preferredPlacement:
+          description: The topology level to use as a preferred placement constraint
+            for the element.
+          type: string
+          x-internal: true
+        requiredPlacement:
+          description: "The topology level to use as a required placement constraint\
+            \ for the element. If the requirement cannot be satisfied at this topology\
+            \ level, placement will fail."
+          type: string
+          x-internal: true
+        actualPlacement:
+          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
+      type: object
     WorkloadElement:
       example:
         createdAt: 2022-01-01T03:49:52.531Z
         replicaKey: replicaKey
+        topology:
+          preferredPlacement: preferredPlacement
+          name: name
+          requiredPlacement: requiredPlacement
+          actualPlacement:
+            level: level
+            value: value
         hierarchyLevel: 1
         name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -16610,6 +16653,8 @@ components:
           example: 2022-01-01T03:49:52.531Z
           format: date-time
           type: string
+        topology:
+          $ref: '#/components/schemas/WorkloadElementTopology'
         kubernetesRef:
           $ref: '#/components/schemas/WorkloadElement_kubernetesRef'
       required:
@@ -17217,6 +17262,13 @@ components:
         structureElements:
         - createdAt: 2022-01-01T03:49:52.531Z
           replicaKey: replicaKey
+          topology:
+            preferredPlacement: preferredPlacement
+            name: name
+            requiredPlacement: requiredPlacement
+            actualPlacement:
+              level: level
+              value: value
           hierarchyLevel: 1
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -17231,6 +17283,13 @@ components:
           instanceKey: instanceKey
         - createdAt: 2022-01-01T03:49:52.531Z
           replicaKey: replicaKey
+          topology:
+            preferredPlacement: preferredPlacement
+            name: name
+            requiredPlacement: requiredPlacement
+            actualPlacement:
+              level: level
+              value: value
           hierarchyLevel: 1
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -18034,6 +18093,13 @@ components:
           structureElements:
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -18048,6 +18114,13 @@ components:
             instanceKey: instanceKey
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -18653,6 +18726,13 @@ components:
           structureElements:
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -18667,6 +18747,13 @@ components:
             instanceKey: instanceKey
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -20484,6 +20571,13 @@ components:
           structureElements:
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -20498,6 +20592,13 @@ components:
             instanceKey: instanceKey
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -21103,6 +21204,13 @@ components:
           structureElements:
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -21117,6 +21225,13 @@ components:
             instanceKey: instanceKey
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -21388,6 +21503,7 @@ components:
         priorityClassName: high-priority
         source: CLI
         type: runai-job
+        preemptibility: non-preemptible
         createdAt: 2022-01-01T03:49:52.531Z
         nodeAffinities:
         - specName: worker
@@ -125207,6 +125323,13 @@ components:
         elements:
         - createdAt: 2022-01-01T03:49:52.531Z
           replicaKey: replicaKey
+          topology:
+            preferredPlacement: preferredPlacement
+            name: name
+            requiredPlacement: requiredPlacement
+            actualPlacement:
+              level: level
+              value: value
           hierarchyLevel: 1
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -125221,6 +125344,13 @@ components:
           instanceKey: instanceKey
         - createdAt: 2022-01-01T03:49:52.531Z
           replicaKey: replicaKey
+          topology:
+            preferredPlacement: preferredPlacement
+            name: name
+            requiredPlacement: requiredPlacement
+            actualPlacement:
+              level: level
+              value: value
           hierarchyLevel: 1
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -125248,24 +125378,6 @@ components:
       required:
       - elements
       type: object
-    WorkloadElementTopology:
-      description: |
-        The element's network topology. Returned only when the element's running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn't support topology, or there are no running pods to place yet).
-      example:
-        name: name
-        actualPlacement:
-          level: level
-          value: value
-      nullable: true
-      properties:
-        name:
-          description: "The name of the network topology associated with the element\
-            \ — either inherited from the workload's topology constraints, or inferred\
-            \ from the nodepools the element's running pods are scheduled on."
-          type: string
-        actualPlacement:
-          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
-      type: object
     WorkloadElementResponse:
       allOf:
       - $ref: '#/components/schemas/WorkloadElement'
@@ -125274,8 +125386,6 @@ components:
             $ref: '#/components/schemas/WorkloadRequestResources'
           allocatedResources:
             $ref: '#/components/schemas/WorkloadAllocatedResources'
-          topology:
-            $ref: '#/components/schemas/WorkloadElementTopology'
         required:
         - allocatedResources
         - podsRequestedResources
@@ -125317,7 +125427,9 @@ components:
           gpu: 1.5
         replicaKey: replicaKey
         topology:
+          preferredPlacement: preferredPlacement
           name: name
+          requiredPlacement: requiredPlacement
           actualPlacement:
             level: level
             value: value
@@ -127235,6 +127347,7 @@ components:
       - category
       - priority
       - priorityClassName
+      - preemptibility
       - guaranteedRuntimeEndsAt
       - aiApplicationId
       - aiApplicationName
@@ -127436,6 +127549,7 @@ components:
           priorityClassName: high-priority
           source: CLI
           type: runai-job
+          preemptibility: non-preemptible
           createdAt: 2022-01-01T03:49:52.531Z
           nodeAffinities:
           - specName: worker
@@ -128062,6 +128176,7 @@ components:
           priorityClassName: high-priority
           source: CLI
           type: runai-job
+          preemptibility: non-preemptible
           createdAt: 2022-01-01T03:49:52.531Z
           nodeAffinities:
           - specName: worker

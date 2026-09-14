@@ -956,13 +956,19 @@ func (s *WorkloadsService) GetWorkloadElement(ctx context.Context, workloadId st
 	response := modelToWorkloadElementResponse(*element, pods)
 
 	if topologyName := resolveTopologyNameForElement(ctx, *workload, pods); topologyName != "" {
-		if actual := getActualTopologyPlacementForElement(
+		actual := getActualTopologyPlacementForElement(
 			ctx, tenantId, wid, elementId, workload.ClusterID.String(), topologyName,
-		); actual != nil {
+		)
+		if response.Topology != nil {
+			response.Topology.ActualPlacement = actual
+		} else if actual != nil {
 			response.Topology = &api.WorkloadElementTopology{
 				Name:            topologyName,
 				ActualPlacement: actual,
 			}
+		}
+		if response.Topology != nil && response.Topology.Name == "" {
+			response.Topology.Name = topologyName
 		}
 	}
 

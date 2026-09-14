@@ -53,6 +53,7 @@ func buildStandardUpgradeFlowGroups(upgradeCfg *config.UpgradeConfig, deps upgra
 
 func buildAirgapUpgradeFlowGroups(upgradeCfg *config.UpgradeConfig, deps upgrade.Deps, externalEvents chan *flow.FlowStatusReportingMsg) []*FlowGroup {
 	var flowGroups []*FlowGroup
+	registrySecrets := steps.NewApplyAirgapRegistrySecrets(upgradeCfg, deps.K8sExecutor)
 
 	// A bundle prepared by `airgap load` is already extracted and its images are
 	// already in the mirror registry, so there is nothing to prepare.
@@ -60,14 +61,13 @@ func buildAirgapUpgradeFlowGroups(upgradeCfg *config.UpgradeConfig, deps upgrade
 		extractStep := steps.NewExtractAirgapPackage(upgradeCfg)
 		pushStep := steps.NewPushAirgapImages(upgradeCfg)
 		prepFlows := []*flow.InstallFlow{
-			flow.NewInstallFlow("Airgap Prepare", []step.InstallStep{extractStep, pushStep}, nil),
+			flow.NewInstallFlow("Airgap Prepare", []step.InstallStep{extractStep, pushStep, registrySecrets}, nil),
 		}
 		flowGroups = append(flowGroups, &FlowGroup{
 			Flows:   prepFlows,
 			Manager: flow.NewFlowManagerWithExternalEvents(prepFlows, externalEvents, false),
 		})
 	} else {
-		registrySecrets := steps.NewApplyAirgapRegistrySecrets(upgradeCfg, deps.K8sExecutor)
 		prepFlows := []*flow.InstallFlow{
 			flow.NewInstallFlow("Airgap Prepare", []step.InstallStep{registrySecrets}, nil),
 		}

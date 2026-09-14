@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
@@ -54,6 +56,7 @@ func (a *StorageClassesApiService) CreateStorageClass(ctx context.Context, uuid 
 }
 
 // Execute executes the request
+//
 //	@return StorageClass
 func (a *StorageClassesApiService) CreateStorageClassExecute(r ApiCreateStorageClassRequest) (*StorageClass, *http.Response, error) {
 	var (
@@ -318,6 +321,7 @@ func (a *StorageClassesApiService) GetStorageClasses(ctx context.Context, uuid s
 }
 
 // Execute executes the request
+//
 //	@return []StorageClass
 func (a *StorageClassesApiService) GetStorageClassesExecute(r ApiGetStorageClassesRequest) ([]StorageClass, *http.Response, error) {
 	var (
@@ -452,6 +456,7 @@ func (a *StorageClassesApiService) SyncStorageClass(ctx context.Context, uuid st
 }
 
 // Execute executes the request
+//
 //	@return StorageClass
 func (a *StorageClassesApiService) SyncStorageClassExecute(r ApiSyncStorageClassRequest) (*StorageClass, *http.Response, error) {
 	var (
@@ -604,6 +609,7 @@ func (a *StorageClassesApiService) UpdateStorageClass(ctx context.Context, uuid 
 }
 
 // Execute executes the request
+//
 //	@return []StorageClass
 func (a *StorageClassesApiService) UpdateStorageClassExecute(r ApiUpdateStorageClassRequest) ([]StorageClass, *http.Response, error) {
 	var (

@@ -38,6 +38,8 @@ properties:
     format: date-time
     example: 2022-01-01T03:49:52.531Z
     description: The timestamp when the structure element was created.
+  topology:
+    $ref: "./WorkloadElementTopology.yaml"
   kubernetesRef:
     type: object
     nullable: true

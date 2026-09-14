@@ -74,6 +74,9 @@ func TestToSpec_MapsAllFields(t *testing.T) {
 			Domain:          "cluster.example.com",
 			Version:         "2.26.1",
 			WorkloadRouting: "path",
+			ControlPlaneURL: "https://cp.example.com",
+			UID:             "cluster-uid",
+			bootstrapToken:  "bootstrap-token",
 			TLS:             &TLS{CertPath: "/cl.crt", KeyPath: "/cl.key"},
 			Inference: &Inference{
 				WildcardDomain: "*.inf.cluster.example.com",
@@ -104,6 +107,9 @@ func TestToSpec_MapsAllFields(t *testing.T) {
 	assert.Equal(t, "cluster.example.com", s.Cluster.Domain)
 	assert.Equal(t, "2.26.1", s.Cluster.Version)
 	assert.Equal(t, "path", s.Cluster.WorkloadRouting)
+	assert.Equal(t, "https://cp.example.com", s.Cluster.ControlPlaneURL)
+	assert.Equal(t, "cluster-uid", s.Cluster.UID)
+	assert.Equal(t, "bootstrap-token", s.Cluster.BootstrapToken)
 	require.NotNil(t, s.Cluster.TLS)
 	assert.Equal(t, "/cl.key", s.Cluster.TLS.KeyPath)
 

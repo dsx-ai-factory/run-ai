@@ -31,7 +31,7 @@ flatWorkloads:
       - container: 6006
         toolName: TensorBoard
         toolType: tensorboard
-      image: gcr.io/run-ai-demo/jupyter-tensorboard-new
+      image: quay.io/jupyter/scipy-notebook
       imagePullPolicy: IfNotPresent
       ports: []
       relatedUrls: []

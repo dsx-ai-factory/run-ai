@@ -49,7 +49,7 @@ func TestAuthorizeApp(t *testing.T) {
 
 	authSessionHandler.On("Parse", ctx, "state_key").Return(&slack.SlackAuthSessionState{
 		TenantId: "1",
-		Email:    "test@run.ai",
+		Email:    "test@example.com",
 	}, nil)
 
 	slackClient.On("ExchangeCode", "code", "client_id", "client_secret").Return(&slack.ExchangeCodeResult{
@@ -68,7 +68,7 @@ func TestAuthorizeApp(t *testing.T) {
 		Enabled:       ptr.To(true),
 	}).Return(nil)
 
-	notifier.On("Welcome", ctx, "1", "test@run.ai", "slack-1").Return(nil)
+	notifier.On("Welcome", ctx, "1", "test@example.com", "slack-1").Return(nil)
 
 	err := manager.AuthorizeApp(ctx, "code", "state_key")
 	require.NoError(t, err)
@@ -118,7 +118,7 @@ func TestAuthorizeApp_ExchangeCodeError(t *testing.T) {
 		}, nil)
 	authSessionHandler.On("Parse", ctx, "state_key").Return(&slack.SlackAuthSessionState{
 		TenantId: "1",
-		Email:    "test@run.ai",
+		Email:    "test@example.com",
 	}, nil)
 	slackClient.On("ExchangeCode", "code", "client_id", "client_secret").Return(nil, errors.New("exchange failed"))
 
@@ -143,7 +143,7 @@ func TestAuthorizeApp_CreateChannelError(t *testing.T) {
 		}, nil)
 	authSessionHandler.On("Parse", ctx, "state_key").Return(&slack.SlackAuthSessionState{
 		TenantId: "1",
-		Email:    "test@run.ai",
+		Email:    "test@example.com",
 	}, nil)
 	slackClient.On("ExchangeCode", "code", "client_id", "client_secret").Return(&slack.ExchangeCodeResult{
 		AccessToken: "token",
@@ -174,7 +174,7 @@ func TestAuthorizeApp_UpdateStateError(t *testing.T) {
 		}, nil)
 	authSessionHandler.On("Parse", ctx, "state_key").Return(&slack.SlackAuthSessionState{
 		TenantId: "1",
-		Email:    "test@run.ai",
+		Email:    "test@example.com",
 	}, nil)
 	slackClient.On("ExchangeCode", "code", "client_id", "client_secret").Return(&slack.ExchangeCodeResult{
 		AccessToken: "token",
@@ -212,7 +212,7 @@ func TestAuthorizeApp_WelcomeNotifierError_DoesNotFail(t *testing.T) {
 		}, nil)
 	authSessionHandler.On("Parse", ctx, "state_key").Return(&slack.SlackAuthSessionState{
 		TenantId: "1",
-		Email:    "test@run.ai",
+		Email:    "test@example.com",
 	}, nil)
 	slackClient.On("ExchangeCode", "code", "client_id", "client_secret").Return(&slack.ExchangeCodeResult{
 		AccessToken: "token",
@@ -225,7 +225,7 @@ func TestAuthorizeApp_WelcomeNotifierError_DoesNotFail(t *testing.T) {
 		return s.TenantId == "1" && *s.Enabled == true
 	})).Return(nil)
 
-	notifier.On("Welcome", ctx, "1", "test@run.ai", "slack-1").Return(errors.New("notification failed"))
+	notifier.On("Welcome", ctx, "1", "test@example.com", "slack-1").Return(errors.New("notification failed"))
 
 	err := manager.AuthorizeApp(ctx, "code", "state_key")
 	require.NoError(t, err)
@@ -298,13 +298,13 @@ func TestConnectWorkspace(t *testing.T) {
 	authSessionHandler := mocks.NewSlackAuthSessionHandlerer(t)
 	manager := slack.NewSlackManager(nil, nil, slackClient, authSessionHandler, nil, slackCredentialsDao, nil)
 
-	authSessionHandler.On("Create", ctx, "1", "test@run.ai").Return("state_key", nil)
+	authSessionHandler.On("Create", ctx, "1", "test@example.com").Return("state_key", nil)
 	slackCredentialsDao.On("Get", ctx).Return(&slack.SlackCredentials{
 		ClientId: "client_id",
 	}, nil)
 	slackClient.On("GetAuthUrl", "state_key", "client_id").Return("https://slack.com/oauth/v2/authorize?client_id=123")
 
-	url, err := manager.ConnectWorkspace(ctx, "1", "test@run.ai")
+	url, err := manager.ConnectWorkspace(ctx, "1", "test@example.com")
 	require.NoError(t, err)
 	require.Equal(t, "https://slack.com/oauth/v2/authorize?client_id=123", url)
 }
@@ -317,7 +317,7 @@ func TestConnectWorkspace_MissingCredentials(t *testing.T) {
 
 	slackCredentialsDao.On("Get", ctx).Return(nil, slack.ErrMissingAppCredentials)
 
-	url, err := manager.ConnectWorkspace(ctx, "1", "test@run.ai")
+	url, err := manager.ConnectWorkspace(ctx, "1", "test@example.com")
 	require.ErrorIs(t, err, slack.ErrMissingAppCredentials)
 	require.Empty(t, url)
 }
@@ -329,12 +329,12 @@ func TestConnectWorkspace_CreateStateError(t *testing.T) {
 	authSessionHandler := mocks.NewSlackAuthSessionHandlerer(t)
 	manager := slack.NewSlackManager(nil, nil, nil, authSessionHandler, nil, slackCredentialsDao, nil)
 
-	authSessionHandler.On("Create", ctx, "1", "test@run.ai").Return("", errors.New("create state failed"))
+	authSessionHandler.On("Create", ctx, "1", "test@example.com").Return("", errors.New("create state failed"))
 	slackCredentialsDao.On("Get", ctx).Return(&slack.SlackCredentials{
 		ClientId: "client_id",
 	}, nil)
 
-	url, err := manager.ConnectWorkspace(ctx, "1", "test@run.ai")
+	url, err := manager.ConnectWorkspace(ctx, "1", "test@example.com")
 	require.EqualError(t, err, "failed to create slack session: create state failed")
 	require.Empty(t, url)
 }

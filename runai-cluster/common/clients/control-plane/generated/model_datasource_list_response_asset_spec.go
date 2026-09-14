@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,13 +18,13 @@ import (
 
 // DatasourceListResponseAssetSpec struct for DatasourceListResponseAssetSpec
 type DatasourceListResponseAssetSpec struct {
-	HostPath NullableDatasourceListResponseAssetSpecHostPath `json:"hostPath,omitempty"`
-	Nfs NullableDatasourceListResponseAssetSpecNfs `json:"nfs,omitempty"`
-	Pvc NullableDatasourceListResponseAssetSpecPvc `json:"pvc,omitempty"`
-	Git NullableDatasourceListResponseAssetSpecGit `json:"git,omitempty"`
-	S3 NullableDatasourceListResponseAssetSpecS3 `json:"s3,omitempty"`
+	HostPath  NullableDatasourceListResponseAssetSpecHostPath  `json:"hostPath,omitempty"`
+	Nfs       NullableDatasourceListResponseAssetSpecNfs       `json:"nfs,omitempty"`
+	Pvc       NullableDatasourceListResponseAssetSpecPvc       `json:"pvc,omitempty"`
+	Git       NullableDatasourceListResponseAssetSpecGit       `json:"git,omitempty"`
+	S3        NullableDatasourceListResponseAssetSpecS3        `json:"s3,omitempty"`
 	ConfigMap NullableDatasourceListResponseAssetSpecConfigMap `json:"config_map,omitempty"`
-	Secret NullableDatasourceListResponseAssetSpecSecret `json:"secret,omitempty"`
+	Secret    NullableDatasourceListResponseAssetSpecSecret    `json:"secret,omitempty"`
 }
 
 // NewDatasourceListResponseAssetSpec instantiates a new DatasourceListResponseAssetSpec object
@@ -74,6 +76,7 @@ func (o *DatasourceListResponseAssetSpec) HasHostPath() bool {
 func (o *DatasourceListResponseAssetSpec) SetHostPath(v DatasourceListResponseAssetSpecHostPath) {
 	o.HostPath.Set(&v)
 }
+
 // SetHostPathNil sets the value for HostPath to be an explicit nil
 func (o *DatasourceListResponseAssetSpec) SetHostPathNil() {
 	o.HostPath.Set(nil)
@@ -116,6 +119,7 @@ func (o *DatasourceListResponseAssetSpec) HasNfs() bool {
 func (o *DatasourceListResponseAssetSpec) SetNfs(v DatasourceListResponseAssetSpecNfs) {
 	o.Nfs.Set(&v)
 }
+
 // SetNfsNil sets the value for Nfs to be an explicit nil
 func (o *DatasourceListResponseAssetSpec) SetNfsNil() {
 	o.Nfs.Set(nil)
@@ -158,6 +162,7 @@ func (o *DatasourceListResponseAssetSpec) HasPvc() bool {
 func (o *DatasourceListResponseAssetSpec) SetPvc(v DatasourceListResponseAssetSpecPvc) {
 	o.Pvc.Set(&v)
 }
+
 // SetPvcNil sets the value for Pvc to be an explicit nil
 func (o *DatasourceListResponseAssetSpec) SetPvcNil() {
 	o.Pvc.Set(nil)
@@ -200,6 +205,7 @@ func (o *DatasourceListResponseAssetSpec) HasGit() bool {
 func (o *DatasourceListResponseAssetSpec) SetGit(v DatasourceListResponseAssetSpecGit) {
 	o.Git.Set(&v)
 }
+
 // SetGitNil sets the value for Git to be an explicit nil
 func (o *DatasourceListResponseAssetSpec) SetGitNil() {
 	o.Git.Set(nil)
@@ -242,6 +248,7 @@ func (o *DatasourceListResponseAssetSpec) HasS3() bool {
 func (o *DatasourceListResponseAssetSpec) SetS3(v DatasourceListResponseAssetSpecS3) {
 	o.S3.Set(&v)
 }
+
 // SetS3Nil sets the value for S3 to be an explicit nil
 func (o *DatasourceListResponseAssetSpec) SetS3Nil() {
 	o.S3.Set(nil)
@@ -284,6 +291,7 @@ func (o *DatasourceListResponseAssetSpec) HasConfigMap() bool {
 func (o *DatasourceListResponseAssetSpec) SetConfigMap(v DatasourceListResponseAssetSpecConfigMap) {
 	o.ConfigMap.Set(&v)
 }
+
 // SetConfigMapNil sets the value for ConfigMap to be an explicit nil
 func (o *DatasourceListResponseAssetSpec) SetConfigMapNil() {
 	o.ConfigMap.Set(nil)
@@ -326,6 +334,7 @@ func (o *DatasourceListResponseAssetSpec) HasSecret() bool {
 func (o *DatasourceListResponseAssetSpec) SetSecret(v DatasourceListResponseAssetSpecSecret) {
 	o.Secret.Set(&v)
 }
+
 // SetSecretNil sets the value for Secret to be an explicit nil
 func (o *DatasourceListResponseAssetSpec) SetSecretNil() {
 	o.Secret.Set(nil)
@@ -397,5 +406,3 @@ func (v *NullableDatasourceListResponseAssetSpec) UnmarshalJSON(src []byte) erro
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

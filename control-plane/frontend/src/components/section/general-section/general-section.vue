@@ -49,6 +49,7 @@
         :model-value="generalModel?.preemptibility || null"
         :policy-rules="policyRules?.preemptibility || null"
         :disabled="sectionDisabled"
+        :support-semi-preemptibility="workloadPriorityData?.supportSemiPreemptibility"
         @update:model-value="updateWorkloadPreemptibility"
         :show-quota-warning="shouldShowQuotaWarning"
         :hint="overrideHints.preemptibility ? 'Overrides YAML' : undefined"

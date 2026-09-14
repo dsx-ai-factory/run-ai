@@ -24,7 +24,7 @@ import (
 const (
 	AccessKeyId   = "accessKeyId"
 	AccessKeyName = "accessKeyName"
-	createdBy     = "test@run.ai"
+	createdBy     = "test@example.com"
 	clientId      = "clientId"
 )
 

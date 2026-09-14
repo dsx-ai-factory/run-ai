@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 // SinksAPIService SinksAPI service
 type SinksAPIService service
 
 type ApiCreateSinkRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *SinksAPIService
-	sinkData *SinkData
+	sinkData   *SinkData
 }
 
 func (r ApiCreateSinkRequest) SinkData(sinkData SinkData) ApiCreateSinkRequest {
@@ -43,24 +44,25 @@ CreateSink Method for CreateSink
 
 Creates a sink
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateSinkRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateSinkRequest
 */
 func (a *SinksAPIService) CreateSink(ctx context.Context) ApiCreateSinkRequest {
 	return ApiCreateSinkRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *SinksAPIService) CreateSinkExecute(r ApiCreateSinkRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SinksAPIService.CreateSink")
@@ -125,8 +127,8 @@ func (a *SinksAPIService) CreateSinkExecute(r ApiCreateSinkRequest) (string, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 409 {
@@ -136,8 +138,8 @@ func (a *SinksAPIService) CreateSinkExecute(r ApiCreateSinkRequest) (string, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -147,8 +149,8 @@ func (a *SinksAPIService) CreateSinkExecute(r ApiCreateSinkRequest) (string, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -166,9 +168,9 @@ func (a *SinksAPIService) CreateSinkExecute(r ApiCreateSinkRequest) (string, *ht
 }
 
 type ApiDeleteSinkRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *SinksAPIService
-	sinkId string
+	sinkId     string
 }
 
 func (r ApiDeleteSinkRequest) Execute() (string, *http.Response, error) {
@@ -180,26 +182,27 @@ DeleteSink Method for DeleteSink
 
 Deletes a sink
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sinkId ID of the sink
- @return ApiDeleteSinkRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sinkId ID of the sink
+	@return ApiDeleteSinkRequest
 */
 func (a *SinksAPIService) DeleteSink(ctx context.Context, sinkId string) ApiDeleteSinkRequest {
 	return ApiDeleteSinkRequest{
 		ApiService: a,
-		ctx: ctx,
-		sinkId: sinkId,
+		ctx:        ctx,
+		sinkId:     sinkId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *SinksAPIService) DeleteSinkExecute(r ApiDeleteSinkRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SinksAPIService.DeleteSink")
@@ -260,8 +263,8 @@ func (a *SinksAPIService) DeleteSinkExecute(r ApiDeleteSinkRequest) (string, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -271,8 +274,8 @@ func (a *SinksAPIService) DeleteSinkExecute(r ApiDeleteSinkRequest) (string, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -290,9 +293,9 @@ func (a *SinksAPIService) DeleteSinkExecute(r ApiDeleteSinkRequest) (string, *ht
 }
 
 type ApiGetSinkRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *SinksAPIService
-	sinkId string
+	sinkId     string
 }
 
 func (r ApiGetSinkRequest) Execute() (*SinkData, *http.Response, error) {
@@ -304,26 +307,27 @@ GetSink Method for GetSink
 
 Get a sink configuration
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sinkId ID of the sink
- @return ApiGetSinkRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sinkId ID of the sink
+	@return ApiGetSinkRequest
 */
 func (a *SinksAPIService) GetSink(ctx context.Context, sinkId string) ApiGetSinkRequest {
 	return ApiGetSinkRequest{
 		ApiService: a,
-		ctx: ctx,
-		sinkId: sinkId,
+		ctx:        ctx,
+		sinkId:     sinkId,
 	}
 }
 
 // Execute executes the request
-//  @return SinkData
+//
+//	@return SinkData
 func (a *SinksAPIService) GetSinkExecute(r ApiGetSinkRequest) (*SinkData, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SinkData
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SinkData
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SinksAPIService.GetSink")
@@ -384,8 +388,8 @@ func (a *SinksAPIService) GetSinkExecute(r ApiGetSinkRequest) (*SinkData, *http.
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -395,8 +399,8 @@ func (a *SinksAPIService) GetSinkExecute(r ApiGetSinkRequest) (*SinkData, *http.
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -414,7 +418,7 @@ func (a *SinksAPIService) GetSinkExecute(r ApiGetSinkRequest) (*SinkData, *http.
 }
 
 type ApiGetSinksRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *SinksAPIService
 }
 
@@ -427,24 +431,25 @@ GetSinks Method for GetSinks
 
 Get all sinks
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetSinksRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetSinksRequest
 */
 func (a *SinksAPIService) GetSinks(ctx context.Context) ApiGetSinksRequest {
 	return ApiGetSinksRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []SinkData
+//
+//	@return []SinkData
 func (a *SinksAPIService) GetSinksExecute(r ApiGetSinksRequest) ([]SinkData, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []SinkData
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []SinkData
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SinksAPIService.GetSinks")
@@ -504,8 +509,8 @@ func (a *SinksAPIService) GetSinksExecute(r ApiGetSinksRequest) ([]SinkData, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -523,9 +528,9 @@ func (a *SinksAPIService) GetSinksExecute(r ApiGetSinksRequest) ([]SinkData, *ht
 }
 
 type ApiUpdateSinkRequest struct {
-	ctx context.Context
-	ApiService *SinksAPIService
-	sinkId string
+	ctx               context.Context
+	ApiService        *SinksAPIService
+	sinkId            string
 	sinkDataForUpdate *SinkDataForUpdate
 }
 
@@ -543,26 +548,27 @@ UpdateSink Method for UpdateSink
 
 Updates a sink
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sinkId ID of the sink
- @return ApiUpdateSinkRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sinkId ID of the sink
+	@return ApiUpdateSinkRequest
 */
 func (a *SinksAPIService) UpdateSink(ctx context.Context, sinkId string) ApiUpdateSinkRequest {
 	return ApiUpdateSinkRequest{
 		ApiService: a,
-		ctx: ctx,
-		sinkId: sinkId,
+		ctx:        ctx,
+		sinkId:     sinkId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *SinksAPIService) UpdateSinkExecute(r ApiUpdateSinkRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SinksAPIService.UpdateSink")
@@ -628,8 +634,8 @@ func (a *SinksAPIService) UpdateSinkExecute(r ApiUpdateSinkRequest) (string, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -639,8 +645,8 @@ func (a *SinksAPIService) UpdateSinkExecute(r ApiUpdateSinkRequest) (string, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -658,9 +664,9 @@ func (a *SinksAPIService) UpdateSinkExecute(r ApiUpdateSinkRequest) (string, *ht
 }
 
 type ApiValidateSinkRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *SinksAPIService
-	sinkData *SinkData
+	sinkData   *SinkData
 }
 
 func (r ApiValidateSinkRequest) SinkData(sinkData SinkData) ApiValidateSinkRequest {
@@ -677,24 +683,25 @@ ValidateSink Method for ValidateSink
 
 Verify that the provided sink settings are correct
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiValidateSinkRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiValidateSinkRequest
 */
 func (a *SinksAPIService) ValidateSink(ctx context.Context) ApiValidateSinkRequest {
 	return ApiValidateSinkRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ValidateSink200Response
+//
+//	@return ValidateSink200Response
 func (a *SinksAPIService) ValidateSinkExecute(r ApiValidateSinkRequest) (*ValidateSink200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ValidateSink200Response
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ValidateSink200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SinksAPIService.ValidateSink")
@@ -759,8 +766,8 @@ func (a *SinksAPIService) ValidateSinkExecute(r ApiValidateSinkRequest) (*Valida
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -770,8 +777,8 @@ func (a *SinksAPIService) ValidateSinkExecute(r ApiValidateSinkRequest) (*Valida
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

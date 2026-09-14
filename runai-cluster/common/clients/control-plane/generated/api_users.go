@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,14 +22,13 @@ import (
 	"strings"
 )
 
-
 type UsersApi interface {
 
 	/*
-	ChangeUserPassword change user password
+		ChangeUserPassword change user password
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiChangeUserPasswordRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiChangeUserPasswordRequest
 	*/
 	ChangeUserPassword(ctx context.Context) UsersApiChangeUserPasswordRequest
 
@@ -36,14 +37,14 @@ type UsersApi interface {
 	ChangeUserPasswordExecute(r UsersApiChangeUserPasswordRequest) (*ChangeUserPassword200Response, *http.Response, error)
 
 	/*
-	CreateGroup Create a new group.
+		CreateGroup Create a new group.
 
-	Create a new group and assign it with roles. Deprecated endpoint. please reffer to Roles & Access rules API.
+		Create a new group and assign it with roles. Deprecated endpoint. please reffer to Roles & Access rules API.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiCreateGroupRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiCreateGroupRequest
 
-	Deprecated
+		Deprecated
 	*/
 	CreateGroup(ctx context.Context) UsersApiCreateGroupRequest
 
@@ -53,10 +54,10 @@ type UsersApi interface {
 	CreateGroupExecute(r UsersApiCreateGroupRequest) (*GroupCreationResponse, *http.Response, error)
 
 	/*
-	CreateIntenralUser create intenral user
+		CreateIntenralUser create intenral user
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiCreateIntenralUserRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiCreateIntenralUserRequest
 	*/
 	CreateIntenralUser(ctx context.Context) UsersApiCreateIntenralUserRequest
 
@@ -65,14 +66,14 @@ type UsersApi interface {
 	CreateIntenralUserExecute(r UsersApiCreateIntenralUserRequest) (*UserPostResponse, *http.Response, error)
 
 	/*
-	CreateUser Create a new user.
+		CreateUser Create a new user.
 
-	Create a new user and assign it with a password. It is possible to force the user to change the password upon next login by setting needToChangePassword to true. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users instead.
+		Create a new user and assign it with a password. It is possible to force the user to change the password upon next login by setting needToChangePassword to true. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiCreateUserRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiCreateUserRequest
 
-	Deprecated
+		Deprecated
 	*/
 	CreateUser(ctx context.Context) UsersApiCreateUserRequest
 
@@ -82,12 +83,12 @@ type UsersApi interface {
 	CreateUserExecute(r UsersApiCreateUserRequest) (*UserCreationResponse, *http.Response, error)
 
 	/*
-	CreateUser_0 Create a local user.
+		CreateUser_0 Create a local user.
 
-	Use to create a local platform user.
+		Use to create a local platform user.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiCreateUser_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiCreateUser_0Request
 	*/
 	CreateUser_1(ctx context.Context) UsersApiCreateUser_0Request
 
@@ -96,15 +97,15 @@ type UsersApi interface {
 	CreateUser_1Execute(r UsersApiCreateUser_0Request) (*UserPostResponse, *http.Response, error)
 
 	/*
-	DeleteGroupByName Delete a group.
+		DeleteGroupByName Delete a group.
 
-	Delete the given group from the tenant. This endpoint requires ADMIN role. Deprecated endpoint. please reffer to Roles & Access rules API.
+		Delete the given group from the tenant. This endpoint requires ADMIN role. Deprecated endpoint. please reffer to Roles & Access rules API.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param groupName
-	@return UsersApiDeleteGroupByNameRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param groupName
+		@return UsersApiDeleteGroupByNameRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteGroupByName(ctx context.Context, groupName string) UsersApiDeleteGroupByNameRequest
 
@@ -113,15 +114,15 @@ type UsersApi interface {
 	DeleteGroupByNameExecute(r UsersApiDeleteGroupByNameRequest) (*http.Response, error)
 
 	/*
-	DeleteUserById Delete a user.
+		DeleteUserById Delete a user.
 
-	Delete the given user from the tenant. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
+		Delete the given user from the tenant. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId
-	@return UsersApiDeleteUserByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId
+		@return UsersApiDeleteUserByIdRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteUserById(ctx context.Context, userId string) UsersApiDeleteUserByIdRequest
 
@@ -130,13 +131,13 @@ type UsersApi interface {
 	DeleteUserByIdExecute(r UsersApiDeleteUserByIdRequest) (*http.Response, error)
 
 	/*
-	DeleteUserById_0 Delete a user by id.
+		DeleteUserById_0 Delete a user by id.
 
-	Use to delete a user by id.
+		Use to delete a user by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId The id of the user
-	@return UsersApiDeleteUserById_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId The id of the user
+		@return UsersApiDeleteUserById_0Request
 	*/
 	DeleteUserById_2(ctx context.Context, userId string) UsersApiDeleteUserById_0Request
 
@@ -144,15 +145,15 @@ type UsersApi interface {
 	DeleteUserById_2Execute(r UsersApiDeleteUserById_0Request) (*http.Response, error)
 
 	/*
-	GeGroupByName Get group details.
+		GeGroupByName Get group details.
 
-	Get the details of a given group. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated endpoint. please reffer to Roles & Access rules API.
+		Get the details of a given group. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated endpoint. please reffer to Roles & Access rules API.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param groupName
-	@return UsersApiGeGroupByNameRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param groupName
+		@return UsersApiGeGroupByNameRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GeGroupByName(ctx context.Context, groupName string) UsersApiGeGroupByNameRequest
 
@@ -162,14 +163,14 @@ type UsersApi interface {
 	GeGroupByNameExecute(r UsersApiGeGroupByNameRequest) (*Group, *http.Response, error)
 
 	/*
-	GetGroups Get groups list.
+		GetGroups Get groups list.
 
-	Return the list of groups of the tenant. Deprecated endpoint. please reffer to Roles & Access rules API.
+		Return the list of groups of the tenant. Deprecated endpoint. please reffer to Roles & Access rules API.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiGetGroupsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiGetGroupsRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetGroups(ctx context.Context) UsersApiGetGroupsRequest
 
@@ -179,14 +180,14 @@ type UsersApi interface {
 	GetGroupsExecute(r UsersApiGetGroupsRequest) ([]Group, *http.Response, error)
 
 	/*
-	GetRoles Get all possible permissions.
+		GetRoles Get all possible permissions.
 
-	Get the complete set of permissions that a tenant can grant to users and applications. Deprecated endpoint. please reffer to Roles & Access rules API.
+		Get the complete set of permissions that a tenant can grant to users and applications. Deprecated endpoint. please reffer to Roles & Access rules API.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiGetRolesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiGetRolesRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetRoles(ctx context.Context) UsersApiGetRolesRequest
 
@@ -196,15 +197,15 @@ type UsersApi interface {
 	GetRolesExecute(r UsersApiGetRolesRequest) ([]Role, *http.Response, error)
 
 	/*
-	GetUserById Get user details.
+		GetUserById Get user details.
 
-	Get the details of a given user. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
+		Get the details of a given user. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId
-	@return UsersApiGetUserByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId
+		@return UsersApiGetUserByIdRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetUserById(ctx context.Context, userId string) UsersApiGetUserByIdRequest
 
@@ -214,13 +215,13 @@ type UsersApi interface {
 	GetUserByIdExecute(r UsersApiGetUserByIdRequest) (*User1, *http.Response, error)
 
 	/*
-	GetUserById_0 Get a user by id.
+		GetUserById_0 Get a user by id.
 
-	Retrieve a user's details by id.
+		Retrieve a user's details by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId The id of the user
-	@return UsersApiGetUserById_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId The id of the user
+		@return UsersApiGetUserById_0Request
 	*/
 	GetUserById_3(ctx context.Context, userId string) UsersApiGetUserById_0Request
 
@@ -229,15 +230,15 @@ type UsersApi interface {
 	GetUserById_3Execute(r UsersApiGetUserById_0Request) (*User2, *http.Response, error)
 
 	/*
-	GetUserRoles Get user permissions.
+		GetUserRoles Get user permissions.
 
-	Return the set of permissions granted to a given user. Deprecated endpoint. please reffer to Roles & Access rules API.
+		Return the set of permissions granted to a given user. Deprecated endpoint. please reffer to Roles & Access rules API.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId
-	@return UsersApiGetUserRolesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId
+		@return UsersApiGetUserRolesRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetUserRoles(ctx context.Context, userId string) UsersApiGetUserRolesRequest
 
@@ -247,14 +248,14 @@ type UsersApi interface {
 	GetUserRolesExecute(r UsersApiGetUserRolesRequest) ([]Role, *http.Response, error)
 
 	/*
-	GetUsers Get users list.
+		GetUsers Get users list.
 
-	Return the list of users of the tenant.
+		Return the list of users of the tenant.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiGetUsersRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiGetUsersRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetUsers(ctx context.Context) UsersApiGetUsersRequest
 
@@ -264,12 +265,12 @@ type UsersApi interface {
 	GetUsersExecute(r UsersApiGetUsersRequest) ([]User1, *http.Response, error)
 
 	/*
-	GetUsers_0 Get users.
+		GetUsers_0 Get users.
 
-	Retrieve a list of platform users.
+		Retrieve a list of platform users.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersApiGetUsers_0Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersApiGetUsers_0Request
 	*/
 	GetUsers_4(ctx context.Context) UsersApiGetUsers_0Request
 
@@ -278,13 +279,13 @@ type UsersApi interface {
 	GetUsers_4Execute(r UsersApiGetUsers_0Request) ([]User2, *http.Response, error)
 
 	/*
-	LogoutUser Logout a user.
+		LogoutUser Logout a user.
 
-	Use to force a user to logout.
+		Use to force a user to logout.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId The id of the user
-	@return UsersApiLogoutUserRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId The id of the user
+		@return UsersApiLogoutUserRequest
 	*/
 	LogoutUser(ctx context.Context, userId string) UsersApiLogoutUserRequest
 
@@ -292,13 +293,13 @@ type UsersApi interface {
 	LogoutUserExecute(r UsersApiLogoutUserRequest) (*http.Response, error)
 
 	/*
-	ResetUserPassword Reset a user's password.
+		ResetUserPassword Reset a user's password.
 
-	Use to to reset a user's password.
+		Use to to reset a user's password.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId The id of the user
-	@return UsersApiResetUserPasswordRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId The id of the user
+		@return UsersApiResetUserPasswordRequest
 	*/
 	ResetUserPassword(ctx context.Context, userId string) UsersApiResetUserPasswordRequest
 
@@ -307,15 +308,15 @@ type UsersApi interface {
 	ResetUserPasswordExecute(r UsersApiResetUserPasswordRequest) (*ResetUserPassword200Response, *http.Response, error)
 
 	/*
-	UpdateGroupByName Update group details.
+		UpdateGroupByName Update group details.
 
-	Update the details of a given group. This endpoint requires ADMIN role. Deprecated endpoint. please reffer to Roles & Access rules API.
+		Update the details of a given group. This endpoint requires ADMIN role. Deprecated endpoint. please reffer to Roles & Access rules API.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param groupName
-	@return UsersApiUpdateGroupByNameRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param groupName
+		@return UsersApiUpdateGroupByNameRequest
 
-	Deprecated
+		Deprecated
 	*/
 	UpdateGroupByName(ctx context.Context, groupName string) UsersApiUpdateGroupByNameRequest
 
@@ -325,15 +326,15 @@ type UsersApi interface {
 	UpdateGroupByNameExecute(r UsersApiUpdateGroupByNameRequest) (*Group, *http.Response, error)
 
 	/*
-	UpdateUserById Update user details.
+		UpdateUserById Update user details.
 
-	Update the details of a given user. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
+		Update the details of a given user. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId
-	@return UsersApiUpdateUserByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId
+		@return UsersApiUpdateUserByIdRequest
 
-	Deprecated
+		Deprecated
 	*/
 	UpdateUserById(ctx context.Context, userId string) UsersApiUpdateUserByIdRequest
 
@@ -347,8 +348,8 @@ type UsersApi interface {
 type UsersApiService service
 
 type UsersApiChangeUserPasswordRequest struct {
-	ctx context.Context
-	ApiService UsersApi
+	ctx                       context.Context
+	ApiService                UsersApi
 	userChangePasswordRequest *UserChangePasswordRequest
 }
 
@@ -365,24 +366,25 @@ func (r UsersApiChangeUserPasswordRequest) Execute() (*ChangeUserPassword200Resp
 /*
 ChangeUserPassword change user password
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiChangeUserPasswordRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiChangeUserPasswordRequest
 */
 func (a *UsersApiService) ChangeUserPassword(ctx context.Context) UsersApiChangeUserPasswordRequest {
 	return UsersApiChangeUserPasswordRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ChangeUserPassword200Response
+//
+//	@return ChangeUserPassword200Response
 func (a *UsersApiService) ChangeUserPasswordExecute(r UsersApiChangeUserPasswordRequest) (*ChangeUserPassword200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ChangeUserPassword200Response
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ChangeUserPassword200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.ChangeUserPassword")
@@ -515,8 +517,8 @@ func (a *UsersApiService) ChangeUserPasswordExecute(r UsersApiChangeUserPassword
 }
 
 type UsersApiCreateGroupRequest struct {
-	ctx context.Context
-	ApiService UsersApi
+	ctx                  context.Context
+	ApiService           UsersApi
 	groupCreationRequest *GroupCreationRequest
 }
 
@@ -534,27 +536,29 @@ CreateGroup Create a new group.
 
 Create a new group and assign it with roles. Deprecated endpoint. please reffer to Roles & Access rules API.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiCreateGroupRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiCreateGroupRequest
 
 Deprecated
 */
 func (a *UsersApiService) CreateGroup(ctx context.Context) UsersApiCreateGroupRequest {
 	return UsersApiCreateGroupRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GroupCreationResponse
+//
+//	@return GroupCreationResponse
+//
 // Deprecated
 func (a *UsersApiService) CreateGroupExecute(r UsersApiCreateGroupRequest) (*GroupCreationResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GroupCreationResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GroupCreationResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.CreateGroup")
@@ -677,8 +681,8 @@ func (a *UsersApiService) CreateGroupExecute(r UsersApiCreateGroupRequest) (*Gro
 }
 
 type UsersApiCreateIntenralUserRequest struct {
-	ctx context.Context
-	ApiService UsersApi
+	ctx                         context.Context
+	ApiService                  UsersApi
 	internalUserCreationRequest *InternalUserCreationRequest
 }
 
@@ -695,24 +699,25 @@ func (r UsersApiCreateIntenralUserRequest) Execute() (*UserPostResponse, *http.R
 /*
 CreateIntenralUser create intenral user
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiCreateIntenralUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiCreateIntenralUserRequest
 */
 func (a *UsersApiService) CreateIntenralUser(ctx context.Context) UsersApiCreateIntenralUserRequest {
 	return UsersApiCreateIntenralUserRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return UserPostResponse
+//
+//	@return UserPostResponse
 func (a *UsersApiService) CreateIntenralUserExecute(r UsersApiCreateIntenralUserRequest) (*UserPostResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *UserPostResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *UserPostResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.CreateIntenralUser")
@@ -845,8 +850,8 @@ func (a *UsersApiService) CreateIntenralUserExecute(r UsersApiCreateIntenralUser
 }
 
 type UsersApiCreateUserRequest struct {
-	ctx context.Context
-	ApiService UsersApi
+	ctx                 context.Context
+	ApiService          UsersApi
 	userCreationRequest *UserCreationRequest
 }
 
@@ -864,27 +869,29 @@ CreateUser Create a new user.
 
 Create a new user and assign it with a password. It is possible to force the user to change the password upon next login by setting needToChangePassword to true. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiCreateUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiCreateUserRequest
 
 Deprecated
 */
 func (a *UsersApiService) CreateUser(ctx context.Context) UsersApiCreateUserRequest {
 	return UsersApiCreateUserRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return UserCreationResponse
+//
+//	@return UserCreationResponse
+//
 // Deprecated
 func (a *UsersApiService) CreateUserExecute(r UsersApiCreateUserRequest) (*UserCreationResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *UserCreationResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *UserCreationResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.CreateUser")
@@ -1007,8 +1014,8 @@ func (a *UsersApiService) CreateUserExecute(r UsersApiCreateUserRequest) (*UserC
 }
 
 type UsersApiCreateUser_0Request struct {
-	ctx context.Context
-	ApiService UsersApi
+	ctx                  context.Context
+	ApiService           UsersApi
 	userCreationRequest1 *UserCreationRequest1
 }
 
@@ -1027,24 +1034,25 @@ CreateUser_0 Create a local user.
 
 Use to create a local platform user.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiCreateUser_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiCreateUser_0Request
 */
 func (a *UsersApiService) CreateUser_1(ctx context.Context) UsersApiCreateUser_0Request {
 	return UsersApiCreateUser_0Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return UserPostResponse
+//
+//	@return UserPostResponse
 func (a *UsersApiService) CreateUser_1Execute(r UsersApiCreateUser_0Request) (*UserPostResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *UserPostResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *UserPostResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.CreateUser_1")
@@ -1177,9 +1185,9 @@ func (a *UsersApiService) CreateUser_1Execute(r UsersApiCreateUser_0Request) (*U
 }
 
 type UsersApiDeleteGroupByNameRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	groupName string
+	groupName  string
 }
 
 func (r UsersApiDeleteGroupByNameRequest) Execute() (*http.Response, error) {
@@ -1191,17 +1199,17 @@ DeleteGroupByName Delete a group.
 
 Delete the given group from the tenant. This endpoint requires ADMIN role. Deprecated endpoint. please reffer to Roles & Access rules API.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param groupName
- @return UsersApiDeleteGroupByNameRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param groupName
+	@return UsersApiDeleteGroupByNameRequest
 
 Deprecated
 */
 func (a *UsersApiService) DeleteGroupByName(ctx context.Context, groupName string) UsersApiDeleteGroupByNameRequest {
 	return UsersApiDeleteGroupByNameRequest{
 		ApiService: a,
-		ctx: ctx,
-		groupName: groupName,
+		ctx:        ctx,
+		groupName:  groupName,
 	}
 }
 
@@ -1209,9 +1217,9 @@ func (a *UsersApiService) DeleteGroupByName(ctx context.Context, groupName strin
 // Deprecated
 func (a *UsersApiService) DeleteGroupByNameExecute(r UsersApiDeleteGroupByNameRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.DeleteGroupByName")
@@ -1331,10 +1339,10 @@ func (a *UsersApiService) DeleteGroupByNameExecute(r UsersApiDeleteGroupByNameRe
 }
 
 type UsersApiDeleteUserByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	userId string
-	usersType *[]UserType
+	userId     string
+	usersType  *[]UserType
 }
 
 // Available only when SSO enabled
@@ -1352,17 +1360,17 @@ DeleteUserById Delete a user.
 
 Delete the given user from the tenant. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId
- @return UsersApiDeleteUserByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId
+	@return UsersApiDeleteUserByIdRequest
 
 Deprecated
 */
 func (a *UsersApiService) DeleteUserById(ctx context.Context, userId string) UsersApiDeleteUserByIdRequest {
 	return UsersApiDeleteUserByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
+		ctx:        ctx,
+		userId:     userId,
 	}
 }
 
@@ -1370,9 +1378,9 @@ func (a *UsersApiService) DeleteUserById(ctx context.Context, userId string) Use
 // Deprecated
 func (a *UsersApiService) DeleteUserByIdExecute(r UsersApiDeleteUserByIdRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.DeleteUserById")
@@ -1503,9 +1511,9 @@ func (a *UsersApiService) DeleteUserByIdExecute(r UsersApiDeleteUserByIdRequest)
 }
 
 type UsersApiDeleteUserById_0Request struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	userId string
+	userId     string
 }
 
 func (r UsersApiDeleteUserById_0Request) Execute() (*http.Response, error) {
@@ -1517,24 +1525,24 @@ DeleteUserById_0 Delete a user by id.
 
 Use to delete a user by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId The id of the user
- @return UsersApiDeleteUserById_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId The id of the user
+	@return UsersApiDeleteUserById_0Request
 */
 func (a *UsersApiService) DeleteUserById_2(ctx context.Context, userId string) UsersApiDeleteUserById_0Request {
 	return UsersApiDeleteUserById_0Request{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
+		ctx:        ctx,
+		userId:     userId,
 	}
 }
 
 // Execute executes the request
 func (a *UsersApiService) DeleteUserById_2Execute(r UsersApiDeleteUserById_0Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.DeleteUserById_2")
@@ -1654,9 +1662,9 @@ func (a *UsersApiService) DeleteUserById_2Execute(r UsersApiDeleteUserById_0Requ
 }
 
 type UsersApiGeGroupByNameRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	groupName string
+	groupName  string
 }
 
 func (r UsersApiGeGroupByNameRequest) Execute() (*Group, *http.Response, error) {
@@ -1668,29 +1676,31 @@ GeGroupByName Get group details.
 
 Get the details of a given group. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated endpoint. please reffer to Roles & Access rules API.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param groupName
- @return UsersApiGeGroupByNameRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param groupName
+	@return UsersApiGeGroupByNameRequest
 
 Deprecated
 */
 func (a *UsersApiService) GeGroupByName(ctx context.Context, groupName string) UsersApiGeGroupByNameRequest {
 	return UsersApiGeGroupByNameRequest{
 		ApiService: a,
-		ctx: ctx,
-		groupName: groupName,
+		ctx:        ctx,
+		groupName:  groupName,
 	}
 }
 
 // Execute executes the request
-//  @return Group
+//
+//	@return Group
+//
 // Deprecated
 func (a *UsersApiService) GeGroupByNameExecute(r UsersApiGeGroupByNameRequest) (*Group, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Group
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Group
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GeGroupByName")
@@ -1819,9 +1829,9 @@ func (a *UsersApiService) GeGroupByNameExecute(r UsersApiGeGroupByNameRequest) (
 }
 
 type UsersApiGetGroupsRequest struct {
-	ctx context.Context
-	ApiService UsersApi
-	roles *[]Role
+	ctx             context.Context
+	ApiService      UsersApi
+	roles           *[]Role
 	onlyCreatedByMe *bool
 }
 
@@ -1846,27 +1856,29 @@ GetGroups Get groups list.
 
 Return the list of groups of the tenant. Deprecated endpoint. please reffer to Roles & Access rules API.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiGetGroupsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiGetGroupsRequest
 
 Deprecated
 */
 func (a *UsersApiService) GetGroups(ctx context.Context) UsersApiGetGroupsRequest {
 	return UsersApiGetGroupsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Group
+//
+//	@return []Group
+//
 // Deprecated
 func (a *UsersApiService) GetGroupsExecute(r UsersApiGetGroupsRequest) ([]Group, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Group
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Group
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GetGroups")
@@ -1998,7 +2010,7 @@ func (a *UsersApiService) GetGroupsExecute(r UsersApiGetGroupsRequest) ([]Group,
 }
 
 type UsersApiGetRolesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
 }
 
@@ -2011,27 +2023,29 @@ GetRoles Get all possible permissions.
 
 Get the complete set of permissions that a tenant can grant to users and applications. Deprecated endpoint. please reffer to Roles & Access rules API.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiGetRolesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiGetRolesRequest
 
 Deprecated
 */
 func (a *UsersApiService) GetRoles(ctx context.Context) UsersApiGetRolesRequest {
 	return UsersApiGetRolesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Role
+//
+//	@return []Role
+//
 // Deprecated
 func (a *UsersApiService) GetRolesExecute(r UsersApiGetRolesRequest) ([]Role, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Role
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Role
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GetRoles")
@@ -2149,9 +2163,9 @@ func (a *UsersApiService) GetRolesExecute(r UsersApiGetRolesRequest) ([]Role, *h
 }
 
 type UsersApiGetUserByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	userId string
+	userId     string
 }
 
 func (r UsersApiGetUserByIdRequest) Execute() (*User1, *http.Response, error) {
@@ -2163,29 +2177,31 @@ GetUserById Get user details.
 
 Get the details of a given user. This endpoint requires ADMIN, EDITOR or VIEWER role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId
- @return UsersApiGetUserByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId
+	@return UsersApiGetUserByIdRequest
 
 Deprecated
 */
 func (a *UsersApiService) GetUserById(ctx context.Context, userId string) UsersApiGetUserByIdRequest {
 	return UsersApiGetUserByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
+		ctx:        ctx,
+		userId:     userId,
 	}
 }
 
 // Execute executes the request
-//  @return User1
+//
+//	@return User1
+//
 // Deprecated
 func (a *UsersApiService) GetUserByIdExecute(r UsersApiGetUserByIdRequest) (*User1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *User1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *User1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GetUserById")
@@ -2314,9 +2330,9 @@ func (a *UsersApiService) GetUserByIdExecute(r UsersApiGetUserByIdRequest) (*Use
 }
 
 type UsersApiGetUserById_0Request struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	userId string
+	userId     string
 }
 
 func (r UsersApiGetUserById_0Request) Execute() (*User2, *http.Response, error) {
@@ -2328,26 +2344,27 @@ GetUserById_0 Get a user by id.
 
 Retrieve a user's details by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId The id of the user
- @return UsersApiGetUserById_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId The id of the user
+	@return UsersApiGetUserById_0Request
 */
 func (a *UsersApiService) GetUserById_3(ctx context.Context, userId string) UsersApiGetUserById_0Request {
 	return UsersApiGetUserById_0Request{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
+		ctx:        ctx,
+		userId:     userId,
 	}
 }
 
 // Execute executes the request
-//  @return User2
+//
+//	@return User2
 func (a *UsersApiService) GetUserById_3Execute(r UsersApiGetUserById_0Request) (*User2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *User2
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *User2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GetUserById_3")
@@ -2476,9 +2493,9 @@ func (a *UsersApiService) GetUserById_3Execute(r UsersApiGetUserById_0Request) (
 }
 
 type UsersApiGetUserRolesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	userId string
+	userId     string
 }
 
 func (r UsersApiGetUserRolesRequest) Execute() ([]Role, *http.Response, error) {
@@ -2490,29 +2507,31 @@ GetUserRoles Get user permissions.
 
 Return the set of permissions granted to a given user. Deprecated endpoint. please reffer to Roles & Access rules API.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId
- @return UsersApiGetUserRolesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId
+	@return UsersApiGetUserRolesRequest
 
 Deprecated
 */
 func (a *UsersApiService) GetUserRoles(ctx context.Context, userId string) UsersApiGetUserRolesRequest {
 	return UsersApiGetUserRolesRequest{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
+		ctx:        ctx,
+		userId:     userId,
 	}
 }
 
 // Execute executes the request
-//  @return []Role
+//
+//	@return []Role
+//
 // Deprecated
 func (a *UsersApiService) GetUserRolesExecute(r UsersApiGetUserRolesRequest) ([]Role, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Role
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Role
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GetUserRoles")
@@ -2641,11 +2660,11 @@ func (a *UsersApiService) GetUserRolesExecute(r UsersApiGetUserRolesRequest) ([]
 }
 
 type UsersApiGetUsersRequest struct {
-	ctx context.Context
-	ApiService UsersApi
-	roles *[]Role
+	ctx             context.Context
+	ApiService      UsersApi
+	roles           *[]Role
 	onlyCreatedByMe *bool
-	usersType *[]UserType
+	usersType       *[]UserType
 }
 
 // Filter the returned entities to only those with the required role
@@ -2675,27 +2694,29 @@ GetUsers Get users list.
 
 Return the list of users of the tenant.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiGetUsersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiGetUsersRequest
 
 Deprecated
 */
 func (a *UsersApiService) GetUsers(ctx context.Context) UsersApiGetUsersRequest {
 	return UsersApiGetUsersRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []User1
+//
+//	@return []User1
+//
 // Deprecated
 func (a *UsersApiService) GetUsersExecute(r UsersApiGetUsersRequest) ([]User1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []User1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []User1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GetUsers")
@@ -2838,9 +2859,9 @@ func (a *UsersApiService) GetUsersExecute(r UsersApiGetUsersRequest) ([]User1, *
 }
 
 type UsersApiGetUsers_0Request struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	filter *string
+	filter     *string
 }
 
 // Filter results by user attribute.
@@ -2858,24 +2879,25 @@ GetUsers_0 Get users.
 
 Retrieve a list of platform users.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return UsersApiGetUsers_0Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersApiGetUsers_0Request
 */
 func (a *UsersApiService) GetUsers_4(ctx context.Context) UsersApiGetUsers_0Request {
 	return UsersApiGetUsers_0Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []User2
+//
+//	@return []User2
 func (a *UsersApiService) GetUsers_4Execute(r UsersApiGetUsers_0Request) ([]User2, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []User2
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []User2
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GetUsers_4")
@@ -2996,9 +3018,9 @@ func (a *UsersApiService) GetUsers_4Execute(r UsersApiGetUsers_0Request) ([]User
 }
 
 type UsersApiLogoutUserRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	userId string
+	userId     string
 }
 
 func (r UsersApiLogoutUserRequest) Execute() (*http.Response, error) {
@@ -3010,24 +3032,24 @@ LogoutUser Logout a user.
 
 Use to force a user to logout.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId The id of the user
- @return UsersApiLogoutUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId The id of the user
+	@return UsersApiLogoutUserRequest
 */
 func (a *UsersApiService) LogoutUser(ctx context.Context, userId string) UsersApiLogoutUserRequest {
 	return UsersApiLogoutUserRequest{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
+		ctx:        ctx,
+		userId:     userId,
 	}
 }
 
 // Execute executes the request
 func (a *UsersApiService) LogoutUserExecute(r UsersApiLogoutUserRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.LogoutUser")
@@ -3147,9 +3169,9 @@ func (a *UsersApiService) LogoutUserExecute(r UsersApiLogoutUserRequest) (*http.
 }
 
 type UsersApiResetUserPasswordRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	userId string
+	userId     string
 }
 
 func (r UsersApiResetUserPasswordRequest) Execute() (*ResetUserPassword200Response, *http.Response, error) {
@@ -3161,26 +3183,27 @@ ResetUserPassword Reset a user's password.
 
 Use to to reset a user's password.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId The id of the user
- @return UsersApiResetUserPasswordRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId The id of the user
+	@return UsersApiResetUserPasswordRequest
 */
 func (a *UsersApiService) ResetUserPassword(ctx context.Context, userId string) UsersApiResetUserPasswordRequest {
 	return UsersApiResetUserPasswordRequest{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
+		ctx:        ctx,
+		userId:     userId,
 	}
 }
 
 // Execute executes the request
-//  @return ResetUserPassword200Response
+//
+//	@return ResetUserPassword200Response
 func (a *UsersApiService) ResetUserPasswordExecute(r UsersApiResetUserPasswordRequest) (*ResetUserPassword200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ResetUserPassword200Response
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ResetUserPassword200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.ResetUserPassword")
@@ -3309,9 +3332,9 @@ func (a *UsersApiService) ResetUserPasswordExecute(r UsersApiResetUserPasswordRe
 }
 
 type UsersApiUpdateGroupByNameRequest struct {
-	ctx context.Context
-	ApiService UsersApi
-	groupName string
+	ctx           context.Context
+	ApiService    UsersApi
+	groupName     string
 	groupWithName *GroupWithName
 }
 
@@ -3329,29 +3352,31 @@ UpdateGroupByName Update group details.
 
 Update the details of a given group. This endpoint requires ADMIN role. Deprecated endpoint. please reffer to Roles & Access rules API.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param groupName
- @return UsersApiUpdateGroupByNameRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param groupName
+	@return UsersApiUpdateGroupByNameRequest
 
 Deprecated
 */
 func (a *UsersApiService) UpdateGroupByName(ctx context.Context, groupName string) UsersApiUpdateGroupByNameRequest {
 	return UsersApiUpdateGroupByNameRequest{
 		ApiService: a,
-		ctx: ctx,
-		groupName: groupName,
+		ctx:        ctx,
+		groupName:  groupName,
 	}
 }
 
 // Execute executes the request
-//  @return Group
+//
+//	@return Group
+//
 // Deprecated
 func (a *UsersApiService) UpdateGroupByNameExecute(r UsersApiUpdateGroupByNameRequest) (*Group, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Group
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Group
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.UpdateGroupByName")
@@ -3485,10 +3510,10 @@ func (a *UsersApiService) UpdateGroupByNameExecute(r UsersApiUpdateGroupByNameRe
 }
 
 type UsersApiUpdateUserByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService UsersApi
-	userId string
-	user1 *User1
+	userId     string
+	user1      *User1
 }
 
 func (r UsersApiUpdateUserByIdRequest) User1(user1 User1) UsersApiUpdateUserByIdRequest {
@@ -3505,29 +3530,31 @@ UpdateUserById Update user details.
 
 Update the details of a given user. This endpoint requires ADMIN role. Deprecated endpoint. Use the new endpoint api/v1/users/{userId} instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId
- @return UsersApiUpdateUserByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId
+	@return UsersApiUpdateUserByIdRequest
 
 Deprecated
 */
 func (a *UsersApiService) UpdateUserById(ctx context.Context, userId string) UsersApiUpdateUserByIdRequest {
 	return UsersApiUpdateUserByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
+		ctx:        ctx,
+		userId:     userId,
 	}
 }
 
 // Execute executes the request
-//  @return User1
+//
+//	@return User1
+//
 // Deprecated
 func (a *UsersApiService) UpdateUserByIdExecute(r UsersApiUpdateUserByIdRequest) (*User1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *User1
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *User1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.UpdateUserById")

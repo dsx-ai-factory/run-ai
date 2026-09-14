@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Workloads V2 Service
 
@@ -100,8 +102,10 @@ func (a *SettingsAPIService) GetWorkloadsSettingByKey(ctx context.Context, key W
 }
 
 // Execute executes the request
-//  @return YamlSubmissionSetting
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
+//
+//	@return YamlSubmissionSetting
+//
+// /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetWorkloadsSettingByKeyExecute(r ApiGetWorkloadsSettingByKeyRequest) (*YamlSubmissionSetting, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
@@ -278,8 +282,10 @@ func (a *SettingsAPIService) GetWorkloadsSettings(ctx context.Context) ApiGetWor
 }
 
 // Execute executes the request
-//  @return WorkloadsSettingsGetResponse
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
+//
+//	@return WorkloadsSettingsGetResponse
+//
+// /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetWorkloadsSettingsExecute(r ApiGetWorkloadsSettingsRequest) (*WorkloadsSettingsGetResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
@@ -442,7 +448,7 @@ func (a *SettingsAPIService) UpdateWorkloadsSettingByKey(ctx context.Context, ke
 }
 
 // Execute executes the request
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
+// /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) UpdateWorkloadsSettingByKeyExecute(r ApiUpdateWorkloadsSettingByKeyRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodPut

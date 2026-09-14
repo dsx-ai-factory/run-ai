@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -76,6 +78,7 @@ func (a *DatavolumesApiService) CountDatavolumes(ctx context.Context) ApiCountDa
 }
 
 // Execute executes the request
+//
 //	@return CountDatavolumes200Response
 func (a *DatavolumesApiService) CountDatavolumesExecute(r ApiCountDatavolumesRequest) (*CountDatavolumes200Response, *http.Response, error) {
 	var (
@@ -242,6 +245,7 @@ func (a *DatavolumesApiService) CreateDatavolume(ctx context.Context) ApiCreateD
 }
 
 // Execute executes the request
+//
 //	@return Datavolume
 func (a *DatavolumesApiService) CreateDatavolumeExecute(r ApiCreateDatavolumeRequest) (*Datavolume, *http.Response, error) {
 	var (
@@ -548,6 +552,7 @@ func (a *DatavolumesApiService) DeleteDatavolume(ctx context.Context, datavolume
 }
 
 // Execute executes the request
+//
 //	@return HttpResponse
 func (a *DatavolumesApiService) DeleteDatavolumeExecute(r ApiDeleteDatavolumeRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -698,6 +703,7 @@ func (a *DatavolumesApiService) GetDatavolume(ctx context.Context, datavolumeId 
 }
 
 // Execute executes the request
+//
 //	@return Datavolume
 func (a *DatavolumesApiService) GetDatavolumeExecute(r ApiGetDatavolumeRequest) (*Datavolume, *http.Response, error) {
 	var (
@@ -848,6 +854,7 @@ func (a *DatavolumesApiService) GetDatavolumeAncestors(ctx context.Context, data
 }
 
 // Execute executes the request
+//
 //	@return Ancestors
 func (a *DatavolumesApiService) GetDatavolumeAncestorsExecute(r ApiGetDatavolumeAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -978,6 +985,7 @@ func (a *DatavolumesApiService) GetDatavolumeSharedScopes(ctx context.Context, d
 }
 
 // Execute executes the request
+//
 //	@return []SharedScope
 func (a *DatavolumesApiService) GetDatavolumeSharedScopesExecute(r ApiGetDatavolumeSharedScopesRequest) ([]SharedScope, *http.Response, error) {
 	var (
@@ -1190,6 +1198,7 @@ func (a *DatavolumesApiService) GetDatavolumes(ctx context.Context) ApiGetDatavo
 }
 
 // Execute executes the request
+//
 //	@return GetDatavolumes200Response
 func (a *DatavolumesApiService) GetDatavolumesExecute(r ApiGetDatavolumesRequest) (*GetDatavolumes200Response, *http.Response, error) {
 	var (
@@ -1387,6 +1396,7 @@ func (a *DatavolumesApiService) GetDatavolumesInternal(ctx context.Context) ApiG
 }
 
 // Execute executes the request
+//
 //	@return GetDatavolumesInternal200Response
 func (a *DatavolumesApiService) GetDatavolumesInternalExecute(r ApiGetDatavolumesInternalRequest) (*GetDatavolumesInternal200Response, *http.Response, error) {
 	var (
@@ -1552,6 +1562,7 @@ func (a *DatavolumesApiService) GetUsedPvcsFromDatavolumes(ctx context.Context) 
 }
 
 // Execute executes the request
+//
 //	@return GetUsedPvcsFromDatavolumes200Response
 func (a *DatavolumesApiService) GetUsedPvcsFromDatavolumesExecute(r ApiGetUsedPvcsFromDatavolumesRequest) (*GetUsedPvcsFromDatavolumes200Response, *http.Response, error) {
 	var (
@@ -1679,6 +1690,7 @@ func (a *DatavolumesApiService) InternalCreateDatavolume(ctx context.Context) Ap
 }
 
 // Execute executes the request
+//
 //	@return InternalDatavolume
 func (a *DatavolumesApiService) InternalCreateDatavolumeExecute(r ApiInternalCreateDatavolumeRequest) (*InternalDatavolume, *http.Response, error) {
 	var (
@@ -1840,6 +1852,7 @@ func (a *DatavolumesApiService) PatchDatavolume(ctx context.Context, datavolumeI
 }
 
 // Execute executes the request
+//
 //	@return DatavolumeNoSharedScopes
 func (a *DatavolumesApiService) PatchDatavolumeExecute(r ApiPatchDatavolumeRequest) (*DatavolumeNoSharedScopes, *http.Response, error) {
 	var (
@@ -2012,6 +2025,7 @@ func (a *DatavolumesApiService) PatchDatavolumeSharedScopes(ctx context.Context,
 }
 
 // Execute executes the request
+//
 //	@return []SharedScope
 func (a *DatavolumesApiService) PatchDatavolumeSharedScopesExecute(r ApiPatchDatavolumeSharedScopesRequest) ([]SharedScope, *http.Response, error) {
 	var (

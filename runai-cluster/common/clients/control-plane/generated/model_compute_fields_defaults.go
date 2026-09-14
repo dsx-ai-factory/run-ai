@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,8 +19,8 @@ import (
 // ComputeFieldsDefaults struct for ComputeFieldsDefaults
 type ComputeFieldsDefaults struct {
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory/migProfile/gpuPortion.
-	GpuDevicesRequest NullableInt32 `json:"gpuDevicesRequest,omitempty"`
-	GpuRequestType NullableGpuRequestType `json:"gpuRequestType,omitempty"`
+	GpuDevicesRequest NullableInt32          `json:"gpuDevicesRequest,omitempty"`
+	GpuRequestType    NullableGpuRequestType `json:"gpuRequestType,omitempty"`
 	// Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
 	GpuPortionRequest NullableFloat64 `json:"gpuPortionRequest,omitempty"`
 	// Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
@@ -26,8 +28,8 @@ type ComputeFieldsDefaults struct {
 	// Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
 	GpuMemoryRequest NullableString `json:"gpuMemoryRequest,omitempty"`
 	// Limitation on the memory consumed by the workload, per GPU device. The system guarantees The gpuMemoryLimit must be no less than gpuMemoryRequest.
-	GpuMemoryLimit NullableString `json:"gpuMemoryLimit,omitempty"`
-	MigProfile NullableMigProfile `json:"migProfile,omitempty"`
+	GpuMemoryLimit NullableString     `json:"gpuMemoryLimit,omitempty"`
+	MigProfile     NullableMigProfile `json:"migProfile,omitempty"`
 	// CPU units to allocate for the created workload (0.5, 1, .etc). The workload will receive at least this amount of CPU. Note that the workload will not be scheduled unless the system can guarantee this amount of CPUs to the workload.
 	CpuCoreRequest NullableFloat64 `json:"cpuCoreRequest,omitempty"`
 	// Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
@@ -37,7 +39,7 @@ type ComputeFieldsDefaults struct {
 	// Limitations on the CPU memory to allocate for this workload (1G, 20M, .etc). The system guarantees that this workload will not be able to consume more than this amount of memory. The workload will receive an error when trying to allocate more memory than this limit.
 	CpuMemoryLimit NullableString `json:"cpuMemoryLimit,omitempty"`
 	// A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM.
-	LargeShmRequest NullableBool `json:"largeShmRequest,omitempty"`
+	LargeShmRequest   NullableBool                      `json:"largeShmRequest,omitempty"`
 	ExtendedResources NullableExtendedResourcesDefaults `json:"extendedResources,omitempty"`
 }
 
@@ -90,6 +92,7 @@ func (o *ComputeFieldsDefaults) HasGpuDevicesRequest() bool {
 func (o *ComputeFieldsDefaults) SetGpuDevicesRequest(v int32) {
 	o.GpuDevicesRequest.Set(&v)
 }
+
 // SetGpuDevicesRequestNil sets the value for GpuDevicesRequest to be an explicit nil
 func (o *ComputeFieldsDefaults) SetGpuDevicesRequestNil() {
 	o.GpuDevicesRequest.Set(nil)
@@ -132,6 +135,7 @@ func (o *ComputeFieldsDefaults) HasGpuRequestType() bool {
 func (o *ComputeFieldsDefaults) SetGpuRequestType(v GpuRequestType) {
 	o.GpuRequestType.Set(&v)
 }
+
 // SetGpuRequestTypeNil sets the value for GpuRequestType to be an explicit nil
 func (o *ComputeFieldsDefaults) SetGpuRequestTypeNil() {
 	o.GpuRequestType.Set(nil)
@@ -174,6 +178,7 @@ func (o *ComputeFieldsDefaults) HasGpuPortionRequest() bool {
 func (o *ComputeFieldsDefaults) SetGpuPortionRequest(v float64) {
 	o.GpuPortionRequest.Set(&v)
 }
+
 // SetGpuPortionRequestNil sets the value for GpuPortionRequest to be an explicit nil
 func (o *ComputeFieldsDefaults) SetGpuPortionRequestNil() {
 	o.GpuPortionRequest.Set(nil)
@@ -216,6 +221,7 @@ func (o *ComputeFieldsDefaults) HasGpuPortionLimit() bool {
 func (o *ComputeFieldsDefaults) SetGpuPortionLimit(v float64) {
 	o.GpuPortionLimit.Set(&v)
 }
+
 // SetGpuPortionLimitNil sets the value for GpuPortionLimit to be an explicit nil
 func (o *ComputeFieldsDefaults) SetGpuPortionLimitNil() {
 	o.GpuPortionLimit.Set(nil)
@@ -258,6 +264,7 @@ func (o *ComputeFieldsDefaults) HasGpuMemoryRequest() bool {
 func (o *ComputeFieldsDefaults) SetGpuMemoryRequest(v string) {
 	o.GpuMemoryRequest.Set(&v)
 }
+
 // SetGpuMemoryRequestNil sets the value for GpuMemoryRequest to be an explicit nil
 func (o *ComputeFieldsDefaults) SetGpuMemoryRequestNil() {
 	o.GpuMemoryRequest.Set(nil)
@@ -300,6 +307,7 @@ func (o *ComputeFieldsDefaults) HasGpuMemoryLimit() bool {
 func (o *ComputeFieldsDefaults) SetGpuMemoryLimit(v string) {
 	o.GpuMemoryLimit.Set(&v)
 }
+
 // SetGpuMemoryLimitNil sets the value for GpuMemoryLimit to be an explicit nil
 func (o *ComputeFieldsDefaults) SetGpuMemoryLimitNil() {
 	o.GpuMemoryLimit.Set(nil)
@@ -342,6 +350,7 @@ func (o *ComputeFieldsDefaults) HasMigProfile() bool {
 func (o *ComputeFieldsDefaults) SetMigProfile(v MigProfile) {
 	o.MigProfile.Set(&v)
 }
+
 // SetMigProfileNil sets the value for MigProfile to be an explicit nil
 func (o *ComputeFieldsDefaults) SetMigProfileNil() {
 	o.MigProfile.Set(nil)
@@ -384,6 +393,7 @@ func (o *ComputeFieldsDefaults) HasCpuCoreRequest() bool {
 func (o *ComputeFieldsDefaults) SetCpuCoreRequest(v float64) {
 	o.CpuCoreRequest.Set(&v)
 }
+
 // SetCpuCoreRequestNil sets the value for CpuCoreRequest to be an explicit nil
 func (o *ComputeFieldsDefaults) SetCpuCoreRequestNil() {
 	o.CpuCoreRequest.Set(nil)
@@ -426,6 +436,7 @@ func (o *ComputeFieldsDefaults) HasCpuCoreLimit() bool {
 func (o *ComputeFieldsDefaults) SetCpuCoreLimit(v float64) {
 	o.CpuCoreLimit.Set(&v)
 }
+
 // SetCpuCoreLimitNil sets the value for CpuCoreLimit to be an explicit nil
 func (o *ComputeFieldsDefaults) SetCpuCoreLimitNil() {
 	o.CpuCoreLimit.Set(nil)
@@ -468,6 +479,7 @@ func (o *ComputeFieldsDefaults) HasCpuMemoryRequest() bool {
 func (o *ComputeFieldsDefaults) SetCpuMemoryRequest(v string) {
 	o.CpuMemoryRequest.Set(&v)
 }
+
 // SetCpuMemoryRequestNil sets the value for CpuMemoryRequest to be an explicit nil
 func (o *ComputeFieldsDefaults) SetCpuMemoryRequestNil() {
 	o.CpuMemoryRequest.Set(nil)
@@ -510,6 +522,7 @@ func (o *ComputeFieldsDefaults) HasCpuMemoryLimit() bool {
 func (o *ComputeFieldsDefaults) SetCpuMemoryLimit(v string) {
 	o.CpuMemoryLimit.Set(&v)
 }
+
 // SetCpuMemoryLimitNil sets the value for CpuMemoryLimit to be an explicit nil
 func (o *ComputeFieldsDefaults) SetCpuMemoryLimitNil() {
 	o.CpuMemoryLimit.Set(nil)
@@ -552,6 +565,7 @@ func (o *ComputeFieldsDefaults) HasLargeShmRequest() bool {
 func (o *ComputeFieldsDefaults) SetLargeShmRequest(v bool) {
 	o.LargeShmRequest.Set(&v)
 }
+
 // SetLargeShmRequestNil sets the value for LargeShmRequest to be an explicit nil
 func (o *ComputeFieldsDefaults) SetLargeShmRequestNil() {
 	o.LargeShmRequest.Set(nil)
@@ -594,6 +608,7 @@ func (o *ComputeFieldsDefaults) HasExtendedResources() bool {
 func (o *ComputeFieldsDefaults) SetExtendedResources(v ExtendedResourcesDefaults) {
 	o.ExtendedResources.Set(&v)
 }
+
 // SetExtendedResourcesNil sets the value for ExtendedResources to be an explicit nil
 func (o *ComputeFieldsDefaults) SetExtendedResourcesNil() {
 	o.ExtendedResources.Set(nil)
@@ -683,5 +698,3 @@ func (v *NullableComputeFieldsDefaults) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

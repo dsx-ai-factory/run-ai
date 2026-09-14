@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
@@ -61,6 +63,7 @@ func (a *JobsApiService) GetClusterJobsCount(ctx context.Context, uuid string) A
 }
 
 // Execute executes the request
+//
 //	@return float32
 func (a *JobsApiService) GetClusterJobsCountExecute(r ApiGetClusterJobsCountRequest) (float32, *http.Response, error) {
 	var (
@@ -242,6 +245,7 @@ func (a *JobsApiService) GetPodsByJobId(ctx context.Context, jobId string, uuid 
 }
 
 // Execute executes the request
+//
 //	@return []Pod
 func (a *JobsApiService) GetPodsByJobIdExecute(r ApiGetPodsByJobIdRequest) ([]Pod, *http.Response, error) {
 	var (
@@ -426,6 +430,7 @@ func (a *JobsApiService) ListJobs(ctx context.Context, uuid string) ApiListJobsR
 }
 
 // Execute executes the request
+//
 //	@return []DisplayedJob
 func (a *JobsApiService) ListJobsExecute(r ApiListJobsRequest) ([]DisplayedJob, *http.Response, error) {
 	var (

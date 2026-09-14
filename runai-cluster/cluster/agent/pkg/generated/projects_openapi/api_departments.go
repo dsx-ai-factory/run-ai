@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Project and Department service API
 
@@ -59,6 +61,7 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdAcc
 }
 
 // Execute executes the request
+//
 //	@return DepartmentAccessControl
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutExecute(r ApiV1K8sClustersClusterIdDepartmentsDepartmentIdAccessControlPutRequest) (*DepartmentAccessControl, *http.Response, error) {
 	var (
@@ -207,6 +210,7 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdDel
 }
 
 // Execute executes the request
+//
 //	@return Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdDeleteExecute(r ApiV1K8sClustersClusterIdDepartmentsDepartmentIdDeleteRequest) (*Department, *http.Response, error) {
 	var (
@@ -324,6 +328,7 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdGet
 }
 
 // Execute executes the request
+//
 //	@return Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdGetExecute(r ApiV1K8sClustersClusterIdDepartmentsDepartmentIdGetRequest) (*Department, *http.Response, error) {
 	var (
@@ -447,6 +452,7 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdPut
 }
 
 // Execute executes the request
+//
 //	@return Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsDepartmentIdPutExecute(r ApiV1K8sClustersClusterIdDepartmentsDepartmentIdPutRequest) (*Department, *http.Response, error) {
 	var (
@@ -573,6 +579,7 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsGet(ctx context
 }
 
 // Execute executes the request
+//
 //	@return []Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsGetExecute(r ApiV1K8sClustersClusterIdDepartmentsGetRequest) ([]Department, *http.Response, error) {
 	var (
@@ -695,6 +702,7 @@ func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsPost(ctx contex
 }
 
 // Execute executes the request
+//
 //	@return Department
 func (a *DepartmentsApiService) V1K8sClustersClusterIdDepartmentsPostExecute(r ApiV1K8sClustersClusterIdDepartmentsPostRequest) (*Department, *http.Response, error) {
 	var (

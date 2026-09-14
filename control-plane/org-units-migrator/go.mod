@@ -200,7 +200,6 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/authorization v0.0.0 => .
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client => ../../control-plane/authorization/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/backend-api-client => ../../runai-clients/backend-api-client
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../control-plane/cluster-service/pkg/client
 

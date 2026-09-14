@@ -58,6 +58,9 @@ func (r *Runner) Run(ctx context.Context) error {
 	if err := deleteLegacyWebhookConfigurations(ctx, r.WorkloadClient); err != nil {
 		return err
 	}
+	if err := stripRetiredResourcesFromCurrentWebhooks(ctx, r.WorkloadClient); err != nil {
+		return err
+	}
 	if err := validateLegacyWebhookState(
 		ctx, r.WorkloadClient, servedWorkloads, ownershipProtectionEnabled(config),
 	); err != nil {
@@ -122,6 +125,15 @@ func (r *Runner) checkAllPermissions(ctx context.Context, servedWorkloads []reso
 				Verb: "delete", Group: resourceSet.gvr.Group, Resource: resourceSet.gvr.Resource,
 				Namespace: resourceSet.namespace, Name: name,
 			})
+		}
+	}
+	for _, resourceSet := range currentWebhookConfigurations {
+		for _, name := range resourceSet.names {
+			for _, verb := range []string{"get", "update"} {
+				workload = append(workload, requiredPermission{
+					Verb: verb, Group: resourceSet.gvr.Group, Resource: resourceSet.gvr.Resource, Name: name,
+				})
+			}
 		}
 	}
 	workload = append(workload,

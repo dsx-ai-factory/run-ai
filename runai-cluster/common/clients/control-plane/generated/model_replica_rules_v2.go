@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,29 +18,29 @@ import (
 
 // ReplicaRulesV2 struct for ReplicaRulesV2
 type ReplicaRulesV2 struct {
-	Command NullableStringRules `json:"command,omitempty"`
-	Args NullableStringRules `json:"args,omitempty"`
-	Image NullableStringRules `json:"image,omitempty"`
-	ImagePullPolicy NullableImagePullPolicyRules `json:"imagePullPolicy,omitempty"`
-	WorkingDir NullableStringRules `json:"workingDir,omitempty"`
-	CreateHomeDir NullableBooleanRules `json:"createHomeDir,omitempty"`
-	Probes NullableProbesRules `json:"probes,omitempty"`
-	NodeType NullableStringRules `json:"nodeType,omitempty"`
-	NodePools NullableArrayRules `json:"nodePools,omitempty"`
-	PodAffinity NullablePodAffinityRules `json:"podAffinity,omitempty"`
-	EnvironmentVariables NullableInstancesRules `json:"environmentVariables,omitempty"`
-	Annotations NullableInstancesRules `json:"annotations,omitempty"`
-	Labels NullableInstancesRules `json:"labels,omitempty"`
-	Tolerations NullableInstancesRules `json:"tolerations,omitempty"`
-	TerminateAfterPreemption NullableBooleanRules `json:"terminateAfterPreemption,omitempty"`
-	AutoDeletionTimeAfterCompletionSeconds NullableIntegerRules `json:"autoDeletionTimeAfterCompletionSeconds,omitempty"`
-	BackoffLimit NullableIntegerRules `json:"backoffLimit,omitempty"`
-	Ports NullablePortsRules `json:"ports,omitempty"`
-	ExposedUrls NullableExposedUrlsRules `json:"exposedUrls,omitempty"`
-	RelatedUrls NullableRelatedUrlsRules `json:"relatedUrls,omitempty"`
-	Security NullableSecurityFlatFieldsRules `json:"security,omitempty"`
-	Compute NullableComputeFieldsRules `json:"compute,omitempty"`
-	Storage NullableStorageFieldsRules `json:"storage,omitempty"`
+	Command                                NullableStringRules             `json:"command,omitempty"`
+	Args                                   NullableStringRules             `json:"args,omitempty"`
+	Image                                  NullableStringRules             `json:"image,omitempty"`
+	ImagePullPolicy                        NullableImagePullPolicyRules    `json:"imagePullPolicy,omitempty"`
+	WorkingDir                             NullableStringRules             `json:"workingDir,omitempty"`
+	CreateHomeDir                          NullableBooleanRules            `json:"createHomeDir,omitempty"`
+	Probes                                 NullableProbesRules             `json:"probes,omitempty"`
+	NodeType                               NullableStringRules             `json:"nodeType,omitempty"`
+	NodePools                              NullableArrayRules              `json:"nodePools,omitempty"`
+	PodAffinity                            NullablePodAffinityRules        `json:"podAffinity,omitempty"`
+	EnvironmentVariables                   NullableInstancesRules          `json:"environmentVariables,omitempty"`
+	Annotations                            NullableInstancesRules          `json:"annotations,omitempty"`
+	Labels                                 NullableInstancesRules          `json:"labels,omitempty"`
+	Tolerations                            NullableInstancesRules          `json:"tolerations,omitempty"`
+	TerminateAfterPreemption               NullableBooleanRules            `json:"terminateAfterPreemption,omitempty"`
+	AutoDeletionTimeAfterCompletionSeconds NullableIntegerRules            `json:"autoDeletionTimeAfterCompletionSeconds,omitempty"`
+	BackoffLimit                           NullableIntegerRules            `json:"backoffLimit,omitempty"`
+	Ports                                  NullablePortsRules              `json:"ports,omitempty"`
+	ExposedUrls                            NullableExposedUrlsRules        `json:"exposedUrls,omitempty"`
+	RelatedUrls                            NullableRelatedUrlsRules        `json:"relatedUrls,omitempty"`
+	Security                               NullableSecurityFlatFieldsRules `json:"security,omitempty"`
+	Compute                                NullableComputeFieldsRules      `json:"compute,omitempty"`
+	Storage                                NullableStorageFieldsRules      `json:"storage,omitempty"`
 }
 
 // NewReplicaRulesV2 instantiates a new ReplicaRulesV2 object
@@ -90,6 +92,7 @@ func (o *ReplicaRulesV2) HasCommand() bool {
 func (o *ReplicaRulesV2) SetCommand(v StringRules) {
 	o.Command.Set(&v)
 }
+
 // SetCommandNil sets the value for Command to be an explicit nil
 func (o *ReplicaRulesV2) SetCommandNil() {
 	o.Command.Set(nil)
@@ -132,6 +135,7 @@ func (o *ReplicaRulesV2) HasArgs() bool {
 func (o *ReplicaRulesV2) SetArgs(v StringRules) {
 	o.Args.Set(&v)
 }
+
 // SetArgsNil sets the value for Args to be an explicit nil
 func (o *ReplicaRulesV2) SetArgsNil() {
 	o.Args.Set(nil)
@@ -174,6 +178,7 @@ func (o *ReplicaRulesV2) HasImage() bool {
 func (o *ReplicaRulesV2) SetImage(v StringRules) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *ReplicaRulesV2) SetImageNil() {
 	o.Image.Set(nil)
@@ -216,6 +221,7 @@ func (o *ReplicaRulesV2) HasImagePullPolicy() bool {
 func (o *ReplicaRulesV2) SetImagePullPolicy(v ImagePullPolicyRules) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *ReplicaRulesV2) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -258,6 +264,7 @@ func (o *ReplicaRulesV2) HasWorkingDir() bool {
 func (o *ReplicaRulesV2) SetWorkingDir(v StringRules) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *ReplicaRulesV2) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -300,6 +307,7 @@ func (o *ReplicaRulesV2) HasCreateHomeDir() bool {
 func (o *ReplicaRulesV2) SetCreateHomeDir(v BooleanRules) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *ReplicaRulesV2) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -342,6 +350,7 @@ func (o *ReplicaRulesV2) HasProbes() bool {
 func (o *ReplicaRulesV2) SetProbes(v ProbesRules) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *ReplicaRulesV2) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -384,6 +393,7 @@ func (o *ReplicaRulesV2) HasNodeType() bool {
 func (o *ReplicaRulesV2) SetNodeType(v StringRules) {
 	o.NodeType.Set(&v)
 }
+
 // SetNodeTypeNil sets the value for NodeType to be an explicit nil
 func (o *ReplicaRulesV2) SetNodeTypeNil() {
 	o.NodeType.Set(nil)
@@ -426,6 +436,7 @@ func (o *ReplicaRulesV2) HasNodePools() bool {
 func (o *ReplicaRulesV2) SetNodePools(v ArrayRules) {
 	o.NodePools.Set(&v)
 }
+
 // SetNodePoolsNil sets the value for NodePools to be an explicit nil
 func (o *ReplicaRulesV2) SetNodePoolsNil() {
 	o.NodePools.Set(nil)
@@ -468,6 +479,7 @@ func (o *ReplicaRulesV2) HasPodAffinity() bool {
 func (o *ReplicaRulesV2) SetPodAffinity(v PodAffinityRules) {
 	o.PodAffinity.Set(&v)
 }
+
 // SetPodAffinityNil sets the value for PodAffinity to be an explicit nil
 func (o *ReplicaRulesV2) SetPodAffinityNil() {
 	o.PodAffinity.Set(nil)
@@ -510,6 +522,7 @@ func (o *ReplicaRulesV2) HasEnvironmentVariables() bool {
 func (o *ReplicaRulesV2) SetEnvironmentVariables(v InstancesRules) {
 	o.EnvironmentVariables.Set(&v)
 }
+
 // SetEnvironmentVariablesNil sets the value for EnvironmentVariables to be an explicit nil
 func (o *ReplicaRulesV2) SetEnvironmentVariablesNil() {
 	o.EnvironmentVariables.Set(nil)
@@ -552,6 +565,7 @@ func (o *ReplicaRulesV2) HasAnnotations() bool {
 func (o *ReplicaRulesV2) SetAnnotations(v InstancesRules) {
 	o.Annotations.Set(&v)
 }
+
 // SetAnnotationsNil sets the value for Annotations to be an explicit nil
 func (o *ReplicaRulesV2) SetAnnotationsNil() {
 	o.Annotations.Set(nil)
@@ -594,6 +608,7 @@ func (o *ReplicaRulesV2) HasLabels() bool {
 func (o *ReplicaRulesV2) SetLabels(v InstancesRules) {
 	o.Labels.Set(&v)
 }
+
 // SetLabelsNil sets the value for Labels to be an explicit nil
 func (o *ReplicaRulesV2) SetLabelsNil() {
 	o.Labels.Set(nil)
@@ -636,6 +651,7 @@ func (o *ReplicaRulesV2) HasTolerations() bool {
 func (o *ReplicaRulesV2) SetTolerations(v InstancesRules) {
 	o.Tolerations.Set(&v)
 }
+
 // SetTolerationsNil sets the value for Tolerations to be an explicit nil
 func (o *ReplicaRulesV2) SetTolerationsNil() {
 	o.Tolerations.Set(nil)
@@ -678,6 +694,7 @@ func (o *ReplicaRulesV2) HasTerminateAfterPreemption() bool {
 func (o *ReplicaRulesV2) SetTerminateAfterPreemption(v BooleanRules) {
 	o.TerminateAfterPreemption.Set(&v)
 }
+
 // SetTerminateAfterPreemptionNil sets the value for TerminateAfterPreemption to be an explicit nil
 func (o *ReplicaRulesV2) SetTerminateAfterPreemptionNil() {
 	o.TerminateAfterPreemption.Set(nil)
@@ -720,6 +737,7 @@ func (o *ReplicaRulesV2) HasAutoDeletionTimeAfterCompletionSeconds() bool {
 func (o *ReplicaRulesV2) SetAutoDeletionTimeAfterCompletionSeconds(v IntegerRules) {
 	o.AutoDeletionTimeAfterCompletionSeconds.Set(&v)
 }
+
 // SetAutoDeletionTimeAfterCompletionSecondsNil sets the value for AutoDeletionTimeAfterCompletionSeconds to be an explicit nil
 func (o *ReplicaRulesV2) SetAutoDeletionTimeAfterCompletionSecondsNil() {
 	o.AutoDeletionTimeAfterCompletionSeconds.Set(nil)
@@ -762,6 +780,7 @@ func (o *ReplicaRulesV2) HasBackoffLimit() bool {
 func (o *ReplicaRulesV2) SetBackoffLimit(v IntegerRules) {
 	o.BackoffLimit.Set(&v)
 }
+
 // SetBackoffLimitNil sets the value for BackoffLimit to be an explicit nil
 func (o *ReplicaRulesV2) SetBackoffLimitNil() {
 	o.BackoffLimit.Set(nil)
@@ -804,6 +823,7 @@ func (o *ReplicaRulesV2) HasPorts() bool {
 func (o *ReplicaRulesV2) SetPorts(v PortsRules) {
 	o.Ports.Set(&v)
 }
+
 // SetPortsNil sets the value for Ports to be an explicit nil
 func (o *ReplicaRulesV2) SetPortsNil() {
 	o.Ports.Set(nil)
@@ -846,6 +866,7 @@ func (o *ReplicaRulesV2) HasExposedUrls() bool {
 func (o *ReplicaRulesV2) SetExposedUrls(v ExposedUrlsRules) {
 	o.ExposedUrls.Set(&v)
 }
+
 // SetExposedUrlsNil sets the value for ExposedUrls to be an explicit nil
 func (o *ReplicaRulesV2) SetExposedUrlsNil() {
 	o.ExposedUrls.Set(nil)
@@ -888,6 +909,7 @@ func (o *ReplicaRulesV2) HasRelatedUrls() bool {
 func (o *ReplicaRulesV2) SetRelatedUrls(v RelatedUrlsRules) {
 	o.RelatedUrls.Set(&v)
 }
+
 // SetRelatedUrlsNil sets the value for RelatedUrls to be an explicit nil
 func (o *ReplicaRulesV2) SetRelatedUrlsNil() {
 	o.RelatedUrls.Set(nil)
@@ -930,6 +952,7 @@ func (o *ReplicaRulesV2) HasSecurity() bool {
 func (o *ReplicaRulesV2) SetSecurity(v SecurityFlatFieldsRules) {
 	o.Security.Set(&v)
 }
+
 // SetSecurityNil sets the value for Security to be an explicit nil
 func (o *ReplicaRulesV2) SetSecurityNil() {
 	o.Security.Set(nil)
@@ -972,6 +995,7 @@ func (o *ReplicaRulesV2) HasCompute() bool {
 func (o *ReplicaRulesV2) SetCompute(v ComputeFieldsRules) {
 	o.Compute.Set(&v)
 }
+
 // SetComputeNil sets the value for Compute to be an explicit nil
 func (o *ReplicaRulesV2) SetComputeNil() {
 	o.Compute.Set(nil)
@@ -1014,6 +1038,7 @@ func (o *ReplicaRulesV2) HasStorage() bool {
 func (o *ReplicaRulesV2) SetStorage(v StorageFieldsRules) {
 	o.Storage.Set(&v)
 }
+
 // SetStorageNil sets the value for Storage to be an explicit nil
 func (o *ReplicaRulesV2) SetStorageNil() {
 	o.Storage.Set(nil)
@@ -1133,5 +1158,3 @@ func (v *NullableReplicaRulesV2) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

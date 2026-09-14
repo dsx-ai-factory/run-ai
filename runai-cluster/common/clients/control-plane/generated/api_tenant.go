@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 type TenantApi interface {
 
 	/*
-	CreateTenant Create tenant
+		CreateTenant Create tenant
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TenantApiCreateTenantRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TenantApiCreateTenantRequest
 	*/
 	CreateTenant(ctx context.Context) TenantApiCreateTenantRequest
 
@@ -35,11 +36,11 @@ type TenantApi interface {
 	CreateTenantExecute(r TenantApiCreateTenantRequest) (*TenantCreationResponse, *http.Response, error)
 
 	/*
-	DeleteTenantById soft delete tenant
+		DeleteTenantById soft delete tenant
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param tenantId The id of the tenant to retrieve
-	@return TenantApiDeleteTenantByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param tenantId The id of the tenant to retrieve
+		@return TenantApiDeleteTenantByIdRequest
 	*/
 	DeleteTenantById(ctx context.Context, tenantId int32) TenantApiDeleteTenantByIdRequest
 
@@ -48,14 +49,14 @@ type TenantApi interface {
 	DeleteTenantByIdExecute(r TenantApiDeleteTenantByIdRequest) (*DeleteTenantById200Response, *http.Response, error)
 
 	/*
-	GetTenant Get tenant
+		GetTenant Get tenant
 
-	Get tenant
+		Get tenant
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TenantApiGetTenantRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TenantApiGetTenantRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetTenant(ctx context.Context) TenantApiGetTenantRequest
 
@@ -65,11 +66,11 @@ type TenantApi interface {
 	GetTenantExecute(r TenantApiGetTenantRequest) (*Tenant, *http.Response, error)
 
 	/*
-	GetTenantById Get tenant
+		GetTenantById Get tenant
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param tenantId The id of the tenant to retrieve
-	@return TenantApiGetTenantByIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param tenantId The id of the tenant to retrieve
+		@return TenantApiGetTenantByIdRequest
 	*/
 	GetTenantById(ctx context.Context, tenantId int32) TenantApiGetTenantByIdRequest
 
@@ -78,14 +79,14 @@ type TenantApi interface {
 	GetTenantByIdExecute(r TenantApiGetTenantByIdRequest) (*Tenant1, *http.Response, error)
 
 	/*
-	GetTenantConfig Get tenant auth config
+		GetTenantConfig Get tenant auth config
 
-	Get tenant auth config, used for authentication.
+		Get tenant auth config, used for authentication.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TenantApiGetTenantConfigRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TenantApiGetTenantConfigRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetTenantConfig(ctx context.Context) TenantApiGetTenantConfigRequest
 
@@ -95,12 +96,12 @@ type TenantApi interface {
 	GetTenantConfigExecute(r TenantApiGetTenantConfigRequest) (*Config, *http.Response, error)
 
 	/*
-	GetTenantSettings Get all tenant settings.
+		GetTenantSettings Get all tenant settings.
 
-	Retrieve all tenant settings.
+		Retrieve all tenant settings.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TenantApiGetTenantSettingsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TenantApiGetTenantSettingsRequest
 	*/
 	GetTenantSettings(ctx context.Context) TenantApiGetTenantSettingsRequest
 
@@ -109,13 +110,13 @@ type TenantApi interface {
 	GetTenantSettingsExecute(r TenantApiGetTenantSettingsRequest) ([]Setting, *http.Response, error)
 
 	/*
-	GetTenantSettingsByKey Get a tenant setting by key.
+		GetTenantSettingsByKey Get a tenant setting by key.
 
-	Retrieve a specific tenant setting by key.
+		Retrieve a specific tenant setting by key.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param settingKey
-	@return TenantApiGetTenantSettingsByKeyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param settingKey
+		@return TenantApiGetTenantSettingsByKeyRequest
 	*/
 	GetTenantSettingsByKey(ctx context.Context, settingKey string) TenantApiGetTenantSettingsByKeyRequest
 
@@ -124,12 +125,12 @@ type TenantApi interface {
 	GetTenantSettingsByKeyExecute(r TenantApiGetTenantSettingsByKeyRequest) (bool, *http.Response, error)
 
 	/*
-	GetTenants Get a list of tenants.
+		GetTenants Get a list of tenants.
 
-	Retrieve a list of tenants and their details.
+		Retrieve a list of tenants and their details.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TenantApiGetTenantsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TenantApiGetTenantsRequest
 	*/
 	GetTenants(ctx context.Context) TenantApiGetTenantsRequest
 
@@ -138,15 +139,15 @@ type TenantApi interface {
 	GetTenantsExecute(r TenantApiGetTenantsRequest) ([]Tenant1, *http.Response, error)
 
 	/*
-	Logo Get tenant logo.
+		Logo Get tenant logo.
 
-	Get tennant logo
+		Get tennant logo
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param tenantId
-	@return TenantApiLogoRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param tenantId
+		@return TenantApiLogoRequest
 
-	Deprecated
+		Deprecated
 	*/
 	Logo(ctx context.Context, tenantId int32) TenantApiLogoRequest
 
@@ -156,10 +157,10 @@ type TenantApi interface {
 	LogoExecute(r TenantApiLogoRequest) (*Logo200Response, *http.Response, error)
 
 	/*
-	PostTenantEula Post tenant eula
+		PostTenantEula Post tenant eula
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TenantApiPostTenantEulaRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TenantApiPostTenantEulaRequest
 	*/
 	PostTenantEula(ctx context.Context) TenantApiPostTenantEulaRequest
 
@@ -167,12 +168,12 @@ type TenantApi interface {
 	PostTenantEulaExecute(r TenantApiPostTenantEulaRequest) (*http.Response, error)
 
 	/*
-	UpdateTenantSetting Update a tenant setting.
+		UpdateTenantSetting Update a tenant setting.
 
-	Use to update tenant settings.
+		Use to update tenant settings.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return TenantApiUpdateTenantSettingRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return TenantApiUpdateTenantSettingRequest
 	*/
 	UpdateTenantSetting(ctx context.Context) TenantApiUpdateTenantSettingRequest
 
@@ -181,15 +182,15 @@ type TenantApi interface {
 	UpdateTenantSettingExecute(r TenantApiUpdateTenantSettingRequest) (*TenantSettingCreationResponse, *http.Response, error)
 
 	/*
-	UploadTenantLogo Upload a tenant logo.
+		UploadTenantLogo Upload a tenant logo.
 
-	Upload tenant logo file. Max size of 128kb.
+		Upload tenant logo file. Max size of 128kb.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param tenantId
-	@return TenantApiUploadTenantLogoRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param tenantId
+		@return TenantApiUploadTenantLogoRequest
 
-	Deprecated
+		Deprecated
 	*/
 	UploadTenantLogo(ctx context.Context, tenantId int32) TenantApiUploadTenantLogoRequest
 
@@ -202,8 +203,8 @@ type TenantApi interface {
 type TenantApiService service
 
 type TenantApiCreateTenantRequest struct {
-	ctx context.Context
-	ApiService TenantApi
+	ctx                   context.Context
+	ApiService            TenantApi
 	tenantCreationRequest *TenantCreationRequest
 }
 
@@ -220,24 +221,25 @@ func (r TenantApiCreateTenantRequest) Execute() (*TenantCreationResponse, *http.
 /*
 CreateTenant Create tenant
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TenantApiCreateTenantRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TenantApiCreateTenantRequest
 */
 func (a *TenantApiService) CreateTenant(ctx context.Context) TenantApiCreateTenantRequest {
 	return TenantApiCreateTenantRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TenantCreationResponse
+//
+//	@return TenantCreationResponse
 func (a *TenantApiService) CreateTenantExecute(r TenantApiCreateTenantRequest) (*TenantCreationResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TenantCreationResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TenantCreationResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.CreateTenant")
@@ -380,9 +382,9 @@ func (a *TenantApiService) CreateTenantExecute(r TenantApiCreateTenantRequest) (
 }
 
 type TenantApiDeleteTenantByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TenantApi
-	tenantId int32
+	tenantId   int32
 }
 
 func (r TenantApiDeleteTenantByIdRequest) Execute() (*DeleteTenantById200Response, *http.Response, error) {
@@ -392,26 +394,27 @@ func (r TenantApiDeleteTenantByIdRequest) Execute() (*DeleteTenantById200Respons
 /*
 DeleteTenantById soft delete tenant
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId The id of the tenant to retrieve
- @return TenantApiDeleteTenantByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId The id of the tenant to retrieve
+	@return TenantApiDeleteTenantByIdRequest
 */
 func (a *TenantApiService) DeleteTenantById(ctx context.Context, tenantId int32) TenantApiDeleteTenantByIdRequest {
 	return TenantApiDeleteTenantByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
+		ctx:        ctx,
+		tenantId:   tenantId,
 	}
 }
 
 // Execute executes the request
-//  @return DeleteTenantById200Response
+//
+//	@return DeleteTenantById200Response
 func (a *TenantApiService) DeleteTenantByIdExecute(r TenantApiDeleteTenantByIdRequest) (*DeleteTenantById200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DeleteTenantById200Response
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DeleteTenantById200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.DeleteTenantById")
@@ -543,7 +546,7 @@ func (a *TenantApiService) DeleteTenantByIdExecute(r TenantApiDeleteTenantByIdRe
 }
 
 type TenantApiGetTenantRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TenantApi
 	tenantName *string
 }
@@ -562,27 +565,29 @@ GetTenant Get tenant
 
 Get tenant
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TenantApiGetTenantRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TenantApiGetTenantRequest
 
 Deprecated
 */
 func (a *TenantApiService) GetTenant(ctx context.Context) TenantApiGetTenantRequest {
 	return TenantApiGetTenantRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Tenant
+//
+//	@return Tenant
+//
 // Deprecated
 func (a *TenantApiService) GetTenantExecute(r TenantApiGetTenantRequest) (*Tenant, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Tenant
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Tenant
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.GetTenant")
@@ -713,9 +718,9 @@ func (a *TenantApiService) GetTenantExecute(r TenantApiGetTenantRequest) (*Tenan
 }
 
 type TenantApiGetTenantByIdRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TenantApi
-	tenantId int32
+	tenantId   int32
 }
 
 func (r TenantApiGetTenantByIdRequest) Execute() (*Tenant1, *http.Response, error) {
@@ -725,26 +730,27 @@ func (r TenantApiGetTenantByIdRequest) Execute() (*Tenant1, *http.Response, erro
 /*
 GetTenantById Get tenant
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId The id of the tenant to retrieve
- @return TenantApiGetTenantByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId The id of the tenant to retrieve
+	@return TenantApiGetTenantByIdRequest
 */
 func (a *TenantApiService) GetTenantById(ctx context.Context, tenantId int32) TenantApiGetTenantByIdRequest {
 	return TenantApiGetTenantByIdRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
+		ctx:        ctx,
+		tenantId:   tenantId,
 	}
 }
 
 // Execute executes the request
-//  @return Tenant1
+//
+//	@return Tenant1
 func (a *TenantApiService) GetTenantByIdExecute(r TenantApiGetTenantByIdRequest) (*Tenant1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Tenant1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Tenant1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.GetTenantById")
@@ -866,7 +872,7 @@ func (a *TenantApiService) GetTenantByIdExecute(r TenantApiGetTenantByIdRequest)
 }
 
 type TenantApiGetTenantConfigRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TenantApi
 	tenantName *string
 }
@@ -885,27 +891,29 @@ GetTenantConfig Get tenant auth config
 
 Get tenant auth config, used for authentication.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TenantApiGetTenantConfigRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TenantApiGetTenantConfigRequest
 
 Deprecated
 */
 func (a *TenantApiService) GetTenantConfig(ctx context.Context) TenantApiGetTenantConfigRequest {
 	return TenantApiGetTenantConfigRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Config
+//
+//	@return Config
+//
 // Deprecated
 func (a *TenantApiService) GetTenantConfigExecute(r TenantApiGetTenantConfigRequest) (*Config, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Config
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Config
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.GetTenantConfig")
@@ -1026,7 +1034,7 @@ func (a *TenantApiService) GetTenantConfigExecute(r TenantApiGetTenantConfigRequ
 }
 
 type TenantApiGetTenantSettingsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TenantApi
 }
 
@@ -1039,24 +1047,25 @@ GetTenantSettings Get all tenant settings.
 
 Retrieve all tenant settings.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TenantApiGetTenantSettingsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TenantApiGetTenantSettingsRequest
 */
 func (a *TenantApiService) GetTenantSettings(ctx context.Context) TenantApiGetTenantSettingsRequest {
 	return TenantApiGetTenantSettingsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Setting
+//
+//	@return []Setting
 func (a *TenantApiService) GetTenantSettingsExecute(r TenantApiGetTenantSettingsRequest) ([]Setting, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Setting
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Setting
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.GetTenantSettings")
@@ -1164,7 +1173,7 @@ func (a *TenantApiService) GetTenantSettingsExecute(r TenantApiGetTenantSettings
 }
 
 type TenantApiGetTenantSettingsByKeyRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TenantApi
 	settingKey string
 }
@@ -1178,26 +1187,27 @@ GetTenantSettingsByKey Get a tenant setting by key.
 
 Retrieve a specific tenant setting by key.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param settingKey
- @return TenantApiGetTenantSettingsByKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param settingKey
+	@return TenantApiGetTenantSettingsByKeyRequest
 */
 func (a *TenantApiService) GetTenantSettingsByKey(ctx context.Context, settingKey string) TenantApiGetTenantSettingsByKeyRequest {
 	return TenantApiGetTenantSettingsByKeyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		settingKey: settingKey,
 	}
 }
 
 // Execute executes the request
-//  @return bool
+//
+//	@return bool
 func (a *TenantApiService) GetTenantSettingsByKeyExecute(r TenantApiGetTenantSettingsByKeyRequest) (bool, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  bool
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue bool
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.GetTenantSettingsByKey")
@@ -1306,7 +1316,7 @@ func (a *TenantApiService) GetTenantSettingsByKeyExecute(r TenantApiGetTenantSet
 }
 
 type TenantApiGetTenantsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TenantApi
 }
 
@@ -1319,24 +1329,25 @@ GetTenants Get a list of tenants.
 
 Retrieve a list of tenants and their details.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TenantApiGetTenantsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TenantApiGetTenantsRequest
 */
 func (a *TenantApiService) GetTenants(ctx context.Context) TenantApiGetTenantsRequest {
 	return TenantApiGetTenantsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Tenant1
+//
+//	@return []Tenant1
 func (a *TenantApiService) GetTenantsExecute(r TenantApiGetTenantsRequest) ([]Tenant1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Tenant1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Tenant1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.GetTenants")
@@ -1454,9 +1465,9 @@ func (a *TenantApiService) GetTenantsExecute(r TenantApiGetTenantsRequest) ([]Te
 }
 
 type TenantApiLogoRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService TenantApi
-	tenantId int32
+	tenantId   int32
 }
 
 func (r TenantApiLogoRequest) Execute() (*Logo200Response, *http.Response, error) {
@@ -1468,29 +1479,31 @@ Logo Get tenant logo.
 
 Get tennant logo
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId
- @return TenantApiLogoRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId
+	@return TenantApiLogoRequest
 
 Deprecated
 */
 func (a *TenantApiService) Logo(ctx context.Context, tenantId int32) TenantApiLogoRequest {
 	return TenantApiLogoRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
+		ctx:        ctx,
+		tenantId:   tenantId,
 	}
 }
 
 // Execute executes the request
-//  @return Logo200Response
+//
+//	@return Logo200Response
+//
 // Deprecated
 func (a *TenantApiService) LogoExecute(r TenantApiLogoRequest) (*Logo200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Logo200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Logo200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.Logo")
@@ -1619,8 +1632,8 @@ func (a *TenantApiService) LogoExecute(r TenantApiLogoRequest) (*Logo200Response
 }
 
 type TenantApiPostTenantEulaRequest struct {
-	ctx context.Context
-	ApiService TenantApi
+	ctx                   context.Context
+	ApiService            TenantApi
 	postTenantEulaRequest *PostTenantEulaRequest
 }
 
@@ -1637,22 +1650,22 @@ func (r TenantApiPostTenantEulaRequest) Execute() (*http.Response, error) {
 /*
 PostTenantEula Post tenant eula
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TenantApiPostTenantEulaRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TenantApiPostTenantEulaRequest
 */
 func (a *TenantApiService) PostTenantEula(ctx context.Context) TenantApiPostTenantEulaRequest {
 	return TenantApiPostTenantEulaRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *TenantApiService) PostTenantEulaExecute(r TenantApiPostTenantEulaRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.PostTenantEula")
@@ -1766,8 +1779,8 @@ func (a *TenantApiService) PostTenantEulaExecute(r TenantApiPostTenantEulaReques
 }
 
 type TenantApiUpdateTenantSettingRequest struct {
-	ctx context.Context
-	ApiService TenantApi
+	ctx                          context.Context
+	ApiService                   TenantApi
 	tenantSettingCreationRequest *TenantSettingCreationRequest
 }
 
@@ -1785,24 +1798,25 @@ UpdateTenantSetting Update a tenant setting.
 
 Use to update tenant settings.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return TenantApiUpdateTenantSettingRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return TenantApiUpdateTenantSettingRequest
 */
 func (a *TenantApiService) UpdateTenantSetting(ctx context.Context) TenantApiUpdateTenantSettingRequest {
 	return TenantApiUpdateTenantSettingRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return TenantSettingCreationResponse
+//
+//	@return TenantSettingCreationResponse
 func (a *TenantApiService) UpdateTenantSettingExecute(r TenantApiUpdateTenantSettingRequest) (*TenantSettingCreationResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TenantSettingCreationResponse
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TenantSettingCreationResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.UpdateTenantSetting")
@@ -1932,9 +1946,9 @@ func (a *TenantApiService) UpdateTenantSettingExecute(r TenantApiUpdateTenantSet
 }
 
 type TenantApiUploadTenantLogoRequest struct {
-	ctx context.Context
-	ApiService TenantApi
-	tenantId int32
+	ctx             context.Context
+	ApiService      TenantApi
+	tenantId        int32
 	logo200Response *Logo200Response
 }
 
@@ -1952,17 +1966,17 @@ UploadTenantLogo Upload a tenant logo.
 
 Upload tenant logo file. Max size of 128kb.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId
- @return TenantApiUploadTenantLogoRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId
+	@return TenantApiUploadTenantLogoRequest
 
 Deprecated
 */
 func (a *TenantApiService) UploadTenantLogo(ctx context.Context, tenantId int32) TenantApiUploadTenantLogoRequest {
 	return TenantApiUploadTenantLogoRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
+		ctx:        ctx,
+		tenantId:   tenantId,
 	}
 }
 
@@ -1970,9 +1984,9 @@ func (a *TenantApiService) UploadTenantLogo(ctx context.Context, tenantId int32)
 // Deprecated
 func (a *TenantApiService) UploadTenantLogoExecute(r TenantApiUploadTenantLogoRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantApiService.UploadTenantLogo")

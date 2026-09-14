@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
@@ -48,6 +50,7 @@ func (a *UsersApiService) GetClusterUsers(ctx context.Context, uuid string) ApiG
 }
 
 // Execute executes the request
+//
 //	@return Users
 func (a *UsersApiService) GetClusterUsersExecute(r ApiGetClusterUsersRequest) (*Users, *http.Response, error) {
 	var (

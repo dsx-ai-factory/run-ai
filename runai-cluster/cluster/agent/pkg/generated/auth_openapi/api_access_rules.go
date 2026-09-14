@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -53,6 +55,7 @@ func (a *AccessRulesApiService) CreateAccessRule(ctx context.Context) ApiCreateA
 }
 
 // Execute executes the request
+//
 //	@return AccessRule
 func (a *AccessRulesApiService) CreateAccessRuleExecute(r ApiCreateAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
@@ -359,6 +362,7 @@ func (a *AccessRulesApiService) GetAccessRule(ctx context.Context, accessRuleId 
 }
 
 // Execute executes the request
+//
 //	@return AccessRule
 func (a *AccessRulesApiService) GetAccessRuleExecute(r ApiGetAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
@@ -586,6 +590,7 @@ func (a *AccessRulesApiService) GetAccessRules(ctx context.Context) ApiGetAccess
 }
 
 // Execute executes the request
+//
 //	@return GetAccessRules200Response
 func (a *AccessRulesApiService) GetAccessRulesExecute(r ApiGetAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error) {
 	var (

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,12 +18,12 @@ import (
 
 // PVCAsset struct for PVCAsset
 type PVCAsset struct {
-	Meta AssetMeta `json:"meta"`
-	Spec PVCAssetSpec `json:"spec"`
-	UsedBy NullableAssetUsageInfo `json:"usedBy,omitempty"`
-	UsageTimes NullableUsageTimesInfo `json:"usageTimes,omitempty"`
-	Compliance NullableComplianceInfo `json:"compliance,omitempty"`
-	Status NullableAssetClusterStatusInfo `json:"status,omitempty"`
+	Meta       AssetMeta                      `json:"meta"`
+	Spec       PVCAssetSpec                   `json:"spec"`
+	UsedBy     NullableAssetUsageInfo         `json:"usedBy,omitempty"`
+	UsageTimes NullableUsageTimesInfo         `json:"usageTimes,omitempty"`
+	Compliance NullableComplianceInfo         `json:"compliance,omitempty"`
+	Status     NullableAssetClusterStatusInfo `json:"status,omitempty"`
 }
 
 // NewPVCAsset instantiates a new PVCAsset object
@@ -123,6 +125,7 @@ func (o *PVCAsset) HasUsedBy() bool {
 func (o *PVCAsset) SetUsedBy(v AssetUsageInfo) {
 	o.UsedBy.Set(&v)
 }
+
 // SetUsedByNil sets the value for UsedBy to be an explicit nil
 func (o *PVCAsset) SetUsedByNil() {
 	o.UsedBy.Set(nil)
@@ -165,6 +168,7 @@ func (o *PVCAsset) HasUsageTimes() bool {
 func (o *PVCAsset) SetUsageTimes(v UsageTimesInfo) {
 	o.UsageTimes.Set(&v)
 }
+
 // SetUsageTimesNil sets the value for UsageTimes to be an explicit nil
 func (o *PVCAsset) SetUsageTimesNil() {
 	o.UsageTimes.Set(nil)
@@ -207,6 +211,7 @@ func (o *PVCAsset) HasCompliance() bool {
 func (o *PVCAsset) SetCompliance(v ComplianceInfo) {
 	o.Compliance.Set(&v)
 }
+
 // SetComplianceNil sets the value for Compliance to be an explicit nil
 func (o *PVCAsset) SetComplianceNil() {
 	o.Compliance.Set(nil)
@@ -249,6 +254,7 @@ func (o *PVCAsset) HasStatus() bool {
 func (o *PVCAsset) SetStatus(v AssetClusterStatusInfo) {
 	o.Status.Set(&v)
 }
+
 // SetStatusNil sets the value for Status to be an explicit nil
 func (o *PVCAsset) SetStatusNil() {
 	o.Status.Set(nil)
@@ -317,5 +323,3 @@ func (v *NullablePVCAsset) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

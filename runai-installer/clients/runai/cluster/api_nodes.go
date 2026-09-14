@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 ClusterService
 
@@ -204,6 +206,7 @@ func (a *NodesAPIService) CountNodes(ctx context.Context, clusterUuid string) No
 }
 
 // Execute executes the request
+//
 //	@return CountNodes200Response
 func (a *NodesAPIService) CountNodesExecute(r NodesAPICountNodesRequest) (*CountNodes200Response, *http.Response, error) {
 	var (
@@ -381,6 +384,7 @@ func (a *NodesAPIService) CountTenantNodes(ctx context.Context) NodesAPICountTen
 }
 
 // Execute executes the request
+//
 //	@return CountNodes200Response
 func (a *NodesAPIService) CountTenantNodesExecute(r NodesAPICountTenantNodesRequest) (*CountNodes200Response, *http.Response, error) {
 	var (
@@ -713,6 +717,7 @@ func (a *NodesAPIService) GetNodeMetrics(ctx context.Context, nodeId string) Nod
 }
 
 // Execute executes the request
+//
 //	@return MetricsResponse
 func (a *NodesAPIService) GetNodeMetricsExecute(r NodesAPIGetNodeMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -934,6 +939,7 @@ func (a *NodesAPIService) GetNodeTelemetry(ctx context.Context) NodesAPIGetNodeT
 }
 
 // Execute executes the request
+//
 //	@return TelemetryResponse
 func (a *NodesAPIService) GetNodeTelemetryExecute(r NodesAPIGetNodeTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
@@ -1176,7 +1182,9 @@ func (a *NodesAPIService) GetNodes(ctx context.Context, clusterUuid string) Node
 }
 
 // Execute executes the request
+//
 //	@return Nodes
+//
 // Deprecated
 func (a *NodesAPIService) GetNodesExecute(r NodesAPIGetNodesRequest) (*Nodes, *http.Response, error) {
 	var (
@@ -1403,6 +1411,7 @@ func (a *NodesAPIService) GetTenantNodes(ctx context.Context) NodesAPIGetTenantN
 }
 
 // Execute executes the request
+//
 //	@return Nodes
 func (a *NodesAPIService) GetTenantNodesExecute(r NodesAPIGetTenantNodesRequest) (*Nodes, *http.Response, error) {
 	var (

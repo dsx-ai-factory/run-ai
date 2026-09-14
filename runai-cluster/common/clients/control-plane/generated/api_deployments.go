@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 type DeploymentsApi interface {
 
 	/*
-	CreateDeployment Create a deployment
+		CreateDeployment Create a deployment
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return DeploymentsApiCreateDeploymentRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return DeploymentsApiCreateDeploymentRequest
 	*/
 	CreateDeployment(ctx context.Context, uuid string) DeploymentsApiCreateDeploymentRequest
 
@@ -35,12 +36,12 @@ type DeploymentsApi interface {
 	CreateDeploymentExecute(r DeploymentsApiCreateDeploymentRequest) (*http.Response, error)
 
 	/*
-	DeleteDeployment Delete a deployment by id
+		DeleteDeployment Delete a deployment by id
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@param deploymentId the unique Id of the deployment (UUID)
-	@return DeploymentsApiDeleteDeploymentRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@param deploymentId the unique Id of the deployment (UUID)
+		@return DeploymentsApiDeleteDeploymentRequest
 	*/
 	DeleteDeployment(ctx context.Context, uuid string, deploymentId string) DeploymentsApiDeleteDeploymentRequest
 
@@ -48,14 +49,14 @@ type DeploymentsApi interface {
 	DeleteDeploymentExecute(r DeploymentsApiDeleteDeploymentRequest) (*http.Response, error)
 
 	/*
-	GetDeployment Get a deployment by id
+		GetDeployment Get a deployment by id
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@param deploymentId the unique Id of the deployment (UUID)
-	@return DeploymentsApiGetDeploymentRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@param deploymentId the unique Id of the deployment (UUID)
+		@return DeploymentsApiGetDeploymentRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetDeployment(ctx context.Context, uuid string, deploymentId string) DeploymentsApiGetDeploymentRequest
 
@@ -65,13 +66,13 @@ type DeploymentsApi interface {
 	GetDeploymentExecute(r DeploymentsApiGetDeploymentRequest) (*Deployment, *http.Response, error)
 
 	/*
-	GetDeployments List deployments
+		GetDeployments List deployments
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return DeploymentsApiGetDeploymentsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return DeploymentsApiGetDeploymentsRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetDeployments(ctx context.Context, uuid string) DeploymentsApiGetDeploymentsRequest
 
@@ -81,11 +82,11 @@ type DeploymentsApi interface {
 	GetDeploymentsExecute(r DeploymentsApiGetDeploymentsRequest) ([]Deployment, *http.Response, error)
 
 	/*
-	GetDeploymentsCount Get the number of deployments
+		GetDeploymentsCount Get the number of deployments
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return DeploymentsApiGetDeploymentsCountRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return DeploymentsApiGetDeploymentsCountRequest
 	*/
 	GetDeploymentsCount(ctx context.Context, uuid string) DeploymentsApiGetDeploymentsCountRequest
 
@@ -94,11 +95,11 @@ type DeploymentsApi interface {
 	GetDeploymentsCountExecute(r DeploymentsApiGetDeploymentsCountRequest) (float32, *http.Response, error)
 
 	/*
-	GetDeploymentsHistory Get all the deployments that were deleted in the cluster
+		GetDeploymentsHistory Get all the deployments that were deleted in the cluster
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return DeploymentsApiGetDeploymentsHistoryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return DeploymentsApiGetDeploymentsHistoryRequest
 	*/
 	GetDeploymentsHistory(ctx context.Context, uuid string) DeploymentsApiGetDeploymentsHistoryRequest
 
@@ -107,11 +108,11 @@ type DeploymentsApi interface {
 	GetDeploymentsHistoryExecute(r DeploymentsApiGetDeploymentsHistoryRequest) ([]Deployment, *http.Response, error)
 
 	/*
-	GetDeploymentsHistoryCount Get the number of deleted deployments
+		GetDeploymentsHistoryCount Get the number of deleted deployments
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return DeploymentsApiGetDeploymentsHistoryCountRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return DeploymentsApiGetDeploymentsHistoryCountRequest
 	*/
 	GetDeploymentsHistoryCount(ctx context.Context, uuid string) DeploymentsApiGetDeploymentsHistoryCountRequest
 
@@ -120,12 +121,12 @@ type DeploymentsApi interface {
 	GetDeploymentsHistoryCountExecute(r DeploymentsApiGetDeploymentsHistoryCountRequest) (float32, *http.Response, error)
 
 	/*
-	GetPodsByDeploymentId Get all pods associated with the deployment by id
+		GetPodsByDeploymentId Get all pods associated with the deployment by id
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@param deploymentId the unique Id of the deployment (UUID)
-	@return DeploymentsApiGetPodsByDeploymentIdRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@param deploymentId the unique Id of the deployment (UUID)
+		@return DeploymentsApiGetPodsByDeploymentIdRequest
 	*/
 	GetPodsByDeploymentId(ctx context.Context, uuid string, deploymentId string) DeploymentsApiGetPodsByDeploymentIdRequest
 
@@ -134,16 +135,16 @@ type DeploymentsApi interface {
 	GetPodsByDeploymentIdExecute(r DeploymentsApiGetPodsByDeploymentIdRequest) ([]Pod, *http.Response, error)
 
 	/*
-	SyncDeployments Sync deployments
+		SyncDeployments Sync deployments
 
-	Sync all deployments from k8s cluster to Run:AI backend
+		Sync all deployments from k8s cluster to Run:AI backend
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return DeploymentsApiSyncDeploymentsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return DeploymentsApiSyncDeploymentsRequest
 
-	Deprecated
+		Deprecated
 	*/
 	SyncDeployments(ctx context.Context, uuid string) DeploymentsApiSyncDeploymentsRequest
 
@@ -152,12 +153,12 @@ type DeploymentsApi interface {
 	SyncDeploymentsExecute(r DeploymentsApiSyncDeploymentsRequest) (*http.Response, error)
 
 	/*
-	UpdateDeployment Update a deployment by id
+		UpdateDeployment Update a deployment by id
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@param deploymentId the unique Id of the deployment (UUID)
-	@return DeploymentsApiUpdateDeploymentRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@param deploymentId the unique Id of the deployment (UUID)
+		@return DeploymentsApiUpdateDeploymentRequest
 	*/
 	UpdateDeployment(ctx context.Context, uuid string, deploymentId string) DeploymentsApiUpdateDeploymentRequest
 
@@ -165,14 +166,14 @@ type DeploymentsApi interface {
 	UpdateDeploymentExecute(r DeploymentsApiUpdateDeploymentRequest) (*http.Response, error)
 
 	/*
-	UpdateDeployments Sync deployments
+		UpdateDeployments Sync deployments
 
-	Sync all deployments in a project from k8s cluster to Run:AI backend
+		Sync all deployments in a project from k8s cluster to Run:AI backend
 
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster
-	@return DeploymentsApiUpdateDeploymentsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param uuid Unique identifier of the cluster
+		@return DeploymentsApiUpdateDeploymentsRequest
 	*/
 	UpdateDeployments(ctx context.Context, uuid string) DeploymentsApiUpdateDeploymentsRequest
 
@@ -185,9 +186,9 @@ type DeploymentsApi interface {
 type DeploymentsApiService service
 
 type DeploymentsApiCreateDeploymentRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DeploymentsApi
-	uuid string
+	uuid       string
 	deployment *Deployment
 }
 
@@ -203,24 +204,24 @@ func (r DeploymentsApiCreateDeploymentRequest) Execute() (*http.Response, error)
 /*
 CreateDeployment Create a deployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return DeploymentsApiCreateDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return DeploymentsApiCreateDeploymentRequest
 */
 func (a *DeploymentsApiService) CreateDeployment(ctx context.Context, uuid string) DeploymentsApiCreateDeploymentRequest {
 	return DeploymentsApiCreateDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
 func (a *DeploymentsApiService) CreateDeploymentExecute(r DeploymentsApiCreateDeploymentRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.CreateDeployment")
@@ -286,13 +287,13 @@ func (a *DeploymentsApiService) CreateDeploymentExecute(r DeploymentsApiCreateDe
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -300,9 +301,9 @@ func (a *DeploymentsApiService) CreateDeploymentExecute(r DeploymentsApiCreateDe
 }
 
 type DeploymentsApiDeleteDeploymentRequest struct {
-	ctx context.Context
-	ApiService DeploymentsApi
-	uuid string
+	ctx          context.Context
+	ApiService   DeploymentsApi
+	uuid         string
 	deploymentId string
 }
 
@@ -313,16 +314,16 @@ func (r DeploymentsApiDeleteDeploymentRequest) Execute() (*http.Response, error)
 /*
 DeleteDeployment Delete a deployment by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param deploymentId the unique Id of the deployment (UUID)
- @return DeploymentsApiDeleteDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param deploymentId the unique Id of the deployment (UUID)
+	@return DeploymentsApiDeleteDeploymentRequest
 */
 func (a *DeploymentsApiService) DeleteDeployment(ctx context.Context, uuid string, deploymentId string) DeploymentsApiDeleteDeploymentRequest {
 	return DeploymentsApiDeleteDeploymentRequest{
-		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ApiService:   a,
+		ctx:          ctx,
+		uuid:         uuid,
 		deploymentId: deploymentId,
 	}
 }
@@ -330,9 +331,9 @@ func (a *DeploymentsApiService) DeleteDeployment(ctx context.Context, uuid strin
 // Execute executes the request
 func (a *DeploymentsApiService) DeleteDeploymentExecute(r DeploymentsApiDeleteDeploymentRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.DeleteDeployment")
@@ -433,9 +434,9 @@ func (a *DeploymentsApiService) DeleteDeploymentExecute(r DeploymentsApiDeleteDe
 }
 
 type DeploymentsApiGetDeploymentRequest struct {
-	ctx context.Context
-	ApiService DeploymentsApi
-	uuid string
+	ctx          context.Context
+	ApiService   DeploymentsApi
+	uuid         string
 	deploymentId string
 }
 
@@ -446,31 +447,33 @@ func (r DeploymentsApiGetDeploymentRequest) Execute() (*Deployment, *http.Respon
 /*
 GetDeployment Get a deployment by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param deploymentId the unique Id of the deployment (UUID)
- @return DeploymentsApiGetDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param deploymentId the unique Id of the deployment (UUID)
+	@return DeploymentsApiGetDeploymentRequest
 
 Deprecated
 */
 func (a *DeploymentsApiService) GetDeployment(ctx context.Context, uuid string, deploymentId string) DeploymentsApiGetDeploymentRequest {
 	return DeploymentsApiGetDeploymentRequest{
-		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ApiService:   a,
+		ctx:          ctx,
+		uuid:         uuid,
 		deploymentId: deploymentId,
 	}
 }
 
 // Execute executes the request
-//  @return Deployment
+//
+//	@return Deployment
+//
 // Deprecated
 func (a *DeploymentsApiService) GetDeploymentExecute(r DeploymentsApiGetDeploymentRequest) (*Deployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Deployment
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Deployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.GetDeployment")
@@ -570,9 +573,9 @@ func (a *DeploymentsApiService) GetDeploymentExecute(r DeploymentsApiGetDeployme
 }
 
 type DeploymentsApiGetDeploymentsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DeploymentsApi
-	uuid string
+	uuid       string
 }
 
 func (r DeploymentsApiGetDeploymentsRequest) Execute() ([]Deployment, *http.Response, error) {
@@ -582,29 +585,31 @@ func (r DeploymentsApiGetDeploymentsRequest) Execute() ([]Deployment, *http.Resp
 /*
 GetDeployments List deployments
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return DeploymentsApiGetDeploymentsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return DeploymentsApiGetDeploymentsRequest
 
 Deprecated
 */
 func (a *DeploymentsApiService) GetDeployments(ctx context.Context, uuid string) DeploymentsApiGetDeploymentsRequest {
 	return DeploymentsApiGetDeploymentsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []Deployment
+//
+//	@return []Deployment
+//
 // Deprecated
 func (a *DeploymentsApiService) GetDeploymentsExecute(r DeploymentsApiGetDeploymentsRequest) ([]Deployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Deployment
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Deployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.GetDeployments")
@@ -678,13 +683,13 @@ func (a *DeploymentsApiService) GetDeploymentsExecute(r DeploymentsApiGetDeploym
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -701,9 +706,9 @@ func (a *DeploymentsApiService) GetDeploymentsExecute(r DeploymentsApiGetDeploym
 }
 
 type DeploymentsApiGetDeploymentsCountRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DeploymentsApi
-	uuid string
+	uuid       string
 }
 
 func (r DeploymentsApiGetDeploymentsCountRequest) Execute() (float32, *http.Response, error) {
@@ -713,26 +718,27 @@ func (r DeploymentsApiGetDeploymentsCountRequest) Execute() (float32, *http.Resp
 /*
 GetDeploymentsCount Get the number of deployments
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return DeploymentsApiGetDeploymentsCountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return DeploymentsApiGetDeploymentsCountRequest
 */
 func (a *DeploymentsApiService) GetDeploymentsCount(ctx context.Context, uuid string) DeploymentsApiGetDeploymentsCountRequest {
 	return DeploymentsApiGetDeploymentsCountRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return float32
+//
+//	@return float32
 func (a *DeploymentsApiService) GetDeploymentsCountExecute(r DeploymentsApiGetDeploymentsCountRequest) (float32, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  float32
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue float32
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.GetDeploymentsCount")
@@ -806,13 +812,13 @@ func (a *DeploymentsApiService) GetDeploymentsCountExecute(r DeploymentsApiGetDe
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -829,9 +835,9 @@ func (a *DeploymentsApiService) GetDeploymentsCountExecute(r DeploymentsApiGetDe
 }
 
 type DeploymentsApiGetDeploymentsHistoryRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DeploymentsApi
-	uuid string
+	uuid       string
 }
 
 func (r DeploymentsApiGetDeploymentsHistoryRequest) Execute() ([]Deployment, *http.Response, error) {
@@ -841,26 +847,27 @@ func (r DeploymentsApiGetDeploymentsHistoryRequest) Execute() ([]Deployment, *ht
 /*
 GetDeploymentsHistory Get all the deployments that were deleted in the cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return DeploymentsApiGetDeploymentsHistoryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return DeploymentsApiGetDeploymentsHistoryRequest
 */
 func (a *DeploymentsApiService) GetDeploymentsHistory(ctx context.Context, uuid string) DeploymentsApiGetDeploymentsHistoryRequest {
 	return DeploymentsApiGetDeploymentsHistoryRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []Deployment
+//
+//	@return []Deployment
 func (a *DeploymentsApiService) GetDeploymentsHistoryExecute(r DeploymentsApiGetDeploymentsHistoryRequest) ([]Deployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Deployment
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Deployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.GetDeploymentsHistory")
@@ -934,13 +941,13 @@ func (a *DeploymentsApiService) GetDeploymentsHistoryExecute(r DeploymentsApiGet
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -957,9 +964,9 @@ func (a *DeploymentsApiService) GetDeploymentsHistoryExecute(r DeploymentsApiGet
 }
 
 type DeploymentsApiGetDeploymentsHistoryCountRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DeploymentsApi
-	uuid string
+	uuid       string
 }
 
 func (r DeploymentsApiGetDeploymentsHistoryCountRequest) Execute() (float32, *http.Response, error) {
@@ -969,26 +976,27 @@ func (r DeploymentsApiGetDeploymentsHistoryCountRequest) Execute() (float32, *ht
 /*
 GetDeploymentsHistoryCount Get the number of deleted deployments
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return DeploymentsApiGetDeploymentsHistoryCountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return DeploymentsApiGetDeploymentsHistoryCountRequest
 */
 func (a *DeploymentsApiService) GetDeploymentsHistoryCount(ctx context.Context, uuid string) DeploymentsApiGetDeploymentsHistoryCountRequest {
 	return DeploymentsApiGetDeploymentsHistoryCountRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return float32
+//
+//	@return float32
 func (a *DeploymentsApiService) GetDeploymentsHistoryCountExecute(r DeploymentsApiGetDeploymentsHistoryCountRequest) (float32, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  float32
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue float32
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.GetDeploymentsHistoryCount")
@@ -1062,13 +1070,13 @@ func (a *DeploymentsApiService) GetDeploymentsHistoryCountExecute(r DeploymentsA
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1085,9 +1093,9 @@ func (a *DeploymentsApiService) GetDeploymentsHistoryCountExecute(r DeploymentsA
 }
 
 type DeploymentsApiGetPodsByDeploymentIdRequest struct {
-	ctx context.Context
-	ApiService DeploymentsApi
-	uuid string
+	ctx          context.Context
+	ApiService   DeploymentsApi
+	uuid         string
 	deploymentId string
 }
 
@@ -1098,28 +1106,29 @@ func (r DeploymentsApiGetPodsByDeploymentIdRequest) Execute() ([]Pod, *http.Resp
 /*
 GetPodsByDeploymentId Get all pods associated with the deployment by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param deploymentId the unique Id of the deployment (UUID)
- @return DeploymentsApiGetPodsByDeploymentIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param deploymentId the unique Id of the deployment (UUID)
+	@return DeploymentsApiGetPodsByDeploymentIdRequest
 */
 func (a *DeploymentsApiService) GetPodsByDeploymentId(ctx context.Context, uuid string, deploymentId string) DeploymentsApiGetPodsByDeploymentIdRequest {
 	return DeploymentsApiGetPodsByDeploymentIdRequest{
-		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ApiService:   a,
+		ctx:          ctx,
+		uuid:         uuid,
 		deploymentId: deploymentId,
 	}
 }
 
 // Execute executes the request
-//  @return []Pod
+//
+//	@return []Pod
 func (a *DeploymentsApiService) GetPodsByDeploymentIdExecute(r DeploymentsApiGetPodsByDeploymentIdRequest) ([]Pod, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Pod
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Pod
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.GetPodsByDeploymentId")
@@ -1219,9 +1228,9 @@ func (a *DeploymentsApiService) GetPodsByDeploymentIdExecute(r DeploymentsApiGet
 }
 
 type DeploymentsApiSyncDeploymentsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DeploymentsApi
-	uuid string
+	uuid       string
 	deployment *[]Deployment
 }
 
@@ -1239,18 +1248,17 @@ SyncDeployments Sync deployments
 
 Sync all deployments from k8s cluster to Run:AI backend
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return DeploymentsApiSyncDeploymentsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return DeploymentsApiSyncDeploymentsRequest
 
 Deprecated
 */
 func (a *DeploymentsApiService) SyncDeployments(ctx context.Context, uuid string) DeploymentsApiSyncDeploymentsRequest {
 	return DeploymentsApiSyncDeploymentsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
@@ -1258,9 +1266,9 @@ func (a *DeploymentsApiService) SyncDeployments(ctx context.Context, uuid string
 // Deprecated
 func (a *DeploymentsApiService) SyncDeploymentsExecute(r DeploymentsApiSyncDeploymentsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.SyncDeployments")
@@ -1326,13 +1334,13 @@ func (a *DeploymentsApiService) SyncDeploymentsExecute(r DeploymentsApiSyncDeplo
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -1340,11 +1348,11 @@ func (a *DeploymentsApiService) SyncDeploymentsExecute(r DeploymentsApiSyncDeplo
 }
 
 type DeploymentsApiUpdateDeploymentRequest struct {
-	ctx context.Context
-	ApiService DeploymentsApi
-	uuid string
+	ctx          context.Context
+	ApiService   DeploymentsApi
+	uuid         string
 	deploymentId string
-	deployment *Deployment
+	deployment   *Deployment
 }
 
 func (r DeploymentsApiUpdateDeploymentRequest) Deployment(deployment Deployment) DeploymentsApiUpdateDeploymentRequest {
@@ -1359,16 +1367,16 @@ func (r DeploymentsApiUpdateDeploymentRequest) Execute() (*http.Response, error)
 /*
 UpdateDeployment Update a deployment by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param deploymentId the unique Id of the deployment (UUID)
- @return DeploymentsApiUpdateDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param deploymentId the unique Id of the deployment (UUID)
+	@return DeploymentsApiUpdateDeploymentRequest
 */
 func (a *DeploymentsApiService) UpdateDeployment(ctx context.Context, uuid string, deploymentId string) DeploymentsApiUpdateDeploymentRequest {
 	return DeploymentsApiUpdateDeploymentRequest{
-		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ApiService:   a,
+		ctx:          ctx,
+		uuid:         uuid,
 		deploymentId: deploymentId,
 	}
 }
@@ -1376,9 +1384,9 @@ func (a *DeploymentsApiService) UpdateDeployment(ctx context.Context, uuid strin
 // Execute executes the request
 func (a *DeploymentsApiService) UpdateDeploymentExecute(r DeploymentsApiUpdateDeploymentRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.UpdateDeployment")
@@ -1484,9 +1492,9 @@ func (a *DeploymentsApiService) UpdateDeploymentExecute(r DeploymentsApiUpdateDe
 }
 
 type DeploymentsApiUpdateDeploymentsRequest struct {
-	ctx context.Context
-	ApiService DeploymentsApi
-	uuid string
+	ctx             context.Context
+	ApiService      DeploymentsApi
+	uuid            string
 	deploymentsSync *DeploymentsSync
 }
 
@@ -1504,27 +1512,27 @@ UpdateDeployments Sync deployments
 
 Sync all deployments in a project from k8s cluster to Run:AI backend
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return DeploymentsApiUpdateDeploymentsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return DeploymentsApiUpdateDeploymentsRequest
 */
 func (a *DeploymentsApiService) UpdateDeployments(ctx context.Context, uuid string) DeploymentsApiUpdateDeploymentsRequest {
 	return DeploymentsApiUpdateDeploymentsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return IdsResponse
+//
+//	@return IdsResponse
 func (a *DeploymentsApiService) UpdateDeploymentsExecute(r DeploymentsApiUpdateDeploymentsRequest) (*IdsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *IdsResponse
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *IdsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploymentsApiService.UpdateDeployments")

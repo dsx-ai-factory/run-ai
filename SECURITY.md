@@ -4,28 +4,18 @@ NVIDIA takes the security of our software products and services seriously, inclu
 
 If you believe you have found a security vulnerability, **please do not open a public GitHub issue**. Use one of the private channels below.
 
-## Supported versions
+## Supported Versions
 
-Security fixes are only issued for currently supported releases. See [`SUPPORT.md`](SUPPORT.md) for the current list of supported minor versions. End-of-life branches do not receive security updates.
+Security fixes are only issued for currently supported releases. See [Support](SUPPORT.md) for the current list of supported minor versions. End-of-life branches do not receive security updates.
 
-## Reporting a vulnerability
+## Reporting a Vulnerability
 
-We accept private reports through the channels below. Any of them is acceptable; use whichever you prefer.
+**Please do not report security vulnerabilities through GitHub** — neither public issues nor GitHub Security Advisories. Report them to NVIDIA PSIRT (Product Security Incident Response Team), which owns coordinated disclosure and CVE assignment across NVIDIA products:
 
-### 1. GitHub Security Advisory (recommended for repository-specific issues)
-
-Open a private advisory from the **Security** tab of this repository, then **Report a vulnerability**. The advisory is only visible to repository maintainers and the reporter.
-
-This is the preferred channel for vulnerabilities specific to the code in this repository.
-
-### 2. NVIDIA PSIRT (for cross-product issues or if you prefer email)
-
-For vulnerabilities that may affect multiple NVIDIA products, or if you prefer to use NVIDIA's coordinated disclosure process:
-
-- Vulnerability Disclosure Program: <https://www.nvidia.com/en-us/security/>
 - Web: [NVIDIA Security Vulnerability Submission Form](https://www.nvidia.com/object/submit-security-vulnerability.html)
 - Email: <psirt@nvidia.com>
-  - PGP key: <https://www.nvidia.com/en-us/security/pgp-key>
+  - PGP key: [NVIDIA public PGP key for secure email communication](https://www.nvidia.com/en-us/security/pgp-key)
+- Vulnerability Disclosure Program: <https://www.nvidia.com/en-us/security/>
 
 Please include in your report:
 
@@ -35,7 +25,7 @@ Please include in your report:
 - Proof-of-concept code or exploit, if available
 - Your assessment of the potential impact
 
-## What to expect
+## What to Expect
 
 - **Acknowledgement:** within 3 business days of your report
 - **Initial assessment:** within 10 business days
@@ -47,7 +37,7 @@ We will coordinate a public disclosure timeline with you once a fix is available
 
 NVIDIA does not currently run a paid bug bounty program for this repository. We do publicly acknowledge externally reported security issues that are addressed under our [coordinated disclosure policy](https://www.nvidia.com/en-us/security/psirt-policies/), where the reporter wishes to be named.
 
-## Security architecture and context
+## Security Architecture and Context
 
 Run:ai is an AI workload orchestration platform for Kubernetes. This repository contains the full stack: a multi-tenant **control plane** of HTTP services, the **in-cluster** operator and controllers deployed into each managed Kubernetes cluster, shared Go libraries, generated API clients, the installer, and a CLI.
 
@@ -64,7 +54,7 @@ Basis: `origin` remote is github.com; the project is Apache-2.0 licensed with pu
 **Service Exposure Classification:** External / Regulated (high confidence).
 Basis: commercially released, customer-deployed enterprise platform with a published self-hosted installation guide and support obligations; multi-tenant; handles customer credentials, user identities, and workload data.
 
-### Trust boundaries
+### Trust Boundaries
 
 The main boundaries an attacker would have to cross, and what is trusted on each side:
 
@@ -78,7 +68,7 @@ The main boundaries an attacker would have to cross, and what is trusted on each
 
 5. **Workload → platform.** Containers submitted by end users are untrusted code. Isolation between a workload and both the platform and other tenants' workloads is delegated to Kubernetes namespaces, RBAC, and the container runtime.
 
-### Threat model
+### Threat Model
 
 The following are the primary security concerns for this project, including auxiliary and support paths. They are ordered roughly by combined severity and likelihood.
 
@@ -96,7 +86,7 @@ The following are the primary security concerns for this project, including auxi
 
 7. **Availability and supply-chain exposure in the delivery path.** No application-level rate limiting or request throttling is present on the platform API, including on authentication and on expensive list and query endpoints, so protection against abuse is delegated entirely to infrastructure. Separately, the build and installation tooling fetches components over the network with inconsistent verification: most runtime images derive from pinned Red Hat UBI bases, but some development and auxiliary images use floating tags, install tooling from unpinned sources, or download third-party binaries without checksum or signature verification, and installer steps apply manifests from remote URLs. Compromise of one of those upstreams reaches the built artifacts.
 
-### Critical security assumptions
+### Critical Security Assumptions
 
 The following are conditions this software assumes are already satisfied by another layer. They are not enforced by the code in this repository, and they define the boundary of what a deployment must provide.
 

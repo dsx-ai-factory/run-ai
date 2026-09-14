@@ -9,5 +9,3 @@ allOf:
         $ref: "./WorkloadRequestResources.yaml"
       allocatedResources:
         $ref: "./WorkloadAllocatedResources.yaml"
-      topology:
-        $ref: "./WorkloadElementTopology.yaml"

@@ -208,7 +208,7 @@ Manually configure the settings below as needed. The changes will apply to this 
    * **Request** - The minimum GPU memory allocated per device. Each pod in the workload receives at least this amount per device it uses.
    * **Limit** - The maximum GPU memory allocated per device. Each pod in the workload receives **at most** this amount of GPU memory for each device(s) the pod utilizes. This is disabled by default, to enable see the above note.
 3. Set the number of workers for your workload.
-4. For a PyTorch workload, optionally enter a positive integer under **Set the number of workers per segment**. Workers in the same segment are placed as close as possible. Set this value to match your application's parallel segment size, or leave it blank to disable segmentation. For more information, see [Accelerating Workloads with Network Topology-Aware Scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling.md#segmented-pytorch-workload-behavior).
+4. Set the number of **workers per segment** (PyTorch only). Workers in the same segment are placed as close as possible. Enter a positive integer to match your application's parallel segment size, or leave it blank to disable segmentation. For more information, see [Segment-Level Placement](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md).
 5. Configure worker elasticity (PyTorch only). Define the **minimum** and **maximum** number of workers your workload can scale between:
 
     * **Minimum** - Enter a value greater than 0, up to the number of workers.

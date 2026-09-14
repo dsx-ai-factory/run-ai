@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Assets
 
@@ -163,6 +165,7 @@ func (a *RegistryApiService) CreateRegistry(ctx context.Context) ApiCreateRegist
 }
 
 // Execute executes the request
+//
 //	@return Registry
 func (a *RegistryApiService) CreateRegistryExecute(r ApiCreateRegistryRequest) (*Registry, *http.Response, error) {
 	var (
@@ -463,6 +466,7 @@ func (a *RegistryApiService) GetRegistryById(ctx context.Context, assetId string
 }
 
 // Execute executes the request
+//
 //	@return Registry
 func (a *RegistryApiService) GetRegistryByIdExecute(r ApiGetRegistryByIdRequest) (*Registry, *http.Response, error) {
 	var (
@@ -615,6 +619,7 @@ func (a *RegistryApiService) GetRepositories(ctx context.Context, assetId string
 }
 
 // Execute executes the request
+//
 //	@return Repositories
 func (a *RegistryApiService) GetRepositoriesExecute(r ApiGetRepositoriesRequest) (*Repositories, *http.Response, error) {
 	var (
@@ -787,6 +792,7 @@ func (a *RegistryApiService) GetRepositoryTags(ctx context.Context, assetId stri
 }
 
 // Execute executes the request
+//
 //	@return RepositoryTags
 func (a *RegistryApiService) GetRepositoryTagsExecute(r ApiGetRepositoryTagsRequest) (*RepositoryTags, *http.Response, error) {
 	var (
@@ -953,6 +959,7 @@ func (a *RegistryApiService) ListRegistries(ctx context.Context) ApiListRegistri
 }
 
 // Execute executes the request
+//
 //	@return RegistryListResponse
 func (a *RegistryApiService) ListRegistriesExecute(r ApiListRegistriesRequest) (*RegistryListResponse, *http.Response, error) {
 	var (
@@ -1093,6 +1100,7 @@ func (a *RegistryApiService) UpdateRegistry(ctx context.Context, assetId string)
 }
 
 // Execute executes the request
+//
 //	@return Registry
 func (a *RegistryApiService) UpdateRegistryExecute(r ApiUpdateRegistryRequest) (*Registry, *http.Response, error) {
 	var (

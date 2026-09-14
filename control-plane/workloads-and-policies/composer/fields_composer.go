@@ -139,6 +139,12 @@ type FieldsComposer struct {
 
 	ItemizedNumbering itemized.ItemizedNumbering
 	OauthPortNumber   int32
+
+	// GpuRequested records whether any replica composed so far requested a GPU.
+	// It is set by ComposeGpuRequestsAndLimits (reusing the resolved GpuSizingInfo)
+	// and consumed by MNNVL defaulting so a GPU-less workload never inherits a
+	// cluster-wide GPU-network-acceleration default.
+	GpuRequested bool
 }
 
 func (fc *FieldsComposer) WithStorageClassConfiguration(config map[string]trackerApi.StorageClassConfiguration) *FieldsComposer {

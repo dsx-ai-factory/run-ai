@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,10 +18,10 @@ import (
 
 // CredentialsListResponseAssetSpec struct for CredentialsListResponseAssetSpec
 type CredentialsListResponseAssetSpec struct {
-	AccessKey NullableCredentialsListResponseAssetSpecAccessKey `json:"accessKey,omitempty"`
-	Password NullableCredentialsListResponseAssetSpecPassword `json:"password,omitempty"`
+	AccessKey      NullableCredentialsListResponseAssetSpecAccessKey      `json:"accessKey,omitempty"`
+	Password       NullableCredentialsListResponseAssetSpecPassword       `json:"password,omitempty"`
 	DockerRegistry NullableCredentialsListResponseAssetSpecDockerRegistry `json:"dockerRegistry,omitempty"`
-	GenericSecret NullableCredentialsListResponseAssetSpecGenericSecret `json:"genericSecret,omitempty"`
+	GenericSecret  NullableCredentialsListResponseAssetSpecGenericSecret  `json:"genericSecret,omitempty"`
 }
 
 // NewCredentialsListResponseAssetSpec instantiates a new CredentialsListResponseAssetSpec object
@@ -71,6 +73,7 @@ func (o *CredentialsListResponseAssetSpec) HasAccessKey() bool {
 func (o *CredentialsListResponseAssetSpec) SetAccessKey(v CredentialsListResponseAssetSpecAccessKey) {
 	o.AccessKey.Set(&v)
 }
+
 // SetAccessKeyNil sets the value for AccessKey to be an explicit nil
 func (o *CredentialsListResponseAssetSpec) SetAccessKeyNil() {
 	o.AccessKey.Set(nil)
@@ -113,6 +116,7 @@ func (o *CredentialsListResponseAssetSpec) HasPassword() bool {
 func (o *CredentialsListResponseAssetSpec) SetPassword(v CredentialsListResponseAssetSpecPassword) {
 	o.Password.Set(&v)
 }
+
 // SetPasswordNil sets the value for Password to be an explicit nil
 func (o *CredentialsListResponseAssetSpec) SetPasswordNil() {
 	o.Password.Set(nil)
@@ -155,6 +159,7 @@ func (o *CredentialsListResponseAssetSpec) HasDockerRegistry() bool {
 func (o *CredentialsListResponseAssetSpec) SetDockerRegistry(v CredentialsListResponseAssetSpecDockerRegistry) {
 	o.DockerRegistry.Set(&v)
 }
+
 // SetDockerRegistryNil sets the value for DockerRegistry to be an explicit nil
 func (o *CredentialsListResponseAssetSpec) SetDockerRegistryNil() {
 	o.DockerRegistry.Set(nil)
@@ -197,6 +202,7 @@ func (o *CredentialsListResponseAssetSpec) HasGenericSecret() bool {
 func (o *CredentialsListResponseAssetSpec) SetGenericSecret(v CredentialsListResponseAssetSpecGenericSecret) {
 	o.GenericSecret.Set(&v)
 }
+
 // SetGenericSecretNil sets the value for GenericSecret to be an explicit nil
 func (o *CredentialsListResponseAssetSpec) SetGenericSecretNil() {
 	o.GenericSecret.Set(nil)
@@ -259,5 +265,3 @@ func (v *NullableCredentialsListResponseAssetSpec) UnmarshalJSON(src []byte) err
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
