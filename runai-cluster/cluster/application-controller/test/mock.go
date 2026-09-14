@@ -20,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	toolscache "k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/cache/synctrack"
 	crcache "sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -109,6 +110,12 @@ func (mi *MockInformer) RemoveEventHandler(toolscache.ResourceEventHandlerRegist
 func (mi *MockInformer) AddIndexers(toolscache.Indexers) error { return nil }
 func (mi *MockInformer) HasSynced() bool                       { return true }
 func (mi *MockInformer) IsStopped() bool                       { return false }
+
+func (mi *MockInformer) HasSyncedChecker() toolscache.DoneChecker {
+	tracker := synctrack.NewSingleFileTracker("MockInformer")
+	tracker.UpstreamHasSynced()
+	return tracker
+}
 
 // MockObjectResolver implements resolver.ObjectResolver for tests
 type MockObjectResolver struct{}
