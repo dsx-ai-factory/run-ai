@@ -181,6 +181,11 @@ openapi-generate-code-client-js:
 	cp /tmp/api.ts ${OPENAPI_GENERATOR_CLIENT_TS_CODE_PATH}/api.ts
 	sed 's/, RequestArgs/, type RequestArgs/'  < ${OPENAPI_GENERATOR_CLIENT_TS_CODE_PATH}/common.ts > /tmp/common.ts
 	cp /tmp/common.ts ${OPENAPI_GENERATOR_CLIENT_TS_CODE_PATH}/common.ts
+	@# Drop the unused git_push.sh scaffolding, matching openapi-fix-client-go on
+	@# the Go side. Needed here too: openapi-check-client-code-uptodate-js diffs
+	@# this output against the committed tree, so if only one side drops the file
+	@# the check fails on "Only in ...: git_push.sh".
+	rm -f ${OPENAPI_GENERATOR_CLIENT_TS_CODE_PATH}/git_push.sh
 .PHONY: openapi-generate-code-client-js
 
 openapi-generate-code-client-go-raw: git-config-command
