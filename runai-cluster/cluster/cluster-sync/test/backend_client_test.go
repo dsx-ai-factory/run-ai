@@ -13,7 +13,7 @@ import (
 
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
+	cpclient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients/control-plane/generated"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
@@ -54,11 +54,11 @@ var _ = Describe("A backend client", func() {
 				server.Reset()
 			})
 			It("Sends liveness", func() {
-				_, err := backendClient.Client.ClustersApi.UpdateClusterLiveness(
-					backendClient.Context(),
-					swagger.UuidLivenessBody{TimeTag: time.Now().UnixMilli()},
-					config.Config().ClusterUuid,
-				)
+				request := cpclient.NewUpdateClusterLiveness1Request()
+				request.SetTimeTag(time.Now().UnixMilli())
+				_, err := backendClient.ControlPlaneClient.ClustersApi.UpdateClusterLiveness1(
+					backendClient.Context(), config.Config().ClusterUuid,
+				).UpdateClusterLiveness1Request(*request).Execute()
 				Expect(err).To(BeNil())
 			})
 			It("checks that backend is marked as available in backend client", func() {

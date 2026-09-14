@@ -12,8 +12,8 @@ import (
 
 	. "github.com/onsi/gomega" //nolint:staticcheck
 
+	clusterswagger "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
 	"github.com/onsi/gomega/ghttp"
 	"go.uber.org/zap"
 )
@@ -40,7 +40,7 @@ func addHandlerToMockClusterInfoSyncRequest(server *ghttp.Server) {
 	server.RouteToHandler("POST", clusterInfoPath, func(writer http.ResponseWriter, request *http.Request) {
 		ghttp.VerifyContentType("application/json")(writer, request)
 
-		var clusterInfo swagger.ClusterInfo
+		var clusterInfo clusterswagger.ClusterInfoSyncRequest
 		err := json.NewDecoder(request.Body).Decode(&clusterInfo)
 		Expect(err).To(BeNil())
 		Expect(clusterInfo.Domain).To(Equal(config.Config().ClusterDomain))

@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
+	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	"github.com/onsi/gomega/ghttp"
 
@@ -66,7 +66,7 @@ var _ = Describe("DistributedHandlerDeprecated", func() {
 				if err != nil {
 					return
 				}
-				distributedStatusRequest := &swagger.WorkloadStatus{}
+				distributedStatusRequest := &swagger.WorkloadStatusUpdate{}
 				err = json.Unmarshal(body, distributedStatusRequest)
 				if err != nil {
 					return
@@ -75,7 +75,7 @@ var _ = Describe("DistributedHandlerDeprecated", func() {
 				distributedId := distributedStatusRequest.Id
 				distributedStatus := distributedStatusRequest.Status
 				ghttp.VerifyContentType("application/json")(writer, request)
-				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
+				ghttp.RespondWithJSONEncoded(http.StatusOK, distributedStatusRequest)(writer, request)
 				updatedDistributed <- distributedId
 				updatedDistributedStatus <- distributedStatus
 			})

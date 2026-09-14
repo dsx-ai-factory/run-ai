@@ -11,10 +11,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/antihax/optional"
+	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers/parsers"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"go.uber.org/zap"
@@ -52,11 +51,9 @@ func (handler *TrainingHandlerDeprecated) HandleAdd(workload *v2alpha1.TrainingW
 		return nil
 	}
 
-	res, err := handler.runaiBackendClient.Client.TrainingsApi.UpdateTrainingStatus(
-		handler.runaiBackendClient.Context(),
-		*statusToSend,
-		config.Config().ClusterUuid,
-	)
+	_, res, err := handler.runaiBackendClient.Client.TrainingsAPI.UpdateTrainingStatus(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
+	).WorkloadStatusUpdate(*statusToSend).Execute()
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("training %s not found in control plane, it has probably removed already from the DB", statusToSend.Id)
 		return nil
@@ -74,11 +71,9 @@ func (handler *TrainingHandlerDeprecated) HandleDelete(workload *v2alpha1.Traini
 		return nil
 	}
 
-	res, err := handler.runaiBackendClient.Client.TrainingsApi.DeleteTraining(
-		handler.runaiBackendClient.Context(),
-		config.Config().ClusterUuid,
-		workloadId,
-	)
+	res, err := handler.runaiBackendClient.Client.TrainingsAPI.DeleteTrainingById(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid, workloadId,
+	).Execute()
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("training %s is already removed from control plane", workloadId)
 		return nil
@@ -107,7 +102,7 @@ func (handler *TrainingHandlerDeprecated) HandleSyncEvent(waitGroup *sync.WaitGr
 		return
 	}
 
-	syncToSend := make([]swagger.WorkloadStatus, 0, len(workloadList.Items))
+	syncToSend := make([]swagger.WorkloadStatusUpdate, 0, len(workloadList.Items))
 
 	for _, workload := range workloadList.Items {
 		jobStatus := workload.Status.DeepCopyToJobStatus()
@@ -117,13 +112,9 @@ func (handler *TrainingHandlerDeprecated) HandleSyncEvent(waitGroup *sync.WaitGr
 		}
 	}
 
-	res, err := handler.runaiBackendClient.Client.TrainingsApi.SyncTrainingsStatus(
-		handler.runaiBackendClient.Context(),
-		config.Config().ClusterUuid,
-		&swagger.TrainingsApiSyncTrainingsStatusOpts{
-			Body: optional.NewInterface(syncToSend),
-		},
-	)
+	_, res, err := handler.runaiBackendClient.Client.TrainingsAPI.SyncTrainingStatus(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
+	).WorkloadStatusUpdate(syncToSend).Execute()
 
 	err = handler.runaiBackendClient.HandleHttpResponse(res, err, "Sync workloads")
 	if err != nil {

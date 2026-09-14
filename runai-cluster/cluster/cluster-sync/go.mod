@@ -3,7 +3,6 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync
 go 1.26.3
 
 require (
-	github.com/antihax/optional v1.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
@@ -17,7 +16,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.31.0
 	github.com/onsi/gomega v1.42.1
 	go.uber.org/zap v1.28.0
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/oauth2 v0.36.0 // indirect
 	k8s.io/api v0.35.4
 	k8s.io/apimachinery v0.35.4
 	k8s.io/client-go v1.5.2
@@ -40,6 +39,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller v0.0.0
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/node-pool-utils v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0
@@ -48,8 +48,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
 	github.com/gin-contrib/pprof v1.5.4
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-logr/zapr v1.3.0
@@ -95,7 +93,9 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect

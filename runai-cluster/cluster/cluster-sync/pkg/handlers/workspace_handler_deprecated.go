@@ -11,10 +11,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/antihax/optional"
+	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers/parsers"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
 	"go.uber.org/zap"
@@ -53,11 +52,9 @@ func (handler *WorkspaceHandlerDeprecated) HandleAdd(workload *v2alpha1.Interact
 		return nil
 	}
 
-	res, err := handler.runaiBackendClient.Client.WorkspacesApi.UpdateWorkspaceStatus(
-		handler.runaiBackendClient.Context(),
-		*statusToSend,
-		config.Config().ClusterUuid,
-	)
+	_, res, err := handler.runaiBackendClient.Client.WorkspacesAPI.UpdateWorkspaceStatus(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
+	).WorkloadStatusUpdate(*statusToSend).Execute()
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("workspace %s not found in control plane, it has probably removed already from the DB", statusToSend.Id)
 		return nil
@@ -75,11 +72,9 @@ func (handler *WorkspaceHandlerDeprecated) HandleDelete(workload *v2alpha1.Inter
 		return nil
 	}
 
-	res, err := handler.runaiBackendClient.Client.WorkspacesApi.DeleteWorkspace(
-		handler.runaiBackendClient.Context(),
-		config.Config().ClusterUuid,
-		workspaceId,
-	)
+	res, err := handler.runaiBackendClient.Client.WorkspacesAPI.DeleteWorkspaceById(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid, workspaceId,
+	).Execute()
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("workspace %s is already removed from control plane", workspaceId)
 		return nil
@@ -108,7 +103,7 @@ func (handler *WorkspaceHandlerDeprecated) HandleSyncEvent(waitGroup *sync.WaitG
 		return
 	}
 
-	syncToSend := make([]swagger.WorkloadStatus, 0, len(workloadList.Items))
+	syncToSend := make([]swagger.WorkloadStatusUpdate, 0, len(workloadList.Items))
 
 	for _, workload := range workloadList.Items {
 		jobStatus := workload.Status.DeepCopyToJobStatus()
@@ -118,13 +113,9 @@ func (handler *WorkspaceHandlerDeprecated) HandleSyncEvent(waitGroup *sync.WaitG
 		}
 	}
 
-	res, err := handler.runaiBackendClient.Client.WorkspacesApi.SyncWorkspacesStatus(
-		handler.runaiBackendClient.Context(),
-		config.Config().ClusterUuid,
-		&swagger.WorkspacesApiSyncWorkspacesStatusOpts{
-			Body: optional.NewInterface(syncToSend),
-		},
-	)
+	_, res, err := handler.runaiBackendClient.Client.WorkspacesAPI.SyncWorkspaceStatus(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
+	).WorkloadStatusUpdate(syncToSend).Execute()
 
 	err = handler.runaiBackendClient.HandleHttpResponse(res, err, "Sync workloads")
 	if err != nil {
