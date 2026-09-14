@@ -3,7 +3,7 @@
 # Every new service require every team to approve PRs by default.
 
 # Default codeowners every team
-/* @dsx-ai-factory/resource-mgmt @dsx-ai-factory/dev-team-leads @dsx-ai-factory/workloads @dsx-ai-factory/observability @dsx-ai-factory/auth @dsx-ai-factory/ops
+/* @dsx-ai-factory/resource-mgmt @dsx-ai-factory/dev-team-leads @dsx-ai-factory/workloads @dsx-ai-factory/infra @dsx-ai-factory/ops
 
 # Team Leaders
 /.nspect-vuln-allowlist.toml @dsx-ai-factory/dev-team-leads
@@ -45,33 +45,31 @@ code-rabbit/ @dsx-ai-factory/workloads
 /plugins/viper-refresh/ @dsx-ai-factory/workloads
 /plugins/viper-setup/ @dsx-ai-factory/workloads
 
-# Phoenix
-/control-plane/grafana/ @dsx-ai-factory/observability
-/control-plane/metrics-service/ @dsx-ai-factory/observability
-/control-plane/metric-stores-migrator/ @dsx-ai-factory/observability
-/control-plane/audit-service/ @dsx-ai-factory/observability
-/control-plane/postgresql-client/ @dsx-ai-factory/observability
-/control-plane/notifications-proxy/ @dsx-ai-factory/observability
-/control-plane/notifications-service/ @dsx-ai-factory/observability
-/control-plane/*/pkg/runaimetrics/ @dsx-ai-factory/observability
+# Infra
+/control-plane/grafana/ @dsx-ai-factory/infra
+/control-plane/metrics-service/ @dsx-ai-factory/infra
+/control-plane/metric-stores-migrator/ @dsx-ai-factory/infra
+/control-plane/audit-service/ @dsx-ai-factory/infra
+/control-plane/postgresql-client/ @dsx-ai-factory/infra
+/control-plane/notifications-proxy/ @dsx-ai-factory/infra
+/control-plane/notifications-service/ @dsx-ai-factory/infra
+/control-plane/*/pkg/runaimetrics/ @dsx-ai-factory/infra
+/control-plane/tenants-manager/ @dsx-ai-factory/infra
+/control-plane/identity-manager/ @dsx-ai-factory/infra
+/control-plane/grafana-proxy/ @dsx-ai-factory/infra
+/control-plane/keycloak-extensions/ @dsx-ai-factory/infra
+/control-plane/gateway-hub/ @dsx-ai-factory/infra
+/control-plane/traefik/ @dsx-ai-factory/infra
+/control-plane/bff-service/ @dsx-ai-factory/infra
+/control-plane/temp-backend-settings/ @dsx-ai-factory/infra
+/runai-mcp-server/ @dsx-ai-factory/infra
 
-# Sphinx
-/control-plane/tenants-manager/ @dsx-ai-factory/auth
-/control-plane/identity-manager/ @dsx-ai-factory/auth
-/control-plane/grafana-proxy/ @dsx-ai-factory/auth
-/control-plane/keycloak-extensions/ @dsx-ai-factory/auth
-/control-plane/gateway-hub/ @dsx-ai-factory/auth
-/control-plane/traefik/ @dsx-ai-factory/auth
-/control-plane/bff-service/ @dsx-ai-factory/auth
-/control-plane/temp-backend-settings/ @dsx-ai-factory/auth
-/runai-mcp-server/ @dsx-ai-factory/auth
-
-# Settings - Sphinx
-/control-plane/frontend/src/views/settings/ @dsx-ai-factory/auth
-/control-plane/frontend/src/components/settings/ @dsx-ai-factory/auth
-/control-plane/backend/js/backend/service/SettingsService @dsx-ai-factory/auth
-/control-plane/backend/js/backend/service/SettingService.ts @dsx-ai-factory/auth
-/control-plane/backend/ @dsx-ai-factory/auth
+# Settings
+/control-plane/frontend/src/views/settings/ @dsx-ai-factory/infra
+/control-plane/frontend/src/components/settings/ @dsx-ai-factory/infra
+/control-plane/backend/js/backend/service/SettingsService @dsx-ai-factory/infra
+/control-plane/backend/js/backend/service/SettingService.ts @dsx-ai-factory/infra
+/control-plane/backend/ @dsx-ai-factory/infra
 
 # DevOps
 /common/opa-policies/ @dsx-ai-factory/ops
@@ -89,8 +87,8 @@ code-rabbit/ @dsx-ai-factory/workloads
 /control-plane/test-service/ @dsx-ai-factory/infra
 /runai-clients/Makefile @dsx-ai-factory/infra
 
-# Sphinx - infra override (must be after the /control-plane/infra/ rule above — last match wins)
-/control-plane/infra/openapi/build/ @dsx-ai-factory/auth
+# Infra override (must be after the /control-plane/infra/ rule above — last match wins)
+/control-plane/infra/openapi/build/ @dsx-ai-factory/infra
 
 # Frontend Guild
 /control-plane/frontend/ @dsx-ai-factory/frontend-devs
@@ -100,10 +98,10 @@ code-rabbit/ @dsx-ai-factory/workloads
 control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild-members
 
 # Cluster Teams
-/control-plane/cluster-migrator/ @dsx-ai-factory/installer
-/control-plane/cluster-service/ @dsx-ai-factory/installer
-/control-plane/control-plane-chart/ @dsx-ai-factory/installer
-/control-plane/control-plane-chart/Chart.yaml @dsx-ai-factory/installer @dsx-ai-factory/observability
+/control-plane/cluster-migrator/ @dsx-ai-factory/infra
+/control-plane/cluster-service/ @dsx-ai-factory/infra
+/control-plane/control-plane-chart/ @dsx-ai-factory/infra
+/control-plane/control-plane-chart/Chart.yaml @dsx-ai-factory/infra
 
 # DB Furom
 /control-plane/**/*.sql @dsx-ai-factory/db
@@ -158,15 +156,13 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 /runai-cluster/cluster/advice-restart-controller/ @dsx-ai-factory/workload-runtime
 /runai-cluster/cluster/dromos/ @dsx-ai-factory/workload-runtime
 
-# Phoenix
-
-# Griffin
-/runai-cluster/cluster/cluster-installer/ @dsx-ai-factory/installer
-/runai-cluster/cluster/cluster-installer-helm/ @dsx-ai-factory/installer
-/runai-cluster/cluster/ocp-cluster-installer/ @dsx-ai-factory/installer
-/runai-cluster/cluster/runai-chart @dsx-ai-factory/installer
-/runai-cluster/cluster/runai-crd-upgrader/ @dsx-ai-factory/installer
-/runai-installer/ @dsx-ai-factory/installer
+# Infra
+/runai-cluster/cluster/cluster-installer/ @dsx-ai-factory/infra
+/runai-cluster/cluster/cluster-installer-helm/ @dsx-ai-factory/infra
+/runai-cluster/cluster/ocp-cluster-installer/ @dsx-ai-factory/infra
+/runai-cluster/cluster/runai-chart @dsx-ai-factory/infra
+/runai-cluster/cluster/runai-crd-upgrader/ @dsx-ai-factory/infra
+/runai-installer/ @dsx-ai-factory/infra
 
 # KAI Dependency Updaters
 /runai-cluster/cluster/runai-chart/Chart.yaml @dsx-ai-factory/ops @dsx-ai-factory/dev-team-leads @dsx-ai-factory/scheduler @dsx-ai-factory/core
@@ -268,23 +264,23 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 /runai-common-chart/** @dsx-ai-factory/ops
 
 # runai-application-packages
-/runai-application-packages/async-events @dsx-ai-factory/observability
-/runai-application-packages/concurrency @dsx-ai-factory/observability
+/runai-application-packages/async-events @dsx-ai-factory/infra
+/runai-application-packages/concurrency @dsx-ai-factory/infra
 /runai-application-packages/convutils @dsx-ai-factory/workloads
-/runai-application-packages/client-utils @dsx-ai-factory/observability
+/runai-application-packages/client-utils @dsx-ai-factory/infra
 /runai-application-packages/datastructs @dsx-ai-factory/workloads
-/runai-application-packages/dbmodels @dsx-ai-factory/observability
+/runai-application-packages/dbmodels @dsx-ai-factory/infra
 /runai-application-packages/jsonutils @dsx-ai-factory/workloads
 /runai-application-packages/patching @dsx-ai-factory/workloads
-/runai-application-packages/old-auth-token-middleware @dsx-ai-factory/auth
+/runai-application-packages/old-auth-token-middleware @dsx-ai-factory/infra
 /runai-application-packages/testutils @dsx-ai-factory/workloads
 /runai-application-packages/telemetry @dsx-ai-factory/resource-mgmt
-/runai-application-packages/versions @dsx-ai-factory/observability
+/runai-application-packages/versions @dsx-ai-factory/infra
 /runai-application-packages/scopeinfo @dsx-ai-factory/workloads
 /runai-application-packages/validation @dsx-ai-factory/workloads
 
 # runai-common-packages
-/runai-common-packages/** @dsx-ai-factory/observability
+/runai-common-packages/** @dsx-ai-factory/infra
 
 ### E2E: ###
 
