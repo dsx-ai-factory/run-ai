@@ -320,7 +320,7 @@ func initContainersFromAnyworkloadPath(
 const (
 	oauth2ParityNamespace           = "runai-test"
 	oauth2ParityProject             = "test"
-	oauth2ParityClusterDomain       = "https://test.run.ai"
+	oauth2ParityClusterDomain       = "https://test.example.com"
 	oauth2ParityImage               = "test.registry/oauth2-proxy:parity"
 	oauth2ParityUsernameLoaderImage = "test.registry/username-loader:parity"
 )
