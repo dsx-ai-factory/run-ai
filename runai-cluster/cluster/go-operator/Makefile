@@ -125,6 +125,7 @@ test-asset-admission:
 	@assets="$${KUBEBUILDER_ASSETS:-}"; \
 	if [ -z "$$assets" ]; then \
 		assets_dir="$$(mktemp -d)"; \
+		trap 'chmod -R u+w "$$assets_dir" && rm -rf "$$assets_dir"' EXIT; \
 		assets="$$(go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION) --bin-dir "$$assets_dir" use 1.33.0 -p path)"; \
 	fi; \
 	test -x "$$assets/kube-apiserver" && test -x "$$assets/etcd"; \
