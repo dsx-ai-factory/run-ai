@@ -1,0 +1,13 @@
+This component is not NVIDIA-authored. It is a fork of the upstream goofys
+project (github.com/kahing/goofys), redistributed under the Apache License,
+Version 2.0. The upstream license text is in LICENSE.md in this directory.
+
+The copyright notices below are those carried by the source files in this
+directory:
+
+  Copyright 2015 - 2020 Ka-Hing Cheung
+  Copyright 2015 - 2017 Google Inc. All Rights Reserved.
+  Copyright 2019 - 2020 Databricks
+
+The inventory below covers the third-party Go modules that goofys depends on;
+it does not restate goofys' own license, which LICENSE.md carries.
