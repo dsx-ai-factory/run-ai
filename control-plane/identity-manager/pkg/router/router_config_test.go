@@ -40,7 +40,7 @@ func TestConfigRouteDoesNotRevealWhetherTenantExists(t *testing.T) {
 	)
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/config", nil)
-	req.Host = "unknown-tenant.run.ai"
+	req.Host = "unknown-tenant.example.com"
 	recorder := httptest.NewRecorder()
 
 	router.ServeHTTP(recorder, req)
@@ -49,5 +49,5 @@ func TestConfigRouteDoesNotRevealWhetherTenantExists(t *testing.T) {
 	var response api.AuthConfiguration
 	require.NoError(t, json.NewDecoder(recorder.Body).Decode(&response))
 	require.Equal(t, "unknown-tenant", response.TenantName)
-	require.Equal(t, "https://unknown-tenant.run.ai", response.RedirectUrl)
+	require.Equal(t, "https://unknown-tenant.example.com", response.RedirectUrl)
 }

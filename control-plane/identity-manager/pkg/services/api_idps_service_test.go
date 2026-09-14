@@ -637,7 +637,7 @@ func TestGetIdp_redirectUriUsesAliasNotProviderType(t *testing.T) {
 	oidc.Alias = ptr.To("oidc-a1b2c3")
 
 	idp := testSubject.iamIdpToApi(ctx, oidc, realm)
-	assert.Equal(t, fmt.Sprintf("https://app.run.ai/auth/realms/%s/broker/oidc-a1b2c3/endpoint", realm), idp.RedirectUri)
+	assert.Equal(t, fmt.Sprintf("https://app.example.com/auth/realms/%s/broker/oidc-a1b2c3/endpoint", realm), idp.RedirectUri)
 }
 
 func TestGetIdp_oidc_noScope(t *testing.T) {
@@ -668,7 +668,7 @@ func TestGetIdp_saml(t *testing.T) {
 	assert.NotNil(t, idp.SamlData)
 	assert.NotNil(t, idp.Mappers)
 	assert.Equal(t, "https://app.run.ai/auth/realms/test/broker/saml-a1b2c3/endpoint/descriptor", idp.SamlData.ServiceProviderMetadataUrl)
-	assert.Equal(t, fmt.Sprintf("https://app.run.ai/auth/realms/%s/broker/saml-a1b2c3/endpoint", "test"), idp.RedirectUri)
+	assert.Equal(t, fmt.Sprintf("https://app.example.com/auth/realms/%s/broker/saml-a1b2c3/endpoint", "test"), idp.RedirectUri)
 	assert.Nil(t, idp.OidcData)
 	assert.Nil(t, idp.OcpData)
 }

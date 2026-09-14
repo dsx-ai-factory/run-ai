@@ -1,27 +1,20 @@
 # Support
 
-## Supported versions
+## Supported Versions
 
-We maintain the latest 5 minor releases:
+We maintain the current release branch:
 
 | Version | Status |
 |---|---|
-| `v2.26` | Supported |
-| `v2.25` | Supported |
-| `v2.24` | Supported |
-| `v2.23` | Supported |
-| `v2.22` | Supported |
-| `v2.21` and earlier | End of life |
+| `release-3.0` | Supported |
 
-`v2.21` and earlier are end of life. Bug reports and pull requests against EOL branches are not accepted, except for critical security issues, which are handled privately through NVIDIA PSIRT (see [`SECURITY.md`](SECURITY.md)).
+Bug reports and pull requests against unsupported branches are not accepted, except for critical security issues, which are handled privately through NVIDIA PSIRT (see [Security](SECURITY.md)).
 
-When a new minor release ships, the oldest supported branch drops out of the list above and moves to EOL.
+When a new release ships, this section is updated to reflect the current supported branch.
 
-## Where to get help
+## Where to Get Help
 
 | Channel | Use it for |
 |---|---|
 | [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) | Bugs, feature requests, documentation issues, usage questions |
-| [NVIDIA PSIRT](https://www.nvidia.com/en-us/security/) | Private vulnerability reports — see [`SECURITY.md`](SECURITY.md) |
-
-For commercial support and enterprise inquiries, contact NVIDIA at <https://www.nvidia.com/en-us/data-center/products/run-ai/>.
+| [NVIDIA PSIRT](https://www.nvidia.com/en-us/security/) | Private vulnerability reports — see [Security](SECURITY.md) |

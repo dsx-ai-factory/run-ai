@@ -6,10 +6,10 @@
   "path_to_artifacts": "bin/",
   "notifications": {
     "slack": {
-      "mention": "@sphinx"
+      "mention": "@phoenix"
     }
   },
   "jira": {
-    "team_name": "Sphinx"
+    "team_name": "Phoenix"
   }
 }
