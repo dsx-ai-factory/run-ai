@@ -355,7 +355,7 @@ func (h *ExternalWorkloadHandler) handleTopOwnedObject(ctx context.Context, obje
 		// this is not considered an error, no need to retry
 		return nil
 	}
-	externWorkloadOfObj, err := utils.GetExternalWorkloadOfObject(ctx, string(uid), object.GetNamespace(), h.cachedClient)
+	externWorkloadOfObj, err := h.getOrRebindExternalWorkloadOfObject(ctx, object, uid)
 	if err != nil || externWorkloadOfObj == nil {
 		if errors.IsNotFound(err) {
 			return h.createExternalWorkloadForObject(ctx, object)
@@ -450,6 +450,68 @@ func (h *ExternalWorkloadHandler) createExternalWorkloadForObject(ctx context.Co
 
 	h.structureUpdater.EnqueueStructureRecalculation(externalWorkload, gvk)
 	return nil
+}
+
+// getOrRebindExternalWorkloadOfObject finds the ExternalWorkload of a top-owned object, falling
+// back to re-binding a surviving one when the object is a child the workload runner has just recreated.
+func (h *ExternalWorkloadHandler) getOrRebindExternalWorkloadOfObject(ctx context.Context,
+	object client.Object, uid types.UID,
+) (*v1alpha1.ExternalWorkload, error) {
+	externalWorkload, err := utils.GetExternalWorkloadOfObject(ctx, string(uid),
+		object.GetNamespace(), h.cachedClient)
+	if err == nil || !errors.IsNotFound(err) {
+		return externalWorkload, err
+	}
+
+	reboundEW, rebindErr := h.rebindExternalWorkloadToObject(ctx, object, uid)
+	if rebindErr != nil {
+		return nil, rebindErr
+	}
+	if reboundEW == nil {
+		// nothing safe to re-bind, so the caller creates a new one
+		return nil, err
+	}
+	return reboundEW, nil
+}
+
+// rebindExternalWorkloadToObject re-points a surviving ExternalWorkload at the child the runner
+// just recreated: the workload runner owns it, so it outlives the child, but it is looked up by the child
+// uid, which changes on every restart of the workload.
+// Returns nil when there is nothing safe to re-bind.
+func (h *ExternalWorkloadHandler) rebindExternalWorkloadToObject(ctx context.Context,
+	object client.Object, uid types.UID,
+) (*v1alpha1.ExternalWorkload, error) {
+	runnerRef := workloadRunnerOwnerRef(object)
+	if runnerRef == nil || runnerRef.UID == "" {
+		return nil, nil
+	}
+
+	existing, err := utils.GetExternalWorkloadOfWorkloadRunner(ctx, string(runnerRef.UID),
+		object.GetNamespace(), h.cachedClient)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// without this annotation the workload id falls back to the child uid, which would change the
+	// control-plane identity on every restart
+	if existing.Annotations[commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload] == "" {
+		return nil, nil
+	}
+
+	reboundEW := existing.DeepCopy()
+	reboundEW.Spec.OriginalWorkloadUID = uid
+	if err = h.cachedClient.Patch(ctx, reboundEW, client.MergeFrom(existing)); err != nil {
+		log.Error().Msgf("Failed to re-bind externalworkload <%s/%s>, error: %s",
+			reboundEW.Namespace, reboundEW.Name, err.Error())
+		return nil, err
+	}
+
+	log.Info().Msgf("Re-bound externalworkload <%s/%s> to recreated %s",
+		reboundEW.Namespace, reboundEW.Name, objectLogStr(object))
+	return reboundEW, nil
 }
 
 func (h *ExternalWorkloadHandler) getOriginalWorkloadUidName(object client.Object) (types.UID, string, error) {
