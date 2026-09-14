@@ -8,7 +8,6 @@
 # Header goes at the very top, above the generator's /* <AppName> ... */ banner,
 # matching the already-headered clients (runai-clients/cli-exposer-client/generated).
 #   sh spdx-header-openapi.sh <dir>   # default <dir> = .
-set -eu
 #
 # NOT stamped: the generator's ancillary scaffolding (git_push.sh, .travis.yml,
 # openapi.yaml specs). Those are exempt, and stamping them breaks the
