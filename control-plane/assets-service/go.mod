@@ -18,7 +18,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0 // indirect
 	github.com/jinzhu/copier v0.4.0
 	github.com/lib/pq v1.11.2 // indirect
-	github.com/onsi/ginkgo/v2 v2.28.3
+	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/onsi/gomega v1.42.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
@@ -26,8 +26,8 @@ require (
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	gorm.io/driver/postgres v1.6.2 // indirect
 	gorm.io/gorm v1.31.2
-	k8s.io/api v0.35.4
-	k8s.io/apimachinery v0.35.4
+	k8s.io/api v0.36.2
+	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v1.5.2
 	k8s.io/kubernetes v1.35.4
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
@@ -114,7 +114,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.16.9 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.17.1-0.20260907192057-119ba4bdd981 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lithammer/shortuuid/v4 v4.2.0 // indirect
@@ -260,10 +260,10 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.45.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260427160629-7cedc36a6bc4 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4 // indirect
-	google.golang.org/grpc v1.82.1 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
+	google.golang.org/grpc v1.83.1 // indirect
+	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -273,7 +273,7 @@ require (
 	k8s.io/component-base v0.35.4 // indirect
 	k8s.io/controller-manager v0.35.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
-	k8s.io/kube-openapi v0.0.0-20260127142750-a19766b6e2d4 // indirect
+	k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
@@ -325,6 +325,8 @@ replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client => ../../runai-clients/assets-service-client
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ../../runai-cluster/cluster/common/topology
+
+replace k8s.io/apimachinery => k8s.io/apimachinery v0.35.4
 
 replace k8s.io/client-go => k8s.io/client-go v0.35.4
 

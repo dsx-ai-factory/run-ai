@@ -15,7 +15,7 @@ require (
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/google/uuid v1.6.0
 	github.com/jinzhu/copier v0.4.0
-	github.com/onsi/ginkgo/v2 v2.28.3
+	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/onsi/gomega v1.42.1
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	gorm.io/driver/postgres v1.6.2 // indirect
@@ -78,7 +78,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/jackc/pgx/v5 v5.10.0 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.16.9 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.17.1-0.20260907192057-119ba4bdd981 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lithammer/shortuuid/v4 v4.2.0 // indirect
@@ -232,17 +232,17 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.45.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260427160629-7cedc36a6bc4 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4 // indirect
-	google.golang.org/grpc v1.82.1 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
+	google.golang.org/grpc v1.83.1 // indirect
+	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/plugin/opentelemetry v0.1.15 // indirect
-	k8s.io/api v0.35.4 // indirect
+	k8s.io/api v0.36.2 // indirect
 	k8s.io/apiextensions-apiserver v0.35.4 // indirect
-	k8s.io/apimachinery v0.35.4
+	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v1.5.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260512234627-ef417d054102
@@ -276,7 +276,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
 	github.com/itchyny/gojq v0.12.19
-	github.com/run-ai/karta v0.1.0
+	github.com/run-ai/karta v0.1.1-0.20260708043952-998140308a96
 )
 
 replace sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.22.4

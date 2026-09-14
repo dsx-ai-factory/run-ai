@@ -272,6 +272,25 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Global.ImagePullSecrets).To(ContainElement(controlPlaneImagePullSecretName))
 	})
 
+	It("defaults FIPSOnly to false when fipsMode is unset", func() {
+		kaiConfig := buildKAIConfig(defaultRunaiConfig())
+		Expect(kaiConfig.Spec.Global.FIPSOnly).To(Equal(ptr.To(false)))
+	})
+
+	It("sets FIPSOnly when fipsMode is \"only\"", func() {
+		runaiConfig := defaultRunaiConfig()
+		runaiConfig.Spec.Internal.Global.FipsMode = "only"
+		kaiConfig := buildKAIConfig(runaiConfig)
+		Expect(kaiConfig.Spec.Global.FIPSOnly).To(Equal(ptr.To(true)))
+	})
+
+	It("leaves FIPSOnly false for fipsMode \"on\"", func() {
+		runaiConfig := defaultRunaiConfig()
+		runaiConfig.Spec.Internal.Global.FipsMode = "on"
+		kaiConfig := buildKAIConfig(runaiConfig)
+		Expect(kaiConfig.Spec.Global.FIPSOnly).To(Equal(ptr.To(false)))
+	})
+
 	It("sets reservation identity and admission/webhook fields like the engine adapter", func() {
 		kaiConfig := buildKAIConfig(defaultRunaiConfig())
 

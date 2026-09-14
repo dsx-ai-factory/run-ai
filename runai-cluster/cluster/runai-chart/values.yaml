@@ -1,5 +1,8 @@
 global:
-  fipsMode: "off"
+  # Dev test build, not for merge: default to "only" so a plain install
+  # exercises fipsMode=only end to end (RUN-41853 / RUN-42555) without an
+  # extra --set. Revert to "off" before merging.
+  fipsMode: "only"
   customCA:
     enabled: false
     secret:
@@ -173,6 +176,13 @@ kai-scheduler:
     resourceReservation:
       namespace: runai-reservation
       serviceAccount: runai-reservation
+    # Dev test build, not for merge: points at personal FIPS-enabled images
+    # built from the same 119ba4b commit as the Chart.yaml dependency
+    # override above, to validate fipsMode=only end to end. Revert alongside
+    # the Chart.yaml override before merging.
+    registry: ghcr.io/nshidlansik/kai-scheduler
+    tag: "0.0.0-119ba4b"
+    fipsMode: only
   operator:
     resources:
       limits:

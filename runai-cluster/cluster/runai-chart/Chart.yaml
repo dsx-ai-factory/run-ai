@@ -7,8 +7,13 @@ kubeVersion: '>=1.30.0-0'
 dependencies:
   - name: kai-scheduler
     condition: kai-scheduler.enabled
+    # Dev test build, not for merge: KAI-Scheduler's own CI auto-publishes a
+    # chart for every main-branch push, tagged 0.0.0-<short-sha>. This one
+    # (119ba4b) is the commit fipsMode=only support landed on (#2101, #2107),
+    # not yet in a real release. Revert to v0.16.9 (or the first real release
+    # containing #2101/#2107) before merging.
     repository: oci://ghcr.io/kai-scheduler/kai-scheduler
-    version: v0.16.9
+    version: 0.0.0-119ba4b
   - name: karta
     condition: karta.enabled
     repository: oci://ghcr.io/run-ai/karta
