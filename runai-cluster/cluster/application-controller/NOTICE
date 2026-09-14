@@ -1,6 +1,17 @@
 # NOTICE FILE
 
-This project includes software components licensed under various open-source licenses. The following licenses apply to the components used in this project, which is a part of **Run.ai**:
+This project includes software components licensed under various open-source licenses.
+
+**Scope of this document.** This NOTICE is a standard template applied uniformly to all
+components of the **Run.ai** project, including those that do not use every license listed
+here. The sections below enumerate license families and reproduce their full texts for
+reference. Their presence is **not** an assertion that a component under each of those
+licenses is included in this product.
+
+For the authoritative list of what this product actually includes -- each component and its
+license -- see **"The following components are included in this product"** below.
+
+The license families reproduced for reference are:
 
 ## MIT License
 
