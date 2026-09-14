@@ -245,6 +245,9 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/supported-workloads => ../../common/supported-workloads
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/top-owner => ../../common/top-owner
+
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils => ../../common/utils
+	
 	// Force all dependencies to use k8s.io v0.34.x to avoid type incompatibilities
 	k8s.io/api => k8s.io/api v0.35.4
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.35.4
