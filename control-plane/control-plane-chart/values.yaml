@@ -1497,8 +1497,7 @@ keycloakx:
     allowedCapabilities: null
     readOnlyRootFilesystem: false
     runAsUser:
-      type: MustRunAs
-      uid: 1000
+      type: MustRunAsNonRoot
     seLinuxContext:
       type: MustRunAs
     seccompProfiles:
@@ -1507,7 +1506,6 @@ keycloakx:
   securityContext:
     allowPrivilegeEscalation: false
     runAsNonRoot: true
-    runAsUser: 65532
     seccompProfile:
       type: RuntimeDefault
     capabilities:
