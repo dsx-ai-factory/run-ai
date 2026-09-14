@@ -1,0 +1,38 @@
+================================================================================
+THIRD-PARTY NOTICES — ory/go-acc
+================================================================================
+
+Component:  go-acc (Go test coverage helper)
+Upstream:   https://github.com/ory/go-acc
+            Identified by the vendored module path in go.mod:
+            "module github.com/ory/go-acc"
+License:    Apache-2.0 (see the LICENSE file in this directory)
+
+--------------------------------------------------------------------------------
+Scope
+--------------------------------------------------------------------------------
+
+This directory vendors the ory/go-acc sources used by the assets-service test
+tooling.
+
+Attribution note: the upstream sources vendored here carry no per-file copyright
+notices, and the LICENSE file in this directory is the unmodified Apache-2.0
+template, whose copyright appendix upstream left unfilled. There were therefore
+no upstream copyright notices to retain under Apache-2.0 section 4(c). This
+NOTICE is added so that the origin of this code is identifiable from the tree
+itself rather than only from the module path in go.mod.
+
+No copyright holder or year is asserted here, because none is stated by
+upstream and we will not infer one.
+
+--------------------------------------------------------------------------------
+Modifications
+--------------------------------------------------------------------------------
+
+The vendored Go sources are unmodified.
+
+The Makefile in this directory currently carries an NVIDIA SPDX header. Its
+content builds the go-acc binary itself (build.darwin / build.amd64) and
+references none of this repository's build infrastructure, which is consistent
+with it being the upstream go-acc Makefile rather than NVIDIA-authored glue.
+That header is under review; if it is upstream, it will be removed.
