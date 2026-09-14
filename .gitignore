@@ -20,6 +20,11 @@ control-plane-works/*
 
 # Test coverage
 cover.out
+coverage.out
+
+# Editor / runtime artifacts
+*.iml
+*.log
 
 # Cursor workspace
 cursor-workspace.json
