@@ -23,6 +23,14 @@ find "$root" -type f -name '*.go' 2>/dev/null | grep -vE '/vendor/|/third_party/
 	{ printf '%s\n%s\n' "$H1" "$H2"; cat "$f"; } > "$tmp" && mv "$tmp" "$f"
 done
 
+# Stamp swagger-codegen Go client files (older codegen, cluster-sync clients)
+find "$root" -type f -name '*.go' 2>/dev/null | grep -vE '/vendor/|/third_party/|/thirdpartyapi/' | while IFS= read -r f; do
+	head -n 15 "$f" | grep -q 'Swagger Codegen' || continue
+	head -n 3 "$f" | grep -q 'SPDX-FileCopyrightText' && continue
+	tmp="${f}.spdxtmp.$$"
+	{ printf '%s\n%s\n' "$H1" "$H2"; cat "$f"; } > "$tmp" && mv "$tmp" "$f"
+done
+
 # Stamp openapi-generator git_push.sh scaffolding scripts (shebang-aware)
 find "$root" -type f -name 'git_push.sh' 2>/dev/null | grep -vE '/vendor/|/third_party/' | while IFS= read -r f; do
 	head -n 5 "$f" | grep -q 'SPDX-FileCopyrightText' && continue
