@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/k8s-objects-tracker
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4

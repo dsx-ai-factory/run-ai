@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
