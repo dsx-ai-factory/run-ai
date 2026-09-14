@@ -155,6 +155,7 @@ func processNextItem(ctx context.Context, ewh *ExternalWorkloadHandler) bool {
 	case string(utils.UpdateOperation):
 		obj, err := ewh.GetFreshObject(ctx, task.Key, task.GVK)
 		if err != nil || utils.IsObjectNilOrEmpty(obj) {
+			ewh.handleMissingChild(ctx, task)
 			return true
 		}
 		ewh.handleTask(ctx, obj, task, ewh.HandleWorkloadAddUpdateEvent, utils.UpdateOperation)

@@ -13,6 +13,7 @@ import (
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/handlers/runaistatus"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/supportedhandlers"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
@@ -22,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -268,3 +270,92 @@ func additionalFields(ew *v1alpha1.ExternalWorkload) map[string]any {
 	Expect(json.Unmarshal([]byte(*ew.Spec.AdditionalFields), &result)).To(Succeed())
 	return result
 }
+
+// The runner keeps the ExternalWorkload alive when a restart fails to recreate the child. Leaving
+// the ewi-status handshake set would make cluster-sync keep EWI's last phase and never fall back
+// to the runner, so the workload would show Running forever.
+var _ = Describe("ExternalWorkloadHandler.handleMissingChild", func() {
+	newStatusEW := func(annotations map[string]string) *v1alpha1.ExternalWorkload {
+		return &v1alpha1.ExternalWorkload{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        "ew-pytorchjob-my-job",
+				Namespace:   testNamespace,
+				Annotations: annotations,
+				Labels:      map[string]string{commonconstants.WorkloadRunnerNameLabel: testWlrName},
+			},
+			Spec: v1alpha1.ExternalWorkloadSpec{OriginalWorkloadName: testJobName},
+		}
+	}
+
+	newStatusHandler := func(objects ...client.Object) (*ExternalWorkloadHandler, client.Client) {
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+		c := fakeclient.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
+		return &ExternalWorkloadHandler{cachedClient: c}, c
+	}
+
+	missingChildTask := func(externalWorkloadName string) utils.ExternalWorkloadTask {
+		task := utils.NewExternalWorkloadTask(utils.UpdateOperation,
+			types.NamespacedName{Name: testJobName, Namespace: testNamespace}, pytorchGVK)
+		if externalWorkloadName != "" {
+			task = task.SetExternalWorkloadName(externalWorkloadName)
+		}
+		return *task
+	}
+
+	It("clears the ewi-status handshake so the runner drives the phase", func() {
+		ctx := context.Background()
+		handler, c := newStatusHandler(newStatusEW(map[string]string{
+			commonconstants.EwiStatusAnnotation: "true",
+		}))
+
+		handler.handleMissingChild(ctx, missingChildTask("ew-pytorchjob-my-job"))
+
+		stored := &v1alpha1.ExternalWorkload{}
+		Expect(c.Get(ctx, types.NamespacedName{
+			Name: "ew-pytorchjob-my-job", Namespace: testNamespace,
+		}, stored)).To(Succeed())
+		Expect(stored.Annotations).NotTo(HaveKey(commonconstants.EwiStatusAnnotation))
+	})
+
+	It("keeps the control-plane workload id while clearing the handshake", func() {
+		ctx := context.Background()
+		handler, c := newStatusHandler(newStatusEW(map[string]string{
+			commonconstants.EwiStatusAnnotation:                         "true",
+			commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: "cp-id-1",
+		}))
+
+		handler.handleMissingChild(ctx, missingChildTask("ew-pytorchjob-my-job"))
+
+		stored := &v1alpha1.ExternalWorkload{}
+		Expect(c.Get(ctx, types.NamespacedName{
+			Name: "ew-pytorchjob-my-job", Namespace: testNamespace,
+		}, stored)).To(Succeed())
+		Expect(stored.Annotations).To(
+			HaveKeyWithValue(commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload, "cp-id-1"))
+	})
+
+	It("does nothing when the task carries no external workload name", func() {
+		ctx := context.Background()
+		handler, c := newStatusHandler(newStatusEW(map[string]string{
+			commonconstants.EwiStatusAnnotation: "true",
+		}))
+
+		handler.handleMissingChild(ctx, missingChildTask(""))
+
+		stored := &v1alpha1.ExternalWorkload{}
+		Expect(c.Get(ctx, types.NamespacedName{
+			Name: "ew-pytorchjob-my-job", Namespace: testNamespace,
+		}, stored)).To(Succeed())
+		Expect(stored.Annotations).To(HaveKeyWithValue(commonconstants.EwiStatusAnnotation, "true"))
+	})
+
+	It("tolerates an external workload that no longer exists", func() {
+		ctx := context.Background()
+		handler, _ := newStatusHandler()
+
+		Expect(func() { handler.handleMissingChild(context.Background(), missingChildTask("gone")) }).
+			NotTo(Panic())
+		_ = ctx
+	})
+})

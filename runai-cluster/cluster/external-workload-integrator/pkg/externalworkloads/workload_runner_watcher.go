@@ -107,7 +107,7 @@ func enqueueWorkloadsForWorkloadRunner(ctx context.Context, cachedClient client.
 		}
 
 		key := types.NamespacedName{Name: ew.Spec.OriginalWorkloadName, Namespace: ew.Namespace}
-		task := utils.NewExternalWorkloadTask(utils.UpdateOperation, key, gvk)
+		task := utils.NewExternalWorkloadTask(utils.UpdateOperation, key, gvk).SetExternalWorkloadName(ew.Name)
 		handler.tasksQueue.Add(*task)
 	}
 }
