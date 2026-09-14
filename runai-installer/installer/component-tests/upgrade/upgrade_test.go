@@ -48,7 +48,7 @@ func TestUpgrade_BothCPAndCluster_AutoDetectedParams(t *testing.T) {
 	err := orchestrator.RunUpgrade(cfg, deps)
 	require.NoError(t, err)
 
-	assert.Equal(t, "test.run.ai", cfg.FQDN)
+	assert.Equal(t, "test.example.com", cfg.FQDN)
 	assert.Equal(t, "uuid-abc", cfg.ClusterUUID)
 
 	require.Len(t, fakeHelm.Calls, 2)
@@ -56,12 +56,12 @@ func TestUpgrade_BothCPAndCluster_AutoDetectedParams(t *testing.T) {
 	cpCall := fakeHelm.Calls[0]
 	assert.Equal(t, step.CPReleaseName, cpCall.ReleaseName)
 	assert.Equal(t, "2.20.0", cpCall.Version)
-	assert.True(t, harness.ContainsValue(cpCall.Values, "global.domain=test.run.ai"))
+	assert.True(t, harness.ContainsValue(cpCall.Values, "global.domain=test.example.com"))
 
 	clusterCall := fakeHelm.Calls[1]
 	assert.Equal(t, step.ClusterReleaseName, clusterCall.ReleaseName)
 	assert.Equal(t, "2.20.0", clusterCall.Version)
-	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.url=test.run.ai"))
+	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.url=test.example.com"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.clientSecret=s3cr3t"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.uid=uuid-abc"))
 }
@@ -134,7 +134,7 @@ func TestUpgrade_ClusterUUIDUnresolvable(t *testing.T) {
 	fakeHelm := &harness.FakeHelmInstaller{}
 	cfg := newBaseCfg()
 	cfg.UpgradeControlPlane = false
-	cfg.FQDN = "test.run.ai"
+	cfg.FQDN = "test.example.com"
 	noUIDReader := func(release, ns string) (map[string]interface{}, error) {
 		if release == step.ClusterReleaseName {
 			return map[string]interface{}{
@@ -330,16 +330,16 @@ func TestAirgapUpgrade_FromLoadedBundle(t *testing.T) {
 	assert.Equal(t, step.CPReleaseName, cpCall.ReleaseName)
 	assert.Equal(t, filepath.Join(workingDir, "bundle", "charts", "control-plane-3.0.0.tgz"), cpCall.ChartName)
 	assert.Equal(t, []string{filepath.Join(workingDir, "control-plane-airgap-values.yaml")}, cpCall.ValueFiles)
-	assert.True(t, harness.ContainsValue(cpCall.Values, "global.domain=test.run.ai"))
+	assert.True(t, harness.ContainsValue(cpCall.Values, "global.domain=test.example.com"))
 
 	clusterCall := fakeHelm.Calls[1]
 	assert.Equal(t, step.ClusterReleaseName, clusterCall.ReleaseName)
 	assert.Equal(t, filepath.Join(workingDir, "bundle", "charts", "runai-cluster-3.0.0.tgz"), clusterCall.ChartName)
 	assert.Equal(t, []string{filepath.Join(workingDir, "cluster-airgap-values.yaml")}, clusterCall.ValueFiles)
-	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.url=test.run.ai"))
+	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.url=test.example.com"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.clientSecret=s3cr3t"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.uid=uuid-abc"))
-	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.url=test.run.ai"))
+	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.url=test.example.com"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "global.additionalImagePullSecrets[0]=runai-reg-creds"))
 
 	secretCalls := fakeK8s.CallsByVerb("create")
@@ -440,7 +440,7 @@ func TestAirgapUpgrade_BothCPAndCluster(t *testing.T) {
 	err := orchestrator.RunUpgrade(cfg, deps)
 	require.NoError(t, err)
 
-	assert.Equal(t, "test.run.ai", cfg.FQDN)
+	assert.Equal(t, "test.example.com", cfg.FQDN)
 	assert.Equal(t, "uuid-abc", cfg.ClusterUUID)
 	assert.NotEmpty(t, cfg.AirgapExtractedDir)
 
@@ -449,7 +449,7 @@ func TestAirgapUpgrade_BothCPAndCluster(t *testing.T) {
 	cpCall := fakeHelm.Calls[0]
 	assert.Equal(t, step.CPReleaseName, cpCall.ReleaseName)
 	assert.Equal(t, step.CPNamespace, cpCall.Namespace)
-	assert.True(t, harness.ContainsValue(cpCall.Values, "global.domain=test.run.ai"))
+	assert.True(t, harness.ContainsValue(cpCall.Values, "global.domain=test.example.com"))
 	assert.True(t, strings.HasSuffix(cpCall.ChartName, "control-plane-2.20.0.tgz"))
 	require.Len(t, cpCall.ValueFiles, 1)
 	assert.True(t, strings.HasSuffix(cpCall.ValueFiles[0], "custom-env.yaml"))
@@ -457,10 +457,10 @@ func TestAirgapUpgrade_BothCPAndCluster(t *testing.T) {
 	clusterCall := fakeHelm.Calls[1]
 	assert.Equal(t, step.ClusterReleaseName, clusterCall.ReleaseName)
 	assert.Equal(t, step.ClusterNamespace, clusterCall.Namespace)
-	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.url=test.run.ai"))
+	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.url=test.example.com"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.clientSecret=s3cr3t"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.uid=uuid-abc"))
-	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.url=test.run.ai"))
+	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.url=test.example.com"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "global.additionalImagePullSecrets[0]=runai-reg-creds"))
 	assert.True(t, strings.HasSuffix(clusterCall.ChartName, "runai-cluster-2.20.0.tgz"))
 	require.Len(t, clusterCall.ValueFiles, 1)
@@ -558,7 +558,7 @@ func TestAirgapUpgrade_BadTarball_Fails(t *testing.T) {
 	harness.UseFastPollInterval(t)
 	fakeHelm := &harness.FakeHelmInstaller{}
 	cfg := newAirgapUpgradeCfg(filepath.Join(t.TempDir(), "nonexistent.tar.gz"))
-	cfg.FQDN = "test.run.ai"
+	cfg.FQDN = "test.example.com"
 	cfg.ClusterUUID = "uuid-abc"
 	deps := upgrade.Deps{
 		HelmInstaller:    fakeHelm,
@@ -583,7 +583,7 @@ func TestAirgapUpgrade_UnreadableTarball_Fails(t *testing.T) {
 	t.Cleanup(func() { os.Chmod(dir, 0o755) })
 
 	cfg := newAirgapUpgradeCfg(tarball)
-	cfg.FQDN = "test.run.ai"
+	cfg.FQDN = "test.example.com"
 	cfg.ClusterUUID = "uuid-abc"
 	deps := upgrade.Deps{
 		HelmInstaller:    fakeHelm,
