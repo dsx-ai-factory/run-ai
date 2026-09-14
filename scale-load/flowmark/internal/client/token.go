@@ -6,51 +6,91 @@
 package client
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
-	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
 )
 
 type passwordGrantSource struct {
 	ctx      context.Context
-	tokens   idmclient.TokensAPI
+	http     *http.Client
+	tokenURL string
 	username string
 	password string
 }
 
-func newTokenSource(ctx context.Context, tokens idmclient.TokensAPI, username, password string) oauth2.TokenSource {
+type tokenRequest struct {
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	GrantType string `json:"grantType"`
+}
+
+type tokenResponse struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
+
+func newTokenSource(ctx context.Context, httpClient *http.Client, tokenURL, username, password string) oauth2.TokenSource {
 	return oauth2.ReuseTokenSource(nil, &passwordGrantSource{
 		ctx:      ctx,
-		tokens:   tokens,
+		http:     httpClient,
+		tokenURL: tokenURL,
 		username: username,
 		password: password,
 	})
 }
 
 func (s *passwordGrantSource) Token() (*oauth2.Token, error) {
-	request := idmclient.TokenRequest{
-		Username:  idmclient.PtrString(s.username),
-		Password:  idmclient.PtrString(s.password),
-		GrantType: idmclient.TOKENREQUESTGRANTTYPEENUM_PASSWORD.Ptr(),
-	}
-	response, _, err := s.tokens.GrantToken(s.ctx).TokenRequest(request).Execute()
+	token, err := s.login()
 	if err != nil {
 		return nil, fmt.Errorf("control-plane login as %q: %w", s.username, err)
+	}
+	return token, nil
+}
+
+func (s *passwordGrantSource) login() (*oauth2.Token, error) {
+	body, err := json.Marshal(tokenRequest{Username: s.username, Password: s.password, GrantType: "password"})
+	if err != nil {
+		return nil, err
 	}
 
-	expiry, err := tokenExpiry(response.GetAccessToken())
+	request, err := http.NewRequestWithContext(s.ctx, http.MethodPost, s.tokenURL, bytes.NewReader(body))
 	if err != nil {
-		return nil, fmt.Errorf("control-plane login as %q: %w", s.username, err)
+		return nil, err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
+	response, err := s.http.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = response.Body.Close() }()
+
+	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("%s returned %s", s.tokenURL, response.Status)
+	}
+
+	var granted tokenResponse
+	if err := json.NewDecoder(response.Body).Decode(&granted); err != nil {
+		return nil, fmt.Errorf("decoding token response: %w", err)
+	}
+
+	expiry, err := tokenExpiry(granted.AccessToken)
+	if err != nil {
+		return nil, err
 	}
 
 	return &oauth2.Token{
-		AccessToken:  response.GetAccessToken(),
-		RefreshToken: response.GetRefreshToken(),
+		AccessToken:  granted.AccessToken,
+		RefreshToken: granted.RefreshToken,
 		Expiry:       expiry,
 	}, nil
 }

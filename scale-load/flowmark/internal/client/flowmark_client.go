@@ -9,10 +9,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
+	"time"
 
 	clusterclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	workloadclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"golang.org/x/oauth2"
@@ -23,8 +24,10 @@ import (
 )
 
 const (
-	kubeQPS   = 50
-	kubeBurst = 200
+	kubeQPS      = 50
+	kubeBurst    = 200
+	loginTimeout = 30 * time.Second
+	loginPath    = "/api/v1/token"
 )
 
 type Clients struct {
@@ -72,8 +75,8 @@ func controlPlaneURL(raw string) (string, error) {
 	if raw == "" {
 		return "", errors.New("control plane URL is empty (set --cp-url)")
 	}
-	if !strings.HasPrefix(raw, "http://") && !strings.HasPrefix(raw, "https://") {
-		return "", fmt.Errorf("control plane URL %q must start with http:// or https://", raw)
+	if !strings.HasPrefix(raw, "https://") {
+		return "", fmt.Errorf("control plane URL %q must start with https://", raw)
 	}
 	return strings.TrimRight(raw, "/"), nil
 }
@@ -86,10 +89,8 @@ func credentials(ctx context.Context, env core.Env, baseURL string) (oauth2.Toke
 		return nil, errors.New("missing control plane credentials: provide username and password, or a token")
 	}
 
-	config := idmclient.NewConfiguration()
-	config.Servers = idmclient.ServerConfigurations{{URL: baseURL}}
-	tokens := idmclient.NewAPIClient(config).TokensAPI
-	return newTokenSource(ctx, tokens, env.Username, env.Password), nil
+	loginClient := &http.Client{Timeout: loginTimeout}
+	return newTokenSource(ctx, loginClient, baseURL+loginPath, env.Username, env.Password), nil
 }
 
 func newKubeClient(path string) (k8sclient.Client, error) {

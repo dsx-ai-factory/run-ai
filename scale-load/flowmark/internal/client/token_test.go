@@ -7,6 +7,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -14,17 +15,28 @@ import (
 	"testing"
 	"time"
 
-	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
 )
 
 type fakeIDM struct {
+	t      *testing.T
 	logins int
 	tokens []string
 }
 
-func (f *fakeIDM) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
+func (f *fakeIDM) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost || r.URL.Path != loginPath {
+		f.t.Errorf("unexpected request %s %s", r.Method, r.URL.Path)
+	}
+	var request tokenRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		f.t.Errorf("decoding login body: %v", err)
+	}
+	if request.GrantType != "password" || request.Username == "" || request.Password == "" {
+		f.t.Errorf("unexpected login body: %+v", tokenRequest{Username: request.Username, GrantType: request.GrantType})
+	}
+
 	i := f.logins
 	if i >= len(f.tokens) {
 		i = len(f.tokens) - 1
@@ -45,12 +57,10 @@ func mintJWT(t *testing.T, claims jwt.MapClaims) string {
 
 func newTestSource(t *testing.T, fake *fakeIDM) oauth2.TokenSource {
 	t.Helper()
+	fake.t = t
 	server := httptest.NewServer(fake)
 	t.Cleanup(server.Close)
-
-	config := idmclient.NewConfiguration()
-	config.Servers = idmclient.ServerConfigurations{{URL: server.URL}}
-	return newTokenSource(context.Background(), idmclient.NewAPIClient(config).TokensAPI, "user@test", "secret")
+	return newTokenSource(context.Background(), server.Client(), server.URL+loginPath, "user@test", "secret")
 }
 
 func TestValidTokenIsCached(t *testing.T) {
@@ -106,6 +116,22 @@ func TestTokenWithoutExpiryClaimFails(t *testing.T) {
 	}
 }
 
+func TestRejectedLoginNamesTheStep(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	t.Cleanup(server.Close)
+	source := newTokenSource(context.Background(), server.Client(), server.URL+loginPath, "user@test", "wrong")
+
+	_, err := source.Token()
+	if err == nil || !strings.Contains(err.Error(), "control-plane login") || !strings.Contains(err.Error(), "401") {
+		t.Fatalf("expected login error with status, got: %v", err)
+	}
+	if strings.Contains(err.Error(), "wrong") {
+		t.Fatal("error must not contain the password")
+	}
+}
+
 func TestControlPlaneURL(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -114,9 +140,10 @@ func TestControlPlaneURL(t *testing.T) {
 		wantErr string
 	}{
 		{name: "empty", in: "", wantErr: "--cp-url"},
-		{name: "no scheme", in: "cp.runailabs.com", wantErr: "http"},
+		{name: "no scheme", in: "cp.runailabs.com", wantErr: "https://"},
+		{name: "plain http rejected", in: "http://cp.runailabs.com", wantErr: "https://"},
 		{name: "https", in: "https://cp.runailabs.com", want: "https://cp.runailabs.com"},
-		{name: "trailing slash trimmed", in: "http://cp.local/", want: "http://cp.local"},
+		{name: "trailing slash trimmed", in: "https://cp.local/", want: "https://cp.local"},
 	}
 
 	for _, tc := range cases {

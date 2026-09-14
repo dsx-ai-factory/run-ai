@@ -4,7 +4,6 @@ go 1.26.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
 	github.com/golang-jwt/jwt/v5 v5.3.0
@@ -68,13 +67,3 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
 )
-
-replace github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client => ../../control-plane/identity-manager/pkg/client
-
-replace github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx => ../../runai-common-packages/runaictx
-
-replace github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing => ../../runai-common-packages/tracing
-
-replace github.com/dsx-ai-factory/run-ai/runai-common-packages/logging => ../../runai-common-packages/logging
-
-replace github.com/dsx-ai-factory/run-ai/runai-common-packages/config => ../../runai-common-packages/config
