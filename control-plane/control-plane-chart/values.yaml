@@ -1497,7 +1497,9 @@ keycloakx:
     allowedCapabilities: null
     readOnlyRootFilesystem: false
     runAsUser:
-      type: MustRunAsNonRoot
+      type: MustRunAsRange
+      uidRangeMin: 70
+      uidRangeMax: 65532
     seLinuxContext:
       type: MustRunAs
     seccompProfiles:
