@@ -27,13 +27,7 @@ from collections import Counter, defaultdict
 FIRST_PARTY = "github.com/dsx-ai-factory/run-ai/"
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-SPDX_HEADER = (
-    "# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. "
-    "All rights reserved.\n"
-    "# SPDX-License-Identifier: Apache-2.0\n\n"
-)
-
-HEADER = SPDX_HEADER + """NVIDIA Run:ai — {component}
+HEADER = """NVIDIA Run:ai — {component}
 Copyright (c) 2026 NVIDIA Corporation & Affiliates. All rights reserved.
 
 This product includes software developed at NVIDIA Corporation & Affiliates,

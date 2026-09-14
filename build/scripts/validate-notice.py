@@ -99,8 +99,6 @@ def validate(path):
     head = "\n".join(text.split("\n")[:6])
     if "NVIDIA Run:ai" not in head:
         problems.append("missing standard NVIDIA Run:ai header")
-    if "SPDX-FileCopyrightText" not in head or "SPDX-License-Identifier" not in head:
-        problems.append("missing SPDX header")
 
     return rows, problems
 
