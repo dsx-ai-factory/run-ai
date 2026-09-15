@@ -272,7 +272,6 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../workload-common
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller => ../workload-controller
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../common/clients
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities => ../../common/cluster-capabilities
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants => ../../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority => ../../common/priority

@@ -10,7 +10,6 @@ import (
 
 	clusterclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
 	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients/control-plane/generated"
 )
 
 const defaultControlPlaneClientID = "runai-internal.installer"
@@ -20,10 +19,6 @@ type ControlPlaneDetails struct {
 	ClientId       string
 	ClientSecret   string
 	BootstrapToken string
-}
-
-type ClusterServiceClient struct {
-	apiClient *openapi.APIClient
 }
 
 func NewAuthenticatedClusterClient(cpDetails *ControlPlaneDetails) (clusterclient.IClusterExternalClient, error) {

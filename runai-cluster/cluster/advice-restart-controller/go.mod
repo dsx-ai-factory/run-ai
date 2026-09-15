@@ -181,8 +181,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
 
-replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../common/clients
-
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../common/profiling
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../common/constants
