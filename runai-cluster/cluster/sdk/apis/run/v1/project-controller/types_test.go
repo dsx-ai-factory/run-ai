@@ -111,15 +111,9 @@ var _ = Describe("Project Controller", func() {
 				}
 			})
 
-			It("should set Enabled to false, since KRM owns the project-controller", func() {
+			It("should set Enabled to true by default", func() {
 				projectController.SetDefaultsWhereNeeded(internal, globalRegistry, globalReplicaCount)
-				Expect(projectController.Enabled).To(Equal(ptr.To(false)))
-			})
-
-			It("should keep Enabled false even when explicitly set to true", func() {
-				projectController.Enabled = ptr.To(true)
-				projectController.SetDefaultsWhereNeeded(internal, globalRegistry, globalReplicaCount)
-				Expect(projectController.Enabled).To(Equal(ptr.To(false)))
+				Expect(projectController.Enabled).To(Equal(ptr.To(true)))
 			})
 
 			It("should set Replicas to globalReplicaCount", func() {

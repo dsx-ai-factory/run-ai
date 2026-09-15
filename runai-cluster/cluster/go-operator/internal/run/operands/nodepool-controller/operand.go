@@ -57,8 +57,10 @@ func (o *operand) Status(ctx context.Context) (operands.Status, error) {
 	return utils.Status(ctx, o.resources)
 }
 
+// Enabled is pinned off: KRM supplies this controller now, and the operand is
+// kept registered only so the Deployment it left behind is deleted.
 func (o *operand) Enabled() bool {
-	return *o.runaiConfig.Spec.NodePoolController.Enabled
+	return false
 }
 
 func Operand(k8sReader kc.HybridClient, runaiConfig *runv1.RunaiConfig) operands.Operand {

@@ -97,10 +97,9 @@ type ProjectController struct {
 
 // SetDefaultsWhereNeeded sets default for unset fields
 func (p *ProjectController) SetDefaultsWhereNeeded(internalSpec *internal.Internal, globalRegistry string, globalReplicaCount *int32) {
-	// KRM owns the project-controller now, so this operand only exists to delete
-	// what the Run:ai-built one left behind. Overwritten rather than defaulted:
-	// re-enabling it would run a second controller against the same Projects.
-	p.Enabled = ptr.To[bool](false)
+	if p.Enabled == nil {
+		p.Enabled = ptr.To[bool](true)
+	}
 
 	p.IsOpenShift = internalSpec.Global.Platform.KubernetesFlavor == internal.KubernetesFlavorOpenShift
 
