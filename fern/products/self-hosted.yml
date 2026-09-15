@@ -263,18 +263,21 @@ navigation:
             path: ../../docs/platform-management/runai-scheduler/scheduling/quick-starts/over-quota.md
       - section: Resource Optimization
         contents:
-        - page: GPU Fractions
-          slug: fractions
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/fractions.md
-        - page: Dynamic GPU Fractions
-          slug: dynamic-fractions
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md
+        - section: GPU Fractions
+          slug: gpu-fractions
+          contents:
+          - page: GPU Memory Fractions
+            slug: memory-fractions
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-fractions.md
+          - page: Dynamic GPU Memory Fractions
+            slug: dynamic-memory-fractions
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md
+          - page: GPU Compute Modes
+            slug: compute-modes
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/compute-modes.md
         - page: Optimize Performance with Node Level Scheduler
           slug: node-level-scheduler
           path: ../../docs/platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md
-        - page: GPU Time-Slicing
-          slug: time-slicing
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/time-slicing.md
         - page: GPU Memory Swap
           slug: memory-swap
           path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-swap.md
@@ -283,12 +286,15 @@ navigation:
           path: ../../docs/platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md
         - section: Quick Starts
           contents:
-          - page: Launching Workloads with GPU Fractions
+          - page: Launching Workloads with GPU Memory Fractions
             slug: gpu-fractions-quickstart
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-fractions-quickstart.md
-          - page: Launching Workloads with Dynamic GPU Fractions
+          - page: Launching Workloads with Dynamic GPU Memory Fractions
             slug: dynamic-gpu-fractions-quickstart
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/dynamic-gpu-fractions-quickstart.md
+          - page: Launching Workloads with GPU Compute Modes
+            slug: compute-modes-quickstart
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/compute-modes-quickstart.md
           - page: Launching Workloads with GPU Memory Swap
             slug: gpu-memory-swap-quickstart
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-memory-swap-quickstart.md

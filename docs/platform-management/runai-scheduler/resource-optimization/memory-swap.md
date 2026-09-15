@@ -10,7 +10,7 @@ There are several use cases where GPU memory swap can benefit and improve the us
 
 ### Sharing a GPU Between Multiple Interactive Workloads (Notebooks)
 
-AI practitioners use notebooks to develop and test new AI models and to improve existing AI models. While developing or testing an AI model, notebooks use GPU resources intermittently, yet, required resources of the GPUs are pre-allocated by the notebook and cannot be used by other workloads after one notebook has already reserved them. To overcome this inefficiency, NVIDIA Run:ai introduced [dynamic GPU fractions](dynamic-fractions.md).
+AI practitioners use notebooks to develop and test new AI models and to improve existing AI models. While developing or testing an AI model, notebooks use GPU resources intermittently, yet, required resources of the GPUs are pre-allocated by the notebook and cannot be used by other workloads after one notebook has already reserved them. To overcome this inefficiency, NVIDIA Run:ai introduced [dynamic GPU fractions](dynamic-memory-fractions.md).
 
 When one or more workloads require more than their requested GPU resources, there’s a high probability not all workloads can run on a single GPU because the total memory required is larger than the physical size of the GPU memory.
 
@@ -36,7 +36,7 @@ Swapping the workload’s GPU memory to and from the CPU is performed simultaneo
 
 In other cases, workloads will run serially, with each workload running for a few seconds before the system swaps them in/out. If multiple workloads occupy more than the GPU physical memory and attempt to run simultaneously, memory swapping will occur. In this scenario, each workload will run part of the time on the GPU while being swapped out to the CPU memory the other part of the time, slowing down the execution of the workloads. Therefore, it is important to evaluate whether memory swapping is suitable for your specific use cases, weighing the benefits against the potential for slower execution time. To better understand the benefits and use cases of GPU memory swap, refer to the detailed sections below. This will help you determine how to best utilize GPU swap for your workloads and achieve optimal performance.
 
-The workload MUST use [dynamic GPU fractions](dynamic-fractions.md). This means the workload’s memory Request is less than a full GPU, but it may add a GPU memory Limit to allow the workload to effectively use the full GPU memory. The NVIDIA Run:ai Scheduler allocates the dynamic fraction pair (Request and Limit) on single or multiple GPU devices in the same node.
+The workload MUST use [dynamic GPU fractions](dynamic-memory-fractions.md). This means the workload’s memory Request is less than a full GPU, but it may add a GPU memory Limit to allow the workload to effectively use the full GPU memory. The NVIDIA Run:ai Scheduler allocates the dynamic fraction pair (Request and Limit) on single or multiple GPU devices in the same node.
 
 To enable GPU memory swap, you must first configure the cluster with the required global setting, `global.core.swap.enabled`. After the cluster supports swap, you can enable GPU memory swap at the node-pool level. When creating or updating a node pool via the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API, set the `gpuResourceOptimization.swapEnabled` parameter to `true`. NVIDIA Run:ai automatically applies the required `run.ai/swap-enabled=true` label to the nodes as part of this configuration. You can also use the `gpuResourceOptimization.cpuSwapMemorySize` field to specify the reserved CPU memory size for serving swapped GPU memory. See [Enabling and configuring GPU memory swap](memory-swap.md#enabling-and-configuring-gpu-memory-swap).
 
@@ -56,7 +56,7 @@ The following outlines the advantages of stacking multiple models on the same no
 ## Deployment Considerations
 
 * A pod created before the GPU memory swap feature was enabled in that cluster, cannot be scheduled to a swap-enabled node. A proper event is generated in case no matching node is found. Users must re-submit those pods to make them swap-enabled.
-* GPU memory swap cannot be enabled if the NVIDIA Run:ai [strict or fair time-slicing](time-slicing.md#gpu-time-slicing-modes) is used. GPU memory swap can only be used with the default NVIDIA time-slicing mechanism.
+* GPU memory swap cannot be enabled if the NVIDIA Run:ai strict or fair time-slicing is used. GPU memory swap can only be used with the default NVIDIA time-slicing mechanism.
 * CPU RAM size cannot be decreased once GPU memory swap is enabled.
 
 ## Enabling and Configuring GPU Memory Swap

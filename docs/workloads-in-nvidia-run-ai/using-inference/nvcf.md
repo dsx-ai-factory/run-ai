@@ -72,8 +72,8 @@ After the NVCF function is deployed, it is added to the [Workloads](../workloads
 | [Over quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#over-quota)                                       |   v  |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md)                                            |   v  |
 | [Bin packing / Spread](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#placement-strategy-bin-pack-and-spread) |   v  |
-| [Multi-GPU fractions](../../platform-management/runai-scheduler/resource-optimization/fractions.md)                                            |      |
-| [Multi-GPU dynamic fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md)                            |      |
+| [Multi-GPU fractions](../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md)                                            |      |
+| [Multi-GPU dynamic fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md)                            |      |
 | [Node level scheduler](../../platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md)                                |   v  |
 | [Multi-GPU memory swap](../../platform-management/runai-scheduler/resource-optimization/memory-swap.md)                                        |      |
 | [Gang scheduling](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#gang-scheduling)                             |   v  |

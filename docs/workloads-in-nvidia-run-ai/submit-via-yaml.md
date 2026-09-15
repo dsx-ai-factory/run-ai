@@ -46,7 +46,7 @@ By default, supported workload types are assigned a priority and preemptibility 
 
 ## Setting GPU Fractions
 
-To enable GPU fractions for workloads submitted via YAML, use the following annotations to define the GPU fraction configuration. You can configure either `gpu-fraction` or `gpu-memory`. For concept details, deployment considerations, and a full example, see [GPU Fractions](../platform-management/runai-scheduler/resource-optimization/fractions.md#setting-gpu-fractions-via-yaml).
+To enable GPU fractions for workloads submitted via YAML, use the following annotations to define the GPU fraction configuration. You can configure either `gpu-fraction` or `gpu-memory`. For concept details, deployment considerations, and a full example, see [GPU Fractions](../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#setting-gpu-memory-fractions-via-yaml).
 
 GPU fractions can be assigned to only one container in the pod. By default, GPU fraction allocation is applied to the first container (index 0) in the pod. Set the `gpu-fraction-container-name` annotation to specify which container should consume the fractional GPU resources. The specified container can be the main container, a sidecar, or an init container, any container other than the default first container.
 

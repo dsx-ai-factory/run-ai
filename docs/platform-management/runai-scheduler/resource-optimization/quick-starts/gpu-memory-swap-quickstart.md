@@ -10,7 +10,7 @@ Before you start, make sure:
 
 * You have created a [project](../../../aiinitiatives/organization/projects.md) or have one created for you.
 * The project has an assigned quota of at least 1 GPU.
-* [Dynamic GPU fractions](../dynamic-fractions.md) is enabled.
+* [Dynamic GPU fractions](../dynamic-memory-fractions.md) is enabled.
 * GPU memory swap is enabled on at least one free node as detailed [here](../memory-swap.md#enabling-and-configuring-gpu-memory-swap).
 * [Host-based routing](../../../../installation-and-configuration/installation/install-using-helm/system-requirements.md#host-based-routing) is configured.
 
