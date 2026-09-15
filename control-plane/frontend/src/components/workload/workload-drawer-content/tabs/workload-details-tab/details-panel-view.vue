@@ -4,7 +4,17 @@
 -->
 
 <template>
-  <runai-details-panel :key="selectedSpec || 'default'" :sections="accordionSections">
+  <runai-default-loader v-if="loading" />
+
+  <runai-drawer-no-data
+    v-else-if="!sections.length"
+    :messages="['There are no details yet.']"
+    icon-name="ph-bold ph-file"
+    icon-class="text-icon-default"
+    wrapper-padding-class="q-px-md q-pb-xl"
+  />
+
+  <runai-details-panel v-else :key="selectedSpec || 'default'" :sections="sections">
     <template v-if="showSpecSelect" #controls-prepend>
       <runai-select
         aid="workload-details-spec-select"
@@ -46,11 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import type { WorkloadDetailed, WorkloadNodeAffinity } from "@/swagger-models/workloads-client";
 import type { IDetailsPanelSectionDef } from "@/models/details-panel.model";
-import type { CrudWorkload } from "@/services/cluster/workload.service/workload.service";
-import { buildSearchableSections, type WorkloadSpec } from "@/utils/workload-details.util";
 import type {
   IGeneralSectionData,
   IEnvironmentSectionData,
@@ -59,7 +65,9 @@ import type {
   IStorageSectionData,
   ICliCommandSectionData,
 } from "@/models/workload-details.model";
+import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
 import { RunaiDetailsPanel } from "@/components/common/runai-details-panel";
+import { RunaiDrawerNoData } from "@/components/common/runai-drawer-no-data";
 import { RunaiSelect } from "@/components/common/runai-select";
 import type { ISelectOption } from "@/models/global.model";
 import {
@@ -71,26 +79,23 @@ import {
   WorkloadCliCommandSection,
 } from "@/components/workload/workload-drawer-content/tabs/workload-details-tab/sections";
 
-defineOptions({ name: "workload-details-panel-view" });
+defineOptions({ name: "details-panel-view" });
 
-const props = withDefaults(
+// Pure renderer over the accordion-section model — it has no idea whether the sections came from
+// a workload or a workload element. workload-details-tab / element-details-tab each build that
+// model from their own data source (via workloadDetailsUtil / workload-element-details.util) and
+// hand it here. Owns the loading + no-data states itself, since both callers need identical
+// handling for them.
+withDefaults(
   defineProps<{
-    workloadDetailed: WorkloadDetailed;
-    workloadCrud?: CrudWorkload | null;
-    currentSpec?: WorkloadSpec;
-    clusterName?: string;
-    topologyLevels?: string[];
-    nodeAffinities?: WorkloadNodeAffinity[];
+    sections: IDetailsPanelSectionDef[];
+    loading?: boolean;
     selectedSpec?: string;
     showSpecSelect?: boolean;
     specOptions?: ISelectOption[];
   }>(),
   {
-    workloadCrud: null,
-    currentSpec: undefined,
-    clusterName: "",
-    topologyLevels: () => [],
-    nodeAffinities: () => [],
+    loading: false,
     selectedSpec: "",
     showSpecSelect: false,
     specOptions: () => [],
@@ -101,31 +106,9 @@ const emit = defineEmits<{
   "update:selectedSpec": [value: string];
 }>();
 
-const currentNodeAffinity = computed<WorkloadNodeAffinity | undefined>(() => {
-  if (!props.nodeAffinities.length) return undefined;
-  if (props.nodeAffinities.length === 1) return props.nodeAffinities[0];
-  return (
-    props.nodeAffinities.find((entry) => entry.specName?.toLowerCase() === props.selectedSpec?.toLowerCase()) ??
-    props.nodeAffinities[0]
-  );
-});
-
-const accordionSections = computed<IDetailsPanelSectionDef[]>(() =>
-  buildSearchableSections({
-    workloadDetailed: props.workloadDetailed,
-    workloadCrud: props.workloadCrud ?? undefined,
-    currentSpec: props.currentSpec,
-    clusterName: props.clusterName,
-    topologyLevels: props.topologyLevels,
-    nodeAffinity: currentNodeAffinity.value?.nodeAffinity,
-  }),
-);
-
 function onSelectedSpecUpdate(value: string): void {
   emit("update:selectedSpec", value);
 }
-
-defineExpose({ accordionSections });
 </script>
 
 <style lang="scss" scoped>

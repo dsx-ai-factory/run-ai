@@ -64,6 +64,7 @@ export const clusterService = {
   getLatestClusterVersion,
   getClusterByUuid,
   getNetworkTopologies,
+  getNetworkTopologyLevelsByName,
   getNetworkTopologyCount,
   createNetworkTopology,
   deleteNetworkTopology,
@@ -431,6 +432,23 @@ async function getNetworkTopologies(filterBy?: Array<string>): Promise<NetworkTo
     return response.data.networkTopologies || [];
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
+  }
+}
+
+/**
+ * Fetches the ordered level list for a single named network topology, scoped to a cluster.
+ * Returns an empty array (never throws) when the topology isn't found or the lookup fails —
+ * callers use this to enrich a details panel where topology levels are supplementary.
+ */
+async function getNetworkTopologyLevelsByName(name: string, clusterId: string): Promise<string[]> {
+  try {
+    const topologies = await getNetworkTopologies([
+      filterUtil.getEqualsFilterString("name", name),
+      filterUtil.getEqualsFilterString("clusterId", clusterId),
+    ]);
+    return topologies.length > 0 ? (topologies[0].levels ?? []) : [];
+  } catch {
+    return [];
   }
 }
 

@@ -4,30 +4,10 @@
 -->
 
 <template>
-  <section class="workload-details" :class="containerPaddingClass" :key="workload.id">
-    <runai-default-loader v-if="loading" />
-
-    <runai-drawer-no-data
-      v-else-if="showElementEmptyState"
-      :messages="elementEmptyStateMessages"
-      icon-name="ph-bold ph-file-text"
-    />
-
-    <runai-drawer-no-data
-      v-else-if="showEmptyState"
-      :messages="['There are no details for this workload yet.']"
-      icon-name="ph-bold ph-file"
-      icon-class="text-icon-default"
-    />
-
-    <workload-details-panel-view
-      v-else-if="workloadDetailed"
-      :workload-detailed="workloadDetailed"
-      :workload-crud="workloadCrud"
-      :current-spec="currentSpec"
-      :cluster-name="getClusterName()"
-      :topology-levels="topologyLevels"
-      :node-affinities="nodeAffinities"
+  <section class="workload-details" :key="workload.id">
+    <details-panel-view
+      :loading="loading"
+      :sections="accordionSections"
       v-model:selected-spec="selectedSpec"
       :show-spec-select="showSpecSelect"
       :spec-options="specOptions"
@@ -44,6 +24,7 @@ import type {
   DistributedWorkload,
 } from "@/swagger-models/workloads-client";
 import type { ISelectOption } from "@/models/global.model";
+import type { IDetailsPanelSectionDef } from "@/models/details-panel.model";
 import { EWorkloadType, EDistributedReplicaType } from "@/models/workload.model";
 //services
 import { workloadService, type CrudWorkload } from "@/services/cluster/workload.service/workload.service";
@@ -51,32 +32,23 @@ import { clusterService } from "@/services/control-plane/cluster.service/cluster
 //stores
 import { useClusterStore } from "@/stores/cluster.store";
 //cmps
-import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
-import { RunaiDrawerNoData } from "@/components/common/runai-drawer-no-data";
-import WorkloadDetailsPanelView from "@/components/workload/workload-drawer-content/tabs/workload-details-tab/workload-details-panel-view.vue";
+import DetailsPanelView from "@/components/workload/workload-drawer-content/tabs/workload-details-tab/details-panel-view.vue";
 //utils
 import { workloadDetailsUtil, type WorkloadSpec } from "@/utils/workload-details.util";
 import { workloadV2ManifestUtil } from "@/utils/workload-v2-manifest.util";
 import { alertUtil } from "@/utils/alert.util";
-import { filterUtil } from "@/utils/filter.util/filter.util";
 import { SourceApi } from "@/swagger-models/workloads-client";
 import { NotFoundError, type HttpErrorResponse } from "@/models/http-response.model";
 
 export default defineComponent({
   name: "workload-details-tab",
   components: {
-    RunaiDefaultLoader,
-    RunaiDrawerNoData,
-    WorkloadDetailsPanelView,
+    DetailsPanelView,
   },
   props: {
     workload: {
       type: Object as PropType<Workload>,
       required: true,
-    },
-    showElementEmptyState: {
-      type: Boolean as PropType<boolean>,
-      default: false,
     },
     isDeletedViewType: {
       type: Boolean as PropType<boolean>,
@@ -98,13 +70,6 @@ export default defineComponent({
     await this.fetchWorkloadDetails();
   },
   computed: {
-    containerPaddingClass(): string {
-      return this.workloadDetailed ? "" : "q-px-md q-pb-xl";
-    },
-
-    elementEmptyStateMessages(): string[] {
-      return ["Details aren't available for this element.", "Details are available at the workload level only."];
-    },
     isNativeWorkload(): boolean {
       const nativeTypes = [
         EWorkloadType.Workspace,
@@ -123,10 +88,6 @@ export default defineComponent({
     // Soft-deleted workloads remain in v1; v2 queue rows are hard-deleted after agent confirm.
     useV2Api(): boolean {
       return this.isWorkloadsV2Workload && !this.isDeletedViewType;
-    },
-
-    showEmptyState(): boolean {
-      return !this.workloadDetailed && !this.workloadCrud;
     },
 
     isDistributed(): boolean {
@@ -182,18 +143,33 @@ export default defineComponent({
 
       return workloadDetailsUtil.getSpecSection(crudWorkload, selectedReplicaType);
     },
+
+    currentNodeAffinity(): WorkloadNodeAffinity | undefined {
+      if (!this.nodeAffinities.length) return undefined;
+      if (this.nodeAffinities.length === 1) return this.nodeAffinities[0];
+      return (
+        this.nodeAffinities.find((entry) => entry.specName?.toLowerCase() === this.selectedSpec?.toLowerCase()) ??
+        this.nodeAffinities[0]
+      );
+    },
+
+    // The accordion-section model consumed by the shared details-panel-view. Built here (rather
+    // than in a separate "view" component) since this is the only consumer of the data this tab
+    // already fetched — no reuse to justify the extra layer.
+    accordionSections(): IDetailsPanelSectionDef[] {
+      if (!this.workloadDetailed) return [];
+      return workloadDetailsUtil.buildSearchableSections({
+        workloadDetailed: this.workloadDetailed,
+        workloadCrud: this.workloadCrud ?? undefined,
+        currentSpec: this.currentSpec,
+        clusterName: this.getClusterName(),
+        topologyLevels: this.topologyLevels,
+        nodeAffinity: this.currentNodeAffinity?.nodeAffinity,
+      });
+    },
   },
   methods: {
     async fetchWorkloadDetails() {
-      if (this.showElementEmptyState) {
-        this.loading = false;
-        this.workloadDetailed = null;
-        this.workloadCrud = null;
-        this.nodeAffinities = [];
-        this.topologyLevels = [];
-        return;
-      }
-
       this.loading = true;
       this.nodeAffinities = [];
       this.workloadCrud = null;
@@ -274,19 +250,10 @@ export default defineComponent({
     async fetchTopologyLevels(): Promise<void> {
       const topologyName = this.workloadDetailed?.topology?.name;
       const clusterId = this.workloadDetailed?.clusterId;
+      this.topologyLevels = [];
       if (!topologyName || !clusterId) return;
 
-      try {
-        const topologies = await clusterService.getNetworkTopologies([
-          filterUtil.getEqualsFilterString("name", topologyName),
-          filterUtil.getEqualsFilterString("clusterId", clusterId),
-        ]);
-        if (topologies.length > 0) {
-          this.topologyLevels = topologies[0].levels ?? [];
-        }
-      } catch {
-        // Topology levels are supplementary; don't fail the whole section
-      }
+      this.topologyLevels = await clusterService.getNetworkTopologyLevelsByName(topologyName, clusterId);
     },
   },
   watch: {
@@ -294,9 +261,6 @@ export default defineComponent({
       handler() {
         this.fetchWorkloadDetails();
       },
-    },
-    showElementEmptyState() {
-      this.fetchWorkloadDetails();
     },
   },
 });

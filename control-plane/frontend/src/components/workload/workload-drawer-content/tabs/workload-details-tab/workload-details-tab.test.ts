@@ -28,7 +28,7 @@ vi.mock("@/services/cluster/workload.service/workload.service", () => ({
 
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: {
-    getNetworkTopologies: vi.fn().mockResolvedValue([]),
+    getNetworkTopologyLevelsByName: vi.fn().mockResolvedValue([]),
   },
 }));
 
@@ -73,8 +73,6 @@ describe("WorkloadDetailsTab", () => {
           createTestingPinia({ createSpy: vi.fn, stubActions: false }),
         ],
         stubs: {
-          RunaiDefaultLoader: true,
-          RunaiDrawerNoData: true,
           RunaiDetailsPanel: PASSTHROUGH_STUB,
           WorkloadGeneralInfoSection: true,
           WorkloadEnvironmentSection: true,
@@ -105,16 +103,11 @@ describe("WorkloadDetailsTab", () => {
 
     it("shows the loader while fetching", async () => {
       const wrapper = createWrapper();
-      expect(wrapper.findComponent({ name: "RunaiDefaultLoader" }).exists()).toBe(true);
+      // The loading UI itself lives in details-panel-view (tested there) — here we only need to
+      // confirm this tab feeds it the right loading flag.
+      expect(wrapper.findComponent({ name: "details-panel-view" }).props("loading")).toBe(true);
       await flushPromises();
-      expect(wrapper.findComponent({ name: "RunaiDefaultLoader" }).exists()).toBe(false);
-    });
-
-    it("shows the element-empty state when showElementEmptyState is true", async () => {
-      const wrapper = createWrapper({ showElementEmptyState: true });
-      await flushPromises();
-      expect(wrapper.findComponent({ name: "RunaiDrawerNoData" }).exists()).toBe(true);
-      expect(workloadService.getWorkloadById).not.toHaveBeenCalled();
+      expect(wrapper.findComponent({ name: "details-panel-view" }).props("loading")).toBe(false);
     });
 
     it("renders details for supported (non-native) workloads from WorkloadDetailed alone", async () => {
@@ -126,7 +119,7 @@ describe("WorkloadDetailsTab", () => {
       expect(workloadService.getWorkloadCrudById).not.toHaveBeenCalled();
       expect(wrapper.vm.workloadDetailed).toMatchObject({ id: "workload-123" });
       expect(wrapper.vm.workloadCrud).toBeNull();
-      expect(wrapper.findComponent({ name: "RunaiDrawerNoData" }).exists()).toBe(false);
+      expect(wrapper.vm.accordionSections.length).toBeGreaterThan(0);
     });
 
     it("shows the empty state for a supported workload when WorkloadDetailed is unavailable", async () => {
@@ -137,7 +130,9 @@ describe("WorkloadDetailsTab", () => {
 
       expect(workloadService.getWorkloadCrudById).not.toHaveBeenCalled();
       expect(wrapper.vm.workloadDetailed).toBeNull();
-      expect(wrapper.findComponent({ name: "RunaiDrawerNoData" }).exists()).toBe(true);
+      // The empty-state UI itself lives in details-panel-view (tested there) — here we only need
+      // to confirm this tab feeds it an empty sections model when there's nothing to show.
+      expect(wrapper.vm.accordionSections).toEqual([]);
     });
 
     it("loads v2 raw manifest details without calling v1 by-id endpoints", async () => {
@@ -210,7 +205,7 @@ describe("WorkloadDetailsTab", () => {
       expect(workloadService.getWorkloadV2ById).toHaveBeenCalledWith("workload-123");
       expect(workloadService.getWorkloadById).toHaveBeenCalledWith("workload-123");
       expect(wrapper.vm.workloadDetailed).toBeNull();
-      expect(wrapper.findComponent({ name: "RunaiDrawerNoData" }).exists()).toBe(true);
+      expect(wrapper.vm.accordionSections).toEqual([]);
       expect(wrapper.vm.$q.notify).toHaveBeenCalled();
     });
 
@@ -252,13 +247,50 @@ describe("WorkloadDetailsTab", () => {
   });
 
   describe("rendering", () => {
-    it("renders the WorkloadDetailsPanelView with the fetched data", async () => {
+    it("renders details-panel-view with the built sections", async () => {
       const wrapper = createWrapper();
       await flushPromises();
 
-      const view = wrapper.findComponent({ name: "workload-details-panel-view" });
+      const view = wrapper.findComponent({ name: "details-panel-view" });
       expect(view.exists()).toBe(true);
-      expect(view.props("workloadDetailed")).toMatchObject({ id: "workload-123" });
+      expect(view.props("sections")).toEqual(wrapper.vm.accordionSections);
+      expect(wrapper.vm.accordionSections.find((s) => s.id === "general")).toBeDefined();
+    });
+
+    it("builds the General information section from the fetched workload detail", async () => {
+      const wrapper = createWrapper();
+      await flushPromises();
+
+      const general = wrapper.vm.accordionSections.find((s) => s.id === "general");
+      const labels = (general?.data as { groups: { label: string }[][] }).groups.flat().map((i) => i.label);
+      expect(labels).toEqual(
+        expect.arrayContaining([
+          "Type",
+          "Category",
+          "Priority",
+          "Preemptible",
+          "Project",
+          "Cluster",
+          "Department",
+          "Creation time",
+          "Created by",
+        ]),
+      );
+    });
+
+    it("includes the CLI Command section when cliCommand is present", async () => {
+      const wrapper = createWrapper();
+      await flushPromises();
+      expect(wrapper.vm.accordionSections.some((s) => s.id === "cli-command")).toBe(true);
+    });
+
+    it("omits the CLI Command section when cliCommand is missing", async () => {
+      (workloadService.getWorkloadById as Mock).mockResolvedValue({ ...mockWorkloadDetailed, additionalFields: {} });
+
+      const wrapper = createWrapper();
+      await flushPromises();
+
+      expect(wrapper.vm.accordionSections.some((s) => s.id === "cli-command")).toBe(false);
     });
   });
 

@@ -101,7 +101,13 @@
               />
             </runai-tab-panel>
             <runai-tab-panel class="q-pa-none" :name="tabOptions.Details">
-              <workload-details-tab :workload="workload" :show-element-empty-state="isElementContext" />
+              <element-details-tab
+                v-if="selectedElementId"
+                :element="elementDetailsById[selectedElementId] ?? null"
+                :element-pods-count="contextPods.length"
+                :cluster-id="workload.clusterId"
+              />
+              <workload-details-tab v-else :workload="workload" />
             </runai-tab-panel>
           </runai-tab-panels>
         </aside>
@@ -128,6 +134,7 @@ import { WorkloadLogsTab } from "@/components/workload/workload-drawer-content/t
 import { WorkloadTerminal } from "@/components/workload/workload-drawer-content/tabs/workload-terminal";
 import { WorkloadYamlTab, EYamlTabView } from "@/components/workload/workload-drawer-content/tabs/workload-yaml-tab";
 import WorkloadDetailsTab from "@/components/workload/workload-drawer-content/tabs/workload-details-tab/workload-details-tab.vue";
+import ElementDetailsTab from "@/components/workload/workload-drawer-content/tabs/workload-details-tab/element-details-tab.vue";
 import WorkloadArchitectureDiagram from "@/components/workload/workload-drawer-content/tabs/workload-architecture-tab/workload-architecture-diagram.vue";
 import type { WorkloadElementDetailsById } from "@/components/workload/workload-drawer-content/tabs/workload-architecture-tab/workload-architecture-diagram.util";
 import { WorkloadPodsTab } from "@/components/workload/workload-drawer-content/tabs/workload-pods-tab";
@@ -216,7 +223,7 @@ const contextTabs = computed<ITab[]>(() => [
   { name: tabOptions.Logs, label: "logs", aid: "workload-structure-tab-logs" },
   { name: tabOptions.Terminal, label: "terminal", aid: "workload-structure-tab-terminal" },
   { name: tabOptions.Yaml, label: "yaml", hidden: hideYamlTab.value, aid: "workload-structure-tab-yaml" },
-  { name: tabOptions.Details, label: "details", hidden: isElementContext.value, aid: "workload-structure-tab-details" },
+  { name: tabOptions.Details, label: "details", aid: "workload-structure-tab-details" },
 ]);
 
 const queryName = computed(() => (typeof route.query.name === "string" ? route.query.name : ""));
@@ -256,7 +263,7 @@ const selectedElementName = computed(() => {
   );
 });
 
-const childIncompatibleTabs: StructureTab[] = [tabOptions.EventHistory, tabOptions.Details];
+const childIncompatibleTabs: StructureTab[] = [tabOptions.EventHistory];
 
 const getRouteTab = (): StructureTab => {
   const tab = route.query.tab;
