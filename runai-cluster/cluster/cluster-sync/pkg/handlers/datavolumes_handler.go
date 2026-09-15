@@ -70,7 +70,6 @@ func (h *DatavolumeHandler) HandleDelete(datavolume *v1alpha1.DataVolume) error 
 	)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted datavolume %s", datavolume.Name))
 }
@@ -85,7 +84,6 @@ func (h *DatavolumeHandler) updateDatavolumeStatus(datavolume *v1alpha1.DataVolu
 	)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Updated datavolume %s", datavolume.Name))
 }

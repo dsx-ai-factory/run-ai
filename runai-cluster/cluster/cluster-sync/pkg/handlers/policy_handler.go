@@ -98,7 +98,6 @@ func (h *PolicyHandler) handlePolicyGenericSyncStatus(policy client.Object, oper
 		res, requestErr := h.backendClient.PolicyClient.UpdateSyncStatusWorkspace(h.backendClient.Context(), updateSyncStatusPayload)
 		if res != nil {
 			_ = res.Body.Close()
-
 		}
 		if requestErr != nil {
 			return requestErr
@@ -107,7 +106,6 @@ func (h *PolicyHandler) handlePolicyGenericSyncStatus(policy client.Object, oper
 		res, requestErr := h.backendClient.PolicyClient.UpdateSyncStatusTraining(h.backendClient.Context(), updateSyncStatusPayload)
 		if res != nil {
 			_ = res.Body.Close()
-
 		}
 		if requestErr != nil {
 			return requestErr
@@ -116,7 +114,6 @@ func (h *PolicyHandler) handlePolicyGenericSyncStatus(policy client.Object, oper
 		res, requestErr := h.backendClient.PolicyClient.UpdateSyncStatusDistributed(h.backendClient.Context(), updateSyncStatusPayload)
 		if res != nil {
 			_ = res.Body.Close()
-
 		}
 		if requestErr != nil {
 			return requestErr
@@ -125,7 +122,6 @@ func (h *PolicyHandler) handlePolicyGenericSyncStatus(policy client.Object, oper
 		res, requestErr := h.backendClient.PolicyClient.UpdateSyncStatusInference(h.backendClient.Context(), updateSyncStatusPayload)
 		if res != nil {
 			_ = res.Body.Close()
-
 		}
 		if requestErr != nil {
 			return requestErr

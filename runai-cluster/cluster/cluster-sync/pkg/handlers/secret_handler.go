@@ -75,7 +75,6 @@ func (secretHandler *SecretHandler) handleSecretAddUpdate(secret *coreV1.Secret)
 			parsedSecret.CreationRequest.Type, parsedSecret.CreationRequest.Origin, parsedSecret.CreationRequest.Issues, parsedSecret.CreationRequest.Private)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
@@ -84,7 +83,6 @@ func (secretHandler *SecretHandler) handleSecretAddUpdate(secret *coreV1.Secret)
 			parsedSecret.CreationRequest.Type, parsedSecret.CreationRequest.Origin, parsedSecret.CreationRequest.Issues)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_PROJECT:
@@ -93,7 +91,6 @@ func (secretHandler *SecretHandler) handleSecretAddUpdate(secret *coreV1.Secret)
 			parsedSecret.CreationRequest.Type, parsedSecret.CreationRequest.Origin, parsedSecret.CreationRequest.Issues)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 	}
 
@@ -118,7 +115,6 @@ func (secretHandler *SecretHandler) HandleSecretDelete(secret *coreV1.Secret) er
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, secret.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
@@ -126,7 +122,6 @@ func (secretHandler *SecretHandler) HandleSecretDelete(secret *coreV1.Secret) er
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, parsedSecret.Scope.Id, secret.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_PROJECT:
@@ -134,7 +129,6 @@ func (secretHandler *SecretHandler) HandleSecretDelete(secret *coreV1.Secret) er
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, parsedSecret.Scope.Id, secret.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 	}
 
@@ -210,7 +204,6 @@ func (secretHandler *SecretHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				secretHandler.backendClient.Context(), config.Config().ClusterUuid, secretList.Secrets)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 
 		case auth_client.SCOPETYPE_DEPARTMENT:
@@ -218,7 +211,6 @@ func (secretHandler *SecretHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				secretHandler.backendClient.Context(), config.Config().ClusterUuid, scope.Id, secretList.Secrets)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 
 		case auth_client.SCOPETYPE_PROJECT:
@@ -226,7 +218,6 @@ func (secretHandler *SecretHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				secretHandler.backendClient.Context(), config.Config().ClusterUuid, scope.Id, secretList.Secrets)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 		}
 

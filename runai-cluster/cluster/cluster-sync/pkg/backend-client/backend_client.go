@@ -252,7 +252,6 @@ func (backendClient *BackendClient) sendLiveness() {
 	).UpdateClusterLiveness1Request(*livenessRequest).Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if err != nil || res.StatusCode >= http.StatusBadRequest {
 		livenessErr = backendClient.HandleHttpResponse(res, err, "Sent liveness")

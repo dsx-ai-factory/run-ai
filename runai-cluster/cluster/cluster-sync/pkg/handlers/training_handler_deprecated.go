@@ -56,7 +56,6 @@ func (handler *TrainingHandlerDeprecated) HandleAdd(workload *v2alpha1.TrainingW
 	).WorkloadStatusUpdate(*statusToSend).Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("training %s not found in control plane, it has probably removed already from the DB", statusToSend.Id)
@@ -80,7 +79,6 @@ func (handler *TrainingHandlerDeprecated) HandleDelete(workload *v2alpha1.Traini
 	).Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("training %s is already removed from control plane", workloadId)
@@ -125,7 +123,6 @@ func (handler *TrainingHandlerDeprecated) HandleSyncEvent(waitGroup *sync.WaitGr
 	).WorkloadStatusUpdate(syncToSend).Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	err = handler.runaiBackendClient.HandleHttpResponse(res, err, "Sync workloads")

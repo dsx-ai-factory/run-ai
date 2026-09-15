@@ -72,7 +72,6 @@ func (h *PriorityClassHandler) HandleAddUpdate(pc *schedulingv1.PriorityClass) e
 			WorkloadPrioritiesStatusExecute(prioritiesForStatusRequest)
 		if res != nil {
 			_ = res.Body.Close()
-
 		}
 		return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Upsert priority class %s", pc.Name))
 	}
@@ -85,7 +84,6 @@ func (h *PriorityClassHandler) HandleAddUpdate(pc *schedulingv1.PriorityClass) e
 		WorkloadClusterPrioritiesStatusExecute(clusterPrioritiesForStatusRequest)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Upsert priority class %s", pc.Name))
 }
@@ -109,7 +107,6 @@ func (h *PriorityClassHandler) HandleDelete(pc *schedulingv1.PriorityClass) erro
 			WorkloadPrioritiesStatusExecute(prioritiesForStatusRequest)
 		if res != nil {
 			_ = res.Body.Close()
-
 		}
 		return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted priority class %s", pc.Name))
 	}
@@ -124,7 +121,6 @@ func (h *PriorityClassHandler) HandleDelete(pc *schedulingv1.PriorityClass) erro
 		WorkloadClusterPrioritiesStatusExecute(clusterPrioritiesForStatusRequest)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted priority class %s", pc.Name))
 }
@@ -164,7 +160,6 @@ func (h *PriorityClassHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 		WorkloadPrioritiesStatusExecute(prioritiesForStatusRequest)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if err != nil {
 		zap.S().Errorf("Failed syncing priority classes: %+v", err)
@@ -182,7 +177,6 @@ func (h *PriorityClassHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 		WorkloadClusterPrioritiesStatusExecute(clusterPrioritiesForStatusRequest)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if err != nil {
 		zap.S().Errorf("Failed syncing priority classes: %+v", err)

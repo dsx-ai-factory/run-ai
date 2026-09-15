@@ -86,7 +86,6 @@ func (h *RevisionHandler) handleUpdateInProject(project *util.ProjectData) {
 	res, err := request.Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	err = h.BackendClient.HandleHttpResponse(res, err, "Sync revisions")
 	if err != nil {
@@ -213,7 +212,6 @@ func (h *RevisionHandler) handleUpsert(revisionSyncFields openapi.RevisionSyncFi
 	res, err := request.Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return h.BackendClient.HandleHttpResponse(res, err, "Upsert revision")
 }
@@ -227,7 +225,6 @@ func (h *RevisionHandler) HandleRevisionDelete(object client.Object) error {
 	).Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("revision %s was already deleted", object.GetUID())

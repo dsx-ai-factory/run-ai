@@ -138,7 +138,6 @@ func (h *WorkloadHandler) handleDelete(uid string, namespace, name, kind string)
 	res, err := request.Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return h.backendClient.HandleHttpResponse(res, err,
 		fmt.Sprintf("Deleted %s <%s/%s>", kind, namespace, name))

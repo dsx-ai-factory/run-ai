@@ -49,7 +49,6 @@ func (storageClassHandler *StorageClassHandler) HandleStorageClassAdd(storageCla
 		storageClassHandler.backendClient.Context(), parsedStorageClass)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	return storageClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Added StorageClasses %s", parsedStorageClass.StorageClassName))
@@ -62,7 +61,6 @@ func (storageClassHandler *StorageClassHandler) HandleStorageClassDelete(storage
 		storageClassHandler.backendClient.Context(), config.Config().ClusterUuid, storageClass.Name)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	return storageClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted StorageClass %s", storageClass.Name))
@@ -75,7 +73,6 @@ func (storageClassHandler *StorageClassHandler) HandleStorageClassUpdate(storage
 		storageClassHandler.backendClient.Context(), parsedStorageClass)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	return storageClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Updated StorageClasses %s", parsedStorageClass.StorageClassName))
@@ -102,7 +99,6 @@ func (storageClassHandler *StorageClassHandler) HandleSyncEvent(waitGroup *sync.
 		storageClassHandler.backendClient.Context(), config.Config().ClusterUuid, storageClasses.Items)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	finalError := storageClassHandler.backendClient.HandleHttpResponse(res, httpErr, "Sync storageClass data")

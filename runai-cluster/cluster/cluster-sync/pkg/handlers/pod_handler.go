@@ -97,7 +97,6 @@ func (h *PodHandler) HandlePodDelete(pod *coreV1.Pod) error {
 	res, err := request.Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return h.backendClient.HandleHttpResponse(res, err,
 		fmt.Sprintf("Deleted pod <%s/%s>", pod.Namespace, pod.Name))

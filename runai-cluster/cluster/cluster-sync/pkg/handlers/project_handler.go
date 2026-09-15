@@ -83,7 +83,6 @@ func (projectHandler *ProjectHandler) HandleSyncEvent(waitGroup *sync.WaitGroup)
 		)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 		err = projectHandler.backendClient.HandleHttpResponse(response, err, "Sync projects")
 		if err != nil {
@@ -122,7 +121,6 @@ func (projectHandler *ProjectHandler) updateProjectStatus(project *kaiv1alpha1.P
 	)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return projectHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Updated status of project %s", project.Name))
 }
@@ -137,7 +135,6 @@ func (projectHandler *ProjectHandler) HandleDelete(project *kaiv1alpha1.Project)
 	)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return projectHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted project %s", project.Name))
 }

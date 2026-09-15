@@ -72,7 +72,6 @@ func (nodePoolHandler *NodePoolHandler) HandleDelete(nodePool *v1alpha1.NodePool
 	res, err := request.Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return nodePoolHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted node pool %s", nodePool.Name))
 }
@@ -93,7 +92,6 @@ func (nodePoolHandler *NodePoolHandler) updateNodePoolStatus(nodePool *v1alpha1.
 	res, err := request.Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	return nodePoolHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Updated node pool %s", nodePool.Name))
@@ -127,7 +125,6 @@ func (nodePoolHandler *NodePoolHandler) HandleSyncEvent(waitGroup *sync.WaitGrou
 	res, err := request.Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	err = nodePoolHandler.backendClient.HandleHttpResponse(res, err, "Sync node pools")
 	if err != nil {

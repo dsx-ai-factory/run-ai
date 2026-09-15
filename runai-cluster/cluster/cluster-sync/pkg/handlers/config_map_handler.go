@@ -77,7 +77,6 @@ func (h *ConfigMapHandler) handleConfigMapAddUpdate(configMap *corev1.ConfigMap)
 			h.backendClient.Context(), clusterId, configMap.Name, parsedConfigMap.CreationRequest.Issues)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
@@ -85,7 +84,6 @@ func (h *ConfigMapHandler) handleConfigMapAddUpdate(configMap *corev1.ConfigMap)
 			h.backendClient.Context(), clusterId, parsedConfigMap.Scope.Id, configMap.Name, parsedConfigMap.CreationRequest.Issues)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_PROJECT:
@@ -93,7 +91,6 @@ func (h *ConfigMapHandler) handleConfigMapAddUpdate(configMap *corev1.ConfigMap)
 			h.backendClient.Context(), clusterId, parsedConfigMap.Scope.Id, configMap.Name, parsedConfigMap.CreationRequest.Issues)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 	}
 
@@ -118,7 +115,6 @@ func (h *ConfigMapHandler) HandleConfigMapDelete(configMap *corev1.ConfigMap) er
 			h.backendClient.Context(), config.Config().ClusterUuid, configMap.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
@@ -126,7 +122,6 @@ func (h *ConfigMapHandler) HandleConfigMapDelete(configMap *corev1.ConfigMap) er
 			h.backendClient.Context(), config.Config().ClusterUuid, parsedConfigMap.Scope.Id, configMap.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_PROJECT:
@@ -134,7 +129,6 @@ func (h *ConfigMapHandler) HandleConfigMapDelete(configMap *corev1.ConfigMap) er
 			h.backendClient.Context(), config.Config().ClusterUuid, parsedConfigMap.Scope.Id, configMap.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 	}
 
@@ -207,7 +201,6 @@ func (h *ConfigMapHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				h.backendClient.Context(), config.Config().ClusterUuid, configMapList.Configmaps)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 
 		case auth_client.SCOPETYPE_DEPARTMENT:
@@ -215,7 +208,6 @@ func (h *ConfigMapHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				h.backendClient.Context(), config.Config().ClusterUuid, scope.Id, configMapList.Configmaps)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 
 		case auth_client.SCOPETYPE_PROJECT:
@@ -223,7 +215,6 @@ func (h *ConfigMapHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				h.backendClient.Context(), config.Config().ClusterUuid, scope.Id, configMapList.Configmaps)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 		}
 

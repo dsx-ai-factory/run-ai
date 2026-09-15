@@ -55,7 +55,6 @@ func (handler *DistributedHandlerDeprecated) HandleAdd(workload *diwv2.Distribut
 	).WorkloadStatusUpdate(*statusToSend).Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("distributed %s not found in control plane, it has probably removed already from the DB", statusToSend.Id)
@@ -79,7 +78,6 @@ func (handler *DistributedHandlerDeprecated) HandleDelete(workload *diwv2.Distri
 	).Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("distributed %s is already removed from control plane", workloadId)
@@ -123,7 +121,6 @@ func (handler *DistributedHandlerDeprecated) HandleSyncEvent(waitGroup *sync.Wai
 	).WorkloadStatusUpdate(syncToSend).Execute()
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	err = handler.runaiBackendClient.HandleHttpResponse(res, err, "Sync workloads")

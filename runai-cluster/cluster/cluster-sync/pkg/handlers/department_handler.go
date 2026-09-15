@@ -92,7 +92,6 @@ func (departmentHandler *DepartmentHandler) updateStatus(department *kaiv1alpha1
 	)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	return departmentHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Updated status of department %s", department.Name))
 }

@@ -98,7 +98,6 @@ func (networkTopologyHandler *NetworkTopologyHandler) deleteNetworkTopology(topo
 	res, err := networkTopologyHandler.sendSyncRequest(request)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	return networkTopologyHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("%s network topology %s", networkTopologySyncActionVerb(openapi.NETWORKTOPOLOGYSYNCACTION_DELETE), topology.Name))
@@ -142,7 +141,6 @@ func (networkTopologyHandler *NetworkTopologyHandler) HandleSyncEvent(waitGroup 
 	res, err := networkTopologyHandler.sendSyncRequest(request)
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 
 	err = networkTopologyHandler.backendClient.HandleHttpResponse(res, err, "Sync network topologies")

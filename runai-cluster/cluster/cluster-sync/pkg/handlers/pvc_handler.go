@@ -76,7 +76,6 @@ func (pvcHandler *PVCHandler) handlePVCAddUpdate(pvc *corev1.PersistentVolumeCla
 			pvcHandler.backendClient.Context(), clusterId, pvc.Name, parsedPvc.CreationRequest)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
@@ -84,7 +83,6 @@ func (pvcHandler *PVCHandler) handlePVCAddUpdate(pvc *corev1.PersistentVolumeCla
 			pvcHandler.backendClient.Context(), clusterId, parsedPvc.Scope.Id, pvc.Name, parsedPvc.CreationRequest)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_PROJECT:
@@ -92,7 +90,6 @@ func (pvcHandler *PVCHandler) handlePVCAddUpdate(pvc *corev1.PersistentVolumeCla
 			pvcHandler.backendClient.Context(), clusterId, parsedPvc.Scope.Id, pvc.Name, parsedPvc.CreationRequest)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 	}
 
@@ -116,7 +113,6 @@ func (pvcHandler *PVCHandler) HandlePVCDelete(pvc *corev1.PersistentVolumeClaim)
 			pvcHandler.backendClient.Context(), config.Config().ClusterUuid, pvc.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
@@ -124,7 +120,6 @@ func (pvcHandler *PVCHandler) HandlePVCDelete(pvc *corev1.PersistentVolumeClaim)
 			pvcHandler.backendClient.Context(), config.Config().ClusterUuid, parsedPvc.Scope.Id, pvc.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 
 	case auth_client.SCOPETYPE_PROJECT:
@@ -132,7 +127,6 @@ func (pvcHandler *PVCHandler) HandlePVCDelete(pvc *corev1.PersistentVolumeClaim)
 			pvcHandler.backendClient.Context(), config.Config().ClusterUuid, parsedPvc.Scope.Id, pvc.Name)
 		if response != nil {
 			_ = response.Body.Close()
-
 		}
 	}
 
@@ -218,7 +212,6 @@ func (pvcHandler *PVCHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 			})
 		if res != nil {
 			_ = res.Body.Close()
-
 		}
 		if err != nil {
 			zap.S().Warnf("Error syncing assets resources ids, error: %v", err)
@@ -237,7 +230,6 @@ func (pvcHandler *PVCHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				pvcHandler.backendClient.Context(), config.Config().ClusterUuid, pvcList.Pvcs)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 
 		case auth_client.SCOPETYPE_DEPARTMENT:
@@ -245,7 +237,6 @@ func (pvcHandler *PVCHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				pvcHandler.backendClient.Context(), config.Config().ClusterUuid, scope.Id, pvcList.Pvcs)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 
 		case auth_client.SCOPETYPE_PROJECT:
@@ -253,7 +244,6 @@ func (pvcHandler *PVCHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 				pvcHandler.backendClient.Context(), config.Config().ClusterUuid, scope.Id, pvcList.Pvcs)
 			if response != nil {
 				_ = response.Body.Close()
-
 			}
 		}
 
@@ -280,7 +270,6 @@ func (pvcHandler *PVCHandler) HandlePvcAssetAdd(pvc *corev1.PersistentVolumeClai
 	})
 	if res != nil {
 		_ = res.Body.Close()
-
 	}
 	if err != nil {
 		zap.S().Warnf("Error syncing asset resources ids for PVC %s:%s, error: %v", pvc.Namespace, pvc.Name, err)
