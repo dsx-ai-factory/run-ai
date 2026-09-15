@@ -16,7 +16,8 @@
   ],
   "includePaths": [
     "NOTE: the rest of this list is added at run time. runai-actions .github/workflows/renovate.yml runs .github/scripts/renovate-scan-candidates.py, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
-    "control-plane/frontend/**"
+    "control-plane/frontend/**",
+    "control-plane/control-plane-chart/**"
   ],
   "ignorePaths": [
     "runai-cluster/cluster/runai-crd-upgrader/**"
@@ -84,6 +85,12 @@
     {
       "matchDatasources": ["docker"],
       "enabled": false
+    },
+    {
+      "description": "traefik base image is pinned in control-plane-chart values.yaml (traefik.image.tag), not a Dockerfile. Carve it out of the docker datasource disable above so CVE fixes in the traefik image keep flowing.",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["traefik"],
+      "enabled": true
     },
     {
       "description": "In-repo generated API clients are versioned by our own release process, not semver. They ship breaking API changes under patch tags, so a bump can leave a release branch pinned to a client its own source no longer compiles against.",
