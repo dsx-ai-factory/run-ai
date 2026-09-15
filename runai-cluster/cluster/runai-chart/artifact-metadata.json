@@ -8,10 +8,10 @@
   "make_extra_cmd": true,
   "notifications": {
     "slack": {
-      "mention": "@griffin"
+      "mention": "@phoenix"
     }
   },
   "jira": {
-    "team_name": "Griffin Team"
+    "team_name": "Phoenix"
   }
 }

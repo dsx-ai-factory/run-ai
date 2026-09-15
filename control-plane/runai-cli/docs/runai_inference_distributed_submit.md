@@ -83,13 +83,13 @@ runai inference distributed submit <workload-name> -p <project-name> -i tiangolo
       --node-type string                                      Enforce node type affinity by setting a node-type label.
       --pod-running-timeout duration                          Timeout for pod to reach running state (e.g. 5s, 2m, 3h).
       --preemptibility preemptibility                         Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
-      --preferred-pod-topology-key string                     If possible, schedule all pods of this workload on nodes with a matching label key and value. Format: key=VALUE.
+      --preferred-pod-topology-key string                     If possible, schedule all pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --priority string                                       Sets the workload’s scheduling priority. Valid values: very-low, low, medium-low, medium, medium-high, high, very-high. 
                                                               Overrides the default priority for the workload type. Changing priority does not update preemptibility automatically.
       --privileged                                            Grants the container full access to the host, bypassing almost all container isolation; the container acts like root.
   -p, --project string                                        Specify the project for the command to use. Defaults to the project set in the context, if any. Use 'runai project set <project>' to set the default.
       --replicas int32                                        The number of replicas (sets of leader and workers) to run. Defaults to 1 (default 1)
-      --required-pod-topology-key string                      Require scheduling pods of this workload on nodes with a matching label key and value. Format: key=VALUE.
+      --required-pod-topology-key string                      Require scheduling pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --restart-policy distributed-inference-restart-policy   Restart policy for distributed inference workload. Valid values: RecreateGroupOnPodRestart (restarts all pods if any pod fails), None (no automatic restart). Defaults to RecreateGroupOnPodRestart
       --run-as-gid int                                        Group ID to run the container as.
       --run-as-non-root                                       Force the container to run as a non-root user.
@@ -136,9 +136,9 @@ runai inference distributed submit <workload-name> -p <project-name> -i tiangolo
       --worker-label stringArray                              Set of labels to populate into worker pods running the workload
       --worker-new-pvc stringArray                            Create and mount a new volume for worker pods. This volume is used only for the duration of the workload's lifecycle. Format: claimname=CLAIM_NAME,storageclass=STORAGE_CLASS,size=SIZE,path=PATH,accessmode-rwo,accessmode-rom,accessmode-rwm,ro,ephemeral.
       --worker-node-type string                               Enforce node type affinity for worker pods by setting a node-type label.
-      --worker-preferred-pod-topology-key string              If possible, schedule all worker pods on nodes with a matching label key and value. Format: key=VALUE.
+      --worker-preferred-pod-topology-key string              If possible, schedule all worker pods within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --worker-privileged                                     Grants worker pods full access to the host, bypassing almost all container isolation; the container acts like root.
-      --worker-required-pod-topology-key string               Require scheduling worker pods on nodes with a matching label key and value. Format: key=VALUE.
+      --worker-required-pod-topology-key string               Require scheduling worker pods within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --worker-run-as-gid int                                 Group ID to run worker pods as.
       --worker-run-as-non-root                                Force worker pods to run as a non-root user.
       --worker-run-as-uid int                                 User ID to run worker pods as.

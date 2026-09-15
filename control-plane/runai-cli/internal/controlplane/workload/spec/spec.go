@@ -1092,6 +1092,24 @@ func (gs *GeneralSpec) Validate() error {
 	if err != nil {
 		return err
 	}
+	topologyKeys := []struct {
+		name  string
+		value string
+	}{
+		{consts.AttributeNamePreferredPodAffinityKey, gs.flags.Container.PodAffinityPreferred},
+		{consts.AttributeNameRequiredPodAffinityKey, gs.flags.Container.PodAffinityRequired},
+		{consts.AttributeNameWorkerPreferredPodTopologyKey, gs.flags.DistributedInference.WorkerPreferredPodTopology},
+		{consts.AttributeNameWorkerRequiredPodTopologyKey, gs.flags.DistributedInference.WorkerRequiredPodTopology},
+	}
+	for _, key := range topologyKeys {
+		if strings.Contains(key.value, "=") {
+			return fmt.Errorf(
+				"invalid value %q for --%s: expected a Kubernetes label key only; do not include '=VALUE'",
+				key.value,
+				key.name,
+			)
+		}
+	}
 	return nil
 }
 

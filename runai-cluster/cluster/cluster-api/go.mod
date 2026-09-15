@@ -155,7 +155,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kai-scheduler/kai-resource-management-api v0.1.1 // indirect
+	github.com/kai-scheduler/kai-resource-management-api v0.1.2 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect

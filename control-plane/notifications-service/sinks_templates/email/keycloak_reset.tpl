@@ -1,3 +1,7 @@
+{{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
 MIME-Version: 1.0
 Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable

@@ -67,6 +67,51 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 		ResetRunaiCommand()
 	})
 
+	Context("Pod topology key validation", func() {
+		DescribeTable("rejects a label value passed with the topology key", func(flag string) {
+			_, err := cli.RunCommand(fmt.Sprintf(
+				"inference distributed submit %s -p p301 -i %s --workers 2 "+
+					"--%s nvidia.com/gpu.clique=11111111-2222-3333-4444-555555555555.32766 "+
+					"--serving-port 8080 --dry-run",
+				DistInfMinimalName, DistInfImageName, flag), envMap)
+
+			Expect(err).To(MatchError(And(
+				ContainSubstring("--"+flag),
+				ContainSubstring("expected a Kubernetes label key only"),
+				ContainSubstring("do not include '=VALUE'"),
+			)))
+		},
+			Entry("preferred", "preferred-pod-topology-key"),
+			Entry("required", "required-pod-topology-key"),
+			Entry("worker preferred", "worker-preferred-pod-topology-key"),
+			Entry("worker required", "worker-required-pod-topology-key"),
+		)
+
+		DescribeTable("preserves a label key supplied with flag=value syntax", func(flag string, worker bool, affinityType openapi.PodAffinityType) {
+			output, err := cli.RunCommand(fmt.Sprintf(
+				"inference distributed submit %s -p p301 -i %s --workers 2 "+
+					"--%s=nvidia.com/gpu.clique --serving-port 8080 --dry-run",
+				DistInfMinimalName, DistInfImageName, flag), envMap)
+			Expect(err).NotTo(HaveOccurred())
+
+			var request openapi.DistributedInferenceCreationRequest
+			Expect(json.Unmarshal([]byte(output), &request)).To(Succeed())
+			podAffinity := request.Spec.Leader.Get().PodAffinity.Get()
+			if worker {
+				Expect(podAffinity).To(BeNil())
+				podAffinity = request.Spec.Worker.Get().PodAffinity.Get()
+			}
+			Expect(podAffinity).NotTo(BeNil())
+			Expect(*podAffinity.Key.Get()).To(Equal("nvidia.com/gpu.clique"))
+			Expect(*podAffinity.Type.Get()).To(Equal(affinityType))
+		},
+			Entry("preferred", "preferred-pod-topology-key", false, openapi.PODAFFINITYTYPE_PREFERRED),
+			Entry("required", "required-pod-topology-key", false, openapi.PODAFFINITYTYPE_REQUIRED),
+			Entry("worker preferred", "worker-preferred-pod-topology-key", true, openapi.PODAFFINITYTYPE_PREFERRED),
+			Entry("worker required", "worker-required-pod-topology-key", true, openapi.PODAFFINITYTYPE_REQUIRED),
+		)
+	})
+
 	Context("Distributed Inference Submit - Basic Scenarios", func() {
 		It("should submit minimal distributed inference workload", func() {
 			output, err := cli.RunCommand(fmt.Sprintf(
@@ -487,7 +532,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 		It("should handle worker-specific required pod topology", func() {
 			output, err := cli.RunCommand(fmt.Sprintf(
 				"inference distributed submit %s -p p301 -i %s --replicas 2 --workers 2 "+
-					"--worker-required-pod-topology-key zone=us-west-1 --serving-port 8080 --dry-run",
+					"--worker-required-pod-topology-key topology.kubernetes.io/zone --serving-port 8080 --dry-run",
 				DistInfMinimalName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
 
@@ -501,13 +546,13 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 			Expect(workerSpec.PodAffinity.IsSet()).To(BeTrue())
 			podAffinity := workerSpec.PodAffinity.Get()
 			Expect(*podAffinity.Type.Get()).To(Equal(openapi.PODAFFINITYTYPE_REQUIRED))
-			Expect(*podAffinity.Key.Get()).To(Equal("zone=us-west-1"))
+			Expect(*podAffinity.Key.Get()).To(Equal("topology.kubernetes.io/zone"))
 		})
 
 		It("should handle worker-specific preferred pod topology", func() {
 			output, err := cli.RunCommand(fmt.Sprintf(
 				"inference distributed submit %s -p p301 -i %s --replicas 2 --workers 2 "+
-					"--worker-preferred-pod-topology-key region=us-west --serving-port 8080 --dry-run",
+					"--worker-preferred-pod-topology-key topology.kubernetes.io/region --serving-port 8080 --dry-run",
 				DistInfMinimalName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
 
@@ -521,7 +566,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 			Expect(workerSpec.PodAffinity.IsSet()).To(BeTrue())
 			podAffinity := workerSpec.PodAffinity.Get()
 			Expect(*podAffinity.Type.Get()).To(Equal(openapi.PODAFFINITYTYPE_PREFERRED))
-			Expect(*podAffinity.Key.Get()).To(Equal("region=us-west"))
+			Expect(*podAffinity.Key.Get()).To(Equal("topology.kubernetes.io/region"))
 		})
 
 		It("should allow different scheduling for leader vs worker", func() {
@@ -594,7 +639,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 				"inference distributed submit %s -p p301 -i %s "+
 					"--node-type GPU-A100 --node-pools default "+
 					"--toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule "+
-					"--required-pod-topology-key datacenter=dc1 "+
+					"--required-pod-topology-key datacenter "+
 					"--serving-port 8080 --dry-run",
 				DistInfFullName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
@@ -694,7 +739,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 				"inference distributed submit %s -p p301 -i %s "+
 					"--worker-node-type GPU-H100 "+
 					"--worker-toleration operator=Equal,key=gpu-type,value=h100,effect=NoSchedule "+
-					"--worker-preferred-pod-topology-key region=us-west "+
+					"--worker-preferred-pod-topology-key topology.kubernetes.io/region "+
 					"--serving-port 8080 --dry-run",
 				DistInfFullName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())

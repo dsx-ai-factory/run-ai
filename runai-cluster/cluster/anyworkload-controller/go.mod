@@ -33,7 +33,7 @@ require (
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/kai-scheduler/kai-resource-management-api v0.1.1 // indirect
+	github.com/kai-scheduler/kai-resource-management-api v0.1.2 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa // indirect
 	golang.org/x/mod v0.35.0 // indirect

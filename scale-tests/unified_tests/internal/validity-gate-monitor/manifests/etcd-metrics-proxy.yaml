@@ -12,6 +12,13 @@ spec:
       labels:
         app: etcd-metrics-proxy
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534  # alpine/socat sets no USER, so runAsNonRoot alone would fail to start
+        seccompProfile:
+          type: RuntimeDefault
+      # hostNetwork is required: etcd's metrics port (127.0.0.1:2381) is loopback-only. See README.
       hostNetwork: true
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
@@ -22,8 +29,19 @@ spec:
       containers:
         - name: socat
           image: alpine/socat:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           args:
-            - TCP-LISTEN:2382,bind=0.0.0.0,reuseaddr,fork
+            - TCP-LISTEN:2382,bind=$(POD_IP),reuseaddr,fork
             - TCP:127.0.0.1:2381
           ports:
             - name: metrics

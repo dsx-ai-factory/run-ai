@@ -91,7 +91,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kai-scheduler/KAI-scheduler v0.16.9 // indirect
-	github.com/kai-scheduler/kai-resource-management-api v0.1.1
+	github.com/kai-scheduler/kai-resource-management-api v0.1.2
 	github.com/moby/spdystream v0.5.1 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

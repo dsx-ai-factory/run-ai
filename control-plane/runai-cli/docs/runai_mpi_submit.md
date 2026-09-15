@@ -107,12 +107,12 @@ runai training mpi submit <workload-name> -p <project-name> -i ubuntu --master-c
       --pod-running-timeout duration                        Timeout for pod to reach running state (e.g. 5s, 2m, 3h).
       --port stringArray                                    Expose ports from the workload container. Format: service-type=NodePort,container=80,external=8080.
       --preemptibility preemptibility                       Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
-      --preferred-pod-topology-key string                   If possible, schedule all pods of this workload on nodes with a matching label key and value. Format: key=VALUE.
+      --preferred-pod-topology-key string                   If possible, schedule all pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --priority string                                     Sets the workload’s scheduling priority. Valid values: very-low, low, medium-low, medium, medium-high, high, very-high. 
                                                             Overrides the default priority for the workload type. Changing priority does not update preemptibility automatically.
       --privileged                                          Grants the container full access to the host, bypassing almost all container isolation; the container acts like root.
   -p, --project string                                      Specify the project for the command to use. Defaults to the project set in the context, if any. Use 'runai project set <project>' to set the default.
-      --required-pod-topology-key string                    Require scheduling pods of this workload on nodes with a matching label key and value. Format: key=VALUE.
+      --required-pod-topology-key string                    Require scheduling pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --restart-policy restart-policy                       Restart policy for worker pods. Valid values: Always, OnFailure, Never.
       --run-as-gid int                                      Group ID to run the container as.
       --run-as-non-root                                     Force the container to run as a non-root user.
