@@ -45,6 +45,12 @@ See [Migrate GPU Fractions](migrate-gpu-fractions.md) for the full procedure.
 
 ### Workload Model Unification
 
+<Warning>
+
+**TODO:** not sure what the name of this heading should be. Ofer, please advise.
+
+</Warning>
+
 The controllers behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller.
 
 Workloads submitted before upgrading through a legacy workload type continue running after the upgrade, but some capabilities are unavailable until the workload is resubmitted. Identify workloads on legacy types now so you can plan for resubmission after upgrading.
