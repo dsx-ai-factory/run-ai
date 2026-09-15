@@ -1963,10 +1963,25 @@ function combineMasterReplicaWorkloadModelWithEnvironmentDetails(
   };
 }
 
+function getSecurityFieldForCreationRequest(
+  security: WorkspaceSpecSpecAllOfSecurity | undefined | null,
+): WorkspaceSpecSpecAllOfSecurity {
+  if (security?.uidGidSource !== UidGidSource.FromIdpToken) return { ...security };
+
+  // Omit identity values even when loaded from a template or existing workload.
+  // The server applies policy defaults, then the submitting user's token claims.
+  return {
+    ...security,
+    runAsUid: undefined,
+    runAsGid: undefined,
+    supplementalGroups: undefined,
+  };
+}
+
 function prepareWorkloadFlatRequest(model: IUISuperWorkloadCreationRequest): WorkspaceCreationRequest {
   const storage = getStorageFieldFromUI(model.spec.storage || {});
   const compute = getComputeFieldFromUI(model.spec.compute || {});
-  const security = { ...model.spec.security };
+  const security = getSecurityFieldForCreationRequest(model.spec.security);
 
   model = _removeTemplateFieldsFromModel(model);
 
@@ -1987,7 +2002,7 @@ function prepareWorkloadFlatRequest(model: IUISuperWorkloadCreationRequest): Wor
 function prepareTrainingFlatRequest(model: IUISuperWorkloadCreationRequest): TrainingCreationRequest {
   const storage = getStorageFieldFromUI(model.spec.storage || {});
   const compute = getComputeFieldFromUI(model.spec.compute || {});
-  const security = { ...model.spec.security };
+  const security = getSecurityFieldForCreationRequest(model.spec.security);
 
   model = _removeTemplateFieldsFromModel(model);
 
@@ -2008,7 +2023,7 @@ function prepareTrainingFlatRequest(model: IUISuperWorkloadCreationRequest): Tra
 function prepareDistributedFlatRequest(model: IUISuperWorkloadCreationRequest): DistributedCreationRequest {
   const storage = getStorageFieldFromUI(model.spec.storage || {});
   const compute = getComputeFieldFromUI(model.spec.compute || {});
-  const security = { ...model.spec.security };
+  const security = getSecurityFieldForCreationRequest(model.spec.security);
 
   model = _removeTemplateFieldsFromModel(model);
 
@@ -2029,7 +2044,7 @@ function prepareDistributedFlatRequest(model: IUISuperWorkloadCreationRequest): 
 
   // if sameAsWorker is falsy AND masterSpec exists, we need prepare it as well
   if (!request.masterSpecSameAsWorker && model.masterSpec) {
-    const security = { ...model.masterSpec.security };
+    const security = getSecurityFieldForCreationRequest(model.masterSpec.security);
 
     // note: we need to remove sshAuthMountPath from the masterSpec since it's not supported in the API
     request.masterSpec = {
