@@ -123,6 +123,7 @@ func CreateClusterApiConfig(urlStr, token string) (*clusterapi.Configuration, er
 	configuration := clusterapi.NewConfiguration()
 	configuration.Scheme = serviceUrl.Scheme
 	configuration.Host = serviceUrl.Host
+	configuration.Servers = clusterapi.ServerConfigurations{{URL: urlStr}}
 	configuration.UserAgent = GetUserAgent()
 	configuration.AddDefaultHeader(AuthorizationHeader, fmt.Sprintf(BearerTokenStr, token))
 	return configuration, nil
