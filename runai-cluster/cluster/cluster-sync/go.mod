@@ -277,8 +277,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common =
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
 
-replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../common/clients
-
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../common/profiling
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/node-pool-utils => ../../common/node-pool-utils

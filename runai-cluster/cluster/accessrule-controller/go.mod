@@ -188,7 +188,6 @@ replace (
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
 
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../common/clients
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../common/profiling
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils => ../../common/utils

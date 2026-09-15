@@ -268,7 +268,6 @@ replace (
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
 
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../common/clients
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants => ../../common/constants
 

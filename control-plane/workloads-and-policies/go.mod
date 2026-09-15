@@ -305,8 +305,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipubli
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ./../../runai-cluster/cluster/common/topology
 
-replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ./../../runai-cluster/common/clients
-
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ./../../runai-cluster/common/cert-utils
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ./../../runai-cluster/common/profiling

@@ -8,7 +8,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/evanphx/json-patch v5.9.11+incompatible
 	github.com/invopop/jsonschema v0.13.0
@@ -211,7 +210,6 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../common/clients
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants => ../../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../common/profiling
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils => ../../common/utils
