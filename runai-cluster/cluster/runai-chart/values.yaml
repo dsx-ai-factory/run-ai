@@ -164,6 +164,33 @@ development:
   enableProfiling: false
 kai-resource-management:
   enabled: true
+  # go-operator owns the KRMConfig singleton, so neither of the chart's own
+  # managers may create it. Both off is KRM's "external" mode.
+  krmConfigDeployer:
+    enabled: false
+  krmConfig:
+    render: false
+  commonArgs:
+    namespaceProjectLabelKey: runai/queue
+  nodePoolController:
+    # Node pool validation is covered by the control-plane and agent reconcile.
+    webhook:
+      nodepool: false
+    # Not modelled on KRMConfig, so they can only be passed verbatim. extraArgs
+    # are appended last and win over anything built before them.
+    extraArgs:
+      - --cpu-worker-node-label-key=node-role.kubernetes.io/runai-cpu-worker
+      - --gpu-worker-node-label-key=node-role.kubernetes.io/runai-gpu-worker
+      - --mig-worker-node-label-key=node-role.kubernetes.io/runai-mig-enabled
+      - --uninstall-detection-ref=run.ai/v1/Cluster//cluster
+  projectController:
+    webhook:
+      project: false
+      department: false
+  podGroupAssigner:
+    # Pod mutation is done by runai's admission-controller.
+    webhook:
+      pod: false
   kai-scheduler:
     global:
       # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's

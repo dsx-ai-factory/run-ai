@@ -1,0 +1,11 @@
+suite: Test RunAI-owned KRM resources
+
+templates:
+  - charts/kai-resource-management/templates/krm-config.yaml
+  - charts/kai-resource-management/templates/hooks/post/krm-config-deployer/job.yaml
+
+tests:
+  - it: should not render the KRMConfig or its deployer hook
+    asserts:
+      - hasDocuments:
+          count: 0
