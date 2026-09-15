@@ -9,11 +9,9 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	cpclient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients/control-plane/generated"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
@@ -46,20 +44,16 @@ var _ = Describe("A backend client", func() {
 			GinkgoWriter.Printf("=============================================Ended test=============================================\n")
 		})
 		Context("Backend is UP", func() {
+			var livenessRequests <-chan *http.Request
 			BeforeEach(func() {
-				addHandlerToMockAndValidateLivenessRequest(server, tokenResponse)
+				livenessRequests = addHandlerToMockAndValidateLivenessRequest(server, tokenResponse)
 				addHandlerToMockClusterInfoSyncRequest(server)
 			})
 			AfterEach(func() {
 				server.Reset()
 			})
 			It("Sends liveness", func() {
-				request := cpclient.NewUpdateClusterLiveness1Request()
-				request.SetTimeTag(time.Now().UnixMilli())
-				_, err := backendClient.ControlPlaneClient.ClustersApi.UpdateClusterLiveness1(
-					backendClient.Context(), config.Config().ClusterUuid,
-				).UpdateClusterLiveness1Request(*request).Execute()
-				Expect(err).To(BeNil())
+				Eventually(livenessRequests).Should(Receive())
 			})
 			It("checks that backend is marked as available in backend client", func() {
 				//Time-outs after 1 seconds
