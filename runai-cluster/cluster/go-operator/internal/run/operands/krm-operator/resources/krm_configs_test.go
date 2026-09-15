@@ -74,6 +74,43 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 		Expect(serviceMonitor.Accounting).To(Equal(ptr.To(true)))
 	})
 
+	Context("nodepool-controller", func() {
+		It("turns the NodePool validating webhook off", func() {
+			nodePoolController := krmConfigFor(defaultRunaiConfig()).Spec.NodePoolController
+			Expect(nodePoolController).NotTo(BeNil())
+			Expect(nodePoolController.Webhooks.EnableNodePoolValidation).To(Equal(ptr.To(false)))
+			Expect(nodePoolController.ControllerService.Webhook).To(BeNil())
+		})
+
+		It("names both published ports", func() {
+			controllerService := krmConfigFor(defaultRunaiConfig()).Spec.NodePoolController.ControllerService
+			Expect(controllerService.Metrics.Name).To(Equal(ptr.To("metrics")))
+			Expect(controllerService.Metrics.Port).To(Equal(ptr.To(int32(9400))))
+			Expect(controllerService.NodePoolMetrics.Name).To(Equal(ptr.To("np-metrics")))
+			Expect(controllerService.NodePoolMetrics.Port).To(Equal(ptr.To(int32(8080))))
+		})
+
+		It("carries the runai vocabulary the binary does not default to", func() {
+			args := krmConfigFor(defaultRunaiConfig()).Spec.NodePoolController.Args
+			Expect(args.MetricsNamespace).To(Equal(ptr.To(clustercommonconstants.NamespaceRunAi)))
+			Expect(args.ExcludedNodepoolName).To(Equal(ptr.To(clustercommonconstants.ExcludedNodepoolName)))
+			Expect(args.ManagedNodesConfigName).To(Equal(ptr.To(clustercommonconstants.ManagedNodesConfigName)))
+			Expect(args.ToExcludeLabel).To(Equal(ptr.To(clustercommonconstants.ShouldBeExcludedLabelKey)))
+			Expect(args.SchedulingShardArgs).NotTo(BeNil())
+		})
+
+		It("passes the flags KRMConfig does not model as extra args", func() {
+			nodePoolController := krmConfigFor(defaultRunaiConfig()).Spec.NodePoolController
+			Expect(nodePoolController.ExtraArgs).To(ContainElements(
+				"--scheduler-namespace=runai",
+				"--cpu-worker-node-label-key=node-role.kubernetes.io/runai-cpu-worker",
+				"--gpu-worker-node-label-key=node-role.kubernetes.io/runai-gpu-worker",
+				"--mig-worker-node-label-key=node-role.kubernetes.io/runai-mig-enabled",
+				"--uninstall-detection-ref=run.ai/v1/Cluster//cluster",
+			))
+		})
+	})
+
 	Context("pod-group-assigner", func() {
 		It("turns the Pod webhook off, since runai's admission-controller serves it", func() {
 			podGroupAssigner := krmConfigFor(defaultRunaiConfig()).Spec.PodGroupAssigner

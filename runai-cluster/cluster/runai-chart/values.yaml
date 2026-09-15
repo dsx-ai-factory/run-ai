@@ -181,13 +181,6 @@ kai-resource-management:
     # Node pool validation is covered by the control-plane and agent reconcile.
     webhook:
       nodepool: false
-    # Not modelled on KRMConfig, so they can only be passed verbatim. extraArgs
-    # are appended last and win over anything built before them.
-    extraArgs:
-      - --cpu-worker-node-label-key=node-role.kubernetes.io/runai-cpu-worker
-      - --gpu-worker-node-label-key=node-role.kubernetes.io/runai-gpu-worker
-      - --mig-worker-node-label-key=node-role.kubernetes.io/runai-mig-enabled
-      - --uninstall-detection-ref=run.ai/v1/Cluster//cluster
   projectController:
     webhook:
       project: false
