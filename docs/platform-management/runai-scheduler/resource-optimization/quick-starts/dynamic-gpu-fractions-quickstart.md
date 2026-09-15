@@ -327,7 +327,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 1. Select the newly created workspace with the Jupyter application that you want to connect to
 2. Click **CONNECT**
 3. Select the Jupyter tool. The selected tool is opened in a new tab on your browser.
-4. Open a terminal and use the `watch nvidia-smi` to get a constant reading of the memory consumed by the pod. The total GPU memory shown is the memory size the workload could allocate at the moment it was bound to the GPU. This value is never below the 4 GB Request and never above the 12 GB Limit, and where it falls between them depends on how much GPU memory was free at that point in time.
+4. Open a terminal and use the `watch nvidia-smi` to get a constant reading of the memory consumed by the pod. The free memory shown always covers the rest of the 4 GB Request, and grows beyond that when the GPU has memory to spare, up to the 12 GB Limit.
 5. Open the file `Untitled.ipynb` and move the frame so you can see both tabs
 6. Execute both cells in `Untitled.ipynb`. This will consume about **3 GB of GPU memory** and be well below the 4GB of the **GPU Memory Request** value.
 7. In the second cell, edit the value after `--image-size` from 100 to 200 and run the cell. This will increase the GPU memory utilization to about 11.5 GB which is above the Request value.
@@ -337,7 +337,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 <Tab title="CLI v2">
 
 1. To connect to the Jupyter Notebook, browse directly to `https://<COMPANY-URL>/<PROJECT-NAME>/<WORKLOAD-NAME>`
-2. Open a terminal and use the `watch nvidia-smi` to get a constant reading of the memory consumed by the pod. The total GPU memory shown is the memory size the workload could allocate at the moment it was bound to the GPU. This value is never below the 4 GB Request and never above the 12 GB Limit, and where it falls between them depends on how much GPU memory was free at that point in time.
+2. Open a terminal and use the `watch nvidia-smi` to get a constant reading of the memory consumed by the pod. The free memory shown always covers the rest of the 4 GB Request, and grows beyond that when the GPU has memory to spare, up to the 12 GB Limit.
 3. Open the file `Untitled.ipynb` and move the frame so you can see both tabs
 4. Execute both cells in `Untitled.ipynb`. This will consume about **3 GB of GPU memory** and be well below the 4GB of the **GPU Memory Request** value.
 5. In the second cell, edit the value after `--image-size` from 100 to 200 and run the cell. This will increase the GPU memory utilization to about 11.5 GB which is above the Request value.
@@ -347,7 +347,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 <Tab title="API">
 
 1. To connect to the Jupyter Notebook, browse directly to `https://<COMPANY-URL>/<PROJECT-NAME>/<WORKLOAD-NAME>`
-2. Open a terminal and use the `watch nvidia-smi` to get a constant reading of the memory consumed by the pod. The total GPU memory shown is the memory size the workload could allocate at the moment it was bound to the GPU. This value is never below the 4 GB Request and never above the 12 GB Limit, and where it falls between them depends on how much GPU memory was free at that point in time.
+2. Open a terminal and use the `watch nvidia-smi` to get a constant reading of the memory consumed by the pod. The free memory shown always covers the rest of the 4 GB Request, and grows beyond that when the GPU has memory to spare, up to the 12 GB Limit.
 3. Open the file `Untitled.ipynb` and move the frame so you can see both tabs
 4. Execute both cells in `Untitled.ipynb`. This will consume about **3 GB of GPU memory** and be well below the 4GB of the **GPU Memory Request** value.
 5. In the second cell, edit the value after `--image-size` from 100 to 200 and run the cell. This will increase the GPU memory utilization to about 11.5 GB which is above the Request value.

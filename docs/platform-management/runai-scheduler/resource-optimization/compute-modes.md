@@ -62,6 +62,8 @@ As a rule of thumb, use time-slicing for work that arrives in bursts and can wai
 
 The compute mode is set per workload with the `nvidia.com/container.<container-name>.gpu-compute.mode` annotation.
 
+Substitute `<container-name>` with the name of the container receiving the GPU memory fraction. A GPU fraction is always allocated to a single container, and NVIDIA Run:ai currently supports one fractional container per pod. This is the same container named by `gpu-fraction-container-name`, or the first container in the pod when that annotation is omitted. If both are used, the container names must be identical or the request is rejected.
+
 | Value | Behavior |
 |---|---|
 | `time-slicing` | Workloads take sequential turns on the GPU compute engines. This is the default and can be omitted. |

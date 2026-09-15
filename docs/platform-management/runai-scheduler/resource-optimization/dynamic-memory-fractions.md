@@ -27,10 +27,16 @@ NVIDIA Run:ai automatically manages the state changes between Request and Limit 
 
 ### What the Application Sees
 
-An application sees its own share of GPU memory through NVML and `nvidia-smi`, rather than the memory of the whole device. The reported size depends on how the workload was submitted:
+An application sees its own share of GPU memory through NVML and `nvidia-smi`, rather than the memory of the whole device.
 
-* **Request only** - The application sees a GPU memory space the size of the Request.
-* **Request and Limit** - The application sees the memory size it can actually allocate at the moment it is bound to the GPU. This value is never below the Request and never above the Limit. Where it falls between them depends on how much additional GPU memory is free at that point in time.
+A GPU memory fraction submitted without a Limit has a Limit equal to its Request. The application therefore sees a GPU memory space the size of the Request, and that size does not change while the workload runs.
+
+For a workload submitted with a Request and a Limit, the free memory reported to the application always covers the rest of its Request, and grows beyond that when the GPU has memory to spare — never above the Limit. In other words, the Request is always available to the workload, and the memory between the Request and the Limit is available only while no one else needs it.
+
+For example, take a workload with a 4 GB Request and a 12 GB Limit that is currently using 1 GB of GPU memory:
+
+* If 9 GB is free on the GPU, the application sees 9 GB free and can grow toward its 12 GB Limit.
+* If the GPU is busy and only 1 GB is free, the application still sees 3 GB free — the remainder of its guaranteed 4 GB.
 
 ### Reclaiming Loaned Memory
 
@@ -75,10 +81,10 @@ A workload that still sets `RUNAI_GPU_MEMORY_LIMIT` starts and runs normally, bu
 
 Dynamic GPU memory fractions extend the [GPU memory fractions annotations](memory-fractions.md#annotation-reference) with a memory Limit. The Request is set exactly as it is for a static memory fraction.
 
-| Annotation | Scope | Input format | Purpose |
-|---|---|---|---|
-| `nvidia.com/container.<container-name>.gpu-memory.limit` | Container | Memory size in Kubernetes resource quantity format. For example, `80G`. | Sets the memory Limit for a request made as an absolute memory size. Replaces `RUNAI_GPU_MEMORY_LIMIT` for absolute values. |
-| `kai.scheduler/container.<container-name>.gpu-memory.portion.limit` | Container | A portion of GPU memory as a double-precision floating-point number. For example, `0.8`. | Sets the memory Limit for a request made as a GPU memory portion. Replaces `RUNAI_GPU_MEMORY_LIMIT` for portion values. |
+| Annotation | Input format | Purpose |
+|---|---|---|
+| `nvidia.com/container.<container-name>.gpu-memory.limit` | Memory size in Kubernetes resource quantity format. For example, `80G`. | Sets the memory Limit for a request made as an absolute memory size. Replaces `RUNAI_GPU_MEMORY_LIMIT` for absolute values. |
+| `kai.scheduler/container.<container-name>.gpu-memory.portion.limit` | A portion of GPU memory as a double-precision floating-point number. For example, `0.8`. | Sets the memory Limit for a request made as a GPU memory portion. Replaces `RUNAI_GPU_MEMORY_LIMIT` for portion values. |
 
 <Info>
 
