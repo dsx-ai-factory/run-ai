@@ -162,35 +162,36 @@ development:
   skipDependeciesChecks: false
   # Enable profiling in the runai-operator
   enableProfiling: false
-kai-scheduler:
+kai-resource-management:
   enabled: true
-  global:
-    # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
-    # chart-level autoscaling switch off so it does not imply enablement.
-    clusterAutoscaling: false
-    # Keep resource reservation aligned with the chart-owned service account,
-    # RBAC, and pull-secret propagation.
-    resourceReservation:
-      namespace: runai-reservation
-      serviceAccount: runai-reservation
-  operator:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 512Mi
-      requests:
-        cpu: 50m
-        memory: 256Mi
-  defaultQueue:
-    createDefaultQueue: false
-  defaultShard:
-    enabled: false
-  defaultPriorityClasses:
-    enabled: false
-  kaiConfigDeployer:
-    enabled: false
-  nodescaleadjuster:
-    scalingPodNamespace: runai-scale-adjust
+  kai-scheduler:
+    global:
+      # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
+      # chart-level autoscaling switch off so it does not imply enablement.
+      clusterAutoscaling: false
+      # Keep resource reservation aligned with the chart-owned service account,
+      # RBAC, and pull-secret propagation.
+      resourceReservation:
+        namespace: runai-reservation
+        serviceAccount: runai-reservation
+    operator:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+    defaultQueue:
+      createDefaultQueue: false
+    defaultShard:
+      enabled: false
+    defaultPriorityClasses:
+      enabled: false
+    kaiConfigDeployer:
+      enabled: false
+    nodescaleadjuster:
+      scalingPodNamespace: runai-scale-adjust
 karta:
   enabled: true
   operator:
