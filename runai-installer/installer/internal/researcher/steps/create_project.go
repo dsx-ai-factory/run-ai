@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/orgunit"
+	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	configinputs "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/inputs"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"

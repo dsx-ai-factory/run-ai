@@ -4,14 +4,23 @@ go 1.26.3
 
 replace github.com/dsx-ai-factory/run-ai/runai-installer/clients => ../clients
 
+replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client => ../../control-plane/authorization/pkg/client
+
+replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../control-plane/cluster-service/pkg/client
+
+replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/charmbracelet/bubbles v0.21.1
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1
+	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-installer/clients v0.0.0
 	github.com/golang-jwt/jwt/v5 v5.3.1

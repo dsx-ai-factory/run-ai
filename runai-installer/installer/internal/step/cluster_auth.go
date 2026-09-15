@@ -5,10 +5,10 @@
 
 package step
 
-import "github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+import cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 
 func ClusterAuthValue(installInfo *cluster.ClusterInstallationInfoResponse) string {
-	return ClusterAuthValueFromCredentials(installInfo.BootstrapToken, installInfo.ClientSecret)
+	return ClusterAuthValueFromCredentials(installInfo.BootstrapToken, installInfo.GetClientSecret())
 }
 
 func ClusterAuthValueFromCredentials(bootstrapToken, clientSecret string) string {
