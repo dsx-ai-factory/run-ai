@@ -55,6 +55,10 @@ func (handler *WorkspaceHandlerDeprecated) HandleAdd(workload *v2alpha1.Interact
 	_, res, err := handler.runaiBackendClient.Client.WorkspacesAPI.UpdateWorkspaceStatus(
 		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
 	).WorkloadStatusUpdate(*statusToSend).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("workspace %s not found in control plane, it has probably removed already from the DB", statusToSend.Id)
 		return nil
@@ -75,6 +79,10 @@ func (handler *WorkspaceHandlerDeprecated) HandleDelete(workload *v2alpha1.Inter
 	res, err := handler.runaiBackendClient.Client.WorkspacesAPI.DeleteWorkspaceById(
 		handler.runaiBackendClient.Context(), config.Config().ClusterUuid, workspaceId,
 	).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("workspace %s is already removed from control plane", workspaceId)
 		return nil
@@ -116,6 +124,10 @@ func (handler *WorkspaceHandlerDeprecated) HandleSyncEvent(waitGroup *sync.WaitG
 	_, res, err := handler.runaiBackendClient.Client.WorkspacesAPI.SyncWorkspaceStatus(
 		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
 	).WorkloadStatusUpdate(syncToSend).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 
 	err = handler.runaiBackendClient.HandleHttpResponse(res, err, "Sync workloads")
 	if err != nil {

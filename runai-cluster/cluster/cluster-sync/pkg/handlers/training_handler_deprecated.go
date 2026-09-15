@@ -54,6 +54,10 @@ func (handler *TrainingHandlerDeprecated) HandleAdd(workload *v2alpha1.TrainingW
 	_, res, err := handler.runaiBackendClient.Client.TrainingsAPI.UpdateTrainingStatus(
 		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
 	).WorkloadStatusUpdate(*statusToSend).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("training %s not found in control plane, it has probably removed already from the DB", statusToSend.Id)
 		return nil
@@ -74,6 +78,10 @@ func (handler *TrainingHandlerDeprecated) HandleDelete(workload *v2alpha1.Traini
 	res, err := handler.runaiBackendClient.Client.TrainingsAPI.DeleteTrainingById(
 		handler.runaiBackendClient.Context(), config.Config().ClusterUuid, workloadId,
 	).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("training %s is already removed from control plane", workloadId)
 		return nil
@@ -115,6 +123,10 @@ func (handler *TrainingHandlerDeprecated) HandleSyncEvent(waitGroup *sync.WaitGr
 	_, res, err := handler.runaiBackendClient.Client.TrainingsAPI.SyncTrainingStatus(
 		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
 	).WorkloadStatusUpdate(syncToSend).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 
 	err = handler.runaiBackendClient.HandleHttpResponse(res, err, "Sync workloads")
 	if err != nil {

@@ -74,14 +74,26 @@ func (pvcHandler *PVCHandler) handlePVCAddUpdate(pvc *corev1.PersistentVolumeCla
 	case auth_client.SCOPETYPE_CLUSTER:
 		_, response, err = pvcHandler.backendClient.K8sObjectTrackerClient.CreateClusterWidePvc(
 			pvcHandler.backendClient.Context(), clusterId, pvc.Name, parsedPvc.CreationRequest)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
 		_, response, err = pvcHandler.backendClient.K8sObjectTrackerClient.CreateDepartmentWidePvc(
 			pvcHandler.backendClient.Context(), clusterId, parsedPvc.Scope.Id, pvc.Name, parsedPvc.CreationRequest)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 
 	case auth_client.SCOPETYPE_PROJECT:
 		_, response, err = pvcHandler.backendClient.K8sObjectTrackerClient.CreateProjectPvc(
 			pvcHandler.backendClient.Context(), clusterId, parsedPvc.Scope.Id, pvc.Name, parsedPvc.CreationRequest)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 	}
 
 	return pvcHandler.backendClient.HandleHttpResponse(response, err, fmt.Sprintf("Added PVC %s:%s", pvc.Namespace, pvc.Name))
@@ -102,14 +114,26 @@ func (pvcHandler *PVCHandler) HandlePVCDelete(pvc *corev1.PersistentVolumeClaim)
 	case auth_client.SCOPETYPE_CLUSTER:
 		response, err = pvcHandler.backendClient.K8sObjectTrackerClient.DeleteClusterWidePvc(
 			pvcHandler.backendClient.Context(), config.Config().ClusterUuid, pvc.Name)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
 		response, err = pvcHandler.backendClient.K8sObjectTrackerClient.DeleteDepartmentWidePvc(
 			pvcHandler.backendClient.Context(), config.Config().ClusterUuid, parsedPvc.Scope.Id, pvc.Name)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 
 	case auth_client.SCOPETYPE_PROJECT:
 		response, err = pvcHandler.backendClient.K8sObjectTrackerClient.DeleteProjectPvc(
 			pvcHandler.backendClient.Context(), config.Config().ClusterUuid, parsedPvc.Scope.Id, pvc.Name)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 	}
 
 	return pvcHandler.backendClient.HandleHttpResponse(response, err, fmt.Sprintf("Deleted PVC %s:%s", pvc.Namespace, pvc.Name))
@@ -188,10 +212,14 @@ func (pvcHandler *PVCHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 	}
 
 	if len(pvcsOfAssets) > 0 {
-		_, err := pvcHandler.backendClient.AssetsClient.SyncAssetsResourcesIds(
+		res, err := pvcHandler.backendClient.AssetsClient.SyncAssetsResourcesIds(
 			pvcHandler.backendClient.Context(), assetsswagger.AssetResourcesIdsSyncRequest{
 				Items: pvcsOfAssets,
 			})
+		if res != nil {
+			_ = res.Body.Close()
+
+		}
 		if err != nil {
 			zap.S().Warnf("Error syncing assets resources ids, error: %v", err)
 		}
@@ -207,14 +235,26 @@ func (pvcHandler *PVCHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 		case auth_client.SCOPETYPE_CLUSTER:
 			_, response, execError = pvcHandler.backendClient.K8sObjectTrackerClient.SyncClusterWidePvcs(
 				pvcHandler.backendClient.Context(), config.Config().ClusterUuid, pvcList.Pvcs)
+			if response != nil {
+				_ = response.Body.Close()
+
+			}
 
 		case auth_client.SCOPETYPE_DEPARTMENT:
 			_, response, execError = pvcHandler.backendClient.K8sObjectTrackerClient.SyncDepartmentWidePvcs(
 				pvcHandler.backendClient.Context(), config.Config().ClusterUuid, scope.Id, pvcList.Pvcs)
+			if response != nil {
+				_ = response.Body.Close()
+
+			}
 
 		case auth_client.SCOPETYPE_PROJECT:
 			_, response, execError = pvcHandler.backendClient.K8sObjectTrackerClient.SyncProjectPvcs(
 				pvcHandler.backendClient.Context(), config.Config().ClusterUuid, scope.Id, pvcList.Pvcs)
+			if response != nil {
+				_ = response.Body.Close()
+
+			}
 		}
 
 		if execError != nil {
@@ -232,12 +272,16 @@ func (pvcHandler *PVCHandler) HandlePvcAssetAdd(pvc *corev1.PersistentVolumeClai
 		return nil
 	}
 
-	_, err := pvcHandler.backendClient.AssetsClient.SyncAssetsResourcesIds(pvcHandler.backendClient.Context(), assetsswagger.AssetResourcesIdsSyncRequest{
+	res, err := pvcHandler.backendClient.AssetsClient.SyncAssetsResourcesIds(pvcHandler.backendClient.Context(), assetsswagger.AssetResourcesIdsSyncRequest{
 		Items: []assetsswagger.AssetResourcesIdsItem{{
 			AssetId:    assetId,
 			ResourceId: string(pvc.UID),
 		}},
 	})
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	if err != nil {
 		zap.S().Warnf("Error syncing asset resources ids for PVC %s:%s, error: %v", pvc.Namespace, pvc.Name, err)
 	}

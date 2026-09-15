@@ -73,16 +73,28 @@ func (secretHandler *SecretHandler) handleSecretAddUpdate(secret *coreV1.Secret)
 		_, response, err = secretHandler.backendClient.K8sObjectTrackerClient.CreateClusterWideSecret(
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, secret.Name,
 			parsedSecret.CreationRequest.Type, parsedSecret.CreationRequest.Origin, parsedSecret.CreationRequest.Issues, parsedSecret.CreationRequest.Private)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
 		_, response, err = secretHandler.backendClient.K8sObjectTrackerClient.CreateDepartmentWideSecret(
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, parsedSecret.Scope.Id, secret.Name,
 			parsedSecret.CreationRequest.Type, parsedSecret.CreationRequest.Origin, parsedSecret.CreationRequest.Issues)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 
 	case auth_client.SCOPETYPE_PROJECT:
 		_, response, err = secretHandler.backendClient.K8sObjectTrackerClient.CreateProjectSecret(
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, parsedSecret.Scope.Id, secret.Name,
 			parsedSecret.CreationRequest.Type, parsedSecret.CreationRequest.Origin, parsedSecret.CreationRequest.Issues)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 	}
 
 	return secretHandler.backendClient.HandleHttpResponse(response, err, fmt.Sprintf("Added Secrets %s:%s",
@@ -104,14 +116,26 @@ func (secretHandler *SecretHandler) HandleSecretDelete(secret *coreV1.Secret) er
 	case auth_client.SCOPETYPE_CLUSTER:
 		response, err = secretHandler.backendClient.K8sObjectTrackerClient.DeleteClusterWideSecret(
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, secret.Name)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
 		response, err = secretHandler.backendClient.K8sObjectTrackerClient.DeleteDepartmentWideSecret(
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, parsedSecret.Scope.Id, secret.Name)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 
 	case auth_client.SCOPETYPE_PROJECT:
 		response, err = secretHandler.backendClient.K8sObjectTrackerClient.DeleteProjectSecret(
 			secretHandler.backendClient.Context(), config.Config().ClusterUuid, parsedSecret.Scope.Id, secret.Name)
+		if response != nil {
+			_ = response.Body.Close()
+
+		}
 	}
 
 	zap.S().Debugf("HandleSecretDelete res %v ", response)
@@ -184,14 +208,26 @@ func (secretHandler *SecretHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 		case auth_client.SCOPETYPE_CLUSTER:
 			_, response, execError = secretHandler.backendClient.K8sObjectTrackerClient.SyncClusterWideSecrets(
 				secretHandler.backendClient.Context(), config.Config().ClusterUuid, secretList.Secrets)
+			if response != nil {
+				_ = response.Body.Close()
+
+			}
 
 		case auth_client.SCOPETYPE_DEPARTMENT:
 			_, response, execError = secretHandler.backendClient.K8sObjectTrackerClient.SyncDepartmentWideSecrets(
 				secretHandler.backendClient.Context(), config.Config().ClusterUuid, scope.Id, secretList.Secrets)
+			if response != nil {
+				_ = response.Body.Close()
+
+			}
 
 		case auth_client.SCOPETYPE_PROJECT:
 			_, response, execError = secretHandler.backendClient.K8sObjectTrackerClient.SyncProjectSecrets(
 				secretHandler.backendClient.Context(), config.Config().ClusterUuid, scope.Id, secretList.Secrets)
+			if response != nil {
+				_ = response.Body.Close()
+
+			}
 		}
 
 		if execError != nil {

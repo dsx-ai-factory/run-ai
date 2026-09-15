@@ -95,6 +95,10 @@ func (h *PodHandler) HandlePodDelete(pod *coreV1.Pod) error {
 	request := h.backendClient.WorkloadsClient.PodsAPI.DeletePod(h.backendClient.Context(), string(pod.UID))
 
 	res, err := request.Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	return h.backendClient.HandleHttpResponse(res, err,
 		fmt.Sprintf("Deleted pod <%s/%s>", pod.Namespace, pod.Name))
 }
@@ -115,6 +119,10 @@ func (h *PodHandler) handleAddUpdate(pod *coreV1.Pod) error {
 	request = request.PodSyncFields(*podSyncFields)
 
 	res, err := request.Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	logDetailedApiErrorMessageIfNeeded(res, err, "upsert pod")
 	if err != nil && res != nil && res.StatusCode == http.StatusPreconditionFailed {
 		h.enqueuePodsHandlingForLaterIfNeeded(res, err, pod, podSyncFields.WorkloadId)
@@ -331,6 +339,10 @@ func (h *PodHandler) sendSyncPodsRequests(podsToSync []openapi.PodSyncFields,
 	})
 
 	res, err := request.Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	logDetailedApiErrorMessageIfNeeded(res, err, msg)
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, msg)
 	if statusCode == http.StatusRequestEntityTooLarge && h.maxNumOfPodsPerRequest > 2 {
@@ -357,6 +369,10 @@ func (h *PodHandler) sendSyncPodsPerWorkloadRequests(podsToSync map[string][]ope
 	request = request.WorkloadPodsSyncRequest(podsRequest)
 
 	res, err := request.Execute()
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	logDetailedApiErrorMessageIfNeeded(res, err, msg)
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, msg)
 	if statusCode == http.StatusRequestEntityTooLarge && h.maxNumOfPodsPerRequest > 2 {

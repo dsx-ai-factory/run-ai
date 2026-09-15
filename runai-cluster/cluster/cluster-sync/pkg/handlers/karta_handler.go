@@ -75,6 +75,10 @@ func (h *KartaHandler) HandleAddUpdate(karta *kartav1alpha1.Karta) error {
 			WorkloadTypes: []swagger.WorkloadTypeForSync{backendKarta},
 		})
 	res, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.SyncWorkloadTypesExecute(request)
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Upsert Karta %s", karta.Name))
 }
 
@@ -96,6 +100,10 @@ func (h *KartaHandler) HandleDelete(karta *kartav1alpha1.Karta) error {
 			WorkloadTypes: []swagger.WorkloadTypeForSync{backendKarta},
 		})
 	res, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.SyncWorkloadTypesExecute(request)
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Delete Karta %s", karta.Name))
 }
 
@@ -139,7 +147,11 @@ func (h *KartaHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 			FullSync:      ptr.To(true),
 			WorkloadTypes: backendKartas,
 		})
-	_, err = h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.SyncWorkloadTypesExecute(request)
+	res, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.SyncWorkloadTypesExecute(request)
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 	if err != nil {
 		zap.S().Errorf("Failed to sync Kartas, error: %s", err.Error())
 	}

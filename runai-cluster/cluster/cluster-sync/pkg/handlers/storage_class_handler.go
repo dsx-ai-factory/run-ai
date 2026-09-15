@@ -47,6 +47,10 @@ func (storageClassHandler *StorageClassHandler) HandleStorageClassAdd(storageCla
 
 	_, res, err := storageClassHandler.backendClient.K8sObjectTrackerClient.CreateStorageClass( // StorageClassesApi from  *swagger.APIClient
 		storageClassHandler.backendClient.Context(), parsedStorageClass)
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 
 	return storageClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Added StorageClasses %s", parsedStorageClass.StorageClassName))
 }
@@ -56,6 +60,10 @@ func (storageClassHandler *StorageClassHandler) HandleStorageClassDelete(storage
 
 	res, err := storageClassHandler.backendClient.K8sObjectTrackerClient.DeleteStorageClass(
 		storageClassHandler.backendClient.Context(), config.Config().ClusterUuid, storageClass.Name)
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 
 	return storageClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted StorageClass %s", storageClass.Name))
 }
@@ -65,6 +73,10 @@ func (storageClassHandler *StorageClassHandler) HandleStorageClassUpdate(storage
 	parsedStorageClass := parsers.ParseStorageClassToServerScheme(storageClass)
 	_, res, err := storageClassHandler.backendClient.K8sObjectTrackerClient.UpdateStorageClass(
 		storageClassHandler.backendClient.Context(), parsedStorageClass)
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 
 	return storageClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Updated StorageClasses %s", parsedStorageClass.StorageClassName))
 }
@@ -88,6 +100,10 @@ func (storageClassHandler *StorageClassHandler) HandleSyncEvent(waitGroup *sync.
 
 	_, res, httpErr := storageClassHandler.backendClient.K8sObjectTrackerClient.SyncStorageClass(
 		storageClassHandler.backendClient.Context(), config.Config().ClusterUuid, storageClasses.Items)
+	if res != nil {
+		_ = res.Body.Close()
+
+	}
 
 	finalError := storageClassHandler.backendClient.HandleHttpResponse(res, httpErr, "Sync storageClass data")
 
