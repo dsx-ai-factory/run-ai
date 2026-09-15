@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/onsi/ginkgo/v2 v2.32.1

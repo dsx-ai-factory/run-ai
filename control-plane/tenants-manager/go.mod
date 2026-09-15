@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.3

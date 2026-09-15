@@ -3,7 +3,7 @@
 
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/{{cookiecutter.app_name}}
 
-go 1.24.6
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-20231016130327-a5dc7c7c3988

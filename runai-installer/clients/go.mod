@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-installer/clients
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0

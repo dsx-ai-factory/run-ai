@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/notifications-service
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints
 
-go 1.26.0
+go 1.26.6
 
 require (
 	github.com/openshift/api v0.0.0-20260513233232-73d7ca93df6d

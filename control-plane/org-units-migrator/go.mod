@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/org-units-migrator
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service v0.0.0
@@ -199,7 +199,6 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service v0.0.0 =
 replace github.com/dsx-ai-factory/run-ai/control-plane/authorization v0.0.0 => ../authorization
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client => ../../control-plane/authorization/pkg/client
-
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../control-plane/cluster-service/pkg/client
 

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/patching
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1

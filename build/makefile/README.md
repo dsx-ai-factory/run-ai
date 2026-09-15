@@ -95,7 +95,7 @@ Override knobs:
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `BUILD_IN_PATH` | `cmd/main.go` | Entry point. |
-| `GO_VERSION_DEFAULT` | `1.26.3` | Fallback Go version if `go.mod` lookup fails. |
+| `GO_VERSION_DEFAULT` | `1.26.6` | Fallback Go version if `go.mod` lookup fails. |
 | `GO_VERSION` | Derived from `go.mod` `go X.Y.Z` directive, else `GO_VERSION_DEFAULT` | Resolved Go image tag. |
 | `GOLANG_LINTER_CONFIG_PATH` | `../infra/lint/.golangci.yaml` | Lint config. |
 | `GO_ACC_IGNORE` | `""` | Comma-separated paths excluded from go-acc coverage. |
