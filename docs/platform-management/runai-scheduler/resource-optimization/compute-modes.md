@@ -79,7 +79,7 @@ During workload submission, open the **General** section and locate **Set annota
 
 1. Click **+ANNOTATION**
 2. In **Name**, enter `nvidia.com/container.<container-name>.gpu-compute.mode`
-3. In **Value**, enter `sm-sharing`
+3. In **Value**, enter `"sm-sharing"`, including the quotation marks
 
 </Tab>
 

@@ -36,14 +36,6 @@ An application sees its own share of GPU memory through NVML and `nvidia-smi`, r
 
 To guarantee fair quality of service between different workloads using the same GPU, NVIDIA Run:ai uses an extendable GPUOOMKiller (Out Of Memory Killer) component that guarantees quality of service using Kubernetes semantics of Request and Limit. When memory that was loaned to a workload is needed by another workload, the GPUOOMKiller sends an OOMKill signal to the process accessing the GPU. The pod itself is not terminated.
 
-<Info>
-
-**Note**
-
-Dynamic GPU memory fractions is enabled by default in the [cluster](../../../installation-and-configuration/post-installation-configuration/cluster-config.md).
-
-</Info>
-
 ## Multi-GPU Dynamic Memory Fractions
 
 NVIDIA Run:ai also supports workload submission using multi-GPU dynamic memory fractions. Multi-GPU dynamic memory fractions work similarly to dynamic memory fractions on a single GPU workload, however, instead of a single GPU device, the NVIDIA Run:ai Scheduler selects the node and the GPUs, and allocates the same Request and Limit pair on multiple GPU devices within the same node. For example, if practitioners develop a new model that uses 8 GPUs and requires 40 GB of memory per GPU, but may want to burst out and consume up to the full GPU memory, they can allocate 8×40 GB with multi-GPU memory fractions and a limit of 80 GB (for example, an H100 GPU) instead of reserving the full memory of each GPU. This leaves 40 GB of GPU memory available on each of the 8 GPUs for other workloads within that node. This is useful during model development, where memory requirements are usually lower due to experimentation with smaller models or configurations.

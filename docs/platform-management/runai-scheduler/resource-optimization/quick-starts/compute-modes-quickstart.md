@@ -76,7 +76,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
    * Select the newly created compute resource from the side pane
 10. Open the **General** section and locate **Set annotation(s)**. Click **+ANNOTATION** and set the compute mode:
     * **Name** - `nvidia.com/container.<container-name>.gpu-compute.mode`
-    * **Value** - `sm-sharing`
+    * **Value** - `"sm-sharing"`, including the quotation marks
 11. Click **CREATE WORKSPACE**
 
 </Tab>
