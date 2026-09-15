@@ -479,6 +479,21 @@ function parseComputeDetails(workloadDetailed: WorkloadDetailed, workloadCrudSpe
     });
   }
 
+  // Allocated resources
+  const allocated = workloadDetailed.allocatedResources;
+  if (allocated?.gpu !== null && allocated?.gpu !== undefined) {
+    content.push(`GPU compute allocation: ${allocated.gpu}`);
+  }
+  if (allocated?.gpuMemory) {
+    content.push(`GPU memory allocation: ${getMemoryUnitsForUI(allocated.gpuMemory)}`);
+  }
+  if (allocated?.cpu !== null && allocated?.cpu !== undefined) {
+    content.push(`CPU compute allocation: ${getCpuCoresForUI(allocated.cpu)}`);
+  }
+  if (allocated?.cpuMemory) {
+    content.push(`CPU memory allocation: ${getMemoryUnitsForUI(allocated.cpuMemory)}`);
+  }
+
   // Master-specific resources for distributed workloads
   if (workloadCrudSpec && "masterSpec" in workloadCrudSpec) {
     const distributedWorkload = workloadCrudSpec as DistributedWorkload;
