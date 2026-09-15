@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
+
 	clientsclusterservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/clusterservice"
 	workloadsMgrClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/workloads_mgr"
@@ -93,6 +95,65 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 	})
 
 	Context("create", func() {
+		DescribeTable("resolves IdP identity independently for each distributed inference replica",
+			func(leaderSource, workerSource api.UidGidSource) {
+				ctx = context.WithValue(ctx, runaictx.CfUId, "2001")
+				ctx = context.WithValue(ctx, runaictx.CfGId, "2002")
+				ctx = context.WithValue(ctx, runaictx.CfSupplementalGroups, "2003,2004")
+				security := func(source api.UidGidSource) *api.DistributedInferenceLeaderWorkerSpecSecurity {
+					result := &api.DistributedInferenceLeaderWorkerSpecSecurity{
+						UidGidSource: convutils.Ref(source),
+						HostIpc:      convutils.Ref(true),
+					}
+					if source != api.UIDGIDSOURCE_FROM_IDP_TOKEN {
+						result.RunAsUid = convutils.Ref(int64(1001))
+						result.RunAsGid = convutils.Ref(int64(1002))
+						result.SupplementalGroups = convutils.Ref("1003")
+					}
+					return result
+				}
+				request := api.DistributedInferenceCreationRequest{
+					Name:      "inference-idp",
+					ProjectId: randoms.ProjectIdStr,
+					ClusterId: randoms.ClusterId,
+					Spec: api.DistributedInferenceSpecSpec{
+						ServingPort: &api.DistributedInferenceServingPort{
+							Port:     convutils.Ref(int32(8080)),
+							Protocol: convutils.Ref(api.DISTRIBUTEDINFERENCESERVINGPORTPROTOCOL_HTTP),
+						},
+						Workers:  convutils.Ref(int32(1)),
+						Replicas: convutils.Ref(int32(1)),
+						Leader:   &api.DistributedInferenceLeaderWorkerSpec{Image: convutils.Ref("leader-image"), Security: security(leaderSource)},
+						Worker:   &api.DistributedInferenceLeaderWorkerSpec{Image: convutils.Ref("worker-image"), Security: security(workerSource)},
+					},
+				}
+				response, err := distributedInferencesService.CreateDistributedInference(ctx, request)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response.Code).To(Equal(http.StatusAccepted))
+				payload := response.Body.(workloadsApi.SupersetWorkload)
+				getResponse, err := distributedInferencesService.GetDistributedInference(ctx, payload.WorkloadId)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(getResponse.Code).To(Equal(http.StatusOK))
+				stored := getResponse.Body.(workloadsApi.SupersetWorkload)
+				for i, replica := range []*workloadsApi.DistributedInferenceLeaderWorkerSpec{stored.Spec.Leader.Get(), stored.Spec.Worker.Get()} {
+					source := []api.UidGidSource{leaderSource, workerSource}[i]
+					uid, gid, groups := int64(1001), int64(1002), "1003"
+					if source == api.UIDGIDSOURCE_FROM_IDP_TOKEN {
+						uid, gid, groups = 2001, 2002, "2003,2004"
+					}
+					Expect(replica).NotTo(BeNil())
+					result := replica.GetSecurity()
+					Expect(result.GetRunAsUid()).To(Equal(uid))
+					Expect(result.GetRunAsGid()).To(Equal(gid))
+					Expect(result.GetSupplementalGroups()).To(Equal(groups))
+					Expect(result.GetHostIpc()).To(BeTrue())
+				}
+			},
+			Entry("both use IdP", api.UIDGIDSOURCE_FROM_IDP_TOKEN, api.UIDGIDSOURCE_FROM_IDP_TOKEN),
+			Entry("only leader uses IdP", api.UIDGIDSOURCE_FROM_IDP_TOKEN, api.UIDGIDSOURCE_CUSTOM),
+			Entry("only worker uses IdP", api.UIDGIDSOURCE_CUSTOM, api.UIDGIDSOURCE_FROM_IDP_TOKEN),
+		)
+
 		It("should create distributed inference with security fields (hostIpc, hostNetwork) on leader and worker", func() {
 			request := api.DistributedInferenceCreationRequest{
 				Name:      "dist-inf-security",
