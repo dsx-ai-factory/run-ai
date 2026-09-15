@@ -58,9 +58,11 @@ type PodGroupAssigner struct {
 
 // SetDefaultsWhereNeeded sets default for unset fields
 func (p *PodGroupAssigner) SetDefaultsWhereNeeded(globalRegistry string, globalReplicaCount *int32) {
-	if p.Enabled == nil {
-		p.Enabled = ptr.To[bool](true)
-	}
+	// KRM owns the pod-group-assigner now, so this operand only exists to delete
+	// what the Run:ai-built one left behind. Overwritten rather than defaulted:
+	// re-enabling it would admit every PodGroup twice, through two webhooks with
+	// independent failure policies.
+	p.Enabled = ptr.To[bool](false)
 
 	if p.Image == nil {
 		p.Image = &common.Image{}

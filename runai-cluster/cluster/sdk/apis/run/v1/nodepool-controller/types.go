@@ -80,9 +80,10 @@ func (m *Metrics) SetDefaultsWhereNeeded() {
 
 // SetDefaultsWhereNeeded sets default for unset fields
 func (c *NodePoolController) SetDefaultsWhereNeeded(globalRegistry string, globalReplicaCount *int32) {
-	if c.Enabled == nil {
-		c.Enabled = ptr.To[bool](true)
-	}
+	// KRM owns the nodepool-controller now, so this operand only exists to delete
+	// what the Run:ai-built one left behind. Overwritten rather than defaulted:
+	// re-enabling it would run a second controller against the same NodePools.
+	c.Enabled = ptr.To[bool](false)
 
 	if c.Image == nil {
 		c.Image = &common.Image{}
