@@ -10,14 +10,14 @@ Before you start, make sure:
 
 * You have created a [project](../../../aiinitiatives/organization/projects.md) or have one created for you.
 * The project has an assigned quota of at least 0.5 GPU.
-* [Dynamic GPU memory fractions](../dynamic-memory-fractions.md) is enabled in the UI, if you are submitting through the UI.
+* [Dynamic GPU memory fractions](../dynamic-memory-fractions.md) is enabled.
 
 <Info>
 
 **Note**
 
 * Flexible workload submission is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload submission.
-* Dynamic GPU memory fractions is disabled by default in the NVIDIA Run:ai UI only. To set a memory Limit through the UI, it must be enabled by your administrator under **General settings** → **Resources** → **GPU resource optimization**. The CLI and the APIs support dynamic GPU memory fractions by default and are not affected by this setting.
+* Dynamic GPU memory fractions is disabled by default. To set a memory Limit through the UI, the CLI, or the APIs, it must be enabled by your administrator under **General settings** → **Resources** → **GPU resource optimization**.
 
 </Info>
 
