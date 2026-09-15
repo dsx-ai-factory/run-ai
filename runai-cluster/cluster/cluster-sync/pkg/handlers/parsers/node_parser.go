@@ -36,6 +36,10 @@ const (
 	MissingNvidiaDcgmExporter     = "MissingNvidiaDcgmExporter"
 	MissingNrtHealthyPrerequisite = "MissingNrtHealthyPrerequisite"
 
+	// Operator-published readiness: True means healthy, the inverse of the faults above.
+	GpuFractioningReadyConditionType  = "gpu-fractioning.nvidia.com/Ready"
+	MissingGpuFractioningPrerequisite = "MissingGpuFractioningPrerequisite"
+
 	ReadyPhase                = "Ready"
 	NotReadyPhase             = "NotReady"
 	MissingPrerequisitesPhase = "MissingPrerequisites"
@@ -83,6 +87,11 @@ var (
 		UndrainedMigratedNode:         true,
 		MissingNvidiaContainerToolkit: true,
 		MissingNvidiaDcgmExporter:     true,
+	}
+
+	knownMissingPrerequisiteConditionTypes = map[string]bool{
+		MissingNrtHealthyPrerequisite:     true,
+		MissingGpuFractioningPrerequisite: true,
 	}
 )
 
@@ -232,6 +241,8 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 
 	result = append(result, calculateUnschedulableCondition(node)...)
 
+	result = append(result, nodeParser.calculateGpuFractioningCondition(node)...)
+
 	if config.Config().EnableNodeNvidiaComponentsReadiness {
 		result = append(result, nodeParser.calculateMissingNvidiaComponentsConditions(node)...)
 	}
@@ -347,7 +358,7 @@ func getReadinessPhase(conditions []swagger.NodeStatusConditionDetails) string {
 		if _, ok := knownNotReadyConditionTypes[condition.Type]; ok {
 			return NotReadyPhase
 		}
-		if condition.Type == MissingNrtHealthyPrerequisite {
+		if knownMissingPrerequisiteConditionTypes[condition.Type] {
 			hasMissingPrerequisite = true
 		}
 	}
@@ -361,6 +372,12 @@ func getReadinessPhase(conditions []swagger.NodeStatusConditionDetails) string {
 func calculateStatusConditions(conditions []corev1.NodeCondition) []swagger.NodeStatusConditionDetails {
 	result := []swagger.NodeStatusConditionDetails{}
 	for _, condition := range conditions {
+		// Readiness polarity: passing this through would emit it on exactly the healthy nodes.
+		// calculateGpuFractioningCondition translates it instead.
+		if condition.Type == GpuFractioningReadyConditionType {
+			continue
+		}
+
 		if condition.Type == corev1.NodeReady {
 			if condition.Status == corev1.ConditionFalse || condition.Status == corev1.ConditionUnknown {
 				result = append(result, swagger.NodeStatusConditionDetails{
@@ -409,6 +426,48 @@ func parseCondition(condition corev1.NodeCondition) swagger.NodeStatusConditionD
 		Reason:  condition.Reason,
 		Message: &condition.Message,
 	}
+}
+
+// Only an explicit False is a missing prerequisite. Absent means the node is unmanaged -
+// including mid-driver-upgrade, where the operator deletes the condition rather than leave a
+// value it cannot refresh - and Unknown carries no more information than that.
+//
+// The reason and message come from the operator: they carry whatever the kubelet reported for
+// the failing daemon pod, so they are passed through rather than mapped.
+func evaluateGpuFractioningReadiness(condition *corev1.NodeCondition) (ok bool, reason string, message string) {
+	if condition == nil || condition.Status != corev1.ConditionFalse {
+		return true, "", ""
+	}
+	return false, condition.Reason, condition.Message
+}
+
+// No GPU-node filter is needed: only the operator writes this condition, and only on the nodes
+// its own nodeSelector covers.
+func (nodeParser *NodeParser) calculateGpuFractioningCondition(node *corev1.Node) []swagger.NodeStatusConditionDetails {
+	if !config.Config().EnableNodeGpuFractioningReadiness {
+		return []swagger.NodeStatusConditionDetails{}
+	}
+
+	condition := findNodeCondition(node, GpuFractioningReadyConditionType)
+	ok, reason, message := evaluateGpuFractioningReadiness(condition)
+	if ok {
+		return []swagger.NodeStatusConditionDetails{}
+	}
+
+	return []swagger.NodeStatusConditionDetails{{
+		Type:    MissingGpuFractioningPrerequisite,
+		Reason:  reason,
+		Message: utils.Ref(message),
+	}}
+}
+
+func findNodeCondition(node *corev1.Node, conditionType corev1.NodeConditionType) *corev1.NodeCondition {
+	for i := range node.Status.Conditions {
+		if node.Status.Conditions[i].Type == conditionType {
+			return &node.Status.Conditions[i]
+		}
+	}
+	return nil
 }
 
 func shouldNodeHaveNvidiaComponents(nodeLabels map[string]string) bool {

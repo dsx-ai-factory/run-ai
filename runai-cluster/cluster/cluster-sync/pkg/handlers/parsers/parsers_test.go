@@ -1285,6 +1285,92 @@ var _ = Describe("Parsers", Ordered, func() {
 				{LabelKey: "topology.kubernetes.io/rack", LabelValue: ""},
 			}))
 		})
+
+		Context("GPU fractioning readiness", func() {
+			gpuFractioningCondition := func(status corev1.ConditionStatus, reason, message string) corev1.NodeCondition {
+				return corev1.NodeCondition{
+					Type:    parsers.GpuFractioningReadyConditionType,
+					Status:  status,
+					Reason:  reason,
+					Message: message,
+				}
+			}
+
+			BeforeEach(func() {
+				config.Config().EnableNodeGpuFractioningReadiness = true
+			})
+
+			AfterEach(func() {
+				config.Config().EnableNodeGpuFractioningReadiness = false
+			})
+
+			DescribeTable("maps the operator's condition onto the node status",
+				func(conditions []corev1.NodeCondition, expectedPhase string,
+					expectedConditions []clustersvcswagger.NodeStatusConditionDetails) {
+					node.Status.Conditions = append([]corev1.NodeCondition{readyCondition}, conditions...)
+
+					parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+					Expect(parsedNodeInfo.Status).To(Equal(expectedPhase))
+					Expect(parsedNodeInfo.Conditions).To(Equal(expectedConditions))
+				},
+				Entry("healthy node reports nothing",
+					[]corev1.NodeCondition{gpuFractioningCondition(
+						corev1.ConditionTrue, "AllDaemonsReady", "all gpu-fractioning daemons are running")},
+					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
+				Entry("absent condition reports nothing",
+					[]corev1.NodeCondition{},
+					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
+				Entry("unknown status reports nothing",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionUnknown, "", "")},
+					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
+				Entry("unsupported driver",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
+						"GPUDriverVersionUnsupported",
+						"NVIDIA driver major version 570 is below minimum supported major version 615")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: "GPUDriverVersionUnsupported",
+						Message: utils.Ref(
+							"NVIDIA driver major version 570 is below minimum supported major version 615"),
+					}}),
+				Entry("crashlooping daemon passes the kubelet reason through",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
+						"CrashLoopBackOff", "mpsd pod is not ready: CrashLoopBackOff")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  "CrashLoopBackOff",
+						Message: utils.Ref("mpsd pod is not ready: CrashLoopBackOff"),
+					}}),
+			)
+
+			It("reports nothing when the feature is disabled", func() {
+				config.Config().EnableNodeGpuFractioningReadiness = false
+				node.Status.Conditions = []corev1.NodeCondition{
+					readyCondition,
+					gpuFractioningCondition(corev1.ConditionFalse, "GPUDriverVersionMissing", "driver label is missing"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			It("lets NotReady outrank a missing fractioning prerequisite", func() {
+				node.Status.Conditions = []corev1.NodeCondition{
+					notReadyCondition,
+					gpuFractioningCondition(corev1.ConditionFalse, "GPUDriverVersionMissing", "driver label is missing"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.NotReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(ContainElement(
+					clustersvcswagger.NodeStatusConditionDetails{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  "GPUDriverVersionMissing",
+						Message: utils.Ref("driver label is missing"),
+					}))
+			})
+		})
 	})
 })
 
