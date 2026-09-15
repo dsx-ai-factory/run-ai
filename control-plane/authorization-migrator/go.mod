@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/authorization-migrator
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2

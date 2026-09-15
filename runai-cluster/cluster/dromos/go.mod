@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20260329235847-c657396bd619

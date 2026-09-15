@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/integration-tests
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/devfile/api/v2 v2.2.2

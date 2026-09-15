@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/deckarep/golang-set/v2 v2.9.0

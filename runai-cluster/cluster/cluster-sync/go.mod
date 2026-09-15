@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/antihax/optional v1.0.0

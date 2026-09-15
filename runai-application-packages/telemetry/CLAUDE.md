@@ -18,7 +18,7 @@
 
 - **Build command:** none. Library consumed via `go.mod`; `make build` is a
   no-op. No Dockerfile, no `cmd/main.go`, no `local-dev.sh` build function.
-- Go version derived from `go.mod` (`go 1.26.3`); no external dependencies.
+- Go version derived from `go.mod` (`go 1.26.8`); no external dependencies.
 - No test files currently exist in the package, so `make test` compiles and
   reports no tests.
 - Real recipes live in `build/makefile/golang.mk` and `build/makefile/packages.mk`.

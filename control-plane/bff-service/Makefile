@@ -30,7 +30,7 @@ validate_mockery:
 		echo "existing mockery binary is not of required version ${MOCKERY_VERSION}. Reinstalling it"; \
 		rm -f ${MOCKERY}; \
 	fi
-	GOTOOLCHAIN=go1.26.6 GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v3@${MOCKERY_VERSION}
+	GOTOOLCHAIN=go1.26.8 GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v3@${MOCKERY_VERSION}
 
 mockery: validate_mockery
 	${MOCKERY}
