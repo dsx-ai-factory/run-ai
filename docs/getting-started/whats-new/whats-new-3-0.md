@@ -34,6 +34,12 @@ NVIDIA Run:ai v3.0 replaces the proprietary engine behind GPU fractions with GPU
 
 ### Workload Model Unification
 
+<Warning>
+
+**TODO:** not sure what the name of this heading should be. Ofer, please advise.
+
+</Warning>
+
 The controllers behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller.
 
 Workloads submitted before upgrading through a legacy workload type - workspace, training, distributed training, standard inference, or distributed inference - continue running after the upgrade, but lose some capabilities until resubmitted. See [Migrate Legacy Workloads](../../installation-and-configuration/upgrade/migrate-legacy-workloads.md) for the affected capabilities and the resubmission procedure.
