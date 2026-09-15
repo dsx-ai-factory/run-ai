@@ -1300,7 +1300,7 @@ export function _getCleanedComputeFieldsFromUI(
 export function _getCleanedSecurityFieldsFromUI(
   security?: WorkspaceSpecSpecAllOfSecurity | null,
 ): WorkspaceSpecSpecAllOfSecurity | undefined {
-  const retSecurity = { ...security };
+  const retSecurity = getSecurityFieldForCreationRequest(security);
 
   return Object.keys(retSecurity).length > 0 ? retSecurity : undefined;
 }
