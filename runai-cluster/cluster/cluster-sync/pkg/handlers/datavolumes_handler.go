@@ -165,8 +165,7 @@ func (h *DatavolumeHandler) sendSyncDatavolumesRequests(dvsToSync []swagger.Data
 		to,
 	)
 	if res != nil {
-		_ = res.Body.Close()
-
+		defer func() { _ = res.Body.Close() }()
 	}
 
 	logDetailedApiErrorMessageIfNeeded(res, err, msg)
