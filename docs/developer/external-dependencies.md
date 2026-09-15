@@ -39,7 +39,7 @@ The API-only counterpart to KRM: the CRD type definitions (`kai.resources`: Proj
 ## Karta
 
 **Source:** [`run-ai/karta`](https://github.com/run-ai/karta)
-**Dependency of:** `runai-chart` - a direct Helm chart dependency (`oci://ghcr.io/run-ai/karta`, declared in `Chart.yaml`)
+**Dependency of:** `runai-chart` - a direct Helm chart dependency (`oci://ghcr.io/dsx-ai-factory/karta`, declared in `Chart.yaml`)
 
 Karta is a CRD-based resource abstraction layer with its own operator. It replaced the legacy `ResourceInterface` (RI) CRD as the way Run:ai represents and reconciles workload resource attachments in the cluster. The `karta-migrate` Helm hook handles the one-time migration from RI to Karta CRs on upgrade.
 

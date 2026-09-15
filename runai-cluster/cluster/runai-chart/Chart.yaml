@@ -11,7 +11,7 @@ dependencies:
     version: v0.16.9
   - name: karta
     condition: karta.enabled
-    repository: oci://ghcr.io/run-ai/karta
+    repository: oci://ghcr.io/dsx-ai-factory/karta
     version: 0.2.6
   - name: crds
     condition: development.includeCRDsInReleaseManifest

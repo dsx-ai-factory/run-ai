@@ -79,7 +79,7 @@ func bindingsLock() *artifactlock.ArtifactLock {
 			Name:    "karta",
 			Version: "0.2.6",
 			Images: []artifactlock.Image{
-				lockImage("operator", "ghcr.io/run-ai/karta/karta-operator", "0.2.6"),
+				lockImage("operator", "ghcr.io/dsx-ai-factory/karta/karta-operator", "0.2.6"),
 			},
 		},
 		{

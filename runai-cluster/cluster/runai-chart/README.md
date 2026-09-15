@@ -89,7 +89,7 @@ Declared in [`Chart.yaml`](Chart.yaml) and vendored as tarballs under `charts/`:
 | Dependency | Version | Condition | Source |
 |------------|---------|-----------|--------|
 | `kai-scheduler` | `v0.16.7` | `kai-scheduler.enabled` | `oci://ghcr.io/kai-scheduler/kai-scheduler` |
-| `karta` | `0.2.6` | `karta.enabled` | `oci://ghcr.io/run-ai/karta` |
+| `karta` | `0.2.6` | `karta.enabled` | `oci://ghcr.io/dsx-ai-factory/karta` |
 | `crds` | `0.0.0` | `development.includeCRDsInReleaseManifest` | `file://charts/crds` |
 
 `helm dep up` (run by `make build`) resolves these into `charts/`.
