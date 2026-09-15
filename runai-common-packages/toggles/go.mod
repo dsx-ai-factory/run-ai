@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/toggles
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/Unleash/unleash-client-go/v3 v3.9.2

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/dao-utils
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2

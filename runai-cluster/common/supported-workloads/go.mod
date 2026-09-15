@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/common/supported-workloads
 
-go 1.26.3
+go 1.26.6
 
 require k8s.io/apimachinery v0.32.0
 

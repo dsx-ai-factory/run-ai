@@ -40,15 +40,7 @@ func (h *HTTPRouteResource) OperandName() string {
 }
 
 func (h *HTTPRouteResource) Enabled() bool {
-	global := h.runaiConfig.Spec.Global
-	if global == nil || global.GatewayAPI == nil {
-		return false
-	}
-	gw := global.GatewayAPI
-	return gw.Enabled != nil &&
-		*gw.Enabled &&
-		gw.Name != "" &&
-		h.runaiConfig.Spec.Internal.Global.ClusterURL != ""
+	return componentEnabled
 }
 
 func (h *HTTPRouteResource) Object(ctx context.Context) (client.Object, error) {

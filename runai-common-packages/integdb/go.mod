@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/aws/smithy-go v1.28.1

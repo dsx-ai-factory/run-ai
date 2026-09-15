@@ -1,8 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runai-crd-upgrader
 
-go 1.26.3
-
-toolchain go1.26.6
+go 1.26.6
 
 require (
 	k8s.io/apiextensions-apiserver v0.35.4

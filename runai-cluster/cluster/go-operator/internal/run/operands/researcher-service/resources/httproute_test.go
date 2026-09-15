@@ -61,7 +61,7 @@ var _ = Describe("HTTPRoute", func() {
 			Expect(r.Enabled()).To(BeFalse())
 		})
 
-		It("should be enabled when gatewayAPI.enabled is true and clusterURL is set", func() {
+		It("stays disabled even when gatewayAPI.enabled is true and clusterURL is set, because the component is retired", func() {
 			runaiConfig.Spec.Global.GatewayAPI = &global.GatewayAPI{
 				Enabled:   ptr.To(true),
 				Name:      "my-gw",
@@ -69,7 +69,7 @@ var _ = Describe("HTTPRoute", func() {
 			}
 			runaiConfig.Spec.Internal.Global.ClusterURL = testClusterURL
 			r := NewHTTPRouteResource("researcher-service", nil, runaiConfig)
-			Expect(r.Enabled()).To(BeTrue())
+			Expect(r.Enabled()).To(BeFalse())
 		})
 	})
 

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/project-controller
 
-go 1.26.3
+go 1.26.6
 
 require (
 	github.com/SemanticallyNull/golandreporter v0.0.0-20200627193113-3dad6cfae7c0
