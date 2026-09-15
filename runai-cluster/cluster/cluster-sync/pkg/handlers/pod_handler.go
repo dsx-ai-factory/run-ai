@@ -120,8 +120,7 @@ func (h *PodHandler) handleAddUpdate(pod *coreV1.Pod) error {
 
 	res, err := request.Execute()
 	if res != nil {
-		_ = res.Body.Close()
-
+		defer func() { _ = res.Body.Close() }()
 	}
 	logDetailedApiErrorMessageIfNeeded(res, err, "upsert pod")
 	if err != nil && res != nil && res.StatusCode == http.StatusPreconditionFailed {
@@ -340,8 +339,7 @@ func (h *PodHandler) sendSyncPodsRequests(podsToSync []openapi.PodSyncFields,
 
 	res, err := request.Execute()
 	if res != nil {
-		_ = res.Body.Close()
-
+		defer func() { _ = res.Body.Close() }()
 	}
 	logDetailedApiErrorMessageIfNeeded(res, err, msg)
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, msg)
@@ -370,8 +368,7 @@ func (h *PodHandler) sendSyncPodsPerWorkloadRequests(podsToSync map[string][]ope
 
 	res, err := request.Execute()
 	if res != nil {
-		_ = res.Body.Close()
-
+		defer func() { _ = res.Body.Close() }()
 	}
 	logDetailedApiErrorMessageIfNeeded(res, err, msg)
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, msg)

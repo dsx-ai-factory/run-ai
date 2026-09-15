@@ -83,8 +83,7 @@ func (h *EventHandler) sendSyncEventsRequestInner(events []corev1.Event) error {
 
 	res, err := request.Execute()
 	if res != nil {
-		_ = res.Body.Close()
-
+		defer func() { _ = res.Body.Close() }()
 	}
 	logDetailedApiErrorMessageIfNeeded(res, err, "sync events")
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, "Sync events")
@@ -99,8 +98,7 @@ func (h *EventHandler) sendAssetsSyncEventsRequestInner(events []corev1.Event) e
 
 	res, err := h.backendClient.AssetsClient.SyncEvents(h.backendClient.Context(), *parsers.ParseEventsToAssetsSyncEventsRequest(events))
 	if res != nil {
-		_ = res.Body.Close()
-
+		defer func() { _ = res.Body.Close() }()
 	}
 	logDetailedApiErrorMessageIfNeeded(res, err, "Sync assets events")
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, "Sync assets events")

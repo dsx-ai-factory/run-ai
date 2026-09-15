@@ -158,8 +158,7 @@ func (h *WorkloadHandler) handleUpsert(workloadSyncFields *openapi.WorkloadSyncF
 
 		res, err := request.Execute()
 		if res != nil {
-			_ = res.Body.Close()
-
+			defer func() { _ = res.Body.Close() }()
 		}
 		logDetailedApiErrorMessageIfNeeded(res, err, "upsert workload")
 		finalError := h.backendClient.HandleHttpResponse(res, err,
@@ -549,8 +548,7 @@ func (h *WorkloadHandler) sendSyncWorkloadsRequests(
 
 	res, err := request.Execute()
 	if res != nil {
-		_ = res.Body.Close()
-
+		defer func() { _ = res.Body.Close() }()
 	}
 	logDetailedApiErrorMessageIfNeeded(res, err, msg)
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, msg)
