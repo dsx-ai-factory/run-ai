@@ -4,6 +4,8 @@
 
 NVIDIA Run:ai v3.0 offers two compute modes — time-slicing and SM-sharing. Both are set per workload, and both are available on any GPU that meets the [prerequisites](memory-fractions.md#prerequisites).
 
+A GPU runs one compute mode at a time. The first workload placed on a GPU sets the compute mode of that GPU, workloads requesting the other mode are not placed on it, and the mode resets when the GPU empties.
+
 ## Why There Is a Choice
 
 Under full contention, both modes give each workload roughly an equal share of the GPU compute. The difference is whether the workloads **take turns** on the GPU or **run at the same time**.
@@ -22,7 +24,7 @@ A single active workload on the GPU can therefore use the whole GPU compute. Com
 
 ### Time-Slicing
 
-Time-slicing is serial. Workloads take turns on the whole GPU, and each turn gives one workload exclusive use of the GPU compute engines. When every workload uses its full turn, each receives roughly an equal share of the GPU time. Time left unused by one workload goes to the others.
+Time-slicing is serial. Workloads take turns on the whole GPU, and each turn gives one workload exclusive use of the GPU compute engines. When every workload uses its full turn, each receives roughly an equal share of the GPU time. Time left unused by one workload goes to the others, up to the whole GPU for a single active workload.
 
 Because only one workload runs at a time, each workload is its own error domain. A fatal fault in one workload does not affect the others sharing the GPU.
 
@@ -34,7 +36,7 @@ SM-sharing is parallel. The GPU streaming multiprocessors (SMs) are divided betw
 
 Nothing is carved out in advance. SMs left idle by one workload are used by the others, up to the whole GPU for a single active workload.
 
-SM-sharing runs the workloads through a shared context, so the workloads sharing a GPU also share an error domain. A fatal fault affects all workloads on that GPU.
+SM-sharing runs the workloads through a shared context, so the workloads sharing a GPU also share an error domain. A fault that is attributed to the GPU context cannot be traced back to the process that caused it, so a fatal fault affects every workload sharing that GPU.
 
 ## Choosing a Compute Mode
 
@@ -53,7 +55,7 @@ As a rule of thumb, use time-slicing for work that arrives in bursts and can wai
 | Execution | Serial — workloads take turns | Concurrent — workloads run at the same time |
 | Compute unit divided | GPU time | GPU streaming multiprocessors |
 | Share under full contention | Roughly equal share of GPU time | Roughly equal share of the SMs |
-| Unused compute | Time left unused is split evenly between the other active workloads | SMs left idle are used by the other active workloads, up to the whole GPU for a single active workload |
+| Unused compute | Time left unused is split evenly between the other active workloads, up to the whole GPU for a single active workload | SMs left idle are used by the other active workloads, up to the whole GPU for a single active workload |
 | Error isolation | Full — each workload is its own error domain | Shared — workloads share a context, so a fatal fault affects all of them |
 | NVLink and peer-to-peer | Not restricted | Not restricted |
 | Set as | The default; can be set explicitly or omitted | Must be set explicitly |
@@ -72,6 +74,8 @@ Substitute `<container-name>` with the name of the container receiving the GPU m
 If the annotation is omitted, time-slicing applies. Workloads migrated from earlier versions therefore keep their previous compute-sharing behavior without any change, and adopting SM-sharing is an explicit decision.
 
 You can set the annotation through the UI, the CLI, or the API. After the workload is submitted, the compute mode is visible in the workload YAML.
+
+Administrators can also control the compute mode centrally with a [workload policy](../../policies/policies-and-rules.md). A policy can supply a default compute mode for workloads that do not set one, or enforce a specific mode so that users cannot change it. Policies set the `annotations` field, target a specific workload type, and apply at the system, cluster, department, or project scope. For the field reference, refer to [Policy YAML reference](../../policies/policy-yaml-reference.md).
 
 <Tabs>
 
@@ -115,7 +119,7 @@ spec:
 ## Deployment Considerations
 
 * **The compute mode is exclusive per GPU.** A GPU running time-slicing cannot also run SM-sharing, and the reverse. The first workload placed on a GPU fixes the compute mode of that GPU. Every workload that joins afterwards must request the same mode, and the mode resets when the GPU empties.
-* **Plan node pools around mode exclusivity.** Because each GPU is held to one mode at a time, mixing compute modes across a node pool divides it into groups of GPUs per mode. Where both modes are in regular use, consider separate node pools so that each mode has GPUs available to it.
+* **Mixing compute modes reduces the GPUs available to each mode.** While a GPU is running one compute mode, workloads requesting the other mode cannot be placed on it. On a cluster where both modes are in regular use, a workload can wait for a GPU even though GPU memory is free elsewhere in the node pool. A workload policy that sets a default compute mode per project or department keeps a team's workloads consistent with each other.
 * **Per-container compute metrics are not available under SM-sharing.** Workloads using SM-sharing share a context, and compute utilization cannot be attributed to an individual container. GPU memory metrics are reported per container in both modes.
 
 ## Using CLI

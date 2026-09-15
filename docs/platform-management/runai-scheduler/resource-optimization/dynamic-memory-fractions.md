@@ -10,7 +10,7 @@ This page covers how GPU **memory** is divided between workloads. How those work
 
 * **Higher GPU utilization** - Memory that a workload requested but is not using at the moment is available to other workloads on the same GPU.
 * **Smaller quota requirements** - Workloads can be sized to their typical usage rather than their peak, so a project needs less quota for the same work.
-* **Resilient interactive sessions** - When a workload must give back borrowed memory, NVIDIA Run:ai sends an OOMKill signal to the process that is accessing the GPU, not to the pod. For a Jupyter Notebook this means the notebook itself keeps running. The user can continue working and the notebook re-attaches to a GPU the next time it uses one, rather than losing the session and starting over.
+* **Resilient interactive sessions** - When a workload must give back borrowed memory, the OOMKill signal is sent to the process that is accessing the GPU rather than to the container as a whole. Where that process is not the root process of the container, as in most interactive notebooks, the session survives and the user can use the GPU again without losing their work.
 
 ## How Dynamic GPU Memory Fractions Work
 
@@ -22,6 +22,11 @@ With dynamic GPU memory fractions, you [submit workloads](../../../workloads-in-
 When setting a GPU memory limit either as a GPU memory portion or a GPU memory size, the Limit must be equal to or greater than the memory Request. Both forms are translated into the actual requested memory size of the Request (guaranteed resources) and the Limit (burstable resources, not guaranteed).
 
 For example, you can specify a workload with a GPU memory portion request of 0.25 GPU, and add a limit of up to 0.80 GPU. The Scheduler schedules the workload to a node that can provide the request (0.25), and then assigns the workload to a GPU. The workload is allowed to occupy memory between 0 and 0.80 of the GPU memory, where only 0.25 of the GPU memory is guaranteed to that workload. The rest of the memory, from 0.25 to 0.80, is loaned to the workload as long as it is not needed by other workloads.
+
+Dynamic memory fractions are useful in several scenarios, for example:
+
+* **Model development** - Memory requirements are usually lower during experimentation with smaller models or configurations, and higher only occasionally.
+* **Workloads that run in sequence** - Workloads sharing a GPU serially, or models and processing stages that form a serial chain. When one workload completes its cycle, it voluntarily frees up the memory it used, and the next one starts and uses more. The memory moves between them as demand shifts, instead of each workload holding its peak for its whole lifetime.
 
 NVIDIA Run:ai automatically manages the state changes between Request and Limit as well as the reverse, when the balance needs to be returned, updating the workloads' utilization compared to Request and Limit parameters in the [metrics pane for each workload](../../../workloads-in-nvidia-run-ai/workloads.md).
 
@@ -40,11 +45,20 @@ For example, take a workload with a 4 GB Request and a 12 GB Limit that is curre
 
 ### Reclaiming Loaned Memory
 
-To guarantee fair quality of service between different workloads using the same GPU, NVIDIA Run:ai uses an extendable GPUOOMKiller (Out Of Memory Killer) component that guarantees quality of service using Kubernetes semantics of Request and Limit. When memory that was loaned to a workload is needed by another workload, the GPUOOMKiller sends an OOMKill signal to the process accessing the GPU. The pod itself is not terminated.
+To guarantee fair quality of service between different workloads using the same GPU, NVIDIA Run:ai uses an extendable GPUOOMKiller (Out Of Memory Killer) component that guarantees quality of service using Kubernetes semantics of Request and Limit. When memory that was loaned to a workload is needed by another workload, the GPUOOMKiller sends an OOMKill signal to the process that is accessing the GPU.
+
+What happens to the workload depends on how the container is built:
+
+* If the process accessing the GPU is the root process of the container, terminating it also terminates the container.
+* If the process accessing the GPU is a child of the root process, the container keeps running. The application can start a new process and use the GPU again.
+
+Interactive notebooks are typically built the second way. The notebook server runs as the root process and the GPU work runs in a kernel process that the server starts. An OOMKill therefore ends the GPU work but leaves the notebook session running, and the user can run the cell again.
+
+A memory reclaim is targeted at a single process and affects only the container that process belongs to. This is true in both [GPU compute modes](compute-modes.md), including SM-sharing, where workloads otherwise share an error domain.
 
 ## Multi-GPU Dynamic Memory Fractions
 
-NVIDIA Run:ai also supports workload submission using multi-GPU dynamic memory fractions. Multi-GPU dynamic memory fractions work similarly to dynamic memory fractions on a single GPU workload, however, instead of a single GPU device, the NVIDIA Run:ai Scheduler selects the node and the GPUs, and allocates the same Request and Limit pair on multiple GPU devices within the same node. For example, if practitioners develop a new model that uses 8 GPUs and requires 40 GB of memory per GPU, but may want to burst out and consume up to the full GPU memory, they can allocate 8×40 GB with multi-GPU memory fractions and a limit of 80 GB (for example, an H100 GPU) instead of reserving the full memory of each GPU. This leaves 40 GB of GPU memory available on each of the 8 GPUs for other workloads within that node. This is useful during model development, where memory requirements are usually lower due to experimentation with smaller models or configurations.
+NVIDIA Run:ai also supports workload submission using multi-GPU dynamic memory fractions. Multi-GPU dynamic memory fractions work similarly to dynamic memory fractions on a single GPU workload, however, instead of a single GPU device, the NVIDIA Run:ai Scheduler selects the node and the GPUs, and allocates the same Request and Limit pair on multiple GPU devices within the same node. For example, if practitioners develop a new model that uses 8 GPUs and requires 40 GB of memory per GPU, but may want to burst out and consume up to the full GPU memory, they can allocate 8×40 GB with multi-GPU memory fractions and a limit of 80 GB (for example, an H100 GPU) instead of reserving the full memory of each GPU. This leaves 40 GB of GPU memory available on each of the 8 GPUs for other workloads within that node.
 
 This approach improves GPU utilization and availability, enabling more precise and often smaller quota requirements for the end user.
 
@@ -165,6 +179,7 @@ spec:
 * The Limit must be equal to or greater than the memory Request.
 * The Limit is enforced at runtime only and is never read by the Scheduler. Raising a Limit does not change where a workload is placed.
 * Memory loaned above the Request is not guaranteed. A workload operating above its Request can have that memory reclaimed at any time.
+* To keep a workload running through a memory reclaim, build the container so that the process accessing the GPU is not the root process of the container. A workload whose root process accesses the GPU directly is terminated when its loaned memory is reclaimed.
 
 ## Using CLI
 
