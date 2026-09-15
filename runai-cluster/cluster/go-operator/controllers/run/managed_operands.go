@@ -33,6 +33,7 @@ import (
 	encryption_key "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/encryption-key"
 	external_workload_integrator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/external-workload-integrator"
 	kai_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/kai-operator"
+	krm_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/krm-operator"
 	metrics_exporter "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/metrics-exporter"
 	mps_server "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/mps-server"
 	nmc_mgmt_prometheus "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/nmc-mgmt-prometheus"
@@ -132,6 +133,7 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addRemoteCluster(anyworkload_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(researcher_service.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(kai_operator.Operand(), *spec.KAIOperator.Enabled)
+	mo.addOldRemoteCluster(krm_operator.Operand(), *spec.KRMOperator.Enabled)
 	mo.addRemoteCluster(runtime_rules.Operand(remoteClusterClient, runaiConfig))
 	// Transitional orphan cleanup for the pre-rename runtime-rules resources.
 	// Always disabled, so its resources are deleted every reconcile.
