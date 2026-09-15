@@ -319,7 +319,6 @@ func TestWebhooksFileContainsOnlySurvivingConfigurations(t *testing.T) {
 		"runai-inference-workload-ownership-protection-validation",
 		"runai-pod",
 		"runai-pod-controller-mutation",
-		"runai-pod-group-mutation",
 		"runai-project-validation",
 		"runai-restartrequest-validation",
 		"runai-secret-pvc-validation",

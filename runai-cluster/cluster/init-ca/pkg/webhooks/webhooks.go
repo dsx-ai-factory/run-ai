@@ -27,7 +27,6 @@ import (
 
 const (
 	deployVersionLabelName              = "deploy-version"
-	podGroupAssignerWebhookName         = "runai-pod-group-mutation"    /* #nosec */
 	accessruleControllerWebhookName     = "runai-accessrule-validation" /* #nosec */
 	projectControllerWebhookName        = "runai-project-validation"    /* #nosec */
 	secretPvcWebhookName                = "runai-secret-pvc-validation"
@@ -44,7 +43,6 @@ var anyworkloadControllerWebhookNamePattern = regexp.MustCompile(`(\w+)-(anywork
 
 type WebhookCertificates struct {
 	AdmissionControllerCertificateDetails     *certificates.CertificateDetails
-	PodGroupAssignerCertificateDetails        *certificates.CertificateDetails
 	AccessruleControllerCertificateDetails    *certificates.CertificateDetails
 	AnyworkloadControllerCertificateDetails   *certificates.CertificateDetails
 	ApplicationControllerCertificateDetails   *certificates.CertificateDetails
@@ -275,9 +273,6 @@ func chooseCertificateDetails(name string, webhookCertificates *WebhookCertifica
 	}
 	if anyworkloadControllerWebhookNamePattern.FindString(name) != "" {
 		return webhookCertificates.AnyworkloadControllerCertificateDetails
-	}
-	if name == podGroupAssignerWebhookName {
-		return webhookCertificates.PodGroupAssignerCertificateDetails
 	}
 	if name == accessruleControllerWebhookName {
 		return webhookCertificates.AccessruleControllerCertificateDetails
