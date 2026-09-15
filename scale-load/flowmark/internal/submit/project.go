@@ -90,7 +90,7 @@ func managedProject(ctx context.Context, clients *client.Clients, clusterID, nam
 	if err != nil {
 		return nil, err
 	}
-	if err := requireManaged(project); err != nil {
+	if err := requireManaged(project, clients.Identity); err != nil {
 		return nil, err
 	}
 	return project, nil
@@ -105,9 +105,12 @@ func projectByName(projects []orgunitclient.Project, name string) (*orgunitclien
 	return nil, fmt.Errorf("project %q: %w", name, errProjectNotFound)
 }
 
-func requireManaged(project *orgunitclient.Project) error {
-	if project.Description != ownerMarker {
-		return fmt.Errorf("project %q was not created by flowmark; refusing to reuse or delete it", project.Name)
+func requireManaged(project *orgunitclient.Project, identity string) error {
+	if identity == "" {
+		return fmt.Errorf("cannot verify ownership of project %q: flowmark identity is unknown", project.Name)
+	}
+	if project.Description != ownerMarker || project.CreatedBy == nil || *project.CreatedBy != identity {
+		return fmt.Errorf("project %q was not created by flowmark as %s; refusing to reuse or delete it", project.Name, identity)
 	}
 	switch project.Status.GetPhase() {
 	case orgunitclient.PROJECTPHASE_DELETING, orgunitclient.PROJECTPHASE_DELETED:

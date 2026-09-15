@@ -55,13 +55,20 @@ func ClusterID(ctx context.Context, clients *client.Clients, name string) (strin
 }
 
 func nodepools(ctx context.Context, clients *client.Clients, clusterID string) ([]clusterclient.Nodepool, error) {
-	result, _, err := clients.ClusterService.NodePoolsAPI.GetNodepools(ctx).
-		FilterBy([]string{"clusterId==" + clusterID}).Limit(nodepoolsPageLimit).Execute()
-	if err != nil {
-		return nil, fmt.Errorf("listing nodepools of cluster %s: %w", clusterID, err)
+	var pools []clusterclient.Nodepool
+	for offset := int32(0); ; offset += nodepoolsPageLimit {
+		page, _, err := clients.ClusterService.NodePoolsAPI.GetNodepools(ctx).
+			FilterBy([]string{"clusterId==" + clusterID}).Limit(nodepoolsPageLimit).Offset(offset).Execute()
+		if err != nil {
+			return nil, fmt.Errorf("listing nodepools of cluster %s: %w", clusterID, err)
+		}
+		pools = append(pools, page.Nodepools...)
+		if len(page.Nodepools) < int(nodepoolsPageLimit) {
+			break
+		}
 	}
-	if len(result.Nodepools) == 0 {
+	if len(pools) == 0 {
 		return nil, fmt.Errorf("cluster %s has no nodepools", clusterID)
 	}
-	return result.Nodepools, nil
+	return pools, nil
 }

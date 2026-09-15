@@ -82,24 +82,32 @@ func TestProjectByNameIsExact(t *testing.T) {
 }
 
 func TestRequireManaged(t *testing.T) {
+	const flowmark = "flowmark-ci@run.ai"
 	cases := []struct {
 		name        string
 		description string
+		createdBy   string
 		phase       orgunitclient.ProjectPhase
+		identity    string
 		wantErr     string
 	}{
-		{name: "flowmark project ready", description: ownerMarker, phase: orgunitclient.PROJECTPHASE_READY},
-		{name: "flowmark project still creating", description: ownerMarker, phase: orgunitclient.PROJECTPHASE_CREATING},
-		{name: "foreign project refused", description: "team quota", phase: orgunitclient.PROJECTPHASE_READY, wantErr: "not created by flowmark"},
-		{name: "unmarked project refused", description: "", phase: orgunitclient.PROJECTPHASE_READY, wantErr: "not created by flowmark"},
-		{name: "deleting project refused", description: ownerMarker, phase: orgunitclient.PROJECTPHASE_DELETING, wantErr: "being deleted"},
+		{name: "flowmark project ready", description: ownerMarker, createdBy: flowmark, phase: orgunitclient.PROJECTPHASE_READY, identity: flowmark},
+		{name: "flowmark project still creating", description: ownerMarker, createdBy: flowmark, phase: orgunitclient.PROJECTPHASE_CREATING, identity: flowmark},
+		{name: "marker forged by another user", description: ownerMarker, createdBy: "alice@run.ai", phase: orgunitclient.PROJECTPHASE_READY, identity: flowmark, wantErr: "not created by flowmark"},
+		{name: "same user but no marker", description: "team quota", createdBy: flowmark, phase: orgunitclient.PROJECTPHASE_READY, identity: flowmark, wantErr: "not created by flowmark"},
+		{name: "unknown creator", description: ownerMarker, phase: orgunitclient.PROJECTPHASE_READY, identity: flowmark, wantErr: "not created by flowmark"},
+		{name: "unknown identity refuses everything", description: ownerMarker, createdBy: flowmark, phase: orgunitclient.PROJECTPHASE_READY, wantErr: "identity is unknown"},
+		{name: "deleting project refused", description: ownerMarker, createdBy: flowmark, phase: orgunitclient.PROJECTPHASE_DELETING, identity: flowmark, wantErr: "being deleted"},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			phase := tc.phase
 			project := &orgunitclient.Project{Name: "p", Description: tc.description, Status: orgunitclient.ProjectStatus{Phase: &phase}}
-			err := requireManaged(project)
+			if tc.createdBy != "" {
+				project.CreatedBy = orgunitclient.PtrString(tc.createdBy)
+			}
+			err := requireManaged(project, tc.identity)
 			if tc.wantErr == "" {
 				if err != nil {
 					t.Fatalf("unexpected error: %v", err)
