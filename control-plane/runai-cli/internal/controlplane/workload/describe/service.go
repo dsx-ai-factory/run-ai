@@ -27,7 +27,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/distributedinference"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/inference"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/nim"
-	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
@@ -65,7 +64,7 @@ type WorkloadClient interface {
 	GetInference(ctx context.Context, id string) (*openapi.Inference, error)
 	GetDistributed(ctx context.Context, id string) (*openapi.DistributedWorkload, error)
 	GetDistributedInference(ctx context.Context, id string) (*openapi.DistributedInference, error)
-	GetNimService(ctx context.Context, id string) (*nimclient.NimServiceResponse, error)
+	GetNimService(ctx context.Context, id string) (*workloadmanager.NimServiceResponse, error)
 }
 
 type WorkloadV2Getter interface {
@@ -893,7 +892,7 @@ func (s *Service) extractRuntimeFromInferenceSpec(runtimeBuilder *displayer.Runt
 	return extractRuntimeFromSpec(runtimeBuilder, spec, &inferenceSpecAdapter{spec: spec})
 }
 
-func (s *Service) extractRuntimeFromNimSpec(runtimeBuilder *displayer.RuntimeBuilder, spec *nimclient.NimServiceSpec) *displayer.RuntimeBuilder {
+func (s *Service) extractRuntimeFromNimSpec(runtimeBuilder *displayer.RuntimeBuilder, spec *workloadmanager.NimServiceSpec) *displayer.RuntimeBuilder {
 	return extractRuntimeFromSpec(runtimeBuilder, spec, &nimSpecAdapter{spec: spec})
 }
 

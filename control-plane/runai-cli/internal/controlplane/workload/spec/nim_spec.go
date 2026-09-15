@@ -17,7 +17,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/specset/storage/pvc"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/submit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec/spectype"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 
 func NewNimSpec() *GeneralSpec {
