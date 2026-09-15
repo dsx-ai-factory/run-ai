@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.26.6
+FROM golang:1.26.8
 ARG TARGETARCH
 ENV TARGETARCH=$TARGETARCH
 RUN go install github.com/go-delve/delve/cmd/dlv@latest

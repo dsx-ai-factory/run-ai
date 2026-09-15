@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/config
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/fsnotify/fsnotify v1.10.1

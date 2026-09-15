@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/integration-tests
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v0.0.0
