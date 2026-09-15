@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"net/http"
 
+	authorization "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	runaiclient "github.com/dsx-ai-factory/run-ai/runai-installer/clients/pkg/clients"
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/authorization"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 )
 

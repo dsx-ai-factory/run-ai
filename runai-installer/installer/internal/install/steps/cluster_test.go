@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/config"
 	configinputs "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/inputs"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
@@ -39,7 +39,7 @@ func TestInstallClusterChart_AddsCustomCAValue_WhenCAPathProvided(t *testing.T) 
 	create := NewCreateCluster(nil)
 	create.clusterUuid = "uuid-123"
 	installInfoStep := NewGetClusterInstallationDetails(create, nil)
-	installInfoStep.installInfo = cluster.NewClusterInstallationInfoResponse("", "", "", "s3cr3t")
+	installInfoStep.installInfo = newClientSecretInstallInfo("s3cr3t")
 
 	fi := &fakeHelmInstallerCluster{}
 	step := NewInstallClusterChart(installInfoStep, fi, nil).(*InstallClusterChart)
@@ -74,10 +74,8 @@ func TestInstallClusterChart_UsesBootstrapToken(t *testing.T) {
 	create := NewCreateCluster(nil)
 	create.clusterUuid = "uuid-123"
 	installInfoStep := NewGetClusterInstallationDetails(create, nil)
-	installInfoStep.installInfo = &cluster.ClusterInstallationInfoResponse{
-		BootstrapToken: "bootstrap-token",
-		ClientSecret:   "client-secret",
-	}
+	installInfoStep.installInfo = cluster.NewClusterInstallationInfoResponse("", "", "", "bootstrap-token")
+	installInfoStep.installInfo.SetClientSecret("client-secret")
 
 	fi := &fakeHelmInstallerCluster{}
 	installStep := NewInstallClusterChart(installInfoStep, fi, nil).(*InstallClusterChart)
@@ -106,7 +104,7 @@ func TestInstallClusterChart_SubdomainSupport_HostRouting(t *testing.T) {
 	create := NewCreateCluster(nil)
 	create.clusterUuid = "uuid-123"
 	installInfoStep := NewGetClusterInstallationDetails(create, nil)
-	installInfoStep.installInfo = cluster.NewClusterInstallationInfoResponse("", "", "", "s3cr3t")
+	installInfoStep.installInfo = newClientSecretInstallInfo("s3cr3t")
 
 	fi := &fakeHelmInstallerCluster{}
 	step := NewInstallClusterChart(installInfoStep, fi, nil).(*InstallClusterChart)
@@ -134,7 +132,7 @@ func TestInstallClusterChart_SubdomainSupport_PathRouting(t *testing.T) {
 	create := NewCreateCluster(nil)
 	create.clusterUuid = "uuid-123"
 	installInfoStep := NewGetClusterInstallationDetails(create, nil)
-	installInfoStep.installInfo = cluster.NewClusterInstallationInfoResponse("", "", "", "s3cr3t")
+	installInfoStep.installInfo = newClientSecretInstallInfo("s3cr3t")
 
 	fi := &fakeHelmInstallerCluster{}
 	step := NewInstallClusterChart(installInfoStep, fi, nil).(*InstallClusterChart)
@@ -164,7 +162,7 @@ func TestInstallClusterChart_DoesNotAddCustomCAValue_WhenCAPathMissing(t *testin
 	create := NewCreateCluster(nil)
 	create.clusterUuid = "uuid-123"
 	installInfoStep := NewGetClusterInstallationDetails(create, nil)
-	installInfoStep.installInfo = cluster.NewClusterInstallationInfoResponse("", "", "", "s3cr3t")
+	installInfoStep.installInfo = newClientSecretInstallInfo("s3cr3t")
 
 	fi := &fakeHelmInstallerCluster{}
 	step := NewInstallClusterChart(installInfoStep, fi, nil).(*InstallClusterChart)
@@ -194,4 +192,10 @@ func TestInstallClusterChart_DoesNotAddCustomCAValue_WhenCAPathMissing(t *testin
 	if !contains(fi.values, wantDomain) {
 		t.Fatalf("expected values to include %q, got: %v", wantDomain, fi.values)
 	}
+}
+
+func newClientSecretInstallInfo(clientSecret string) *cluster.ClusterInstallationInfoResponse {
+	installInfo := cluster.NewClusterInstallationInfoResponse("", "", "", "")
+	installInfo.SetClientSecret(clientSecret)
+	return installInfo
 }

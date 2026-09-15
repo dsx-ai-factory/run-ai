@@ -25,7 +25,7 @@ func TestGetTenants_HappyFlow(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	tenants, resp, err := OpenapiClient.TenantAPI.GetTenants(newTestContext()).Execute()
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestGetTenants_FilterByName(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	tenants, resp, err := OpenapiClient.TenantAPI.GetTenants(newTestContext()).
 		Name(created.Tenant.Name).Execute()
@@ -62,7 +62,7 @@ func TestGetTenants_FilterByAlias(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	alias := GenerateRandomString("alias-")
 	updateReq := openapi.TenantUpdateRequest{}
@@ -154,7 +154,7 @@ func TestGetTenantById_HappyFlow(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	tenant, resp, err := OpenapiClient.TenantAPI.GetTenantById(newTestContext(), created.Tenant.Id).Execute()
 	require.NoError(t, err)
@@ -201,7 +201,7 @@ func TestCreateTenant_DuplicateName(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	req := openapi.TenantCreationRequest{
 		Name:  created.Tenant.Name,
@@ -236,7 +236,7 @@ func TestCreateTenant_DuplicateAlias(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	tenant1 := createAndCleanupTenant(t, ctx)
+	tenant1 := createAndCleanupTenant(t, ctx, false)
 
 	alias := GenerateRandomString("alias-")
 	updateReq := openapi.TenantUpdateRequest{}
@@ -264,7 +264,7 @@ func TestCreateTenant_NameConflictsWithExistingAlias(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	tenant1 := createAndCleanupTenant(t, ctx)
+	tenant1 := createAndCleanupTenant(t, ctx, false)
 
 	alias := GenerateRandomString("alias-")
 	updateReq := openapi.TenantUpdateRequest{}
@@ -290,7 +290,7 @@ func TestCreateTenant_AliasConflictsWithExistingName(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	tenant1 := createAndCleanupTenant(t, ctx)
+	tenant1 := createAndCleanupTenant(t, ctx, false)
 
 	name2 := GenerateRandomTenantName()
 	createReq := openapi.TenantCreationRequest{
@@ -314,7 +314,7 @@ func TestUpdateTenantAlias(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	alias := GenerateRandomString("alias-")
 	updateReq := openapi.TenantUpdateRequest{}
@@ -335,7 +335,7 @@ func TestUpdateTenantAlias_ClearAlias(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	alias := GenerateRandomString("alias-")
 	setReq := openapi.TenantUpdateRequest{}
@@ -358,8 +358,8 @@ func TestUpdateTenantAlias_DuplicateAlias(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	tenant1 := createAndCleanupTenant(t, ctx)
-	tenant2 := createAndCleanupTenant(t, ctx)
+	tenant1 := createAndCleanupTenant(t, ctx, false)
+	tenant2 := createAndCleanupTenant(t, ctx, false)
 
 	alias := GenerateRandomString("alias-")
 	setReq := openapi.TenantUpdateRequest{}
@@ -381,8 +381,8 @@ func TestUpdateTenantAlias_ConflictsWithExistingName(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	tenant1 := createAndCleanupTenant(t, ctx)
-	tenant2 := createAndCleanupTenant(t, ctx)
+	tenant1 := createAndCleanupTenant(t, ctx, false)
+	tenant2 := createAndCleanupTenant(t, ctx, false)
 
 	updateReq := openapi.TenantUpdateRequest{}
 	updateReq.SetAlias(tenant1.Tenant.Name)
@@ -415,7 +415,7 @@ func TestCreateTenant_InitialStatus_IsCreating(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	require.Equal(t, "Creating", created.Tenant.Status)
 }
@@ -424,7 +424,7 @@ func TestCreateTenant_MimirId_IsPresent(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	require.True(t, created.Tenant.HasMimirId(), "mimirId should be set after tenant creation")
 	require.NotEmpty(t, created.Tenant.GetMimirId())
@@ -434,7 +434,7 @@ func TestCreateTenant_ContractType_IsNormal(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	require.Equal(t, "normal", created.Tenant.ContractType)
 }
@@ -548,7 +548,7 @@ func TestGetTenantByNameInternal(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	tenant, resp, err := OpenapiClient.TenantsAPI.GetTenant(ctx).TenantName(created.Tenant.Name).Execute()
 	require.NoError(t, err)

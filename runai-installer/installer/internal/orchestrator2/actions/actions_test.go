@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	runaicluster "github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	runaicluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/component-tests/harness"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
@@ -56,7 +56,9 @@ func (f *fakeAPI) GetClusterByUUID(context.Context, string) (*runaicluster.Displ
 }
 
 func (f *fakeAPI) GetClusterInstallInfoByUUID(context.Context, string, string, string) (*runaicluster.ClusterInstallationInfoResponse, int, error) {
-	return runaicluster.NewClusterInstallationInfoResponse("", "", "", f.clientSecret), 200, nil
+	installInfo := runaicluster.NewClusterInstallationInfoResponse("", "", "", "")
+	installInfo.SetClientSecret(f.clientSecret)
+	return installInfo, 200, nil
 }
 
 func providerFor(api step.RunAIAPIClient) step.RunAIAPIClientProvider {

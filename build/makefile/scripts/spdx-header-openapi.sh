@@ -9,16 +9,20 @@
 # matching the already-headered clients (runai-clients/cli-exposer-client/generated).
 #   sh spdx-header-openapi.sh <dir>   # default <dir> = .
 #
-# NOT stamped: the generator's ancillary scaffolding (git_push.sh, .travis.yml,
-# openapi.yaml specs). Those are exempt, and stamping them breaks the
-# regen-diff gate in openapi.mk (openapi-check-client-code-uptodate-go
-# regenerates into a tmp dir WITHOUT running this script, then `diff -r -w -B`
-# — git_push.sh is not in its --exclude list, so a stamped copy can never
-# converge with the bare regen output).
+# Also drops git_push.sh, which openapi-generator emits but we never use. It is
+# removed rather than stamped: the generate targets in openapi.mk regenerate
+# into a tmp dir and `diff -r` the result against the committed tree, and
+# git_push.sh is not in that diff's exclude list, so a stamped copy could never
+# converge. Deleting it on every generation keeps both sides consistent.
 set -eu
 H1='// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.'
 H2='// SPDX-License-Identifier: Apache-2.0'
 root="${1:-.}"
+
+# Remove unused generator scaffolding.
+find "$root" -type f -name 'git_push.sh' 2>/dev/null | grep -vE '/vendor/|/third_party/' | while IFS= read -r f; do
+	rm -f "$f"
+done
 
 # Stamp openapi-generator Go client files
 find "$root" -type f -name '*.go' 2>/dev/null | grep -vE '/vendor/|/third_party/|/thirdpartyapi/' | while IFS= read -r f; do

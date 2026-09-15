@@ -27,10 +27,9 @@ import (
 
 const (
 	deployVersionLabelName              = "deploy-version"
-	podGroupAssignerWebhookName         = "runai-pod-group-mutation"    /* #nosec */
-	accessruleControllerWebhookName     = "runai-accessrule-validation" /* #nosec */
-	projectControllerWebhookName        = "runai-project-validation"    /* #nosec */
-	secretPvcWebhookName                = "runai-secret-pvc-validation"
+	podGroupAssignerWebhookName         = "runai-pod-group-mutation"         /* #nosec */
+	accessruleControllerWebhookName     = "runai-accessrule-validation"      /* #nosec */
+	projectControllerWebhookName        = "runai-project-validation"         /* #nosec */
 	applicationControllerWebhookName    = "application-validation"           /* #nosec */
 	adviceRestartControllerWebhookName  = "runai-advice-restart-dw-mutation" /* #nosec */
 	restartRequestValidationWebhookName = "runai-restartrequest-validation"  /* #nosec */
@@ -285,9 +284,6 @@ func chooseCertificateDetails(name string, webhookCertificates *WebhookCertifica
 	if name == projectControllerWebhookName {
 		// The project/department validating webhook is served by the agent, so its
 		// CA bundle must match the agent's serving certificate.
-		return webhookCertificates.AgentCertificateDetails
-	}
-	if name == secretPvcWebhookName {
 		return webhookCertificates.AgentCertificateDetails
 	}
 	if name == applicationControllerWebhookName {

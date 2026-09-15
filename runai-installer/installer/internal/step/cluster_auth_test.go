@@ -8,22 +8,21 @@ package step
 import (
 	"testing"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestClusterAuthValue(t *testing.T) {
+	bootstrapTokenInfo := cluster.NewClusterInstallationInfoResponse("", "", "", "token")
+	bootstrapTokenInfo.SetClientSecret("secret")
 	assert.Equal(t,
 		"controlPlane.bootstrapToken=token",
-		ClusterAuthValue(&cluster.ClusterInstallationInfoResponse{
-			BootstrapToken: "token",
-			ClientSecret:   "secret",
-		}),
+		ClusterAuthValue(bootstrapTokenInfo),
 	)
+	clientSecretInfo := cluster.NewClusterInstallationInfoResponse("", "", "", "")
+	clientSecretInfo.SetClientSecret("secret")
 	assert.Equal(t,
 		"controlPlane.clientSecret=secret",
-		ClusterAuthValue(&cluster.ClusterInstallationInfoResponse{
-			ClientSecret: "secret",
-		}),
+		ClusterAuthValue(clientSecretInfo),
 	)
 }

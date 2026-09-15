@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 )
 
@@ -70,8 +70,10 @@ func (f *FakeRunAIAPIClient) GetClusterByUUID(_ context.Context, uuid string) (*
 }
 
 func (f *FakeRunAIAPIClient) GetClusterInstallInfoByUUID(_ context.Context, _, _, _ string) (*cluster.ClusterInstallationInfoResponse, int, error) {
-	installInfo := cluster.NewClusterInstallationInfoResponse("", "", "", f.ClientSecret)
-	installInfo.BootstrapToken = f.BootstrapToken
+	installInfo := cluster.NewClusterInstallationInfoResponse("", "", "", f.BootstrapToken)
+	if f.ClientSecret != "" {
+		installInfo.SetClientSecret(f.ClientSecret)
+	}
 	return installInfo, 200, nil
 }
 
@@ -102,7 +104,9 @@ func (f *FakeClusterLookup) GetClusterInstallInfoByUUID(_ context.Context, _, _,
 // NewFakeClusterLookup returns a FakeClusterLookup pre-seeded with a
 // stock install-info response that carries the well-known test client secret.
 func NewFakeClusterLookup() *FakeClusterLookup {
+	installInfo := cluster.NewClusterInstallationInfoResponse("", "", "", "")
+	installInfo.SetClientSecret("s3cr3t")
 	return &FakeClusterLookup{
-		InstallInfo: cluster.NewClusterInstallationInfoResponse("", "", "", "s3cr3t"),
+		InstallInfo: installInfo,
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -54,7 +55,7 @@ func (ts *TestSteps) HardDeleteTenantInternal(ctx context.Context, tenantId int3
 	return nil
 }
 
-func createAndCleanupTenant(t *testing.T, ctx context.Context) *openapi.TenantCreationResponse {
+func createAndCleanupTenant(t *testing.T, ctx context.Context, waitReady bool) *openapi.TenantCreationResponse {
 	t.Helper()
 	name := GenerateRandomTenantName()
 	email := GenerateRandomEmail(name)
@@ -65,5 +66,10 @@ func createAndCleanupTenant(t *testing.T, ctx context.Context) *openapi.TenantCr
 	t.Cleanup(func() {
 		_ = TestStepsClient.HardDeleteTenantInternal(context.Background(), created.Tenant.Id)
 	})
+
+	if waitReady {
+		pollTenantStatus(t, created.Tenant.Id, "Ready", 30*time.Second)
+	}
+
 	return created
 }
