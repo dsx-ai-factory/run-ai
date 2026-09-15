@@ -1,49 +1,47 @@
-# Recovering Affected Workloads After Upgrade
+# Migrate Legacy Workloads
 
-This guide explains how to recreate legacy NVIDIA Run:ai workloads through the Workloads V2 submission path, to restore the capabilities described in [Post-Upgrade Recovery for Affected Workloads](upgrade.md#post-upgrade-recovery-for-affected-workloads).
+The controllers behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller. Workloads submitted before upgrading through a legacy workload type continue running after the upgrade, but lose some capabilities until resubmitted.
 
-The procedure uses only NVIDIA Run:ai control-plane APIs. You do not create a `WorkloadRunner` directly, and you do not need `kubectl` or Kubernetes API access.
+Resolving an affected workload is not required immediately after upgrading; each workload can be resubmitted independently at any time. To restore full functionality, resubmit an affected workload either [manually](#submit-workload-via-ui-api-cli) through the NVIDIA Run:ai UI, API, or CLI, or, for a large number of workloads, [using the migration script](#submit-workload-via-migration-script) against the control plane API.
 
-## How the Migration Works
+## Affected Capabilities
 
-For each legacy workload, the migration:
+| Capability | Status after upgrade |
+| --- | --- |
+| Suspend / Resume | Not functional |
+| Error handling / auto-restart | Not functional. A workload backed by a third-party controller, such as Knative, keeps running, but NVIDIA Run:ai no longer tracks its status |
+| Fractional GPU support | Not functional. Can silently fall back to CPU-only if the CUDA driver was not updated during the upgrade |
+| Events / status visibility | Partially functional. Pods are still detected and their status is still updated |
+| Update (modify spec in place) | Not functional. Applies to standard inference and Distributed Inference workloads |
+| Duplicate, metrics and monitoring, log streaming, port forwarding, CLI operations (`runai get`/`describe`/`logs`), delete | Unaffected |
 
-1. Lists the workloads in the selected NVIDIA Run:ai project or cluster.
-2. Gets the workload from its typed `/api/v1/workloads/...` endpoint.
-3. Removes fields that are returned by GET but are not accepted during creation.
-4. Restores any secrets or credentials omitted from the GET response.
-5. Posts the transformed request to the same typed collection endpoint.
-6. Verifies the resulting workload through the Workloads V2 and typed APIs.
+## Submit Workload via UI/API/CLI
 
-When the target cluster supports the required workload capabilities, the workloads service composes the typed request into a Workloads V2 native manifest. The cluster agent then wraps that manifest in a `WorkloadRunner`.
+Resubmitting an affected workload through the NVIDIA Run:ai UI, API, or CLI binds it to the unified controller.
 
 <Warning>
 
-Do not submit a hand-written manifest to `/api/v2/workloads`. Doing so bypasses the server-side composer used by this migration.
+**TODO:** this procedure mirrors the migration script's create-then-cutover pattern, but that sequence has not been explicitly confirmed for manual resubmission by Chen Amiel / Lior Hilel (RUN-42321) - Jira left the exact manual procedure undefined (placeholder `XXX`/`YYY`/`ZZZ` commands were never filled in by engineering). Confirm before publishing.
+
+It is also unconfirmed whether manual submission through the UI, API, or CLI goes through the same typed v1 API -> composer -> `WorkloadRunner` pipeline described in [Submit Workload via Migration Script](#submit-workload-via-migration-script), or reaches the unified controller by some other path. Confirm the mechanism before publishing.
 
 </Warning>
 
-## Supported Workload Types
+1. Submit the replacement workload through the NVIDIA Run:ai UI, API, or CLI, using a temporary name so it can coexist with the legacy workload during verification.
+2. Verify the replacement works as expected.
+3. Stop or delete the legacy workload once the replacement is verified and application owners approve the cutover.
+4. If the workload must keep its original name, delete the temporary replacement and resubmit it with the original name, then verify it again.
 
-The typed creation APIs support this procedure for the following workload types:
+## Submit Workload via Migration Script
 
-| Workload type | Typed API resource | Expected Workloads V2 manifest |
-| --- | --- | --- |
-| Workspace | `workspaces` | `batch/v1` `Job` |
-| Training | `trainings` | `batch/v1` `Job` |
-| Distributed Training | `distributed` | Framework-specific distributed workload |
-| Inference | `inferences` | `serving.knative.dev/v1` `Service` |
-| Distributed Inference | `distributed-inferences` | `leaderworkerset.x-k8s.io/v1` `LeaderWorkerSet` |
+Use this procedure instead of manual resubmission when you need to recreate many workloads without re-entering each one's configuration by hand. It uses only NVIDIA Run:ai control plane APIs - you do not create a `WorkloadRunner` directly, and you do not need `kubectl` or Kubernetes API access.
 
-The target cluster must support the selected workload type and its native manifest. In particular, Inference requires Knative Serving, and Distributed Inference requires LeaderWorkerSet (LWS).
-
-## Before You Begin
+### Before You Begin
 
 Confirm that:
 
 * The target NVIDIA Run:ai version and cluster support Workloads V2 submissions.
-* Knative Serving is available when migrating Inference workloads.
-* LWS is available when migrating Distributed Inference workloads.
+* The target cluster supports each workload type's native manifest. In particular, Knative Serving is available when migrating standard inference workloads, and LWS is available when migrating Distributed Inference workloads.
 * Your account can read and create the relevant workload types in every project selected for migration.
 * You have the original values for secrets and credentials that the GET API redacts or omits.
 * The `runai` CLI, `curl`, and `jq` are installed.
@@ -55,7 +53,7 @@ Creating a replacement can immediately start application code. Running the old a
 
 </Warning>
 
-## 1. Configure the Target
+### Configure the Target
 
 Set the control plane URL, authentication URL, and target cluster ID:
 
@@ -93,7 +91,7 @@ Do not print the token or enable shell tracing while it is set.
 
 </Warning>
 
-## 2. Choose the Migration Scope
+### Choose the Migration Scope
 
 You can discover workloads by project or across the entire cluster.
 
@@ -210,7 +208,7 @@ jq '
 
 Use this inventory to define the project order, then follow the project-by-project procedure. Cluster-wide discovery is not a recommendation to submit all replacements concurrently.
 
-To recreate the supported legacy workloads cluster-wide, repeat [Select One Workload](#3-select-one-workload) through [Repeat for the Remaining Workloads](#10-repeat-for-the-remaining-workloads) for each workload in the inventory, completing one project before starting the next.
+To recreate the supported legacy workloads cluster-wide, repeat [Select One Workload](#select-one-workload) through [Repeat for the Remaining Workloads](#repeat-for-the-remaining-workloads) for each workload in the inventory, completing one project before starting the next.
 
 The API returns only workloads the caller is authorized to read. A cluster-wide migration therefore requires read and create permissions for every project in scope.
 
@@ -220,11 +218,11 @@ If the selected scope contains more than 100 workloads, retrieve all pages befor
 
 </Tabs>
 
-Record each legacy workload's ID, name, and type. Use the workload type to select the typed API resource from the [supported workload types](#supported-workload-types) table.
+Record each legacy workload's ID, name, and type. Use the workload type to select the typed API resource in [Select One Workload](#select-one-workload) below.
 
 Do not recreate a workload whose `sourceApi` already indicates `WorkloadsV2`.
 
-## 3. Select One Workload
+### Select One Workload
 
 Migrate and verify one workload at a time. Set:
 
@@ -234,11 +232,19 @@ OLD_ID="<legacy-workload-id>"
 REPLACEMENT_NAME="<temporary-replacement-name>"
 ```
 
-Set `RESOURCE` to `workspaces`, `trainings`, `distributed`, `inferences`, or `distributed-inferences` according to the workload type.
+Set `RESOURCE` to the typed API resource matching the workload's type:
+
+| Workload type | Typed API resource |
+| --- | --- |
+| Workspace | `workspaces` |
+| Training | `trainings` |
+| Distributed Training | `distributed` |
+| standard inference | `inferences` |
+| Distributed Inference | `distributed-inferences` |
 
 Use a temporary replacement name so the legacy workload remains available during verification.
 
-## 4. Get and Inspect the Typed Workload
+### Get and Inspect the Typed Workload
 
 Create a private temporary directory for the migration files:
 
@@ -273,7 +279,7 @@ A GET response can be sanitized. It must not be assumed to contain reusable secr
 
 </Warning>
 
-## 5. Build the Creation Request
+### Build the Creation Request
 
 The following response-only fields must be removed:
 
@@ -312,7 +318,15 @@ Review the complete payload before submitting it:
 jq . "$PAYLOAD_FILE"
 ```
 
-## 6. Create the Replacement
+### Create the Replacement
+
+When the target cluster supports the required workload capabilities, the workloads service composes the typed request into a Workloads V2 native manifest, and the cluster agent wraps that manifest in a `WorkloadRunner`.
+
+<Warning>
+
+Do not submit a hand-written manifest to `/api/v2/workloads`. Doing so bypasses the server-side composer used by this migration.
+
+</Warning>
 
 Post the transformed request to the same typed API:
 
@@ -340,7 +354,7 @@ The API normally returns `202 Accepted`. Save `NEW_ID`; it is required for verif
 
 If the request fails, do not repeatedly resubmit it without first checking whether a replacement was created.
 
-## 7. Verify the Workloads V2 Representation
+### Verify the Workloads V2 Representation
 
 ```bash
 curl -fsS \
@@ -362,12 +376,12 @@ Verify that:
 * `syncStatus` is `Synced`.
 * Workspace and Training workloads contain a `batch/v1` `Job` manifest.
 * Distributed Training workloads contain the expected distributed-workload manifest, such as a `kubeflow.org/v1` `PyTorchJob`.
-* Inference workloads contain a `serving.knative.dev/v1` `Service` manifest.
+* standard inference workloads contain a `serving.knative.dev/v1` `Service` manifest.
 * Distributed Inference workloads contain a `leaderworkerset.x-k8s.io/v1` `LeaderWorkerSet` manifest.
 
 The cluster agent creates the `WorkloadRunner` internally. The migration procedure does not create that resource directly.
 
-## 8. Compare the Typed Specifications
+### Compare the Typed Specifications
 
 Normalize the source and replacement GET responses:
 
@@ -424,7 +438,7 @@ The replacement API can add explicit defaults. For example, it can return `spec.
 
 Do not print a diff in shared logs if the normalized files contain restored credentials.
 
-## 9. Verify Runtime State
+### Verify Runtime State
 
 Confirm that the replacement is listed as a Workloads V2 workload:
 
@@ -466,11 +480,11 @@ jq '{
 
 Verify pod creation, storage, network access, credentials, resource allocation, and application behavior. Rendered pods need not be byte-for-byte identical because the newer submission path uses newer controllers and generated identities.
 
-An Inference workload configured to scale to zero can have no running pods while idle. For that workload, verify the Knative service state and send a test inference request to confirm that it scales up and serves traffic.
+A standard inference workload configured to scale to zero can have no running pods while idle. For that workload, verify the Knative service state and send a test inference request to confirm that it scales up and serves traffic.
 
 For Distributed Inference, verify the expected leader and worker topology, the serving endpoint, and communication between replicas.
 
-## 10. Repeat for the Remaining Workloads
+### Repeat for the Remaining Workloads
 
 After one replacement passes verification:
 
@@ -486,14 +500,14 @@ Do not turn this procedure into an unattended bulk migration unless credential r
 
 </Warning>
 
-## Production Cutover
+### Production Cutover
 
 The steps above leave the legacy workload untouched.
 
 For production cutover:
 
 1. Fully verify the temporary replacement.
-2. Stop or delete the legacy workload through the NVIDIA Run:ai control-plane API.
+2. Stop or delete the legacy workload through the NVIDIA Run:ai control plane API.
 3. If retaining the original name is required, delete the verified temporary replacement and repeat the creation request with the original name.
 4. Verify the final workload again.
 
@@ -503,7 +517,7 @@ Stopping or deleting the legacy workload is destructive. Perform that step only 
 
 </Warning>
 
-## Limitations
+### Limitations
 
 * Sanitized GET responses are not guaranteed to round-trip secrets.
 * Platform defaults can create small typed-spec differences.
