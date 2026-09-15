@@ -47,28 +47,32 @@ func TestBootConfigUsesConfiguredDistributionAssetsProfile(t *testing.T) {
 	assert.Equal(t, "ce", result.DistributionAssets.Profile)
 }
 
-func TestBootConfigUsesCommunityDefaultsWithoutSupportEntitlement(t *testing.T) {
+func TestBootConfigUsesV2DefaultsWithoutSupportEntitlement(t *testing.T) {
 	bootConfig := &config.BootConfig{}
 	bootConfig.SetDefaults()
 
-	result := NewBootConfigAPIService("2.25.9", bootConfig).resolve()
+	result := NewBootConfigAPIService("3.0.4", bootConfig).resolve()
 
 	assert.Equal(t, "cc", result.DistributionAssets.Profile)
-	assert.Equal(t, "https://run-ai-docs.nvidia.com/self-hosted/2.25", result.Docs.BaseUrl)
+	assert.Equal(t, "v2", result.Docs.CatalogVersion)
+	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/v3.0", result.Docs.BaseUrl)
+	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/v3.0/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
 	assert.Empty(t, result.Support.Url)
 }
 
-func TestBootConfigAppliesSupportEntitlementToSelfHostedDefaults(t *testing.T) {
+func TestBootConfigKeepsV2DefaultsWithSupportEntitlement(t *testing.T) {
 	bootConfig := &config.BootConfig{}
 	bootConfig.SetDefaults()
 	bootConfig.SupportEntitled = true
 
-	result := NewBootConfigAPIService("2.25.9", bootConfig).resolve()
+	result := NewBootConfigAPIService("3.0.4", bootConfig).resolve()
 	payload, err := json.Marshal(result)
 	require.NoError(t, err)
 
 	assert.Equal(t, "ce", result.DistributionAssets.Profile)
-	assert.Equal(t, "https://run-ai-docs.nvidia.com/self-hosted/2.25", result.Docs.BaseUrl)
+	assert.Equal(t, "v2", result.Docs.CatalogVersion)
+	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/v3.0", result.Docs.BaseUrl)
+	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/v3.0/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
 	assert.Equal(t, supportEntitledURL, result.Support.Url)
 	assert.Equal(t, supportEntitledLabel, result.Support.Label)
 	assert.NotContains(t, string(payload), "supportEntitled")
@@ -226,4 +230,20 @@ func TestBootConfigV2PreservesConfiguredTemplateAndRelativeBase(t *testing.T) {
 	result := NewBootConfigAPIService("3.0.1", bootConfig).resolve()
 	assert.Equal(t, "/internal-docs/v3.0", result.Docs.BaseUrl)
 	assert.Equal(t, "/internal-docs/v3.0/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
+}
+
+func TestBootConfigPreservesV1DeploymentOverride(t *testing.T) {
+	bootConfig := &config.BootConfig{}
+	bootConfig.SetDefaults()
+	bootConfig.DistributionAssetsProfile = config.DistributionAssetsProfileCE
+	bootConfig.DocsCatalogVersion = "v1"
+	bootConfig.DocsBaseURL = "https://run-ai-docs.nvidia.com/saas"
+	bootConfig.DocsVersioned = false
+	bootConfig.DocsWhatsNewURLTemplate = "{docsBaseUrl}/getting-started/whats-new-for-nvidia-run-ai-saas"
+
+	result := NewBootConfigAPIService("3.0.4", bootConfig).resolve()
+
+	assert.Equal(t, "v1", result.Docs.CatalogVersion)
+	assert.Equal(t, "https://run-ai-docs.nvidia.com/saas", result.Docs.BaseUrl)
+	assert.Equal(t, "https://run-ai-docs.nvidia.com/saas/getting-started/whats-new-for-nvidia-run-ai-saas", result.Docs.WhatsNew.Url)
 }

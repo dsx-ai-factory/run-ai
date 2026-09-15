@@ -114,6 +114,14 @@ describe("bootConfigService", () => {
 
     await expect(loadBootConfig()).resolves.toEqual(FALLBACK_BOOT_CONFIG);
     expect(getBootConfig()).toEqual(FALLBACK_BOOT_CONFIG);
+    expect(getBootConfig().docs).toEqual({
+      catalogVersion: "v2",
+      baseUrl: "https://docs.nvidia.com/run-ai/self-hosted",
+      whatsNew: {
+        label: "What's New",
+        url: "https://docs.nvidia.com/run-ai/self-hosted/documentation/getting-started/whats-new/whats-new",
+      },
+    });
   });
 
   it("uses the fallback when the endpoint returns an incomplete payload", async () => {

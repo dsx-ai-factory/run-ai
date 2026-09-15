@@ -14,11 +14,11 @@ export const FALLBACK_BOOT_CONFIG: BootConfig = {
   },
   version: { display: "" },
   docs: {
-    catalogVersion: "v1",
-    baseUrl: "https://run-ai-docs.nvidia.com/self-hosted",
+    catalogVersion: "v2",
+    baseUrl: "https://docs.nvidia.com/run-ai/self-hosted",
     whatsNew: {
       label: "What's New",
-      url: "https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new",
+      url: "https://docs.nvidia.com/run-ai/self-hosted/documentation/getting-started/whats-new/whats-new",
     },
   },
   support: {

@@ -14,7 +14,7 @@ data:
   SUPPORT_ENTITLED: {{ include "control-plane.supportEntitled" $top | quote }}
   DISTRIBUTION_ASSETS_PROFILE: {{ $top.Values.bffService.bootConfig.distributionAssets.profile | quote }}
   DOCS_BASE_URL: {{ $top.Values.bffService.bootConfig.docs.baseUrl | quote }}
-  {{- $catalogVersion := default "v1" $top.Values.bffService.bootConfig.docs.catalogVersion }}
+  {{- $catalogVersion := default "v2" $top.Values.bffService.bootConfig.docs.catalogVersion }}
   {{- if not (has $catalogVersion (list "v1" "v2")) }}
   {{- fail "bffService.bootConfig.docs.catalogVersion must be v1 or v2" }}
   {{- end }}
