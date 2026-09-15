@@ -117,8 +117,12 @@ func removeOrphanNamespace(ctx context.Context, kube k8sclient.Client, name stri
 	if len(namespaces.Items) == 0 {
 		return nil
 	}
-	if err := kube.Get(ctx, k8sclient.ObjectKey{Name: name}, clusterProject(name)); err == nil {
+	err := kube.Get(ctx, k8sclient.ObjectKey{Name: name}, clusterProject(name))
+	switch {
+	case err == nil:
 		return fmt.Errorf("project %q is gone from the control plane but still present on the cluster; not touching it", name)
+	case !apierrors.IsNotFound(err):
+		return fmt.Errorf("checking project %q on the cluster before removing its namespace: %w", name, err)
 	}
 	for i := range namespaces.Items {
 		if err := k8sclient.IgnoreNotFound(kube.Delete(ctx, &namespaces.Items[i])); err != nil {
