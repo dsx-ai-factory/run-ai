@@ -79,7 +79,7 @@ Using the [compute resources](../../../workloads-in-nvidia-run-ai/workload-asset
 
 Dynamic GPU memory fractions is disabled by default. To set a memory Limit through the NVIDIA Run:ai UI or CLI, it must be enabled by your administrator under **General settings** → **Resources** → **GPU resource optimization**. While the setting is disabled, the UI does not offer a Limit field on a compute resource, and the CLI rejects a submission that specifies one.
 
-The setting applies wherever the memory Limit is a field of the workload submission, which covers the UI, the CLI, and the workload APIs behind them. It does not apply where the Limit is carried inside a Kubernetes manifest, such as a manifest-based workload submission or a workload submitted directly to Kubernetes, and it does not change Scheduler behavior. Do not rely on this setting to prevent the use of memory Limits across a cluster.
+The setting applies wherever the memory Limit is a field of the workload submission, which covers the UI, the CLI, and the workload APIs behind them. It does not apply where the Limit is carried inside a Kubernetes manifest, such as a manifest-based workload submission or a workload submitted directly to Kubernetes, and it does not change Scheduler behavior. A workload submitted with a manifest still appears in the Workloads list; its Limit is simply not validated at submission. Do not rely on this setting to prevent the use of memory Limits across a cluster.
 
 </Info>
 
