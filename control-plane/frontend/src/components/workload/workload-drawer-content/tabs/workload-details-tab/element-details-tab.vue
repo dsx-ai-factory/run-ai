@@ -34,18 +34,22 @@ const props = withDefaults(
 
 const topologyLevels = ref<string[]>([]);
 
-async function fetchTopologyLevels(): Promise<void> {
-  const topologyName = props.element?.topology?.name;
-  topologyLevels.value = [];
-  if (!topologyName || !props.clusterId) return;
+let latestRequestId = 0;
 
-  topologyLevels.value = await clusterService.getNetworkTopologyLevelsByName(topologyName, props.clusterId);
+async function fetchTopologyLevels(topologyName: string | undefined, clusterId: string): Promise<void> {
+  const requestId = ++latestRequestId;
+  topologyLevels.value = [];
+  if (!topologyName || !clusterId) return;
+
+  const levels = await clusterService.getNetworkTopologyLevelsByName(topologyName, clusterId);
+  if (requestId !== latestRequestId) return;
+  topologyLevels.value = levels;
 }
 
 watch(
-  () => props.element?.id,
-  () => {
-    fetchTopologyLevels();
+  () => [props.element?.id, props.element?.topology?.name, props.clusterId] as const,
+  ([, topologyName, clusterId]) => {
+    fetchTopologyLevels(topologyName, clusterId);
   },
   { immediate: true },
 );

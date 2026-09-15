@@ -86,6 +86,37 @@ describe("ElementDetailsTab", () => {
     expect(clusterService.getNetworkTopologyLevelsByName).toHaveBeenCalledWith("other-topology", "cluster-123");
   });
 
+  it("re-fetches when only the clusterId changes (same element)", async () => {
+    const wrapper = createWrapper();
+    await flushPromises();
+    (clusterService.getNetworkTopologyLevelsByName as Mock).mockClear();
+
+    await wrapper.setProps({ clusterId: "cluster-456" });
+    await flushPromises();
+
+    expect(clusterService.getNetworkTopologyLevelsByName).toHaveBeenCalledWith("my-gb200-topology", "cluster-456");
+  });
+
+  it("discards a superseded topology response so it cannot overwrite the current element's levels", async () => {
+    let resolveFirst: (levels: string[]) => void = () => {};
+    (clusterService.getNetworkTopologyLevelsByName as Mock)
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
+      .mockResolvedValueOnce(["rack", "host"]);
+
+    const wrapper = createWrapper();
+    await flushPromises();
+
+    await wrapper.setProps({ element: { ...mockElement, id: "element-2", topology: { name: "other-topology" } } });
+    await flushPromises();
+
+    // The stale first request resolves after the second one has already completed.
+    resolveFirst(["region", "zone"]);
+    await flushPromises();
+
+    const network = wrapper.vm.accordionSections.find((s) => s.id === "network");
+    expect((network?.data as { topologyLevels: string[] }).topologyLevels).toEqual(["rack", "host"]);
+  });
+
   it("feeds elementPodsCount into the Compute section", async () => {
     const wrapper = createWrapper({ elementPodsCount: 4 });
     await flushPromises();

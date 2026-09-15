@@ -10,6 +10,7 @@ import { Quasar } from "quasar";
 import WorkloadDetailsTab from "./workload-details-tab.vue";
 import { EWorkloadType } from "@/models/workload.model";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
+import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import {
   SourceApi,
   type Workload,
@@ -243,6 +244,29 @@ describe("WorkloadDetailsTab", () => {
       await flushPromises();
 
       expect(workloadService.getWorkloadById).toHaveBeenCalledWith("workload-999");
+    });
+
+    it("discards a superseded topology response so it cannot overwrite the current workload's levels", async () => {
+      let resolveFirst: (levels: string[]) => void = () => {};
+      (clusterService.getNetworkTopologyLevelsByName as Mock)
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
+        .mockResolvedValueOnce(["rack", "host"]);
+
+      (workloadService.getWorkloadById as Mock)
+        .mockResolvedValueOnce({ ...mockWorkloadDetailed, topology: { name: "topology-a" } })
+        .mockResolvedValueOnce({ ...mockWorkloadDetailed, id: "workload-999", topology: { name: "topology-b" } });
+
+      const wrapper = createWrapper();
+      await flushPromises();
+
+      await wrapper.setProps({ workload: { ...mockWorkload, id: "workload-999" } });
+      await flushPromises();
+
+      // The stale first request resolves after the second one has already completed.
+      resolveFirst(["region", "zone"]);
+      await flushPromises();
+
+      expect(wrapper.vm.topologyLevels).toEqual(["rack", "host"]);
     });
   });
 

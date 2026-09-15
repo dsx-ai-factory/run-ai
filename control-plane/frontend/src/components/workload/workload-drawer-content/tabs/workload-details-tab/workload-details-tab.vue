@@ -61,6 +61,7 @@ export default defineComponent({
       workloadCrud: null as CrudWorkload | null,
       nodeAffinities: [] as WorkloadNodeAffinity[],
       topologyLevels: [] as string[],
+      topologyLevelsRequestId: 0,
       loading: false,
       selectedSpec: EDistributedReplicaType.Master,
       clusterStore: useClusterStore(),
@@ -248,12 +249,15 @@ export default defineComponent({
     },
 
     async fetchTopologyLevels(): Promise<void> {
+      const requestId = ++this.topologyLevelsRequestId;
       const topologyName = this.workloadDetailed?.topology?.name;
       const clusterId = this.workloadDetailed?.clusterId;
       this.topologyLevels = [];
       if (!topologyName || !clusterId) return;
 
-      this.topologyLevels = await clusterService.getNetworkTopologyLevelsByName(topologyName, clusterId);
+      const levels = await clusterService.getNetworkTopologyLevelsByName(topologyName, clusterId);
+      if (requestId !== this.topologyLevelsRequestId) return;
+      this.topologyLevels = levels;
     },
   },
   watch: {
