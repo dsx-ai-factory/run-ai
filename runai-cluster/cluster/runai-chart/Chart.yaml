@@ -11,8 +11,12 @@ dependencies:
     version: v0.16.9
   - name: karta
     condition: karta.enabled
-    repository: oci://ghcr.io/run-ai/karta
-    version: 0.2.3
+    # Dev test build, not for merge: points at a personal test artifact to
+    # validate karta reading global.fipsMode (run-ai/karta#360) before it
+    # ships as a real karta release. Revert to oci://ghcr.io/run-ai/karta
+    # before merging.
+    repository: oci://ghcr.io/nshidlansik/karta
+    version: 0.0.0-v02globalfips-63d37d9
   - name: crds
     condition: development.includeCRDsInReleaseManifest
     repository: file://charts/crds

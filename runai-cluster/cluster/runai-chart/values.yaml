@@ -199,6 +199,12 @@ karta:
   # Helm discards null values when coalescing a parent chart's values.yaml into a
   # subchart, so the subchart default always wins (RUN-41722). On OpenShift the UID
   # is allowed by the runai-karta-operator SCC in templates/ocp/scc.yaml.
+  # Dev test build, not for merge: points at a personal test image to
+  # validate karta reading global.fipsMode (run-ai/karta#360). Revert
+  # alongside the Chart.yaml karta dependency override before merging.
+  image:
+    repository: ghcr.io/nshidlansik/karta/karta-operator
+    tag: 0.0.0-v02globalfips-63d37d9
 # Karta migration job: runs as Helm pre/post-upgrade hooks to copy
 # legacy ResourceInterface CRs into Karta CRs and (post-upgrade) clean up RIs.
 # Skipped on fresh installs (RI CRD not present).
