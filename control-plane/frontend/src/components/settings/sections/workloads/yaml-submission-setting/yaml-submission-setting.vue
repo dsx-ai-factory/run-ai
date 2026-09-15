@@ -36,7 +36,7 @@ export default defineComponent({
         value: this.yamlSubmissionSetting.enabled ? "true" : "false",
         label: "Submit supported workload types via YAML",
         description:
-          "Enable to submit a range of workload types using a standard Kubernetes YAML. For more information, see the <a href='https://run-ai-docs.nvidia.com/self-hosted/workloads-in-nvidia-run-ai/submit-via-yaml' target='_blank'>Submit Supported Workload Types via YAML guide</a>.",
+          "Enable to submit a range of workload types using a standard Kubernetes YAML. For more information, see the <a data-doc-key='yamlSubmission' target='_blank'>Submit Supported Workload Types via YAML guide</a>.",
       };
     },
   },

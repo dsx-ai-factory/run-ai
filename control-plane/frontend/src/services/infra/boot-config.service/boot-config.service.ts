@@ -14,6 +14,7 @@ export const FALLBACK_BOOT_CONFIG: BootConfig = {
   },
   version: { display: "" },
   docs: {
+    catalogVersion: "v1",
     baseUrl: "https://run-ai-docs.nvidia.com/self-hosted",
     whatsNew: {
       label: "What's New",
@@ -68,6 +69,9 @@ function isBootConfig(value: unknown): value is BootConfig {
     (candidate.distributionAssets?.profile === "cc" || candidate.distributionAssets?.profile === "ce") &&
     typeof candidate.version?.display === "string" &&
     typeof candidate.docs?.baseUrl === "string" &&
+    (candidate.docs.catalogVersion === undefined ||
+      candidate.docs.catalogVersion === "v1" ||
+      candidate.docs.catalogVersion === "v2") &&
     isSafeBrowserUrl(candidate.docs.baseUrl, false) &&
     typeof candidate.docs?.whatsNew?.label === "string" &&
     typeof candidate.docs?.whatsNew?.url === "string" &&

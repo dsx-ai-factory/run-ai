@@ -39,6 +39,10 @@ func (s *BootConfigAPIService) GetBootConfig(_ context.Context) (api.ImplRespons
 func (s *BootConfigAPIService) resolve() api.BootConfig {
 	trimmedVersion := strings.TrimSpace(s.runaiVersion)
 	docsBaseURL := strings.TrimRight(s.config.DocsBaseURL, "/")
+	catalogVersion := "v1"
+	if s.config.DocsCatalogVersion == "v2" {
+		catalogVersion = "v2"
+	}
 	distributionAssetsProfile := s.resolveDistributionAssetsProfile()
 	supportURL := s.config.SupportURL
 	supportLabel := s.config.SupportLabel
@@ -51,7 +55,14 @@ func (s *BootConfigAPIService) resolve() api.BootConfig {
 	versionMatches := releaseVersionPattern.FindStringSubmatch(trimmedVersion)
 	hasDocsVersion := hasUsableDocsVersion(versionMatches)
 	if s.config.DocsVersioned && hasDocsVersion {
-		docsBaseURL += "/" + versionMatches[1] + "." + versionMatches[2]
+		versionPrefix := "/"
+		if catalogVersion == "v2" {
+			versionPrefix += "v"
+		}
+		docsBaseURL += versionPrefix + versionMatches[1] + "." + versionMatches[2]
+	}
+	if catalogVersion == "v2" {
+		whatsNewBaseURL = docsBaseURL
 	}
 
 	whatsNewURL := strings.ReplaceAll(s.config.DocsWhatsNewURLTemplate, "{docsBaseUrl}", whatsNewBaseURL)
@@ -70,7 +81,8 @@ func (s *BootConfigAPIService) resolve() api.BootConfig {
 		DistributionAssets: api.BootConfigDistributionAssets{Profile: distributionAssetsProfile},
 		Version:            api.BootConfigVersion{Display: displayVersion},
 		Docs: api.BootConfigDocs{
-			BaseUrl: docsBaseURL,
+			CatalogVersion: catalogVersion,
+			BaseUrl:        docsBaseURL,
 			WhatsNew: api.BootConfigWhatsNew{
 				Label: whatsNewLabel,
 				Url:   whatsNewURL,

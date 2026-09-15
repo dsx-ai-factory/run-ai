@@ -4719,6 +4719,7 @@ bffService:
     distributionAssets:
       profile: cc
     docs:
+      catalogVersion: v1
       baseUrl: https://run-ai-docs.nvidia.com/self-hosted
       versioned: true
       whatsNew:

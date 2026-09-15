@@ -146,3 +146,37 @@ tests:
       - equal:
           path: data.UNLEASH_PROJECT
           value: example-project
+
+  - it: defaults the documentation catalog to v1
+    asserts:
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v1
+
+  - it: renders v2 independently of asset profile and support entitlement
+    set:
+      supportEntitled: true
+      bffService.bootConfig.distributionAssets.profile: ce
+      bffService.bootConfig.docs.catalogVersion: v2
+    asserts:
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v2
+      - equal:
+          path: data.DISTRIBUTION_ASSETS_PROFILE
+          value: ce
+
+  - it: uses v1 when the catalog is omitted
+    set:
+      bffService.bootConfig.docs.catalogVersion: null
+    asserts:
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v1
+
+  - it: rejects unsupported documentation catalogs
+    set:
+      bffService.bootConfig.docs.catalogVersion: v3
+    asserts:
+      - failedTemplate:
+          errorMessage: bffService.bootConfig.docs.catalogVersion must be v1 or v2

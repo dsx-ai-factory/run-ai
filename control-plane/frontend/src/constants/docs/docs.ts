@@ -5,9 +5,8 @@
 
 import { getBootConfig } from "@/services/infra/boot-config.service/boot-config.service";
 
-const RUNAI_DOCS_ORIGIN = "https://run-ai-docs.nvidia.com";
-const LATEST_URL = "https://docs.run.ai/latest";
-// when you change this link make sure you update the login-success.html as well
+import { DOCS_CATALOG_V1, DOCS_CATALOG_V2, type DocsKey } from "./catalogs";
+
 const bootConfig = getBootConfig();
 
 export function getDocsUrl(path: string): string {
@@ -20,96 +19,82 @@ export const DOCS = {
   ROOT: bootConfig.docs.baseUrl,
 
   INSTALLATION: {
-    CLUSTER: getDocsUrl("getting-started/overview#nvidia-run-ai-cluster"),
-    PREREQUISITES: getDocsUrl("getting-started/installation/install-using-helm/system-requirements"),
-    NETWORK_REQUIREMENTS: getDocsUrl("getting-started/installation/install-using-helm/network-requirements"),
-    HELM_INSTALL: getDocsUrl("getting-started/installation/install-using-helm/helm-install"),
-    CUSTOM_INSTALL: getDocsUrl("getting-started/installation/custom-install"),
-    UNINSTALL: getDocsUrl("getting-started/installation/install-using-helm/uninstall"),
-    FQDN_REQUIREMENTS: getDocsUrl(
-      "getting-started/installation/install-using-helm/system-requirements#fully-qualified-domain-name-fqdn",
-    ),
-    DISTRIBUTED_TRAINING: getDocsUrl(
-      "getting-started/installation/install-using-helm/system-requirements#distributed-training",
-    ),
-    EMAIL_NOTIFICATIONS: getDocsUrl("settings/general-settings/notifications#email-notifications"),
-    USER_INVITATIONS: getDocsUrl("infrastructure-setup/authentication/users#creating-a-local-user"),
+    CLUSTER: getDocsLink("clusterOverview"),
+    PREREQUISITES: getDocsLink("systemRequirements"),
+    NETWORK_REQUIREMENTS: getDocsLink("networkRequirements"),
+    HELM_INSTALL: getDocsLink("clusterInstallation"),
+    CUSTOM_INSTALL: getDocsLink("customInstallation"),
+    UNINSTALL: getDocsLink("uninstallation"),
+    FQDN_REQUIREMENTS: getDocsLink("fqdnRequirements"),
+    DISTRIBUTED_TRAINING: getDocsLink("distributedTraining"),
+    EMAIL_NOTIFICATIONS: getDocsLink("emailNotifications"),
+    USER_INVITATIONS: getDocsLink("localUserCreation"),
   },
 
   AUTHENTICATION: {
-    OVERVIEW: getDocsUrl("infrastructure-setup/authentication/overview"),
-    ACCESS_RULES: getDocsUrl("infrastructure-setup/authentication/accessrules"),
-    SSO: getDocsUrl("infrastructure-setup/authentication/sso/"),
-    SAML: getDocsUrl("infrastructure-setup/authentication/sso/saml"),
-    OIDC: getDocsUrl("infrastructure-setup/authentication/sso/openidconnect"),
-    OPENSHIFT: getDocsUrl("infrastructure-setup/authentication/sso/openshift"),
-    ROLES: getDocsUrl("infrastructure-setup/authentication/roles#roles-in-nvidia-run-ai"),
-    CUSTOM_ROLES_API: getDocsUrl("infrastructure-setup/authentication/roles#custom-roles-api-only"),
+    OVERVIEW: getDocsLink("authenticationOverview"),
+    ACCESS_RULES: getDocsLink("accessRules"),
+    SSO: getDocsLink("sso"),
+    SAML: getDocsLink("saml"),
+    OIDC: getDocsLink("oidc"),
+    OPENSHIFT: getDocsLink("openshift"),
+    ROLES: getDocsLink("roles"),
+    CUSTOM_ROLES_API: getDocsLink("customRoles"),
     RESEARCHER: {
-      OVERVIEW: `${LATEST_URL}/admin/runai-setup/authentication/researcher-authentication`,
-      CLI_ACCESS: `${LATEST_URL}/admin/runai-setup/authentication/researcher-authentication/#command-line-interface-access`,
-      K8S_CONFIG: getDocsUrl("infrastructure-setup/authentication/cluster-authentication"),
+      OVERVIEW: getDocsLink("authenticationOverview"),
+      CLI_ACCESS: getDocsLink("cliInstallation"),
+      K8S_CONFIG: getDocsLink("clusterAuthentication"),
     },
   },
 
   CLI: {
-    INSTALL: getDocsUrl("reference/cli/install-cli"),
-    SUBMIT: getDocsUrl("reference/cli/runai"),
+    INSTALL: getDocsLink("cliInstallation"),
+    SUBMIT: getDocsLink("cliReference"),
   },
 
   PLATFORM_MANAGEMENT: {
-    PROJECTS: getDocsUrl("platform-management/aiinitiatives/organization/projects"),
-    DEPARTMENTS: getDocsUrl("platform-management/aiinitiatives/organization/departments"),
-    POLICIES: getDocsUrl("platform-management/policies/policies-and-rules"),
-    SCHEDULING_RULES: getDocsUrl("platform-management/policies/scheduling-rules"),
-    SCHEDULING_CONCEPTS: getDocsUrl("platform-management/runai-scheduler/scheduling/concepts-and-principles"),
-    DYNAMIC_FRACTION: getDocsUrl("platform-management/runai-scheduler/resource-optimization/dynamic-fractions"),
+    PROJECTS: getDocsLink("projects"),
+    DEPARTMENTS: getDocsLink("departments"),
+    POLICIES: getDocsLink("policies"),
+    SCHEDULING_RULES: getDocsLink("schedulingRules"),
+    SCHEDULING_CONCEPTS: getDocsLink("schedulingConcepts"),
+    DYNAMIC_FRACTION: getDocsLink("dynamicFractions"),
     ORGANIZATION: {
-      PROJECTS: getDocsUrl("platform-management/aiinitiatives/organization/projects"),
-      DEPARTMENTS: getDocsUrl("platform-management/aiinitiatives/organization/departments"),
+      PROJECTS: getDocsLink("projects"),
+      DEPARTMENTS: getDocsLink("departments"),
     },
-    NODE_GROUPS: `${LATEST_URL}/admin/researcher-setup/limit-to-node-group`,
-    REPORTS: getDocsUrl("platform-management/monitor-performance/reports"),
+    NODE_GROUPS: getDocsLink("nodePools"),
+    REPORTS: getDocsLink("reports"),
   },
 
   WORKLOADS: {
-    DATA_VOLUMES: getDocsUrl("workloads-in-nvidia-run-ai/assets/data-volumes"),
-    EXTERNAL_ACCESS_TO_CONTAINERS: getDocsUrl(
-      "infrastructure-setup/advanced-setup/container-access/external-access-to-containers",
-    ),
-    CREATING_A_HUGGING_FACE_INFERENCE_WORKLOAD: getDocsUrl(
-      "workloads-in-nvidia-run-ai/using-inference/hugging-face-inference#creating-a-hugging-face-inference-workload",
-    ),
+    DATA_VOLUMES: getDocsLink("dataVolumes"),
+    EXTERNAL_ACCESS_TO_CONTAINERS: getDocsLink("externalContainerAccess"),
+    CREATING_A_HUGGING_FACE_INFERENCE_WORKLOAD: getDocsLink("huggingFaceWorkloadCreation"),
   },
 
   SLACK_NOTIFICATIONS: {
-    CONNECT_WORKSPACE: getDocsUrl("settings/general-settings/notifications#slack-notifications"),
+    CONNECT_WORKSPACE: getDocsLink("slackNotifications"),
   },
 
   TROUBLESHOOTING: {
-    CLUSTERS: getDocsUrl("infrastructure-setup/procedures/clusters"),
-    TERMINAL: getDocsUrl("workloads-in-nvidia-run-ai/workloads#troubleshooting"),
+    CLUSTERS: getDocsLink("clusters"),
+    TERMINAL: getDocsLink("workloadTroubleshooting"),
   },
 
   CONFIGURATION: {
-    NON_ROOT_CONTAINERS: getDocsUrl(
-      "latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers",
-    ),
+    NON_ROOT_CONTAINERS: getDocsLink("containerIdentity"),
   },
 
   TOPOLOGIES: {
-    SCHEDULING: getDocsUrl("platform-management/aiinitiatives/resources/topology-aware-scheduling"),
-    GB200: getDocsUrl("platform-management/aiinitiatives/resources/using-gb200"),
+    SCHEDULING: getDocsLink("topologyScheduling"),
+    GB200: getDocsLink("gb200"),
   },
 
   NODE_POOLS: {
-    TIME_BASED_FAIR_SHARE: getDocsUrl(
-      "platform-management/runai-scheduler/scheduling/how-the-scheduler-works#time-based-fairshare",
-    ),
-    PERSISTENT_DATA: getDocsUrl(
-      "infrastructure-setup/advanced-setup/cluster-config#all-configurations-helm-and-runaiconfig",
-    ),
-    NUMA_AWARE_SCHEDULING: getDocsUrl("platform-management/aiinitiatives/resources/numa-aware-scheduling"),
+    TIME_BASED_FAIR_SHARE: getDocsLink("timeBasedFairShare"),
+    PERSISTENT_DATA: getDocsLink("clusterConfiguration"),
+    NUMA_AWARE_SCHEDULING: getDocsLink("numaScheduling"),
   },
 
   WHATS_NEW: {
@@ -128,7 +113,7 @@ export const DOCS = {
     NIM: {
       CATALOG_BASE_URL: "https://catalog.ngc.nvidia.com/orgs/nim/teams",
       NGC_CATALOG: "https://docs.nvidia.com/ngc/gpu-cloud/ngc-catalog-user-guide/index.html#what-is-ngc-catalog",
-      DEPLOY_INFERENCE: getDocsUrl("workloads-in-nvidia-run-ai/using-inference/nim-inference"),
+      DEPLOY_INFERENCE: getDocsLink("nimInference"),
     },
   },
 
@@ -150,36 +135,37 @@ export const DOCS = {
   },
 } as const;
 
+export function resolveDocsPath(key: DocsKey): string | null {
+  const catalog = getBootConfig().docs.catalogVersion === "v2" ? DOCS_CATALOG_V2 : DOCS_CATALOG_V1;
+  // eslint-disable-next-line security/detect-object-injection -- Keys are restricted to the DocsKey union.
+  return catalog[key];
+}
+
+type ConfirmedDocsKey = {
+  [Key in DocsKey]: (typeof DOCS_CATALOG_V1 | typeof DOCS_CATALOG_V2)[Key] extends string ? Key : never;
+}[DocsKey];
+
+export function getDocsLink(key: ConfirmedDocsKey): string;
+export function getDocsLink(key: DocsKey): string | undefined;
+export function getDocsLink(key: DocsKey): string | undefined {
+  const path = resolveDocsPath(key);
+  return path === null ? undefined : getDocsUrl(path);
+}
+
 export function resolveDocsLinksInHtml(html: string): string {
-  return html.replace(/(\bhref\s*=\s*)(["'])([^"']+)\2/gi, (match, prefix, quote, href: string) => {
-    const parsedUrl = parseRunaiDocsUrl(href);
-    if (!parsedUrl) return match;
-
-    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
-    pathParts.shift();
-    if (isDocsVersionSegment(pathParts[0])) pathParts.shift();
-
-    const resolvedUrl = `${getDocsUrl(pathParts.join("/"))}${parsedUrl.search}${parsedUrl.hash}`;
-    return `${prefix}${quote}${resolvedUrl}${quote}`;
+  const template = document.createElement("template");
+  template.innerHTML = html;
+  template.content.querySelectorAll<HTMLAnchorElement>("a[data-doc-key]").forEach((anchor) => {
+    const key = anchor.getAttribute("data-doc-key") ?? "";
+    const href = Object.prototype.hasOwnProperty.call(DOCS_CATALOG_V1, key) ? getDocsLink(key as DocsKey) : undefined;
+    if (href) {
+      anchor.setAttribute("href", href);
+    } else {
+      anchor.removeAttribute("href");
+    }
+    anchor.removeAttribute("data-doc-key");
   });
-}
-
-function parseRunaiDocsUrl(url: string): URL | null {
-  try {
-    const parsedUrl = new URL(url);
-    return parsedUrl.origin === RUNAI_DOCS_ORIGIN ? parsedUrl : null;
-  } catch {
-    return null;
-  }
-}
-
-function isDocsVersionSegment(value: string | undefined): boolean {
-  if (!value) return false;
-  const normalized = value.startsWith("v") ? value.slice(1) : value;
-  const parts = normalized.split(".");
-  return (
-    parts.length === 2 && parts.every((part) => part.length > 0 && [...part].every((char) => char >= "0" && char <= "9"))
-  );
+  return template.innerHTML;
 }
 
 export type DocsType = typeof DOCS;

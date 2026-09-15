@@ -26,6 +26,7 @@ function createDeploymentConfig(): BootConfig {
     distributionAssets: { profile: "cc" },
     version: { display: "release-42" },
     docs: {
+      catalogVersion: "v1",
       baseUrl: "https://docs.example.test/product",
       whatsNew: {
         label: "Product updates",
@@ -69,6 +70,33 @@ describe("bootConfigService", () => {
     apiState.getBootConfig = () => Promise.resolve({ data: deploymentConfig });
 
     await expect(loadBootConfig()).resolves.toEqual(deploymentConfig);
+  });
+
+  it.each(["cc", "ce"] as const)("accepts v2 independently of asset profile %s", async (profile) => {
+    const deploymentConfig = createDeploymentConfig();
+    deploymentConfig.distributionAssets.profile = profile;
+    deploymentConfig.docs.catalogVersion = "v2";
+    apiState.getBootConfig = () => Promise.resolve({ data: deploymentConfig });
+
+    await expect(loadBootConfig()).resolves.toEqual(deploymentConfig);
+  });
+
+  it("preserves deployment URLs when an older response omits the catalog", async () => {
+    const deploymentConfig = createDeploymentConfig();
+    delete deploymentConfig.docs.catalogVersion;
+    apiState.getBootConfig = () => Promise.resolve({ data: deploymentConfig });
+
+    await expect(loadBootConfig()).resolves.toEqual(deploymentConfig);
+  });
+
+  it.each(["v3", 2, null])("rejects unsupported catalog %s", async (catalogVersion) => {
+    const deploymentConfig = createDeploymentConfig();
+    apiState.getBootConfig = () =>
+      Promise.resolve({
+        data: { ...deploymentConfig, docs: { ...deploymentConfig.docs, catalogVersion } },
+      });
+
+    await expect(loadBootConfig()).resolves.toEqual(FALLBACK_BOOT_CONFIG);
   });
 
   it("uses fallback defaults for an unknown distribution asset profile", async () => {

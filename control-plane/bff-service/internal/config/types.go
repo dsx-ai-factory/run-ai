@@ -34,6 +34,7 @@ type BootConfig struct {
 	SupportEntitled           bool                      `mapstructure:"support_entitled"`
 	DistributionAssetsProfile DistributionAssetsProfile `mapstructure:"distribution_assets_profile"`
 	DocsBaseURL               string                    `mapstructure:"docs_base_url"`
+	DocsCatalogVersion        string                    `mapstructure:"docs_catalog_version"`
 	DocsVersioned             bool                      `mapstructure:"docs_versioned"`
 	DocsWhatsNewURLTemplate   string                    `mapstructure:"docs_whats_new_url_template"`
 	SupportURL                string                    `mapstructure:"support_url"`
@@ -52,6 +53,7 @@ func (b *BootConfig) SetDefaults() {
 	b.DistributionAssetsProfile = DistributionAssetsProfileCC
 	b.DocsBaseURL = "https://run-ai-docs.nvidia.com/self-hosted"
 	b.DocsVersioned = true
+	b.DocsCatalogVersion = "v1"
 	b.DocsWhatsNewURLTemplate = "{docsBaseUrl}/getting-started/whats-new/whats-new"
 	b.SupportLabel = "NVIDIA Run:ai support"
 	b.ShowsClusterLocationStep = true
