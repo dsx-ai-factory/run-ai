@@ -49,6 +49,7 @@ func KRMConfigForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 	krmConfig.Name = krmConfigCRName
 	krmConfig.Spec.Namespace = runaiConfig.GetNamespace()
 	krmConfig.Spec.Global = convertKRMGlobal(runaiConfig)
+	krmConfig.Spec.PodGroupAssigner = convertPodGroupAssigner(runaiConfig)
 
 	return krmConfig, nil
 }
