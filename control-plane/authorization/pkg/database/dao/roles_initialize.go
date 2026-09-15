@@ -177,31 +177,9 @@ func getCspPermissionSets(original *[]models.PermissionSet, changeMap map[string
 
 func addToDGXCRolesIfNeeded(role *models.Role) bool {
 	role.RoleType = models.ALL
-	dgxcRole := models.Role{
-		ScopeType: models.ROLE_SCOPE_SYSTEM,
-	}
 	for _, permission := range role.Permissions {
 		if permission.ReadOnlyForDGXCManaged && (permission.Create || permission.Update || permission.Delete) {
 			role.RoleType = models.NonDGXC
-			dgxcRole.Permissions = append(dgxcRole.Permissions, &models.Permission{
-				ResourceType: permission.ResourceType,
-				Read:         permission.Read,
-			})
-		} else {
-			dgxcRole.Permissions = append(dgxcRole.Permissions, permission)
-		}
-	}
-
-	// Marking the dgxcRole as DGXC and adding it to the roles to create since the base role had at least one permission that should be duplicated
-	if role.RoleType == models.NonDGXC {
-		dgxcRole.Name = fmt.Sprintf("%s%s", role.Name, models.DGXCManagedPostfix)
-		dgxcRole.Description = role.Description
-		dgxcRole.RoleType = models.DGXC
-		dgxcRole.InternalOnly = role.InternalOnly
-		dgxcRole.Enabled = role.Enabled
-
-		if role.ShowForDGXC {
-			dgxcRole.InternalOnly = false
 		}
 	}
 
