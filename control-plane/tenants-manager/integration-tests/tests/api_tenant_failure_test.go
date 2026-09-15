@@ -21,7 +21,7 @@ import (
 
 func TestTenantFailure_StatusAndDiagnosticsExposedViaGetById(t *testing.T) {
 	ctx := context.Background()
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 	tenantId := created.Tenant.Id
 
 	const wantDiagnostics = "builder: auth realm creation failed"
@@ -36,7 +36,7 @@ func TestTenantFailure_StatusAndDiagnosticsExposedViaGetById(t *testing.T) {
 
 func TestTenantFailure_FailedStatusVisibleInList(t *testing.T) {
 	ctx := context.Background()
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 	tenantId := created.Tenant.Id
 
 	setTenantFailed(t, tenantId, "builder: mimir tenant creation failed")
@@ -103,7 +103,7 @@ func TestTenantFailure_NameIsFreedAfterHardDelete(t *testing.T) {
 
 func TestTenantFailure_DiagnosticsEmptyForReadyTenant(t *testing.T) {
 	ctx := context.Background()
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 
 	tenant, resp, err := OpenapiClient.TenantAPI.GetTenantById(newTestContext(), created.Tenant.Id).Execute()
 	require.NoError(t, err)
@@ -117,11 +117,8 @@ func TestTenantFailure_DiagnosticsEmptyForReadyTenant(t *testing.T) {
 
 func TestTenantFailure_SubscriberRecovery_FailedTenantBecomesReadyOnRedelivery(t *testing.T) {
 	ctx := context.Background()
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, true)
 	tenantId := created.Tenant.Id
-
-	// wait for the initial TenantProvision to be processed (tenant reaches Ready)
-	pollTenantStatus(t, tenantId, "Ready", 30*time.Second)
 
 	// simulate a builder failure by forcing the tenant back to Failed
 	const failDiagnostics = "builder: auth realm failed"
@@ -160,7 +157,7 @@ func TestTenantFailure_SubscriberRecovery_FailedTenantBecomesReadyOnRedelivery(t
 
 func TestTenantFailure_ListDoesNotReturnDiagnostics(t *testing.T) {
 	ctx := context.Background()
-	created := createAndCleanupTenant(t, ctx)
+	created := createAndCleanupTenant(t, ctx, false)
 	tenantId := created.Tenant.Id
 
 	setTenantFailed(t, tenantId, "metric_store: connection refused")

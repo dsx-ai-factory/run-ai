@@ -40,6 +40,8 @@ func openDB(t *testing.T) *sql.DB {
 
 func setTenantFailed(t *testing.T, tenantId int32, diagnostics string) {
 	t.Helper()
+	pollTenantStatus(t, tenantId, "Ready", 30*time.Second)
+
 	db := openDB(t)
 	_, err := db.Exec(`UPDATE tenants SET status = 'Failed' WHERE id = $1`, tenantId)
 	require.NoError(t, err, "failed to set tenant %d to Failed in DB", tenantId)
