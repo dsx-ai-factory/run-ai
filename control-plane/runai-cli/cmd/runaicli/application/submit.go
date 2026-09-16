@@ -23,11 +23,12 @@ import (
 )
 
 type submitOptions struct {
-	Project    string
-	ChartURL   string
-	Values     string
-	Set        []string
-	Credential string
+	Project        string
+	ChartURL       string
+	Values         string
+	Set            []string
+	Credential     string
+	UserCredential bool
 }
 
 var submitFlags submitOptions
@@ -39,6 +40,9 @@ var Submit = &cobra.Command{
 	Example: SubmitExample,
 
 	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if err := validateUserCredentialFlag(); err != nil {
+			return cmdtxn.CmdErrorValidationMessage(cmd, "%s", err)
+		}
 		if submitFlags.Project == "" {
 			submitFlags.Project = instance.GetConfigValue(config.ClusterProjectName)
 		}
@@ -69,8 +73,13 @@ var Submit = &cobra.Command{
 
 		var credentialAssetId string
 		if submitFlags.Credential != "" {
-			credentialAssetId, err = applicationservice.ResolveCredentialAssetId(
-				txn, cpUrl, token, submitFlags.Credential, projectId, clusterId)
+			if submitFlags.UserCredential {
+				credentialAssetId, err = applicationservice.ResolvePrivateCredentialAssetId(
+					txn, cpUrl, token, submitFlags.Credential)
+			} else {
+				credentialAssetId, err = applicationservice.ResolveCredentialAssetId(
+					txn, cpUrl, token, submitFlags.Credential, projectId, clusterId)
+			}
 			if err != nil {
 				return cmdtxn.CmdErrorPrintAndSet(cmd, FailedToSubmitAIApplication, err)
 			}
@@ -83,6 +92,7 @@ var Submit = &cobra.Command{
 			ChartURL:          submitFlags.ChartURL,
 			Values:            values,
 			CredentialAssetId: credentialAssetId,
+			UserCredential:    submitFlags.UserCredential,
 		})
 
 		if _, err = applicationservice.CreateAIApplication(txn, cpUrl, token, request); err != nil {
@@ -102,8 +112,16 @@ func init() {
 	Submit.Flags().StringVar(&submitFlags.Values, attributeNameValues, "", ValuesFlagUsage)
 	Submit.Flags().StringArrayVar(&submitFlags.Set, attributeNameSet, nil, SetFlagUsage)
 	Submit.Flags().StringVar(&submitFlags.Credential, attributeNameCredential, "", CredentialFlagUsage)
+	Submit.Flags().BoolVar(&submitFlags.UserCredential, attributeNameUserCredential, false, UserCredentialFlagUsage)
 
 	_ = Submit.MarkFlagRequired(attributeNameChartURL)
 	_ = Submit.MarkFlagFilename(attributeNameValues, "yaml", "yml")
 	_ = Submit.RegisterFlagCompletionFunc(consts.ProjectStr, projectCmd.GetProjectNamesForFlag)
+}
+
+func validateUserCredentialFlag() error {
+	if submitFlags.UserCredential && submitFlags.Credential == "" {
+		return fmt.Errorf("--%s requires --%s", attributeNameUserCredential, attributeNameCredential)
+	}
+	return nil
 }
