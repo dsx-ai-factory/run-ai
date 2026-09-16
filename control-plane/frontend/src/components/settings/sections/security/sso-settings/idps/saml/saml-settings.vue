@@ -65,12 +65,14 @@
     use-larger-label
   >
     <template v-slot:start>
-      <div class="expiration-date row" v-if="isExpiredCertificate">
-        <div class="col-2 q-ml-lg">
-          <q-icon name="ph-bold ph-warning-circle" class="q-mr-xl exclamation-icon" />
-        </div>
-        <div class="col-8 expiration-text">Certificate expired</div>
-      </div>
+      <notification-alert-bar
+        v-if="certificateWarningVariant"
+        class="q-mx-lg q-mb-md certificate-warning"
+        :variant="certificateWarningVariant"
+        show-h1-content
+        :title="certificateWarningTitle"
+        message="Edit the identity provider and replace the metadata XML with an updated file."
+      />
       <runai-btn
         icon="ph-bold ph-arrow-square-out"
         class="q-pa-sm download-icon"
@@ -110,10 +112,19 @@ import { SettingReadableField } from "@/components/settings/setting-readable-fie
 import SamlFields from "@/components/settings/sections/security/sso-settings/idps/saml/saml-fields/saml-fields.vue";
 import { DOCS } from "@/constants/docs";
 import { RunaiBtn } from "@/components/common/runai-btn";
+import { ENotificationBarVariant, NotificationAlertBar } from "@/components/common/notification-alert-bar";
 
 export default defineComponent({
   name: "saml-settings",
-  components: { RunaiBtn, SamlFields, SettingEditableField, IdpMappers, SettingReadableField, SettingWrapperBox },
+  components: {
+    RunaiBtn,
+    SamlFields,
+    SettingEditableField,
+    IdpMappers,
+    SettingReadableField,
+    SettingWrapperBox,
+    NotificationAlertBar,
+  },
   emits: ["remove", "add-idp", "update-idp", "cancel-edit-idp", "edit-mode-changed"],
   props: {
     title: {
@@ -139,7 +150,7 @@ export default defineComponent({
       isValidIdpFields: false,
       authStore: useAuthStore(),
       isIdpFieldsChanged: false,
-      isExpiredCertificate: false,
+      certificateExpirationDate: null as Date | null,
       idpStore: useIdpsStore(),
       idpResources: {} as IdpResources,
       DOCS,
@@ -147,9 +158,25 @@ export default defineComponent({
   },
   async created(): Promise<void> {
     this.isEditMode = this.isNewIdp;
-    this.isExpiredCertificate = await this.isCertificateExpired();
+    this.certificateExpirationDate = this.idp?.samlData?.signingCertificate
+      ? await idpCommon.getCertificateExpirationDate(this.idp.samlData.signingCertificate)
+      : null;
   },
   computed: {
+    isExpiredCertificate(): boolean {
+      return !!this.certificateExpirationDate && !idpCommon.iValidCertificateDate(this.certificateExpirationDate);
+    },
+    isCertificateExpiringSoon(): boolean {
+      return !!this.certificateExpirationDate && idpCommon.isCertificateExpiringSoon(this.certificateExpirationDate);
+    },
+    certificateWarningVariant(): ENotificationBarVariant | null {
+      if (this.isExpiredCertificate) return ENotificationBarVariant.Error;
+      if (this.isCertificateExpiringSoon) return ENotificationBarVariant.Warning;
+      return null;
+    },
+    certificateWarningTitle(): string {
+      return this.isExpiredCertificate ? "The certificate expired." : "The certificate is expiring soon.";
+    },
     defaultEntityId(): string {
       return settingsUtil.getDefaultEntityId(window.location.hostname);
     },
@@ -242,11 +269,6 @@ export default defineComponent({
         window.open(spMetadataUrl, "_blank");
       }
     },
-    async isCertificateExpired(): Promise<boolean> {
-      if (!this.idp?.samlData?.signingCertificate) return false;
-      const expirationDate = await idpCommon.getCertificateExpirationDate(this.idp?.samlData?.signingCertificate);
-      return !idpCommon.iValidCertificateDate(expirationDate as Date);
-    },
   },
   watch: {
     isEditMode(newValue: boolean): void {
@@ -256,16 +278,8 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.expiration-date {
-  color: $negative;
+.certificate-warning {
   margin-top: 12px;
-  .exclamation-icon {
-    font-size: 18px;
-  }
-  .expiration-text {
-    margin-top: 4px;
-    font-size: 12px;
-  }
 }
 .download-icon {
   color: $black-54;
