@@ -98,3 +98,11 @@ This setting applies cluster-wide to every `Route` object NVIDIA Run:ai creates,
 With `passthrough` termination, NVIDIA Run:ai does not provision or manage a TLS certificate for the pod. You must terminate TLS inside the container yourself, for example, using your own certificate mounted as a Kubernetes secret and a web server or sidecar that you own and maintain.
 
 </Warning>
+
+<Warning>
+
+**Impact on existing workloads**
+
+This setting applies to every `Route` NVIDIA Run:ai creates, including Routes for workloads that are already running. Switching to `passthrough` on a cluster where existing workloads serve plain HTTP makes those workloads unreachable until each one terminates TLS inside the pod. Plan this as a cluster-wide change rather than a change scoped to the single workload that requires end-to-end encryption.
+
+</Warning>
