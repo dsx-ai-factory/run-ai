@@ -890,7 +890,7 @@ components:
           description: The Kubernetes Service name.
           type: string
           minLength: 1
-          maxLength: 253
+          maxLength: 63
           example: workload-service
         type:
           description: Kubernetes service type that determines how the service is exposed.
@@ -930,7 +930,7 @@ components:
           description: The name of the existing Kubernetes Service.
           type: string
           minLength: 1
-          maxLength: 253
+          maxLength: 63
           example: existing-service
         port:
           description: The port on the existing Service to route traffic to.

@@ -1319,7 +1319,7 @@
             "description": "The Kubernetes Service name.",
             "type": "string",
             "minLength": 1,
-            "maxLength": 253,
+            "maxLength": 63,
             "example": "workload-service"
           },
           "type": {
@@ -1372,7 +1372,7 @@
             "description": "The name of the existing Kubernetes Service.",
             "type": "string",
             "minLength": 1,
-            "maxLength": 253,
+            "maxLength": 63,
             "example": "existing-service"
           },
           "port": {

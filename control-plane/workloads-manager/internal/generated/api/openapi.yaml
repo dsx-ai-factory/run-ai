@@ -1658,7 +1658,7 @@ components:
         name:
           description: The Kubernetes Service name.
           example: workload-service
-          maxLength: 253
+          maxLength: 63
           minLength: 1
           type: string
         type:
@@ -1701,7 +1701,7 @@ components:
         name:
           description: The name of the existing Kubernetes Service.
           example: existing-service
-          maxLength: 253
+          maxLength: 63
           minLength: 1
           type: string
         port:
