@@ -27,7 +27,6 @@ var (
 	resourceFunctions = []operands.ResourceFunction{
 		resources.DeploymentForRunaiConfig,
 		resources.ConfigMapForRunaiConfig,
-		resources.BlockersConfigMapForRunaiConfig,
 		resources.ServiceForRunaiConfig,
 		resources.ServiceAccountForRunaiConfig,
 		resources.ServiceMonitorForRunaiConfig,

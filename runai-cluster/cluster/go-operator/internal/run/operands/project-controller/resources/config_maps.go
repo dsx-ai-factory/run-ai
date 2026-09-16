@@ -17,7 +17,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
-	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
@@ -913,19 +912,4 @@ func ConfigMapStatus(ctx context.Context,
 	}
 
 	return operands.ReadyStatus(), nil
-}
-
-// BlockersConfigMapForRunaiConfig declares the "project-delete-blockers" ConfigMap
-// this operand used to write. KRM owns the blockers now and its operator writes
-// the ConfigMap from KRMConfig, so nothing is built here any more -- but the
-// object must stay declared, because a disabled operand deletes exactly the
-// resources it enumerates, and dropping it would orphan the old ConfigMap.
-func BlockersConfigMapForRunaiConfig(_ context.Context, _ client.Reader,
-	runaiConfig *runv1.RunaiConfig) (client.Object, error) {
-	return &v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      clustercommonconstants.GvkDeleteBlockersConfigMapName,
-			Namespace: runaiConfig.Namespace,
-		},
-	}, nil
 }

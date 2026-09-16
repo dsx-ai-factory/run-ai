@@ -72,16 +72,18 @@ jobs:
 
       - name: Run update script
         if: steps.check.outputs.needed == 'true'
-        run: runai-cluster/kai-scheduler/update-krm-version.sh '${{ steps.check.outputs.latest }}'
+        env:
+          LATEST: ${{ steps.check.outputs.latest }}
+        run: runai-cluster/kai-scheduler/update-krm-version.sh "$LATEST"
 
       - name: Create PR with auto-merge
         id: create_pr
         if: steps.check.outputs.needed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GIT_HUB_OSS }}
+          LATEST: ${{ steps.check.outputs.latest }}
         run: |
           set -euo pipefail
-          LATEST='${{ steps.check.outputs.latest }}'
 
           if git diff --quiet; then
             echo "No file changes produced by the update; skipping PR."
