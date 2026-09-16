@@ -3,10 +3,10 @@
 
 # Deployment Model
 
-The infrastructure required depends on your deployment model:
+The NVIDIA Run:ai control plane and NVIDIA Run:ai clusters can be deployed across your Kubernetes environment in one of two models. The infrastructure required depends on which model you choose:
 
-* **Same-cluster deployment** - The NVIDIA Run:ai control plane and the first NVIDIA Run:ai cluster are installed on the same Kubernetes cluster.
-* **Multi-cluster deployment** - The NVIDIA Run:ai control plane is installed on a dedicated Kubernetes cluster, while one or more NVIDIA Run:ai clusters are installed on separate Kubernetes clusters.
+* **Same-cluster deployment** - The NVIDIA Run:ai control plane and the first NVIDIA Run:ai cluster are installed on the same Kubernetes cluster. This is the most common deployment model. Infrastructure such as the load balancer, ingress controller, and DNS can be shared between the two components.
+* **Multi-cluster deployment** - The NVIDIA Run:ai control plane is installed on a dedicated Kubernetes cluster, while one or more NVIDIA Run:ai clusters are installed on separate Kubernetes clusters. Each NVIDIA Run:ai cluster requires its own load balancer, ingress controller, FQDNs, and TLS certificates.
 
 ## Connectivity
 
@@ -14,7 +14,7 @@ NVIDIA Run:ai involves two distinct traffic flows, each with its own connectivit
 
 * **Management traffic (outbound)** - NVIDIA Run:ai cluster services initiate the connection to the control plane FQDN (for example, `runai.mycorp.local`) over HTTPS (port 443). In restricted networks, allow outbound HTTPS from the NVIDIA Run:ai cluster nodes to the control plane FQDN.
 * **User access traffic (inbound)** - Users and clients require inbound access to:
-  * The control plane cluster, for UI and API access.
+  * The NVIDIA Run:ai control plane, for UI and API access.
   * Each NVIDIA Run:ai cluster, for access to workspaces, training, and inference workloads exposed through the cluster's load balancer and ingress controller.
 
 In a same-cluster deployment, both inbound flows arrive at the same Kubernetes cluster and can share the load balancer and ingress controller. In a multi-cluster deployment, each NVIDIA Run:ai cluster must be reachable by its users - this is why the load balancer, ingress controller, and cluster-specific FQDNs and TLS certificates are required per cluster. The control plane domain and its certificate remain single regardless of deployment model.
@@ -35,20 +35,20 @@ The following diagram shows the traffic flows in a multi-cluster deployment, whe
 
 <img src="../../assets/traffic-multi-cluster.svg" alt="Multi-cluster traffic flow: control plane and cluster workloads on separate Kubernetes clusters, connected via management traffic" />
 
-The following tables summarize the networking, DNS, and TLS components required for each deployment model. "Single" means one component shared across the whole deployment; "Per cluster" means one component is required for each additional NVIDIA Run:ai cluster beyond the control plane.
+## Infrastructure by Deployment Model
 
-## Networking
+Use the tables below to determine how many of each networking, DNS, and TLS component to provision before you begin installation, based on the deployment model you chose. "Single" means one component shared across the whole deployment; "Per cluster" means one component is required for each additional NVIDIA Run:ai cluster beyond the control plane. For setup instructions, see [Networking Setup](networking-setup.md).
 
-The following tables show how many of each networking component you need, based on your deployment model. For setup instructions, see [Networking Setup](networking-setup.md).
+### Load Balancer and Ingress
 
-### Kubernetes
+#### Kubernetes
 
 | Component | Same-cluster | Multi-cluster |
 |---|---|---|
 | Load balancer | Single | Per cluster |
 | Ingress controller | Single | Per cluster |
 
-### OpenShift
+#### OpenShift
 
 OpenShift ships with a pre-installed router that serves as both load balancer and ingress controller, so no separate installation is required.
 
@@ -56,7 +56,7 @@ OpenShift ships with a pre-installed router that serves as both load balancer an
 |---|---|---|
 | Router (built-in) | Single | Per cluster |
 
-## DNS
+### DNS
 
 <Info>
 
@@ -77,9 +77,9 @@ Applies to Kubernetes only. On OpenShift, the domain is derived from the cluster
 
 > *Required only if inference workloads are exposed externally.
 
-## TLS Certificates
+### TLS Certificates
 
-### Kubernetes
+#### Kubernetes
 
 | Component | Same-cluster | Multi-cluster |
 |---|---|---|
@@ -90,7 +90,7 @@ Applies to Kubernetes only. On OpenShift, the domain is derived from the cluster
 
 > *Required only if inference workloads are exposed externally.
 
-### OpenShift
+#### OpenShift
 
 | Component | Same-cluster | Multi-cluster |
 |---|---|---|

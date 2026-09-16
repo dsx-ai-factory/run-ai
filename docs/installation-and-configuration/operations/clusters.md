@@ -66,12 +66,12 @@ Follow the setup and installation instructions below to get the installation ins
 1. In the NVIDIA Run:ai UI, go to Resources -> Clusters
 2. Enter a unique **name** for your cluster
 3. Optional: Choose the NVIDIA Run:ai cluster version (latest, by default)
-4. Enter the Cluster URL. For more information, see [Fully Qualified Domain Name](../../getting-started/installation/install-using-helm/system-requirements.md#fully-qualified-domain-name-fqdn) requirement.
+4. Enter the Cluster URL. For more information, see [Fully Qualified Domain Name](../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
 5. Click **CONTINUE**
 
 ### Installation Instructions
 
-1. Follow the installation instructions and run the commands provided on your Kubernetes cluster. To add a new cluster, see the [installation guide](../../getting-started/installation/install-using-helm/helm-install.md).
+1. Follow the installation instructions and run the commands provided on your Kubernetes cluster. To add a new cluster, see the [installation guide](../../installation-and-configuration/installation/install-using-helm/helm-install.md).
 2. Click **DONE**
 
 The cluster is displayed in the table with the status **Waiting to connect**. Once installation is complete, the cluster status changes to **Connected**.

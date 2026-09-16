@@ -35,7 +35,7 @@ If both `privileged` and `allowPrivilegeEscalation` are set to `true`, the `allo
 
 ### Passing User Identity from Identity Provider
 
-A best practice is to store the **User Identifier (UID)** and **Group Identifier (GID)** in the organization's directory. NVIDIA Run:ai allows you to pass these values to the container and use them as the container identity. To perform this, you must set up [single sign-on](../../authentication/overview.md) and perform the steps for UID/GID integration.
+A best practice is to store the **User Identifier (UID)** and **Group Identifier (GID)** in the organization's directory. NVIDIA Run:ai allows you to pass these values to the container and use them as the container identity. To perform this, you must set up [single sign-on](../../../platform-management/authentication/overview.md) and perform the steps for UID/GID integration.
 
 ### Passing User Identity via UI
 

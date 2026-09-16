@@ -18,7 +18,7 @@ Before you begin, ensure that:
 The platform supports the following installation methods, depending on your environment:
 
 * [Guided Installer](../../installation-and-configuration/installation/guided-installation/README.md) (Recommended) - a CLI tool (`runai-installer`) that reads a configuration YAML file and installs NVIDIA Run:ai from it.
-* [Install using Helm](../../installation-and-configuration/installation/install-using-helm/cp-system-requirements.md) - the standard installation method using Helm charts. Provides full control and flexibility over configuration and deployment.
+* [Install using Helm](../../installation-and-configuration/installation/install-using-helm/preparations.md) - the standard installation method using Helm charts. Provides full control and flexibility over configuration and deployment.
 * [Install using Base Command Manager (BCM)](../../installation-and-configuration/installation/bcm-install.md) - a guided installation method available through NVIDIA Base Command Manager intended to simplify deployment, employing defaults meant to enable most NVIDIA Run:ai capabilities on NVIDIA DGX SuperPOD systems.
 
 ## Complete the Onboarding Wizard
@@ -45,7 +45,7 @@ If the NVIDIA Run:ai cluster is already deployed and connected to the control pl
 
 </Info>
 
-A cluster is your organization's compute infrastructure, where AI workloads are executed. The wizard first directs you to review [cluster system requirements](../../installation-and-configuration/installation/install-using-helm/system-requirements.md) and [networking setup](../../installation-and-configuration/system-requirements/networking-setup.md). It then generates a Helm command that you run on your Kubernetes cluster to install the required components and prepare the cluster for workload scheduling.
+A cluster is your organization's compute infrastructure, where AI workloads are executed. The wizard first directs you to review [cluster system requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md) and [networking setup](../../installation-and-configuration/system-requirements/networking-setup.md). It then generates a Helm command that you run on your Kubernetes cluster to install the required components and prepare the cluster for workload scheduling.
 
 The wizard displays **Waiting for cluster to connect** while the cluster is being installed and connected to the control plane. Once the installation completes successfully and the cluster establishes communication with the control plane, the wizard updates to **Cluster connected**. After completing the wizard flow, the cluster is added to the [Clusters](../../installation-and-configuration/operations/clusters.md) table.
 

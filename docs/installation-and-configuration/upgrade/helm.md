@@ -194,7 +194,7 @@ If your control plane was upgraded using NGC, the cluster must also be upgraded 
         helm repo update
         helm upgrade -i runai-cluster runai/runai-cluster -n runai \
           --set controlPlane.url=... \
-          --set controlPlane.bootstrapToken=... \
+          --set controlPlane.clientSecret=... \
           --set cluster.uid=... \
           --set cluster.url=... --version="<VERSION>" --create-namespace
           --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -227,7 +227,7 @@ Once installation is complete, validate the cluster is **Connected** and listed 
     helm repo update
     helm upgrade -i runai-cluster runai/runai-cluster -n runai \
       --set controlPlane.url=... \
-      --set controlPlane.bootstrapToken=... \
+      --set controlPlane.clientSecret=... \
       --set cluster.uid=... \
       --set cluster.url=... --version="<VERSION>" --create-namespace
       --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -257,7 +257,7 @@ The following instructions apply whether you downloaded the package via NGC or J
     ```bash
     helm upgrade -i runai-cluster runai-cluster-<VERSION>.tgz \
       --set controlPlane.url=... \
-      --set controlPlane.bootstrapToken=... \
+      --set controlPlane.clientSecret=... \
       --set cluster.uid=... \
       --set cluster.url=... --create-namespace \
       --set global.image.registry=registry.mycompany.local \
@@ -516,7 +516,22 @@ If you encounter an issue with the cluster upgrade, use the troubleshooting scen
 
 If the NVIDIA Run:ai cluster installation failed, check the installation logs to identify the issue. Run the following script to print the installation logs:
 
-[get-installation-logs.sh](../../../assets/get-installation-logs.sh)
+```bash
+#!/bin/bash
+
+# Print logs of helm hooks if installation failed
+hook_pods=$(kubectl get pod -n runai -l run.ai/hook 2> /dev/null | wc -l)
+if [ $hook_pods -ne 0 ]
+then
+  kubectl logs -n runai -l run.ai/hook
+fi
+
+runaiconfig="$(kubectl get runaiconfig runai -n runai 2> /dev/null; echo $?)"
+if [[ $runaiconfig -eq 0 ]]
+then
+  kubectl logs -n runai -l name=runai | grep ERROR
+fi
+```
 
 ### Cluster Status
 

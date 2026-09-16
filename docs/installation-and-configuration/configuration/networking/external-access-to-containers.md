@@ -35,11 +35,11 @@ By default, NVIDIA Run:ai uses host-based routing to expose workload URLs using 
 https://project-name-workload-name.<CLUSTER_URL>/
 ```
 
-Host-based routing is enabled by default via the `subdomainSupport: true` cluster configuration. For setup instructions, see [Host-based routing](../../../getting-started/installation/install-using-helm/system-requirements.md#host-based-routing) in the system requirements.
+Host-based routing is enabled by default via the `subdomainSupport: true` cluster configuration. For setup instructions, see [Host-Based Routing (Ingress Resource)](../../installation/install-using-helm/preparations.md#host-based-routing-ingress-resource).
 
 ### Path-Based Routing
 
-Path-based routing uses the [Cluster URL](../../../getting-started/installation/install-using-helm/system-requirements.md#fully-qualified-domain-name-fqdn) provided to dynamically create SSL-secured URLs in the following format:
+Path-based routing uses the [Cluster URL](../../system-requirements/networking-setup.md#fqdn-and-dns) provided to dynamically create SSL-secured URLs in the following format:
 
 ```bash
 https://<CLUSTER_URL>/project-name/workload-name

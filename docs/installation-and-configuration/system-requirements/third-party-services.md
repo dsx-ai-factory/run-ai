@@ -2,11 +2,16 @@
 
 Third-party services are a set of supporting services deployed as part of the NVIDIA Run:ai installation, including Keycloak for authentication and identity management, PostgreSQL as the centralized database, Traefik as the API gateway, NATS for asynchronous communication, and others. This page lists those services, their configuration options, and how to replace select services with externally managed instances. For supported versions of each service, see the [Support Matrix](../support-matrix.md#third-party-service-versions).
 
+## Externally Managed Instances
+
+By default, NVIDIA Run:ai deploys every third-party service itself as part of installation. Some services can instead be replaced with an externally managed instance - one you already operate outside the NVIDIA Run:ai installation (for example, a managed cloud database). In that case, NVIDIA Run:ai connects to your existing instance instead of deploying its own.
+
+Each service's table below has a **Supports External Instance** column indicating whether this is available. Where it is, disable that service's built-in deployment and provide its connection details and credentials - see that service's own section for the exact configuration keys.
+
 ## Image Registry
 
-* **Open Source and NVIDIA Supported installations** - All third-party service images are pulled from the official upstream registries on Docker Hub (`docker.io`), Quay (`quay.io`), and the Kubernetes registry (`registry.k8s.io`). No registry credentials are required for these images. Ensure that your cluster nodes can reach these registries, see [External Access to Critical Services](external-access-to-critical-services.md) for the required outbound access.
-* **Gov-ready installations** - Customers must obtain hardened, FIPS-enabled images from [Chainguard](https://www.chainguard.dev/) for each supported third-party component. Chainguard images must match the supported version of each component for the NVIDIA Run:ai release in use.
-* **Air-gapped installations** - NVIDIA Run:ai provides a script to download and mirror the images.
+* **Connected installations** - All third-party service images are pulled from the official upstream registries on Docker Hub (`docker.io`), Quay (`quay.io`), and the Kubernetes registry (`registry.k8s.io`), for Open Source and NVIDIA Run:ai Support-Entitled installations. No registry credentials are required for these images. Ensure that your cluster nodes can reach these registries, see [External Access to Critical Services](external-access-to-critical-services.md) for the required outbound access.
+* **Air-gapped installations** - For Open Source and NVIDIA Run:ai Support-Entitled installations, third-party service images are packed into the same tarball as the platform images on a connected machine, then loaded into your internal registry along with the rest.
 
 ## Control Plane Services
 
@@ -63,6 +68,53 @@ PostgreSQL is the centralized database for the NVIDIA Run:ai control plane. It i
 #### Using an External PostgreSQL Instance
 
 To replace the deployed PostgreSQL with an external managed database, set `postgresql.enabled: false`, configure `global.postgresql.auth.*` with the external server connection details, and update `grafana.dbUser` and `grafana.dbPassword`.
+
+Before installing, provision the database, role, and Grafana user on your external PostgreSQL server:
+
+1.  Create an SQL script file, edit the parameters below, and save it locally:
+
+    * Replace `<DATABASE_NAME>` with a dedicated database name for NVIDIA Run:ai in your PostgreSQL database.
+    * Replace `<ROLE_NAME>` with a dedicated role name (user) for the NVIDIA Run:ai database.
+    * Replace `<ROLE_PASSWORD>` with a password for the new PostgreSQL role.
+    * Replace `<GRAFANA_PASSWORD>` with the password to be set for Grafana integration.
+
+    ```sql
+    -- Create a new database for runai
+    CREATE DATABASE <DATABASE_NAME>; 
+
+    -- Create the role with login and password
+    CREATE ROLE <ROLE_NAME>  WITH LOGIN PASSWORD '<ROLE_PASSWORD>'; 
+
+    -- Grant all privileges on the database to the role
+    GRANT ALL PRIVILEGES ON DATABASE <DATABASE_NAME> TO <ROLE_NAME>; 
+
+    -- Connect to the newly created database
+    \c <DATABASE_NAME> 
+
+    -- grafana
+    CREATE ROLE grafana WITH LOGIN PASSWORD '<GRAFANA_PASSWORD>'; 
+    CREATE SCHEMA grafana authorization grafana;
+    ALTER USER grafana set search_path='grafana';
+    -- Exit psql
+    \q
+    ```
+2.  Run the following command on a machine where PostgreSQL client (`pgsql`) is installed:
+
+    * Replace `<POSTGRESQL_HOST>` with the PostgreSQL IP address or hostname.
+    * Replace `<POSTGRESQL_USER>` with the PostgreSQL username.
+    * Replace `<POSTGRESQL_PORT>` with the port number where PostgreSQL is running.
+    * Replace `<POSTGRESQL_DB>` with the name of your PostgreSQL database.
+    * Replace `<SQL_FILE>` with the path to the SQL script created in the previous step.
+
+    ```bash
+    psql --host <POSTGRESQL_HOST> \
+    --user <POSTGRESQL_USER> \
+    --port <POSTGRESQL_PORT> \
+    --dbname <POSTGRESQL_DB> \
+    -a -f <SQL_FILE> \
+    ```
+
+Then configure the chart to use the provisioned database:
 
 #### Configuration
 
@@ -155,13 +207,13 @@ To replace the deployed Thanos with an external metrics store, set `thanos.enabl
 
 ## Cluster Services
 
+Cluster services do not support external instances. Their upstream images can be overridden via Helm or the `RunaiConfig` custom resource. For the full list of configurable fields and instructions, see [Advanced Cluster Configurations](../configuration/cluster-config.md#third-party-service-images).
+
 | Component | Supports External Instance | Description |
 | --------- | -------------------------- | ----------- |
 | Valkey | No | In-memory cache for workload state and session data |
 | oauth2-proxy | No | Authenticates and authorizes access to workloads that expose external URLs |
 | git-sync | No | Syncs Git repositories as data sources into running workloads |
-
-Cluster services do not support external instances. Their upstream images can be overridden via Helm or the `RunaiConfig` custom resource. For the full list of configurable fields and instructions, see [Advanced Cluster Configurations](../configuration/cluster-config.md#third-party-service-images).
 
 ### Valkey
 

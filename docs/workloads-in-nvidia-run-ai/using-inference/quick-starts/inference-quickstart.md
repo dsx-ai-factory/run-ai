@@ -18,7 +18,7 @@ Before you start, make sure:
 
 * You have created a [project](../../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
 * The project has an assigned quota of at least 1 GPU.
-* [Knative](../../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) is properly installed by your administrator.
+* [Knative](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) is properly installed by your administrator.
 
 <Info>
 

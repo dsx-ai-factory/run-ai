@@ -9,7 +9,7 @@ This guide outlines the best practices for configuring the NVIDIA Run:ai platfor
 
 The NVIDIA Run:ai platform allows you to dedicate specific nodes (system nodes) exclusively for core platform services. This approach provides improved operational isolation and easier resource management.
 
-Ensure that at least **three system nodes** are configured to support high availability. If you use only a single node for core services, horizontally scaled components will not be distributed, resulting in a single point of failure. See [NVIDIA Run:ai system nodes](../advanced-setup/node-roles.md) for more details. This practice applies to both the NVIDIA Run:ai cluster and control plane.
+Ensure that at least **three system nodes** are configured to support high availability. If you use only a single node for core services, horizontally scaled components will not be distributed, resulting in a single point of failure. See [NVIDIA Run:ai system nodes](../configuration/node-roles.md) for more details. This practice applies to both the NVIDIA Run:ai cluster and control plane.
 
 ## Service Replicas <a href="#undefined" id="undefined"></a>
 
@@ -21,13 +21,13 @@ In addition, the control plane supports autoscaling for certain services to hand
 
 #### Deployments
 
-By default, NVIDIA Run:ai deployments are deployed with a single replica. To achieve high availability, it is recommended to configure multiple replicas for core NVIDIA Run:ai services. For more information, see [Advanced control plane configuration](../advanced-setup/control-plane-config.md).
+By default, NVIDIA Run:ai deployments are deployed with a single replica. To achieve high availability, it is recommended to configure multiple replicas for core NVIDIA Run:ai services. For more information, see [Advanced control plane configuration](../configuration/control-plane-config.md).
 
 #### StatefulSets
 
-NVIDIA Run:ai uses the following third-party components which are managed as Kubernetes StatefulSets. For more information, see [Advanced control plane configurations](../advanced-setup/control-plane-config.md):
+NVIDIA Run:ai uses the following third-party components which are managed as Kubernetes StatefulSets. For more information, see [Advanced control plane configurations](../configuration/control-plane-config.md):
 
-* **PostgreSQL** - The internal PostgreSQL cannot be scaled horizontally. To connect NVIDIA Run:ai to an external PostgreSQL service which can be configured for high availability, see [External Postgres Database](../../getting-started/installation/install-using-helm/cp-system-requirements.md#external-postgres-database-optional).
+* **PostgreSQL** - The internal PostgreSQL cannot be scaled horizontally. To connect NVIDIA Run:ai to an external PostgreSQL service which can be configured for high availability, see [Using an External PostgreSQL Instance](../system-requirements/third-party-services.md#using-an-external-postgresql-instance).
 *   **Thanos** - To enable Thanos autoscaling, use the following NVIDIA Run:ai control plane helm flags:
 
     ```bash
@@ -43,4 +43,4 @@ NVIDIA Run:ai uses the following third-party components which are managed as Kub
 
 ### Cluster Services Replicas <a href="#nvidia-run-ai-services-replicas" id="nvidia-run-ai-services-replicas"></a>
 
-By default, NVIDIA Run:ai cluster services are deployed with a single replica. To achieve high availability, it is recommended to configure multiple replicas for core NVIDIA Run:ai services. For more information, see [NVIDIA Run:ai services replicas](../advanced-setup/cluster-config.md#nvidia-run-ai-services-replicas).
+By default, NVIDIA Run:ai cluster services are deployed with a single replica. To achieve high availability, it is recommended to configure multiple replicas for core NVIDIA Run:ai services. For more information, see [NVIDIA Run:ai services replicas](../configuration/cluster-config.md#nvidia-run-ai-services-replicas).

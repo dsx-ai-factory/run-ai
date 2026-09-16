@@ -15,6 +15,8 @@ Fields marked **Required** must be specified. All other fields are optional.
 - [`tls`](#tls) - Default TLS certificates for the control plane and cluster: certificate, key, CA chain, or a self-signed option for non-production use. Component-level `tls` blocks override these defaults.
 - [`registry`](#registry) - Credentials for pulling NVIDIA Run:ai images and Helm charts: token authentication (NGC), basic authentication (Harbor and other OCI registries), or no authentication.
 - [`airgap`](#airgap) - Bundle path, working directory, and extraction behavior for an air-gapped installation. Required when `install.connectivity` is `air_gapped`.
+- [`airgap pack`](#airgap-pack) - Configuration for the separate `airgap pack` command, which builds an air-gapped bundle from a release's artifacts.
+- [`airgap load`](#airgap-load) - Configuration for the separate `airgap load` command, which pushes a bundle's images to your registry and writes the Helm values `install` consumes.
 
 **NVIDIA Run:ai components**
 
@@ -36,7 +38,7 @@ Fields marked **Required** must be specified. All other fields are optional.
 
 ## `install`
 
-Controls the installation type and network connectivity model. `mode` is based on your [deployment model](../../overview.md#deployment-model) - same-cluster or multi-cluster.
+Controls the installation type and network connectivity model. `mode` is based on your [deployment model](../../system-requirements/deployment-model.md) - same-cluster or multi-cluster.
 
 ```yaml
 install:
@@ -90,7 +92,7 @@ Token authentication:
 ```yaml
 registry:
   type: ngc
-  tokenPath: /path/to/ngc-token
+  tokenPath: /path/to/ngc-token # Support-Entitled Release only
 ```
 
 Basic authentication:
@@ -134,14 +136,86 @@ Configures the air-gapped installation bundle. Required when `install.connectivi
 airgap:
   bundlePath: /data/runai-airgap-bundle.tar.gz
   workingDir: /data/runai-airgap
+  valuesDir: /data/runai-airgap
   skipPrepare: false
 ```
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `bundlePath` | string | Conditional | Absolute path to the air-gap bundle archive. Required unless `skipPrepare` is `true`. |
+| `bundlePath` | string | Conditional | Absolute path to the air-gapped bundle archive. Required unless `skipPrepare` is `true`. |
 | `workingDir` | string | Yes | Directory where the installer extracts the bundle. The directory must have sufficient free disk space. The installer does not create temporary directories automatically. |
+| `valuesDir` | string | No | Directory where the installer writes the generated Helm values files for the control plane and cluster charts, pointing them at your internal registry. Defaults to `workingDir` if not set. |
 | `skipPrepare` | bool | No | Skips bundle extraction and image import into the registry. Use when rerunning an installation after the bundle has already been extracted and the images are already available in the registry. |
+
+---
+
+## `airgap pack`
+
+Configures the `airgap pack` command, which builds an air-gapped bundle from a release's artifacts on a connected machine. This is a separate command from `install`, with its own configuration file passed via `airgap pack`'s own `--config` flag. See [Air-Gapped Bundle](air-gapped/preparations.md#air-gapped-bundle) for the full procedure.
+
+```yaml
+settings:
+  runaiVersion: 3.0.2
+  architecture: amd64
+  output: /path/to/runai-airgap.tar
+
+imageOverrides:
+  - name: keycloak
+    source: <your-registry>/keycloak:<tag>
+
+registryAuth:
+  - registry: <your-registry-host>
+    username: <username>
+    passwordPath: /path/to/registry-password
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `settings.runaiVersion` | string | No | Target NVIDIA Run:ai version to pack. |
+| `settings.architecture` | string | No | CPU architecture to pack. Supported values: `amd64`, `arm64`. |
+| `settings.output` | string | No | Path to write the resulting bundle archive. Defaults to `runai-<version>-airgap.tar` in the current directory. |
+| `imageOverrides` | list | No | Substitutes or adds images sourced from your own registry instead of the release's defaults - for example, a third-party service image such as Keycloak. |
+| `imageOverrides[].group` | string | Conditional | Image group the override applies to. Required only when `name` exists in more than one group. |
+| `imageOverrides[].name` | string | Yes (per entry) | Name of the image to override. |
+| `imageOverrides[].source` | string | Yes (per entry) | Full image reference to pull instead, including an explicit tag or digest. |
+| `registryAuth` | list | No | Credentials for registries referenced by `imageOverrides` sources, or for a Support-Entitled Release's own registry. Each entry authenticates to one registry. |
+| `registryAuth[].registry` | string | Yes (per entry) | Registry hostname this entry authenticates to. |
+| `registryAuth[].username` / `password` / `passwordPath` / `passwordEnv` | string | No | Basic authentication. `password`, `passwordPath`, and `passwordEnv` are mutually exclusive. |
+| `registryAuth[].token` / `tokenPath` / `tokenEnv` | string | No | Token authentication. Mutually exclusive with each other. |
+| `registryAuth[].bearerToken` / `bearerTokenPath` / `bearerTokenEnv` | string | No | Bearer token authentication. Mutually exclusive with each other. |
+| `registryAuth[].caChainPath` | string | No | Path to the CA certificate chain. Required when the registry uses a private CA. |
+| `registryAuth[].insecure` | bool | No | Connects to the registry over HTTP instead of HTTPS. |
+| `registryAuth[].insecureSkipVerify` | bool | No | Connects over HTTPS without verifying the server's TLS certificate. |
+
+---
+
+## `airgap load`
+
+Configures the `airgap load` command, which extracts an air-gapped bundle, pushes its images to your internal registry, and writes the Helm values files consumed by `install`'s own [`airgap`](#airgap) configuration. This is a separate command from `install`, with its own configuration file passed via `airgap load`'s own `--config` flag. See [Air-Gapped Bundle](air-gapped/preparations.md#air-gapped-bundle) for the full procedure.
+
+```yaml
+settings:
+  bundlePath: /path/to/runai-airgap.tar
+  workingDir: /data/runai-airgap
+  valuesDir: /data/runai-airgap
+
+registry:
+  url: <your-registry-host>
+  username: <username>
+  passwordPath: /path/to/registry-password
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `settings.bundlePath` | string | Yes | Path to the bundle archive produced by `airgap pack`. Must exist and be a file, not a directory. |
+| `settings.workingDir` | string | Yes | Directory where the bundle is extracted. |
+| `settings.valuesDir` | string | No | Directory where the generated Helm values files (`control-plane-airgap-values.yaml`, `cluster-airgap-values.yaml`) are written. Defaults to `workingDir` if not set. |
+| `registry.url` | string | Yes | Destination registry for the pushed images, as a fully qualified hostname, `localhost`, or `host:port`, with an optional path. No scheme, and no tag or digest. |
+| `registry.username` / `password` / `passwordPath` / `passwordEnv` | string | No | Basic authentication. `password`, `passwordPath`, and `passwordEnv` are mutually exclusive. |
+| `registry.token` / `tokenPath` / `tokenEnv` | string | No | Token authentication. Mutually exclusive with each other. |
+| `registry.caChainPath` | string | No | Path to the CA certificate chain. Required when the registry uses a private CA. |
+| `registry.insecure` | bool | No | Connects to the registry over HTTP instead of HTTPS. |
+| `registry.insecureSkipVerify` | bool | No | Connects over HTTPS without verifying the server's TLS certificate. |
 
 ---
 
@@ -270,8 +344,8 @@ features:
 |---|---|---|---|
 | `skip` | bool | No | Skips installation of all optional features. |
 | `knative` | object | No | Knative Serving. Required for standard (single-node) inference workloads. Installing it requires `cluster.inference.wildcardDomain` to be set (plus a resolvable wildcard certificate, unless using Gateway API or OpenShift), or validation fails. |
-| `kubeflow` | object | No | Kubeflow Training Operator. Required for distributed training workloads (TensorFlow, PyTorch, XGBoost, and JAX). Installs from pinned manifests - `customHelmValues` and `version` are not supported. |
-| `mpiOperator` | object | No | MPI Operator. Required for MPI v2-based distributed training, alongside the frameworks the Kubeflow Training Operator provides. Installs from pinned manifests - `customHelmValues` and `version` are not supported. |
+| `kubeflow` | object | No | Kubeflow Training Operator. Required for distributed training workloads (TensorFlow, PyTorch, XGBoost, and JAX). Installs from pinned manifests - `customHelmValues` is not supported. |
+| `mpiOperator` | object | No | MPI Operator. Required for MPI v2-based distributed training, alongside the frameworks the Kubeflow Training Operator provides. Installs from pinned manifests - `customHelmValues` is not supported. |
 | `lws` | object | No | LeaderWorkerSet (LWS). Required for distributed (multi-node) inference workloads. |
 | `nimOperator` | object | No | NVIDIA NIM Operator. Enables Kubernetes cluster administrators to operate the software components and services necessary to deploy NVIDIA NIMs and NVIDIA NeMo microservices. |
 | `grove` | object | No | NVIDIA Grove. Orchestrates multi-component, gang-scheduled workloads, such as disaggregated NVIDIA Dynamo inference deployments. |
@@ -295,7 +369,7 @@ gpuOperator:
 |---|---|---|---|
 | `mode` | string | No | Installation behavior. Supported values: `install` (install the component if it is not already installed) and `skip` (do not install or require the component). If omitted, defaults to `install` for prerequisites and `skip` for features. |
 | `type` | string | No | `gpuOperator` only. GPU Operator variant: `real` (default) for physical GPUs, or `fake` for testing without GPU hardware. |
-| `version` | string | No | Component version. Omit to use the version from the NVIDIA Run:ai compatibility matrix. |
+| `version` | string | No | Component version. Omit to install the latest version. To set it explicitly, see [Support Matrix](../../support-matrix.md) for the supported version range. |
 | `customHelmValues` | map | No | Custom Helm values merged into the component's Helm chart. Not supported for `kubeflow` or `mpiOperator`, which install from pinned manifests rather than a Helm chart - setting it there is rejected. On OpenShift, also rejected for components that install via OLM instead of Helm (see `openshift`, below). |
 | `openshift` | object | No | OpenShift-specific settings - see [Per-Component OpenShift Fields](#per-component-openshift-fields), below. Used only when `install.kubernetesDistribution` is `openshift`, and only for components that install via OLM on OpenShift. Setting it for a component that doesn't is rejected. |
 
@@ -337,7 +411,7 @@ Required on standard Kubernetes clusters - set `type` to `ingress` or `gatewayAp
 externalConnection:
   type: ingress
   ingress:
-    className: nginx
+    className: haproxy
 ```
 
 | Field | Type | Required | Description |
