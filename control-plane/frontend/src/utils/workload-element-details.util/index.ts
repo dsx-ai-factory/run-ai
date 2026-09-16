@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { buildElementDetailsSections, type IBuildElementDetailsSectionsOptions } from "./workload-element-details.util";
+export { workloadElementDetailsUtil, type IBuildElementDetailsSectionsOptions } from "./workload-element-details.util";

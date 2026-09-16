@@ -5,8 +5,11 @@
 
 import { describe, it, expect } from "vitest";
 import type { WorkloadElementResponse } from "@/swagger-models/workloads-client";
-import { buildElementDetailsSections } from "./workload-element-details.util";
+import { workloadElementDetailsUtil } from "./workload-element-details.util";
+
+const { buildElementDetailsSections } = workloadElementDetailsUtil;
 import type { IGeneralSectionData, INetworkSectionData, IComputeSectionData } from "@/models/workload-details.model";
+import { formatK8sResourceMemory } from "@/utils/format.util/format.util";
 
 function buildElement(overrides: Partial<WorkloadElementResponse> = {}): WorkloadElementResponse {
   return {
@@ -73,7 +76,7 @@ describe("buildElementDetailsSections", () => {
           cpu: { request: 1, limit: 1 },
           cpuMemory: { request: "100M", limit: "200M" },
         },
-        allocatedResources: { gpu: 4, gpuMemory: "0.5G", cpu: 1, cpuMemory: "100M" },
+        allocatedResources: { gpu: 4, gpuMemory: "536870912", cpu: 1, cpuMemory: "104857600" },
       }),
       { podsCount: 4 },
     );
@@ -93,6 +96,8 @@ describe("buildElementDetailsSections", () => {
       "Pods",
     ]);
     expect(items.find((i) => i.label === "GPU compute allocation")?.value).toBe("4");
+    expect(items.find((i) => i.label === "GPU memory allocation")?.value).toBe(formatK8sResourceMemory("536870912"));
+    expect(items.find((i) => i.label === "CPU memory allocation")?.value).toBe(formatK8sResourceMemory("104857600"));
     expect(items.find((i) => i.label === "Pods")?.value).toBe("4");
   });
 

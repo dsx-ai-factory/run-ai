@@ -6,15 +6,16 @@
 import { describe, it, expect } from "vitest";
 import { workloadDetailsUtil } from "@/utils/workload-details.util/workload-details.util";
 import type { WorkloadDetailed } from "@/swagger-models/workloads-client";
+import { formatK8sResourceMemory } from "@/utils/format.util/format.util";
 
 describe("workloadDetailsUtil.parseComputeDetails", () => {
   it("includes allocation rows when allocatedResources is present", () => {
     const workloadDetailed = {
       allocatedResources: {
         gpu: 4,
-        gpuMemory: "0.5G",
+        gpuMemory: "536870912",
         cpu: 1,
-        cpuMemory: "100M",
+        cpuMemory: "104857600",
       },
     } as unknown as WorkloadDetailed;
 
@@ -22,10 +23,10 @@ describe("workloadDetailsUtil.parseComputeDetails", () => {
 
     expect(content).toEqual(
       expect.arrayContaining([
-        expect.stringMatching(/^GPU compute allocation: 4$/),
-        expect.stringMatching(/^GPU memory allocation: /),
+        "GPU compute allocation: 4",
+        `GPU memory allocation: ${formatK8sResourceMemory("536870912")}`,
+        `CPU memory allocation: ${formatK8sResourceMemory("104857600")}`,
         expect.stringMatching(/^CPU compute allocation: /),
-        expect.stringMatching(/^CPU memory allocation: /),
       ]),
     );
   });

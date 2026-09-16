@@ -105,6 +105,7 @@
                 v-if="selectedElementId"
                 :element="elementDetailsById[selectedElementId] ?? null"
                 :element-pods-count="contextPods.length"
+                :pods-count-loading="loadingContextPods"
                 :cluster-id="workload.clusterId"
               />
               <workload-details-tab v-else :workload="workload" />

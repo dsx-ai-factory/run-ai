@@ -6,8 +6,14 @@
 import type { WorkloadElementResponse } from "@/swagger-models/workloads-client";
 import type { IDetailsPanelItem, IDetailsPanelSectionDef, IDetailsPanelTopology } from "@/models/details-panel.model";
 import type { IComputeSectionData, IGeneralSectionData, INetworkSectionData } from "@/models/workload-details.model";
-import { matchesItem, objectMatchesTerm } from "@/utils/details-panel.utils";
-import { getCpuCoresForUI, getMemoryUnitsForUI } from "@/utils/table-format.util";
+import {
+  matchAnyItem,
+  filterDefined,
+  topologyMatches,
+  defineSection,
+  buildSections,
+  type SectionBuilder,
+} from "@/utils/details-panel.utils";
 import { DETAILS_PANEL_SECTIONS, workloadDetailsUtil } from "@/utils/workload-details.util";
 
 export interface IBuildElementDetailsSectionsOptions {
@@ -17,36 +23,38 @@ export interface IBuildElementDetailsSectionsOptions {
   podsCount?: number;
 }
 
-function buildElementGeneralSection(element: WorkloadElementResponse): IDetailsPanelSectionDef | undefined {
-  const group: IDetailsPanelItem[] = [];
-  const type = element.kubernetesRef?.gvk?.kind;
-  if (type) group.push({ label: "Type", value: type });
-  if (element.createdAt) {
-    group.push({ label: "Creation time", value: workloadDetailsUtil.formatDate(element.createdAt) });
-  }
-  if (!group.length) return undefined;
-
-  const data: IGeneralSectionData = { groups: [group] };
-  return {
-    ...DETAILS_PANEL_SECTIONS.GENERAL,
-    customMatch: (term: string) => group.some((item) => matchesItem(item, term)),
-    data,
-  };
+interface IBuildElementSectionsInput {
+  element: WorkloadElementResponse;
+  topologyLevels: string[];
+  podsCount: number;
 }
 
-function buildElementNetworkSection(
-  element: WorkloadElementResponse,
-  topologyLevels: string[],
-): IDetailsPanelSectionDef | undefined {
-  const topology: IDetailsPanelTopology | undefined = element.topology?.name ? element.topology : undefined;
-  if (!topology) return undefined;
-
-  const data: INetworkSectionData = { connections: [], topology, topologyLevels };
-  return {
-    ...DETAILS_PANEL_SECTIONS.NETWORK,
-    customMatch: (term: string) => objectMatchesTerm({ ...topology, levels: topologyLevels }, term),
+function buildElementGeneralSection(input: IBuildElementSectionsInput): IDetailsPanelSectionDef | undefined {
+  const { element } = input;
+  const group = filterDefined([
+    workloadDetailsUtil.pair("Type", element.kubernetesRef?.gvk?.kind),
+    workloadDetailsUtil.pair(
+      "Creation time",
+      element.createdAt ? workloadDetailsUtil.formatDate(element.createdAt) : undefined,
+    ),
+  ]);
+  const data: IGeneralSectionData = { groups: [group] };
+  return defineSection(DETAILS_PANEL_SECTIONS.GENERAL, {
+    isEmpty: !group.length,
     data,
-  };
+    customMatch: (term: string) => matchAnyItem(group, term),
+  });
+}
+
+function buildElementNetworkSection(input: IBuildElementSectionsInput): IDetailsPanelSectionDef | undefined {
+  const { element, topologyLevels } = input;
+  const topology: IDetailsPanelTopology | undefined = element.topology?.name ? element.topology : undefined;
+  const data: INetworkSectionData = { connections: [], topology, topologyLevels };
+  return defineSection(DETAILS_PANEL_SECTIONS.NETWORK, {
+    isEmpty: !topology,
+    data,
+    customMatch: (term: string) => (topology ? topologyMatches(topology, topologyLevels, term) : false),
+  });
 }
 
 function buildElementComputeItems(element: WorkloadElementResponse, podsCount: number): IDetailsPanelItem[] {
@@ -65,49 +73,45 @@ function buildElementComputeItems(element: WorkloadElementResponse, podsCount: n
     if (formatted) items.push({ label, value: formatted });
   }
 
-  if (allocated?.gpu !== null && allocated?.gpu !== undefined) {
-    items.push({ label: "GPU compute allocation", value: String(allocated.gpu) });
-  }
-  if (allocated?.gpuMemory) {
-    items.push({ label: "GPU memory allocation", value: getMemoryUnitsForUI(allocated.gpuMemory) });
-  }
-  if (allocated?.cpu !== null && allocated?.cpu !== undefined) {
-    items.push({ label: "CPU compute allocation", value: getCpuCoresForUI(allocated.cpu) });
-  }
-  if (allocated?.cpuMemory) {
-    items.push({ label: "CPU memory allocation", value: getMemoryUnitsForUI(allocated.cpuMemory) });
-  }
-
+  items.push(...workloadDetailsUtil.buildAllocatedResourceItems(allocated));
   items.push({ label: "Pods", value: String(podsCount) });
 
   return items;
 }
 
-function buildElementComputeSection(element: WorkloadElementResponse, podsCount: number): IDetailsPanelSectionDef {
+function buildElementComputeSection(input: IBuildElementSectionsInput): IDetailsPanelSectionDef | undefined {
+  const { element, podsCount } = input;
   const items = buildElementComputeItems(element, podsCount);
   const data: IComputeSectionData = { items };
-  return {
-    ...DETAILS_PANEL_SECTIONS.COMPUTE,
-    customMatch: (term: string) => items.some((item) => matchesItem(item, term)),
+  // Never empty — "Pods" is always included.
+  return defineSection(DETAILS_PANEL_SECTIONS.COMPUTE, {
+    isEmpty: false,
     data,
-  };
+    customMatch: (term: string) => matchAnyItem(items, term),
+  });
 }
+
+// Order here determines the on-screen order of the accordion cards.
+const ELEMENT_SECTION_BUILDERS: SectionBuilder<IBuildElementSectionsInput>[] = [
+  buildElementGeneralSection,
+  buildElementNetworkSection,
+  buildElementComputeSection,
+];
 
 /**
  * Builds the accordion sections for the workload-element Details tab. Unlike the workload-level
- * builder, this always has exactly one data source (the element response) so there's no need for
- * the workload-level orchestration machinery — Environment/Storage/CLI-command don't apply to
- * elements per the design.
+ * builder, this always has exactly one data source (the element response), so Environment /
+ * Storage / CLI-command builders don't apply per the design — but it drives off the same
+ * registry + shared `buildSections` orchestration as the workload-level tab.
  */
-export function buildElementDetailsSections(
+function buildElementDetailsSections(
   element: WorkloadElementResponse,
   options: IBuildElementDetailsSectionsOptions = {},
 ): IDetailsPanelSectionDef[] {
   const { topologyLevels = [], podsCount = 0 } = options;
-  const sections = [
-    buildElementGeneralSection(element),
-    buildElementNetworkSection(element, topologyLevels),
-    buildElementComputeSection(element, podsCount),
-  ];
-  return sections.filter((s): s is IDetailsPanelSectionDef => s !== undefined);
+  return buildSections(ELEMENT_SECTION_BUILDERS, { element, topologyLevels, podsCount });
 }
+
+export const workloadElementDetailsUtil = {
+  buildElementDetailsSections,
+};

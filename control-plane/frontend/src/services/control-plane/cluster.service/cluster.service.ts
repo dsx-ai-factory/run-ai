@@ -435,20 +435,27 @@ async function getNetworkTopologies(filterBy?: Array<string>): Promise<NetworkTo
   }
 }
 
+// The network topologies endpoint has no generated filter/sort-field enum (unlike e.g.
+// NodepoolSortFilterFields) — these field names aren't in the OpenAPI spec, so they're
+// declared locally instead.
+enum ENetworkTopologyFilterField {
+  Name = "name",
+  ClusterId = "clusterId",
+}
+
 /**
  * Fetches the ordered level list for a single named network topology, scoped to a cluster.
- * Returns an empty array (never throws) when the topology isn't found or the lookup fails —
- * callers use this to enrich a details panel where topology levels are supplementary.
+ * Assumes name+clusterId identifies at most one topology.
  */
 async function getNetworkTopologyLevelsByName(name: string, clusterId: string): Promise<string[]> {
   try {
     const topologies = await getNetworkTopologies([
-      filterUtil.getEqualsFilterString("name", name),
-      filterUtil.getEqualsFilterString("clusterId", clusterId),
+      filterUtil.getEqualsFilterString(ENetworkTopologyFilterField.Name, name),
+      filterUtil.getEqualsFilterString(ENetworkTopologyFilterField.ClusterId, clusterId),
     ]);
-    return topologies.length > 0 ? (topologies[0].levels ?? []) : [];
-  } catch {
-    return [];
+    return topologies[0]?.levels ?? [];
+  } catch (err: unknown) {
+    throw httpService.handleHttpError(err);
   }
 }
 

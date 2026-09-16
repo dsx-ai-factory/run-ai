@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createPinia, setActivePinia } from "pinia";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 
 const getNetworkTopologies = vi.fn();
@@ -17,6 +18,10 @@ vi.mock("@/services/infra/client-apis/cluster-service-api/cluster-service-api", 
 }));
 
 describe("clusterService.getNetworkTopologyLevelsByName", () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+  });
+
   it("returns the levels of the matching topology", async () => {
     getNetworkTopologies.mockResolvedValue({
       data: { networkTopologies: [{ name: "my-gb200-topology", levels: ["region", "zone"] }] },
@@ -36,11 +41,9 @@ describe("clusterService.getNetworkTopologyLevelsByName", () => {
     expect(levels).toEqual([]);
   });
 
-  it("returns an empty array instead of throwing when the lookup fails", async () => {
+  it("throws a normalized error when the lookup fails, like its siblings in this service", async () => {
     getNetworkTopologies.mockRejectedValue(new Error("network error"));
 
-    const levels = await clusterService.getNetworkTopologyLevelsByName("my-gb200-topology", "cluster-123");
-
-    expect(levels).toEqual([]);
+    await expect(clusterService.getNetworkTopologyLevelsByName("my-gb200-topology", "cluster-123")).rejects.toThrow();
   });
 });

@@ -44,14 +44,17 @@ describe("ElementDetailsTab", () => {
       },
     });
 
+  function getSections(wrapper: ReturnType<typeof createWrapper>) {
+    return wrapper.findComponent(DetailsPanelView).props("sections");
+  }
+
   it("feeds an empty sections model to details-panel-view when there is no element", async () => {
     const wrapper = createWrapper({ element: null });
     await flushPromises();
 
     // The empty-state UI itself lives in details-panel-view (tested there) — here we only need to
     // confirm this tab feeds it an empty sections model when there's nothing to show.
-    expect(wrapper.vm.accordionSections).toEqual([]);
-    expect(wrapper.findComponent(DetailsPanelView).props("sections")).toEqual([]);
+    expect(getSections(wrapper)).toEqual([]);
   });
 
   it("renders details-panel-view with the built sections when an element is given", async () => {
@@ -60,8 +63,7 @@ describe("ElementDetailsTab", () => {
 
     const view = wrapper.findComponent(DetailsPanelView);
     expect(view.exists()).toBe(true);
-    expect(view.props("sections")).toEqual(wrapper.vm.accordionSections);
-    expect(wrapper.vm.accordionSections.map((s) => s.id)).toEqual(["general", "network", "compute"]);
+    expect(getSections(wrapper).map((s) => s.id)).toEqual(["general", "network", "compute"]);
   });
 
   it("fetches topology levels scoped to the element's topology name and feeds them into the network section", async () => {
@@ -71,7 +73,7 @@ describe("ElementDetailsTab", () => {
     await flushPromises();
 
     expect(clusterService.getNetworkTopologyLevelsByName).toHaveBeenCalledWith("my-gb200-topology", "cluster-123");
-    const network = wrapper.vm.accordionSections.find((s) => s.id === "network");
+    const network = getSections(wrapper).find((s) => s.id === "network");
     expect((network?.data as { topologyLevels: string[] }).topologyLevels).toEqual(["region", "zone"]);
   });
 
@@ -113,15 +115,22 @@ describe("ElementDetailsTab", () => {
     resolveFirst(["region", "zone"]);
     await flushPromises();
 
-    const network = wrapper.vm.accordionSections.find((s) => s.id === "network");
+    const network = getSections(wrapper).find((s) => s.id === "network");
     expect((network?.data as { topologyLevels: string[] }).topologyLevels).toEqual(["rack", "host"]);
+  });
+
+  it("forwards podsCountLoading to details-panel-view's loading prop", async () => {
+    const wrapper = createWrapper({ podsCountLoading: true });
+    await flushPromises();
+
+    expect(wrapper.findComponent(DetailsPanelView).props("loading")).toBe(true);
   });
 
   it("feeds elementPodsCount into the Compute section", async () => {
     const wrapper = createWrapper({ elementPodsCount: 4 });
     await flushPromises();
 
-    const compute = wrapper.vm.accordionSections.find((s) => s.id === "compute");
+    const compute = getSections(wrapper).find((s) => s.id === "compute");
     expect((compute?.data as { items: { label: string; value: string }[] }).items).toEqual(
       expect.arrayContaining([{ label: "Pods", value: "4" }]),
     );

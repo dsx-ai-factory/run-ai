@@ -5,7 +5,7 @@
 
 <template>
   <section class="element-details-tab">
-    <details-panel-view :sections="accordionSections" />
+    <details-panel-view :sections="accordionSections" :loading="podsCountLoading" />
   </section>
 </template>
 
@@ -13,8 +13,8 @@
 import { computed, ref, watch } from "vue";
 import type { WorkloadElementResponse } from "@/swagger-models/workloads-client";
 import type { IDetailsPanelSectionDef } from "@/models/details-panel.model";
-import { buildElementDetailsSections } from "@/utils/workload-element-details.util";
-import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
+import { workloadElementDetailsUtil } from "@/utils/workload-element-details.util";
+import { topologyLevelsFetcherService } from "@/services/topology-levels-fetcher.service/topology-levels-fetcher.service";
 import DetailsPanelView from "@/components/workload/workload-drawer-content/tabs/workload-details-tab/details-panel-view.vue";
 
 defineOptions({ name: "element-details-tab" });
@@ -23,46 +23,38 @@ const props = withDefaults(
   defineProps<{
     element: WorkloadElementResponse | null;
     elementPodsCount?: number;
+    podsCountLoading?: boolean;
     clusterId?: string;
   }>(),
   {
     element: null,
     elementPodsCount: 0,
+    podsCountLoading: false,
     clusterId: "",
   },
 );
 
 const topologyLevels = ref<string[]>([]);
 
-let latestRequestId = 0;
-
-async function fetchTopologyLevels(topologyName: string | undefined, clusterId: string): Promise<void> {
-  const requestId = ++latestRequestId;
-  topologyLevels.value = [];
-  if (!topologyName || !clusterId) return;
-
-  const levels = await clusterService.getNetworkTopologyLevelsByName(topologyName, clusterId);
-  if (requestId !== latestRequestId) return;
-  topologyLevels.value = levels;
-}
+const fetchTopologyLevels = topologyLevelsFetcherService.createTopologyLevelsFetcher();
 
 watch(
   () => [props.element?.id, props.element?.topology?.name, props.clusterId] as const,
-  ([, topologyName, clusterId]) => {
-    fetchTopologyLevels(topologyName, clusterId);
+  async ([, topologyName, clusterId]) => {
+    topologyLevels.value = [];
+    const levels = await fetchTopologyLevels(topologyName, clusterId);
+    if (levels !== undefined) topologyLevels.value = levels;
   },
   { immediate: true },
 );
 
 const accordionSections = computed<IDetailsPanelSectionDef[]>(() => {
   if (!props.element) return [];
-  return buildElementDetailsSections(props.element, {
+  return workloadElementDetailsUtil.buildElementDetailsSections(props.element, {
     topologyLevels: topologyLevels.value,
     podsCount: props.elementPodsCount,
   });
 });
-
-defineExpose({ accordionSections });
 </script>
 
 <style scoped lang="scss">

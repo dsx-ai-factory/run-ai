@@ -28,7 +28,6 @@ import type { IDetailsPanelSectionDef } from "@/models/details-panel.model";
 import { EWorkloadType, EDistributedReplicaType } from "@/models/workload.model";
 //services
 import { workloadService, type CrudWorkload } from "@/services/cluster/workload.service/workload.service";
-import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 //stores
 import { useClusterStore } from "@/stores/cluster.store";
 //cmps
@@ -39,6 +38,7 @@ import { workloadV2ManifestUtil } from "@/utils/workload-v2-manifest.util";
 import { alertUtil } from "@/utils/alert.util";
 import { SourceApi } from "@/swagger-models/workloads-client";
 import { NotFoundError, type HttpErrorResponse } from "@/models/http-response.model";
+import { topologyLevelsFetcherService } from "@/services/topology-levels-fetcher.service/topology-levels-fetcher.service";
 
 export default defineComponent({
   name: "workload-details-tab",
@@ -61,7 +61,7 @@ export default defineComponent({
       workloadCrud: null as CrudWorkload | null,
       nodeAffinities: [] as WorkloadNodeAffinity[],
       topologyLevels: [] as string[],
-      topologyLevelsRequestId: 0,
+      fetchTopologyLevelsGuarded: topologyLevelsFetcherService.createTopologyLevelsFetcher(),
       loading: false,
       selectedSpec: EDistributedReplicaType.Master,
       clusterStore: useClusterStore(),
@@ -249,15 +249,12 @@ export default defineComponent({
     },
 
     async fetchTopologyLevels(): Promise<void> {
-      const requestId = ++this.topologyLevelsRequestId;
-      const topologyName = this.workloadDetailed?.topology?.name;
-      const clusterId = this.workloadDetailed?.clusterId;
       this.topologyLevels = [];
-      if (!topologyName || !clusterId) return;
-
-      const levels = await clusterService.getNetworkTopologyLevelsByName(topologyName, clusterId);
-      if (requestId !== this.topologyLevelsRequestId) return;
-      this.topologyLevels = levels;
+      const levels = await this.fetchTopologyLevelsGuarded(
+        this.workloadDetailed?.topology?.name,
+        this.workloadDetailed?.clusterId,
+      );
+      if (levels !== undefined) this.topologyLevels = levels;
     },
   },
   watch: {
@@ -277,9 +274,5 @@ export default defineComponent({
 
 :deep(.item-details-item) {
   margin-bottom: 24px;
-}
-
-.spec-select {
-  min-width: 140px;
 }
 </style>

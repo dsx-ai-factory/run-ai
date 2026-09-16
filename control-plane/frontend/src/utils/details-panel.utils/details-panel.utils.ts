@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { IDetailsPanelItem } from "@/models/details-panel.model";
+import type { IDetailsPanelItem, IDetailsPanelSectionDef, IDetailsPanelTopology } from "@/models/details-panel.model";
 
 function includesCI(value: string, term: string): boolean {
   return value.toLowerCase().includes(term.toLowerCase());
@@ -65,7 +65,46 @@ export function matchesItem(item: IDetailsPanelItem, term: string): boolean {
   return filterItem(item, term) !== null;
 }
 
+/** True when any item in the list matches the term (used by section-level `customMatch`). */
+export function matchAnyItem(items: IDetailsPanelItem[], term: string): boolean {
+  return items.some((item) => matchesItem(item, term));
+}
+
+/** True when the topology (including its resolved levels) matches the term. */
+export function topologyMatches(topology: IDetailsPanelTopology, levels: string[], term: string): boolean {
+  return objectMatchesTerm({ ...topology, levels }, term);
+}
+
+/** Drop `null`/`undefined` entries from a list, narrowing the result type. */
+export function filterDefined<T>(arr: Array<T | null | undefined>): T[] {
+  return arr.filter((x): x is T => x !== null && x !== undefined);
+}
+
 /** @deprecated use `filterItems` */
 export function filterItemsByTerm(items: IDetailsPanelItem[], term: string): IDetailsPanelItem[] {
   return filterItems(items, term);
+}
+
+/**
+ * Builds a section-def, or `undefined` when there's nothing to show — the shape every section
+ * builder in workload-details.util.ts / workload-element-details.util.ts repeats by hand.
+ */
+export function defineSection<T>(
+  def: { id: string; title: string },
+  options: { isEmpty: boolean; data: T; customMatch: (term: string) => boolean },
+): IDetailsPanelSectionDef<T> | undefined {
+  if (options.isEmpty) return undefined;
+  return { ...def, customMatch: options.customMatch, data: options.data };
+}
+
+export type SectionBuilder<TInput> = (input: TInput) => IDetailsPanelSectionDef | undefined;
+
+/**
+ * Shared registry-driven orchestration for both the workload-level and element-level Details
+ * tabs: runs every builder against the same input and drops the sections that came back empty.
+ * Adding a new section only means adding a builder to the registry array, not threading a new
+ * positional argument through a hardcoded list.
+ */
+export function buildSections<TInput>(builders: SectionBuilder<TInput>[], input: TInput): IDetailsPanelSectionDef[] {
+  return filterDefined(builders.map((build) => build(input)));
 }
