@@ -71,6 +71,19 @@
       "rangeStrategy": "bump"
     },
     {
+      "description": "Allow indirect (transitive) go.mod dependencies to receive update PRs, not just direct ones.",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "enabled": true
+    },
+    {
+      "description": "Go major bumps change the import path, breaking the build. The indirect-enable rule above has no matchUpdateTypes filter and overrides the general major block.",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
       "description": "gomodTidy only tidies the module Renovate edited, so a sibling in the same folder that had no dependency change is absent from the branch and its go.mod goes stale, failing with `go: updates to go.mod needed`. Grouping cannot fix that on its own, because Renovate only includes a module that actually had an update. The script tidies every module in the group, and regenerates mocks where a module has a mockery config -- upstream interfaces gain methods between releases and a checked-in mock that no longer satisfies one breaks compilation of the whole test package. fileFilters must cover the generated mock paths or Renovate discards them.",
       "matchManagers": ["gomod"],
       "postUpgradeTasks": {
