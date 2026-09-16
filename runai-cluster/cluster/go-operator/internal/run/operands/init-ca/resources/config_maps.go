@@ -18,7 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
@@ -89,8 +88,6 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig) map[string]string {
 		accessRuleWebhookName  = "accessrule-controller.runai.svc"
 		projectWebhookName     = "runai-project-controller.runai.svc"
 		accessRuleServiceName  = operands.RunaiAccessRuleControllerName
-		secretPvcWebhookName   = "runai-agent.runai.svc"
-		secretPvcServiceName   = "runai-agent"
 		applicationServiceName = "application-controller"
 		applicationWebhookName = "application-validation.runai.svc"
 
@@ -491,52 +488,6 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig) map[string]string {
 		},
 	}
 
-	secretPvcValidationWebhook := &admissionv1.ValidatingWebhookConfiguration{
-		TypeMeta: validatingWebhookTypeMeta,
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   "runai-secret-pvc-validation",
-			Labels: labels,
-		},
-		Webhooks: []admissionv1.ValidatingWebhook{
-			{
-				Name:                    secretPvcWebhookName,
-				AdmissionReviewVersions: v1,
-				SideEffects:             sideEffectsNone(),
-				FailurePolicy:           failurePolicyTypeIgnore(),
-				ObjectSelector: &metav1.LabelSelector{
-					MatchExpressions: []metav1.LabelSelectorRequirement{
-						{
-							Key:      constants.RunaiAssetLabel,
-							Operator: metav1.LabelSelectorOpExists,
-						},
-					},
-				},
-				// Webhook is served by the agent, on the same TLS port as
-				// /validate-project. Kept hardcoded to 9443 to match the
-				// sibling runai-project-validation entry above.
-				ClientConfig: clientConfigWithNamespaceServicePathAndPort(namespace,
-					secretPvcServiceName,
-					"/validate-secrets-pvc",
-					9443),
-				Rules: []admissionv1.RuleWithOperations{
-					{
-						Operations: []admissionv1.OperationType{
-							admissionv1.Create,
-							admissionv1.Update,
-							admissionv1.Delete,
-						},
-						Rule: admissionv1.Rule{
-							APIGroups:   star,
-							APIVersions: star,
-							Resources:   []string{"secrets", "persistentvolumeclaims"},
-							Scope:       scopeTypeNamespaced(),
-						},
-					},
-				},
-			},
-		},
-	}
-
 	applicationValidationWebhook := &admissionv1.ValidatingWebhookConfiguration{
 		TypeMeta: validatingWebhookTypeMeta,
 		ObjectMeta: metav1.ObjectMeta{
@@ -590,8 +541,6 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig) map[string]string {
 	if !runaiConfig.Spec.Internal.Development.Headless {
 		appendWebhookToFile(projectValidationWebhook, fileData)
 	}
-
-	appendWebhookToFile(secretPvcValidationWebhook, fileData)
 
 	appendWebhookToFile(applicationValidationWebhook, fileData)
 

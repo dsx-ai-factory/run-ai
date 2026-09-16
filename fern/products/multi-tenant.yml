@@ -40,11 +40,8 @@ navigation:
         path: ../../docs/multi-tenant/getting-started/installation/uninstall.md
     - page: API Access Setup
       path: ../../docs/multi-tenant/getting-started/api-access-setup.md
-    - section: About NVIDIA Run:ai Enterprise
-      path: ../../docs/about-enterprise/README.md
-      contents:
-      - page: Support, Lifecycle, and Deprecation Policy
-        path: ../../docs/about-enterprise/product-support-policy.md
+    - page: Support, Lifecycle, and Deprecation Policy
+      path: ../../docs/getting-started/product-support-policy.md
   - section: Organization Life Cycle
     contents:
     - section: Organization Onboarding

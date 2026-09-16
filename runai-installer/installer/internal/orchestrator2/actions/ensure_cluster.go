@@ -9,7 +9,7 @@ import (
 	"context"
 	"fmt"
 
-	runaicluster "github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	runaicluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 )
 

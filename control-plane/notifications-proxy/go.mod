@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy
 
-go 1.26.3
+go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6

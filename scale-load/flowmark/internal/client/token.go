@@ -95,6 +95,21 @@ func (s *passwordGrantSource) login() (*oauth2.Token, error) {
 	}, nil
 }
 
+func tokenIdentity(accessToken string) (string, error) {
+	claims := jwt.MapClaims{}
+	if _, _, err := jwt.NewParser().ParseUnverified(accessToken, claims); err != nil {
+		return "", fmt.Errorf("parsing access token: %w", err)
+	}
+	subject, err := claims.GetSubject()
+	if err != nil {
+		return "", fmt.Errorf("reading token subject: %w", err)
+	}
+	if subject == "" {
+		return "", errors.New("access token has no subject claim")
+	}
+	return subject, nil
+}
+
 func tokenExpiry(accessToken string) (time.Time, error) {
 	claims := jwt.MapClaims{}
 	if _, _, err := jwt.NewParser().ParseUnverified(accessToken, claims); err != nil {

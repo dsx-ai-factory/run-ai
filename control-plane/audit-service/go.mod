@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/audit-service
 
-go 1.26.3
+go 1.26.8
 
 require (
 	github.com/Rican7/retry v0.3.1
@@ -19,7 +19,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
 	github.com/go-chi/chi/v5 v5.3.2
-	github.com/gocarina/gocsv v0.0.0-20260905190356-869064524258
+	github.com/gocarina/gocsv v0.0.0-20260908110832-9ab82d65b1cc
 	github.com/google/uuid v1.6.0
 	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
@@ -133,7 +133,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 	google.golang.org/grpc v1.83.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	gorm.io/driver/postgres v1.6.2
+	gorm.io/driver/postgres v1.6.3
 	gorm.io/plugin/opentelemetry v0.1.15 // indirect
 )
 

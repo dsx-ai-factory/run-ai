@@ -62,6 +62,9 @@ func (h *ApplicationHandler) HandleAddUpdate(application *v1alpha1.Application) 
 			Applications: []swagger.AIApplicationForSync{backendApplication},
 		})
 	res, err := h.backendClient.WorkloadsClient.AIApplicationsAPI.SyncApplicationsExecute(request)
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Upsert application %s", application.Name))
 }
 
@@ -80,6 +83,9 @@ func (h *ApplicationHandler) HandleDelete(application *v1alpha1.Application) err
 			Applications: []swagger.AIApplicationForSync{backendApplication},
 		})
 	res, err := h.backendClient.WorkloadsClient.AIApplicationsAPI.SyncApplicationsExecute(request)
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted application %s", application.Name))
 }
 
@@ -110,7 +116,10 @@ func (h *ApplicationHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 			FullSync:     ptr.To(true),
 			Applications: backendApplications,
 		})
-	_, err := h.backendClient.WorkloadsClient.AIApplicationsAPI.SyncApplicationsExecute(request)
+	res, err := h.backendClient.WorkloadsClient.AIApplicationsAPI.SyncApplicationsExecute(request)
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	if err != nil {
 		zap.S().Errorf("Failed syncing applications: %+v", err)
 	}

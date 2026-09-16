@@ -87,6 +87,9 @@ func (nodeHandler *NodeHandler) HandleDelete(node *corev1.Node) error {
 		config.Config().ClusterUuid,
 		node.Name,
 	).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	return nodeHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted node %s", node.Name))
 }
 
@@ -100,6 +103,9 @@ func (nodeHandler *NodeHandler) updateNodeInfo(node *corev1.Node, action string)
 			config.Config().ClusterUuid,
 			node.Name,
 		).NodeInfo(nodeInfo).Execute()
+		if res != nil {
+			_ = res.Body.Close()
+		}
 		return nodeHandler.backendClient.HandleHttpResponse(res, err,
 			fmt.Sprintf("%s node %s", action, node.Name))
 	}
@@ -228,6 +234,9 @@ func (nodeHandler *NodeHandler) sendSyncNodesRequest(nodesToSync []swagger.NodeF
 		nodeHandler.backendClient.Context(),
 		config.Config().ClusterUuid,
 	).NodesSyncRequest(nodesSyncRequest).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	statusCode, err := nodeHandler.backendClient.HandleHttpResponseGetStatus(res, httpErr, msg)
 	if statusCode == http.StatusRequestEntityTooLarge && nodeHandler.maxNumOfNodesPerRequest > 2 {
 		// reduce by 20%

@@ -18,7 +18,23 @@ tests:
       - templates/ocp/admission-webhooks.yaml
     asserts:
       - hasDocuments:
-          count: 7
+          count: 6
+
+  - it: should retain the project validator after retiring the Secret/PVC webhook
+    set:
+      openShift.mode: Enabled
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    documentSelector:
+      path: metadata.name
+      value: runai-project-validation
+    asserts:
+      - equal:
+          path: webhooks[0].clientConfig.service.name
+          value: runai-agent
+      - equal:
+          path: webhooks[0].clientConfig.service.path
+          value: /validate-project
 
   - it: should retain the WorkloadRunner RestartRequest validator
     set:

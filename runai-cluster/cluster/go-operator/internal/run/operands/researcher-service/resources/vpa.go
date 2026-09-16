@@ -64,6 +64,5 @@ func (v *VPAResource) Status(ctx context.Context) error {
 }
 
 func (v *VPAResource) Enabled() bool {
-	vpaSpec := v.runaiConfig.Spec.ResearcherService.VPA
-	return vpaSpec != nil && vpaSpec.Enabled != nil && *vpaSpec.Enabled
+	return componentEnabled
 }

@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"time"
 
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	runaiclient "github.com/dsx-ai-factory/run-ai/runai-installer/clients/pkg/clients"
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 )
 

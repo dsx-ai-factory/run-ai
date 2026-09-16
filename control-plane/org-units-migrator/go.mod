@@ -1,13 +1,13 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/org-units-migrator
 
-go 1.26.3
+go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/google/uuid v1.6.0
-	github.com/onsi/ginkgo/v2 v2.32.1
+	github.com/onsi/ginkgo/v2 v2.32.2
 	github.com/onsi/gomega v1.43.0
 	gorm.io/driver/postgres v1.6.2 // indirect
 	gorm.io/gorm v1.31.2
@@ -199,7 +199,6 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service v0.0.0 =
 replace github.com/dsx-ai-factory/run-ai/control-plane/authorization v0.0.0 => ../authorization
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client => ../../control-plane/authorization/pkg/client
-
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../control-plane/cluster-service/pkg/client
 

@@ -70,6 +70,9 @@ func (h *PriorityClassHandler) HandleAddUpdate(pc *schedulingv1.PriorityClass) e
 			PrioritiesForStatus(prioritiesForStatus)
 		res, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
 			WorkloadPrioritiesStatusExecute(prioritiesForStatusRequest)
+		if res != nil {
+			_ = res.Body.Close()
+		}
 		return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Upsert priority class %s", pc.Name))
 	}
 	// else - source is not control plane
@@ -79,6 +82,9 @@ func (h *PriorityClassHandler) HandleAddUpdate(pc *schedulingv1.PriorityClass) e
 		PrioritiesForStatus(prioritiesForStatus)
 	res, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
 		WorkloadClusterPrioritiesStatusExecute(clusterPrioritiesForStatusRequest)
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Upsert priority class %s", pc.Name))
 }
 
@@ -99,6 +105,9 @@ func (h *PriorityClassHandler) HandleDelete(pc *schedulingv1.PriorityClass) erro
 			})
 		res, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
 			WorkloadPrioritiesStatusExecute(prioritiesForStatusRequest)
+		if res != nil {
+			_ = res.Body.Close()
+		}
 		return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted priority class %s", pc.Name))
 	}
 	clusterPrioritiesForStatusRequest := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
@@ -110,6 +119,9 @@ func (h *PriorityClassHandler) HandleDelete(pc *schedulingv1.PriorityClass) erro
 		})
 	res, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
 		WorkloadClusterPrioritiesStatusExecute(clusterPrioritiesForStatusRequest)
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	return h.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted priority class %s", pc.Name))
 }
 
@@ -144,8 +156,11 @@ func (h *PriorityClassHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 			Priorities: runaiPriorities,
 		})
 
-	_, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
+	res, err := h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
 		WorkloadPrioritiesStatusExecute(prioritiesForStatusRequest)
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	if err != nil {
 		zap.S().Errorf("Failed syncing priority classes: %+v", err)
 	}
@@ -158,8 +173,11 @@ func (h *PriorityClassHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 			Priorities: clusterPriorities,
 		})
 
-	_, err = h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
+	res, err = h.backendClient.WorkloadsClient.WorkloadPropertiesAPI.
 		WorkloadClusterPrioritiesStatusExecute(clusterPrioritiesForStatusRequest)
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	if err != nil {
 		zap.S().Errorf("Failed syncing priority classes: %+v", err)
 	}

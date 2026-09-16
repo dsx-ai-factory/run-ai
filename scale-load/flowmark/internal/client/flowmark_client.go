@@ -32,6 +32,7 @@ const (
 )
 
 type Clients struct {
+	Identity       string
 	Kube           k8sclient.Client
 	ClusterService *clusterclient.APIClient
 	OrgUnits       *orgunitclient.APIClient
@@ -48,6 +49,14 @@ func New(ctx context.Context, env core.Env) (*Clients, error) {
 	if err != nil {
 		return nil, err
 	}
+	token, err := source.Token()
+	if err != nil {
+		return nil, err
+	}
+	identity, err := tokenIdentity(token.AccessToken)
+	if err != nil {
+		return nil, fmt.Errorf("resolving the flowmark identity: %w", err)
+	}
 	httpClient := oauth2.NewClient(ctx, source)
 	baseURL := base.String()
 
@@ -57,7 +66,8 @@ func New(ctx context.Context, env core.Env) (*Clients, error) {
 	}
 
 	return &Clients{
-		Kube: kube,
+		Identity: identity,
+		Kube:     kube,
 		ClusterService: clusterclient.NewAPIClient(&clusterclient.Configuration{
 			HTTPClient: httpClient,
 			Servers:    clusterclient.ServerConfigurations{{URL: baseURL}},

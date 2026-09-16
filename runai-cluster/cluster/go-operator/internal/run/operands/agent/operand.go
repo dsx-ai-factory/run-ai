@@ -11,6 +11,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/agent/resources"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/admissionpolicy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 )
@@ -24,6 +25,8 @@ const (
 //+kubebuilder:rbac:namespace=runai,groups="",resources=serviceaccounts,verbs=get;create;update;watch;patch;delete;list
 //+kubebuilder:rbac:namespace=runai,groups="",resources=secrets,verbs=get;watch;list
 //+kubebuilder:rbac:namespace=runai,groups="autoscaling.k8s.io",resources=verticalpodautoscalers,verbs=get;create;update;watch;patch;delete;list
+//+kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=validatingadmissionpolicies,verbs=get;create;update;watch;patch;delete;list
+//+kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=validatingadmissionpolicybindings,verbs=get;create;update;watch;patch;delete;list
 
 type operand struct {
 	runaiConfig *runv1.RunaiConfig
@@ -42,15 +45,20 @@ func (o *operand) Enabled() bool {
 }
 
 func Operand(k8sReader kc.HybridClient, runaiConfig *runv1.RunaiConfig) operands.Operand {
+	operandResources := []operands.Resource{
+		resources.NewSecretResource(name, k8sReader, runaiConfig),
+		resources.NewDeploymentResource(name, k8sReader, runaiConfig),
+		resources.NewServiceResource(name, k8sReader, runaiConfig),
+		resources.NewServiceMonitorResource(name, k8sReader, runaiConfig),
+		resources.NewServiceAccountResource(name, k8sReader, runaiConfig),
+		resources.NewVPAResource(name, k8sReader, runaiConfig),
+	}
+	for _, definition := range resources.AssetIdentityAdmissionPolicyDefinitions(runaiConfig) {
+		operandResources = append(operandResources, admissionpolicy.NewResources(name, k8sReader, definition)...)
+	}
+
 	return &operand{
 		runaiConfig: runaiConfig,
-		resources: []operands.Resource{
-			resources.NewSecretResource(name, k8sReader, runaiConfig),
-			resources.NewDeploymentResource(name, k8sReader, runaiConfig),
-			resources.NewServiceResource(name, k8sReader, runaiConfig),
-			resources.NewServiceMonitorResource(name, k8sReader, runaiConfig),
-			resources.NewServiceAccountResource(name, k8sReader, runaiConfig),
-			resources.NewVPAResource(name, k8sReader, runaiConfig),
-		},
+		resources:   operandResources,
 	}
 }

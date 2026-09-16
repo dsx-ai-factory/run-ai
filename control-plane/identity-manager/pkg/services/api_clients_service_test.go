@@ -18,10 +18,23 @@ import (
 	iamMock "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/mocks"
 	iamModels "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	businessMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/business/mocks"
+	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/utils"
 	clientMock "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/utils/mocks"
+	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 )
+
+// setConfigForTest applies setConfig() and restores the previous global
+// TenantRealm config on test cleanup, so this test doesn't leak config
+// into other tests in the package that assume the default config.
+func setConfigForTest(t *testing.T) {
+	original := runai_config.Get[*config.TenantRealm]()
+	t.Cleanup(func() {
+		runai_config.Set(original)
+	})
+	setConfig()
+}
 
 func initClientServiceTest(t *testing.T) (iamServicesContainerMock *iamMock.MockServicesContainer, realmDalMock *businessMocks.RealmDal, testSubject *ClientsApiService) {
 	mockIamServicesContainer := iamMock.NewMockServicesContainer()
@@ -73,6 +86,66 @@ func TestCreateInternalClients_HappyFlow(t *testing.T) {
 	})
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusCreated, response.Code)
+}
+
+func TestCreateInternalClients_WorkloadsAuth_SetsEmailScopeDefault(t *testing.T) {
+	setConfigForTest(t)
+	iamMock, _, testSubject := initClientServiceTest(t)
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, utils.AuthRealmKey, clientMock.REALM_NAME)
+	iamMock.MockClientService.On("CreateClient", ctx, clientMock.REALM_NAME, mock.Anything).Return(clientMock.ID_OF_CLIENT, nil)
+	iamMock.MockClientService.On("SetEmailScopeDefault", ctx, clientMock.REALM_NAME, clientMock.ID_OF_CLIENT).Return(nil)
+
+	response, err := testSubject.CreateInternalClient(ctx, api.ClientCreationRequest{
+		Type:     "WorkloadsAuth",
+		ClientId: clientMock.CLIENT_ID,
+		TenantId: clientMock.TENANT_ID,
+		Attributes: api.ClientAttributeCreationRequest{
+			RunaiClusterId: "cluster-id",
+		},
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusCreated, response.Code)
+	iamMock.MockClientService.AssertCalled(t, "SetEmailScopeDefault", ctx, clientMock.REALM_NAME, clientMock.ID_OF_CLIENT)
+}
+
+func TestCreateInternalClients_WorkloadsAuth_SetEmailScopeDefaultError(t *testing.T) {
+	setConfigForTest(t)
+	apiError := utils.Error{
+		Code: http.StatusInternalServerError,
+	}
+	iamMock, _, testSubject := initClientServiceTest(t)
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, utils.AuthRealmKey, clientMock.REALM_NAME)
+	iamMock.MockClientService.On("CreateClient", ctx, clientMock.REALM_NAME, mock.Anything).Return(clientMock.ID_OF_CLIENT, nil)
+	iamMock.MockClientService.On("SetEmailScopeDefault", ctx, clientMock.REALM_NAME, clientMock.ID_OF_CLIENT).Return(apiError)
+
+	response, err := testSubject.CreateInternalClient(ctx, api.ClientCreationRequest{
+		Type:     "WorkloadsAuth",
+		ClientId: clientMock.CLIENT_ID,
+		TenantId: clientMock.TENANT_ID,
+		Attributes: api.ClientAttributeCreationRequest{
+			RunaiClusterId: "cluster-id",
+		},
+	})
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusInternalServerError, response.Code)
+}
+
+func TestCreateInternalClients_Agent_DoesNotSetEmailScopeDefault(t *testing.T) {
+	iamMock, _, testSubject := initClientServiceTest(t)
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, utils.AuthRealmKey, clientMock.REALM_NAME)
+	iamMock.MockClientService.On("CreateClient", ctx, clientMock.REALM_NAME, mock.Anything).Return(clientMock.ID_OF_CLIENT, nil)
+
+	response, err := testSubject.CreateInternalClient(ctx, api.ClientCreationRequest{
+		Type:     "Agent",
+		ClientId: clientMock.CLIENT_ID,
+		TenantId: clientMock.TENANT_ID,
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusCreated, response.Code)
+	iamMock.MockClientService.AssertNotCalled(t, "SetEmailScopeDefault", mock.Anything, mock.Anything, mock.Anything)
 }
 
 func TestCreateInternalClients_NonSupportedType_InternalError(t *testing.T) {

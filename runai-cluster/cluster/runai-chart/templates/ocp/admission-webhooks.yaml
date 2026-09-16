@@ -89,36 +89,6 @@ webhooks:
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: runai-secret-pvc-validation
-  annotations:
-    service.beta.openshift.io/inject-cabundle: "true"
-  labels:
-    app: runai
-webhooks:
-- name: runai-agent.runai.svc
-  admissionReviewVersions: [ "v1" ]
-  sideEffects: None
-  failurePolicy: Ignore
-  objectSelector:
-    matchExpressions:
-    - key: run.ai/asset
-      operator: Exists
-  clientConfig:
-    service:
-      name: runai-agent
-      namespace: runai
-      path: "/validate-secrets-pvc"
-      port: 9443
-  rules:
-  - operations: ["CREATE", "UPDATE", "DELETE"]
-    apiGroups: ["*"]
-    apiVersions: ["*"]
-    resources: ["secrets", "persistentvolumeclaims"]
-    scope: "Namespaced"
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
-metadata:
   name: application-validation
   annotations:
     service.beta.openshift.io/inject-cabundle: "true"

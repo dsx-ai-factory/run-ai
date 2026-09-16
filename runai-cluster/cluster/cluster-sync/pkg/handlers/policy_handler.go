@@ -95,24 +95,36 @@ func (h *PolicyHandler) handlePolicyGenericSyncStatus(policy client.Object, oper
 
 	switch policy.(type) {
 	case *ipv1.InteractivePolicy:
-		_, err = h.backendClient.PolicyClient.UpdateSyncStatusWorkspace(h.backendClient.Context(), updateSyncStatusPayload)
-		if err != nil {
-			return err
+		res, requestErr := h.backendClient.PolicyClient.UpdateSyncStatusWorkspace(h.backendClient.Context(), updateSyncStatusPayload)
+		if res != nil {
+			_ = res.Body.Close()
+		}
+		if requestErr != nil {
+			return requestErr
 		}
 	case *tpv1.TrainingPolicy:
-		_, err = h.backendClient.PolicyClient.UpdateSyncStatusTraining(h.backendClient.Context(), updateSyncStatusPayload)
-		if err != nil {
-			return err
+		res, requestErr := h.backendClient.PolicyClient.UpdateSyncStatusTraining(h.backendClient.Context(), updateSyncStatusPayload)
+		if res != nil {
+			_ = res.Body.Close()
+		}
+		if requestErr != nil {
+			return requestErr
 		}
 	case *dpv1.DistributedPolicy:
-		_, err = h.backendClient.PolicyClient.UpdateSyncStatusDistributed(h.backendClient.Context(), updateSyncStatusPayload)
-		if err != nil {
-			return err
+		res, requestErr := h.backendClient.PolicyClient.UpdateSyncStatusDistributed(h.backendClient.Context(), updateSyncStatusPayload)
+		if res != nil {
+			_ = res.Body.Close()
+		}
+		if requestErr != nil {
+			return requestErr
 		}
 	case *infpv1.InferencePolicy:
-		_, err = h.backendClient.PolicyClient.UpdateSyncStatusInference(h.backendClient.Context(), updateSyncStatusPayload)
-		if err != nil {
-			return err
+		res, requestErr := h.backendClient.PolicyClient.UpdateSyncStatusInference(h.backendClient.Context(), updateSyncStatusPayload)
+		if res != nil {
+			_ = res.Body.Close()
+		}
+		if requestErr != nil {
+			return requestErr
 		}
 	}
 

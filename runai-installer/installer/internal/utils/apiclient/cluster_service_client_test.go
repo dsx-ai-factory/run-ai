@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,7 +38,7 @@ func TestClusterInstallationInfoResponseSupportsBothCredentials(t *testing.T) {
 			var installInfo cluster.ClusterInstallationInfoResponse
 			require.NoError(t, json.Unmarshal([]byte(tt.response), &installInfo))
 			assert.Equal(t, tt.bootstrapToken, installInfo.BootstrapToken)
-			assert.Equal(t, tt.clientSecret, installInfo.ClientSecret)
+			assert.Equal(t, tt.clientSecret, installInfo.GetClientSecret())
 		})
 	}
 }

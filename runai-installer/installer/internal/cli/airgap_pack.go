@@ -15,9 +15,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/plan"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/packconfig"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/releaselock"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/specrun"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/terminal"
-	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/pkg/artifactlock"
 	"github.com/spf13/cobra"
 )
 
@@ -27,13 +27,22 @@ air-gapped bundle.
 Two files drive the command. The artifact lock, published by Run:ai, pins the
 exact images and charts a release is made of. The config supplies what only you
 can know: the credentials for your registries, and any images you want to
-substitute or add.`
+substitute or add.
 
-const packExample = `  # Build a bundle for a release
-  installer airgap pack --config airgap-pack.yaml --airgap-lock-file runai-2.26.13.yaml
+The lock is fetched for you when --airgap-lock-file is not set: the command
+looks up the GitHub release of the version in settings.runaiVersion (an exact
+tag such as 3.0.5, or a line such as 3.0 for its newest patch) and downloads
+the lock for settings.architecture (amd64 unless set). A lock file you provide
+is always used as-is.`
+
+const packExample = `  # Build a bundle for the newest 3.0 release, fetching its lock from GitHub
+  installer airgap pack --config airgap-pack.yaml
+
+  # Build a bundle from a lock you already have
+  installer airgap pack --config airgap-pack.yaml --airgap-lock-file runai-3.0.5-standard-linux-amd64.yaml
 
   # Report what would be packed without downloading anything
-  installer airgap pack --config airgap-pack.yaml --airgap-lock-file runai-2.26.13.yaml --dry-run`
+  installer airgap pack --config airgap-pack.yaml --dry-run`
 
 func newAirgapPackCmd() *cobra.Command {
 	var (
@@ -59,9 +68,17 @@ func newAirgapPackCmd() *cobra.Command {
 				return err
 			}
 
-			lock, err := artifactlock.ParseFile(lockFilePath)
+			term := terminal.New(terminal.WithYes(yes))
+
+			lock, source, err := cfg.ResolveLock(cmd.Context(), lockFilePath, releaselock.NewFetcher())
 			if err != nil {
 				return err
+			}
+			if source.Tag != "" {
+				logging.Infof("[Pack] Using artifact lock %s from release %s (%s)", source.Asset, source.Tag, source.URL)
+				if textOutput(output, term) {
+					term.Info("Using artifact lock %s from release %s (%s)", source.Asset, source.Tag, source.URL)
+				}
 			}
 
 			s, err := cfg.ToSpec(lock, packconfig.RunOptions{
@@ -78,8 +95,6 @@ func newAirgapPackCmd() *cobra.Command {
 				return err
 			}
 
-			term := terminal.New(terminal.WithYes(yes))
-
 			return specrun.Execute(cmd.Context(), s, packDeps(s), term, specrun.ExecOptions{
 				PlanBuilder:   plan.Resolve,
 				SkipPreflight: skipPreflight,
@@ -92,7 +107,7 @@ func newAirgapPackCmd() *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVar(&configPath, "config", "", "path to the pack config YAML (required)")
-	f.StringVar(&lockFilePath, "airgap-lock-file", "", "path to the release's artifact lock (required)")
+	f.StringVar(&lockFilePath, "airgap-lock-file", "", "path to the release's artifact lock (fetched from the release on GitHub when not set)")
 	f.BoolVar(&dryRun, "dry-run", false, "report what would be packed without downloading anything")
 	f.BoolVar(&preflightOnly, "preflight-only", false, "run only the preflight checks")
 	f.BoolVar(&skipPreflight, "skip-preflight", false, "skip the preflight checks")
@@ -102,9 +117,18 @@ func newAirgapPackCmd() *cobra.Command {
 	f.DurationVar(&executionTimeout, "execution-timeout", 120*time.Minute, "total timeout for the run")
 
 	_ = cmd.MarkFlagRequired("config")
-	_ = cmd.MarkFlagRequired("airgap-lock-file")
 
 	return cmd
+}
+
+func textOutput(output string, term *terminal.Terminal) bool {
+	switch spec.OutputFormat(output) {
+	case spec.OutputFormatText:
+		return true
+	case spec.OutputFormatNone:
+		return term.IsTTY()
+	}
+	return false
 }
 
 // packDeps wires the pack engine. Unlike the install commands it touches no
