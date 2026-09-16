@@ -13,17 +13,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 )
 
-// EnsureCluster registers the cluster with the control plane by name
-// (get-or-create). ControlPlane.Domain is the cluster's own domain, which for a
-// same-cluster install is also the control plane's; ControlPlane.URL and
-// Credentials point at an external control plane instead.
 type EnsureCluster struct {
 	ClusterName  string
 	ControlPlane ControlPlaneRef
 }
 
-// NewEnsureCluster is the same-cluster form: the control plane lives at domain
-// and is reached with the admin credentials read from the local cluster.
 func NewEnsureCluster(clusterName, domain, caCertPath string) EnsureCluster {
 	return EnsureCluster{ClusterName: clusterName, ControlPlane: ControlPlaneRef{Domain: domain, CACertPath: caCertPath}}
 }
@@ -42,8 +36,6 @@ func (a EnsureCluster) Describe() string {
 	return fmt.Sprintf("ensure cluster %q is registered with control plane at %s", a.ClusterName, a.ControlPlane.Endpoint())
 }
 
-// clusterDomain is the address the control plane records for the cluster: the
-// cluster's own URL, which for a same-cluster install is the control plane URL.
 func (a EnsureCluster) clusterDomain() string {
 	return ControlPlaneURL(a.ControlPlane.Domain)
 }
@@ -75,7 +67,6 @@ func (a EnsureCluster) Execute(ctx context.Context, deps orchestrator2.Deps) (or
 	return orchestrator2.ActionResult{Data: data}, nil
 }
 
-// Detect reports whether the control plane already knows the cluster by name.
 func (a EnsureCluster) Detect(ctx context.Context, deps orchestrator2.Deps) (bool, error) {
 	apiClient, err := a.ControlPlane.Client(deps)
 	if err != nil {

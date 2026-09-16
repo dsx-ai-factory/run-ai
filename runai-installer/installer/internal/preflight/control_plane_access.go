@@ -15,11 +15,6 @@ import (
 
 func init() { builders = append(builders, controlPlaneAccessBuilder) }
 
-// controlPlaneAccessBuilder assembles the external control-plane access check.
-// It applies only when a cluster-only install registers the cluster with an
-// external control plane using user-supplied credentials: that is the one case
-// where the installer must reach a control plane it did not install, before
-// any install work depends on it. Needs a credentialed client provider.
 func controlPlaneAccessBuilder(s *spec.Spec, deps orchestrator2.Deps) orchestrator2.Step {
 	if deps.RunAIClientWithCredentials == nil || s.Cluster == nil || !s.Cluster.UsesControlPlaneCredentials() {
 		return nil

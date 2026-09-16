@@ -15,11 +15,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 )
 
-// ControlPlaneRef locates the control plane a cluster registers with and says
-// how the installer authenticates to it. With Credentials set it is an external
-// control plane reached at URL with the user-supplied credentials; otherwise it
-// is the control plane installed in the local cluster, reached at Domain with
-// the admin credentials read from that cluster's secrets.
 type ControlPlaneRef struct {
 	URL         string
 	Domain      string
@@ -27,7 +22,6 @@ type ControlPlaneRef struct {
 	Credentials *step.ControlPlaneCredentials
 }
 
-// Endpoint is the control-plane base URL API calls go to.
 func (r ControlPlaneRef) Endpoint() string {
 	if r.URL != "" {
 		return r.URL
@@ -35,7 +29,6 @@ func (r ControlPlaneRef) Endpoint() string {
 	return ControlPlaneURL(r.Domain)
 }
 
-// Client returns the control-plane API client matching the ref's auth mode.
 func (r ControlPlaneRef) Client(deps orchestrator2.Deps) (step.RunAIAPIClient, error) {
 	if r.Credentials != nil {
 		if deps.RunAIClientWithCredentials == nil {
@@ -49,11 +42,6 @@ func (r ControlPlaneRef) Client(deps orchestrator2.Deps) (step.RunAIAPIClient, e
 	return deps.RunAIClientProvider(r.Endpoint(), r.CACertPath)
 }
 
-// clusterChartCredentialValues resolves the cluster's uid and control-plane
-// credential from the control plane (registered by name) and renders the chart
-// values that connect the cluster to it. controlPlaneURL is what the cluster
-// chart is told to call; clusterURL is the address the control plane reaches
-// the cluster on.
 func clusterChartCredentialValues(ctx context.Context, apiClient step.RunAIAPIClient, clusterName, version, controlPlaneURL, clusterURL string) ([]string, error) {
 	uuid, err := FindClusterUUID(ctx, apiClient, clusterName)
 	if err != nil {

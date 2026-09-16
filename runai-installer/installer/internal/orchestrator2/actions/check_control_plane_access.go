@@ -13,12 +13,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 )
 
-// CheckControlPlaneAccess is a read-only preflight check for cluster-only
-// installs that register the cluster with an external control plane: it
-// verifies the control plane is reachable at its URL (trusted via the given CA)
-// and that the supplied credentials can list clusters, which is the permission
-// the register and install steps need. Reported as a hard failure because
-// those steps cannot succeed otherwise.
 type CheckControlPlaneAccess struct {
 	ClusterName  string
 	ControlPlane ControlPlaneRef

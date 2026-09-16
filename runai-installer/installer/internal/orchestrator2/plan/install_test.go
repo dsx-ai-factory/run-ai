@@ -195,9 +195,6 @@ func TestResolve_Install_ExternalControlPlaneCredentials(t *testing.T) {
 	assert.Equal(t, "admin@example.com", clusterAction.Credentials.Username)
 }
 
-// TestResolve_Install_ExternalControlPlane_NoAccessCheckWithSuppliedIdentity
-// verifies the control-plane access check is only planned when the installer
-// itself must talk to the external control plane.
 func TestResolve_Install_ExternalControlPlane_NoAccessCheckWithSuppliedIdentity(t *testing.T) {
 	s := &spec.Spec{
 		Command:      spec.CommandInstall,

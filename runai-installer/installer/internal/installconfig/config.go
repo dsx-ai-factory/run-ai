@@ -135,15 +135,9 @@ type Cluster struct {
 	// WorkloadRouting selects how workloads are exposed: "host" (subdomain
 	// routing, the default) or "path". It maps to the cluster chart's
 	// clusterConfig.global.subdomainSupport value.
-	WorkloadRouting string     `yaml:"workloadRouting,omitempty"`
-	TLS             *TLS       `yaml:"tls,omitempty"`
-	Inference       *Inference `yaml:"inference,omitempty"`
-	// ControlPlaneURL points a cluster-only install at an external control
-	// plane. The cluster's identity there comes from one of two mutually
-	// exclusive sources: uid + bootstrapTokenPath|clientSecretPath (the
-	// cluster was pre-registered in the control plane), or
-	// controlPlaneCredentials (the installer registers the cluster by name
-	// and fetches its install info itself).
+	WorkloadRouting         string                   `yaml:"workloadRouting,omitempty"`
+	TLS                     *TLS                     `yaml:"tls,omitempty"`
+	Inference               *Inference               `yaml:"inference,omitempty"`
 	ControlPlaneURL         string                   `yaml:"controlPlaneUrl,omitempty"`
 	UID                     string                   `yaml:"uid,omitempty"`
 	BootstrapTokenPath      string                   `yaml:"bootstrapTokenPath,omitempty"`
@@ -154,14 +148,6 @@ type Cluster struct {
 	clientSecret            string
 }
 
-// ControlPlaneCredentials authenticate the installer to an external control
-// plane. Exactly one scheme applies (the inline-vs-file choice is checked by
-// ResolveClusterCredentials, the scheme itself by the spec validation):
-//   - basic auth: username + (password | passwordPath)
-//   - bearer token: token | tokenPath
-//
-// A secret can be supplied inline (password/token) or read from a file
-// (passwordPath/tokenPath), mirroring the registry block.
 type ControlPlaneCredentials struct {
 	Username     string `yaml:"username,omitempty"`
 	Password     string `yaml:"password,omitempty"`

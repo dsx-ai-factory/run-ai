@@ -18,13 +18,8 @@ import (
 )
 
 type InstallClusterChartLocal struct {
-	ClusterName string
-	// Domain is the cluster's own domain; for a same-cluster install it is also
-	// the control plane's.
-	Domain string
-	// ControlPlaneURL is set for an external control plane. With ClusterUID and
-	// BootstrapToken/ClientSecret the cluster identity was supplied by the
-	// user; with Credentials the installer resolves it from the control plane.
+	ClusterName     string
+	Domain          string
 	ControlPlaneURL string
 	ClusterUID      string
 	BootstrapToken  string
@@ -70,9 +65,6 @@ func (a InstallClusterChartLocal) ClusterRef() (clusterName string, controlPlane
 	return a.ClusterName, ControlPlaneRef{URL: a.ControlPlaneURL, Domain: a.Domain, CACertPath: a.CACertPath, Credentials: a.Credentials}
 }
 
-// UsesSuppliedCredentials reports whether the user pre-registered the cluster
-// and supplied its uid and bootstrap token / client secret, so the control
-// plane is never contacted.
 func (a InstallClusterChartLocal) UsesSuppliedCredentials() bool {
 	return a.ClusterUID != ""
 }
@@ -115,8 +107,6 @@ func (a InstallClusterChartLocal) Execute(ctx context.Context, deps orchestrator
 		if err != nil {
 			return orchestrator2.ActionResult{}, err
 		}
-		// A same-cluster install keeps the historical bare-domain URL the chart
-		// has always been given; an external control plane gets its full URL.
 		controlPlaneURL := a.Domain
 		if a.ControlPlaneURL != "" {
 			controlPlaneURL = a.ControlPlaneURL

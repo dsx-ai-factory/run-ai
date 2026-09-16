@@ -18,7 +18,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// credentialedCall records one call to the credentialed provider.
 type credentialedCall struct {
 	url, caCertPath string
 	creds           step.ControlPlaneCredentials

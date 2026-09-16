@@ -219,17 +219,12 @@ type ControlPlane struct {
 }
 
 type Cluster struct {
-	Name            string
-	Domain          string
-	Version         string
-	TLS             *TLS
-	WorkloadRouting string
-	Inference       *Inference
-	// ControlPlaneURL points a cluster-only install at an external control
-	// plane. The cluster's identity there comes from exactly one of two
-	// sources: the pre-registered UID plus its BootstrapToken/ClientSecret, or
-	// ControlPlaneCredentials, with which the installer registers the cluster
-	// by name and fetches the install info itself.
+	Name                    string
+	Domain                  string
+	Version                 string
+	TLS                     *TLS
+	WorkloadRouting         string
+	Inference               *Inference
 	ControlPlaneURL         string
 	UID                     string
 	BootstrapToken          string
@@ -238,8 +233,6 @@ type Cluster struct {
 	CustomHelmValues        map[string]string
 }
 
-// ControlPlaneCredentials authenticate the installer to an external control
-// plane: either Username+Password or a pre-issued bearer Token.
 type ControlPlaneCredentials struct {
 	Username string
 	Password string
@@ -250,22 +243,14 @@ func (c *Cluster) UsesExternalControlPlane() bool {
 	return c != nil && c.ControlPlaneURL != ""
 }
 
-// UsesControlPlaneCredentials reports whether the installer registers the
-// cluster with the external control plane itself (get-or-create by name and
-// fetch the install info) instead of relying on a user-supplied UID and
-// bootstrap token / client secret.
 func (c *Cluster) UsesControlPlaneCredentials() bool {
 	return c != nil && c.ControlPlaneCredentials != nil
 }
 
-// UsesSuppliedClusterIdentity reports whether the user pre-registered the
-// cluster and supplied its UID together with its bootstrap token or client
-// secret.
 func (c *Cluster) UsesSuppliedClusterIdentity() bool {
 	return c != nil && c.UID != ""
 }
 
-// FieldError is a validation problem attributed to a config field.
 type FieldError struct {
 	Field   string
 	Message string
@@ -273,10 +258,6 @@ type FieldError struct {
 
 func (e FieldError) Error() string { return e.Message }
 
-// ExternalControlPlaneProblems returns every problem with the external
-// control-plane settings (empty when none are set or all are consistent). It
-// is shared by Validate (the hard gate, which reports the first) and the
-// offline input checks (which surface all of them).
 func (s *Spec) ExternalControlPlaneProblems() []FieldError {
 	if s.Cluster == nil {
 		return nil

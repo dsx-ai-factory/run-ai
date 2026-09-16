@@ -88,11 +88,6 @@ func TestInstallMode_ClusterOnly_InstallsClusterOnly(t *testing.T) {
 	assert.True(t, hasPipelineEvent(evs, "pipeline_succeeded", "runai"))
 }
 
-// TestInstallMode_ClusterOnly_ExternalControlPlaneCredentials verifies a
-// cluster-only install that points at an external control plane with
-// user-supplied credentials: the installer checks access in preflight,
-// registers the cluster by name, resolves its uid and credential from that
-// control plane, and never reads admin secrets from the local cluster.
 func TestInstallMode_ClusterOnly_ExternalControlPlaneCredentials(t *testing.T) {
 	helm := harness.NewFakeHelmWithReleases()
 	k8s := &harness.FakeK8sExecutor{}
@@ -105,7 +100,7 @@ func TestInstallMode_ClusterOnly_ExternalControlPlaneCredentials(t *testing.T) {
 	cfg.Install.Mode = "runai_cluster_only"
 	cfg.ControlPlane.Enabled = false
 	cfg.Cluster.Name = "test-cluster"
-	cfg.Cluster.Domain = "test.runai.local" // the generated test certificate covers this name
+	cfg.Cluster.Domain = "test.runai.local"
 	cfg.Cluster.ControlPlaneURL = "https://cp.runai.local"
 	cfg.Cluster.ControlPlaneCredentials = &installconfig.ControlPlaneCredentials{Username: "admin@run.ai", Password: "pw"}
 	cfg.Prerequisites = &installconfig.Prerequisites{Skip: true}

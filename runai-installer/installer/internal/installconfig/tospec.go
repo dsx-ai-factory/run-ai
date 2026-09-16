@@ -240,10 +240,6 @@ func toSpecGPUType(d *Dependency) spec.GPUType {
 	return spec.GPUType(d.Type)
 }
 
-// toSpecControlPlaneCredentials maps the credentials block with its file-based
-// secrets already resolved (see ResolveClusterCredentials). Inline values are
-// used directly when the resolver has not run, so in-memory specs behave the
-// same as loaded ones.
 func toSpecControlPlaneCredentials(cc *ControlPlaneCredentials) *spec.ControlPlaneCredentials {
 	if cc == nil {
 		return nil

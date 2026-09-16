@@ -147,9 +147,6 @@ func validateRegistryType(t spec.RegistryType) error {
 	return fmt.Errorf("unknown registry type: %q", t)
 }
 
-// ResolveClusterCredentials reads the file-based secrets of the cluster block
-// (the pre-registered cluster's bootstrap token / client secret, or the
-// external control plane's password / token) into the config.
 func ResolveClusterCredentials(cfg *Config) error {
 	if cfg == nil || cfg.Cluster == nil {
 		return nil
@@ -172,10 +169,6 @@ func ResolveClusterCredentials(cfg *Config) error {
 	return resolveControlPlaneCredentials(c.ControlPlaneCredentials)
 }
 
-// resolveControlPlaneCredentials validates the inline-vs-file choice for each
-// secret and reads the file-based ones. The auth-scheme rules (basic vs token,
-// required pairs) are enforced later by the spec, so all findings surface
-// together in input validation.
 func resolveControlPlaneCredentials(cc *ControlPlaneCredentials) error {
 	if cc == nil {
 		return nil

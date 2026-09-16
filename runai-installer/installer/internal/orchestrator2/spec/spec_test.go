@@ -250,8 +250,6 @@ func TestValidate_Install_ExternalControlPlaneCredentialsInvalid(t *testing.T) {
 	}
 }
 
-// TestExternalControlPlaneProblems_ReportsAll verifies the offline input
-// report gets every problem at once, not just the first the hard gate stops at.
 func TestExternalControlPlaneProblems_ReportsAll(t *testing.T) {
 	s := validInstallSpec()
 	s.InstallMode = InstallModeFull

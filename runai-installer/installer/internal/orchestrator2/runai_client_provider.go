@@ -27,9 +27,6 @@ func newRunAIClientProvider(k8s K8sExecutor, version string) step.RunAIAPIClient
 	}
 }
 
-// newCredentialedRunAIClientProvider authenticates to an external control
-// plane with the credentials the user put in the config, so it never reads
-// secrets from the local cluster.
 func newCredentialedRunAIClientProvider() step.RunAIAPICredentialedClientProvider {
 	return func(url, caCertPath string, creds step.ControlPlaneCredentials) (step.RunAIAPIClient, error) {
 		return apiclient.NewClusterServiceClientWithCredentials(url, caCertPath, runaiclient.Credentials{
