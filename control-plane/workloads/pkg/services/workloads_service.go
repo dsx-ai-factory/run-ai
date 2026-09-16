@@ -33,6 +33,7 @@ import (
 	"github.com/google/uuid"
 
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
+	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/topology"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
@@ -147,6 +148,23 @@ func validateNodepoolFilterGroups(clusterFilter string, nodepoolFilter string, g
 func (s *WorkloadsService) GetWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
 	clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, phases []api.Phase,
 ) (api.ImplResponse, error) {
+	permittedScopes, scopesErr := authorization_client.ParsePermittedScopes(ctx)
+	if scopesErr != nil {
+		permittedScopes = nil
+	}
+	return s.getWorkloadsTelemetry(ctx, telemetryType, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases)
+}
+
+func (s *WorkloadsService) GetInternalWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
+	clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, phases []api.Phase,
+) (api.ImplResponse, error) {
+	return s.getWorkloadsTelemetry(ctx, telemetryType, clusterId, nodepoolName, departmentId, projectId, nil, groupBy, phases)
+}
+
+func (s *WorkloadsService) getWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
+	clusterId string, nodepoolName string, departmentId string, projectId string,
+	permittedScopes *authorization_api.PermittedScopes, groupBy []string, phases []api.Phase,
+) (api.ImplResponse, error) {
 	err := validateNodepoolFilterGroups(clusterId, nodepoolName, groupBy, ClusterId, CurrentNodepools)
 	if err != nil {
 		return ErrorToApiError(err, http.StatusBadRequest), nil
@@ -177,11 +195,6 @@ func (s *WorkloadsService) GetWorkloadsTelemetry(ctx context.Context, telemetryT
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
-	permittedScopes, scopesErr := authorization_client.ParsePermittedScopes(ctx)
-	if scopesErr != nil {
-		permittedScopes = nil
-	}
-
 	var telemetryGroups *[]telemetry_utils.TelemetryGroupValue
 	var dbErr *api.Error
 

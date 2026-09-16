@@ -72,6 +72,28 @@ type WorkloadsAPI interface {
 	DeleteWorkloadExecute(r ApiDeleteWorkloadRequest) (*http.Response, error)
 
 	/*
+		GetInternalWorkloadsTelemetry Get the internal workloads telemetry.
+
+		Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.
+
+	Telemetry Types:
+	- WORKLOADS_COUNT: Count of workloads
+	- GPU_ALLOCATION: GPU allocation metrics
+	- PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+	  For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+	- IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
+
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiGetInternalWorkloadsTelemetryRequest
+	*/
+	GetInternalWorkloadsTelemetry(ctx context.Context) ApiGetInternalWorkloadsTelemetryRequest
+
+	// GetInternalWorkloadsTelemetryExecute executes the request
+	//  @return TelemetryResponse
+	GetInternalWorkloadsTelemetryExecute(r ApiGetInternalWorkloadsTelemetryRequest) (*TelemetryResponse, *http.Response, error)
+
+	/*
 		GetWorkload Get a workload.
 
 		Retrieve workload data using a `workloadId`.
@@ -863,6 +885,232 @@ func (a *WorkloadsAPIService) DeleteWorkloadExecute(r ApiDeleteWorkloadRequest) 
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type ApiGetInternalWorkloadsTelemetryRequest struct {
+	ctx            context.Context
+	ApiService     WorkloadsAPI
+	telemetryType  *WorkloadTelemetryType
+	clusterId      *string
+	nodepoolName   *string
+	departmentId   *string
+	projectId      *string
+	groupBy        *[]string
+	filterByPhases *[]Phase
+}
+
+// Specifies the telemetry type.
+func (r ApiGetInternalWorkloadsTelemetryRequest) TelemetryType(telemetryType WorkloadTelemetryType) ApiGetInternalWorkloadsTelemetryRequest {
+	r.telemetryType = &telemetryType
+	return r
+}
+
+// Filter using the Universally Unique Identifier (UUID) of the cluster.
+func (r ApiGetInternalWorkloadsTelemetryRequest) ClusterId(clusterId string) ApiGetInternalWorkloadsTelemetryRequest {
+	r.clusterId = &clusterId
+	return r
+}
+
+// Filter using the nodepool.
+func (r ApiGetInternalWorkloadsTelemetryRequest) NodepoolName(nodepoolName string) ApiGetInternalWorkloadsTelemetryRequest {
+	r.nodepoolName = &nodepoolName
+	return r
+}
+
+// Filter using the department id.
+func (r ApiGetInternalWorkloadsTelemetryRequest) DepartmentId(departmentId string) ApiGetInternalWorkloadsTelemetryRequest {
+	r.departmentId = &departmentId
+	return r
+}
+
+// project id to filter by
+func (r ApiGetInternalWorkloadsTelemetryRequest) ProjectId(projectId string) ApiGetInternalWorkloadsTelemetryRequest {
+	r.projectId = &projectId
+	return r
+}
+
+// Group workloads by field.
+func (r ApiGetInternalWorkloadsTelemetryRequest) GroupBy(groupBy []string) ApiGetInternalWorkloadsTelemetryRequest {
+	r.groupBy = &groupBy
+	return r
+}
+
+// Filter workloads by specific phases. If not specified, all phases are included.
+func (r ApiGetInternalWorkloadsTelemetryRequest) FilterByPhases(filterByPhases []Phase) ApiGetInternalWorkloadsTelemetryRequest {
+	r.filterByPhases = &filterByPhases
+	return r
+}
+
+func (r ApiGetInternalWorkloadsTelemetryRequest) Execute() (*TelemetryResponse, *http.Response, error) {
+	return r.ApiService.GetInternalWorkloadsTelemetryExecute(r)
+}
+
+/*
+GetInternalWorkloadsTelemetry Get the internal workloads telemetry.
+
+Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.
+
+Telemetry Types:
+
+  - WORKLOADS_COUNT: Count of workloads
+
+  - GPU_ALLOCATION: GPU allocation metrics
+
+  - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+    For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+
+  - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
+
+    @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+    @return ApiGetInternalWorkloadsTelemetryRequest
+*/
+func (a *WorkloadsAPIService) GetInternalWorkloadsTelemetry(ctx context.Context) ApiGetInternalWorkloadsTelemetryRequest {
+	return ApiGetInternalWorkloadsTelemetryRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//  @return TelemetryResponse
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *WorkloadsAPIService) GetInternalWorkloadsTelemetryExecute(r ApiGetInternalWorkloadsTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TelemetryResponse
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsAPIService.GetInternalWorkloadsTelemetry")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/internal/workloads/telemetry"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.telemetryType == nil {
+		return localVarReturnValue, nil, reportError("telemetryType is required and must be specified")
+	}
+
+	if r.clusterId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "clusterId", r.clusterId, "form", "")
+	}
+	if r.nodepoolName != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "nodepoolName", r.nodepoolName, "form", "")
+	}
+	if r.departmentId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "departmentId", r.departmentId, "form", "")
+	}
+	if r.projectId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "projectId", r.projectId, "form", "")
+	}
+	if r.groupBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "groupBy", r.groupBy, "form", "csv")
+	}
+	parameterAddToHeaderOrQuery(localVarQueryParams, "telemetryType", r.telemetryType, "form", "")
+	if r.filterByPhases != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "filterByPhases", r.filterByPhases, "form", "csv")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiGetWorkloadRequest struct {
