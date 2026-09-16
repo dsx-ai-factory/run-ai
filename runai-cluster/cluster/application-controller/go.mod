@@ -5,6 +5,7 @@ go 1.26.8
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-20240519090715-44f7f790e5ee
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
@@ -213,6 +214,7 @@ require (
 replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters => ../common/getters
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds => ../common/personalcreds
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../common/runaipublic
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator

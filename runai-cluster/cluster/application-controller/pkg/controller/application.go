@@ -13,6 +13,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/application-controller/pkg/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/application-controller/pkg/deployers/helm_deployer"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/application-controller/pkg/providers"
+	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	personalcreds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,9 +32,10 @@ import (
 )
 
 type ApplicationController struct {
-	client    client.Client
-	factories map[string]common.ApplicationFactory
-	providers map[string]common.ApplicationSourceProvider
+	client         client.Client
+	runaiNamespace string
+	factories      map[string]common.ApplicationFactory
+	providers      map[string]common.ApplicationSourceProvider
 
 	helmWorkers HelmWorkers
 
@@ -46,7 +49,8 @@ type ApplicationController struct {
 func NewApplicationController(client client.Client) *ApplicationController {
 	helmSource := providers.NewHelmSourceProvider()
 	return &ApplicationController{
-		client: client,
+		client:         client,
+		runaiNamespace: clusterconstants.NamespaceRunAi,
 
 		factories: map[string]common.ApplicationFactory{
 			helmSource.GetApplicationSource(): helmSource,
@@ -70,6 +74,25 @@ func NewApplicationControllerWithChartAuth(client client.Client, chartAuthClient
 
 func (c *ApplicationController) SetupWithManager(mgr ctrl.Manager) error {
 	applicationPredicate := c.CreateApplicationPredicate()
+
+	if err := mgr.GetFieldIndexer().IndexField(
+		context.Background(),
+		&v1alpha1.Application{},
+		personalCredentialsSourceIndex,
+		func(obj client.Object) []string {
+			entries, err := personalcreds.Get(obj)
+			if err != nil {
+				return nil
+			}
+			sources := make([]string, 0, len(entries))
+			for _, entry := range entries {
+				sources = append(sources, entry.SourceSecret)
+			}
+			return sources
+		},
+	); err != nil {
+		return fmt.Errorf("index application personal credentials: %w", err)
+	}
 
 	controllerBuilder := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Application{})
@@ -134,9 +157,55 @@ func (c *ApplicationController) SetupWithManager(mgr ctrl.Manager) error {
 			&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(c.mapResourceToApplication),
 			builder.WithPredicates(applicationPredicate),
+		).
+		Watches(
+			&corev1.Secret{},
+			handler.EnqueueRequestsFromMapFunc(c.mapPersonalCredentialSourceToApplications),
+			builder.WithPredicates(c.personalCredentialSourcePredicate()),
 		)
 
-	return controllerBuilder.Complete(c)
+	return controllerBuilder.Owns(
+		&corev1.Secret{},
+		builder.WithPredicates(predicate.NewPredicateFuncs(func(obj client.Object) bool {
+			return obj.GetLabels()[personalcreds.CopyLabel] == "true"
+		})),
+	).Complete(c)
+}
+
+func (c *ApplicationController) mapPersonalCredentialSourceToApplications(
+	ctx context.Context,
+	source client.Object,
+) []reconcile.Request {
+	if source.GetNamespace() != c.runaiNamespace {
+		return nil
+	}
+	var applications v1alpha1.ApplicationList
+	if err := c.client.List(ctx, &applications,
+		client.MatchingFields{personalCredentialsSourceIndex: source.GetName()},
+	); err != nil {
+		log.Error().Err(err).Msg("failed to list applications for personal credential source")
+		return nil
+	}
+	requests := make([]reconcile.Request, 0, len(applications.Items))
+	for i := range applications.Items {
+		requests = append(requests, reconcile.Request{
+			NamespacedName: client.ObjectKeyFromObject(&applications.Items[i]),
+		})
+	}
+	return requests
+}
+
+func (c *ApplicationController) personalCredentialSourcePredicate() predicate.Predicate {
+	matches := func(obj client.Object) bool {
+		return obj.GetNamespace() == c.runaiNamespace &&
+			obj.GetLabels()[personalcreds.UserCredentialsLabel] == "true"
+	}
+	return predicate.Funcs{
+		CreateFunc:  func(e event.CreateEvent) bool { return matches(e.Object) },
+		UpdateFunc:  func(e event.UpdateEvent) bool { return matches(e.ObjectOld) || matches(e.ObjectNew) },
+		DeleteFunc:  func(e event.DeleteEvent) bool { return matches(e.Object) },
+		GenericFunc: func(e event.GenericEvent) bool { return matches(e.Object) },
+	}
 }
 
 func (c *ApplicationController) Start(ctx context.Context) error {
