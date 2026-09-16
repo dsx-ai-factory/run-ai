@@ -67,7 +67,7 @@ var _ = Describe("A backend client", func() {
 			BeforeEach(func() {
 				retryCounterLock = sync.RWMutex{}
 				retryCounter = new(int)
-				livenessPath := fmt.Sprintf("/v1/k8s/clusters/%s/liveness", ClusterIdForTests)
+				livenessPath := fmt.Sprintf("/api/v1/clusters/%s/liveness", ClusterIdForTests)
 				server.RouteToHandler("POST", livenessPath, func(writer http.ResponseWriter, request *http.Request) {
 					GinkgoWriter.Printf("Got Liveness Request in mock %d\n", retryCounter)
 					retryCounterLock.Lock()

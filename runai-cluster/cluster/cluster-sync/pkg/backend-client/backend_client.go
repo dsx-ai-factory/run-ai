@@ -29,13 +29,11 @@ import (
 	workloadswagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/metrics"
-	cpclient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients/control-plane/generated"
 	"go.uber.org/zap"
 )
 
 type BackendClient struct {
 	Client                 *assetsgenerated.APIClient
-	ControlPlaneClient     *cpclient.APIClient
 	AccessRulesClient      authclient.IAuthorizationExternalClient
 	DatavolumesClient      datavolumesclient.IDatavolumesClient
 	ClusterServiceClient   *clustersvcswagger.APIClient
@@ -71,12 +69,8 @@ func NewBackendClient(basePath string, httpClient *http.Client) *BackendClient {
 		Servers:    assetsgenerated.ServerConfigurations{{URL: basePath}},
 		HTTPClient: httpClient,
 	}
-	controlPlaneConfig := cpclient.NewConfiguration()
-	controlPlaneConfig.Servers = cpclient.ServerConfigurations{{URL: basePath}}
-	controlPlaneConfig.HTTPClient = httpClient
 	runaiBackendClient := &BackendClient{
-		Client:             assetsgenerated.NewAPIClient(assetsConfig),
-		ControlPlaneClient: cpclient.NewAPIClient(controlPlaneConfig),
+		Client: assetsgenerated.NewAPIClient(assetsConfig),
 		AccessRulesClient: authclient.NewAccessRulesClientWithConfig(&authgenerated.Configuration{
 			Servers:    authgenerated.ServerConfigurations{{URL: basePath}},
 			HTTPClient: httpClient,
@@ -245,11 +239,10 @@ func (backendClient *BackendClient) sendLiveness() {
 	var livenessErr error
 	livenessErr = nil
 	requestTimeTag := time.Now().UnixMilli()
-	livenessRequest := cpclient.NewUpdateClusterLiveness1Request()
-	livenessRequest.SetTimeTag(requestTimeTag)
-	res, err := backendClient.ControlPlaneClient.ClustersApi.UpdateClusterLiveness1(
+	livenessRequest := clustersvcswagger.NewClusterLivenessSyncRequest(requestTimeTag)
+	res, err := backendClient.ClusterServiceClient.ClustersAPI.UpdateClusterLiveness(
 		backendClient.Context(), config.Config().ClusterUuid,
-	).UpdateClusterLiveness1Request(*livenessRequest).Execute()
+	).ClusterLivenessSyncRequest(*livenessRequest).Execute()
 	if res != nil {
 		_ = res.Body.Close()
 	}
