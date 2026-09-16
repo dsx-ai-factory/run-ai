@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/build/airgap
 
-go 1.26.8
+go 1.27.1
 
 require (
 	github.com/google/go-containerregistry v0.21.9
