@@ -241,11 +241,15 @@ func (nodeParser *NodeParser) getNetworkTopologyLabels(node *corev1.Node) []swag
 func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagger.NodeStatusConditionDetails {
 	result := []swagger.NodeStatusConditionDetails{}
 
-	result = append(result, calculateStatusConditions(node.Status.Conditions)...)
+	gpuFractioningEnabled := config.Config().EnableNodeGpuFractioningReadiness
+
+	result = append(result, calculateStatusConditions(node.Status.Conditions, gpuFractioningEnabled)...)
 
 	result = append(result, calculateUnschedulableCondition(node)...)
 
-	result = append(result, nodeParser.calculateGpuFractioningCondition(node)...)
+	if gpuFractioningEnabled {
+		result = append(result, calculateGpuFractioningConditions(node)...)
+	}
 
 	if config.Config().EnableNodeNvidiaComponentsReadiness {
 		result = append(result, nodeParser.calculateMissingNvidiaComponentsConditions(node)...)
@@ -373,12 +377,14 @@ func getReadinessPhase(conditions []swagger.NodeStatusConditionDetails) string {
 	return ReadyPhase
 }
 
-func calculateStatusConditions(conditions []corev1.NodeCondition) []swagger.NodeStatusConditionDetails {
+func calculateStatusConditions(
+	conditions []corev1.NodeCondition, gpuFractioningEnabled bool,
+) []swagger.NodeStatusConditionDetails {
 	result := []swagger.NodeStatusConditionDetails{}
 	for _, condition := range conditions {
 		// Readiness polarity: passing this through would emit it on exactly the healthy nodes.
 		// calculateGpuFractioningCondition translates it instead.
-		if condition.Type == GpuFractioningReadyConditionType {
+		if gpuFractioningEnabled && condition.Type == GpuFractioningReadyConditionType {
 			continue
 		}
 
@@ -432,34 +438,35 @@ func parseCondition(condition corev1.NodeCondition) swagger.NodeStatusConditionD
 	}
 }
 
-// An absent condition means the operator's nodeSelector does not cover this node, so fractions
-// will not work there whether or not that exclusion was intended.
-//
-// For an explicit False the reason and message come from the operator: they carry whatever the
-// kubelet reported for the failing daemon pod, so they are passed through rather than mapped.
-func evaluateGpuFractioningReadiness(condition *corev1.NodeCondition) (ok bool, reason string, message string) {
-	if condition == nil {
-		return false, GpuFractioningNotManaged, gpuFractioningNotManagedMessage
-	}
-	if condition.Status != corev1.ConditionFalse {
-		return true, "", ""
-	}
-	return false, condition.Reason, condition.Message
-}
-
-// Restricted to GPU nodes: an absent condition is reported as unsupported, which would otherwise
-// fire on every CPU node in the cluster.
-func (nodeParser *NodeParser) calculateGpuFractioningCondition(node *corev1.Node) []swagger.NodeStatusConditionDetails {
-	if !config.Config().EnableNodeGpuFractioningReadiness || !shouldNodeHaveNvidiaComponents(node.Labels) {
+// Only an explicit True confirms support: a stale True is what an uninstalled operator leaves
+// behind, so anything else fails closed. GPU nodes only, since absent counts as unsupported and
+// would otherwise fire on every CPU node.
+func calculateGpuFractioningConditions(node *corev1.Node) []swagger.NodeStatusConditionDetails {
+	if !shouldNodeHaveNvidiaComponents(node.Labels) {
 		return []swagger.NodeStatusConditionDetails{}
 	}
 
 	condition := findNodeCondition(node, GpuFractioningReadyConditionType)
-	ok, reason, message := evaluateGpuFractioningReadiness(condition)
-	if ok {
+	switch {
+	case condition == nil:
+		return gpuFractioningConditionDetails(GpuFractioningNotManaged, gpuFractioningNotManagedMessage)
+	case condition.Status == corev1.ConditionTrue:
 		return []swagger.NodeStatusConditionDetails{}
+	case condition.Status == corev1.ConditionFalse:
+		// Reason is optional in the Kubernetes API but required by the Nodes API, so a producer
+		// that omits it must not leave us emitting a blank one.
+		if condition.Reason == "" {
+			return gpuFractioningConditionDetails(MissingGpuFractioningPrerequisite, condition.Message)
+		}
+		return gpuFractioningConditionDetails(condition.Reason, condition.Message)
+	default:
+		zap.S().Warnf("Node <%s> has an unrecognized %s status <%s>; treating fractions as unsupported",
+			node.Name, GpuFractioningReadyConditionType, condition.Status)
+		return gpuFractioningConditionDetails(GpuFractioningNotManaged, gpuFractioningNotManagedMessage)
 	}
+}
 
+func gpuFractioningConditionDetails(reason, message string) []swagger.NodeStatusConditionDetails {
 	return []swagger.NodeStatusConditionDetails{{
 		Type:    MissingGpuFractioningPrerequisite,
 		Reason:  reason,

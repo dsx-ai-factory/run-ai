@@ -1296,12 +1296,15 @@ var _ = Describe("Parsers", Ordered, func() {
 				}
 			}
 
+			var previousGpuFractioningReadiness bool
+
 			BeforeEach(func() {
+				previousGpuFractioningReadiness = config.Config().EnableNodeGpuFractioningReadiness
 				config.Config().EnableNodeGpuFractioningReadiness = true
 			})
 
 			AfterEach(func() {
-				config.Config().EnableNodeGpuFractioningReadiness = false
+				config.Config().EnableNodeGpuFractioningReadiness = previousGpuFractioningReadiness
 			})
 
 			DescribeTable("maps the operator's condition onto the node status",
@@ -1325,9 +1328,14 @@ var _ = Describe("Parsers", Ordered, func() {
 						Message: utils.Ref("GPU fractions are not supported on this node - " +
 							"it is not covered by the GPU fractioning operator."),
 					}}),
-				Entry("unknown status reports nothing",
+				Entry("unknown status is treated as unsupported",
 					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionUnknown, "", "")},
-					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: parsers.GpuFractioningNotManaged,
+						Message: utils.Ref("GPU fractions are not supported on this node - " +
+							"it is not covered by the GPU fractioning operator."),
+					}}),
 				Entry("unsupported driver",
 					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
 						"GPUDriverVersionUnsupported",
@@ -1337,6 +1345,13 @@ var _ = Describe("Parsers", Ordered, func() {
 						Reason: "GPUDriverVersionUnsupported",
 						Message: utils.Ref(
 							"NVIDIA driver major version 570 is below minimum supported major version 615"),
+					}}),
+				Entry("an empty reason falls back to the condition type",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse, "", "")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  parsers.MissingGpuFractioningPrerequisite,
+						Message: utils.Ref(""),
 					}}),
 				Entry("crashlooping daemon passes the kubelet reason through",
 					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
@@ -1367,6 +1382,22 @@ var _ = Describe("Parsers", Ordered, func() {
 				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
 				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
 				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			It("leaves the operator's condition untouched when the feature is disabled", func() {
+				config.Config().EnableNodeGpuFractioningReadiness = false
+				node.Status.Conditions = []corev1.NodeCondition{
+					readyCondition,
+					gpuFractioningCondition(corev1.ConditionTrue, "AllDaemonsReady", "all gpu-fractioning daemons are running"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Conditions).To(ContainElement(
+					clustersvcswagger.NodeStatusConditionDetails{
+						Type:    parsers.GpuFractioningReadyConditionType,
+						Reason:  "AllDaemonsReady",
+						Message: utils.Ref("all gpu-fractioning daemons are running"),
+					}))
 			})
 
 			It("lets NotReady outrank a missing fractioning prerequisite", func() {
