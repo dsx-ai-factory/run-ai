@@ -28,7 +28,7 @@
         </div>
         <div
           class="flex-1 runai-expansion-header-content-right justify-between text-weight-regular"
-          v-if="!isOpen || showSubHeader || isInvalid || isWarning"
+          v-if="!isOpen || showSubHeader || hasStatusIcon"
         >
           <div class="flex-1 subheader" :aid="aidSubheader">
             <template v-if="!isOpen || showSubHeader">
@@ -213,6 +213,9 @@ export default defineComponent({
     },
     isWarning(): boolean {
       return this.sectionWarning || false;
+    },
+    hasStatusIcon(): boolean {
+      return this.isInvalid || this.isWarning;
     },
   },
   methods: {
