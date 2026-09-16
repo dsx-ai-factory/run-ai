@@ -57349,7 +57349,6 @@ components:
           type: string
           nullable: true
         networking:
-          x-internal: true
           $ref: '#/components/schemas/NetworkingConfiguration'
         userCredentials:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials'

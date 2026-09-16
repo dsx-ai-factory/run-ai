@@ -1724,7 +1724,6 @@
             "nullable": true
           },
           "networking": {
-            "x-internal": true,
             "$ref": "#/components/schemas/NetworkingConfiguration"
           },
           "userCredentials": {
