@@ -275,12 +275,6 @@ navigation:
           - page: GPU Compute Modes
             slug: compute-modes
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/compute-modes.md
-        - page: Optimize Performance with Node Level Scheduler
-          slug: node-level-scheduler
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md
-        - page: GPU Memory Swap
-          slug: memory-swap
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-swap.md
         - page: CPU Compute and Memory Allocation
           slug: allocation-of-cpu-and-memory
           path: ../../docs/platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md
@@ -295,9 +289,6 @@ navigation:
           - page: Launching Workloads with GPU Compute Modes
             slug: compute-modes-quickstart
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/compute-modes-quickstart.md
-          - page: Launching Workloads with GPU Memory Swap
-            slug: gpu-memory-swap-quickstart
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-memory-swap-quickstart.md
     - section: Policies
       contents:
       - page: Policies and Rules

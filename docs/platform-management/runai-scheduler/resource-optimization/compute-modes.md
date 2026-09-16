@@ -75,7 +75,7 @@ If the annotation is omitted, time-slicing applies. Workloads migrated from earl
 
 You can set the annotation through the UI, the CLI, or the API. After the workload is submitted, the compute mode is visible in the workload YAML.
 
-Administrators can also control the compute mode centrally with a [workload policy](../../policies/policies-and-rules.md). A policy can supply a default compute mode for workloads that do not set one, or enforce a specific mode so that users cannot change it. Policies set the `annotations` field, target a specific workload type, and apply at the system, cluster, department, or project scope. For the field reference, refer to [Policy YAML reference](../../policies/policy-yaml-reference.md).
+Administrators can also control the compute mode centrally with a [workload policy](../../../policies/policies-and-rules.md). A policy can supply a default compute mode for workloads that do not set one, or enforce a specific mode so that users cannot change it. Policies set the `annotations` field, target a specific workload type, and apply at the system, cluster, department, or project scope. For the field reference, refer to [Policy YAML reference](../../../policies/policy-yaml-reference.md).
 
 <Tabs>
 
@@ -124,7 +124,7 @@ spec:
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../../reference/cli/runai/) and run according to your workload.
 
 ## Using API
 

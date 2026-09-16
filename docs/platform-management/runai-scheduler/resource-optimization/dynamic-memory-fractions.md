@@ -4,7 +4,11 @@ Many workloads utilize GPU resources intermittently, with long periods of inacti
 
 To address this challenge, NVIDIA Run:ai provides dynamic GPU memory fractions. This feature optimizes GPU utilization by enabling workloads to adjust their memory usage at runtime. Instead of a single value, a workload declares a memory **Request** that is guaranteed to it, and a higher memory **Limit** that it can grow into when the additional memory is not needed by others.
 
-This page covers how GPU **memory** is divided between workloads. How those workloads share the GPU **compute** is a separate setting — refer to [GPU compute modes](compute-modes.md).
+<Note>
+**Note**
+
+This page covers how GPU **memory** is divided between workloads. How those workloads share GPU **compute** is a separate setting. Refer to [GPU compute modes](compute-modes.md).
+</Note>
 
 ## Benefits of Dynamic GPU Memory Fractions
 
@@ -12,9 +16,31 @@ This page covers how GPU **memory** is divided between workloads. How those work
 * **Smaller quota requirements** - Workloads can be sized to their typical usage rather than their peak, so a project needs less quota for the same work.
 * **Resilient interactive sessions** - When a workload must give back borrowed memory, the OOMKill signal is sent to the process that is accessing the GPU rather than to the container as a whole. Where that process is not the root process of the container, as in most interactive notebooks, the session survives and the user can use the GPU again without losing their work.
 
+## Quota Planning with Dynamic GPU Memory Fractions
+
+When planning the quota distribution for your [projects](../../../aiinitiatives/organization/projects.md) and [departments](../../../aiinitiatives/organization/departments.md), dynamic memory fractions let the platform administrator size quota to the Request alone. The Limit lets a workload burst beyond its allocated quota when the GPU has memory to spare, without provisioning additional quota for that burst capacity.
+
+### Model Development
+
+Consider researchers developing and testing models in notebooks:
+
+* Sizing the Request to a workload's typical memory footprint during experimentation keeps quota consumption low, while a higher Limit lets the workload grow during occasional peaks, for example loading a larger checkpoint to validate a change.
+* Because quota is based on the Request, more researchers can be granted access to the same node pool than static fractions would allow, with bursts handled opportunistically rather than provisioned for upfront.
+
+### Serial Workload Chains
+
+Consider a processing pipeline where multiple stages run in sequence on the same GPU, for example a data-preprocessing stage followed by a training stage:
+
+* Each stage requests only the memory it is guaranteed as its Request, and grows into its Limit as memory becomes available when a prior stage in the chain completes and frees its GPU memory.
+* Quota reflects the sum of each stage's Request rather than the peak memory used by any single stage, since memory moves between stages as demand shifts instead of each one holding its peak for its entire lifetime.
+
 ## How Dynamic GPU Memory Fractions Work
 
-With dynamic GPU memory fractions, you [submit workloads](../../../workloads-in-nvidia-run-ai/workloads.md) using a GPU memory Request and Limit, which is achieved by leveraging the Kubernetes Request and Limit notations. You can either:
+A dynamic GPU memory fraction is submitted with a Request and a Limit, using the Kubernetes Request and Limit notations. NVIDIA Run:ai supports this both on a single GPU and across multiple GPUs on the same node.
+
+### Single-GPU Dynamic Memory Fractions
+
+With dynamic GPU memory fractions, you [submit workloads](../../../../workloads-in-nvidia-run-ai/workloads.md) using a GPU memory Request and Limit. You can either:
 
 * Request a GPU memory portion using a percentage of a GPU and specify a Limit
 * Request a GPU memory size (GB, MB) and specify a Limit
@@ -23,12 +49,13 @@ When setting a GPU memory limit either as a GPU memory portion or a GPU memory s
 
 For example, you can specify a workload with a GPU memory portion request of 0.25 GPU, and add a limit of up to 0.80 GPU. The Scheduler schedules the workload to a node that can provide the request (0.25), and then assigns the workload to a GPU. The workload is allowed to occupy memory between 0 and 0.80 of the GPU memory, where only 0.25 of the GPU memory is guaranteed to that workload. The rest of the memory, from 0.25 to 0.80, is loaned to the workload as long as it is not needed by other workloads.
 
-Dynamic memory fractions are useful in several scenarios, for example:
+NVIDIA Run:ai automatically manages the transition between Request and Limit, and the reverse when the borrowed memory needs to be returned. You can view a workload's utilization against its Request and Limit in the [metrics pane for each workload](../../../../workloads-in-nvidia-run-ai/workloads.md).
 
-* **Model development** - Memory requirements are usually lower during experimentation with smaller models or configurations, and higher only occasionally.
-* **Workloads that run in sequence** - Workloads sharing a GPU serially, or models and processing stages that form a serial chain. When one workload completes its cycle, it voluntarily frees up the memory it used, and the next one starts and uses more. The memory moves between them as demand shifts, instead of each workload holding its peak for its whole lifetime.
+### Multi-GPU Dynamic Memory Fractions
 
-NVIDIA Run:ai automatically manages the state changes between Request and Limit as well as the reverse, when the balance needs to be returned, updating the workloads' utilization compared to Request and Limit parameters in the [metrics pane for each workload](../../../workloads-in-nvidia-run-ai/workloads.md).
+NVIDIA Run:ai also supports workload submission using multi-GPU dynamic memory fractions. Multi-GPU dynamic memory fractions work similarly to dynamic memory fractions on a single GPU workload, however, instead of a single GPU device, the NVIDIA Run:ai Scheduler selects the node and the GPUs, and allocates the same Request and Limit pair on multiple GPU devices within the same node. For example, if practitioners develop a new model that uses 8 GPUs and requires 40 GB of memory per GPU, but may want to burst out and consume up to the full GPU memory, they can allocate 8×40 GB with multi-GPU memory fractions and a limit of 80 GB (for example, an H100 GPU) instead of reserving the full memory of each GPU. This leaves 40 GB of GPU memory available on each of the 8 GPUs for other workloads within that node.
+
+This approach improves GPU utilization and availability, enabling more precise and often smaller quota requirements for the end user.
 
 ### What the Application Sees
 
@@ -36,12 +63,12 @@ An application sees its own share of GPU memory through NVML and `nvidia-smi`, r
 
 A GPU memory fraction submitted without a Limit has a Limit equal to its Request. The application therefore sees a GPU memory space the size of the Request, and that size does not change while the workload runs.
 
-For a workload submitted with a Request and a Limit, the free memory reported to the application always covers the rest of its Request, and grows beyond that when the GPU has memory to spare — never above the Limit. In other words, the Request is always available to the workload, and the memory between the Request and the Limit is available only while no one else needs it.
+For a workload submitted with a Request and a Limit, the free memory reported to the application always covers the rest of its Request, and grows beyond that when the GPU has memory to spare - never above the Limit. In other words, the Request is always available to the workload, and the memory between the Request and the Limit is available only while no one else needs it.
 
 For example, take a workload with a 4 GB Request and a 12 GB Limit that is currently using 1 GB of GPU memory:
 
 * If 9 GB is free on the GPU, the application sees 9 GB free and can grow toward its 12 GB Limit.
-* If the GPU is busy and only 1 GB is free, the application still sees 3 GB free — the remainder of its guaranteed 4 GB.
+* If the GPU is busy and only 1 GB is free, the application still sees 3 GB free - the remainder of its guaranteed 4 GB.
 
 ### Reclaiming Loaned Memory
 
@@ -56,19 +83,29 @@ Interactive notebooks are typically built the second way. The notebook server ru
 
 A memory reclaim is targeted at a single process and affects only the container that process belongs to. This is true in both [GPU compute modes](compute-modes.md), including SM-sharing, where workloads otherwise share an error domain.
 
-## Multi-GPU Dynamic Memory Fractions
-
-NVIDIA Run:ai also supports workload submission using multi-GPU dynamic memory fractions. Multi-GPU dynamic memory fractions work similarly to dynamic memory fractions on a single GPU workload, however, instead of a single GPU device, the NVIDIA Run:ai Scheduler selects the node and the GPUs, and allocates the same Request and Limit pair on multiple GPU devices within the same node. For example, if practitioners develop a new model that uses 8 GPUs and requires 40 GB of memory per GPU, but may want to burst out and consume up to the full GPU memory, they can allocate 8×40 GB with multi-GPU memory fractions and a limit of 80 GB (for example, an H100 GPU) instead of reserving the full memory of each GPU. This leaves 40 GB of GPU memory available on each of the 8 GPUs for other workloads within that node.
-
-This approach improves GPU utilization and availability, enabling more precise and often smaller quota requirements for the end user.
-
 ## Prerequisites
 
-Dynamic GPU memory fractions require the same cluster prerequisites as GPU memory fractions — CUDA 13.4 or later, CUDA driver r615 or later, and NVIDIA GPU Operator 26.7 or later on every GPU node. Refer to [GPU memory fractions](memory-fractions.md#prerequisites) for the full list.
+Dynamic GPU memory fractions require the following on every GPU node in the cluster:
+
+| Component | Required version |
+|---|---|
+| CUDA | 13.4 or later |
+| CUDA driver | r615 or later |
+| NVIDIA GPU Operator | 26.7 or later |
+
+In addition, GPU nodes must run Linux with cgroup v2 mounted at `/sys/fs/cgroup`.
+
+<Note>
+
+**Note**
+
+NVIDIA Run:ai installs and operates normally without these prerequisites in place, and non-fractional workloads are unaffected. Fractional workloads, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
+
+</Note>
 
 ## Setting Dynamic GPU Memory Fractions
 
-Using the [compute resources](../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU memory portion or GPU memory size, and set a Limit. You can then use the compute resource with any of the [NVIDIA Run:ai workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) for single-GPU and multi-GPU dynamic memory fractions. In addition, you can view the workloads' utilization compared to Request and Limit parameters in the [metrics pane for each workload](../../../workloads-in-nvidia-run-ai/workloads.md).
+Using the [compute resources](../../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU memory portion or GPU memory size, and set a Limit. You can then use the compute resource with [NVIDIA Run:ai native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) for single-GPU and multi-GPU dynamic memory fractions. In addition, you can view the workloads' utilization compared to Request and Limit parameters in the [metrics pane for each workload](../../../../workloads-in-nvidia-run-ai/workloads.md).
 
 * **Single-GPU dynamic memory fractions** - Define the compute requirement to run 1 GPU device, by specifying either a portion (percentage) of the overall memory or a memory request (GB, MB) with a Limit.
 * **Multi-GPU dynamic memory fractions** - Define the compute requirement to run multiple GPU devices, by specifying either a portion (percentage) of the overall memory or a memory request (GB, MB) with a Limit.
@@ -85,22 +122,47 @@ The setting applies wherever the memory Limit is a field of the workload submiss
 
 ## Setting Dynamic GPU Memory Fractions via YAML
 
+This method applies to [supported workload types](../../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) and to [workloads submitted externally](../../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable dynamic GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
+
+<Info>
+
+**Note**
+
+Make sure the [default scheduler](../../scheduling/default-scheduler.md) is set to `runai-scheduler`.
+
+</Info>
+
 <Warning>
 
-**Breaking change from version 3.0:**
+**Warning**
 
-The `RUNAI_GPU_MEMORY_LIMIT` environment variable is no longer honored. The memory Limit is now set with an annotation.
-
-A workload that still sets `RUNAI_GPU_MEMORY_LIMIT` starts and runs normally, but with no memory ceiling — it is treated as a Request without a Limit. No error is raised and no event is generated. Audit your manifests for the variable rather than waiting for a symptom.
+If you are upgrading from a release that used the `RUNAI_GPU_MEMORY_LIMIT` environment variable, that variable is no longer honored; the memory Limit is now set with an annotation. A workload that still sets `RUNAI_GPU_MEMORY_LIMIT` starts and runs normally, but with no memory ceiling, and no error or event is raised. Refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for the annotation replacement and a before/after example.
 
 </Warning>
 
-Dynamic GPU memory fractions extend the [GPU memory fractions annotations](memory-fractions.md#annotation-reference) with a memory Limit. The Request is set exactly as it is for a static memory fraction.
+### Annotation Prefixes
+
+Two prefixes are used, and the prefix indicates which component consumes the annotation:
+
+* `nvidia.com/` - The annotation reaches the node and is applied to CUDA.
+* `kai.scheduler/` - The annotation is consumed by the Scheduler only and is never passed to the node. GPU memory portions are a Scheduler convention, because CUDA expresses memory only as an absolute size. The Scheduler resolves the portion against the GPU it selected and passes an absolute size to the node.
+
+### Annotation Reference
+
+A dynamic GPU memory fraction is always allocated to a single container. NVIDIA Run:ai currently supports one fractional container per pod, so every annotation below ultimately applies to that one container. The Request sets the guaranteed memory, and the Limit sets the ceiling the workload can grow into. The annotations differ only in how the container is identified:
+
+* Annotations that embed `container.<container-name>` in the key name the container directly.
+* Annotations without that element apply to the container named by `gpu-fraction-container-name`, or to the first container in the pod when that annotation is omitted.
 
 | Annotation | Input format | Purpose |
 |---|---|---|
-| `nvidia.com/container.<container-name>.gpu-memory.limit` | Memory size in Kubernetes resource quantity format. For example, `80G`. | Sets the memory Limit for a request made as an absolute memory size. Replaces `RUNAI_GPU_MEMORY_LIMIT` for absolute values. |
-| `kai.scheduler/container.<container-name>.gpu-memory.portion.limit` | A portion of GPU memory as a double-precision floating-point number. For example, `0.8`. | Sets the memory Limit for a request made as a GPU memory portion. Replaces `RUNAI_GPU_MEMORY_LIMIT` for portion values. |
+| `gpu-fraction` | A portion of GPU memory as a double-precision floating-point number. For example, `0.25`, `0.75`. | Requests a portion of GPU memory. |
+| `gpu-memory` | Memory size in MiB. For example, `2500`, `4096`. | Requests an absolute amount of GPU memory. |
+| `gpu-fraction-num-devices` | The number of GPU devices to allocate using the specified `gpu-fraction` or `gpu-memory` value. Defaults to 1 if omitted. | Requests multiple GPU devices for the fractional container. |
+| `gpu-fraction-container-name` | The name of a container in the pod. Defaults to the first container (index 0) if omitted. | Selects which container receives the GPU allocation when the request is made with `gpu-fraction` or `gpu-memory`. |
+| `nvidia.com/container.<container-name>.gpu-memory.request` | Memory size in Kubernetes resource quantity format. For example, `40G`. | Requests an absolute amount of GPU memory. This is the official NVIDIA alternative to `gpu-memory`. |
+| `nvidia.com/container.<container-name>.gpu-memory.limit` | Memory size in Kubernetes resource quantity format. For example, `80G`. | Sets the memory Limit for a request made as an absolute memory size. |
+| `kai.scheduler/container.<container-name>.gpu-memory.portion.limit` | A portion of GPU memory as a double-precision floating-point number. For example, `0.8`. | Sets the memory Limit for a request made as a GPU memory portion. |
 
 <Info>
 
@@ -112,35 +174,6 @@ Dynamic GPU memory fractions extend the [GPU memory fractions annotations](memor
 
 </Info>
 
-### Migrating from the Environment Variable
-
-The following example shows a workload requesting an absolute memory size before and after the upgrade to v3.0.
-
-Before, up to v2.26:
-
-```yaml
-spec:
-  containers:
-  - image: gcr.io/run-ai-demo/quickstart-cuda
-    name: app
-    env:
-    - name: RUNAI_GPU_MEMORY_LIMIT   # <-- remove: no longer honored in v3.0
-      value: "8000M"
-```
-
-After, from v3.0:
-
-```yaml
-metadata:
-  annotations:
-    gpu-memory: "4000"   # MiB
-    nvidia.com/container.app.gpu-memory.limit: "8000M"
-spec:
-  containers:
-  - image: gcr.io/run-ai-demo/quickstart-cuda
-    name: app
-```
-
 ### Examples
 
 The following example requests an absolute amount of GPU memory with a Limit, on 4 GPU devices:
@@ -149,11 +182,9 @@ The following example requests an absolute amount of GPU memory with a Limit, on
 metadata:
   annotations:
     gpu-memory: "4000"   # MiB
-    # or, new-style: nvidia.com/container.app.gpu-memory.request: "40G"
+    # or: nvidia.com/container.app.gpu-memory.request: "40G"
     nvidia.com/container.app.gpu-memory.limit: "80G"
-    # "time-slicing" (the default, may be omitted) or "sm-sharing"
-    nvidia.com/container.app.gpu-compute.mode: "sm-sharing"
-    # optional; 1 if omitted — number of fractional GPU devices
+    # optional; 1 if omitted - number of fractional GPU devices
     gpu-fraction-num-devices: "4"
 spec:
   containers:
@@ -167,9 +198,7 @@ metadata:
   annotations:
     gpu-fraction: "0.5"
     kai.scheduler/container.app.gpu-memory.portion.limit: "0.8"
-    # "time-slicing" (the default, may be omitted) or "sm-sharing"
-    nvidia.com/container.app.gpu-compute.mode: "time-slicing"
-    # optional; 1 if omitted — number of fractional GPU devices
+    # optional; 1 if omitted - number of fractional GPU devices
     gpu-fraction-num-devices: "2"
 spec:
   containers:
@@ -185,7 +214,7 @@ spec:
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../../reference/cli/runai/) and run according to your workload.
 
 ## Using API
 
