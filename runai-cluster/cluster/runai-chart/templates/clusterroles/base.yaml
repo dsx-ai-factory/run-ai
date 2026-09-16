@@ -878,8 +878,11 @@ subjects:
     name: init-ca
 ---
 
-# Run:AI Projects
-# Alows the reading of project-related data and editing of Run:AI specific CRDs.
+# Run:AI project deletion blockers
+# KRM grants the project-controller everything it needs to reconcile projects.
+# These read grants stay because KRM deliberately grants none for delete-blocker
+# kinds, treating that as the administrator's job, and a blocker the controller
+# cannot list is an error that blocks project deletion outright.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -888,90 +891,24 @@ rules:
   - apiGroups:
       - run.ai
     resources:
-      - projects
-      - projects/finalizers
-      - projects/status
-    verbs:
-      - create
-      - get
-      - list
-      - watch
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - kai.resources
-    resources:
-      - projects
-      - projects/finalizers
-      - projects/status
-      - departments
-      - departments/finalizers
-      - departments/status
-    verbs:
-      - create
-      - get
-      - list
-      - watch
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - run.ai
-    resources:
       - trainingworkloads
       - interactiveworkloads
       - inferenceworkloads
       - distributedworkloads
       - externalworkloads
-      - datavolumes
-      - workloadrunners
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - run.ai
-    resources:
       - distributedinferenceworkloads
       - runaijobs
+      - workloadrunners
+      - datavolumes
     verbs:
-      - list
-  - apiGroups:
-      - scheduling.run.ai
-    resources:
-      - queues
-      - departments
-      - departments/finalizers
-    verbs:
-      - create
       - get
       - list
       - watch
-      - update
-      - patch
-      - delete
   - apiGroups:
       - ""
     resources:
-      - configmaps
-      - namespaces
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - rbac.authorization.k8s.io
-    resources:
-      - rolebindings
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - monitoring.coreos.com
-    resources:
-      - servicemonitors
+      - secrets
+      - persistentvolumeclaims
     verbs:
       - get
       - list
@@ -986,8 +923,10 @@ roleRef:
   kind: ClusterRole
   name: runai-project-controller
 subjects:
+  # KRM's service account, which is not named the same as the one the Run:ai
+  # project-controller used.
   - kind: ServiceAccount
-    name: runai-project-controller
+    name: project-controller
     namespace: runai
 ---
 {{- end }}

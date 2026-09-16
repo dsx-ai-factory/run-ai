@@ -53,6 +53,7 @@ func runaiDeletionBlockers() []kaiv1alpha1.DeleteBlocker {
 		{DisplayName: "Workloads", Group: runaiGroup, Version: v1alpha1, Kind: "ExternalWorkload"},
 		{DisplayName: "Workloads", Group: runaiGroup, Version: v1alpha1, Kind: "DistributedInferenceWorkload"},
 		{DisplayName: "Workloads", Group: runaiGroup, Version: "v1", Kind: "RunaiJob"},
+		{DisplayName: "Workloads", Group: runaiGroup, Version: v1alpha1, Kind: "WorkloadRunner"},
 		{DisplayName: "DataVolumes", Group: runaiGroup, Version: v1alpha1, Kind: "DataVolume"},
 		{DisplayName: "Secrets", Group: "", Version: "v1", Kind: "Secret",
 			LabelSelector: projectScopeWithType(clustercommonconstants.RunaiResourceLabel)},

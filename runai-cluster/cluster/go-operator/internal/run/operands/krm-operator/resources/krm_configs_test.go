@@ -116,7 +116,7 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 
 		It("carries every deletion blocker onto the CR", func() {
 			blockers := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.DeleteBlockers
-			Expect(blockers).To(HaveLen(11))
+			Expect(blockers).To(HaveLen(12))
 
 			var displayNames []string
 			for _, blocker := range blockers {
