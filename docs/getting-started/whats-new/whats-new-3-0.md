@@ -24,42 +24,28 @@ NVIDIA Run:ai uses life cycle labels to indicate the maturity and stability of f
 
 Upgrading to v3.0 requires administrators to perform additional steps beyond the base upgrade procedure. See [Plan the Upgrade](../../installation-and-configuration/upgrade/plan-the-upgrade.md) for the specific changes to plan for, and [Upgrade NVIDIA Run:ai](../../installation-and-configuration/upgrade/upgrade.md) for the base upgrade procedure.
 
-### Backup Before Upgrading
+### Upstream Third-Party Images
 
 NVIDIA Run:ai v3.0 changes how third-party service images are sourced: instead of NVIDIA Run:ai bundling these images, you now pull them yourself from the upstream registry or your own mirror. Back up your cluster configurations, control plane configurations, and third-party services (PostgreSQL, Thanos) before upgrading. See [Back Up Before Upgrading](../../installation-and-configuration/upgrade/backup-before-upgrading.md) for the full backup procedure.
 
-### GPU Fractions Upgrade
+### NVIDIA CUDA-Based GPU Fractions
 
-NVIDIA Run:ai v3.0 replaces the proprietary engine behind GPU fractions with GPU sharing built directly into NVIDIA CUDA. This makes the capability part of the standard NVIDIA stack, with broader compatibility and long-term maintenance by NVIDIA. Native workload types require no changes; supported workload types require changes only if their manifest sets a fraction limit. See [Migrate GPU Fractions](../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for prerequisites and the full procedure.
+GPU fractions remain supported in v3.0, now powered by NVIDIA CUDA instead of the previous proprietary engine. This makes the capability part of the standard NVIDIA stack, with broader compatibility and long-term maintenance by NVIDIA. Native workload types require no changes; supported workload types require changes only if their manifest sets a fraction limit. See [Migrate GPU Fractions](../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for prerequisites and the full procedure.
 
-### Workload Model Unification
+### Unified Controller for All Workload Types
 
-<Warning>
+The controllers and CRDs behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller and CRD.
 
-**TODO:** not sure what the name of this heading should be. Ofer, please advise.
-
-</Warning>
-
-The controllers behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller.
-
-Workloads submitted before upgrading through a legacy workload type - workspace, training, distributed training, standard inference, or distributed inference - continue running after the upgrade, but lose some capabilities until resubmitted. See [Migrate Legacy Workloads](../../installation-and-configuration/upgrade/migrate-legacy-workloads.md) for the affected capabilities and the resubmission procedure.
-
-<Info>
-
-**Note**
-
-Resubmitting an affected workload through the NVIDIA Run:ai UI, API, or CLI binds it to the unified controller.
-
-</Info>
+Native workloads submitted before upgrading through a legacy workload type - workspace, training, distributed training, standard inference, or distributed inference - continue running after the upgrade, but lose some capabilities until resubmitted. See [Migrate Legacy Workloads](../../installation-and-configuration/upgrade/migrate-legacy-workloads.md) for the affected capabilities and the resubmission procedure.
 
 ### Dynamic Resource Allocation (DRA) Driver
 
 A fresh GPU Operator installation installs the NVIDIA DRA driver automatically, but upgrading an existing GPU Operator deployment does not. If your cluster requires the DRA driver (for example, Multi-Node NVLink deployments such as GB200), install it manually after upgrading the GPU Operator. See [Plan the Upgrade](../../installation-and-configuration/upgrade/plan-the-upgrade.md) for details.
 
-### GPU Memory SWAP Disabled
+### GPU Memory Swap Disabled
 
-Upgrading to v3.0 forces GPU Memory SWAP and the node-level scheduler off, even if they were previously enabled, and neither can be re-enabled afterward. The node-level scheduler was deprecated in v2.25 and GPU Memory SWAP in v2.26. Snapshot, the planned replacement capability, is targeted for v3.1 and is not available in v3.0. See [Plan the Upgrade](../../installation-and-configuration/upgrade/plan-the-upgrade.md) for what to check before upgrading.
+Upgrading to v3.0 forces GPU memory swap and the node-level scheduler off, even if they were previously enabled, and neither can be re-enabled afterward. The node-level scheduler was deprecated in v2.25 and GPU memory swap in v2.26. Snapshot, the planned replacement capability, is targeted for v3.1 and is not available in v3.0. See [Plan the Upgrade](../../installation-and-configuration/upgrade/plan-the-upgrade.md) for what to check before upgrading.
 
-### Air-Gapped Upgrades
+### New Air-Gapped Installer Workflow
 
 Air-gapped upgrades now use the `runai-installer` binary's `airgap pack` and `airgap load` commands to rebuild your private registry mirror and generate fresh Helm values for the target version, replacing the previous NGC/JFrog `.tgz` download and hand-edited Helm command. See [Upgrade NVIDIA Run:ai](../../installation-and-configuration/upgrade/upgrade.md) for the full procedure.

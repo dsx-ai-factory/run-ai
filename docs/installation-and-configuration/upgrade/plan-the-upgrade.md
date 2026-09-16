@@ -22,8 +22,8 @@ Before upgrading NVIDIA Run:ai, verify that your Kubernetes or OpenShift distrib
 | NVIDIA Run:ai version | Supported Kubernetes versions | Supported OpenShift versions |
 | --------------------- | ----------------------------- | ---------------------------- |
 | 3.0 (latest)          | 1.35 to 1.37                  | 4.20 to 4.22                 |
-| 2.26                  | 1.34 to 1.36                  | 4.18 to 4.22                 |
-| 2.25                  | 1.33 to 1.35                  | 4.18 to 4.22                 |
+| 2.26                  | 1.34 to 1.36                  | 4.18 to 4.21                 |
+| 2.25                  | 1.33 to 1.35                  | 4.18 to 4.21                 |
 | 2.24                  | 1.33 to 1.35                  | 4.17 to 4.20                 |
 
 For information on supported versions of managed Kubernetes, consult the release notes provided by your Kubernetes service provider. For an up-to-date end-of-life statement see [Kubernetes Release History](https://kubernetes.io/releases/) or [OpenShift Container Platform Life Cycle Policy](https://access.redhat.com/support/policy/updates/openshift).
@@ -32,9 +32,9 @@ For information on supported versions of managed Kubernetes, consult the release
 
 The following v3.0 changes can affect your upgrade. Review each one and determine whether it applies to your environment.
 
-### GPU Fractions
+### NVIDIA CUDA-Based GPU Fractions
 
-v3.0 replaces the proprietary engine behind GPU fractions with GPU sharing built directly into NVIDIA CUDA. This affects every cluster running fractional GPU workloads:
+GPU fractions remain supported in v3.0, now powered by NVIDIA CUDA instead of the previous proprietary engine. This affects every cluster running fractional GPU workloads:
 
 * Fractional workloads must be suspended (native workload types) or deleted (supported workload types) before the NVIDIA Run:ai upgrade begins.
 * CUDA 13.4 or later, CUDA driver r615 or later, and GPU Operator 26.7 or later are required for fractions to work on v3.0.
@@ -43,23 +43,17 @@ v3.0 replaces the proprietary engine behind GPU fractions with GPU sharing built
 
 See [Migrate GPU Fractions](migrate-gpu-fractions.md) for the full procedure.
 
-### Workload Model Unification
+### Unified Controller for All Workload Types
 
-<Warning>
+The controllers and CRDs behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller and CRD.
 
-**TODO:** not sure what the name of this heading should be. Ofer, please advise.
-
-</Warning>
-
-The controllers behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller.
-
-Workloads submitted before upgrading through a legacy workload type continue running after the upgrade, but some capabilities are unavailable until the workload is resubmitted. Identify workloads on legacy types now so you can plan for resubmission after upgrading.
+Native workloads submitted before upgrading through a legacy workload type continue running after the upgrade, but some capabilities are unavailable until the workload is resubmitted. Identify workloads on legacy types now so you can plan for resubmission after upgrading.
 
 See [Migrate Legacy Workloads](migrate-legacy-workloads.md) for the affected capabilities and the resubmission procedure.
 
-### GPU Memory SWAP and Node-Level Scheduler
+### GPU Memory Swap Disabled
 
-The node-level scheduler was deprecated in v2.25 and GPU Memory SWAP in v2.26. In v3.0, both are disabled:
+The node-level scheduler was deprecated in v2.25 and GPU memory swap in v2.26. In v3.0, both are disabled:
 
 * The `swapEnabled` and `nodeLevelSchedulerEnabled` API fields accept only `false`. Setting either to `true` returns an API error.
 * Upgrading to v3.0 forces both fields to `false`, even if they were previously `true`. Neither can be re-enabled afterward.
@@ -68,13 +62,10 @@ The node-level scheduler was deprecated in v2.25 and GPU Memory SWAP in v2.26. I
 
 Snapshot, the planned replacement capability, is targeted for v3.1 and is not available in v3.0 - no replacement exists for the duration of the v3.0 release.
 
-Before upgrading, identify any workloads or node pools relying on GPU Memory SWAP or the node-level scheduler, since neither is available after the upgrade and there is no post-upgrade action that restores them.
+Before upgrading, identify any workloads or node pools relying on GPU memory swap or the node-level scheduler, since neither is available after the upgrade and there is no post-upgrade action that restores them:
 
-<Warning>
-
-**TODO:** what should the admin actually do with workloads/node pools identified here before upgrading? Stop them? Reconfigure them? Delete the node pool config? Confirm the required pre-upgrade action.
-
-</Warning>
+* **Workloads** - GPU memory swap workloads are dynamic fractions workloads under the hood. After upgrading, they continue running as standard dynamic fractions workloads, but without swap they no longer serve their original purpose. Delete these workloads before upgrading.
+* **Node pools** - No action is required. Swap-related node pool configuration becomes inactive after the upgrade.
 
 ### Dynamic Resource Allocation (DRA) Driver
 
@@ -85,5 +76,5 @@ A fresh GPU Operator installation installs the [NVIDIA DRA driver](https://docs.
 1. [Back up your deployment](backup-before-upgrading.md), including cluster and control plane configuration and any third-party services such as PostgreSQL and metrics storage.
 2. If you use GPU fractions, suspend or delete fractional workloads and migrate any dynamic fractions YAML as described in [Migrate GPU Fractions](migrate-gpu-fractions.md).
 3. [Upgrade NVIDIA Run:ai](upgrade.md): prepare the software artifacts, then upgrade the control plane followed by the cluster.
-4. [Migrate legacy workloads](migrate-legacy-workloads.md) as they apply to your environment, including resubmitting workloads on legacy types and resubmitting any GPU fraction workloads suspended or deleted in step 2.
+4. [Migrate legacy workloads](migrate-legacy-workloads.md) if they apply to your environment, including resubmitting workloads on legacy types and resubmitting any GPU fraction workloads suspended or deleted in step 2.
 5. Verify affected functionality - confirm the cluster is **Connected**, GPU fractions are enforcing their limits, and resubmitted workloads behave as expected.

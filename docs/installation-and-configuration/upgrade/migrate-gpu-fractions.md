@@ -1,6 +1,6 @@
 # Migrate GPU Fractions
 
-NVIDIA Run:ai v3.0 replaces the proprietary engine behind GPU fractions with GPU sharing built directly into NVIDIA CUDA. This makes the capability part of the standard NVIDIA stack, with broader compatibility and long-term maintenance by NVIDIA.
+GPU fractions remain supported in v3.0, now powered by NVIDIA CUDA instead of the previous proprietary engine. This makes the capability part of the standard NVIDIA stack, with broader compatibility and long-term maintenance by NVIDIA.
 
 The upgrade affects every cluster running fractional GPU workloads. The submission method determines whether the workload's request needs to be rewritten before it is resubmitted:
 
@@ -25,7 +25,9 @@ In releases up to v2.26, a dynamic fraction was expressed in two places: the fra
 
 <Warning>
 
-Every workload that sets `RUNAI_GPU_MEMORY_LIMIT` must be migrated. The environment variable is no longer honored in v3.0 - a workload that still uses it is treated as a request without a limit, silently losing its burst ceiling.
+**Warning**
+
+Every supported workload type that sets `RUNAI_GPU_MEMORY_LIMIT` must be migrated. The environment variable is no longer honored in v3.0 - a workload that still uses it is treated as a request without a limit, silently losing its burst ceiling.
 
 </Warning>
 
