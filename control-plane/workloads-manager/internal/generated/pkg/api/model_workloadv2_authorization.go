@@ -20,11 +20,12 @@ var dummyWorkloadv2Authorization = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
+// Workloadv2Authorization - Access control enforced by the endpoint's authentication proxy. Requires externalAccess on the endpoint. authorizationType must be supplied explicitly; it is not inferred from the access lists.
 type Workloadv2Authorization struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//AuthorizationType *AuthorizationType `json:"authorizationType,omitempty"`
-	AuthorizationType *AuthorizationType `json:"authorizationType,omitempty" gorm:""`
+	//AuthorizationType *AuthorizationType `json:"authorizationType"`
+	AuthorizationType *AuthorizationType `json:"authorizationType" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// List of users or service accounts that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
@@ -48,6 +49,15 @@ type Workloadv2Authorization struct {
 
 // AssertWorkloadv2AuthorizationRequired checks if the required fields are not zero-ed
 func AssertWorkloadv2AuthorizationRequired(obj Workloadv2Authorization) error {
+	elements := map[string]interface{}{
+		"authorizationType": obj.AuthorizationType,
+	}
+	for name, el := range elements {
+		if isZero := IsZeroValue(el); isZero {
+			return &RequiredError{Field: name}
+		}
+	}
+
 	return nil
 }
 

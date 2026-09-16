@@ -13,7 +13,6 @@ docs/AgentNetworkingConfiguration.md
 docs/AgentNetworkingService.md
 docs/AgentServiceCreate.md
 docs/Annotation.md
-docs/Authorization.md
 docs/AuthorizationType.md
 docs/BatchResponse.md
 docs/BatchResponseFailureItem.md
@@ -128,7 +127,6 @@ model_agent_networking_configuration.go
 model_agent_networking_service.go
 model_agent_service_create.go
 model_annotation.go
-model_authorization.go
 model_authorization_type.go
 model_batch_response.go
 model_batch_response_failure_item.go

@@ -6,12 +6,15 @@
 package inference_workloads
 
 import (
+	"strings"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"k8s.io/apimachinery/pkg/util/validation"
 )
 
 var _ = Describe("Inference engine metrics", func() {
@@ -74,6 +77,15 @@ var _ = Describe("Inference engine metrics", func() {
 		Expect(spec.Ports[0].GetTargetPort()).To(Equal(int32(9000)))
 		Expect(string(spec.Ports[0].GetProtocol())).To(Equal("TCP"))
 	})
+
+	DescribeTable("keeps metrics Service names valid at the 50-character workload-name limit", func(engine inferenceEngine) {
+		workloadName := strings.Repeat("a", 50)
+		endpoint := buildMetricsEndpoint(engine, workloadName, nil)
+		name := endpoint.Services[0].GetSpec().Name
+		Expect(name).To(Equal(workloadName + "-metrics"))
+		Expect(name).To(HaveLen(58))
+		Expect(validation.IsDNS1035Label(name)).To(BeEmpty())
+	}, Entry("NIM", inferenceEngineNIM), Entry("vLLM", inferenceEngineVLLM))
 
 	It("falls back to port 8000", func() {
 		endpoint := buildMetricsEndpoint(inferenceEngineNIM, "my-llm", nil)

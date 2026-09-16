@@ -18,7 +18,6 @@ pkg/api/model_agent_networking_configuration.go
 pkg/api/model_agent_networking_service.go
 pkg/api/model_agent_service_create.go
 pkg/api/model_annotation.go
-pkg/api/model_authorization.go
 pkg/api/model_authorization_type.go
 pkg/api/model_batch_response.go
 pkg/api/model_batch_response_failure_item.go

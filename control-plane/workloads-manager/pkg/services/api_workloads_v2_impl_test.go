@@ -1010,6 +1010,51 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect((*update.Configuration.Networking.Services)[0].Ref.Port).To(Equal(port))
 		})
 
+		DescribeTable("requires ownership enforcement for direct networking submissions", func(dryRun bool) {
+			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
+				WithCluster(randoms.ClusterId, clusterInfoOf(randoms, "2.26.0")))
+			checker.InitClusterCapabilitiesChecker("", defaultClusterCacheConfig(), "")
+			request := api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "networking-version-gate", ProjectId: randoms.ProjectIdStr,
+					Configuration: api.WorkloadV2Configuration{Networking: &[]api.NetworkingEndpoint{{
+						Services: &[]api.NetworkingService{{Ref: &api.ServiceRef{Name: "networking-version-gate", Port: 8080}}},
+					}}},
+				},
+				Manifest: sampleManifest,
+			}
+			req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s?dryRun=%t", testHost, urlWorkloads, dryRun), makePayload(request))
+			Expect(err).NotTo(HaveOccurred())
+			req.Header = *headerForAdmin(randoms)
+			resp := httptest.NewRecorder()
+			router.ServeHTTP(resp, req)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+			Expect(resp.Body.String()).To(ContainSubstring("requires cluster version 3.0.0 and above for networking ownership validation"))
+		}, Entry("create", false), Entry("dry run", true))
+
+		It("allows old-cluster workloads without networking but rejects adding networking on update", func() {
+			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
+				WithCluster(randoms.ClusterId, clusterInfoOf(randoms, "2.26.0")))
+			checker.InitClusterCapabilitiesChecker("", defaultClusterCacheConfig(), "")
+			id, _ := createWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "networking-update-gate", ProjectId: randoms.ProjectIdStr,
+					Priority: convutils.Ref("high"), Category: convutils.Ref("train"),
+				},
+				Manifest: sampleManifest,
+			})
+			request := api.WorkloadV2UpdateRequest{Manifest: sampleManifest, Metadata: api.WorkloadV2MetadataUpdateParams{
+				Configuration: &api.WorkloadV2Configuration{Networking: &[]api.NetworkingEndpoint{{
+					Services: &[]api.NetworkingService{{Ref: &api.ServiceRef{Name: "networking-update-gate", Port: 8080}}},
+				}}},
+			}}
+			resp := tryToUpdateWorkloadForTest(router, randoms, id, &request)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+			Expect(resp.Body.String()).To(ContainSubstring("networking ownership validation"))
+			request.Metadata.Configuration.Networking = &[]api.NetworkingEndpoint{}
+			updateWorkloadForTest(router, randoms, id, &request)
+		})
+
 		It("rejects metadata.configuration.networking for cluster < 2.25", func() {
 			// Use a cluster version that supports V2 workloads (>= 2.23) but not networking (< 2.25)
 			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
@@ -1049,7 +1094,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect(createResp.Body.String()).To(ContainSubstring("metadata.configuration.networking is supported for cluster version 2.25.0 and above"))
 		})
 
-		It("rejects endpoint-only networking fields for clusters below endpoint-array networking support", func() {
+		It("rejects native endpoint-only networking fields for clusters below endpoint-array networking support", func() {
 			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
 				WithCluster(randoms.ClusterId, clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)).
 				WithCluster(oldCluster.ClusterId, clusterInfoOf(oldCluster, "2.25.0")))
@@ -1084,13 +1129,13 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				Manifest: sampleManifest,
 			}
 
-			createResp := tryToCreateWorkloadForTest(router, oldCluster, &toCreate)
+			createResp := tryToCreateInternalWorkloadForTest(router, oldCluster, &toCreate)
 			Expect(createResp.Code).To(Equal(http.StatusBadRequest), "create with endpoint-only fields on cluster below endpoint-array networking support should be rejected: %s", createResp.Body.String())
 			Expect(createResp.Body.String()).To(ContainSubstring("metadata.configuration.networking includes values that require cluster version 2.26.0 and above"))
 			Expect(createResp.Body.String()).To(ContainSubstring("type"))
 		})
 
-		It("accepts agent-networking-compatible config for clusters below endpoint-array networking support", func() {
+		It("accepts native agent-networking-compatible config for clusters below endpoint-array networking support", func() {
 			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
 				WithCluster(randoms.ClusterId, clusterInfoOf(randoms, "2.25.0")).
 				WithCluster(oldCluster.ClusterId, clusterInfoOf(oldCluster, "2.22.0")))
@@ -1115,7 +1160,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				Manifest: sampleManifest,
 			}
 
-			id, _ := createWorkloadForTest(router, randoms, &toCreate)
+			id, _ := createInternalWorkloadForTest(router, randoms, &toCreate)
 
 			updates := getUpdatesForTest(router, randoms, 0, 50, emptyClusterReports)
 			var update *api.WorkloadV2Update

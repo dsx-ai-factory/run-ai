@@ -1540,18 +1540,22 @@ components:
       nullable: true
       properties:
         ingress:
-          description: Full Kubernetes Ingress resource (networking.k8s.io/v1). Used
-            when cluster uses Ingress.
+          description: |-
+            Kubernetes Ingress resource (networking.k8s.io/v1). Must contain rules with HTTP paths.
+            When the endpoint defines a Service, each path's backend.service must match spec.name and spec.ports[0].port,
+            or ref.name and ref.port, using a numeric backend port. With authorization, still specify the workload Service;
+            the controller redirects the backend to its generated authentication proxy.
           nullable: true
           type: object
         route:
-          description: Full OpenShift Route resource (route.openshift.io/v1). Used
-            when cluster uses Route.
+          description: OpenShift Route resource (route.openshift.io/v1). Requires
+            spec.host. Used when the cluster uses Route.
           nullable: true
           type: object
         httpRoute:
-          description: Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1).
-            Used when cluster uses Gateway API.
+          description: Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1).
+            Requires at least one spec.rules entry. Used when the cluster uses Gateway
+            API.
           nullable: true
           type: object
       type: object
@@ -1581,7 +1585,6 @@ components:
         name: http
         targetPort: 8000
         nodePort: 30080
-      nullable: true
       properties:
         name:
           description: The Service port name.
@@ -1666,8 +1669,8 @@ components:
         selector:
           additionalProperties:
             type: string
-          description: Label selector to identify the pods that this service routes
-            traffic to.
+          description: Pod labels used to select destination Pods within this workload.
+            All selector entries must match.
           example:
             app: my-app
           nullable: true
@@ -1675,12 +1678,14 @@ components:
         labels:
           additionalProperties:
             type: string
-          description: Labels to apply to the Kubernetes Service.
+          description: Labels to apply to the Kubernetes Service. Run:ai metrics labels
+            trigger metrics-specific behavior and validation.
           example:
             app: my-app
           type: object
         ports:
-          description: Ports exposed by the service.
+          description: Ports exposed by the Service. Attached Ingress and HTTPRoute
+            backends and the authentication proxy use the first port.
           items:
             $ref: '#/components/schemas/ServicePort'
           maxItems: 1000
@@ -1692,7 +1697,9 @@ components:
       - selector
       type: object
     ServiceRef:
-      description: Reference an existing Service.
+      description: Reference an existing Service. Requires authorization on the service
+        and externalAccess on the endpoint. The Service and its destination Pods must
+        belong to the same workload; the referenced Service is not modified.
       example:
         port: 8000
         name: existing-service
@@ -1716,12 +1723,12 @@ components:
       - port
       type: object
     AuthorizationType:
-      description: |
-        Specifies who can access the connection URL:
-        - `authenticatedUsers`: Any authenticated user or service account can access the URL; the authorizedUsers and authorizedGroups fields are ignored.
-        - `authorizedUsers`: Only users listed in the authorizedUsers field are allowed to access the URL; the authorizedGroups field is ignored.
-        - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field are allowed to access the URL; the authorizedUsers field is ignored.
-        If not specified, authorization is determined by whether authorizedUsers or authorizedGroups is present. If both fields are set, this results in an error. If neither is set, any authenticatedUser can access.
+      description: |-
+        Specifies who can access the endpoint through its authentication proxy. Must be provided explicitly.
+        - `authenticatedUsers`: Any authenticated user or service account can access. Both access lists must be omitted or empty.
+        - `authorizedUsers`: Only users or service accounts in the nonempty authorizedUsers list can access. authorizedGroups must be omitted or empty.
+        - `authorizedGroups`: Only members of groups in the nonempty authorizedGroups list can access. authorizedUsers must be omitted or empty.
+        Incompatible nonempty access lists are rejected, not ignored.
       enum:
       - authenticatedUsers
       - authorizedUsers
@@ -1754,8 +1761,13 @@ components:
       maxItems: 1000
       nullable: true
       type: array
-    Authorization:
-      description: Authorization configuration.
+    Workloadv2Authorization:
+      description: |-
+        Access control enforced by the endpoint's authentication proxy. Requires externalAccess on the endpoint.
+        authorizationType must be supplied explicitly; it is not inferred from the access lists.
+      example:
+        forceJsonResponse: false
+        authorizationType: authenticatedUsers
       nullable: true
       properties:
         authorizationType:
@@ -1786,25 +1798,17 @@ components:
           maxItems: 1000
           nullable: true
           type: array
-      type: object
-    Workloadv2Authorization:
-      allOf:
-      - $ref: '#/components/schemas/Authorization'
-      - properties:
-          forceJsonResponse:
-            default: false
-            description: Force JSON errors instead of HTTP error pages or redirects.
-            nullable: true
-            type: boolean
-        type: object
-      example:
-        forceJsonResponse: false
-        authorizationType: authenticatedUsers
-      nullable: true
+        forceJsonResponse:
+          default: false
+          description: Force JSON errors instead of HTTP error pages or redirects.
+          nullable: true
+          type: boolean
+      required:
+      - authorizationType
       type: object
     NetworkingService:
-      description: Service configuration for routing traffic to the workload. Use
-        'spec' or 'ref' (not both).
+      description: Service configuration for routing traffic to the workload. Provide
+        exactly one of spec or ref.
       example:
         authorization:
           forceJsonResponse: false
@@ -1845,7 +1849,6 @@ components:
             nodePort: 30080
           labels:
             app: my-app
-      nullable: true
       properties:
         spec:
           $ref: '#/components/schemas/ServiceSpec'
@@ -1855,8 +1858,9 @@ components:
           $ref: '#/components/schemas/Workloadv2Authorization'
       type: object
     NetworkingEndpoint:
-      description: A single networking endpoint. An endpoint may create or reference
-        one Service and may expose it externally.
+      description: |-
+        A single networking endpoint. Provide a Service, externalAccess containing an Ingress, Route, or HTTPRoute, or both.
+        An endpoint may create or reference at most one Service. Authorization requires externalAccess.
       example:
         services:
         - authorization:
@@ -1902,7 +1906,6 @@ components:
           ingress: "{}"
           route: "{}"
           httpRoute: "{}"
-      nullable: true
       properties:
         externalAccess:
           $ref: '#/components/schemas/ExternalAccess'
@@ -1918,7 +1921,7 @@ components:
     NetworkingConfiguration:
       description: |
         Networking endpoint configurations for the workload (external access, services with auth).
-        Supported for cluster version 2.25 and above.
+        Direct submissions require cluster version 3.0.0 or above for networking ownership validation.
       items:
         $ref: '#/components/schemas/NetworkingEndpoint'
       maxItems: 1000
@@ -2436,7 +2439,7 @@ components:
         networking:
           description: |
             Networking endpoint configurations for the workload (external access, services with auth).
-            Supported for cluster version 2.25 and above.
+            Direct submissions require cluster version 3.0.0 or above for networking ownership validation.
           items:
             $ref: '#/components/schemas/NetworkingEndpoint'
           maxItems: 1000

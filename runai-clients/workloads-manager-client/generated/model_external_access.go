@@ -22,11 +22,11 @@ var _ MappedNullable = &ExternalAccess{}
 
 // ExternalAccess External access configuration. Same shape as the networking plugin. Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API). Omit or leave empty for no external access.
 type ExternalAccess struct {
-	// Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress.
+	// Kubernetes Ingress resource (networking.k8s.io/v1). Must contain rules with HTTP paths. When the endpoint defines a Service, each path's backend.service must match spec.name and spec.ports[0].port, or ref.name and ref.port, using a numeric backend port. With authorization, still specify the workload Service; the controller redirects the backend to its generated authentication proxy.
 	Ingress map[string]interface{} `json:"ingress,omitempty"`
-	// Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route.
+	// OpenShift Route resource (route.openshift.io/v1). Requires spec.host. Used when the cluster uses Route.
 	Route map[string]interface{} `json:"route,omitempty"`
-	// Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
+	// Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Requires at least one spec.rules entry. Used when the cluster uses Gateway API.
 	HttpRoute map[string]interface{} `json:"httpRoute,omitempty"`
 }
 

@@ -12,7 +12,7 @@ properties:
     description: Kubernetes service type that determines how the service is exposed.
     $ref: "./ServiceType.yaml"
   selector:
-    description: Label selector to identify the pods that this service routes traffic to.
+    description: Pod labels used to select destination Pods within this workload. All selector entries must match.
     type: object
     additionalProperties:
       type: string
@@ -20,14 +20,14 @@ properties:
       app: my-app
     nullable: true
   labels:
-    description: Labels to apply to the Kubernetes Service.
+    description: Labels to apply to the Kubernetes Service. Run:ai metrics labels trigger metrics-specific behavior and validation.
     type: object
     additionalProperties:
       type: string
     example:
       app: my-app
   ports:
-    description: Ports exposed by the service.
+    description: Ports exposed by the Service. Attached Ingress and HTTPRoute backends and the authentication proxy use the first port.
     type: array
     minItems: 1
     maxItems: 1000

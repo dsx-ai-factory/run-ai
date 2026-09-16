@@ -33602,15 +33602,19 @@ components:
       nullable: true
       properties:
         ingress:
-          description: Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress.
+          description: |-
+            Kubernetes Ingress resource (networking.k8s.io/v1). Must contain rules with HTTP paths.
+            When the endpoint defines a Service, each path's backend.service must match spec.name and spec.ports[0].port,
+            or ref.name and ref.port, using a numeric backend port. With authorization, still specify the workload Service;
+            the controller redirects the backend to its generated authentication proxy.
           type: object
           nullable: true
         route:
-          description: Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route.
+          description: OpenShift Route resource (route.openshift.io/v1). Requires spec.host. Used when the cluster uses Route.
           type: object
           nullable: true
         httpRoute:
-          description: Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
+          description: Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Requires at least one spec.rules entry. Used when the cluster uses Gateway API.
           type: object
           nullable: true
     ServiceType:
@@ -33634,7 +33638,6 @@ components:
     ServicePort:
       type: object
       description: Service port specification.
-      nullable: true
       properties:
         name:
           description: The Service port name.
@@ -33686,7 +33689,7 @@ components:
           description: Kubernetes service type that determines how the service is exposed.
           $ref: '#/components/schemas/ServiceType'
         selector:
-          description: Label selector to identify the pods that this service routes traffic to.
+          description: Pod labels used to select destination Pods within this workload. All selector entries must match.
           type: object
           additionalProperties:
             type: string
@@ -33694,14 +33697,14 @@ components:
             app: my-app
           nullable: true
         labels:
-          description: Labels to apply to the Kubernetes Service.
+          description: Labels to apply to the Kubernetes Service. Run:ai metrics labels trigger metrics-specific behavior and validation.
           type: object
           additionalProperties:
             type: string
           example:
             app: my-app
         ports:
-          description: Ports exposed by the service.
+          description: Ports exposed by the Service. Attached Ingress and HTTPRoute backends and the authentication proxy use the first port.
           type: array
           minItems: 1
           maxItems: 1000
@@ -33713,7 +33716,7 @@ components:
         - ports
     ServiceRef:
       type: object
-      description: Reference an existing Service.
+      description: Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint. The Service and its destination Pods must belong to the same workload; the referenced Service is not modified.
       nullable: true
       properties:
         name:
@@ -33732,36 +33735,45 @@ components:
       required:
         - name
         - port
-    Authorization:
-      type: object
-      description: Authorization configuration.
+    AuthorizationType1:
+      type: string
+      enum:
+        - authenticatedUsers
+        - authorizedUsers
+        - authorizedGroups
+      description: |-
+        Specifies who can access the endpoint through its authentication proxy. Must be provided explicitly.
+        - `authenticatedUsers`: Any authenticated user or service account can access. Both access lists must be omitted or empty.
+        - `authorizedUsers`: Only users or service accounts in the nonempty authorizedUsers list can access. authorizedGroups must be omitted or empty.
+        - `authorizedGroups`: Only members of groups in the nonempty authorizedGroups list can access. authorizedUsers must be omitted or empty.
+        Incompatible nonempty access lists are rejected, not ignored.
       nullable: true
+    Workloadv2Authorization:
+      type: object
+      description: |-
+        Access control enforced by the endpoint's authentication proxy. Requires externalAccess on the endpoint.
+        authorizationType must be supplied explicitly; it is not inferred from the access lists.
+      example:
+        forceJsonResponse: false
+        authorizationType: authenticatedUsers
       properties:
         authorizationType:
-          $ref: '#/components/schemas/AuthorizationType'
+          $ref: '#/components/schemas/AuthorizationType1'
         authorizedUsers:
           $ref: '#/components/schemas/AuthorizedUsers'
         authorizedGroups:
           $ref: '#/components/schemas/AuthorizedGroups'
-    Workloadv2Authorization:
-      type: object
-      example:
-        forceJsonResponse: false
-        authorizationType: authenticatedUsers
-      allOf:
-        - $ref: '#/components/schemas/Authorization'
-        - type: object
-          properties:
-            forceJsonResponse:
-              description: Force JSON errors instead of HTTP error pages or redirects.
-              type: boolean
-              default: false
-              nullable: true
+        forceJsonResponse:
+          description: Force JSON errors instead of HTTP error pages or redirects.
+          type: boolean
+          default: false
+          nullable: true
+      required:
+        - authorizationType
       nullable: true
     NetworkingService:
       type: object
-      description: Service configuration for routing traffic to the workload. Use 'spec' or 'ref' (not both).
-      nullable: true
+      description: Service configuration for routing traffic to the workload. Provide exactly one of spec or ref.
       properties:
         spec:
           description: Specification for a new Kubernetes service to create for this endpoint. Mutually exclusive with `ref`.
@@ -33770,12 +33782,13 @@ components:
           description: Reference to an existing Kubernetes service. Mutually exclusive with `spec`.
           $ref: '#/components/schemas/ServiceRef'
         authorization:
-          description: Access control configuration for traffic through this endpoint.
+          description: Access control configuration for traffic through this endpoint. Required when using ref. Requires externalAccess on the endpoint.
           $ref: '#/components/schemas/Workloadv2Authorization'
     NetworkingEndpoint:
       type: object
-      description: A single networking endpoint. An endpoint may create or reference one Service and may expose it externally.
-      nullable: true
+      description: |-
+        A single networking endpoint. Provide a Service, externalAccess containing an Ingress, Route, or HTTPRoute, or both.
+        An endpoint may create or reference at most one Service. Authorization requires externalAccess.
       properties:
         externalAccess:
           description: External access configuration for exposing the endpoint outside the cluster.
@@ -33791,7 +33804,7 @@ components:
       type: array
       description: |
         Networking endpoint configurations for the workload (external access, services with auth).
-        Supported for cluster version 2.25 and above.
+        Direct submissions require cluster version 3.0.0 or above for networking ownership validation.
       nullable: true
       maxItems: 1000
       items:

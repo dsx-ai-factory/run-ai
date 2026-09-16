@@ -4,9 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Ingress** | Pointer to **map[string]interface{}** | Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress. | [optional] 
-**Route** | Pointer to **map[string]interface{}** | Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route. | [optional] 
-**HttpRoute** | Pointer to **map[string]interface{}** | Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API. | [optional] 
+**Ingress** | Pointer to **map[string]interface{}** | Kubernetes Ingress resource (networking.k8s.io/v1). Must contain rules with HTTP paths. When the endpoint defines a Service, each path&#39;s backend.service must match spec.name and spec.ports[0].port, or ref.name and ref.port, using a numeric backend port. With authorization, still specify the workload Service; the controller redirects the backend to its generated authentication proxy. | [optional] 
+**Route** | Pointer to **map[string]interface{}** | OpenShift Route resource (route.openshift.io/v1). Requires spec.host. Used when the cluster uses Route. | [optional] 
+**HttpRoute** | Pointer to **map[string]interface{}** | Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Requires at least one spec.rules entry. Used when the cluster uses Gateway API. | [optional] 
 
 ## Methods
 

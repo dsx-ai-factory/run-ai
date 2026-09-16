@@ -14,15 +14,17 @@ Contact: support@run.ai
 package openapi
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the Workloadv2Authorization type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Workloadv2Authorization{}
 
-// Workloadv2Authorization struct for Workloadv2Authorization
+// Workloadv2Authorization Access control enforced by the endpoint's authentication proxy. Requires externalAccess on the endpoint. authorizationType must be supplied explicitly; it is not inferred from the access lists.
 type Workloadv2Authorization struct {
-	AuthorizationType NullableAuthorizationType `json:"authorizationType,omitempty"`
+	AuthorizationType NullableAuthorizationType `json:"authorizationType"`
 	// List of users or service accounts that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
 	AuthorizedUsers []string `json:"authorizedUsers,omitempty"`
 	// List of groups that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
@@ -31,12 +33,15 @@ type Workloadv2Authorization struct {
 	ForceJsonResponse NullableBool `json:"forceJsonResponse,omitempty"`
 }
 
+type _Workloadv2Authorization Workloadv2Authorization
+
 // NewWorkloadv2Authorization instantiates a new Workloadv2Authorization object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkloadv2Authorization() *Workloadv2Authorization {
+func NewWorkloadv2Authorization(authorizationType NullableAuthorizationType) *Workloadv2Authorization {
 	this := Workloadv2Authorization{}
+	this.AuthorizationType = authorizationType
 	var forceJsonResponse bool = false
 	this.ForceJsonResponse = *NewNullableBool(&forceJsonResponse)
 	return &this
@@ -52,16 +57,18 @@ func NewWorkloadv2AuthorizationWithDefaults() *Workloadv2Authorization {
 	return &this
 }
 
-// GetAuthorizationType returns the AuthorizationType field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetAuthorizationType returns the AuthorizationType field value
+// If the value is explicit nil, the zero value for AuthorizationType will be returned
 func (o *Workloadv2Authorization) GetAuthorizationType() AuthorizationType {
-	if o == nil || IsNil(o.AuthorizationType.Get()) {
+	if o == nil || o.AuthorizationType.Get() == nil {
 		var ret AuthorizationType
 		return ret
 	}
+
 	return *o.AuthorizationType.Get()
 }
 
-// GetAuthorizationTypeOk returns a tuple with the AuthorizationType field value if set, nil otherwise
+// GetAuthorizationTypeOk returns a tuple with the AuthorizationType field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Workloadv2Authorization) GetAuthorizationTypeOk() (*AuthorizationType, bool) {
@@ -71,28 +78,9 @@ func (o *Workloadv2Authorization) GetAuthorizationTypeOk() (*AuthorizationType, 
 	return o.AuthorizationType.Get(), o.AuthorizationType.IsSet()
 }
 
-// HasAuthorizationType returns a boolean if a field has been set.
-func (o *Workloadv2Authorization) HasAuthorizationType() bool {
-	if o != nil && o.AuthorizationType.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetAuthorizationType gets a reference to the given NullableAuthorizationType and assigns it to the AuthorizationType field.
+// SetAuthorizationType sets field value
 func (o *Workloadv2Authorization) SetAuthorizationType(v AuthorizationType) {
 	o.AuthorizationType.Set(&v)
-}
-
-// SetAuthorizationTypeNil sets the value for AuthorizationType to be an explicit nil
-func (o *Workloadv2Authorization) SetAuthorizationTypeNil() {
-	o.AuthorizationType.Set(nil)
-}
-
-// UnsetAuthorizationType ensures that no value is present for AuthorizationType, not even an explicit nil
-func (o *Workloadv2Authorization) UnsetAuthorizationType() {
-	o.AuthorizationType.Unset()
 }
 
 // GetAuthorizedUsers returns the AuthorizedUsers field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -214,9 +202,7 @@ func (o Workloadv2Authorization) MarshalJSON() ([]byte, error) {
 
 func (o Workloadv2Authorization) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.AuthorizationType.IsSet() {
-		toSerialize["authorizationType"] = o.AuthorizationType.Get()
-	}
+	toSerialize["authorizationType"] = o.AuthorizationType.Get()
 	if o.AuthorizedUsers != nil {
 		toSerialize["authorizedUsers"] = o.AuthorizedUsers
 	}
@@ -227,6 +213,50 @@ func (o Workloadv2Authorization) ToMap() (map[string]interface{}, error) {
 		toSerialize["forceJsonResponse"] = o.ForceJsonResponse.Get()
 	}
 	return toSerialize, nil
+}
+
+func (o *Workloadv2Authorization) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	// RUNAI
+	// requiredProperties := []string{
+	//
+	//  	"authorizationType",
+	// }
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	// RUNAI
+	//  for _, requiredProperty := range(requiredProperties) {
+	//  	if _, exists := allProperties[requiredProperty]; !exists {
+	//  		return fmt.Errorf("no value given for required property %v", requiredProperty)
+	//  	}
+	//  }
+	//
+	fmt.Sprintf("dummy")
+
+	varWorkloadv2Authorization := _Workloadv2Authorization{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	// RUNAI
+	// decoder.DisallowUnknownFields()
+	//
+	err = decoder.Decode(&varWorkloadv2Authorization)
+
+	if err != nil {
+		return err
+	}
+
+	*o = Workloadv2Authorization(varWorkloadv2Authorization)
+
+	return err
 }
 
 type NullableWorkloadv2Authorization struct {
