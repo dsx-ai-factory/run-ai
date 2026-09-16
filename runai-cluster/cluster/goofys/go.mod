@@ -3,7 +3,7 @@ module github.com/kahing/goofys
 go 1.26.6
 
 require (
-	cloud.google.com/go/storage v1.67.0
+	cloud.google.com/go/storage v1.67.1
 	github.com/Azure/azure-pipeline-go v0.2.3
 	github.com/Azure/azure-sdk-for-go v61.6.0+incompatible
 	github.com/Azure/azure-storage-blob-go v0.14.0
