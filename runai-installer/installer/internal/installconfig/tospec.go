@@ -76,17 +76,18 @@ func (c *Config) ToSpec(opts RunOptions) *spec.Spec {
 
 	if c.Cluster != nil && c.Cluster.Enabled {
 		s.Cluster = &spec.Cluster{
-			Name:             c.Cluster.Name,
-			Domain:           c.Cluster.Domain,
-			Version:          c.Cluster.Version,
-			WorkloadRouting:  c.Cluster.WorkloadRouting,
-			TLS:              toSpecTLS(c.Cluster.TLS),
-			Inference:        toSpecInference(c.Cluster.Inference),
-			ControlPlaneURL:  c.Cluster.ControlPlaneURL,
-			UID:              c.Cluster.UID,
-			BootstrapToken:   c.Cluster.bootstrapToken,
-			ClientSecret:     c.Cluster.clientSecret,
-			CustomHelmValues: toStringMap(c.Cluster.CustomHelmValues),
+			Name:                    c.Cluster.Name,
+			Domain:                  c.Cluster.Domain,
+			Version:                 c.Cluster.Version,
+			WorkloadRouting:         c.Cluster.WorkloadRouting,
+			TLS:                     toSpecTLS(c.Cluster.TLS),
+			Inference:               toSpecInference(c.Cluster.Inference),
+			ControlPlaneURL:         c.Cluster.ControlPlaneURL,
+			UID:                     c.Cluster.UID,
+			BootstrapToken:          c.Cluster.bootstrapToken,
+			ClientSecret:            c.Cluster.clientSecret,
+			ControlPlaneCredentials: toSpecControlPlaneCredentials(c.Cluster.ControlPlaneCredentials),
+			CustomHelmValues:        toStringMap(c.Cluster.CustomHelmValues),
 		}
 	}
 
@@ -237,6 +238,28 @@ func toSpecGPUType(d *Dependency) spec.GPUType {
 		return spec.GPUTypeReal
 	}
 	return spec.GPUType(d.Type)
+}
+
+// toSpecControlPlaneCredentials maps the credentials block with its file-based
+// secrets already resolved (see ResolveClusterCredentials). Inline values are
+// used directly when the resolver has not run, so in-memory specs behave the
+// same as loaded ones.
+func toSpecControlPlaneCredentials(cc *ControlPlaneCredentials) *spec.ControlPlaneCredentials {
+	if cc == nil {
+		return nil
+	}
+	password, token := cc.password, cc.token
+	if password == "" {
+		password = cc.Password
+	}
+	if token == "" {
+		token = cc.Token
+	}
+	return &spec.ControlPlaneCredentials{
+		Username: cc.Username,
+		Password: password,
+		Token:    token,
+	}
 }
 
 func toSpecInference(i *Inference) *spec.Inference {

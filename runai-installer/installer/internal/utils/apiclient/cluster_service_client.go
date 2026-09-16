@@ -106,3 +106,15 @@ func IsWithinLastMinute(timestampStr string) (bool, error) {
 	oneMinuteAgo := time.Now().Add(-1 * time.Minute)
 	return t.After(oneMinuteAgo) && t.Before(time.Now()), nil
 }
+
+// NewClusterServiceClientWithCredentials builds a standalone cluster-service
+// client for an external control plane, authenticated with the supplied
+// credentials. Unlike GetClientsInstanceWithCredentials it is not a singleton
+// and does not touch the local cluster.
+func NewClusterServiceClientWithCredentials(controlPlaneURL, caCertPath string, creds runaiclient.Credentials) (*ClusterServiceClient, error) {
+	client, err := runaiclient.NewClientWithCA(controlPlaneURL, creds, caCertPath)
+	if err != nil {
+		return nil, fmt.Errorf("connect to control plane %s: %w", controlPlaneURL, err)
+	}
+	return NewClusterServiceClientFromRunAI(client), nil
+}

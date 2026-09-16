@@ -137,3 +137,29 @@ func TestLoad_MissingFile(t *testing.T) {
 	_, err := Load(filepath.Join(t.TempDir(), "does-not-exist.yaml"))
 	require.Error(t, err)
 }
+
+func TestLoad_ControlPlaneCredentials(t *testing.T) {
+	path := writeConfig(t, `
+install:
+  mode: runai_cluster_only
+  connectivity: connected
+registry:
+  type: ngc
+cluster:
+  enabled: true
+  name: cluster01
+  domain: cluster.example.com
+  controlPlaneUrl: https://cp.example.com
+  controlPlaneCredentials:
+    username: admin@example.com
+    passwordPath: /etc/runai/cp-password
+`)
+
+	cfg, err := Load(path)
+	require.NoError(t, err)
+
+	require.NotNil(t, cfg.Cluster.ControlPlaneCredentials)
+	assert.Equal(t, "admin@example.com", cfg.Cluster.ControlPlaneCredentials.Username)
+	assert.Equal(t, "/etc/runai/cp-password", cfg.Cluster.ControlPlaneCredentials.PasswordPath)
+	assert.Empty(t, cfg.Cluster.UID)
+}

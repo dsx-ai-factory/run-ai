@@ -34,6 +34,9 @@ type FakeRunAIAPIClient struct {
 type RunAIClientProviderCall struct {
 	URL        string
 	CACertPath string
+	// Credentials is set for calls made through the credentialed provider
+	// (external control plane), nil for the local-admin provider.
+	Credentials *step.ControlPlaneCredentials
 }
 
 func (f *FakeRunAIAPIClient) cpInstalled() bool {
@@ -89,6 +92,18 @@ func NewFakeRunAIClientProvider(helm *FakeHelmInstaller) (*FakeRunAIAPIClient, s
 	return client, func(url, caCertPath string) (step.RunAIAPIClient, error) {
 		client.ProviderCalls = append(client.ProviderCalls, RunAIClientProviderCall{URL: url, CACertPath: caCertPath})
 		return client, nil
+	}
+}
+
+// CredentialedProvider returns a step.RunAIAPICredentialedClientProvider that
+// hands out the same fake client and records the credentials each call carried,
+// so tests can assert the external control plane was reached with the
+// user-supplied credentials rather than local-cluster secrets.
+func (f *FakeRunAIAPIClient) CredentialedProvider() step.RunAIAPICredentialedClientProvider {
+	return func(url, caCertPath string, creds step.ControlPlaneCredentials) (step.RunAIAPIClient, error) {
+		c := creds
+		f.ProviderCalls = append(f.ProviderCalls, RunAIClientProviderCall{URL: url, CACertPath: caCertPath, Credentials: &c})
+		return f, nil
 	}
 }
 

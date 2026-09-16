@@ -241,11 +241,12 @@ func buildClusterFlow(s *spec.Spec, deps orchestrator2.Deps) *orchestrator2.Flow
 		flowSteps = append(flowSteps, steps.NewCASecret("install-cluster-ca", clusterCASecret, step.ClusterNamespace, step.ClusterReleaseName, caPath, clusterCASecretLabels, deps))
 	}
 
-	if !c.UsesExternalControlPlane() {
+	// The cluster is registered by name unless the user pre-registered it and
+	// supplied its identity (uid + bootstrap token / client secret).
+	if !c.UsesSuppliedClusterIdentity() {
 		flowSteps = append(flowSteps, steps.NewEnsureCluster("register-cluster", actions.EnsureCluster{
-			ClusterName: c.Name,
-			Domain:      domain,
-			CACertPath:  caPath,
+			ClusterName:  c.Name,
+			ControlPlane: controlPlaneRef(c, domain, caPath),
 		}, deps))
 	}
 
@@ -267,6 +268,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 				ClusterUID:      c.UID,
 				BootstrapToken:  c.BootstrapToken,
 				ClientSecret:    c.ClientSecret,
+				Credentials:     controlPlaneCredentials(c),
 				CACertPath:      caPath,
 				WorkingDir:      workingDir,
 				LockChart:       step.ClusterChartName,
@@ -285,6 +287,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 			ClusterUID:      c.UID,
 			BootstrapToken:  c.BootstrapToken,
 			ClientSecret:    c.ClientSecret,
+			Credentials:     controlPlaneCredentials(c),
 			CACertPath:      caPath,
 			WorkingDir:      workingDir,
 			ChartPrefix:     step.ClusterChartName,
@@ -304,6 +307,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 		ClusterUID:      c.UID,
 		BootstrapToken:  c.BootstrapToken,
 		ClientSecret:    c.ClientSecret,
+		Credentials:     controlPlaneCredentials(c),
 		CACertPath:      caPath,
 		Repo:            repo,
 		IsOCI:           isOCI,
@@ -315,6 +319,29 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 		HostRouting:     c.HostRouting(),
 		ExtraValues:     clusterExtraValues(s, c),
 	}, deps), title)
+}
+
+// controlPlaneRef locates the control plane the cluster registers with: the
+// external one (URL + user credentials) for a credentialed cluster-only
+// install, otherwise the control plane at the cluster's domain.
+func controlPlaneRef(c *spec.Cluster, domain, caPath string) actions.ControlPlaneRef {
+	return actions.ControlPlaneRef{
+		URL:         c.ControlPlaneURL,
+		Domain:      domain,
+		CACertPath:  caPath,
+		Credentials: controlPlaneCredentials(c),
+	}
+}
+
+func controlPlaneCredentials(c *spec.Cluster) *step.ControlPlaneCredentials {
+	if !c.UsesControlPlaneCredentials() {
+		return nil
+	}
+	return &step.ControlPlaneCredentials{
+		Username: c.ControlPlaneCredentials.Username,
+		Password: c.ControlPlaneCredentials.Password,
+		Token:    c.ControlPlaneCredentials.Token,
+	}
 }
 
 func controlPlaneValues(s *spec.Spec, caPath string) []string {

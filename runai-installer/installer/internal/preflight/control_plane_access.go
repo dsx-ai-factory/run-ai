@@ -1,0 +1,42 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package preflight
+
+import (
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/actions"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/steps"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+)
+
+func init() { builders = append(builders, controlPlaneAccessBuilder) }
+
+// controlPlaneAccessBuilder assembles the external control-plane access check.
+// It applies only when a cluster-only install registers the cluster with an
+// external control plane using user-supplied credentials: that is the one case
+// where the installer must reach a control plane it did not install, before
+// any install work depends on it. Needs a credentialed client provider.
+func controlPlaneAccessBuilder(s *spec.Spec, deps orchestrator2.Deps) orchestrator2.Step {
+	if deps.RunAIClientWithCredentials == nil || s.Cluster == nil || !s.Cluster.UsesControlPlaneCredentials() {
+		return nil
+	}
+	c := s.Cluster
+	return steps.NewActionStepTitled("preflight-control-plane-access", "Control-plane access",
+		actions.CheckControlPlaneAccess{
+			ClusterName: c.Name,
+			ControlPlane: actions.ControlPlaneRef{
+				URL:        c.ControlPlaneURL,
+				Domain:     c.Domain,
+				CACertPath: controlPlaneCAPath(s),
+				Credentials: &step.ControlPlaneCredentials{
+					Username: c.ControlPlaneCredentials.Username,
+					Password: c.ControlPlaneCredentials.Password,
+					Token:    c.ControlPlaneCredentials.Token,
+				},
+			},
+		})
+}

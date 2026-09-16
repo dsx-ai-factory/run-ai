@@ -219,21 +219,121 @@ type ControlPlane struct {
 }
 
 type Cluster struct {
-	Name             string
-	Domain           string
-	Version          string
-	TLS              *TLS
-	WorkloadRouting  string
-	Inference        *Inference
-	ControlPlaneURL  string
-	UID              string
-	BootstrapToken   string
-	ClientSecret     string
-	CustomHelmValues map[string]string
+	Name            string
+	Domain          string
+	Version         string
+	TLS             *TLS
+	WorkloadRouting string
+	Inference       *Inference
+	// ControlPlaneURL points a cluster-only install at an external control
+	// plane. The cluster's identity there comes from exactly one of two
+	// sources: the pre-registered UID plus its BootstrapToken/ClientSecret, or
+	// ControlPlaneCredentials, with which the installer registers the cluster
+	// by name and fetches the install info itself.
+	ControlPlaneURL         string
+	UID                     string
+	BootstrapToken          string
+	ClientSecret            string
+	ControlPlaneCredentials *ControlPlaneCredentials
+	CustomHelmValues        map[string]string
+}
+
+// ControlPlaneCredentials authenticate the installer to an external control
+// plane: either Username+Password or a pre-issued bearer Token.
+type ControlPlaneCredentials struct {
+	Username string
+	Password string
+	Token    string
 }
 
 func (c *Cluster) UsesExternalControlPlane() bool {
 	return c != nil && c.ControlPlaneURL != ""
+}
+
+// UsesControlPlaneCredentials reports whether the installer registers the
+// cluster with the external control plane itself (get-or-create by name and
+// fetch the install info) instead of relying on a user-supplied UID and
+// bootstrap token / client secret.
+func (c *Cluster) UsesControlPlaneCredentials() bool {
+	return c != nil && c.ControlPlaneCredentials != nil
+}
+
+// UsesSuppliedClusterIdentity reports whether the user pre-registered the
+// cluster and supplied its UID together with its bootstrap token or client
+// secret.
+func (c *Cluster) UsesSuppliedClusterIdentity() bool {
+	return c != nil && c.UID != ""
+}
+
+// FieldError is a validation problem attributed to a config field.
+type FieldError struct {
+	Field   string
+	Message string
+}
+
+func (e FieldError) Error() string { return e.Message }
+
+// ExternalControlPlaneProblems returns every problem with the external
+// control-plane settings (empty when none are set or all are consistent). It
+// is shared by Validate (the hard gate, which reports the first) and the
+// offline input checks (which surface all of them).
+func (s *Spec) ExternalControlPlaneProblems() []FieldError {
+	if s.Cluster == nil {
+		return nil
+	}
+	c := s.Cluster
+	hasExternalFields := c.ControlPlaneURL != "" || c.UID != "" || c.BootstrapToken != "" || c.ClientSecret != "" || c.ControlPlaneCredentials != nil
+	if !hasExternalFields {
+		return nil
+	}
+	var problems []FieldError
+	if s.InstallMode != InstallModeClusterOnly {
+		problems = append(problems, FieldError{"install.mode", "external control plane details are only supported for runai_cluster_only"})
+	}
+	if c.ControlPlaneURL == "" {
+		problems = append(problems, FieldError{"cluster.controlPlaneUrl", "cluster.controlPlaneUrl is required"})
+	} else if u, err := url.ParseRequestURI(c.ControlPlaneURL); err != nil || u.Scheme != "https" || u.Host == "" || u.Path != "" || u.RawQuery != "" || u.User != nil {
+		problems = append(problems, FieldError{"cluster.controlPlaneUrl", "cluster.controlPlaneUrl must be an HTTPS URL without a path"})
+	}
+	if c.Domain == "" {
+		problems = append(problems, FieldError{"cluster.domain", "cluster.domain is required"})
+	}
+	if c.ControlPlaneCredentials != nil {
+		if c.UID != "" || c.BootstrapToken != "" || c.ClientSecret != "" {
+			problems = append(problems, FieldError{"cluster.controlPlaneCredentials", "cluster.controlPlaneCredentials cannot be combined with cluster.uid, cluster.bootstrapTokenPath or cluster.clientSecretPath: either pre-register the cluster and supply its identity, or let the installer register it"})
+		}
+		problems = append(problems, c.ControlPlaneCredentials.problems()...)
+		return problems
+	}
+	if c.UID == "" {
+		problems = append(problems, FieldError{"cluster.uid", "cluster.uid is required (or set cluster.controlPlaneCredentials to let the installer register the cluster)"})
+	}
+	if (c.BootstrapToken == "") == (c.ClientSecret == "") {
+		problems = append(problems, FieldError{"cluster.bootstrapTokenPath", "exactly one of cluster.bootstrapTokenPath or cluster.clientSecretPath is required (or set cluster.controlPlaneCredentials to let the installer register the cluster)"})
+	}
+	return problems
+}
+
+func (cc *ControlPlaneCredentials) problems() []FieldError {
+	const field = "cluster.controlPlaneCredentials"
+	usesBasic := cc.Username != "" || cc.Password != ""
+	switch {
+	case usesBasic && cc.Token != "":
+		return []FieldError{{field, field + ": username/password and token are mutually exclusive"}}
+	case usesBasic:
+		var problems []FieldError
+		if cc.Username == "" {
+			problems = append(problems, FieldError{field + ".username", field + ": a password requires a username"})
+		}
+		if cc.Password == "" {
+			problems = append(problems, FieldError{field + ".password", field + ": a username requires a password or passwordPath"})
+		}
+		return problems
+	case cc.Token != "":
+		return nil
+	default:
+		return []FieldError{{field, field + ": set either username and password (or passwordPath), or token (or tokenPath)"}}
+	}
 }
 
 func (s *Spec) ControlPlaneTLS() *TLS {
@@ -519,32 +619,8 @@ func (s *Spec) validateInstall() error {
 }
 
 func (s *Spec) validateExternalControlPlane() error {
-	if s.Cluster == nil {
-		return nil
-	}
-	c := s.Cluster
-	hasExternalFields := c.ControlPlaneURL != "" || c.UID != "" || c.BootstrapToken != "" || c.ClientSecret != ""
-	if !hasExternalFields {
-		return nil
-	}
-	if s.InstallMode != InstallModeClusterOnly {
-		return errors.New("external control plane details are only supported for runai_cluster_only")
-	}
-	if c.ControlPlaneURL == "" {
-		return errors.New("cluster.controlPlaneUrl is required")
-	}
-	if c.Domain == "" {
-		return errors.New("cluster.domain is required")
-	}
-	if c.UID == "" {
-		return errors.New("cluster.uid is required")
-	}
-	if (c.BootstrapToken == "") == (c.ClientSecret == "") {
-		return errors.New("exactly one of cluster.bootstrapTokenPath or cluster.clientSecretPath is required")
-	}
-	u, err := url.ParseRequestURI(c.ControlPlaneURL)
-	if err != nil || u.Scheme != "https" || u.Host == "" || u.Path != "" || u.RawQuery != "" || u.User != nil {
-		return errors.New("cluster.controlPlaneUrl must be an HTTPS URL without a path")
+	if problems := s.ExternalControlPlaneProblems(); len(problems) > 0 {
+		return problems[0]
 	}
 	return nil
 }

@@ -147,6 +147,9 @@ func validateRegistryType(t spec.RegistryType) error {
 	return fmt.Errorf("unknown registry type: %q", t)
 }
 
+// ResolveClusterCredentials reads the file-based secrets of the cluster block
+// (the pre-registered cluster's bootstrap token / client secret, or the
+// external control plane's password / token) into the config.
 func ResolveClusterCredentials(cfg *Config) error {
 	if cfg == nil || cfg.Cluster == nil {
 		return nil
@@ -157,12 +160,45 @@ func ResolveClusterCredentials(cfg *Config) error {
 	}
 	var err error
 	if c.BootstrapTokenPath != "" {
-		c.bootstrapToken, err = readSecretFile(c.BootstrapTokenPath, "cluster bootstrap token")
+		if c.bootstrapToken, err = readSecretFile(c.BootstrapTokenPath, "cluster bootstrap token"); err != nil {
+			return err
+		}
 	}
 	if c.ClientSecretPath != "" {
-		c.clientSecret, err = readSecretFile(c.ClientSecretPath, "cluster client secret")
+		if c.clientSecret, err = readSecretFile(c.ClientSecretPath, "cluster client secret"); err != nil {
+			return err
+		}
 	}
-	return err
+	return resolveControlPlaneCredentials(c.ControlPlaneCredentials)
+}
+
+// resolveControlPlaneCredentials validates the inline-vs-file choice for each
+// secret and reads the file-based ones. The auth-scheme rules (basic vs token,
+// required pairs) are enforced later by the spec, so all findings surface
+// together in input validation.
+func resolveControlPlaneCredentials(cc *ControlPlaneCredentials) error {
+	if cc == nil {
+		return nil
+	}
+	if cc.Password != "" && cc.PasswordPath != "" {
+		return errors.New("cluster.controlPlaneCredentials: set either password or passwordPath, not both")
+	}
+	if cc.Token != "" && cc.TokenPath != "" {
+		return errors.New("cluster.controlPlaneCredentials: set either token or tokenPath, not both")
+	}
+	var err error
+	cc.password, cc.token = cc.Password, cc.Token
+	if cc.PasswordPath != "" {
+		if cc.password, err = readSecretFile(cc.PasswordPath, "control plane password"); err != nil {
+			return err
+		}
+	}
+	if cc.TokenPath != "" {
+		if cc.token, err = readSecretFile(cc.TokenPath, "control plane token"); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func readSecretFile(path, name string) (string, error) {

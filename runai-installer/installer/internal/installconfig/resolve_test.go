@@ -227,3 +227,49 @@ func TestResolveClusterCredentials_RejectsMultipleCredentials(t *testing.T) {
 	err := ResolveClusterCredentials(cfg)
 	require.ErrorContains(t, err, "mutually exclusive")
 }
+
+func TestResolveClusterCredentials_ControlPlanePasswordPath(t *testing.T) {
+	passwordPath := writeToken(t, "  s3cret\n")
+	cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &ControlPlaneCredentials{Username: "admin@example.com", PasswordPath: passwordPath}}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "s3cret", cfg.Cluster.ControlPlaneCredentials.password)
+	assert.Empty(t, cfg.Cluster.ControlPlaneCredentials.token)
+}
+
+func TestResolveClusterCredentials_ControlPlaneTokenPath(t *testing.T) {
+	tokenPath := writeToken(t, "bearer-token")
+	cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &ControlPlaneCredentials{TokenPath: tokenPath}}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "bearer-token", cfg.Cluster.ControlPlaneCredentials.token)
+}
+
+func TestResolveClusterCredentials_ControlPlaneInline(t *testing.T) {
+	cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &ControlPlaneCredentials{Username: "admin@example.com", Password: "inline"}}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "inline", cfg.Cluster.ControlPlaneCredentials.password)
+}
+
+func TestResolveClusterCredentials_ControlPlaneRejectsInlineAndPath(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		creds ControlPlaneCredentials
+	}{
+		{name: "password", creds: ControlPlaneCredentials{Username: "u", Password: "p", PasswordPath: "/p"}},
+		{name: "token", creds: ControlPlaneCredentials{Token: "t", TokenPath: "/t"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			creds := tc.creds
+			cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &creds}}
+			require.ErrorContains(t, ResolveClusterCredentials(cfg), "not both")
+		})
+	}
+}
+
+func TestResolveClusterCredentials_ControlPlaneMissingFile(t *testing.T) {
+	cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &ControlPlaneCredentials{TokenPath: "/does/not/exist"}}}
+
+	require.ErrorContains(t, ResolveClusterCredentials(cfg), "control plane token")
+}

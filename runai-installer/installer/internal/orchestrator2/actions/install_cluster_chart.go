@@ -8,7 +8,6 @@ package actions
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
@@ -17,12 +16,18 @@ import (
 )
 
 type InstallClusterChart struct {
-	ClusterName     string
-	Domain          string
+	ClusterName string
+	// Domain is the cluster's own domain; for a same-cluster install it is also
+	// the control plane's.
+	Domain string
+	// ControlPlaneURL is set for an external control plane. With ClusterUID and
+	// BootstrapToken/ClientSecret the cluster identity was supplied by the
+	// user; with Credentials the installer resolves it from the control plane.
 	ControlPlaneURL string
 	ClusterUID      string
 	BootstrapToken  string
 	ClientSecret    string
+	Credentials     *step.ControlPlaneCredentials
 	CACertPath      string
 	Repo            string
 	Version         string
@@ -39,10 +44,13 @@ func (a InstallClusterChart) Kind() string { return "runai.install_cluster_chart
 
 func (a InstallClusterChart) Release() (name, namespace string) { return a.ReleaseName, a.Namespace }
 
-func (a InstallClusterChart) ClusterRef() (clusterName, domain, caCertPath string) {
-	return a.ClusterName, a.Domain, a.CACertPath
+func (a InstallClusterChart) ClusterRef() (clusterName string, controlPlane ControlPlaneRef) {
+	return a.ClusterName, ControlPlaneRef{URL: a.ControlPlaneURL, Domain: a.Domain, CACertPath: a.CACertPath, Credentials: a.Credentials}
 }
 
+// UsesSuppliedCredentials reports whether the user pre-registered the cluster
+// and supplied its uid and bootstrap token / client secret, so the control
+// plane is never contacted.
 func (a InstallClusterChart) UsesSuppliedCredentials() bool {
 	return a.ClusterUID != ""
 }
@@ -77,30 +85,20 @@ func (a InstallClusterChart) Execute(ctx context.Context, deps orchestrator2.Dep
 			"cluster.url=" + a.Domain,
 		}
 	} else {
-		url := ControlPlaneURL(a.Domain)
-		apiClient, err := deps.RunAIClientProvider(url, a.CACertPath)
+		_, controlPlane := a.ClusterRef()
+		apiClient, err := controlPlane.Client(deps)
 		if err != nil {
 			return orchestrator2.ActionResult{}, err
 		}
-		uuid, err := FindClusterUUID(ctx, apiClient, a.ClusterName)
+		// A same-cluster install keeps the historical bare-domain URL the chart
+		// has always been given; an external control plane gets its full URL.
+		controlPlaneURL := a.Domain
+		if a.ControlPlaneURL != "" {
+			controlPlaneURL = a.ControlPlaneURL
+		}
+		values, err = clusterChartCredentialValues(ctx, apiClient, a.ClusterName, a.Version, controlPlaneURL, a.Domain)
 		if err != nil {
 			return orchestrator2.ActionResult{}, err
-		}
-		if uuid == "" {
-			return orchestrator2.ActionResult{}, fmt.Errorf("cluster %q not found in control plane", a.ClusterName)
-		}
-		installInfo, statusCode, err := apiClient.GetClusterInstallInfoByUUID(ctx, uuid, a.Version, a.Domain)
-		if err != nil {
-			return orchestrator2.ActionResult{}, err
-		}
-		if statusCode != http.StatusOK {
-			return orchestrator2.ActionResult{}, fmt.Errorf("get cluster install info: unexpected status %d", statusCode)
-		}
-		values = []string{
-			"controlPlane.url=" + a.Domain,
-			step.ClusterAuthValue(installInfo),
-			"cluster.uid=" + uuid,
-			"cluster.url=" + a.Domain,
 		}
 	}
 	if a.CACertPath != "" {
