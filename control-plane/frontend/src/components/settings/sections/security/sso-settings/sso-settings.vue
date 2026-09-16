@@ -53,6 +53,7 @@
         @add-idp="addIdp"
         @cancel-edit-idp="cancelEditIdp"
         @edit-mode-changed="onEditModeChanged"
+        @certificate-status="onCertificateStatus"
         ref="samlSettingsEl"
       />
       <oidc-settings
@@ -142,7 +143,7 @@ import { DOCS } from "@/constants/docs";
 export default defineComponent({
   name: "sso-settings",
   components: { ToggleSetting, SettingReadonlyInput, OcpSettings, OidcSettings, SamlSettings, RunaiTooltip, RunaiBtn },
-  emits: ["update:settings"],
+  emits: ["update:settings", "certificate-status"],
   props: {
     settings: {
       type: Object as PropType<SettingsGetResponse | null>,
@@ -251,6 +252,9 @@ export default defineComponent({
     },
     onEditModeChanged(isEditMode: boolean): void {
       this.isEditMode = isEditMode;
+    },
+    onCertificateStatus(status: { expired: boolean; expiringSoon: boolean }): void {
+      this.$emit("certificate-status", status);
     },
     getDefaultIdpConfig(idpType: IdpTypeEnum): Idp | undefined {
       if (!idpType) return undefined;

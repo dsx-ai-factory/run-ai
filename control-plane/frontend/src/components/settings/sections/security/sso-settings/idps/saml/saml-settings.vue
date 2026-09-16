@@ -52,39 +52,40 @@
       </div>
     </div>
   </setting-wrapper-box>
-  <setting-editable-field
-    v-else
-    resource-type="SecuritySettings"
-    @edit="onEdit"
-    @delete="onDelete"
-    :delete-disabled="isSSOUser"
-    :delete-tool-tip="settingBoxMessages.removeToolTip"
-    :edit-tool-tip="settingBoxMessages.editToolTip"
-    :label="settingBoxMessages.headerTitle"
-    :delete-sub-title="settingBoxMessages.confirmRemoveSubTitle"
-    use-larger-label
-  >
-    <template v-slot:start>
-      <notification-alert-bar
-        v-if="certificateWarningVariant"
-        class="q-mx-lg q-mb-md certificate-warning"
-        :variant="certificateWarningVariant"
-        show-h1-content
-        :title="certificateWarningTitle"
-        message="Edit the identity provider and replace the metadata XML with an updated file."
-      />
-      <runai-btn
-        icon="ph-bold ph-arrow-square-out"
-        class="q-pa-sm download-icon"
-        flat
-        size="sm"
-        rounded
-        aid="open-metadata-xml"
-        @click="openMetadataXml"
-        tooltip="Open service provider metadata XML"
-      />
-    </template>
-  </setting-editable-field>
+  <div v-else>
+    <setting-editable-field
+      resource-type="SecuritySettings"
+      @edit="onEdit"
+      @delete="onDelete"
+      :delete-disabled="isSSOUser"
+      :delete-tool-tip="settingBoxMessages.removeToolTip"
+      :edit-tool-tip="settingBoxMessages.editToolTip"
+      :label="settingBoxMessages.headerTitle"
+      :delete-sub-title="settingBoxMessages.confirmRemoveSubTitle"
+      use-larger-label
+    >
+      <template v-slot:start>
+        <runai-btn
+          icon="ph-bold ph-arrow-square-out"
+          class="q-pa-sm download-icon"
+          flat
+          size="sm"
+          rounded
+          aid="open-metadata-xml"
+          @click="openMetadataXml"
+          tooltip="Open service provider metadata XML"
+        />
+      </template>
+    </setting-editable-field>
+    <notification-alert-bar
+      v-if="certificateWarningVariant"
+      class="q-mx-sm q-mb-sm certificate-warning"
+      :variant="certificateWarningVariant"
+      show-h1-content
+      :title="certificateWarningTitle"
+      message="Edit the identity provider and replace the metadata XML with an updated file."
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -125,7 +126,7 @@ export default defineComponent({
     SettingWrapperBox,
     NotificationAlertBar,
   },
-  emits: ["remove", "add-idp", "update-idp", "cancel-edit-idp", "edit-mode-changed"],
+  emits: ["remove", "add-idp", "update-idp", "cancel-edit-idp", "edit-mode-changed", "certificate-status"],
   props: {
     title: {
       type: String as PropType<string>,
@@ -161,6 +162,10 @@ export default defineComponent({
     this.certificateExpirationDate = this.idp?.samlData?.signingCertificate
       ? await idpCommon.getCertificateExpirationDate(this.idp.samlData.signingCertificate)
       : null;
+    this.$emit("certificate-status", {
+      expired: this.isExpiredCertificate,
+      expiringSoon: this.isCertificateExpiringSoon,
+    });
   },
   computed: {
     isExpiredCertificate(): boolean {

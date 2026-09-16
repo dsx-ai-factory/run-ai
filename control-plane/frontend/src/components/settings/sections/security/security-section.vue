@@ -8,9 +8,11 @@
     class="security-section settings-container"
     label="Security"
     :subheader="sectionSubHeader"
+    :section-invalid="isCertificateExpired"
+    :section-warning="isCertificateExpiringSoon"
     @show="() => initializeSecuritySettings(true)"
   >
-    <sso-settings v-if="settings" v-model:settings="settings" />
+    <sso-settings v-if="settings" v-model:settings="settings" @certificate-status="onCertificateStatus" />
     <div class="row items-center q-mt-xl">
       <span class="q-mr-md">Set logout redirect URL</span>
       <runai-tooltip
@@ -103,6 +105,8 @@ export default defineComponent({
       idleTimerService: IdleTimer.getInstance(),
       logoutRedirectUri: null as GetLogoutRedirectUriSettingValue | null,
       settings: null as SettingsGetResponse | null,
+      isCertificateExpired: false,
+      isCertificateExpiringSoon: false,
     };
   },
   async created() {
@@ -153,6 +157,11 @@ export default defineComponent({
       } catch (error) {
         console.error("Failed to get security settings:", error);
       }
+    },
+
+    onCertificateStatus(status: { expired: boolean; expiringSoon: boolean }): void {
+      this.isCertificateExpired = status.expired;
+      this.isCertificateExpiringSoon = status.expiringSoon;
     },
 
     handleVisibilityChange(): void {
