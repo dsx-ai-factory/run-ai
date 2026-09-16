@@ -13,7 +13,7 @@
     @show="() => initializeSecuritySettings(true)"
   >
     <sso-settings v-if="settings" v-model:settings="settings" @certificate-status="onCertificateStatus" />
-    <div class="row items-center q-mt-xl">
+    <div class="row items-center q-mt-md">
       <span class="q-mr-md">Set logout redirect URL</span>
       <runai-tooltip
         aid="tooltip-logout-redirect-url"
@@ -32,7 +32,7 @@
       delete-sub-title="Users will be directed back to the Run:ai sign-in screen after signing out."
       :resource-type="securityResourceType"
     />
-    <div class="row items-center q-mt-xl q-mb-sm">
+    <div class="row items-center q-mt-md q-mb-sm">
       <span class="q-mr-md">Set UI inactivity timeout</span>
       <runai-tooltip
         aid="tooltip-session-timeout"

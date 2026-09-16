@@ -55,7 +55,26 @@
         @edit-mode-changed="onEditModeChanged"
         @certificate-status="onCertificateStatus"
         ref="samlSettingsEl"
-      />
+      >
+        <template v-if="shouldShowAutoRedirectSSO || shouldShowHelp" #box-footer>
+          <q-separator v-if="shouldShowAutoRedirectSSO" class="idp-card-separator" />
+          <div v-if="shouldShowAutoRedirectSSO" class="row items-center q-my-md q-mx-md">
+            <toggle-setting
+              ref="toggleSetting"
+              @update-setting="updateRedirectSSO"
+              :setting="autoRedirectSetting"
+              emit-only
+              resource-type="SecuritySettings"
+            />
+          </div>
+          <div class="row items-center q-mt-md q-mb-lg q-mx-md" v-if="shouldShowHelp">
+            <span class="text-italic"
+              >For more information, see the
+              <a :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
+            >
+          </div>
+        </template>
+      </saml-settings>
       <oidc-settings
         v-if="isOidcIdp"
         :idp="currentIdp"
@@ -84,7 +103,7 @@
       />
     </div>
   </div>
-  <div v-if="shouldShowAutoRedirectSSO" class="q-ml-sm q-mr-sm">
+  <div v-if="!isSamlIdp && shouldShowAutoRedirectSSO" class="q-ml-sm q-mr-sm">
     <q-separator class="q-mt-lg" />
     <div class="row items-center q-my-md">
       <toggle-setting
@@ -97,7 +116,7 @@
     </div>
     <q-separator class="q-mb-md" />
   </div>
-  <div class="row items-center q-my-md" v-if="shouldShowHelp">
+  <div class="row items-center q-my-md" v-if="!isSamlIdp && shouldShowHelp">
     <span class="text-italic"
       >For more information, see the
       <a :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
@@ -352,5 +371,8 @@ export default defineComponent({
   .idp-button {
     margin-bottom: 20px;
   }
+}
+.idp-card-separator {
+  margin: 0 12px;
 }
 </style>

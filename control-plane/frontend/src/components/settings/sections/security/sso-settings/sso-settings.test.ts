@@ -73,7 +73,10 @@ describe("sso-settings.vue", () => {
         plugins: [Quasar],
         stubs: {
           // Stub only the components we use
-          SamlSettings: true,
+          SamlSettings: {
+            name: "saml-settings",
+            template: '<div><slot name="box-footer"></slot></div>',
+          },
           OidcSettings: true,
           OcpSettings: true,
           RunaiTooltip: true,

@@ -44,7 +44,7 @@
       </div>
     </div>
   </setting-wrapper-box>
-  <div v-else>
+  <div v-else class="idp-card">
     <setting-editable-field
       resource-type="SecuritySettings"
       @edit="onEdit"
@@ -55,6 +55,7 @@
       :label="settingBoxMessages.headerTitle"
       :delete-sub-title="settingBoxMessages.confirmRemoveSubTitle"
       use-larger-label
+      hide-border
     >
       <template v-slot:start>
         <runai-btn
@@ -69,6 +70,15 @@
         />
       </template>
     </setting-editable-field>
+    <q-separator class="idp-card-separator" />
+    <notification-alert-bar
+      v-if="certificateWarningVariant"
+      class="q-mx-sm q-mb-sm certificate-warning"
+      :variant="certificateWarningVariant"
+      show-h1-content
+      :title="certificateWarningTitle"
+      message="Edit the identity provider and replace the metadata XML with an updated file."
+    />
     <div v-if="hasIdpAttributes" class="redirect-url-field">
       <div>Use the following if required by the identity provider</div>
       <setting-readable-field label="Redirect URL">
@@ -79,14 +89,7 @@
         </div>
       </setting-readable-field>
     </div>
-    <notification-alert-bar
-      v-if="certificateWarningVariant"
-      class="q-mx-sm q-mb-sm certificate-warning"
-      :variant="certificateWarningVariant"
-      show-h1-content
-      :title="certificateWarningTitle"
-      message="Edit the identity provider and replace the metadata XML with an updated file."
-    />
+    <slot name="box-footer" />
   </div>
 </template>
 
@@ -285,11 +288,19 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
+.idp-card {
+  border: 1px solid $black-12;
+  border-radius: 4px;
+  overflow: hidden;
+}
 .certificate-warning,
 .redirect-url-field {
-  margin-top: 12px;
+  margin: 12px;
 }
-.download-icon {
+.idp-card-separator {
+  margin: 0 12px;
+}
+:deep(.download-icon) {
   color: var(--icon-default);
 }
 </style>
