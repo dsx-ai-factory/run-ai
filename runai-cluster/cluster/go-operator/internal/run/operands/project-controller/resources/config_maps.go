@@ -9,8 +9,6 @@ import (
 	"context"
 	"fmt"
 
-	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -19,6 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
+	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
@@ -916,117 +915,17 @@ func ConfigMapStatus(ctx context.Context,
 	return operands.ReadyStatus(), nil
 }
 
-// blockersConfigMapKey is the single ConfigMap entry holding the YAML list of blockers.
-const blockersConfigMapKey = "blockers.yaml"
-
-// BlockersConfigMapForRunaiConfig builds the "project-delete-blockers" ConfigMap read by the
-// project-controller at startup to construct its generic project-deletion blockers. The
-// runai blocker set (runaiDeletionBlockers) reproduces the historical
-// Workload/DataVolume/Secret/PVC blockers. The project-controller is pointed at this
-// namespace via --project-delete-blockers-namespace (see buildContainerArgs).
-func BlockersConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
+// BlockersConfigMapForRunaiConfig declares the "project-delete-blockers" ConfigMap
+// this operand used to write. KRM owns the blockers now and its operator writes
+// the ConfigMap from KRMConfig, so nothing is built here any more -- but the
+// object must stay declared, because a disabled operand deletes exactly the
+// resources it enumerates, and dropping it would orphan the old ConfigMap.
+func BlockersConfigMapForRunaiConfig(_ context.Context, _ client.Reader,
 	runaiConfig *runv1.RunaiConfig) (client.Object, error) {
-	var (
-		name      = clustercommonconstants.GvkDeleteBlockersConfigMapName
-		namespace = runaiConfig.Namespace
-	)
-
-	configMap := &v1.ConfigMap{}
-
-	// Get the existing config map if it exists to consume any cluster-set values
-	err := k8sReader.Get(ctx, types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}, configMap)
-	if err != nil && !errors.IsNotFound(err) {
-		return nil, err
-	}
-
-	configMap.ObjectMeta.Name = name
-	configMap.ObjectMeta.Namespace = namespace
-
-	// A single ConfigMap entry holding the YAML list of blockers the project-controller
-	// parses at startup. Blockers sharing a displayName are grouped into one project
-	// condition by the controller.
-	encoded, err := yaml.Marshal(runaiDeletionBlockers())
-	if err != nil {
-		return nil, fmt.Errorf("marshalling project-delete-blockers: %w", err)
-	}
-	configMap.Data = map[string]string{blockersConfigMapKey: string(encoded)}
-
-	return configMap, nil
-}
-
-func BlockersConfigMapStatus(ctx context.Context,
-	k8sReader client.Reader, runaiConfig *runv1.RunaiConfig) (operands.Status, error) {
-	configMap, err := BlockersConfigMapForRunaiConfig(ctx, k8sReader, runaiConfig)
-	if err != nil {
-		return operands.NotReadyStatus(), err
-	}
-
-	if configMap.GetUID() == "" {
-		return operands.NotReadyStatus(fmt.Sprintf("configmap [%s] is missing",
-			configMap.GetName())), nil
-	}
-
-	return operands.ReadyStatus(), nil
-}
-
-// blocker mirrors the YAML shape the project-controller parses from the project-delete-blockers
-// ConfigMap (json tags == the wire contract): a flat list where blockers sharing a displayName
-// are grouped into one project condition by the controller. It is defined locally so the
-// go-operator has no build-time dependency on project-controller — the only contract between
-// them is these YAML field names (the same arrangement as the rolebindings ConfigMap, where
-// go-operator marshals RoleBinding objects the controller decodes).
-type blocker struct {
-	DisplayName   string                `json:"displayName"`
-	Group         string                `json:"group"`
-	Version       string                `json:"version"`
-	Kind          string                `json:"kind"`
-	LabelSelector *metav1.LabelSelector `json:"labelSelector,omitempty"`
-}
-
-// runaiDeletionBlockers is the runai-specific set of project-deletion blockers. It reproduces
-// the historically hard-coded Workload/DataVolume/Secret/PVC blockers and is the single source
-// of truth for the runai packaging. Blockers sharing a displayName (Workloads, Secrets) are
-// grouped by the project-controller into a single project condition.
-func runaiDeletionBlockers() []blocker {
-	const (
-		runaiGroup = "run.ai"
-		v2alpha1   = "v2alpha1"
-		v1alpha1   = "v1alpha1"
-	)
-	assetKinds := []string{"password", "access-key", "generic", "docker-registry"}
-
-	// projectScopeExpressions excludes department / cluster-wide / tenant-wide scoped
-	// resources, matching common.getProjectScopeLabelSelector in project-controller.
-	projectScopeExpressions := []metav1.LabelSelectorRequirement{
-		{Key: clustercommonconstants.DepartmentScopeLabel, Operator: metav1.LabelSelectorOpDoesNotExist},
-		{Key: clustercommonconstants.ClusterWideResourceLabel, Operator: metav1.LabelSelectorOpDoesNotExist},
-		{Key: clustercommonconstants.TenantScopeLabel, Operator: metav1.LabelSelectorOpDoesNotExist},
-	}
-
-	projectScopeWithType := func(typeLabel string) *metav1.LabelSelector {
-		exprs := append(projectScopeExpressions, metav1.LabelSelectorRequirement{
-			Key: typeLabel, Operator: metav1.LabelSelectorOpIn, Values: assetKinds,
-		})
-		return &metav1.LabelSelector{MatchExpressions: exprs}
-	}
-
-	return []blocker{
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v2alpha1, Kind: "TrainingWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v2alpha1, Kind: "InferenceWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v2alpha1, Kind: "DistributedWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v2alpha1, Kind: "InteractiveWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v1alpha1, Kind: "ExternalWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v1alpha1, Kind: "DistributedInferenceWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: "v1", Kind: "RunaiJob"},
-		{DisplayName: "DataVolumes", Group: runaiGroup, Version: v1alpha1, Kind: "DataVolume"},
-		{DisplayName: "Secrets", Group: "", Version: "v1", Kind: "Secret",
-			LabelSelector: projectScopeWithType(clustercommonconstants.RunaiResourceLabel)},
-		{DisplayName: "Secrets", Group: "", Version: "v1", Kind: "Secret",
-			LabelSelector: projectScopeWithType(clustercommonconstants.RunaiAssetLabel)},
-		{DisplayName: "Pvcs", Group: "", Version: "v1", Kind: "PersistentVolumeClaim",
-			LabelSelector: &metav1.LabelSelector{MatchExpressions: projectScopeExpressions}},
-	}
+	return &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      clustercommonconstants.GvkDeleteBlockersConfigMapName,
+			Namespace: runaiConfig.Namespace,
+		},
+	}, nil
 }

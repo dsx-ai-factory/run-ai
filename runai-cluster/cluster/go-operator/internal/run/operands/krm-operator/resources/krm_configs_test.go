@@ -114,11 +114,34 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 			Expect(profiling.APIPort).NotTo(BeNil())
 		})
 
+		It("carries every deletion blocker onto the CR", func() {
+			blockers := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.DeleteBlockers
+			Expect(blockers).To(HaveLen(11))
+
+			var displayNames []string
+			for _, blocker := range blockers {
+				displayNames = append(displayNames, blocker.DisplayName)
+			}
+			Expect(displayNames).To(ContainElements("Workloads", "DataVolumes", "Secrets", "Pvcs"))
+		})
+
+		It("scopes the Secret and PVC blockers to project-scoped objects", func() {
+			blockers := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.DeleteBlockers
+			for _, blocker := range blockers {
+				if blocker.Kind == "Secret" || blocker.Kind == "PersistentVolumeClaim" {
+					Expect(blocker.LabelSelector).NotTo(BeNil())
+				}
+			}
+		})
+
+		It("passes no extra args, since KRM's operator derives them from the CR", func() {
+			Expect(krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.ExtraArgs).To(BeEmpty())
+		})
+
 		It("names the rolebindings ConfigMap the operator writes", func() {
 			projectController := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController
 			Expect(projectController.RoleBindingsConfigMapName).
 				To(Equal(ptr.To(clustercommonconstants.ProjectControllerRoleBindingCm)))
-			Expect(projectController.ExtraArgs).To(ContainElement("--install-namespace=runai"))
 		})
 	})
 

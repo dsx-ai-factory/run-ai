@@ -39,7 +39,6 @@ var (
 	resourceStatusFunctions = []operands.ResourceStatusFunction{
 		resources.DeploymentStatus,
 		resources.ConfigMapStatus,
-		resources.BlockersConfigMapStatus,
 		resources.ServiceStatus,
 		resources.ServiceAccountStatus,
 		resources.ServiceMonitorStatus,

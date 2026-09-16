@@ -6,7 +6,6 @@
 package resources
 
 import (
-	"fmt"
 	"strconv"
 
 	kaicommon "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1/common"
@@ -60,12 +59,9 @@ func convertProjectController(runaiConfig *runaiv1.RunaiConfig) *kaiv1alpha1.Pro
 			ResourceManualOverrideLabelKey: ptr.To(clustercommonconstants.RunaiResourceManualOverrideLabel),
 			LimitRangeName:                 ptr.To(clustercommonconstants.RunaiLimitRangeName),
 		},
-		// Neither is modelled on KRMConfig. The blockers namespace is where the
-		// controller reads the ConfigMap the operator writes for it.
-		ExtraArgs: []string{
-			fmt.Sprintf("--install-namespace=%s", runaiConfig.GetNamespace()),
-			fmt.Sprintf("--project-delete-blockers-namespace=%s", clustercommonconstants.NamespaceRunAi),
-		},
+		// No extra args: every flag the operand passed is either modelled above or
+		// already passed by KRM's operator from the CR.
+		DeleteBlockers:            runaiDeletionBlockers(),
 		RoleBindingsConfigMapName: ptr.To(clustercommonconstants.ProjectControllerRoleBindingCm),
 		Replicas:                  config.Replicas,
 		// RunaiConfig carries no VPA or extra project role bindings for this
