@@ -29,13 +29,13 @@ Keycloak provides authentication and identity management for the NVIDIA Run:ai c
 
 The Helm chart uses [Keycloakx](https://artifacthub.io/packages/helm/codecentric/keycloakx) (`keycloakx`).
 
-<Info>
+<Note>
 
 **Note**
 
 The `keycloakx.adminUser` can only be set during the initial installation. The admin password can be changed later through the Keycloak UI, but you must also update `keycloakx.adminPassword` in the Helm chart using `helm upgrade`.
 
-</Info>
+</Note>
 
 | Key | Change | Description |
 | --- | ------ | ----------- |
@@ -53,13 +53,13 @@ The `keycloakx.adminUser` can only be set during the initial installation. The a
 5. Set the new password and click **Save**
 6. Run `helm upgrade` and set `keycloakx.adminPassword` to the new password
 
-<Info>
+<Note>
 
 **Note**
 
 Failing to update the Helm values after changing the password can cause control plane services to encounter errors.
 
-</Info>
+</Note>
 
 ### PostgreSQL
 
@@ -156,13 +156,13 @@ Then configure the chart to use the provisioned database:
    kubectl rollout restart deployment -n runai-backend
    ```
 
-<Info>
+<Note>
 
 **Note**
 
 Failing to restart the pods after updating the secret can cause control plane services to encounter errors.
 
-</Info>
+</Note>
 
 ### Traefik
 

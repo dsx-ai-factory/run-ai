@@ -23,13 +23,13 @@ The following diagram shows the traffic flows in a same-cluster deployment:
 
 <img src="../../assets/traffic-same-cluster.svg" alt="Same-cluster traffic flow: users reach the Run:ai control plane and cluster workloads through a shared load balancer and ingress controller" />
 
-<Info>
+<Note>
 
 **Note**
 
 The load balancer is drawn inside the cluster, as with MetalLB in on-premises deployments. In managed cloud environments it is provided by the cloud provider. Either way, it is the single shared entry point for inbound traffic.
 
-</Info>
+</Note>
 
 The following diagram shows the traffic flows in a multi-cluster deployment, where each cluster has its own load balancer and ingress controller:
 
@@ -58,13 +58,13 @@ OpenShift ships with a pre-installed router that serves as both load balancer an
 
 ### DNS
 
-<Info>
+<Note>
 
 **Note**
 
 Applies to Kubernetes only. On OpenShift, the domain is derived from the cluster's route domain (`oc get routes -A`) rather than manually configured DNS records.
 
-</Info>
+</Note>
 
 | Component | Same-cluster | Multi-cluster |
 |---|---|---|

@@ -130,7 +130,7 @@ NVIDIA Run:ai supports three installation paths. Choose based on your tooling, e
 | Path | Tooling | Best For |
 | ---- | ------- | -------- |
 | **[Guided Installation](installation/guided-installation/README.md)** (recommended) | `runai-installer` CLI - reads a single configuration YAML file and performs the full installation | Most deployments |
-| **[Manual Helm](installation/install-using-helm/install-control-plane.md)** | NVIDIA Run:ai Helm charts, deployed directly | Organizations managing deployments through their own tooling (for example, Argo CD), or needing granular control over Helm values |
+| **[Manual Helm](installation/install-using-helm/preparations.md)** | NVIDIA Run:ai Helm charts, deployed directly | Organizations managing deployments through their own tooling (for example, Argo CD), or needing granular control over Helm values |
 | **[BCM](installation/bcm-install.md)** (NVIDIA Run:ai Support-Entitled only) | NVIDIA Base Command Manager | DGX SuperPOD environments managed by BCM |
 
 ### Artifact Sources
@@ -151,9 +151,9 @@ An NVIDIA Run:ai installation relies on several categories of software and infra
 
 * **Third-party services** - A set of supporting services deployed as part of the installation, including Keycloak for authentication and identity management, PostgreSQL as the centralized database, Traefik as the API gateway, NATS for asynchronous communication, and others. See [Third-Party Services](system-requirements/third-party-services.md).
 
-* **Prerequisites** - Components that NVIDIA Run:ai requires: GPU Operator (provisions and manages GPUs on worker nodes) and Prometheus (required for metrics collection and monitoring). The Network Operator is required only if you are using Multi-Node NVLink (MNNVL) workloads.
+* **Prerequisites** - Components that NVIDIA Run:ai requires: GPU Operator (provisions and manages GPUs on worker nodes) and Prometheus (required for metrics collection and monitoring). The Network Operator is required only if you are using Multi-Node NVLink (MNNVL) workloads. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#prerequisites).
 
-* **Feature-specific components** - Optional components required only for specific NVIDIA Run:ai features. When using the guided installer, these components can be enabled in the configuration file and installed alongside NVIDIA Run:ai.
+* **Feature-specific components** - Optional components required only for specific NVIDIA Run:ai features. When using the guided installer, these components can be enabled in the configuration file and installed alongside NVIDIA Run:ai. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#features).
 
   | Component | Required for |
   | --------- | ------------ |
@@ -179,4 +179,4 @@ If you are deploying NVIDIA Run:ai through NVIDIA Base Command Manager (BCM), do
 * Complete [System Requirements](system-requirements/README.md) to plan your deployment model and prepare your infrastructure, networking, and more, before installation begins.
 * Install using the path that fits your environment:
   * [Guided Installation](installation/guided-installation/README.md) - Recommended for most installations.
-  * [Manual Helm](installation/install-using-helm/install-control-plane.md) - For organizations managing releases through their own tooling.
+  * [Manual Helm](installation/install-using-helm/preparations.md) - For organizations managing releases through their own tooling.

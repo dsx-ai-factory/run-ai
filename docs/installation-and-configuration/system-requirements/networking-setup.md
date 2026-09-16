@@ -173,7 +173,6 @@ NVIDIA Run:ai also supports path-based routing, which you can use instead of the
 
 * Configure wildcard FQDNs once for a same-cluster deployment, or separately for each NVIDIA Run:ai cluster in a multi-cluster deployment.
 * Applies to Kubernetes only - on OpenShift, the domain is derived automatically from the cluster's route domain.
-* For more information, see [Deployment Model](deployment-model.md).
 
 </Note>
 

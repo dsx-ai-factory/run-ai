@@ -73,14 +73,14 @@ Consider the following methods to back up the PostgreSQL database:
 * **Persistent volume backup** - Back up the entire PV that stores the PostgreSQL data.
 * **Third-Party backup solutions** - Integrate with external backup tools that support Kubernetes and PostgreSQL to automate and manage backups effectively.
 
-<Info>
+<Note>
 
 **Note**
 
 * To obtain your `PGPASSWORD=<password>`, run `helm get values runai-backend -n runai-backend --all`.
 * NVIDIA Run:ai also supports an external PostgreSQL database. If you are using an PostgreSQL database, the above steps do not apply. For more details, see [Using an External PostgreSQL Instance](../../system-requirements/third-party-services.md#using-an-external-postgresql-instance).
 
-</Info>
+</Note>
 
 ### Metrics Storage <a href="#metrics-storage" id="metrics-storage"></a>
 
@@ -114,10 +114,10 @@ Follow the steps below to restore the control plane including previously backed-
    * Connect the control plane to the recovered PostgreSQL volume
    * Reconnect Thanos to the restored metrics volume
 
-<Info>
+<Note>
 
 **Note**
 
 For external PostgreSQL databases, ensure the appropriate connection details and credentials are reconfigured. See [Using an External PostgreSQL Instance](../../system-requirements/third-party-services.md#using-an-external-postgresql-instance) for more details.
 
-</Info>
+</Note>

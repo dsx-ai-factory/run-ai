@@ -53,10 +53,10 @@ navigation:
         path: ../../docs/installation-and-configuration/system-requirements/infrastructure-requirements.md
       - page: Networking Setup
         path: ../../docs/installation-and-configuration/system-requirements/networking-setup.md
-      - page: External Access to Critical Services
-        path: ../../docs/installation-and-configuration/system-requirements/external-access-to-critical-services.md
       - page: Third-Party Services
         path: ../../docs/installation-and-configuration/system-requirements/third-party-services.md
+      - page: External Access to Critical Services
+        path: ../../docs/installation-and-configuration/system-requirements/external-access-to-critical-services.md
     - section: Installation
       slug: install
       contents:

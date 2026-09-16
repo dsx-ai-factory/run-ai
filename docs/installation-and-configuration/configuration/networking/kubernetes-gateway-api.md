@@ -4,13 +4,13 @@ NVIDIA Run:ai supports the Kubernetes Gateway API as an alternative to Ingress f
 
 This page builds on the concepts described in [Routing Traffic to and from NVIDIA Run:ai Services](../../system-requirements/networking-setup.md#routing-traffic-to-and-from-nvidia-runai-services), including FQDN configuration, TLS certificates, and routing behavior.
 
-<Info>
+<Note>
 
 **Note**
 
 Gateway API support in NVIDIA Run:ai is **optional**. If you are currently using HAProxy Ingress or other ingress controllers, no action is required. Customers who wish to adopt Gateway API may do so using the instructions on this page.
 
-</Info>
+</Note>
 
 ## Scope and Prerequisites
 
@@ -97,13 +97,13 @@ In this configuration:
 
 ### Gateway Configuration
 
-<Info>
+<Note>
 
 **Note**
 
 Routing is based on hostnames (subdomains). HTTPRoute resources for the control plane and workloads are created automatically by NVIDIA Run:ai and bind to the configured Gateway.
 
-</Info>
+</Note>
 
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -152,13 +152,13 @@ clusterConfig.global.subdomainSupport: false
 
 ### Gateway Configuration
 
-<Info>
+<Note>
 
 **Note**
 
 Routing is based on URL paths under a shared domain. HTTPRoute resources for the control plane and workloads are created automatically by NVIDIA Run:ai and bind to the configured Gateway.
 
-</Info>
+</Note>
 
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -214,13 +214,13 @@ kubectl create secret tls runai-cluster-inference-tls-secret -n runai \
 
 ### Gateway Configuration
 
-<Info>
+<Note>
 
 **Note**
 
 Routing to inference workloads is based on hostnames (subdomains).
 
-</Info>
+</Note>
 
 Add an inference listener to the existing Gateway resource:
 

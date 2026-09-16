@@ -3,7 +3,7 @@
 
 # System Requirements
 
-This section describes the infrastructure you must provide before installing NVIDIA Run:ai - hardware, Kubernetes distribution, networking, and storage - and the third-party services the installation deploys for you, whether you use the [Guided Installation](../installation/guided-installation/README.md) or [Manual Helm](../installation/install-using-helm/install-control-plane.md) path. It follows the [shared responsibility model](../overview.md#shared-responsibility): NVIDIA provides the Run:ai software, while you prepare and manage the Kubernetes environment it runs on.
+This section describes the infrastructure you must provide before installing NVIDIA Run:ai - hardware, Kubernetes distribution, networking, and storage - and the third-party services the installation deploys for you, whether you use the [Guided Installation](../installation/guided-installation/README.md) or [Manual Helm](../installation/install-using-helm/preparations.md) path. It follows the [shared responsibility model](../overview.md#shared-responsibility): NVIDIA provides the Run:ai software, while you prepare and manage the Kubernetes environment it runs on.
 
 <Note>
 
@@ -28,4 +28,4 @@ Complete each of the following before installing NVIDIA Run:ai:
 Once your environment is prepared, proceed to installation:
 
 * [Guided Installation](../installation/guided-installation/README.md) - Recommended for most installations.
-* [Manual Helm](../installation/install-using-helm/install-control-plane.md) - For organizations managing releases through their own tooling.
+* [Manual Helm](../installation/install-using-helm/preparations.md) - For organizations managing releases through their own tooling.

@@ -11,13 +11,13 @@ Complete [Preparations](preparations.md) before continuing - system requirements
 
 ## Create a Configuration File
 
-<Info>
+<Note>
 
 **Configuration Templates**
 
 The configuration shown below is the minimum required to install. If your use case matches one of the [Configuration Templates](templates.md), copy that template instead of building a configuration from scratch. For a complete list of configuration fields to build your own configuration from scratch, see the [Configuration Reference](../configuration-reference.md).
 
-</Info>
+</Note>
 
 Create a `config.yaml` file describing your installation. At a minimum, configure:
 
@@ -30,14 +30,14 @@ Create a `config.yaml` file describing your installation. At a minimum, configur
 - `cluster.name` - The name of the NVIDIA Run:ai cluster
 - `externalConnection` - Required on standard Kubernetes, even if workloads will not be exposed externally - the control plane UI/API and the cluster endpoint are routed through it. See [Networking Setup](../../../system-requirements/networking-setup.md).
 
-<Info>
+<Note>
 
 **Note**
 
 - `controlPlane.customHelmValues` / `cluster.customHelmValues` merge Helm values into the control plane or cluster chart, for settings not otherwise exposed by the installer - see [`controlPlane`](../configuration-reference.md#controlplane) and [`cluster`](../configuration-reference.md#cluster) for how to set it. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) and [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys each accepts.
 - GPU Operator and Prometheus are required for every installation, but the installer does not install them in air-gapped environments - they are skipped by default. Install both yourself beforehand, using each vendor's own air-gapped installation instructions. See [Prerequisites and Features](preparations.md#prerequisites-and-features).
 
-</Info>
+</Note>
 
 The following example installs the NVIDIA Run:ai control plane and cluster on the same Kubernetes cluster from an already-loaded air-gapped bundle:
 

@@ -14,23 +14,23 @@ Meeting these requirements ensures that:
 |---|---|---|
 | Inbound | Ports open for user and API access | See [Inbound Rules](#inbound-rules) |
 | Outbound | Control plane and cluster sync | See [Control Plane and Cluster Sync](#control-plane-and-cluster-sync) |
-| Outbound | NVIDIA Run:ai registry and catalog access | See [NVIDIA Run:ai Registry and Catalogs](#nvidia-run-ai-registry-and-catalogs) |
+| Outbound | NVIDIA Run:ai registry and catalog access | See [NVIDIA Run:ai Registry and Catalogs](#nvidia-runai-registry-and-catalogs) |
 | Outbound | Networking component registry access | See [Networking Component Registries](#networking-component-registries) |
 | Outbound | Third-party service registry access | See [Third-Party Service Registries](#third-party-service-registries) |
 | Outbound | Prerequisite and feature component registry access | See [Prerequisite and Feature Registries](#prerequisite-and-feature-registries) |
 | Internal | Node-to-node connectivity | See [Internal Network](#internal-network) |
 
-<Info>
+<Note>
 
 **Note**
 
 Ensure the inbound and outbound rules below are correctly applied to your firewall before proceeding with installation.
 
-</Info>
+</Note>
 
 ## Inbound Rules
 
-To allow your organization's NVIDIA Run:ai users to interact with the cluster using the [NVIDIA Run:ai Command-line interface](../../reference/cli/runai/), or access specific UI features, certain inbound ports need to be open:
+To allow your organization's NVIDIA Run:ai users to interact with the cluster using the [NVIDIA Run:ai Command-line interface](../../reference/cli/runai/runai.md), or access specific UI features, certain inbound ports need to be open:
 
 | Name                        | Description       | Source  | Destination                | Port |
 | --------------------------- | ----------------- | ------- | --------------------------- | ---- |
@@ -41,13 +41,13 @@ To allow your organization's NVIDIA Run:ai users to interact with the cluster us
 
 ### Control Plane and Cluster Sync
 
-<Info>
+<Note>
 
 **Note**
 
 These rules apply only to [multi-cluster deployments](deployment-model.md), where the NVIDIA Run:ai cluster is installed on a separate Kubernetes cluster from the control plane. In a same-cluster deployment, the control plane and cluster run on the same Kubernetes cluster and communicate internally.
 
-</Info>
+</Note>
 
 | Name          | Description                                                                      | Source                             | Destination                      | Port |
 | ------------- | --------------------------------------------------------------------------------- | ----------------------------------- | --------------------------------- | ---- |

@@ -12,13 +12,13 @@ The `clusterConfig` subset can also be managed at runtime through the `runaiconf
 
 At runtime, `runaiconfig` is the source of truth for the active cluster configuration. If a configuration key is defined in both Helm and `runaiconfig` and the values differ, a Helm upgrade will overwrite the `runaiconfig` value to match the chart.
 
-<Info>
+<Note>
 
 **Note**
 
 The approach remains backward compatible so existing clusters configured via `runaiconfig` continue to work. However, when using Helm, you should manage configurations exclusively through Helm values. Mixing Helm values and manual `runaiconfig` edits is not recommended.
 
-</Info>
+</Note>
 
 ## Helm Chart Values
 
@@ -57,14 +57,14 @@ When using `runaiconfig`, the `clusterConfig` values appear under `spec`.
 
 The following configurations allow you to enable or disable features, control permissions, and customize the behavior of your NVIDIA Run:ai cluster
 
-<Info>
+<Note>
 
 **Note**
 
 * Keys that start with `clusterConfig` are available both in Helm and at runtime in `runaiconfig` (under `spec`). All other keys are available only through Helm.
 * At runtime, `runaiconfig` reflects the active configuration. If specific `clusterConfig` values set in `runaiconfig` differ from those in Helm, a subsequent Helm upgrade will overwrite only those fields to align with the chart.
 
-</Info>
+</Note>
 
 ### Helm Only Configurations
 
@@ -167,13 +167,13 @@ The NVIDIA Run:ai cluster bundles Valkey, oauth2-proxy, and git-sync. For what t
 
 NVIDIA Run:ai cluster includes many different services. To simplify resource management, the configuration structure allows you to configure the containers CPU / memory resources for each service individually or group of services together.
 
-<Info>
+<Note>
 
 **Note**
 
 For resource recommendations, see [Vertical scaling](../operations/scaling.md#vertical-scaling). To automatically adjust resources based on actual usage, see [Vertical Pod Autoscaling (VPA)](../operations/vpa.md). Note that static resource configuration remains the primary mechanism. VPA works alongside it by generating recommendations or dynamically applying adjustments depending on the configured update mode.
 
-</Info>
+</Note>
 
 | Service Group      | Description                                                                                                      | NVIDIA Run:ai containers                                                                                                                                                                             |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

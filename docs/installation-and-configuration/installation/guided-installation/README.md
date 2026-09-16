@@ -17,7 +17,7 @@ Use `runai-installer` when:
 - You want built-in preflight validation before any changes are applied.
 - You prefer a single tool that validates your configuration, runs preflight checks, installs prerequisites, and deploys the NVIDIA Run:ai control plane and cluster.
 
-For environments with an existing GitOps pipeline (Argo CD) or where administrators manage Helm releases directly, see [Manual Helm](../install-using-helm/helm-install.md).
+For environments with an existing GitOps pipeline (Argo CD) or where administrators manage Helm releases directly, see [Manual Helm](../install-using-helm/preparations.md).
 
 ## Installer Flow
 

@@ -30,13 +30,13 @@ This command gathers diagnostic logs from your Kubernetes cluster to facilitate 
 
 3. After the command completes, the CLI displays the path of the generated compressed log file. Send this file to NVIDIA Run:ai Support for troubleshooting.
 
-<Info>
+<Note>
 
 **Note**
 
 The command collects diagnostic logs from Kubernetes namespaces in a NVIDIA Run:ai installation. By default, logs are collected from the following namespaces: `runai`, `runai-reservation`, `runai-backend`, `training-operator`, `knative`, `gpu-operator`, and `nim-operator`. Use the `--namespaces` flag to target specific namespaces.
 
-</Info>
+</Note>
 
 ## Logs Verbosity
 

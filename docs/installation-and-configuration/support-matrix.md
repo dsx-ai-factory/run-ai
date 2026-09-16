@@ -1,6 +1,6 @@
 # Support Matrix
 
-The support matrix outlines the verified compatibility standards for NVIDIA Run:ai v3.0, and applies whether you install using the [Guided Installation](installation/guided-installation/README.md) or [Manual Helm](installation/install-using-helm/install-control-plane.md) path. To ensure a stable and performant deployment, all infrastructure components, including Kubernetes/OpenShift distributions, NVIDIA Operators, and specialized frameworks, must align with the versions specified below. Use this matrix as a validation checklist prior to performing new installations or upgrades. Once you've confirmed your versions, continue to [System Requirements](system-requirements/README.md) to prepare your cluster infrastructure.
+The support matrix outlines the verified compatibility standards for NVIDIA Run:ai v3.0, and applies whether you install using the [Guided Installation](installation/guided-installation/README.md) or [Manual Helm](installation/install-using-helm/preparations.md) path. To ensure a stable and performant deployment, all infrastructure components, including Kubernetes/OpenShift distributions, NVIDIA Operators, and specialized frameworks, must align with the versions specified below. Use this matrix as a validation checklist prior to performing new installations or upgrades. Once you've confirmed your versions, continue to [System Requirements](system-requirements/README.md) to prepare your cluster infrastructure.
 
 ## Operator and Framework Versions <a href="#operator-and-framework-versions" id="operator-and-framework-versions"></a>
 
@@ -48,7 +48,7 @@ NVIDIA Run:ai v3.0 is compatible with all Data Center GPUs supported by the NVID
 * Supported operator range - NVIDIA Run:ai v3.0 supports GPU Operator versions 25.10 through 26.7.
 * Hardware verification - To confirm if a specific GPU model is supported, please cross-reference your Operator version with the [Supported NVIDIA Data Center GPUs and Systems](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/platform-support.html#supported-nvidia-data-center-gpus-and-systems) documentation.
 
-<Info>
+<Note>
 
 **Note**
 
@@ -56,19 +56,19 @@ NVIDIA Run:ai v3.0 is compatible with all Data Center GPUs supported by the NVID
 * vGPU is not supported. NVIDIA Run:ai currently supports GPU passthrough only.
 * In addition to GPU Operator compatibility, support also depends on the framework being used (for example, CUDA, PyTorch, TensorFlow, or NVIDIA NIM). Before running a workload, verify that the selected framework version supports your target GPU architecture according to the relevant support matrix.
 
-</Info>
+</Note>
 
 ## NVIDIA Run:ai Compatible Distributions
 
 NVIDIA Run:ai v3.0 supports a wide range of Kubernetes distributions across on-premises, hybrid, and public cloud environments. Use the table below to verify version requirements for your specific platform.
 
-<Info>
+<Note>
 
 **Note**
 
 For a per-version Kubernetes and OpenShift compatibility matrix, see [Kubernetes and OpenShift Version Alignment](upgrade/helm.md#kubernetes-and-openshift-version-alignment). Review this before upgrading to ensure your Kubernetes or OpenShift distribution version is compatible with your target NVIDIA Run:ai version.
 
-</Info>
+</Note>
 
 | Orchestration Platform                 | Versions                         | Engine     | x86       | ARM       |
 | -------------------------------------- | -------------------------------- | ---------- | --------- | --------- |

@@ -110,7 +110,7 @@ The latest release of NVIDIA Run:ai supports **Kubernetes 1.34 to 1.36** and **O
 
 </Note>
 
-For the full list of compatible distributions and per-version compatibility, see the [Support Matrix](../support-matrix.md#nvidia-run-ai-compatible-distributions).
+For the full list of compatible distributions and per-version compatibility, see the [Support Matrix](../support-matrix.md#nvidia-runai-compatible-distributions).
 
 ### Partner-Compatible Distributions
 

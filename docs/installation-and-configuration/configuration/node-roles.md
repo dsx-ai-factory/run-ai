@@ -36,14 +36,14 @@ To set a system role for a node in your Kubernetes cluster using Kubectl, follow
     kubectl label nodes <node-name> node-role.kubernetes.io/runai-system=false
     ```
 
-<Info>
+<Note>
 
 **Note**
 
 * To ensure [high availability](../operations/high-availability.md) and prevent a single point of failure, it is recommended to configure at least three system nodes in your cluster.
 * By default, Kubernetes master nodes are configured to prevent workloads from running on them as a best-practice measure to safeguard control plane stability. While this restriction is generally recommended, certain NVIDIA reference architectures allow adding tolerations to the NVIDIA Run:ai deployment so critical system services can run on these nodes.
 
-</Info>
+</Note>
 
 ### Worker Nodes
 

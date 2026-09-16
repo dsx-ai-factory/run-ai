@@ -8,7 +8,7 @@ This page describes how to install the NVIDIA Run:ai control plane on a dedicate
 The `runai-installer` CLI runs once per Kubernetes cluster with a dedicated configuration file:
 
 1. **Install the control plane** (`mode: runai_control_plane_only`) on the control plane cluster.
-2. **Install the cluster component** (`mode: runai_cluster_only`) on each NVIDIA Run:ai cluster, and register it with the control plane - see the TODO note under [Install Each NVIDIA Run:ai Cluster](#install-each-nvidia-runai-cluster) below.
+2. **Install the cluster component** (`mode: runai_cluster_only`) on each NVIDIA Run:ai cluster, and register it with the control plane.
 
 ## Before You Start
 
@@ -16,13 +16,13 @@ Complete [Preparations](preparations.md) before continuing - system requirements
 
 ## Install the Control Plane
 
-<Info>
+<Note>
 
 **Configuration Templates**
 
 The configuration shown below is the minimum required to install. If your use case matches one of the [Configuration Templates](templates.md), copy that template instead of building a configuration from scratch. For a complete list of configuration fields to build your own configuration from scratch, see the [Configuration Reference](../configuration-reference.md).
 
-</Info>
+</Note>
 
 Create a `cp-config.yaml` file for the control plane cluster. At a minimum, configure:
 
@@ -34,13 +34,13 @@ Create a `cp-config.yaml` file for the control plane cluster. At a minimum, conf
 - `controlPlane.tls` - A certificate and private key for the control plane's FQDN, as `certPath` and `keyPath`. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates).
 - `externalConnection` - Required on standard Kubernetes, even if workloads will not be exposed externally - the control plane UI/API and the cluster endpoint are routed through it. See [Networking Setup](../../../system-requirements/networking-setup.md).
 
-<Info>
+<Note>
 
 **Note**
 
 `controlPlane.customHelmValues` merges Helm values into the control plane chart, for settings not otherwise exposed by the installer - see [`controlPlane`](../configuration-reference.md#controlplane) for how to set it. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys it accepts.
 
-</Info>
+</Note>
 
 The following example installs the NVIDIA Run:ai control plane from an already-loaded air-gapped bundle:
 
@@ -125,14 +125,14 @@ At a minimum, configure:
 - `cluster.tls` - A certificate and private key for the cluster's FQDN, as `certPath` and `keyPath`. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates).
 - `externalConnection` - Required on standard Kubernetes, even if workloads will not be exposed externally - the control plane UI/API and the cluster endpoint are routed through it. See [Networking Setup](../../../system-requirements/networking-setup.md).
 
-<Info>
+<Note>
 
 **Note**
 
 - `cluster.customHelmValues` merges Helm values into the cluster chart, for settings not otherwise exposed by the installer - see [`cluster`](../configuration-reference.md#cluster) for how to set it. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys it accepts.
 - GPU Operator and Prometheus are required for every installation, but the installer does not install them in air-gapped environments - they are skipped by default. Install both yourself beforehand, using each vendor's own air-gapped installation instructions. See [Prerequisites and Features](preparations.md#prerequisites-and-features).
 
-</Info>
+</Note>
 
 The following example installs the NVIDIA Run:ai cluster component from an already-loaded air-gapped bundle:
 

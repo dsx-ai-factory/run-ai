@@ -4,13 +4,13 @@ Vertical Pod Autoscaling (VPA) automatically adjusts CPU and memory requests and
 
 As clusters scale in nodes and workloads, NVIDIA Run:ai services may benefit from resource adjustments beyond the static defaults. VPA helps identify services that are over-provisioned or under-provisioned and can automatically apply right-sized resource recommendations - reducing the need for manual tuning.
 
-<Info>
+<Note>
 
 **Note**
 
 VPA can be configured on NVIDIA Run:ai cluster components only, not the control plane. For more information about NVIDIA Run:ai service groups and manual scaling recommendations, see [NVIDIA Run:ai at scale](scaling.md).
 
-</Info>
+</Note>
 
 ### Update Modes
 

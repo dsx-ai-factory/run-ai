@@ -114,7 +114,8 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 
 Loading happens once the tarball is in the air-gapped network, on any machine there with access to both the tarball and your internal mirror registry - this can be a different machine than the one you later run `install` from, as long as `install` can reach the same `workingDir` and `valuesDir` afterward.
 
-Create a load configuration file (`airgap-load.yaml`) and run `airgap load` against it:
+1. Extract the `runai-installer` binary from the transferred bundle tarball.
+2. Create a load configuration file (`airgap-load.yaml`) and run `airgap load` against it:
 
 ```bash
 cat > airgap-load.yaml <<'EOF'

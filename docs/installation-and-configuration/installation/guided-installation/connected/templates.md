@@ -5,17 +5,17 @@
 
 Ready-to-use configuration YAMLs for internet-connected environments. Each template is a complete, standalone `config.yaml` for a same-cluster installation (`install.mode: full_installation`) - copy the one that matches your use case. For a multi-cluster deployment, split the template into two configs - see [Splitting a Template for Multi-Cluster](#splitting-a-template-for-multi-cluster) below for a worked example.
 
-<Info>
+<Note>
 
 **Note**
 
 See the [Configuration Reference](../configuration-reference.md) for what every field accepts.
 
-</Info>
+</Note>
 
 ## Full Install (Same-Cluster)
 
-Deploys the control plane and cluster together on the same Kubernetes cluster, with every prerequisite and feature enabled and external traffic routed through an Ingress controller (`haproxy`). See [Prerequisites and Features](../prerequisites-and-features.md) for what each one does. Before applying, replace the domain and TLS certificate paths with your own values, and add registry credentials if you're on a Support-Entitled release.
+Deploys the control plane and cluster on the same Kubernetes cluster with every prerequisite and feature enabled, routing external traffic through an Ingress controller (`haproxy`). See [Prerequisites and Features](../prerequisites-and-features.md). Replace the domain, TLS certificate paths, and (Support-Entitled only) registry credentials before applying.
 
 ```yaml
 install:
@@ -208,7 +208,7 @@ Apply the same split to any other template on this page - move `cluster`, `prere
 
 ## Training Deployment Only
 
-Enables the GPU Operator and Prometheus prerequisites and the Kubeflow and MPI Operator features for a training deployment only — no inference stack. See [Prerequisites and Features](../prerequisites-and-features.md) for what each one does. Before applying, replace the domain and TLS certificate paths with your own values, and add registry credentials if you're on a Support-Entitled release.
+Enables the GPU Operator and Prometheus prerequisites and the Kubeflow and MPI Operator features, for training workloads only. See [Prerequisites and Features](../prerequisites-and-features.md). Replace the domain, TLS certificate paths, and (Support-Entitled only) registry credentials before applying.
 
 ```yaml
 install:
@@ -263,7 +263,7 @@ externalConnection:
 
 ## Inference Deployment Only
 
-Enables the GPU Operator and Prometheus prerequisites and the Knative, LWS, NIM Operator, Grove, and Dynamo features for an inference deployment only — no training stack. See [Prerequisites and Features](../prerequisites-and-features.md) for what each one does. Before applying, replace the domain and TLS certificate paths with your own values, and add registry credentials if you're on a Support-Entitled release.
+Enables the GPU Operator and Prometheus prerequisites and the Knative, LWS, NIM Operator, Grove, and Dynamo features, for inference workloads only. See [Prerequisites and Features](../prerequisites-and-features.md). Replace the domain, TLS certificate paths, and (Support-Entitled only) registry credentials before applying.
 
 ```yaml
 install:
@@ -337,7 +337,7 @@ externalConnection:
 
 ## Gateway API
 
-Installs the GPU Operator and Prometheus prerequisites, with no features enabled. See [Prerequisites and Features](../prerequisites-and-features.md) for what each one does. Routes external traffic through the Kubernetes Gateway API instead of Ingress. Before applying, replace the domain, TLS certificate paths, and Gateway name/namespace with your own values, and add registry credentials if you're on a Support-Entitled release.
+Installs the GPU Operator and Prometheus prerequisites with no features enabled, routing external traffic through the Kubernetes Gateway API instead of Ingress. See [Prerequisites and Features](../prerequisites-and-features.md). Replace the domain, TLS certificate paths, Gateway name/namespace, and (Support-Entitled only) registry credentials before applying.
 
 ```yaml
 install:
@@ -385,7 +385,7 @@ externalConnection:
 
 ## OpenShift
 
-Deploys the control plane and cluster together on the same OpenShift cluster (`install.kubernetesDistribution: openshift`), with the training and inference prerequisites and features enabled. Unlike the templates above, this one omits `externalConnection` entirely - OpenShift Routes are configured automatically. `prerequisites.prometheus.mode` is set to `skip`, since OpenShift's built-in Cluster Monitoring Operator is used instead of the installer-managed Prometheus stack. Before applying, install the [Node Feature Discovery (NFD) Operator](../prerequisites-and-features.md#nvidia-gpu-operator) manually through OperatorHub first - it's a prerequisite for the GPU Operator on OpenShift and isn't installed by the `runai-installer`. Then replace the domain and TLS certificate paths with your own values, and add registry credentials if you're on a Support-Entitled release.
+Deploys the control plane and cluster on the same OpenShift cluster (`install.kubernetesDistribution: openshift`), with the training and inference prerequisites and features enabled. Omits `externalConnection` - OpenShift Routes are configured automatically. Sets `prerequisites.prometheus.mode: skip`, since OpenShift's built-in Cluster Monitoring Operator replaces the installer-managed Prometheus stack. Install the [Node Feature Discovery (NFD) Operator](../prerequisites-and-features.md#nvidia-gpu-operator) manually through OperatorHub first - a GPU Operator prerequisite on OpenShift not installed by `runai-installer`. Replace the domain, TLS certificate paths, and (Support-Entitled only) registry credentials before applying.
 
 ```yaml
 install:

@@ -27,13 +27,13 @@ The following workload types can run on worker nodes:
 * **Training workloads** - These are long-running processes that, in case of node downtime, can automatically move to another node.
 * **Interactive workloads** - These are short-lived, interactive processes that require manual intervention to be relocated to another node.
 
-<Info>
+<Note>
 
 **Note**
 
 While training workloads can be automatically migrated, it is recommended to plan maintenance and manually manage this process for a faster response, as it may take time for Kubernetes to detect a node failure.
 
-</Info>
+</Note>
 
 #### Planned Maintenance
 

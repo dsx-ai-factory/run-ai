@@ -49,13 +49,13 @@ To use path-based routing instead, disable host-based routing by setting `subdom
 
 While path-based routing works with applications such as Jupyter Notebooks, it may not be compatible with other applications. Some applications assume they are running at the root file system, so hardcoded file paths and settings within the container may become invalid when running at a path other than the root. For example, if an application expects to access `/etc/config.json` but is served at `/project-name/workspace-name`, the file will not be found. This can cause the container to fail or not function as intended.
 
-<Info>
+<Note>
 
 **Note**
 
 For existing clusters, changing the routing model affects how workload URLs are generated. Administrators should plan this transition accordingly.
 
-</Info>
+</Note>
 
 ### OpenShift Route TLS Termination
 

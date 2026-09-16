@@ -5,17 +5,17 @@
 
 Ready-to-use configuration YAMLs for air-gapped environments. Each template is a complete, standalone `config.yaml` for a same-cluster installation (`install.mode: full_installation`) - copy the one that matches your use case. For a multi-cluster deployment, split the template into two configs - see [Splitting a Template for Multi-Cluster](#splitting-a-template-for-multi-cluster) below for a worked example.
 
-<Info>
+<Note>
 
 **Note**
 
 See the [Configuration Reference](../configuration-reference.md) for what every field accepts.
 
-</Info>
+</Note>
 
 ## Full Install (Same-Cluster)
 
-Deploys the control plane and cluster together on the same Kubernetes cluster, pulling images from your private mirror registry and routing external traffic through an Ingress controller (`haproxy`). Before applying, replace the domain, TLS certificate paths, private mirror registry, and air-gapped bundle working directory with your own values.
+Deploys the control plane and cluster on the same Kubernetes cluster, pulling images from your private mirror registry and routing external traffic through an Ingress controller (`haproxy`). Replace the domain, TLS certificate paths, mirror registry, and bundle working directory before applying.
 
 ```yaml
 install:
@@ -139,7 +139,7 @@ Apply the same split to the Gateway API template below - move `cluster` into the
 
 ## Gateway API
 
-Deploys the control plane and cluster together on the same Kubernetes cluster, pulling images from your private mirror registry and routing external traffic through the Kubernetes Gateway API instead of Ingress. Before applying, replace the domain, TLS certificate paths, private mirror registry, and air-gapped bundle working directory with your own values.
+Deploys the control plane and cluster on the same Kubernetes cluster, pulling images from your private mirror registry and routing external traffic through the Kubernetes Gateway API instead of Ingress. Replace the domain, TLS certificate paths, mirror registry, and bundle working directory before applying.
 
 ```yaml
 install:
@@ -189,7 +189,7 @@ externalConnection:
 
 ## OpenShift
 
-Deploys the control plane and cluster together on the same OpenShift cluster (`install.kubernetesDistribution: openshift`) from an air-gapped bundle. Unlike the templates above, this one omits `externalConnection` entirely - OpenShift Routes are configured automatically. It also sets `openshift.olmCatalog` to point OLM-based operator installs at your mirrored OperatorHub catalog, since the public catalogs aren't reachable in an air-gapped environment. GPU Operator and Prometheus are installed manually, using each vendor's own air-gapped OpenShift instructions - see [Prerequisites and Features](preparations.md#prerequisites-and-features) - and the Node Feature Discovery (NFD) Operator, a prerequisite for the GPU Operator on OpenShift, is also installed manually through your mirrored catalog. Before applying, replace the domain, TLS certificate paths, private mirror registry, air-gapped bundle working directory, and OperatorHub catalog source with your own values.
+Deploys the control plane and cluster on the same OpenShift cluster (`install.kubernetesDistribution: openshift`) from an air-gapped bundle. Omits `externalConnection` - OpenShift Routes are configured automatically. Sets `openshift.olmCatalog` to point OLM-based operator installs at your mirrored OperatorHub catalog, since public catalogs aren't reachable air-gapped. GPU Operator, Prometheus, and the Node Feature Discovery (NFD) Operator (a GPU Operator prerequisite on OpenShift) are installed manually through your mirrored catalog - see [Prerequisites and Features](preparations.md#prerequisites-and-features). Replace the domain, TLS certificate paths, mirror registry, bundle working directory, and OperatorHub catalog source before applying.
 
 ```yaml
 install:

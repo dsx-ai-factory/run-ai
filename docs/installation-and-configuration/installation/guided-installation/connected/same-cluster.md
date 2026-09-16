@@ -11,13 +11,13 @@ Complete [Preparations](preparations.md) before continuing - system requirements
 
 ## Create a Configuration File
 
-<Info>
+<Note>
 
 **Configuration Templates**
 
 The configuration shown below is the minimum required to install. If your use case matches one of the [Configuration Templates](templates.md), copy that template instead of building a configuration from scratch. For a complete list of configuration fields to build your own configuration from scratch, see the [Configuration Reference](../configuration-reference.md).
 
-</Info>
+</Note>
 
 Create a `config.yaml` file describing your installation. At a minimum, configure:
 
@@ -31,13 +31,13 @@ Create a `config.yaml` file describing your installation. At a minimum, configur
 - `prerequisites` - GPU Operator and Prometheus are required for every installation. Set both to `mode: install`. Each also accepts its own `version` field - omit it to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported version range if you want to set it explicitly. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites).
 - `externalConnection` - Required on standard Kubernetes, even if workloads will not be exposed externally - the control plane UI/API and the cluster endpoint are routed through it. See [Networking Setup](../../../system-requirements/networking-setup.md).
 
-<Info>
+<Note>
 
 **Note**
 
 `controlPlane.customHelmValues` / `cluster.customHelmValues` merge Helm values into the control plane or cluster chart, for settings not otherwise exposed by the installer - see [`controlPlane`](../configuration-reference.md#controlplane) and [`cluster`](../configuration-reference.md#cluster) for how to set it. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) and [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys each accepts.
 
-</Info>
+</Note>
 
 The following example installs the NVIDIA Run:ai control plane and cluster on the same Kubernetes cluster:
 

@@ -238,13 +238,13 @@ Cordoning the node is not sufficient. A common first response is to cordon the f
     kubectl taint node <node-name> runai/gpu-fault=true:NoSchedule-
     ```
 
-<Info>
+<Note>
 
 **Note**
 
 If the node has no workloads worth preserving on its remaining healthy GPUs, a full drain and reboot (`kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data`) is an alternative approach. This resolves the underlying hardware fault directly and the taint workaround is not needed.
 
-</Info>
+</Note>
 
 </Accordion>
 
