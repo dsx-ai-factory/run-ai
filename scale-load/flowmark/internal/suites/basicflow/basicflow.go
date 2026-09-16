@@ -7,6 +7,8 @@ package basicflow
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -72,7 +74,10 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 		return core.Section{}, err
 	}
 
-	stamp := time.Now().Unix() % 1_000_000
+	id, err := runID()
+	if err != nil {
+		return core.Section{}, err
+	}
 	var created []string
 	defer func() {
 		cleanupErr := cleanup(clients, clusterID, created, knobs.timeout)
@@ -89,7 +94,7 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 
 	projects := make([]submit.ProjectRef, 0, knobs.projects)
 	for i := range knobs.projects {
-		name := fmt.Sprintf("flowmark-basic-%d-%d", stamp, i+1)
+		name := fmt.Sprintf("flowmark-basic-%s-%d", id, i+1)
 		created = append(created, name)
 		project, err := submit.Project(ctx, clients, clusterID, name, knobs.timeout)
 		if err != nil {
@@ -102,7 +107,7 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 	for i := range knobs.workloads {
 		project := projects[i%len(projects)]
 		ref, err := submit.Training(ctx, clients, submit.WorkloadSpec{
-			Name:    fmt.Sprintf("flowmark-basic-%d-w%d", stamp, i+1),
+			Name:    fmt.Sprintf("flowmark-basic-%s-w%d", id, i+1),
 			Project: project,
 			Image:   "ubuntu",
 			Command: "sleep infinity",
@@ -116,6 +121,14 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 
 	result := measure(ctx, accepted, runnerExists(clients.Kube), pollInterval, knobs.timeout)
 	return result.section(knobs.workloads), nil
+}
+
+func runID() (string, error) {
+	var raw [4]byte
+	if _, err := rand.Read(raw[:]); err != nil {
+		return "", fmt.Errorf("generate run id: %w", err)
+	}
+	return hex.EncodeToString(raw[:]), nil
 }
 
 func parseSettings(cfg core.Config) (settings, error) {
