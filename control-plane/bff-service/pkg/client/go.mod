@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5

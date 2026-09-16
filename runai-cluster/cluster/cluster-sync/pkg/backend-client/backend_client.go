@@ -28,15 +28,12 @@ import (
 	policiesgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
 	workloadswagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
-	projswagger "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-projects-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/metrics"
 	"go.uber.org/zap"
 )
 
 type BackendClient struct {
-	Client                 *swagger.APIClient
-	ProjectsClient         *projswagger.APIClient
+	Client                 *assetsgenerated.APIClient
 	AccessRulesClient      authclient.IAuthorizationExternalClient
 	DatavolumesClient      datavolumesclient.IDatavolumesClient
 	ClusterServiceClient   *clustersvcswagger.APIClient
@@ -68,15 +65,12 @@ func NewBackendClient(basePath string, httpClient *http.Client) *BackendClient {
 	if httpClient == nil {
 		httpClient = &http.Client{Transport: http.DefaultTransport}
 	}
+	assetsConfig := &assetsgenerated.Configuration{
+		Servers:    assetsgenerated.ServerConfigurations{{URL: basePath}},
+		HTTPClient: httpClient,
+	}
 	runaiBackendClient := &BackendClient{
-		Client: swagger.NewAPIClient(&swagger.Configuration{
-			BasePath:   basePath,
-			HTTPClient: httpClient,
-		}),
-		ProjectsClient: projswagger.NewAPIClient(&projswagger.Configuration{
-			BasePath:   basePath,
-			HTTPClient: httpClient,
-		}),
+		Client: assetsgenerated.NewAPIClient(assetsConfig),
 		AccessRulesClient: authclient.NewAccessRulesClientWithConfig(&authgenerated.Configuration{
 			Servers:    authgenerated.ServerConfigurations{{URL: basePath}},
 			HTTPClient: httpClient,
@@ -109,10 +103,7 @@ func NewBackendClient(basePath string, httpClient *http.Client) *BackendClient {
 			Servers:    policiesgenerated.ServerConfigurations{{URL: basePath}},
 			HTTPClient: httpClient,
 		}),
-		AssetsClient: asssets.NewExternalClientWithConfig(&assetsgenerated.Configuration{
-			Servers:    assetsgenerated.ServerConfigurations{{URL: basePath}},
-			HTTPClient: httpClient,
-		}),
+		AssetsClient: asssets.NewExternalClientWithConfig(assetsConfig),
 		OrgUnitClient: orgUnit.NewOrgUnitExternalClientWithConfig(&orgunitgenerated.Configuration{
 			Servers:    orgunitgenerated.ServerConfigurations{{URL: basePath}},
 			HTTPClient: httpClient,
@@ -248,11 +239,13 @@ func (backendClient *BackendClient) sendLiveness() {
 	var livenessErr error
 	livenessErr = nil
 	requestTimeTag := time.Now().UnixMilli()
-	res, err := backendClient.Client.ClustersApi.UpdateClusterLiveness(
-		backendClient.Context(),
-		swagger.UuidLivenessBody{TimeTag: requestTimeTag},
-		config.Config().ClusterUuid,
-	)
+	livenessRequest := clustersvcswagger.NewClusterLivenessSyncRequest(requestTimeTag)
+	res, err := backendClient.ClusterServiceClient.ClustersAPI.UpdateClusterLiveness(
+		backendClient.Context(), config.Config().ClusterUuid,
+	).ClusterLivenessSyncRequest(*livenessRequest).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	if err != nil || res.StatusCode >= http.StatusBadRequest {
 		livenessErr = backendClient.HandleHttpResponse(res, err, "Sent liveness")
 		if livenessErr != nil {

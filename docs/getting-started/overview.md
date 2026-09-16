@@ -74,12 +74,3 @@ The NVIDIA Run:ai control plane provides a centralized management interface for 
 * [**Multi-cluster management**](../installation-and-configuration/operations/clusters.md) - Manages multiple NVIDIA Run:ai clusters for a single tenant across different locations and subnets from a single unified interface.
 * [**Resource and access management**](../platform-management/aiinitiatives/adapting-ai-initiatives.md) - Allows administrators to define Projects, Departments and user roles, enforcing policies for fair resource distribution.
 * [**Workload submission and monitoring**](../workloads-in-nvidia-run-ai/workloads.md) - Allows teams to submit workloads, track usage, and monitor GPU performance in real time.
-
-## Installation Types
-NVIDIA Run:ai is deployed as a self-hosted installation:
-
-| Installation Type | Description                                                                                                                                                                                                                                                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Self-hosted       | NVIDIA Run:ai is installed on the customer's data science GPU clusters, with the control plane running in the customer's data center                                                                                                                                                                                                                                           |
-
-<figure><img src="../assets/installation-types.png" alt=""/><figcaption></figcaption></figure>

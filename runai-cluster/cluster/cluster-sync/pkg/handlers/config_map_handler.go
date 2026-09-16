@@ -75,14 +75,23 @@ func (h *ConfigMapHandler) handleConfigMapAddUpdate(configMap *corev1.ConfigMap)
 	case auth_client.SCOPETYPE_CLUSTER:
 		_, response, err = h.backendClient.K8sObjectTrackerClient.CreateClusterWideConfigmap(
 			h.backendClient.Context(), clusterId, configMap.Name, parsedConfigMap.CreationRequest.Issues)
+		if response != nil {
+			_ = response.Body.Close()
+		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
 		_, response, err = h.backendClient.K8sObjectTrackerClient.CreateDepartmentsWideConfigmap(
 			h.backendClient.Context(), clusterId, parsedConfigMap.Scope.Id, configMap.Name, parsedConfigMap.CreationRequest.Issues)
+		if response != nil {
+			_ = response.Body.Close()
+		}
 
 	case auth_client.SCOPETYPE_PROJECT:
 		_, response, err = h.backendClient.K8sObjectTrackerClient.CreateProjectsConfigmap(
 			h.backendClient.Context(), clusterId, parsedConfigMap.Scope.Id, configMap.Name, parsedConfigMap.CreationRequest.Issues)
+		if response != nil {
+			_ = response.Body.Close()
+		}
 	}
 
 	return h.backendClient.HandleHttpResponse(response, err, fmt.Sprintf("Added ConfigMap %s:%s", configMap.Namespace, configMap.Name))
@@ -104,14 +113,23 @@ func (h *ConfigMapHandler) HandleConfigMapDelete(configMap *corev1.ConfigMap) er
 	case auth_client.SCOPETYPE_CLUSTER:
 		response, err = h.backendClient.K8sObjectTrackerClient.DeleteClusterWideConfigmap(
 			h.backendClient.Context(), config.Config().ClusterUuid, configMap.Name)
+		if response != nil {
+			_ = response.Body.Close()
+		}
 
 	case auth_client.SCOPETYPE_DEPARTMENT:
 		response, err = h.backendClient.K8sObjectTrackerClient.DeleteDepartmentsWideConfigmap(
 			h.backendClient.Context(), config.Config().ClusterUuid, parsedConfigMap.Scope.Id, configMap.Name)
+		if response != nil {
+			_ = response.Body.Close()
+		}
 
 	case auth_client.SCOPETYPE_PROJECT:
 		response, err = h.backendClient.K8sObjectTrackerClient.DeleteProjectsConfigmap(
 			h.backendClient.Context(), config.Config().ClusterUuid, parsedConfigMap.Scope.Id, configMap.Name)
+		if response != nil {
+			_ = response.Body.Close()
+		}
 	}
 
 	return h.backendClient.HandleHttpResponse(response, err, fmt.Sprintf("Deleted ConfigMap %s:%s", configMap.Namespace, configMap.Name))
@@ -181,14 +199,23 @@ func (h *ConfigMapHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 		case auth_client.SCOPETYPE_CLUSTER:
 			_, response, execError = h.backendClient.K8sObjectTrackerClient.SyncClusterWideConfigmaps(
 				h.backendClient.Context(), config.Config().ClusterUuid, configMapList.Configmaps)
+			if response != nil {
+				_ = response.Body.Close()
+			}
 
 		case auth_client.SCOPETYPE_DEPARTMENT:
 			_, response, execError = h.backendClient.K8sObjectTrackerClient.SyncDepartmentsWideConfigmap(
 				h.backendClient.Context(), config.Config().ClusterUuid, scope.Id, configMapList.Configmaps)
+			if response != nil {
+				_ = response.Body.Close()
+			}
 
 		case auth_client.SCOPETYPE_PROJECT:
 			_, response, execError = h.backendClient.K8sObjectTrackerClient.SyncProjectsConfigmap(
 				h.backendClient.Context(), config.Config().ClusterUuid, scope.Id, configMapList.Configmaps)
+			if response != nil {
+				_ = response.Body.Close()
+			}
 		}
 
 		if execError != nil {
