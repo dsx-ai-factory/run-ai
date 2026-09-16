@@ -70,8 +70,18 @@ func TestResolveConfig_Full_NoOverride(t *testing.T) {
 	require.Equal(t, "file:///tmp", conf.MigrationDirPath)
 }
 
+func TestResolveConfig_OmittedPassword_UniquePerResolve(t *testing.T) {
+	first := resolveConfig(&IntegdbConfig{Schema: "my_schema"})
+	require.Len(t, first.Password, 32)
+
+	second := resolveConfig(&IntegdbConfig{Schema: "my_schema"})
+	require.Len(t, second.Password, 32)
+
+	require.NotEqual(t, first.Password, second.Password)
+}
+
 func TestGenerateRandomHex(t *testing.T) {
-	key := generateRandomHex(16)
+	key := generateRandomHex()
 	require.Equal(t, 32, len(key))
 }
 

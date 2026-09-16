@@ -32,7 +32,7 @@ type IntegdbConfig struct {
 
 func (c *IntegdbConfig) SetDefaults() {
 	c.User = "postgres"
-	c.Password = generateRandomHex(16)
+	c.Password = generateRandomHex()
 	c.Name = "backend"
 	c.Schema = "test"
 	c.MigrationDirPath = "file:///migrations"
@@ -87,7 +87,7 @@ func SetupPostgresDB(conf *IntegdbConfig) (*dbconfig.Config, func(), error) {
 	dbConf.Migration.Auto = ptr.Bool(conf.MigrationDirPath != "")
 
 	dbConf.ServiceName = "test-integdb"
-	dbConf.EncryptionKey = generateRandomHex(16)
+	dbConf.EncryptionKey = generateRandomHex()
 
 	return dbConf, cleanup, nil
 }
@@ -126,8 +126,8 @@ func resolveConfig(conf *IntegdbConfig) *IntegdbConfig {
 	return config.Get[*IntegdbConfig]()
 }
 
-func generateRandomHex(n int) string {
-	b := make([]byte, n)
+func generateRandomHex() string {
+	b := make([]byte, 16)
 	_, _ = rand.Read(b)
 	return hex.EncodeToString(b)
 }
