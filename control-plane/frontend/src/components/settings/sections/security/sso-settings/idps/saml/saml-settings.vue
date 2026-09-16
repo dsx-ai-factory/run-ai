@@ -28,14 +28,6 @@
         />
       </div>
       <div class="col-12 q-mb-lg">
-        <div v-if="hasIdpAttributes">Use the following if required by the identity provider</div>
-        <setting-readable-field label="Redirect URL" v-if="idp?.redirectUri">
-          <div class="row no-wrap items-center">
-            <div class="col-12 q-pt-md q-pl-md">
-              {{ idp.redirectUri }}
-            </div>
-          </div>
-        </setting-readable-field>
         <setting-readable-field label="Entity ID">
           <div class="row no-wrap items-center">
             <div class="col-12 q-pt-md q-pl-md">
@@ -77,6 +69,16 @@
         />
       </template>
     </setting-editable-field>
+    <div v-if="hasIdpAttributes" class="redirect-url-field">
+      <div>Use the following if required by the identity provider</div>
+      <setting-readable-field label="Redirect URL">
+        <div class="row no-wrap items-center">
+          <div class="col-12 q-pt-md q-pl-md">
+            {{ idp?.redirectUri }}
+          </div>
+        </div>
+      </setting-readable-field>
+    </div>
     <notification-alert-bar
       v-if="certificateWarningVariant"
       class="q-mx-sm q-mb-sm certificate-warning"
@@ -202,7 +204,7 @@ export default defineComponent({
       return this.isIdpFieldsChanged || this.isIdpMapperChanged;
     },
     hasIdpAttributes(): boolean {
-      return this.idp?.redirectUri !== "";
+      return (this.idp?.redirectUri || "") !== "";
     },
     samlConfigSettings(): SamlConfigSettings {
       if (this.idp?.samlData) {
@@ -283,10 +285,11 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.certificate-warning {
+.certificate-warning,
+.redirect-url-field {
   margin-top: 12px;
 }
 .download-icon {
-  color: $black-54;
+  color: var(--icon-default);
 }
 </style>
