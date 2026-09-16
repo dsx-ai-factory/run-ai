@@ -12,7 +12,7 @@ NVIDIA Run:ai recommends resubmitting an affected workload if you want it fully 
 | --- | --- |
 | Suspend / Resume | Not functional |
 | Error handling / auto-restart | Not functional. A workload backed by a third-party controller, such as Knative, keeps running, but NVIDIA Run:ai no longer tracks its status |
-| Fractional GPU support | Not functional. Can silently fall back to CPU-only if the CUDA driver was not updated during the upgrade |
+| Fractional GPU support | Not functional. Fractional workloads should also be migrated, following [Migrate GPU Fractions](migrate-gpu-fractions.md), since fractions are now CUDA-based |
 | Events / status visibility | Partially functional. Pods are still detected and their status is still updated |
 | Update (modify spec in place) | Not functional. Applies to standard inference and distributed inference workloads |
 | Make a Copy, metrics and monitoring, log streaming, port forwarding, CLI operations (`runai get`/`describe`/`logs`), delete | Unaffected |
