@@ -6,7 +6,7 @@ require (
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2
-	github.com/onsi/ginkgo/v2 v2.32.1
+	github.com/onsi/ginkgo/v2 v2.32.2
 	github.com/onsi/gomega v1.43.0
 	sigs.k8s.io/yaml v1.6.0
 )
