@@ -55,8 +55,8 @@ func TestBootConfigUsesV2DefaultsWithoutSupportEntitlement(t *testing.T) {
 
 	assert.Equal(t, "cc", result.DistributionAssets.Profile)
 	assert.Equal(t, "v2", result.Docs.CatalogVersion)
-	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/v3.0", result.Docs.BaseUrl)
-	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/v3.0/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
+	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/3.0", result.Docs.BaseUrl)
+	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
 	assert.Empty(t, result.Support.Url)
 }
 
@@ -71,8 +71,8 @@ func TestBootConfigKeepsV2DefaultsWithSupportEntitlement(t *testing.T) {
 
 	assert.Equal(t, "ce", result.DistributionAssets.Profile)
 	assert.Equal(t, "v2", result.Docs.CatalogVersion)
-	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/v3.0", result.Docs.BaseUrl)
-	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/v3.0/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
+	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/3.0", result.Docs.BaseUrl)
+	assert.Equal(t, "https://docs.nvidia.com/run-ai/self-hosted/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
 	assert.Equal(t, supportEntitledURL, result.Support.Url)
 	assert.Equal(t, supportEntitledLabel, result.Support.Label)
 	assert.NotContains(t, string(payload), "supportEntitled")
@@ -185,13 +185,13 @@ func TestBootConfigOmitsIncompleteUnleashConfig(t *testing.T) {
 	assert.Nil(t, result.UnleashConfig)
 }
 
-func TestBootConfigCatalogVersioning(t *testing.T) {
+func TestBootConfigPreservesVersioningAcrossCatalogs(t *testing.T) {
 	for _, tc := range []struct {
 		name, catalog, version, baseSuffix, updatesSuffix string
 		versioned                                         bool
 	}{
 		{name: "v1 release", catalog: "v1", version: "3.0.4", versioned: true, baseSuffix: "/3.0", updatesSuffix: "/updates-3-0"},
-		{name: "v2 release", catalog: "v2", version: "v3.0.4", versioned: true, baseSuffix: "/v3.0", updatesSuffix: "/v3.0/updates-3-0"},
+		{name: "v2 release", catalog: "v2", version: "v3.0.4", versioned: true, baseSuffix: "/3.0", updatesSuffix: "/updates-3-0"},
 		{name: "v2 development", catalog: "v2", version: "0.0.0-build.42", versioned: true, updatesSuffix: "/updates"},
 		{name: "v2 unversioned", catalog: "v2", version: "3.0.4", updatesSuffix: "/updates"},
 	} {
@@ -228,8 +228,8 @@ func TestBootConfigV2PreservesConfiguredTemplateAndRelativeBase(t *testing.T) {
 	bootConfig.DocsWhatsNewURLTemplate = "{docsBaseUrl}/documentation/getting-started/whats-new/whats-new"
 
 	result := NewBootConfigAPIService("3.0.1", bootConfig).resolve()
-	assert.Equal(t, "/internal-docs/v3.0", result.Docs.BaseUrl)
-	assert.Equal(t, "/internal-docs/v3.0/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
+	assert.Equal(t, "/internal-docs/3.0", result.Docs.BaseUrl)
+	assert.Equal(t, "/internal-docs/documentation/getting-started/whats-new/whats-new-3-0", result.Docs.WhatsNew.Url)
 }
 
 func TestBootConfigPreservesV1DeploymentOverride(t *testing.T) {

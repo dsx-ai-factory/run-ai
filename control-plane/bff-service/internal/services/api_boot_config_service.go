@@ -55,14 +55,7 @@ func (s *BootConfigAPIService) resolve() api.BootConfig {
 	versionMatches := releaseVersionPattern.FindStringSubmatch(trimmedVersion)
 	hasDocsVersion := hasUsableDocsVersion(versionMatches)
 	if s.config.DocsVersioned && hasDocsVersion {
-		versionPrefix := "/"
-		if catalogVersion == "v2" {
-			versionPrefix += "v"
-		}
-		docsBaseURL += versionPrefix + versionMatches[1] + "." + versionMatches[2]
-	}
-	if catalogVersion == "v2" {
-		whatsNewBaseURL = docsBaseURL
+		docsBaseURL += "/" + versionMatches[1] + "." + versionMatches[2]
 	}
 
 	whatsNewURL := strings.ReplaceAll(s.config.DocsWhatsNewURLTemplate, "{docsBaseUrl}", whatsNewBaseURL)
