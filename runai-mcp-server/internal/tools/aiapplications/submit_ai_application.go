@@ -27,13 +27,14 @@ type aiApplicationChartRef struct {
 }
 
 type aiApplicationAuth struct {
-	AssetID string `json:"assetId" jsonschema:"Credential asset ID used to authenticate to a private Helm repository or chart URL."`
+	AssetID        string `json:"assetId"                  jsonschema:"Credential asset ID used to authenticate to a private Helm repository or chart URL."`
+	UserCredential bool   `json:"userCredential,omitempty" jsonschema:"Set to true when assetId identifies a personal credential owned by the caller. Omitted or false means a shared credential."`
 }
 
 type aiApplicationSpec struct {
 	ChartRef     aiApplicationChartRef `json:"chartRef"              jsonschema:"Helm chart origin. Provide exactly one source: repo with chartName and chartVersion, chartURL, or chartId."`
-	Values       map[string]any        `json:"values,omitempty"       jsonschema:"Inline Helm values merged with the chart defaults. Mutually exclusive with valuesBase64."`
-	ValuesBase64 *string               `json:"valuesBase64,omitempty" jsonschema:"Base64-encoded Helm values. Mutually exclusive with values."`
+	Values       map[string]any        `json:"values,omitempty"       jsonschema:"Inline Helm values merged with chart defaults. Personal credentials must occupy the entire string value: USERCREDENTIAL:<name>. For NGC credentials use USERCREDENTIAL:<name>,generic-secret or USERCREDENTIAL:<name>,docker-registry."`
+	ValuesBase64 *string               `json:"valuesBase64,omitempty" jsonschema:"Base64-encoded Helm values, mutually exclusive with values. Decoded personal-credential references use the same exact whole-string USERCREDENTIAL:<name>[,generic-secret|,docker-registry] grammar."`
 	Auth         *aiApplicationAuth    `json:"auth,omitempty"         jsonschema:"Authentication for a private Helm chart source."`
 }
 
@@ -55,6 +56,11 @@ func (in submitAIApplicationInput) Validate() error {
 	if in.Spec.ValuesBase64 != nil {
 		if _, err := base64.StdEncoding.DecodeString(*in.Spec.ValuesBase64); err != nil {
 			return fmt.Errorf("spec.valuesBase64 must be valid base64")
+		}
+	}
+	if in.Spec.Auth != nil {
+		if in.Spec.Auth.AssetID == "" {
+			return fmt.Errorf("spec.auth.assetId is required")
 		}
 	}
 	return nil
@@ -98,7 +104,8 @@ func registerSubmitAIApplication(r *runaimcp.Registry, client *runaiclient.Clien
 		Description: "Call when the user asks to submit a new AI application for scheduling from a Helm chart. " +
 			"Provide clusterId, projectId, name, and exactly one chart source: an HTTP/HTTPS/OCI repository with " +
 			"chartName and chartVersion, a direct HTTPS chartURL, or a previously uploaded chartId. " +
-			"The spec can include inline or base64-encoded Helm values and a credential asset for a private chart source. Submission requires confirmation. " +
+			"The spec can include inline or base64-encoded Helm values and shared or personal credentials for a private chart source. " +
+			"Personal runtime references must be exact whole strings using USERCREDENTIAL:<name>; NGC references require ,generic-secret or ,docker-registry. Submission requires confirmation. " +
 			"Returns the created application ID and its desired, action, and release phases. " +
 			"Do not use this tool to inspect existing applications; use list_ai_applications. " +
 			"Do not use it to submit an individual workload; use submit_workload.",
@@ -180,6 +187,9 @@ func toAIApplicationCreationRequest(in submitAIApplicationInput) workloads.AIApp
 	if in.Spec.Auth != nil {
 		auth := workloads.AIApplicationAuth{}
 		auth.SetAssetId(in.Spec.Auth.AssetID)
+		if in.Spec.Auth.UserCredential {
+			auth.SetUserCredential(true)
+		}
 		spec.SetAuth(auth)
 	}
 	return workloads.AIApplicationCreationRequest{ClusterId: in.ClusterID, ProjectId: in.ProjectID, Name: in.Name, Spec: spec}
