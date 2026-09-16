@@ -113,16 +113,16 @@ The runai-cluster chart configures these scheduling subcharts:
 
 | Subchart | Setting | Notes |
 |---|---|---|
-| `kai-scheduler` | `enabled=true` | CNCF-donated AI-aware GPU scheduler — applies fair-share, preemption, bin-packing, and multi-node placement rules. The engine underlying the Run:ai Scheduler. |
+| `kai-resource-management` | `enabled=true` | KAI Resource Management — supplies the nodepool-controller, project-controller and pod-group-assigner, and bundles `kai-scheduler` as its own dependency. |
 | `karta` | `enabled=true` | CRD-based resource abstraction layer with a standard schema for describing any Kubernetes workload type, so controllers can extract pod specs and status without per-type logic. |
 
-#### kai-scheduler CRDs
+#### KRM and kai-scheduler CRDs
 
-The script applies these directly from the Go module cache (`podgroups`, `queues`, `schedulingshards`, `configs`, `topologies`), since the `crd-upgrader` job does not manage them. The module version is pinned in `runai-cluster/cluster/go-operator/go.mod` — if it is not in the cache, you will see `kai-scheduler Go module not found; CRDs may be missing`; run `go mod download` in `go-operator` and re-deploy.
+The script applies nothing by hand. Both charts ship their CRDs in their own `crds/` directory, which Helm applies for subcharts, and each carries a crd-upgrader hook for the upgrade path. If a placeholder subchart was installed (see below), the CRDs are missing along with everything else.
 
 #### Scale-Adjust Namespace
 
-Enabling `kai-scheduler` triggers creation of the `runai-scale-adjust` namespace. If a previous failed install left it without Helm ownership labels, the script deletes it first so Helm can recreate it cleanly.
+Enabling `kai-resource-management` triggers creation of the `runai-scale-adjust` namespace. If a previous failed install left it without Helm ownership labels, the script deletes it first so Helm can recreate it cleanly.
 
 #### Chart Reconciliation
 
@@ -134,7 +134,7 @@ Before installing, the script reconciles `charts/` against `Chart.yaml`, since H
 
 Names and versions are read from `Chart.yaml`, so bumping a dependency cannot leave the script stale.
 
-> **If you see the placeholder warning,** `kai-scheduler` and `karta` will be enabled but deploy nothing — Helm matches dependencies by name only, so a placeholder satisfies the check and the subchart installs empty. Re-run once you have network access, or fetch manually with `helm dependency build runai-cluster/cluster/runai-chart`. See [Known Issues](#known-issues).
+> **If you see the placeholder warning,** `kai-resource-management` and `karta` will be enabled but deploy nothing — Helm matches dependencies by name only, so a placeholder satisfies the check and the subchart installs empty. Re-run once you have network access, or fetch manually with `helm dependency build runai-cluster/cluster/runai-chart`. See [Known Issues](#known-issues).
 
 ---
 
@@ -365,20 +365,20 @@ Images are pushed to the local `kind-registry` container and referenced as `loca
 
 ## Known Issues
 
-### No kai-scheduler / karta Pods After Deploy
+### No KRM / kai-scheduler / karta Pods After Deploy
 
 The script fetches these subcharts automatically, but if the fetch failed it falls back to an empty placeholder and the scheduler silently deploys nothing. Look for this in the output:
 
 ```
-[warn]   Could not fetch kai-scheduler@<version> — installing an EMPTY placeholder.
+[warn]   Could not fetch kai-resource-management@<version> — installing an EMPTY placeholder.
 ```
 
 The version comes from `Chart.yaml`, so it moves as that pin moves. Confirm by size: a real chart is tens of KB, a placeholder a few hundred bytes:
 
 ```bash
 ls -l runai-cluster/cluster/runai-chart/charts/*.tgz
-# kai-scheduler-v<version>.tgz   ~84 KB   real
-# karta-<version>.tgz            ~13 KB   real
+# kai-resource-management-v<version>.tgz  ~140 KB   real  (bundles kai-scheduler)
+# karta-<version>.tgz                      ~13 KB   real
 ```
 
 Fix by fetching manually, then redeploying just the chart:
