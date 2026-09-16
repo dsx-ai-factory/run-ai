@@ -16,7 +16,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/joho/godotenv v1.5.1
-	github.com/onsi/ginkgo/v2 v2.32.1
+	github.com/onsi/ginkgo/v2 v2.32.2
 	github.com/onsi/gomega v1.43.0
 	github.com/russross/blackfriday/v2 v2.1.0
 	golang.org/x/mod v0.40.0
