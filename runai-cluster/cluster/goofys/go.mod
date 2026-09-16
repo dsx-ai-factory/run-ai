@@ -1,6 +1,6 @@
 module github.com/kahing/goofys
 
-go 1.26.8
+go 1.27.1
 
 require (
 	cloud.google.com/go/storage v1.67.1
