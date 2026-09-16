@@ -1,22 +1,19 @@
 type: object
 description: |-
-  Access control enforced by the endpoint's authentication proxy. Requires externalAccess on the endpoint.
-  authorizationType must be supplied explicitly; it is not inferred from the access lists.
+  Access control for this networking endpoint. Requires externalAccess and an explicit authorizationType.
+  Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
 example:
   forceJsonResponse: false
   authorizationType: authenticatedUsers
-properties:
-  authorizationType:
-    $ref: "./AuthorizationType.yaml"
-  authorizedUsers:
-    $ref: "../../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/AuthorizedUsers.yaml"
-  authorizedGroups:
-    $ref: "../../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/AuthorizedGroups.yaml"
-  forceJsonResponse:
-    description: Force JSON errors instead of HTTP error pages or redirects.
-    type: boolean
-    default: false
-    nullable: true
+allOf:
+  - $ref: "../../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/Authorization.yaml"
+  - type: object
+    properties:
+      forceJsonResponse:
+        description: Force JSON errors instead of HTTP error pages or redirects.
+        type: boolean
+        default: false
+        nullable: true
 required:
   - authorizationType
 nullable: true

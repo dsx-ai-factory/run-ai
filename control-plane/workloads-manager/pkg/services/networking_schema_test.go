@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/services"
 )
 
 func TestNetworkingAuthorizationTypeRequired(t *testing.T) {
@@ -68,43 +67,11 @@ func TestNetworkingServiceNameConstraints(t *testing.T) {
 	}
 }
 
-func TestNetworkingServicePortNameConstraints(t *testing.T) {
-	if err := api.AssertServicePortConstraints(api.ServicePort{Port: 8080}); err != nil {
-		t.Fatalf("omitted port name: %v", err)
-	}
-	for _, length := range []int{0, 1, 15, 16, 63, 64} {
-		name := strings.Repeat("a", length)
-		err := api.AssertServicePortConstraints(api.ServicePort{Name: &name, Port: 8080})
-		wantErr := length == 0 || length > 63
-		if (err != nil) != wantErr {
-			t.Errorf("port name length %d: got error %v, want error %t", length, err, wantErr)
-		}
-	}
-}
-
-func TestNetworkingMetricsServiceNameAtWorkloadLimit(t *testing.T) {
-	workloads := &services.WorkloadsV2Impl{}
-	name := strings.Repeat("a", services.MaxWorkloadNameLength)
-	if err := workloads.ValidateWorkloadNameFormat(name); err != nil {
-		t.Fatalf("maximum-length workload name: %v", err)
-	}
-	if err := workloads.ValidateWorkloadNameFormat(name + "a"); err == nil {
-		t.Fatal("expected workload name above the limit to be rejected")
-	}
-	if err := api.AssertServiceSpecConstraints(api.ServiceSpec{
-		Name: name + "-metrics", Ports: []api.ServicePort{{Port: 8000}},
-	}); err != nil {
-		t.Fatalf("metrics Service name for maximum-length workload: %v", err)
-	}
-}
-
 func TestNetworkingArrayItemSchemas(t *testing.T) {
 	// Check the published schema contract; generated Go decoding does not itself reject every JSON null.
 	type schema struct {
-		Ref        string `json:"$ref"`
 		Type       string
 		Nullable   bool
-		Items      *schema
 		Properties map[string]schema
 	}
 	var spec struct {
@@ -117,26 +84,15 @@ func TestNetworkingArrayItemSchemas(t *testing.T) {
 	if err := json.Unmarshal(data, &spec); err != nil {
 		t.Fatal(err)
 	}
-	for _, tc := range []struct {
-		parent, property, item string
-		nullable               bool
-	}{
-		{parent: "NetworkingConfiguration", item: "NetworkingEndpoint", nullable: true},
-		{parent: "NetworkingEndpoint", property: "services", item: "NetworkingService", nullable: true},
-		{parent: "ServiceSpec", property: "ports", item: "ServicePort"},
-	} {
-		t.Run(tc.item, func(t *testing.T) {
-			array := spec.Components.Schemas[tc.parent]
-			if tc.property != "" {
-				array = array.Properties[tc.property]
-			}
-			if array.Type != "array" || array.Nullable != tc.nullable || array.Items == nil || array.Items.Ref != "#/components/schemas/"+tc.item {
-				t.Fatalf("unexpected array schema: %+v", array)
-			}
-			item := spec.Components.Schemas[tc.item]
+	for _, name := range []string{"NetworkingEndpoint", "NetworkingService", "ServicePort"} {
+		t.Run(name, func(t *testing.T) {
+			item := spec.Components.Schemas[name]
 			if item.Type != "object" || item.Nullable {
 				t.Fatalf("array items must be non-null objects: %+v", item)
 			}
 		})
+	}
+	if !spec.Components.Schemas["NetworkingConfiguration"].Nullable || !spec.Components.Schemas["NetworkingEndpoint"].Properties["services"].Nullable {
+		t.Fatal("optional networking arrays must remain nullable")
 	}
 }

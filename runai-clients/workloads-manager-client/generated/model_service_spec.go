@@ -27,11 +27,11 @@ type ServiceSpec struct {
 	// The Kubernetes Service name.
 	Name string              `json:"name"`
 	Type NullableServiceType `json:"type,omitempty"`
-	// Pod labels used to select destination Pods within this workload. All selector entries must match.
+	// Label selector to identify the pods that this service routes traffic to.
 	Selector map[string]string `json:"selector"`
-	// Labels to apply to the Kubernetes Service. Run:ai metrics labels trigger metrics-specific behavior and validation.
+	// Labels to apply to the Kubernetes Service.
 	Labels *map[string]string `json:"labels,omitempty"`
-	// Ports exposed by the Service. Attached Ingress and HTTPRoute backends and the authentication proxy use the first port.
+	// Ports exposed by the service.
 	Ports []ServicePort `json:"ports"`
 }
 

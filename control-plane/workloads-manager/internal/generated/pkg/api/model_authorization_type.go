@@ -24,7 +24,7 @@ var dummyAuthorizationType = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// AuthorizationType : Specifies who can access the endpoint through its authentication proxy. Must be provided explicitly. - `authenticatedUsers`: Any authenticated user or service account can access. Both access lists must be omitted or empty. - `authorizedUsers`: Only users or service accounts in the nonempty authorizedUsers list can access. authorizedGroups must be omitted or empty. - `authorizedGroups`: Only members of groups in the nonempty authorizedGroups list can access. authorizedUsers must be omitted or empty. Incompatible nonempty access lists are rejected, not ignored.
+// AuthorizationType : Specifies who can access the connection URL: - `authenticatedUsers`: Any authenticated user or service account can access the URL; the authorizedUsers and authorizedGroups fields are ignored. - `authorizedUsers`: Only users listed in the authorizedUsers field are allowed to access the URL; the authorizedGroups field is ignored. - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field are allowed to access the URL; the authorizedUsers field is ignored. If not specified, authorization is determined by whether authorizedUsers or authorizedGroups is present. If both fields are set, this results in an error. If neither is set, any authenticatedUser can access.
 type AuthorizationType string
 
 // List of AuthorizationType

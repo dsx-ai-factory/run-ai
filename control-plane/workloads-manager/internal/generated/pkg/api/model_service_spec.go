@@ -34,19 +34,19 @@ type ServiceSpec struct {
 	Type *ServiceType `json:"type,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Pod labels used to select destination Pods within this workload. All selector entries must match.
+	// Label selector to identify the pods that this service routes traffic to.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Selector *map[string]string `json:"selector"`
 	Selector *map[string]string `json:"selector" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Labels to apply to the Kubernetes Service. Run:ai metrics labels trigger metrics-specific behavior and validation.
+	// Labels to apply to the Kubernetes Service.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Labels map[string]string `json:"labels,omitempty"`
 	Labels map[string]string `json:"labels,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Ports exposed by the Service. Attached Ingress and HTTPRoute backends and the authentication proxy use the first port.
+	// Ports exposed by the service.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Ports []ServicePort `json:"ports"`
 	Ports []ServicePort `json:"ports" gorm:"serializer:json; type:jsonb;not null;"`

@@ -6,9 +6,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** | The Kubernetes Service name. | 
 **Type** | Pointer to [**NullableServiceType**](ServiceType.md) |  | [optional] [default to SERVICETYPE_CLUSTER_IP]
-**Selector** | **map[string]string** | Pod labels used to select destination Pods within this workload. All selector entries must match. | 
-**Labels** | Pointer to **map[string]string** | Labels to apply to the Kubernetes Service. Run:ai metrics labels trigger metrics-specific behavior and validation. | [optional] 
-**Ports** | [**[]ServicePort**](ServicePort.md) | Ports exposed by the Service. Attached Ingress and HTTPRoute backends and the authentication proxy use the first port. | 
+**Selector** | **map[string]string** | Label selector to identify the pods that this service routes traffic to. | 
+**Labels** | Pointer to **map[string]string** | Labels to apply to the Kubernetes Service. | [optional] 
+**Ports** | [**[]ServicePort**](ServicePort.md) | Ports exposed by the service. | 
 
 ## Methods
 

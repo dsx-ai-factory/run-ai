@@ -23,19 +23,19 @@ var dummyExternalAccess = runaihttp.AssertPattern
 // ExternalAccess - External access configuration. Same shape as the networking plugin. Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API). Omit or leave empty for no external access.
 type ExternalAccess struct {
 
-	// Kubernetes Ingress resource (networking.k8s.io/v1). Must contain rules with HTTP paths. When the endpoint defines a Service, each path's backend.service must match spec.name and spec.ports[0].port, or ref.name and ref.port, using a numeric backend port. With authorization, still specify the workload Service; the controller redirects the backend to its generated authentication proxy.
+	// Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Ingress *map[string]interface{} `json:"ingress,omitempty"`
 	Ingress *map[string]interface{} `json:"ingress,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// OpenShift Route resource (route.openshift.io/v1). Requires spec.host. Used when the cluster uses Route.
+	// Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Route *map[string]interface{} `json:"route,omitempty"`
 	Route *map[string]interface{} `json:"route,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Requires at least one spec.rules entry. Used when the cluster uses Gateway API.
+	// Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//HttpRoute *map[string]interface{} `json:"httpRoute,omitempty"`
 	HttpRoute *map[string]interface{} `json:"httpRoute,omitempty" gorm:""`

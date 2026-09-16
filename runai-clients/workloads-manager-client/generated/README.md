@@ -103,6 +103,7 @@ Class | Method | HTTP request | Description
  - [AgentNetworkingService](docs/AgentNetworkingService.md)
  - [AgentServiceCreate](docs/AgentServiceCreate.md)
  - [Annotation](docs/Annotation.md)
+ - [Authorization](docs/Authorization.md)
  - [AuthorizationType](docs/AuthorizationType.md)
  - [BatchResponse](docs/BatchResponse.md)
  - [BatchResponseFailureItem](docs/BatchResponseFailureItem.md)

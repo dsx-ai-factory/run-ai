@@ -1224,17 +1224,17 @@
         "nullable": true,
         "properties": {
           "ingress": {
-            "description": "Kubernetes Ingress resource (networking.k8s.io/v1). Must contain rules with HTTP paths.\nWhen the endpoint defines a Service, each path's backend.service must match spec.name and spec.ports[0].port,\nor ref.name and ref.port, using a numeric backend port. With authorization, still specify the workload Service;\nthe controller redirects the backend to its generated authentication proxy.",
+            "description": "Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress.",
             "type": "object",
             "nullable": true
           },
           "route": {
-            "description": "OpenShift Route resource (route.openshift.io/v1). Requires spec.host. Used when the cluster uses Route.",
+            "description": "Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route.",
             "type": "object",
             "nullable": true
           },
           "httpRoute": {
-            "description": "Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Requires at least one spec.rules entry. Used when the cluster uses Gateway API.",
+            "description": "Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.",
             "type": "object",
             "nullable": true
           }
@@ -1326,7 +1326,7 @@
             "$ref": "#/components/schemas/ServiceType"
           },
           "selector": {
-            "description": "Pod labels used to select destination Pods within this workload. All selector entries must match.",
+            "description": "Label selector to identify the pods that this service routes traffic to.",
             "type": "object",
             "additionalProperties": {
               "type": "string"
@@ -1337,7 +1337,7 @@
             "nullable": true
           },
           "labels": {
-            "description": "Labels to apply to the Kubernetes Service. Run:ai metrics labels trigger metrics-specific behavior and validation.",
+            "description": "Labels to apply to the Kubernetes Service.",
             "type": "object",
             "additionalProperties": {
               "type": "string"
@@ -1347,7 +1347,7 @@
             }
           },
           "ports": {
-            "description": "Ports exposed by the Service. Attached Ingress and HTTPRoute backends and the authentication proxy use the first port.",
+            "description": "Ports exposed by the service.",
             "type": "array",
             "minItems": 1,
             "maxItems": 1000,
@@ -1364,7 +1364,7 @@
       },
       "ServiceRef": {
         "type": "object",
-        "description": "Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint. The Service and its destination Pods must belong to the same workload; the referenced Service is not modified.",
+        "description": "Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint.",
         "nullable": true,
         "properties": {
           "name": {
@@ -1395,7 +1395,7 @@
           "authorizedUsers",
           "authorizedGroups"
         ],
-        "description": "Specifies who can access the endpoint through its authentication proxy. Must be provided explicitly.\n- `authenticatedUsers`: Any authenticated user or service account can access. Both access lists must be omitted or empty.\n- `authorizedUsers`: Only users or service accounts in the nonempty authorizedUsers list can access. authorizedGroups must be omitted or empty.\n- `authorizedGroups`: Only members of groups in the nonempty authorizedGroups list can access. authorizedUsers must be omitted or empty.\nIncompatible nonempty access lists are rejected, not ignored.",
+        "description": "Specifies who can access the connection URL:\n- `authenticatedUsers`: Any authenticated user or service account can access the URL; the authorizedUsers and authorizedGroups fields are ignored.\n- `authorizedUsers`: Only users listed in the authorizedUsers field are allowed to access the URL; the authorizedGroups field is ignored.\n- `authorizedGroups`: Only members of user groups listed in the authorizedGroups field are allowed to access the URL; the authorizedUsers field is ignored.\nIf not specified, authorization is determined by whether authorizedUsers or authorizedGroups is present. If both fields are set, this results in an error. If neither is set, any authenticatedUser can access.\n",
         "nullable": true
       },
       "AuthorizedUsers": {
@@ -1428,13 +1428,10 @@
         ],
         "nullable": true
       },
-      "Workloadv2Authorization": {
+      "Authorization": {
         "type": "object",
-        "description": "Access control enforced by the endpoint's authentication proxy. Requires externalAccess on the endpoint.\nauthorizationType must be supplied explicitly; it is not inferred from the access lists.",
-        "example": {
-          "forceJsonResponse": false,
-          "authorizationType": "authenticatedUsers"
-        },
+        "description": "Authorization configuration.",
+        "nullable": true,
         "properties": {
           "authorizationType": {
             "$ref": "#/components/schemas/AuthorizationType"
@@ -1444,14 +1441,32 @@
           },
           "authorizedGroups": {
             "$ref": "#/components/schemas/AuthorizedGroups"
-          },
-          "forceJsonResponse": {
-            "description": "Force JSON errors instead of HTTP error pages or redirects.",
-            "type": "boolean",
-            "default": false,
-            "nullable": true
           }
+        }
+      },
+      "Workloadv2Authorization": {
+        "type": "object",
+        "description": "Access control for this networking endpoint. Requires externalAccess and an explicit authorizationType.\nOnly the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.",
+        "example": {
+          "forceJsonResponse": false,
+          "authorizationType": "authenticatedUsers"
         },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Authorization"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "forceJsonResponse": {
+                "description": "Force JSON errors instead of HTTP error pages or redirects.",
+                "type": "boolean",
+                "default": false,
+                "nullable": true
+              }
+            }
+          }
+        ],
         "required": [
           "authorizationType"
         ],

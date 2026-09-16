@@ -22,7 +22,7 @@ import (
 // checks if the ServiceRef type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ServiceRef{}
 
-// ServiceRef Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint. The Service and its destination Pods must belong to the same workload; the referenced Service is not modified.
+// ServiceRef Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint.
 type ServiceRef struct {
 	// The name of the existing Kubernetes Service.
 	Name string `json:"name"`

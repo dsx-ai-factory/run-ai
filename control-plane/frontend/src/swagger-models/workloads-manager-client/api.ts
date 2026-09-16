@@ -113,7 +113,32 @@ export interface Annotation {
     'exclude'?: boolean | null;
 }
 /**
- * Specifies who can access the endpoint through its authentication proxy. Must be provided explicitly. - `authenticatedUsers`: Any authenticated user or service account can access. Both access lists must be omitted or empty. - `authorizedUsers`: Only users or service accounts in the nonempty authorizedUsers list can access. authorizedGroups must be omitted or empty. - `authorizedGroups`: Only members of groups in the nonempty authorizedGroups list can access. authorizedUsers must be omitted or empty. Incompatible nonempty access lists are rejected, not ignored.
+ * Authorization configuration.
+ * @export
+ * @interface Authorization
+ */
+export interface Authorization {
+    /**
+     * 
+     * @type {AuthorizationType}
+     * @memberof Authorization
+     */
+    'authorizationType'?: AuthorizationType | null;
+    /**
+     * List of users or service accounts that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
+     * @type {Array<string>}
+     * @memberof Authorization
+     */
+    'authorizedUsers'?: Array<string> | null;
+    /**
+     * List of groups that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
+     * @type {Array<string>}
+     * @memberof Authorization
+     */
+    'authorizedGroups'?: Array<string> | null;
+}
+/**
+ * Specifies who can access the connection URL: - `authenticatedUsers`: Any authenticated user or service account can access the URL; the authorizedUsers and authorizedGroups fields are ignored. - `authorizedUsers`: Only users listed in the authorizedUsers field are allowed to access the URL; the authorizedGroups field is ignored. - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field are allowed to access the URL; the authorizedUsers field is ignored. If not specified, authorization is determined by whether authorizedUsers or authorizedGroups is present. If both fields are set, this results in an error. If neither is set, any authenticatedUser can access. 
  * @export
  * @enum {string}
  */
@@ -475,19 +500,19 @@ export interface EnvironmentVariableUserCredential {
  */
 export interface ExternalAccess {
     /**
-     * Kubernetes Ingress resource (networking.k8s.io/v1). Must contain rules with HTTP paths. When the endpoint defines a Service, each path\'s backend.service must match spec.name and spec.ports[0].port, or ref.name and ref.port, using a numeric backend port. With authorization, still specify the workload Service; the controller redirects the backend to its generated authentication proxy.
+     * Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress.
      * @type {object}
      * @memberof ExternalAccess
      */
     'ingress'?: object | null;
     /**
-     * OpenShift Route resource (route.openshift.io/v1). Requires spec.host. Used when the cluster uses Route.
+     * Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route.
      * @type {object}
      * @memberof ExternalAccess
      */
     'route'?: object | null;
     /**
-     * Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Requires at least one spec.rules entry. Used when the cluster uses Gateway API.
+     * Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
      * @type {object}
      * @memberof ExternalAccess
      */
@@ -1701,7 +1726,7 @@ export type ServiceProtocol = typeof ServiceProtocol[keyof typeof ServiceProtoco
 
 
 /**
- * Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint. The Service and its destination Pods must belong to the same workload; the referenced Service is not modified.
+ * Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint.
  * @export
  * @interface ServiceRef
  */
@@ -1738,19 +1763,19 @@ export interface ServiceSpec {
      */
     'type'?: ServiceType | null;
     /**
-     * Pod labels used to select destination Pods within this workload. All selector entries must match.
+     * Label selector to identify the pods that this service routes traffic to.
      * @type {{ [key: string]: string; }}
      * @memberof ServiceSpec
      */
     'selector': { [key: string]: string; } | null;
     /**
-     * Labels to apply to the Kubernetes Service. Run:ai metrics labels trigger metrics-specific behavior and validation.
+     * Labels to apply to the Kubernetes Service.
      * @type {{ [key: string]: string; }}
      * @memberof ServiceSpec
      */
     'labels'?: { [key: string]: string; };
     /**
-     * Ports exposed by the Service. Attached Ingress and HTTPRoute backends and the authentication proxy use the first port.
+     * Ports exposed by the service.
      * @type {Array<ServicePort>}
      * @memberof ServiceSpec
      */
@@ -2899,7 +2924,7 @@ export interface WorkloadsV2Updates {
     'workloads'?: Array<WorkloadV2Update>;
 }
 /**
- * Access control enforced by the endpoint\'s authentication proxy. Requires externalAccess on the endpoint. authorizationType must be supplied explicitly; it is not inferred from the access lists.
+ * Access control for this networking endpoint. Requires externalAccess and an explicit authorizationType. Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
  * @export
  * @interface Workloadv2Authorization
  */
@@ -2926,6 +2951,19 @@ export interface Workloadv2Authorization {
      * Force JSON errors instead of HTTP error pages or redirects.
      * @type {boolean}
      * @memberof Workloadv2Authorization
+     */
+    'forceJsonResponse'?: boolean | null;
+}
+/**
+ * 
+ * @export
+ * @interface Workloadv2AuthorizationAllOf
+ */
+export interface Workloadv2AuthorizationAllOf {
+    /**
+     * Force JSON errors instead of HTTP error pages or redirects.
+     * @type {boolean}
+     * @memberof Workloadv2AuthorizationAllOf
      */
     'forceJsonResponse'?: boolean | null;
 }

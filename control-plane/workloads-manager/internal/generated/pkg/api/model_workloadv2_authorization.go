@@ -20,7 +20,7 @@ var dummyWorkloadv2Authorization = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// Workloadv2Authorization - Access control enforced by the endpoint's authentication proxy. Requires externalAccess on the endpoint. authorizationType must be supplied explicitly; it is not inferred from the access lists.
+// Workloadv2Authorization - Access control for this networking endpoint. Requires externalAccess and an explicit authorizationType. Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
 type Workloadv2Authorization struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
