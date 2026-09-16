@@ -39,7 +39,6 @@ const (
 // inline render -- so this is the only writer of the object.
 func KRMConfigForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 	runaiConfig *runaiv1.RunaiConfig) (client.Object, error) {
-
 	krmConfig := &kaiv1alpha1.KRMConfig{}
 	err := k8sReader.Get(ctx, types.NamespacedName{Name: krmConfigCRName}, krmConfig)
 	if err != nil && !errors.IsNotFound(err) {
@@ -120,7 +119,6 @@ func convertVPA(vpa *global.VPASpec) *kaicommon.VPASpec {
 
 func KRMConfigStatus(ctx context.Context, k8sReader client.Reader,
 	_ *runaiv1.RunaiConfig) (operands.Status, error) {
-
 	krmConfig := &kaiv1alpha1.KRMConfig{}
 	if err := k8sReader.Get(ctx, types.NamespacedName{Name: krmConfigCRName}, krmConfig); err != nil {
 		if errors.IsNotFound(err) {

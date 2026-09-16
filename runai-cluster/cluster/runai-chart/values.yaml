@@ -1,5 +1,9 @@
 global:
   fipsMode: "off"
+  # The bundled kai-scheduler reads this boolean rather than fipsMode, and Helm
+  # derives neither from the other, so set both together or KRM fails the render.
+  # Being global it reaches the scheduler through KRM, without naming either.
+  fips: false
   customCA:
     enabled: false
     secret:
@@ -191,10 +195,6 @@ kai-resource-management:
       pod: false
   kai-scheduler:
     global:
-      # KRM's own components read global.fipsMode, which Helm shares into them.
-      # The pinned scheduler still reads this boolean and Helm derives neither
-      # from the other, so set it with global.fipsMode or KRM fails the render.
-      fips: false
       # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
       # chart-level autoscaling switch off so it does not imply enablement.
       clusterAutoscaling: false

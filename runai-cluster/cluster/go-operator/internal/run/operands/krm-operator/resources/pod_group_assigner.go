@@ -63,10 +63,10 @@ func portMapping(port, targetPort *int) *kaiv1alpha1.PortMapping {
 
 	mapping := &kaiv1alpha1.PortMapping{}
 	if port != nil {
-		mapping.Port = ptr.To(int32(*port))
+		mapping.Port = ptr.To(int32(*port)) // #nosec G115 -- port value is bounded by config defaults (443)
 	}
 	if targetPort != nil {
-		mapping.TargetPort = ptr.To(int32(*targetPort))
+		mapping.TargetPort = ptr.To(int32(*targetPort)) // #nosec G115 -- port value is bounded by config defaults (8443)
 	}
 	return mapping
 }

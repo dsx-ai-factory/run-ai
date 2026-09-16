@@ -48,7 +48,7 @@ tests:
     template: charts/kai-resource-management/templates/krm-config.yaml
     set:
       global.fipsMode: "on"
-      kai-resource-management.kai-scheduler.global.fips: true
+      global.fips: true
     asserts:
       - hasDocuments:
           count: 0

@@ -27,7 +27,6 @@ const nodePoolMetricsPortName = "np-metrics"
 
 func convertNodePoolController(ctx context.Context, k8sReader client.Reader,
 	runaiConfig *runaiv1.RunaiConfig) (*kaiv1alpha1.NodePoolController, error) {
-
 	config := runaiConfig.Spec.NodePoolController
 	if config == nil {
 		return nil, nil
