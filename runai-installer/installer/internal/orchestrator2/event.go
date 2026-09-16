@@ -149,10 +149,19 @@ type RunaiSummary struct {
 
 // RunaiControlPlane describes the installed control plane.
 type RunaiControlPlane struct {
-	Installed bool   `json:"installed"`
-	Version   string `json:"version,omitempty"`
-	Domain    string `json:"domain,omitempty"`
-	URL       string `json:"url,omitempty"`
+	Installed        bool                 `json:"installed"`
+	Version          string               `json:"version,omitempty"`
+	Domain           string               `json:"domain,omitempty"`
+	URL              string               `json:"url,omitempty"`
+	AdminCredentials *AdminCredentialsRef `json:"adminCredentials,omitempty"`
+}
+
+type AdminCredentialsRef struct {
+	Namespace         string `json:"namespace"`
+	UsernameConfigMap string `json:"usernameConfigMap"`
+	UsernameKey       string `json:"usernameKey"`
+	PasswordSecret    string `json:"passwordSecret"`
+	PasswordKey       string `json:"passwordKey"`
 }
 
 // RunaiCluster describes the installed/registered Run:ai cluster.
