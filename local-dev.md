@@ -129,7 +129,7 @@ Enabling `kai-scheduler` triggers creation of the `runai-scale-adjust` namespace
 Before installing, the script reconciles `charts/` against `Chart.yaml`, since Helm needs a subchart present for every declared dependency and `charts/*.tgz` is gitignored (a fresh clone has none):
 
 1. **Prune** — deletes any tarball that no longer matches a declared dependency. Helm loads *every* tarball in `charts/`, so a leftover from a previous version bump would make the resolved subchart ambiguous, and a tarball for a removed dependency would render with no condition to gate it.
-2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/karta`) and need no credentials.
+2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/workload-map/karta`) and need no credentials.
 3. **Fall back** — if the fetch fails (offline, registry down), generates a minimal placeholder so the install can still proceed, and warns that the subchart will be empty.
 
 Names and versions are read from `Chart.yaml`, so bumping a dependency cannot leave the script stale.

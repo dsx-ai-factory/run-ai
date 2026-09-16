@@ -76,7 +76,7 @@ func TestPack_PreflightFailsOnAnInaccessibleChartRepository(t *testing.T) {
 func TestPack_PreflightProbesOCIChartsAsRegistries(t *testing.T) {
 	lock := harness.TestLock()
 	lock.Spec.Charts = lock.Spec.Charts[:1]
-	lock.Spec.Charts[0].Source = "oci://ghcr.io/dsx-ai-factory/karta:0.1.0"
+	lock.Spec.Charts[0].Source = "oci://ghcr.io/dsx-ai-factory/workload-map/karta:0.1.0"
 
 	res := run(t, packConfig(t), lock, false)
 	require.NoError(t, res.err)
