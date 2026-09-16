@@ -65,7 +65,7 @@ The feature designed here serves two purposes:
 
       
 
-   2. Removal of a template in the CP also removes it from the cluster.
+   2. Removal of a `ResourceClaimTemplate` in the CP also removes it from the cluster.
 
    3. It is possible to remove a `ResourceClaimTemplate` even if there are running pods that use it (in k8s, the claims are detached from the template). New/rescheduled pods will fail, but this is unlikely for native workloads (CP will block this) and user responsibility on anyworkload submission.
 
