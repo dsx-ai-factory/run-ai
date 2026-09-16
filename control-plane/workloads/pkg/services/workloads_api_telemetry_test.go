@@ -782,6 +782,19 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		})
 	})
 
+	Context("group by source", func() {
+		It("groups workload count by source", func() {
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, []string{Source}, []api.Phase{})
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
+			telemetryValues := telemetry.Values
+			Expect(len(telemetryValues)).To(Equal(1))
+			Expect(telemetryValues[0].Groups).To(HaveLen(1))
+			Expect(telemetryValues[0].Groups[0].Key).To(Equal(Source))
+			Expect(telemetryValues[0].Groups[0].Value).To(Equal(string(DefaultSource)))
+		})
+	})
+
 })
 
 func validateClusterFilterAllocation(g Gomega, telemetryValues []api.TelemetryResponseValuesInner) {

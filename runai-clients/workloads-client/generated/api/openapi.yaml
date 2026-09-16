@@ -1423,6 +1423,7 @@ paths:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
             type: string
           maxItems: 2
           type: array
@@ -1588,6 +1589,7 @@ paths:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
             type: string
           maxItems: 2
           type: array
@@ -13516,6 +13518,7 @@ components:
           - RequestedNodepools
           - Phase
           - Category
+          - Source
           type: string
         maxItems: 2
         type: array

@@ -36905,12 +36905,12 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInternalWorkloadsTelemetry: async (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getInternalWorkloadsTelemetry: async (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'telemetryType' is not null or undefined
             assertParamExists('getInternalWorkloadsTelemetry', 'telemetryType', telemetryType)
             const localVarPath = `/internal/workloads/telemetry`;
@@ -37389,12 +37389,12 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloadsTelemetry: async (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getWorkloadsTelemetry: async (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'telemetryType' is not null or undefined
             assertParamExists('getWorkloadsTelemetry', 'telemetryType', telemetryType)
             const localVarPath = `/api/v1/workloads/telemetry`;
@@ -38019,12 +38019,12 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TelemetryResponse>> {
+        async getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TelemetryResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getInternalWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -38142,12 +38142,12 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TelemetryResponse>> {
+        async getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TelemetryResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -38345,12 +38345,12 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: any): AxiosPromise<TelemetryResponse> {
+        getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: any): AxiosPromise<TelemetryResponse> {
             return localVarFp.getInternalWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options).then((request) => request(axios, basePath));
         },
         /**
@@ -38459,12 +38459,12 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: any): AxiosPromise<TelemetryResponse> {
+        getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: any): AxiosPromise<TelemetryResponse> {
             return localVarFp.getWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options).then((request) => request(axios, basePath));
         },
         /**
@@ -38655,13 +38655,13 @@ export class WorkloadsApi extends BaseAPI {
      * @param {string} [nodepoolName] Filter using the nodepool.
      * @param {string} [departmentId] Filter using the department id.
      * @param {string} [projectId] project id to filter by
-     * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+     * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
      * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkloadsApi
      */
-    public getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig) {
+    public getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig) {
         return WorkloadsApiFp(this.configuration).getInternalWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -38787,13 +38787,13 @@ export class WorkloadsApi extends BaseAPI {
      * @param {string} [nodepoolName] Filter using the nodepool.
      * @param {string} [departmentId] Filter using the department id.
      * @param {string} [projectId] project id to filter by
-     * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+     * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
      * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkloadsApi
      */
-    public getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig) {
+    public getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig) {
         return WorkloadsApiFp(this.configuration).getWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options).then((request) => request(this.axios, this.basePath));
     }
 

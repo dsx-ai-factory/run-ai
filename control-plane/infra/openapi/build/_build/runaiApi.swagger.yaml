@@ -36815,6 +36815,7 @@ components:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
     TelemetryType2:
       name: telemetryType
       in: query

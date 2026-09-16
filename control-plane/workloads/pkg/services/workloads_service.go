@@ -60,6 +60,7 @@ const (
 	RequestedNodepools          = "RequestedNodepools"
 	Phase                       = "Phase"
 	Category                    = "Category"
+	Source                      = "Source"
 	Bucket                      = "Bucket"
 )
 
@@ -93,6 +94,7 @@ func createFieldsMap() map[string][]string {
 		RequestedNodepools: {"unnest(requested_nodepools)"},
 		Phase:              {"phase"},
 		Category:           {"category"},
+		Source:             {"source"},
 	}
 }
 

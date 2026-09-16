@@ -8833,7 +8833,8 @@
               "CurrentNodepools",
               "RequestedNodepools",
               "Phase",
-              "Category"
+              "Category",
+              "Source"
             ]
           }
         }

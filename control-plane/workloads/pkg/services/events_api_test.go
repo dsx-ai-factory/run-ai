@@ -27,7 +27,7 @@ const (
 	CompletedReason  = "completed"
 	FailureReason    = "failure"
 	SubmissionReason = "submitted"
-	Source           = "kubelet"
+	EventSource      = "kubelet"
 	WorkloadKind     = "Workload"
 	RevisionKind     = "Workload"
 	PodKind          = "Pod"
@@ -69,7 +69,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 					Message:   CompletedMsg,
 					Reason:    CompletedReason,
 					CreatedAt: time.Now().Add(time.Hour),
-					Source:    Source,
+					Source:    EventSource,
 					InvolvedObject: api.InvolvedObject{
 						Uid:       testing.TestUuid1,
 						Kind:      WorkloadKind,
@@ -84,7 +84,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 					Message:   SubmittedMsg,
 					Reason:    SubmissionReason,
 					CreatedAt: time.Now(),
-					Source:    Source,
+					Source:    EventSource,
 					InvolvedObject: api.InvolvedObject{
 						Uid:       testing.TestUuid1,
 						Kind:      WorkloadKind,
@@ -99,7 +99,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 					Message:   FailureMsg,
 					Reason:    FailureReason,
 					CreatedAt: time.Now(),
-					Source:    Source,
+					Source:    EventSource,
 					InvolvedObject: api.InvolvedObject{
 						Uid:       testing.TestUuid2,
 						Kind:      WorkloadKind,
@@ -124,7 +124,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 			Expect(eventsResponse.Next).To(Equal(int32(0)))
 			Expect(len(eventsResponse.Events)).To(Equal(2))
 			Expect(eventsResponse.Events[1].Id).ToNot(BeNil())
-			Expect(eventsResponse.Events[1].Source).To(Equal(Source))
+			Expect(eventsResponse.Events[1].Source).To(Equal(EventSource))
 			Expect(eventsResponse.Events[1].Type).To(Equal(NormalType))
 			Expect(eventsResponse.Events[1].Message).To(Equal(SubmittedMsg))
 			Expect(eventsResponse.Events[1].Reason).To(Equal(SubmissionReason))
@@ -270,7 +270,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 						Message:   CompletedMsg,
 						Reason:    CompletedReason,
 						CreatedAt: time.Now().Add(time.Hour),
-						Source:    Source,
+						Source:    EventSource,
 						InvolvedObject: api.InvolvedObject{
 							Uid:       pod.Id,
 							Kind:      PodKind,
@@ -285,7 +285,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 						Message:   FailureMsg,
 						Reason:    FailureReason,
 						CreatedAt: time.Now(),
-						Source:    Source,
+						Source:    EventSource,
 						InvolvedObject: api.InvolvedObject{
 							Uid:       pod2.Id,
 							Kind:      PodKind,
@@ -300,7 +300,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 						Message:   FailureMsg,
 						Reason:    FailureReason,
 						CreatedAt: time.Now(),
-						Source:    Source,
+						Source:    EventSource,
 						InvolvedObject: api.InvolvedObject{
 							Uid:       pod3.Id,
 							Kind:      PodKind,
@@ -320,7 +320,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 			Expect(len(eventsResponse.Events)).To(Equal(1))
 			event := eventsResponse.Events[0]
 			Expect(event.Id).To(Equal(eventId1))
-			Expect(event.Source).To(Equal(Source))
+			Expect(event.Source).To(Equal(EventSource))
 			Expect(event.Type).To(Equal(NormalType))
 			Expect(event.Message).To(Equal(CompletedMsg))
 			Expect(event.Reason).To(Equal(CompletedReason))
@@ -337,7 +337,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 			Expect(len(eventsResponse.Events)).To(Equal(1))
 			event = eventsResponse.Events[0]
 			Expect(event.Id).To(Equal(eventId2))
-			Expect(event.Source).To(Equal(Source))
+			Expect(event.Source).To(Equal(EventSource))
 			Expect(event.Type).To(Equal(FailureType))
 			Expect(event.Message).To(Equal(FailureMsg))
 			Expect(event.Reason).To(Equal(FailureReason))
@@ -379,7 +379,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 							Message:   CompletedMsg,
 							Reason:    CompletedReason,
 							CreatedAt: time.Now().Add(time.Hour),
-							Source:    Source,
+							Source:    EventSource,
 							InvolvedObject: api.InvolvedObject{
 								Uid:       pod.Id,
 								Kind:      PodKind,
@@ -394,7 +394,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 							Message:   FailureMsg,
 							Reason:    FailureReason,
 							CreatedAt: time.Now(),
-							Source:    Source,
+							Source:    EventSource,
 							InvolvedObject: api.InvolvedObject{
 								Uid:       pod.Id,
 								Kind:      PodKind,
@@ -409,7 +409,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 							Message:   FailureMsg,
 							Reason:    FailureReason,
 							CreatedAt: time.Now().Add(time.Minute),
-							Source:    Source,
+							Source:    EventSource,
 							InvolvedObject: api.InvolvedObject{
 								Uid:       pod.Id,
 								Kind:      PodKind,
@@ -465,7 +465,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 					Message:   CompletedMsg,
 					Reason:    CompletedReason,
 					CreatedAt: time.Now().Add(time.Hour),
-					Source:    Source,
+					Source:    EventSource,
 					InvolvedObject: api.InvolvedObject{
 						Uid:       revisionId,
 						Kind:      RevisionKind,
@@ -480,7 +480,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 					Message:   SubmittedMsg,
 					Reason:    SubmissionReason,
 					CreatedAt: time.Now(),
-					Source:    Source,
+					Source:    EventSource,
 					InvolvedObject: api.InvolvedObject{
 						Uid:       revisionId,
 						Kind:      RevisionKind,
@@ -495,7 +495,7 @@ var _ = Describe("Events API tests", Ordered, func() {
 					Message:   FailureMsg,
 					Reason:    FailureReason,
 					CreatedAt: time.Now(),
-					Source:    Source,
+					Source:    EventSource,
 					InvolvedObject: api.InvolvedObject{
 						Uid:       uuid.NewString(), // a different revision id
 						Kind:      RevisionKind,
