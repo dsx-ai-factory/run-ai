@@ -8,7 +8,7 @@
 # Team Leaders
 /.nspect-vuln-allowlist.toml @dsx-ai-factory/dev-team-leads
 /CODEOWNERS @dsx-ai-factory/dev-team-leads
-/renovate.json @dsx-ai-factory/dev-team-leads
+/renovate.json @dsx-ai-factory/infra
 /.gitignore @dsx-ai-factory/dev-team-leads
 
 # DevOps GitHub-Actions
@@ -85,9 +85,9 @@ code-rabbit/ @dsx-ai-factory/workloads
 ### Groups
 
 # Backend Guild
-/control-plane/infra/ @dsx-ai-factory/backend-devs
-/control-plane/test-service/ @dsx-ai-factory/backend-devs
-/runai-clients/Makefile @dsx-ai-factory/backend-devs
+/control-plane/infra/ @dsx-ai-factory/infra
+/control-plane/test-service/ @dsx-ai-factory/infra
+/runai-clients/Makefile @dsx-ai-factory/infra
 
 # Sphinx - infra override (must be after the /control-plane/infra/ rule above — last match wins)
 /control-plane/infra/openapi/build/ @dsx-ai-factory/auth
@@ -305,5 +305,5 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 **/docker-compose.yml
 
 # Build folders
-/build @dsx-ai-factory/backend-devs
-**/Makefile  @dsx-ai-factory/backend-devs 
+/build @dsx-ai-factory/infra
+**/Makefile  @dsx-ai-factory/infra 
