@@ -14,7 +14,7 @@ Dynamic Resource Allocation (DRA) is a Kubernetes feature that lets pods request
 
 The resources are requested using either a standalone `ResourceClaim` instance that pods specify in the spec or a `ResourceClaimTemplate` instance that the pod spec references.
 
-# The key differences between the two methods:
+The key differences between the two methods:
 
 - **Sharing**: A standalone claim can be shared by multiple pods (same physical device), while a template creates a per-pod claim that cannot be shared.
 - **Lifecycle/ownership**: the template-generated claim is owned by the pod and GC'd with it.
@@ -33,7 +33,7 @@ The feature designed here serves two purposes:
 
 ## 2. Definition of Done
 
-1. The `k8s-objects-tracker` keeps track of all the `ResourceTemplateClaims` in the Run:ai related namespaces (both managed and unmanaged).
+1. The `k8s-objects-tracker` keeps track of all the `ResourceClaimTemplates` in the Run:ai related namespaces (both managed and unmanaged).
 
 2. The `k8s-objects-tracker` keeps track of `DeviceClasses` in the cluster.
 
@@ -53,7 +53,7 @@ The feature designed here serves two purposes:
 
    2. Spec identical to k8s spec.
 
-   3. Creation rejected if the spec contains a `DeviceClass`that does not exist in the cluster.  
+   3. Creation rejected if the spec contains a `DeviceClass` that does not exist in the cluster.  
 
       
 
@@ -80,12 +80,12 @@ The feature designed here serves two purposes:
 
       
 
-   3. Submission is rejected if the status of the referenced `ResouceClaimTemplate` is not successful (e.g. not synced/replicated).
+   3. Submission is rejected if the status of the referenced `ResourceClaimTemplate` is not successful (e.g. not synced/replicated).
 
       
 
 7. Usage visibility.
-   1. It is possible to obtain the list of workloads currently referencing a `ResourceClaimsTemplate`.
+   1. It is possible to obtain the list of workloads currently referencing a `ResourceClaimTemplate`.
    2. It is possible to obtain the list of `ResourceClaimTemplate` and `ResourceClaims` that a workload references, with pod granularity.
 
 ### Possible Additions
@@ -230,10 +230,10 @@ meta:
 spec:
   apiVersion: resource.k8s.io/v1  ## worth keeping even if we only support v1
   objectMeta:
-  	annotations:
-  		...
-  	labels:
-  		...
+    annotations:
+      ...
+    labels:
+      ...
   objectSpec:
     devices:
       requests:
@@ -278,7 +278,7 @@ This chapter covers DoD 7 (usage visibility): the workload detail should show wh
 
 There are two ways to obtain this link:
 
-- **CP-composed at submission** — like the way the control plane composes `environments`/connection metadata onto the workload from the submitted spec. This only exists for native workloads (anyworkloads submit a raw `podSpec` that the CP does not compose), so it cannot cover anyworkloads which makes it irrelevant 
+- **CP-composed at submission** — like the way the control plane composes `environments`/connection metadata onto the workload from the submitted spec. This only exists for native workloads (anyworkloads submit a raw `podSpec` that the CP does not compose), so it cannot cover anyworkloads, which makes it irrelevant.
 - **Reported from the cluster (chosen)** — `cluster-sync` reads the DRA references off the running pods and reports them to the control plane, exactly like it reports per-pod requested/allocated resources and structure `elements[]`. This covers **all** workloads (native, anyworkload, and even directly-created pods) and reflects the **actual** binding rather than the submitted intent.
 
 ### Reporting flow (cluster-sync path)
@@ -335,7 +335,7 @@ pods:
 
 `GET /api/v1/k8s-objects/resource-claim-template/{id}/workloads`
 
-(The same endpoint already listed under §4.1.) Lists the workloads currently referencing the template, with the pods that use it. This view is **template-only** by nature: standalone `ResourceClaims` have no template, so they never appear here — only in the workload's forward view above.
+(The same endpoint already listed under §4.1.) Lists the workloads currently referencing the template, with the pods that use it. This view is **template-only** by nature: standalone `ResourceClaim`s have no template, so they never appear here — only in the workload's forward view above.
 
 ```yaml
 workloads:
