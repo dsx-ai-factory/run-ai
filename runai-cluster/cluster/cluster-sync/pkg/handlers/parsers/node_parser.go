@@ -39,6 +39,10 @@ const (
 	// Operator-published readiness: True means healthy, the inverse of the faults above.
 	GpuFractioningReadyConditionType  = "gpu-fractioning.nvidia.com/Ready"
 	MissingGpuFractioningPrerequisite = "MissingGpuFractioningPrerequisite"
+	GpuFractioningNotManaged          = "NotManaged"
+
+	gpuFractioningNotManagedMessage = "GPU fractions are not supported on this node - " +
+		"it is not covered by the GPU fractioning operator."
 
 	ReadyPhase                = "Ready"
 	NotReadyPhase             = "NotReady"
@@ -428,23 +432,25 @@ func parseCondition(condition corev1.NodeCondition) swagger.NodeStatusConditionD
 	}
 }
 
-// Only an explicit False is a missing prerequisite. Absent means the node is unmanaged -
-// including mid-driver-upgrade, where the operator deletes the condition rather than leave a
-// value it cannot refresh - and Unknown carries no more information than that.
+// An absent condition means the operator's nodeSelector does not cover this node, so fractions
+// will not work there whether or not that exclusion was intended.
 //
-// The reason and message come from the operator: they carry whatever the kubelet reported for
-// the failing daemon pod, so they are passed through rather than mapped.
+// For an explicit False the reason and message come from the operator: they carry whatever the
+// kubelet reported for the failing daemon pod, so they are passed through rather than mapped.
 func evaluateGpuFractioningReadiness(condition *corev1.NodeCondition) (ok bool, reason string, message string) {
-	if condition == nil || condition.Status != corev1.ConditionFalse {
+	if condition == nil {
+		return false, GpuFractioningNotManaged, gpuFractioningNotManagedMessage
+	}
+	if condition.Status != corev1.ConditionFalse {
 		return true, "", ""
 	}
 	return false, condition.Reason, condition.Message
 }
 
-// No GPU-node filter is needed: only the operator writes this condition, and only on the nodes
-// its own nodeSelector covers.
+// Restricted to GPU nodes: an absent condition is reported as unsupported, which would otherwise
+// fire on every CPU node in the cluster.
 func (nodeParser *NodeParser) calculateGpuFractioningCondition(node *corev1.Node) []swagger.NodeStatusConditionDetails {
-	if !config.Config().EnableNodeGpuFractioningReadiness {
+	if !config.Config().EnableNodeGpuFractioningReadiness || !shouldNodeHaveNvidiaComponents(node.Labels) {
 		return []swagger.NodeStatusConditionDetails{}
 	}
 

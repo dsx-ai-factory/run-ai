@@ -1317,9 +1317,14 @@ var _ = Describe("Parsers", Ordered, func() {
 					[]corev1.NodeCondition{gpuFractioningCondition(
 						corev1.ConditionTrue, "AllDaemonsReady", "all gpu-fractioning daemons are running")},
 					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
-				Entry("absent condition reports nothing",
+				Entry("absent condition reports the node as unmanaged",
 					[]corev1.NodeCondition{},
-					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: parsers.GpuFractioningNotManaged,
+						Message: utils.Ref("GPU fractions are not supported on this node - " +
+							"it is not covered by the GPU fractioning operator."),
+					}}),
 				Entry("unknown status reports nothing",
 					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionUnknown, "", "")},
 					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
@@ -1342,6 +1347,15 @@ var _ = Describe("Parsers", Ordered, func() {
 						Message: utils.Ref("mpsd pod is not ready: CrashLoopBackOff"),
 					}}),
 			)
+
+			It("reports nothing on a node without GPUs", func() {
+				delete(node.Labels, "feature.node.kubernetes.io/pci-10de.present")
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
 
 			It("reports nothing when the feature is disabled", func() {
 				config.Config().EnableNodeGpuFractioningReadiness = false
