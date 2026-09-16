@@ -11,10 +11,10 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
-	github.com/jackc/pgx/v5 v5.10.0
-	github.com/onsi/ginkgo/v2 v2.32.1
+	github.com/jackc/pgx/v5 v5.11.0
+	github.com/onsi/ginkgo/v2 v2.32.2
 	github.com/onsi/gomega v1.43.0
-	gorm.io/driver/postgres v1.6.2
+	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 )
