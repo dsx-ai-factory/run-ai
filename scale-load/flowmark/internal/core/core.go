@@ -48,6 +48,30 @@ func (c Config) Duration(key string, fallback time.Duration) (time.Duration, err
 	return parsed, nil
 }
 
+func (c Config) Int(key string, fallback int) (int, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	value, ok := raw.(int)
+	if !ok {
+		return 0, fmt.Errorf("knob %q must be a whole number, got %T", key, raw)
+	}
+	return value, nil
+}
+
+func (c Config) String(key string, fallback string) (string, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	value, ok := raw.(string)
+	if !ok {
+		return "", fmt.Errorf("knob %q must be a string, got %T", key, raw)
+	}
+	return value, nil
+}
+
 type Category string
 
 const (
