@@ -50,6 +50,7 @@ func KRMConfigForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 	krmConfig.Spec.Namespace = runaiConfig.GetNamespace()
 	krmConfig.Spec.Global = convertKRMGlobal(runaiConfig)
 	krmConfig.Spec.PodGroupAssigner = convertPodGroupAssigner(runaiConfig)
+	krmConfig.Spec.ProjectController = convertProjectController(runaiConfig)
 
 	nodePoolController, err := convertNodePoolController(ctx, k8sReader, runaiConfig)
 	if err != nil {

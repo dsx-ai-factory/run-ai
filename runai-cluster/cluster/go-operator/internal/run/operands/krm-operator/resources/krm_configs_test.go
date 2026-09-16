@@ -74,6 +74,54 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 		Expect(serviceMonitor.Accounting).To(Equal(ptr.To(true)))
 	})
 
+	Context("project-controller", func() {
+		It("turns both validating webhooks off, since the agent serves them", func() {
+			projectController := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController
+			Expect(projectController).NotTo(BeNil())
+			Expect(projectController.Webhooks.EnableProjectValidation).To(Equal(ptr.To(false)))
+			Expect(projectController.Webhooks.EnableDepartmentValidation).To(Equal(ptr.To(false)))
+			Expect(projectController.ControllerService.Webhook).To(BeNil())
+		})
+
+		It("carries the per-project feature toggles", func() {
+			features := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.Features
+			Expect(features.CreateNamespaces).To(Equal(ptr.To(true)))
+			Expect(features.CreateRoleBindings).To(Equal(ptr.To(true)))
+			Expect(features.LimitRange).To(Equal(ptr.To(false)))
+		})
+
+		It("carries the runai label vocabulary", func() {
+			args := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.Args
+			Expect(args.ProjectNamePrefix).To(Equal(ptr.To(clustercommonconstants.NamespaceRunAi)))
+			Expect(args.ProjectIDLabelKey).To(Equal(ptr.To(clustercommonconstants.ProjectIdLabel)))
+			Expect(args.QueueDepartmentNameLabelKey).
+				To(Equal(ptr.To(clustercommonconstants.QueueDepartmentNameLabel)))
+			Expect(args.LimitRangeName).To(Equal(ptr.To(clustercommonconstants.RunaiLimitRangeName)))
+		})
+
+		It("translates verbosity into the debug flag", func() {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.ProjectController.Args.Verbosity = ptr.To(-1)
+			Expect(krmConfigFor(runaiConfig).Spec.ProjectController.Args.Debug).To(Equal(ptr.To(true)))
+
+			runaiConfig.Spec.ProjectController.Args.Verbosity = ptr.To(0)
+			Expect(krmConfigFor(runaiConfig).Spec.ProjectController.Args.Debug).To(Equal(ptr.To(false)))
+		})
+
+		It("carries the profiler port as a number", func() {
+			profiling := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.Profiling
+			Expect(profiling).NotTo(BeNil())
+			Expect(profiling.APIPort).NotTo(BeNil())
+		})
+
+		It("names the rolebindings ConfigMap the operator writes", func() {
+			projectController := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController
+			Expect(projectController.RoleBindingsConfigMapName).
+				To(Equal(ptr.To(clustercommonconstants.ProjectControllerRoleBindingCm)))
+			Expect(projectController.ExtraArgs).To(ContainElement("--install-namespace=runai"))
+		})
+	})
+
 	Context("nodepool-controller", func() {
 		It("turns the NodePool validating webhook off", func() {
 			nodePoolController := krmConfigFor(defaultRunaiConfig()).Spec.NodePoolController
