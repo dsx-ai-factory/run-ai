@@ -1,72 +1,62 @@
 suite: Test native KAI shard permissions
 
-templates:
-  - templates/clusterroles/nodepool-controller.yaml
-
 tests:
+  # These grants moved to KRM with the controller itself. They are asserted here
+  # because the capability is still ours to rely on, wherever it is granted.
   - it: should let the nodepool controller reconcile KAI SchedulingShards
+    template: charts/kai-resource-management/templates/nodepool-controller/clusterrole.yaml
     asserts:
       - contains:
           path: rules
           content:
-            apiGroups:
-              - kai.scheduler
-            resources:
-              - schedulingshards
-            verbs:
-              - create
-              - delete
-              - get
-              - list
-              - patch
-              - update
-              - watch
+            apiGroups: ["kai.scheduler"]
+            resources: ["schedulingshards"]
+            verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
         documentIndex: 0
 
-  # The controller reconciles the kai.resources NodePool CRD, so it needs the same
-  # access there that it had on the legacy run.ai one.
   - it: should let the nodepool controller reconcile KAI NodePools
+    template: charts/kai-resource-management/templates/nodepool-controller/clusterrole.yaml
     asserts:
       - contains:
           path: rules
           content:
+            apiGroups: ["kai.resources"]
+            resources: ["nodepools", "managednodesconfigs"]
+            verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["kai.resources"]
+            resources: ["nodepools/status", "managednodesconfigs/status"]
+            verbs: ["get", "update", "patch", "watch"]
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["kai.resources"]
+            resources: ["nodepools/finalizers"]
+            verbs: ["update", "patch"]
+        documentIndex: 0
+
+  # KRM does not grant access for the CR named by --uninstall-detection-ref,
+  # treating that as the installer's job, so this one rule stays with us.
+  - it: should keep granting the uninstall detection CR
+    template: templates/clusterroles/nodepool-controller.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: runai-nodepool-controller
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
             apiGroups:
-              - kai.resources
+              - run.ai
             resources:
-              - nodepools
-              - managednodesconfigs
+              - clusters
             verbs:
-              - create
-              - delete
               - get
               - list
-              - patch
-              - update
               - watch
-        documentIndex: 0
-      - contains:
-          path: rules
-          content:
-            apiGroups:
-              - kai.resources
-            resources:
-              - nodepools/status
-              - managednodesconfigs/status
-            verbs:
-              - get
-              - update
-              - patch
-              - watch
-        documentIndex: 0
-      - contains:
-          path: rules
-          content:
-            apiGroups:
-              - kai.resources
-            resources:
-              - nodepools/finalizers
-              - managednodesconfigs/finalizers
-            verbs:
-              - update
-              - patch
         documentIndex: 0
