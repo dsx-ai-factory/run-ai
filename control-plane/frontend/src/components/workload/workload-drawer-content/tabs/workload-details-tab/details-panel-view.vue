@@ -8,7 +8,7 @@
 
   <runai-drawer-no-data
     v-else-if="!sections.length"
-    :messages="['There are no details yet.']"
+    :messages="emptyMessages"
     icon-name="ph-bold ph-file"
     icon-class="text-icon-default"
     wrapper-padding-class="q-px-md q-pb-xl"
@@ -93,12 +93,15 @@ withDefaults(
     selectedSpec?: string;
     showSpecSelect?: boolean;
     specOptions?: ISelectOption[];
+    /** Empty-state copy — callers own the wording, this component owns the layout. */
+    emptyMessages?: string[];
   }>(),
   {
     loading: false,
     selectedSpec: "",
     showSpecSelect: false,
     specOptions: () => [],
+    emptyMessages: () => ["There are no details yet."],
   },
 );
 

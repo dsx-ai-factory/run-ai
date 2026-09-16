@@ -11,6 +11,7 @@
       v-model:selected-spec="selectedSpec"
       :show-spec-select="showSpecSelect"
       :spec-options="specOptions"
+      :empty-messages="['There are no details for this workload yet.']"
     />
   </section>
 </template>

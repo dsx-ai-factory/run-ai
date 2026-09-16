@@ -52,13 +52,20 @@ describe("DetailsPanelView", () => {
     expect(wrapper.findComponent({ name: "RunaiDetailsPanel" }).exists()).toBe(false);
   });
 
-  it("shows the no-data state when sections is empty", () => {
+  it("shows the no-data state with the default message when sections is empty", () => {
     const wrapper = mountView([]);
 
     const noData = wrapper.findComponent(RunaiDrawerNoData);
     expect(noData.exists()).toBe(true);
     expect(noData.props("messages")).toEqual(["There are no details yet."]);
     expect(wrapper.findComponent({ name: "RunaiDetailsPanel" }).exists()).toBe(false);
+  });
+
+  it("shows the no-data state with the caller-supplied message when given", () => {
+    const wrapper = mountView([], { emptyMessages: ["There are no details for this element yet."] });
+
+    const noData = wrapper.findComponent(RunaiDrawerNoData);
+    expect(noData.props("messages")).toEqual(["There are no details for this element yet."]);
   });
 
   it("renders runai-details-panel instead of the no-data state when sections is non-empty", () => {

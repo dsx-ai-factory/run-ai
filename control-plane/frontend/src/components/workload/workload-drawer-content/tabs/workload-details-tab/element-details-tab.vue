@@ -5,7 +5,11 @@
 
 <template>
   <section class="element-details-tab">
-    <details-panel-view :sections="accordionSections" :loading="podsCountLoading" />
+    <details-panel-view
+      :sections="accordionSections"
+      :loading="podsCountLoading"
+      :empty-messages="['There are no details for this element yet.']"
+    />
   </section>
 </template>
 
