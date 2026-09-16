@@ -82,6 +82,9 @@ func (handler *ClusterInfoHandler) sendClusterInfo(clusterInfoCm *corev1.ConfigM
 			handler.runaiBackendClient.Context(),
 			config.Config().ClusterUuid,
 		).ClusterInfoSyncRequest(clusterInfoToSend).Execute()
+		if res != nil {
+			_ = res.Body.Close()
+		}
 
 		return handler.runaiBackendClient.HandleHttpResponse(
 			res,

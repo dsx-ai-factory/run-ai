@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/accessrule-controller
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
@@ -188,7 +188,6 @@ replace (
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
 
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../common/clients
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../common/profiling
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils => ../../common/utils

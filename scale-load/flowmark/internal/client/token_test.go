@@ -163,6 +163,33 @@ func TestLoginDoesNotFollowRedirects(t *testing.T) {
 	}
 }
 
+func TestTokenIdentity(t *testing.T) {
+	cases := []struct {
+		name    string
+		claims  jwt.MapClaims
+		want    string
+		wantErr bool
+	}{
+		{name: "subject claim", claims: jwt.MapClaims{"sub": "8f2c-user-uuid", "email": "ci@run.ai"}, want: "8f2c-user-uuid"},
+		{name: "email alone is not an identity", claims: jwt.MapClaims{"email": "ci@run.ai"}, wantErr: true},
+		{name: "no claims", claims: jwt.MapClaims{"exp": 1}, wantErr: true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := tokenIdentity(mintJWT(t, tc.claims))
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected error, got %q", got)
+				}
+				return
+			}
+			if err != nil || got != tc.want {
+				t.Fatalf("got %q (%v), want %q", got, err, tc.want)
+			}
+		})
+	}
+}
+
 func TestControlPlaneURL(t *testing.T) {
 	cases := []struct {
 		name    string

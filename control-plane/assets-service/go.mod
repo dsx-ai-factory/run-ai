@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/assets-service
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
@@ -298,7 +298,6 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../../runai-cluster/cluster/workload-common
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller => ../../runai-cluster/cluster/workload-controller
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../runai-cluster/common/cert-utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../runai-cluster/common/clients
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities => ../../runai-cluster/common/cluster-capabilities
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants => ../../runai-cluster/common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../runai-cluster/common/profiling

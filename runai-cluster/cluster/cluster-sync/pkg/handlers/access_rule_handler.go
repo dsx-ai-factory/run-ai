@@ -73,6 +73,9 @@ func (accessRuleHandler *AccessRuleHandler) HandleDelete(accessRule *v1alpha1.Ac
 			config.Config().ClusterUuid,
 			toDelete,
 		)
+		if res != nil {
+			_ = res.Body.Close()
+		}
 		return accessRuleHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted access rule %s", accessRule.Name))
 	}
 }
@@ -91,6 +94,9 @@ func (accessRuleHandler *AccessRuleHandler) updateAccessRuleStatus(accessRule *v
 		config.Config().ClusterUuid,
 		toUpdate,
 	)
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	return accessRuleHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Updated access rule %s", accessRule.Name))
 }
 
@@ -117,6 +123,9 @@ func (accessRuleHandler *AccessRuleHandler) HandleSyncEvent(waitGroup *sync.Wait
 			config.Config().ClusterUuid,
 			toSync,
 		)
+		if res != nil {
+			_ = res.Body.Close()
+		}
 		err = accessRuleHandler.backendClient.HandleHttpResponse(res, err, "Sync access rules")
 		if err != nil {
 			zap.S().Errorf("Had an error while syncing access rules: %+v", err)

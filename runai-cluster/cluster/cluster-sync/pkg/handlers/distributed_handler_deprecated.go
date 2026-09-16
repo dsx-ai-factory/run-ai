@@ -11,10 +11,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/antihax/optional"
+	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers/parsers"
 	diwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
 	"go.uber.org/zap"
@@ -51,11 +50,12 @@ func (handler *DistributedHandlerDeprecated) HandleAdd(workload *diwv2.Distribut
 		return nil
 	}
 
-	res, err := handler.runaiBackendClient.Client.DistributedApi.UpdateDistributedStatus(
-		handler.runaiBackendClient.Context(),
-		*statusToSend,
-		config.Config().ClusterUuid,
-	)
+	_, res, err := handler.runaiBackendClient.Client.TrainingsAPI.UpdateDistributedStatus(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
+	).WorkloadStatusUpdate(*statusToSend).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("distributed %s not found in control plane, it has probably removed already from the DB", statusToSend.Id)
 		return nil
@@ -73,11 +73,12 @@ func (handler *DistributedHandlerDeprecated) HandleDelete(workload *diwv2.Distri
 		return nil
 	}
 
-	res, err := handler.runaiBackendClient.Client.DistributedApi.DeleteDistributed(
-		handler.runaiBackendClient.Context(),
-		config.Config().ClusterUuid,
-		workloadId,
-	)
+	res, err := handler.runaiBackendClient.Client.TrainingsAPI.DeleteDistributedById(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid, workloadId,
+	).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	if res != nil && res.StatusCode == http.StatusNotFound {
 		zap.S().Infof("distributed %s is already removed from control plane", workloadId)
 		return nil
@@ -106,7 +107,7 @@ func (handler *DistributedHandlerDeprecated) HandleSyncEvent(waitGroup *sync.Wai
 		return
 	}
 
-	syncToSend := make([]swagger.WorkloadStatus, 0, len(workloadList.Items))
+	syncToSend := make([]swagger.WorkloadStatusUpdate, 0, len(workloadList.Items))
 
 	for _, workload := range workloadList.Items {
 		curStatus := parsers.WorkloadDistributedToStatusChangeRequest(&workload.ObjectMeta, workload.Status)
@@ -115,13 +116,12 @@ func (handler *DistributedHandlerDeprecated) HandleSyncEvent(waitGroup *sync.Wai
 		}
 	}
 
-	res, err := handler.runaiBackendClient.Client.DistributedApi.SyncDistributedStatus(
-		handler.runaiBackendClient.Context(),
-		config.Config().ClusterUuid,
-		&swagger.DistributedApiSyncDistributedStatusOpts{
-			Body: optional.NewInterface(syncToSend),
-		},
-	)
+	_, res, err := handler.runaiBackendClient.Client.TrainingsAPI.SyncDistributedStatus(
+		handler.runaiBackendClient.Context(), config.Config().ClusterUuid,
+	).WorkloadStatusUpdate(syncToSend).Execute()
+	if res != nil {
+		_ = res.Body.Close()
+	}
 
 	err = handler.runaiBackendClient.HandleHttpResponse(res, err, "Sync workloads")
 	if err != nil {

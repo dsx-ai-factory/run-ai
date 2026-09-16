@@ -7,7 +7,7 @@ package parsers
 
 import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
+	swagger "github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients/control-plane/generated"
 	knv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
@@ -19,7 +19,7 @@ func ParseServiceToServerScheme(service *knv1.Service) swagger.Service {
 	}
 	return swagger.Service{
 		ClusterUuid: config.Config().ClusterUuid,
-		Url:         host,
+		Url:         &host,
 		Id:          string(service.UID),
 		Name:        service.Name,
 		Namespace:   service.Namespace,

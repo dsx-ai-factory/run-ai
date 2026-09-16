@@ -1,3 +1,3 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events
 
-go 1.26.6
+go 1.26.8

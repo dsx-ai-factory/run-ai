@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/NVIDIA/k8s-nim-operator v0.0.0-20260601160319-679627a97be7
@@ -304,8 +304,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/extensions
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ./../../runai-cluster/cluster/common/runaipublic
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ./../../runai-cluster/cluster/common/topology
-
-replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ./../../runai-cluster/common/clients
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ./../../runai-cluster/common/cert-utils
 
