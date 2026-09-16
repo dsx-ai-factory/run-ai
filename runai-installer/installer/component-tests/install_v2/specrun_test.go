@@ -44,7 +44,7 @@ func newInstallRunConfig() *installconfig.Config {
 func baseRunOptions() installconfig.RunOptions {
 	return installconfig.RunOptions{
 		Yes:      true,
-		Registry: &spec.Registry{Type: spec.RegistryTypeJFrog, Token: base64.StdEncoding.EncodeToString([]byte(`{"auths":{}}`))},
+		Registry: &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: base64.StdEncoding.EncodeToString([]byte(`{"auths":{}}`))},
 	}
 }
 

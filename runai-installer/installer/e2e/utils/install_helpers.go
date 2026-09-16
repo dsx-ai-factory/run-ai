@@ -61,8 +61,8 @@ func InstallVersion(version string, testEnv *TestEnv, extraConfigValues config.M
 	for k, v := range extraConfigValues {
 		opts.ConfigValues[k] = v
 	}
-	if testEnv.JfrogToken != "" {
-		opts.ConfigValues["jfrog_creds"] = testEnv.JfrogToken
+	if testEnv.PullSecret != "" {
+		opts.ConfigValues["registry_pull_secret"] = testEnv.PullSecret
 	}
 	if testEnv.KubernetesDistribution != "" {
 		opts.ConfigValues["kubernetes_distribution"] = testEnv.KubernetesDistribution

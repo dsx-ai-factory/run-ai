@@ -8,6 +8,7 @@ package step
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/config"
@@ -15,7 +16,25 @@ import (
 	"helm.sh/helm/v3/pkg/chartutil"
 )
 
-const jfrogBase = "https://runai.jfrog.io/artifactory/api/helm"
+// ChartRepoBaseEnv names the environment variable holding the base URL of the
+// classic Helm repositories the Run:ai charts are served from when the
+// registry is not NGC. Each environment appends its own repository name to it,
+// so the base is the common prefix of the control plane and cluster chart
+// repositories (e.g. "https://charts.example.com/api/helm"). It is deliberately
+// not compiled in: the installer has no default chart host outside NGC.
+const ChartRepoBaseEnv = "RUNAI_CHART_REPO_BASE"
+
+// ChartRepoBase returns the configured chart repository base without a
+// trailing slash, or "" when none is set.
+func ChartRepoBase() string {
+	return strings.TrimSuffix(strings.TrimSpace(os.Getenv(ChartRepoBaseEnv)), "/")
+}
+
+// MissingChartRepoError explains how to configure the chart repository when a
+// chart has no repository to install from.
+func MissingChartRepoError(chart string) error {
+	return fmt.Errorf("no chart repository configured for the %s chart: set the %s environment variable", chart, ChartRepoBaseEnv)
+}
 
 const ngcChartHost = "helm.ngc.nvidia.com"
 
@@ -61,29 +80,41 @@ func NGCChartRepo(env config.RunaiEnvType) string {
 	return fmt.Sprintf("https://%s/%s", ngcChartHost, ngcChartOrgTeam(env))
 }
 
+// CPChartRepo returns the control plane chart repository for env under the
+// configured chart repository base, or "" when no base is set.
 func CPChartRepo(env config.RunaiEnvType) string {
+	base := ChartRepoBase()
+	if base == "" {
+		return ""
+	}
 	switch env {
 	case config.EnvProd:
-		return jfrogBase + "/cp-charts-prod"
+		return base + "/cp-charts-prod"
 	case config.EnvLab:
-		return jfrogBase + "/cp-charts-lab"
+		return base + "/cp-charts-lab"
 	case config.EnvStaging:
-		return jfrogBase + "/cp-charts-staging"
+		return base + "/cp-charts-staging"
 	default:
-		return jfrogBase + "/cp-charts-test"
+		return base + "/cp-charts-test"
 	}
 }
 
+// ClusterChartRepo returns the cluster chart repository for env under the
+// configured chart repository base, or "" when no base is set.
 func ClusterChartRepo(env config.RunaiEnvType) string {
+	base := ChartRepoBase()
+	if base == "" {
+		return ""
+	}
 	switch env {
 	case config.EnvProd:
-		return jfrogBase + "/run-ai-charts"
+		return base + "/run-ai-charts"
 	case config.EnvLab:
-		return jfrogBase + "/op-charts-lab"
+		return base + "/op-charts-lab"
 	case config.EnvStaging:
-		return jfrogBase + "/op-charts-staging"
+		return base + "/op-charts-staging"
 	default:
-		return jfrogBase + "/run-ai-charts-test"
+		return base + "/run-ai-charts-test"
 	}
 }
 

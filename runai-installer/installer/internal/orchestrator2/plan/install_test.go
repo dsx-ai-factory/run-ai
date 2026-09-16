@@ -55,7 +55,7 @@ func actionForStep(t *testing.T, f *orchestrator2.Flow, stepName string) orchest
 func fullInstallSpec() *spec.Spec {
 	return &spec.Spec{
 		Command:  spec.CommandInstall,
-		Registry: &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"},
+		Registry: &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"},
 		ControlPlane: &spec.ControlPlane{
 			Domain:  "test.runai.local",
 			Version: "2.26.0",
@@ -168,7 +168,7 @@ func TestControlPlaneValues_CustomCA(t *testing.T) {
 }
 
 func TestUsesManagedRegistrySecret(t *testing.T) {
-	registry := &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"}
+	registry := &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"}
 
 	assert.True(t, usesManagedRegistrySecret(&spec.Spec{Registry: registry}))
 	assert.True(t, usesManagedRegistrySecret(&spec.Spec{
@@ -211,7 +211,7 @@ func TestResolve_Install_Airgap(t *testing.T) {
 		"push-airgap-images",
 	}, stepNames(runai.Flows[0]))
 
-	// Air-gapped control plane skips the JFrog registry secret.
+	// Air-gapped control plane skips the managed registry secret.
 	assert.Equal(t, []string{
 		"create-control-plane-namespace",
 		"install-control-plane-tls",

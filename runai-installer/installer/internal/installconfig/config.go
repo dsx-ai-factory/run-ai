@@ -75,7 +75,7 @@ type Install struct {
 // Registry holds the registry coordinates and credentials. The credential
 // fields form one of three mutually exclusive auth schemes (validated by
 // resolveRegistryFromConfig):
-//   - token auth: token | tokenPath (JFrog/NGC connected installs)
+//   - token auth: token | tokenPath (docker config or NGC token, connected installs)
 //   - basic auth: username + (password | passwordPath) (e.g. a Harbor mirror)
 //   - none: host only (an unauthenticated registry)
 //
@@ -90,7 +90,7 @@ type Registry struct {
 	Token        string `yaml:"token,omitempty"`
 	TokenPath    string `yaml:"tokenPath,omitempty"`
 	CAChainPath  string `yaml:"caChainPath,omitempty"`
-	// ChartRepository overrides the NGC Helm repository.
+	// ChartRepository overrides the Helm repository both Run:ai charts are pulled from.
 	ChartRepository string `yaml:"chartRepository,omitempty"`
 	// Insecure marks the registry as plain HTTP (no TLS).
 	Insecure bool `yaml:"insecure,omitempty"`

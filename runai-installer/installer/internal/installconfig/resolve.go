@@ -24,15 +24,15 @@ const (
 )
 
 // ResolveRegistry picks exactly one registry source and resolves its
-// credentials into a spec.Registry. Precedence: the --jfrog-token-path /
+// credentials into a spec.Registry. Precedence: the --registry-token-path /
 // --ngc-token-path CLI flags override the config file's registry section.
-func ResolveRegistry(cfg *Config, jfrogTokenPath, ngcTokenPath string) (*spec.Registry, error) {
-	if jfrogTokenPath != "" && ngcTokenPath != "" {
-		return nil, errors.New("--jfrog-token-path and --ngc-token-path are mutually exclusive")
+func ResolveRegistry(cfg *Config, registryTokenPath, ngcTokenPath string) (*spec.Registry, error) {
+	if registryTokenPath != "" && ngcTokenPath != "" {
+		return nil, errors.New("--registry-token-path and --ngc-token-path are mutually exclusive")
 	}
 
-	if jfrogTokenPath != "" || ngcTokenPath != "" {
-		typ, path := spec.RegistryTypeJFrog, jfrogTokenPath
+	if registryTokenPath != "" || ngcTokenPath != "" {
+		typ, path := spec.RegistryTypeDockerConfig, registryTokenPath
 		if ngcTokenPath != "" {
 			typ, path = spec.RegistryTypeNGC, ngcTokenPath
 		}
@@ -52,7 +52,7 @@ func ResolveRegistry(cfg *Config, jfrogTokenPath, ngcTokenPath string) (*spec.Re
 	}
 
 	if cfg == nil || cfg.Registry == nil {
-		return nil, errors.New("no registry credentials: set --jfrog-token-path, --ngc-token-path, or registry in the config")
+		return nil, errors.New("no registry credentials: set --registry-token-path, --ngc-token-path, or registry in the config")
 	}
 	return resolveRegistryFromConfig(cfg.Registry)
 }
@@ -141,7 +141,7 @@ func validateRegistryAuth(r *Registry) (registryAuthMode, error) {
 
 func validateRegistryType(t spec.RegistryType) error {
 	switch t {
-	case spec.RegistryTypeJFrog, spec.RegistryTypeNGC:
+	case spec.RegistryTypeDockerConfig, spec.RegistryTypeNGC:
 		return nil
 	}
 	return fmt.Errorf("unknown registry type: %q", t)

@@ -181,7 +181,7 @@ var _ = Describe("Airgap Installation E2E", func() {
 		upgradeVersion := airgapUpgradeVersion()
 
 		installTarball := downloadOrReuseAirgapPackage(
-			testEnv.JfrogToken, installVersion, testEnv.TempDir, "E2E_AIRGAP_TARBALL")
+			testEnv.PullSecret, installVersion, testEnv.TempDir, "E2E_AIRGAP_TARBALL")
 
 		installExtractedDir := airgapInstall(installTarball, installVersion)
 
@@ -196,7 +196,7 @@ var _ = Describe("Airgap Installation E2E", func() {
 		}
 
 		upgradeTarball := downloadOrReuseAirgapPackage(
-			testEnv.JfrogToken, upgradeVersion, testEnv.TempDir, "E2E_AIRGAP_UPGRADE_TARBALL")
+			testEnv.PullSecret, upgradeVersion, testEnv.TempDir, "E2E_AIRGAP_UPGRADE_TARBALL")
 
 		upgradeExtractedDir := airgapUpgrade(upgradeTarball, upgradeVersion)
 

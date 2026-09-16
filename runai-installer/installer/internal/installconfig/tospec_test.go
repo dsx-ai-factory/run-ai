@@ -37,7 +37,7 @@ func TestToSpec_FullInstall(t *testing.T) {
 		Output:     spec.OutputFormatText,
 		EventsFile: "/tmp/events.ndjson",
 		OnFailure:  spec.FailurePolicySkip,
-		Registry:   &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"},
+		Registry:   &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"},
 	}
 
 	s := cfg.ToSpec(opts)
@@ -50,7 +50,7 @@ func TestToSpec_FullInstall(t *testing.T) {
 	assert.Equal(t, "/tmp/events.ndjson", s.Output.EventsFile)
 	assert.Equal(t, spec.FailurePolicySkip, s.OnStepFailure)
 	require.NotNil(t, s.Registry)
-	assert.Equal(t, spec.RegistryTypeJFrog, s.Registry.Type)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, s.Registry.Type)
 	require.NotNil(t, s.ControlPlane)
 	assert.Equal(t, "runai.example.com", s.ControlPlane.Domain)
 	require.NotNil(t, s.Cluster)
@@ -84,7 +84,7 @@ func TestToSpec_MapsAllFields(t *testing.T) {
 			},
 		},
 	}
-	opts := RunOptions{Env: spec.EnvLab, Registry: &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"}}
+	opts := RunOptions{Env: spec.EnvLab, Registry: &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"}}
 
 	s := cfg.ToSpec(opts)
 

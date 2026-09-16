@@ -152,8 +152,8 @@ const (
 type RegistryType string
 
 const (
-	RegistryTypeJFrog RegistryType = "jfrog"
-	RegistryTypeNGC   RegistryType = "ngc"
+	RegistryTypeDockerConfig RegistryType = "dockerconfig"
+	RegistryTypeNGC          RegistryType = "ngc"
 )
 
 type Registry struct {
@@ -163,7 +163,7 @@ type Registry struct {
 	Password    string
 	Host        string
 	CAChainPath string
-	// ChartRepository overrides the NGC Helm repository.
+	// ChartRepository overrides the Helm repository both Run:ai charts are pulled from.
 	ChartRepository string
 	// Insecure means the registry is served over plain HTTP (no TLS).
 	Insecure bool
@@ -591,10 +591,10 @@ func (e Env) validate() error {
 
 func (r *Registry) validate() error {
 	if r == nil {
-		return errors.New("registry is required (jfrog or ngc)")
+		return errors.New("registry is required (dockerconfig or ngc)")
 	}
 	switch r.Type {
-	case RegistryTypeJFrog:
+	case RegistryTypeDockerConfig:
 		if r.Token == "" {
 			return errors.New("registry token is required")
 		}
@@ -614,7 +614,7 @@ func (r *Registry) ImagePullConfig() (string, bool) {
 	if r == nil {
 		return "", false
 	}
-	if r.Type == RegistryTypeJFrog {
+	if r.Type == RegistryTypeDockerConfig {
 		return r.Token, r.Token != ""
 	}
 	username, password := r.Username, r.Password

@@ -27,8 +27,8 @@ install:
   mode: full_installation
   connectivity: connected
 registry:
-  type: jfrog
-  tokenPath: /etc/runai/jfrog.token
+  type: dockerconfig
+  tokenPath: /etc/runai/registry.token
 tls:
   certPath: /etc/runai/tls.crt
   keyPath: /etc/runai/tls.key
@@ -57,8 +57,8 @@ prerequisites:
 
 	assert.Equal(t, "full_installation", cfg.Install.Mode)
 	require.NotNil(t, cfg.Registry)
-	assert.Equal(t, "jfrog", cfg.Registry.Type)
-	assert.Equal(t, "/etc/runai/jfrog.token", cfg.Registry.TokenPath)
+	assert.Equal(t, "dockerconfig", cfg.Registry.Type)
+	assert.Equal(t, "/etc/runai/registry.token", cfg.Registry.TokenPath)
 	require.NotNil(t, cfg.TLS)
 	assert.Equal(t, "/etc/runai/tls.crt", cfg.TLS.CertPath)
 	assert.Equal(t, "/etc/runai/tls.key", cfg.TLS.KeyPath)

@@ -17,7 +17,7 @@ import (
 func validInstallSpec() *Spec {
 	return &Spec{
 		Command:      CommandInstall,
-		Registry:     &Registry{Type: RegistryTypeJFrog, Token: "tok"},
+		Registry:     &Registry{Type: RegistryTypeDockerConfig, Token: "tok"},
 		ControlPlane: &ControlPlane{Domain: "runai.example.com"},
 		Cluster:      &Cluster{Name: "cluster01"},
 	}
@@ -254,9 +254,9 @@ func TestValidate_Install_RegistryUnknownType(t *testing.T) {
 	assert.Contains(t, err.Error(), "registry type")
 }
 
-func TestValidate_Install_JFrogTokenRequired(t *testing.T) {
+func TestValidate_Install_DockerConfigTokenRequired(t *testing.T) {
 	s := validInstallSpec()
-	s.Registry = &Registry{Type: RegistryTypeJFrog}
+	s.Registry = &Registry{Type: RegistryTypeDockerConfig}
 	err := s.Validate()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "token")
@@ -291,7 +291,7 @@ func TestValidate_NGCRegistry_OK(t *testing.T) {
 }
 
 func TestRegistry_ChartCredentials(t *testing.T) {
-	u, p := (&Registry{Type: RegistryTypeJFrog, Token: "tok"}).ChartCredentials()
+	u, p := (&Registry{Type: RegistryTypeDockerConfig, Token: "tok"}).ChartCredentials()
 	assert.Empty(t, u)
 	assert.Empty(t, p)
 
@@ -309,7 +309,7 @@ func TestRegistry_ChartCredentials(t *testing.T) {
 }
 
 func TestRegistry_ImagePullConfig(t *testing.T) {
-	cfg, ok := (&Registry{Type: RegistryTypeJFrog, Token: "encoded"}).ImagePullConfig()
+	cfg, ok := (&Registry{Type: RegistryTypeDockerConfig, Token: "encoded"}).ImagePullConfig()
 	assert.True(t, ok)
 	assert.Equal(t, "encoded", cfg)
 

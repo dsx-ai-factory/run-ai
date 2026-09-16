@@ -22,13 +22,13 @@ func writeToken(t *testing.T, contents string) string {
 	return path
 }
 
-func TestResolveRegistry_JFrogFlag(t *testing.T) {
-	path := writeToken(t, "  jfrog-token\n")
+func TestResolveRegistry_RegistryTokenFlag(t *testing.T) {
+	path := writeToken(t, "  registry-token\n")
 
 	reg, err := ResolveRegistry(&Config{}, path, "")
 	require.NoError(t, err)
-	assert.Equal(t, spec.RegistryTypeJFrog, reg.Type)
-	assert.Equal(t, "jfrog-token", reg.Token)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, reg.Type)
+	assert.Equal(t, "registry-token", reg.Token)
 }
 
 func TestResolveRegistry_NGCFlag(t *testing.T) {
@@ -66,14 +66,14 @@ func TestResolveRegistry_FlagOverridesConfig(t *testing.T) {
 
 	reg, err := ResolveRegistry(cfg, flagPath, "")
 	require.NoError(t, err)
-	assert.Equal(t, spec.RegistryTypeJFrog, reg.Type)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, reg.Type)
 	assert.Equal(t, "flag-token", reg.Token)
 }
 
 func TestResolveRegistry_FlagCarriesConfigHostAndCA(t *testing.T) {
 	flagPath := writeToken(t, "flag-token")
 	// Only Host and CAChainPath carry over from the config; the type and token
-	// come from the --jfrog-token-path flag, which takes precedence.
+	// come from the --registry-token-path flag, which takes precedence.
 	cfg := &Config{Registry: &Registry{
 		Host:        "mirror.local:5000",
 		CAChainPath: "/etc/runai/registry-ca.crt",
@@ -81,7 +81,7 @@ func TestResolveRegistry_FlagCarriesConfigHostAndCA(t *testing.T) {
 
 	reg, err := ResolveRegistry(cfg, flagPath, "")
 	require.NoError(t, err)
-	assert.Equal(t, spec.RegistryTypeJFrog, reg.Type)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, reg.Type)
 	assert.Equal(t, "flag-token", reg.Token)
 	assert.Equal(t, "mirror.local:5000", reg.Host, "host carries over from config when a token flag is used")
 	assert.Equal(t, "/etc/runai/registry-ca.crt", reg.CAChainPath, "CA chain carries over from config when a token flag is used")
@@ -123,7 +123,7 @@ func TestValidateRegistryAuth(t *testing.T) {
 		wantErr string
 	}{
 		{name: "host only is unauthenticated", reg: Registry{Host: "h"}, want: authNone},
-		{name: "token inline", reg: Registry{Type: "jfrog", Token: "t"}, want: authToken},
+		{name: "token inline", reg: Registry{Type: "dockerconfig", Token: "t"}, want: authToken},
 		{name: "token path", reg: Registry{Type: "ngc", TokenPath: "/p"}, want: authToken},
 		{name: "basic inline", reg: Registry{Username: "u", Password: "p"}, want: authBasic},
 		{name: "basic path", reg: Registry{Username: "u", PasswordPath: "/p"}, want: authBasic},
@@ -169,11 +169,11 @@ func TestResolveRegistry_BasicPasswordPath(t *testing.T) {
 }
 
 func TestResolveRegistry_TokenInline(t *testing.T) {
-	cfg := &Config{Registry: &Registry{Type: "jfrog", Token: "inline-token"}}
+	cfg := &Config{Registry: &Registry{Type: "dockerconfig", Token: "inline-token"}}
 
 	reg, err := ResolveRegistry(cfg, "", "")
 	require.NoError(t, err)
-	assert.Equal(t, spec.RegistryTypeJFrog, reg.Type)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, reg.Type)
 	assert.Equal(t, "inline-token", reg.Token)
 }
 
