@@ -784,11 +784,13 @@ func (w *WorkloadsDao) buildTelemetryQuery(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) orm.DB {
 	tx := runaidb.DB().WithContext(ctx)
 	query := tx.Table(w.view).
 		Where("tenant_id = ?", tenantId).
-		Where("deleted_at IS NULL")
+		Where("deleted_at IS NULL").
+		WithEnricher(querydbenrich.Filters(filterBy))
 
 	if permittedScopes != nil {
 		if permittedScopes.System == nil || !*permittedScopes.System {
@@ -837,6 +839,7 @@ func (w *WorkloadsDao) dbGetWorkloadTelemetry(
 	groupBy [][]string,
 	dataField string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, error) {
 	telemetryGroupValues := []telemetry_utils.TelemetryGroupValue{}
 
@@ -848,7 +851,7 @@ func (w *WorkloadsDao) dbGetWorkloadTelemetry(
 		}
 	}
 
-	query := w.buildTelemetryQuery(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases).
+	query := w.buildTelemetryQuery(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases, filterBy).
 		Select(selectPhrase)
 
 	_, err := query.Scan(&telemetryGroupValues)
@@ -869,10 +872,11 @@ func (w *WorkloadsDao) DbGetWorkloadCount(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get workload count", nil)
 
-	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COUNT(id)", phases)
+	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COUNT(id)", phases, filterBy)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get workload count, err: %v", err)
 		return workloadTelemetry, dbErr.WithDetails(err)
@@ -891,10 +895,11 @@ func (w *WorkloadsDao) DbGetGpuAllocation(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get gpu allocation", nil)
 
-	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COALESCE(SUM(allocated_gpu), 0)", phases)
+	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COALESCE(SUM(allocated_gpu), 0)", phases, filterBy)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get gpu allocation, err: %v", err)
 		return workloadTelemetry, dbErr.WithDetails(err)
@@ -913,10 +918,11 @@ func (w *WorkloadsDao) DbGetIdleAllocatedGpus(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get idle allocated gpus", nil)
 
-	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COALESCE(SUM(idle_allocated_gpus), 0)", phases)
+	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COALESCE(SUM(idle_allocated_gpus), 0)", phases, filterBy)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get idle allocated gpus, err: %v", err)
 		return workloadTelemetry, dbErr.WithDetails(err)

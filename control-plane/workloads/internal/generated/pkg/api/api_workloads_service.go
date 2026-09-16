@@ -336,7 +336,7 @@ func (s *WorkloadsAPIService) CountWorkloads(ctx context.Context, deleted bool, 
 }
 
 // GetWorkloadsTelemetry - Get the workloads telemetry.
-func (s *WorkloadsAPIService) GetWorkloadsTelemetry(ctx context.Context, telemetryType WorkloadTelemetryType, clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, filterByPhases []Phase) (ImplResponse, error) {
+func (s *WorkloadsAPIService) GetWorkloadsTelemetry(ctx context.Context, telemetryType WorkloadTelemetryType, clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, filterByPhases []Phase, filterBy []string) (ImplResponse, error) {
 	// TODO - update GetWorkloadsTelemetry with the required logic for this service method.
 	// Add api_workloads_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
@@ -365,7 +365,7 @@ func (s *WorkloadsAPIService) GetWorkloadsTelemetry(ctx context.Context, telemet
 }
 
 // GetInternalWorkloadsTelemetry - Get the internal workloads telemetry.
-func (s *WorkloadsAPIService) GetInternalWorkloadsTelemetry(ctx context.Context, telemetryType WorkloadTelemetryType, clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, filterByPhases []Phase) (ImplResponse, error) {
+func (s *WorkloadsAPIService) GetInternalWorkloadsTelemetry(ctx context.Context, telemetryType WorkloadTelemetryType, clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, filterByPhases []Phase, filterBy []string) (ImplResponse, error) {
 	// TODO - update GetInternalWorkloadsTelemetry with the required logic for this service method.
 	// Add api_workloads_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
