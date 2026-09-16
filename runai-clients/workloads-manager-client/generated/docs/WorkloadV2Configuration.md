@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Mnnvl** | Pointer to [**NullableMnnvlMode**](MnnvlMode.md) |  | [optional] 
-**Networking** | Pointer to [**[]NetworkingEndpoint**](NetworkingEndpoint.md) | Networking endpoint configurations for the workload (external access, services with auth). Direct submissions require cluster version 3.0.0 or above for networking ownership validation.  | [optional] 
+**Networking** | Pointer to [**[]NetworkingEndpoint**](NetworkingEndpoint.md) | Networking endpoint configurations for the workload (external access, services with auth). Requires cluster version 3.0.0 or later.  | [optional] 
 **UserCredentials** | Pointer to [**NullableWorkloadV2UpdateConfigurationUserCredentials**](WorkloadV2UpdateConfigurationUserCredentials.md) |  | [optional] 
 **Pvcs** | Pointer to [**[]WorkloadV2UpdateConfigurationPvc**](WorkloadV2UpdateConfigurationPvc.md) | PVCs to create and reconcile alongside the workload. | [optional] 
 **PvcsConfig** | Pointer to [**NullableWorkloadV2UpdateConfigurationPvcsConfig**](WorkloadV2UpdateConfigurationPvcsConfig.md) |  | [optional] 

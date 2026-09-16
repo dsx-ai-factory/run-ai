@@ -33745,7 +33745,7 @@ components:
     Workloadv2Authorization:
       type: object
       description: |-
-        Access control for this networking endpoint. Requires externalAccess and an explicit authorizationType.
+        Access control for this networking endpoint. Requires externalAccess.
         Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
       example:
         forceJsonResponse: false
@@ -33759,8 +33759,6 @@ components:
               type: boolean
               default: false
               nullable: true
-      required:
-        - authorizationType
       nullable: true
     NetworkingService:
       type: object
@@ -33795,7 +33793,7 @@ components:
       type: array
       description: |
         Networking endpoint configurations for the workload (external access, services with auth).
-        Direct submissions require cluster version 3.0.0 or above for networking ownership validation.
+        Requires cluster version 3.0.0 or later.
       nullable: true
       maxItems: 1000
       items:

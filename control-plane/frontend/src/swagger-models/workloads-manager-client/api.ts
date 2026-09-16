@@ -2037,7 +2037,7 @@ export interface WorkloadV2Configuration {
      */
     'mnnvl'?: MnnvlMode | null;
     /**
-     * Networking endpoint configurations for the workload (external access, services with auth). Direct submissions require cluster version 3.0.0 or above for networking ownership validation. 
+     * Networking endpoint configurations for the workload (external access, services with auth). Requires cluster version 3.0.0 or later. 
      * @type {Array<NetworkingEndpoint>}
      * @memberof WorkloadV2Configuration
      */
@@ -2447,7 +2447,7 @@ export interface WorkloadV2MetadataUpdateParamsConfiguration {
      */
     'mnnvl'?: MnnvlMode | null;
     /**
-     * Networking endpoint configurations for the workload (external access, services with auth). Direct submissions require cluster version 3.0.0 or above for networking ownership validation. 
+     * Networking endpoint configurations for the workload (external access, services with auth). Requires cluster version 3.0.0 or later. 
      * @type {Array<NetworkingEndpoint>}
      * @memberof WorkloadV2MetadataUpdateParamsConfiguration
      */
@@ -2924,7 +2924,7 @@ export interface WorkloadsV2Updates {
     'workloads'?: Array<WorkloadV2Update>;
 }
 /**
- * Access control for this networking endpoint. Requires externalAccess and an explicit authorizationType. Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
+ * Access control for this networking endpoint. Requires externalAccess. Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
  * @export
  * @interface Workloadv2Authorization
  */
@@ -2934,7 +2934,7 @@ export interface Workloadv2Authorization {
      * @type {AuthorizationType}
      * @memberof Workloadv2Authorization
      */
-    'authorizationType': AuthorizationType | null;
+    'authorizationType'?: AuthorizationType | null;
     /**
      * List of users or service accounts that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
      * @type {Array<string>}

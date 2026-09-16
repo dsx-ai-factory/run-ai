@@ -1446,7 +1446,7 @@
       },
       "Workloadv2Authorization": {
         "type": "object",
-        "description": "Access control for this networking endpoint. Requires externalAccess and an explicit authorizationType.\nOnly the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.",
+        "description": "Access control for this networking endpoint. Requires externalAccess.\nOnly the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.",
         "example": {
           "forceJsonResponse": false,
           "authorizationType": "authenticatedUsers"
@@ -1466,9 +1466,6 @@
               }
             }
           }
-        ],
-        "required": [
-          "authorizationType"
         ],
         "nullable": true
       },
@@ -1511,7 +1508,7 @@
       },
       "NetworkingConfiguration": {
         "type": "array",
-        "description": "Networking endpoint configurations for the workload (external access, services with auth).\nDirect submissions require cluster version 3.0.0 or above for networking ownership validation.\n",
+        "description": "Networking endpoint configurations for the workload (external access, services with auth).\nRequires cluster version 3.0.0 or later.\n",
         "nullable": true,
         "maxItems": 1000,
         "items": {

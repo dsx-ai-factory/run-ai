@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**AuthorizationType** | [**NullableAuthorizationType**](AuthorizationType.md) |  | 
+**AuthorizationType** | Pointer to [**NullableAuthorizationType**](AuthorizationType.md) |  | [optional] 
 **AuthorizedUsers** | Pointer to **[]string** | List of users or service accounts that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive. | [optional] 
 **AuthorizedGroups** | Pointer to **[]string** | List of groups that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive. | [optional] 
 **ForceJsonResponse** | Pointer to **NullableBool** | Force JSON errors instead of HTTP error pages or redirects. | [optional] [default to false]
@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 
 ### NewWorkloadv2Authorization
 
-`func NewWorkloadv2Authorization(authorizationType NullableAuthorizationType, ) *Workloadv2Authorization`
+`func NewWorkloadv2Authorization() *Workloadv2Authorization`
 
 NewWorkloadv2Authorization instantiates a new Workloadv2Authorization object
 This constructor will assign default values to properties that have it defined,
@@ -47,6 +47,11 @@ and a boolean to check if the value has been set.
 
 SetAuthorizationType sets AuthorizationType field to given value.
 
+### HasAuthorizationType
+
+`func (o *Workloadv2Authorization) HasAuthorizationType() bool`
+
+HasAuthorizationType returns a boolean if a field has been set.
 
 ### SetAuthorizationTypeNil
 

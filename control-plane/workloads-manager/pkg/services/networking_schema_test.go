@@ -12,29 +12,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
 )
 
-func TestNetworkingAuthorizationTypeRequired(t *testing.T) {
-	for _, tc := range []struct {
-		name, payload string
-		wantErr       bool
-	}{
-		{name: "no authorization", payload: `{}`},
-		{name: "missing type", payload: `{"authorization":{"authorizedUsers":["alice"]}}`, wantErr: true},
-		{name: "null type", payload: `{"authorization":{"authorizationType":null}}`, wantErr: true},
-		{name: "explicit type", payload: `{"authorization":{"authorizationType":"authorizedUsers","authorizedUsers":["alice"]}}`},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			var service api.NetworkingService
-			if err := json.Unmarshal([]byte(tc.payload), &service); err != nil {
-				t.Fatal(err)
-			}
-			err := api.AssertNetworkingServiceRequired(service)
-			if (err != nil) != tc.wantErr {
-				t.Fatalf("got error %v, want error %t", err, tc.wantErr)
-			}
-		})
-	}
-}
-
 func TestNetworkingServiceNameConstraints(t *testing.T) {
 	for _, tc := range []struct {
 		name    string

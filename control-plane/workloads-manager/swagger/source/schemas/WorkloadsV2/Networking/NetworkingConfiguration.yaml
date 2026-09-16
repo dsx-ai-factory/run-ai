@@ -1,7 +1,7 @@
 type: array
 description: |
   Networking endpoint configurations for the workload (external access, services with auth).
-  Direct submissions require cluster version 3.0.0 or above for networking ownership validation.
+  Requires cluster version 3.0.0 or later.
 nullable: true
 maxItems: 1000
 items:
