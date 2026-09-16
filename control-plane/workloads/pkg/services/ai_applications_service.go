@@ -79,7 +79,9 @@ func (s *AIApplicationsService) ListApplications(ctx context.Context,
 	apiApplications := []api.AiApplication{}
 	if applications != nil {
 		for _, application := range *applications {
-			apiApplications = append(apiApplications, applicationViewToApi(application, verbosity))
+			apiApplication := applicationViewToApi(application, verbosity)
+			sanitizeAIApplicationResponse(ctx, &apiApplication)
+			apiApplications = append(apiApplications, apiApplication)
 		}
 	}
 
@@ -118,6 +120,7 @@ func (s *AIApplicationsService) GetApplication(ctx context.Context, applicationI
 	}
 
 	response := applicationViewToApi(*application, api.AIAPPLICATIONVERBOSITY_FULL)
+	sanitizeAIApplicationResponse(ctx, &response)
 	return api.Response(http.StatusOK, response), nil
 }
 
@@ -216,6 +219,16 @@ func (s *AIApplicationsService) CreateApplication(ctx context.Context, createApp
 		return NewErrorResponse(api.NewError(int(capErr.GetCode()), capErr.GetMessage(), nil)), nil
 	}
 
+	usesPersonalCredentials, credentialsErr := processAIApplicationCredentials(ctx, createApplicationRequest.Name, &createApplicationRequest.Spec)
+	if credentialsErr != nil {
+		return NewErrorResponse(credentialsErr), nil
+	}
+	if usesPersonalCredentials {
+		if capabilityErr := validateApplicationPersonalCredentialsCapability(ctx, createApplicationRequest.ClusterId); capabilityErr != nil {
+			return NewErrorResponse(capabilityErr), nil
+		}
+	}
+
 	applicationId := uuid.New()
 	createdBy := convutils.Deref(runaictx.GetString(ctx, runaictx.CfSubjectID), "")
 
@@ -252,7 +265,9 @@ func (s *AIApplicationsService) CreateApplication(ctx context.Context, createApp
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "application created but failed to retrieve it", nil).WithDetails(getErr)), nil
 	}
 
-	return api.Response(http.StatusOK, applicationViewToApi(*created, api.AIAPPLICATIONVERBOSITY_FULL)), nil
+	response := applicationViewToApi(*created, api.AIAPPLICATIONVERBOSITY_FULL)
+	sanitizeAIApplicationResponse(ctx, &response)
+	return api.Response(http.StatusOK, response), nil
 }
 
 func (s *AIApplicationsService) DeleteApplication(ctx context.Context, aiApplicationId string) (api.ImplResponse, error) {
