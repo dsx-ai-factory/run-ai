@@ -40,7 +40,7 @@ Then run whichever language-level checks apply, matching the jobs in
 
 ```bash
 # Go
-golangci-lint run            # CI pins v2.9.0; matches the go-lint job
+golangci-lint run            # CI pins v2.13.2; matches the go-lint job
 govulncheck ./...            # matches the govulncheck job
 gofmt -l .                   # formatting is not optional in this repo
 
