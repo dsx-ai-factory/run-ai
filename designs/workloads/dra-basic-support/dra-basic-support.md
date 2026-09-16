@@ -14,7 +14,7 @@ Dynamic Resource Allocation (DRA) is a Kubernetes feature that lets pods request
 
 The resources are requested using either a standalone `ResourceClaim` instance that pods specify in the spec or a `ResourceClaimTemplate` instance that the pod spec references.
 
-The key differences between the two methods:
+# The key differences between the two methods:
 
 - **Sharing**: A standalone claim can be shared by multiple pods (same physical device), while a template creates a per-pod claim that cannot be shared.
 - **Lifecycle/ownership**: the template-generated claim is owned by the pod and GC'd with it.
@@ -31,62 +31,62 @@ The feature designed here serves two purposes:
 | PRD     | https://docs.google.com/document/d/1LPvjpdUlX2MpVl3TkUNgbwTcafRIbc7vskVNeyCexRQ/edit?tab=t.0 |
 | K8s Doc | https://kubernetes.io/docs/concepts/resource-management/dynamic-resource-allocation/ |
 
-## 2. Requirements
+## 2. Definition of Done
 
-1. The cluster should report whether it supports DRA to the control plane as part of `ClusterConfiguration`.
+1. The `k8s-objects-tracker` keeps track of all the `ResourceTemplateClaims` in the Run:ai related namespaces (both managed and unmanaged).
 
-   1. `ResourceClaimTemplate` creation is blocked when the cluster does not support DRA. 
+2. The `k8s-objects-tracker` keeps track of `DeviceClasses` in the cluster.
 
-   1. Workload submission referencing a template is rejected when the cluster does not support DRA.
-
-   1. ⚠️**TBD** Only overall DRA support will be checked (not per-feature VS spec).
-
-      
-
-2. Users can create/update/delete/view `ResourceClaimTemplates` in the control plane. 
-
-   1. Adopt assets to support k8s-objects.
-
-   2. **Direction (per team decision):** target **only v1 (1.34+)**. Supporting earlier spec variations (`v1beta1`/`v1beta2`) is a stretch goal, still ⚠️**TBD**.
-
-   3. ⚠️**TBD** Spec identical to k8s spec rather than symbolic spec translated to k8s spec. (Leaning to raw/identical, reinforced by the v1-only direction.) 
-
-3. New RBAC resource type for controlling templates access.
+3. New RBAC resource type for controlling templates access exists.
 
    1. Two new permission sets are introduced, following the same model as other asset types:
       1. **Edit Access** — create/update/delete templates.
       2. **View Access** — read-only access to templates.
 
-4. Sync the `ResourceClaimTemplates` to the cluster.
+4. Permitted users can create/update/delete/view `ResourceClaimTemplates` in the control plane. 
 
    
 
-   1. In the cluster, the template is replicated to all the desired scope(s) and keep being replicated dynamically (for newly created project, for example). 
+   
+
+   1. Support only 1.34+ clusters (in which the feature is enabled by default).
+
+   2. Spec identical to k8s spec.
+
+   3. Creation rejected if the spec contains a `DeviceClass`that does not exist in the cluster.  
 
       
 
-   2. Removal of a template in the CP also remove it from the cluster.
+5. The `ResourceClaimTemplates` are synced to the cluster.
 
-   3. Sync/replication issues are reported to the CP.
+   
+
+   1. In the cluster, they are replicated to all the relevant namespaces and keeps being replicated dynamically (for newly created projects, for example). 
 
       
 
-5. The `k8s-objects-tracker` should keep track of all the templates in the Run:ai related namespaces (both managed and unmanaged).
+   2. Removal of a template in the CP also removes it from the cluster.
 
-6. Workloads can be submitted with reference to a template (both managed and non-managed).
-   1. ***Anyworkload***: as part of the spec, limited to any-workloads allowing `podSpec` control.
+   3. It is possible to remove a `ResourceClaimTemplate` even if there are running pods that use it (in k8s, the claims are detached from the template). New/rescheduled pods will fail, but this is unlikely for native workloads (CP will block this) and user responsibility on anyworkload submission.
+
+   4. Sync/replication issues are reported to the CP.
+
+      
+
+6. Workloads can be submitted with reference to `ResourceClaimTemplates` (both managed and non-managed).
+   1. ***Anyworkload***: as part of the spec, thus limited to any-workloads allowing `podSpec` control.
+
    2. ***Native workloads***: DRA field in the spec. 
-   3. Submission is rejected if the status of the referenced template is not successful (e.g. not synced/replicated).
 
-7. It is possible to remove a template even if there are running pods that use it (in k8s, the claims are detached from the template). New/rescheduled pods will fail, but this is unlikely for native workloads (CP will block this) and user responsibility on anyworkload submission.
+      
 
-8. Usage visibility.
-   1. The template detail view shows the list of workloads currently referencing it.
-   2. The workload detail view shows which template it references and exposes the associated `ResourceClaim` (the actual binding), so users can inspect the allocation.
+   3. Submission is rejected if the status of the referenced `ResouceClaimTemplate` is not successful (e.g. not synced/replicated).
 
-### Out of Scope
+      
 
-1. *referenced `DeviceClass` does not exist* → REQ-8.2: "If the referenced `DeviceClass` does not exist in the cluster — `ResourceClaimTemplate` creation is blocked." → ⚠️ Will require us to upload device types 
+7. Usage visibility.
+   1. It is possible to obtain the list of workloads currently referencing a `ResourceClaimsTemplate`.
+   2. It is possible to obtain the list of `ResourceClaimTemplate` and `ResourceClaims` that a workload references, with pod granularity.
 
 ### Possible Additions
 
@@ -114,37 +114,28 @@ Assuming that more cluster objects are expected to be supported in the future, a
 A recommended approach would be to enhance the assets to support k8s object kind of resources. That includes:
 
 * Adding generic spec table with single JSON column. 
+* Tenant scope will not be supported.
 * New APIs to work with the new filtering standards.
 
 ### Symbolic VS K8s Raw Spec
 
+#### Comparison
+
+Comparison between **symbolic** (Run:ai-defined) spec that we translate into k8s, or the **raw** k8s spec stored (mostly) as-is.
+
+| Aspect                | Raw k8s spec                                                 | Symbolic spec                                                |
+| :-------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| Version independence  | 🔴 Spec is pinned to the k8s version it was authored in       | 🟢 Version-agnostic; the concrete object is generated per cluster at apply time |
+| Translation mechanism | 🟢 No translation needed                                      | 🔴 Translation layer per supported k8s version.               |
+| Validation            | 🟢 Validate against the correct k8s version (much less effort) | 🔴 Validate the symbolic model, then trust the generation     |
+| Expressiveness        | 🟢 Anything k8s accepts is expressible                        | 🔴 Limited to what Run:ai models; arbitrary drivers/fields are hard |
+| Cluster upgrade       | 🔴 Stored spec may drift from the cluster; see below          | 🟡 A served-version change requires re-translation, but it is a deterministic automated process. |
+
+The PRD itself pushes into raw k8s spec, which seems to be the right choice.
+
 #### K8s Spec Variations
 
-DRA's core (structured parameters) reached beta in 1.32 (`v1beta1`) and GA in 1.34 (`v1`); the API also changed in `v1beta2` (1.33). The following example demonstrates the different variations. 
-
-The following template is the v1beta1 way of requesting 2 x H100 devices:
-
-```yaml
-apiVersion: resource.k8s.io/v1beta1
-kind: ResourceClaimTemplate
-metadata:
-  name: two-h100
-  namespace: runai-<project>
-spec:
-  spec:
-    devices:
-      requests:
-        - name: gpu
-          deviceClassName: gpu.nvidia.com   # <- NO `exactly:` wrapper — fields are inline
-          allocationMode: ExactCount
-          count: 2
-          selectors:
-            - cel:
-                expression: >-
-                  device.attributes['gpu.nvidia.com'].productName == 'NVIDIA H100 80GB HBM3'
-```
-
-The same request looks different in v1:
+DRA's core (structured parameters) reached beta in 1.32 (`v1beta1`) and GA in 1.34 (`v1`); the API also changed in `v1beta2` (1.33). As we support only 1.34+ versions, we only need to work with v1, which has the following spec:
 
 ```yaml
 apiVersion: resource.k8s.io/v1
@@ -156,7 +147,7 @@ spec:
     devices:
       requests:
         - name: gpu
-          exactly:                   # <- the "single request" wrapper
+          exactly:                
             deviceClassName: gpu.nvidia.com
             allocationMode: ExactCount   # default, can be omitted
             count: 2
@@ -166,49 +157,6 @@ spec:
                     device.attributes['gpu.nvidia.com'].productName == 'NVIDIA H100 80GB HBM3'
 
 ```
-
-Some differences:
-
-| Nuance                                                       | v1beta1 (1.32)                 | v1beta2 (1.33)                           | v1 (1.34)                                   |
-| :----------------------------------------------------------- | :----------------------------- | :--------------------------------------- | :------------------------------------------ |
-| `exactly` wrapper                                            | ❌ fields inline on the request | ✅                                        | ✅                                           |
-| `firstAvailable` prioritized list                            | ❌                              | ⚠️ alpha, needs `DRAPrioritizedList` gate | ✅ beta / on by default                      |
-| `capacity.requests` (ask for a real memory amount, e.g. `memory: 40Gi`) | ❌                              | ❌                                        | ⚠️ alpha, needs `DRAConsumableCapacity` gate |
-
-#### Comparison
-
-Comparison between **symbolic** (Run:ai-defined) spec that we translate into k8s, or the **raw** k8s spec stored (mostly) as-is.
-
-| Aspect | Raw k8s spec | Symbolic spec |
-| :----- | :------------ | :----------- |
-| Version independence | 🔴 Spec is pinned to the k8s version it was authored in | 🟢 Version-agnostic; the concrete object is generated per cluster at apply time |
-| Translation mechanism | 🟢 No translation needed | 🔴 Translation layer per supported k8s version. |
-| Validation | 🟢 Validate against the correct k8s version (much less effort) | 🔴 Validate the symbolic model, then trust the generation |
-| Expressiveness | 🟢 Anything k8s accepts is expressible | 🔴 Limited to what Run:ai models; arbitrary drivers/fields are hard |
-| Cluster upgrade | 🔴 Stored spec may drift from the cluster; see below | 🟡 A served-version change require re-translation, but it is a determenistic auomated process. |
-
-#### The cluster-upgrade problem (raw spec)
-
-The main concern with a raw spec is what happens when the cluster is upgraded to a newer k8s version.
-
-***What k8s actually does on upgrade?***
-
-K8s serves a resource in multiple API versions simultaneously and converts between them through an internal representation. The DRA versions (`v1beta1`/`v1beta2`/`v1`) are different *syntax of the same object* (inline fields vs the `exactly` wrapper, etc.). Objects stored in an older version are migrated lazily **on the next write** (or via an explicit storage-version migration). 
-
-So on upgrade:
-
-- Existing templates keep working; running pods and their claims are unaffected.
-- A `GET` as `v1` returns the `exactly` shape; a `GET` as `v1beta1` (still served during the deprecation window) returns the inline shape.
-
-***Does this create CP/cluster inconsistency?***
-
-1. **During the deprecation window** (both versions served): if the CP stored the spec as `v1beta1` and the cluster's storage version is `v1`, they look different but mean the same. Our agent sync always applies (it doesn't run a diff), so as long as the version is still served the apiserver accepts it and converts.
-2. **After the old version is removed** (k8s removes beta APIs a few releases after GA, so `v1beta1`/`v1beta2` will eventually disappear): the CP's stored old-version spec becomes **un-appliable** — the apiserver will simply reject it.
-
-***Control plane options***
-
-1. ***Auto-conversion*** by re-applying each outdated template on the cluster, reading back the converted object, and uploading it to the control plane (leveraging the apiserver's own conversion). This only works during a **limited window** (typically 3 versions, 9 months) until the old k8s version is removed from the cluster — and requires the system to detect an upgrade and migrate in time.
-2. ***Indication*** to the user that the template needs to be fixed. Responsibility on the user to re-apply the fix.
 
 ### Sync and Replication Issues Reporting
 
@@ -268,21 +216,24 @@ flowchart TD
 
 ### 4.1 Template Management APIs
 
-> **Assumption:** the APIs below assume an **enhanced-assets** model, and a **raw** Kubernetes spec. 
-
 #### Create a `ResourceClaimTemplate`
 
 `POST /api/v1/k8s-objects/resource-claim-template`
 
 ```yaml
 meta:
-  name: gpu-nic-topology
-  description: 2x H100 paired with a NIC on the same NUMA node
+  name: two-gpus
+  description: 2 x NVIDIA GPU
   scope: project
   projectId: 123
   clusterId: <cluster-uuid>
 spec:
   apiVersion: resource.k8s.io/v1  ## worth keeping even if we only support v1
+  objectMeta:
+  	annotations:
+  		...
+  	labels:
+  		...
   objectSpec:
     devices:
       requests:
@@ -296,7 +247,7 @@ spec:
 - `meta.scope` — one of `project` / `department` / `cluster`, with exactly one of `projectId` / `departmentId` / `clusterId` set accordingly.
 - `spec.apiVersion` — the object's API version. Kept even in a v1-only design for forward-compatibility, since future k8s versions (e.g. `v2`) may change the spec shape.
 - `spec.objectSpec` — the device spec (the k8s `ResourceClaimSpec`: `devices` / `constraints` / `config`), analogous to a `podSpec`. Run:ai wraps it into the `ResourceClaimTemplate`'s `spec.spec` and sets `metadata.name` / `namespace` when it materializes the object(s) in the cluster.
-- Creation is rejected if DRA prerequisites are not met on the target cluster (feature gate disabled, or a referenced `DeviceClass` does not exist).
+- `spec.objectMeta` — allows the user to specify annotations and labels for the created `ResourceClaimTemplate`. 
 
 #### Other endpoints (outline)
 
@@ -308,7 +259,7 @@ These endpoints operate on **managed** templates only (the ones created and owne
 | `GET /api/v1/k8s-objects/resource-claim-template/{id}` | Get a single managed template, including status and per-scope issues |
 | `PUT /api/v1/k8s-objects/resource-claim-template/{id}` | Update a managed template (re-applied to all target namespaces) |
 | `DELETE /api/v1/k8s-objects/resource-claim-template/{id}` | Delete a managed template (removed from all target namespaces) |
-| `GET /api/v1/k8s-objects/resource-claim-template/{id}/workloads` | List workloads currently referencing the template (REQ-7) |
+| `GET /api/v1/k8s-objects/resource-claim-template/{id}/workloads` | List workloads currently referencing the template (DoD 7.1) |
 
 ### 4.2 Template Tracking APIs (k8s-objects-tracker)
 
@@ -323,7 +274,7 @@ Following the storage-class pattern (a user-facing `v2` read + an internal `v1` 
 
 ## 5. User Visibility
 
-This chapter covers REQ-8 (usage visibility): the workload detail should show which `ResourceClaimTemplate` it uses and expose the actual `ResourceClaim` binding, and the template detail should list the workloads currently referencing it.
+This chapter covers DoD 7 (usage visibility): the workload detail should show which `ResourceClaimTemplate` it uses and expose the actual `ResourceClaim` binding, and the template detail should list the workloads currently referencing it.
 
 There are two ways to obtain this link:
 
@@ -332,11 +283,11 @@ There are two ways to obtain this link:
 
 ### Reporting flow (cluster-sync path)
 
-1. A pod may reference **one or more** per-pod `ResourceClaim`s generated from templates; for each, `spec.resourceClaims` carries the `ResourceClaimTemplate` name and the generated `ResourceClaim` name.
-2. `cluster-sync` watches pods and reads `spec.resourceClaims` **per pod**. It reports each reference **as-is** (template name + generated claim name); it does **not** decide whether a template is managed — it only sees the pod, which carries no ownership information.
+1. A pod may reference **one or more** claims in `spec.resourceClaims`. Each entry is either a per-pod `ResourceClaim` generated from a `ResourceClaimTemplate` or a **standalone** `ResourceClaim` created directly, with no template. Anyworkloads can use either form.
+2. `cluster-sync` watches pods and reads `spec.resourceClaims` **per pod**. It reports each reference **as-is** — the actual `ResourceClaim` name plus, when present, the `ResourceClaimTemplate` name it was generated from. It does **not** decide whether a template is managed — it only sees the pod, which carries no ownership information.
 3. It reports the claims as a new per-pod field on `PodSyncFields` (alongside the existing per-pod resources and `elements[]`).
-4. `workloads-service` stores the per-pod usage and **resolves `managed` vs unmanaged** by matching each `(template name, namespace → scope, cluster)` against the templates already tracked by `k8s-objects-tracker` / the managed k8s-object store, attaching the k8s-object id for managed ones.
-5. The **visibility APIs** (below) read it back: the workload detail exposes the referenced template(s) and the actual `ResourceClaim` per pod (multiple claims per pod supported); the reverse view (template → referencing workloads) is answered from the same stored per-pod usage.
+4. `workloads-service` stores the per-pod usage **exactly as reported** — the actual `ResourceClaim` name, plus the template name/namespace when the claim came from one. No managed/ownership resolution happens on this ingest path.
+5. The **visibility APIs** resolve managed vs unmanaged (and the k8s-object id) **at read time, in the API logic** — matching template-backed claims by `(template name, namespace → scope, cluster)` against the managed k8s-object store / `k8s-objects-tracker`. This keeps the high-frequency sync/write path cheap and avoids `workloads-service` interrogating the k8s-object service on every report. Standalone claims have no template and are always unmanaged. Both the workload (forward) and template (reverse) views are served from the stored per-pod usage.
 
 ```mermaid
 flowchart TD
@@ -344,27 +295,26 @@ flowchart TD
     CS([cluster-sync - cluster])
     WL([workloads-service - CP])
     DB[(per-pod claim usage)]
+    KOS([k8s-object store - CP])
     U([User / API])
 
     POD -->|1 pod references one or more per-pod claims| CS
     CS -->|2 report resourceClaims per pod as-is| WL
-    WL -->|3 store per-pod usage| DB
-    WL -->|4 resolve managed id against tracked templates| DB
-    U -->|5 workload detail shows templates and actual claims| WL
-    U -->|5 template detail lists referencing workloads| WL
+    WL -->|3 store raw per-pod usage| DB
+    U -->|4 read workload or template view| WL
+    WL -->|5 resolve managed id at read time| KOS
+    WL -->|5 return templates and actual claims| U
 ```
 
 **Granularity.** Reporting is **per-pod** (the source of truth, since claims are pod-scoped in `spec.resourceClaims`), rolled up to **per-replica-type** and **workload** — consistent with the existing `environments[]` / pods model. Per-container reporting is intentionally not used: the platform exposes no per-container resource surface today, and claims are declared per-pod (only *referenced* by containers).
 
 ### Visibility APIs
 
-> **Assumption:** both views are exposed as **dedicated sub-resources** — one under the workload (`/api/v1/workloads/{id}/...`) and one under the template (`/api/v1/k8s-objects/resource-claim-template/{id}/...`) — rather than embedded in the main `Workload` / template responses. This mirrors how the workloads service already serves `pods`, `elements`, and `endpoints` as sub-resources (each computed by direct queries, not by the main read view).
-
 #### Forward — a workload's DRA usage
 
 `GET /api/v1/workloads/{workloadId}/resource-claims`
 
-Lists the claims used by the workload, grouped per pod (a pod may use several claims), each with the referenced template and the actual `ResourceClaim` binding.
+Lists the claims used by the workload, grouped per pod (a pod may use several claims). Each entry carries the actual `ResourceClaim` binding and, **when the claim was generated from a template**, the referenced template. A **standalone** `ResourceClaim` (used directly, not created from a template) appears with `template: null`.
 
 ```yaml
 pods:
@@ -373,22 +323,19 @@ pods:
     task: worker               # replica role, when known (leader/worker/master)
     resourceClaims:
       - claimName: bert-worker-0-gpus   # the actual ResourceClaim bound to the pod
-        template:
+        template:                       # present only when generated from a template
           name: gpu-topology
           managed: true                 # false for unmanaged templates
           id: 3a9e-...                  # k8s-object id; null when unmanaged
-      - claimName: bert-worker-0-nic
-        template:
-          name: fast-nic
-          managed: false
-          id: null
+      - claimName: shared-infiniband    # a standalone ResourceClaim, not created from a template
+        template: null                  # no template -> standalone claim (always unmanaged)
 ```
 
 #### Reverse — workloads referencing a template
 
 `GET /api/v1/k8s-objects/resource-claim-template/{id}/workloads`
 
-(The same endpoint already listed under §4.1.) Lists the workloads currently referencing the template, with the pods that use it.
+(The same endpoint already listed under §4.1.) Lists the workloads currently referencing the template, with the pods that use it. This view is **template-only** by nature: standalone `ResourceClaims` have no template, so they never appear here — only in the workload's forward view above.
 
 ```yaml
 workloads:
@@ -405,10 +352,16 @@ workloads:
 
 Because both APIs are **sub-resources served by direct queries** (like `elements`, which already rolls up per-pod resources on the fly without touching `workloads_view`), the storage change is minimal and the Postgres views are **not** affected.
 
-The change lives entirely in `workloads-service` — the cluster side is stateless (k8s objects only). `cluster-sync` reports the per-pod DRA usage as a new field on `PodSyncFields`, so that per-pod data needs to be persisted. Two options:
+The change lives entirely in `workloads-service` — the cluster side is stateless (k8s objects only). `cluster-sync` reports the per-pod DRA usage as a new field on `PodSyncFields`, so that per-pod data needs to be persisted. 
 
-- **`jsonb` column on the `pods` table** (e.g. `resource_claims`) — cheapest, but the reverse lookup (template → workloads) becomes a `jsonb` scan.
-- **Dedicated association table** `pod_resource_claims(pod_id, workload_id, namespace, template_name, template_id/managed, claim_name)` — indexable, which makes both the forward and reverse queries (and any per-replica-type roll-up) efficient. One row per `(pod, claim)`, so a pod with multiple claims is simply multiple rows.
+Two options, to be decided in the implementation phase:
 
-A `workloads_view` change would be needed **only** if we later decide to embed a claim summary directly on the main `Workload` object — which the sub-resource approach above deliberately avoids.
+- **`jsonb` column on the `pods` table** (e.g. `resource_claims`) — the claims are stored inline on the pod row (a GIN index supports the reverse lookup).
+- **Dedicated association table** `pod_resource_claims(pod_id, workload_id, namespace, template_name, claim_name)` — one row per `(pod, claim)`, with a B-tree index on `template_name`; simpler joins/aggregation for the reverse view. `claim_name` is always set; `template_name` is **null for standalone claims** (used directly, not created from a template).
+
+Either way, the `managed` flag and k8s-object id are **not stored** — the API logic resolves them at read time by matching `template_name` + namespace against the managed k8s-object store, keeping the write/sync path free of any cross-service lookup. For the reverse view, the API maps the template id to its `(name, namespace)` and queries by `template_name`.
+
+No need to change the `workloads_view` as we do not have this information in the main `Workload` object.
+
+
 
