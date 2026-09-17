@@ -301,6 +301,11 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 		)
 
 		useAuditWriter := func(writer audit.Writer) {
+			// Specs that delete reports without installing a recorder leave audit
+			// writers in flight. The writer is resolved when each record is written,
+			// not when it is queued, so a straggler lands in whichever writer is
+			// installed by then. Drain first, so this recorder sees only its own.
+			reports.WaitForAuditWrites()
 			audit.SetMock(writer)
 			DeferCleanup(func() {
 				reports.WaitForAuditWrites()
