@@ -53,6 +53,14 @@ const (
 	// rather than scaling the Deployment directly (which go-operator would revert).
 	ProjectControllerOperandName = "runai-project-controller"
 
+	// ProjectControllerDeploymentName is the Deployment the migration waits to be
+	// ready again before the cleanup, now that KRM owns the project-controller. KRM
+	// names it without the runai- prefix, and the Run:ai operand of that name is no
+	// longer deployed at all, so this deliberately differs from
+	// ProjectControllerOperandName above (which still names the pods being taken
+	// down on the way in).
+	ProjectControllerDeploymentName = "project-controller"
+
 	// AgentOperandName is the app-label prefix of the runai-agent pods the
 	// migration waits to disappear after disabling it. Like the project-controller
 	// it is owned and scaled by go-operator from RunaiConfig, so the migration
