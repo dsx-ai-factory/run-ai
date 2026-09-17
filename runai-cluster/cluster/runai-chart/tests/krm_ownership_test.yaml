@@ -3,9 +3,11 @@ suite: Test RunAI-owned KRM resources
 templates:
   - charts/kai-resource-management/templates/krm-config.yaml
   - charts/kai-resource-management/templates/hooks/post/krm-config-deployer/job.yaml
+  - charts/kai-resource-management/templates/default-nodepool.yaml
 
 tests:
-  - it: should not render the KRMConfig or its deployer hook
+  # The agent syncs node pools from the control plane, so KRM must create none.
+  - it: should not render the KRMConfig, its deployer hook, or a default node pool
     asserts:
       - hasDocuments:
           count: 0

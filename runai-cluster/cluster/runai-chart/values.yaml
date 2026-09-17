@@ -193,6 +193,11 @@ kai-resource-management:
     # Pod mutation is done by runai's admission-controller.
     webhook:
       pod: false
+  # The agent syncs node pools from the control plane, including the default one,
+  # so KRM must not create its own: the two write different specs for the same
+  # object, and KRM's carries a resource-policy that survives uninstall.
+  defaultNodePool:
+    enabled: false
   kai-scheduler:
     global:
       # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
