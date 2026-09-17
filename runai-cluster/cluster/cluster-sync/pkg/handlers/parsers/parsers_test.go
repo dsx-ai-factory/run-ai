@@ -1323,18 +1323,16 @@ var _ = Describe("Parsers", Ordered, func() {
 				Entry("absent condition reports the node as unmanaged",
 					[]corev1.NodeCondition{},
 					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
-						Type:   parsers.MissingGpuFractioningPrerequisite,
-						Reason: parsers.GpuFractioningNotManaged,
-						Message: utils.Ref("GPU fractions are not supported on this node - " +
-							"it is not covered by the GPU fractioning operator."),
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  parsers.GpuFractioningNotManaged,
+						Message: utils.Ref("The node is not covered by the GPU fractioning operator."),
 					}}),
 				Entry("unknown status is treated as unsupported",
 					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionUnknown, "", "")},
 					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
-						Type:   parsers.MissingGpuFractioningPrerequisite,
-						Reason: parsers.GpuFractioningNotManaged,
-						Message: utils.Ref("GPU fractions are not supported on this node - " +
-							"it is not covered by the GPU fractioning operator."),
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  parsers.GpuFractioningNotManaged,
+						Message: utils.Ref("The node is not covered by the GPU fractioning operator."),
 					}}),
 				Entry("unsupported driver",
 					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
