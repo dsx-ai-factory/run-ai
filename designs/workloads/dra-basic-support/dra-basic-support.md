@@ -55,6 +55,8 @@ The feature designed here serves two purposes:
 
    3. Creation rejected if the spec contains a `DeviceClass` that does not exist in the cluster.  
 
+   4. Listing **compute assets** returns the DRA `ResourceClaimTemplate`s as well (they surface in the compute asset list alongside compute assets). No need to include the spec itself (TBD)
+
       
 
 5. The `ResourceClaimTemplates` are synced to the cluster.
@@ -119,7 +121,32 @@ A recommended approach would be to enhance the assets to support k8s object kind
 
 * Adding generic spec table with single JSON column. 
 * Tenant scope will not be supported.
-* New APIs to work with the new filtering standards.
+* New APIs that adopt the modern filtering standard — see **Filtering** below (including the asset-specific scope-hierarchy expansion).
+
+#### Filtering
+
+Assets today use an obsolete query-string filtering mechanism. The new k8s-object APIs should adopt the platform's modern filtering standard — the `queryapi` package already used by `workloads`, `org-unit-service`, and `datavolumes-service`:
+
+- **`filterBy`** — comma-separated predicates in the form `field<op>value`. Operators: `==`, `!=`, `<=`, `>=`, `=@` (contains), `!@` (not-contains), `=^` (starts-with), `=$` (ends-with). Multiple predicates are **AND**-ed; **OR** is expressed as `a||b` inside a single value. Companion params: `sortBy`, `sortOrder`, `offset`, `limit`, and a free-text `search`. Filterable fields are whitelisted per model.
+- **RBAC** visibility (`permittedScopes`) is derived from the token and applied implicitly — it is **not** part of `filterBy`.
+
+**Scope hierarchy (the asset-specific part).** Filtering by an exact scope is a normal predicate (e.g. `filterBy=departmentId==<id>`). Expanding to the rest of the hierarchy is done with **separate booleans**, not a filter operator — matching the existing workloads-templates precedent (`filterBy=projectId==X&includeAncestors=true`):
+
+- `includeAncestors=true` — also return objects from ancestor scopes (department → cluster → tenant).
+- `includeDescendants=true` — also return objects from descendant scopes (department → its projects).
+
+When either flag is set, exactly one scope predicate (`projectId` / `departmentId` / `clusterId`) must be present in `filterBy`; the API strips it and expands it into the scope set — ancestors via the org-unit ancestor resolver, descendants via the org-unit department→projects expansion already used by assets.
+
+> **Hierarchy denormalization (going forward).** Legacy assets store only the scope's own id — a **project-scoped** row leaves `departmentId` NULL, so descendant-by-department filtering needs an org-unit department→projects expansion. We will **not** migrate existing assets, but from now on the new k8s-object will **write `departmentId` (and `clusterId`) on project-scoped rows** at create (like workloads/policy). That turns `includeDescendants` into a plain `departmentId==` / `clusterId==` column predicate instead of a per-query org-unit fan-out.
+
+```
+GET /api/v1/k8s-objects/resource-claim-template
+  ?filterBy=departmentId==<id>,name=@gpu-
+  &includeDescendants=true
+  &sortBy=createdAt&sortOrder=desc&offset=0&limit=50
+```
+
+> `filterBy` + `includeAncestors` is already in production (workloads templates); `filterBy` + `includeDescendants` would be a small addition to the standard — descendant expansion exists today only on the legacy asset / `k8s-objects-tracker` endpoints.
 
 ### Symbolic VS K8s Raw Spec
 
@@ -259,7 +286,7 @@ These endpoints operate on **managed** templates only (the ones created and owne
 
 | Method & path | Purpose |
 | :-- | :-- |
-| `GET /api/v1/k8s-objects/resource-claim-template` | List managed templates visible in a scope (supports the existing scope / `includeDescendants` / `statusInfo` query params) |
+| `GET /api/v1/k8s-objects/resource-claim-template` | List managed templates (modern `filterBy` + `includeAncestors`/`includeDescendants` scope expansion — see §3 *Filtering*; plus `statusInfo` for per-scope status) |
 | `GET /api/v1/k8s-objects/resource-claim-template/{id}` | Get a single managed template, including status and per-scope issues |
 | `PUT /api/v1/k8s-objects/resource-claim-template/{id}` | Update a managed template (re-applied to all target namespaces) |
 | `DELETE /api/v1/k8s-objects/resource-claim-template/{id}` | Delete a managed template (removed from all target namespaces) |
@@ -463,18 +490,19 @@ No need to change the `workloads_view` as we do not have this information in the
 | # | Task | Notes / references | Effort / comments |
 | :-- | :-- | :-- | :-- |
 | 1 | `k8s-objects-tracker` tracks `DeviceClass`es (incl. APIs) | DoD 2; §4.3 — cluster-scoped, storage-class pattern (`v2` read + `v1` sync). Precondition for DeviceClass validation. | — |
-| 2 | New asset support — management | DoD 4; §3 (Assets), §4.1 — enhanced-assets k8s-object: generic JSON spec table, CRUD APIs. | — |
-| 3 | New RBAC resource type + permission sets | DoD 3 — new `ResourceClaimTemplate` resource type with **Edit Access** and **View Access** permission sets. | — |
-| 4 | New asset support — `DeviceClass` validation | DoD 4.3 — reject creation when `deviceClassName` is absent from the cluster's tracked `DeviceClass`es. | — |
-| 5 | New asset sync + replicate | DoD 5; §3 (Sync and Replication Issues Reporting) — apply to the cluster, replicate to target namespaces, report sync/replication issues to the CP. | — |
-| 6 | `k8s-objects-tracker` tracks `ResourceClaimTemplate`s (incl. APIs) | DoD 1; §4.2 — managed + unmanaged, storage-class pattern (`v2` read + `v1` sync). | — |
-| 7 | Submission — anyworkload | DoD 6.1 — reference a template in the `podSpec`. | — |
-| 8 | Submission — native workloads (incl. policies) | DoD 6.2 — DRA field in the native spec; wire through the composer and policy enforcement. | CP blocks deleting a template that is still referenced by native workloads (delete-in-use guard). |
-| 9 | Ensure anyworkload policies model the DRA fields correctly | DoD 6.1 — policy schema/validation covers the `resourceClaims` fields for anyworkloads. | — |
-| 10 | Reject submission if the referenced template is not ready | DoD 6.3 — reject when the referenced template's status is not successful (e.g. not synced/replicated). Applies to anyworkload and native. | — |
-| 11 | `cluster-sync` reports DRA usage | DoD 7; §5 — read `spec.resourceClaims` + `status.resourceClaimStatuses` per pod, add to `PodSyncFields`, persist per-pod usage. | — |
-| 12 | Visibility API — workloads of a template (reverse) | DoD 7.1; §5 — `GET /api/v1/k8s-objects/resource-claim-template/{id}/workloads`. | — |
-| 13 | Visibility API — templates of a workload (forward) | DoD 7.2; §5 — `GET /api/v1/workloads/{id}/resource-claims`, incl. standalone claims and the actual `ResourceClaim` binding. | — |
-| 14 | UI — management + visibility screens | §1 — template CRUD + the workload/template usage views. | Need figma. |
-| 15 | CLI — template management | §1 — CLI verbs for template CRUD. | Requires mini design. |
+| 2 | New asset support — management | DoD 4 (incl. 4.4); §3 (Assets), §4.1 — enhanced-assets k8s-object: generic JSON spec table, CRUD APIs, and surfacing the templates in the **compute asset list**. | — |
+| 3 | Modern filtering for the new asset list APIs | §3 (Filtering), §4.1 — adopt the `queryapi` `filterBy` standard; scope-hierarchy expansion via `includeAncestors`/`includeDescendants`; denormalize `departmentId`/`clusterId` onto project-scoped rows so descendants is a column predicate. | — |
+| 4 | New RBAC resource type + permission sets | DoD 3 — new `ResourceClaimTemplate` resource type with **Edit Access** and **View Access** permission sets. | — |
+| 5 | New asset support — `DeviceClass` validation | DoD 4.3 — reject creation when `deviceClassName` is absent from the cluster's tracked `DeviceClass`es. | — |
+| 6 | New asset sync + replicate | DoD 5; §3 (Sync and Replication Issues Reporting) — apply to the cluster, replicate to target namespaces, report sync/replication issues to the CP. | — |
+| 7 | `k8s-objects-tracker` tracks `ResourceClaimTemplate`s (incl. APIs) | DoD 1; §4.2 — managed + unmanaged, storage-class pattern (`v2` read + `v1` sync). | — |
+| 8 | Submission — anyworkload | DoD 6.1 — reference a template in the `podSpec`. | — |
+| 9 | Submission — native workloads (incl. policies) | DoD 6.2 — DRA field in the native spec; wire through the composer and policy enforcement. | CP blocks deleting a template that is still referenced by native workloads (delete-in-use guard). |
+| 10 | Ensure anyworkload policies model the DRA fields correctly | DoD 6.1 — policy schema/validation covers the `resourceClaims` fields for anyworkloads. | — |
+| 11 | Reject submission if the referenced template is not ready | DoD 6.3 — reject when the referenced template's status is not successful (e.g. not synced/replicated). Applies to anyworkload and native. | — |
+| 12 | `cluster-sync` reports DRA usage | DoD 7; §5 — read `spec.resourceClaims` + `status.resourceClaimStatuses` per pod, add to `PodSyncFields`, persist per-pod usage. | — |
+| 13 | Visibility API — workloads of a template (reverse) | DoD 7.1; §5 — `GET /api/v1/k8s-objects/resource-claim-template/{id}/workloads`. | — |
+| 14 | Visibility API — templates of a workload (forward) | DoD 7.2; §5 — `GET /api/v1/workloads/{id}/resource-claims`, incl. standalone claims and the actual `ResourceClaim` binding. | — |
+| 15 | UI — management + visibility screens | §1 — template CRUD + the workload/template usage views. | Need figma. |
+| 16 | CLI — template management | §1 — CLI verbs for template CRUD. | Requires mini design. |
 
