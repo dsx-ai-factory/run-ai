@@ -116,16 +116,16 @@ GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
 
 GO_LDFLAGS=''
 
-# Optional: restrict golangci-lint to changes since this rev (--new-from-rev).
-# Empty (the default) lints all files. RC services opt in via runai-cluster.mk
-# to preserve the legacy "only flag new code" behavior.
-LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),master)
+# Restrict golangci-lint to changes since the PR's base branch
+# (--new-from-rev), so a PR is judged on the code it actually touched.
+# Override to empty in a service Makefile to lint every file.
+LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),main)
 ifeq ($(GITHUB_REF_TYPE),tag)
   LINT_REV ?= $(LINT_BASE_BRANCH)
 else
   LINT_REV ?= origin/$(LINT_BASE_BRANCH)
 endif
-LINT_NEW_FROM_REV ?=
+LINT_NEW_FROM_REV ?= $(LINT_REV)
 
 ################### OS DEPENDENCY ##########################
 # Build the project
