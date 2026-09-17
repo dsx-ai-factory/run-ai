@@ -237,13 +237,13 @@ func TestBootConfigPreservesV1DeploymentOverride(t *testing.T) {
 	bootConfig.SetDefaults()
 	bootConfig.DistributionAssetsProfile = config.DistributionAssetsProfileCE
 	bootConfig.DocsCatalogVersion = "v1"
-	bootConfig.DocsBaseURL = "https://run-ai-docs.nvidia.com/saas"
+	bootConfig.DocsBaseURL = "https://docs.example.test"
 	bootConfig.DocsVersioned = false
-	bootConfig.DocsWhatsNewURLTemplate = "{docsBaseUrl}/getting-started/whats-new-for-nvidia-run-ai-saas"
+	bootConfig.DocsWhatsNewURLTemplate = "{docsBaseUrl}/getting-started/release-notes"
 
 	result := NewBootConfigAPIService("3.0.4", bootConfig).resolve()
 
 	assert.Equal(t, "v1", result.Docs.CatalogVersion)
-	assert.Equal(t, "https://run-ai-docs.nvidia.com/saas", result.Docs.BaseUrl)
-	assert.Equal(t, "https://run-ai-docs.nvidia.com/saas/getting-started/whats-new-for-nvidia-run-ai-saas", result.Docs.WhatsNew.Url)
+	assert.Equal(t, "https://docs.example.test", result.Docs.BaseUrl)
+	assert.Equal(t, "https://docs.example.test/getting-started/release-notes", result.Docs.WhatsNew.Url)
 }

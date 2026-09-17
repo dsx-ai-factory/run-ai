@@ -80,13 +80,14 @@ describe("toggle-setting.vue", () => {
       const { wrapper } = createWrapper({
         props: {
           setting: buildSetting({
-            description: 'See <a data-doc-key="policies">policies</a>.',
+            description: 'See <a aid="policies-guide-link" data-doc-key="policies">policies</a>.',
           }),
         },
       });
 
       expect(wrapper.find(".description a").attributes("href")).toBe(getDocsLink("policies"));
       expect(wrapper.find(".description a").attributes("data-doc-key")).toBeUndefined();
+      expect(wrapper.find(".description a").attributes("aid")).toBe("policies-guide-link");
     });
   });
 

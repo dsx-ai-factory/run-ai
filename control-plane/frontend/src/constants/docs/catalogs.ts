@@ -9,7 +9,7 @@ export const DOCS_CATALOG_V1 = {
   systemRequirements: "getting-started/installation/install-using-helm/system-requirements",
   networkRequirements: "getting-started/installation/install-using-helm/network-requirements",
   clusterInstallation: "getting-started/installation/install-using-helm/helm-install",
-  customInstallation: "getting-started/installation/custom-install",
+  customInstallation: "infrastructure-setup/advanced-setup/cluster-config",
   uninstallation: "getting-started/installation/install-using-helm/uninstall",
   fqdnRequirements:
     "getting-started/installation/install-using-helm/system-requirements#fully-qualified-domain-name-fqdn",

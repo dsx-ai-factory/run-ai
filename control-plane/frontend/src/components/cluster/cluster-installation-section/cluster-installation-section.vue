@@ -12,10 +12,21 @@
   >
     <div class="q-pb-md">
       Before installing the Run:ai cluster, refer to the
-      <a v-if="DOCS.INSTALLATION.PREREQUISITES" :href="DOCS.INSTALLATION.PREREQUISITES" target="_blank">system</a>
+      <a
+        aid="system-requirements-link"
+        v-if="DOCS.INSTALLATION.PREREQUISITES"
+        :href="DOCS.INSTALLATION.PREREQUISITES"
+        target="_blank"
+        >system</a
+      >
       <span v-else>system</span>
       and
-      <a v-if="DOCS.INSTALLATION.NETWORK_REQUIREMENTS" :href="DOCS.INSTALLATION.NETWORK_REQUIREMENTS" target="_blank">
+      <a
+        aid="network-requirements-link"
+        v-if="DOCS.INSTALLATION.NETWORK_REQUIREMENTS"
+        :href="DOCS.INSTALLATION.NETWORK_REQUIREMENTS"
+        target="_blank"
+      >
         network
       </a>
       <span v-else>network</span>
@@ -39,7 +50,9 @@
         <template #bottom>
           <div class="italic">
             Optional: To customize the cluster installation,
-            <a v-if="helmLink" :href="helmLink" target="_blank"> edit the Helm values file</a>
+            <a aid="helm-values-guide-link" v-if="helmLink" :href="helmLink" target="_blank">
+              edit the Helm values file</a
+            >
             <span v-else> edit the Helm values file</span>
           </div>
         </template>
