@@ -283,11 +283,12 @@ There are two ways to obtain this link:
 
 ### Reporting flow (cluster-sync path)
 
-1. A pod may reference **one or more** claims in `spec.resourceClaims`. Each entry is either a per-pod `ResourceClaim` generated from a `ResourceClaimTemplate` or a **standalone** `ResourceClaim` created directly, with no template. Anyworkloads can use either form.
-2. `cluster-sync` watches pods and reads `spec.resourceClaims` **per pod**. It reports each reference **as-is** — the actual `ResourceClaim` name plus, when present, the `ResourceClaimTemplate` name it was generated from. It does **not** decide whether a template is managed — it only sees the pod, which carries no ownership information.
-3. It reports the claims as a new per-pod field on `PodSyncFields` (alongside the existing per-pod resources and `elements[]`).
-4. `workloads-service` stores the per-pod usage **exactly as reported** — the actual `ResourceClaim` name, plus the template name/namespace when the claim came from one. No managed/ownership resolution happens on this ingest path.
-5. The **visibility APIs** resolve managed vs unmanaged (and the k8s-object id) **at read time, in the API logic** — matching template-backed claims by `(template name, namespace → scope, cluster)` against the managed k8s-object store / `k8s-objects-tracker`. This keeps the high-frequency sync/write path cheap and avoids `workloads-service` interrogating the k8s-object service on every report. Standalone claims have no template and are always unmanaged. Both the workload (forward) and template (reverse) views are served from the stored per-pod usage.
+1. A pod may reference **one or more** claims in `spec.resourceClaims`. Each entry has a pod-local `name` and points to either a `ResourceClaimTemplate` (`resourceClaimTemplateName`) or a **standalone** `ResourceClaim` (`resourceClaimName`); containers opt in by listing that pod-local name under `resources.claims`.  Anyworkloads can use either form.
+2. The **actual allocated `ResourceClaim`** is not in the spec — k8s publishes it in `status.resourceClaimStatuses` once bound (see example below).
+3. `cluster-sync` watches pods and reads, **per pod**: from `spec.resourceClaims` the pod-local name and the template/standalone reference, and from `status.resourceClaimStatuses` the **actual bound `ResourceClaim` name**. It reports these **as-is**; it does **not** decide whether a template is managed — the pod carries no ownership information.
+4. It reports the claims as a new per-pod field on `PodSyncFields` (alongside the existing per-pod resources and `elements[]`).
+5. `workloads-service` stores the per-pod usage **exactly as reported** — the actual `ResourceClaim` name, plus the template name/namespace when the claim came from one. No managed/ownership resolution happens on this ingest path.
+6. The **visibility APIs** resolve managed vs unmanaged (and the k8s-object id) **at read time, in the API logic** — matching template-backed claims by `(template name, namespace → scope, cluster)` against the managed k8s-object store / `k8s-objects-tracker`. This keeps the high-frequency sync/write path cheap and avoids `workloads-service` interrogating the k8s-object service on every report. Standalone claims have no template and are always unmanaged. Both the workload (forward) and template (reverse) views are served from the stored per-pod usage.
 
 ```mermaid
 flowchart TD
@@ -307,6 +308,79 @@ flowchart TD
 ```
 
 **Granularity.** Reporting is **per-pod** (the source of truth, since claims are pod-scoped in `spec.resourceClaims`), rolled up to **per-replica-type** and **workload** — consistent with the existing `environments[]` / pods model. Per-container reporting is intentionally not used: the platform exposes no per-container resource surface today, and claims are declared per-pod (only *referenced* by containers).
+
+### What the pod exposes (example)
+
+Take a template plus a two-container pod, where only one container consumes the claim:
+
+```yaml
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: single-gpu
+  namespace: default
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpu
+          exactly:
+            deviceClassName: gpu.nvidia.com
+            count: 1
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dra-gpu-test
+  namespace: default
+spec:
+  restartPolicy: Never
+  resourceClaims:
+    - name: gpu-1                          # pod-local claim name
+      resourceClaimTemplateName: single-gpu
+  containers:
+    - name: cuda                           # consumes the claim
+      image: nvidia/cuda:12.4.0-base-ubuntu22.04
+      command: ["nvidia-smi", "-L"]
+      resources:
+        claims:
+          - name: gpu-1
+    - name: ubuntu                         # does NOT consume the claim
+      image: ubuntu
+      command: ["sleep", "infinity"]
+```
+
+Once scheduled, the pod (trimmed to the DRA-relevant fields) looks like this — note that the **actual allocated `ResourceClaim` name only appears in `status`**:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dra-gpu-test
+  namespace: default
+spec:
+  nodeName: ip-10-0-143-61.ec2.internal
+  resourceClaims:
+    - name: gpu-1                          # pod-local name
+      resourceClaimTemplateName: single-gpu   # the template it was generated from
+  containers:
+    - name: cuda
+      resources:
+        claims:
+          - name: gpu-1                    # this container consumes the claim
+    - name: ubuntu
+      resources: {}                        # no claim
+status:
+  phase: Running
+  resourceClaimStatuses:
+    - name: gpu-1                                   # pod-local name
+      resourceClaimName: dra-gpu-test-gpu-1-mk4s8   # <-- the ACTUAL allocated ResourceClaim
+```
+
+So `cluster-sync` combines two sources per pod:
+
+- `spec.resourceClaims[]` — the pod-local `name` and the `resourceClaimTemplateName` (or `resourceClaimName` for a standalone claim), plus which containers consume it via `resources.claims`.
+- `status.resourceClaimStatuses[]` — the mapping from the pod-local `name` (`gpu-1`) to the **real generated `ResourceClaim`** (`dra-gpu-test-gpu-1-mk4s8`). This binding is what the workload view exposes, and it is **not** available in the spec.
 
 ### Visibility APIs
 
