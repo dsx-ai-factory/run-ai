@@ -37,7 +37,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0-20260205082336-62820b5e4517
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
@@ -206,7 +206,7 @@ require (
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client => ../../control-plane/authorization/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
 

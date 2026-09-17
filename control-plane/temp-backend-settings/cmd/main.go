@@ -18,7 +18,7 @@ import (
 	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 	catalog_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client/generated"
 	dv_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
-	orgunit_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	wc_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"

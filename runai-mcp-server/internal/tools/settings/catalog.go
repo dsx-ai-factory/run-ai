@@ -16,7 +16,7 @@ import (
 	clusterservice "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	catalog "github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client/generated"
 	datavolumes "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
-	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	workloads "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"

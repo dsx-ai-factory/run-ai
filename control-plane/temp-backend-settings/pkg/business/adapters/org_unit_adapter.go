@@ -12,7 +12,7 @@ import (
 	"strconv"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/autorization"
-	orgunit_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 )
 
 type OrgUnitSettingsAdapter struct {

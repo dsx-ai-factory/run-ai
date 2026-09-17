@@ -29,7 +29,7 @@ import (
 	clustersync "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/sync"
 	idm_client "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client"
 	tm_client "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
-	org_unit_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
+	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/pubsub"
 

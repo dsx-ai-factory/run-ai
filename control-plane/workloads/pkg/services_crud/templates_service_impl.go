@@ -31,7 +31,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/google/uuid"

@@ -18,7 +18,7 @@ import (
 	assets "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	catalog "github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client/generated"
 	datavolumes "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
-	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	policy "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
 	workloads "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadsv2 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"

@@ -12,11 +12,11 @@ import (
 	"time"
 
 	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 
 	tenants_api "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client"
 	tenants_openapi "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
-	org_unit_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
+	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"

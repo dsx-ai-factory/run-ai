@@ -16,7 +16,7 @@ import (
 	imc "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	cec "github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client/generated"
 	cac "github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client/generated"
-	ousc "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	ousc "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	wsc "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	wmc "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )

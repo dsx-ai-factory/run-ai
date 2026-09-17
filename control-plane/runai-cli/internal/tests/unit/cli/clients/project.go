@@ -21,7 +21,7 @@ import (
 	nodepool2 "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/nodepool"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/project"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	"k8s.io/utils/ptr"
 )

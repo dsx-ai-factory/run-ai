@@ -16,15 +16,15 @@ import (
 
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
 
-	org_unit_service_swagger "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/structs"
+	org_unit_service_swagger "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
 	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	tenants_api "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client"
 	datavolumes_client "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client"
-	org_unit_service_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
+	org_unit_service_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 	workloads_client "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"

@@ -50,7 +50,7 @@ import (
 	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/org_unit"
 	workloadsClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/settings"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 

@@ -14,9 +14,9 @@ import (
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/config"
-	orgUnitService "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/structs"
+	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"

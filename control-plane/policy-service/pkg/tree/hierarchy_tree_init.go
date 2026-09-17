@@ -11,7 +11,7 @@ import (
 	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	"github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/structs"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"gorm.io/gorm"
 	"net/http"
