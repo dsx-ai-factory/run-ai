@@ -10,7 +10,7 @@ RUN echo "nonroot:x:65532:65532:nonroot:/home/nonroot:/sbin/nologin" > /etc/pass
 # Create a dedicated writable directory and set ownership
 RUN mkdir -p /tmp && \
     chown -R 65532:65532 /tmp && \
-    chmod 777 /tmp
+    chmod 700 /tmp
 
 FROM scratch
 

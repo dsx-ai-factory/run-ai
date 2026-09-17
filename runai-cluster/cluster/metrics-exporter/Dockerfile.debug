@@ -4,7 +4,7 @@
 FROM golang:1.26.8
 ARG TARGETARCH
 ENV TARGETARCH=$TARGETARCH
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.2
 
 ADD bin/metrics-exporter-$TARGETARCH /usr/local/bin/metrics_exporter
 RUN chgrp -R 0 /usr/local/bin/metrics_exporter && chmod -R g=u /usr/local/bin/metrics_exporter
