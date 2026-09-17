@@ -123,11 +123,14 @@ GO_LDFLAGS=''
 # Override to empty in a service Makefile to lint every file.
 LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),main)
 ifeq ($(GITHUB_REF_TYPE),tag)
+  # GITHUB_REF_NAME is the tag itself here, so --new-from-rev would diff the
+  # tagged commit against itself and report nothing. Lint the whole tree.
   LINT_REV ?= $(LINT_BASE_BRANCH)
+  LINT_NEW_FROM_REV ?=
 else
   LINT_REV ?= origin/$(LINT_BASE_BRANCH)
+  LINT_NEW_FROM_REV ?= $(LINT_REV)
 endif
-LINT_NEW_FROM_REV ?= $(LINT_REV)
 
 ################### OS DEPENDENCY ##########################
 # Build the project
