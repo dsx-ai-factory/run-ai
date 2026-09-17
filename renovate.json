@@ -55,17 +55,6 @@
       "enabled": false
     },
     {
-      "description": "Blocks 0.x minor bumps (breaking-by-SemVer-convention pre-1.0 releases), Match both forms so this works whether the manager's currentValue is v-prefixed or not.",
-      "matchCurrentVersion": "<v1.0.0",
-      "matchUpdateTypes": ["minor"],
-      "enabled": false
-    },
-    {
-      "matchCurrentVersion": "<1.0.0",
-      "matchUpdateTypes": ["minor"],
-      "enabled": false
-    },
-    {
       "matchManagers": ["gomod"],
       "postUpdateOptions": ["gomodTidy"]
     },
@@ -87,6 +76,12 @@
       "matchManagers": ["gomod"],
       "matchDepTypes": ["indirect"],
       "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Blocks 0.x minor bumps (breaking-by-SemVer-convention pre-1.0 releases), e.g. k8s.io/api. Regex form, not a semver range string -- plain range syntax like \"<1.0.0\"/\"<v1.0.0\" was confirmed via Renovate's own debug log to never match against gomod deps (no packageRule matched k8s.io/api's v0.35.4 -> v0.37.0 minor update in two separate live runs), while this is Renovate's own documented idiom for the same pattern (its default presets use matchCurrentVersion: \"!/^0/\"). Matches both v-prefixed and bare forms. Must stay after the indirect-enable rule above, which sets enabled true with no matchUpdateTypes filter and would otherwise flip this back on for indirect deps.",
+      "matchCurrentVersion": "/^v?0\\./",
+      "matchUpdateTypes": ["minor"],
       "enabled": false
     },
     {
