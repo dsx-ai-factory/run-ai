@@ -88,6 +88,8 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 			runaiConfig.SetDefaultsWhereNeeded()
 			runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor = tt.kubernetesFlavor
 			runaiConfig.Spec.Global.GatewayAPI.Enabled = &tt.gatewayAPIEnabled
+			runaiConfig.Spec.Global.GatewayAPI.Name = "workload-gateway"
+			runaiConfig.Spec.Global.GatewayAPI.Namespace = "gateway-system"
 			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
 			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
@@ -97,6 +99,80 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 
 			assertEnvValue(t, envVars, "IS_OPENSHIFT", tt.expectedOpenShift)
 			assertEnvValue(t, envVars, "GATEWAY_API_ENABLED", tt.expectedGatewayAPI)
+			if tt.gatewayAPIEnabled {
+				assertEnvValue(t, envVars, "GATEWAY_NAME", "workload-gateway")
+				assertEnvValue(t, envVars, "GATEWAY_NAMESPACE", "gateway-system")
+			} else {
+				for _, name := range []string{"GATEWAY_NAME", "GATEWAY_NAMESPACE"} {
+					if _, found := envValue(envVars, name); found {
+						t.Fatalf("env var %s unexpectedly configured while Gateway API is disabled", name)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestBuildEnvVarsRejectsIncompleteGatewayConfiguration(t *testing.T) {
+	for _, tt := range []struct {
+		name      string
+		gateway   string
+		namespace string
+	}{
+		{name: "missing name", namespace: "gateway-system"},
+		{name: "missing namespace", gateway: "workload-gateway"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			runaiConfig := &runaiv1.RunaiConfig{}
+			runaiConfig.SetDefaultsWhereNeeded()
+			*runaiConfig.Spec.Global.GatewayAPI.Enabled = true
+			runaiConfig.Spec.Global.GatewayAPI.Name = tt.gateway
+			runaiConfig.Spec.Global.GatewayAPI.Namespace = tt.namespace
+			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+
+			if _, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal); err == nil {
+				t.Fatal("buildEnvVars() accepted an incomplete enabled Gateway configuration")
+			}
+		})
+	}
+}
+
+func TestBuildEnvVarsIncludesConfiguredIngressAnnotations(t *testing.T) {
+	for _, tt := range []struct {
+		name        string
+		annotations map[string]string
+	}{
+		{name: "unset"},
+		{name: "empty", annotations: map[string]string{}},
+		{name: "configured", annotations: map[string]string{
+			"haproxy.router.openshift.io/timeout": "5m",
+			"example.com/default":                 `trusted "value"`,
+		}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			runaiConfig := &runaiv1.RunaiConfig{}
+			runaiConfig.SetDefaultsWhereNeeded()
+			runaiConfig.Spec.Global.Ingress.Annotations = tt.annotations
+			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+			if err != nil {
+				t.Fatalf("buildEnvVars() error = %v", err)
+			}
+			assertEnvValue(t, envVars, "INGRESS_CLASS", runaiConfig.Spec.Global.Ingress.Class)
+			value, found := envValue(envVars, "INGRESS_ANNOTATIONS")
+			if len(tt.annotations) == 0 {
+				if found {
+					t.Fatal("INGRESS_ANNOTATIONS unexpectedly configured without annotations")
+				}
+				return
+			}
+			var actual map[string]string
+			if err := json.Unmarshal([]byte(value), &actual); err != nil {
+				t.Fatalf("INGRESS_ANNOTATIONS contains invalid JSON: %v", err)
+			}
+			if !reflect.DeepEqual(actual, tt.annotations) {
+				t.Fatalf("INGRESS_ANNOTATIONS = %v, want %v", actual, tt.annotations)
+			}
 		})
 	}
 }

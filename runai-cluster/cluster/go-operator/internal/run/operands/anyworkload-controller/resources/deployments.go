@@ -7,6 +7,7 @@ package resources
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -290,12 +291,33 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 	}
 
 	if d.runaiConfig.Spec.Global != nil && d.runaiConfig.Spec.Global.Ingress != nil {
+		if len(d.runaiConfig.Spec.Global.Ingress.Annotations) > 0 {
+			annotationsJSON, err := json.Marshal(d.runaiConfig.Spec.Global.Ingress.Annotations)
+			if err != nil {
+				return nil, fmt.Errorf("marshal ingress annotations: %w", err)
+			}
+			envVars = append(envVars, v1.EnvVar{
+				Name:  "INGRESS_ANNOTATIONS",
+				Value: string(annotationsJSON),
+			})
+		}
 		if d.runaiConfig.Spec.Global.Ingress.Class != "" {
 			envVars = append(envVars, v1.EnvVar{
 				Name:  "INGRESS_CLASS",
 				Value: d.runaiConfig.Spec.Global.Ingress.Class,
 			})
 		}
+	}
+
+	if gatewayAPIEnabled {
+		gateway := d.runaiConfig.Spec.Global.GatewayAPI
+		if gateway.Name == "" || gateway.Namespace == "" {
+			return nil, fmt.Errorf("gatewayAPI is enabled but name or namespace is empty")
+		}
+		envVars = append(envVars,
+			v1.EnvVar{Name: "GATEWAY_NAME", Value: gateway.Name},
+			v1.EnvVar{Name: "GATEWAY_NAMESPACE", Value: gateway.Namespace},
+		)
 	}
 
 	if config != nil {
