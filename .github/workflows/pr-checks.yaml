@@ -170,7 +170,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - run: pip install ruff==0.15.15
+      - run: pip install --only-binary :all: ruff==0.15.15
 
       - name: Run ruff on changed .py files in this project
         env:
@@ -209,7 +209,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - run: pip install pip-audit==2.10.0
+      - run: pip install --only-binary :all: pip-audit==2.10.0
 
       - name: Run pip-audit (informational — does not gate merge)
         continue-on-error: true
@@ -263,7 +263,11 @@ jobs:
             echo "::notice::No ESLint config found in ${PROJECT} — skipping"
             exit 0
           fi
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          if [ ! -f package-lock.json ]; then
+            echo "::error::${PROJECT} has an ESLint config but no package-lock.json — commit a lockfile so CI can install pinned, resolved versions"
+            exit 1
+          fi
+          npm ci --ignore-scripts
           # Convert workspace-relative paths to project-relative
           relative=$(echo "$changed" | sed "s|^${PROJECT}/||")
           echo "Linting changed files in ${PROJECT}:"
