@@ -9,7 +9,7 @@ local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine
 | Requirement | Notes |
 |---|---|
 | **OS / Architecture** | `macOS` or `Linux`, `amd64` or `arm64` — the only four supported combinations. Any other platform, such as Windows, stops the script with a clear error before setup begins. |
-| **Docker Desktop** | Must be running. On Linux, enable the containerd image store. macOS uses Podman instead (see below). |
+| **Container Runtime** | Use docker or podman. On Linux, enable the containerd image store. See more info on Podman settings for MacOS below. |
 | **Podman VM ≥ 12 GB RAM** | macOS only. The full stack (NATS×3, PostgreSQL, Keycloak, ~50 services) requires at least 12 GB. With 8 GB the API server starves under QEMU overhead and the cluster never stabilises. Resize with `podman machine stop && podman machine set --memory 12288 && podman machine start`. |
 | **`GITHUB_TOKEN`** | Only needed while the repo is private — Go builds pull modules from `github.com/run-ai/*`. Not required with `--skip-build` or once the repo is public. Set it before running: `export GITHUB_TOKEN=ghp_...` |
 | **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.31.0`, node image `v1.32.5`); `kubectl` and `helm` always install the latest release. |
@@ -129,7 +129,7 @@ Enabling `kai-scheduler` triggers creation of the `runai-scale-adjust` namespace
 Before installing, the script reconciles `charts/` against `Chart.yaml`, since Helm needs a subchart present for every declared dependency and `charts/*.tgz` is gitignored (a fresh clone has none):
 
 1. **Prune** — deletes any tarball that no longer matches a declared dependency. Helm loads *every* tarball in `charts/`, so a leftover from a previous version bump would make the resolved subchart ambiguous, and a tarball for a removed dependency would render with no condition to gate it.
-2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/run-ai/karta`) and need no credentials.
+2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/workload-map/karta`) and need no credentials.
 3. **Fall back** — if the fetch fails (offline, registry down), generates a minimal placeholder so the install can still proceed, and warns that the subchart will be empty.
 
 Names and versions are read from `Chart.yaml`, so bumping a dependency cannot leave the script stale.

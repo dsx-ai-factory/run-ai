@@ -7,7 +7,7 @@ kai-scheduler:
 karta:
     image:
         repository: registry.local:5000/runai/karta/operator
-        tag: 0.2.3
+        tag: 0.2.6
 thirdPartyImages:
     git-sync:
         registry: registry.local:5000/runai/runai-cluster

@@ -97,11 +97,14 @@ works out of the box:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `INTEGDB_USER` | Postgres superuser | `postgres` |
-| `INTEGDB_PASSWORD` | Postgres password | `postgres` |
+| `INTEGDB_PASSWORD` | Postgres password | random 32-char hex, regenerated per run |
 | `INTEGDB_NAME` | Database name | `backend` |
 | `INTEGDB_SCHEMA` | Schema to use (required) | `test` |
 | `INTEGDB_MIGRATION_DIR_PATH` | golang-migrate source; empty disables auto-migration | `file:///migrations` |
 | `INTEGDB_IMAGE_VERSION` | Postgres image tag (major version drives the `pg_cron` package) | `16` |
+
+Read the effective password from `dbConf.Connection.Password`, or set
+`INTEGDB_PASSWORD` to pin it.
 
 Releases are cut by tagging the repo `integdb/vX.Y.Z`; see the
 [repository README](../README.md) for the versioning workflow.

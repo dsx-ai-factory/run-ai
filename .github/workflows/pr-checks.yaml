@@ -170,7 +170,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      - run: "pip install --only-binary :all: ruff==0.15.15"
+      # The lockfile is a single pinned entry -- ruff has no transitive
+      # dependencies -- but --require-hashes still verifies the wheel digest,
+      # which a version pin alone does not.
+      - run: "pip install --require-hashes --only-binary :all: -r .github/requirements/ruff.txt"
 
       - name: Run ruff on changed .py files in this project
         env:
@@ -209,7 +212,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - run: "pip install --only-binary :all: pip-audit==2.10.0"
+      - run: "pip install --require-hashes --only-binary :all: -r .github/requirements/pip-audit.txt"
 
       - name: Run pip-audit (informational — does not gate merge)
         continue-on-error: true
