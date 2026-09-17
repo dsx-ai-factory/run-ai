@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/metric-stores-migrator
 
-go 1.26.6
+go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.17

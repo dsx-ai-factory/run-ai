@@ -29,7 +29,7 @@ validate_mockery:
 		rm -f ${MOCKERY}; \
 	fi
 	@if [ ! -e ${MOCKERY} ]; then \
-		GOTOOLCHAIN=go1.26.6 GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v3@${MOCKERY_VERSION}; \
+		GOTOOLCHAIN=go1.26.8 GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v3@${MOCKERY_VERSION}; \
 	fi
 
 mockery: validate_mockery

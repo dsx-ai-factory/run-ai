@@ -211,7 +211,7 @@ func TestAirgapInstall_FullFlow(t *testing.T) {
 	applied := appliedNames(k8s)
 	assert.True(t, applied["runai-backend"], "CP namespace applied")
 	assert.True(t, applied["runai"], "cluster namespace applied")
-	assert.False(t, applied["runai-reg-creds"], "air-gapped install must not create the JFrog registry secret")
+	assert.False(t, applied["runai-reg-creds"], "air-gapped install must not create the managed registry secret")
 	assert.False(t, applied["runai-ca-cert"], "no CA secret without a CA chain")
 
 	assert.True(t, apiClient.ClusterCreated, "cluster registered via control-plane API")

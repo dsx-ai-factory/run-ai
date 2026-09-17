@@ -61,6 +61,7 @@ type ClusterSyncConfig struct {
 	NodeLabelNvidiaContainerToolkit     string `mapstructure:"NODE_LABEL_NVIDIA_CONTAINER_TOOLKIT"`
 	NodeLabelNvidiaDcgmExporter         string `mapstructure:"NODE_LABEL_NVIDIA_DCGM_EXPORTER"`
 	EnableNodeNvidiaComponentsReadiness bool   `mapstructure:"ENABLE_NODE_NVIDIA_COMPONENTS_READINESS"`
+	EnableNodeGpuFractioningReadiness   bool   `mapstructure:"ENABLE_NODE_GPU_FRACTIONING_READINESS"`
 
 	SyncPodsWithWorkloads bool `mapstructure:"SYNC_PODS_WITH_WORKLOADS"`
 
@@ -102,6 +103,7 @@ func (a *ClusterSyncConfig) SetDefaults() {
 	a.NodeLabelNvidiaContainerToolkit = "nvidia.com/gpu.deploy.container-toolkit"
 	a.NodeLabelNvidiaDcgmExporter = "nvidia.com/gpu.deploy.dcgm-exporter"
 	a.EnableNodeNvidiaComponentsReadiness = false
+	a.EnableNodeGpuFractioningReadiness = false
 	a.RateLimiterWorkloadsDelaySeconds = 10
 	a.RateLimiterWorkloadsNumOfWorkers = 3
 	a.RateLimiterRegularDelaySeconds = 5

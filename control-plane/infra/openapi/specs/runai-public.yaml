@@ -23,7 +23,7 @@ info:
     name: NVIDIA Run:ai
     url: https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/
 servers:
-  - url: https://app.run.ai
+  - url: http://localhost:8080
 security:
   - bearerAuth: []
 tags:

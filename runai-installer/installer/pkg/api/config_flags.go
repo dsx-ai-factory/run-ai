@@ -14,8 +14,8 @@ import "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/inpu
 // to provide installation parameters
 
 const (
-	// FlagJfrogCreds is the key for JFrog credentials (base64 encoded)
-	FlagJfrogCreds = inputs.FlagJfrogCreds
+	// FlagRegistryPullSecret is the key for the registry pull secret: a base64-encoded docker config (.dockerconfigjson)
+	FlagRegistryPullSecret = inputs.FlagRegistryPullSecret
 	// FlagFQDN is the key for Fully Qualified Domain Name
 	// Example: "runai.example.com"
 	FlagFQDN = inputs.FlagFQDN

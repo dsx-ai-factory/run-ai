@@ -15,8 +15,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/httputils"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/nim/client"
 
-	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 
 // Create infra for sorting direction and types

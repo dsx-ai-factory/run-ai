@@ -121,6 +121,7 @@ var _ = Describe("ClassifyRunner", func() {
 		Entry("Workspace + Degraded -> Interactive", "Workspace", dromosv1alpha1.WorkloadRunnerPhaseDegraded, constants.KindInteractiveWorkload),
 		Entry("Training + Running -> Training", "Training", dromosv1alpha1.WorkloadRunnerPhaseRunning, constants.KindTrainingWorkload),
 		Entry("Training + Degraded -> Training", "Training", dromosv1alpha1.WorkloadRunnerPhaseDegraded, constants.KindTrainingWorkload),
+		Entry("Distributed + Running -> Distributed", "Distributed", dromosv1alpha1.WorkloadRunnerPhaseRunning, constants.KindDistributedWorkload),
 		Entry("MPIJob + Running -> Distributed", "MPIJob", dromosv1alpha1.WorkloadRunnerPhaseRunning, constants.KindDistributedWorkload),
 		Entry("PyTorchJob + Running -> Distributed", "PyTorchJob", dromosv1alpha1.WorkloadRunnerPhaseRunning, constants.KindDistributedWorkload),
 		Entry("TFJob + Running -> Distributed", "TFJob", dromosv1alpha1.WorkloadRunnerPhaseRunning, constants.KindDistributedWorkload),

@@ -18,7 +18,7 @@
 - **Build command:** none. This is a library consumed by other modules via
   `go.mod`; `make build` and `make validate` produce no image. There is no
   Dockerfile, no `cmd/main.go`, and no `local-dev.sh` build function.
-- Go version derived from `go.mod` (`go 1.26.3`).
+- Go version derived from `go.mod` (`go 1.26.8`).
 - Make targets only `include ../../build/makefile/index.mk`; the real recipes
   live in `build/makefile/golang.mk` (`test-go`, `lint-go`) and
   `build/makefile/packages.mk` (`validate` prerequisites).

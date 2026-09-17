@@ -42,6 +42,7 @@ func (s *StripRunAICRFinalizers) Execute(ctx context.Context, _ *model.RunAIInst
 
 	logging.Infof("[Uninstall] Stripping finalizers from all Run.AI CRs")
 	if err := s.k8sWrapper.StripRunAICRFinalizers(ctx); err != nil {
+		logging.Errorf("[Uninstall] Failed to strip Run.AI CR finalizers: %v", err)
 		s.SetStatus(model.Failed, err)
 		return fmt.Errorf("failed to strip Run.AI CR finalizers: %w", err)
 	}

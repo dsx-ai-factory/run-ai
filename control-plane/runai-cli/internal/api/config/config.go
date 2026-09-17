@@ -21,7 +21,6 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client/generated"
 	clusterapi "github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client/generated"
 	datavolumesservice "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
-	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
 	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadmanager "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
@@ -85,19 +84,6 @@ func CreateWorkloadServiceConfig(urlStr, token string) (*workloadservice.Configu
 	return configuration, nil
 }
 
-func CreateNimClientConfig(urlStr, token string) (*nimclient.Configuration, error) {
-	serviceUrl, err := url.Parse(urlStr)
-	if err != nil {
-		return nil, err
-	}
-	configuration := nimclient.NewConfiguration()
-	configuration.Scheme = serviceUrl.Scheme
-	configuration.Host = serviceUrl.Host
-	configuration.UserAgent = GetUserAgent()
-	configuration.AddDefaultHeader(AuthorizationHeader, fmt.Sprintf(BearerTokenStr, token))
-	return configuration, nil
-}
-
 func CreateLoginClientConfig(urlStr string) (*loginapi.Configuration, error) {
 	serviceUrl, err := url.Parse(urlStr)
 	if err != nil {
@@ -137,6 +123,7 @@ func CreateClusterApiConfig(urlStr, token string) (*clusterapi.Configuration, er
 	configuration := clusterapi.NewConfiguration()
 	configuration.Scheme = serviceUrl.Scheme
 	configuration.Host = serviceUrl.Host
+	configuration.Servers = clusterapi.ServerConfigurations{{URL: urlStr}}
 	configuration.UserAgent = GetUserAgent()
 	configuration.AddDefaultHeader(AuthorizationHeader, fmt.Sprintf(BearerTokenStr, token))
 	return configuration, nil
@@ -163,6 +150,7 @@ func CreateWorkloadManagerServiceConfig(urlStr, token string) (*workloadmanager.
 	configuration := workloadmanager.NewConfiguration()
 	configuration.Scheme = serviceUrl.Scheme
 	configuration.Host = serviceUrl.Host
+	configuration.Servers = workloadmanager.ServerConfigurations{{URL: urlStr}}
 	configuration.UserAgent = GetUserAgent()
 	configuration.AddDefaultHeader(AuthorizationHeader, fmt.Sprintf(BearerTokenStr, token))
 	return configuration, nil
