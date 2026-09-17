@@ -143,7 +143,7 @@ jobs:
       - name: Init cache
         run: |
           mkdir -p ~/.cache
-          chmod -R 777 ~/.cache
+          chmod -R 755 ~/.cache
           touch ~/.gitconfig
 
       - name: make build / test / lint / validate in ${{ matrix.service }}
@@ -216,7 +216,7 @@ jobs:
       - name: Init cache
         run: |
           mkdir -p ~/.cache
-          chmod -R 777 ~/.cache
+          chmod -R 755 ~/.cache
           touch ~/.gitconfig
 
       - name: make build then docker build (no push)
