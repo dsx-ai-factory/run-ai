@@ -55,6 +55,12 @@
       "enabled": false
     },
     {
+      "description": "Blocks 0.x minor bumps (breaking-by-SemVer-convention pre-1.0 releases), e.g. k8s.io/api. Go module versions carry a leading 'v' (v0.35.4), which strict-mode node-semver range checks reject, so plain \"<1.0.0\" silently never matches gomod deps -- PR #373 (k8s.io/api v0.35.4 -> v0.37.0) slipped through and broke the build. Match both forms so this works whether the manager's currentValue is v-prefixed or not.",
+      "matchCurrentVersion": "<v1.0.0",
+      "matchUpdateTypes": ["minor"],
+      "enabled": false
+    },
+    {
       "matchCurrentVersion": "<1.0.0",
       "matchUpdateTypes": ["minor"],
       "enabled": false
