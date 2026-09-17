@@ -168,6 +168,26 @@ rules:
   - apiGroups:
       - kai.resources
     resources:
+      - krmconfigs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - krmconfigs/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
       - managednodesconfigs
     verbs:
       - create

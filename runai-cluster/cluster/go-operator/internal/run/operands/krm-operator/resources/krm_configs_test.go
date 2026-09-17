@@ -134,14 +134,35 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 			}
 		})
 
-		It("passes no extra args, since KRM's operator derives them from the CR", func() {
-			Expect(krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.ExtraArgs).To(BeEmpty())
+		It("carries the per-project role bindings KRM now owns", func() {
+			projectController := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController
+			Expect(projectController.ExtraProjectRoleBindings).To(HaveLen(18))
+
+			var names []string
+			for _, binding := range projectController.ExtraProjectRoleBindings {
+				names = append(names, binding.Name)
+				Expect(binding.ServiceAccountName).NotTo(BeEmpty())
+			}
+			Expect(names).To(ContainElements("runai-agent", "cluster-sync", "anyworkload-controller"))
 		})
 
-		It("names the rolebindings ConfigMap the operator writes", func() {
-			projectController := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController
-			Expect(projectController.RoleBindingsConfigMapName).
-				To(Equal(ptr.To(clustercommonconstants.ProjectControllerRoleBindingCm)))
+		It("leaves the limit range binding to KRM's builtin", func() {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.ProjectController.LimitRange = ptr.To(true)
+
+			var names []string
+			for _, b := range krmConfigFor(runaiConfig).Spec.ProjectController.ExtraProjectRoleBindings {
+				names = append(names, b.Name)
+			}
+			Expect(names).NotTo(ContainElement(ContainSubstring("limit-range")))
+		})
+
+		It("leaves the role bindings ConfigMap name to KRM", func() {
+			Expect(krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.RoleBindingsConfigMapName).To(BeNil())
+		})
+
+		It("passes no extra args, since KRM's operator derives them from the CR", func() {
+			Expect(krmConfigFor(defaultRunaiConfig()).Spec.ProjectController.ExtraArgs).To(BeEmpty())
 		})
 	})
 

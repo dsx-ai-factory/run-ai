@@ -58,7 +58,7 @@ func (o *operand) Status(ctx context.Context) (operands.Status, error) {
 }
 
 // Enabled is pinned off: KRM supplies this controller now, and the operand is
-// kept registered only so the Deployment it left behind is deleted.
+// kept registered only to delete what KRM does not take over.
 func (o *operand) Enabled() bool {
 	return false
 }
@@ -66,15 +66,14 @@ func (o *operand) Enabled() bool {
 func Operand(k8sReader kc.HybridClient, runaiConfig *runv1.RunaiConfig) operands.Operand {
 	return &operand{
 		runaiConfig: runaiConfig,
+		// A disabled operand deletes exactly what it lists, and KRM names its
+		// Deployment, ServiceAccount, Service, ServiceMonitors and VPA the same,
+		// so listing those would delete objects KRM has already adopted and
+		// recreates seconds later. Only the Role and RoleBinding are left: KRM
+		// prefixes its own with kai-, so nothing else would ever remove ours.
 		resources: []operands.Resource{
-			resources.NewDeploymentResource(name, k8sReader, runaiConfig),
-			resources.NewServiceAccountResource(name, k8sReader, runaiConfig),
 			resources.NewRoleResource(name, k8sReader, runaiConfig),
 			resources.NewRoleBindingResource(name, k8sReader, runaiConfig),
-			resources.NewServiceResource(name, k8sReader, runaiConfig),
-			resources.NewServiceMonitorResource(name, k8sReader, runaiConfig),
-			resources.NewAccountingServiceMonitorResource(name, k8sReader, runaiConfig),
-			resources.NewVPAResource(name, k8sReader, runaiConfig),
 		},
 	}
 }

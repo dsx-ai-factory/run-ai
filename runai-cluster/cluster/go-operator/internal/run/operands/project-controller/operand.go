@@ -37,7 +37,6 @@ var (
 	// Update this slice when a resource has a status to report.
 	resourceStatusFunctions = []operands.ResourceStatusFunction{
 		resources.DeploymentStatus,
-		resources.ConfigMapStatus,
 		resources.ServiceStatus,
 		resources.ServiceAccountStatus,
 		resources.ServiceMonitorStatus,

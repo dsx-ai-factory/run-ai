@@ -1,0 +1,43 @@
+suite: Test operator permissions for KRMConfig
+
+templates:
+  - templates/clusterroles/base.yaml
+
+# The operator watches KRMConfig and is its only writer. The kubebuilder markers
+# on the operand generate config/rbac/role.yaml, which the chart does not
+# install, so the grant has to exist here too or the cache never syncs.
+tests:
+  - it: should let the operator reconcile the KRMConfig singleton
+    documentSelector:
+      path: rules[0].resources[0]
+      value: clusterversions
+    asserts:
+      - isKind:
+          of: ClusterRole
+      - equal:
+          path: metadata.name
+          value: runai-operator
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.resources
+            resources:
+              - krmconfigs
+            verbs:
+              - create
+              - delete
+              - get
+              - list
+              - patch
+              - update
+              - watch
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.resources
+            resources:
+              - krmconfigs/status
+            verbs:
+              - get
