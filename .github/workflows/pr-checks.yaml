@@ -170,6 +170,8 @@ jobs:
         with:
           python-version: '3.x'
 
+      # ruff has no transitive dependencies, so the pinned version plus
+      # --only-binary fully determines the install; a lockfile would add nothing.
       - run: "pip install --only-binary :all: ruff==0.15.15"
 
       - name: Run ruff on changed .py files in this project
@@ -209,7 +211,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - run: "pip install --only-binary :all: pip-audit==2.10.0"
+      - run: "pip install --require-hashes --only-binary :all: -r .github/requirements/pip-audit.txt"
 
       - name: Run pip-audit (informational — does not gate merge)
         continue-on-error: true

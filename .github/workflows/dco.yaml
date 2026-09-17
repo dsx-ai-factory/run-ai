@@ -27,6 +27,8 @@ jobs:
         with:
           python-version: '3.x'
 
+      # dco-check has no transitive dependencies, so the pinned version plus
+      # --only-binary fully determines the install; a lockfile would add nothing.
       - run: "pip install --only-binary :all: dco-check==0.5.1"
 
       - name: Verify DCO sign-off on every PR commit
