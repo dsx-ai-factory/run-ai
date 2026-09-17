@@ -270,6 +270,12 @@ func (i *InstallClusterChart) Execute(ctx context.Context, runaiData *model.RunA
 	}
 	version := runaiData.Config.ClusterVersion
 	repo := i.getRepoName(runaiData.Config.EffectiveClusterEnv())
+	if repo == "" {
+		err := step.MissingChartRepoError(step.ClusterChartName)
+		logging.Errorf("[RunAI] %v", err)
+		i.SetStatus(model.Failed, err)
+		return err
+	}
 	logging.Infof("[RunAI] Installing cluster chart version %s from %s...", version, repo)
 	err := i.helmInstaller.InstallOrUpgradeRelease(ctx, repo,
 		version, step.ClusterReleaseName, step.ClusterChartName, step.ClusterNamespace, false, values)

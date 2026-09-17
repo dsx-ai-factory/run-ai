@@ -18,7 +18,7 @@ type TestEnv struct {
 	ClusterName            string
 	TLSCertPath            string
 	TLSKeyPath             string
-	JfrogToken             string
+	PullSecret             string
 	KubernetesDistribution string
 }
 
@@ -43,10 +43,10 @@ func SetupTestEnv() (*TestEnv, error) {
 		clusterName = "installer-e2e"
 	}
 
-	jfrogToken := ""
-	tokenPath := filepath.Join(tempDir, "runai_jfrog_token")
+	pullSecret := ""
+	tokenPath := filepath.Join(tempDir, "runai_pull_secret")
 	if data, err := os.ReadFile(tokenPath); err == nil {
-		jfrogToken = string(data)
+		pullSecret = string(data)
 	}
 
 	env := &TestEnv{
@@ -55,7 +55,7 @@ func SetupTestEnv() (*TestEnv, error) {
 		ClusterName:            clusterName,
 		TLSCertPath:            filepath.Join(tempDir, "tls.crt"),
 		TLSKeyPath:             filepath.Join(tempDir, "tls.key"),
-		JfrogToken:             jfrogToken,
+		PullSecret:             pullSecret,
 		KubernetesDistribution: os.Getenv("E2E_KUBERNETES_DISTRIBUTION"),
 	}
 

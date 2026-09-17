@@ -35,10 +35,14 @@ type RunAIClient struct {
 	fqdn          string
 }
 
-// Credentials holds the username and password for authentication
 type Credentials struct {
 	Username string
 	Password string
+	Token    string
+}
+
+func (c Credentials) UsesToken() bool {
+	return c.Token != ""
 }
 
 // NotFoundError represents a resource not found error
@@ -212,19 +216,9 @@ func initClient(fqdn string, creds Credentials, caCertPath string) (*RunAIClient
 		return nil, fmt.Errorf("control plane not responsive: %w", err)
 	}
 
-	if creds.Username == "" || creds.Password == "" {
-		return nil, fmt.Errorf("RunAI API credentials not provided")
-	}
-
-	// Create IDM client for token management
-	idmClient := newIdmClientWithCA(serverURL, caCertPath)
-
-	// Create token source for automatic token rotation
-	tokenSource := &TokenSource{
-		tokenApi:  idmClient.TokensAPI,
-		user:      creds.Username,
-		password:  creds.Password,
-		serverURL: serverURL,
+	tokenSource, err := newTokenSource(serverURL, caCertPath, creds)
+	if err != nil {
+		return nil, err
 	}
 
 	// Create HTTP transport with optional custom CA
@@ -278,6 +272,24 @@ func initClient(fqdn string, creds Credentials, caCertPath string) (*RunAIClient
 
 	logger.Infof("RunAI client initialized successfully for %s", serverURL)
 	return client, nil
+}
+
+func newTokenSource(serverURL, caCertPath string, creds Credentials) (oauth2.TokenSource, error) {
+	if creds.UsesToken() {
+		return oauth2.StaticTokenSource(&oauth2.Token{AccessToken: creds.Token}), nil
+	}
+	if creds.Username == "" || creds.Password == "" {
+		return nil, fmt.Errorf("RunAI API credentials not provided")
+	}
+
+	idmClient := newIdmClientWithCA(serverURL, caCertPath)
+
+	return &TokenSource{
+		tokenApi:  idmClient.TokensAPI,
+		user:      creds.Username,
+		password:  creds.Password,
+		serverURL: serverURL,
+	}, nil
 }
 
 // normalizeURL ensures the URL has the https:// prefix

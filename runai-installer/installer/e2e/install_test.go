@@ -53,8 +53,8 @@ var _ = Describe("Installer E2E", func() {
 					"ssl_key_path":  testEnv.TLSKeyPath,
 				},
 			}
-			if testEnv.JfrogToken != "" {
-				opts.ConfigValues["jfrog_creds"] = testEnv.JfrogToken
+			if testEnv.PullSecret != "" {
+				opts.ConfigValues["registry_pull_secret"] = testEnv.PullSecret
 			}
 			if testEnv.KubernetesDistribution != "" {
 				opts.ConfigValues["kubernetes_distribution"] = testEnv.KubernetesDistribution
@@ -109,8 +109,8 @@ var _ = Describe("Installer E2E", func() {
 					"host_routing_key_path":  testEnv.WildcardKeyPath(),
 				},
 			}
-			if testEnv.JfrogToken != "" {
-				opts.ConfigValues["jfrog_creds"] = testEnv.JfrogToken
+			if testEnv.PullSecret != "" {
+				opts.ConfigValues["registry_pull_secret"] = testEnv.PullSecret
 			}
 			if testEnv.KubernetesDistribution != "" {
 				opts.ConfigValues["kubernetes_distribution"] = testEnv.KubernetesDistribution

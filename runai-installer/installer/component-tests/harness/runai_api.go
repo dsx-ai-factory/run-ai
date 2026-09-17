@@ -32,8 +32,9 @@ type FakeRunAIAPIClient struct {
 }
 
 type RunAIClientProviderCall struct {
-	URL        string
-	CACertPath string
+	URL         string
+	CACertPath  string
+	Credentials *step.ControlPlaneCredentials
 }
 
 func (f *FakeRunAIAPIClient) cpInstalled() bool {
@@ -89,6 +90,14 @@ func NewFakeRunAIClientProvider(helm *FakeHelmInstaller) (*FakeRunAIAPIClient, s
 	return client, func(url, caCertPath string) (step.RunAIAPIClient, error) {
 		client.ProviderCalls = append(client.ProviderCalls, RunAIClientProviderCall{URL: url, CACertPath: caCertPath})
 		return client, nil
+	}
+}
+
+func (f *FakeRunAIAPIClient) CredentialedProvider() step.RunAIAPICredentialedClientProvider {
+	return func(url, caCertPath string, creds step.ControlPlaneCredentials) (step.RunAIAPIClient, error) {
+		c := creds
+		f.ProviderCalls = append(f.ProviderCalls, RunAIClientProviderCall{URL: url, CACertPath: caCertPath, Credentials: &c})
+		return f, nil
 	}
 }
 

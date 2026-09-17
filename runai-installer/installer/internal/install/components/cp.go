@@ -34,7 +34,7 @@ func (r *controlplane) GetMandatoryInputs(runaiData *model.RunAIInstallData) []c
 		configinputs.InstallInputSSLKeyPath,
 	}
 	if !runaiData.Config.DevMode && !runaiData.Config.IsAirgap() {
-		inputs = append(inputs, configinputs.InstallInputJfrogCreds)
+		inputs = append(inputs, configinputs.InstallInputRegistryPullSecret)
 	}
 	return inputs
 }
@@ -44,7 +44,7 @@ func (r *controlplane) GetOptionalInputs(runaiData *model.RunAIInstallData) []co
 		configinputs.InstallInputCAChainPath,
 	}
 	if runaiData.Config.DevMode {
-		inputs = append(inputs, configinputs.InstallInputJfrogCreds)
+		inputs = append(inputs, configinputs.InstallInputRegistryPullSecret)
 	}
 	return inputs
 }
