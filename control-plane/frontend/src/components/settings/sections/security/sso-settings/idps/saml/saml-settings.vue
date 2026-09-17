@@ -75,6 +75,7 @@
       v-if="certificateWarningVariant"
       class="q-mx-sm q-mb-sm certificate-warning"
       :variant="certificateWarningVariant"
+      icon-override="ph-bold ph-warning-circle"
       show-h1-content
       :title="certificateWarningTitle"
       message="Edit the identity provider and replace the metadata XML with an updated file."
@@ -174,7 +175,8 @@ export default defineComponent({
   },
   computed: {
     isExpiredCertificate(): boolean {
-      return !!this.certificateExpirationDate && !idpCommon.iValidCertificateDate(this.certificateExpirationDate);
+      if (!this.idp?.samlData?.signingCertificate) return false;
+      return !this.certificateExpirationDate || !idpCommon.iValidCertificateDate(this.certificateExpirationDate);
     },
     isCertificateExpiringSoon(): boolean {
       return !!this.certificateExpirationDate && idpCommon.isCertificateExpiringSoon(this.certificateExpirationDate);
