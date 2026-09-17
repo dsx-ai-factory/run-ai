@@ -52,11 +52,11 @@ As a rule of thumb, use time-slicing for work that arrives in bursts and can wai
 
 | | Time-slicing | SM-sharing |
 |---|---|---|
-| Execution | Serial — workloads take turns | Concurrent — workloads run at the same time |
+| Execution | Serial - workloads take turns | Concurrent - workloads run at the same time |
 | Compute unit divided | GPU time | GPU streaming multiprocessors |
 | Share under full contention | Roughly equal share of GPU time | Roughly equal share of the SMs |
 | Unused compute | Time left unused is split evenly between the other active workloads, up to the whole GPU for a single active workload | SMs left idle are used by the other active workloads, up to the whole GPU for a single active workload |
-| Error isolation | Full — each workload is its own error domain | Shared — workloads share a context, so a fatal fault affects all of them |
+| Error isolation | Full - each workload is its own error domain | Shared - workloads share a context, so a fatal fault affects all of them |
 | NVLink and peer-to-peer | Not restricted | Not restricted |
 | Set as | The default; can be set explicitly or omitted | Must be set explicitly |
 

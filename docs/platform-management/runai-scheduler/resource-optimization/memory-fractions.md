@@ -61,13 +61,13 @@ When a workload is submitted, the Scheduler finds a node with a GPU that can sat
 
 The NVIDIA Run:ai Scheduler can work alongside other schedulers. To avoid collisions with other schedulers, the NVIDIA Run:ai Scheduler creates special reservation pods. After a workload is submitted requesting a fraction of a GPU, NVIDIA Run:ai creates a pod in a dedicated `runai-reservation` namespace with the full GPU as a resource, allowing other schedulers to understand that the GPU is reserved.
 
-Each container also sees only its own share of GPU memory through NVML and `nvidia-smi`, rather than the memory of the whole device. A workload that requests 10 GB on an 80 GB GPU reports 10 GB of total GPU memory.
+Each container also sees only its own share of GPU memory through the NVIDIA Management Library (NVML) and `nvidia-smi`, rather than the memory of the whole device. A workload that requests 10 GB on an 80 GB GPU reports 10 GB of total GPU memory.
 
 A GPU memory fraction requested without a memory Limit has a Limit equal to its Request, so the memory available to the workload is fixed for its lifetime. To allow a workload to grow beyond its Request while the GPU has memory to spare, refer to [dynamic GPU memory fractions](dynamic-memory-fractions.md).
 
 While [MIG](../../aiinitiatives/resources/mig-profiles.md) requires administrative work to configure every MIG slice, where a slice is a fixed chunk of memory, GPU memory fractions allow dynamic and fully flexible allocation of GPU memory chunks. NVIDIA Run:ai GPU memory fractions are agile and dynamic, allowing you to allocate and free GPU memory fractions during the runtime of the system, at any size between zero and the maximum GPU portion (100%) or memory size (up to the maximum memory size of a GPU).
 
-<Info>
+<Note>
 
 **Note**
 
@@ -75,7 +75,7 @@ While [MIG](../../aiinitiatives/resources/mig-profiles.md) requires administrati
 * Using [bin-pack](../../aiinitiatives/resources/node-pools.md#adding-a-new-node-pool) as a scheduling placement strategy can also reduce GPU fragmentation.
 * Using [dynamic GPU memory fractions](dynamic-memory-fractions.md) ensures that even small unused fragments of GPU memory are utilized by workloads.
 
-</Info>
+</Note>
 
 ### Multi-GPU Memory Fractions
 
@@ -85,18 +85,6 @@ Sharing a single GPU between multiple workloads remains unchanged. It now serves
 
 ## Prerequisites
 
-GPU memory fractions require the following on every GPU node in the cluster:
-
-| Component | Required version |
-|---|---|
-| CUDA | 13.4 or later |
-| CUDA driver | r615 or later |
-| NVIDIA GPU Operator | 26.7.1 or later |
-
-In addition, GPU nodes must run Linux with cgroup v2 mounted at `/sys/fs/cgroup`.
-
-GPU Operator 26.7.1 does not default to CUDA driver r615. Set the driver version explicitly rather than relying on the default.
-
 <Note>
 
 **Note**
@@ -104,6 +92,14 @@ GPU Operator 26.7.1 does not default to CUDA driver r615. Set the driver version
 NVIDIA Run:ai installs and operates normally without these prerequisites in place, and non-fractional workloads are unaffected. Fractional workloads, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
 
 </Note>
+
+GPU memory fractions require the following on every GPU node in the cluster. GPU nodes must also run Linux with cgroup v2 mounted at `/sys/fs/cgroup`, and since [GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html) 26.7.1 does not default to CUDA driver r615, set the driver version explicitly rather than relying on the default.
+
+| Component | Required version |
+|---|---|
+| CUDA | 13.4 or later |
+| CUDA driver | r615 or later |
+| NVIDIA GPU Operator | 26.7.1 or later |
 
 ## Setting GPU Memory Fractions
 
@@ -124,20 +120,17 @@ Using the [compute resources](../../../workloads-in-nvidia-run-ai/workload-asset
 
 This method applies to [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) and to [workloads submitted externally](../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
 
-<Info>
+<Note>
 
 **Note**
 
 Make sure the [default scheduler](../scheduling/default-scheduler.md) is set to `runai-scheduler`.
 
-</Info>
+</Note>
 
 ### Annotation Prefixes
 
-Two prefixes are used, and the prefix indicates which component consumes the annotation:
-
-* `nvidia.com/` - The annotation reaches the node and is applied to CUDA.
-* `kai.scheduler/` - The annotation is consumed by the Scheduler only and is never passed to the node. GPU memory portions are a Scheduler convention, because CUDA expresses memory only as an absolute size. The Scheduler resolves the portion against the GPU it selected and passes an absolute size to the node.
+Annotations without a prefix (`gpu-fraction`, `gpu-memory`, `gpu-fraction-num-devices`, `gpu-fraction-container-name`) are Run:ai's own convention, consumed by the Scheduler rather than passed to CUDA. GPU memory portions are a Scheduler convention, because CUDA expresses memory only as an absolute size; the Scheduler resolves the portion against the GPU it selected and passes an absolute size to the node. The `nvidia.com/` prefix indicates that the annotation reaches the node instead, and is applied directly to CUDA.
 
 ### Annotation Reference
 
@@ -158,11 +151,12 @@ A GPU memory fraction is always allocated to a single container. NVIDIA Run:ai c
 
 **Note**
 
-To set how a workload shares GPU compute, refer to the annotations described in [GPU compute modes](compute-modes.md).
+* To set how a workload shares GPU compute, refer to the annotations described in [GPU compute modes](compute-modes.md).
+* Dynamic GPU memory fractions add a memory limit to the request. Refer to [dynamic GPU memory fractions](dynamic-memory-fractions.md) for those annotations.
 
 </Note>
 
-<Info>
+<Note>
 
 **Note**
 
@@ -170,7 +164,7 @@ To set how a workload shares GPU compute, refer to the annotations described in 
 * There is no `container.<container-name>` form of a GPU memory portion request. Use `gpu-fraction`.
 * If `gpu-fraction-container-name` is used together with an annotation that names a container in its key, the container names must be identical or the request is rejected.
 
-</Info>
+</Note>
 
 Dynamic GPU memory fractions add a memory limit to the request. Refer to [dynamic GPU memory fractions](dynamic-memory-fractions.md) for those annotations.
 
@@ -183,7 +177,7 @@ metadata:
   annotations:
     gpu-memory: "4000"   # MiB
     # or: nvidia.com/container.app.gpu-memory.request: "40G"
-    # optional; 1 if omitted — number of fractional GPU devices
+    # optional; 1 if omitted - number of fractional GPU devices
     gpu-fraction-num-devices: "4"
 spec:
   containers:
@@ -196,7 +190,7 @@ The following example requests a portion of GPU memory on 2 GPU devices:
 metadata:
   annotations:
     gpu-fraction: "0.5"
-    # optional; 1 if omitted — number of fractional GPU devices
+    # optional; 1 if omitted - number of fractional GPU devices
     gpu-fraction-num-devices: "2"
 spec:
   containers:
@@ -244,7 +238,7 @@ spec:
 ## Deployment Considerations
 
 * Selecting a GPU portion using percentages as units does not guarantee the exact memory size. This means 50% of an A-100-40GB is 20 GB while 50% of an A-100-80GB is 40 GB. To have better control over the exact allocated memory, specify the exact memory size, for example 40 GB.
-* GPU memory fractions control the memory split. Each workload's share of GPU compute is controlled separately by its compute mode — refer to [GPU compute modes](compute-modes.md).
+* GPU memory fractions control the memory split. Each workload's share of GPU compute is controlled separately by its compute mode - refer to [GPU compute modes](compute-modes.md).
 * An application sees its own requested GPU memory size through NVML and `nvidia-smi`, not the memory of the whole device. Tools that report total GPU memory inside the container report the fraction.
 
 ## Using CLI
