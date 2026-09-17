@@ -170,9 +170,10 @@ jobs:
         with:
           python-version: '3.x'
 
-      # ruff has no transitive dependencies, so the pinned version plus
-      # --only-binary fully determines the install; a lockfile would add nothing.
-      - run: "pip install --only-binary :all: ruff==0.15.15"
+      # The lockfile is a single pinned entry -- ruff has no transitive
+      # dependencies -- but --require-hashes still verifies the wheel digest,
+      # which a version pin alone does not.
+      - run: "pip install --require-hashes --only-binary :all: -r .github/requirements/ruff.txt"
 
       - name: Run ruff on changed .py files in this project
         env:
