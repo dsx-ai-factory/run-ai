@@ -91,18 +91,10 @@ NVIDIA Run:ai requires additional prerequisite and feature components to be inst
 
 | Name                        | Type          | Description                                     | Source                | Destination | Port |
 | ---------------------------- | ------------- | ------------------------------------------------ | ---------------------- | ----------- | ---- |
-| Google Container Registry    | Prerequisite  | GPU Operator image repository (registry source TBD) | All Kubernetes nodes   | gcr.io      | 443  |
+| NVIDIA NGC Catalog          | Prerequisite  | GPU Operator image repository                    | All Kubernetes nodes   | nvcr.io     | 443  |
 | Red Hat Container Registry   | Prerequisite  | Prometheus Operator image repository             | All Kubernetes nodes   | quay.io     | 443  |
 | Google Container Registry    | Feature       | Knative image repository                          | All Kubernetes nodes   | gcr.io      | 443  |
 | Docker Hub Registry          | Feature       | Kubeflow Training Operator image repository       | All Kubernetes nodes   | docker.io   | 443  |
-
-<Warning>
-
-**TODO - confirm with engineering**
-
-The GPU Operator image registry is listed as `gcr.io`, but NVIDIA's own GPU Operator `values.yaml` (github.com/NVIDIA/gpu-operator) defaults to `nvcr.io`. Confirm the correct destination with engineering before publishing.
-
-</Warning>
 
 ## Internal Network
 

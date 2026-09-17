@@ -32,6 +32,7 @@ Using a Kubernetes user with the `cluster-admin` role to ensure a successful ins
 
 * To customize the installation based on your environment, see [Advanced cluster configurations](../../configuration/cluster-config.md).
 * You can store the `clientSecret` as a Kubernetes secret within the cluster instead of using plain text. You can then configure the installation to use it by setting the `controlPlane.existingSecret` and `controlPlane.secretKeys.clientSecret` parameters as described in [Advanced cluster configurations](../../configuration/cluster-config.md).
+* The `bootstrapToken` in the generated Helm command is a short-lived token that expires 2 hours after generation. If you do not complete the installation within that window, return to the cluster wizard in the NVIDIA Run:ai UI to generate a new command before running it.
 
 </Note>
 
@@ -59,13 +60,7 @@ When adding a cluster for the first time, the onboarding wizard opens automatica
 
 In the next section, the NVIDIA Run:ai cluster installation steps will be presented.
 
-1. Before installing the NVIDIA Run:ai cluster, ensure that all required [system requirements and prerequisites](prerequisites-and-features.md) are met.
-
-   <Warning>
-
-   **TODO - update step 1 when UI changes**
-
-   </Warning>
+1. Before installing the NVIDIA Run:ai cluster, see [Preparations](preparations.md) and follow the instructions there.
 2. The NVIDIA Run:ai platform displays the Helm installation command in the cluster wizard.
 3. Modify the UI-generated command as follows:
    * If you are using a local certificate authority, add `--set global.customCA.enabled=true` to the Helm command as described in the [Cluster Local CA](preparations.md#cluster-local-ca) section.
@@ -76,7 +71,7 @@ helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
     --set controlPlane.url=... \
-    --set controlPlane.clientSecret=... \
+    --set controlPlane.bootstrapToken=... \
     --set cluster.uid=... \
     --set cluster.url=... --version="<VERSION>" --create-namespace \
     --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -120,13 +115,7 @@ When adding a cluster for the first time, the onboarding wizard opens automatica
 
 In the next section, the NVIDIA Run:ai cluster installation steps will be presented.
 
-1. Before installing the NVIDIA Run:ai cluster, ensure that all required [system requirements and prerequisites](prerequisites-and-features.md) are met.
-
-   <Warning>
-
-   **TODO - update step 1 when UI changes**
-
-   </Warning>
+1. Before installing the NVIDIA Run:ai cluster, see [Preparations](preparations.md) and follow the instructions there.
 2.  The NVIDIA Run:ai platform displays the Helm installation command in the cluster wizard.
 
     **- Do not run the command exactly as shown in the UI -**
@@ -143,7 +132,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
 ```bash
 helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
     --set controlPlane.url=... \
-    --set controlPlane.clientSecret=... \
+    --set controlPlane.bootstrapToken=... \
     --set cluster.uid=... \
     --set cluster.url=... --create-namespace \
     --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \
@@ -184,13 +173,7 @@ When adding a cluster for the first time, the onboarding wizard opens automatica
 
 In the next section, the NVIDIA Run:ai cluster installation steps will be presented.
 
-1. Before installing the NVIDIA Run:ai cluster, ensure that all required [system requirements and prerequisites](prerequisites-and-features.md) are met.
-
-   <Warning>
-
-   **TODO - update step 1 when UI changes**
-
-   </Warning>
+1. Before installing the NVIDIA Run:ai cluster, see [Preparations](preparations.md) and follow the instructions there.
 2. The NVIDIA Run:ai platform displays the Helm installation command in the cluster wizard.
 3. Modify the UI-generated command as follows:
    * If you are using a local certificate authority, add `--set global.customCA.enabled=true` to the Helm command as described in the [Cluster Local CA](preparations.md#cluster-local-ca) section.
@@ -200,7 +183,7 @@ helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
   --set controlPlane.url=... \
-  --set controlPlane.clientSecret=... \
+  --set controlPlane.bootstrapToken=... \
   --set cluster.uid=... \
   --set cluster.url=... --version="<VERSION>" --create-namespace
 ```
@@ -243,13 +226,7 @@ When adding a cluster for the first time, the onboarding wizard opens automatica
 
 In the next section, the NVIDIA Run:ai cluster installation steps will be presented.
 
-1. Before installing the NVIDIA Run:ai cluster, ensure that all required [system requirements and prerequisites](prerequisites-and-features.md) are met.
-
-   <Warning>
-
-   **TODO - update step 1 when UI changes**
-
-   </Warning>
+1. Before installing the NVIDIA Run:ai cluster, see [Preparations](preparations.md) and follow the instructions there.
 2.  The NVIDIA Run:ai platform displays the Helm installation command in the cluster wizard.
 
     **- Do not run the command exactly as shown in the UI -**
@@ -266,7 +243,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
     ```bash
     helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
         --set controlPlane.url=... \
-        --set controlPlane.clientSecret=... \
+        --set controlPlane.bootstrapToken=... \
         --set cluster.uid=... \
         --set cluster.url=... --create-namespace \
         --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \
