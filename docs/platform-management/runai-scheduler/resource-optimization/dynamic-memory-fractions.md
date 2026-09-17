@@ -18,7 +18,7 @@ This page covers how GPU **memory** is divided between workloads. How those work
 
 ## Quota Planning with Dynamic GPU Memory Fractions
 
-When planning the quota distribution for your [projects](../../../aiinitiatives/organization/projects.md) and [departments](../../../aiinitiatives/organization/departments.md), dynamic memory fractions let the platform administrator size quota to the Request alone. The Limit lets a workload burst beyond its allocated quota when the GPU has memory to spare, without provisioning additional quota for that burst capacity.
+When planning the quota distribution for your [projects](../../aiinitiatives/organization/projects.md) and [departments](../../aiinitiatives/organization/departments.md), dynamic memory fractions let the platform administrator size quota to the Request alone. The Limit lets a workload burst beyond its allocated quota when the GPU has memory to spare, without provisioning additional quota for that burst capacity.
 
 ### Model Development
 
@@ -40,7 +40,7 @@ A dynamic GPU memory fraction is submitted with a Request and a Limit, using the
 
 ### Single-GPU Dynamic Memory Fractions
 
-With dynamic GPU memory fractions, you [submit workloads](../../../../workloads-in-nvidia-run-ai/workloads.md) using a GPU memory Request and Limit. You can either:
+With dynamic GPU memory fractions, you [submit workloads](../../../workloads-in-nvidia-run-ai/workloads.md) using a GPU memory Request and Limit. You can either:
 
 * Request a GPU memory portion using a percentage of a GPU and specify a Limit
 * Request a GPU memory size (GB, MB) and specify a Limit
@@ -49,7 +49,7 @@ When setting a GPU memory limit either as a GPU memory portion or a GPU memory s
 
 For example, you can specify a workload with a GPU memory portion request of 0.25 GPU, and add a limit of up to 0.80 GPU. The Scheduler schedules the workload to a node that can provide the request (0.25), and then assigns the workload to a GPU. The workload is allowed to occupy memory between 0 and 0.80 of the GPU memory, where only 0.25 of the GPU memory is guaranteed to that workload. The rest of the memory, from 0.25 to 0.80, is loaned to the workload as long as it is not needed by other workloads.
 
-NVIDIA Run:ai automatically manages the transition between Request and Limit, and the reverse when the borrowed memory needs to be returned. You can view a workload's utilization against its Request and Limit in the [metrics pane for each workload](../../../../workloads-in-nvidia-run-ai/workloads.md).
+NVIDIA Run:ai automatically manages the transition between Request and Limit, and the reverse when the borrowed memory needs to be returned. You can view a workload's utilization against its Request and Limit in the [metrics pane for each workload](../../../workloads-in-nvidia-run-ai/workloads.md).
 
 ### Multi-GPU Dynamic Memory Fractions
 
@@ -107,7 +107,7 @@ NVIDIA Run:ai installs and operates normally without these prerequisites in plac
 
 ## Setting Dynamic GPU Memory Fractions
 
-Using the [compute resources](../../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU memory portion or GPU memory size, and set a Limit. You can then use the compute resource with [NVIDIA Run:ai native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) for single-GPU and multi-GPU dynamic memory fractions. In addition, you can view the workloads' utilization compared to Request and Limit parameters in the [metrics pane for each workload](../../../../workloads-in-nvidia-run-ai/workloads.md).
+Using the [compute resources](../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU memory portion or GPU memory size, and set a Limit. You can then use the compute resource with [NVIDIA Run:ai native workloads](../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) for single-GPU and multi-GPU dynamic memory fractions. In addition, you can view the workloads' utilization compared to Request and Limit parameters in the [metrics pane for each workload](../../../workloads-in-nvidia-run-ai/workloads.md).
 
 * **Single-GPU dynamic memory fractions** - Define the compute requirement to run 1 GPU device, by specifying either a portion (percentage) of the overall memory or a memory request (GB, MB) with a Limit.
 * **Multi-GPU dynamic memory fractions** - Define the compute requirement to run multiple GPU devices, by specifying either a portion (percentage) of the overall memory or a memory request (GB, MB) with a Limit.
@@ -124,13 +124,13 @@ The setting applies wherever the memory Limit is a field of the workload submiss
 
 ## Setting Dynamic GPU Memory Fractions via YAML
 
-This method applies to [supported workload types](../../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) and to [workloads submitted externally](../../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable dynamic GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
+This method applies to [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) and to [workloads submitted externally](../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable dynamic GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
 
 <Info>
 
 **Note**
 
-Make sure the [default scheduler](../../scheduling/default-scheduler.md) is set to `runai-scheduler`.
+Make sure the [default scheduler](../scheduling/default-scheduler.md) is set to `runai-scheduler`.
 
 </Info>
 
@@ -216,7 +216,7 @@ spec:
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
 
 ## Using API
 

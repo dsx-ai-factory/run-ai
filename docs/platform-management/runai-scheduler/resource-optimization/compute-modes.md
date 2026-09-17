@@ -2,7 +2,7 @@
 
 [GPU memory fractions](memory-fractions.md) determine how much GPU memory each workload receives. GPU compute modes determine how the workloads sharing a GPU divide the GPU compute between them.
 
-NVIDIA Run:ai v3.0 offers two compute modes — time-slicing and SM-sharing. Both are set per workload, and both are available on any GPU that meets the [prerequisites](memory-fractions.md#prerequisites).
+NVIDIA Run:ai offers two compute modes - time-slicing and SM-sharing. Both are set per workload, and both are available on any GPU that meets the [prerequisites](memory-fractions.md#prerequisites).
 
 A GPU runs one compute mode at a time. The first workload placed on a GPU sets the compute mode of that GPU, workloads requesting the other mode are not placed on it, and the mode resets when the GPU empties.
 
@@ -44,7 +44,7 @@ As a rule of thumb, use time-slicing for work that arrives in bursts and can wai
 
 | Choose | When the workload is |
 |---|---|
-| Time-slicing | Bursty and interactive — notebooks, model development, and inference that is not delay-sensitive. A workload with nothing to do gives up its turn, and the next workload gets the whole GPU for its turn. |
+| Time-slicing | Bursty and interactive - notebooks, model development, and inference that is not delay-sensitive. A workload with nothing to do gives up its turn, and the next workload gets the whole GPU for its turn. |
 | SM-sharing | Latency-sensitive inference, highly interactive applications, and real-time applications. With time-slicing, a request arriving during another workload's turn waits for that turn to end. With SM-sharing there is no turn to wait for, so response times stay steadier. |
 | SM-sharing | Distributed training or inference across GPUs or pods. These workloads exchange results constantly, so one GPU pausing to wait its turn holds up every peer it is synchronizing with, and the whole job runs at the pace of its slowest participant. |
 
@@ -75,7 +75,7 @@ If the annotation is omitted, time-slicing applies. Workloads migrated from earl
 
 You can set the annotation through the UI, the CLI, or the API. After the workload is submitted, the compute mode is visible in the workload YAML.
 
-Administrators can also control the compute mode centrally with a [workload policy](../../../policies/policies-and-rules.md). A policy can supply a default compute mode for workloads that do not set one, or enforce a specific mode so that users cannot change it. Policies set the `annotations` field, target a specific workload type, and apply at the system, cluster, department, or project scope. For the field reference, refer to [Policy YAML reference](../../../policies/policy-yaml-reference.md).
+Administrators can also control the compute mode centrally with a [workload policy](../../policies/policies-and-rules.md). A policy can supply a default compute mode for workloads that do not set one, or enforce a specific mode so that users cannot change it. Policies set the `annotations` field, target a specific workload type, and apply at the system, cluster, department, or project scope. For the field reference, refer to [Policy YAML reference](../../policies/policy-yaml-reference.md).
 
 <Tabs>
 
@@ -124,7 +124,7 @@ spec:
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
 
 ## Using API
 

@@ -1,6 +1,6 @@
 # GPU Memory Fractions
 
-To submit a [workload](../../../../workloads-in-nvidia-run-ai/workloads.md) with GPU resources in Kubernetes, you typically need to specify an integer number of GPUs. However, workloads often require diverse GPU memory and compute requirements or even use GPUs intermittently depending on the application (such as inference workloads, training workloads or notebooks at the model-creation phase). Additionally, GPUs are becoming increasingly powerful, offering more processing power and larger memory capacity for applications. Despite the increasing model sizes, the increasing capabilities of GPUs allow them to be effectively shared among multiple users or applications.
+To submit a [workload](../../../workloads-in-nvidia-run-ai/workloads.md) with GPU resources in Kubernetes, you typically need to specify an integer number of GPUs. However, workloads often require diverse GPU memory and compute requirements or even use GPUs intermittently depending on the application (such as inference workloads, training workloads or notebooks at the model-creation phase). Additionally, GPUs are becoming increasingly powerful, offering more processing power and larger memory capacity for applications. Despite the increasing model sizes, the increasing capabilities of GPUs allow them to be effectively shared among multiple users or applications.
 
 NVIDIA Run:ai's GPU memory fractions provide an agile and easy-to-use method to share a GPU or multiple GPUs across workloads. With GPU memory fractions, you can divide the GPU memory into smaller chunks and allocate each chunk to a different workload, resulting in higher GPU utilization and more efficient resource allocation. GPU memory fractions rely on the standard NVIDIA CUDA implementation to enforce the memory allocation on each GPU.
 
@@ -16,16 +16,16 @@ Sharing GPU resources among multiple workloads with GPU memory fractions provide
 
 * For the AI practitioner:
   * **Reduced wait time** - Workloads with smaller GPU requests are more likely to be scheduled quickly, minimizing delays in accessing resources.
-  * **Increased workload capacity** - More workloads can be run using the same admin-defined GPU [quota](../../scheduling/concepts-and-principles.md#quota) and available unused resources - [over quota](../../scheduling/concepts-and-principles.md#over-quota).
+  * **Increased workload capacity** - More workloads can be run using the same admin-defined GPU [quota](../scheduling/concepts-and-principles.md#quota) and available unused resources - [over quota](../scheduling/concepts-and-principles.md#over-quota).
 * For the platform administrator:
   * **Improved GPU utilization** - Sharing GPUs across workloads increases the utilization of individual GPUs, resulting in better overall platform efficiency.
   * **Higher resource availability** - More users gain access to GPU resources, ensuring better distribution.
   * **Enhanced workload throughput** - More workloads can be served per GPU, ensuring maximum output from existing hardware.
-  * **Optimized scheduling** - Smaller and dynamic resource allocations gives the [Scheduler](../../scheduling/concepts-and-principles.md) a higher chance of finding GPU resources for incoming workloads.
+  * **Optimized scheduling** - Smaller and dynamic resource allocations gives the [Scheduler](../scheduling/concepts-and-principles.md) a higher chance of finding GPU resources for incoming workloads.
 
 ## Quota Planning with GPU Memory Fractions
 
-When planning the quota distribution for your [projects](../../../aiinitiatives/organization/projects.md) and [departments](../../../aiinitiatives/organization/departments.md), memory fractions give the platform administrator the ability to allocate more precise quota per project and department, assuming the usage of GPU memory fractions, or enforcing it with [pre-defined policies](../../../policies/policy-yaml-reference.md) or [compute resource](../../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) templates.
+When planning the quota distribution for your [projects](../../aiinitiatives/organization/projects.md) and [departments](../../aiinitiatives/organization/departments.md), memory fractions give the platform administrator the ability to allocate more precise quota per project and department, assuming the usage of GPU memory fractions, or enforcing it with [pre-defined policies](../../policies/policy-yaml-reference.md) or [compute resource](../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) templates.
 
 ### Interactive Development
 
@@ -43,7 +43,7 @@ Consider a team serving a small language model across a single node of **8×H100
 * The remaining memory on each GPU accommodates the CUDA context and driver overhead, so the allocation holds under production load.
 * Quota can be expressed in the memory each model actually needs, rather than rounded up to whole devices.
 
-For more details on mapping your organization and resources, refer to [Adapting AI initiatives to your organization](../../../aiinitiatives/adapting-ai-initiatives.md).
+For more details on mapping your organization and resources, refer to [Adapting AI initiatives to your organization](../../aiinitiatives/adapting-ai-initiatives.md).
 
 ## How GPU Memory Fractions Work
 
@@ -65,14 +65,14 @@ Each container also sees only its own share of GPU memory through NVML and `nvid
 
 A GPU memory fraction requested without a memory Limit has a Limit equal to its Request, so the memory available to the workload is fixed for its lifetime. To allow a workload to grow beyond its Request while the GPU has memory to spare, refer to [dynamic GPU memory fractions](dynamic-memory-fractions.md).
 
-While [MIG](../../../aiinitiatives/resources/mig-profiles.md) requires administrative work to configure every MIG slice, where a slice is a fixed chunk of memory, GPU memory fractions allow dynamic and fully flexible allocation of GPU memory chunks. NVIDIA Run:ai GPU memory fractions are agile and dynamic, allowing you to allocate and free GPU memory fractions during the runtime of the system, at any size between zero and the maximum GPU portion (100%) or memory size (up to the maximum memory size of a GPU).
+While [MIG](../../aiinitiatives/resources/mig-profiles.md) requires administrative work to configure every MIG slice, where a slice is a fixed chunk of memory, GPU memory fractions allow dynamic and fully flexible allocation of GPU memory chunks. NVIDIA Run:ai GPU memory fractions are agile and dynamic, allowing you to allocate and free GPU memory fractions during the runtime of the system, at any size between zero and the maximum GPU portion (100%) or memory size (up to the maximum memory size of a GPU).
 
 <Info>
 
 **Note**
 
-* Splitting a GPU into memory fractions may generate some fragmentation of the GPU memory. The [Scheduler](../../scheduling/concepts-and-principles.md) will try to consolidate GPU resources where feasible (that is, preemptible workloads).
-* Using [bin-pack](../../../aiinitiatives/resources/node-pools.md#adding-a-new-node-pool) as a scheduling placement strategy can also reduce GPU fragmentation.
+* Splitting a GPU into memory fractions may generate some fragmentation of the GPU memory. The [Scheduler](../scheduling/concepts-and-principles.md) will try to consolidate GPU resources where feasible (that is, preemptible workloads).
+* Using [bin-pack](../../aiinitiatives/resources/node-pools.md#adding-a-new-node-pool) as a scheduling placement strategy can also reduce GPU fragmentation.
 * Using [dynamic GPU memory fractions](dynamic-memory-fractions.md) ensures that even small unused fragments of GPU memory are utilized by workloads.
 
 </Info>
@@ -115,20 +115,20 @@ If you are upgrading from a release that used the proprietary GPU sharing implem
 
 </Note>
 
-Using the [compute resources](../../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU portion or GPU memory, and use it with [NVIDIA Run:ai native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) for single-GPU and multi-GPU memory fractions.
+Using the [compute resources](../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU portion or GPU memory, and use it with [NVIDIA Run:ai native workloads](../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) for single-GPU and multi-GPU memory fractions.
 
 * **Single-GPU memory fractions** - Define the compute requirement to run 1 GPU device, by specifying either a fraction (percentage) of the overall memory or a memory request (GB, MB).
 * **Multi-GPU memory fractions** - Define the compute requirement to run multiple GPU devices, by specifying either a fraction (percentage) of the overall memory or a memory request (GB, MB).
 
 ## Setting GPU Memory Fractions via YAML
 
-This method applies to [supported workload types](../../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) and to [workloads submitted externally](../../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
+This method applies to [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) and to [workloads submitted externally](../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai. To enable GPU memory fractions for workloads submitted via Kubernetes YAML, use the annotations described below.
 
 <Info>
 
 **Note**
 
-Make sure the [default scheduler](../../scheduling/default-scheduler.md) is set to `runai-scheduler`.
+Make sure the [default scheduler](../scheduling/default-scheduler.md) is set to `runai-scheduler`.
 
 </Info>
 
@@ -249,7 +249,7 @@ spec:
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
 
 ## Using API
 
