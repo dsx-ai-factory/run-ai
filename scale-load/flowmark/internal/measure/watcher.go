@@ -120,7 +120,9 @@ func externalWorkloadSource(obj *unstructured.Unstructured) string {
 
 // MarkCreated records when the caller finished creating name, taken from the
 // same local clock the arrival is stamped with. It may be called before or
-// after the arrival event; the duration is the same either way.
+// after the arrival event; the duration is the same either way. An arrival
+// stamped before t0, possible when the cluster reacts while the create call is
+// still returning, is reported as zero, never negative.
 func (w *Watcher) MarkCreated(name string, t0 time.Time) {
 	w.mu.Lock()
 	w.created[name] = t0
@@ -141,8 +143,9 @@ func (w *Watcher) MarkFailed(name string, err error) {
 // WaitAll blocks until every marked item has arrived or failed, or until
 // timeout has passed since the last MarkCreated. Items still unresolved are
 // reported as Pending, never as zero-duration arrivals. If the server closed
-// the watch, pending items carry that error so a broken watch cannot pass
-// as a slow cluster. Results are sorted by name.
+// the watch or the context was cancelled, WaitAll returns at once and pending
+// items carry that error so a broken watch cannot pass as a slow cluster.
+// Results are sorted by name.
 func (w *Watcher) WaitAll(timeout time.Duration) []Timing {
 	for {
 		w.mu.Lock()
@@ -177,6 +180,7 @@ func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 	for {
 		select {
 		case <-ctx.Done():
+			w.close(fmt.Errorf("%w: %w", errWatchClosed, ctx.Err()))
 			return
 		case event, open := <-events.ResultChan():
 			if !open {
@@ -247,7 +251,7 @@ func (w *Watcher) timings() []Timing {
 		case !w.arrived[name].IsZero():
 			timing.Outcome = Arrived
 			timing.Arrived = w.arrived[name]
-			timing.Duration = timing.Arrived.Sub(t0)
+			timing.Duration = max(timing.Arrived.Sub(t0), 0)
 		default:
 			timing.Outcome = Pending
 			timing.Err = w.closed

@@ -28,7 +28,8 @@ The file has three top-level keys: `schema` (currently `v1`), `metadata`
 given), and `scenarios`, one section per scenario file. `clock_offset_ms`
 is how far the cluster clock is ahead of the machine running FlowMark,
 measured once at startup with a probe ConfigMap in the `default`
-namespace. It is reported for context only and never enters a latency.
+namespace. It is reported for context only and never enters a latency. If
+the probe fails, the run continues and `clock_offset_error` holds the reason.
 
 `./bin/flowmark --help` lists all flags.
 

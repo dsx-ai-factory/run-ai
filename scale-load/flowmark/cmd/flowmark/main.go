@@ -53,9 +53,11 @@ func run() error {
 	if env.KubeconfigPath != "" {
 		offset, err := clockOffset(ctx, env.KubeconfigPath)
 		if err != nil {
-			return err
+			fmt.Fprintln(os.Stderr, "flowmark:", err)
+			results.Metadata.ClockOffsetError = err.Error()
+		} else {
+			results.Metadata.ClockOffsetMs = &offset
 		}
-		results.Metadata.ClockOffsetMs = &offset
 	}
 
 	sections, runErr := runner.Run(ctx, env, *scenariosDir, registry)

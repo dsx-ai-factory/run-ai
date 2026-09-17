@@ -154,7 +154,7 @@ func TestFirstEventWins(t *testing.T) {
 	}
 }
 
-func TestClosedWatchMarksPendingWithError(t *testing.T) {
+func TestCancelledContextEndsWaitWithError(t *testing.T) {
 	kube := fake.NewClientBuilder().Build()
 	ctx, cancel := context.WithCancel(context.Background())
 	w, err := WatchWorkloads(ctx, kube, testNamespace)
@@ -164,12 +164,26 @@ func TestClosedWatchMarksPendingWithError(t *testing.T) {
 	w.MarkCreated("w1", time.Now())
 
 	cancel()
-	<-w.done
-	w.close(errWatchClosed)
-
+	start := time.Now()
 	got := byName(w.WaitAll(time.Minute))["w1"]
-	if got.Outcome != Pending || !errors.Is(got.Err, errWatchClosed) {
-		t.Fatalf("a closed watch must surface on pending items, got %+v", got)
+
+	if waited := time.Since(start); waited > 5*time.Second {
+		t.Fatalf("WaitAll must return promptly after cancellation, waited %s", waited)
+	}
+	if got.Outcome != Pending || !errors.Is(got.Err, errWatchClosed) || !errors.Is(got.Err, context.Canceled) {
+		t.Fatalf("cancellation must surface on pending items, got %+v", got)
+	}
+}
+
+func TestArrivalBeforeMarkIsZeroNotNegative(t *testing.T) {
+	_, w := startWatch(t)
+
+	w.recordArrival("w1", time.Now())
+	w.MarkCreated("w1", time.Now().Add(50*time.Millisecond))
+
+	got := byName(w.WaitAll(time.Second))["w1"]
+	if got.Outcome != Arrived || got.Duration != 0 {
+		t.Fatalf("an arrival stamped before t0 must be a zero-duration arrival, got %+v", got)
 	}
 }
 

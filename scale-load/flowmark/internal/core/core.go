@@ -89,9 +89,10 @@ type Section struct {
 const SchemaVersion = "v1"
 
 type Metadata struct {
-	StartedAt     time.Time `json:"started_at"`
-	FinishedAt    time.Time `json:"finished_at"`
-	ClockOffsetMs *int64    `json:"clock_offset_ms,omitempty"`
+	StartedAt        time.Time `json:"started_at"`
+	FinishedAt       time.Time `json:"finished_at"`
+	ClockOffsetMs    *int64    `json:"clock_offset_ms,omitempty"`
+	ClockOffsetError string    `json:"clock_offset_error,omitempty"`
 }
 
 type Results struct {
