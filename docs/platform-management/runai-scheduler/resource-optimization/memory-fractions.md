@@ -91,9 +91,11 @@ GPU memory fractions require the following on every GPU node in the cluster:
 |---|---|
 | CUDA | 13.4 or later |
 | CUDA driver | r615 or later |
-| NVIDIA GPU Operator | 26.7 or later |
+| NVIDIA GPU Operator | 26.7.1 or later |
 
 In addition, GPU nodes must run Linux with cgroup v2 mounted at `/sys/fs/cgroup`.
+
+GPU Operator 26.7.1 does not default to CUDA driver r615. Set the driver version explicitly rather than relying on the default.
 
 <Note>
 
