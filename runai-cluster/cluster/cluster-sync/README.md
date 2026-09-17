@@ -150,6 +150,7 @@ Configuration is **environment-variable driven** (the uppercase `mapstructure` t
 | `NODE_LABEL_NVIDIA_CONTAINER_TOOLKIT` | Node label for NVIDIA container toolkit readiness | `nvidia.com/gpu.deploy.container-toolkit` |
 | `NODE_LABEL_NVIDIA_DCGM_EXPORTER` | Node label for DCGM exporter readiness | `nvidia.com/gpu.deploy.dcgm-exporter` |
 | `ENABLE_NODE_NVIDIA_COMPONENTS_READINESS` | Report NVIDIA component readiness | `false` |
+| `ENABLE_NODE_GPU_FRACTIONING_READINESS` | Report GPU fractioning readiness per node | `false` |
 | `SYNC_PODS_WITH_WORKLOADS` | Sync pods together with workloads | `false` |
 | `RATE_LIMITER_WORKLOADS_DELAY_SECONDS` | Workloads limiter delay | `10` |
 | `RATE_LIMITER_WORKLOADS_NUM_OF_WORKERS` | Workloads limiter workers | `3` |

@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Hash-pinned install of dco-check, used by the dco-check job in .github/workflows/dco.yaml.
+#
+# dco-check has no transitive dependencies, so the version pin already settles
+# which version is installed. The hashes are here for artifact integrity:
+# --only-binary :all: selects a wheel but never verifies its digest, so
+# without --require-hashes a compromised index or CDN could serve a different
+# artifact under this filename.
+#
+# Every wheel hash published for this version is listed, so the install stays
+# valid as the job's floating `python-version: '3.x'` moves between
+# interpreter versions and platform wheel variants.
+#
+# Regenerate after a version bump: collect every bdist_wheel sha256 for the
+# new version from https://pypi.org/pypi/dco-check/<version>/json
+
+dco-check==0.5.1 \
+    --hash=sha256:2ae255242d9b83722dd75a44ad8eebffb83f5d4cabf5e4b5d24c4b194437b3a5
