@@ -55,6 +55,12 @@
       "enabled": false
     },
     {
+      "description": "Blocks 0.x minor bumps (breaking-by-SemVer-convention pre-1.0 releases), Match both forms so this works whether the manager's currentValue is v-prefixed or not.",
+      "matchCurrentVersion": "<v1.0.0",
+      "matchUpdateTypes": ["minor"],
+      "enabled": false
+    },
+    {
       "matchCurrentVersion": "<1.0.0",
       "matchUpdateTypes": ["minor"],
       "enabled": false
