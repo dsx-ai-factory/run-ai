@@ -48,4 +48,4 @@ Upgrading to v3.0 forces GPU memory swap and the node-level scheduler off, even 
 
 ### New Air-Gapped Installer Workflow
 
-Air-gapped upgrades now use the `runai-installer` binary's `airgap pack` and `airgap load` commands to rebuild your private registry mirror and generate fresh Helm values for the target version, replacing the previous NGC/JFrog `.tgz` download and hand-edited Helm command. See [Upgrade NVIDIA Run:ai](../../installation-and-configuration/upgrade/upgrade.md) for the full procedure.
+Air-gapped upgrades now use the `runai-installer` binary's `airgap pack` and `airgap load` commands to rebuild your private registry mirror and generate fresh Helm values for the target version, replacing the previous NGC `.tgz` download and hand-edited Helm command. See [Upgrade NVIDIA Run:ai](../../installation-and-configuration/upgrade/upgrade.md) for the full procedure.

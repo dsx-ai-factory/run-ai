@@ -122,7 +122,7 @@ NVIDIA Run:ai supports three installation paths. Choose based on your tooling, e
 
 During installation, NVIDIA Run:ai pulls platform images, Helm charts, and third-party service images from different sources depending on your license and environment. Understanding these sources helps you plan network access, registry credentials, and air-gapped deployments.
 
-* **NVIDIA Run:ai platform images and Helm charts** are published to NVIDIA NGC. Open Source installations access them without credentials. NVIDIA Supported installations require an NGC API key. Organizations that mirror artifacts to an internal registry (for example, JFrog Artifactory) can configure the installer or Helm charts to pull from that registry instead.
+* **NVIDIA Run:ai platform images and Helm charts** are published to NVIDIA NGC. Open Source installations access them without credentials. NVIDIA Supported installations require an NGC API key. Organizations that mirror artifacts to an internal registry can configure the installer or Helm charts to pull from that registry instead.
 
 * **Third-party service images** (PostgreSQL, Keycloak, and others) are pulled from their official upstream registries on Docker Hub, Quay, and the Kubernetes registry (`registry.k8s.io`) for Open Source and NVIDIA Supported installations. For Gov-ready installations, customers are responsible for obtaining and providing hardened, FIPS-enabled images from [Chainguard](https://www.chainguard.dev/). See [Third-Party Services](system-requirements/third-party-services.md#image-registry) for the complete list.
 
