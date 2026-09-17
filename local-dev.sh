@@ -2198,7 +2198,7 @@ ${DOMAIN}:53 {
   # charts/*.tgz is gitignored, so a fresh clone has none.
   #
   # Dependency names and versions are read from Chart.yaml rather than hardcoded here,
-  # so bumping a dependency (e.g. kai-scheduler v0.16.8, karta 0.2.3) cannot leave this
+  # so bumping a dependency (e.g. kai-scheduler v0.16.8, karta 0.2.6) cannot leave this
   # block stale.
   local charts_dir="${rc_chart}/charts"
   mkdir -p "${charts_dir}"
