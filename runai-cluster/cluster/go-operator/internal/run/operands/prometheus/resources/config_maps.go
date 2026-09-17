@@ -7,6 +7,7 @@ package resources
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
@@ -75,24 +76,44 @@ func (cm *ConfigMap) Object(ctx context.Context) (client.Object, error) {
 	// Prevent the operator from deleting this configmap on finalization
 	configMap.Annotations[runv1.DeletionPolicyAnnotationKey] = string(runv1.DeletionPolicyRetain)
 
-	clusterMonitoringConfig := &manifests.ClusterMonitoringConfiguration{}
+	clusterMonitoringConfig := map[string]interface{}{}
 
 	if configMap.Data == nil {
 		configMap.Data = map[string]string{}
 	}
 
 	if configMap.Data["config.yaml"] != "" {
-		err := yaml.Unmarshal([]byte(configMap.Data["config.yaml"]), clusterMonitoringConfig)
+		err := yaml.Unmarshal([]byte(configMap.Data["config.yaml"]), &clusterMonitoringConfig)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("unmarshal OpenShift monitoring configuration: %w", err)
+		}
+		if clusterMonitoringConfig == nil {
+			clusterMonitoringConfig = map[string]interface{}{}
 		}
 	}
 
-	// If not using openshift built-in prometheus, revert configuration to default
+	prometheusK8sConfig, err := getPrometheusK8sConfig(clusterMonitoringConfig,
+		*cm.runaiConfig.Spec.Prometheus.Openshift.UseBuiltInPrometheus)
+	if err != nil {
+		return nil, err
+	}
+
+	remoteWrites, err := getRemoteWrites(prometheusK8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	if *cm.runaiConfig.Spec.Prometheus.Openshift.UseBuiltInPrometheus {
-		applyPrometheusConfig(clusterMonitoringConfig, config)
+		remoteWrites, err = applyPrometheusConfig(remoteWrites, config)
 	} else {
-		resetPrometheusConfig(clusterMonitoringConfig, config)
+		remoteWrites, err = resetPrometheusConfig(remoteWrites, config)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if prometheusK8sConfig != nil {
+		setRemoteWrites(prometheusK8sConfig, remoteWrites)
 	}
 
 	yamlConfig, err := yaml.Marshal(clusterMonitoringConfig)
@@ -126,15 +147,7 @@ func (cm *ConfigMap) Enabled() bool {
 	return true
 }
 
-func applyPrometheusConfig(clusterMonitoringConfig *manifests.ClusterMonitoringConfiguration, config *prometheus.Prometheus) {
-	if clusterMonitoringConfig.PrometheusK8sConfig == nil {
-		clusterMonitoringConfig.PrometheusK8sConfig = &manifests.PrometheusK8sConfig{}
-	}
-
-	if len(clusterMonitoringConfig.PrometheusK8sConfig.ExternalLabels) == 0 {
-		clusterMonitoringConfig.PrometheusK8sConfig.ExternalLabels = map[string]string{}
-	}
-
+func applyPrometheusConfig(remoteWrites []interface{}, config *prometheus.Prometheus) ([]interface{}, error) {
 	for _, spec := range config.Spec.RemoteWrite {
 		var insecureSkipVerify *bool
 		ca := promv1.SecretOrConfigMap{}
@@ -153,22 +166,133 @@ func applyPrometheusConfig(clusterMonitoringConfig *manifests.ClusterMonitoringC
 			URL:                 spec.URL,
 			WriteRelabelConfigs: spec.WriteRelabelConfigs,
 		}
-		exist, idx := findRemoteWrite(clusterMonitoringConfig.PrometheusK8sConfig.RemoteWrite, remoteWrite)
+		unstructuredRemoteWrite, err := remoteWriteToUnstructured(remoteWrite)
+		if err != nil {
+			return nil, err
+		}
+
+		exist, idx, err := findUnstructuredRemoteWrite(remoteWrites, remoteWrite.Name)
+		if err != nil {
+			return nil, err
+		}
 		if !exist {
-			clusterMonitoringConfig.PrometheusK8sConfig.RemoteWrite = append(clusterMonitoringConfig.PrometheusK8sConfig.RemoteWrite, remoteWrite)
+			remoteWrites = append(remoteWrites, unstructuredRemoteWrite)
 		} else {
-			clusterMonitoringConfig.PrometheusK8sConfig.RemoteWrite[idx] = remoteWrite
+			remoteWrites[idx] = unstructuredRemoteWrite
 		}
 	}
+
+	return remoteWrites, nil
 }
 
 // Reset the changes made to the configmap by the operator.
 // Not resetting the external labels as they might be configured by the user and are not RunAI specific.
-func resetPrometheusConfig(clusterMonitoringConfig *manifests.ClusterMonitoringConfiguration, config *prometheus.Prometheus) {
+func resetPrometheusConfig(remoteWrites []interface{}, config *prometheus.Prometheus) ([]interface{}, error) {
 	remoteWriteNames := lo.Map(config.Spec.RemoteWrite, func(rws promv1.RemoteWriteSpec, _ int) string { return utils.Deref(rws.Name) })
-	clusterMonitoringConfig.PrometheusK8sConfig.RemoteWrite = lo.Reject(clusterMonitoringConfig.PrometheusK8sConfig.RemoteWrite,
-		func(rw manifests.RemoteWriteSpec, _ int) bool {
-			return lo.Contains(remoteWriteNames, rw.Name)
-		},
-	)
+	remainingRemoteWrites := make([]interface{}, 0, len(remoteWrites))
+	for _, remoteWrite := range remoteWrites {
+		name, err := unstructuredRemoteWriteName(remoteWrite)
+		if err != nil {
+			return nil, err
+		}
+		if !lo.Contains(remoteWriteNames, name) {
+			remainingRemoteWrites = append(remainingRemoteWrites, remoteWrite)
+		}
+	}
+
+	return remainingRemoteWrites, nil
+}
+
+func getPrometheusK8sConfig(clusterMonitoringConfig map[string]interface{}, create bool) (map[string]interface{}, error) {
+	value, exists := clusterMonitoringConfig["prometheusK8s"]
+	if !exists || value == nil {
+		if !create {
+			return nil, nil
+		}
+
+		prometheusK8sConfig := map[string]interface{}{}
+		clusterMonitoringConfig["prometheusK8s"] = prometheusK8sConfig
+		return prometheusK8sConfig, nil
+	}
+
+	prometheusK8sConfig, ok := value.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("prometheusK8s configuration must be an object")
+	}
+
+	return prometheusK8sConfig, nil
+}
+
+func getRemoteWrites(prometheusK8sConfig map[string]interface{}) ([]interface{}, error) {
+	if prometheusK8sConfig == nil {
+		return nil, nil
+	}
+
+	value, exists := prometheusK8sConfig["remoteWrite"]
+	if !exists || value == nil {
+		return nil, nil
+	}
+
+	remoteWrites, ok := value.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("prometheusK8s.remoteWrite configuration must be an array")
+	}
+
+	return remoteWrites, nil
+}
+
+func setRemoteWrites(prometheusK8sConfig map[string]interface{}, remoteWrites []interface{}) {
+	if len(remoteWrites) == 0 {
+		delete(prometheusK8sConfig, "remoteWrite")
+		return
+	}
+
+	prometheusK8sConfig["remoteWrite"] = remoteWrites
+}
+
+func remoteWriteToUnstructured(remoteWrite manifests.RemoteWriteSpec) (map[string]interface{}, error) {
+	data, err := json.Marshal(remoteWrite)
+	if err != nil {
+		return nil, fmt.Errorf("marshal updated OpenShift remote write configuration: %w", err)
+	}
+
+	value := map[string]interface{}{}
+	if err := json.Unmarshal(data, &value); err != nil {
+		return nil, fmt.Errorf("unmarshal updated OpenShift remote write configuration: %w", err)
+	}
+
+	return value, nil
+}
+
+func findUnstructuredRemoteWrite(remoteWrites []interface{}, name string) (bool, int, error) {
+	for index, remoteWrite := range remoteWrites {
+		remoteWriteName, err := unstructuredRemoteWriteName(remoteWrite)
+		if err != nil {
+			return false, -1, err
+		}
+		if remoteWriteName == name {
+			return true, index, nil
+		}
+	}
+
+	return false, -1, nil
+}
+
+func unstructuredRemoteWriteName(remoteWrite interface{}) (string, error) {
+	remoteWriteMap, ok := remoteWrite.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("prometheusK8s.remoteWrite entry must be an object")
+	}
+
+	value, exists := remoteWriteMap["name"]
+	if !exists || value == nil {
+		return "", nil
+	}
+
+	name, ok := value.(string)
+	if !ok {
+		return "", fmt.Errorf("prometheusK8s.remoteWrite name must be a string")
+	}
+
+	return name, nil
 }
