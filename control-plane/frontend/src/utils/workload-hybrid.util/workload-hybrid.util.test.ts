@@ -359,7 +359,7 @@ describe("workload-hybrid.util", () => {
       expect(result).toBeUndefined();
     });
 
-    it("returns undefined if tokenData is missing and uidGidSource is FromIdpToken", () => {
+    it("preserves the IdP source when identity fields are already absent", () => {
       const security: WorkspaceSpecSpecAllOfSecurity = { uidGidSource: UidGidSource.FromIdpToken };
 
       const result = workloadHybridUtil._getCleanedSecurityFieldsFromUI(security);

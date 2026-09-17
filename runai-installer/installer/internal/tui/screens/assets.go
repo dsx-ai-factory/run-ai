@@ -83,7 +83,7 @@ func GetInputsViewOrder() map[configinputs.InstallInputType]int {
 	inputsViewOrderOnce.Do(func() {
 		inputsViewOrder = map[configinputs.InstallInputType]int{
 			configinputs.InstallInputClusterName:                0,
-			configinputs.InstallInputJfrogCreds:                 1,
+			configinputs.InstallInputRegistryPullSecret:         1,
 			configinputs.InstallInputFQDN:                       2,
 			configinputs.InstallInputIngressControllerHTTPSPort: 3,
 			configinputs.InstallInputSSLPath:                    4,

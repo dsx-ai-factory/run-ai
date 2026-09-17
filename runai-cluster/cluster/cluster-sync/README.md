@@ -36,7 +36,6 @@ The service is responsible for:
 │   ├── constants/          # Shared constants (labels, mount paths)
 │   ├── controllers/        # One reconciler per resource kind (nodes, pods, projects, …)
 │   ├── handlers/           # Per-kind translation to backend API payloads (+ parsers/)
-│   ├── generated/          # Generated swagger clients (do not edit — see copy-clients)
 │   ├── logger/             # zap logger setup
 │   ├── metrics/            # Prometheus metrics
 │   └── util/               # Shared helpers
@@ -62,7 +61,6 @@ Built with Go (see [`go.mod`](go.mod) — module `github.com/dsx-ai-factory/run-
 | `make lint` | Runs the Go linter (`lint-go`). |
 | `make validate` | No-op (kept for target parity across runai-cluster services). |
 | `make local-deploy` | Builds (amd64) and pushes the image (`build-go docker-build-generic docker-push-generic`). |
-| `make copy-clients` | Refreshes the generated swagger clients from `runai-common-packages/clients` (see [Code generation](#code-generation)). |
 
 ### Local build (local-dev.sh)
 
@@ -163,12 +161,6 @@ The Dockerfile sets `TARGETARCH` (build arg → env) to select the binary; it de
 
 ## Code generation
 
-`cluster-sync` talks to the backend through generated OpenAPI clients under `pkg/generated/` — **these directories are generated and must not be edited by hand.** Rather than regenerating in place, the clients are copied from the canonical generated sources in `runai-common-packages/clients`:
-
-```bash
-make copy-clients
-```
-
-The `copy-clients` target copies `runai-common-packages/clients/<client>/generated/*` into `pkg/generated/swagger-runai-<client>/`. The active `CLIENTS` set in the Makefile is currently `k8s-objects-tracker-client` and `policy-service-client` (other clients — assets/authorization/workloads/etc. — are consumed as Go module dependencies via `go.mod`; see the `TODO` note in the Makefile about migrating the remaining ones to the new generator).
+`cluster-sync` consumes OpenAPI clients from their canonical monorepo Go modules. Local `replace` directives in `go.mod` keep development builds on the matching source in this repository.
 
 The Kubernetes clientset under `pkg/` is likewise generated (via the code-generator tooling pinned in `tools.go`); regenerate it with the update-client script rather than editing by hand.

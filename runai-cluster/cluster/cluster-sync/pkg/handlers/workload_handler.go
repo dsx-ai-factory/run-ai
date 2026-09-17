@@ -136,6 +136,9 @@ func (h *WorkloadHandler) handleDelete(uid string, namespace, name, kind string)
 	request := h.backendClient.WorkloadsClient.WorkloadsAPI.DeleteWorkload(h.backendClient.Context(), uid)
 
 	res, err := request.Execute()
+	if res != nil {
+		_ = res.Body.Close()
+	}
 	return h.backendClient.HandleHttpResponse(res, err,
 		fmt.Sprintf("Deleted %s <%s/%s>", kind, namespace, name))
 }
@@ -153,6 +156,9 @@ func (h *WorkloadHandler) handleUpsert(workloadSyncFields *openapi.WorkloadSyncF
 		request = request.WorkloadSyncFields(*workloadSyncFields)
 
 		res, err := request.Execute()
+		if res != nil {
+			defer func() { _ = res.Body.Close() }()
+		}
 		logDetailedApiErrorMessageIfNeeded(res, err, "upsert workload")
 		finalError := h.backendClient.HandleHttpResponse(res, err,
 			fmt.Sprintf("Upserted %s <%s/%s>", kind, namespace, name))
@@ -540,6 +546,9 @@ func (h *WorkloadHandler) sendSyncWorkloadsRequests(
 	})
 
 	res, err := request.Execute()
+	if res != nil {
+		defer func() { _ = res.Body.Close() }()
+	}
 	logDetailedApiErrorMessageIfNeeded(res, err, msg)
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, msg)
 	if statusCode == http.StatusRequestEntityTooLarge && h.maxNumOfWorkloadsPerRequest > 2 {

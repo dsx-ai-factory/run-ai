@@ -27,15 +27,11 @@ func NewEnsureCluster(name string, action actions.EnsureCluster, deps orchestrat
 }
 
 func (s *ensureClusterStep) Detect(ctx context.Context, _ *spec.Spec) (orchestrator2.DetectResult, error) {
-	apiClient, err := s.deps.RunAIClientProvider(actions.ControlPlaneURL(s.action.Domain), s.action.CACertPath)
+	registered, err := s.action.Detect(ctx, s.deps)
 	if err != nil {
 		return orchestrator2.DetectResult{}, err
 	}
-	uuid, err := actions.FindClusterUUID(ctx, apiClient, s.action.ClusterName)
-	if err != nil {
-		return orchestrator2.DetectResult{}, err
-	}
-	if uuid != "" {
+	if registered {
 		return orchestrator2.DetectResult{Phase: orchestrator2.DetectInstalled}, nil
 	}
 	return orchestrator2.DetectResult{Phase: orchestrator2.DetectNotInstalled}, nil

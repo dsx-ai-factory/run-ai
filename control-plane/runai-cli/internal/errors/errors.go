@@ -16,7 +16,6 @@ import (
 	imc "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	cec "github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client/generated"
 	cac "github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client/generated"
-	nmc "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
 	ousc "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	wsc "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	wmc "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
@@ -78,8 +77,6 @@ func HandleResponseError(response *http.Response, err error) error {
 	case *imc.GenericOpenAPIError:
 		return newHttpError(response.Status, string(errType.Body()))
 	case *wmc.GenericOpenAPIError:
-		return newHttpError(response.Status, string(errType.Body()))
-	case *nmc.GenericOpenAPIError:
 		return newHttpError(response.Status, string(errType.Body()))
 	default:
 		return err

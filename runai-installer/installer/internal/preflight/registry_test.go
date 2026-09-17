@@ -36,22 +36,22 @@ func TestRegistryTargets_NGCTokenFree(t *testing.T) {
 	assert.Empty(t, targets)
 }
 
-func TestRegistryTargets_JFrogDockerConfig(t *testing.T) {
+func TestRegistryTargets_DockerConfig(t *testing.T) {
 	raw, err := json.Marshal(map[string]any{
 		"auths": map[string]any{
-			"runai.jfrog.io": map[string]any{"username": "u", "password": "p"},
+			"registry.example.com": map[string]any{"username": "u", "password": "p"},
 		},
 	})
 	require.NoError(t, err)
 	token := base64.StdEncoding.EncodeToString(raw)
 
 	targets, configErr := registryTargets(&spec.Spec{
-		Registry: &spec.Registry{Type: spec.RegistryTypeJFrog, Token: token},
+		Registry: &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: token},
 	})
 
 	assert.Empty(t, configErr)
 	require.Len(t, targets, 1)
-	assert.Equal(t, "runai.jfrog.io", targets[0].Host)
+	assert.Equal(t, "registry.example.com", targets[0].Host)
 	assert.Equal(t, "u", targets[0].Username)
 	assert.Equal(t, "p", targets[0].Password)
 }

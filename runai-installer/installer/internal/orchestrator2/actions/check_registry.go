@@ -14,7 +14,7 @@ import (
 
 // RegistryTarget is one registry the check probes (read-only).
 type RegistryTarget struct {
-	Name               string // human label, e.g. "image registry runai.jfrog.io"
+	Name               string // human label, e.g. "image registry registry.example.com"
 	Host               string
 	Repo               string
 	Project            string

@@ -125,7 +125,7 @@ func TestPack_PreflightForwardsCredentials(t *testing.T) {
 	t.Fatal("nvcr.io was never probed")
 }
 
-func TestPack_JFrogJWTWithoutDockerAccessClaim(t *testing.T) {
+func TestPack_JWTWithoutDockerAccessClaim(t *testing.T) {
 	res := runPackWithRegistryClaims(t, map[string]any{
 		"sub": "ci-user",
 		"scp": "member-of-groups:readers",

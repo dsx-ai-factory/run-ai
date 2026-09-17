@@ -16,9 +16,20 @@ import (
 )
 
 const (
-	adminUsernameKey = "ADMIN_USERNAME"
-	adminPasswordKey = "ADMIN_PASSWORD"
+	AdminUsernameKey = "ADMIN_USERNAME"
+	AdminPasswordKey = "ADMIN_PASSWORD"
 )
+
+func AdminConfigMapName(release string) string {
+	return release + "-tenants-manager"
+}
+
+func AdminSecretName(release, version string) string {
+	if useGeneratedAdminSecret(version) {
+		return release + "-gen-tenants-manager"
+	}
+	return release + "-tenants-manager"
+}
 
 type ObjectGetter interface {
 	Get(ctx context.Context, key client.ObjectKey, obj client.Object) error
@@ -38,26 +49,22 @@ func (g *clientObjectGetter) Get(ctx context.Context, key client.ObjectKey, obj 
 
 func LoadControlPlaneCredentials(ctx context.Context, getter ObjectGetter, namespace, release, version string) (runaiclient.Credentials, error) {
 	configMap := &corev1.ConfigMap{}
-	if err := getter.Get(ctx, client.ObjectKey{Namespace: namespace, Name: release + "-tenants-manager"}, configMap); err != nil {
+	if err := getter.Get(ctx, client.ObjectKey{Namespace: namespace, Name: AdminConfigMapName(release)}, configMap); err != nil {
 		return runaiclient.Credentials{}, fmt.Errorf("get control-plane admin username: %w", err)
 	}
 
-	secretName := release + "-tenants-manager"
-	if useGeneratedAdminSecret(version) {
-		secretName = release + "-gen-tenants-manager"
-	}
 	secret := &corev1.Secret{}
-	if err := getter.Get(ctx, client.ObjectKey{Namespace: namespace, Name: secretName}, secret); err != nil {
+	if err := getter.Get(ctx, client.ObjectKey{Namespace: namespace, Name: AdminSecretName(release, version)}, secret); err != nil {
 		return runaiclient.Credentials{}, fmt.Errorf("get control-plane admin password: %w", err)
 	}
 
-	username := configMap.Data[adminUsernameKey]
+	username := configMap.Data[AdminUsernameKey]
 	if username == "" {
-		return runaiclient.Credentials{}, fmt.Errorf("%s is empty in ConfigMap %s/%s", adminUsernameKey, namespace, configMap.Name)
+		return runaiclient.Credentials{}, fmt.Errorf("%s is empty in ConfigMap %s/%s", AdminUsernameKey, namespace, configMap.Name)
 	}
-	password := string(secret.Data[adminPasswordKey])
+	password := string(secret.Data[AdminPasswordKey])
 	if password == "" {
-		return runaiclient.Credentials{}, fmt.Errorf("%s is empty in Secret %s/%s", adminPasswordKey, namespace, secret.Name)
+		return runaiclient.Credentials{}, fmt.Errorf("%s is empty in Secret %s/%s", AdminPasswordKey, namespace, secret.Name)
 	}
 
 	return runaiclient.Credentials{Username: username, Password: password}, nil

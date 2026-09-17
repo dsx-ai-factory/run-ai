@@ -36,15 +36,15 @@ type ValidationResult struct {
 	Message string
 }
 
-// ValidateJfrogCredentials validates NGC credentials in base64 format
-func ValidateJfrogCredentials(credentials string) ValidationResult {
+// ValidatePullSecret validates a base64-encoded docker config (.dockerconfigjson) pull secret
+func ValidatePullSecret(credentials string) ValidationResult {
 	credentials = strings.TrimSpace(credentials)
 
 	if credentials == "" {
 		return ValidationResult{
-			Name:    "Jfrog credentials",
+			Name:    "Registry pull secret",
 			Status:  false,
-			Message: "registry token is required: provide the base64-encoded docker config (.dockerconfigjson) from JFrog",
+			Message: "registry token is required: provide the base64-encoded docker config (.dockerconfigjson) for the image registry",
 		}
 	}
 
@@ -54,14 +54,14 @@ func ValidateJfrogCredentials(credentials string) ValidationResult {
 	// tokens (wrong padding/length, URL-safe alphabet) the real decoder rejects.
 	if _, err := base64.StdEncoding.DecodeString(credentials); err != nil {
 		return ValidationResult{
-			Name:    "Jfrog credentials",
+			Name:    "Registry pull secret",
 			Status:  false,
 			Message: "registry token must be a single-line standard base64-encoded docker config (.dockerconfigjson) with no spaces or line breaks.",
 		}
 	}
 
 	return ValidationResult{
-		Name:    "Jfrog credentials",
+		Name:    "Registry pull secret",
 		Status:  true,
 		Message: "Valid",
 	}

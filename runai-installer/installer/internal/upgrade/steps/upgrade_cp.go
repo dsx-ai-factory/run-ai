@@ -47,6 +47,11 @@ func (s *UpgradeCPChart) Execute(ctx context.Context, runaiData *model.RunAIInst
 	)
 
 	repo := step.CPChartRepo(s.upgradeCfg.Env)
+	if repo == "" {
+		err := step.MissingChartRepoError(step.CPChartName)
+		s.SetStatus(model.Failed, err)
+		return err
+	}
 	logging.Infof("[Upgrade] Upgrading CP chart to version %s from %s", version, repo)
 	err := s.helmInstaller.InstallOrUpgradeRelease(ctx,
 		repo, version, step.CPReleaseName, step.CPChartName, step.CPNamespace, false, values)

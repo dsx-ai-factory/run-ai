@@ -106,3 +106,11 @@ func IsWithinLastMinute(timestampStr string) (bool, error) {
 	oneMinuteAgo := time.Now().Add(-1 * time.Minute)
 	return t.After(oneMinuteAgo) && t.Before(time.Now()), nil
 }
+
+func NewClusterServiceClientWithCredentials(controlPlaneURL, caCertPath string, creds runaiclient.Credentials) (*ClusterServiceClient, error) {
+	client, err := runaiclient.NewClientWithCA(controlPlaneURL, creds, caCertPath)
+	if err != nil {
+		return nil, fmt.Errorf("connect to control plane %s: %w", controlPlaneURL, err)
+	}
+	return NewClusterServiceClientFromRunAI(client), nil
+}

@@ -36,11 +36,8 @@ navigation:
         path: ../../docs/getting-started/whats-new/whats-new-3-0.md
       - page: Deprecation Notifications
         path: ../../docs/getting-started/whats-new/deprecation-notifications.md
-    - section: About NVIDIA Run:ai Enterprise
-      path: ../../docs/about-enterprise/README.md
-      contents:
-      - page: Support, Lifecycle, and Deprecation Policy
-        path: ../../docs/about-enterprise/product-support-policy.md
+    - page: Support, Lifecycle, and Deprecation Policy
+      path: ../../docs/getting-started/product-support-policy.md
   - section: Installation and Configuration
     contents:
     - page: Overview

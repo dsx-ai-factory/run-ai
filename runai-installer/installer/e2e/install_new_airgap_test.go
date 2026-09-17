@@ -30,7 +30,7 @@ var _ = Describe("Installer New Flow Airgap E2E", Label(newFlowLabel), func() {
 
 	It("should install an air-gapped self-hosted environment from a spec file", func() {
 		version := airgapVersion()
-		tarball := downloadOrReuseAirgapPackage(testEnv.JfrogToken, version, testEnv.TempDir, "E2E_AIRGAP_TARBALL")
+		tarball := downloadOrReuseAirgapPackage(testEnv.PullSecret, version, testEnv.TempDir, "E2E_AIRGAP_TARBALL")
 
 		workingDir := filepath.Join(testEnv.TempDir, "airgap-extracted")
 		Expect(os.MkdirAll(workingDir, 0o755)).To(Succeed())

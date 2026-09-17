@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   version: 2.0.0
 servers:
-- url: https://app.run.ai
+- url: http://localhost:8080
 tags:
 # Parent group tags (required for GitBook x-parent hierarchy)
 - name: Organizations
@@ -356,4 +356,3 @@ x-tagGroups:
 - name: AI Applications
   tags:
   - AI Applications
-
