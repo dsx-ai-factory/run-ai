@@ -1,4 +1,4 @@
-module github.com/dsx-ai-factory/run-ai/runai-common-packages/auth
+module github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth
 
 go 1.23.4
 

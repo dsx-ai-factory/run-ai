@@ -4,7 +4,7 @@ go 1.26.8
 
 require (
 	github.com/coreos/go-oidc/v3 v3.11.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/auth v0.0.0-20250428075130-be7291f11588
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
 	github.com/rs/zerolog v1.34.0
 	golang.org/x/oauth2 v0.36.0
@@ -79,4 +79,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/dsx-ai-factory/run-ai/runai-common-packages/auth => ./../runai-auth
+replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth => ./../runai-auth

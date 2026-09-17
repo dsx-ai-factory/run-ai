@@ -104,8 +104,8 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/auth v0.0.0-20250428075130-be7291f11588 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
@@ -296,4 +296,4 @@ replace knative.dev/networking => knative.dev/networking v0.0.0-20250117155906-6
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 => ../dromos/api/v1alpha1
 
-replace github.com/dsx-ai-factory/run-ai/runai-common-packages/auth => ./../../common/runai-auth
+replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth => ./../../common/runai-auth
