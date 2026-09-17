@@ -99,7 +99,7 @@ func (s *AccessRulesApiService) AccessRulesMigrateDeprecated(ctx context.Context
 
 	// Old role: must exist and be deprecated. Enabled check is intentionally skipped — a
 	// deprecated role may also be disabled, and migrating away from it is still valid.
-	oldRole, apiErr := dao.DbGetRoleByIdWithInternal(ctx, tenantIdStr, uint(request.OldRoleId), nil)
+	oldRole, apiErr := dao.DbGetRoleByIdWithInternal(ctx, tenantIdStr, uint(request.OldRoleId))
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
@@ -278,7 +278,7 @@ func validateSubjectId(req api.AccessRuleCreationFields) *api.Error {
 }
 
 func validateCreationRequestRole(ctx context.Context, roleId int32, tenantId uint) (*models.Role, *api.Error) {
-	role, err := dao.DbGetRoleByIdWithInternal(ctx, fmt.Sprintf("%d", tenantId), uint(roleId), nil)
+	role, err := dao.DbGetRoleByIdWithInternal(ctx, fmt.Sprintf("%d", tenantId), uint(roleId))
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get the role %d data. err: %v", roleId, err)
 		return nil, err
@@ -588,7 +588,7 @@ func getPredefinedRoleForSync(ctx context.Context, accessRule models.AccessRule,
 	if newRolesSupported {
 		// all roles supported - return the original predefined role
 		if accessRule.Role.ClusterRolePredefinedId != nil {
-			return dao.DbGetRoleById(ctx, fmt.Sprint(tenantId), uint(*accessRule.Role.ClusterRolePredefinedId), nil)
+			return dao.DbGetRoleById(ctx, fmt.Sprint(tenantId), uint(*accessRule.Role.ClusterRolePredefinedId))
 		}
 		return nil, nil
 	}
@@ -596,7 +596,7 @@ func getPredefinedRoleForSync(ctx context.Context, accessRule models.AccessRule,
 	var err *api.Error
 	if accessRule.Role.ClusterRolePredefinedId != nil {
 		// not all roles are supported and there is predefined role - return it or the supported one from NewToLegacyRolesMap
-		predefinedRole, err = dao.DbGetRoleById(ctx, fmt.Sprint(tenantId), uint(*accessRule.Role.ClusterRolePredefinedId), nil)
+		predefinedRole, err = dao.DbGetRoleById(ctx, fmt.Sprint(tenantId), uint(*accessRule.Role.ClusterRolePredefinedId))
 		if err != nil {
 			return nil, err
 		}
@@ -604,13 +604,13 @@ func getPredefinedRoleForSync(ctx context.Context, accessRule models.AccessRule,
 		if !found {
 			return predefinedRole, nil
 		}
-		return dao.DbGetRoleById(ctx, fmt.Sprint(tenantId), dao.MapStaticRoleNameToRoleId[mappedRoleName], nil)
+		return dao.DbGetRoleById(ctx, fmt.Sprint(tenantId), dao.MapStaticRoleNameToRoleId[mappedRoleName])
 	}
 	// not all roles are supported and there is no predefined role - return the role itself or the supported one from NewToLegacyRolesMap
 	mappedRoleName, found := NewToLegacyRolesMap[accessRule.Role.Name]
 	if found {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("role %s is not supported in cluster, mapping to role %s", accessRule.Role.Name, mappedRoleName)
-		return dao.DbGetRoleById(ctx, fmt.Sprint(tenantId), dao.MapStaticRoleNameToRoleId[mappedRoleName], nil)
+		return dao.DbGetRoleById(ctx, fmt.Sprint(tenantId), dao.MapStaticRoleNameToRoleId[mappedRoleName])
 	}
 	return nil, nil
 }

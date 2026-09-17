@@ -85,7 +85,6 @@ func renameRoleIfLegacyNotExists(oldName, newName string) {
 
 func migrateDeprecatedRoleNames() {
 	renameRoleIfLegacyNotExists("Department administrator", "Department administrator (Legacy)")
-	renameRoleIfLegacyNotExists("Department administrator-DGXC", "Department administrator-DGXC (Legacy)")
 }
 
 func InitStaticLegacyRoles() {
@@ -94,16 +93,8 @@ func InitStaticLegacyRoles() {
 	initializerDao := RoleDaoInitializer{}
 
 	for _, role := range LegacyRoles {
-		var added bool
 		if config.Get[*authorization_config.Server]().IsCSP {
 			role.Permissions = updateCSPPermissions(role.Permissions)
-		}
-
-		added = addToDGXCRolesIfNeeded(&role)
-		if added {
-			role.RoleType = models.NonDGXC
-		} else {
-			role.RoleType = models.ALL
 		}
 
 		id, err := initializerDao.DbUpsertLegacyRole(context.Background(), role)
@@ -175,17 +166,6 @@ func getCspPermissionSets(original *[]models.PermissionSet, changeMap map[string
 	return newPermissionSets
 }
 
-func addToDGXCRolesIfNeeded(role *models.Role) bool {
-	role.RoleType = models.ALL
-	for _, permission := range role.Permissions {
-		if permission.ReadOnlyForDGXCManaged && (permission.Create || permission.Update || permission.Delete) {
-			role.RoleType = models.NonDGXC
-		}
-	}
-
-	return role.RoleType == models.NonDGXC
-}
-
 func updateCSPPermissions(permissions []*models.Permission) []*models.Permission {
 	filtered := []*models.Permission{}
 	for _, permission := range permissions {
@@ -238,7 +218,7 @@ func InitAccessRulesForTests(tenantId uint, managementTenantId uint) (*models.Ac
 
 func InitRolesMap(rolesMap *map[string]uint) {
 	logging.Infof("Initializing roles map")
-	roles, _ := DbGetRoles(context.Background(), fmt.Sprintf("%d", testing.TestTenant), testing.TestTenant == testing.DGXCTestTenant, 0, 0, "", "", nil, "", false)
+	roles, _ := DbGetRoles(context.Background(), fmt.Sprintf("%d", testing.TestTenant), 0, 0, "", "", nil, "", false)
 
 	for _, role := range *roles {
 		(*rolesMap)[role.Name] = role.ID

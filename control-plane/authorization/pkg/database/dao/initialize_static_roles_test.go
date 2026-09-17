@@ -64,7 +64,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 
 		It("test after init that legacy roles have permission set", func() {
 			InitStaticLegacyRoles()
-			roles, err := DbGetRoles(context.Background(), "", false, 100, 0, "", "", nil, "", false)
+			roles, err := DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "L1 researcher" {
@@ -89,7 +89,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 
 		It("test after init that new roles have permission set", func() {
 			// before second run - System administrator has 30 permission sets
-			roles, err := DbGetRoles(context.Background(), "", false, 100, 0, "", "", nil, "", false)
+			roles, err := DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "System administrator" {
@@ -128,7 +128,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 			}
 			InitStaticRoles()
 			// before second run - System administrator has 3 permission sets
-			roles, err = DbGetRoles(context.Background(), "", false, 100, 0, "", "", nil, "", false)
+			roles, err = DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "System administrator" {
@@ -187,7 +187,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 		BeforeAll(func() {
 			var legacyForUpdate models.Role
 			var migratedForUpdate models.Role
-			roles, err := DbGetRoles(context.Background(), "", false, 100, 0, "", "", nil, "", false)
+			roles, err := DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "L1 researcher" {
@@ -224,7 +224,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 		})
 
 		It("test legacy update after roles don't have permission set", func() {
-			roles, err := DbGetRoles(context.Background(), "", false, 100, 0, "", "", nil, "", false)
+			roles, err := DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "L1 researcher" {
@@ -247,7 +247,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 				}
 			}
 			InitStaticLegacyRoles()
-			roles, err = DbGetRoles(context.Background(), "", false, 100, 0, "", "", nil, "", false)
+			roles, err = DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "L1 researcher" {
@@ -266,7 +266,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 		})
 
 		It("test upgraded update after roles don't have permission set", func() {
-			roles, err := DbGetRoles(context.Background(), "", false, 100, 0, "", "", nil, "", false)
+			roles, err := DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "Viewer" {
@@ -274,7 +274,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 				}
 			}
 			InitStaticRoles()
-			roles, err = DbGetRoles(context.Background(), "", false, 100, 0, "", "", nil, "", false)
+			roles, err = DbGetRoles(context.Background(), "", 100, 0, "", "", nil, "", false)
 			Expect(err).To(BeNil())
 			for _, role := range *roles {
 				if role.Name == "Viewer" {

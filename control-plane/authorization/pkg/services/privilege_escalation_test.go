@@ -35,7 +35,6 @@ type ValidateCurrentUserHasPrivilegeTestArgs struct {
 	ShouldAllow      bool
 	Tenant           uint
 	AssignedRole     *models.Role
-	DgxcRole         bool
 }
 
 const SuperAdmin = "super-admin"
@@ -81,13 +80,13 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 		role := args.AssignedRole
 		var err *api.Error
 		if role == nil {
-			role, err = dao.DbGetRoleByIdWithInternal(ctx, fmt.Sprintf("%d", args.Tenant), dao.MapStaticRoleNameToRoleId[args.AssignedRoleName], nil)
+			role, err = dao.DbGetRoleByIdWithInternal(ctx, fmt.Sprintf("%d", args.Tenant), dao.MapStaticRoleNameToRoleId[args.AssignedRoleName])
 			Expect(err).To(BeNil())
 		} else {
 			// roles are override (in DescribeTable) so we want the new id
 			filters, _ := queryapi.NewParser(models.Role{}.SortAndFilterFieldsToColumn()).
 				Filters([]string{fmt.Sprintf("name=^%s", args.AssignedRoleName)})
-			roles, err := dao.DbGetRoles(ctx, fmt.Sprintf("%d", testing.TestTenant), args.DgxcRole, 0, 0, "", "", filters, "", false)
+			roles, err := dao.DbGetRoles(ctx, fmt.Sprintf("%d", testing.TestTenant), 0, 0, "", "", filters, "", false)
 			Expect(err).To(BeNil())
 			Expect(roles).NotTo(BeNil())
 			Expect(len(*roles)).To(BeNumerically(">=", 1)) // at least one role with the name, could be more due legacy and non-legacy roles
@@ -170,17 +169,11 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 	AfterAll(func() {
 		for _, accessRule := range createdAccessRules {
 			err := dao.DbDeleteAccessRule(ctx, testing.TestTenant, accessRule.ID)
-			if err != nil {
-				err = dao.DbDeleteAccessRule(ctx, testing.DGXCTestTenant, accessRule.ID)
-			}
 			Expect(err).To(BeNil())
 		}
 		createdAccessRules = []*models.AccessRule{}
 		for _, accessRule := range createdAccessRulesForNewUser {
 			err := dao.DbDeleteAccessRule(ctx, testing.TestTenant, accessRule.ID)
-			if err != nil {
-				err = dao.DbDeleteAccessRule(ctx, testing.DGXCTestTenant, accessRule.ID)
-			}
 			Expect(err).To(BeNil())
 		}
 		createdAccessRulesForNewUser = []*models.AccessRule{}
