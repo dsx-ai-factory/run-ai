@@ -266,6 +266,10 @@ cluster:
       certPath: /path/to/wildcard-cert.pem
       keyPath: /path/to/wildcard-key.pem
   controlPlaneUrl: ""
+  uid: "" # alternative to controlPlaneCredentials, together with bootstrapTokenPath or clientSecretPath
+  bootstrapTokenPath: ""
+  controlPlaneCredentials:
+    tokenPath: ""
   customHelmValues: {}
 ```
 
@@ -279,7 +283,11 @@ cluster:
 | `tls` | [`tls`](#tls) | No | Cluster TLS settings. Overrides the top-level `tls` configuration. |
 | `inference.wildcardDomain` | string | No | Wildcard FQDN for inference endpoints (for example, `*.runai-inference.mycorp.local`). Required when Knative is installed. |
 | `inference.wildcardTls` | [`tls`](#tls) | No | TLS settings for the wildcard inference domain. |
-| `controlPlaneUrl` | string | No | URL of the NVIDIA Run:ai control plane. Not currently read by the installer - the control plane endpoint the cluster component calls is derived from `domain` instead. Do not rely on this field. |
+| `controlPlaneUrl` | string | No | URL of the NVIDIA Run:ai control plane, reachable over HTTPS. Required when the cluster component is installed on a different Kubernetes cluster than the control plane (`mode: runai_cluster_only`), so the installer can reach the control plane to register the cluster. |
+| `uid` | string | No | Unique identifier of an existing cluster in the control plane, obtained from the control plane UI or API. Used together with exactly one of `bootstrapTokenPath` or `clientSecretPath` to register with an existing cluster, as an alternative to `controlPlaneCredentials`. |
+| `bootstrapTokenPath` | string | No | Path to a file containing the bootstrap token for the existing cluster identified by `uid`, obtained from the control plane UI or API. Mutually exclusive with `clientSecretPath`. |
+| `clientSecretPath` | string | No | Path to a file containing the client secret for the existing cluster identified by `uid`, obtained from the control plane UI or API. Mutually exclusive with `bootstrapTokenPath`. |
+| `controlPlaneCredentials` | object | No | Control plane login used to create the cluster in the control plane if it does not already exist, or reuse it if it does, as an alternative to `uid` plus `bootstrapTokenPath`/`clientSecretPath`. Accepts either a username and password (`username`, and `passwordPath` or inline `password`) or a token (`tokenPath` or inline `token`), but not both. |
 | `customHelmValues` | map | No | Custom Helm values merged into the cluster chart. Use this field to configure settings that are not exposed directly by the installer. |
 
 ---

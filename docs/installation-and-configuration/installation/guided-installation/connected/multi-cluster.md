@@ -98,15 +98,7 @@ When the installation completes, verify that the control plane is reachable at i
 
 ## Install Each NVIDIA Run:ai Cluster
 
-Create a `cluster-config.yaml` file for each NVIDIA Run:ai cluster.
-
-<Warning>
-
-**TODO**
-
-This section is stale - cluster registration is not fully automatic. `runai_cluster_only` now requires `cluster.controlPlaneUrl`, `cluster.uid`, and `cluster.bootstrapTokenPath` in the cluster config, obtained from the control plane. How the user obtains these values is still being decided by engineering (as of 2026-09). Update this note, the field list, and the example config below once that's settled. The control plane must already be installed and reachable at the cluster's domain.
-
-</Warning>
+Create a `cluster-config.yaml` file for each NVIDIA Run:ai cluster. The control plane must already be installed and reachable at its FQDN.
 
 At a minimum, configure:
 
@@ -115,6 +107,8 @@ At a minimum, configure:
 - `registry` - Open Source installations set `registry.type: ngc` with no credentials needed. NVIDIA Run:ai Support-Entitled Release installations set the same field, plus your NGC credentials. See [Registry Credentials](preparations.md#registry-credentials).
 - `cluster.name` - The name of the NVIDIA Run:ai cluster as it appears in the control plane
 - `cluster.domain` - The FQDN for this cluster. Required when the cluster component is installed on a different Kubernetes cluster than the control plane. The installer also uses this domain to reach the control plane when registering the cluster.
+- `cluster.controlPlaneUrl` - The control plane's FQDN, reachable over HTTPS from this cluster.
+- `cluster.uid` plus one of `cluster.bootstrapTokenPath`/`cluster.clientSecretPath`, or `cluster.controlPlaneCredentials` - Identifies this cluster to the control plane. See [Preparations](preparations.md#system-requirements) for the two available methods.
 - `cluster.tls` - A certificate and private key for the cluster's FQDN, as `certPath` and `keyPath`. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates).
 - `cluster.version` - The cluster version to install. Omit it to install the latest supported version. See [`cluster`](../configuration-reference.md#cluster).
 - `prerequisites` - GPU Operator and Prometheus are required for every installation. Set both to `mode: install`. Each also accepts its own `version` field - omit it to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported version range if you want to set it explicitly. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites).
@@ -128,7 +122,7 @@ At a minimum, configure:
 
 </Note>
 
-The following example installs the NVIDIA Run:ai cluster component on a separate Kubernetes cluster and registers it with the control plane (see the TODO note above):
+The following example installs the NVIDIA Run:ai cluster component on a separate Kubernetes cluster, and has the installer register it with the control plane using a control plane token:
 
 ```yaml
 install:
@@ -143,6 +137,9 @@ cluster:
   enabled: true
   name: cluster-a
   domain: runai-a.mycorp.local
+  controlPlaneUrl: https://runai.mycorp.local
+  controlPlaneCredentials:
+    tokenPath: /path/to/cp-token
   tls:
     certPath: /path/to/cluster-a-cert.pem
     keyPath: /path/to/cluster-a-key.pem

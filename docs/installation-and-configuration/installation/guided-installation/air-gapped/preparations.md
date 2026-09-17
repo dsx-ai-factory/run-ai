@@ -23,16 +23,13 @@ Multi-cluster deployments also need:
 
 | Requirement | Details |
 |---|---|
-| Control plane access | The control plane's FQDN (`cluster.controlPlaneUrl`), reachable over HTTPS - the installer registers each cluster by calling the control plane's API directly, authenticated with credentials it reads from a Kubernetes Secret |
+| Control plane access | The control plane's FQDN (`cluster.controlPlaneUrl`), reachable over HTTPS from each NVIDIA Run:ai cluster, and a way to identify the cluster to the control plane - see below |
 | Network connectivity | Outbound HTTPS (port 443) from the nodes of each NVIDIA Run:ai cluster to the control plane FQDN. See [Control Plane and Cluster Sync](../../../system-requirements/external-access-to-critical-services.md#control-plane-and-cluster-sync) |
 
-<Warning>
+Identify the NVIDIA Run:ai cluster to the control plane using one of two methods:
 
-**TODO**
-
-Unconfirmed how the installer obtains the control plane's admin credentials when registering a cluster in a genuine multi-cluster deployment. The registration step reads these credentials from a Kubernetes Secret via the same Kubernetes client used for the current run - which, for `runai_cluster_only` (run with `--kubeconfig` pointed at the target NVIDIA Run:ai cluster, not the control plane), would be the target cluster's client, not the control plane's. Need to confirm with engineering whether a separate credential-passing mechanism exists for this case, or whether this is a real gap in the current flow.
-
-</Warning>
+- Let the installer add the cluster - The default for a new installation. Provide a control plane login, and the installer creates the cluster in the control plane for you (or reuses it, if a cluster with that name already exists there). Set `cluster.controlPlaneCredentials` to either a username and password (`username`, plus `passwordPath` or inline `password`) or a token (`tokenPath` or inline `token`). The control plane's own admin login works here - the installer prints it after installing the control plane. See [Install the Control Plane](multi-cluster.md#install-the-control-plane).
+- Cluster already added in the control plane - Use this method if someone already added the cluster in the control plane UI or API beforehand, where it now shows status **Waiting to connect**. Provide the identity the control plane issued for it: `cluster.uid`, plus one of `cluster.bootstrapTokenPath` or `cluster.clientSecretPath`.
 
 ## Registry Credentials
 
