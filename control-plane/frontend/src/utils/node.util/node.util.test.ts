@@ -5,7 +5,7 @@
 
 import { vi, describe, it, expect } from "vitest";
 import { NodeStatusEnum, type Node, type MetricsResponse } from "@/swagger-models/cluster-service-client";
-import { NrtHealthyConditionType } from "@/models/node.model";
+import { GpuFractioningConditionType, NrtHealthyConditionType } from "@/models/node.model";
 import { nodeUtil } from "@/utils/node.util/node.util";
 
 vi.mock("@/utils/docs.util/docs.util", () => ({
@@ -47,6 +47,37 @@ describe("getStatusColOptions", () => {
     const result = nodeUtil.getStatusColOptions(node);
 
     expect(result.tooltipText).toBe("");
+  });
+
+  it("renders the operator-provided message for a missing GPU fractioning prerequisite", () => {
+    const node = {
+      status: NodeStatusEnum.MissingPrerequisites,
+      conditions: [
+        {
+          type: GpuFractioningConditionType,
+          reason: "GPUDriverVersionMissing",
+          message: "The NVIDIA driver on this node is older than the version GPU fractions require.",
+        },
+      ],
+    } as Node;
+
+    const result = nodeUtil.getStatusColOptions(node);
+
+    expect(result.status).toBe("Missing Prerequisites");
+    expect(result.tooltipText).toBe(
+      "The NVIDIA driver on this node is older than the version GPU fractions require.<br>",
+    );
+  });
+
+  it("falls back to the static message when the GPU fractioning condition carries none", () => {
+    const node = {
+      status: NodeStatusEnum.MissingPrerequisites,
+      conditions: [{ type: GpuFractioningConditionType, reason: "NotManaged" }],
+    } as Node;
+
+    const result = nodeUtil.getStatusColOptions(node);
+
+    expect(result.tooltipText).toBe("GPU fractions are not supported on this node.<br>");
   });
 
   it("still renders static messages for existing condition types", () => {

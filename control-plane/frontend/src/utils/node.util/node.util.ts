@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type INode, NodeConditionMap, NodeStatusMap, NrtHealthyConditionType } from "@/models/node.model";
+import {
+  GpuFractioningConditionType,
+  type INode,
+  NodeConditionMap,
+  NodeStatusMap,
+  NrtHealthyConditionType,
+} from "@/models/node.model";
 import {
   type MetricsResponse,
   type Node,
@@ -71,6 +77,13 @@ function _getConditionMessage(condition: NodeStatusConditionDetails): string | u
     return condition.message
       ? `${stringUtil.replaceNewLineWithBreaks(condition.message)} ${docsUtil.getNumaAwareSchedulingHTMLLink()}`
       : undefined;
+  }
+  // The GPU fractioning operator supplies its own reason and message per failing node, so the
+  // static entry is only a fallback for when it reports none.
+  if (condition.type === GpuFractioningConditionType) {
+    return condition.message
+      ? stringUtil.replaceNewLineWithBreaks(condition.message)
+      : NodeConditionMap[condition.type]?.message;
   }
   return NodeConditionMap[condition.type]?.message;
 }
