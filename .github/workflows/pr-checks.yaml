@@ -170,7 +170,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - run: pip install --only-binary :all: ruff==0.15.15
+      - run: "pip install --only-binary :all: ruff==0.15.15"
 
       - name: Run ruff on changed .py files in this project
         env:
@@ -209,7 +209,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - run: pip install --only-binary :all: pip-audit==2.10.0
+      - run: "pip install --only-binary :all: pip-audit==2.10.0"
 
       - name: Run pip-audit (informational — does not gate merge)
         continue-on-error: true
