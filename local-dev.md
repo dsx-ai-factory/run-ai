@@ -9,7 +9,7 @@ local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine
 | Requirement | Notes |
 |---|---|
 | **OS / Architecture** | `macOS` or `Linux`, `amd64` or `arm64` — the only four supported combinations. Any other platform, such as Windows, stops the script with a clear error before setup begins. |
-| **Docker Desktop** | Must be running. On Linux, enable the containerd image store. macOS uses Podman instead (see below). |
+| **Container Runtime** | Use docker or podman. On Linux, enable the containerd image store. See more info on Podman settings for MacOS below. |
 | **Podman VM ≥ 12 GB RAM** | macOS only. The full stack (NATS×3, PostgreSQL, Keycloak, ~50 services) requires at least 12 GB. With 8 GB the API server starves under QEMU overhead and the cluster never stabilises. Resize with `podman machine stop && podman machine set --memory 12288 && podman machine start`. |
 | **`GITHUB_TOKEN`** | Only needed while the repo is private — Go builds pull modules from `github.com/run-ai/*`. Not required with `--skip-build` or once the repo is public. Set it before running: `export GITHUB_TOKEN=ghp_...` |
 | **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.31.0`, node image `v1.32.5`); `kubectl` and `helm` always install the latest release. |
