@@ -243,7 +243,12 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 
 	gpuFractioningEnabled := config.Config().EnableNodeGpuFractioningReadiness
 
-	result = append(result, calculateStatusConditions(node.Status.Conditions, gpuFractioningEnabled)...)
+	ignoredConditionTypes := map[corev1.NodeConditionType]bool{}
+	if gpuFractioningEnabled {
+		ignoredConditionTypes[GpuFractioningReadyConditionType] = true
+	}
+
+	result = append(result, calculateStatusConditions(node.Status.Conditions, ignoredConditionTypes)...)
 
 	result = append(result, calculateUnschedulableCondition(node)...)
 
@@ -378,13 +383,11 @@ func getReadinessPhase(conditions []swagger.NodeStatusConditionDetails) string {
 }
 
 func calculateStatusConditions(
-	conditions []corev1.NodeCondition, gpuFractioningEnabled bool,
+	conditions []corev1.NodeCondition, ignoredConditionTypes map[corev1.NodeConditionType]bool,
 ) []swagger.NodeStatusConditionDetails {
 	result := []swagger.NodeStatusConditionDetails{}
 	for _, condition := range conditions {
-		// Readiness polarity: passing this through would emit it on exactly the healthy nodes.
-		// calculateGpuFractioningCondition translates it instead.
-		if gpuFractioningEnabled && condition.Type == GpuFractioningReadyConditionType {
+		if ignoredConditionTypes[condition.Type] {
 			continue
 		}
 
