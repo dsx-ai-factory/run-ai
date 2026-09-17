@@ -22,22 +22,18 @@ import (
 
 const ingressClassAnnotation = "kubernetes.io/ingress.class"
 
-// These settings are administrator-owned, not derived from a submission profile
-// or from the object being validated. Exact defaults are explicitly trusted
-// infrastructure; they are not evidence that their destinations are workload Pods.
+// Routing bindings come from cluster configuration, not the object being validated.
 type routingConstraints struct {
-	ingressClass       string
-	gatewayName        string
-	gatewayNamespace   string
-	ingressAnnotations map[string]string
+	ingressClass     string
+	gatewayName      string
+	gatewayNamespace string
 }
 
 func configuredRoutingConstraints() routingConstraints {
 	return routingConstraints{
-		ingressClass:       workloadconfig.IngressClass(),
-		gatewayName:        workloadconfig.GatewayName(),
-		gatewayNamespace:   workloadconfig.GatewayNamespace(),
-		ingressAnnotations: workloadconfig.IngressAnnotations(),
+		ingressClass:     workloadconfig.IngressClass(),
+		gatewayName:      workloadconfig.GatewayName(),
+		gatewayNamespace: workloadconfig.GatewayNamespace(),
 	}
 }
 
@@ -129,9 +125,6 @@ func allowedRoutingAnnotation(object client.Object, key, value string, constrain
 		if key == ingressClassAnnotation {
 			return value != "" && value == constraints.ingressClass
 		}
-		if configured, found := constraints.ingressAnnotations[key]; found && value == configured {
-			return true
-		}
 		switch key {
 		case "nginx.ingress.kubernetes.io/proxy-body-size":
 			return annotationSize.MatchString(value)
@@ -160,9 +153,6 @@ func allowedRoutingAnnotation(object client.Object, key, value string, constrain
 			}
 		}
 	case *openshiftv1.Route:
-		if configured, found := constraints.ingressAnnotations[key]; found && value == configured {
-			return true
-		}
 		if key == "haproxy.router.openshift.io/timeout" {
 			return routeTimeout.MatchString(value)
 		}

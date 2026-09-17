@@ -21,7 +21,7 @@ import (
 
 func TestRoutingAnnotationContract(t *testing.T) {
 	t.Parallel()
-	constraints := routingConstraints{ingressAnnotations: map[string]string{"platform.example/default": "approved"}}
+	constraints := routingConstraints{}
 	constructors := map[string]func() client.Object{
 		"Ingress":   func() client.Object { return ingressWithServices("", "owned") },
 		"Route":     func() client.Object { return routeWithServices("owned") },
@@ -64,11 +64,6 @@ func TestRoutingAnnotationContract(t *testing.T) {
 		{"Route", "openshift.io/host.generated", "true", true},
 		{"Route", "openshift.io/host.generated", "unrecognized", false},
 		{"Route", "haproxy.router.openshift.io/timeout", "60s\nhttp-request redirect", false},
-		{"Ingress", "platform.example/default", "approved", true},
-		{"Route", "platform.example/default", "approved", true},
-		{"Ingress", "platform.example/default", "overridden", false},
-		{"HTTPRoute", "platform.example/default", "approved", false},
-		{"Service", "platform.example/default", "approved", false},
 		{"Service", "openshift.io/scc", "nonroot", true},
 		{"Service", "openshift.io/required-scc", "hostmount-anyuid", true},
 		{"Service", "nvidia.com/parent-spec-hash", "6bb75d4567", true},
@@ -196,26 +191,16 @@ func TestRoutingExtensionsAggregateChecks(t *testing.T) {
 	}
 }
 
-func TestRenderedAdministratorDefaults(t *testing.T) {
-	t.Setenv("INGRESS_CLASS", "nginx")
+func TestConfiguredIngressAnnotationsDoNotAuthorizeExtensions(t *testing.T) {
 	t.Setenv("INGRESS_ANNOTATIONS", `{"platform.example/default":"approved"}`)
 	constraints := configuredRoutingConstraints()
-	plugin := NewPlugin(nil)
-	runner := newOwnershipRunner()
-	for _, construct := range []func() client.Object{
-		func() client.Object { return plugin.buildIngress(runner, ingressWithServices("own"), "", 0) },
-		func() client.Object { return plugin.buildRoute(runner, routeWithServices("own"), "") },
+	for _, object := range []client.Object{
+		&networkingv1.Ingress{},
+		&openshiftv1.Route{},
 	} {
-		object := construct()
-		if object.GetAnnotations()["platform.example/default"] != "approved" {
-			t.Fatalf("administrator default not rendered on %T", object)
-		}
-		if err := validateExposureExtensions(object, constraints); err != nil {
-			t.Fatalf("rendered administrator defaults rejected: %v", err)
-		}
-		object.GetAnnotations()["platform.example/default"] = "caller override"
-		if err := validateExposureExtensions(object, constraints); !errors.Is(err, errOwnershipViolation) {
-			t.Fatalf("same key must not authorize a different value: %v", err)
+		object.SetAnnotations(map[string]string{"platform.example/default": "approved"})
+		if err := validateRoutingAnnotations(object, constraints); !errors.Is(err, errOwnershipViolation) {
+			t.Fatalf("configured default must not authorize an unsupported annotation on %T: %v", object, err)
 		}
 	}
 }

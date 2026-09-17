@@ -137,43 +137,19 @@ func TestBuildEnvVarsRejectsIncompleteGatewayConfiguration(t *testing.T) {
 	}
 }
 
-func TestBuildEnvVarsIncludesConfiguredIngressAnnotations(t *testing.T) {
-	for _, tt := range []struct {
-		name        string
-		annotations map[string]string
-	}{
-		{name: "unset"},
-		{name: "empty", annotations: map[string]string{}},
-		{name: "configured", annotations: map[string]string{
-			"haproxy.router.openshift.io/timeout": "5m",
-			"example.com/default":                 `trusted "value"`,
-		}},
-	} {
-		t.Run(tt.name, func(t *testing.T) {
-			runaiConfig := &runaiv1.RunaiConfig{}
-			runaiConfig.SetDefaultsWhereNeeded()
-			runaiConfig.Spec.Global.Ingress.Annotations = tt.annotations
-			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
-			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
-			if err != nil {
-				t.Fatalf("buildEnvVars() error = %v", err)
-			}
-			assertEnvValue(t, envVars, "INGRESS_CLASS", runaiConfig.Spec.Global.Ingress.Class)
-			value, found := envValue(envVars, "INGRESS_ANNOTATIONS")
-			if len(tt.annotations) == 0 {
-				if found {
-					t.Fatal("INGRESS_ANNOTATIONS unexpectedly configured without annotations")
-				}
-				return
-			}
-			var actual map[string]string
-			if err := json.Unmarshal([]byte(value), &actual); err != nil {
-				t.Fatalf("INGRESS_ANNOTATIONS contains invalid JSON: %v", err)
-			}
-			if !reflect.DeepEqual(actual, tt.annotations) {
-				t.Fatalf("INGRESS_ANNOTATIONS = %v, want %v", actual, tt.annotations)
-			}
-		})
+func TestBuildEnvVarsDoesNotInjectIngressAnnotationDefaults(t *testing.T) {
+	runaiConfig := &runaiv1.RunaiConfig{}
+	runaiConfig.SetDefaultsWhereNeeded()
+	runaiConfig.Spec.Global.Ingress.Annotations = map[string]string{"example.com/default": "value"}
+	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	if err != nil {
+		t.Fatalf("buildEnvVars() error = %v", err)
+	}
+	assertEnvValue(t, envVars, "INGRESS_CLASS", runaiConfig.Spec.Global.Ingress.Class)
+	if _, found := envValue(envVars, "INGRESS_ANNOTATIONS"); found {
+		t.Fatal("INGRESS_ANNOTATIONS must not be enabled by routing validation")
 	}
 }
 
