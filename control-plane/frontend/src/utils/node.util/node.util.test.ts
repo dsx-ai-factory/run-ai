@@ -7,6 +7,7 @@ import { vi, describe, it, expect } from "vitest";
 import { NodeStatusEnum, type Node, type MetricsResponse } from "@/swagger-models/cluster-service-client";
 import { GpuFractioningConditionType, NrtHealthyConditionType } from "@/models/node.model";
 import { nodeUtil } from "@/utils/node.util/node.util";
+import { docsUtil } from "@/utils/docs.util/docs.util";
 
 vi.mock("@/utils/docs.util/docs.util", () => ({
   docsUtil: {
@@ -88,6 +89,23 @@ describe("getStatusColOptions", () => {
         "As a result, GPU fractions are not supported on this node.<br>" +
         'For more information, see the <a href="https://docs.example.test/prerequisites">Prerequisites guide.</a><br>',
     );
+  });
+
+  it("omits the docs line when the catalog has no prerequisites destination", () => {
+    vi.spyOn(docsUtil, "getPrerequisitesHTMLLink").mockReturnValue("");
+    const node = {
+      status: NodeStatusEnum.MissingPrerequisites,
+      conditions: [{ type: GpuFractioningConditionType, reason: "NotManaged" }],
+    } as Node;
+
+    const result = nodeUtil.getStatusColOptions(node);
+
+    expect(result.tooltipText).toBe(
+      "The following prerequisites are not met on the node:<br>" +
+        "The GPU fractioning operator did not report a reason.<br>" +
+        "As a result, GPU fractions are not supported on this node.<br>",
+    );
+    vi.restoreAllMocks();
   });
 
   it("still renders static messages for existing condition types", () => {

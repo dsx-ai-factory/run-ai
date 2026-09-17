@@ -91,7 +91,9 @@ function _getConditionMessage(condition: NodeStatusConditionDetails): string | u
       unmetPrerequisite,
       GPU_FRACTIONING_PREREQUISITES_OUTCOME,
       docsUtil.getPrerequisitesHTMLLink(),
-    ].join("<br>");
+    ]
+      .filter((line): line is string => Boolean(line))
+      .join("<br>");
   }
   return NodeConditionMap[condition.type]?.message;
 }
