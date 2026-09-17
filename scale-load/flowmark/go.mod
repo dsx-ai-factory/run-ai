@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/scale-load/flowmark
 
-go 1.27.1
+go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0

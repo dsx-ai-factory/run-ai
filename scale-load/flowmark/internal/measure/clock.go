@@ -65,7 +65,7 @@ func probeOffset(ctx context.Context, kube k8sclient.Client, namespace string, n
 		return 0, fmt.Errorf("deleting probe %s/%s: %w", namespace, probe.Name, deleteErr)
 	}
 	midpoint := before.Add(after.Sub(before) / 2)
-	return probe.CreationTimestamp.Time.Sub(midpoint), nil
+	return probe.CreationTimestamp.Sub(midpoint), nil
 }
 
 func randomSuffix() (string, error) {
