@@ -7,10 +7,11 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal AS base
 RUN echo "nonroot:x:65532:65532:nonroot:/home/nonroot:/sbin/nologin" > /etc/passwd && \
     echo "nonroot:x:65532:" > /etc/group
 
-# Create a dedicated writable directory and set ownership
-RUN mkdir -p /tmp && \
-    chown -R 65532:65532 /tmp && \
-    chmod 700 /tmp
+# Wrap /tmp inside /temp so /tmp lands as a *child* during COPY. Docker BuildKit resets the
+# mode of any destination directory it creates to 0755, but preserves modes on children
+RUN mkdir -p /temp/tmp && \
+    chown 65532:0 /temp/tmp && \
+    chmod 770 /temp/tmp
 
 FROM scratch
 
@@ -28,8 +29,8 @@ COPY --from=base /etc/pki/ /etc/pki/
 # DNS resolution config
 COPY --from=base /etc/nsswitch.conf /etc/nsswitch.conf
 
-# Writable Filesystem
-COPY --from=base --chown=65532:65532 /tmp /tmp
+# Writable Filesystem: Copy /temp's contents into / so /tmp lands at /tmp as a child (mode preserved)
+COPY --from=base /temp /
 
 WORKDIR /
 
