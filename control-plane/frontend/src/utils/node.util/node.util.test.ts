@@ -12,6 +12,8 @@ vi.mock("@/utils/docs.util/docs.util", () => ({
   docsUtil: {
     getNumaAwareSchedulingHTMLLink: () =>
       'For more information see the <a href="https://docs.example.test/numa">Configuring NUMA-Aware Scheduling guide.</a>',
+    getPrerequisitesHTMLLink: () =>
+      'For more information, see the <a href="https://docs.example.test/prerequisites">Prerequisites guide.</a>',
   },
 }));
 
@@ -65,7 +67,10 @@ describe("getStatusColOptions", () => {
 
     expect(result.status).toBe("Missing Prerequisites");
     expect(result.tooltipText).toBe(
-      "The NVIDIA driver on this node is older than the version GPU fractions require.<br>",
+      "The following prerequisites are not met on the node:<br>" +
+        "The NVIDIA driver on this node is older than the version GPU fractions require.<br>" +
+        "As a result, GPU fractions are not supported on this node.<br>" +
+        'For more information, see the <a href="https://docs.example.test/prerequisites">Prerequisites guide.</a><br>',
     );
   });
 
@@ -77,7 +82,12 @@ describe("getStatusColOptions", () => {
 
     const result = nodeUtil.getStatusColOptions(node);
 
-    expect(result.tooltipText).toBe("GPU fractions are not supported on this node.<br>");
+    expect(result.tooltipText).toBe(
+      "The following prerequisites are not met on the node:<br>" +
+        "The GPU fractioning operator did not report a reason.<br>" +
+        "As a result, GPU fractions are not supported on this node.<br>" +
+        'For more information, see the <a href="https://docs.example.test/prerequisites">Prerequisites guide.</a><br>',
+    );
   });
 
   it("still renders static messages for existing condition types", () => {

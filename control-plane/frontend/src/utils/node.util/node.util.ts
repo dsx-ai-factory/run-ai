@@ -23,6 +23,8 @@ import { stringUtil } from "@/utils/string.util";
 import type { IGpuModalRow } from "@/table-models/node.table-model";
 
 const NODE_STATUS_TOOLTIP_MAX_WIDTH = "300px";
+const GPU_FRACTIONING_PREREQUISITES_INTRO = "The following prerequisites are not met on the node:";
+const GPU_FRACTIONING_PREREQUISITES_OUTCOME = "As a result, GPU fractions are not supported on this node.";
 
 export const nodeUtil = {
   enrichNodesWithInfoFromCluster,
@@ -79,11 +81,17 @@ function _getConditionMessage(condition: NodeStatusConditionDetails): string | u
       : undefined;
   }
   // The GPU fractioning operator supplies its own reason and message per failing node, so the
-  // static entry is only a fallback for when it reports none.
+  // unmet prerequisite is rendered from the backend and only the surrounding copy is fixed.
   if (condition.type === GpuFractioningConditionType) {
-    return condition.message
+    const unmetPrerequisite = condition.message
       ? stringUtil.replaceNewLineWithBreaks(condition.message)
       : NodeConditionMap[condition.type]?.message;
+    return [
+      GPU_FRACTIONING_PREREQUISITES_INTRO,
+      unmetPrerequisite,
+      GPU_FRACTIONING_PREREQUISITES_OUTCOME,
+      docsUtil.getPrerequisitesHTMLLink(),
+    ].join("<br>");
   }
   return NodeConditionMap[condition.type]?.message;
 }

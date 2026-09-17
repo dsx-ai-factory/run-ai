@@ -89,7 +89,7 @@ export const NodeConditionMap: Record<string, NodeStatusConditionDetails> = {
   [GpuFractioningConditionType]: {
     type: GpuFractioningConditionType,
     reason: "Missing GPU fractioning prerequisites",
-    message: "GPU fractions are not supported on this node.",
+    message: "The GPU fractioning operator did not report a reason.",
   },
 };
 export interface INode {
