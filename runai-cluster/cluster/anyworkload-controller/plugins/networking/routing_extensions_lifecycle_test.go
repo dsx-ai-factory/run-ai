@@ -186,7 +186,12 @@ func TestRoutingAnnotationsReferencedServiceCleanupAndRecovery(t *testing.T) {
 	config := runner.Spec.Instructions.Networking
 	service := config.Services[0].Create.DeepCopy()
 	service.Namespace, service.UID = runner.Namespace, "referenced-service-uid"
-	service.Annotations = map[string]string{"traefik.ingress.kubernetes.io/service.nativelb": "true"}
+	service.Annotations = map[string]string{
+		"nvidia.com/last-applied-hash":                   "58d4b4b4ff",
+		"nvidia.com/parent-spec-hash":                    "5df844fc9c",
+		"openshift.io/required-scc":                      "nonroot",
+		"traefik.ingress.kubernetes.io/service.nativelb": "true",
+	}
 	config.Services[0] = dromosv1alpha1.NetworkingServiceItem{
 		Ref: &dromosv1alpha1.NetworkingServiceRef{Name: service.Name, Port: 8080},
 	}
@@ -201,7 +206,7 @@ func TestRoutingAnnotationsReferencedServiceCleanupAndRecovery(t *testing.T) {
 			t.Fatal(err)
 		}
 		if !forbidden {
-			before.Annotations = nil
+			delete(before.Annotations, "traefik.ingress.kubernetes.io/service.nativelb")
 			if err := k8sClient.Update(ctx, before); err != nil {
 				t.Fatal(err)
 			}

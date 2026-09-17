@@ -166,7 +166,7 @@ func allowedRoutingAnnotation(object client.Object, key, value string, constrain
 		switch key {
 		case "openshift.io/scc", "openshift.io/required-scc":
 			return value == "nonroot" || value == "anyuid" || value == "hostmount-anyuid"
-		case "nvidia.com/parent-spec-hash":
+		case "nvidia.com/parent-spec-hash", "nvidia.com/last-applied-hash":
 			return annotationHash.MatchString(value)
 		case "gpu-memory", "gpu-fraction", "gpu-fraction-num-devices":
 			return annotationNumber.MatchString(value)
