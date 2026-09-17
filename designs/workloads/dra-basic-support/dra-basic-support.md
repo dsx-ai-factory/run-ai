@@ -88,6 +88,10 @@ The feature designed here serves two purposes:
    1. It is possible to obtain the list of workloads currently referencing a `ResourceClaimTemplate`.
    2. It is possible to obtain the list of `ResourceClaimTemplate` and `ResourceClaims` that a workload references, with pod granularity.
 
+### Out of Scope
+
+1. Reacting to a `DeviceClass` that is **removed after** a template was created (reflecting a degraded / unschedulable status on the template). Creation-time validation is covered by DoD 4.3; runtime removal is out of scope for now.
+
 ### Possible Additions
 
 1. Option to convert compute asset to DRA.
@@ -269,8 +273,25 @@ Following the storage-class pattern (a user-facing `v2` read + an internal `v1` 
 
 | Method & path | Purpose |
 | :-- | :-- |
-| `GET /api/v1/resource-claim-templates?clusterId=<id>` | List all tracked templates (managed + unmanaged) for a cluster; each entry carries a `managed` flag, the scope inferred from its namespace, and observed status/issues. Authorizes `read` on the `ResourceClaimTemplate` resource type |
+| `GET /api/v2/resource-claim-templates?clusterId=<id>` | List all tracked templates (managed + unmanaged) for a cluster; each entry carries a `managed` flag, the scope inferred from its namespace, and observed status/issues. Authorizes `read` on the `ResourceClaimTemplate` resource type |
 | `POST /api/v1/resource-claim-templates/sync?clusterId=<id>` | Internal (`x-internal`) — the cluster pushes the full set of `ResourceClaimTemplate`s it observes in the Run:ai namespaces; the tracker upserts/reconciles them. Authorizes `sync` (same shape as `storage-classes/sync`) |
+
+### 4.3 DeviceClass Tracking APIs (k8s-objects-tracker)
+
+`DeviceClass`es are the categories of devices a `ResourceClaimTemplate` requests (via `deviceClassName`). They are **cluster-scoped** (not namespaced), **driver-defined**, and therefore vary per cluster — e.g. `gpu.nvidia.com` where the NVIDIA DRA driver is installed, or `mrdma.google.com` / `netdev.google.com` on GKE networking DRA. There is no standard set, so the control plane cannot hardcode them.
+
+The control plane therefore tracks the `DeviceClass`es of each cluster through `k8s-objects-tracker`, exactly like `StorageClass`es (both are cluster-scoped objects). This backs:
+
+- **DoD 2** — the tracker keeps an up-to-date list of the cluster's `DeviceClass`es.
+- **DoD 4.3** — template creation is rejected when the referenced `deviceClassName` does not exist in the target cluster (validated against this list).
+- UX — the user can pick a valid `deviceClassName` per cluster when authoring a template.
+
+Following the same storage-class pattern (a user-facing `v2` read + an internal `v1` sync):
+
+| Method & path | Purpose |
+| :-- | :-- |
+| `GET /api/v2/device-classes?clusterId=<id>` | List the `DeviceClass`es tracked for a cluster. Cluster-scoped, so a flat per-cluster list (no scope / per-scope issues). Authorizes `read` on the `DeviceClass` resource type |
+| `POST /api/v1/device-classes/sync?clusterId=<id>` | Internal (`x-internal`) — the cluster pushes the full set of `DeviceClass`es it observes; the tracker upserts/reconciles them. Authorizes `sync` (same shape as `storage-classes/sync`) |
 
 ## 5. User Visibility
 
@@ -437,5 +458,23 @@ Either way, the `managed` flag and k8s-object id are **not stored** — the API 
 
 No need to change the `workloads_view` as we do not have this information in the main `Workload` object.
 
+## 6. Task Breakdown
 
+| # | Task | Notes / references | Effort / comments |
+| :-- | :-- | :-- | :-- |
+| 1 | `k8s-objects-tracker` tracks `DeviceClass`es (incl. APIs) | DoD 2; §4.3 — cluster-scoped, storage-class pattern (`v2` read + `v1` sync). Precondition for DeviceClass validation. | — |
+| 2 | New asset support — management | DoD 4; §3 (Assets), §4.1 — enhanced-assets k8s-object: generic JSON spec table, CRUD APIs. | — |
+| 3 | New RBAC resource type + permission sets | DoD 3 — new `ResourceClaimTemplate` resource type with **Edit Access** and **View Access** permission sets. | — |
+| 4 | New asset support — `DeviceClass` validation | DoD 4.3 — reject creation when `deviceClassName` is absent from the cluster's tracked `DeviceClass`es. | — |
+| 5 | New asset sync + replicate | DoD 5; §3 (Sync and Replication Issues Reporting) — apply to the cluster, replicate to target namespaces, report sync/replication issues to the CP. | — |
+| 6 | `k8s-objects-tracker` tracks `ResourceClaimTemplate`s (incl. APIs) | DoD 1; §4.2 — managed + unmanaged, storage-class pattern (`v2` read + `v1` sync). | — |
+| 7 | Submission — anyworkload | DoD 6.1 — reference a template in the `podSpec`. | — |
+| 8 | Submission — native workloads (incl. policies) | DoD 6.2 — DRA field in the native spec; wire through the composer and policy enforcement. | CP blocks deleting a template that is still referenced by native workloads (delete-in-use guard). |
+| 9 | Ensure anyworkload policies model the DRA fields correctly | DoD 6.1 — policy schema/validation covers the `resourceClaims` fields for anyworkloads. | — |
+| 10 | Reject submission if the referenced template is not ready | DoD 6.3 — reject when the referenced template's status is not successful (e.g. not synced/replicated). Applies to anyworkload and native. | — |
+| 11 | `cluster-sync` reports DRA usage | DoD 7; §5 — read `spec.resourceClaims` + `status.resourceClaimStatuses` per pod, add to `PodSyncFields`, persist per-pod usage. | — |
+| 12 | Visibility API — workloads of a template (reverse) | DoD 7.1; §5 — `GET /api/v1/k8s-objects/resource-claim-template/{id}/workloads`. | — |
+| 13 | Visibility API — templates of a workload (forward) | DoD 7.2; §5 — `GET /api/v1/workloads/{id}/resource-claims`, incl. standalone claims and the actual `ResourceClaim` binding. | — |
+| 14 | UI — management + visibility screens | §1 — template CRUD + the workload/template usage views. | Need figma. |
+| 15 | CLI — template management | §1 — CLI verbs for template CRUD. | Requires mini design. |
 

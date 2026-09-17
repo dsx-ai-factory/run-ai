@@ -100,29 +100,3 @@ kubectl get resourceclaims.resource.k8s.io -w      # pending -> allocated
 kubectl logs dra-gpu-test                          # e.g. GPU 0: NVIDIA A10G ...
 ```
 
-## Gotchas cheat-sheet
-
-- **`nvidiaDriverRoot`**: `/` for the EKS AMI host driver (the default);
-  `/run/nvidia/driver` only for a GPU-Operator-managed containerized driver.
-  Wrong value → the kubelet-plugin is stuck `Init:0/1` logging
-  `nvidia-smi: not found`. Confirm the real location with:
-
-  ```bash
-  kubectl debug node/<gpu-node> -it --image=busybox -- \
-    sh -c 'ls -l /host/usr/bin/nvidia-smi; ls -l /host/run/nvidia/driver'
-  ```
-
-- **`gpuResourcesEnabledOverride=true`** is required whenever the standard GPU
-  device plugin also runs (it does, via the GPU Operator); otherwise the chart
-  refuses to install. For a clean DRA-only setup instead, install the GPU
-  Operator with `--set devicePlugin.enabled=false` and drop the override.
-
-- **No `ResourceQuota` step** — the `insufficient quota to match these scopes:
-  [{PriorityClass In [system-node-critical system-cluster-critical]}]` error is
-  **GKE-only** (GKE restricts those priority classes outside `kube-system`).
-  EKS does not impose it.
-
-- **Controller `Pending`** is harmless for GPU allocation: under DRA v1 the
-  scheduler allocates from the slices the kubelet-plugin publishes, so the test
-  works even while the controller is unscheduled.
-
