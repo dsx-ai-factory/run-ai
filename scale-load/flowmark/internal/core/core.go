@@ -85,3 +85,17 @@ type Section struct {
 	Failed   bool           `json:"failed"`
 	Error    string         `json:"error,omitempty"`
 }
+
+const SchemaVersion = "v1"
+
+type Metadata struct {
+	StartedAt     time.Time `json:"started_at"`
+	FinishedAt    time.Time `json:"finished_at"`
+	ClockOffsetMs *int64    `json:"clock_offset_ms,omitempty"`
+}
+
+type Results struct {
+	Schema    string             `json:"schema"`
+	Metadata  Metadata           `json:"metadata"`
+	Scenarios map[string]Section `json:"scenarios"`
+}
