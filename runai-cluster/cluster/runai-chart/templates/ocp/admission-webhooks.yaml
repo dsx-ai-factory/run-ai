@@ -78,11 +78,11 @@ webhooks:
         port: 9443
     rules:
       - operations: ["CREATE", "UPDATE", "DELETE"]
-        apiGroups: ["run.ai"]
+        apiGroups: ["run.ai", "kai.resources"]
         apiVersions: ["*"]
         resources: ["projects"]
       - operations: ["CREATE", "UPDATE", "DELETE"]
-        apiGroups: ["scheduling.run.ai"]
+        apiGroups: ["scheduling.run.ai", "kai.resources"]
         apiVersions: ["*"]
         resources: ["departments"]
 ---
