@@ -5,7 +5,7 @@
 
 package userinfo
 
-import "github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth/providers/oidc"
+import "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth/oidc"
 
 type Provider interface {
 	Load(userIdentifier string) (*oidc.UserInfo, error)

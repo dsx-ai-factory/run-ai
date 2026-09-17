@@ -9,9 +9,9 @@ import (
 	"context"
 	"time"
 
-	roidc "github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth/providers/oidc"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth/providers/oidc/configuration"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth/providers/oidc/userinfo"
+	roidc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth/oidc"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth/oidc/configuration"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth/oidc/userinfo"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"
 	"github.com/rs/zerolog/log"

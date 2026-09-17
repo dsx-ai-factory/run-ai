@@ -9,8 +9,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/coreos/go-oidc/v3/oidc"
-	roidc "github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth/providers/oidc"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/runai-auth/providers/oidc/configuration"
+	roidc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth/oidc"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth/oidc/configuration"
 	"golang.org/x/oauth2"
 )
 
