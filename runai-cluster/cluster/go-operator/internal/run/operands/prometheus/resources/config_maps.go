@@ -114,7 +114,12 @@ func (cm *ConfigMap) Object(ctx context.Context) (client.Object, error) {
 	}
 
 	if prometheusK8sConfig != nil {
-		setRemoteWrites(prometheusK8sConfig, remoteWrites)
+		if err := setRemoteWrites(prometheusK8sConfig, remoteWrites); err != nil {
+			return nil, err
+		}
+		if err := unstructured.SetNestedMap(clusterMonitoringConfig, prometheusK8sConfig, "prometheusK8s"); err != nil {
+			return nil, fmt.Errorf("set prometheusK8s configuration: %w", err)
+		}
 	}
 
 	yamlConfig, err := yaml.Marshal(clusterMonitoringConfig)
@@ -205,20 +210,16 @@ func resetPrometheusConfig(remoteWrites []interface{}, config *prometheus.Promet
 }
 
 func getPrometheusK8sConfig(clusterMonitoringConfig map[string]interface{}, create bool) (map[string]interface{}, error) {
-	value, exists := clusterMonitoringConfig["prometheusK8s"]
-	if !exists || value == nil {
+	prometheusK8sConfig, found, err := unstructured.NestedMap(clusterMonitoringConfig, "prometheusK8s")
+	if err != nil {
+		return nil, fmt.Errorf("get prometheusK8s configuration: %w", err)
+	}
+	if !found {
 		if !create {
 			return nil, nil
 		}
 
-		prometheusK8sConfig := map[string]interface{}{}
-		clusterMonitoringConfig["prometheusK8s"] = prometheusK8sConfig
-		return prometheusK8sConfig, nil
-	}
-
-	prometheusK8sConfig, ok := value.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("prometheusK8s configuration must be an object")
+		return map[string]interface{}{}, nil
 	}
 
 	return prometheusK8sConfig, nil
@@ -229,26 +230,28 @@ func getRemoteWrites(prometheusK8sConfig map[string]interface{}) ([]interface{},
 		return nil, nil
 	}
 
-	value, exists := prometheusK8sConfig["remoteWrite"]
-	if !exists || value == nil {
-		return nil, nil
+	remoteWrites, found, err := unstructured.NestedSlice(prometheusK8sConfig, "remoteWrite")
+	if err != nil {
+		return nil, fmt.Errorf("get prometheusK8s.remoteWrite configuration: %w", err)
 	}
-
-	remoteWrites, ok := value.([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("prometheusK8s.remoteWrite configuration must be an array")
+	if !found {
+		return nil, nil
 	}
 
 	return remoteWrites, nil
 }
 
-func setRemoteWrites(prometheusK8sConfig map[string]interface{}, remoteWrites []interface{}) {
+func setRemoteWrites(prometheusK8sConfig map[string]interface{}, remoteWrites []interface{}) error {
 	if len(remoteWrites) == 0 {
-		delete(prometheusK8sConfig, "remoteWrite")
-		return
+		unstructured.RemoveNestedField(prometheusK8sConfig, "remoteWrite")
+		return nil
 	}
 
-	prometheusK8sConfig["remoteWrite"] = remoteWrites
+	if err := unstructured.SetNestedSlice(prometheusK8sConfig, remoteWrites, "remoteWrite"); err != nil {
+		return fmt.Errorf("set prometheusK8s.remoteWrite configuration: %w", err)
+	}
+
+	return nil
 }
 
 func remoteWriteToUnstructured(remoteWrite manifests.RemoteWriteSpec) (map[string]interface{}, error) {
