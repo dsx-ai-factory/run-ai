@@ -207,12 +207,12 @@ var _ = Describe("Ingress", func() {
 			Expect(r.Enabled()).To(BeFalse())
 		})
 
-		It("returns true when ResearcherService.Enabled is true and other conditions allow", func() {
+		It("returns false even when ResearcherService.Enabled is true, because the component is retired", func() {
 			runaiConfig := makeRunaiConfigWithIngressEligible()
 			runaiConfig.Spec.ResearcherService.Enabled = pointer.Bool(true)
 
 			r := NewIngressResource("researcher-service", fake.NewClientBuilder().Build(), runaiConfig)
-			Expect(r.Enabled()).To(BeTrue())
+			Expect(r.Enabled()).To(BeFalse())
 		})
 
 		It("IngressStatus reports Ready when ResearcherService is disabled even with no ingress on cluster", func() {

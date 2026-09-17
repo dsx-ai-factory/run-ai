@@ -87,3 +87,47 @@ func TestInstallMode_ClusterOnly_InstallsClusterOnly(t *testing.T) {
 	assert.Nil(t, findEvent(evs, "step_started", "install-control-plane-chart"), "no control-plane flow in cluster-only mode")
 	assert.True(t, hasPipelineEvent(evs, "pipeline_succeeded", "runai"))
 }
+
+func TestInstallMode_ClusterOnly_ExternalControlPlaneCredentials(t *testing.T) {
+	helm := harness.NewFakeHelmWithReleases()
+	k8s := &harness.FakeK8sExecutor{}
+	apiClient, _ := harness.NewFakeRunAIClientProvider(helm)
+	apiClient.CPReady = true
+	deps := orchestrator2.Deps{K8sExecutor: k8s, HelmInstaller: helm, RunAIClientWithCredentials: apiClient.CredentialedProvider(), ClusterProbe: okProbe()}
+
+	eventsPath := filepath.Join(t.TempDir(), "events.ndjson")
+	cfg, opts := connectedConfig(t, eventsPath, false)
+	cfg.Install.Mode = "runai_cluster_only"
+	cfg.ControlPlane.Enabled = false
+	cfg.Cluster.Name = "test-cluster"
+	cfg.Cluster.Domain = "test.runai.local"
+	cfg.Cluster.ControlPlaneURL = "https://cp.runai.local"
+	cfg.Cluster.ControlPlaneCredentials = &installconfig.ControlPlaneCredentials{Username: "admin@run.ai", Password: "pw"}
+	cfg.Prerequisites = &installconfig.Prerequisites{Skip: true}
+	term, _, _ := newTestTerminal()
+
+	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
+
+	assert.True(t, apiClient.ClusterCreated, "the installer registers the cluster itself")
+	clusterCalls := helm.CallsByRelease("runai-cluster")
+	require.Len(t, clusterCalls, 1)
+	assert.Subset(t, clusterCalls[0].Values, []string{
+		"controlPlane.url=https://cp.runai.local",
+		"controlPlane.clientSecret=" + apiClient.ClientSecret,
+		"cluster.uid=" + apiClient.ClusterUUID,
+		"cluster.url=test.runai.local",
+	})
+	assert.Empty(t, helm.CallsByRelease("runai-backend"))
+	require.NotEmpty(t, apiClient.ProviderCalls)
+	for _, call := range apiClient.ProviderCalls {
+		assert.Equal(t, "https://cp.runai.local", call.URL)
+		require.NotNil(t, call.Credentials, "every control-plane call uses the supplied credentials")
+		assert.Equal(t, "admin@run.ai", call.Credentials.Username)
+	}
+
+	evs := readEvents(t, eventsPath)
+	require.NotNil(t, findEvent(evs, "step_succeeded", "preflight-control-plane-access"))
+	require.NotNil(t, findEvent(evs, "step_succeeded", "register-cluster"))
+	require.NotNil(t, findEvent(evs, "step_succeeded", "install-cluster-chart"))
+	assert.True(t, hasPipelineEvent(evs, "pipeline_succeeded", "runai"))
+}

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-mcp-server
 
-go 1.26.3
+go 1.26.8
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
@@ -20,7 +20,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/jsonschema-go v0.4.3
 	github.com/google/uuid v1.6.0
-	github.com/modelcontextprotocol/go-sdk v1.7.0
+	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
@@ -35,7 +35,7 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.61.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sync v0.21.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
@@ -81,10 +81,10 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )

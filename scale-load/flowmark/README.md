@@ -41,3 +41,35 @@ knobs the suite understands:
 suite: selfcheck
 message: hello from flowmark
 ```
+
+## Suites
+
+`selfcheck` touches nothing and needs no environment. It stays the
+zero-dependency check that the yaml → runner → suite → results wiring works.
+
+`basic-flow` runs against a real Run:ai environment: it creates a project,
+submits workloads, measures how long each one takes to reach the cluster,
+and deletes only what it created. It needs `--cp-url`, `--kubeconfig` and
+credentials in `FLOWMARK_CP_USER` / `FLOWMARK_CP_PASSWORD` (or
+`FLOWMARK_CP_TOKEN`):
+
+```
+FLOWMARK_CP_USER=... FLOWMARK_CP_PASSWORD=... ./bin/flowmark \
+  --scenarios ./scenarios --output ./out \
+  --cp-url https://my-control-plane.example.com \
+  --kubeconfig ~/.kube/config
+```
+
+Knobs of `scenarios/basic-two-workloads.yaml`:
+
+| knob | default | meaning |
+|---|---|---|
+| `projects` | 1 | projects to create; workloads are spread across them |
+| `workloads` | 2 | workloads to submit |
+| `workloadType` | `Training` | only `Training` for now |
+| `timeout` | `5m` | project readiness and workload arrival limit |
+| `cluster` | *(single cluster)* | cluster name when the control plane has several |
+
+Its section reports `sync_to_cluster_ms` per workload, `sync_to_cluster_max_ms`,
+and `pending`: workloads that never reached the cluster within the timeout are
+counted as pending, never as zero, and make the section fail.

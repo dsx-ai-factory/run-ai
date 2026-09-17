@@ -3,7 +3,7 @@
 
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/{{cookiecutter.app_name}}
 
-go 1.24.6
+go 1.26.6
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-20231016130327-a5dc7c7c3988
@@ -15,8 +15,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
 
-replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients => ../../common/clients
-
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../common/profiling
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../../cluster/common/constants
@@ -26,7 +24,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => .
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../../control-plane/cluster-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/identity-manager-client => ../../../runai-clients/identity-manager-client
-
 
 
 

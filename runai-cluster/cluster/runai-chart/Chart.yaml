@@ -11,8 +11,8 @@ dependencies:
     version: v0.16.9
   - name: karta
     condition: karta.enabled
-    repository: oci://ghcr.io/run-ai/karta
-    version: 0.2.3
+    repository: oci://ghcr.io/dsx-ai-factory/workload-map
+    version: 0.2.6
   - name: crds
     condition: development.includeCRDsInReleaseManifest
     repository: file://charts/crds

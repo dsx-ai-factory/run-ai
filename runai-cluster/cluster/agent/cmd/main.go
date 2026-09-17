@@ -134,18 +134,15 @@ func main() {
 //
 // Registered paths:
 //   - /validate-project      -> projects / departments
-//   - /validate-secrets-pvc  -> labeled secrets / persistentvolumeclaims
 func registerValidatingWebhooks(mgr ctrl.Manager) {
 	allowedServiceAccounts := splitAndTrim(config.Config().AllowedServiceAccounts)
 	projectHandler := validator.NewProjectValidator(mgr.GetClient(), allowedServiceAccounts)
-	secretPvcHandler := validator.NewSecretPvcValidator(mgr.GetClient(), allowedServiceAccounts)
 
 	webhookServer := webhook.NewServer(webhook.Options{
 		Port:    config.Config().WebhookPort,
 		CertDir: config.Config().CertDir,
 	})
 	webhookServer.Register("/validate-project", &webhook.Admission{Handler: projectHandler})
-	webhookServer.Register("/validate-secrets-pvc", &webhook.Admission{Handler: secretPvcHandler})
 
 	if err := mgr.Add(webhookServer); err != nil {
 		log.Error().Msgf("Unable to add webhook server to manager: %v", err)

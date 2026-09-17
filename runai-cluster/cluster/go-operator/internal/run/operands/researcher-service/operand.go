@@ -45,8 +45,11 @@ func (o *operand) Status(ctx context.Context) (operands.Status, error) {
 	return utils.Status(ctx, o.resources)
 }
 
+// Enabled is always false: researcher-service is retired and this operand now
+// exists only so the reconcile loop deletes the resources it used to manage.
+// See resources.componentEnabled for the full rationale.
 func (o *operand) Enabled() bool {
-	return *o.runaiConfig.Spec.ResearcherService.Enabled && !o.runaiConfig.Spec.Internal.Development.Headless
+	return false
 }
 
 func Operand(k8sReader kc.HybridClient, runaiConfig *runv1.RunaiConfig) operands.Operand {

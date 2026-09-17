@@ -18,7 +18,7 @@ GOLANG_LINTER_CONFIG_PATH?=../infra/lint/.golangci.yaml
 # GO_VERSION_DEFAULT; services that need to pin a different value (e.g.
 # traefik, which has no service-level go.mod) can still override GO_VERSION
 # in their own Makefile.
-GO_VERSION_DEFAULT?=1.26.3
+GO_VERSION_DEFAULT?=1.26.8
 
 GO_VERSION_BASE?=$(or $(strip $(if $(wildcard go.mod),$(shell awk '$$1=="go"{print $$2;exit}' go.mod),)), $(GO_VERSION_DEFAULT))
 # Use the default tagged version which should be ubuntu-based
@@ -94,7 +94,7 @@ DOCKER_CGO_COMMAND=${DOCKER_CGO_BASE_COMMAND} -e CGO_ENABLED=1 -e GOOS=${OS} -e 
 DOCKER_GINKGO_COMMAND=${DOCKER_GO_COMMAND} /bin/sh -c '${GINKGO_COMMAND}'
 DOCKER_GINKGO_COMMAND_PRIVILEGED=${DOCKER_GO_COMMAND_PRIVILEGED} /bin/sh -c '${GINKGO_COMMAND}'
 
-DOCKER_GO_LINTER_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GOFLAGS="-buildvcs=false" ${DOCKERHUB_PROXY}golangci/golangci-lint:${GOLANGCI_LINT_VERSION}-alpine
+DOCKER_GO_LINTER_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GOFLAGS="-buildvcs=false" --entrypoint /bin/sh ${DOCKERHUB_PROXY}library/golang:${GO_VERSION} -c 'go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} &&
 DOCKER_GO_IMPORTS_COMMAND=${DOCKER_GO_BASE_COMMAND} ${DOCKERHUB_PROXY}cytopia/goimports:latest-0.3
 DOCKER_MOCKERY_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GO111MODULE=on --entrypoint /bin/sh ${DOCKERHUB_PROXY}library/golang:${GO_VERSION} -c 'go install github.com/vektra/mockery/v3@${MOCKERY_VERSION} &&
 
@@ -254,7 +254,7 @@ lint-go: git-config-command gocache
 	@ echo $(GREEN_CONSOLE) "${CONSOLE_PREFIX} Running golangci linter for ${SERVICE_NAME}" $(BASE_CONSOLE); \
 		if [ -n "$(LINT_NEW_FROM_REV)" ]; then git fetch origin $(LINT_BASE_BRANCH) --depth=1 2>/dev/null || true; fi; \
 		$(DOCKER_GO_LINTER_COMMAND) \
-		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),) || $(FAILURE_MESSAGE_HANDLER)
+		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),)' || $(FAILURE_MESSAGE_HANDLER)
 .PHONY: lint-go
 
 .PHONY: build-go

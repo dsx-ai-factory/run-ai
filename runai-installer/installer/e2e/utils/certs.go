@@ -34,7 +34,7 @@ func init() {
 }
 
 var requiredSecretFiles = []string{
-	"runai_jfrog_token",
+	"runai_pull_secret",
 }
 
 // optionalSecretFiles are copied from the source secrets dir if present. TLS

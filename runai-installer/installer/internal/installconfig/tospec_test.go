@@ -37,7 +37,7 @@ func TestToSpec_FullInstall(t *testing.T) {
 		Output:     spec.OutputFormatText,
 		EventsFile: "/tmp/events.ndjson",
 		OnFailure:  spec.FailurePolicySkip,
-		Registry:   &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"},
+		Registry:   &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"},
 	}
 
 	s := cfg.ToSpec(opts)
@@ -50,7 +50,7 @@ func TestToSpec_FullInstall(t *testing.T) {
 	assert.Equal(t, "/tmp/events.ndjson", s.Output.EventsFile)
 	assert.Equal(t, spec.FailurePolicySkip, s.OnStepFailure)
 	require.NotNil(t, s.Registry)
-	assert.Equal(t, spec.RegistryTypeJFrog, s.Registry.Type)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, s.Registry.Type)
 	require.NotNil(t, s.ControlPlane)
 	assert.Equal(t, "runai.example.com", s.ControlPlane.Domain)
 	require.NotNil(t, s.Cluster)
@@ -84,7 +84,7 @@ func TestToSpec_MapsAllFields(t *testing.T) {
 			},
 		},
 	}
-	opts := RunOptions{Env: spec.EnvLab, Registry: &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"}}
+	opts := RunOptions{Env: spec.EnvLab, Registry: &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"}}
 
 	s := cfg.ToSpec(opts)
 
@@ -208,4 +208,32 @@ func TestToSpec_ClusterDisabled(t *testing.T) {
 
 	require.NotNil(t, s.ControlPlane)
 	assert.Nil(t, s.Cluster, "disabled cluster must not be mapped")
+}
+
+func TestToSpec_ControlPlaneCredentials(t *testing.T) {
+	cfg := &Config{
+		Install: Install{Mode: "runai_cluster_only"},
+		Cluster: &Cluster{
+			Enabled:                 true,
+			Name:                    "cluster01",
+			Domain:                  "cluster.example.com",
+			ControlPlaneURL:         "https://cp.example.com",
+			ControlPlaneCredentials: &ControlPlaneCredentials{Username: "admin@example.com", Password: "inline-pw"},
+		},
+	}
+
+	s := cfg.ToSpec(RunOptions{})
+
+	require.NotNil(t, s.Cluster.ControlPlaneCredentials)
+	assert.Equal(t, "admin@example.com", s.Cluster.ControlPlaneCredentials.Username)
+	assert.Equal(t, "inline-pw", s.Cluster.ControlPlaneCredentials.Password, "inline secrets map without the resolver")
+	assert.Empty(t, s.Cluster.ControlPlaneCredentials.Token)
+	assert.Empty(t, s.Cluster.UID)
+
+	cfg.Cluster.ControlPlaneCredentials = &ControlPlaneCredentials{TokenPath: "/t", token: "resolved-token"}
+	s = cfg.ToSpec(RunOptions{})
+	assert.Equal(t, "resolved-token", s.Cluster.ControlPlaneCredentials.Token, "file-based secrets use the resolved value")
+
+	cfg.Cluster.ControlPlaneCredentials = nil
+	assert.Nil(t, cfg.ToSpec(RunOptions{}).Cluster.ControlPlaneCredentials)
 }

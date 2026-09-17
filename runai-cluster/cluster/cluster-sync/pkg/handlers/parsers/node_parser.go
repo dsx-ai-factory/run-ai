@@ -371,7 +371,7 @@ func getReadinessPhase(conditions []swagger.NodeStatusConditionDetails) string {
 		if _, ok := knownNotReadyConditionTypes[condition.Type]; ok {
 			return NotReadyPhase
 		}
-		if knownMissingPrerequisiteConditionTypes[condition.Type] {
+		if _, ok := knownMissingPrerequisiteConditionTypes[condition.Type]; ok {
 			hasMissingPrerequisite = true
 		}
 	}

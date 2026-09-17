@@ -68,6 +68,12 @@ func (r *InstallCPChart) Execute(ctx context.Context, runaiData *model.RunAIInst
 	values := r.buildHelmValues(runaiData, fqdn)
 	version := runaiData.Config.CpVersion
 	repo := r.getChartRepo(runaiData.Config.Env)
+	if repo == "" {
+		err := step.MissingChartRepoError(step.CPChartName)
+		logging.Errorf("[RunAI] %v", err)
+		r.SetStatus(model.Failed, err)
+		return err
+	}
 	logging.Infof("[RunAI] Installing Control Plane chart version %s from %s...", version, repo)
 	err := r.helmInstaller.InstallOrUpgradeRelease(ctx,
 		repo,

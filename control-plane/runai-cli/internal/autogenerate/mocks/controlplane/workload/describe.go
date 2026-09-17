@@ -11,9 +11,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
-	openapi0 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
-	openapi1 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi0 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -41,10 +40,10 @@ func (m *MockWorkloadClient) EXPECT() *MockWorkloadClientMockRecorder {
 }
 
 // GetDistributed mocks base method.
-func (m *MockWorkloadClient) GetDistributed(ctx context.Context, id string) (*openapi0.DistributedWorkload, error) {
+func (m *MockWorkloadClient) GetDistributed(ctx context.Context, id string) (*openapi.DistributedWorkload, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDistributed", ctx, id)
-	ret0, _ := ret[0].(*openapi0.DistributedWorkload)
+	ret0, _ := ret[0].(*openapi.DistributedWorkload)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -56,10 +55,10 @@ func (mr *MockWorkloadClientMockRecorder) GetDistributed(ctx, id interface{}) *g
 }
 
 // GetDistributedInference mocks base method.
-func (m *MockWorkloadClient) GetDistributedInference(ctx context.Context, id string) (*openapi0.DistributedInference, error) {
+func (m *MockWorkloadClient) GetDistributedInference(ctx context.Context, id string) (*openapi.DistributedInference, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDistributedInference", ctx, id)
-	ret0, _ := ret[0].(*openapi0.DistributedInference)
+	ret0, _ := ret[0].(*openapi.DistributedInference)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -71,10 +70,10 @@ func (mr *MockWorkloadClientMockRecorder) GetDistributedInference(ctx, id interf
 }
 
 // GetInference mocks base method.
-func (m *MockWorkloadClient) GetInference(ctx context.Context, id string) (*openapi0.Inference, error) {
+func (m *MockWorkloadClient) GetInference(ctx context.Context, id string) (*openapi.Inference, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetInference", ctx, id)
-	ret0, _ := ret[0].(*openapi0.Inference)
+	ret0, _ := ret[0].(*openapi.Inference)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -86,10 +85,10 @@ func (mr *MockWorkloadClientMockRecorder) GetInference(ctx, id interface{}) *gom
 }
 
 // GetNimService mocks base method.
-func (m *MockWorkloadClient) GetNimService(ctx context.Context, id string) (*openapi.NimServiceResponse, error) {
+func (m *MockWorkloadClient) GetNimService(ctx context.Context, id string) (*openapi0.NimServiceResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNimService", ctx, id)
-	ret0, _ := ret[0].(*openapi.NimServiceResponse)
+	ret0, _ := ret[0].(*openapi0.NimServiceResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -101,10 +100,10 @@ func (mr *MockWorkloadClientMockRecorder) GetNimService(ctx, id interface{}) *go
 }
 
 // GetTraining mocks base method.
-func (m *MockWorkloadClient) GetTraining(ctx context.Context, id string) (*openapi0.Training, error) {
+func (m *MockWorkloadClient) GetTraining(ctx context.Context, id string) (*openapi.Training, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTraining", ctx, id)
-	ret0, _ := ret[0].(*openapi0.Training)
+	ret0, _ := ret[0].(*openapi.Training)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -116,10 +115,10 @@ func (mr *MockWorkloadClientMockRecorder) GetTraining(ctx, id interface{}) *gomo
 }
 
 // GetWorkload mocks base method.
-func (m *MockWorkloadClient) GetWorkload(ctx context.Context, id string) (*openapi0.WorkloadDetailed, error) {
+func (m *MockWorkloadClient) GetWorkload(ctx context.Context, id string) (*openapi.WorkloadDetailed, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWorkload", ctx, id)
-	ret0, _ := ret[0].(*openapi0.WorkloadDetailed)
+	ret0, _ := ret[0].(*openapi.WorkloadDetailed)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -131,10 +130,10 @@ func (mr *MockWorkloadClientMockRecorder) GetWorkload(ctx, id interface{}) *gomo
 }
 
 // GetWorkspace mocks base method.
-func (m *MockWorkloadClient) GetWorkspace(ctx context.Context, id string) (*openapi0.Workspace, error) {
+func (m *MockWorkloadClient) GetWorkspace(ctx context.Context, id string) (*openapi.Workspace, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWorkspace", ctx, id)
-	ret0, _ := ret[0].(*openapi0.Workspace)
+	ret0, _ := ret[0].(*openapi.Workspace)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -146,10 +145,10 @@ func (mr *MockWorkloadClientMockRecorder) GetWorkspace(ctx, id interface{}) *gom
 }
 
 // List mocks base method.
-func (m *MockWorkloadClient) List(ctx context.Context, limit, offset int32, filters []string, deleted bool) (*openapi0.GetWorkloads200Response, error) {
+func (m *MockWorkloadClient) List(ctx context.Context, limit, offset int32, filters []string, deleted bool) (*openapi.GetWorkloads200Response, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", ctx, limit, offset, filters, deleted)
-	ret0, _ := ret[0].(*openapi0.GetWorkloads200Response)
+	ret0, _ := ret[0].(*openapi.GetWorkloads200Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -184,10 +183,10 @@ func (m *MockWorkloadV2Getter) EXPECT() *MockWorkloadV2GetterMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockWorkloadV2Getter) Get(ctx context.Context, id string) (*openapi1.WorkloadV2GetResponse, error) {
+func (m *MockWorkloadV2Getter) Get(ctx context.Context, id string) (*openapi0.WorkloadV2GetResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx, id)
-	ret0, _ := ret[0].(*openapi1.WorkloadV2GetResponse)
+	ret0, _ := ret[0].(*openapi0.WorkloadV2GetResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -222,10 +221,10 @@ func (m *MockPodsClient) EXPECT() *MockPodsClientMockRecorder {
 }
 
 // ListByLimit mocks base method.
-func (m *MockPodsClient) ListByLimit(ctx context.Context, workloadID string, limit int32) ([]openapi0.Pod, error) {
+func (m *MockPodsClient) ListByLimit(ctx context.Context, workloadID string, limit int32) ([]openapi.Pod, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListByLimit", ctx, workloadID, limit)
-	ret0, _ := ret[0].([]openapi0.Pod)
+	ret0, _ := ret[0].([]openapi.Pod)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -260,10 +259,10 @@ func (m *MockEventClient) EXPECT() *MockEventClientMockRecorder {
 }
 
 // ListByLimit mocks base method.
-func (m *MockEventClient) ListByLimit(ctx context.Context, workloadID string, limit int32) ([]openapi0.Event, error) {
+func (m *MockEventClient) ListByLimit(ctx context.Context, workloadID string, limit int32) ([]openapi.Event, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListByLimit", ctx, workloadID, limit)
-	ret0, _ := ret[0].([]openapi0.Event)
+	ret0, _ := ret[0].([]openapi.Event)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -298,10 +297,10 @@ func (m *MockstorageFields) EXPECT() *MockstorageFieldsMockRecorder {
 }
 
 // GetConfigMapVolume mocks base method.
-func (m *MockstorageFields) GetConfigMapVolume() []openapi0.ConfigMapInstance {
+func (m *MockstorageFields) GetConfigMapVolume() []openapi.ConfigMapInstance {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetConfigMapVolume")
-	ret0, _ := ret[0].([]openapi0.ConfigMapInstance)
+	ret0, _ := ret[0].([]openapi.ConfigMapInstance)
 	return ret0
 }
 
@@ -312,10 +311,10 @@ func (mr *MockstorageFieldsMockRecorder) GetConfigMapVolume() *gomock.Call {
 }
 
 // GetEmptyDirVolume mocks base method.
-func (m *MockstorageFields) GetEmptyDirVolume() []openapi0.EmptyDirInstance {
+func (m *MockstorageFields) GetEmptyDirVolume() []openapi.EmptyDirInstance {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetEmptyDirVolume")
-	ret0, _ := ret[0].([]openapi0.EmptyDirInstance)
+	ret0, _ := ret[0].([]openapi.EmptyDirInstance)
 	return ret0
 }
 
@@ -326,10 +325,10 @@ func (mr *MockstorageFieldsMockRecorder) GetEmptyDirVolume() *gomock.Call {
 }
 
 // GetGit mocks base method.
-func (m *MockstorageFields) GetGit() []openapi0.GitInstance {
+func (m *MockstorageFields) GetGit() []openapi.GitInstance {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetGit")
-	ret0, _ := ret[0].([]openapi0.GitInstance)
+	ret0, _ := ret[0].([]openapi.GitInstance)
 	return ret0
 }
 
@@ -340,10 +339,10 @@ func (mr *MockstorageFieldsMockRecorder) GetGit() *gomock.Call {
 }
 
 // GetHostPath mocks base method.
-func (m *MockstorageFields) GetHostPath() []openapi0.HostPathInstance {
+func (m *MockstorageFields) GetHostPath() []openapi.HostPathInstance {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetHostPath")
-	ret0, _ := ret[0].([]openapi0.HostPathInstance)
+	ret0, _ := ret[0].([]openapi.HostPathInstance)
 	return ret0
 }
 
@@ -354,10 +353,10 @@ func (mr *MockstorageFieldsMockRecorder) GetHostPath() *gomock.Call {
 }
 
 // GetPvc mocks base method.
-func (m *MockstorageFields) GetPvc() []openapi0.PvcInstance {
+func (m *MockstorageFields) GetPvc() []openapi.PvcInstance {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPvc")
-	ret0, _ := ret[0].([]openapi0.PvcInstance)
+	ret0, _ := ret[0].([]openapi.PvcInstance)
 	return ret0
 }
 
@@ -368,10 +367,10 @@ func (mr *MockstorageFieldsMockRecorder) GetPvc() *gomock.Call {
 }
 
 // GetS3 mocks base method.
-func (m *MockstorageFields) GetS3() []openapi0.S3Instance {
+func (m *MockstorageFields) GetS3() []openapi.S3Instance {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetS3")
-	ret0, _ := ret[0].([]openapi0.S3Instance)
+	ret0, _ := ret[0].([]openapi.S3Instance)
 	return ret0
 }
 
@@ -382,10 +381,10 @@ func (mr *MockstorageFieldsMockRecorder) GetS3() *gomock.Call {
 }
 
 // GetSecretVolume mocks base method.
-func (m *MockstorageFields) GetSecretVolume() []openapi0.SecretInstance {
+func (m *MockstorageFields) GetSecretVolume() []openapi.SecretInstance {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSecretVolume")
-	ret0, _ := ret[0].([]openapi0.SecretInstance)
+	ret0, _ := ret[0].([]openapi.SecretInstance)
 	return ret0
 }
 

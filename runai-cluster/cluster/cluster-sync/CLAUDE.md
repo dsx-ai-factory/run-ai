@@ -25,7 +25,6 @@ cluster↔backend sync (inbound is `agent`).
 | format | `format-go` |
 | validate | no-op |
 | local-deploy | `build-go docker-build-generic docker-push-generic` (amd64) |
-| copy-clients | Copies generated swagger clients from `runai-common-packages/clients` into `pkg/generated/` |
 
 Includes: `../../../build/makefile/runai-cluster.mk`, `index.mk`.
 
@@ -38,7 +37,7 @@ Includes: `../../../build/makefile/runai-cluster.mk`, `index.mk`.
   ```
 - **Image tag: `0.0.0-dev`** (RC tag, hardcoded in the runai-cluster chart values). Ref: `runai-local/cluster-sync:0.0.0-dev`.
 - **Both arches:** amd64 (`build-go-amd`, reads `OS=`/`ARCH=`) and arm64 (`build-go-arm`, hardcodes `GOOS=linux GOARCH=arm64` — do NOT pass `OS=`/`ARCH=`). Same tag; only `--build-arg TARGETARCH` differs. local-dev.sh builds amd64 only (Kind nodes are linux/amd64).
-- **Generated code:** `pkg/generated/` swagger clients are generated — run `make copy-clients` (copies from `runai-common-packages/clients`; current `CLIENTS` = `k8s-objects-tracker-client policy-service-client`). k8s clientset generated via `tools.go` code-generator. Do not edit generated dirs by hand.
+- **API clients:** Service clients are consumed from their canonical monorepo Go modules through local `replace` directives in `go.mod`. K8s clientset code is generated via `tools.go`.
 - **Base image:** Dockerfile is `ubi9/ubi-minimal` (for certs/passwd/tmp) → final `FROM scratch`, non-root `USER 65532:65532`, `ENTRYPOINT ["./cluster-sync"]`. Build arg `TARGETARCH` selects `bin/cluster-sync-$TARGETARCH`.
 - **Artifact caching:** `artifact-metadata.json` sets `cache_artifacts: true`, `path_to_artifacts: bin/`.
 - **Config:** loaded via `runai-common-packages/config` (mapstructure env tags in `pkg/config/config.go`); secrets (`CLUSTER_ID`, `CLIENT_NAME`, `CLIENT_SECRET`) from mounted secret. Out-of-cluster fallback reads `KUBE_CONFIG_FILE_PATH`.

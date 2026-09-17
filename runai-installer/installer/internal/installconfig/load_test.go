@@ -27,8 +27,8 @@ install:
   mode: full_installation
   connectivity: connected
 registry:
-  type: jfrog
-  tokenPath: /etc/runai/jfrog.token
+  type: dockerconfig
+  tokenPath: /etc/runai/registry.token
 tls:
   certPath: /etc/runai/tls.crt
   keyPath: /etc/runai/tls.key
@@ -57,8 +57,8 @@ prerequisites:
 
 	assert.Equal(t, "full_installation", cfg.Install.Mode)
 	require.NotNil(t, cfg.Registry)
-	assert.Equal(t, "jfrog", cfg.Registry.Type)
-	assert.Equal(t, "/etc/runai/jfrog.token", cfg.Registry.TokenPath)
+	assert.Equal(t, "dockerconfig", cfg.Registry.Type)
+	assert.Equal(t, "/etc/runai/registry.token", cfg.Registry.TokenPath)
 	require.NotNil(t, cfg.TLS)
 	assert.Equal(t, "/etc/runai/tls.crt", cfg.TLS.CertPath)
 	assert.Equal(t, "/etc/runai/tls.key", cfg.TLS.KeyPath)
@@ -136,4 +136,30 @@ controlPlane:
 func TestLoad_MissingFile(t *testing.T) {
 	_, err := Load(filepath.Join(t.TempDir(), "does-not-exist.yaml"))
 	require.Error(t, err)
+}
+
+func TestLoad_ControlPlaneCredentials(t *testing.T) {
+	path := writeConfig(t, `
+install:
+  mode: runai_cluster_only
+  connectivity: connected
+registry:
+  type: ngc
+cluster:
+  enabled: true
+  name: cluster01
+  domain: cluster.example.com
+  controlPlaneUrl: https://cp.example.com
+  controlPlaneCredentials:
+    username: admin@example.com
+    passwordPath: /etc/runai/cp-password
+`)
+
+	cfg, err := Load(path)
+	require.NoError(t, err)
+
+	require.NotNil(t, cfg.Cluster.ControlPlaneCredentials)
+	assert.Equal(t, "admin@example.com", cfg.Cluster.ControlPlaneCredentials.Username)
+	assert.Equal(t, "/etc/runai/cp-password", cfg.Cluster.ControlPlaneCredentials.PasswordPath)
+	assert.Empty(t, cfg.Cluster.UID)
 }

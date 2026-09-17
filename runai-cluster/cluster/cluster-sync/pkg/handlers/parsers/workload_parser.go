@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
+	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	diwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
 	kubeaischedv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
@@ -27,7 +27,7 @@ const (
 	lastStartTimestampAnnotation = "kai.scheduler/last-start-timestamp"
 )
 
-func WorkloadToStatusChangeRequest(workloadObjectMeta *v1.ObjectMeta, workloadStatus jobs.JobStatus) *swagger.WorkloadStatus {
+func WorkloadToStatusChangeRequest(workloadObjectMeta *v1.ObjectMeta, workloadStatus jobs.JobStatus) *swagger.WorkloadStatusUpdate {
 	workloadId := workloadObjectMeta.Annotations[AnnotationWorkloadId]
 	if workloadId == "" {
 		return nil
@@ -36,7 +36,7 @@ func WorkloadToStatusChangeRequest(workloadObjectMeta *v1.ObjectMeta, workloadSt
 		// do not notify backend before the workload receives status.
 		return nil
 	}
-	return &swagger.WorkloadStatus{
+	return &swagger.WorkloadStatusUpdate{
 		Id:     workloadId,
 		Status: workloadStatus.CreationStatus,
 	}
@@ -44,7 +44,7 @@ func WorkloadToStatusChangeRequest(workloadObjectMeta *v1.ObjectMeta, workloadSt
 
 // WorkloadDistributedToStatusChangeRequest converts a distributed workload status to a backend request.
 // TODO: check this later.
-func WorkloadDistributedToStatusChangeRequest(workloadObjectMeta *v1.ObjectMeta, workloadStatus diwv2.DistributedWorkloadStatus) *swagger.WorkloadStatus {
+func WorkloadDistributedToStatusChangeRequest(workloadObjectMeta *v1.ObjectMeta, workloadStatus diwv2.DistributedWorkloadStatus) *swagger.WorkloadStatusUpdate {
 	workloadId := workloadObjectMeta.Annotations[AnnotationWorkloadId]
 	if workloadId == "" {
 		return nil
@@ -53,7 +53,7 @@ func WorkloadDistributedToStatusChangeRequest(workloadObjectMeta *v1.ObjectMeta,
 		// do not notify backend before the workload receives status.
 		return nil
 	}
-	return &swagger.WorkloadStatus{
+	return &swagger.WorkloadStatusUpdate{
 		Id:     workloadId,
 		Status: workloadStatus.CreationStatus,
 	}

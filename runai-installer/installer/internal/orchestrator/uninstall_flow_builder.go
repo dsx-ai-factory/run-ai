@@ -16,9 +16,9 @@ import (
 func buildUninstallFlowGroups(cfg *config.UninstallConfig, deps uninstall.Deps, externalEvents chan *flow.FlowStatusReportingMsg) []*FlowGroup {
 	helmAndNamespaceFlows := append(getClusterUninstallFlows(cfg, deps), getCPUninstallFlows(cfg, deps)...)
 	helmAndNamespaceFlows = append(helmAndNamespaceFlows, getAdditionalNamespaceFlows(cfg, deps)...)
+	deleteWebhooksFlows := getDeleteWebhooksFlows(cfg, deps)
 	stripCRFinalizersFlows := getStripRunAICRFinalizersFlows(cfg, deps)
 	deleteCRDsFlows := getDeleteCRDsFlows(cfg, deps)
-	deleteWebhooksFlows := getDeleteWebhooksFlows(cfg, deps)
 	deleteResourceInterfacesFlows := getDeleteResourceInterfacesFlows(cfg, deps)
 	deleteClusterRolesFlows := getDeleteClusterRolesFlows(cfg, deps)
 	deletePriorityClassesFlows := getDeletePriorityClassesFlows(cfg, deps)
@@ -30,31 +30,31 @@ func buildUninstallFlowGroups(cfg *config.UninstallConfig, deps uninstall.Deps, 
 	// Helm uninstall also shuts down the running controllers, which is a prerequisite
 	// for safely removing the CRDs they depend on.
 	//
+	// Webhook configurations MUST be deleted before finalizers are stripped. Once the
+	// namespaces are gone the webhook backing services no longer exist, but the
+	// ValidatingWebhookConfigurations still intercept UPDATE requests on their CRs
+	// (e.g. AccessRule, Project). With failurePolicy=Fail the API server rejects the
+	// finalizer patch, the CR keeps its finalizer, and CRD deletion hangs.
+	//
 	// Finalizer stripping MUST happen after helm uninstall (controllers are gone) and
 	// before CRD deletion. Deleting a CRD while any of its CRs still carry finalizers
 	// leaves the CRD stuck in Terminating state: Kubernetes sets deletionTimestamp on
 	// every CR but cannot complete deletion because the finalizer owner is already gone.
 	//
-	// The remaining groups have no strict ordering dependency between them:
-	// - Webhook configurations are placed before CRDs for cleanliness, but the order
-	//   does not matter. We rely on Kubernetes CRD cascade deletion to remove all CRD
-	//   instances as a side effect of deleting the CRD itself, bypassing any registered
-	//   validating/mutating webhooks that would block direct instance deletion (e.g.
-	//   when the backing service is already gone after namespace deletion).
-	// - ResourceInterfaces, ClusterRoles, and PriorityClasses are independent of each
-	//   other and of the CRD/webhook groups.
+	// ResourceInterfaces, ClusterRoles, and PriorityClasses are independent of each
+	// other and of the groups above.
 	return []*FlowGroup{
 		{
 			Flows:   helmAndNamespaceFlows,
 			Manager: flow.NewFlowManagerWithExternalEvents(helmAndNamespaceFlows, externalEvents, false),
 		},
 		{
-			Flows:   stripCRFinalizersFlows,
-			Manager: flow.NewFlowManagerWithExternalEvents(stripCRFinalizersFlows, externalEvents, false),
-		},
-		{
 			Flows:   deleteWebhooksFlows,
 			Manager: flow.NewFlowManagerWithExternalEvents(deleteWebhooksFlows, externalEvents, false),
+		},
+		{
+			Flows:   stripCRFinalizersFlows,
+			Manager: flow.NewFlowManagerWithExternalEvents(stripCRFinalizersFlows, externalEvents, false),
 		},
 		{
 			Flows:   deleteCRDsFlows,
