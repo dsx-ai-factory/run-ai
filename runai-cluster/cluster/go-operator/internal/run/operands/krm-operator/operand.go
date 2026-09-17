@@ -32,7 +32,7 @@ var (
 
 // RBAC permissions the operand requires for resource management
 //+kubebuilder:rbac:namespace="",groups="kai.resources",resources=krmconfigs,verbs=get;create;update;watch;patch;delete;list
-//+kubebuilder:rbac:namespace="",groups="kai.resources",resources=krmconfigs/status,verbs=get
+//+kubebuilder:rbac:namespace="",groups="kai.resources",resources=krmconfigs/status,verbs=get;list;watch
 
 type operand struct{}
 

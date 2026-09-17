@@ -41,3 +41,5 @@ tests:
               - krmconfigs/status
             verbs:
               - get
+              - list
+              - watch
