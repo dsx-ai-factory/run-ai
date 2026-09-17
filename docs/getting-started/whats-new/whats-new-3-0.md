@@ -30,7 +30,7 @@ NVIDIA Run:ai v3.0 changes how third-party service images are sourced: instead o
 
 ### NVIDIA CUDA-Based GPU Fractions
 
-GPU fractions remain supported in v3.0, now powered by NVIDIA CUDA instead of the previous proprietary engine. This makes the capability part of the standard NVIDIA stack, with broader compatibility and long-term maintenance by NVIDIA. Native workload types require no changes; supported workload types require changes only if their manifest sets a fraction limit. See [Migrate GPU Fractions](../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for prerequisites and the full procedure.
+GPU fractions remain supported in v3.0, now powered by NVIDIA CUDA instead of the previous proprietary engine. This makes the capability part of the standard NVIDIA stack, with broader compatibility and long-term maintenance by NVIDIA. Native workload types use the same UI, API, and CLI fields as before; supported workload types require a manifest change only if their manifest sets a fraction limit. See [Migrate GPU Fractions](../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for prerequisites and the full procedure.
 
 ### Unified Controller for All Workload Types
 

@@ -6,7 +6,7 @@ The upgrade affects every cluster running fractional GPU workloads. The submissi
 
 | Workload type | Anything else required |
 | --- | --- |
-| [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) | None. NVIDIA Run:ai converts the workload to the new annotation format automatically. Existing automation, pipelines, and saved templates continue to work unchanged. |
+| [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) | No changes - the request and limit are still set through the same UI, API, and CLI fields. NVIDIA Run:ai converts the workload to the new annotation format automatically. Existing automation, pipelines, and saved templates continue to work unchanged. |
 | [Supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), submitted as a Kubernetes manifest | The manifest itself requires a change only for dynamic fractions - a fractional workload that declares a memory limit in addition to a request. A manifest that requests a fraction without a limit needs no change. See [Migrate Dynamic Fractions YAML](#migrate-dynamic-fractions-yaml). |
 
 ## Prerequisites
@@ -15,11 +15,11 @@ The upgrade affects every cluster running fractional GPU workloads. The submissi
 | --- | --- | --- |
 | CUDA | 13.4 or later | Delivers the CUDA-native GPU sharing implementation |
 | CUDA driver | r615 or later | Must be installed on all GPU nodes |
-| GPU Operator | 26.7 or later | Deploys the CUDA sharing components cluster-wide |
+| GPU Operator | 26.7.1 or later | Deploys the CUDA sharing components cluster-wide. Does not default to CUDA driver r615 - set the driver version explicitly |
 
 ## Migrate Dynamic Fractions YAML
 
-This section applies only to [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) whose manifest sets a fraction limit. [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) are converted automatically and require no action.
+This section applies only to [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) whose manifest sets a fraction limit. [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) use the same UI, API, and CLI fields as before - NVIDIA Run:ai converts them to the new annotation format automatically.
 
 In releases up to v2.26, a dynamic fraction was expressed in two places: the fraction request was an annotation, while the fraction limit was the container environment variable `RUNAI_GPU_MEMORY_LIMIT`. In v3.0, the limit becomes an annotation alongside the request.
 
@@ -116,7 +116,7 @@ No fractional workload may be running when the NVIDIA Run:ai upgrade begins.
 
 **Step 2 - Migrate Dynamic Fractions YAML**
 
-For supported workload types whose manifest sets a fraction limit, update those manifests now, before resubmission - see [Migrate Dynamic Fractions YAML](#migrate-dynamic-fractions-yaml) above. Native workload types are converted automatically and require no action. Doing this while the workload is already suspended or deleted avoids a second disruption.
+For supported workload types whose manifest sets a fraction limit, update those manifests now, before resubmission - see [Migrate Dynamic Fractions YAML](#migrate-dynamic-fractions-yaml) above. Native workload types keep the same UI, API, and CLI fields - NVIDIA Run:ai converts them to the new annotation format automatically. Doing this while the workload is already suspended or deleted avoids a second disruption.
 
 **Step 3 - Upgrade the CUDA driver on all GPU nodes**
 
@@ -124,7 +124,7 @@ Upgrade to r615 or later (or r620 when available). This is the core dependency f
 
 **Step 4 - Upgrade the GPU Operator**
 
-Upgrade to 26.7 or later. This deploys the CUDA sharing components and updates related node-level components across the cluster. Skip this step if you are following Option B.
+Upgrade to 26.7.1 or later. This deploys the CUDA sharing components and updates related node-level components across the cluster. GPU Operator 26.7.1 does not default to CUDA driver r615 - set the driver version to r615 or later explicitly in the GPU Operator configuration (`driver.version`) rather than relying on the default. Skip this step if you are following Option B.
 
 **Step 5 - Upgrade NVIDIA Run:ai**
 
@@ -136,13 +136,22 @@ If you upgraded NVIDIA Run:ai first, upgrade the CUDA driver and GPU Operator as
 
 **Step 7 - Resubmit fractional workloads**
 
-* Native workload types cannot resume their original suspended workload on the new CUDA-based fractions stack: copy each suspended workload to a new workload with a different name, submit the copy through the NVIDIA Run:ai UI, CLI, or API, then delete the original suspended workload.
-* Supported workload types are resubmitted directly, using the manifests migrated in Step 2.
+Native workload types cannot resume their original suspended workload on the new CUDA-based fractions stack:
+
+1. Copy each suspended workload - using **Make a Copy** in the NVIDIA Run:ai UI, or by resubmitting the same configuration through the API or CLI.
+2. Give the copy a different name so it can coexist with the original during verification. Submit it as-is, with the same fields and configuration - no changes are required.
+3. Verify the replacement reaches `Running` and holds its fraction as expected.
+4. Delete the original suspended workload once the replacement is verified.
+
+Supported workload types were deleted, not suspended, in Step 1, so there is no original workload left to delete afterward:
+
+1. Submit the migrated manifest from Step 2 through the NVIDIA Run:ai UI, API, or CLI.
+2. Verify the workload reaches `Running` and holds its fraction limit as expected.
 
 ## Verify GPU Fractions
 
-* Confirm all GPU nodes report CUDA driver r615 or later. A single node on an older driver accepts non-fractional work but rejects fractional workloads, producing scheduling failures that are easy to misdiagnose.
-* Confirm the GPU Operator is at 26.7 or later and its pods are `Running` across the cluster (`kubectl get pods -n gpu-operator`).
+* Confirm all GPU nodes report CUDA driver r615 or later. A single node on an older driver accepts non-fractional work but rejects fractional workloads, producing scheduling failures that are easy to misdiagnose. Verify this explicitly rather than assuming it from the GPU Operator version, since GPU Operator 26.7.1 does not default to r615.
+* Confirm the GPU Operator is at 26.7.1 or later and its pods are `Running` across the cluster (`kubectl get pods -n gpu-operator`).
 * Confirm the platform reports v3.0.
 * Submit a small test workload requesting a fraction and confirm it reaches `Running` rather than remaining `Pending`.
 * For a migrated dynamic fraction workload, confirm the limit annotation is present on the pod and that the container is held to its ceiling - a missed limit annotation runs normally but without a burst ceiling, so verify explicitly rather than inferring from a successful start.
@@ -152,13 +161,14 @@ If you upgraded NVIDIA Run:ai first, upgrade the CUDA driver and GPU Operator as
 
 | Symptom | Likely cause | Resolution |
 | --- | --- | --- |
-| Fractional workloads stay `Pending` after the upgrade; non-fractional workloads schedule normally | A prerequisite is not yet satisfied, most often the CUDA driver on one or more nodes, or a GPU Operator still below 26.7 | Check the driver on every GPU node and the GPU Operator version - fractions enable automatically once both are correct |
+| Fractional workloads stay `Pending` after the upgrade; non-fractional workloads schedule normally | A prerequisite is not yet satisfied, most often the CUDA driver on one or more nodes, or a GPU Operator still below 26.7.1 | Check the driver on every GPU node and the GPU Operator version - fractions enable automatically once both are correct |
 | Only some fractional workloads are `Pending`; others run | Mixed driver versions across the node pool | Audit the driver version node by node rather than cluster-wide, and upgrade any node below r615 |
+| GPU Operator is at 26.7.1 or later, but GPU nodes still report a driver older than r615 | GPU Operator 26.7.1 does not default to CUDA driver r615 | Set the driver version to r615 or later explicitly in the GPU Operator configuration (`driver.version`) - do not rely on the GPU Operator default |
 | A dynamic fraction workload runs but is not held to its limit | `RUNAI_GPU_MEMORY_LIMIT` is still in the manifest and was not replaced by the annotation; v3.0 ignores the variable | Migrate the manifest as described above. This failure is silent - audit manifests rather than waiting for a symptom |
 | The limit annotation is present but has no effect | The container name in the annotation key does not match a container in the pod, or does not match `gpu-fraction-container-name` | Confirm the `<container>` element of the annotation key matches the container name exactly, including case |
 | The limit is interpreted as the wrong kind of value | An absolute limit was paired with a portion request, or the reverse | Pair `gpu-memory` with the `nvidia.com/…gpu-memory.limit` key, and `gpu-fraction` with the `kai.scheduler/…portion.limit` key |
 | Workloads fail to start after enabling SM-sharing | Insufficient SM capacity for the number of concurrent fractional workloads requested | Revert to time-slicing by removing the annotation, then reintroduce SM-sharing with fewer concurrent fractions |
-| OpenShift cluster cannot install GPU Operator 26.7 | The OCP version is outside the GPU Operator 26.7 support matrix | Upgrade OCP to a supported version. NVIDIA Run:ai v3.0 can be installed in the meantime; fractions remain disabled until the stack is compatible |
+| OpenShift cluster cannot install GPU Operator 26.7.1 | The OCP version is outside the GPU Operator 26.7.1 support matrix | Upgrade OCP to a supported version. NVIDIA Run:ai v3.0 can be installed in the meantime; fractions remain disabled until the stack is compatible |
 
 ## Optional: Configure GPU Compute Sharing Mode
 

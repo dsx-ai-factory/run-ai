@@ -37,8 +37,9 @@ The following v3.0 changes can affect your upgrade. Review each one and determin
 GPU fractions remain supported in v3.0, now powered by NVIDIA CUDA instead of the previous proprietary engine. This affects every cluster running fractional GPU workloads:
 
 * Fractional workloads must be suspended (native workload types) or deleted (supported workload types) before the NVIDIA Run:ai upgrade begins.
-* CUDA 13.4 or later, CUDA driver r615 or later, and GPU Operator 26.7 or later are required for fractions to work on v3.0.
-* For [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), Kubernetes manifests using dynamic fractions (a fraction request with a memory limit) require migration to a new annotation. [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) are converted automatically and require no action.
+* CUDA 13.4 or later, CUDA driver r615 or later, and GPU Operator 26.7.1 or later are required for fractions to work on v3.0.
+* GPU Operator 26.7.1 does not default to CUDA driver r615. Set the driver version explicitly - see [Migrate GPU Fractions](migrate-gpu-fractions.md).
+* For [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), Kubernetes manifests using dynamic fractions (a fraction request with a memory limit) require migration to a new annotation. [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) keep the same UI, API, and CLI fields - NVIDIA Run:ai converts them to the new annotation format automatically.
 * You can choose whether to upgrade the CUDA driver and GPU Operator before or after upgrading NVIDIA Run:ai - the choice affects only how long fractions stay unavailable.
 
 See [Migrate GPU Fractions](migrate-gpu-fractions.md) for the full procedure.
