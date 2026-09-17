@@ -22,6 +22,7 @@ import (
 	"github.com/openshift/cluster-monitoring-operator/pkg/manifests"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -284,14 +285,12 @@ func unstructuredRemoteWriteName(remoteWrite interface{}) (string, error) {
 		return "", fmt.Errorf("prometheusK8s.remoteWrite entry must be an object")
 	}
 
-	value, exists := remoteWriteMap["name"]
-	if !exists || value == nil {
-		return "", nil
+	name, found, err := unstructured.NestedString(remoteWriteMap, "name")
+	if err != nil {
+		return "", fmt.Errorf("get prometheusK8s.remoteWrite name: %w", err)
 	}
-
-	name, ok := value.(string)
-	if !ok {
-		return "", fmt.Errorf("prometheusK8s.remoteWrite name must be a string")
+	if !found {
+		return "", nil
 	}
 
 	return name, nil
