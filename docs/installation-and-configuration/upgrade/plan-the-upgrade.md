@@ -22,9 +22,9 @@ Before upgrading NVIDIA Run:ai, verify that your Kubernetes or OpenShift distrib
 | NVIDIA Run:ai version | Supported Kubernetes versions | Supported OpenShift versions |
 | --------------------- | ----------------------------- | ---------------------------- |
 | 3.0 (latest)          | 1.35 to 1.37                  | 4.20 to 4.22                 |
-| 2.26                  | 1.34 to 1.36                  | 4.18 to 4.21                 |
-| 2.25                  | 1.33 to 1.35                  | 4.18 to 4.21                 |
-| 2.24                  | 1.33 to 1.35                  | 4.17 to 4.20                 |
+| 2.26                  | 1.34 to 1.36                  | 4.18 to 4.22                 |
+| 2.25                  | 1.33 to 1.35                  | 4.18 to 4.22                 |
+| 2.24                  | 1.33 to 1.35                  | 4.17 to 4.22                 |
 
 For information on supported versions of managed Kubernetes, consult the release notes provided by your Kubernetes service provider. For an up-to-date end-of-life statement see [Kubernetes Release History](https://kubernetes.io/releases/) or [OpenShift Container Platform Life Cycle Policy](https://access.redhat.com/support/policy/updates/openshift).
 
