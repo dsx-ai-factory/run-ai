@@ -235,6 +235,18 @@ spec:
   terminationGracePeriodSeconds: 5
 ```
 
+## Enforcing GPU Memory Fractions with a Policy
+
+Administrators can also control GPU memory fractions centrally with a [workload policy](../../policies/policies-and-rules.md). A policy can supply a default GPU memory fraction for workloads that do not set one, or enforce a specific value so that users cannot change it. This is available for both [native workloads](../../policies/native-workload-policies.md) and [supported workload types](../../policies/supported-workload-type-policies.md).
+
+<Note>
+
+**Note**
+
+Policy enforcement does not reach [externally submitted workloads](../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads).
+
+</Note>
+
 ## Deployment Considerations
 
 * Selecting a GPU portion using percentages as units does not guarantee the exact memory size. This means 50% of an A-100-40GB is 20 GB while 50% of an A-100-80GB is 40 GB. To have better control over the exact allocated memory, specify the exact memory size, for example 40 GB.

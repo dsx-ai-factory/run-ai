@@ -163,8 +163,8 @@ A workload requesting `time-slicing`, or a workload submitted without a compute 
 <Tab title="UI">
 
 1. Go to the Workload manager → Workloads
-2. Select one of the workspaces you created
-3. Open the workload **details** and select the **YAML** view
+2. Select one of the workspaces you created and click **SHOW DETAILS**
+3. Open the **YAML** tab
 4. Confirm that `nvidia.com/container.<container-name>.gpu-compute.mode` is present with the value `sm-sharing`
 
 </Tab>

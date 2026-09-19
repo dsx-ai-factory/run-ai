@@ -212,8 +212,21 @@ spec:
     - name: app          # the <container-name> used in the limit annotation
 ```
 
+## Enforcing Dynamic GPU Memory Fractions with a Policy
+
+Administrators can also control dynamic GPU memory fractions centrally with a [workload policy](../../policies/policies-and-rules.md). A policy can supply a default Request and Limit for workloads that do not set one, or enforce specific values so that users cannot change them. This is available for both [native workloads](../../policies/native-workload-policies.md) and [supported workload types](../../policies/supported-workload-type-policies.md).
+
+<Note>
+
+**Note**
+
+Policy enforcement does not reach [externally submitted workloads](../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads).
+
+</Note>
+
 ## Deployment Considerations
 
+* Selecting a GPU portion using percentages as units for the Request does not guarantee the exact memory size. This means 50% of an A-100-40GB is 20 GB while 50% of an A-100-80GB is 40 GB. To have better control over the exact allocated memory, specify the exact memory size, for example 40 GB.
 * The Limit must be equal to or greater than the memory Request.
 * The Limit is enforced at runtime only and is never read by the Scheduler. Raising a Limit does not change where a workload is placed.
 * Memory loaned above the Request is not guaranteed. A workload operating above its Request can have that memory reclaimed at any time.
