@@ -86,8 +86,8 @@ The value is a duration string, a number followed by a unit (`s`, `m`, or `h`), 
        metadata:
          namespace: my-project-name
        ```
-6. Set whether the **workload may be interrupted**. Change this setting only if you want to override the default preemptibility defined for the workload type. Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running. Preemptible workloads may be interrupted if resources are needed for higher priority workloads:
-   * In the UI, select **Preemptible** or **Non-preemptible** from the dropdown.
+6. Set whether the **workload may be interrupted**. Change this setting only if you want to override the default preemptibility defined for the workload type. Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running. Preemptible workloads may be interrupted if resources are needed for higher priority workloads. Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas:
+   * In the UI, select **Preemptible**, **Semi-preemptible**, or **Non-preemptible** from the dropdown.
    *   In the YAML, set the following label under `metadata.labels`:
 
        ```yaml

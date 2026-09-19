@@ -6,6 +6,7 @@ NVIDIA Run:ai defines workload priority and preemptibility to determine how work
 * **Workload preemptibility** - Determines the workload's resource usage policy and its guarantee against interruption:
   * Non-preemptible workloads must run within the project’s deserved quota, cannot use over-quota resources, and will not be interrupted once scheduled.
   * Preemptible workloads can use opportunistic resources beyond the project’s quota and may be interrupted at any time by higher priority workload, even if running within the project's quota.
+  * Semi-preemptible workloads guarantee their minimum required replicas run without interruption. Any replicas beyond that minimum behave as preemptible replicas - they can use opportunistic resources beyond the project's quota, and may be interrupted at any time by a higher priority workload.
 
 <Info>
 
@@ -133,7 +134,7 @@ For [supported workload types](../../../workloads-in-nvidia-run-ai/workload-type
 * **CLI** - Set using the `--priority` and `--preemptibility` flags
 * **via YAML manifest** - Set by adding the following labels to your YAML manifest under the `metadata.labels` section of your workload definition.
   * Use the following values for priority - `very-low`, `low`, `medium-low`, `medium`, `medium-high`, `high`, `very-high` :
-  *   Use the following values for preemptibility - `preemptible` or `non-preemptible`
+  *   Use the following values for preemptibility - `preemptible`, `semi-preemptible`, or `non-preemptible`
 
       ```yaml
       metadata:
