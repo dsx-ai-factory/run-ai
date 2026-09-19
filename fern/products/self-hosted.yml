@@ -28,6 +28,9 @@ navigation:
         path: ../../docs/getting-started/quick-starts/configure-the-platform-quick-start.md
       - page: Run Workloads Quick Start
         path: ../../docs/getting-started/quick-starts/run-workloads-quick-start.md
+      - page: Quick Start Guide
+        path: ../../docs/getting-started/quick-start-guide.md
+        hidden: true
     - section: What's New
       slug: whats-new
       contents:
