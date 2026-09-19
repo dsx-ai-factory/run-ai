@@ -64,7 +64,7 @@ The structure of a policy depends on the workload type it targets.
 Scope availability depends on the policy type:
 
 * Policies for NVIDIA Run:ai native workloads support all scopes: system, cluster, department, and project.
-* Policies for supported workload types support project scope only.
+* Policies for supported workload types support cluster, department, and project scope. System scope is not available for these policies.
 
 </Info>
 
@@ -89,6 +89,8 @@ The different scoping of policies also allows the breakdown of the responsibilit
 ![](../../assets/effective-policy.png)
 
 If a field is used by multiple policies at different scopes, the platform applies a reconciliation mechanism to determine which policy takes effect. Defaults of the same field can still be submitted by different organizational policies, as they are considered “soft” rules. In this case, the closest scope to the workload becomes the effective default (project default “wins” vs. department default, department default “wins” vs. cluster default, etc.). For rules, precedence depends on their type: simple rules on non-security and non-compute fields follow the same order as defaults (project > department > cluster), while strict rules on security and compute fields apply in reverse order (cluster > department > project).
+
+Supported workload type policies use a different reconciliation mechanism: each rule declares, at the scope where it is created, whether a narrower scope is allowed to override it. See [Overriding rules across scopes](supported-workload-type-policies.md#overriding-rules-across-scopes) for details.
 
 <Accordion title="NVIDIA Run:ai policies vs. Kyverno policies">
 
