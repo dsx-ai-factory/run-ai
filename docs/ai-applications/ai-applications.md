@@ -61,10 +61,21 @@ NVIDIA Run:ai surfaces the Helm chart state as-is and maps it to the AI applicat
 
 ### Show/Hide Details
 
-Click a row in the AI applications table and then click the SHOW DETAILS button at the upper-right side of the action bar. The details pane appears, presenting detailed breakdown of some Kubernetes resources that belong to it. The details pane displays:
+Click a row in the AI applications table and then click **SHOW DETAILS** at the upper-right of the action bar to open the details pane.
 
-* A list of all AI application components (workloads, services, secrets, PVCs, ConfigMaps, etc.)
-* Status indicators (Running, Pending, Failed, etc.) for each workload
+The details pane displays a diagram of the AI application's structure. Each workload in the AI application appears in its own group, connected to the endpoints and Kubernetes resources it uses:
+
+* **Workload** - The workload, with a status indicator (Running, Pending, Failed, and so on)
+* **Endpoint** - A network endpoint the workload exposes
+* **Secret** - A Kubernetes Secret the workload references
+* **PVC** - A PersistentVolumeClaim the workload references
+* **ConfigMap** - A Kubernetes ConfigMap the workload references
+
+A legend in the upper-left corner of the diagram identifies each node type. Use the **Type** filter or the search box above the diagram to filter nodes by type or name.
+
+Click a workload node to expand it and view its GPU compute allocation, GPU memory allocation, CPU compute allocation, and CPU memory allocation. The expanded view includes a link to open the workload in the Workloads table.
+
+Use the zoom and pan controls, or the minimap, to navigate the diagram.
 
 ## Creating an AI Application
 
