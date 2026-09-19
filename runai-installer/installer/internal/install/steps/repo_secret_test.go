@@ -30,7 +30,7 @@ func newTestRunAIInstallData(ngcCreds string, devMode bool) *model.RunAIInstallD
 		LogsDir:     "/tmp",
 	}
 	d, _ := model.NewRunAIInstallData(opts)
-	d.Inputs[configinputs.InstallInputJfrogCreds] = ngcCreds
+	d.Inputs[configinputs.InstallInputRegistryPullSecret] = ngcCreds
 	return d
 }
 

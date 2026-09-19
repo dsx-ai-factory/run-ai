@@ -145,25 +145,25 @@ helm upgrade runai-backend control-plane-<VERSION>.tgz -n runai-backend -f runai
 
 Before upgrading the NVIDIA Run:ai cluster, validate that the latest [system requirements](system-requirements.md) and [network requirements](network-requirements.md) are met:
 
-<Info>
+<Note>
 
 **Note**
 
 It is highly recommended to upgrade the Kubernetes version together with the NVIDIA Run:ai cluster version, to ensure compatibility with latest supported version of your [Kubernetes distribution](system-requirements.md#kubernetes-distribution).
 
-</Info>
+</Note>
 
 ### Getting Installation Instructions
 
 Follow the setup and installation instructions below to get the installation instructions to upgrade the NVIDIA Run:ai cluster.
 
-<Info>
+<Note>
 
 **Note**
 
 If your control plane was upgraded using NGC, the cluster must also be upgraded using NGC. See the NGC tab in the [Installation instructions](upgrade.md#installation-instructions) section below.
 
-</Info>
+</Note>
 
 #### Setup
 
@@ -194,7 +194,7 @@ If your control plane was upgraded using NGC, the cluster must also be upgraded 
         helm repo update
         helm upgrade -i runai-cluster runai/runai-cluster -n runai \
           --set controlPlane.url=... \
-          --set controlPlane.bootstrapToken=... \
+          --set controlPlane.clientSecret=... \
           --set cluster.uid=... \
           --set cluster.url=... --version="<VERSION>" --create-namespace
           --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -227,7 +227,7 @@ Once installation is complete, validate the cluster is **Connected** and listed 
     helm repo update
     helm upgrade -i runai-cluster runai/runai-cluster -n runai \
       --set controlPlane.url=... \
-      --set controlPlane.bootstrapToken=... \
+      --set controlPlane.clientSecret=... \
       --set cluster.uid=... \
       --set cluster.url=... --version="<VERSION>" --create-namespace
       --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -257,7 +257,7 @@ The following instructions apply whether you downloaded the package via NGC or J
     ```bash
     helm upgrade -i runai-cluster runai-cluster-<VERSION>.tgz \
       --set controlPlane.url=... \
-      --set controlPlane.bootstrapToken=... \
+      --set controlPlane.clientSecret=... \
       --set cluster.uid=... \
       --set cluster.url=... --create-namespace \
       --set global.image.registry=registry.mycompany.local \
@@ -275,25 +275,25 @@ Once installation is complete, validate the cluster is **Connected** and listed 
 
 ## Migrate from NGINX to HAProxy Kubernetes Ingress Controller
 
-<Info>
+<Note>
 
 **Note**
 
 This section applies to Kubernetes only. OpenShift includes a pre-installed ingress controller by default and does not require this migration.
 
-</Info>
+</Note>
 
 NVIDIA Run:ai recommends using [HAProxy Kubernetes Ingress Controller](https://www.haproxy.com/documentation/kubernetes-ingress/) as the ingress controller. This change aligns with the announced retirement of the upstream NGINX Ingress Controller project.
 
 Clusters upgraded from earlier versions typically already have NGINX installed. After upgrading to v2.26, follow the steps below to migrate ingress traffic from NGINX Ingress Controller to HAProxy Kubernetes Ingress Controller.
 
-<Info>
+<Note>
 
 **Migration Resources**
 
 You can utilize additional resources to streamline your migration. Visit the [HAProxy Migration Center](https://www.haproxy.com/landing/ingress-nginx-retirement) to access a dedicated migration assistant tool and a technical webinar on moving from NGINX to HAProxy.
 
-</Info>
+</Note>
 
 ### Check the Service Type of the Existing Ingress Controller
 
@@ -308,13 +308,13 @@ kubectl get svc -n <nginx-namespace>
 
 When running more than one ingress controller in the same cluster, port conflicts are relevant only for NodePort-based setups. LoadBalancer-based controllers automatically receive separate external IP addresses.
 
-<Info>
+<Note>
 
 **Note**
 
 If your setup differs from the examples above, adjust the configuration accordingly. When using external LoadBalancer on top of Ingress with service type NodePort, you may need to update external resources to route traffic to HAProxy’s configured NodePort values.
 
-</Info>
+</Note>
 
 ### Install and Configure HAProxy Kubernetes Ingress Controller
 
@@ -322,13 +322,13 @@ Ingress controllers can be installed and configured in different ways depending 
 
 The sections below provide environment-specific Helm installation examples. Select the option that matches your deployment environment.
 
-<Info>
+<Note>
 
 **Note**
 
 OpenShift and RKE2 include a pre-installed ingress controller by default.
 
-</Info>
+</Note>
 
 <Accordion title="Vanilla Kubernetes">
 
@@ -516,7 +516,22 @@ If you encounter an issue with the cluster upgrade, use the troubleshooting scen
 
 If the NVIDIA Run:ai cluster installation failed, check the installation logs to identify the issue. Run the following script to print the installation logs:
 
-[get-installation-logs.sh](../../../assets/get-installation-logs.sh)
+```bash
+#!/bin/bash
+
+# Print logs of helm hooks if installation failed
+hook_pods=$(kubectl get pod -n runai -l run.ai/hook 2> /dev/null | wc -l)
+if [ $hook_pods -ne 0 ]
+then
+  kubectl logs -n runai -l run.ai/hook
+fi
+
+runaiconfig="$(kubectl get runaiconfig runai -n runai 2> /dev/null; echo $?)"
+if [[ $runaiconfig -eq 0 ]]
+then
+  kubectl logs -n runai -l name=runai | grep ERROR
+fi
+```
 
 ### Cluster Status
 

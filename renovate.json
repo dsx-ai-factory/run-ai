@@ -55,13 +55,34 @@
       "enabled": false
     },
     {
-      "matchCurrentVersion": "<1.0.0",
-      "matchUpdateTypes": ["minor"],
+      "matchManagers": ["gomod"],
+      "postUpdateOptions": ["gomodTidy"]
+    },
+    {
+      "description": "go-mod-directive versioning treats the `go` line as a range (1.26 behaves like ^1.26, satisfied by anything newer), so Renovate's default rangeStrategy leaves it alone once the toolchain already meets it. Force bump so new Go minors still land.",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["golang"],
+      "matchDepNames": ["go"],
+      "rangeStrategy": "bump"
+    },
+    {
+      "description": "Allow indirect (transitive) go.mod dependencies to receive update PRs, not just direct ones.",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "enabled": true
+    },
+    {
+      "description": "Go major bumps change the import path, breaking the build. The indirect-enable rule above has no matchUpdateTypes filter and overrides the general major block.",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "matchUpdateTypes": ["major"],
       "enabled": false
     },
     {
-      "matchManagers": ["gomod"],
-      "postUpdateOptions": ["gomodTidy"]
+      "description": "Blocks 0.x minor bumps (breaking-by-SemVer-convention pre-1.0 releases), e.g. k8s.io/api. Regex form, not a semver range string -- plain range syntax like \"<1.0.0\"/\"<v1.0.0\" was confirmed via Renovate's own debug log to never match against gomod deps (no packageRule matched k8s.io/api's v0.35.4 -> v0.37.0 minor update in two separate live runs), while this is Renovate's own documented idiom for the same pattern (its default presets use matchCurrentVersion: \"!/^0/\"). Matches both v-prefixed and bare forms. Must stay after the indirect-enable rule above, which sets enabled true with no matchUpdateTypes filter and would otherwise flip this back on for indirect deps.",
+      "matchCurrentVersion": "/^v?0\\./",
+      "matchUpdateTypes": ["minor"],
+      "enabled": false
     },
     {
       "description": "gomodTidy only tidies the module Renovate edited, so a sibling in the same folder that had no dependency change is absent from the branch and its go.mod goes stale, failing with `go: updates to go.mod needed`. Grouping cannot fix that on its own, because Renovate only includes a module that actually had an update. The script tidies every module in the group, and regenerates mocks where a module has a mockery config -- upstream interfaces gain methods between releases and a checked-in mock that no longer satisfies one breaks compilation of the whole test package. fileFilters must cover the generated mock paths or Renovate discards them.",

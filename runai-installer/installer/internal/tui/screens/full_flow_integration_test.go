@@ -118,7 +118,7 @@ func TestFullFlowIntegration(t *testing.T) {
 
 		// Fill in required configuration
 		runaiData.Inputs[configinputs.InstallInputClusterName] = "test-cluster"
-		runaiData.Inputs[configinputs.InstallInputJfrogCreds] = "dGVzdDp0ZXN0" // base64 encoded "test:test"
+		runaiData.Inputs[configinputs.InstallInputRegistryPullSecret] = "dGVzdDp0ZXN0" // base64 encoded "test:test"
 		runaiData.Inputs[configinputs.InstallInputFQDN] = "runai.example.com"
 
 		// Reinitialize screen with filled data
@@ -242,7 +242,7 @@ func TestFullFlowWithInstallation(t *testing.T) {
 	// Pre-fill all required data to skip input screens
 	runaiData.Prerequisites = []string{} // No prerequisites for faster test
 	runaiData.Inputs[configinputs.InstallInputClusterName] = "test-cluster"
-	runaiData.Inputs[configinputs.InstallInputJfrogCreds] = "dGVzdDp0ZXN0"
+	runaiData.Inputs[configinputs.InstallInputRegistryPullSecret] = "dGVzdDp0ZXN0"
 	runaiData.Inputs[configinputs.InstallInputFQDN] = "runai.example.com"
 
 	// Initialize screens
@@ -437,7 +437,7 @@ func TestFullFlowStepByStep(t *testing.T) {
 
 	// Simulate typing in configuration values
 	runaiData.Inputs[configinputs.InstallInputClusterName] = "integration-test-cluster"
-	runaiData.Inputs[configinputs.InstallInputJfrogCreds] = "dGVzdGNyZWRz" // "testcreds" in base64
+	runaiData.Inputs[configinputs.InstallInputRegistryPullSecret] = "dGVzdGNyZWRz" // "testcreds" in base64
 	runaiData.Inputs[configinputs.InstallInputFQDN] = "integration.runai.example.com"
 
 	// Re-init to pick up the values
@@ -522,7 +522,7 @@ func TestScreenTransitions(t *testing.T) {
 	// Fill in all required data upfront
 	runaiData.Prerequisites = []string{}
 	runaiData.Inputs[configinputs.InstallInputClusterName] = "test-cluster"
-	runaiData.Inputs[configinputs.InstallInputJfrogCreds] = "dGVzdDp0ZXN0"
+	runaiData.Inputs[configinputs.InstallInputRegistryPullSecret] = "dGVzdDp0ZXN0"
 	runaiData.Inputs[configinputs.InstallInputFQDN] = "runai.example.com"
 
 	views := GetScreensWithK8s(k8sClient)

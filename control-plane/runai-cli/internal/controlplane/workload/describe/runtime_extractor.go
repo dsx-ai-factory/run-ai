@@ -7,8 +7,8 @@ package describe
 
 import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/displayer"
-	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 
 // runtimeSpecExtractor defines an interface for extracting runtime fields from different spec types

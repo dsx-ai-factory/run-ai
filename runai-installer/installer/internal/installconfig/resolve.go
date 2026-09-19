@@ -24,15 +24,15 @@ const (
 )
 
 // ResolveRegistry picks exactly one registry source and resolves its
-// credentials into a spec.Registry. Precedence: the --jfrog-token-path /
+// credentials into a spec.Registry. Precedence: the --registry-token-path /
 // --ngc-token-path CLI flags override the config file's registry section.
-func ResolveRegistry(cfg *Config, jfrogTokenPath, ngcTokenPath string) (*spec.Registry, error) {
-	if jfrogTokenPath != "" && ngcTokenPath != "" {
-		return nil, errors.New("--jfrog-token-path and --ngc-token-path are mutually exclusive")
+func ResolveRegistry(cfg *Config, registryTokenPath, ngcTokenPath string) (*spec.Registry, error) {
+	if registryTokenPath != "" && ngcTokenPath != "" {
+		return nil, errors.New("--registry-token-path and --ngc-token-path are mutually exclusive")
 	}
 
-	if jfrogTokenPath != "" || ngcTokenPath != "" {
-		typ, path := spec.RegistryTypeJFrog, jfrogTokenPath
+	if registryTokenPath != "" || ngcTokenPath != "" {
+		typ, path := spec.RegistryTypeDockerConfig, registryTokenPath
 		if ngcTokenPath != "" {
 			typ, path = spec.RegistryTypeNGC, ngcTokenPath
 		}
@@ -52,7 +52,7 @@ func ResolveRegistry(cfg *Config, jfrogTokenPath, ngcTokenPath string) (*spec.Re
 	}
 
 	if cfg == nil || cfg.Registry == nil {
-		return nil, errors.New("no registry credentials: set --jfrog-token-path, --ngc-token-path, or registry in the config")
+		return nil, errors.New("no registry credentials: set --registry-token-path, --ngc-token-path, or registry in the config")
 	}
 	return resolveRegistryFromConfig(cfg.Registry)
 }
@@ -141,7 +141,7 @@ func validateRegistryAuth(r *Registry) (registryAuthMode, error) {
 
 func validateRegistryType(t spec.RegistryType) error {
 	switch t {
-	case spec.RegistryTypeJFrog, spec.RegistryTypeNGC:
+	case spec.RegistryTypeDockerConfig, spec.RegistryTypeNGC:
 		return nil
 	}
 	return fmt.Errorf("unknown registry type: %q", t)
@@ -157,12 +157,41 @@ func ResolveClusterCredentials(cfg *Config) error {
 	}
 	var err error
 	if c.BootstrapTokenPath != "" {
-		c.bootstrapToken, err = readSecretFile(c.BootstrapTokenPath, "cluster bootstrap token")
+		if c.bootstrapToken, err = readSecretFile(c.BootstrapTokenPath, "cluster bootstrap token"); err != nil {
+			return err
+		}
 	}
 	if c.ClientSecretPath != "" {
-		c.clientSecret, err = readSecretFile(c.ClientSecretPath, "cluster client secret")
+		if c.clientSecret, err = readSecretFile(c.ClientSecretPath, "cluster client secret"); err != nil {
+			return err
+		}
 	}
-	return err
+	return resolveControlPlaneCredentials(c.ControlPlaneCredentials)
+}
+
+func resolveControlPlaneCredentials(cc *ControlPlaneCredentials) error {
+	if cc == nil {
+		return nil
+	}
+	if cc.Password != "" && cc.PasswordPath != "" {
+		return errors.New("cluster.controlPlaneCredentials: set either password or passwordPath, not both")
+	}
+	if cc.Token != "" && cc.TokenPath != "" {
+		return errors.New("cluster.controlPlaneCredentials: set either token or tokenPath, not both")
+	}
+	var err error
+	cc.password, cc.token = cc.Password, cc.Token
+	if cc.PasswordPath != "" {
+		if cc.password, err = readSecretFile(cc.PasswordPath, "control plane password"); err != nil {
+			return err
+		}
+	}
+	if cc.TokenPath != "" {
+		if cc.token, err = readSecretFile(cc.TokenPath, "control plane token"); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func readSecretFile(path, name string) (string, error) {

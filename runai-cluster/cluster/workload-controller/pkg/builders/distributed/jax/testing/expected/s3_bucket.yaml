@@ -75,7 +75,7 @@ spec:
                 secretKeyRef:
                   key: liza-secret
                   name: k8s-secret-a
-            image: runai.jfrog.io/op-containers-prod/goofys
+            image: example.io/goofys
             imagePullPolicy: IfNotPresent
             name: s3-fs-0
             resources: {}
@@ -112,7 +112,7 @@ spec:
                 secretKeyRef:
                   key: henry-secret
                   name: k8s-secret-b
-            image: runai.jfrog.io/op-containers-prod/goofys
+            image: example.io/goofys
             imagePullPolicy: IfNotPresent
             name: s3-fs-1
             resources: {}

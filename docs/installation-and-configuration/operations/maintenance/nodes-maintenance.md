@@ -6,7 +6,7 @@ This guide provides detailed instructions on how to manage both planned and unpl
 
 * **Access to Kubernetes cluster** - Administrative access to the Kubernetes cluster, including permissions to run `kubectl` commands
 * **Basic knowledge of Kubernetes** - Familiarity with Kubernetes concepts such as nodes, taints, and workloads
-* **NVIDIA Run:ai installation** - The [NVIDIA Run:ai software installed](../../getting-started/installation/README.md) and configured within your Kubernetes cluster
+* **NVIDIA Run:ai installation** - The [NVIDIA Run:ai software installed](../../overview.md) and configured within your Kubernetes cluster
 * **Node naming conventions** - Know the names of the nodes within your cluster, as these are required when executing the commands
 
 ## Node Types
@@ -27,13 +27,13 @@ The following workload types can run on worker nodes:
 * **Training workloads** - These are long-running processes that, in case of node downtime, can automatically move to another node.
 * **Interactive workloads** - These are short-lived, interactive processes that require manual intervention to be relocated to another node.
 
-<Info>
+<Note>
 
 **Note**
 
 While training workloads can be automatically migrated, it is recommended to plan maintenance and manually manage this process for a faster response, as it may take time for Kubernetes to detect a node failure.
 
-</Info>
+</Note>
 
 #### Planned Maintenance
 
@@ -112,7 +112,7 @@ In the event of unplanned downtime:
 
 ### NVIDIA Run:ai System Nodes
 
-In a production environment, the services responsible for scheduling, submitting and managing NVIDIA Run:ai workloads operate on one or more NVIDIA Run:ai system nodes. It is recommended to have more than one system node to ensure [high availability](high-availability.md). If one system node goes down, another can take over, maintaining continuity. If a second system node does not exist, you must designate another node in the cluster as a temporary NVIDIA Run:ai system node to maintain operations.
+In a production environment, the services responsible for scheduling, submitting and managing NVIDIA Run:ai workloads operate on one or more NVIDIA Run:ai system nodes. It is recommended to have more than one system node to ensure [high availability](../high-availability.md). If one system node goes down, another can take over, maintaining continuity. If a second system node does not exist, you must designate another node in the cluster as a temporary NVIDIA Run:ai system node to maintain operations.
 
 The protocols for handling planned maintenance and unplanned downtime are identical to those for worker nodes. Refer to the above section for detailed instructions.
 

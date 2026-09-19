@@ -1,3 +1,7 @@
+{{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
 # Admin Password — materialized by the secret-generator hook into
 # runai-backend-gen-tenants-manager unless the user supplies an existingSecret
 # that contains ADMIN_PASSWORD itself.

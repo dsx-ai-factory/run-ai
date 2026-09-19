@@ -43,7 +43,7 @@ info:
     url: >-
       https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/
 servers:
-  - url: 'https://app.run.ai'
+  - url: 'http://localhost:8080'
 security:
   - bearerAuth: []
 tags:
@@ -3865,11 +3865,9 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/org-unit/reports/batch-delete:
-    x-internal: true
     post:
       summary: Delete multiple reports in batch.
       operationId: batch_delete_reports
-      x-internal: true
       x-service: org-unit-service
       description: >-
         Deletes multiple reports in a single request. Returns per-report

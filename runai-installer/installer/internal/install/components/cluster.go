@@ -44,7 +44,7 @@ func (r *runaiCluster) GetMandatoryInputs(runaiData *model.RunAIInstallData) []c
 		configinputs.InstallInputSSLKeyPath,
 	}
 	if !runaiData.Config.DevMode && !runaiData.Config.IsAirgap() {
-		inputs = append(inputs, configinputs.InstallInputJfrogCreds)
+		inputs = append(inputs, configinputs.InstallInputRegistryPullSecret)
 	}
 	if needsHostRoutingStep(runaiData) {
 		inputs = append(inputs, configinputs.InstallInputHostRoutingCertPath)
@@ -59,7 +59,7 @@ func (r *runaiCluster) GetOptionalInputs(runaiData *model.RunAIInstallData) []co
 		configinputs.InstallInputWorkloadRouting,
 	}
 	if runaiData.Config.DevMode {
-		inputs = append(inputs, configinputs.InstallInputJfrogCreds)
+		inputs = append(inputs, configinputs.InstallInputRegistryPullSecret)
 	}
 	if !needsHostRoutingStep(runaiData) {
 		inputs = append(inputs, configinputs.InstallInputHostRoutingCertPath)

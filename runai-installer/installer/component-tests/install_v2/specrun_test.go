@@ -44,7 +44,7 @@ func newInstallRunConfig() *installconfig.Config {
 func baseRunOptions() installconfig.RunOptions {
 	return installconfig.RunOptions{
 		Yes:      true,
-		Registry: &spec.Registry{Type: spec.RegistryTypeJFrog, Token: base64.StdEncoding.EncodeToString([]byte(`{"auths":{}}`))},
+		Registry: &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: base64.StdEncoding.EncodeToString([]byte(`{"auths":{}}`))},
 	}
 }
 
@@ -96,6 +96,9 @@ func TestSpecRun_TextOutput(t *testing.T) {
 	assert.Contains(t, stdout, `Run:ai cluster "test-cluster" is registered and running`)
 	assert.Contains(t, stdout, "NVIDIA Run:ai installation completed", "final run banner renders")
 	assert.Contains(t, stdout, "Completed in")
+	assert.Contains(t, stdout, "Log in with the admin user:")
+	assert.Contains(t, stdout, "kubectl -n runai-backend get configmap runai-backend-tenants-manager -o jsonpath='{.data.ADMIN_USERNAME}'")
+	assert.Contains(t, stdout, "kubectl -n runai-backend get secret runai-backend-gen-tenants-manager -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d")
 }
 
 func TestSpecRun_InstallsControlPlaneAndCluster(t *testing.T) {

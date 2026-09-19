@@ -5,7 +5,11 @@
 
 package core
 
-import "context"
+import (
+	"context"
+	"fmt"
+	"time"
+)
 
 type Scenario interface {
 	Name() string
@@ -25,6 +29,49 @@ type Config struct {
 	Knobs map[string]any
 }
 
+func (c Config) Duration(key string, fallback time.Duration) (time.Duration, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	text, ok := raw.(string)
+	if !ok {
+		return 0, fmt.Errorf("knob %q must be a duration string like \"2m\", got %T", key, raw)
+	}
+	parsed, err := time.ParseDuration(text)
+	if err != nil {
+		return 0, fmt.Errorf("knob %q: %w", key, err)
+	}
+	if parsed <= 0 {
+		return 0, fmt.Errorf("knob %q must be a positive duration, got %s", key, parsed)
+	}
+	return parsed, nil
+}
+
+func (c Config) Int(key string, fallback int) (int, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	value, ok := raw.(int)
+	if !ok {
+		return 0, fmt.Errorf("knob %q must be a whole number, got %T", key, raw)
+	}
+	return value, nil
+}
+
+func (c Config) String(key string, fallback string) (string, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	value, ok := raw.(string)
+	if !ok {
+		return "", fmt.Errorf("knob %q must be a string, got %T", key, raw)
+	}
+	return value, nil
+}
+
 type Category string
 
 const (
@@ -37,4 +84,19 @@ type Section struct {
 	Metrics  map[string]any `json:"metrics"`
 	Failed   bool           `json:"failed"`
 	Error    string         `json:"error,omitempty"`
+}
+
+const SchemaVersion = "v1"
+
+type Metadata struct {
+	StartedAt        time.Time `json:"started_at"`
+	FinishedAt       time.Time `json:"finished_at"`
+	ClockOffsetMs    *int64    `json:"clock_offset_ms,omitempty"`
+	ClockOffsetError string    `json:"clock_offset_error,omitempty"`
+}
+
+type Results struct {
+	Schema    string             `json:"schema"`
+	Metadata  Metadata           `json:"metadata"`
+	Scenarios map[string]Section `json:"scenarios"`
 }

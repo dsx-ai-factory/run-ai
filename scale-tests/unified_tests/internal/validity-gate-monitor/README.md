@@ -43,7 +43,10 @@ Idempotent. It:
 1. **Applies `manifests/etcd-metrics-proxy.yaml`** — DaemonSet (socat) + Service + ServiceMonitor
    tunnelling etcd's localhost metrics port (2381) to a scrapeable port (2382) on the control-plane
    node. etcd only listens on loopback, so without this proxy Prometheus cannot scrape it and gates
-   2–4 are permanently `UNAVAILABLE`.
+   2–4 are permanently `UNAVAILABLE`. The DaemonSet runs with `hostNetwork` to reach that loopback
+   port. Its listener binds to `$(POD_IP)`, the node's primary IP, instead of `0.0.0.0` (a
+   `hostNetwork` pod's `status.podIP` is the node IP). That same IP is the endpoint the headless
+   Service publishes, so the bind address and the address Prometheus scrapes are identical.
 2. **Applies `manifests/runai-backend-servicemonitor.yaml`** — tells Prometheus to scrape every
    `runai-backend` service exposing a `metrics` port. Without it the workload submission and
    workload list latency histograms do not exist.

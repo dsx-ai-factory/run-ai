@@ -1066,7 +1066,7 @@ build_cli_exposer() {
         -v "${gocache_vol}:/tmp/.cache:z" \
         -e GOPATH=/go \
         -e GOCACHE=/tmp/.cache \
-        library/golang:1.26.3 \
+        library/golang:1.26.8 \
         go build \
           -ldflags "-X github.com/run-ai/runai-oss-test/control-plane/runai-cli/pkg/version.version=${cli_version} -extldflags -static -s -w" \
           -o bin/dist/linux/amd64/runai \
@@ -1549,7 +1549,7 @@ prefetch_go_modules() {
     -e GOPRIVATE="github.com/run-ai/*" \
     -e CGO_ENABLED=0 \
     -e GO111MODULE=on \
-    library/golang:1.26.3 \
+    library/golang:1.26.8 \
     bash -c "${cmds}" >/dev/null 2>&1 || \
     warn "Module pre-warm incomplete — remaining modules will download during build"
 
@@ -2198,7 +2198,7 @@ ${DOMAIN}:53 {
   # charts/*.tgz is gitignored, so a fresh clone has none.
   #
   # Dependency names and versions are read from Chart.yaml rather than hardcoded here,
-  # so bumping a dependency (e.g. kai-scheduler v0.16.8, karta 0.2.3) cannot leave this
+  # so bumping a dependency (e.g. kai-scheduler v0.16.8, karta 0.2.6) cannot leave this
   # block stale.
   local charts_dir="${rc_chart}/charts"
   mkdir -p "${charts_dir}"

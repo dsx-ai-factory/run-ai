@@ -1524,7 +1524,8 @@ function prepareInferenceFlatRequest(model: IUISuperWorkloadCreationRequest): In
   const specFields = _getFlatInferenceSpecData(model.spec);
 
   return {
-    ...model,
+    // The template is already expanded; sending its ID would restore omitted identity defaults.
+    ...omit(model, ["templateId"]),
     spec: specFields,
   };
 }

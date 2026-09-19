@@ -74,7 +74,7 @@ var _ = Describe("Installer New Flow E2E", Label(newFlowLabel), func() {
 
 // connectedFullInstallConfig builds a connected full-installation spec (control
 // plane + cluster) wired to the shared TestEnv: domain, cluster name, generated
-// self-signed certs and the JFrog token from RUNAI_SECRETS_DIR. Mandatory
+// self-signed certs and the registry pull secret from RUNAI_SECRETS_DIR. Mandatory
 // prerequisites are requested so the run exercises the new prereq flow; the GPU
 // operator is fake to avoid real drivers.
 func connectedFullInstallConfig() installconfig.Config {
@@ -127,10 +127,10 @@ func connectedFullInstallConfig() installconfig.Config {
 		}
 	}
 
-	if testEnv.JfrogToken != "" {
+	if testEnv.PullSecret != "" {
 		cfg.Registry = &installconfig.Registry{
-			Type:      "jfrog",
-			TokenPath: filepath.Join(testEnv.TempDir, "runai_jfrog_token"),
+			Type:      "dockerconfig",
+			TokenPath: filepath.Join(testEnv.TempDir, "runai_pull_secret"),
 		}
 	}
 

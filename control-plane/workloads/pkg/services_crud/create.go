@@ -316,6 +316,12 @@ func createWorkload(ctx context.Context, backendClient clients.TenantSettingsCli
 
 	params.Response.Spec = responseSpec
 
+	if workloadType == DistributedInference {
+		if setTokenErr := setTokenUIDGIDForDistributedInference(ctx, responseSpec); setTokenErr != nil {
+			return workloadsApi.NewSubmissionErrorV2(setTokenErr.Code, setTokenErr.Message)
+		}
+	}
+
 	security, setTokenErr := setTokenUIDGIDForSecurity(ctx, params.Response.Spec.GetSecurity())
 	if setTokenErr != nil {
 		return workloadsApi.NewSubmissionErrorV2(setTokenErr.Code, setTokenErr.Message)
@@ -654,6 +660,31 @@ func setMasterPreemptibilityFromPriority(spec *workloadsApi.MasterSpec, priority
 			spec.SetPreemptibility(workloadsApi.PREEMPTIBILITY_NON_PREEMPTIBLE)
 		}
 	}
+}
+
+// Distributed inference stores security inside each replica rather than at spec.security.
+func setTokenUIDGIDForDistributedInference(ctx context.Context, spec *workloadsApi.SupersetSpec) *api.Error {
+	for _, replica := range []*workloadsApi.DistributedInferenceLeaderWorkerSpec{spec.Leader.Get(), spec.Worker.Get()} {
+		if replica == nil || replica.Security.Get() == nil {
+			continue
+		}
+		security := replica.Security.Get()
+		resolved, err := setTokenUIDGIDForSecurity(ctx, workloadsApi.WorkspaceSpecSpecAllOfSecurity{
+			UidGidSource:       security.UidGidSource,
+			RunAsUid:           security.RunAsUid,
+			RunAsGid:           security.RunAsGid,
+			SupplementalGroups: security.SupplementalGroups,
+		})
+		if err != nil {
+			return err
+		}
+		if resolved != nil {
+			security.RunAsUid = resolved.RunAsUid
+			security.RunAsGid = resolved.RunAsGid
+			security.SupplementalGroups = resolved.SupplementalGroups
+		}
+	}
+	return nil
 }
 
 func setTokenUIDGIDForSecurity(ctx context.Context, security workloadsApi.WorkspaceSpecSpecAllOfSecurity) (*workloadsApi.WorkspaceSpecSpecAllOfSecurity, *api.Error) {

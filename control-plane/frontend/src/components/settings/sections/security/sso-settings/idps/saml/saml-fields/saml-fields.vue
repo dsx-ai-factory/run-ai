@@ -119,7 +119,7 @@
         :disable="true"
       />
     </div>
-    <div class="row" v-if="samlSettings?.signingCertificate">
+    <div class="row" v-if="samlSettings?.signingCertificate || metadataFile">
       <q-tooltip anchor="center middle">
         {{ disabledTooltip }}
       </q-tooltip>
@@ -290,10 +290,11 @@ export default defineComponent({
     iValidCertificateDate(): boolean | string {
       return this.isValidCertificate || "Certificate expired. To replace it, enter another metadata URL above.";
     },
-    async validateCertificate(): Promise<void> {
-      this.expirationDate = await idpCommon.getCertificateExpirationDate(
-        this.samlSettings?.signingCertificate as string,
-      );
+    async validateCertificate(certificateOverride?: string | null): Promise<void> {
+      const certificate =
+        certificateOverride !== undefined ? certificateOverride : this.samlSettings?.signingCertificate;
+      this.isValidated = false;
+      this.expirationDate = certificate ? await idpCommon.getCertificateExpirationDate(certificate) : null;
       (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
       if (this.expirationDate && idpCommon.iValidCertificateDate(this.expirationDate as Date)) {
         this.isValidated = true;
@@ -314,16 +315,28 @@ export default defineComponent({
       };
       reader.readAsText(file);
     },
-    setFileContent(fileName: string, fileContent: string): void {
+    async setFileContent(fileName: string, fileContent: string): Promise<void> {
       this.samlFields.metadataXmlFile = stringUtil.stringToBase64(fileContent);
       this.samlFields.fileName = fileName;
       this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.File;
       this.samlFields.metadataXmlUrl = "";
+      await this.validateCertificate(this.extractCertificateFromMetadataXml(fileContent));
       this.onUpdated();
+    },
+    extractCertificateFromMetadataXml(xmlContent: string): string | null {
+      try {
+        const doc = new DOMParser().parseFromString(xmlContent, "text/xml");
+        const certEl = doc.getElementsByTagNameNS("*", "X509Certificate")[0];
+        return certEl?.textContent?.replace(/\s/g, "") || null;
+      } catch {
+        return null;
+      }
     },
     clearFileContent(): void {
       this.samlFields.metadataXmlFile = "";
       this.samlFields.fileName = "";
+      this.expirationDate = null;
+      this.isValidated = false;
       this.onUpdated();
     },
     clearUrlContent(): void {

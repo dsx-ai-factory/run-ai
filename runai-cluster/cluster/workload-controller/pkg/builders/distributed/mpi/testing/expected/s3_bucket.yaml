@@ -80,7 +80,7 @@ spec:
                   name: k8s-secret-a
             - name: RUNAI_MPI_NUM_WORKERS
               value: "1"
-            image: runai.jfrog.io/op-containers-prod/goofys
+            image: example.io/goofys
             imagePullPolicy: IfNotPresent
             name: s3-fs-0
             resources: {}
@@ -119,7 +119,7 @@ spec:
                   name: k8s-secret-b
             - name: RUNAI_MPI_NUM_WORKERS
               value: "1"
-            image: runai.jfrog.io/op-containers-prod/goofys
+            image: example.io/goofys
             imagePullPolicy: IfNotPresent
             name: s3-fs-1
             resources: {}
@@ -195,7 +195,7 @@ spec:
                   name: k8s-secret-a
             - name: RUNAI_MPI_NUM_WORKERS
               value: "1"
-            image: runai.jfrog.io/op-containers-prod/goofys
+            image: example.io/goofys
             imagePullPolicy: IfNotPresent
             name: s3-fs-0
             resources: {}
@@ -234,7 +234,7 @@ spec:
                   name: k8s-secret-b
             - name: RUNAI_MPI_NUM_WORKERS
               value: "1"
-            image: runai.jfrog.io/op-containers-prod/goofys
+            image: example.io/goofys
             imagePullPolicy: IfNotPresent
             name: s3-fs-1
             resources: {}

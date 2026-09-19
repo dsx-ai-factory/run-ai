@@ -34,7 +34,7 @@ func main() {
         ConfigValues: map[string]string{
             api.FlagFQDN:        "runai.example.com",
             api.FlagClusterName: "production-cluster",
-            api.FlagJfrogCreds:  "base64-encoded-credentials",
+            api.FlagRegistryPullSecret:  "base64-encoded-credentials",
         },
     }
 
@@ -145,7 +145,7 @@ The following configuration flags are available:
 
 | Flag | Description | Example |
 |------|-------------|---------|
-| `FlagJfrogCreds` | JFrog credentials (base64) | `"YWRtaW46cGFzc3dvcmQ="` |
+| `FlagRegistryPullSecret` | Registry pull secret, base64 docker config | `"YWRtaW46cGFzc3dvcmQ="` |
 | `FlagFQDN` | Fully Qualified Domain Name | `"runai.example.com"` |
 | `FlagClusterName` | Kubernetes cluster name | `"my-cluster"` |
 | `FlagIngressControllerHTTPSPort` | HTTPS NodePort (30000-32767) | `"30443"` |

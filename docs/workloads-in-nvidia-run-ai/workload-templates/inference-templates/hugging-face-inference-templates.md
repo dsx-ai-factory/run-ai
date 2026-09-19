@@ -69,7 +69,7 @@ Linking data source assets is currently not supported.
    * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
    * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 4. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 
 </Tab>
@@ -110,7 +110,7 @@ Manually configure the settings below as needed.
      * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
      * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 4. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 5. Set the connection for your **tool(s)**. If you are loading from existing setup, the tools are configured as part of the environment.
    * Select the connection type:

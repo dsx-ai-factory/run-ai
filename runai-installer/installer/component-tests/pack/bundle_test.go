@@ -176,8 +176,8 @@ func TestPack_PreservesImageGroups(t *testing.T) {
 			Name:    "karta",
 			Version: "0.2.3",
 			Images: []artifactlock.Image{{
-				Name: "operator", Image: "ghcr.io/run-ai/karta/karta-operator@sha256:3333333333333333333333333333333333333333333333333333333333333333",
-				Source: "ghcr.io/run-ai/karta/karta-operator:0.2.3", IndexDigest: "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+				Name: "operator", Image: "ghcr.io/dsx-ai-factory/workload-map/karta-operator@sha256:3333333333333333333333333333333333333333333333333333333333333333",
+				Source: "ghcr.io/dsx-ai-factory/workload-map/karta-operator:0.2.3", IndexDigest: "sha256:3333333333333333333333333333333333333333333333333333333333333333",
 			}},
 		},
 	}

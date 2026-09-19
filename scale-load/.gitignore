@@ -1,4 +1,5 @@
 flowmark/bin/
 flowmark/out/
+flowmark/.env
 linter.json
 cover.out

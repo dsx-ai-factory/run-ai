@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/component-tests/harness"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/config"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator"

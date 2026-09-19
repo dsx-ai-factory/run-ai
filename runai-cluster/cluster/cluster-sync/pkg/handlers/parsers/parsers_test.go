@@ -1285,6 +1285,137 @@ var _ = Describe("Parsers", Ordered, func() {
 				{LabelKey: "topology.kubernetes.io/rack", LabelValue: ""},
 			}))
 		})
+
+		Context("GPU fractioning readiness", func() {
+			gpuFractioningCondition := func(status corev1.ConditionStatus, reason, message string) corev1.NodeCondition {
+				return corev1.NodeCondition{
+					Type:    parsers.GpuFractioningReadyConditionType,
+					Status:  status,
+					Reason:  reason,
+					Message: message,
+				}
+			}
+
+			var previousGpuFractioningReadiness bool
+
+			BeforeEach(func() {
+				previousGpuFractioningReadiness = config.Config().EnableNodeGpuFractioningReadiness
+				config.Config().EnableNodeGpuFractioningReadiness = true
+			})
+
+			AfterEach(func() {
+				config.Config().EnableNodeGpuFractioningReadiness = previousGpuFractioningReadiness
+			})
+
+			DescribeTable("maps the operator's condition onto the node status",
+				func(conditions []corev1.NodeCondition, expectedPhase string,
+					expectedConditions []clustersvcswagger.NodeStatusConditionDetails) {
+					node.Status.Conditions = append([]corev1.NodeCondition{readyCondition}, conditions...)
+
+					parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+					Expect(parsedNodeInfo.Status).To(Equal(expectedPhase))
+					Expect(parsedNodeInfo.Conditions).To(Equal(expectedConditions))
+				},
+				Entry("healthy node reports nothing",
+					[]corev1.NodeCondition{gpuFractioningCondition(
+						corev1.ConditionTrue, "AllDaemonsReady", "all gpu-fractioning daemons are running")},
+					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
+				Entry("absent condition reports the node as unmanaged",
+					[]corev1.NodeCondition{},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: parsers.GpuFractioningNotManaged,
+						Message: utils.Ref("GPU fractions are not supported on this node - " +
+							"it is not covered by the GPU fractioning operator."),
+					}}),
+				Entry("unknown status is treated as unsupported",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionUnknown, "", "")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: parsers.GpuFractioningNotManaged,
+						Message: utils.Ref("GPU fractions are not supported on this node - " +
+							"it is not covered by the GPU fractioning operator."),
+					}}),
+				Entry("unsupported driver",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
+						"GPUDriverVersionUnsupported",
+						"NVIDIA driver major version 570 is below minimum supported major version 615")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: "GPUDriverVersionUnsupported",
+						Message: utils.Ref(
+							"NVIDIA driver major version 570 is below minimum supported major version 615"),
+					}}),
+				Entry("an empty reason falls back to the condition type",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse, "", "")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  parsers.MissingGpuFractioningPrerequisite,
+						Message: utils.Ref(""),
+					}}),
+				Entry("crashlooping daemon passes the kubelet reason through",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
+						"CrashLoopBackOff", "mpsd pod is not ready: CrashLoopBackOff")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  "CrashLoopBackOff",
+						Message: utils.Ref("mpsd pod is not ready: CrashLoopBackOff"),
+					}}),
+			)
+
+			It("reports nothing on a node without GPUs", func() {
+				delete(node.Labels, "feature.node.kubernetes.io/pci-10de.present")
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			It("reports nothing when the feature is disabled", func() {
+				config.Config().EnableNodeGpuFractioningReadiness = false
+				node.Status.Conditions = []corev1.NodeCondition{
+					readyCondition,
+					gpuFractioningCondition(corev1.ConditionFalse, "GPUDriverVersionMissing", "driver label is missing"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			It("leaves the operator's condition untouched when the feature is disabled", func() {
+				config.Config().EnableNodeGpuFractioningReadiness = false
+				node.Status.Conditions = []corev1.NodeCondition{
+					readyCondition,
+					gpuFractioningCondition(corev1.ConditionTrue, "AllDaemonsReady", "all gpu-fractioning daemons are running"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Conditions).To(ContainElement(
+					clustersvcswagger.NodeStatusConditionDetails{
+						Type:    parsers.GpuFractioningReadyConditionType,
+						Reason:  "AllDaemonsReady",
+						Message: utils.Ref("all gpu-fractioning daemons are running"),
+					}))
+			})
+
+			It("lets NotReady outrank a missing fractioning prerequisite", func() {
+				node.Status.Conditions = []corev1.NodeCondition{
+					notReadyCondition,
+					gpuFractioningCondition(corev1.ConditionFalse, "GPUDriverVersionMissing", "driver label is missing"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.NotReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(ContainElement(
+					clustersvcswagger.NodeStatusConditionDetails{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  "GPUDriverVersionMissing",
+						Message: utils.Ref("driver label is missing"),
+					}))
+			})
+		})
 	})
 })
 

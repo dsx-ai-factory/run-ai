@@ -14,7 +14,7 @@ import (
 type InstallInputType int
 
 const (
-	InstallInputJfrogCreds InstallInputType = iota
+	InstallInputRegistryPullSecret InstallInputType = iota
 	InstallInputFQDN
 	InstallInputClusterName
 	// the port where the ingress controller nodesPort will listen on for https requests
@@ -39,7 +39,7 @@ const (
 	InstallInputRegistryUsername
 	InstallInputRegistryPassword
 
-	FlagJfrogCreds                 = "jfrog_creds"
+	FlagRegistryPullSecret         = "registry_pull_secret"
 	FlagFQDN                       = "fqdn"
 	FlagClusterName                = "cluster_name"
 	FlagIngressControllerHTTPSPort = "ingress_controller_https_port"
@@ -64,7 +64,7 @@ const (
 // FlagToInstallInput provides a reverse lookup from flag string to InstallInputType.
 var (
 	FlagToInstallInput = map[string]InstallInputType{
-		FlagJfrogCreds:                 InstallInputJfrogCreds,
+		FlagRegistryPullSecret:         InstallInputRegistryPullSecret,
 		FlagFQDN:                       InstallInputFQDN,
 		FlagClusterName:                InstallInputClusterName,
 		FlagIngressControllerHTTPSPort: InstallInputIngressControllerHTTPSPort,
@@ -93,9 +93,9 @@ var (
 func GetConfigInputs() map[InstallInputType]*ConfigurationItem {
 	configInputsOnce.Do(func() {
 		configInputs = map[InstallInputType]*ConfigurationItem{
-			InstallInputJfrogCreds:  NewConfigurationItem("JFROG credentials (base64)", "Enter your NGC credentials...", InstallInputJfrogCreds, validation.ValidateJfrogCredentials),
-			InstallInputFQDN:        NewConfigurationItem("Fully Qualified Domain Name (FQDN)", "e.g., runai.example.com", InstallInputFQDN, validation.ValidateFQDN),
-			InstallInputClusterName: NewConfigurationItem("Cluster Name", "e.g., my-cluster", InstallInputClusterName, validation.ValidateClusterName),
+			InstallInputRegistryPullSecret: NewConfigurationItem("Registry pull secret (base64 docker config)", "Enter your base64-encoded .dockerconfigjson...", InstallInputRegistryPullSecret, validation.ValidatePullSecret),
+			InstallInputFQDN:               NewConfigurationItem("Fully Qualified Domain Name (FQDN)", "e.g., runai.example.com", InstallInputFQDN, validation.ValidateFQDN),
+			InstallInputClusterName:        NewConfigurationItem("Cluster Name", "e.g., my-cluster", InstallInputClusterName, validation.ValidateClusterName),
 			InstallInputIngressControllerHTTPSPort: NewConfigurationItem(
 				"Ingress Controller HTTPS port ",
 				"Leaving empty will let k8s pick the port. should be between 30000 and 32767. e.g., 30443",
@@ -116,8 +116,8 @@ func GetConfigInputs() map[InstallInputType]*ConfigurationItem {
 			InstallInputHostRoutingKeyPath:     NewConfigurationItem("Host routing SSL key path", "/path/to/wildcard-key.pem", InstallInputHostRoutingKeyPath, validation.ValidateSSLPaths),
 			InstallInputAirgapPackagePath:      NewConfigurationItem("Airgap package path", "/path/to/runai-airgapped-package.tar.gz", InstallInputAirgapPackagePath, validation.ValidateNonEmpty),
 			InstallInputRegistryURL:            NewConfigurationItem("Registry URL", "registry.example.com:5000", InstallInputRegistryURL, validation.ValidateNonEmpty),
-			InstallInputRegistryUsername:        NewConfigurationItem("Registry username", "admin", InstallInputRegistryUsername, validation.ValidateNonEmpty),
-			InstallInputRegistryPassword:        NewConfigurationItem("Registry password", "", InstallInputRegistryPassword, validation.ValidateNonEmpty),
+			InstallInputRegistryUsername:       NewConfigurationItem("Registry username", "admin", InstallInputRegistryUsername, validation.ValidateNonEmpty),
+			InstallInputRegistryPassword:       NewConfigurationItem("Registry password", "", InstallInputRegistryPassword, validation.ValidateNonEmpty),
 		}
 	})
 	return configInputs

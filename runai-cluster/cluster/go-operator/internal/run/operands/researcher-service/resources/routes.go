@@ -11,7 +11,6 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
-	runv1_internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 	osv1 "github.com/openshift/api/route/v1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -90,8 +89,7 @@ func (r *CliRouteResource) Status(ctx context.Context) error {
 }
 
 func (r *CliRouteResource) Enabled() bool {
-	return r.runaiConfig.Spec.Internal.Global.ClusterURL != "" &&
-		(r.runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor == runv1_internal.KubernetesFlavorOpenShift)
+	return componentEnabled
 }
 
 type ResearcherRouteResource struct {
@@ -162,8 +160,7 @@ func (r *ResearcherRouteResource) Status(ctx context.Context) error {
 }
 
 func (r *ResearcherRouteResource) Enabled() bool {
-	return r.runaiConfig.Spec.Internal.Global.ClusterURL != "" &&
-		(r.runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor == runv1_internal.KubernetesFlavorOpenShift)
+	return componentEnabled
 }
 
 func initCLIRoute(ctx context.Context, k8sReader client.Reader, route *osv1.Route, runaiConfig *runv1.RunaiConfig) error {

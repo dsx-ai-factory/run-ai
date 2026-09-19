@@ -293,6 +293,7 @@ func TestLegacyWebhookNamesInClusterRoleResourceNames(t *testing.T) {
 		"runai-inference-workload-ownership-mutation",
 		"runai-restartrequest-validation",
 		"runai-advice-restart-dw-mutation",
+		"runai-secret-pvc-validation",
 	} {
 		if !nameSet[legacyName] {
 			t.Errorf("legacy webhook %q is missing from ClusterRole resourceNames; init-ca needs it to clean up upgrades", legacyName)
@@ -322,7 +323,6 @@ func TestWebhooksFileContainsOnlySurvivingConfigurations(t *testing.T) {
 		"runai-pod-group-mutation",
 		"runai-project-validation",
 		"runai-restartrequest-validation",
-		"runai-secret-pvc-validation",
 		"runai-workload-ownership-mutation",
 		"runai-workload-ownership-protection-validation",
 	}
