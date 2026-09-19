@@ -99,6 +99,28 @@ NVIDIA NIM metrics provide workload-level observability, including key runtime a
 | <code>NIM_TIME_TO_FIRST_TOKEN_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Time to first token (TTFT) by percentiles | Workloads |
 | <code>NIM_E2E_REQUEST_LATENCY_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | End to end request latency by percentiles | Workloads |
 
+### vLLM
+
+vLLM metrics provide workload-level observability for large language model (LLM) inference workloads served with the vLLM inference engine, including request concurrency, token throughput, latency, and GPU KV-cache utilization. NVIDIA Run:ai detects a vLLM workload automatically from the container image name, or you can set it explicitly with the `run.ai/vllm-workload` label.
+
+| Metric name in API | Applicable API endpoint | Metric name in UI per grid | Applicable UI grid |
+| --- | --- | --- | --- |
+| <code>VLLM_NUM_REQUESTS_RUNNING</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Request concurrency by status | Workloads |
+| <code>VLLM_NUM_REQUESTS_WAITING</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Request concurrency by status | Workloads |
+| <code>VLLM_REQUEST_SUCCESS</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Request count by status | Workloads |
+| <code>VLLM_REQUEST_SUCCESS_RATE</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Request success rate | Workloads |
+| <code>VLLM_KV_CACHE_USAGE_PERC</code> | <ul><li>Pods</li><li>Workloads</li></ul> | GPU KV cache utilization | Workloads |
+| <code>VLLM_PROMPT_TOKENS_PER_SECOND</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Token throughput | Workloads |
+| <code>VLLM_GENERATION_TOKENS_PER_SECOND</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Token throughput | Workloads |
+| <code>VLLM_TIME_TO_FIRST_TOKEN_SECONDS</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Time to first token (TTFT) | Workloads |
+| <code>VLLM_TIME_TO_FIRST_TOKEN_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Time to first token (TTFT) by percentiles | Workloads |
+| <code>VLLM_E2E_REQUEST_LATENCY_SECONDS</code> | <ul><li>Pods</li><li>Workloads</li></ul> | End to end request latency | Workloads |
+| <code>VLLM_E2E_REQUEST_LATENCY_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | End to end request latency by percentiles | Workloads |
+| <code>VLLM_REQUEST_QUEUE_TIME_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Queue time percentiles | Workloads |
+| <code>VLLM_REQUEST_PREFILL_TIME_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
+| <code>VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
+| <code>VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
+
 ## Supported Telemetry
 
 | Metric                              | Applicable API endpoint                                          | Metric name in UI              | Applicable UI table                                          |
