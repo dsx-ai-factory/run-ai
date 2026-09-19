@@ -57,6 +57,21 @@ GPU fractions can be assigned to only one container in the pod. By default, GPU 
 | `gpu-fraction-num-devices` | The number of GPU devices to allocate using the specified `gpu-fraction` or `gpu-memory` value. Set this annotation only if you want to request multiple GPU devices. | Pod annotation (`metadata.annotations`) |
 | `gpu-fraction-container-name` | By default, GPU fraction allocation is applied to the first container (index 0) in the pod. Set this annotation to specify a different container to receive the GPU allocation. | Pod annotation (`metadata.annotations`) |
 
+## Setting DRA Resource Claims
+
+To request hardware managed via Kubernetes [Dynamic Resource Allocation (DRA)](../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#dynamic-resource-allocation-dra), declare a `ResourceClaim` at the pod level, then opt in each container that needs access to the claimed device under `resources.claims`. Containers without a matching entry cannot access the device.
+
+```yaml
+spec:
+  resourceClaims:
+  - name: gpu-claim
+  containers:
+  - name: training
+    resources:
+      claims:
+      - name: gpu-claim
+```
+
 ## Setting Stale Gang Eviction Timeout
 
 For gang-scheduled workloads (for example, distributed training or distributed inference), set the `kai.scheduler/staleness-grace-period` annotation to override the cluster-wide default grace period before the Scheduler evicts a stale pod group. For concept details, see [Stale Gang Eviction](../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#stale-gang-eviction).
