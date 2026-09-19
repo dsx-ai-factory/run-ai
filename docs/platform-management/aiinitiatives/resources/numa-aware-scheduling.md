@@ -67,6 +67,14 @@ If no node satisfies the workload's resource request within the policy constrain
 
 Enabling or disabling NUMA-aware scheduling does not affect workloads already running in the pool unless they are rescheduled.
 
+## NUMA Visibility
+
+NUMA topology data and NUMA-related node health are visible in the [Nodes](nodes.md) and [Node pools](node-pools.md) tables.
+
+* **Topology Manager policy** - The Kubelet Topology Manager policy read from each node's NodeResourceTopology data (`none`, `best-effort`, `restricted`, or `single-numa-node`). See the Topology Manager policy column in [Nodes](nodes.md).
+* **Per-NUMA-node resource breakdown** - For each NUMA node on a physical node, the total and allocated GPUs, CPU cores, and CPU memory. See [NUMA Nodes for a Node](nodes.md#numa-nodes-for-a-node).
+* **Missing Prerequisites status** - A node or node pool with NUMA-aware scheduling enabled shows a Missing Prerequisites status when a node's NodeResourceTopology data is missing or invalid, or its Topology Manager policy is set to `none`. Hovering the node's status shows the specific reason. See the Status column in [Nodes](nodes.md) and [Node pools](node-pools.md).
+
 ## Best Practices
 
 * Configure all nodes in the same node pool to the same Kubelet Topology Manager policy. Mixed policies within a pool can produce inconsistent scheduling results.

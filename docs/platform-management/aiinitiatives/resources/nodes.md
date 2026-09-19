@@ -24,11 +24,13 @@ The Nodes table consists of the following columns:
 | Column                    | Description                                                                                                                                                                                                                                            |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Node                      | The Kubernetes name of the node                                                                                                                                                                                                                        |
-| Status                    | The state of the node. Nodes in the Ready state are eligible for scheduling. If the state is Not ready then the main reason appears in parenthesis on the right side of the state field. Hovering the state lists the reasons why a node is Not ready. |
+| Status                    | The state of the node. Nodes in the Ready state are eligible for scheduling. If the state is Not ready then the main reason appears in parenthesis on the right side of the state field. Hovering the state lists the reasons why a node is Not ready. A node in a node pool with [NUMA-aware scheduling](numa-aware-scheduling.md) enabled shows the Missing Prerequisites state if its NodeResourceTopology data is missing or invalid, or if its Topology Manager policy is set to `none`; hovering the state shows the specific reason. |
 | Node pool                 | The name of the associated node pool. By default, every node in the NVIDIA Run:ai platform is associated with the default node pool, if no other node pool is associated.                                                                              |
 | Cluster                   | The cluster that the node is associated with                                                                                                                                                                                                           |
 | NVLink domain UID         | Indicates if the MNNVL domain ID is part of the MNNVL label value. In case the MNNVL label is not the default MNNVL label key (`nvidia.com/gpu.clique`), this field will show the whole label value.                                                   |
 | MNNVL domain clique ID    | Indicates if the MNNVL clique ID is part of the MNNVL label value. In case the MNNVL label is not the default MNNVL label key (`nvidia.com/gpu.clique`), this field will show an empty value.                                                          |
+| Topology Manager policy   | The Kubernetes Topology Manager policy configured on the node (`none`, `best-effort`, `restricted`, or `single-numa-node`), which controls how NUMA-aligned resource allocation is enforced. Shows `-` if not available.                                |
+| NUMA nodes                | Click to view the resource breakdown per NUMA node on this node (described below in this article).                                                                                                                                                    |
 | GPU type                  | The GPU model, for example, H100, or V100                                                                                                                                                                                                              |
 | Ready / total GPU devices | The number of GPU devices installed on the node. Clicking this field pops up a dialog with details per GPU (described below in this article).                                                                                                          |
 | GPU memory                | The total amount of GPU memory installed on this node. For example, if the number is 640GB and the number of GPU devices is 8, then each GPU is installed with 80GB of memory (assuming the node is assembled of homogenous GPU devices).              |
@@ -39,6 +41,14 @@ The Nodes table consists of the following columns:
 | Allocated CPU (Cores)     | The number of CPU cores allocated by pods running on this node (decimal number, e.g. a pod allocating 350 mili-cores shows an allocation of 0.35 cores).                                                                                               |
 | Allocated CPU memory      | The total amount of CPU memory allocated by pods running on this node (in GB or MB)                                                                                                                                                                    |
 | Pod(s)                    | List of pods running on this node, click the field to view details (described below in this article)                                                                                                                                                   |
+
+<Info>
+
+**Note**
+
+The **Topology Manager policy** and **NUMA nodes** columns are hidden by default. They only appear (and can be added via **Columns**, see [Customizing the Table View](#customizing-the-table-view)) when at least one cluster in view is running NVIDIA Run:ai cluster version 2.26 or later, the minimum version required for [NUMA-aware scheduling](numa-aware-scheduling.md).
+
+</Info>
 
 ### GPU Devices for Node
 
@@ -53,6 +63,28 @@ Click one of the values in the GPU devices column, to view the list of GPU devic
 | Compute utilization | The portion of time the GPU is being used by applications (percentage)                             |
 | Memory utilization  | The portion of the GPU memory that is being used by applications (percentage)                      |
 | Idle time           | The elapsed time since the GPU was used (i.e. the GPU is being idle for ‘Idle time’)               |
+
+### NUMA Nodes for a Node
+
+Click the value in the NUMA nodes column to view the resource breakdown per NUMA node on this node.
+
+<Info>
+
+**Note**
+
+The list is empty for a node whose NUMA topology data is not yet available. This data requires the prerequisites described in [NUMA-aware scheduling](numa-aware-scheduling.md).
+
+</Info>
+
+| Column                | Description                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| Name                   | The identifier of the NUMA node, for example, node-0                             |
+| Total GPU devices      | The total number of GPU devices available for allocation on this NUMA node       |
+| Allocated GPUs         | The number of GPU devices currently allocated to workloads on this NUMA node     |
+| CPU (Cores)            | The total number of CPU cores available for allocation on this NUMA node         |
+| CPU memory             | The total amount of CPU memory available for allocation on this NUMA node        |
+| Allocated CPU (Cores)  | The number of CPU cores currently allocated to workloads on this NUMA node       |
+| Allocated CPU memory   | The amount of CPU memory currently allocated to workloads on this NUMA node      |
 
 ### Pods Associated with a Node
 
