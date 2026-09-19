@@ -88,6 +88,8 @@ AI application submission is enabled by default. If you do not see it in the men
      * Select the **Chart version** to deploy. To browse available charts, click **View on NGC catalog**.
    * **Custom URL** - Provide a link to a Helm chart hosted on a private or public repository (for example, GitHub, S3, or a private registry). Use this for proprietary applications or customized versions of existing charts:
      * Enter the **Chart URL**. The URL must point directly to a versioned Helm chart package (`.tgz` file), for example: `https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz`.
+   * **Upload file** - Upload a packaged Helm chart (`.tgz`) file from your local machine. Use this to deploy a chart you built locally without hosting it in a repository or registry:
+     * Click **Chart file** and select a `.tgz` file. The file must be no larger than 10 MB.
 6.  Optional: Under **Set application overrides** to override specific parameters in your Helm chart, enter the corresponding key-value pairs in YAML format. These will replace the defaults in your values.yaml.
 
     ```yaml
