@@ -87,7 +87,15 @@ Substitute `<container-name>` with the name of the container receiving the GPU m
 | `time-slicing` | Workloads take sequential turns on the GPU compute engines. This is the default and can be omitted. |
 | `sm-sharing` | Workloads run concurrently on separate streaming multiprocessors. |
 
-If the annotation is omitted, time-slicing applies. Workloads migrated from earlier versions therefore keep their previous compute-sharing behavior without any change, and adopting SM-sharing is an explicit decision.
+If the annotation is omitted, time-slicing applies.
+
+<Note>
+
+**Note**
+
+Clusters upgraded from the proprietary GPU sharing implementation keep running fractional workloads on time-slicing behavior after the upgrade, with no annotation required. See [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for upgrade details.
+
+</Note>
 
 This annotation applies the same way to [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) submitted via YAML and to [workloads submitted externally](../../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads), outside of NVIDIA Run:ai.
 
