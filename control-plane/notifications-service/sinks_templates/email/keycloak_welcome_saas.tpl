@@ -115,7 +115,7 @@ Content-Transfer-Encoding: quoted-printable
     </div>
     <br />
      <div class="highlight">Your invitation is valid for the next 7 days.</div>
-    For more information, check out our <a class="link" href="https://run-ai-docs.nvidia.com/saas">documentation</a> or <a class="link" href="https://www.nvidia.com/en-eu/support/enterprise/#contact-us">contact support</a>
+    For more information, check out our <a class="link" href="https://docs.nvidia.com/run-ai/saas/">documentation</a> or <a class="link" href="https://www.nvidia.com/en-eu/support/enterprise/#contact-us">contact support</a>
     <br/><br />
     Thanks,
     <br />

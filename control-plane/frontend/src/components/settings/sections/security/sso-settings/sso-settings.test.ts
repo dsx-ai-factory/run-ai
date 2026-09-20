@@ -17,6 +17,7 @@ import type { Idp, SamlData } from "@/swagger-models/identity-manager-client";
 import { IdpTypeEnum, SettingsKeyEnum } from "@/swagger-models/identity-manager-client";
 import { securitySettingsService } from "@/services/control-plane/security-settings.service/security-settings.service";
 import { settingsUtil } from "@/utils/settings.util";
+import { DOCS } from "@/constants/docs";
 import type { MockedFunction } from "vitest";
 
 vi.mock("@/services/control-plane/security-settings.service/security-settings.service");
@@ -266,7 +267,7 @@ describe("sso-settings.vue", () => {
       idpNewAlias: "",
     });
     await wrapper.vm.$nextTick();
-    expect(wrapper.find("a[href*='infrastructure-setup']").exists()).toBe(true);
+    expect(wrapper.find(`a[href="${DOCS.AUTHENTICATION.OVERVIEW}"]`).exists()).toBe(true);
   });
 
   it("hides help text when in edit mode", async () => {
@@ -279,7 +280,7 @@ describe("sso-settings.vue", () => {
     const { wrapper } = factory(mockIdp);
     await wrapper.setData({ isEditMode: true });
     await wrapper.vm.$nextTick();
-    expect(wrapper.find("a[href*='infrastructure-setup']").exists()).toBe(false);
+    expect(wrapper.find(`a[href="${DOCS.AUTHENTICATION.OVERVIEW}"]`).exists()).toBe(false);
   });
 
   it("updates auto-redirect setting when toggle is changed", async () => {

@@ -20,7 +20,9 @@ export const CLUSTER_STATUS_TOOLTIP = {
   MissingPrerequisites:
     "The following prerequisites are missing from the cluster: {{missing_prerequisit}}." +
     "<br>As a result, some features may be impacted." +
-    `<br> For more information see the <a href="${DOCS.INSTALLATION.PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>`,
+    (DOCS.INSTALLATION.PREREQUISITES
+      ? `<br> For more information see the <a href="${DOCS.INSTALLATION.PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>`
+      : ""),
   ServiceIssues:
     "Some Run:ai service(s) in the cluster are not functioning properly. <br>" +
     "As a result, some features may be impacted." +
