@@ -18,9 +18,6 @@ navigation:
     - page: Architecture and Components
       slug: architecture
       path: ../../docs/developer/architecture.md
-    - page: Quick Start Guide
-      path: ../../docs/getting-started/quick-start-guide.md
-      hidden: true
     - section: Quick Start Guides
       slug: quick-starts
       path: ../../docs/getting-started/quick-starts/README.md
@@ -41,6 +38,9 @@ navigation:
         path: ../../docs/getting-started/whats-new/deprecation-notifications.md
     - page: Support, Lifecycle, and Deprecation Policy
       path: ../../docs/getting-started/product-support-policy.md
+    - page: Quick Start Guide
+      path: ../../docs/getting-started/quick-start-guide.md
+      hidden: true
   - section: Installation and Configuration
     contents:
     - page: Overview
