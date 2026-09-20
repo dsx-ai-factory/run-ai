@@ -315,11 +315,27 @@ func isVersionSupportsOauth2(version string) error {
 
 func getGpuStackStatus(ctx context.Context, kbClient client.Client) runv1.PublicStatus {
 	nvidiaStatus := getNvidiaStatus(ctx, kbClient)
+	gpuFractioningStatus := controller_utils.CheckGpuFractioningReadiness(ctx, kbClient)
+
+	available := *nvidiaStatus.Available && *gpuFractioningStatus.Available
+
+	// Surface the failing sub-check's reason at the top level too, so
+	// consumers that only read Dependencies.Required["gpu-stack"].reason
+	// (e.g. the cluster table's status tooltip) don't need to walk
+	// Components to find the explanation.
+	var reason string
+	if !*gpuFractioningStatus.Available {
+		reason = gpuFractioningStatus.Reason
+	} else if !*nvidiaStatus.Available {
+		reason = nvidiaStatus.Reason
+	}
 
 	return runv1.PublicStatus{
-		Available: nvidiaStatus.Available,
+		Available: runv1.AvailableStatus(available),
+		Reason:    reason,
 		Components: map[string]runv1.PublicStatus{
-			"nvidia": nvidiaStatus,
+			"nvidia":          nvidiaStatus,
+			"gpu-fractioning": gpuFractioningStatus,
 		},
 	}
 }

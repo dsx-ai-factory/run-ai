@@ -113,6 +113,13 @@ rules:
   verbs:
   - get
 - apiGroups:
+  - gpu-fractioning.kai.scheduler
+  resources:
+  - gpufractioningconfigs
+  verbs:
+  - get
+  - list
+- apiGroups:
   - monitoring.coreos.com
   resources:
   - servicemonitors
