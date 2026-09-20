@@ -46,7 +46,7 @@ Makefile overrides the shared targets with chart recipes (`VERSION?=0.0.0-dev`,
     and `cluster.uid`, layers `.local-dev/values-rc.yaml`.
 - **Dependencies** (`Chart.yaml`, vendored tarballs in `charts/`):
   `kai-resource-management` (`oci://ghcr.io/kai-scheduler/kai-resource-management`
-  v0.0.1, which bundles `kai-scheduler` itself), `karta`
+  v0.0.3, which bundles `kai-scheduler` itself), `karta`
   (`oci://ghcr.io/dsx-ai-factory/workload-map/karta` 0.2.6), `crds` (`file://charts/crds` 0.0.0, gated
   by `development.includeCRDsInReleaseManifest`). `runai-engine-*.tgz` is a legacy
   tarball also present.
