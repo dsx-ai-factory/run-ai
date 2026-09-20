@@ -3,13 +3,9 @@
 
 -- The DGXC role mechanism (roles.role_type) is being removed.
 --
--- If nothing references the DGXC roles - no access rule is assigned to one, and no
--- custom role names one as its predefined cluster role - they are simply deleted.
---
--- Otherwise they are kept, but handed over: '-DGXC' is dropped from the name, a
--- '-legacy' suffix is added, and custom is set so the static role definitions no
--- longer own them. No rows are added and no access rule is touched - each role keeps
--- its id, so access rules and cluster_role_predefined_id stay valid.
+-- Unreferenced DGXC roles are deleted. The rest are handed over: renamed to
+-- '-Unmanaged' and marked custom. No rows are added and no access rule is touched -
+-- each role keeps its id, so everything pointing at it stays valid.
 
 DO $$
 DECLARE
@@ -23,8 +19,7 @@ BEGIN
                 WHERE r.role_type = 'DGXC'
                   AND r.custom = false
                   AND r.scope_type = 'system')
-        -- or serving as the predefined cluster role of a custom role. roles are hard
-        -- deleted - the table has no deleted_at - so every row here is live.
+        -- or named as a custom role's predefined cluster role
         OR EXISTS (SELECT 1
                    FROM roles c
                    JOIN roles r ON r.id = c.cluster_role_predefined_id
@@ -35,27 +30,52 @@ BEGIN
     INTO in_use;
 
     IF in_use THEN
-        -- "Cloud operator-DGXC"                    -> "Cloud operator-legacy"
-        -- "Department administrator-DGXC (Legacy)" -> "Department administrator (Legacy)-legacy"
-        -- "Application administrator"              -> "Application administrator-legacy"
-        UPDATE roles
-        SET name = replace(name, '-DGXC', '') || '-legacy',
+        -- Point each role at whatever its bindings resolve to today, so the rename
+        -- stays cosmetic: the agent prefers PredefinedRole.Name over the role's own
+        -- name, and no ClusterRole ships under the renamed form.
+        --
+        --   "Cloud operator-DGXC"                    -> "Cloud operator"
+        --   "Department administrator-DGXC"          -> "Department administrator"
+        --   "Department administrator-DGXC (Legacy)" -> "Department administrator (Legacy)"
+        --   "Application administrator"              -> "Editor"   ) RoleNamesMapping in
+        --   "Cloud support"                          -> "Viewer"   ) the cluster, which
+        --                                                            the rename would miss
+        --
+        -- The subquery matches on the pre-update snapshot, i.e. the name before the
+        -- rename. It sits in SET, not FROM: a FROM clause is an inner join, and a role
+        -- whose target is missing would not be renamed at all. COALESCE leaves a
+        -- pointer that is already set alone.
+        UPDATE roles d
+        SET name = replace(d.name, '-DGXC', '') || '-Unmanaged',
             custom = true,
+            cluster_role_predefined_id = COALESCE(
+                d.cluster_role_predefined_id,
+                (SELECT t.id
+                 FROM roles t
+                 WHERE t.scope_type = 'system'
+                   AND t.role_type <> 'DGXC'
+                   AND t.id <> d.id
+                   AND t.name = CASE d.name
+                                    WHEN 'Application administrator' THEN 'Editor'
+                                    WHEN 'Cloud support'             THEN 'Viewer'
+                                    ELSE replace(d.name, '-DGXC', '')
+                                END)
+            ),
             updated_at = NOW()
-        WHERE role_type = 'DGXC'
-          AND custom = false
-          AND scope_type = 'system';
+        WHERE d.role_type = 'DGXC'
+          AND d.custom = false
+          AND d.scope_type = 'system';
     ELSE
         -- role_to_permission_set has no ON DELETE clause and would block the delete.
-        -- Permission sets themselves are shared and are left alone.
+        -- The permission sets themselves are shared and are left alone.
         DELETE FROM role_to_permission_set
         WHERE role_id IN (
             SELECT id FROM roles
             WHERE role_type = 'DGXC' AND custom = false AND scope_type = 'system'
         );
 
-        -- Cascades: permissions, disabled_roles. No access rule can reference these -
-        -- that is what put us on this branch.
+        -- Cascades: permissions, disabled_roles. Nothing references these - that is
+        -- what put us on this branch.
         DELETE FROM roles
         WHERE role_type = 'DGXC' AND custom = false AND scope_type = 'system';
     END IF;

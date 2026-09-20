@@ -153,13 +153,13 @@ var migrationCases = []migrationCase{
 			{Name: "Tenant custom role", Type: "ALL", Custom: true, Scope: "tenant", ScopeID: "1", Creator: "user-1"},
 		},
 		PredefinedRoleOf:  map[string]string{"Tenant custom role": "Cloud operator-DGXC"},
-		WantPredefinedFor: map[string]string{"Tenant custom role": "Cloud operator-legacy"},
+		WantPredefinedFor: map[string]string{"Tenant custom role": "Cloud operator-Unmanaged"},
 		WantRoles: []wantRole{
 			{Name: "Cloud operator", Scope: "system"},
-			{Name: "Cloud operator-legacy", Scope: "system", Custom: true},
+			{Name: "Cloud operator-Unmanaged", Scope: "system", Custom: true},
 			{Name: "Tenant custom role", Scope: "tenant", ScopeID: "1", Custom: true},
 		},
-		WantPermissionSets: map[string][]string{"Cloud operator-legacy": {"Workspace edit"}},
+		WantPermissionSets: map[string][]string{"Cloud operator-Unmanaged": {"Workspace edit"}},
 	},
 	{
 		// Same pointer, but from a non-custom role: not a reference, so the set goes.
@@ -186,18 +186,90 @@ var migrationCases = []migrationCase{
 		Rules: []seedRule{{Subject: "alice", Role: "Cloud operator-DGXC", Tenant: "1"}},
 		WantRoles: []wantRole{
 			{Name: "Cloud operator", Scope: "system"},
-			{Name: "Cloud operator-legacy", Scope: "system", Custom: true},
+			{Name: "Cloud operator-Unmanaged", Scope: "system", Custom: true},
 		},
-		WantRules: []wantRule{{Subject: "alice", Role: "Cloud operator-legacy"}},
+		WantRules: []wantRule{{Subject: "alice", Role: "Cloud operator-Unmanaged"}},
+	},
+	{
+		// The agent prefers PredefinedRole.Name when deriving a ClusterRole name, so
+		// each renamed role points at its twin and bindings keep resolving to the
+		// ClusterRole they use today.
+		Name: "each renamed role points at its non-DGXC twin",
+		Roles: []seedRole{
+			dgxc("Cloud operator-DGXC"), twin("Cloud operator"),
+			dgxc("Department administrator-DGXC"), twin("Department administrator"),
+			dgxc("Department administrator-DGXC (Legacy)"), twin("Department administrator (Legacy)"),
+			dgxc("Application administrator"), dgxc("Cloud support"),
+			// the cluster remaps these two to editor/viewer, so that is what the
+			// predefined role has to name
+			plain("Editor"), plain("Viewer"),
+		},
+		Rules: []seedRule{{Subject: "alice", Role: "Cloud operator-DGXC", Tenant: "1"}},
+		WantPredefinedFor: map[string]string{
+			"Cloud operator-Unmanaged":                    "Cloud operator",
+			"Department administrator-Unmanaged":          "Department administrator",
+			"Department administrator (Legacy)-Unmanaged": "Department administrator (Legacy)",
+			// no twin: point at what the cluster's RoleNamesMapping resolves them to
+			"Application administrator-Unmanaged": "Editor",
+			"Cloud support-Unmanaged":             "Viewer",
+		},
+		WantRoles: []wantRole{
+			{Name: "Application administrator-Unmanaged", Scope: "system", Custom: true},
+			{Name: "Cloud operator", Scope: "system"},
+			{Name: "Cloud operator-Unmanaged", Scope: "system", Custom: true},
+			{Name: "Cloud support-Unmanaged", Scope: "system", Custom: true},
+			{Name: "Department administrator", Scope: "system"},
+			{Name: "Department administrator (Legacy)", Scope: "system"},
+			{Name: "Department administrator (Legacy)-Unmanaged", Scope: "system", Custom: true},
+			{Name: "Department administrator-Unmanaged", Scope: "system", Custom: true},
+			{Name: "Editor", Scope: "system"},
+			{Name: "Viewer", Scope: "system"},
+		},
+		WantRules: []wantRule{{Subject: "alice", Role: "Cloud operator-Unmanaged"}},
+	},
+	{
+		// A pointer already on the role wins over the twin - the migration only fills
+		// in a NULL one.
+		Name: "an existing predefined role is not overwritten",
+		Roles: []seedRole{
+			dgxc("Cloud operator-DGXC"), twin("Cloud operator"), plain("Editor"),
+		},
+		Rules:             []seedRule{{Subject: "alice", Role: "Cloud operator-DGXC", Tenant: "1"}},
+		PredefinedRoleOf:  map[string]string{"Cloud operator-DGXC": "Editor"},
+		WantPredefinedFor: map[string]string{"Cloud operator-Unmanaged": "Editor"},
+		WantRoles: []wantRole{
+			{Name: "Cloud operator", Scope: "system"},
+			{Name: "Cloud operator-Unmanaged", Scope: "system", Custom: true},
+			{Name: "Editor", Scope: "system"},
+		},
+		WantRules: []wantRule{{Subject: "alice", Role: "Cloud operator-Unmanaged"}},
+	},
+	{
+		// The twin must be a real non-DGXC role. Here a system-scoped custom role
+		// happens to carry both the twin's name and role_type DGXC; it is not renamed
+		// (custom = false is required for that), so there is no name collision - but
+		// pointing at it would derive a ClusterRole name that does not exist.
+		Name: "a DGXC-typed role is not mistaken for the twin",
+		Roles: []seedRole{
+			dgxc("Department administrator-DGXC"),
+			{Name: "Department administrator", Type: "DGXC", Custom: true, Creator: "user-3"},
+		},
+		Rules:             []seedRule{{Subject: "alice", Role: "Department administrator-DGXC", Tenant: "1"}},
+		WantPredefinedFor: map[string]string{"Department administrator-Unmanaged": ""},
+		WantRoles: []wantRole{
+			{Name: "Department administrator", Scope: "system", Custom: true},
+			{Name: "Department administrator-Unmanaged", Scope: "system", Custom: true},
+		},
+		WantRules: []wantRule{{Subject: "alice", Role: "Department administrator-Unmanaged"}},
 	},
 	{
 		Name:  "a soft-deleted rule counts as a reference",
 		Roles: []seedRole{dgxc("Cloud support")},
 		Rules: []seedRule{{Subject: "erin", Role: "Cloud support", Tenant: "3", Deleted: true}},
 		WantRoles: []wantRole{
-			{Name: "Cloud support-legacy", Scope: "system", Custom: true},
+			{Name: "Cloud support-Unmanaged", Scope: "system", Custom: true},
 		},
-		WantRules: []wantRule{{Subject: "erin", Role: "Cloud support-legacy"}},
+		WantRules: []wantRule{{Subject: "erin", Role: "Cloud support-Unmanaged"}},
 	},
 	{
 		Name:  "a rule with no tenant counts as a reference",
@@ -205,9 +277,9 @@ var migrationCases = []migrationCase{
 		Rules: []seedRule{{Subject: "grace", Role: "Cloud operator-DGXC", Tenant: ""}},
 		WantRoles: []wantRole{
 			{Name: "Cloud operator", Scope: "system"},
-			{Name: "Cloud operator-legacy", Scope: "system", Custom: true},
+			{Name: "Cloud operator-Unmanaged", Scope: "system", Custom: true},
 		},
-		WantRules: []wantRule{{Subject: "grace", Role: "Cloud operator-legacy"}},
+		WantRules: []wantRule{{Subject: "grace", Role: "Cloud operator-Unmanaged"}},
 	},
 	{
 		Name: "one role in use renames the whole DGXC set",
@@ -223,16 +295,16 @@ var migrationCases = []migrationCase{
 		},
 		Rules: []seedRule{{Subject: "alice", Role: "Cloud operator-DGXC", Tenant: "1"}},
 		WantRoles: []wantRole{
-			{Name: "Application administrator-legacy", Scope: "system", Custom: true},
+			{Name: "Application administrator-Unmanaged", Scope: "system", Custom: true},
 			{Name: "Cloud operator", Scope: "system"},
-			{Name: "Cloud operator-legacy", Scope: "system", Custom: true},
-			{Name: "Cloud support-legacy", Scope: "system", Custom: true},
+			{Name: "Cloud operator-Unmanaged", Scope: "system", Custom: true},
+			{Name: "Cloud support-Unmanaged", Scope: "system", Custom: true},
 			{Name: "Department administrator", Scope: "system"},
 			{Name: "Department administrator (Legacy)", Scope: "system"},
-			{Name: "Department administrator (Legacy)-legacy", Scope: "system", Custom: true},
-			{Name: "Department administrator-legacy", Scope: "system", Custom: true},
+			{Name: "Department administrator (Legacy)-Unmanaged", Scope: "system", Custom: true},
+			{Name: "Department administrator-Unmanaged", Scope: "system", Custom: true},
 		},
-		WantRules: []wantRule{{Subject: "alice", Role: "Cloud operator-legacy"}},
+		WantRules: []wantRule{{Subject: "alice", Role: "Cloud operator-Unmanaged"}},
 	},
 	{
 		Name:  "a role pointing at a renamed role keeps its predefined cluster role",
@@ -242,13 +314,13 @@ var migrationCases = []migrationCase{
 			{Name: "Tenant custom role", Type: "ALL", Custom: true, Scope: "tenant", ScopeID: "1", Creator: "user-1"},
 		},
 		PredefinedRoleOf:  map[string]string{"Tenant custom role": "Cloud operator-DGXC"},
-		WantPredefinedFor: map[string]string{"Tenant custom role": "Cloud operator-legacy"},
+		WantPredefinedFor: map[string]string{"Tenant custom role": "Cloud operator-Unmanaged"},
 		WantRoles: []wantRole{
 			{Name: "Cloud operator", Scope: "system"},
-			{Name: "Cloud operator-legacy", Scope: "system", Custom: true},
+			{Name: "Cloud operator-Unmanaged", Scope: "system", Custom: true},
 			{Name: "Tenant custom role", Scope: "tenant", ScopeID: "1", Custom: true},
 		},
-		WantRules: []wantRule{{Subject: "alice", Role: "Cloud operator-legacy"}},
+		WantRules: []wantRule{{Subject: "alice", Role: "Cloud operator-Unmanaged"}},
 	},
 
 	// ---- roles the migration must never touch ------------------------------------
