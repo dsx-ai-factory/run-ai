@@ -16,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/templates"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/common/shared_data"
+	gpu_fractioning_metrics "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/gpu-fractioning-metrics"
 	init_ca "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/init-ca"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/knative"
 	legacy_workload_cleanup "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-workload-cleanup"
@@ -140,6 +141,8 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addOldRemoteCluster(project_controller.Operand(), *spec.ProjectController.Enabled)
 	mo.addOldRemoteCluster(accessrule_controller.Operand(), *spec.AccessRuleController.Enabled && *spec.ProjectController.CreateRoleBindings)
 	mo.addOldRemoteCluster(mpi_operator.Operand(), true)
+	// Inert until gpu-fractioning is installed: the PodMonitor simply selects no pods.
+	mo.addOldRemoteCluster(gpu_fractioning_metrics.Operand(), true)
 	mo.addOldRemoteCluster(training_operator.Operand(), true)
 	mo.addOldRemoteCluster(admission_controller.Operand(), *spec.AdmissionController.Enabled)
 	// mps-server is no longer configurable; registering it disabled deletes the
