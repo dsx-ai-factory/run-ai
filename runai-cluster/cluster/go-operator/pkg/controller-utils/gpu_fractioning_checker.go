@@ -77,6 +77,13 @@ func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) run
 		return runv1.PublicStatus{Available: runv1.AvailableStatus(true)}
 	}
 
+	if reason == "" {
+		// A False Ready condition always means fractions are not usable, even
+		// if the message is empty - do not surface that as a silent, reasonless
+		// MissingPrerequisites.
+		reason = "GPU fractions are not supported on this cluster: kai-gpu-fractioning reports Ready=False with no message"
+	}
+
 	return runv1.PublicStatus{
 		Available: runv1.AvailableStatus(false),
 		Reason:    reason,

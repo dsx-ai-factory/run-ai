@@ -81,6 +81,17 @@ var _ = Describe("CheckGpuFractioningReadiness", func() {
 		Expect(status.Reason).To(Equal("NVIDIA GPU Operator version v25.3.0 is below minimum supported version v26.7.1"))
 	})
 
+	It("falls back to a non-empty reason when Ready is False with no message", func() {
+		obj := newGpuFractioningConfig(
+			readyCond("False", ""),
+		)
+		k8s = newClient(obj)
+
+		status := CheckGpuFractioningReadiness(apiAccessContext, k8s)
+		Expect(*status.Available).To(BeFalse())
+		Expect(status.Reason).NotTo(BeEmpty())
+	})
+
 	It("reports available when Ready is Unknown (not itself blocking)", func() {
 		obj := newGpuFractioningConfig(
 			readyCond("Unknown", "one or more components have unknown status"),
