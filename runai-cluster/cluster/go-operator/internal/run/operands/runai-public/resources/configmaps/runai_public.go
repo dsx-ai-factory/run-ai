@@ -317,8 +317,22 @@ func getGpuStackStatus(ctx context.Context, kbClient client.Client) runv1.Public
 	nvidiaStatus := getNvidiaStatus(ctx, kbClient)
 	gpuOperatorVersionStatus := controller_utils.CheckGpuOperatorVersion(ctx, kbClient)
 
+	available := *nvidiaStatus.Available && *gpuOperatorVersionStatus.Available
+
+	// Surface the failing sub-check's reason at the top level too, so
+	// consumers that only read Dependencies.Required["gpu-stack"].reason
+	// (e.g. the cluster table's status tooltip, which does not walk
+	// Components) still get a human-readable explanation.
+	var reason string
+	if !*gpuOperatorVersionStatus.Available {
+		reason = gpuOperatorVersionStatus.Reason
+	} else if !*nvidiaStatus.Available {
+		reason = nvidiaStatus.Reason
+	}
+
 	return runv1.PublicStatus{
-		Available: runv1.AvailableStatus(*nvidiaStatus.Available && *gpuOperatorVersionStatus.Available),
+		Available: runv1.AvailableStatus(available),
+		Reason:    reason,
 		Components: map[string]runv1.PublicStatus{
 			"nvidia":               nvidiaStatus,
 			"gpu-operator-version": gpuOperatorVersionStatus,
