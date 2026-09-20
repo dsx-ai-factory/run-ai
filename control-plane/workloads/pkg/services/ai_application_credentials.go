@@ -17,9 +17,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	assetsClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/assets"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/util/validation"
@@ -42,28 +44,17 @@ const (
 func processAIApplicationCredentials(ctx context.Context, applicationName string, spec *api.AiApplicationSpec) (bool, *api.Error) {
 	usesPersonalChartAuth := isPersonalAIApplicationAuth(spec.Auth)
 	if usesPersonalChartAuth && spec.Auth.AssetId == "" {
-		return false, api.NewError(400, "spec.auth.assetId is required when spec.auth.userCredential is true.", nil)
+		return false, api.NewValidationError("spec.auth.assetId is required when spec.auth.userCredential is true.")
 	}
 
-	values := spec.Values
-	if values == nil && spec.ValuesBase64 != "" {
-		decoded, err := base64.StdEncoding.DecodeString(spec.ValuesBase64)
-		if err != nil {
-			decoded = nil
-		}
-		if bytes.Contains(decoded, []byte(userCredentialPlaceholderPrefix)) {
-			if err := yaml.Unmarshal(decoded, &values); err != nil {
-				return false, api.NewError(400, "spec.valuesBase64 containing personal credentials must be a valid YAML object.", err)
-			}
-			if values == nil {
-				values = map[string]interface{}{}
-			}
-		}
+	values, validationErr := personalCredentialValues(spec)
+	if validationErr != nil {
+		return false, validationErr
 	}
 
-	placeholders, err := collectPersonalCredentialPlaceholders(values)
-	if err != nil {
-		return false, api.NewError(400, err.Error(), nil)
+	placeholders, validationErr := collectPersonalCredentialPlaceholders(values)
+	if validationErr != nil {
+		return false, validationErr
 	}
 	usesPersonalCredentials := usesPersonalChartAuth || len(placeholders) > 0
 	if !usesPersonalCredentials {
@@ -76,29 +67,49 @@ func processAIApplicationCredentials(ctx context.Context, applicationName string
 	}
 
 	if usesPersonalChartAuth {
-		if err := validatePersonalChartAuthOwnership(spec.Auth.AssetId, credentials.Entries); err != nil {
-			return false, api.NewError(400, err.Error(), nil)
+		if validationErr := validatePersonalChartAuthOwnership(spec.Auth.AssetId, credentials.Entries); validationErr != nil {
+			return false, validationErr
 		}
 	}
 	if len(placeholders) == 0 {
 		return true, nil
 	}
 
-	resolvedValues, err := resolvePersonalCredentialPlaceholders(applicationName, values, credentials.Entries)
-	if err != nil {
-		return false, api.NewError(400, err.Error(), nil)
+	resolvedValues, validationErr := resolvePersonalCredentialPlaceholders(applicationName, values, credentials.Entries)
+	if validationErr != nil {
+		return false, validationErr
 	}
 	spec.Values = resolvedValues
 	spec.ValuesBase64 = ""
 	return true, nil
 }
 
+func personalCredentialValues(spec *api.AiApplicationSpec) (map[string]interface{}, *api.Error) {
+	if spec.Values != nil || spec.ValuesBase64 == "" {
+		return spec.Values, nil
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(spec.ValuesBase64)
+	if err != nil {
+		return nil, api.NewValidationError("spec.valuesBase64 must be valid base64")
+	}
+	if !bytes.Contains(decoded, []byte(userCredentialPlaceholderPrefix)) {
+		return nil, nil
+	}
+
+	values := make(map[string]interface{})
+	if err := yaml.Unmarshal(decoded, &values); err != nil {
+		return nil, api.NewValidationError("spec.valuesBase64 containing personal credentials must be a valid YAML object.")
+	}
+	return values, nil
+}
+
 // collectPersonalCredentialPlaceholders recursively walks parsed Helm values,
 // collecting whole-value USERCREDENTIAL references and rejecting malformed or embedded references.
-func collectPersonalCredentialPlaceholders(value interface{}) ([]string, error) {
+func collectPersonalCredentialPlaceholders(value interface{}) ([]string, *api.Error) {
 	var placeholders []string
-	var visit func(interface{}) error
-	visit = func(current interface{}) error {
+	var visit func(interface{}) *api.Error
+	visit = func(current interface{}) *api.Error {
 		switch typed := current.(type) {
 		case map[string]interface{}:
 			for _, child := range typed {
@@ -117,7 +128,7 @@ func collectPersonalCredentialPlaceholders(value interface{}) ([]string, error) 
 				return nil
 			}
 			if !userCredentialPlaceholderPattern.MatchString(typed) {
-				return fmt.Errorf("personal credential placeholders must occupy the complete value and use the supported USERCREDENTIAL grammar")
+				return api.NewValidationError("personal credential placeholders must occupy the complete value and use the supported USERCREDENTIAL grammar")
 			}
 			placeholders = append(placeholders, typed)
 		}
@@ -129,7 +140,7 @@ func collectPersonalCredentialPlaceholders(value interface{}) ([]string, error) 
 	return placeholders, nil
 }
 
-func resolvePersonalCredentialPlaceholders(applicationName string, values map[string]interface{}, credentials []assetsApi.CredentialsListResponseEntry) (map[string]interface{}, error) {
+func resolvePersonalCredentialPlaceholders(applicationName string, values map[string]interface{}, credentials []assetsApi.CredentialsListResponseEntry) (map[string]interface{}, *api.Error) {
 	credentialsByName := make(map[string][]assetsApi.CredentialsListResponseEntry, len(credentials))
 	for _, credential := range credentials {
 		name := credential.Meta.Name
@@ -145,7 +156,7 @@ func resolvePersonalCredentialPlaceholders(applicationName string, values map[st
 	return resolved.(map[string]interface{}), nil
 }
 
-func resolvePersonalCredentialValue(applicationName string, value interface{}, credentialsByName map[string][]assetsApi.CredentialsListResponseEntry) (interface{}, error) {
+func resolvePersonalCredentialValue(applicationName string, value interface{}, credentialsByName map[string][]assetsApi.CredentialsListResponseEntry) (interface{}, *api.Error) {
 	switch typed := value.(type) {
 	case map[string]interface{}:
 		resolved := make(map[string]interface{}, len(typed))
@@ -173,7 +184,7 @@ func resolvePersonalCredentialValue(applicationName string, value interface{}, c
 		}
 		matches := userCredentialPlaceholderPattern.FindStringSubmatch(typed)
 		if matches == nil {
-			return nil, fmt.Errorf("personal credential placeholders must occupy the complete value and use the supported USERCREDENTIAL grammar")
+			return nil, api.NewValidationError("personal credential placeholders must occupy the complete value and use the supported USERCREDENTIAL grammar")
 		}
 		sourceName, err := resolvePersonalCredentialSource(matches[1], personalCredentialRepresentation(matches[2]), credentialsByName)
 		if err != nil {
@@ -188,10 +199,14 @@ func resolvePersonalCredentialValue(applicationName string, value interface{}, c
 	}
 }
 
-func resolvePersonalCredentialSource(name string, representation personalCredentialRepresentation, credentialsByName map[string][]assetsApi.CredentialsListResponseEntry) (string, error) {
+func resolvePersonalCredentialSource(name string, representation personalCredentialRepresentation, credentialsByName map[string][]assetsApi.CredentialsListResponseEntry) (string, *api.Error) {
 	matches := credentialsByName[name]
-	if len(matches) != 1 {
-		return "", fmt.Errorf("personal credential reference is invalid")
+	switch len(matches) {
+	case 0:
+		return "", api.NewValidationError(fmt.Sprintf("personal credential %q was not found", name))
+	case 1:
+	default:
+		return "", api.NewValidationError(fmt.Sprintf("personal credential name %q is ambiguous", name))
 	}
 
 	return canonicalPersonalCredentialSource(matches[0], representation)
@@ -199,12 +214,12 @@ func resolvePersonalCredentialSource(name string, representation personalCredent
 
 // canonicalPersonalCredentialSource returns the encrypted runai-namespace Secret name
 // generated for a personal credential, selecting the requested NGC representation when needed.
-func canonicalPersonalCredentialSource(credential assetsApi.CredentialsListResponseEntry, representation personalCredentialRepresentation) (string, error) {
+func canonicalPersonalCredentialSource(credential assetsApi.CredentialsListResponseEntry, representation personalCredentialRepresentation) (string, *api.Error) {
 	var ngcPrefix string
 	switch credential.Meta.Kind {
 	case assetsApi.ASSETKIND_GENERIC_SECRET, assetsApi.ASSETKIND_DOCKER_REGISTRY:
 		if representation != "" {
-			return "", fmt.Errorf("credential representation is supported only for NGC credentials")
+			return "", api.NewValidationError("credential representation is supported only for NGC credentials")
 		}
 	case assetsApi.ASSETKIND_NGC_API_KEY:
 		switch representation {
@@ -213,10 +228,13 @@ func canonicalPersonalCredentialSource(credential assetsApi.CredentialsListRespo
 		case personalCredentialRepresentationDocker:
 			ngcPrefix = workloadsComposer.NgcApiKeyDockerRegistryPrefix
 		default:
-			return "", fmt.Errorf("NGC credential placeholders must specify generic-secret or docker-registry")
+			return "", api.NewValidationError("NGC credential placeholders must specify generic-secret or docker-registry")
 		}
 	default:
-		return "", fmt.Errorf("personal credential kind is not supported for AI Application values")
+		return "", api.NewValidationError(fmt.Sprintf(
+			"personal credential kind %q is not supported for AI Application values",
+			credential.Meta.Kind,
+		))
 	}
 
 	assetID := credential.Meta.Id
@@ -228,12 +246,12 @@ func canonicalPersonalCredentialSource(credential assetsApi.CredentialsListRespo
 		ngcPrefix,
 	)
 	if buildErr != nil {
-		return "", fmt.Errorf("personal credential reference is invalid")
+		return "", api.NewValidationError(fmt.Sprintf("personal credential %q has an invalid asset ID", credential.Meta.Name))
 	}
 	return strings.TrimPrefix(reference, userCredentialPlaceholderPrefix), nil
 }
 
-func validatePersonalChartAuthOwnership(assetID string, credentials []assetsApi.CredentialsListResponseEntry) error {
+func validatePersonalChartAuthOwnership(assetID string, credentials []assetsApi.CredentialsListResponseEntry) *api.Error {
 	matches := make([]assetsApi.CredentialsListResponseEntry, 0, 1)
 	for _, credential := range credentials {
 		if credential.Meta.Id == assetID {
@@ -241,15 +259,15 @@ func validatePersonalChartAuthOwnership(assetID string, credentials []assetsApi.
 		}
 	}
 	if len(matches) != 1 {
-		return fmt.Errorf("personal authentication credential is invalid")
+		return api.NewValidationError("personal authentication credential is invalid")
 	}
 	return nil
 }
 
-func validatePersonalCredentialDestinationName(applicationName, sourceName string) error {
+func validatePersonalCredentialDestinationName(applicationName, sourceName string) *api.Error {
 	destinationName := fmt.Sprintf("pc-%s-%s", applicationName, sourceName)
 	if problems := validation.IsDNS1123Subdomain(destinationName); len(problems) != 0 {
-		return fmt.Errorf("personal credential destination name is invalid: %s", strings.Join(problems, "; "))
+		return api.NewValidationError(fmt.Sprintf("personal credential destination name is invalid: %s", strings.Join(problems, "; ")))
 	}
 	return nil
 }
@@ -277,21 +295,17 @@ func sanitizeAIApplicationResponse(ctx context.Context, application *api.AiAppli
 	if isPersonalAIApplicationAuth(application.Spec.Auth) {
 		application.Spec.Auth.AssetId = ""
 	}
-	application.Spec.Values = redactPersonalCredentialValues(application.Spec.Values)
+	if application.Spec.Values != nil {
+		application.Spec.Values = convutils.MapMe(redactPersonalCredentialValue(application.Spec.Values))
+	}
 	if application.Spec.ValuesBase64 != "" {
 		decoded, err := base64.StdEncoding.DecodeString(application.Spec.ValuesBase64)
-		if err == nil && strings.Contains(string(decoded), userCredentialPlaceholderPrefix) {
+		if err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to decode AI Application valuesBase64 while sanitizing response: %s", err)
+		} else if strings.Contains(string(decoded), userCredentialPlaceholderPrefix) {
 			application.Spec.ValuesBase64 = ""
 		}
 	}
-}
-
-func redactPersonalCredentialValues(values map[string]interface{}) map[string]interface{} {
-	if values == nil {
-		return nil
-	}
-	redacted, _ := redactPersonalCredentialValue(values).(map[string]interface{})
-	return redacted
 }
 
 func redactPersonalCredentialValue(value interface{}) interface{} {

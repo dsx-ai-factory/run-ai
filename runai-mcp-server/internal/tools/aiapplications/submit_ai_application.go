@@ -33,8 +33,8 @@ type aiApplicationAuth struct {
 
 type aiApplicationSpec struct {
 	ChartRef     aiApplicationChartRef `json:"chartRef"              jsonschema:"Helm chart origin. Provide exactly one source: repo with chartName and chartVersion, chartURL, or chartId."`
-	Values       map[string]any        `json:"values,omitempty"       jsonschema:"Inline Helm values merged with chart defaults. Personal credentials must occupy the entire string value: USERCREDENTIAL:<name>. For NGC credentials use USERCREDENTIAL:<name>,generic-secret or USERCREDENTIAL:<name>,docker-registry."`
-	ValuesBase64 *string               `json:"valuesBase64,omitempty" jsonschema:"Base64-encoded Helm values, mutually exclusive with values. Decoded personal-credential references use the same exact whole-string USERCREDENTIAL:<name>[,generic-secret|,docker-registry] grammar."`
+	Values       map[string]any        `json:"values,omitempty"       jsonschema:"Helm values. Personal credentials use whole-string USERCREDENTIAL:<name>[,generic-secret|,docker-registry]."`
+	ValuesBase64 *string               `json:"valuesBase64,omitempty" jsonschema:"Base64 Helm values. Personal credentials use the same USERCREDENTIAL grammar as values."`
 	Auth         *aiApplicationAuth    `json:"auth,omitempty"         jsonschema:"Authentication for a private Helm chart source."`
 }
 

@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	runaiBackendClient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config"
@@ -41,7 +42,8 @@ import (
 const (
 	applicationDesiredPhaseDeleted     = "deleted"
 	annotationApplicationUpdateCounter = "run.ai/application-update-counter"
-	userCredentialPlaceholderPrefix    = "USERCREDENTIAL:"
+	userCredentialPlaceholderPrefix    = "USERCREDENTIAL:" //nolint:gosec // Protocol marker, not a credential.
+	helmOCIURLPrefix                   = "oci://"
 )
 
 var errNoMatchingSecret = errors.New("no matching secret found")
@@ -292,9 +294,14 @@ func (h *ApplicationsHandler) convertToApplication(ctx context.Context, projInfo
 	return app, nil
 }
 
-func (h *ApplicationsHandler) convertHelmSpec(ctx context.Context, applicationName, namespace string, spec *workloads_openapi.AIApplicationSpec, requiresControlPlaneAuth bool) (*runv1alpha1.HelmSpec, []personalcreds.Cred, error) {
+func (h *ApplicationsHandler) convertHelmSpec(
+	ctx context.Context,
+	applicationName, namespace string,
+	spec *workloads_openapi.AIApplicationSpec,
+	requiresControlPlaneAuth bool,
+) (*runv1alpha1.HelmSpec, []personalcreds.Cred, error) {
 	helmSpec := &runv1alpha1.HelmSpec{}
-	credentialSources := map[string]struct{}{}
+	credentialSources := datastructs.NewSet[string]()
 
 	chartRef := spec.ChartRef
 	if chartRef.GetChartURL() != "" {
@@ -334,7 +341,7 @@ func (h *ApplicationsHandler) convertHelmSpec(ctx context.Context, applicationNa
 			if err != nil {
 				return nil, nil, fmt.Errorf("failed to resolve personal chart authentication: %w", err)
 			}
-			credentialSources[sourceName] = struct{}{}
+			credentialSources.Add(sourceName)
 			secretName = personalcreds.DestName(applicationName, sourceName)
 		} else {
 			var err error
@@ -357,10 +364,7 @@ func (h *ApplicationsHandler) convertHelmSpec(ctx context.Context, applicationNa
 	}
 
 	credentials := make([]personalcreds.Cred, 0, len(credentialSources))
-	sourceNames := make([]string, 0, len(credentialSources))
-	for sourceName := range credentialSources {
-		sourceNames = append(sourceNames, sourceName)
-	}
+	sourceNames := credentialSources.Keys()
 	sort.Strings(sourceNames)
 	for _, sourceName := range sourceNames {
 		credentials = append(credentials, personalcreds.Cred{SourceSecret: sourceName})
@@ -368,7 +372,7 @@ func (h *ApplicationsHandler) convertHelmSpec(ctx context.Context, applicationNa
 	return helmSpec, credentials, nil
 }
 
-func rewritePersonalCredentialPlaceholders(value interface{}, applicationName string, sources map[string]struct{}) (interface{}, error) {
+func rewritePersonalCredentialPlaceholders(value interface{}, applicationName string, sources datastructs.Set[string]) (interface{}, error) {
 	switch typed := value.(type) {
 	case string:
 		if !strings.HasPrefix(typed, userCredentialPlaceholderPrefix) {
@@ -378,7 +382,7 @@ func rewritePersonalCredentialPlaceholders(value interface{}, applicationName st
 		if sourceName == "" {
 			return nil, fmt.Errorf("personal credential placeholder has an empty source")
 		}
-		sources[sourceName] = struct{}{}
+		sources.Add(sourceName)
 		return personalcreds.DestName(applicationName, sourceName), nil
 	case map[string]interface{}:
 		rewritten := make(map[string]interface{}, len(typed))
@@ -406,7 +410,7 @@ func rewritePersonalCredentialPlaceholders(value interface{}, applicationName st
 }
 
 func preferredHelmAuthSecretKind(repository, chartURL string) string {
-	if strings.HasPrefix(repository, "oci://") || strings.HasPrefix(chartURL, "oci://") {
+	if strings.HasPrefix(repository, helmOCIURLPrefix) || strings.HasPrefix(chartURL, helmOCIURLPrefix) {
 		return dockerRegistryKindLabel
 	}
 	return genericSecretKindLabel

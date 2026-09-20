@@ -104,20 +104,35 @@ var _ = Describe("AI Application personal credentials", func() {
 		},
 		Entry("base64 placeholder outside an object", nil, base64.StdEncoding.EncodeToString([]byte("USERCREDENTIAL:generic\n")), "valid YAML object"),
 		Entry("embedded placeholder", map[string]interface{}{"a": "prefix-USERCREDENTIAL:generic"}, "", "complete value"),
-		Entry("unknown credential", map[string]interface{}{"a": "USERCREDENTIAL:other"}, "", "reference is invalid"),
-		Entry("unsupported kind", map[string]interface{}{"a": "USERCREDENTIAL:password"}, "", "kind is not supported"),
+		Entry("unknown credential", map[string]interface{}{"a": "USERCREDENTIAL:other"}, "", "was not found"),
+		Entry("unsupported kind", map[string]interface{}{"a": "USERCREDENTIAL:password"}, "", `"password"`),
 		Entry("NGC without representation", map[string]interface{}{"a": "USERCREDENTIAL:ngc"}, "", "must specify"),
 		Entry("representation on generic", map[string]interface{}{"a": "USERCREDENTIAL:generic,generic-secret"}, "", "only for NGC"),
 	)
 
-	It("preserves invalid base64 when it does not contain a personal credential", func() {
+	It("rejects an ambiguous credential name", func() {
+		assetsClient.SetMock(assetsClient.NewSimpleMock().WithCredentials(append(credentials,
+			credential("generic", "22222222-abcd-4000-8000-000000000005", assetsApi.ASSETKIND_GENERIC_SECRET),
+		)))
+		spec := &api.AiApplicationSpec{
+			Values: map[string]interface{}{"secret": "USERCREDENTIAL:generic"},
+		}
+
+		_, apiErr := processAIApplicationCredentials(
+			testing.SetContext(testing.TestTenant, testing.TestUser, nil),
+			"my-app",
+			spec,
+		)
+		Expect(apiErr).NotTo(BeNil())
+		Expect(apiErr.Message).To(ContainSubstring("ambiguous"))
+	})
+
+	It("rejects invalid base64", func() {
 		spec := &api.AiApplicationSpec{ValuesBase64: "existing-invalid-value"}
 
-		used, apiErr := processAIApplicationCredentials(testing.SetContext(testing.TestTenant, testing.TestUser, nil), "my-app", spec)
-		Expect(apiErr).To(BeNil())
-		Expect(used).To(BeFalse())
-		Expect(spec.ValuesBase64).To(Equal("existing-invalid-value"))
-		Expect(spec.Values).To(BeNil())
+		_, apiErr := processAIApplicationCredentials(testing.SetContext(testing.TestTenant, testing.TestUser, nil), "my-app", spec)
+		Expect(apiErr).NotTo(BeNil())
+		Expect(apiErr.Message).To(ContainSubstring("valid base64"))
 	})
 
 	It("rejects an invalid computed destination name", func() {

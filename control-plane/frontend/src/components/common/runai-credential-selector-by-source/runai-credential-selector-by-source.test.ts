@@ -341,7 +341,6 @@ describe("runai-credential-selector-by-source.vue", () => {
       expect(clusterStore.isClusterVersionSufficient).toHaveBeenCalledWith("cluster-1", "3.1");
       expect(wrapper.vm.credentialSourceOptions).toHaveLength(1);
     });
-
   });
   describe("isRequired prop functionality", () => {
     it("should set validation rules when isRequired is true (default)", async () => {

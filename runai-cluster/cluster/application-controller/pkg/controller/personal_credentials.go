@@ -72,7 +72,7 @@ func (c *ApplicationController) materializePersonalCredentials(
 			continue
 		}
 		_, stillDesired := desired[copy.Name]
-		if stillDesired && !containsDestinationError(materializationErrors, copy.Name) {
+		if stillDesired && !containsRevocationError(materializationErrors, copy.Name) {
 			continue
 		}
 		if err := c.client.Delete(ctx, copy); err != nil && !apierrors.IsNotFound(err) {
@@ -96,10 +96,18 @@ func (c *ApplicationController) materializePersonalCredential(
 	if err := c.client.Get(ctx, types.NamespacedName{
 		Name: sourceName, Namespace: c.runaiNamespace,
 	}, &source); err != nil {
-		return destinationError{destination: destName, err: fmt.Errorf("get source secret %s/%s: %w", c.runaiNamespace, sourceName, err)}
+		return destinationError{
+			destination: destName,
+			revoke:      apierrors.IsNotFound(err),
+			err:         fmt.Errorf("get source secret %s/%s: %w", c.runaiNamespace, sourceName, err),
+		}
 	}
 	if source.Labels[personalcreds.UserCredentialsLabel] != "true" {
-		return destinationError{destination: destName, err: fmt.Errorf("source secret %s/%s is not a personal credential", source.Namespace, source.Name)}
+		return destinationError{
+			destination: destName,
+			revoke:      true,
+			err:         fmt.Errorf("source secret %s/%s is not a personal credential", source.Namespace, source.Name),
+		}
 	}
 
 	dest, err := personalcreds.BuildDestination(destName, application.Namespace, &source, key)
@@ -131,16 +139,17 @@ func (c *ApplicationController) materializePersonalCredential(
 
 type destinationError struct {
 	destination string
+	revoke      bool
 	err         error
 }
 
 func (e destinationError) Error() string { return e.err.Error() }
 func (e destinationError) Unwrap() error { return e.err }
 
-func containsDestinationError(errs []error, destination string) bool {
+func containsRevocationError(errs []error, destination string) bool {
 	for _, err := range errs {
 		var destErr destinationError
-		if errors.As(err, &destErr) && destErr.destination == destination {
+		if errors.As(err, &destErr) && destErr.destination == destination && destErr.revoke {
 			return true
 		}
 	}

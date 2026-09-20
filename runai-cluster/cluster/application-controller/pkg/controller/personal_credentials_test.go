@@ -85,6 +85,49 @@ func TestPersonalCredentialLifecycle(t *testing.T) {
 		t.Fatalf("rotated value = %q", got)
 	}
 
+	if err := k8sClient.Get(context.Background(), client.ObjectKeyFromObject(source), source); err != nil {
+		t.Fatal(err)
+	}
+	source.Data["token"] = []byte("invalid-ciphertext")
+	if err := k8sClient.Update(context.Background(), source); err != nil {
+		t.Fatal(err)
+	}
+	if err := controller.materializePersonalCredentials(context.Background(), app); err == nil {
+		t.Fatal("expected invalid ciphertext to fail")
+	}
+	if err := k8sClient.Get(context.Background(), destKey, &dest); err != nil {
+		t.Fatal(err)
+	}
+	if got := string(dest.Data["token"]); got != "second" {
+		t.Fatalf("working destination changed after retryable failure: %q", got)
+	}
+
+	delete(source.Labels, personalcreds.UserCredentialsLabel)
+	if err := k8sClient.Update(context.Background(), source); err != nil {
+		t.Fatal(err)
+	}
+	if err := controller.materializePersonalCredentials(context.Background(), app); err == nil {
+		t.Fatal("expected removed personal credential label to fail")
+	}
+	if err := k8sClient.Get(context.Background(), destKey, &dest); !apierrors.IsNotFound(err) {
+		t.Fatalf("revoked destination still exists after label removal: %v", err)
+	}
+
+	source.Labels[personalcreds.UserCredentialsLabel] = "true"
+	source.Data["token"] = encryptForTest(t, []byte("third"), []byte(encryptionKey))
+	if err := k8sClient.Update(context.Background(), source); err != nil {
+		t.Fatal(err)
+	}
+	if err := controller.materializePersonalCredentials(context.Background(), app); err != nil {
+		t.Fatalf("materialization after restoring source failed: %v", err)
+	}
+	if err := k8sClient.Get(context.Background(), destKey, &dest); err != nil {
+		t.Fatal(err)
+	}
+	if got := string(dest.Data["token"]); got != "third" {
+		t.Fatalf("restored value = %q", got)
+	}
+
 	if err := k8sClient.Delete(context.Background(), source); err != nil {
 		t.Fatal(err)
 	}
