@@ -55,7 +55,7 @@ func validateExposureServiceOwnership(
 			continue
 		}
 		extracted, err := exposureServiceBackends(exposure)
-		errs = append(errs, err, validateExposureExtensions(exposure, constraints))
+		errs = append(errs, err, validateExposureExtensions(runner, exposure, constraints))
 		backends = append(backends, extracted...)
 
 		namespace, supported := exposureObjectNamespace(exposure)

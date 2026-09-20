@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"sort"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	openshiftv1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -20,7 +22,11 @@ import (
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
-const ingressClassAnnotation = "kubernetes.io/ingress.class"
+const (
+	ingressClassAnnotation = "kubernetes.io/ingress.class"
+	generatedNativeProfile = "generated-native"
+	generatedNIMProfile    = "generated-nim"
+)
 
 // Routing bindings come from cluster configuration, not the object being validated.
 type routingConstraints struct {
@@ -37,10 +43,10 @@ func configuredRoutingConstraints() routingConstraints {
 	}
 }
 
-// validateExposureExtensions complements backend ownership checks: opaque
-// controller instructions must not introduce destinations outside that graph.
+// validateExposureExtensions complements backend ownership checks with routing
+// restrictions. Only annotation validation depends on the submission profile.
 // Labels and independently attached administrator policies are not checked here.
-func validateExposureExtensions(object client.Object, constraints routingConstraints) error {
+func validateExposureExtensions(runner *dromosv1alpha1.WorkloadRunner, object client.Object, constraints routingConstraints) error {
 	var errs []error
 	switch exposure := object.(type) {
 	case *networkingv1.Ingress:
@@ -51,7 +57,7 @@ func validateExposureExtensions(object client.Object, constraints routingConstra
 	default:
 		return nil // Unsupported kinds are reported by the backend extractor.
 	}
-	return prioritizeOwnershipErrors(append(errs, validateRoutingAnnotations(object, constraints))...)
+	return prioritizeOwnershipErrors(append(errs, validateRoutingAnnotations(runner, object, constraints))...)
 }
 
 func validateIngressClass(ingress *networkingv1.Ingress, approved string) error {
@@ -97,7 +103,17 @@ var (
 	haproxyPathRewrite = regexp.MustCompile(`^/[A-Za-z0-9._~/-]*\(/\|\$\)\(\.\*\) /\\2$`)
 )
 
-func validateRoutingAnnotations(object client.Object, constraints routingConstraints) error {
+func validateRoutingAnnotations(runner *dromosv1alpha1.WorkloadRunner, object client.Object, constraints routingConstraints) error {
+	// The agent writes this profile from CP-derived provenance, not workload
+	// metadata. Preserve native/NIM annotation compatibility only for these
+	// exact profiles; direct, missing, and unknown profiles remain restricted.
+	// This exemption does not affect backend or Pod ownership validation.
+	if runner != nil {
+		switch runner.Annotations[constants.NetworkingSubmissionProfileAnnotation] {
+		case generatedNativeProfile, generatedNIMProfile:
+			return nil
+		}
+	}
 	annotations := object.GetAnnotations()
 	keys := make([]string, 0, len(annotations))
 	for key := range annotations {
@@ -161,8 +177,8 @@ func allowedRoutingAnnotation(object client.Object, key, value string, constrain
 			return value == "true"
 		}
 	case *corev1.Service:
-		// NIM operator bookkeeping copied to referenced Services. No origin or
-		// prefix exemption: user annotations on NIM Services use these same rules.
+		// Direct submissions can reference operator-created Services. Only the
+		// exact bookkeeping keys below are accepted, not the whole operator prefix.
 		switch key {
 		case "openshift.io/scc", "openshift.io/required-scc":
 			return value == "nonroot" || value == "anyuid" || value == "hostmount-anyuid"

@@ -67,7 +67,7 @@ func validateDesiredServiceOwnership(
 		return err
 	}
 	return prioritizeOwnershipErrors(
-		validateRoutingAnnotations(desired, routingConstraints{}),
+		validateRoutingAnnotations(runner, desired, routingConstraints{}),
 		validateSelectorPods(ctx, validationReader, runner, desired, make(map[endpointPodIdentity]*corev1.Pod)),
 	)
 }
@@ -131,7 +131,7 @@ func validateServiceOwnership(
 		errs = append(errs, validateObjectOwner(ctx, validationReader, runner, service, "Service"))
 	}
 	errs = append(errs,
-		validateRoutingAnnotations(service, routingConstraints{}),
+		validateRoutingAnnotations(runner, service, routingConstraints{}),
 		validateSelectorPods(ctx, validationReader, runner, service, verifiedPods),
 		validateEndpointSlices(ctx, validationReader, runner, service, verifiedPods),
 	)

@@ -37,7 +37,7 @@ func TestRoutingAnnotationContract(t *testing.T) {
 			t.Run(kind+"/"+key, func(t *testing.T) {
 				object := construct()
 				object.SetAnnotations(map[string]string{key: "private-value-not-for-errors"})
-				err := validateRoutingAnnotations(object, constraints)
+				err := validateRoutingAnnotations(nil, object, constraints)
 				if !errors.Is(err, errOwnershipViolation) || !strings.Contains(err.Error(), key) {
 					t.Fatalf("expected field-specific violation, got %v", err)
 				}
@@ -88,7 +88,7 @@ func TestRoutingAnnotationContract(t *testing.T) {
 		t.Run(tt.kind+"/"+tt.key+"/"+tt.value, func(t *testing.T) {
 			object := constructors[tt.kind]()
 			object.SetAnnotations(map[string]string{tt.key: tt.value})
-			err := validateRoutingAnnotations(object, constraints)
+			err := validateRoutingAnnotations(nil, object, constraints)
 			if (err == nil) != tt.allowed {
 				t.Fatalf("allowed=%t, got %v", tt.allowed, err)
 			}
@@ -189,14 +189,14 @@ func TestRoutingExtensionsAggregateChecks(t *testing.T) {
 	route := &gatewayv1.HTTPRoute{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{"unrecognized": "secret"}}}
 	route.Spec.ParentRefs = []gatewayv1.ParentReference{{Name: "foreign"}}
 	route.Spec.Rules = []gatewayv1.HTTPRouteRule{{Filters: []gatewayv1.HTTPRouteFilter{{Type: "Unknown"}}}}
-	err := validateExposureExtensions(route, routingConstraints{})
+	err := validateExposureExtensions(nil, route, routingConstraints{})
 	for _, part := range []string{"parentRefs[0]", "filter[0]", "unrecognized"} {
 		if err == nil || !strings.Contains(err.Error(), part) {
 			t.Fatalf("missing %q from aggregated error: %v", part, err)
 		}
 	}
 	// Route is also part of the shared gate, without an Ingress/Gateway binding.
-	if err := validateExposureExtensions(&openshiftv1.Route{}, routingConstraints{}); err != nil {
+	if err := validateExposureExtensions(nil, &openshiftv1.Route{}, routingConstraints{}); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -209,7 +209,7 @@ func TestConfiguredIngressAnnotationsDoNotAuthorizeExtensions(t *testing.T) {
 		&openshiftv1.Route{},
 	} {
 		object.SetAnnotations(map[string]string{"platform.example/default": "approved"})
-		if err := validateRoutingAnnotations(object, constraints); !errors.Is(err, errOwnershipViolation) {
+		if err := validateRoutingAnnotations(nil, object, constraints); !errors.Is(err, errOwnershipViolation) {
 			t.Fatalf("configured default must not authorize an unsupported annotation on %T: %v", object, err)
 		}
 	}
