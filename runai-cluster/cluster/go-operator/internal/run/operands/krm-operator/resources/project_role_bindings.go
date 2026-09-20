@@ -25,7 +25,7 @@ func runaiProjectRoleBindings(runaiConfig *runaiv1.RunaiConfig) []kaiv1alpha1.Pr
 	bindings := []kaiv1alpha1.ProjectRoleBinding{
 		{Name: "runai-accessrule-controller-project", ServiceAccountName: operands.RunaiAccessRuleControllerName},
 		{Name: "researcher-service-rw", ServiceAccountName: "researcher-service"},
-		{Name: "cluster-api-project", ServiceAccountName: "cluster-api"},
+		{Name: "cluster-api-project", ServiceAccountName: operands.RunaiClusterApiName},
 		{Name: "runai-scheduler-rw", ServiceAccountName: "runai-scheduler"},
 		{Name: "runai-admission-controller-project", ServiceAccountName: "runai-admission-controller"},
 		{Name: "runai-binder-project", ServiceAccountName: "binder"},
@@ -38,7 +38,7 @@ func runaiProjectRoleBindings(runaiConfig *runaiv1.RunaiConfig) []kaiv1alpha1.Pr
 			ClusterRoleName:    "runai-external-workload-integrator-project",
 			ServiceAccountName: "external-workload-integrator",
 		},
-		{Name: "cluster-api", ClusterRoleName: "runai-cluster-api-project", ServiceAccountName: "cluster-api"},
+		{Name: "cluster-api", ClusterRoleName: "runai-cluster-api-project", ServiceAccountName: operands.RunaiClusterApiName},
 		{
 			Name:               "shared-objects-controller",
 			ClusterRoleName:    "runai-shared-objects-controller-project",
@@ -50,11 +50,11 @@ func runaiProjectRoleBindings(runaiConfig *runaiv1.RunaiConfig) []kaiv1alpha1.Pr
 			ServiceAccountName: "advice-restart-controller",
 		},
 		{Name: "cluster-sync", ClusterRoleName: "cluster-sync-project", ServiceAccountName: "cluster-sync"},
-		{Name: "runai-agent", ClusterRoleName: "runai-agent-project", ServiceAccountName: "runai-agent"},
+		{Name: "runai-agent", ClusterRoleName: "runai-agent-project", ServiceAccountName: operands.RunaiAgentName},
 		{
 			Name:               "runai-agent-additional-workload-gvks",
 			ClusterRoleName:    runaiConfig.Spec.ExternalWorkloadIntegrator.RIDRbacConfig.ClusterRoleCrudName,
-			ServiceAccountName: "runai-agent",
+			ServiceAccountName: operands.RunaiAgentName,
 		},
 		{
 			Name:               "anyworkload-controller",

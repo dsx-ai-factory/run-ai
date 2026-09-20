@@ -27,6 +27,7 @@ func runaiDeletionBlockers() []kaiv1alpha1.DeleteBlocker {
 		runaiGroup = "run.ai"
 		v2alpha1   = "v2alpha1"
 		v1alpha1   = "v1alpha1"
+		workloads  = "Workloads"
 	)
 	assetKinds := []string{"password", "access-key", "generic", "docker-registry"}
 
@@ -46,14 +47,14 @@ func runaiDeletionBlockers() []kaiv1alpha1.DeleteBlocker {
 	}
 
 	return []kaiv1alpha1.DeleteBlocker{
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v2alpha1, Kind: "TrainingWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v2alpha1, Kind: "InferenceWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v2alpha1, Kind: "DistributedWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v2alpha1, Kind: "InteractiveWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v1alpha1, Kind: "ExternalWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v1alpha1, Kind: "DistributedInferenceWorkload"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: "v1", Kind: "RunaiJob"},
-		{DisplayName: "Workloads", Group: runaiGroup, Version: v1alpha1, Kind: "WorkloadRunner"},
+		{DisplayName: workloads, Group: runaiGroup, Version: v2alpha1, Kind: "TrainingWorkload"},
+		{DisplayName: workloads, Group: runaiGroup, Version: v2alpha1, Kind: "InferenceWorkload"},
+		{DisplayName: workloads, Group: runaiGroup, Version: v2alpha1, Kind: "DistributedWorkload"},
+		{DisplayName: workloads, Group: runaiGroup, Version: v2alpha1, Kind: "InteractiveWorkload"},
+		{DisplayName: workloads, Group: runaiGroup, Version: v1alpha1, Kind: "ExternalWorkload"},
+		{DisplayName: workloads, Group: runaiGroup, Version: v1alpha1, Kind: "DistributedInferenceWorkload"},
+		{DisplayName: workloads, Group: runaiGroup, Version: "v1", Kind: "RunaiJob"},
+		{DisplayName: workloads, Group: runaiGroup, Version: v1alpha1, Kind: "WorkloadRunner"},
 		{DisplayName: "DataVolumes", Group: runaiGroup, Version: v1alpha1, Kind: "DataVolume"},
 		{DisplayName: "Secrets", Group: "", Version: "v1", Kind: "Secret",
 			LabelSelector: projectScopeWithType(clustercommonconstants.RunaiResourceLabel)},
