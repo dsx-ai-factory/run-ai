@@ -1,6 +1,6 @@
 # Support Matrix
 
-The support matrix outlines the verified compatibility standards for NVIDIA Run:ai v3.0, and applies whether you install using the [Guided Installation](installation/guided-installation/README.md) or [Manual Helm](installation/install-using-helm/install-control-plane.md) path. To ensure a stable and performant deployment, all infrastructure components, including Kubernetes/OpenShift distributions, NVIDIA Operators, and specialized frameworks, must align with the versions specified below. Use this matrix as a validation checklist prior to performing new installations or upgrades. Once you've confirmed your versions, continue to [System Requirements](system-requirements/README.md) to prepare your cluster infrastructure.
+The support matrix outlines the verified compatibility standards for NVIDIA Run:ai v3.0, and applies whether you install using the [Guided Installation](installation/guided-installation/README.md) or [Manual Helm](installation/install-using-helm/preparations.md) path. To ensure a stable and performant deployment, all infrastructure components, including Kubernetes/OpenShift distributions, NVIDIA Operators, and specialized frameworks, must align with the versions specified below. Use this matrix as a validation checklist prior to performing new installations or upgrades. Once you've confirmed your versions, continue to [System Requirements](system-requirements/README.md) to prepare your cluster infrastructure.
 
 ## Operator and Framework Versions <a href="#operator-and-framework-versions" id="operator-and-framework-versions"></a>
 
@@ -8,22 +8,23 @@ The support matrix outlines the verified compatibility standards for NVIDIA Run:
 
 | Component                            | Supported Versions   |
 | ------------------------------------- | -------------------- |
-| NVIDIA GPU Operator                   | 25.10 - 26.3         |
-| NVIDIA DRA driver                     | 25.8 - 25.12         |
-| NVIDIA Network Operator               | 25.10 - 26.1         |
-| Prometheus / Kube‑Prometheus Stack    | 3.5 / 76.0 and above |
+| NVIDIA GPU Operator                   | 25.10 - 26.7         |
+| NVIDIA DRA driver<sup>1</sup>         | 25.8 - 25.12         |
+| NVIDIA Network Operator               | 25.10 - 26.7         |
+| Prometheus / Kube‑Prometheus Stack    | 3.13.1 / 88.6.5 and above |
+
+<sup>1</sup> Applies to GPU Operator 25.10 - 26.3, where the DRA driver is installed separately. For GPU Operator 26.7, the DRA driver is installed by the GPU Operator.
 
 ### Features
 
 | Component                            | Supported Versions   |
 | ------------------------------------- | -------------------- |
-| Knative Serving                       | 1.19 - 1.21          |
-| Kubeflow Training Operator            | 1.9.2                |
-| MPI Operator                          | 0.6.0 or later       |
-| Leader-Worker Set (LWS)               | 0.7.0 or higher      |
-| NIM Operator                          | 3.0.x                |
-| Grove                                  | TBD                  |
-| Dynamo Operator                        | 1.2.0                |
+| Knative Serving                       | 1.21 - 1.23          |
+| Kubeflow Training Operator            | 1.9.4                |
+| MPI Operator                          | 0.6.0 - 0.8.2         |
+| Leader-Worker Set (LWS)               | 0.7.0 - 0.10.0       |
+| NIM Operator                          | 3.1.x                |
+| Dynamo Operator                        | 1.4.x                |
 
 ## Third-Party Service Versions
 
@@ -44,10 +45,10 @@ Each NVIDIA Run:ai release is tested and validated against a single minor versio
 
 NVIDIA Run:ai v3.0 is compatible with all Data Center GPUs supported by the NVIDIA GPU Operator. Hardware compatibility is determined by the specific version of the GPU Operator deployed within your cluster.
 
-* Supported operator range - NVIDIA Run:ai v3.0 supports GPU Operator versions 25.10 through 26.3.
+* Supported operator range - NVIDIA Run:ai v3.0 supports GPU Operator versions 25.10 through 26.7.
 * Hardware verification - To confirm if a specific GPU model is supported, please cross-reference your Operator version with the [Supported NVIDIA Data Center GPUs and Systems](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/platform-support.html#supported-nvidia-data-center-gpus-and-systems) documentation.
 
-<Info>
+<Note>
 
 **Note**
 
@@ -55,25 +56,25 @@ NVIDIA Run:ai v3.0 is compatible with all Data Center GPUs supported by the NVID
 * vGPU is not supported. NVIDIA Run:ai currently supports GPU passthrough only.
 * In addition to GPU Operator compatibility, support also depends on the framework being used (for example, CUDA, PyTorch, TensorFlow, or NVIDIA NIM). Before running a workload, verify that the selected framework version supports your target GPU architecture according to the relevant support matrix.
 
-</Info>
+</Note>
 
 ## NVIDIA Run:ai Compatible Distributions
 
 NVIDIA Run:ai v3.0 supports a wide range of Kubernetes distributions across on-premises, hybrid, and public cloud environments. Use the table below to verify version requirements for your specific platform.
 
-<Info>
+<Note>
 
 **Note**
 
 For a per-version Kubernetes and OpenShift compatibility matrix, see [Kubernetes and OpenShift Version Alignment](upgrade/helm.md#kubernetes-and-openshift-version-alignment). Review this before upgrading to ensure your Kubernetes or OpenShift distribution version is compatible with your target NVIDIA Run:ai version.
 
-</Info>
+</Note>
 
 | Orchestration Platform                 | Versions                         | Engine     | x86       | ARM       |
 | -------------------------------------- | -------------------------------- | ---------- | --------- | --------- |
-| Upstream Kubernetes                    | 1.34 - 1.36                      | Containerd | Supported | Supported |
-| Red Hat OpenShift                      | 4.18 - 4.21                      | CRI-O      | Supported | Supported |
-| Amazon Elastic Kubernetes Engine (EKS) | Based on the upstream Kubernetes | Containerd | Supported | Supported |
+| Upstream Kubernetes                    | 1.35 - 1.37                      | Containerd | Supported | Supported |
+| Red Hat OpenShift                      | 4.20 - 4.22                      | CRI-O      | Supported | Supported |
+| Amazon Elastic Kubernetes Service (EKS) | Based on the upstream Kubernetes | Containerd | Supported | Supported |
 | Google Kubernetes Engine (GKE)         | Based on the upstream Kubernetes | Containerd | Supported | Supported |
 | Azure Kubernetes Service (AKS)         | Based on the upstream Kubernetes | Containerd | Supported | Supported |
 | Oracle Kubernetes Engine (OKE)         | Based on the upstream Kubernetes | Containerd | Supported | Supported |

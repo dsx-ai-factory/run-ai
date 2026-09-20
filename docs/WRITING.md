@@ -85,7 +85,7 @@ Never use plain text for callouts or warnings. Every note, tip, warning, or
 important callout must use a Fern component — not bold text, blockquotes, or
 any other markdown construct.
 
-- `<Info>` — notes and supplemental information; open body with **Note**
+- `<Note>` — notes and supplemental information; open body with **Note**
 - `<Warning>` — caveats, prerequisites, breaking changes; use **Important**,
   **Prerequisite**, **Warning**, or **Breaking change from version X.Y:**
 - `<Callout intent="info">` — short informational notes; typically a

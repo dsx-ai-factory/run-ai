@@ -29,7 +29,7 @@ After completing the onboarding wizard, continue managing the platform through t
 
 NVIDIA Run:ai provides global configuration options to control system-wide features and functionality.
 
-Use the [General settings](../../settings/general-settings/) in the Admin panel to tailor how the platform operates, including feature enablement and analytics behavior. These settings apply across all users and workloads and can be adjusted to align with organizational policies and operational requirements.
+Use the [General settings](../../settings/general-settings/README.md) in the Admin panel to tailor how the platform operates, including feature enablement and analytics behavior. These settings apply across all users and workloads and can be adjusted to align with organizational policies and operational requirements.
 
 ### Define Authorization and Access Control
 

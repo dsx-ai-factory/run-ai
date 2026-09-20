@@ -4,13 +4,13 @@ Vertical Pod Autoscaling (VPA) automatically adjusts CPU and memory requests and
 
 As clusters scale in nodes and workloads, NVIDIA Run:ai services may benefit from resource adjustments beyond the static defaults. VPA helps identify services that are over-provisioned or under-provisioned and can automatically apply right-sized resource recommendations - reducing the need for manual tuning.
 
-<Info>
+<Note>
 
 **Note**
 
-VPA can be configured on NVIDIA Run:ai cluster components only, not the control plane. For more information about NVIDIA Run:ai service groups and manual scaling recommendations, see [NVIDIA Run:ai at scale](../procedures/scaling.md).
+VPA can be configured on NVIDIA Run:ai cluster components only, not the control plane. For more information about NVIDIA Run:ai service groups and manual scaling recommendations, see [NVIDIA Run:ai at scale](scaling.md).
 
-</Info>
+</Note>
 
 ### Update Modes
 
@@ -27,7 +27,7 @@ VPA can operate in the following modes:
 
 **Important**
 
-VPA does not replace static resource configuration. Your existing static resource settings remain active and in effect regardless of the VPA mode. For static resource configuration, see [NVIDIA Run:ai services resource management](cluster-config.md#nvidia-run-ai-services-resource-management).
+VPA does not replace static resource configuration. Your existing static resource settings remain active and in effect regardless of the VPA mode. For static resource configuration, see [NVIDIA Run:ai services resource management](../configuration/cluster-config.md#nvidia-run-ai-services-resource-management).
 
 </Warning>
 
@@ -119,7 +119,7 @@ kubectl get vpa -n runai
 
 #### Scaling Group Configuration
 
-Use scaling group configuration to override the global setting for one of the built-in service groups: `workloadServices`, `syncServices`, or `schedulingServices`. For a description of each group and sizing recommendations, see [NVIDIA Run:ai services resource management](cluster-config.md#nvidia-run-ai-services-resource-management) and [NVIDIA Run:ai at scale](../procedures/scaling.md).
+Use scaling group configuration to override the global setting for one of the built-in service groups: `workloadServices`, `syncServices`, or `schedulingServices`. For a description of each group and sizing recommendations, see [NVIDIA Run:ai services resource management](../configuration/cluster-config.md#nvidia-run-ai-services-resource-management) and [NVIDIA Run:ai at scale](scaling.md).
 
 <Tabs>
 

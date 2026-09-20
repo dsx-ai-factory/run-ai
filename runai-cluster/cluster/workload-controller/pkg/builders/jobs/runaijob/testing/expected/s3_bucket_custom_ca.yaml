@@ -74,7 +74,7 @@
             value: aaabbbccc
           - name: AWS_SECRET_ACCESS_KEY
             value: dddeeefff
-          image: runai.jfrog.io/op-containers-prod/goofys
+          image: example.io/goofys
           imagePullPolicy: IfNotPresent
           name: s3-fs-0
           resources: {}
@@ -110,7 +110,7 @@
             value: ggghhhiii
           - name: AWS_SECRET_ACCESS_KEY
             value: jjjkkklll
-          image: runai.jfrog.io/op-containers-prod/goofys
+          image: example.io/goofys
           imagePullPolicy: IfNotPresent
           name: s3-fs-1
           resources: {}

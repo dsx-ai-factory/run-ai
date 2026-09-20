@@ -11,25 +11,20 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
 	"time"
-
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
+	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/measure"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/submit"
 )
 
 const (
-	pollInterval = time.Second
 	cleanupGrace = time.Minute
 	trainingType = "Training"
 )
-
-var workloadRunnerKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
 
 type Suite struct{}
 
@@ -39,20 +34,6 @@ type settings struct {
 	workloadType string
 	timeout      time.Duration
 	cluster      string
-}
-
-type acceptedWorkload struct {
-	ref        submit.WorkloadRef
-	namespace  string
-	acceptedAt time.Time
-}
-
-type arrivalCheck func(ctx context.Context, workload acceptedWorkload) (bool, error)
-
-type measurement struct {
-	syncMillis map[string]int64
-	pending    []string
-	lastErr    error
 }
 
 func (Suite) Name() string {
@@ -103,32 +84,42 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 		projects = append(projects, project)
 	}
 
-	accepted := make([]acceptedWorkload, 0, knobs.workloads)
-	for i := range knobs.workloads {
-		project := projects[i%len(projects)]
-		ref, err := submit.Training(ctx, clients, submit.WorkloadSpec{
-			Name:    fmt.Sprintf("flowmark-basic-%s-w%d", id, i+1),
-			Project: project,
-			Image:   "ubuntu",
-			Command: "sleep infinity",
-		})
-		acceptedAt := time.Now()
+	watchers := make([]*measure.Watcher, 0, len(projects))
+	defer func() {
+		for _, watcher := range watchers {
+			watcher.Stop()
+		}
+	}()
+	for _, project := range projects {
+		watcher, err := measure.WatchWorkloads(ctx, clients.Kube, project.Namespace)
 		if err != nil {
 			return core.Section{}, err
 		}
-		accepted = append(accepted, acceptedWorkload{ref: ref, namespace: project.Namespace, acceptedAt: acceptedAt})
+		watchers = append(watchers, watcher)
 	}
 
-	result := measure(ctx, accepted, runnerExists(clients.Kube), pollInterval, knobs.timeout)
-	return result.section(knobs.workloads), nil
-}
-
-func runID() (string, error) {
-	var raw [4]byte
-	if _, err := rand.Read(raw[:]); err != nil {
-		return "", fmt.Errorf("generate run id: %w", err)
+	for i := range knobs.workloads {
+		slot := i % len(projects)
+		spec := submit.WorkloadSpec{
+			Name:    fmt.Sprintf("flowmark-basic-%s-w%d", id, i+1),
+			Project: projects[slot],
+			Image:   "ubuntu",
+			Command: "sleep infinity",
+		}
+		_, err := submit.Training(ctx, clients, spec)
+		acceptedAt := time.Now()
+		if err != nil {
+			watchers[slot].MarkFailed(spec.Name, err)
+			continue
+		}
+		watchers[slot].MarkCreated(spec.Name, acceptedAt)
 	}
-	return hex.EncodeToString(raw[:]), nil
+
+	var timings []measure.Timing
+	for _, watcher := range watchers {
+		timings = append(timings, watcher.WaitAll(knobs.timeout)...)
+	}
+	return buildSection(timings, knobs.workloads), nil
 }
 
 func parseSettings(cfg core.Config) (settings, error) {
@@ -158,83 +149,49 @@ func parseSettings(cfg core.Config) (settings, error) {
 	return knobs, nil
 }
 
-func runnerExists(kube k8sclient.Client) arrivalCheck {
-	return func(ctx context.Context, workload acceptedWorkload) (bool, error) {
-		runner := &unstructured.Unstructured{}
-		runner.SetGroupVersionKind(workloadRunnerKind)
-		err := kube.Get(ctx, k8sclient.ObjectKey{Namespace: workload.namespace, Name: workload.ref.Name}, runner)
-		switch {
-		case err == nil:
-			return true, nil
-		case apierrors.IsNotFound(err):
-			return false, nil
-		}
-		return false, err
+func runID() (string, error) {
+	var raw [4]byte
+	if _, err := rand.Read(raw[:]); err != nil {
+		return "", fmt.Errorf("generate run id: %w", err)
 	}
+	return hex.EncodeToString(raw[:]), nil
 }
 
-// TODO(Task 7): replace this polling loop with watch-arrival timing from the measure task.
-func measure(ctx context.Context, workloads []acceptedWorkload, arrived arrivalCheck, interval, timeout time.Duration) measurement {
-	result := measurement{syncMillis: map[string]int64{}}
-	remaining := append([]acceptedWorkload(nil), workloads...)
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
+func buildSection(timings []measure.Timing, total int) core.Section {
+	metrics := measure.Stats(timings).Metrics()
+	metrics["workloads"] = total
 
-	for len(remaining) > 0 {
-		still := remaining[:0]
-		for _, workload := range remaining {
-			ok, err := arrived(ctx, workload)
-			if err != nil {
-				result.lastErr = err
+	sync := map[string]int64{}
+	var pending, failed []string
+	var lastErr error
+	for _, timing := range timings {
+		switch timing.Outcome {
+		case measure.Arrived:
+			sync[timing.Name] = timing.Duration.Milliseconds()
+		case measure.Pending:
+			pending = append(pending, timing.Name)
+			if timing.Err != nil {
+				lastErr = timing.Err
 			}
-			switch {
-			case ok:
-				result.syncMillis[workload.ref.Name] = time.Since(workload.acceptedAt).Milliseconds()
-			case time.Since(workload.acceptedAt) >= timeout:
-				result.pending = append(result.pending, workload.ref.Name)
-			default:
-				still = append(still, workload)
-			}
-		}
-		remaining = still
-		if len(remaining) == 0 {
-			break
-		}
-
-		select {
-		case <-ctx.Done():
-			for _, workload := range remaining {
-				result.pending = append(result.pending, workload.ref.Name)
-			}
-			result.lastErr = ctx.Err()
-			return result
-		case <-ticker.C:
+		case measure.Failed:
+			failed = append(failed, fmt.Sprintf("%s: %v", timing.Name, timing.Err))
 		}
 	}
-	return result
-}
-
-func (m measurement) section(total int) core.Section {
-	metrics := map[string]any{
-		"workloads":          total,
-		"sync_to_cluster_ms": m.syncMillis,
-		"pending":            len(m.pending),
-	}
-	if len(m.syncMillis) > 0 {
-		var maxMillis int64
-		for _, millis := range m.syncMillis {
-			maxMillis = max(maxMillis, millis)
-		}
-		metrics["sync_to_cluster_max_ms"] = maxMillis
-	}
+	metrics["sync_to_cluster_ms"] = sync
+	sort.Strings(pending)
+	sort.Strings(failed)
 
 	section := core.Section{Category: core.CategoryScale, Metrics: metrics}
-	if len(m.pending) > 0 {
+	if len(pending) > 0 {
 		section.Failed = true
-		section.Error = fmt.Sprintf("%d of %d workloads never reached the cluster within the timeout: %v", len(m.pending), total, m.pending)
-		if m.lastErr != nil {
-			section.Error = joinMessages(section.Error, "last cluster error: "+m.lastErr.Error())
+		section.Error = fmt.Sprintf("%d of %d workloads never reached the cluster within the timeout: %v", len(pending), total, pending)
+		if lastErr != nil {
+			section.Error = joinMessages(section.Error, "watch error: "+lastErr.Error())
 		}
+	}
+	if len(failed) > 0 {
+		section.Failed = true
+		section.Error = joinMessages(section.Error, fmt.Sprintf("%d of %d workload submissions failed: %s", len(failed), total, strings.Join(failed, "; ")))
 	}
 	return section
 }
