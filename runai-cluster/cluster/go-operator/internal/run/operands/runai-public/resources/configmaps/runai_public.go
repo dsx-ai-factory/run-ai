@@ -315,11 +315,13 @@ func isVersionSupportsOauth2(version string) error {
 
 func getGpuStackStatus(ctx context.Context, kbClient client.Client) runv1.PublicStatus {
 	nvidiaStatus := getNvidiaStatus(ctx, kbClient)
+	gpuOperatorVersionStatus := controller_utils.CheckGpuOperatorVersion(ctx, kbClient)
 
 	return runv1.PublicStatus{
-		Available: nvidiaStatus.Available,
+		Available: runv1.AvailableStatus(*nvidiaStatus.Available && *gpuOperatorVersionStatus.Available),
 		Components: map[string]runv1.PublicStatus{
-			"nvidia": nvidiaStatus,
+			"nvidia":               nvidiaStatus,
+			"gpu-operator-version": gpuOperatorVersionStatus,
 		},
 	}
 }

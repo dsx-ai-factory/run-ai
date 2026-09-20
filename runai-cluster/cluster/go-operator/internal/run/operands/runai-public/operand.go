@@ -24,6 +24,8 @@ const (
 
 // RBAC permissions the operand requires for resource management
 //+kubebuilder:rbac:namespace=runai,groups="",resources=configmaps,verbs=get;create;update;watch;patch;delete;list
+//+kubebuilder:rbac:groups=nvidia.com,resources=clusterpolicies,verbs=get;list
+//+kubebuilder:rbac:groups=operators.coreos.com,resources=clusterserviceversions,verbs=get;list
 
 type operand struct {
 	k8sReader   client.Reader
