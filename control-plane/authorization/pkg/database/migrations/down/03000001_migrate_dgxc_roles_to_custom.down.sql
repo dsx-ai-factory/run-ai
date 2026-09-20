@@ -17,6 +17,7 @@
 UPDATE roles r
 SET name = m.old_name,
     custom = false,
+    role_type = 'DGXC',
     cluster_role_predefined_id = NULL,
     updated_at = NOW()
 FROM (VALUES
