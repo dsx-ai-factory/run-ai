@@ -80,15 +80,17 @@ func (pv *ProjectValidator) getRunaiClusterSyncUID(ctx context.Context, k8sClien
 	return string(runaiClusterSyncServiceAccount.UID), nil
 }
 
+// getProjectControllerUID resolves KRM's project-controller, which replaced the
+// Run:ai-built one; its service account is named without the runai- prefix.
 func (pv *ProjectValidator) getProjectControllerUID(ctx context.Context, k8sClient client.Client) (string, error) {
-	runaiProjectControllerServiceAccount, err := GetServiceAccount(
+	projectControllerServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.RunaiProjectControllerName, runaiv1.DefaultNamespace)
+		operands.KRMProjectControllerName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}
 
-	return string(runaiProjectControllerServiceAccount.UID), nil
+	return string(projectControllerServiceAccount.UID), nil
 }
 
 func (pv *ProjectValidator) getRunaiOperatorUID(ctx context.Context, k8sClient client.Client) (string, error) {

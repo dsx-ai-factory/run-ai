@@ -136,7 +136,7 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 
 		It("carries the per-project role bindings KRM now owns", func() {
 			projectController := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController
-			Expect(projectController.ExtraProjectRoleBindings).To(HaveLen(18))
+			Expect(projectController.ExtraProjectRoleBindings).To(HaveLen(17))
 
 			var names []string
 			for _, binding := range projectController.ExtraProjectRoleBindings {
@@ -144,6 +144,9 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 				Expect(binding.ServiceAccountName).NotTo(BeEmpty())
 			}
 			Expect(names).To(ContainElements("runai-agent", "cluster-sync", "anyworkload-controller"))
+			// KRM's controller reaches project namespaces cluster-wide, and the Run:ai
+			// service account this bound no longer exists.
+			Expect(names).NotTo(ContainElement("runai-project-controller-project"))
 		})
 
 		It("leaves the limit range binding to KRM's builtin", func() {

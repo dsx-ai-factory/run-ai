@@ -27,7 +27,6 @@ func runaiProjectRoleBindings(runaiConfig *runaiv1.RunaiConfig) []kaiv1alpha1.Pr
 		{Name: "researcher-service-rw", ServiceAccountName: "researcher-service"},
 		{Name: "cluster-api-project", ServiceAccountName: "cluster-api"},
 		{Name: "runai-scheduler-rw", ServiceAccountName: "runai-scheduler"},
-		{Name: "runai-project-controller-project", ServiceAccountName: operands.RunaiProjectControllerName},
 		{Name: "runai-admission-controller-project", ServiceAccountName: "runai-admission-controller"},
 		{Name: "runai-binder-project", ServiceAccountName: "binder"},
 		{Name: "status-updater", ServiceAccountName: "status-updater"},
