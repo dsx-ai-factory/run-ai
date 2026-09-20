@@ -1,0 +1,9 @@
+/* Force long inline <code> values inside table cells to wrap instead of
+   stretching the column. Default overflow-wrap: break-word only breaks at
+   natural points (hyphens, etc.), which isn't enough for long dotted/
+   camelCase config keys. */
+.fern-table td code,
+.fern-table th code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

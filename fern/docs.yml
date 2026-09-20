@@ -6,6 +6,7 @@ instances:
   multi-source: true
 title: NVIDIA Run:ai Self-Hosted Product Documentation
 global-theme: nvidia
+css: table-fixes.css
 logo:
   right-text: Run:ai
 navbar-links:
