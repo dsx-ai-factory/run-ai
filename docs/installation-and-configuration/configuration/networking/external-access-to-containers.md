@@ -35,11 +35,11 @@ By default, NVIDIA Run:ai uses host-based routing to expose workload URLs using 
 https://project-name-workload-name.<CLUSTER_URL>/
 ```
 
-Host-based routing is enabled by default via the `subdomainSupport: true` cluster configuration. For setup instructions, see [Host-based routing](../../../getting-started/installation/install-using-helm/system-requirements.md#host-based-routing) in the system requirements.
+Host-based routing is enabled by default via the `subdomainSupport: true` cluster configuration. For setup instructions, see [Host-Based Routing (Ingress Resource)](../../installation/install-using-helm/preparations.md#host-based-routing-ingress-resource).
 
 ### Path-Based Routing
 
-Path-based routing uses the [Cluster URL](../../../getting-started/installation/install-using-helm/system-requirements.md#fully-qualified-domain-name-fqdn) provided to dynamically create SSL-secured URLs in the following format:
+Path-based routing uses the [Cluster URL](../../system-requirements/networking-setup.md#fqdn-and-dns) provided to dynamically create SSL-secured URLs in the following format:
 
 ```bash
 https://<CLUSTER_URL>/project-name/workload-name
@@ -49,13 +49,13 @@ To use path-based routing instead, disable host-based routing by setting `subdom
 
 While path-based routing works with applications such as Jupyter Notebooks, it may not be compatible with other applications. Some applications assume they are running at the root file system, so hardcoded file paths and settings within the container may become invalid when running at a path other than the root. For example, if an application expects to access `/etc/config.json` but is served at `/project-name/workspace-name`, the file will not be found. This can cause the container to fail or not function as intended.
 
-<Info>
+<Note>
 
 **Note**
 
 For existing clusters, changing the routing model affects how workload URLs are generated. Administrators should plan this transition accordingly.
 
-</Info>
+</Note>
 
 ### OpenShift Route TLS Termination
 

@@ -299,7 +299,7 @@ Submit a multi-worker training workload. Two workers each request four GPUs, for
 3. Within the new training form, select the **cluster** and the `nccl-benchmarking` **project**.
 4. Set the training workload **architecture** to **Distributed**. A distributed workload runs multiple processes that can span across different nodes.
 5. Select **Start from scratch**.
-6. Set the framework for the distributed workload to **MPI**. If MPI isn't available, see [Distributed training prerequisites](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#distributed-training) for details on enabling.
+6. Set the framework for the distributed workload to **MPI**. If MPI isn't available, see [Distributed training prerequisites](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) for details on enabling.
 7. Enter `nccl-multi-node` as the **name** for the workload, then click **CONTINUE**.
 8. Under **Environment**, set the **Image URL** to `nvcr.io/nvidia/pytorch:26.01-py3`.
 9. Under **Runtime settings**, click **+COMMAND & ARGUMENTS**, then set the **Command** to `bash` and the **Arguments** to `-c 'apt-get update -qq && apt-get install -y --no-install-recommends openssh-server && mkdir -p /var/run/sshd && /usr/sbin/sshd -p 2222 -o StrictModes=no && sleep 1d'`. This installs and starts an SSH server on port `2222` so the MPI launcher can reach the workers, then idles the container.

@@ -28,14 +28,6 @@
         />
       </div>
       <div class="col-12 q-mb-lg">
-        <div v-if="hasIdpAttributes">Use the following if required by the identity provider</div>
-        <setting-readable-field label="Redirect URL" v-if="idp?.redirectUri">
-          <div class="row no-wrap items-center">
-            <div class="col-12 q-pt-md q-pl-md">
-              {{ idp.redirectUri }}
-            </div>
-          </div>
-        </setting-readable-field>
         <setting-readable-field label="Entity ID">
           <div class="row no-wrap items-center">
             <div class="col-12 q-pt-md q-pl-md">
@@ -52,37 +44,54 @@
       </div>
     </div>
   </setting-wrapper-box>
-  <setting-editable-field
-    v-else
-    resource-type="SecuritySettings"
-    @edit="onEdit"
-    @delete="onDelete"
-    :delete-disabled="isSSOUser"
-    :delete-tool-tip="settingBoxMessages.removeToolTip"
-    :edit-tool-tip="settingBoxMessages.editToolTip"
-    :label="settingBoxMessages.headerTitle"
-    :delete-sub-title="settingBoxMessages.confirmRemoveSubTitle"
-    use-larger-label
-  >
-    <template v-slot:start>
-      <div class="expiration-date row" v-if="isExpiredCertificate">
-        <div class="col-2 q-ml-lg">
-          <q-icon name="ph-bold ph-warning-circle" class="q-mr-xl exclamation-icon" />
+  <div v-else class="idp-card">
+    <setting-editable-field
+      resource-type="SecuritySettings"
+      @edit="onEdit"
+      @delete="onDelete"
+      :delete-disabled="isSSOUser"
+      :delete-tool-tip="settingBoxMessages.removeToolTip"
+      :edit-tool-tip="settingBoxMessages.editToolTip"
+      :label="settingBoxMessages.headerTitle"
+      :delete-sub-title="settingBoxMessages.confirmRemoveSubTitle"
+      use-larger-label
+      hide-border
+    >
+      <template v-slot:start>
+        <runai-btn
+          icon="ph-bold ph-arrow-square-out"
+          class="q-pa-sm download-icon"
+          flat
+          size="sm"
+          rounded
+          aid="open-metadata-xml"
+          @click="openMetadataXml"
+          tooltip="Open service provider metadata XML"
+        />
+      </template>
+    </setting-editable-field>
+    <q-separator class="idp-card-separator" />
+    <notification-alert-bar
+      v-if="certificateWarningVariant"
+      class="q-mx-sm q-mb-sm certificate-warning"
+      :variant="certificateWarningVariant"
+      icon-override="ph-bold ph-warning-circle"
+      show-h1-content
+      :title="certificateWarningTitle"
+      message="Edit the identity provider and replace the metadata XML with an updated file."
+    />
+    <div v-if="hasIdpAttributes" class="redirect-url-field">
+      <div>Use the following if required by the identity provider</div>
+      <setting-readable-field label="Redirect URL">
+        <div class="row no-wrap items-center">
+          <div class="col-12 q-pt-md q-pl-md">
+            {{ idp?.redirectUri }}
+          </div>
         </div>
-        <div class="col-8 expiration-text">Certificate expired</div>
-      </div>
-      <runai-btn
-        icon="ph-bold ph-arrow-square-out"
-        class="q-pa-sm download-icon"
-        flat
-        size="sm"
-        rounded
-        aid="open-metadata-xml"
-        @click="openMetadataXml"
-        tooltip="Open service provider metadata XML"
-      />
-    </template>
-  </setting-editable-field>
+      </setting-readable-field>
+    </div>
+    <slot name="box-footer" />
+  </div>
 </template>
 
 <script lang="ts">
@@ -110,11 +119,20 @@ import { SettingReadableField } from "@/components/settings/setting-readable-fie
 import SamlFields from "@/components/settings/sections/security/sso-settings/idps/saml/saml-fields/saml-fields.vue";
 import { DOCS } from "@/constants/docs";
 import { RunaiBtn } from "@/components/common/runai-btn";
+import { ENotificationBarVariant, NotificationAlertBar } from "@/components/common/notification-alert-bar";
 
 export default defineComponent({
   name: "saml-settings",
-  components: { RunaiBtn, SamlFields, SettingEditableField, IdpMappers, SettingReadableField, SettingWrapperBox },
-  emits: ["remove", "add-idp", "update-idp", "cancel-edit-idp", "edit-mode-changed"],
+  components: {
+    RunaiBtn,
+    SamlFields,
+    SettingEditableField,
+    IdpMappers,
+    SettingReadableField,
+    SettingWrapperBox,
+    NotificationAlertBar,
+  },
+  emits: ["remove", "add-idp", "update-idp", "cancel-edit-idp", "edit-mode-changed", "certificate-status"],
   props: {
     title: {
       type: String as PropType<string>,
@@ -139,7 +157,7 @@ export default defineComponent({
       isValidIdpFields: false,
       authStore: useAuthStore(),
       isIdpFieldsChanged: false,
-      isExpiredCertificate: false,
+      certificateExpirationDate: null as Date | null,
       idpStore: useIdpsStore(),
       idpResources: {} as IdpResources,
       DOCS,
@@ -147,9 +165,30 @@ export default defineComponent({
   },
   async created(): Promise<void> {
     this.isEditMode = this.isNewIdp;
-    this.isExpiredCertificate = await this.isCertificateExpired();
+    this.certificateExpirationDate = this.idp?.samlData?.signingCertificate
+      ? await idpCommon.getCertificateExpirationDate(this.idp.samlData.signingCertificate)
+      : null;
+    this.$emit("certificate-status", {
+      expired: this.isExpiredCertificate,
+      expiringSoon: this.isCertificateExpiringSoon,
+    });
   },
   computed: {
+    isExpiredCertificate(): boolean {
+      if (!this.idp?.samlData?.signingCertificate) return false;
+      return !this.certificateExpirationDate || !idpCommon.iValidCertificateDate(this.certificateExpirationDate);
+    },
+    isCertificateExpiringSoon(): boolean {
+      return !!this.certificateExpirationDate && idpCommon.isCertificateExpiringSoon(this.certificateExpirationDate);
+    },
+    certificateWarningVariant(): ENotificationBarVariant | null {
+      if (this.isExpiredCertificate) return ENotificationBarVariant.Error;
+      if (this.isCertificateExpiringSoon) return ENotificationBarVariant.Warning;
+      return null;
+    },
+    certificateWarningTitle(): string {
+      return this.isExpiredCertificate ? "The certificate expired." : "The certificate is expiring soon.";
+    },
     defaultEntityId(): string {
       return settingsUtil.getDefaultEntityId(window.location.hostname);
     },
@@ -170,7 +209,7 @@ export default defineComponent({
       return this.isIdpFieldsChanged || this.isIdpMapperChanged;
     },
     hasIdpAttributes(): boolean {
-      return this.idp?.redirectUri !== "";
+      return (this.idp?.redirectUri || "") !== "";
     },
     samlConfigSettings(): SamlConfigSettings {
       if (this.idp?.samlData) {
@@ -242,11 +281,6 @@ export default defineComponent({
         window.open(spMetadataUrl, "_blank");
       }
     },
-    async isCertificateExpired(): Promise<boolean> {
-      if (!this.idp?.samlData?.signingCertificate) return false;
-      const expirationDate = await idpCommon.getCertificateExpirationDate(this.idp?.samlData?.signingCertificate);
-      return !idpCommon.iValidCertificateDate(expirationDate as Date);
-    },
   },
   watch: {
     isEditMode(newValue: boolean): void {
@@ -256,18 +290,19 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.expiration-date {
-  color: $negative;
-  margin-top: 12px;
-  .exclamation-icon {
-    font-size: 18px;
-  }
-  .expiration-text {
-    margin-top: 4px;
-    font-size: 12px;
-  }
+.idp-card {
+  border: 1px solid $black-12;
+  border-radius: 4px;
+  overflow: hidden;
 }
-.download-icon {
-  color: $black-54;
+.certificate-warning,
+.redirect-url-field {
+  margin: 12px;
+}
+.idp-card-separator {
+  margin: 0 12px;
+}
+:deep(.download-icon) {
+  color: var(--icon-default);
 }
 </style>

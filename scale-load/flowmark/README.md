@@ -18,10 +18,18 @@ The binary lands in `bin/flowmark`.
 ./bin/flowmark --scenarios ./scenarios --output ./out
 ```
 
-Runs every `*.yaml` scenario in the scenarios directory and writes all
-sections to `out/results.json`. Exit code 0 means every scenario passed;
+Runs every `*.yaml` scenario in the scenarios directory and writes
+`out/results.json`. Exit code 0 means every scenario passed;
 1 means any error: a failed scenario (the results file is still written),
 invalid scenarios or scenario files, or a failure writing the results.
+
+The file has three top-level keys: `schema` (currently `v1`), `metadata`
+(`started_at`, `finished_at`, and `clock_offset_ms` when a kubeconfig was
+given), and `scenarios`, one section per scenario file. `clock_offset_ms`
+is how far the cluster clock is ahead of the machine running FlowMark,
+measured once at startup with a probe ConfigMap in the `default`
+namespace. It is reported for context only and never enters a latency. If
+the probe fails, the run continues and `clock_offset_error` holds the reason.
 
 `./bin/flowmark --help` lists all flags.
 
@@ -70,6 +78,12 @@ Knobs of `scenarios/basic-two-workloads.yaml`:
 | `timeout` | `5m` | project readiness and workload arrival limit |
 | `cluster` | *(single cluster)* | cluster name when the control plane has several |
 
-Its section reports `sync_to_cluster_ms` per workload, `sync_to_cluster_max_ms`,
-and `pending`: workloads that never reached the cluster within the timeout are
-counted as pending, never as zero, and make the section fail.
+Timing comes from a Kubernetes watch opened before anything is submitted:
+each workload's duration is the gap, on FlowMark's own clock, between the
+control plane accepting it and its `WorkloadRunner` appearing on the
+cluster. The section reports `sync_to_cluster_ms` per workload plus
+`p50_ms`, `p90_ms`, `p99_ms`, `mean_ms`, `max_ms`, `makespan_ms`,
+`throughput_per_s`, `success_rate`, `sample_size`, `pending_count` and
+`failed_count`. Workloads that never reached the cluster within the timeout
+are counted in `pending_count`, never as zero latency, and make the section
+fail; when nothing arrived the latency keys are omitted entirely.

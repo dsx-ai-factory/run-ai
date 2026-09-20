@@ -22,8 +22,8 @@ NVIDIA Run:ai includes built-in support for the following Kubernetes components 
 | Tool | Category | Additional Information |
 | --- | --- | --- |
 | Docker Registry | Repositories | NVIDIA Run:ai allows using a docker registry as a [Credential](../../../workloads-in-nvidia-run-ai/workload-assets/credentials.md) asset |
-| GitHub | Storage | NVIDIA Run:ai communicates with GitHub by defining it as a [data source](../../../workloads-in-nvidia-run-ai/workload-assets/datasources/README.md) asset |
-| S3 | Storage | NVIDIA Run:ai communicates with S3 by defining a [data source](../../../workloads-in-nvidia-run-ai/workload-assets/datasources/README.md) asset |
+| GitHub | Storage | NVIDIA Run:ai communicates with GitHub by defining it as a [data source](../../../workloads-in-nvidia-run-ai/workload-assets/datasources.md) asset |
+| S3 | Storage | NVIDIA Run:ai communicates with S3 by defining a [data source](../../../workloads-in-nvidia-run-ai/workload-assets/datasources.md) asset |
 
 ## Experiment Tracking and Monitoring
 

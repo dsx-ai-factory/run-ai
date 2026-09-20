@@ -12,7 +12,7 @@ Before you start, make sure:
 * The project has an assigned quota of at least 1 GPU.
 * [Dynamic GPU fractions](../dynamic-fractions.md) is enabled.
 * GPU memory swap is enabled on at least one free node as detailed [here](../memory-swap.md#enabling-and-configuring-gpu-memory-swap).
-* [Host-based routing](../../../../installation-and-configuration/installation/install-using-helm/system-requirements.md#host-based-routing) is configured.
+* [Host-based routing](../../../../installation-and-configuration/configuration/networking/external-access-to-containers.md#host-based-routing) is configured.
 
 <Info>
 

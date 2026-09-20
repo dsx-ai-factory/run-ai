@@ -161,7 +161,7 @@ func Run(t *testing.T, curTest *TestConfig, expectedErr error,
 	os.Setenv(workloadconfig.EnvVarClusterDomain, "https://cluster-domain.mock")
 	defer os.Unsetenv(workloadconfig.EnvVarClusterDomain)
 	t.Setenv(workloadconfig.EnvVarGitSyncImage, "registry.k8s.io/git-sync/git-sync:v4.7.0")
-	t.Setenv(workloadconfig.EnvVarS3FileSystemImage, "runai.jfrog.io/op-containers-prod/goofys")
+	t.Setenv(workloadconfig.EnvVarS3FileSystemImage, "example.io/goofys")
 	t.Setenv(workloadconfig.EnvVarOauth2ProxyUsernameLoaderImage, "registry.access.redhat.com/ubi9/ubi-minimal:9.8")
 	t.Setenv("RUNAI_LLM_GATEWAY_IMAGE", "litellm:latest")
 
@@ -306,7 +306,7 @@ func TestJobBuilder(ctx context.Context, t *testing.T, curTest *TestConfig, comp
 	os.Setenv(workloadconfig.EnvVarClusterDomain, "https://cluster-domain.mock")
 	defer os.Unsetenv(workloadconfig.EnvVarClusterDomain)
 	t.Setenv(workloadconfig.EnvVarGitSyncImage, "registry.k8s.io/git-sync/git-sync:v4.7.0")
-	t.Setenv(workloadconfig.EnvVarS3FileSystemImage, "runai.jfrog.io/op-containers-prod/goofys")
+	t.Setenv(workloadconfig.EnvVarS3FileSystemImage, "example.io/goofys")
 	t.Setenv(workloadconfig.EnvVarOauth2ProxyUsernameLoaderImage, "registry.access.redhat.com/ubi9/ubi-minimal:9.8")
 	t.Setenv("RUNAI_LLM_GATEWAY_IMAGE", "litellm:latest")
 

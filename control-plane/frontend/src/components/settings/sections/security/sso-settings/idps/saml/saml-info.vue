@@ -70,7 +70,7 @@ export default defineComponent({
   },
   computed: {
     hasIdpAttributes(): boolean {
-      return this.idp?.redirectUri !== "";
+      return (this.idp?.redirectUri || "") !== "";
     },
     defaultEntityId(): string {
       return settingsUtil.getDefaultEntityId(window.location.hostname);
