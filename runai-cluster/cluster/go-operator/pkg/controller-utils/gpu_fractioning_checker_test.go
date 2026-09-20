@@ -14,12 +14,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-// gpuFractioningTestScheme registers the GpuFractioningConfig GVK for the
-// fake client. This is deliberately a local, minimal scheme rather than
-// scheme_init.Scheme() - kai-gpu-fractioning is not vendored in this repo
-// (see gpu_fractioning_checker.go), so its types are never part of the
-// production scheme either; CheckGpuFractioningReadiness only ever operates
-// on unstructured objects.
 func gpuFractioningTestScheme() *runtime.Scheme {
 	s := runtime.NewScheme()
 	s.AddKnownTypeWithName(gpuFractioningConfigGVK, &unstructured.Unstructured{})
@@ -134,6 +128,16 @@ var _ = Describe("CheckGpuFractioningReadiness", func() {
 		Expect(*status.Available).To(BeTrue())
 	})
 
+	It("reports available when the Ready condition's status is an invalid value", func() {
+		obj := newGpuFractioningConfig(
+			readyCond("Degraded", "not a valid condition status"),
+		)
+		k8s = newClient(obj)
+
+		status := CheckGpuFractioningReadiness(apiAccessContext, k8s)
+		Expect(*status.Available).To(BeTrue())
+	})
+
 	It("reports available when the GpuFractioningConfig CR does not exist", func() {
 		k8s = newClient()
 
@@ -168,6 +172,24 @@ var _ = Describe("readyCondition", func() {
 
 	It("reports not found when status.conditions is empty", func() {
 		obj := newGpuFractioningConfig()
+
+		_, _, found := readyCondition(obj)
+		Expect(found).To(BeFalse())
+	})
+
+	It("reports not found when the Ready condition's status is missing", func() {
+		obj := newGpuFractioningConfig(
+			map[string]interface{}{"type": "Ready", "message": "no status field"},
+		)
+
+		_, _, found := readyCondition(obj)
+		Expect(found).To(BeFalse())
+	})
+
+	It("reports not found when the Ready condition's status is an invalid value", func() {
+		obj := newGpuFractioningConfig(
+			readyCond("Degraded", "not a valid condition status"),
+		)
 
 		_, _, found := readyCondition(obj)
 		Expect(found).To(BeFalse())

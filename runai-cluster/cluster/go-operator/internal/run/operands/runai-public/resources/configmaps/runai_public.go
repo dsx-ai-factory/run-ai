@@ -319,10 +319,6 @@ func getGpuStackStatus(ctx context.Context, kbClient client.Client) runv1.Public
 
 	available := *nvidiaStatus.Available && *gpuFractioningStatus.Available
 
-	// Surface the failing sub-check's reason at the top level too, so
-	// consumers that only read Dependencies.Required["gpu-stack"].reason
-	// (e.g. the cluster table's status tooltip) don't need to walk
-	// Components to find the explanation.
 	var reason string
 	if !*gpuFractioningStatus.Available {
 		reason = gpuFractioningStatus.Reason

@@ -18,23 +18,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// This file reads the readiness signal already computed by
-// github.com/kai-scheduler/kai-gpu-fractioning (the GPU Sharing Operator),
-// instead of independently re-deriving GPU Operator version support. That
-// operator's own GpuOperatorDependencyChecker already reads the NVIDIA GPU
-// Operator's ClusterPolicy/ClusterServiceVersion, validates its version
-// against the same minimum CUDA-fractions requires, and publishes the result
-// as the "Ready" condition on its singleton GpuFractioningConfig CR (named
-// "default", cluster-scoped). We read that condition rather than duplicating
-// the version-detection and semver logic ourselves.
-//
-// kai-gpu-fractioning is not currently vendored as a Go dependency of this
-// repo (see internal/run/consts and go.mod), so this reads the CR via the
-// unstructured client and a well-known GVK, the same pattern already used
-// for GetDependencyStatus/ClusterPolicy - no new go.mod dependency, and it
-// degrades gracefully (Available: true, i.e. non-blocking) if the CRD isn't
-// installed on the cluster.
-
 const gpuFractioningConfigName = "default"
 
 var gpuFractioningConfigGVK = schema.GroupVersionKind{
@@ -43,15 +26,6 @@ var gpuFractioningConfigGVK = schema.GroupVersionKind{
 	Kind:    "GpuFractioningConfig",
 }
 
-// CheckGpuFractioningReadiness reads the singleton GpuFractioningConfig CR's
-// aggregate "Ready" condition, published by the GPU Sharing Operator
-// (kai-gpu-fractioning). It reflects GPU Operator version support as well as
-// GPU driver and daemon health for CUDA fractions.
-//
-// If the CRD is not installed, or the "default" CR does not exist yet, this
-// is treated as "unknown" and reported as available (non-blocking) - the
-// GPU Sharing Operator not being deployed is not itself evidence that GPU
-// fractions prerequisites are unmet.
 func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) runv1.PublicStatus {
 	config := &unstructured.Unstructured{}
 	config.SetGroupVersionKind(gpuFractioningConfigGVK)
@@ -68,8 +42,6 @@ func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) run
 
 	status, reason, found := readyCondition(config)
 	if !found {
-		// No Ready condition yet (e.g. CR just created, controller has not
-		// reconciled it). Not evidence of a missing prerequisite.
 		return runv1.PublicStatus{Available: runv1.AvailableStatus(true)}
 	}
 
@@ -78,9 +50,6 @@ func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) run
 	}
 
 	if reason == "" {
-		// A False Ready condition always means fractions are not usable, even
-		// if the message is empty - do not surface that as a silent, reasonless
-		// MissingPrerequisites.
 		reason = "GPU fractions are not supported on this cluster: kai-gpu-fractioning reports Ready=False with no message"
 	}
 
@@ -89,6 +58,8 @@ func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) run
 		Reason:    reason,
 	}
 }
+
+var validConditionStatuses = map[string]bool{"True": true, "False": true, "Unknown": true}
 
 func readyCondition(config *unstructured.Unstructured) (status, message string, found bool) {
 	conditions, ok, err := unstructured.NestedSlice(config.Object, "status", "conditions")
@@ -105,7 +76,10 @@ func readyCondition(config *unstructured.Unstructured) (status, message string, 
 		if condType != "Ready" {
 			continue
 		}
-		condStatus, _, _ := unstructured.NestedString(condMap, "status")
+		condStatus, statusFound, err := unstructured.NestedString(condMap, "status")
+		if err != nil || !statusFound || !validConditionStatuses[condStatus] {
+			return "", "", false
+		}
 		condMessage, _, _ := unstructured.NestedString(condMap, "message")
 		return condStatus, condMessage, true
 	}

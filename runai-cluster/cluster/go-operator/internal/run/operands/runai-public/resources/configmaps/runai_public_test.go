@@ -453,11 +453,6 @@ var _ = Describe("getGatewayAPIStatus", func() {
 	})
 })
 
-// gpuFractioningConfigGVK mirrors the GVK used by
-// controller_utils.CheckGpuFractioningReadiness. Kept as a local literal
-// (rather than importing the unexported var from that package) since
-// kai-gpu-fractioning is not vendored in this repo and the check operates
-// purely on unstructured objects.
 var gpuFractioningConfigGVK = schema.GroupVersionKind{
 	Group:   "gpu-fractioning.kai.scheduler",
 	Version: "v1alpha1",
@@ -472,11 +467,6 @@ func newDCGMExporterService() *corev1.Service {
 			Labels:    map[string]string{"app": "nvidia-dcgm-exporter"},
 		},
 		Spec: corev1.ServiceSpec{
-			// Only the service's existence gates the top-level nvidia
-			// Available status (see getAvailableNvidiaStatus); the metrics
-			// HTTP check below is expected to fail against this
-			// unreachable address in tests, which only affects the nested
-			// "nvidia-metrics" sub-component, not "nvidia" itself.
 			ClusterIP: "100.0.0.127",
 			Ports:     []corev1.ServicePort{{Port: 12345}},
 		},
@@ -538,7 +528,6 @@ var _ = Describe("getGpuStackStatus", func() {
 	})
 
 	It("prefers the gpu-fractioning reason when both sub-checks fail", func() {
-		// No DCGM exporter service created, so the nvidia sub-check also fails.
 		kbClient = fake.NewClientBuilder().WithScheme(scheme).WithObjects(
 			newGpuFractioningConfigWithReadyCondition("False", "gpu-fractioning failure reason"),
 		).Build()
