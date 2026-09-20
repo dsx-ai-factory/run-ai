@@ -37,7 +37,7 @@ Before you begin, ensure that you have your [order confirmation message](#your-o
 
 * If you do not have an NVIDIA Enterprise Account, create an account to log in to the web properties for getting NVIDIA Run:ai and technical support from NVIDIA.
 * To create a separate account for your purchased licenses, perform this task using a different email address than the address you used to create your existing account.
-* If you already have an account, skip this task and go to [Installing NVIDIA Run:ai Software Components](#installing-nvidia-run-ai-software-components).
+* If you already have an account, skip this task and go to [Installing NVIDIA Run:ai Software Components](#installing-nvidia-runai-software-components).
 
 To create an NVIDIA Enterprise Account:
 
@@ -58,10 +58,7 @@ To create an NVIDIA Enterprise Account:
 
 The installation artifacts of NVIDIA Run:ai are available under the NVIDIA Run:ai collections and resources. Before downloading any NVIDIA Run:ai assets, sign in to NVIDIA NGC from the [NVIDIA NGC Sign In](https://ngc.nvidia.com/signin) page.
 
-<!-- TODO(sdaher): add the NGC catalog URL for the Support-entitled collection once it is live. -->
-
 * **NVIDIA Run:ai Support-entitled collection** - Fully deployed within your own infrastructure, including both the control plane and connected clusters (connected and air-gapped environments). This deployment model gives you full control over platform configuration, security boundaries, and operational management within your environment. NVIDIA Run:ai self-hosted is included in the NVIDIA AI Enterprise license.
-  * [NVIDIA Run:ai Air-gapped resource](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/runai/resources/runai-airgapp-package) - Fully deployed within a restricted, disconnected environment where no external network access is permitted. All required artifacts are imported into your environment, enabling secure operation in controlled or regulated infrastructures.
 
 ### Installing NVIDIA Run:ai Software
 
