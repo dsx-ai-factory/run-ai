@@ -7,20 +7,16 @@ package resources
 
 import (
 	kaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
+	"k8s.io/utils/ptr"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
+	runv1internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 )
 
 // runaiProjectRoleBindings are the RoleBindings the project-controller replicates
 // into every project namespace. KRM builds them into the ConfigMap the controller
 // reads, so they move here from the ConfigMap the operand used to write.
-//
-// KRM binds every subject to a service account in the install namespace. The
-// OpenShift bindings runai also ships cannot be expressed that way -- three bind
-// the project namespace's own default service account, and one binds
-// prometheus-k8s in the OpenShift monitoring namespace -- so they are not carried
-// over. Those remain outstanding for OpenShift installs.
 func runaiProjectRoleBindings(runaiConfig *runaiv1.RunaiConfig) []kaiv1alpha1.ProjectRoleBinding {
 	bindings := []kaiv1alpha1.ProjectRoleBinding{
 		{Name: "runai-accessrule-controller-project", ServiceAccountName: operands.RunaiAccessRuleControllerName},
@@ -65,5 +61,23 @@ func runaiProjectRoleBindings(runaiConfig *runaiv1.RunaiConfig) []kaiv1alpha1.Pr
 
 	// The per-project LimitRange binding is not listed: KRM ships its own builtin
 	// under the same feature flag, bound to the ClusterRole its chart renders.
+
+	// Jupyter notebooks, S3 storage and hostpath storage rely on the project
+	// namespace's own default service account holding these SCCs. ClusterRoleName is
+	// left unset because KRM defaults it to Name.
+	if runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor == runv1internal.KubernetesFlavorOpenShift {
+		for _, name := range []string{
+			"runai-jupyter-notebook-scc",
+			"runai-openshift-s3-scc",
+			"runai-user-job",
+		} {
+			bindings = append(bindings, kaiv1alpha1.ProjectRoleBinding{
+				Name:                      name,
+				ServiceAccountName:        "default",
+				BindProjectServiceAccount: ptr.To(true),
+			})
+		}
+	}
+
 	return bindings
 }

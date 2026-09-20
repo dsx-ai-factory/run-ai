@@ -19,6 +19,7 @@ import (
 
 	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
+	runv1internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 )
 
 func defaultRunaiConfig() *runaiv1.RunaiConfig {
@@ -27,6 +28,13 @@ func defaultRunaiConfig() *runaiv1.RunaiConfig {
 	}
 	runaiConfig.SetDefaultsWhereNeeded()
 	return runaiConfig
+}
+
+// openShiftSCCBindings are the SCC bindings added only on OpenShift.
+var openShiftSCCBindings = []string{
+	"runai-jupyter-notebook-scc",
+	"runai-openshift-s3-scc",
+	"runai-user-job",
 }
 
 func krmConfigFor(runaiConfig *runaiv1.RunaiConfig) *kaiv1alpha1.KRMConfig {
@@ -142,11 +150,36 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 			for _, binding := range projectController.ExtraProjectRoleBindings {
 				names = append(names, binding.Name)
 				Expect(binding.ServiceAccountName).NotTo(BeEmpty())
+				// Everything outside the OpenShift set binds the install namespace.
+				Expect(binding.BindProjectServiceAccount).To(BeNil())
 			}
 			Expect(names).To(ContainElements("runai-agent", "cluster-sync", "anyworkload-controller"))
 			// KRM's controller reaches project namespaces cluster-wide, and the Run:ai
 			// service account this bound no longer exists.
 			Expect(names).NotTo(ContainElement("runai-project-controller-project"))
+			Expect(names).NotTo(ContainElements(openShiftSCCBindings))
+		})
+
+		It("adds the OpenShift SCC bindings against the project's own service account", func() {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor = runv1internal.KubernetesFlavorOpenShift
+
+			bindings := krmConfigFor(runaiConfig).Spec.ProjectController.ExtraProjectRoleBindings
+			Expect(bindings).To(HaveLen(20))
+
+			found := map[string]kaiv1alpha1.ProjectRoleBinding{}
+			for _, binding := range bindings {
+				found[binding.Name] = binding
+			}
+			for _, name := range openShiftSCCBindings {
+				Expect(found).To(HaveKey(name))
+				// Jupyter, S3 and hostpath all need the project namespace's own
+				// default account, not the install namespace's.
+				Expect(found[name].ServiceAccountName).To(Equal("default"))
+				Expect(found[name].BindProjectServiceAccount).To(HaveValue(BeTrue()))
+				// KRM defaults ClusterRoleName to Name.
+				Expect(found[name].ClusterRoleName).To(BeEmpty())
+			}
 		})
 
 		It("leaves the limit range binding to KRM's builtin", func() {

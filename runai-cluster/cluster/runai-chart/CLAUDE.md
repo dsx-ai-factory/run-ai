@@ -10,7 +10,7 @@ Umbrella Helm chart for the Run:AI cluster side. Packages the `runai-operator`
 (`go-operator`) Deployment/RBAC, the `crdUpgrader` + `helmHooksHandler` +
 `kartaMigrate` lifecycle Jobs, cluster-scoped ClusterRoles, priority classes,
 `RunaiConfig`/`Cluster` CRs, OpenShift SCC/webhooks, ServiceMonitor, and the
-scheduler stack as dependencies (`kai-resource-management v0.0.1`, `karta 0.2.6`,
+scheduler stack as dependencies (`kai-resource-management v0.0.3`, `karta 0.2.6`,
 `crds` subchart; `kai-scheduler` arrives as a sub-dependency of KRM). Produces
 `runai-cluster.tgz`.
 
