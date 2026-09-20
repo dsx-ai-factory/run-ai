@@ -123,6 +123,8 @@ This time-based fairshare calculation ensures that each project and department r
 
 ### Priority and Preemption
 
+TBD: Hagay to update this section to account for semi-preemptible workloads.
+
 NVIDIA Run:ai supports scheduling workloads using different priority and preemption policies:
 
 * Workload's priority and preemption are two distinct parameters set in a workload. Workload's priority sets the scheduling precedence within a project, while workload's preemption sets whether the workload is preemptible or non-preemptible.

@@ -321,9 +321,9 @@ The following general settings are optional.
 <Tab title="Flexible">
 
 1. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
    * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 2. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 3. Set the **grace period** for workload preemption. This is a buffer that allows a preempted workload to reach a safe checkpoint before it is forcibly preempted. Enter a timeframe between 0 sec and 5 min.
 4. Set the **backoff limit** before workload failure. The backoff limit is the maximum number of retry attempts for failed workloads. After reaching the limit, the workload status will change to "Failed." Enter a value between 0 and 100.

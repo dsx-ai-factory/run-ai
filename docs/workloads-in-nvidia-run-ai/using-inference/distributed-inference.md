@@ -240,9 +240,9 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 
 1. Set the number of replicas for your workload. Each replica consists of one leader pod and its associated worker pods.
 2. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
    * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 3. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 4. Set when the workers' pod should be created:
    * **When the leader pod is created** - Create the workers’ pods alongside the leader pod to reduce startup time. This may cause the deployment to fail if the leader isn't ready.
