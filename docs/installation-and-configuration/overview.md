@@ -21,7 +21,7 @@ NVIDIA Run:ai is made up of two components, both installed on a Kubernetes clust
 
 Every installation includes at least one NVIDIA Run:ai control plane and one NVIDIA Run:ai cluster. In a typical deployment, both are installed on the same Kubernetes cluster. As your environment grows, you can connect additional NVIDIA Run:ai clusters to the same control plane. See [Deployment Model](#deployment-model).
 
-<figure><img src="../assets/self-hosted.png" alt="" width="375"/><figcaption></figcaption></figure>
+<img src="../assets/self-hosted.svg" alt="NVIDIA Run:ai self-hosted deployment: Run:ai Control Plane and one or more Run:ai Clusters running on the customer's Kubernetes cluster(s), cloud or on-prem" width="480" />
 
 ## Setup Lifecycle
 
