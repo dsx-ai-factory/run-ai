@@ -238,7 +238,21 @@ Add an inference listener to the existing Gateway resource:
 
 ### Configure Knative Serving
 
-NVIDIA Run:ai supports Knative-based inference workloads. Inference traffic arrives at the Gateway and is forwarded to Knative Serving through Kourier, which routes it to the individual inference endpoints. The following steps install Knative Serving and configure the HTTPRoute to connect the Gateway to Kourier. Knative versions 1.19 to 1.21 are supported.
+NVIDIA Run:ai supports Knative-based inference workloads. Inference traffic arrives at the Gateway and is forwarded to Knative Serving through Kourier, which routes it to the individual inference endpoints. Knative versions 1.19 to 1.21 are supported.
+
+<Tabs>
+
+<Tab title="Guided Installation">
+
+Set `features.knative.mode: install` and `cluster.inference.wildcardDomain` in your `config.yaml`. With `externalConnection.type: gatewayApi` already configured, the installer installs Knative Serving and automatically attaches it to the Gateway with an HTTPRoute - no manual YAML is needed, and no wildcard certificate is required for Knative itself under Gateway API. See [`features`](../../installation/guided-installation/configuration-reference.md#features) and [Fields Available Under Each Prerequisite and Feature](../../installation/guided-installation/configuration-reference.md#fields-available-under-each-prerequisite-and-feature).
+
+Re-run `runai-installer install` with the updated `config.yaml` to apply the change.
+
+</Tab>
+
+<Tab title="Manual Helm">
+
+The following steps install Knative Serving and configure the HTTPRoute to connect the Gateway to Kourier.
 
 <Tabs>
 
@@ -409,11 +423,35 @@ NVIDIA Run:ai supports Knative-based inference workloads. Inference traffic arri
 
 </Tabs>
 
+</Tab>
+
+</Tabs>
+
 ## Introduce the Gateway API to NVIDIA Run:ai Services
 
 To enable NVIDIA Run:ai to route traffic through the configured Gateway, both the control plane and the cluster must be updated to reference the Gateway.
 
 At this stage, traffic is still served through the existing Ingress. The Gateway is introduced alongside the current setup and will become active only after DNS is updated in a later step.
+
+<Tabs>
+
+<Tab title="Guided Installation">
+
+Set `externalConnection.type: gatewayApi` in your `config.yaml`, for both the control plane and cluster:
+
+```yaml
+externalConnection:
+  type: gatewayApi
+  gatewayApi:
+    name: <gateway-name>
+    namespace: <gateway-namespace>
+```
+
+Re-run `runai-installer install` with the updated `config.yaml` against the control plane cluster and each NVIDIA Run:ai cluster to apply the change. See [`externalConnection`](../../installation/guided-installation/configuration-reference.md#externalconnection).
+
+</Tab>
+
+<Tab title="Manual Helm">
 
 ### Configure the NVIDIA Run:ai Control Plane
 
@@ -434,6 +472,10 @@ helm upgrade runai-cluster -n runai runai/runai-cluster \
   --set-string clusterConfig.global.gatewayAPI.name=<gateway-name> \
   --set-string clusterConfig.global.gatewayAPI.namespace=<gateway-namespace>
 ```
+
+</Tab>
+
+</Tabs>
 
 ## Verify Gateway Configuration
 
@@ -470,6 +512,34 @@ nslookup <CLUSTER_DOMAIN>
 curl https://<CLUSTER_DOMAIN>/
 ```
 
+Disable Ingress on both the cluster and the control plane. There's no dedicated `externalConnection` field for this - Ingress and Gateway API can be enabled together, so disabling Ingress is a separate step.
+
+<Tabs>
+
+<Tab title="Guided Installation">
+
+Set `ingress.enabled: false` under `customHelmValues` for both the cluster and control plane in your `config.yaml`:
+
+```yaml
+cluster:
+  customHelmValues:
+    clusterConfig:
+      global:
+        ingress:
+          enabled: false
+controlPlane:
+  customHelmValues:
+    global:
+      ingress:
+        enabled: false
+```
+
+Re-run `runai-installer install` with the updated `config.yaml` to apply the change. See [`cluster`](../../installation/guided-installation/configuration-reference.md#cluster) / [`controlPlane`](../../installation/guided-installation/configuration-reference.md#controlplane).
+
+</Tab>
+
+<Tab title="Manual Helm">
+
 Disable Ingress on the cluster:
 
 ```bash
@@ -486,9 +556,32 @@ helm upgrade runai-backend -n runai-backend runai-backend/control-plane \
   --set-string global.ingress.enabled=false
 ```
 
+</Tab>
+
+</Tabs>
+
 ## Rollback to Ingress
 
 To roll back to Ingress, re-enable Ingress and disable Gateway API on both the cluster and the control plane. Then update DNS records to point back to the Ingress IP.
+
+<Tabs>
+
+<Tab title="Guided Installation">
+
+In your `config.yaml`, set `externalConnection.type` back to `ingress` (with `ingress.className`), and remove or set to `true` the `ingress.enabled` override under `customHelmValues` for both the cluster and control plane:
+
+```yaml
+externalConnection:
+  type: ingress
+  ingress:
+    className: <ingress-class>
+```
+
+Re-run `runai-installer install` with the updated `config.yaml` to apply the change.
+
+</Tab>
+
+<Tab title="Manual Helm">
 
 Cluster:
 
@@ -507,5 +600,9 @@ helm upgrade runai-backend -n runai-backend runai-backend/control-plane \
   --set-string global.ingress.enabled=true \
   --set-string global.gatewayAPI.enabled=false
 ```
+
+</Tab>
+
+</Tabs>
 
 Update DNS records for `<CLUSTER_DOMAIN>` and `*.<CLUSTER_DOMAIN>` to point back to the Ingress IP.

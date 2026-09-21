@@ -35,7 +35,7 @@ By default, NVIDIA Run:ai uses host-based routing to expose workload URLs using 
 https://project-name-workload-name.<CLUSTER_URL>/
 ```
 
-Host-based routing is enabled by default via the `subdomainSupport: true` cluster configuration. For setup instructions, see [Host-Based Routing (Ingress Resource)](../../installation/install-using-helm/preparations.md#host-based-routing-ingress-resource).
+Host-based routing is enabled by default via the `subdomainSupport: true` cluster configuration. If you're using Guided Installation, the installer configures this automatically as part of `externalConnection` - see [Configures Networking](../../installation/guided-installation/README.md#configures-networking). If you're using Manual Helm, see [Host-Based Routing (Ingress Resource)](../../installation/install-using-helm/preparations.md#host-based-routing-ingress-resource) for setup instructions.
 
 ### Path-Based Routing
 
@@ -45,7 +45,7 @@ Path-based routing uses the [Cluster URL](../../system-requirements/networking-s
 https://<CLUSTER_URL>/project-name/workload-name
 ```
 
-To use path-based routing instead, disable host-based routing by setting `subdomainSupport: false` in [Advanced cluster configurations](../cluster-config.md).&#x20;
+To use path-based routing instead: if you're using Guided Installation, set `cluster.workloadRouting: path` in your `config.yaml` - see [`cluster`](../../installation/guided-installation/configuration-reference.md#cluster). If you're using Manual Helm, disable host-based routing by setting `subdomainSupport: false` in [Advanced cluster configurations](../cluster-config.md).&#x20;
 
 While path-based routing works with applications such as Jupyter Notebooks, it may not be compatible with other applications. Some applications assume they are running at the root file system, so hardcoded file paths and settings within the container may become invalid when running at a path other than the root. For example, if an application expects to access `/etc/config.json` but is served at `/project-name/workspace-name`, the file will not be found. This can cause the container to fail or not function as intended.
 

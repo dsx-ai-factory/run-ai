@@ -100,6 +100,8 @@ When the installation completes, verify that the control plane is reachable at i
 
 Create a `cluster-config.yaml` file for each NVIDIA Run:ai cluster. The control plane must already be installed and reachable at its FQDN.
 
+You can also generate this configuration from the NVIDIA Run:ai UI instead of writing it by hand - the onboarding wizard or the Clusters form walks through the same choices and generates a starter `config.yaml` and `runai-installer` command for you. See [Clusters](../../../operations/clusters.md).
+
 At a minimum, configure:
 
 - `install.mode` - Set to `runai_cluster_only` to install the cluster component only. See [`install`](../configuration-reference.md#install).

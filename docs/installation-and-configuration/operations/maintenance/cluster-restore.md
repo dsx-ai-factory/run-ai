@@ -36,7 +36,7 @@ Before restoring the NVIDIA Run:ai cluster, it is essential to validate that it 
 
 ### Re-install the Cluster
 
-1. Follow the NVIDIA Run:ai cluster [installation](../../installation/install-using-helm/helm-install.md) instructions and ensure all [prerequisites](../../installation/install-using-helm/prerequisites-and-features.md) are met.
+1. Follow the NVIDIA Run:ai cluster [installation](../../installation/guided-installation/connected/multi-cluster.md#install-each-nvidia-runai-cluster) instructions and ensure all [prerequisites](../../installation/guided-installation/prerequisites-and-features.md) are met.
 2.  If you have a backup of the cluster configurations, reload it once the installation is complete:
 
     ```bash
@@ -109,7 +109,7 @@ Follow the steps below to restore the control plane including previously backed-
 2. Restore Persistent Volumes - Recover the PVs and ensure these volumes are correctly reattached or restored from your backup solution:
    * PostgreSQL database - Stores control plane metadata
    * Thanos - Stores workload metrics and historical data
-3. Reinstall the control plane - Install the NVIDIA Run:ai [control plane](../../installation/install-using-helm/install-control-plane.md) on the newly created cluster. During installation:
+3. Reinstall the control plane - Install the NVIDIA Run:ai [control plane](../../installation/guided-installation/connected/multi-cluster.md#install-the-control-plane) on the newly created cluster. During installation:
    * Use the saved Helm configuration overrides to preserve custom settings
    * Connect the control plane to the recovered PostgreSQL volume
    * Reconnect Thanos to the restored metrics volume

@@ -4,6 +4,14 @@
 
 The NVIDIA Run:ai control plane installation can be customized to support your environment via Helm [values files](https://helm.sh/docs/chart_template_guide/values_files/) or [Helm install](https://helm.sh/docs/helm/helm_install/) flags. Make sure to restart the relevant NVIDIA Run:ai pods so they can fetch the new configurations.
 
+<Note>
+
+**Note**
+
+If you're using [Guided Installation](../installation/guided-installation/README.md), set the same keys under `controlPlane.customHelmValues` in your `config.yaml` instead of a Helm values file - see [`controlPlane`](../installation/guided-installation/configuration-reference.md#controlplane).
+
+</Note>
+
 | Key                                                                                                                                                                                                                                                       | Change                           | Description                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `global.ingress.ingressClass`                                                                                                                                                                                                                             | Ingress class                    | NVIDIA Run:ai uses NGINX as the default ingress controller. If your cluster has a different ingress controller, you can configure the ingress class to be created by NVIDIA Run:ai.                                                                                                         |

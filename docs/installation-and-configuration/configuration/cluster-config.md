@@ -36,6 +36,14 @@ global:
                 operator: Exists
 ```
 
+<Note>
+
+**Note**
+
+If you're using [Guided Installation](../installation/guided-installation/README.md), set the same keys under `cluster.customHelmValues` in your `config.yaml` instead of a Helm values file - see [`cluster`](../installation/guided-installation/configuration-reference.md#cluster).
+
+</Note>
+
 ## Modify Cluster Configurations at Runtime
 
 The `clusterConfig` subset of settings can also be managed at runtime via the `runaiconfig` [Kubernetes Custom Resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/).

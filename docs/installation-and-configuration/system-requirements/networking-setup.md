@@ -139,7 +139,7 @@ This section describes how to route traffic to and from NVIDIA Run:ai services. 
 
 **Note**
 
-When exposed externally, inference workloads always use host-based routing via their own wildcard subdomain, regardless of whether workspaces and training workloads use host-based or path-based routing - see [Inference](../installation/install-using-helm/prerequisites-and-features.md#standard-inference).
+When exposed externally, inference workloads always use host-based routing via their own wildcard subdomain, regardless of whether workspaces and training workloads use host-based or path-based routing.
 
 </Note>
 
