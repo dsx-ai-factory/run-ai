@@ -13,7 +13,7 @@ Each service's table below has a **Supports External Instance** column indicatin
 * **Connected installations** - All third-party service images are pulled from the official upstream registries on Docker Hub (`docker.io`), Quay (`quay.io`), and the Kubernetes registry (`registry.k8s.io`), for Open Source and NVIDIA Run:ai Support-Entitled installations. No registry credentials are required for these images. Ensure that your cluster nodes can reach these registries, see [External Access to Critical Services](external-access-to-critical-services.md) for the required outbound access.
 * **Air-gapped installations** - For Open Source and NVIDIA Run:ai Support-Entitled installations, third-party service images are packed into the same tarball as the platform images on a connected machine, then loaded into your internal registry along with the rest.
 
-## Control Plane Services
+## NVIDIA Run:ai Control Plane Services
 
 | Component | Supports External Instance | Description |
 | --------- | -------------------------- | ----------- |
@@ -205,7 +205,7 @@ To replace the deployed Thanos with an external metrics store, set `thanos.enabl
 | `metricsService.config.datasourceProvider.staticDatasource.write.url` | Metrics write URL | URL for writing metrics to the Thanos instance. Required when using an external instance. |
 | `metricsService.config.datasourceProvider.staticDatasource.existingSecret` | Metrics credentials | Existing secret name with Thanos authentication credentials. |
 
-## Cluster Services
+## NVIDIA Run:ai Cluster Services
 
 Cluster services do not support external instances. Their upstream images can be overridden via Helm or the `RunaiConfig` custom resource. For the full list of configurable fields and instructions, see [Advanced Cluster Configurations](../configuration/cluster-config.md#third-party-service-images).
 
