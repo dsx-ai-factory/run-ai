@@ -39,7 +39,7 @@ services:
     container_name: redis
     profiles:
       - redis-setup
-    image: redis:6.2-alpine
+    image: redis:8.10-alpine
     ports:
       - '6379:6379'
     command: redis-server
