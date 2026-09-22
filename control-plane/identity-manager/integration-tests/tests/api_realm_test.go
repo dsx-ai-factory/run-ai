@@ -409,7 +409,7 @@ func checkRunaiClient(t *testing.T, ctx context.Context) {
 	require.Equal(t, serviceUtils.RUNAI_CLIENT_ID, *client.Name)
 	require.Equal(t, serviceUtils.RUNAI_CLIENT_ID, *client.ClientID)
 	require.True(t, *client.Enabled)
-	require.False(t, client.IsClientAuthenticationEnabled())
+	require.True(t, client.IsClientAuthenticationEnabled())
 	require.NotNil(t, client.Attributes)
 }
 

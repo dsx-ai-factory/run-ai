@@ -71,8 +71,8 @@ func TestApplyClientProfile(t *testing.T) {
 			name:       "Runai",
 			clientType: ClientTypeRunai,
 			expectedConfig: &iamModels.ClientConfig{
-				PublicClient:              ptr.To(true),
-				DirectAccessGrantsEnabled: ptr.To(true),
+				PublicClient:              ptr.To(false),
+				DirectAccessGrantsEnabled: ptr.To(false),
 				StandardFlowEnabled:       ptr.To(false),
 				ServiceAccountsEnabled:    ptr.To(false),
 			},

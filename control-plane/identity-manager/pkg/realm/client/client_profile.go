@@ -108,8 +108,6 @@ var clientProfiles = map[string]clientProfile{
 	},
 	ClientTypeRunai: {
 		clientID:            utils.RUNAI_CLIENT_ID,
-		publicClient:        true,
-		directAccessGrants:  true,
 		emailScopeDefault:   true,
 		redirect:            redirectDefault,
 		webOrigins:          true,

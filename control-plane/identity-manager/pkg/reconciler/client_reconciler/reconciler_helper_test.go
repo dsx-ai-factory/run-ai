@@ -151,8 +151,8 @@ func TestReconcileClient_CreatesNewClient(t *testing.T) {
 
 func TestReconcileClient_SetsEmailScopeDefaultWhenProfileRequiresIt(t *testing.T) {
 	const (
-		realm    = "test-realm"
-		clientID = "runai-admin-ui"
+		realm      = "test-realm"
+		clientID   = "runai-admin-ui"
 		internalID = "some-internal-id"
 	)
 
@@ -185,8 +185,8 @@ func TestReconcileClient_SetsEmailScopeDefaultWhenProfileRequiresIt(t *testing.T
 
 func TestReconcileClient_DoesNotSetEmailScopeDefaultWhenProfileDoesNotRequireIt(t *testing.T) {
 	const (
-		realm    = "test-realm"
-		clientID = "runai-token-exchange"
+		realm      = "test-realm"
+		clientID   = "runai-token-exchange"
 		internalID = "some-internal-id"
 	)
 
