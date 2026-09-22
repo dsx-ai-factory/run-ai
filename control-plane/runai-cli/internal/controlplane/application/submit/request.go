@@ -16,6 +16,7 @@ type CreationOptions struct {
 	ChartURL          string
 	Values            map[string]interface{}
 	CredentialAssetId string
+	UserCredential    bool
 }
 
 func BuildCreationRequest(options CreationOptions) openapi.AIApplicationCreationRequest {
@@ -28,6 +29,9 @@ func BuildCreationRequest(options CreationOptions) openapi.AIApplicationCreation
 
 	if options.CredentialAssetId != "" {
 		spec.Auth = &openapi.AIApplicationAuth{AssetId: &options.CredentialAssetId}
+		if options.UserCredential {
+			spec.Auth.SetUserCredential(true)
+		}
 	}
 
 	return openapi.AIApplicationCreationRequest{

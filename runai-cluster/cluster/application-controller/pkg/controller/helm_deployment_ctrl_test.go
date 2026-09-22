@@ -7,10 +7,15 @@ package controller
 
 import (
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/application-controller/test"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -305,7 +310,9 @@ var _ = Describe("helm deployment controller test", func() {
 
 	Context("application is not deployed", func() {
 		It("can be removed without uninstall", func() {
-			Expect(k8sCli.Create(ctx, makeApp(appKey1))).To(Succeed())
+			app := makeApp(appKey1)
+			app.Annotations["run.ai/personal-credentials"] = "- sourceSecret: already-deleted\n"
+			Expect(k8sCli.Create(ctx, app)).To(Succeed())
 			Expect(k8sCli.Delete(ctx, getApplication(appKey1))).To(Succeed())
 
 			result := reconcile(appKey1)
@@ -314,6 +321,99 @@ var _ = Describe("helm deployment controller test", func() {
 
 			gone := &runv1alpha1.Application{}
 			Expect(apierrors.IsNotFound(k8sCli.Get(ctx, appKey1, gone))).To(BeTrue())
+		})
+	})
+
+	Context("personal credentials", func() {
+		It("materializes credentials before queuing Helm", func() {
+			const encryptionKey = "905c18f0839affcddca117dcac633f79"
+			Expect(os.Setenv(constants.RunaiAdsEncryptionKeyEnvVar, encryptionKey)).To(Succeed())
+			DeferCleanup(os.Unsetenv, constants.RunaiAdsEncryptionKeyEnvVar)
+
+			source := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "private-source",
+					Namespace: constants.NamespaceRunAi,
+					Labels: map[string]string{
+						personalcreds.UserCredentialsLabel: "true",
+						personalcreds.AssetLabel:           personalcreds.GenericAssetKind,
+					},
+				},
+				Data: map[string][]byte{
+					"token": encryptCredentialForGinkgo([]byte("secret-value"), []byte(encryptionKey)),
+				},
+			}
+			Expect(k8sCli.Create(ctx, source)).To(Succeed())
+			app := makeApp(appKey1)
+			app.Annotations[personalcreds.Annotation] = "- sourceSecret: private-source\n"
+			Expect(k8sCli.Create(ctx, app)).To(Succeed())
+
+			result := reconcile(appKey1)
+			Expect(result.RequeueAfter).To(BeNumerically(">", time.Second))
+			job := drainJob(appKey1, "after credential materialization")
+			Expect(job.Task.Action()).To(Equal(helm_deployer.TaskActionInstall))
+
+			var destination corev1.Secret
+			Expect(k8sCli.Get(ctx, types.NamespacedName{
+				Namespace: appKey1.Namespace,
+				Name:      personalcreds.DestName(appKey1.Name, source.Name),
+			}, &destination)).To(Succeed())
+			Expect(destination.Data["token"]).To(Equal([]byte("secret-value")))
+		})
+
+		It("blocks Helm and reports a credential-safe status", func() {
+			Expect(os.Setenv(constants.RunaiAdsEncryptionKeyEnvVar, "905c18f0839affcddca117dcac633f79")).To(Succeed())
+			DeferCleanup(os.Unsetenv, constants.RunaiAdsEncryptionKeyEnvVar)
+
+			app := makeApp(appKey1)
+			app.Annotations["run.ai/personal-credentials"] = "- sourceSecret: private-source\n"
+			Expect(k8sCli.Create(ctx, app)).To(Succeed())
+
+			result := reconcile(appKey1)
+			Expect(result.RequeueAfter).To(Equal(30 * time.Second))
+			Expect(testController.HelmJobsChannel()).To(BeEmpty())
+
+			current := getApplication(appKey1)
+			Expect(current.Status.HelmStatus.Error).To(Equal("personal credentials unavailable"))
+			Expect(current.Status.HelmStatus.Error).NotTo(ContainSubstring("private-source"))
+			Expect(current.Status.ActionStatus.Phase).To(Equal(helm_deployer.ActionFailed))
+			Expect(current.Status.ActionStatus.Message).To(Equal("personal credentials unavailable"))
+		})
+
+		It("queues Helm after a previously unavailable credential appears", func() {
+			const encryptionKey = "905c18f0839affcddca117dcac633f79"
+			Expect(os.Setenv(constants.RunaiAdsEncryptionKeyEnvVar, encryptionKey)).To(Succeed())
+			DeferCleanup(os.Unsetenv, constants.RunaiAdsEncryptionKeyEnvVar)
+
+			app := makeApp(appKey1)
+			app.Annotations[personalcreds.Annotation] = "- sourceSecret: private-source\n"
+			Expect(k8sCli.Create(ctx, app)).To(Succeed())
+
+			Expect(reconcile(appKey1).RequeueAfter).To(Equal(30 * time.Second))
+			Expect(testController.HelmJobsChannel()).To(BeEmpty())
+
+			source := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "private-source",
+					Namespace: constants.NamespaceRunAi,
+					Labels: map[string]string{
+						personalcreds.UserCredentialsLabel: "true",
+						personalcreds.AssetLabel:           personalcreds.GenericAssetKind,
+					},
+				},
+				Data: map[string][]byte{
+					"token": encryptCredentialForGinkgo([]byte("secret-value"), []byte(encryptionKey)),
+				},
+			}
+			Expect(k8sCli.Create(ctx, source)).To(Succeed())
+
+			reconcile(appKey1)
+			job := drainJob(appKey1, "after credential recovery")
+			Expect(job.Task.Action()).To(Equal(helm_deployer.TaskActionInstall))
+
+			current := getApplication(appKey1)
+			Expect(current.Status.HelmStatus.Error).To(BeEmpty())
+			Expect(current.Status.ActionStatus.Phase).To(Equal(helm_deployer.ActionQueued))
 		})
 	})
 
@@ -823,3 +923,12 @@ var _ = Describe("helm deployment controller test", func() {
 		})
 	})
 })
+
+func encryptCredentialForGinkgo(plaintext, key []byte) []byte {
+	block, err := aes.NewCipher(key)
+	Expect(err).NotTo(HaveOccurred())
+	gcm, err := cipher.NewGCM(block)
+	Expect(err).NotTo(HaveOccurred())
+	nonce := make([]byte, gcm.NonceSize())
+	return gcm.Seal(nonce, nonce, plaintext, nil)
+}

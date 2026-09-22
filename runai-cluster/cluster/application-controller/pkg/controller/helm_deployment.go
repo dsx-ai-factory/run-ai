@@ -140,6 +140,24 @@ func (c *ApplicationController) reconcileHelmDeployment(ctx context.Context, app
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
+	recoveringFromCredentialFailure := isPersonalCredentialFailure(application)
+	if err := c.materializePersonalCredentials(ctx, application); err != nil {
+		log.Error().Err(err).Msgf("failed to materialize personal credentials for application %s", appKey.String())
+		status.WithError(errPersonalCredentialsUnavailable)
+		if application.Status.ActionStatus == nil || application.Status.ActionStatus.Phase == "" {
+			status.ActionFailedWithoutTask(
+				string(helm_deployer.TaskActionInstall),
+				errPersonalCredentialsUnavailable.Error(),
+			)
+		}
+		c.updateHelmStatus(ctx, appKey, status)
+		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+	}
+	status.ClearError()
+	if recoveringFromCredentialFailure {
+		status.ResetAction()
+	}
+
 	// Add finalizer if not present
 	if !controllerutil.ContainsFinalizer(application, HelmApplicationFinalizer) {
 		log.Debug().Msgf("application %s has no finalizer yet, adding finalizer", application.GetName())
@@ -174,7 +192,9 @@ func (c *ApplicationController) reconcileHelmDeployment(ctx context.Context, app
 
 	// If the last install/upgrade already failed, don't send the same task again (avoids frequent reconcile loop).
 	// Retry after RequeueAfterFailed or when the user changes the spec (generation increases).
-	if application.Status.ActionStatus != nil && application.Status.ActionStatus.Phase == helm_deployer.ActionFailed {
+	if application.Status.ActionStatus != nil &&
+		application.Status.ActionStatus.Phase == helm_deployer.ActionFailed &&
+		!recoveringFromCredentialFailure {
 		var lastFailedGen int64
 		if a := application.Annotations[AnnotationHelmLastFailedGeneration]; a != "" {
 			_, err = fmt.Sscanf(a, "%d", &lastFailedGen)
@@ -247,6 +267,11 @@ func (c *ApplicationController) reconcileHelmDeployment(ctx context.Context, app
 
 	c.submitTask(ctx, appKey, status, task)
 	return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+}
+
+func isPersonalCredentialFailure(application *v1alpha1.Application) bool {
+	return application.Status.HelmStatus != nil &&
+		application.Status.HelmStatus.Error == errPersonalCredentialsUnavailable.Error()
 }
 
 // submitTask reserves a worker slot, writes "queued" status, then dispatches the task to the

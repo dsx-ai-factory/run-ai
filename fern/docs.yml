@@ -46,6 +46,15 @@ products:
         path: archived-versions.yml
 
 redirects:
+  - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/fractions
+    destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/memory-fractions
+    permanent: true
+  - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/dynamic-fractions
+    destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/dynamic-memory-fractions
+    permanent: true
+  - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/time-slicing
+    destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/compute-modes
+    permanent: true
   - source: /self-hosted/v2.26/:slug*
     destination: https://run-ai-docs.nvidia.com/self-hosted
     permanent: false
