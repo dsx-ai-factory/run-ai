@@ -140,7 +140,7 @@ require (
 )
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.0
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 )
 
