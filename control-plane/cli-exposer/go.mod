@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/runai-cli v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
