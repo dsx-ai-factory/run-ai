@@ -75,10 +75,32 @@ describe("getStatusColOptions", () => {
     );
   });
 
+  it("phrases the unmanaged node itself, rather than echoing the backend sentence", () => {
+    const node = {
+      status: NodeStatusEnum.MissingPrerequisites,
+      conditions: [
+        {
+          type: GpuFractioningConditionType,
+          reason: "NotManaged",
+          message: "GPU fractions are not supported on this node - it is not covered by the GPU fractioning operator.",
+        },
+      ],
+    } as Node;
+
+    const result = nodeUtil.getStatusColOptions(node);
+
+    expect(result.tooltipText).toBe(
+      "The following prerequisites are not met on the node:<br>" +
+        "The node is not covered by the GPU fractioning operator.<br>" +
+        "As a result, GPU fractions are not supported on this node.<br>" +
+        'For more information, see the <a href="https://docs.example.test/prerequisites">Prerequisites guide.</a><br>',
+    );
+  });
+
   it("falls back to the static message when the GPU fractioning condition carries none", () => {
     const node = {
       status: NodeStatusEnum.MissingPrerequisites,
-      conditions: [{ type: GpuFractioningConditionType, reason: "NotManaged" }],
+      conditions: [{ type: GpuFractioningConditionType, reason: "GPUDriverVersionMissing" }],
     } as Node;
 
     const result = nodeUtil.getStatusColOptions(node);
@@ -102,7 +124,7 @@ describe("getStatusColOptions", () => {
 
     expect(result.tooltipText).toBe(
       "The following prerequisites are not met on the node:<br>" +
-        "The GPU fractioning operator did not report a reason.<br>" +
+        "The node is not covered by the GPU fractioning operator.<br>" +
         "As a result, GPU fractions are not supported on this node.<br>",
     );
     vi.restoreAllMocks();

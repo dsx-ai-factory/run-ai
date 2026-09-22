@@ -5,6 +5,8 @@
 
 import {
   GpuFractioningConditionType,
+  GpuFractioningNotManagedPrerequisite,
+  GpuFractioningNotManagedReason,
   type INode,
   NodeConditionMap,
   NodeStatusMap,
@@ -83,9 +85,7 @@ function _getConditionMessage(condition: NodeStatusConditionDetails): string | u
   // The GPU fractioning operator supplies its own reason and message per failing node, so the
   // unmet prerequisite is rendered from the backend and only the surrounding copy is fixed.
   if (condition.type === GpuFractioningConditionType) {
-    const unmetPrerequisite = condition.message
-      ? stringUtil.replaceNewLineWithBreaks(condition.message)
-      : NodeConditionMap[condition.type]?.message;
+    const unmetPrerequisite = _getGpuFractioningPrerequisite(condition);
     return [
       GPU_FRACTIONING_PREREQUISITES_INTRO,
       unmetPrerequisite,
@@ -96,6 +96,17 @@ function _getConditionMessage(condition: NodeStatusConditionDetails): string | u
       .join("<br>");
   }
   return NodeConditionMap[condition.type]?.message;
+}
+
+// The backend states the unmanaged case as a full sentence, which repeats the frame's own
+// consequence line, so that one prerequisite is phrased here instead.
+function _getGpuFractioningPrerequisite(condition: NodeStatusConditionDetails): string | undefined {
+  if (condition.reason === GpuFractioningNotManagedReason) {
+    return GpuFractioningNotManagedPrerequisite;
+  }
+  return condition.message
+    ? stringUtil.replaceNewLineWithBreaks(condition.message)
+    : NodeConditionMap[condition.type]?.message;
 }
 
 function _getEmptyNode(): INode {
