@@ -23,6 +23,12 @@ export const CLUSTER_STATUS_TOOLTIP = {
     (DOCS.INSTALLATION.PREREQUISITES
       ? `<br> For more information see the <a href="${DOCS.INSTALLATION.PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>`
       : ""),
+  MissingGpuFractioningPrerequisites:
+    "{{reason}}" +
+    "<br>As a result, GPU fractions are not supported." +
+    (DOCS.INSTALLATION.PREREQUISITES
+      ? `<br>For more information, see the <a href="${DOCS.INSTALLATION.PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>`
+      : ""),
   ServiceIssues:
     "Some Run:ai service(s) in the cluster are not functioning properly. <br>" +
     "As a result, some features may be impacted." +

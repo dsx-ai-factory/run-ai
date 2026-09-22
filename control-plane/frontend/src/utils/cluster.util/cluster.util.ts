@@ -153,8 +153,24 @@ function getMissingPrerequisites(dependencies: ClusterDependenciesStatus): strin
   );
 }
 
+// The gpu-stack dependency covers both the NVIDIA stack and GPU fractioning. Naming the
+// dependency alone would not say which of them is unsupported, so the fractioning reason the
+// cluster reports is rendered instead.
+function getGpuFractioningPrerequisiteReason(dependencies: ClusterDependenciesStatus): string | undefined {
+  const gpuFractioning = dependencies.required?.["gpu-stack"]?.components?.["gpu-fractioning"];
+  if (!gpuFractioning || gpuFractioning.available) return undefined;
+  return gpuFractioning.reason;
+}
+
 function getMissingPrerequisitesText(status: ClusterDisplayedStatus): string {
-  const missingPrerequisites = clusterUtil.getMissingPrerequisites(status.dependencies as ClusterDependenciesStatus);
+  const dependencies = status.dependencies as ClusterDependenciesStatus;
+
+  const gpuFractioningReason = getGpuFractioningPrerequisiteReason(dependencies);
+  if (gpuFractioningReason) {
+    return CLUSTER_STATUS_TOOLTIP.MissingGpuFractioningPrerequisites.replace("{{reason}}", gpuFractioningReason);
+  }
+
+  const missingPrerequisites = clusterUtil.getMissingPrerequisites(dependencies);
   if (missingPrerequisites.length) {
     return CLUSTER_STATUS_TOOLTIP.MissingPrerequisites.replace(
       "{{missing_prerequisit}}",

@@ -36,6 +36,58 @@ describe("cluster.util", () => {
     expect(result.tooltipText).toContain("dependency2");
   });
 
+  it("renders the fractioning reason rather than naming the gpu-stack dependency", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            reason: "NVIDIA GPU Operator version 26.6.0 is below minimum supported version v26.7.1",
+            components: {
+              nvidia: { available: true },
+              "gpu-fractioning": {
+                available: false,
+                reason: "NVIDIA GPU Operator version 26.6.0 is below minimum supported version v26.7.1",
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain(
+      "NVIDIA GPU Operator version 26.6.0 is below minimum supported version v26.7.1",
+    );
+    expect(result.tooltipText).toContain("As a result, GPU fractions are not supported.");
+    expect(result.tooltipText).not.toContain("gpu-stack");
+  });
+
+  it("names the dependency when gpu-stack fails for a reason other than fractioning", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            reason: "dcgm-exporter service not found in the cluster",
+            components: {
+              nvidia: { available: false, reason: "dcgm-exporter service not found in the cluster" },
+              "gpu-fractioning": { available: true },
+            },
+          },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain("gpu-stack");
+    expect(result.tooltipText).not.toContain("GPU fractions are not supported.");
+  });
+
   it('should handle "Connected" status and set color to "success"', () => {
     const status = {
       state: ClusterState.Connected,
