@@ -6,8 +6,8 @@ github.com/PaesslerAG/gval v1.2.4/go.mod h1:XRFLwvmkTEdYziLdaCeCa5ImcGVrfQbeNUbV
 github.com/PaesslerAG/jsonpath v0.1.0/go.mod h1:4BzmtoM/PI8fPO4aQGIusjGxGir2BzcV0grWtFzq1Y8=
 github.com/PaesslerAG/jsonpath v0.1.1 h1:c1/AToHQMVsduPAa4Vh6xp2U0evy4t8SWp8imEsylIk=
 github.com/PaesslerAG/jsonpath v0.1.1/go.mod h1:lVboNxFGal/VwW6d9JzIy56bUsYAP6tH/x80vjnCseY=
-github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4 h1:YT2fav2fCN0l/OH9OO3GfTke54iKzXias7xRBkL63tc=
-github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4/go.mod h1:PTKL7n9jUSwJEEoMWSI5O5oC9ylszPWvoxX8jZ+C2xw=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5 h1:VsVvUhPY9OCcgO32NnAhjz+oyGOgZ/CWa08CZqrfnBc=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5/go.mod h1:jqO0+q1TnbjpcyoyDQ4bSrsixa8Ld522tIWdYc7bJiU=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2 h1:NhxiElE7Mc8DFzVNLkBl8ySJbtMWeWhVv9tQjt1KGz4=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2/go.mod h1:yUX6YVj41VwyX85Lgu8Nk524JEMsV58xz3U+87rvIqQ=
 github.com/gkampitakis/ciinfo v0.3.2 h1:JcuOPk8ZU7nZQjdUhctuhQofk7BGHuIy0c9Ez8BNhXs=
