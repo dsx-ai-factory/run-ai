@@ -153,6 +153,53 @@ describe("saml-fields.vue", () => {
     });
   });
 
+  describe("setSamlResources", () => {
+    it("initializes metadataXmlUrl for an existing URL-sourced IdP so mapper-only updates aren't blocked", async () => {
+      const { wrapper } = factory({
+        samlSettings: validSamlSettings,
+        isNewIdp: false,
+        idpResources: {
+          resourceName: SamlCreationDataMetadataXmlTypeEnum.Url,
+          resource: "https://idp.example.com/metadata",
+        },
+      });
+      await flushPromises();
+
+      expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(true);
+    });
+  });
+
+  describe("stale certificate validation guard", () => {
+    it("ignores a validation result that resolves after a newer file selection has started", async () => {
+      let resolveStale: (d: Date | null) => void = () => {};
+      const stalePromise = new Promise<Date | null>((resolve) => {
+        resolveStale = resolve;
+      });
+      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockReturnValueOnce(stalePromise);
+
+      const { wrapper } = factory({ isNewIdp: true });
+      const vm = wrapper.vm as unknown as {
+        setFileContent: (n: string, c: string, t?: number) => Promise<void>;
+        fileSelectionToken: number;
+        expirationDate: Date | null;
+      };
+
+      // Start validating a "first" file selection (token 0), but its lookup hasn't resolved yet.
+      const firstCall = vm.setFileContent("first.xml", fakeMetadataXml, 0);
+
+      // A newer selection supersedes it before the first lookup resolves.
+      vm.fileSelectionToken = 1;
+
+      // The stale lookup finally resolves with an (irrelevant) expired date.
+      resolveStale(new Date("2020-01-01T00:00:00.000Z"));
+      await firstCall;
+      await wrapper.vm.$nextTick();
+
+      expect(vm.expirationDate).toBeNull();
+      expect(wrapper.text()).not.toContain("Certificate expired");
+    });
+  });
+
   describe("isValidInput", () => {
     const now = new Date("2026-01-01T00:00:00.000Z");
     const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
