@@ -226,7 +226,7 @@ func parseSettings(cfg core.Config) (settings, error) {
 	default:
 		return settings{}, fmt.Errorf("workloadType %q is not supported, use %s or %s", knobs.workloadType, deploymentType, trainingType)
 	}
-	knobs.pods = int32(pods)
+	knobs.pods = int32(pods) //nolint:gosec
 	return knobs, nil
 }
 
