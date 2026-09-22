@@ -22,6 +22,8 @@ var _ MappedNullable = &AIApplicationAuth{}
 
 // AIApplicationAuth Authentication configuration required to access a private Helm repository or chart URL. This is used when the chart source requires credentials.
 type AIApplicationAuth struct {
+	// Indicates whether the asset is a user credential owned by the caller. When omitted or false, the asset is treated as a shared credential.
+	UserCredential NullableBool `json:"userCredential,omitempty"`
 	// The ID of the asset to use for authentication.
 	AssetId *string `json:"assetId,omitempty"`
 }
@@ -41,6 +43,49 @@ func NewAIApplicationAuth() *AIApplicationAuth {
 func NewAIApplicationAuthWithDefaults() *AIApplicationAuth {
 	this := AIApplicationAuth{}
 	return &this
+}
+
+// GetUserCredential returns the UserCredential field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *AIApplicationAuth) GetUserCredential() bool {
+	if o == nil || IsNil(o.UserCredential.Get()) {
+		var ret bool
+		return ret
+	}
+	return *o.UserCredential.Get()
+}
+
+// GetUserCredentialOk returns a tuple with the UserCredential field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AIApplicationAuth) GetUserCredentialOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.UserCredential.Get(), o.UserCredential.IsSet()
+}
+
+// HasUserCredential returns a boolean if a field has been set.
+func (o *AIApplicationAuth) HasUserCredential() bool {
+	if o != nil && o.UserCredential.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetUserCredential gets a reference to the given NullableBool and assigns it to the UserCredential field.
+func (o *AIApplicationAuth) SetUserCredential(v bool) {
+	o.UserCredential.Set(&v)
+}
+
+// SetUserCredentialNil sets the value for UserCredential to be an explicit nil
+func (o *AIApplicationAuth) SetUserCredentialNil() {
+	o.UserCredential.Set(nil)
+}
+
+// UnsetUserCredential ensures that no value is present for UserCredential, not even an explicit nil
+func (o *AIApplicationAuth) UnsetUserCredential() {
+	o.UserCredential.Unset()
 }
 
 // GetAssetId returns the AssetId field value if set, zero value otherwise.
@@ -85,6 +130,9 @@ func (o AIApplicationAuth) MarshalJSON() ([]byte, error) {
 
 func (o AIApplicationAuth) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.UserCredential.IsSet() {
+		toSerialize["userCredential"] = o.UserCredential.Get()
+	}
 	if !IsNil(o.AssetId) {
 		toSerialize["assetId"] = o.AssetId
 	}

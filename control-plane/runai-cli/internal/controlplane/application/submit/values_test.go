@@ -164,6 +164,7 @@ var _ = Describe("BuildCreationRequest", func() {
 			ChartURL:          "https://charts.example.com/grafana-11.0.0.tgz",
 			Values:            map[string]interface{}{"replicas": 2},
 			CredentialAssetId: "asset-1",
+			UserCredential:    true,
 		})
 
 		Expect(request.ClusterId).To(Equal("cluster-1"))
@@ -172,6 +173,7 @@ var _ = Describe("BuildCreationRequest", func() {
 		Expect(request.Spec.ChartRef.GetChartURL()).To(Equal("https://charts.example.com/grafana-11.0.0.tgz"))
 		Expect(request.Spec.Values).To(HaveKeyWithValue("replicas", 2))
 		Expect(request.Spec.Auth.GetAssetId()).To(Equal("asset-1"))
+		Expect(request.Spec.Auth.GetUserCredential()).To(BeTrue())
 	})
 
 	It("omits auth when no credential is given", func() {

@@ -89,7 +89,7 @@ Declared in [`Chart.yaml`](Chart.yaml) and vendored as tarballs under `charts/`:
 
 | Dependency | Version | Condition | Source |
 |------------|---------|-----------|--------|
-| `kai-resource-management` | `v0.0.1` | `kai-resource-management.enabled` | `oci://ghcr.io/kai-scheduler/kai-resource-management` |
+| `kai-resource-management` | `v0.0.3` | `kai-resource-management.enabled` | `oci://ghcr.io/kai-scheduler/kai-resource-management` |
 | `karta` | `0.2.6` | `karta.enabled` | `oci://ghcr.io/dsx-ai-factory/workload-map/karta` |
 | `crds` | `0.0.0` | `development.includeCRDsInReleaseManifest` | `file://charts/crds` |
 

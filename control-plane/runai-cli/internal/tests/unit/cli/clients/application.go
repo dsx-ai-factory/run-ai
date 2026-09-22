@@ -6,6 +6,7 @@
 package clients
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
@@ -34,8 +35,10 @@ const (
 	AppNameWithResources  = "app-with-resources"
 
 	// credential fixtures (submit flows)
-	CredentialName    = "chart-cred"
-	CredentialAssetID = "cred-asset-1"
+	CredentialName           = "chart-cred"
+	CredentialAssetID        = "cred-asset-1"
+	PrivateCredentialName    = "personal-chart-cred"
+	PrivateCredentialAssetID = "personal-cred-asset-1"
 
 	// same NGC API key name at two scopes - ambiguous
 	CredentialNameAmbiguous     = "dup-cred"
@@ -49,6 +52,15 @@ const (
 // LastAIApplicationCreationRequest captures the most recent request passed to
 // the mocked creator, so tests can assert on the built spec.
 var LastAIApplicationCreationRequest openapi.AIApplicationCreationRequest
+
+type privateCredentialResolver struct{}
+
+func (privateCredentialResolver) GetPrivateCredentialAssetId(_ context.Context, name, typeFilter string) (string, error) {
+	if name != PrivateCredentialName || typeFilter != string(assetsopenapi.ASSETKIND_NGC_API_KEY) {
+		return "", fmt.Errorf("personal credential %q not found", name)
+	}
+	return PrivateCredentialAssetID, nil
+}
 
 var (
 	appOne = openapi.AIApplication{
@@ -246,4 +258,5 @@ func MockAIApplication(mockCtrl *gomock.Controller) {
 	applicationservice.SetDeleter(mockDeleter)
 	applicationservice.SetCreator(mockCreator)
 	applicationservice.SetCredentialLister(mockCredentialLister)
+	applicationservice.SetPrivateCredentialResolver(privateCredentialResolver{})
 }
