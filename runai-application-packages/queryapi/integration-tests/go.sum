@@ -55,8 +55,8 @@ github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2 h1:2oNaltp
 github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2/go.mod h1:tXpIAWdJLzQSq4pE3q6gc76JIyEcR+J0WL1oiMcNUVg=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3 h1:m1zQsIJPsIl5u8wgmL5vhWy9PvB0o4Xd6mXSDMw/VCk=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3/go.mod h1:Fv0cg09zVJrbxG2pkpzQS+pgI7RwMKzsyAXSMTtAnag=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11 h1:XbMdxc0ORj/76qTPXc554obdorN1k8WGLBRoMchzclM=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11/go.mod h1:OPUH1UkE2ymD0eI8ZBF1xJy9QUZa8O5iDmC3S/6DRB0=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13 h1:OnCb2hgnV69obRYYEIYMjKX/cxL2FuFdaPNWYgfTGd8=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13/go.mod h1:ROawBxH+invwjJMjCdS5qpgkFPGEFim+YoqHNrjQejI=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24 h1:SiG1YAAhoF9mSlzbyuhBwsqEu15nb9Vvbo2adsMGcS8=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24/go.mod h1:GX3HcZH27l61sghfGa3Y5rjNE6wSdKHs3cT7jOWkgTI=
 github.com/ebitengine/purego v0.11.1 h1:2zpWRSQNVKN4eKsKO9eM1ILDgWfYMY9GwqRmK6XeQ/0=
