@@ -39,6 +39,10 @@ const (
 	MissingNvidiaDcgmExporter     = "MissingNvidiaDcgmExporter"
 	MissingNrtHealthyPrerequisite = "MissingNrtHealthyPrerequisite"
 
+	// The ConfigMap has no ResourceVersion when it cannot be read, so fail-open results are
+	// cached under a version no real object can have.
+	unreadableClusterInfoVersion = "\x00unreadable"
+
 	gpuStackDependencyName      = "gpu-stack"
 	gpuFractioningComponentName = "gpu-fractioning"
 
@@ -115,17 +119,19 @@ type NodeParser struct {
 }
 
 // The verdict only changes when the ConfigMap does, and re-parsing its YAML for every node of
-// every sync is needless work on a large cluster.
+// every sync is needless work on a large cluster. Fail-open outcomes are cached under a sentinel
+// version too, so an absent or malformed ConfigMap costs one log line rather than one per node.
 type gpuFractioningSupportCache struct {
 	mutex           sync.RWMutex
 	resourceVersion string
 	supported       bool
+	loaded          bool
 }
 
 func (c *gpuFractioningSupportCache) load(resourceVersion string) (bool, bool) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
-	if c.resourceVersion == "" || c.resourceVersion != resourceVersion {
+	if !c.loaded || c.resourceVersion != resourceVersion {
 		return false, false
 	}
 	return c.supported, true
@@ -136,6 +142,13 @@ func (c *gpuFractioningSupportCache) store(resourceVersion string, supported boo
 	defer c.mutex.Unlock()
 	c.resourceVersion = resourceVersion
 	c.supported = supported
+	c.loaded = true
+}
+
+func (c *gpuFractioningSupportCache) last() (bool, bool) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.supported, c.loaded
 }
 
 func NewNodeParser(cachedReader client.Reader) *NodeParser {
@@ -303,12 +316,16 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 func (nodeParser *NodeParser) clusterSupportsGpuFractioning() bool {
 	clusterInfoCm := &corev1.ConfigMap{}
 	err := nodeParser.cachedReader.Get(context.Background(), client.ObjectKey{
-		Name:      runaiv1.RunaiPublicConfigMapName,
+		Name:      constants.ClusterInfoConfigMapName,
 		Namespace: runaiv1.DefaultNamespace,
 	}, clusterInfoCm)
 	if err != nil {
+		if cached, ok := nodeParser.gpuFractioningSupport.load(unreadableClusterInfoVersion); ok {
+			return cached
+		}
 		zap.S().Warnf("Failed to read %s to determine cluster GPU fractioning support: %v",
-			runaiv1.RunaiPublicConfigMapName, err)
+			constants.ClusterInfoConfigMapName, err)
+		nodeParser.gpuFractioningSupport.store(unreadableClusterInfoVersion, true)
 		return true
 	}
 
@@ -317,8 +334,9 @@ func (nodeParser *NodeParser) clusterSupportsGpuFractioning() bool {
 	}
 
 	var runaiPublic runaiv1.RunaiPublic
-	if err := yaml.Unmarshal([]byte(clusterInfoCm.Data[runaiv1.RunaiPublicConfigMapName]), &runaiPublic); err != nil {
-		zap.S().Warnf("Failed to unmarshal %s: %v", runaiv1.RunaiPublicConfigMapName, err)
+	if err := yaml.Unmarshal([]byte(clusterInfoCm.Data[constants.ClusterInfoConfigMapName]), &runaiPublic); err != nil {
+		zap.S().Warnf("Failed to unmarshal %s: %v", constants.ClusterInfoConfigMapName, err)
+		nodeParser.gpuFractioningSupport.store(clusterInfoCm.ResourceVersion, true)
 		return true
 	}
 
@@ -333,6 +351,14 @@ func (nodeParser *NodeParser) clusterSupportsGpuFractioning() bool {
 
 	nodeParser.gpuFractioningSupport.store(clusterInfoCm.ResourceVersion, supported)
 	return supported
+}
+
+// GpuFractioningSupportChanged reports whether the currently published verdict differs from the
+// one the parser last used. The cluster-info ConfigMap carries unrelated fields that churn on
+// every operator reconcile, so node resyncs are driven off this rather than off the update event.
+func (nodeParser *NodeParser) GpuFractioningSupportChanged() bool {
+	previous, hadPrevious := nodeParser.gpuFractioningSupport.last()
+	return hadPrevious && previous != nodeParser.clusterSupportsGpuFractioning()
 }
 
 func (nodeParser *NodeParser) calculateMissingNvidiaComponentsConditions(node *corev1.Node) []swagger.NodeStatusConditionDetails {
