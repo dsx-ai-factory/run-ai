@@ -299,15 +299,13 @@ export default defineComponent({
         ? "Certificate expired. Replace the metadata file above."
         : "Certificate expired. Replace the metadata URL above.";
     },
-    async validateCertificate(
-      certificateOverride?: string | null,
-      selectionToken = this.fileSelectionToken,
-    ): Promise<boolean> {
+    async validateCertificate(certificateOverride?: string | null, selectionToken?: number): Promise<boolean> {
+      const token = selectionToken ?? this.fileSelectionToken;
       const certificate =
         certificateOverride !== undefined ? certificateOverride : this.samlSettings?.signingCertificate;
       this.isValidated = false;
       const expirationDate = certificate ? await idpCommon.getCertificateExpirationDate(certificate) : null;
-      if (selectionToken !== this.fileSelectionToken) return false;
+      if (token !== this.fileSelectionToken) return false;
       this.expirationDate = expirationDate;
       (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
       if (this.expirationDate && idpCommon.iValidCertificateDate(this.expirationDate as Date)) {
@@ -340,17 +338,11 @@ export default defineComponent({
       };
       reader.readAsText(file);
     },
-    async setFileContent(
-      fileName: string,
-      fileContent: string,
-      selectionToken = this.fileSelectionToken,
-    ): Promise<void> {
-      if (selectionToken !== this.fileSelectionToken) return;
-      const isCurrent = await this.validateCertificate(
-        this.extractCertificateFromMetadataXml(fileContent),
-        selectionToken,
-      );
-      if (!isCurrent || selectionToken !== this.fileSelectionToken) return;
+    async setFileContent(fileName: string, fileContent: string, selectionToken?: number): Promise<void> {
+      const token = selectionToken ?? this.fileSelectionToken;
+      if (token !== this.fileSelectionToken) return;
+      const isCurrent = await this.validateCertificate(this.extractCertificateFromMetadataXml(fileContent), token);
+      if (!isCurrent || token !== this.fileSelectionToken) return;
       this.samlFields.metadataXmlFile = stringUtil.stringToBase64(fileContent);
       this.samlFields.fileName = fileName;
       this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.File;
