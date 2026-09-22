@@ -75,6 +75,8 @@
 
 * `STORAGE_CLASS_CONFIGURATION` (value: `"storage-class-configuration"`)
 
+* `DRA` (value: `"dra"`)
+
 * `ACCESS_KEYS` (value: `"access-keys"`)
 
 * `WORKLOAD_PROPERTIES` (value: `"workload-properties"`)

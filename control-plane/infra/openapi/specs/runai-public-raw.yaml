@@ -48050,6 +48050,7 @@ components:
         - datavolumes
         - secret-volume-assets
         - storage-class-configuration
+        - dra
         - access-keys
         - workload-properties
         - network-topologies
