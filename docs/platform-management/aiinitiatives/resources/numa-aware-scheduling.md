@@ -45,14 +45,6 @@ The Topology Manager only coordinates hints from the CPU manager and memory mana
 
 NUMA-aware scheduling is configured per node pool and is disabled by default. To enable it, toggle the **NUMA-aware scheduling** option when creating or editing a node pool. See [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/node-pools) for details.
 
-<Info>
-
-**Note**
-
-The NUMA-aware scheduling toggle is only available for clusters running version 2.26 or later.
-
-</Info>
-
 ## How It Works
 
 When NUMA-aware scheduling is enabled on a node pool, the Scheduler reads each node's NUMA topology from NodeResourceTopology resources published by the NFD topology updater. This includes the Topology Manager policy and scope configured on each node, and the available and allocated GPUs, CPUs, and memory per NUMA node.
