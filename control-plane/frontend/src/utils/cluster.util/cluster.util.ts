@@ -162,23 +162,45 @@ function getGpuFractioningPrerequisiteReason(dependencies: ClusterDependenciesSt
   return gpuFractioning.reason;
 }
 
+// gpu-stack is reported by name alone, which says nothing a reader can act on. When fractioning
+// is its only failing part, the dedicated section carries the reason instead; when something else
+// under gpu-stack is also failing, the name has to stay or that failure goes unreported.
+function isFractioningOnlyGpuStackFailure(dependencies: ClusterDependenciesStatus): boolean {
+  const components = dependencies.required?.["gpu-stack"]?.components;
+  if (!components) return false;
+
+  const unavailable = Object.entries(components)
+    .filter(([, component]) => !component.available)
+    .map(([name]) => name);
+
+  return unavailable.length === 1 && unavailable[0] === "gpu-fractioning";
+}
+
 function getMissingPrerequisitesText(status: ClusterDisplayedStatus): string {
   const dependencies = status.dependencies as ClusterDependenciesStatus;
-
   const gpuFractioningReason = getGpuFractioningPrerequisiteReason(dependencies);
-  if (gpuFractioningReason) {
-    return CLUSTER_STATUS_TOOLTIP.MissingGpuFractioningPrerequisites.replace("{{reason}}", gpuFractioningReason);
+
+  const missingPrerequisites = clusterUtil
+    .getMissingPrerequisites(dependencies)
+    .filter((name) => !(gpuFractioningReason && name === "gpu-stack" && isFractioningOnlyGpuStackFailure(dependencies)));
+
+  const sections: string[] = [];
+
+  if (missingPrerequisites.length) {
+    sections.push(
+      CLUSTER_STATUS_TOOLTIP.MissingPrerequisites.replace("{{missing_prerequisit}}", missingPrerequisites.join(", ")),
+    );
   }
 
-  const missingPrerequisites = clusterUtil.getMissingPrerequisites(dependencies);
-  if (missingPrerequisites.length) {
-    return CLUSTER_STATUS_TOOLTIP.MissingPrerequisites.replace(
-      "{{missing_prerequisit}}",
-      missingPrerequisites.join(", "),
-    );
-  } else {
-    return CLUSTER_STATUS_TOOLTIP.MissingPrerequisites.replace("{{missing_prerequisit}}", "none");
+  if (gpuFractioningReason) {
+    sections.push(CLUSTER_STATUS_TOOLTIP.MissingGpuFractioningPrerequisites.replace("{{reason}}", gpuFractioningReason));
   }
+
+  if (!sections.length) {
+    sections.push(CLUSTER_STATUS_TOOLTIP.MissingPrerequisites.replace("{{missing_prerequisit}}", "none"));
+  }
+
+  return [...sections, CLUSTER_STATUS_TOOLTIP.PrerequisitesGuide].filter(Boolean).join("<br><br>");
 }
 
 function getDistribution(distribution: ClusterReportedStatusPlatformTypeEnum): string {

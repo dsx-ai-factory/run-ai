@@ -19,16 +19,12 @@ export const CLUSTER_STATUS_TOOLTIP = {
     "<br> If so, try the following Run:ai troubleshooting options:",
   MissingPrerequisites:
     "The following prerequisites are missing from the cluster: {{missing_prerequisit}}." +
-    "<br>As a result, some features may be impacted." +
-    (DOCS.INSTALLATION.PREREQUISITES
-      ? `<br> For more information see the <a href="${DOCS.INSTALLATION.PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>`
-      : ""),
-  MissingGpuFractioningPrerequisites:
-    "{{reason}}" +
-    "<br>As a result, GPU fractions are not supported." +
-    (DOCS.INSTALLATION.PREREQUISITES
-      ? `<br>For more information, see the <a href="${DOCS.INSTALLATION.PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>`
-      : ""),
+    "<br>As a result, some features may be impacted.",
+  MissingGpuFractioningPrerequisites: "{{reason}}" + "<br>As a result, GPU fractions are not supported.",
+  // Emitted once after the sections above, which may both be present.
+  PrerequisitesGuide: DOCS.INSTALLATION.PREREQUISITES
+    ? `For more information see the <a href="${DOCS.INSTALLATION.PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>.`
+    : "",
   ServiceIssues:
     "Some Run:ai service(s) in the cluster are not functioning properly. <br>" +
     "As a result, some features may be impacted." +
