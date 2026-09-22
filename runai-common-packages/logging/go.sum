@@ -1,5 +1,5 @@
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 h1:Fy946r1JrfkYN5KBZhu+GBLhxuA7EY1Lt10sgDIzDxs=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8/go.mod h1:xAYNpT7DXg6+KXXeNERsHq6fYR605zz2lE+GCE8BKZY=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0 h1:tIxjIoZUYFme1g/DfE5LD9HOXoY7mEa4OmE+218l73k=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0/go.mod h1:7eHCBYbQ9OWPdWD1WP9OmaeEnXKQs5UC4HYjGHm2TXc=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 h1:7vShtDVlUAl+kbFfF8/kopQ7iudfJPFCaOHYknwZIRI=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5/go.mod h1:AQK0wu+zIXkf9lBnxLhIFHVay37vYzRR92qrar+LbVI=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
