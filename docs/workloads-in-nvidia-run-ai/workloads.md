@@ -132,6 +132,7 @@ The Metrics screen contains a dropdown allowing you to switch between the follow
 * **GPU profiling** - Shows additional NVIDIA-specific metrics
 * **Inference** - Displays inference workload metrics including throughput, latency, and replica counts
 * **NVIDIA NIM** - Displays NIM-specific workload metrics such as request concurrency, request counts, time to first token (TTFT), latency percentiles, and GPU KV-cache utilization
+* **vLLM** - Displays vLLM-specific workload metrics such as request concurrency, request counts, token throughput, time to first token (TTFT), latency percentiles, and GPU KV-cache utilization
 
 <Info>
 
@@ -192,6 +193,33 @@ For NVIDIA NIM workloads, select **NVIDIA NIM** from the dropdown to view dedica
   Measures the total response time from request submission to completion, with percentile values (p50, p90, p99) to help identify latency patterns.
 * **GPU KV cache utilization**\
   Reports the percentage of GPU key-value cache currently in use over time.
+
+#### vLLM
+
+For vLLM workloads, select **vLLM** from the dropdown to view dedicated vLLM-specific metrics:
+
+* **Request concurrency by status**\
+  Shows the number of inference requests that are currently running or waiting.
+* **Request count by status**\
+  Displays the total number of inference requests completed over time, categorized as succeeded or failed.
+* **Request success rate**\
+  Shows the percentage of completed requests that succeeded over time.
+* **GPU KV cache utilization**\
+  Reports the percentage of GPU key-value cache currently in use over time.
+* **Token throughput**\
+  Displays the number of prompt and generation tokens processed per second.
+* **Time to first token (TTFT)**\
+  Shows a histogram of the time (in seconds) it takes for the model to generate the first token.
+* **Time to first token (TTFT) by percentiles**\
+  Tracks how long it takes for the model to generate the first token of a response, with percentile breakdowns (p50, p95, p99) for performance analysis.
+* **End to end request latency**\
+  Shows a histogram of the total request latency (in seconds), measured from request submission to completion.
+* **End to end request latency by percentiles**\
+  Measures the total response time from request submission to completion, with percentile values (p50, p95, p99) to help identify latency patterns.
+* **Queue time percentiles**\
+  Tracks how long requests wait before processing begins, with percentile breakdowns (p50, p95, p99).
+* **Latency phase breakdown**\
+  Shows percentile breakdowns (p50, p95, p99) of time spent in the prefill, decode, and inter-token latency phases of a request.
 
 #### Navigating the Graphs
 

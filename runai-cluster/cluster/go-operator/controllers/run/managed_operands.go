@@ -33,10 +33,10 @@ import (
 	encryption_key "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/encryption-key"
 	external_workload_integrator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/external-workload-integrator"
 	kai_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/kai-operator"
+	krm_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/krm-operator"
 	metrics_exporter "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/metrics-exporter"
 	mps_server "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/mps-server"
 	nmc_mgmt_prometheus "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/nmc-mgmt-prometheus"
-	pod_group_assigner "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/pod-group-assigner"
 	project_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/project-controller"
 	prometheus "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/prometheus"
 	reconciliation_trigger "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/reconciliation-trigger"
@@ -132,12 +132,15 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addRemoteCluster(anyworkload_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(researcher_service.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(kai_operator.Operand(), *spec.KAIOperator.Enabled)
+	mo.addOldRemoteCluster(krm_operator.Operand(), *spec.KRMOperator.Enabled)
 	mo.addRemoteCluster(runtime_rules.Operand(remoteClusterClient, runaiConfig))
 	// Transitional orphan cleanup for the pre-rename runtime-rules resources.
 	// Always disabled, so its resources are deleted every reconcile.
 	// Remove once all supported clusters have upgraded past the rename.
 	mo.addRemoteCluster(legacy_runtime_runner.Operand(remoteClusterClient, runaiConfig))
-	mo.addOldRemoteCluster(project_controller.Operand(), *spec.ProjectController.Enabled)
+	// KRM supplies the project-controller now; registering it disabled deletes
+	// the Deployment left behind.
+	mo.addOldRemoteCluster(project_controller.Operand(), false)
 	mo.addOldRemoteCluster(accessrule_controller.Operand(), *spec.AccessRuleController.Enabled && *spec.ProjectController.CreateRoleBindings)
 	mo.addOldRemoteCluster(mpi_operator.Operand(), true)
 	mo.addOldRemoteCluster(training_operator.Operand(), true)
@@ -146,7 +149,9 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	// DaemonSet left behind on clusters that had opted in.
 	mo.addOldRemoteCluster(mps_server.Operand(), false)
 	mo.addRemoteCluster(queue_controller.Operand(remoteClusterClient, runaiConfig))
-	mo.addRemoteCluster(pod_group_assigner.Operand(remoteClusterClient, runaiConfig))
+	// pod-group-assigner is deliberately not registered: KRM supplies it and names
+	// every object it owns identically, so KRM adopts them all. Registering it
+	// disabled would delete what KRM recreates seconds later.
 	mo.addRemoteCluster(cluster_api.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(knative.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(cluster_redis.Operand(remoteClusterClient, runaiConfig))

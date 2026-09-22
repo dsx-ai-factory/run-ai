@@ -1,5 +1,9 @@
 global:
   fipsMode: "off"
+  # The bundled kai-scheduler reads this boolean rather than fipsMode, and Helm
+  # derives neither from the other, so set both together or KRM fails the render.
+  # Being global it reaches the scheduler through KRM, without naming either.
+  fips: false
   customCA:
     enabled: false
     secret:
@@ -162,35 +166,66 @@ development:
   skipDependeciesChecks: false
   # Enable profiling in the runai-operator
   enableProfiling: false
-kai-scheduler:
+kai-resource-management:
   enabled: true
-  global:
-    # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
-    # chart-level autoscaling switch off so it does not imply enablement.
-    clusterAutoscaling: false
-    # Keep resource reservation aligned with the chart-owned service account,
-    # RBAC, and pull-secret propagation.
-    resourceReservation:
-      namespace: runai-reservation
-      serviceAccount: runai-reservation
-  operator:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 512Mi
-      requests:
-        cpu: 50m
-        memory: 256Mi
-  defaultQueue:
-    createDefaultQueue: false
-  defaultShard:
+  # Helm resolves subchart values before templates render, so this cannot be
+  # derived from openShift.mode. KRM autodetects the platform by looking up the
+  # clusterversions CRD, which covers an ordinary install; set this to true
+  # alongside openShift.mode=Enabled when that autodetect is being overridden.
+  openshift: false
+  # go-operator owns the KRMConfig singleton, so neither of the chart's own
+  # managers may create it. Both off is KRM's "external" mode.
+  krmConfigDeployer:
     enabled: false
-  defaultPriorityClasses:
+  krmConfig:
+    render: false
+  commonArgs:
+    namespaceProjectLabelKey: runai/queue
+  nodePoolController:
+    # Node pool validation is covered by the control-plane and agent reconcile.
+    webhook:
+      nodepool: false
+  projectController:
+    webhook:
+      project: false
+      department: false
+  podGroupAssigner:
+    # Pod mutation is done by runai's admission-controller.
+    webhook:
+      pod: false
+  # The agent syncs node pools from the control plane, including the default one,
+  # so KRM must not create its own: the two write different specs for the same
+  # object, and KRM's carries a resource-policy that survives uninstall.
+  defaultNodePool:
     enabled: false
-  kaiConfigDeployer:
-    enabled: false
-  nodescaleadjuster:
-    scalingPodNamespace: runai-scale-adjust
+  kai-scheduler:
+    global:
+      # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
+      # chart-level autoscaling switch off so it does not imply enablement.
+      clusterAutoscaling: false
+      # Keep resource reservation aligned with the chart-owned service account,
+      # RBAC, and pull-secret propagation.
+      resourceReservation:
+        namespace: runai-reservation
+        serviceAccount: runai-reservation
+    operator:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+    defaultQueue:
+      createDefaultQueue: false
+    defaultShard:
+      enabled: false
+    defaultPriorityClasses:
+      enabled: false
+    kaiConfigDeployer:
+      enabled: false
+    nodescaleadjuster:
+      scalingPodNamespace: runai-scale-adjust
 karta:
   enabled: true
   operator:

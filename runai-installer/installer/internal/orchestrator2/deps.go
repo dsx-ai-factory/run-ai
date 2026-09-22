@@ -13,9 +13,10 @@ import (
 )
 
 type Deps struct {
-	K8sExecutor         K8sExecutor
-	HelmInstaller       step.HelmInstaller
-	RunAIClientProvider step.RunAIAPIClientProvider
+	K8sExecutor                K8sExecutor
+	HelmInstaller              step.HelmInstaller
+	RunAIClientProvider        step.RunAIAPIClientProvider
+	RunAIClientWithCredentials step.RunAIAPICredentialedClientProvider
 	// ClusterProbe is the read-only cluster capability used by preflight checks.
 	// It is optional: nil when no preflight runs (e.g. component tests that don't
 	// exercise checks).
@@ -62,13 +63,14 @@ func ProductionDeps(c client.Client, cfg *rest.Config, controlPlaneVersion strin
 	}
 	k8sExecutor := NewK8sExecutor(c)
 	return Deps{
-		K8sExecutor:         k8sExecutor,
-		HelmInstaller:       step.NewHelmInstaller(),
-		RunAIClientProvider: newRunAIClientProvider(k8sExecutor, controlPlaneVersion),
-		ClusterProbe:        probe,
-		RegistryProber:      NewRegistryProber(),
-		TLSProber:           NewTLSProber(),
-		NodeLabeler:         labeler,
-		ManifestProvider:    NewManifestProvider(),
+		K8sExecutor:                k8sExecutor,
+		HelmInstaller:              step.NewHelmInstaller(),
+		RunAIClientProvider:        newRunAIClientProvider(k8sExecutor, controlPlaneVersion),
+		RunAIClientWithCredentials: newCredentialedRunAIClientProvider(),
+		ClusterProbe:               probe,
+		RegistryProber:             NewRegistryProber(),
+		TLSProber:                  NewTLSProber(),
+		NodeLabeler:                labeler,
+		ManifestProvider:           NewManifestProvider(),
 	}, nil
 }

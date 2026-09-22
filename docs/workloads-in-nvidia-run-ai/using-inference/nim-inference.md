@@ -20,7 +20,7 @@ The NIM option in the NVIDIA Run:ai UI requires cluster access to NVIDIA NGC and
 ## Before You Start
 
 * Make sure you have created a [project](../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
-* Make sure [Knative](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) is properly installed by your administrator.
+* Make sure [Knative](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) is properly installed by your administrator.
 * To access NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../settings/user-settings/user-credentials.md) (created under User settings).
 
 <Info>
@@ -113,7 +113,7 @@ The [Docker registry credential](../workload-assets/credentials.md#docker-regist
      * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
      * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 5. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 
 </Tab>
@@ -141,7 +141,7 @@ The [Docker registry credential](../workload-assets/credentials.md#docker-regist
    * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
    * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 6. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 
 </Tab>
@@ -187,7 +187,7 @@ Manually configure the settings below as needed. The changes will apply to this 
      * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
      * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 4. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 5. Set the connection for your **tool(s)**. If you are loading from existing setup, the tools are configured as part of the environment.
    * Select the connection type:

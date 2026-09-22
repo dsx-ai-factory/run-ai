@@ -25,8 +25,8 @@ Before you start, make sure the following requirements are met:
 
 * Your administrator has:
   * Created a [project](../../platform-management/aiinitiatives/organization/projects.md) for you.
-  * Installed and configured [LWS](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#distributed-inference) (Leader-Worker Set) on the cluster.
-  * Configured external access if needed. Endpoints ending with `.svc.cluster.local` are accessible only inside the cluster; external access must be enabled by your administrator as described in the [inference requirements](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) section.
+  * Installed and configured [LWS](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-inference) (Leader-Worker Set) on the cluster.
+  * Configured external access if needed. Endpoints ending with `.svc.cluster.local` are accessible only inside the cluster; external access must be enabled by your administrator as described in the [inference requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section.
 * You have:
   * A Hugging Face account with an active personal access token, available under [Account Settings](https://huggingface.co/) → Access Tokens in your Hugging Face profile.
   * Accepted the model license for the [Llama-3.1-405B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-405B-Instruct) model or for any other model you plan to use.

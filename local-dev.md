@@ -9,7 +9,7 @@ local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine
 | Requirement | Notes |
 |---|---|
 | **OS / Architecture** | `macOS` or `Linux`, `amd64` or `arm64` — the only four supported combinations. Any other platform, such as Windows, stops the script with a clear error before setup begins. |
-| **Docker Desktop** | Must be running. On Linux, enable the containerd image store. macOS uses Podman instead (see below). |
+| **Container Runtime** | Use docker or podman. On Linux, enable the containerd image store. See more info on Podman settings for MacOS below. |
 | **Podman VM ≥ 12 GB RAM** | macOS only. The full stack (NATS×3, PostgreSQL, Keycloak, ~50 services) requires at least 12 GB. With 8 GB the API server starves under QEMU overhead and the cluster never stabilises. Resize with `podman machine stop && podman machine set --memory 12288 && podman machine start`. |
 | **`GITHUB_TOKEN`** | Only needed while the repo is private — Go builds pull modules from `github.com/run-ai/*`. Not required with `--skip-build` or once the repo is public. Set it before running: `export GITHUB_TOKEN=ghp_...` |
 | **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.31.0`, node image `v1.32.5`); `kubectl` and `helm` always install the latest release. |
@@ -113,28 +113,28 @@ The runai-cluster chart configures these scheduling subcharts:
 
 | Subchart | Setting | Notes |
 |---|---|---|
-| `kai-scheduler` | `enabled=true` | CNCF-donated AI-aware GPU scheduler — applies fair-share, preemption, bin-packing, and multi-node placement rules. The engine underlying the Run:ai Scheduler. |
+| `kai-resource-management` | `enabled=true` | KAI Resource Management — supplies the nodepool-controller, project-controller and pod-group-assigner, and bundles `kai-scheduler` as its own dependency. |
 | `karta` | `enabled=true` | CRD-based resource abstraction layer with a standard schema for describing any Kubernetes workload type, so controllers can extract pod specs and status without per-type logic. |
 
-#### kai-scheduler CRDs
+#### KRM and kai-scheduler CRDs
 
-The script applies these directly from the Go module cache (`podgroups`, `queues`, `schedulingshards`, `configs`, `topologies`), since the `crd-upgrader` job does not manage them. The module version is pinned in `runai-cluster/cluster/go-operator/go.mod` — if it is not in the cache, you will see `kai-scheduler Go module not found; CRDs may be missing`; run `go mod download` in `go-operator` and re-deploy.
+The script applies nothing by hand. Both charts ship their CRDs in their own `crds/` directory, which Helm applies for subcharts, and each carries a crd-upgrader hook for the upgrade path. If a placeholder subchart was installed (see below), the CRDs are missing along with everything else.
 
 #### Scale-Adjust Namespace
 
-Enabling `kai-scheduler` triggers creation of the `runai-scale-adjust` namespace. If a previous failed install left it without Helm ownership labels, the script deletes it first so Helm can recreate it cleanly.
+Enabling `kai-resource-management` triggers creation of the `runai-scale-adjust` namespace. If a previous failed install left it without Helm ownership labels, the script deletes it first so Helm can recreate it cleanly.
 
 #### Chart Reconciliation
 
 Before installing, the script reconciles `charts/` against `Chart.yaml`, since Helm needs a subchart present for every declared dependency and `charts/*.tgz` is gitignored (a fresh clone has none):
 
 1. **Prune** — deletes any tarball that no longer matches a declared dependency. Helm loads *every* tarball in `charts/`, so a leftover from a previous version bump would make the resolved subchart ambiguous, and a tarball for a removed dependency would render with no condition to gate it.
-2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/run-ai/karta`) and need no credentials.
+2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/workload-map/karta`) and need no credentials.
 3. **Fall back** — if the fetch fails (offline, registry down), generates a minimal placeholder so the install can still proceed, and warns that the subchart will be empty.
 
 Names and versions are read from `Chart.yaml`, so bumping a dependency cannot leave the script stale.
 
-> **If you see the placeholder warning,** `kai-scheduler` and `karta` will be enabled but deploy nothing — Helm matches dependencies by name only, so a placeholder satisfies the check and the subchart installs empty. Re-run once you have network access, or fetch manually with `helm dependency build runai-cluster/cluster/runai-chart`. See [Known Issues](#known-issues).
+> **If you see the placeholder warning,** `kai-resource-management` and `karta` will be enabled but deploy nothing — Helm matches dependencies by name only, so a placeholder satisfies the check and the subchart installs empty. Re-run once you have network access, or fetch manually with `helm dependency build runai-cluster/cluster/runai-chart`. See [Known Issues](#known-issues).
 
 ---
 
@@ -365,20 +365,20 @@ Images are pushed to the local `kind-registry` container and referenced as `loca
 
 ## Known Issues
 
-### No kai-scheduler / karta Pods After Deploy
+### No KRM / kai-scheduler / karta Pods After Deploy
 
 The script fetches these subcharts automatically, but if the fetch failed it falls back to an empty placeholder and the scheduler silently deploys nothing. Look for this in the output:
 
 ```
-[warn]   Could not fetch kai-scheduler@<version> — installing an EMPTY placeholder.
+[warn]   Could not fetch kai-resource-management@<version> — installing an EMPTY placeholder.
 ```
 
 The version comes from `Chart.yaml`, so it moves as that pin moves. Confirm by size: a real chart is tens of KB, a placeholder a few hundred bytes:
 
 ```bash
 ls -l runai-cluster/cluster/runai-chart/charts/*.tgz
-# kai-scheduler-v<version>.tgz   ~84 KB   real
-# karta-<version>.tgz            ~13 KB   real
+# kai-resource-management-v<version>.tgz  ~140 KB   real  (bundles kai-scheduler)
+# karta-<version>.tgz                      ~13 KB   real
 ```
 
 Fix by fetching manually, then redeploying just the chart:

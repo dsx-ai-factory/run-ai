@@ -2168,7 +2168,7 @@ ${DOMAIN}:53 {
     fi
   fi
 
-  # runai-scale-adjust is created by the chart (kai-scheduler.enabled=true). If it exists
+  # runai-scale-adjust is created by the chart (kai-resource-management.enabled=true). If it exists
   # without helm ownership labels (leftover from a failed install), helm refuses to adopt it.
   # Delete it so helm can recreate it cleanly.
   if kubectl get namespace runai-scale-adjust &>/dev/null; then
@@ -2198,7 +2198,7 @@ ${DOMAIN}:53 {
   # charts/*.tgz is gitignored, so a fresh clone has none.
   #
   # Dependency names and versions are read from Chart.yaml rather than hardcoded here,
-  # so bumping a dependency (e.g. kai-scheduler v0.16.8, karta 0.2.3) cannot leave this
+  # so bumping a dependency (e.g. kai-scheduler v0.16.8, karta 0.2.6) cannot leave this
   # block stale.
   local charts_dir="${rc_chart}/charts"
   mkdir -p "${charts_dir}"
@@ -2286,25 +2286,13 @@ CHARTEOF
 
   local scheduler_args=(
     --set runai-engine.enabled=false
-    --set kai-scheduler.enabled=true
+    --set kai-resource-management.enabled=true
     --set karta.enabled=true
   )
 
-  # kai-scheduler CRDs (podgroups, queues, schedulingshards, configs, topologies) are not
-  # managed by the crd-upgrader job — install them directly from the Go module cache.
-  # The module version is pinned in cluster/go-operator/go.mod.
-  local kai_mod_dir
-  # `find | head -1` can trigger SIGPIPE (exit 141) under set -euo pipefail when
-  # find has more results than head consumes, or when the module dir doesn't exist.
-  # The `|| true` prevents the pipeline's non-zero exit from aborting the script.
-  kai_mod_dir="$(find "${GOPATH:-${HOME}/go}/pkg/mod/github.com/kai-scheduler" \
-    -maxdepth 1 -type d -name "!k!a!i-scheduler@*4d91aed*" 2>/dev/null | head -1 || true)"
-  if [[ -d "${kai_mod_dir}/deployments/kai-scheduler/crds" ]]; then
-    kubectl apply --server-side -f "${kai_mod_dir}/deployments/kai-scheduler/crds/" \
-      >/dev/null 2>&1 && log "  kai-scheduler CRDs applied" || warn "  kai-scheduler CRDs apply failed (may already exist)"
-  else
-    warn "  kai-scheduler Go module not found; CRDs may be missing"
-  fi
+  # KRM and the KAI scheduler it bundles both ship their CRDs in their charts'
+  # crds/ directories, which Helm applies for subcharts, and each carries its own
+  # crd-upgrader hook for the upgrade path. Nothing to apply by hand here.
 
   # helm post-install/upgrade hooks run queue-version validation which can take >6m to
   # converge. Allow the hook timeout, then fix the cluster in post_deploy_fixes below.
@@ -2368,8 +2356,8 @@ print_access_info() {
   echo "  CP namespace:         ${CP_NAMESPACE}"
   echo "  Cluster namespace:    ${RC_NAMESPACE}"
   echo ""
-  echo "  Scheduler:  kai-scheduler + karta enabled"
-  echo "    If no kai-scheduler/karta pods are running, charts/ holds placeholder"
+  echo "  Scheduler:  kai-resource-management (bundles kai-scheduler) + karta enabled"
+  echo "    If no KRM/kai-scheduler/karta pods are running, charts/ holds placeholder"
   echo "    subcharts. Fix with: helm dependency build ${REPO_ROOT}/runai-cluster/cluster/runai-chart"
   echo "  Re-deploy cluster with updated credentials:"
   echo "    helm upgrade runai-cluster ${REPO_ROOT}/runai-cluster/cluster/runai-chart \\"

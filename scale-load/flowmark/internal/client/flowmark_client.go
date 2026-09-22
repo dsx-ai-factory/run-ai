@@ -33,7 +33,7 @@ const (
 
 type Clients struct {
 	Identity       string
-	Kube           k8sclient.Client
+	Kube           k8sclient.WithWatch
 	ClusterService *clusterclient.APIClient
 	OrgUnits       *orgunitclient.APIClient
 	Workloads      *workloadclient.APIClient
@@ -60,7 +60,7 @@ func New(ctx context.Context, env core.Env) (*Clients, error) {
 	httpClient := oauth2.NewClient(ctx, source)
 	baseURL := base.String()
 
-	kube, err := newKubeClient(env.KubeconfigPath)
+	kube, err := Kube(env.KubeconfigPath)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func credentials(ctx context.Context, env core.Env, base *url.URL) (oauth2.Token
 	return newTokenSource(ctx, loginClient, base.JoinPath(loginPath).String(), env.Username, env.Password), nil
 }
 
-func newKubeClient(path string) (k8sclient.Client, error) {
+func Kube(path string) (k8sclient.WithWatch, error) {
 	if path == "" {
 		return nil, errors.New("kubeconfig path is empty (set --kubeconfig)")
 	}
@@ -134,7 +134,7 @@ func newKubeClient(path string) (k8sclient.Client, error) {
 	config.QPS = kubeQPS
 	config.Burst = kubeBurst
 
-	kube, err := k8sclient.New(config, k8sclient.Options{})
+	kube, err := k8sclient.NewWithWatch(config, k8sclient.Options{})
 	if err != nil {
 		return nil, fmt.Errorf("creating kube client: %w", err)
 	}

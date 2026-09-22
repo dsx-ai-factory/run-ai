@@ -16,7 +16,7 @@ type EnablePolicies struct {
 
 func (e *EnablePolicies) Category() string { return WorkloadsCategory }
 func (e *EnablePolicies) Description() string {
-	return "Enable to impose restrictions and default values on workloads' fields. For more information, see the Policies guide"
+	return "Enable to impose restrictions and default values on workloads' fields. For more information, see the <a data-doc-key='policies' target='_blank'>Policies guide</a>"
 }
 func (e *EnablePolicies) DisplayName() string         { return "Policies" }
 func (e *EnablePolicies) Key() string                 { return string(api.WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES) }
@@ -58,7 +58,7 @@ type EnableTemplatesV2 struct {
 
 func (e *EnableTemplatesV2) Category() string { return WorkloadsCategory }
 func (e *EnableTemplatesV2) Description() string {
-	return "Enable to create workload templates via the new flexible form. For more information, see the Workload Templates guide"
+	return "Enable to create workload templates via the new flexible form. For more information, see the <a data-doc-key='workloadTemplates' target='_blank'>Workload Templates guide</a>"
 }
 func (e *EnableTemplatesV2) DisplayName() string { return "Flexible workload templates" }
 func (e *EnableTemplatesV2) Key() string {
@@ -102,7 +102,7 @@ type GpuOverProvisioning struct {
 
 func (e *GpuOverProvisioning) Category() string { return WorkloadsCategory }
 func (e *GpuOverProvisioning) Description() string {
-	return "Enable to set a GPU memory limit for workloads. To enable this on each Run:ai cluster, see the Dynamic GPU fractions guide"
+	return "Enable to set a GPU memory limit for workloads. To enable this on each Run:ai cluster, see the <a data-doc-key='dynamicFractions' target='_blank'>Dynamic GPU fractions guide</a>"
 }
 func (e *GpuOverProvisioning) DisplayName() string { return "GPU resource optimization" }
 func (e *GpuOverProvisioning) Key() string {

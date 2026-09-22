@@ -18,10 +18,10 @@ helm uninstall runai-cluster -n runai
 
 To remove the NVIDIA Run:ai cluster from the NVIDIA Run:ai platform, see [Removing a cluster](../../operations/clusters.md#removing-a-cluster).
 
-<Info>
+<Note>
 
 **Note**
 
 Uninstall of NVIDIA Run:ai cluster from the Kubernetes cluster does **not** delete existing projects, departments or workloads submitted by users.
 
-</Info>
+</Note>

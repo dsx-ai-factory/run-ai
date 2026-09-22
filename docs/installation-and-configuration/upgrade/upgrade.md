@@ -106,13 +106,13 @@ Before upgrading the NVIDIA Run:ai cluster, validate that the latest [system req
 
 </Warning>
 
-<Info>
+<Note>
 
 **Note**
 
 It is highly recommended to upgrade the Kubernetes version together with the NVIDIA Run:ai cluster version, to ensure compatibility with latest supported version of your [Kubernetes distribution](../installation/install-using-helm/system-requirements.md#kubernetes-distribution).
 
-</Info>
+</Note>
 
 ### Setup
 
@@ -122,13 +122,13 @@ It is highly recommended to upgrade the Kubernetes version together with the NVI
 4. Optional: Select the NVIDIA Run:ai cluster version (latest, by default)
 5. Click **CONTINUE**
 
-<Info>
+<Note>
 
 **Note**
 
 If your control plane was upgraded using NGC, the cluster must also be upgraded using NGC. See the NGC tab below.
 
-</Info>
+</Note>
 
 ### Run the Upgrade Command
 
@@ -151,13 +151,14 @@ If your control plane was upgraded using NGC, the cluster must also be upgraded 
         helm repo update
         helm upgrade -i runai-cluster runai/runai-cluster -n runai \
           --set controlPlane.url=... \
-          --set controlPlane.bootstrapToken=... \
+          --set controlPlane.clientSecret=... \
           --set cluster.uid=... \
           --set cluster.url=... --version="<VERSION>" --create-namespace
           --set clusterConfig.global.ingress.ingressClass=haproxy
 
     ```
 3. Click **DONE**
+
 
 </Tab>
 
@@ -178,7 +179,7 @@ If your control plane was upgraded using NGC, the cluster must also be upgraded 
     ```bash
     helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
       --set controlPlane.url=... \
-      --set controlPlane.bootstrapToken=... \
+      --set controlPlane.clientSecret=... \
       --set cluster.uid=... \
       --set cluster.url=... --create-namespace \
       --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \
@@ -192,27 +193,29 @@ If your control plane was upgraded using NGC, the cluster must also be upgraded 
 
 </Tabs>
 
+Once installation is complete, validate the cluster is **Connected** and listed with the new cluster version. Once you have done this, the cluster is upgraded to the latest version. If the cluster does not appear as expected, see the [cluster troubleshooting scenarios](../operations/clusters.md#troubleshooting-scenarios).
+
 ## Migrate from NGINX to HAProxy Kubernetes Ingress Controller
 
-<Info>
+<Note>
 
 **Note**
 
 This section applies to Kubernetes only. OpenShift includes a pre-installed ingress controller by default and does not require this migration.
 
-</Info>
+</Note>
 
 NVIDIA Run:ai recommends using [HAProxy Kubernetes Ingress Controller](https://www.haproxy.com/documentation/kubernetes-ingress/) as the ingress controller. This change aligns with the announced retirement of the upstream NGINX Ingress Controller project.
 
 Clusters upgraded from earlier versions typically already have NGINX installed. After upgrading to v2.26, follow the steps below to migrate ingress traffic from NGINX Ingress Controller to HAProxy Kubernetes Ingress Controller.
 
-<Info>
+<Note>
 
 **Migration Resources**
 
 You can utilize additional resources to streamline your migration. Visit the [HAProxy Migration Center](https://www.haproxy.com/landing/ingress-nginx-retirement) to access a dedicated migration assistant tool and a technical webinar on moving from NGINX to HAProxy.
 
-</Info>
+</Note>
 
 ### Check the Service Type of the Existing Ingress Controller
 
@@ -227,13 +230,13 @@ kubectl get svc -n <nginx-namespace>
 
 When running more than one ingress controller in the same cluster, port conflicts are relevant only for NodePort-based setups. LoadBalancer-based controllers automatically receive separate external IP addresses.
 
-<Info>
+<Note>
 
 **Note**
 
 If your setup differs from the examples above, adjust the configuration accordingly. When using external LoadBalancer on top of Ingress with service type NodePort, you may need to update external resources to route traffic to HAProxy’s configured NodePort values.
 
-</Info>
+</Note>
 
 ### Install and Configure HAProxy Kubernetes Ingress Controller
 
@@ -241,13 +244,13 @@ Ingress controllers can be installed and configured in different ways depending 
 
 The sections below provide environment-specific Helm installation examples. Select the option that matches your deployment environment.
 
-<Info>
+<Note>
 
 **Note**
 
 OpenShift and RKE2 include a pre-installed ingress controller by default.
 
-</Info>
+</Note>
 
 <Accordion title="Vanilla Kubernetes">
 

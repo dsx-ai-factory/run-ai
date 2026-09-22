@@ -154,7 +154,7 @@ func TestEnsureCluster_CreatesWhenMissing(t *testing.T) {
 	api := &fakeAPI{}
 	deps := orchestrator2.Deps{RunAIClientProvider: providerFor(api)}
 
-	execOK(t, EnsureCluster{ClusterName: "c1", Domain: "runai.example.com"}, deps)
+	execOK(t, NewEnsureCluster("c1", "runai.example.com", ""), deps)
 
 	require.Len(t, api.created, 1)
 	assert.Equal(t, "c1", api.created[0].Name)
@@ -166,7 +166,7 @@ func TestEnsureCluster_SkipsWhenExists(t *testing.T) {
 	api := &fakeAPI{clusters: []runaicluster.DisplayedCluster{{Name: "c1", Uuid: "u1"}}}
 	deps := orchestrator2.Deps{RunAIClientProvider: providerFor(api)}
 
-	execOK(t, EnsureCluster{ClusterName: "c1", Domain: "d"}, deps)
+	execOK(t, NewEnsureCluster("c1", "d", ""), deps)
 
 	assert.Empty(t, api.created)
 }
@@ -485,7 +485,7 @@ func TestActionsDescribe(t *testing.T) {
 		TLSSecret{SecretName: "s", Namespace: "n", CertPath: "/c"}.Describe(),
 		CASecret{SecretName: "s", Namespace: "n", CACertPath: "/c"}.Describe(),
 		RegistrySecret{SecretName: "s", Namespace: "n"}.Describe(),
-		EnsureCluster{ClusterName: "c1", Domain: "d"}.Describe(),
+		NewEnsureCluster("c1", "d", "").Describe(),
 		InstallClusterChart{ClusterName: "c1", ReleaseName: "r", ChartName: "ch", Version: "v", Namespace: "n"}.Describe(),
 		ExtractAirgap{BundlePath: "/b.tgz", WorkingDir: "/w"}.Describe(),
 		PushAirgapImages{WorkingDir: "/w", RegistryURL: "mirror.local:5000"}.Describe(),

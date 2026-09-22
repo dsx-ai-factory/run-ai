@@ -25,7 +25,9 @@ GO_VERSION_BASE?=$(or $(strip $(if $(wildcard go.mod),$(shell awk '$$1=="go"{pri
 GO_VERSION?=$(GO_VERSION_BASE)
 GO_ALPINE_VERSION?=$(GO_VERSION_BASE)-alpine
 MOCKERY_VERSION=v3.2.5
-GOLANGCI_LINT_VERSION=v2.9.0
+# Must be new enough to decode the Go release's export data: v2.9.0 fails
+# every package on Go 1.27 with "export data version 4 ... (typecheck)".
+GOLANGCI_LINT_VERSION=v2.13.2
 GOPRIVATE=github.com/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.
@@ -94,7 +96,7 @@ DOCKER_CGO_COMMAND=${DOCKER_CGO_BASE_COMMAND} -e CGO_ENABLED=1 -e GOOS=${OS} -e 
 DOCKER_GINKGO_COMMAND=${DOCKER_GO_COMMAND} /bin/sh -c '${GINKGO_COMMAND}'
 DOCKER_GINKGO_COMMAND_PRIVILEGED=${DOCKER_GO_COMMAND_PRIVILEGED} /bin/sh -c '${GINKGO_COMMAND}'
 
-DOCKER_GO_LINTER_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GOFLAGS="-buildvcs=false" ${DOCKERHUB_PROXY}golangci/golangci-lint:${GOLANGCI_LINT_VERSION}-alpine
+DOCKER_GO_LINTER_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GOFLAGS="-buildvcs=false" --entrypoint /bin/sh ${DOCKERHUB_PROXY}library/golang:${GO_VERSION} -c 'go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} &&
 DOCKER_GO_IMPORTS_COMMAND=${DOCKER_GO_BASE_COMMAND} ${DOCKERHUB_PROXY}cytopia/goimports:latest-0.3
 DOCKER_MOCKERY_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GO111MODULE=on --entrypoint /bin/sh ${DOCKERHUB_PROXY}library/golang:${GO_VERSION} -c 'go install github.com/vektra/mockery/v3@${MOCKERY_VERSION} &&
 
@@ -116,16 +118,19 @@ GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
 
 GO_LDFLAGS=''
 
-# Optional: restrict golangci-lint to changes since this rev (--new-from-rev).
-# Empty (the default) lints all files. RC services opt in via runai-cluster.mk
-# to preserve the legacy "only flag new code" behavior.
-LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),master)
+# Restrict golangci-lint to changes since the PR's base branch
+# (--new-from-rev), so a PR is judged on the code it actually touched.
+# Override to empty in a service Makefile to lint every file.
+LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),main)
 ifeq ($(GITHUB_REF_TYPE),tag)
+  # GITHUB_REF_NAME is the tag itself here, so --new-from-rev would diff the
+  # tagged commit against itself and report nothing. Lint the whole tree.
   LINT_REV ?= $(LINT_BASE_BRANCH)
+  LINT_NEW_FROM_REV ?=
 else
   LINT_REV ?= origin/$(LINT_BASE_BRANCH)
+  LINT_NEW_FROM_REV ?= $(LINT_REV)
 endif
-LINT_NEW_FROM_REV ?=
 
 ################### OS DEPENDENCY ##########################
 # Build the project
@@ -254,7 +259,7 @@ lint-go: git-config-command gocache
 	@ echo $(GREEN_CONSOLE) "${CONSOLE_PREFIX} Running golangci linter for ${SERVICE_NAME}" $(BASE_CONSOLE); \
 		if [ -n "$(LINT_NEW_FROM_REV)" ]; then git fetch origin $(LINT_BASE_BRANCH) --depth=1 2>/dev/null || true; fi; \
 		$(DOCKER_GO_LINTER_COMMAND) \
-		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),) || $(FAILURE_MESSAGE_HANDLER)
+		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),)' || $(FAILURE_MESSAGE_HANDLER)
 .PHONY: lint-go
 
 .PHONY: build-go

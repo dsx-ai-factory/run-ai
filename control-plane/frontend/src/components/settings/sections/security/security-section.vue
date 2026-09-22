@@ -8,10 +8,12 @@
     class="security-section settings-container"
     label="Security"
     :subheader="sectionSubHeader"
+    :section-invalid="isCertificateExpired"
+    :section-warning="isCertificateExpiringSoon"
     @show="() => initializeSecuritySettings(true)"
   >
-    <sso-settings v-if="settings" v-model:settings="settings" />
-    <div class="row items-center q-mt-xl">
+    <sso-settings v-if="settings" v-model:settings="settings" @certificate-status="onCertificateStatus" />
+    <div class="row items-center q-mt-md">
       <span class="q-mr-md">Set logout redirect URL</span>
       <runai-tooltip
         aid="tooltip-logout-redirect-url"
@@ -30,7 +32,7 @@
       delete-sub-title="Users will be directed back to the Run:ai sign-in screen after signing out."
       :resource-type="securityResourceType"
     />
-    <div class="row items-center q-mt-xl q-mb-sm">
+    <div class="row items-center q-mt-md q-mb-sm">
       <span class="q-mr-md">Set UI inactivity timeout</span>
       <runai-tooltip
         aid="tooltip-session-timeout"
@@ -103,6 +105,8 @@ export default defineComponent({
       idleTimerService: IdleTimer.getInstance(),
       logoutRedirectUri: null as GetLogoutRedirectUriSettingValue | null,
       settings: null as SettingsGetResponse | null,
+      isCertificateExpired: false,
+      isCertificateExpiringSoon: false,
     };
   },
   async created() {
@@ -153,6 +157,11 @@ export default defineComponent({
       } catch (error) {
         console.error("Failed to get security settings:", error);
       }
+    },
+
+    onCertificateStatus(status: { expired: boolean; expiringSoon: boolean }): void {
+      this.isCertificateExpired = status.expired;
+      this.isCertificateExpiringSoon = status.expiringSoon;
     },
 
     handleVisibilityChange(): void {

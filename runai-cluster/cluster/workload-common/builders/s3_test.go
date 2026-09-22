@@ -28,7 +28,7 @@ var _ = Describe("S3 tests", func() {
 	BeforeEach(func() {
 		// Setup common test variables
 		ctx = context.Background()
-		GinkgoT().Setenv(config.EnvVarS3FileSystemImage, "runai.jfrog.io/op-containers-prod/goofys")
+		GinkgoT().Setenv(config.EnvVarS3FileSystemImage, "example.io/goofys")
 		sharedFields = &field_groups.WorkloadFields{
 			StorageFields: field_groups.StorageFields{
 				S3buckets: &field_types.S3bucketField{

@@ -19,3 +19,11 @@ type RunAIAPIClient interface {
 }
 
 type RunAIAPIClientProvider func(fqdn, caCertPath string) (RunAIAPIClient, error)
+
+type ControlPlaneCredentials struct {
+	Username string
+	Password string
+	Token    string
+}
+
+type RunAIAPICredentialedClientProvider func(url, caCertPath string, creds ControlPlaneCredentials) (RunAIAPIClient, error)

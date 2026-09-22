@@ -15,6 +15,9 @@ BUILD_TAGS?=
 INTERNAL_TAG=runai_internal
 INTERNAL_BIN_REL_PATH?=bin-internal
 
+# Derive the Go runtime version from go.mod so the linter is always built
+# with a toolchain new enough for whatever go.mod currently requires.
+GO_VERSION_BASE?=$(shell awk '$$1=="go"{print $$2;exit}' go.mod)
 GOLANGCI_LINT_VERSION=v2.9.0
 DOCKERHUB_PROXY?=
 
@@ -43,8 +46,9 @@ lint: git-config-command
 		-e GOPRIVATE=$(GOPRIVATE) \
 		-e GOFLAGS=-buildvcs=false \
 		-e GIT_CONFIG_GLOBAL=/.gitconfig \
-		$(DOCKERHUB_PROXY)golangci/golangci-lint:$(GOLANGCI_LINT_VERSION)-alpine \
-		golangci-lint run -c .golangci.yaml $(if $(BUILD_TAGS),--build-tags "$(BUILD_TAGS)",)
+		--entrypoint /bin/sh \
+		$(DOCKERHUB_PROXY)library/golang:$(GO_VERSION_BASE) \
+		-c 'go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) && golangci-lint run -c .golangci.yaml $(if $(BUILD_TAGS),--build-tags "$(BUILD_TAGS)",)'
 .PHONY: lint
 
 lint-internal: git-config-command

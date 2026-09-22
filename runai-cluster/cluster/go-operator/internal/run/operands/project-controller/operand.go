@@ -27,7 +27,6 @@ var (
 	resourceFunctions = []operands.ResourceFunction{
 		resources.DeploymentForRunaiConfig,
 		resources.ConfigMapForRunaiConfig,
-		resources.BlockersConfigMapForRunaiConfig,
 		resources.ServiceForRunaiConfig,
 		resources.ServiceAccountForRunaiConfig,
 		resources.ServiceMonitorForRunaiConfig,
@@ -38,8 +37,6 @@ var (
 	// Update this slice when a resource has a status to report.
 	resourceStatusFunctions = []operands.ResourceStatusFunction{
 		resources.DeploymentStatus,
-		resources.ConfigMapStatus,
-		resources.BlockersConfigMapStatus,
 		resources.ServiceStatus,
 		resources.ServiceAccountStatus,
 		resources.ServiceMonitorStatus,
