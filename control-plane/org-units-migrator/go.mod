@@ -173,7 +173,7 @@ require (
 )
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2
