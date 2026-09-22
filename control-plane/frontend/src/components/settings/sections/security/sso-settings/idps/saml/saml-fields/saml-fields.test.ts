@@ -107,6 +107,41 @@ describe("saml-fields.vue", () => {
     });
   });
 
+  describe("isValidUrl", () => {
+    it("requires a URL when switching an existing file-sourced IdP to URL", () => {
+      const { wrapper } = factory({
+        samlSettings: validSamlSettings,
+        isNewIdp: false,
+        idpResources: { resourceName: "idp.xml", resource: fakeMetadataXml },
+      });
+
+      expect((wrapper.vm as unknown as { isValidUrl: (u: string) => boolean | string }).isValidUrl("")).toBe(
+        "Enter a valid URL",
+      );
+    });
+
+    it("allows leaving the URL blank for an existing URL-sourced IdP", () => {
+      const { wrapper } = factory({
+        samlSettings: validSamlSettings,
+        isNewIdp: false,
+        idpResources: {
+          resourceName: SamlCreationDataMetadataXmlTypeEnum.Url,
+          resource: "https://idp.example.com/metadata",
+        },
+      });
+
+      expect((wrapper.vm as unknown as { isValidUrl: (u: string) => boolean | string }).isValidUrl("")).toBe(true);
+    });
+
+    it("requires a URL for a new IdP", () => {
+      const { wrapper } = factory({ isNewIdp: true });
+
+      expect((wrapper.vm as unknown as { isValidUrl: (u: string) => boolean | string }).isValidUrl("")).toBe(
+        "Enter a valid URL",
+      );
+    });
+  });
+
   describe("certificate expiration field", () => {
     const now = new Date("2026-01-01T00:00:00.000Z");
     const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);

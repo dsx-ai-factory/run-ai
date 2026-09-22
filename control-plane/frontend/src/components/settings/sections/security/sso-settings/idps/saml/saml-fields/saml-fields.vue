@@ -275,7 +275,8 @@ export default defineComponent({
       }
     },
     isValidUrl(url: string): boolean | string {
-      return isValidUrl(url) || (!this.isNewIdp && !url) || "Enter a valid URL";
+      const canLeaveBlank = !this.isNewIdp && this.getSourceType === SamlCreationDataMetadataXmlTypeEnum.Url;
+      return isValidUrl(url) || (canLeaveBlank && !url) || "Enter a valid URL";
     },
     isValidFile(file: string): boolean | string {
       return !!file || "Upload a file";
