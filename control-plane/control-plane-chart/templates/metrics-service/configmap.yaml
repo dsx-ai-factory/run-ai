@@ -1244,11 +1244,11 @@ data:
         cross_version_query: sum(runai_used_memory_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
         queries:
           2.25.0: sum(runai_used_memory_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
-      runai_service_availability:
+      runai_cluster_component_availability:
         cross_version_query: sum by (clusterId, container) (sum_over_time(kube_pod_container_status_ready{FILTERS}[RANGE])) / sum by (clusterId, container) (count_over_time(kube_pod_container_status_ready{FILTERS}[RANGE]))
         queries:
           2.25.0: sum by (clusterId, container) (sum_over_time(kube_pod_container_status_ready{FILTERS}[RANGE])) / sum by (clusterId, container) (count_over_time(kube_pod_container_status_ready{FILTERS}[RANGE]))
-      runai_service_restarts:
+      runai_cluster_component_restarts:
         cross_version_query: round(sum by (clusterId, container) (increase(kube_pod_container_status_restarts_total{FILTERS}[RANGE])))
         queries:
           2.25.0: round(sum by (clusterId, container) (increase(kube_pod_container_status_restarts_total{FILTERS}[RANGE])))
