@@ -145,7 +145,6 @@ CP_GO_SERVICES=(
   notifications-proxy
   notifications-service
   org-unit-service
-  org-units-migrator
   policy-service
   secret-generator
   temp-backend-settings

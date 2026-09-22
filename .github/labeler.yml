@@ -394,16 +394,6 @@ org-unit-service:
     - *no-integration_tests-dir
     - *no-mocks-dir
 
-org-units-migrator:
-- changed-files:
-  - all-globs-to-any-file:
-    - 'control-plane/org-units-migrator/**/*.{go,sql}'
-    - *no-test-go
-    - *no-tests-dir
-    - *no-integration-tests-dir
-    - *no-integration_tests-dir
-    - *no-mocks-dir
-
 otel-collector:
 - changed-files:
   - all-globs-to-any-file:
