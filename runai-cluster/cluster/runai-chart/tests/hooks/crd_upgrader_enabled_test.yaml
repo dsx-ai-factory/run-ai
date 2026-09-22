@@ -41,6 +41,9 @@ tests:
     set:
       crdUpgrader.enabled: true
       global.fipsMode: "on"
+      # KRM fails the render when fipsMode is on without it, and the whole
+      # chart renders here even though this suite asserts on one template.
+      global.fips: true
     templates:
       - templates/hooks/upgrade_crds/job.yaml
     documentSelector:

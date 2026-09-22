@@ -26,10 +26,8 @@ Feature availability may vary across NVIDIA Run:ai versions and cluster deployme
 | [Over quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#over-quota) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | [Bin packing / Spread](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#placement-strategy-bin-pack-and-spread) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| [Multi-GPU fractions](../../platform-management/runai-scheduler/resource-optimization/fractions.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| [Multi-GPU dynamic fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| [Node level scheduler](../../platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| [Multi-GPU memory swap](../../platform-management/runai-scheduler/resource-optimization/memory-swap.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| [Multi-GPU fractions](../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| [Multi-GPU dynamic fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Elastic scaling | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ |
 | [Gang scheduling](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#gang-scheduling) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | [Network topology-aware scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md) | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ |
@@ -67,9 +65,7 @@ Kubernetes workloads can be submitted outside of NVIDIA Run:ai, for example by u
   * [Over quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#over-quota)
   * [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md)
   * [Bin packing / Spread](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#placement-strategy-bin-pack-and-spread)
-  * [Multi-GPU fractions](../../platform-management/runai-scheduler/resource-optimization/fractions.md)
-  * [Multi-GPU dynamic fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md)
-  * [Node level scheduler](../../platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md)
-  * [Multi-GPU memory swap](../../platform-management/runai-scheduler/resource-optimization/memory-swap.md)
+  * [Multi-GPU fractions](../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md)
+  * [Multi-GPU dynamic fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md)
   * [Gang scheduling](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#gang-scheduling)
 * All [monitoring](../workloads.md#show-hide-details) capabilities are supported including event history, metrics and logs.

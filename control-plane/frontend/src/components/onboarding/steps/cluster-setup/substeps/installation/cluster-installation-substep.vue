@@ -18,8 +18,27 @@
     <onboarding-content-wrapper v-else>
       <template #title>Install NVIDIA Run:ai on your cluster</template>
       <template #subtitle>
-        Review the <a :href="DOCS.INSTALLATION.PREREQUISITES" target="_blank">system</a> and
-        <a :href="DOCS.INSTALLATION.NETWORK_REQUIREMENTS" target="_blank">network</a> requirements.
+        Review the
+        <a
+          v-if="DOCS.INSTALLATION.PREREQUISITES"
+          aid="onboarding-system-requirements-link"
+          :href="DOCS.INSTALLATION.PREREQUISITES"
+          target="_blank"
+        >
+          system
+        </a>
+        <span v-else>system</span>
+        and
+        <a
+          v-if="DOCS.INSTALLATION.NETWORK_REQUIREMENTS"
+          aid="onboarding-network-requirements-link"
+          :href="DOCS.INSTALLATION.NETWORK_REQUIREMENTS"
+          target="_blank"
+        >
+          network
+        </a>
+        <span v-else>network</span>
+        requirements.
         <br />
 
         Then run the command below in your Kubernetes cluster to

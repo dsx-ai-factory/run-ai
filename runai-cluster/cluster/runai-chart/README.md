@@ -7,7 +7,8 @@ owns the `RunaiConfig`, the CRD-upgrader and helm-hooks-handler jobs that
 prepare the cluster on install/upgrade, cluster-scoped RBAC and priority
 classes, OpenShift-specific resources, the `RunaiConfig`/`Cluster` custom
 resources, and the scheduler stack pulled in as chart dependencies
-(`kai-scheduler`, `karta`, and the CRDs subchart). The chart is named
+(`kai-resource-management`, `karta`, and the CRDs subchart; `kai-scheduler`
+arrives as a sub-dependency of KRM). The chart is named
 `runai-cluster` (see [`Chart.yaml`](Chart.yaml)) and is owned by the
 **Griffin Team**.
 
@@ -53,14 +54,14 @@ The chart renders and manages:
 
 ```text
 .
-├── Chart.yaml               # Chart metadata + dependencies (kai-scheduler, karta, crds)
+├── Chart.yaml               # Chart metadata + dependencies (kai-resource-management, karta, crds)
 ├── values.yaml              # Default customer-facing values
 ├── values.schema.json       # JSON Schema validating values.yaml
 ├── internal_values.yaml     # Internal-only values doc (NOT referenced by the chart)
 ├── crds/                    # run.ai_clusters CRD (installed ahead of templates)
 ├── charts/                  # Packaged dependency charts (.tgz) + crds subchart
 │   ├── crds/                # Subchart bundling the full Run:AI CRD set
-│   ├── kai-scheduler-*.tgz
+│   ├── kai-resource-management-*.tgz   # bundles kai-scheduler as its own dependency
 │   ├── karta-*.tgz
 │   └── runai-engine-*.tgz   # (legacy engine chart tarball)
 ├── templates/
@@ -88,7 +89,7 @@ Declared in [`Chart.yaml`](Chart.yaml) and vendored as tarballs under `charts/`:
 
 | Dependency | Version | Condition | Source |
 |------------|---------|-----------|--------|
-| `kai-scheduler` | `v0.16.7` | `kai-scheduler.enabled` | `oci://ghcr.io/kai-scheduler/kai-scheduler` |
+| `kai-resource-management` | `v0.0.3` | `kai-resource-management.enabled` | `oci://ghcr.io/kai-scheduler/kai-resource-management` |
 | `karta` | `0.2.6` | `karta.enabled` | `oci://ghcr.io/dsx-ai-factory/workload-map/karta` |
 | `crds` | `0.0.0` | `development.includeCRDsInReleaseManifest` | `file://charts/crds` |
 
@@ -162,7 +163,7 @@ Full defaults are in [`values.yaml`](values.yaml) and validated by
 | `crdUpgrader` | `runai-crd-upgrader` job: `enabled`, `establishedTimeout`, image, resources. |
 | `helmHooksHandler` | Hook job image, resources. |
 | `kartaMigrate` | Karta migration job: `enabled`, `removeRid`, `activeDeadlineSeconds`, `backoffLimit`, image, resources. |
-| `kai-scheduler` | Subchart values (resource reservation namespace/SA, autoscaling, queues, shards, priority classes). |
+| `kai-resource-management` | Subchart values for KRM's three controllers and its KRMConfig mode, plus a nested `kai-scheduler` block (resource reservation namespace/SA, autoscaling, queues, shards, priority classes). |
 | `karta` | Subchart values (operator, pod security context). |
 | `operands` | Enable/RBAC for training operator, researcher service, cluster API, prometheus. |
 | `userAuth` | RBAC for Run:AI user `kubectl` access. |

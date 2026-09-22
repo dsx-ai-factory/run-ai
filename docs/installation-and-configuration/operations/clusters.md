@@ -217,7 +217,7 @@ Before starting, make sure you have access to the Kubernetes cluster where NVIDI
 
 **Description:** A single faulty GPU node can cause the entire cluster to show a **Disconnected** status in the NVIDIA Run:ai platform, even when all other nodes are healthy. This typically occurs when the node is stuck in GPU validation and the NVIDIA Run:ai system DaemonSets cannot complete initialization on it. This happens because the NVIDIA Run:ai platform evaluates cluster health based on all system DaemonSet pods being available. A single stuck pod causes the DaemonSet to report as unavailable, which cascades to the cluster-level health status.
 
-Cordoning the node is not sufficient. A common first response is to cordon the faulty node using `kubectl cordon`. However, cordoning only prevents new pods from being scheduled on the node. It does not evict pods that already tolerate the `node.kubernetes.io/unschedulable` taint. The `runai-container-toolkit` DaemonSet tolerates this taint by default. As a result, its pod remains running (or stuck) on the cordoned node, and the cluster continues to report as Disconnected.
+Cordoning the node is not sufficient. A common first response is to cordon the faulty node using `kubectl cordon`. However, cordoning only prevents new pods from being scheduled on the node. It does not evict pods that already tolerate the `node.kubernetes.io/unschedulable` taint. The NVIDIA Run:ai system DaemonSets tolerate this taint by default. As a result, their pods remain running (or stuck) on the cordoned node, and the cluster continues to report as Disconnected.
 
 **Mitigation:** These steps require `cluster-admin` permissions to taint nodes. To isolate the faulty node and allow the cluster to recover:
 
@@ -226,13 +226,18 @@ Cordoning the node is not sufficient. A common first response is to cordon the f
     ```bash
     kubectl taint node <node-name> runai/gpu-fault=true:NoSchedule
     ```
-2. Delete the stuck DaemonSet pod on the faulty node. The taint from step 1 prevents the DaemonSet controller from recreating it, which reduces the expected pod count and allows the DaemonSet to report as fully available:
+2. Identify the stuck DaemonSet pod on the faulty node:
 
     ```bash
-    kubectl -n runai delete pod -l app=runai-container-toolkit --field-selector spec.nodeName=<node-name>
+    kubectl -n runai get pods --field-selector spec.nodeName=<node-name>
     ```
-3. Verify the cluster status returns to **Connected** in the NVIDIA Run:ai platform UI.
-4. Once the hardware issue on the node is resolved, remove the taint:
+3. Delete the stuck pod. The taint from step 1 prevents the DaemonSet controller from recreating it, which reduces the expected pod count and allows the DaemonSet to report as fully available:
+
+    ```bash
+    kubectl -n runai delete pod <pod-name>
+    ```
+4. Verify the cluster status returns to **Connected** in the NVIDIA Run:ai platform UI.
+5. After the hardware issue on the node is resolved, remove the taint:
 
     ```bash
     kubectl taint node <node-name> runai/gpu-fault=true:NoSchedule-
