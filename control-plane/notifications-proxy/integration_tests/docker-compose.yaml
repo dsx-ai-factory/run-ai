@@ -125,7 +125,7 @@ services:
       - "8025"
 
   redis:
-    image: redis:8.8-alpine
+    image: redis:8.10-alpine
     container_name: redis
     ports:
       - '6379:6379'
