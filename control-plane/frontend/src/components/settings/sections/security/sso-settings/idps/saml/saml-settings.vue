@@ -78,7 +78,7 @@
       icon-override="ph-bold ph-warning-circle"
       show-h1-content
       :title="certificateWarningTitle"
-      message="Edit the identity provider and replace the metadata XML with an updated file."
+      message="Edit the identity provider and update the SAML metadata source with a new certificate."
     />
     <div v-if="hasIdpAttributes" class="redirect-url-field">
       <div>Use the following if required by the identity provider</div>
@@ -158,6 +158,7 @@ export default defineComponent({
       authStore: useAuthStore(),
       isIdpFieldsChanged: false,
       certificateExpirationDate: null as Date | null,
+      certificateRequestToken: 0,
       idpStore: useIdpsStore(),
       idpResources: {} as IdpResources,
       DOCS,
@@ -165,13 +166,7 @@ export default defineComponent({
   },
   async created(): Promise<void> {
     this.isEditMode = this.isNewIdp;
-    this.certificateExpirationDate = this.idp?.samlData?.signingCertificate
-      ? await idpCommon.getCertificateExpirationDate(this.idp.samlData.signingCertificate)
-      : null;
-    this.$emit("certificate-status", {
-      expired: this.isExpiredCertificate,
-      expiringSoon: this.isCertificateExpiringSoon,
-    });
+    await this.refreshCertificateExpiration();
   },
   computed: {
     isExpiredCertificate(): boolean {
@@ -281,10 +276,26 @@ export default defineComponent({
         window.open(spMetadataUrl, "_blank");
       }
     },
+    async refreshCertificateExpiration(): Promise<void> {
+      const signingCertificate = this.idp?.samlData?.signingCertificate;
+      const requestToken = ++this.certificateRequestToken;
+      const expirationDate = signingCertificate
+        ? await idpCommon.getCertificateExpirationDate(signingCertificate)
+        : null;
+      if (requestToken !== this.certificateRequestToken) return;
+      this.certificateExpirationDate = expirationDate;
+      this.$emit("certificate-status", {
+        expired: this.isExpiredCertificate,
+        expiringSoon: this.isCertificateExpiringSoon,
+      });
+    },
   },
   watch: {
     isEditMode(newValue: boolean): void {
       this.$emit("edit-mode-changed", newValue);
+    },
+    "idp.samlData.signingCertificate"(): void {
+      this.refreshCertificateExpiration();
     },
   },
 });

@@ -161,5 +161,54 @@ describe("saml-settings.vue", () => {
         "error",
       );
     });
+
+    it("refreshes the expiration date when the signing certificate is replaced", async () => {
+      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
+
+      const { wrapper } = factory(mockIdp, false);
+      await wrapper.vm.$nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect((wrapper.vm as unknown as { certificateWarningVariant: string | null }).certificateWarningVariant).toBe(
+        "error",
+      );
+
+      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
+
+      await wrapper.setProps({
+        idp: {
+          ...mockIdp,
+          samlData: { ...mockSamlData, signingCertificate: "new-cert" },
+        },
+      });
+      await wrapper.vm.$nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect((wrapper.vm as unknown as { certificateWarningVariant: string | null }).certificateWarningVariant).toBe(
+        null,
+      );
+    });
+
+    it("clears the expiration date when the signing certificate is removed", async () => {
+      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
+
+      const { wrapper } = factory(mockIdp, false);
+      await wrapper.vm.$nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect((wrapper.vm as unknown as { certificateWarningVariant: string | null }).certificateWarningVariant).toBe(
+        "error",
+      );
+
+      await wrapper.setProps({
+        idp: { ...mockIdp, samlData: { ...mockSamlData, signingCertificate: "" } },
+      });
+      await wrapper.vm.$nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect((wrapper.vm as unknown as { certificateWarningVariant: string | null }).certificateWarningVariant).toBe(
+        null,
+      );
+    });
   });
 });
