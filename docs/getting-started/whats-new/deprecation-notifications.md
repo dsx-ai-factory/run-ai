@@ -11,3 +11,5 @@ For details on how long deprecated features remain supported, see [Support, Life
 </Info>
 
 Placeholder — deprecation content for v3.0 coming soon.
+
+TBD: PMs need to provide the v3.0 deprecation list.
