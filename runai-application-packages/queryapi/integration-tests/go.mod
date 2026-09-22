@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
 	github.com/stretchr/testify v1.12.1
 )
 
