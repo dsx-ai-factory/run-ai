@@ -115,40 +115,33 @@ type NodeParser struct {
 	nodeLabelNvidiaContainerToolkit string
 	nodeLabelNvidiaDcgmExporter     string
 
-	gpuFractioningSupport gpuFractioningSupportCache
+	gpuFractioningSupport lastGpuFractioningSupport
 }
 
-// The verdict only changes when the ConfigMap does, and re-parsing its YAML for every node of
-// every sync is needless work on a large cluster. Fail-open outcomes are cached under a sentinel
-// version too, so an absent or malformed ConfigMap costs one log line rather than one per node.
-type gpuFractioningSupportCache struct {
-	mutex           sync.RWMutex
-	resourceVersion string
-	supported       bool
-	loaded          bool
+// Holds the verdict the parser last acted on. Not a read cache — the ConfigMap is re-read and
+// re-parsed per call like every other parser here — this only exists so a flip can be detected,
+// which is otherwise invisible because the Node objects do not change when the verdict does.
+type lastGpuFractioningSupport struct {
+	mutex     sync.RWMutex
+	supported bool
+	loaded    bool
 }
 
-func (c *gpuFractioningSupportCache) load(resourceVersion string) (bool, bool) {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	if !c.loaded || c.resourceVersion != resourceVersion {
-		return false, false
-	}
-	return c.supported, true
-}
-
-func (c *gpuFractioningSupportCache) store(resourceVersion string, supported bool) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.resourceVersion = resourceVersion
-	c.supported = supported
-	c.loaded = true
-}
-
-func (c *gpuFractioningSupportCache) last() (bool, bool) {
+func (c *lastGpuFractioningSupport) last() (bool, bool) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	return c.supported, c.loaded
+}
+
+// store reports whether this verdict differs from the one already held, so callers can act —
+// or log — only on a real change.
+func (c *lastGpuFractioningSupport) store(supported bool) bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	changed := !c.loaded || c.supported != supported
+	c.supported = supported
+	c.loaded = true
+	return changed
 }
 
 func NewNodeParser(cachedReader client.Reader) *NodeParser {
@@ -314,43 +307,37 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 // Unreadable or absent cluster state is treated as supported, matching what the cluster status
 // does with the same input, so the two never disagree.
 func (nodeParser *NodeParser) clusterSupportsGpuFractioning() bool {
+	supported, reason := nodeParser.readClusterGpuFractioningSupport()
+	if nodeParser.gpuFractioningSupport.store(supported) && reason != "" {
+		zap.S().Warnf("Assuming the cluster supports GPU fractioning: %s", reason)
+	}
+	return supported
+}
+
+// A non-empty reason means the verdict could not be read and support was assumed.
+func (nodeParser *NodeParser) readClusterGpuFractioningSupport() (bool, string) {
 	clusterInfoCm := &corev1.ConfigMap{}
 	err := nodeParser.cachedReader.Get(context.Background(), client.ObjectKey{
 		Name:      constants.ClusterInfoConfigMapName,
 		Namespace: runaiv1.DefaultNamespace,
 	}, clusterInfoCm)
 	if err != nil {
-		if cached, ok := nodeParser.gpuFractioningSupport.load(unreadableClusterInfoVersion); ok {
-			return cached
-		}
-		zap.S().Warnf("Failed to read %s to determine cluster GPU fractioning support: %v",
-			constants.ClusterInfoConfigMapName, err)
-		nodeParser.gpuFractioningSupport.store(unreadableClusterInfoVersion, true)
-		return true
-	}
-
-	if cached, ok := nodeParser.gpuFractioningSupport.load(clusterInfoCm.ResourceVersion); ok {
-		return cached
+		return true, fmt.Sprintf("failed to read %s: %v", constants.ClusterInfoConfigMapName, err)
 	}
 
 	var runaiPublic runaiv1.RunaiPublic
 	if err := yaml.Unmarshal([]byte(clusterInfoCm.Data[constants.ClusterInfoConfigMapName]), &runaiPublic); err != nil {
-		zap.S().Warnf("Failed to unmarshal %s: %v", constants.ClusterInfoConfigMapName, err)
-		nodeParser.gpuFractioningSupport.store(clusterInfoCm.ResourceVersion, true)
-		return true
+		return true, fmt.Sprintf("failed to unmarshal %s: %v", constants.ClusterInfoConfigMapName, err)
 	}
 
-	supported := true
 	if deps := runaiPublic.Dependencies; deps != nil {
 		if gpuStack, found := deps.Required[gpuStackDependencyName]; found {
 			if fractioning, found := gpuStack.Components[gpuFractioningComponentName]; found {
-				supported = ptr.Deref(fractioning.Available, true)
+				return ptr.Deref(fractioning.Available, true), ""
 			}
 		}
 	}
-
-	nodeParser.gpuFractioningSupport.store(clusterInfoCm.ResourceVersion, supported)
-	return supported
+	return true, ""
 }
 
 // GpuFractioningSupportChanged reports whether the currently published verdict differs from the
