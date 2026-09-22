@@ -4,7 +4,7 @@
 -- The DGXC role mechanism (roles.role_type) is being removed.
 --
 -- Unreferenced DGXC roles are deleted. The rest are handed over: renamed to
--- ' -Superseded' and marked custom. No rows are added and no access rule is touched -
+-- '-Superseded' and marked custom. No rows are added and no access rule is touched -
 -- each role keeps its id, so everything pointing at it stays valid.
 
 DO $$
@@ -46,7 +46,7 @@ BEGIN
         -- whose target is missing would not be renamed at all. COALESCE leaves a
         -- pointer that is already set alone.
         UPDATE roles d
-        SET name = replace(d.name, '-DGXC', '') || ' -Superseded',
+        SET name = replace(d.name, '-DGXC', '') || '-Superseded',
             custom = true,
             cluster_role_predefined_id = COALESCE(
                 d.cluster_role_predefined_id,
@@ -68,7 +68,7 @@ BEGIN
 
         -- Flatten any chain the rename just created. A custom role could already name
         -- one of these as its predefined cluster role; getPredefinedRoleForSync
-        -- resolves a single hop, so it would hand the agent the ' -Superseded' name and
+        -- resolves a single hop, so it would hand the agent the '-Superseded' name and
         -- the binding would find no ClusterRole. Point it at the same target the
         -- renamed role now uses.
         UPDATE roles c
@@ -79,7 +79,7 @@ BEGIN
           AND d.role_type = 'DGXC'
           AND d.custom = true
           AND d.scope_type = 'system'
-          AND d.name LIKE '% -Superseded'
+          AND d.name LIKE '%-Superseded'
           AND d.cluster_role_predefined_id IS NOT NULL;
     ELSE
         -- role_to_permission_set has no ON DELETE clause and would block the delete.
