@@ -57,7 +57,7 @@ func New(ctx context.Context, env core.Env) (*Clients, error) {
 	if err != nil {
 		return nil, fmt.Errorf("resolving the flowmark identity: %w", err)
 	}
-	httpClient := oauth2.NewClient(ctx, source)
+	httpClient := paced(oauth2.NewClient(ctx, source))
 	baseURL := base.String()
 
 	kube, err := Kube(env.KubeconfigPath)

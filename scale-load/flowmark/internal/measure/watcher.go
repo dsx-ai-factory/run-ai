@@ -30,14 +30,15 @@ const (
 	Failed  Outcome = "failed"
 )
 
+// WorkloadRunnerKind is the object Run:ai creates on the cluster for every
+// workload submitted through the control plane.
+var WorkloadRunnerKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
+
 // ExternalWorkloadKind is the object Run:ai creates for every plain Kubernetes
 // workload it integrates.
 var ExternalWorkloadKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "ExternalWorkload"}
 
-var (
-	workloadRunnerKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
-	errWatchClosed     = errors.New("watch closed by the server")
-)
+var errWatchClosed = errors.New("watch closed by the server")
 
 // Timing is the measurement of one item. Duration is only meaningful when
 // Outcome is Arrived; pending and failed items carry no duration so they can
@@ -100,7 +101,7 @@ func Watch(ctx context.Context, kube k8sclient.WithWatch, kind schema.GroupVersi
 // workloads submitted through the control plane. The item name is the
 // workload name.
 func WatchWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
-	return Watch(ctx, kube, workloadRunnerKind, namespace, (*unstructured.Unstructured).GetName)
+	return Watch(ctx, kube, WorkloadRunnerKind, namespace, (*unstructured.Unstructured).GetName)
 }
 
 // WatchExternalWorkloads watches the ExternalWorkload objects Run:ai creates

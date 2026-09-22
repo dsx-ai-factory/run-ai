@@ -55,11 +55,19 @@ message: hello from flowmark
 `selfcheck` touches nothing and needs no environment. It stays the
 zero-dependency check that the yaml → runner → suite → results wiring works.
 
-`basic-flow` runs against a real Run:ai environment: it creates a project,
-submits workloads, measures how long each one takes to reach the cluster,
-and deletes only what it created. It needs `--cp-url`, `--kubeconfig` and
-credentials in `FLOWMARK_CP_USER` / `FLOWMARK_CP_PASSWORD` (or
-`FLOWMARK_CP_TOKEN`):
+`workload-burst` is the scale suite. It creates one Run:ai project, then for
+each round size N in the yaml it opens a Kubernetes watch, burst-creates N
+workloads, measures how long each one takes to appear on the cluster, and
+tears the round down before the next one starts. The yaml decides which flow
+is measured:
+
+| `workloadType` | what is created | what the watch waits for | `flow` in the section |
+|---|---|---|---|
+| `Deployment` | plain Deployments through the Kubernetes API | the `ExternalWorkload` Run:ai creates for each one | `deployment_to_external_workload` |
+| `Training` | Trainings through the Run:ai control-plane API | the `WorkloadRunner` that reaches the cluster | `training_to_workload_runner` |
+
+It needs `--cp-url`, `--kubeconfig` and credentials in `FLOWMARK_CP_USER` /
+`FLOWMARK_CP_PASSWORD` (or `FLOWMARK_CP_TOKEN`):
 
 ```
 FLOWMARK_CP_USER=... FLOWMARK_CP_PASSWORD=... ./bin/flowmark \
@@ -68,55 +76,37 @@ FLOWMARK_CP_USER=... FLOWMARK_CP_PASSWORD=... ./bin/flowmark \
   --kubeconfig ~/.kube/config
 ```
 
-Knobs of `scenarios/basic-two-workloads.yaml`:
+Two scenarios ship with it: `scenarios/external-workload.yaml` (Deployments)
+and `scenarios/training-sync.yaml` (Trainings). Knobs:
 
 | knob | default | meaning |
 |---|---|---|
-| `projects` | 1 | projects to create; workloads are spread across them |
-| `workloads` | 2 | workloads to submit |
-| `workloadType` | `Training` | only `Training` for now |
-| `timeout` | `5m` | project readiness and workload arrival limit |
-| `cluster` | *(single cluster)* | cluster name when the control plane has several |
-
-Timing comes from a Kubernetes watch opened before anything is submitted:
-each workload's duration is the gap, on FlowMark's own clock, between the
-control plane accepting it and its `WorkloadRunner` appearing on the
-cluster. The section reports `sync_to_cluster_ms` per workload plus
-`p50_ms`, `p90_ms`, `p99_ms`, `mean_ms`, `max_ms`, `makespan_ms`,
-`throughput_per_s`, `success_rate`, `sample_size`, `pending_count` and
-`failed_count`. Workloads that never reached the cluster within the timeout
-are counted in `pending_count`, never as zero latency, and make the section
-fail; when nothing arrived the latency keys are omitted entirely.
-
-`external-workload` is the first PRD scenario: it burst-creates plain
-Kubernetes Deployments in a Run:ai project namespace and measures how long
-Run:ai's external-workload-integrator takes to create the matching
-`ExternalWorkload` for each one, for a growing number of Deployments. It
-needs the same flags and credentials as `basic-flow`.
-
-Knobs of `scenarios/external-workload.yaml`:
-
-| knob | default | meaning |
-|---|---|---|
-| `workloads` | `[100, 250, 500]` | round sizes, each unique; each round creates that many Deployments |
-| `workloadType` | `Deployment` | only `Deployment` for now |
-| `podsPerWorkload` | 1 | replicas per Deployment, 0 to 10 |
-| `timeout` | `15m` | how long a round waits for its ExternalWorkloads |
+| `workloads` | `[100, 250, 500]` | round sizes, each unique; each round creates that many workloads |
+| `workloadType` | `Deployment` | `Deployment` or `Training` |
+| `podsPerWorkload` | 1 | replicas per Deployment, 0 to 10; must be 1 for `Training` |
+| `timeout` | `15m` | how long a round waits for its workloads to reach the cluster |
 | `setupTimeout` | `5m` | project readiness, quiesce between rounds, cleanup |
 | `settle` | `90s` | extra quiet time after a round's objects are gone, before the next round |
-| `slo` | *(none)* | mapping of whole-number milliseconds copied into the section; `create_to_ew_p90_ms` also appears as `create_to_ew_slo_ms` |
+| `slo` | *(none)* | mapping of whole-number milliseconds copied into the section; `p90_ms` also appears as `slo_p90_ms` |
 | `cluster` | *(single cluster)* | cluster name when the control plane has several |
 
-Rounds are isolated: the watch is opened before the first create, the
-ExternalWorkload is matched to its Deployment by the UID the API returned,
-and after each round the Deployments are deleted and the suite waits until
-the namespace holds no ExternalWorkloads and no pods of that round, then
-pauses for `settle`, before the next round starts. The pause exists because
-an empty namespace is not yet a quiet cluster right after hundreds of pods
-were torn down. Per round the section reports
-`create_to_ew_p50_ms@N`, `p90`, `p99`, `max`, `throughput_per_sec@N`,
-`ew_makespan_ms@N`, `submit_makespan_ms@N`, `quiesce_ms@N`,
-`sample_size@N`, `pending_count@N`, `failed_count@N` and
-`success_rate@N`. Deployments whose ExternalWorkload never appeared count
-as pending, never as zero, and fail the section; a round that cannot
-quiesce stops the run.
+Timing comes from a watch opened before anything is submitted: each
+workload's duration is the gap, on FlowMark's own clock, between the create
+response and the first event for its cluster object, matched by the
+Deployment UID or the workload name. Deployments are deleted through the
+Kubernetes API and Trainings through the control plane; the suite then waits
+until the namespace holds no workload objects and no pods at all, pauses for
+`settle`, and only then starts the next round. An empty namespace is not yet
+a quiet cluster right after hundreds of pods were torn down.
+
+Per round the section reports `p50_ms@N`, `p90_ms@N`, `p99_ms@N`,
+`max_ms@N`, `throughput_per_sec@N`, `arrival_makespan_ms@N`,
+`submit_makespan_ms@N`, `quiesce_ms@N`, `sample_size@N`, `pending_count@N`,
+`failed_count@N` and `success_rate@N`, plus `flow`, `rounds`,
+`workload_type`, `pods_per_workload`, `settle_ms` and the copied `slo`.
+Workloads that never reached the cluster within the timeout are counted in
+`pending_count`, never as zero latency, and fail the section; when nothing
+arrived the latency keys are omitted entirely; a round that cannot quiesce
+stops the run. Submission to the control plane is paced at 25 requests per
+second and to the Kubernetes API at 50, so `submit_makespan_ms@N` shows how
+much of each round's window was FlowMark's own submission.

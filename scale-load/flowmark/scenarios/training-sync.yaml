@@ -1,8 +1,10 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-suite: basic-flow
-projects: 1
-workloads: 2
+suite: workload-burst
+workloads: [100, 250, 500]
 workloadType: Training
-timeout: 5m
+podsPerWorkload: 1
+timeout: 15m
+slo:
+  p90_ms: 10000

@@ -22,7 +22,7 @@ const testNamespace = "runai-flowmark"
 
 func runner(name string) *unstructured.Unstructured {
 	obj := &unstructured.Unstructured{}
-	obj.SetGroupVersionKind(workloadRunnerKind)
+	obj.SetGroupVersionKind(WorkloadRunnerKind)
 	obj.SetNamespace(testNamespace)
 	obj.SetName(name)
 	return obj
