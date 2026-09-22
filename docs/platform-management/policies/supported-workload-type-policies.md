@@ -7,7 +7,7 @@ NVIDIA Run:ai workload policies can target any supported workload type registere
 **Note**
 
 * Workload policies are enabled by default. If you do not see it in the menu, contact your administrator to enable it under **General settings** → Workloads → Policies.
-* Supported workload type policies can be scoped to a cluster, department, or project. System scope is not available for these policies.
+* Supported workload type policies can be scoped to a tenant, cluster, department, or project. System scope is not available for these policies. Tenant scope is available via API only.
 * For policies targeting native workload types (Workspace, Training, and Inference), see [NVIDIA Run:ai native workload policies](native-workload-policies.md).
 * To apply policies to a new [workload type](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md) your organization has registered, you must first map it to the policy engine using the mapping APIs. See [Workload types policy mapping](workload-type-policy-mapping.md).
 
@@ -106,10 +106,12 @@ All fields in a rule are mandatory. If a rule has unresolved issues when you sav
 
 ### Overriding Rules Across Scopes
 
-When a policy is scoped to a cluster or department, each rule includes an **Override by descendant scope** setting that determines whether a policy at a narrower scope (department or project) can replace it:
+When a policy is scoped to a tenant, cluster, or department, each rule can specify whether a policy at a narrower scope is allowed to override it. See [Scope of Effectiveness](policies-and-rules.md#scope-of-effectiveness) for how the scope hierarchy is structured. For cluster- and department-scoped policies, the override setting is exposed in the Rule builder as an **Override by descendant scope** setting:
 
 * **Descendant scopes cannot override this rule** (default) - the rule from this scope always applies, regardless of any rule for the same field defined at a narrower scope.
 * **Any descendant scope can define a policy that overrides this rule** - a policy at a narrower scope can define a rule for the same field, and that rule takes effect instead.
+
+For tenant-scoped policies, the same behavior is controlled directly by the `allowOverride` field in the rule YAML. See [Using the YAML Editor](supported-workload-type-policies.md#using-the-yaml-editor).
 
 This setting is not available for project-scoped policies, since a project has no narrower scope.
 
@@ -130,12 +132,12 @@ rules:
     itemSelector: <item-selector>    # optional; only for list-type fields
     selectorParams:                   # optional; required by some selectors
       <param>: <value>
-    allowOverride: <boolean>          # optional; cluster/department scope only, defaults to false
+    allowOverride: <boolean>          # optional; tenant/cluster/department scope only, defaults to false
     enforcements:
       - <enforcement-type>: <value>
 ```
 
-`allowOverride` controls whether a policy at a narrower scope can override this rule. It only applies to rules in cluster- or department-scoped policies. See [Overriding rules across scopes](supported-workload-type-policies.md#overriding-rules-across-scopes).
+`allowOverride` controls whether a policy at a narrower scope can override this rule. It applies to rules in tenant-, cluster-, or department-scoped policies; it has no effect for project-scoped policies, since a project has no narrower scope. See [Overriding rules across scopes](supported-workload-type-policies.md#overriding-rules-across-scopes).
 
 To discover the fields and spec selectors available for a specific workload type, use the following APIs:
 
@@ -167,7 +169,7 @@ To view a policy:
    * **Rule**\
      The enforcements applied to the field
    * **Source**\
-     The scope at which the rule was defined (cluster, department, or project). Rules inherited from a broader scope are shown alongside rules defined at the policy's own scope.
+     The scope at which the rule was defined (tenant, cluster, department, or project). Rules inherited from a broader scope are shown alongside rules defined at the policy's own scope.
 
 ## Deleting a Policy
 

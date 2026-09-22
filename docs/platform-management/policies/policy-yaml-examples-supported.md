@@ -13,7 +13,7 @@ rules:
     itemSelector: <item-selector>    # optional; only for list-type fields
     selectorParams:                   # optional; required by some selectors
       <param>: <value>
-    allowOverride: <boolean>          # optional; cluster/department scope only, defaults to false
+    allowOverride: <boolean>          # optional; tenant/cluster/department scope only, defaults to false
     enforcements:
       - <enforcement-type>: <value>
 ```
