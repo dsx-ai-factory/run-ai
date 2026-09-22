@@ -2,7 +2,7 @@
 -- SPDX-License-Identifier: Apache-2.0
 
 -- 03000001 deleted the unreferenced DGXC roles and renamed the rest in place to
--- '-Superseded' custom roles - still system-scoped, same ids, so everything pointing at
+-- ' - superseded' custom roles - still system-scoped, same ids, so everything pointing at
 -- them still resolves. Nothing reads role_type any more.
 --
 -- Ship this only in a release whose code has already dropped models.Role.RoleType:
