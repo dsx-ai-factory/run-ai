@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+suite: external-workload
+workloads: [100, 250, 500]
+workloadType: Deployment
+podsPerWorkload: 1
+timeout: 15m
+slo:
+  create_to_ew_p90_ms: 5000

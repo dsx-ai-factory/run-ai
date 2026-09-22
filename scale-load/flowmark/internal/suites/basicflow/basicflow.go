@@ -7,8 +7,6 @@ package basicflow
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"sort"
@@ -55,7 +53,7 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 		return core.Section{}, err
 	}
 
-	id, err := runID()
+	id, err := core.RunID()
 	if err != nil {
 		return core.Section{}, err
 	}
@@ -147,14 +145,6 @@ func parseSettings(cfg core.Config) (settings, error) {
 		return settings{}, fmt.Errorf("workloadType %q is not supported yet, only %s", knobs.workloadType, trainingType)
 	}
 	return knobs, nil
-}
-
-func runID() (string, error) {
-	var raw [4]byte
-	if _, err := rand.Read(raw[:]); err != nil {
-		return "", fmt.Errorf("generate run id: %w", err)
-	}
-	return hex.EncodeToString(raw[:]), nil
 }
 
 func buildSection(timings []measure.Timing, total int) core.Section {

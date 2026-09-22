@@ -115,20 +115,3 @@ func TestBuildSectionReportsWatchAndSubmissionErrors(t *testing.T) {
 		t.Fatalf("counts wrong: %v", section.Metrics)
 	}
 }
-
-func TestRunIDIsShortUniqueHex(t *testing.T) {
-	first, err := runID()
-	if err != nil {
-		t.Fatal(err)
-	}
-	second, err := runID()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(first) != 8 || strings.Trim(first, "0123456789abcdef") != "" {
-		t.Fatalf("run id must be 8 lowercase hex characters, got %q", first)
-	}
-	if first == second {
-		t.Fatalf("two run ids must differ, both were %q", first)
-	}
-}

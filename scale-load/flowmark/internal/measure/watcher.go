@@ -30,10 +30,13 @@ const (
 	Failed  Outcome = "failed"
 )
 
+// ExternalWorkloadKind is the object Run:ai creates for every plain Kubernetes
+// workload it integrates.
+var ExternalWorkloadKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "ExternalWorkload"}
+
 var (
-	workloadRunnerKind   = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
-	externalWorkloadKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "ExternalWorkload"}
-	errWatchClosed       = errors.New("watch closed by the server")
+	workloadRunnerKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
+	errWatchClosed     = errors.New("watch closed by the server")
 )
 
 // Timing is the measurement of one item. Duration is only meaningful when
@@ -101,13 +104,26 @@ func WatchWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace str
 }
 
 // WatchExternalWorkloads watches the ExternalWorkload objects Run:ai creates
-// for plain Kubernetes workloads. Run:ai names them ew-<kind>-<name>; the item
-// name is the original object name.
+// for plain Kubernetes workloads. The item key is the UID of the source object
+// as recorded in spec.originalWorkloadUID, so callers mark each item with the
+// UID the API server returned on create. The owner reference UID and, last,
+// the ew-<kind>-<name> naming rule are fallbacks for objects missing that
+// field; they never override it.
 func WatchExternalWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
-	return Watch(ctx, kube, externalWorkloadKind, namespace, externalWorkloadSource)
+	return Watch(ctx, kube, ExternalWorkloadKind, namespace, externalWorkloadSource)
 }
 
 func externalWorkloadSource(obj *unstructured.Unstructured) string {
+	if uid, _, _ := unstructured.NestedString(obj.Object, "spec", "originalWorkloadUID"); uid != "" {
+		return uid
+	}
+	if owners := obj.GetOwnerReferences(); len(owners) > 0 && owners[0].UID != "" {
+		return string(owners[0].UID)
+	}
+	return externalWorkloadSourceName(obj)
+}
+
+func externalWorkloadSourceName(obj *unstructured.Unstructured) string {
 	rest, ok := strings.CutPrefix(obj.GetName(), "ew-")
 	if !ok {
 		return obj.GetName()
