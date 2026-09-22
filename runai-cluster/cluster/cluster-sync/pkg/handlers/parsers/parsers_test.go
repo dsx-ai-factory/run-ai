@@ -6,6 +6,7 @@
 package parsers_test
 
 import (
+	"fmt"
 	"strconv"
 
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
@@ -1305,6 +1306,57 @@ var _ = Describe("Parsers", Ordered, func() {
 
 			AfterEach(func() {
 				config.Config().EnableNodeGpuFractioningReadiness = previousGpuFractioningReadiness
+			})
+
+			clusterInfoConfigMap := func(gpuFractioningAvailable bool) *corev1.ConfigMap {
+				return &corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{Name: "runai-public", Namespace: "runai"},
+					Data: map[string]string{
+						"runai-public": fmt.Sprintf(`dependencies:
+  required:
+    gpu-stack:
+      available: %t
+      components:
+        gpu-fractioning:
+          available: %t
+`, gpuFractioningAvailable, gpuFractioningAvailable),
+					},
+				}
+			}
+
+			It("reports nothing on the node when the cluster does not support fractions", func() {
+				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
+					WithObjects(nvidiaComponentsPod, clusterInfoConfigMap(false))
+				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+				nodeParser = parsers.NewNodeParser(fakeCachedClient)
+
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition, gpuFractioningCondition(
+					corev1.ConditionFalse, "GPUDriverVersionUnsupported",
+					"NVIDIA driver major version 595 is below minimum supported major version 615")}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(Equal([]clustersvcswagger.NodeStatusConditionDetails{}))
+			})
+
+			It("still reports the node when the cluster does support fractions", func() {
+				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
+					WithObjects(nvidiaComponentsPod, clusterInfoConfigMap(true))
+				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+				nodeParser = parsers.NewNodeParser(fakeCachedClient)
+
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition, gpuFractioningCondition(
+					corev1.ConditionFalse, "MpsdNotReady", "mps daemon is not running")}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.MissingPrerequisitesPhase))
+				Expect(parsedNodeInfo.Conditions).To(Equal([]clustersvcswagger.NodeStatusConditionDetails{{
+					Type:    parsers.MissingGpuFractioningPrerequisite,
+					Reason:  "MpsdNotReady",
+					Message: utils.Ref("mps daemon is not running"),
+				}}))
 			})
 
 			DescribeTable("maps the operator's condition onto the node status",

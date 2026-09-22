@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	kaiv1alpha1 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1alpha1"
@@ -21,7 +22,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	sdkkaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
+	"gopkg.in/yaml.v2"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -35,6 +38,9 @@ const (
 	MissingNvidiaContainerToolkit = "MissingNvidiaContainerToolkit"
 	MissingNvidiaDcgmExporter     = "MissingNvidiaDcgmExporter"
 	MissingNrtHealthyPrerequisite = "MissingNrtHealthyPrerequisite"
+
+	gpuStackDependencyName      = "gpu-stack"
+	gpuFractioningComponentName = "gpu-fractioning"
 
 	// Operator-published readiness: True means healthy, the inverse of the faults above.
 	GpuFractioningReadyConditionType  = "gpu-fractioning.nvidia.com/Ready"
@@ -104,6 +110,32 @@ type NodeParser struct {
 
 	nodeLabelNvidiaContainerToolkit string
 	nodeLabelNvidiaDcgmExporter     string
+
+	gpuFractioningSupport gpuFractioningSupportCache
+}
+
+// The verdict only changes when the ConfigMap does, and re-parsing its YAML for every node of
+// every sync is needless work on a large cluster.
+type gpuFractioningSupportCache struct {
+	mutex           sync.RWMutex
+	resourceVersion string
+	supported       bool
+}
+
+func (c *gpuFractioningSupportCache) load(resourceVersion string) (bool, bool) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	if c.resourceVersion == "" || c.resourceVersion != resourceVersion {
+		return false, false
+	}
+	return c.supported, true
+}
+
+func (c *gpuFractioningSupportCache) store(resourceVersion string, supported bool) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.resourceVersion = resourceVersion
+	c.supported = supported
 }
 
 func NewNodeParser(cachedReader client.Reader) *NodeParser {
@@ -252,7 +284,7 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 
 	result = append(result, calculateUnschedulableCondition(node)...)
 
-	if gpuFractioningEnabled {
+	if gpuFractioningEnabled && nodeParser.clusterSupportsGpuFractioning() {
 		result = append(result, calculateGpuFractioningConditions(node)...)
 	}
 
@@ -261,6 +293,46 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 	}
 
 	return result
+}
+
+// The fractioning operator stamps a cluster-wide reason onto every GPU node, so without this
+// every node would repeat what the cluster status already says once.
+//
+// Unreadable or absent cluster state is treated as supported, matching what the cluster status
+// does with the same input, so the two never disagree.
+func (nodeParser *NodeParser) clusterSupportsGpuFractioning() bool {
+	clusterInfoCm := &corev1.ConfigMap{}
+	err := nodeParser.cachedReader.Get(context.Background(), client.ObjectKey{
+		Name:      runaiv1.RunaiPublicConfigMapName,
+		Namespace: runaiv1.DefaultNamespace,
+	}, clusterInfoCm)
+	if err != nil {
+		zap.S().Warnf("Failed to read %s to determine cluster GPU fractioning support: %v",
+			runaiv1.RunaiPublicConfigMapName, err)
+		return true
+	}
+
+	if cached, ok := nodeParser.gpuFractioningSupport.load(clusterInfoCm.ResourceVersion); ok {
+		return cached
+	}
+
+	var runaiPublic runaiv1.RunaiPublic
+	if err := yaml.Unmarshal([]byte(clusterInfoCm.Data[runaiv1.RunaiPublicConfigMapName]), &runaiPublic); err != nil {
+		zap.S().Warnf("Failed to unmarshal %s: %v", runaiv1.RunaiPublicConfigMapName, err)
+		return true
+	}
+
+	supported := true
+	if deps := runaiPublic.Dependencies; deps != nil {
+		if gpuStack, found := deps.Required[gpuStackDependencyName]; found {
+			if fractioning, found := gpuStack.Components[gpuFractioningComponentName]; found {
+				supported = ptr.Deref(fractioning.Available, true)
+			}
+		}
+	}
+
+	nodeParser.gpuFractioningSupport.store(clusterInfoCm.ResourceVersion, supported)
+	return supported
 }
 
 func (nodeParser *NodeParser) calculateMissingNvidiaComponentsConditions(node *corev1.Node) []swagger.NodeStatusConditionDetails {
