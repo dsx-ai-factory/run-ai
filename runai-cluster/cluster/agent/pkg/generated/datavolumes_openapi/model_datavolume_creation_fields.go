@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -227,6 +229,7 @@ func (o *DatavolumeCreationFields) HasUseOriginalVolume() bool {
 func (o *DatavolumeCreationFields) SetUseOriginalVolume(v bool) {
 	o.UseOriginalVolume.Set(&v)
 }
+
 // SetUseOriginalVolumeNil sets the value for UseOriginalVolume to be an explicit nil
 func (o *DatavolumeCreationFields) SetUseOriginalVolumeNil() {
 	o.UseOriginalVolume.Set(nil)
@@ -295,5 +298,3 @@ func (v *NullableDatavolumeCreationFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

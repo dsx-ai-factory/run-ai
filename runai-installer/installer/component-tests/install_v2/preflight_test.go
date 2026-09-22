@@ -617,7 +617,7 @@ func TestPreflight_ClockSkew_SingleNodeSkipped(t *testing.T) {
 // TestPreflight_Registry_AllGood verifies the registry check passes silently when
 // the registry is reachable and the credentials authenticate.
 func TestPreflight_Registry_AllGood(t *testing.T) {
-	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"runai.jfrog.io":{"username":"u","password":"p"}}}`))
+	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"registry.example.com":{"username":"u","password":"p"}}}`))
 	fake := &harness.FakeRegistryProber{Default: orchestrator2.RegistryCheckResult{Reachable: true, Authenticated: true, CanPull: true}}
 	deps, helm, _, _ := depsWithProbe(&harness.FakeClusterProbe{Version: "v1.30.0", AllowAll: true})
 	deps.RegistryProber = fake
@@ -626,7 +626,7 @@ func TestPreflight_Registry_AllGood(t *testing.T) {
 	opts := baseRunOptions()
 	opts.Output = spec.OutputFormatText
 	opts.EventsFile = eventsPath
-	opts.Registry = &spec.Registry{Type: spec.RegistryTypeJFrog, Token: token}
+	opts.Registry = &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: token}
 	term, _, _ := newTestTerminal()
 
 	require.NoError(t, specrun.Execute(context.Background(), newInstallRunConfig().ToSpec(opts), deps, term, execOpts()))
@@ -799,9 +799,9 @@ func TestPreflight_ClockDrift_PassWhenInSync(t *testing.T) {
 // probes each image registry from the pull-secret token, warns (non-blocking) on
 // an auth failure, and aggregates the finding into the summary.
 func TestPreflight_Registry_ConnectedWarnsOnAuthFailure(t *testing.T) {
-	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"runai.jfrog.io":{"username":"u","password":"p"}}}`))
+	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"registry.example.com":{"username":"u","password":"p"}}}`))
 	fake := &harness.FakeRegistryProber{Results: map[string]orchestrator2.RegistryCheckResult{
-		"runai.jfrog.io": {Reachable: true, Authenticated: false, Detail: "bad credentials"},
+		"registry.example.com": {Reachable: true, Authenticated: false, Detail: "bad credentials"},
 	}}
 	deps, helm, _, _ := depsWithProbe(&harness.FakeClusterProbe{Version: "v1.30.0", AllowAll: true})
 	deps.RegistryProber = fake
@@ -810,7 +810,7 @@ func TestPreflight_Registry_ConnectedWarnsOnAuthFailure(t *testing.T) {
 	opts := baseRunOptions()
 	opts.Output = spec.OutputFormatText
 	opts.EventsFile = eventsPath
-	opts.Registry = &spec.Registry{Type: spec.RegistryTypeJFrog, Token: token}
+	opts.Registry = &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: token}
 	term, _, _ := newTestTerminal()
 
 	require.NoError(t, specrun.Execute(context.Background(), newInstallRunConfig().ToSpec(opts), deps, term, execOpts()))
@@ -828,11 +828,11 @@ func TestPreflight_Registry_ConnectedWarnsOnAuthFailure(t *testing.T) {
 	issues := summary["registryIssues"].([]any)
 	require.Len(t, issues, 1)
 	issue := issues[0].(map[string]any)
-	assert.Contains(t, issue["registry"], "runai.jfrog.io")
+	assert.Contains(t, issue["registry"], "registry.example.com")
 	assert.Contains(t, issue["issue"], "Invalid registry credentials")
 
 	require.Len(t, fake.Calls, 1)
-	assert.Equal(t, "runai.jfrog.io", fake.Calls[0].Host)
+	assert.Equal(t, "registry.example.com", fake.Calls[0].Host)
 	assert.Equal(t, "u", fake.Calls[0].Username)
 	assert.False(t, fake.Calls[0].CheckPush, "connected install only needs pull")
 
@@ -852,7 +852,7 @@ func TestPreflight_Registry_MalformedTokenWarns(t *testing.T) {
 	opts.EventsFile = eventsPath
 	// Valid base64 (so it passes input validation) but not a docker config: this
 	// is the silent path that previously produced no check at all.
-	opts.Registry = &spec.Registry{Type: spec.RegistryTypeJFrog, Token: base64.StdEncoding.EncodeToString([]byte("garbage"))}
+	opts.Registry = &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: base64.StdEncoding.EncodeToString([]byte("garbage"))}
 	term, _, _ := newTestTerminal()
 
 	require.NoError(t, specrun.Execute(context.Background(), newInstallRunConfig().ToSpec(opts), deps, term, execOpts()))
@@ -873,9 +873,9 @@ func TestPreflight_Registry_MalformedTokenWarns(t *testing.T) {
 // TestPreflight_Registry_UnreachableWarns verifies the "no route to the registry"
 // case (network unreachable) surfaces as a warning.
 func TestPreflight_Registry_UnreachableWarns(t *testing.T) {
-	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"runai.jfrog.io":{"username":"u","password":"p"}}}`))
+	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"registry.example.com":{"username":"u","password":"p"}}}`))
 	fake := &harness.FakeRegistryProber{Results: map[string]orchestrator2.RegistryCheckResult{
-		"runai.jfrog.io": {Reachable: false, Detail: "dial tcp: i/o timeout"},
+		"registry.example.com": {Reachable: false, Detail: "dial tcp: i/o timeout"},
 	}}
 	deps, helm, _, _ := depsWithProbe(&harness.FakeClusterProbe{Version: "v1.30.0", AllowAll: true})
 	deps.RegistryProber = fake
@@ -884,7 +884,7 @@ func TestPreflight_Registry_UnreachableWarns(t *testing.T) {
 	opts := baseRunOptions()
 	opts.Output = spec.OutputFormatText
 	opts.EventsFile = eventsPath
-	opts.Registry = &spec.Registry{Type: spec.RegistryTypeJFrog, Token: token}
+	opts.Registry = &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: token}
 	term, _, _ := newTestTerminal()
 
 	require.NoError(t, specrun.Execute(context.Background(), newInstallRunConfig().ToSpec(opts), deps, term, execOpts()))

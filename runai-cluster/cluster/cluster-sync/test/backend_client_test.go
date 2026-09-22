@@ -9,11 +9,9 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/generated/swagger-runai-backend-client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
@@ -46,20 +44,16 @@ var _ = Describe("A backend client", func() {
 			GinkgoWriter.Printf("=============================================Ended test=============================================\n")
 		})
 		Context("Backend is UP", func() {
+			var livenessRequests <-chan *http.Request
 			BeforeEach(func() {
-				addHandlerToMockAndValidateLivenessRequest(server, tokenResponse)
+				livenessRequests = addHandlerToMockAndValidateLivenessRequest(server, tokenResponse)
 				addHandlerToMockClusterInfoSyncRequest(server)
 			})
 			AfterEach(func() {
 				server.Reset()
 			})
 			It("Sends liveness", func() {
-				_, err := backendClient.Client.ClustersApi.UpdateClusterLiveness(
-					backendClient.Context(),
-					swagger.UuidLivenessBody{TimeTag: time.Now().UnixMilli()},
-					config.Config().ClusterUuid,
-				)
-				Expect(err).To(BeNil())
+				Eventually(livenessRequests).Should(Receive())
 			})
 			It("checks that backend is marked as available in backend client", func() {
 				//Time-outs after 1 seconds
@@ -73,7 +67,7 @@ var _ = Describe("A backend client", func() {
 			BeforeEach(func() {
 				retryCounterLock = sync.RWMutex{}
 				retryCounter = new(int)
-				livenessPath := fmt.Sprintf("/v1/k8s/clusters/%s/liveness", ClusterIdForTests)
+				livenessPath := fmt.Sprintf("/api/v1/clusters/%s/liveness", ClusterIdForTests)
 				server.RouteToHandler("POST", livenessPath, func(writer http.ResponseWriter, request *http.Request) {
 					GinkgoWriter.Printf("Got Liveness Request in mock %d\n", retryCounter)
 					retryCounterLock.Lock()

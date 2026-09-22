@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 )
 
@@ -32,8 +32,9 @@ type FakeRunAIAPIClient struct {
 }
 
 type RunAIClientProviderCall struct {
-	URL        string
-	CACertPath string
+	URL         string
+	CACertPath  string
+	Credentials *step.ControlPlaneCredentials
 }
 
 func (f *FakeRunAIAPIClient) cpInstalled() bool {
@@ -70,8 +71,10 @@ func (f *FakeRunAIAPIClient) GetClusterByUUID(_ context.Context, uuid string) (*
 }
 
 func (f *FakeRunAIAPIClient) GetClusterInstallInfoByUUID(_ context.Context, _, _, _ string) (*cluster.ClusterInstallationInfoResponse, int, error) {
-	installInfo := cluster.NewClusterInstallationInfoResponse("", "", "", f.ClientSecret)
-	installInfo.BootstrapToken = f.BootstrapToken
+	installInfo := cluster.NewClusterInstallationInfoResponse("", "", "", f.BootstrapToken)
+	if f.ClientSecret != "" {
+		installInfo.SetClientSecret(f.ClientSecret)
+	}
 	return installInfo, 200, nil
 }
 
@@ -90,6 +93,14 @@ func NewFakeRunAIClientProvider(helm *FakeHelmInstaller) (*FakeRunAIAPIClient, s
 	}
 }
 
+func (f *FakeRunAIAPIClient) CredentialedProvider() step.RunAIAPICredentialedClientProvider {
+	return func(url, caCertPath string, creds step.ControlPlaneCredentials) (step.RunAIAPIClient, error) {
+		c := creds
+		f.ProviderCalls = append(f.ProviderCalls, RunAIClientProviderCall{URL: url, CACertPath: caCertPath, Credentials: &c})
+		return f, nil
+	}
+}
+
 // FakeClusterLookup implements upgrade.ClusterLookup for upgrade tests.
 type FakeClusterLookup struct {
 	InstallInfo *cluster.ClusterInstallationInfoResponse
@@ -102,7 +113,9 @@ func (f *FakeClusterLookup) GetClusterInstallInfoByUUID(_ context.Context, _, _,
 // NewFakeClusterLookup returns a FakeClusterLookup pre-seeded with a
 // stock install-info response that carries the well-known test client secret.
 func NewFakeClusterLookup() *FakeClusterLookup {
+	installInfo := cluster.NewClusterInstallationInfoResponse("", "", "", "")
+	installInfo.SetClientSecret("s3cr3t")
 	return &FakeClusterLookup{
-		InstallInfo: cluster.NewClusterInstallationInfoResponse("", "", "", "s3cr3t"),
+		InstallInfo: installInfo,
 	}
 }

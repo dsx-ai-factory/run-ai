@@ -1,5 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * datavolumes-service
  * An API for managing datavolumes

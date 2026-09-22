@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/nodepool-controller
 
-go 1.26.3
+go 1.26.8
 
 require (
 	github.com/ai-dynamo/grove/operator/api v0.1.0-alpha.10-rc1
@@ -84,7 +84,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kai-scheduler/kai-resource-management-api v0.1.1
+	github.com/kai-scheduler/kai-resource-management-api v0.1.3
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect

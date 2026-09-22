@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -17,7 +19,7 @@ import (
 
 // SharedScopesPatchRequest struct for SharedScopesPatchRequest
 type SharedScopesPatchRequest struct {
-	Add []SharedScopeBase `json:"add,omitempty"`
+	Add    []SharedScopeBase `json:"add,omitempty"`
 	Remove []SharedScopeBase `json:"remove,omitempty"`
 }
 
@@ -148,5 +150,3 @@ func (v *NullableSharedScopesPatchRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

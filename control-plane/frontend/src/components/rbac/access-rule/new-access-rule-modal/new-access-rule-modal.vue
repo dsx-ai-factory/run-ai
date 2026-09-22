@@ -60,6 +60,7 @@
                 counter
                 :maxlength="isAllAuthenticatedUsers ? 1 : scopeMaxAmount"
                 :hint="scopeHint"
+                :allowed-scopes="allowedScopes"
               />
             </div>
           </q-form>
@@ -92,7 +93,7 @@ import {
 } from "@/models/access-rule.model";
 import type { SubjectType } from "@/swagger-models/authorization-client";
 import { SubjectTypeExtended, ScopeType } from "@/swagger-models/authorization-client";
-import { type AccessRulesBatchCreateResponse } from "@/swagger-models/authorization-client";
+import { type AccessRulesBatchCreateResponse, type PermittedScopes } from "@/swagger-models/authorization-client";
 import type {
   AccessRulesBatchCreateFields,
   AuthenticatedUsersAccessRuleCreationFields,
@@ -125,6 +126,10 @@ export default defineComponent({
     roles: {
       type: Array as PropType<RoleV1[]>,
       required: true,
+    },
+    allowedScopes: {
+      type: Object as PropType<PermittedScopes>,
+      required: false,
     },
   },
   data() {

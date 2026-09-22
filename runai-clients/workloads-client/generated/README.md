@@ -200,6 +200,7 @@ Class | Method | HTTP request | Description
 *WorkloadsAPI* | [**CountWorkloadElements**](docs/WorkloadsAPI.md#countworkloadelements) | **Get** /api/v1/workloads/{workloadId}/elements/count | Count workload structure elements.
 *WorkloadsAPI* | [**CountWorkloads**](docs/WorkloadsAPI.md#countworkloads) | **Get** /api/v1/workloads/count | Count workloads.
 *WorkloadsAPI* | [**DeleteWorkload**](docs/WorkloadsAPI.md#deleteworkload) | **Delete** /api/v1/workloads/{workloadId} | Delete the workload as is does not exist in the cluster anymore.
+*WorkloadsAPI* | [**GetInternalWorkloadsTelemetry**](docs/WorkloadsAPI.md#getinternalworkloadstelemetry) | **Get** /internal/workloads/telemetry | Get the internal workloads telemetry.
 *WorkloadsAPI* | [**GetWorkload**](docs/WorkloadsAPI.md#getworkload) | **Get** /api/v1/workloads/{workloadId} | Get a workload.
 *WorkloadsAPI* | [**GetWorkloadAncestors**](docs/WorkloadsAPI.md#getworkloadancestors) | **Get** /internal/workloads/{workloadId}/ancestors | Get the workload ancestors.
 *WorkloadsAPI* | [**GetWorkloadElement**](docs/WorkloadsAPI.md#getworkloadelement) | **Get** /api/v1/workloads/{workloadId}/elements/{elementId} | Get a single workload structure element by element id.

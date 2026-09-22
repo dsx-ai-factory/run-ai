@@ -1,6 +1,6 @@
 {
   "app_name": "example-service",
-  "go_version": "1.21",
+  "go_version": "1.26.6",
   "use_postgresql": true,
   "use_redis": false,
   "use_nats": false,

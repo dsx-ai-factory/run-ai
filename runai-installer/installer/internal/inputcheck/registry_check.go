@@ -15,7 +15,7 @@ func init() { checks = append(checks, registryHostCheck, registryAirgapAuthCheck
 
 // registryAirgapAuthCheck rejects token-based registry auth for air-gapped
 // installs. The image push runs setup.sh with REGISTRY_USERNAME/REGISTRY_PASSWORD;
-// a JFrog/NGC token is never forwarded to it, so a token-authenticated mirror
+// a registry token is never forwarded to it, so a token-authenticated mirror
 // would silently fail to push. Air-gapped mirrors must use username/password,
 // or no credentials for an open mirror. Token auth is meaningful only for
 // connected installs that target Run:ai's hosted registries.
@@ -40,7 +40,7 @@ func registryAirgapAuthCheck(s *spec.Spec) []Finding {
 //   - Basic-auth and unauthenticated registries identify a specific mirror by
 //     host; without it the resolved registry is not actionable.
 //
-// Token auth (JFrog/NGC) targets Run:ai's known registries, where the host is
+// Token auth (docker config or NGC) targets Run:ai's known registries, where the host is
 // optional, so it is exempt for connected installs.
 func registryHostCheck(s *spec.Spec) []Finding {
 	if s.IsAirGapped() {
@@ -68,7 +68,7 @@ func registryHostCheck(s *spec.Spec) []Finding {
 	return nil
 }
 
-// isTokenAuth reports whether the registry authenticates with a JFrog/NGC token
+// isTokenAuth reports whether the registry authenticates with a registry token
 // rather than basic auth or no credentials.
 func isTokenAuth(r *spec.Registry) bool {
 	return r.Token != ""

@@ -6,7 +6,7 @@ This page lists features, APIs, and capabilities that are deprecated as of this 
 
 **Note**
 
-For details on how long deprecated features remain supported, see [Support, Lifecycle, and Deprecation Policy](../../about-enterprise/product-support-policy.md).
+For details on how long deprecated features remain supported, see [Support, Lifecycle, and Deprecation Policy](../product-support-policy.md).
 
 </Info>
 

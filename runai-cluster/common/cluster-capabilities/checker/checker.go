@@ -223,6 +223,9 @@ const (
 	// MinVersionOfApplicationCreation - the min cluster version that supports create and delete applications API
 	MinVersionOfApplicationCreation
 
+	// MinVersionOfApplicationPersonalCredentials - the min cluster version that supports personal credentials in AI Applications
+	MinVersionOfApplicationPersonalCredentials
+
 	// MinVersionWorkloadsStructureElements - minimum cluster version that supports workload structure elements
 	MinVersionWorkloadsStructureElements
 
@@ -319,6 +322,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionTopologyAddress:                           "2.25.0",
 	MinVersionNIMIngressViaWorkloadV2:                   "2.25.0",
 	MinVersionOfApplicationCreation:                     "2.25.0",
+	MinVersionOfApplicationPersonalCredentials:          "3.1.0",
 	MinVersionWorkloadsStructureElements:                "2.25.0",
 	MinVersionOfAnyWorkloadSuspendResume:                "2.26.0",
 	MinVersionWorkloadV2Pvcs:                            "2.26.0",

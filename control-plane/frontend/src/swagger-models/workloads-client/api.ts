@@ -1,5 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * WorkloadsService
  * An API for managing RunAi scheduler managed workloads.
@@ -203,6 +207,12 @@ export interface AIApplicationAllocatedResources {
  */
 export interface AIApplicationAuth {
     /**
+     * Indicates whether the asset is a user credential owned by the caller. When omitted or false, the asset is treated as a shared credential.
+     * @type {boolean}
+     * @memberof AIApplicationAuth
+     */
+    'userCredential'?: boolean | null;
+    /**
      * The ID of the asset to use for authentication.
      * @type {string}
      * @memberof AIApplicationAuth
@@ -401,13 +411,13 @@ export interface AIApplicationSpec {
      */
     'chartRef': AIApplicationSpecChartRef;
     /**
-     * Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+     * Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.  A complete string value can reference a personal credential using `USERCREDENTIAL:<name>`. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: `USERCREDENTIAL:<name>,generic-secret` or `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.
      * @type {{ [key: string]: any; }}
      * @memberof AIApplicationSpec
      */
     'values'?: { [key: string]: any; };
     /**
-     * Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`.
+     * Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`. When the decoded content contains personal credential references, it must be a YAML object.  String values support the same exact personal credential placeholder grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and Docker registry credentials, or `USERCREDENTIAL:<name>,generic-secret` and `USERCREDENTIAL:<name>,docker-registry` for NGC credentials. Embedded or partial placeholders are not supported.
      * @type {string}
      * @memberof AIApplicationSpec
      */
@@ -22307,6 +22317,12 @@ export interface Workload {
     'preemptible'?: boolean | null;
     /**
      * 
+     * @type {string}
+     * @memberof Workload
+     */
+    'preemptibility'?: string | null;
+    /**
+     * 
      * @type {boolean}
      * @memberof Workload
      */
@@ -22983,6 +22999,12 @@ export interface WorkloadDetailed {
     'preemptible'?: boolean | null;
     /**
      * 
+     * @type {string}
+     * @memberof WorkloadDetailed
+     */
+    'preemptibility'?: string | null;
+    /**
+     * 
      * @type {boolean}
      * @memberof WorkloadDetailed
      */
@@ -23159,6 +23181,12 @@ export interface WorkloadElement {
     'createdAt'?: string;
     /**
      * 
+     * @type {WorkloadElementTopology}
+     * @memberof WorkloadElement
+     */
+    'topology'?: WorkloadElementTopology | null;
+    /**
+     * 
      * @type {WorkloadElementKubernetesRef}
      * @memberof WorkloadElement
      */
@@ -23264,6 +23292,12 @@ export interface WorkloadElementResponse {
     'createdAt'?: string;
     /**
      * 
+     * @type {WorkloadElementTopology}
+     * @memberof WorkloadElementResponse
+     */
+    'topology'?: WorkloadElementTopology | null;
+    /**
+     * 
      * @type {WorkloadElementKubernetesRef}
      * @memberof WorkloadElementResponse
      */
@@ -23280,12 +23314,6 @@ export interface WorkloadElementResponse {
      * @memberof WorkloadElementResponse
      */
     'allocatedResources': WorkloadAllocatedResources | null;
-    /**
-     * 
-     * @type {WorkloadElementTopology}
-     * @memberof WorkloadElementResponse
-     */
-    'topology'?: WorkloadElementTopology | null;
 }
 /**
  * 
@@ -23305,25 +23333,31 @@ export interface WorkloadElementResponseAllOf {
      * @memberof WorkloadElementResponseAllOf
      */
     'allocatedResources': WorkloadAllocatedResources | null;
-    /**
-     * 
-     * @type {WorkloadElementTopology}
-     * @memberof WorkloadElementResponseAllOf
-     */
-    'topology'?: WorkloadElementTopology | null;
 }
 /**
- * The element\'s network topology. Returned only when the element\'s running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn\'t support topology, or there are no running pods to place yet). 
+ * The element\'s network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy. 
  * @export
  * @interface WorkloadElementTopology
  */
 export interface WorkloadElementTopology {
     /**
-     * The name of the network topology associated with the element — either inherited from the workload\'s topology constraints, or inferred from the nodepools the element\'s running pods are scheduled on.
+     * The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload\'s topology constraints, or inferred from the nodepools the element\'s running pods are scheduled on.
      * @type {string}
      * @memberof WorkloadElementTopology
      */
     'name'?: string;
+    /**
+     * The topology level to use as a preferred placement constraint for the element.
+     * @type {string}
+     * @memberof WorkloadElementTopology
+     */
+    'preferredPlacement'?: string;
+    /**
+     * The topology level to use as a required placement constraint for the element. If the requirement cannot be satisfied at this topology level, placement will fail.
+     * @type {string}
+     * @memberof WorkloadElementTopology
+     */
+    'requiredPlacement'?: string;
     /**
      * 
      * @type {WorkloadTopologyActualPlacement}
@@ -23881,6 +23915,7 @@ export const WorkloadSortFilterFields = {
     Category: 'category',
     Priority: 'priority',
     PriorityClassName: 'priorityClassName',
+    Preemptibility: 'preemptibility',
     GuaranteedRuntimeEndsAt: 'guaranteedRuntimeEndsAt',
     AiApplicationId: 'aiApplicationId',
     AiApplicationName: 'aiApplicationName'
@@ -36863,6 +36898,77 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
+         * Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.  Telemetry Types: - WORKLOADS_COUNT: Count of workloads - GPU_ALLOCATION: GPU allocation metrics - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).   For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters. - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads 
+         * @summary Get the internal workloads telemetry.
+         * @param {WorkloadTelemetryType} telemetryType Specifies the telemetry type.
+         * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
+         * @param {string} [nodepoolName] Filter using the nodepool.
+         * @param {string} [departmentId] Filter using the department id.
+         * @param {string} [projectId] project id to filter by
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
+         * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getInternalWorkloadsTelemetry: async (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'telemetryType' is not null or undefined
+            assertParamExists('getInternalWorkloadsTelemetry', 'telemetryType', telemetryType)
+            const localVarPath = `/internal/workloads/telemetry`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (nodepoolName !== undefined) {
+                localVarQueryParameter['nodepoolName'] = nodepoolName;
+            }
+
+            if (departmentId !== undefined) {
+                localVarQueryParameter['departmentId'] = departmentId;
+            }
+
+            if (projectId !== undefined) {
+                localVarQueryParameter['projectId'] = projectId;
+            }
+
+            if (groupBy) {
+                localVarQueryParameter['groupBy'] = groupBy.join(COLLECTION_FORMATS.csv);
+            }
+
+            if (telemetryType !== undefined) {
+                localVarQueryParameter['telemetryType'] = telemetryType;
+            }
+
+            if (filterByPhases) {
+                localVarQueryParameter['filterByPhases'] = filterByPhases.join(COLLECTION_FORMATS.csv);
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve workload data using a `workloadId`.
          * @summary Get a workload.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -37213,13 +37319,13 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
-         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
+         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloads: async (deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getWorkloads: async (deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/workloads`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -37283,12 +37389,12 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloadsTelemetry: async (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getWorkloadsTelemetry: async (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'telemetryType' is not null or undefined
             assertParamExists('getWorkloadsTelemetry', 'telemetryType', telemetryType)
             const localVarPath = `/api/v1/workloads/telemetry`;
@@ -37906,6 +38012,23 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.  Telemetry Types: - WORKLOADS_COUNT: Count of workloads - GPU_ALLOCATION: GPU allocation metrics - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).   For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters. - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads 
+         * @summary Get the internal workloads telemetry.
+         * @param {WorkloadTelemetryType} telemetryType Specifies the telemetry type.
+         * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
+         * @param {string} [nodepoolName] Filter using the nodepool.
+         * @param {string} [departmentId] Filter using the department id.
+         * @param {string} [projectId] project id to filter by
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
+         * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TelemetryResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInternalWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Retrieve workload data using a `workloadId`.
          * @summary Get a workload.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -38001,13 +38124,13 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
-         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
+         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloads200Response>> {
+        async getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloads200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -38019,12 +38142,12 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TelemetryResponse>> {
+        async getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TelemetryResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -38215,6 +38338,22 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
             return localVarFp.deleteWorkload(workloadId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.  Telemetry Types: - WORKLOADS_COUNT: Count of workloads - GPU_ALLOCATION: GPU allocation metrics - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).   For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters. - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads 
+         * @summary Get the internal workloads telemetry.
+         * @param {WorkloadTelemetryType} telemetryType Specifies the telemetry type.
+         * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
+         * @param {string} [nodepoolName] Filter using the nodepool.
+         * @param {string} [departmentId] Filter using the department id.
+         * @param {string} [projectId] project id to filter by
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
+         * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: any): AxiosPromise<TelemetryResponse> {
+            return localVarFp.getInternalWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve workload data using a `workloadId`.
          * @summary Get a workload.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -38303,13 +38442,13 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
-         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
+         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: any): AxiosPromise<GetWorkloads200Response> {
+        getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: any): AxiosPromise<GetWorkloads200Response> {
             return localVarFp.getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(axios, basePath));
         },
         /**
@@ -38320,12 +38459,12 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
          * @param {string} [nodepoolName] Filter using the nodepool.
          * @param {string} [departmentId] Filter using the department id.
          * @param {string} [projectId] project id to filter by
-         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+         * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
          * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: any): AxiosPromise<TelemetryResponse> {
+        getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: any): AxiosPromise<TelemetryResponse> {
             return localVarFp.getWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options).then((request) => request(axios, basePath));
         },
         /**
@@ -38509,6 +38648,24 @@ export class WorkloadsApi extends BaseAPI {
     }
 
     /**
+     * Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.  Telemetry Types: - WORKLOADS_COUNT: Count of workloads - GPU_ALLOCATION: GPU allocation metrics - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).   For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters. - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads 
+     * @summary Get the internal workloads telemetry.
+     * @param {WorkloadTelemetryType} telemetryType Specifies the telemetry type.
+     * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
+     * @param {string} [nodepoolName] Filter using the nodepool.
+     * @param {string} [departmentId] Filter using the department id.
+     * @param {string} [projectId] project id to filter by
+     * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
+     * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkloadsApi
+     */
+    public getInternalWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig) {
+        return WorkloadsApiFp(this.configuration).getInternalWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrieve workload data using a `workloadId`.
      * @summary Get a workload.
      * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -38611,14 +38768,14 @@ export class WorkloadsApi extends BaseAPI {
      * @param {number} [offset] The offset of the first item returned in the collection.
      * @param {number} [limit] The maximum number of entries to return.
      * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
-     * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
+     * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
      * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;.
      * @param {string} [search] Filter results by a free text search.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkloadsApi
      */
-    public getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig) {
+    public getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig) {
         return WorkloadsApiFp(this.configuration).getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -38630,13 +38787,13 @@ export class WorkloadsApi extends BaseAPI {
      * @param {string} [nodepoolName] Filter using the nodepool.
      * @param {string} [departmentId] Filter using the department id.
      * @param {string} [projectId] project id to filter by
-     * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>} [groupBy] Group workloads by field.
+     * @param {Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>} [groupBy] Group workloads by field.
      * @param {Array<Phase>} [filterByPhases] Filter workloads by specific phases. If not specified, all phases are included.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkloadsApi
      */
-    public getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig) {
+    public getWorkloadsTelemetry(telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, options?: AxiosRequestConfig) {
         return WorkloadsApiFp(this.configuration).getWorkloadsTelemetry(telemetryType, clusterId, nodepoolName, departmentId, projectId, groupBy, filterByPhases, options).then((request) => request(this.axios, this.basePath));
     }
 

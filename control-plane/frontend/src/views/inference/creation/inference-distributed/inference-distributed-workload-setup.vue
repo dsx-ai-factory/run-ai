@@ -194,6 +194,7 @@ export default defineComponent({
         totalGpuRequest: this.totalGpuRequest,
         workloadPriorities: this.clusterConfig.workloadPriorities,
         supportPriorityClass: this.features.supportPriorityClass,
+        supportSemiPreemptibility: this.features.supportSemiPreemptibility,
       };
     },
     shouldShowQuotaWarning(): boolean {

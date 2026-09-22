@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -19,9 +21,9 @@ import (
 // SharedScopeAllOf struct for SharedScopeAllOf
 type SharedScopeAllOf struct {
 	// The name of the scope
-	ScopeName string `json:"scopeName"`
+	ScopeName string     `json:"scopeName"`
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
-	CreatedBy *string `json:"createdBy,omitempty"`
+	CreatedBy *string    `json:"createdBy,omitempty"`
 }
 
 // NewSharedScopeAllOf instantiates a new SharedScopeAllOf object
@@ -179,5 +181,3 @@ func (v *NullableSharedScopeAllOf) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

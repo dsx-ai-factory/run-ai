@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/config"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
@@ -103,6 +103,11 @@ func (s *UpgradeClusterChart) Execute(ctx context.Context, runaiData *model.RunA
 
 	version := s.upgradeCfg.ClusterVersion
 	repo := step.ClusterChartRepo(s.upgradeCfg.EffectiveClusterEnv())
+	if repo == "" {
+		err := step.MissingChartRepoError(step.ClusterChartName)
+		s.SetStatus(model.Failed, err)
+		return err
+	}
 	logging.Infof("[Upgrade] Upgrading cluster chart to version %s from %s", version, repo)
 	err := s.helmInstaller.InstallOrUpgradeRelease(ctx,
 		repo, version, step.ClusterReleaseName, step.ClusterChartName, step.ClusterNamespace, false, values)

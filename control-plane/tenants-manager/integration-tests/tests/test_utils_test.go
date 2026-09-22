@@ -20,7 +20,7 @@ func GenerateRandomTenantName() string {
 }
 
 func GenerateRandomEmail(tenantName string) string {
-	return fmt.Sprintf("%s@test.run.ai", tenantName)
+	return fmt.Sprintf("%s@example.com", tenantName)
 }
 
 func StrPtr(s string) *string { return &s }

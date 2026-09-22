@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 // EventsAPIService EventsAPI service
 type EventsAPIService service
 
 type ApiDeleteEventRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *EventsAPIService
-	eventId string
+	eventId    string
 }
 
 func (r ApiDeleteEventRequest) Execute() (string, *http.Response, error) {
@@ -38,26 +39,27 @@ DeleteEvent Method for DeleteEvent
 
 Deletes a specific event by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param eventId Unique identifier of the event
- @return ApiDeleteEventRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param eventId Unique identifier of the event
+	@return ApiDeleteEventRequest
 */
 func (a *EventsAPIService) DeleteEvent(ctx context.Context, eventId string) ApiDeleteEventRequest {
 	return ApiDeleteEventRequest{
 		ApiService: a,
-		ctx: ctx,
-		eventId: eventId,
+		ctx:        ctx,
+		eventId:    eventId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *EventsAPIService) DeleteEventExecute(r ApiDeleteEventRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EventsAPIService.DeleteEvent")
@@ -118,8 +120,8 @@ func (a *EventsAPIService) DeleteEventExecute(r ApiDeleteEventRequest) (string, 
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -129,8 +131,8 @@ func (a *EventsAPIService) DeleteEventExecute(r ApiDeleteEventRequest) (string, 
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -148,11 +150,11 @@ func (a *EventsAPIService) DeleteEventExecute(r ApiDeleteEventRequest) (string, 
 }
 
 type ApiDeleteEventsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *EventsAPIService
-	tenantId *string
-	userId *string
-	read *bool
+	tenantId   *string
+	userId     *string
+	read       *bool
 }
 
 // Tenant that owns the events
@@ -182,24 +184,25 @@ DeleteEvents Method for DeleteEvents
 
 Deletes a batch of events for a specific user in a specific tenant, optionally filtered by read status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiDeleteEventsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiDeleteEventsRequest
 */
 func (a *EventsAPIService) DeleteEvents(ctx context.Context) ApiDeleteEventsRequest {
 	return ApiDeleteEventsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *EventsAPIService) DeleteEventsExecute(r ApiDeleteEventsRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EventsAPIService.DeleteEvents")
@@ -270,8 +273,8 @@ func (a *EventsAPIService) DeleteEventsExecute(r ApiDeleteEventsRequest) (string
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -289,11 +292,11 @@ func (a *EventsAPIService) DeleteEventsExecute(r ApiDeleteEventsRequest) (string
 }
 
 type ApiGetEventsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *EventsAPIService
-	tenantId *string
-	userId *string
-	read *bool
+	tenantId   *string
+	userId     *string
+	read       *bool
 }
 
 // Tenant that owns the events
@@ -323,24 +326,25 @@ GetEvents Method for GetEvents
 
 Returns the list of events for a tenant user, optionally filtered by tenantId, userId (only supported if tenantId is provided), and read status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetEventsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetEventsRequest
 */
 func (a *EventsAPIService) GetEvents(ctx context.Context) ApiGetEventsRequest {
 	return ApiGetEventsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Event
+//
+//	@return []Event
 func (a *EventsAPIService) GetEventsExecute(r ApiGetEventsRequest) ([]Event, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Event
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Event
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EventsAPIService.GetEvents")
@@ -409,8 +413,8 @@ func (a *EventsAPIService) GetEventsExecute(r ApiGetEventsRequest) ([]Event, *ht
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -428,9 +432,9 @@ func (a *EventsAPIService) GetEventsExecute(r ApiGetEventsRequest) ([]Event, *ht
 }
 
 type ApiUpdateEventReadRequest struct {
-	ctx context.Context
-	ApiService *EventsAPIService
-	eventId string
+	ctx             context.Context
+	ApiService      *EventsAPIService
+	eventId         string
 	eventReadUpdate *EventReadUpdate
 }
 
@@ -448,26 +452,27 @@ UpdateEventRead Method for UpdateEventRead
 
 Updates the read status of a specific event for a user
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param eventId Unique identifier of the event
- @return ApiUpdateEventReadRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param eventId Unique identifier of the event
+	@return ApiUpdateEventReadRequest
 */
 func (a *EventsAPIService) UpdateEventRead(ctx context.Context, eventId string) ApiUpdateEventReadRequest {
 	return ApiUpdateEventReadRequest{
 		ApiService: a,
-		ctx: ctx,
-		eventId: eventId,
+		ctx:        ctx,
+		eventId:    eventId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *EventsAPIService) UpdateEventReadExecute(r ApiUpdateEventReadRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EventsAPIService.UpdateEventRead")
@@ -533,8 +538,8 @@ func (a *EventsAPIService) UpdateEventReadExecute(r ApiUpdateEventReadRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
@@ -544,8 +549,8 @@ func (a *EventsAPIService) UpdateEventReadExecute(r ApiUpdateEventReadRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -555,8 +560,8 @@ func (a *EventsAPIService) UpdateEventReadExecute(r ApiUpdateEventReadRequest) (
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

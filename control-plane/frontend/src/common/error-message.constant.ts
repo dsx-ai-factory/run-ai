@@ -151,7 +151,7 @@ export enum errorMessages {
   STEP_MUST_BE_ABOVE_ZERO = "Enter a step greater than 0",
   STEP_EXCEEDS_RANGE = "Step can't exceed the max minus the min",
   ENFORCEMENT_FIELD_NOT_READY = "Finish configuring the field and selectors before saving the rule",
-  SAVE_OR_CANCEL_OPEN_RULE = "Save or cancel the open rule before saving the policy",
+  SAVE_OR_CANCEL_OPEN_RULE = "Save or cancel rule before saving the policy",
   UNSAVED_RULE_CHANGES = "Unsaved changes",
 }
 

@@ -18,21 +18,30 @@ GOLANG_LINTER_CONFIG_PATH?=../infra/lint/.golangci.yaml
 # GO_VERSION_DEFAULT; services that need to pin a different value (e.g.
 # traefik, which has no service-level go.mod) can still override GO_VERSION
 # in their own Makefile.
-GO_VERSION_DEFAULT?=1.26.3
+GO_VERSION_DEFAULT?=1.26.8
 
 GO_VERSION_BASE?=$(or $(strip $(if $(wildcard go.mod),$(shell awk '$$1=="go"{print $$2;exit}' go.mod),)), $(GO_VERSION_DEFAULT))
 # Use the default tagged version which should be ubuntu-based
 GO_VERSION?=$(GO_VERSION_BASE)
 GO_ALPINE_VERSION?=$(GO_VERSION_BASE)-alpine
 MOCKERY_VERSION=v3.2.5
-GOLANGCI_LINT_VERSION=v2.9.0
+# Must be new enough to decode the Go release's export data: v2.9.0 fails
+# every package on Go 1.27 with "export data version 4 ... (typecheck)".
+GOLANGCI_LINT_VERSION=v2.13.2
 GOPRIVATE=github.com/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.
-GINKGO_VERSION?=v2.13.2
 GINKGO_TIMEOUT?=15m
 GINKGO_PROCS?=1
 GINKGO_COMPILERS?=1
+
+ifneq ($(strip ${GITHUB_RUN_ID}),)
+GINKGO_CONTAINER_NAME?=runai-${GITHUB_RUN_ID}-${SERVICE_NAME}-test
+else
+GINKGO_LOCAL_RUN_ID:=$(shell printf '%s' $$$$)
+GINKGO_CONTAINER_NAME?=runai-local-${GINKGO_LOCAL_RUN_ID}-${SERVICE_NAME}-test
+endif
+GINKGO_DOCKER_RUN_ARGS=--name=${GINKGO_CONTAINER_NAME}
 
 # Extra flags passed to `go test` (e.g. -short, -count=1, -tags=...).
 GO_TEST_FLAGS?=-short
@@ -87,7 +96,7 @@ DOCKER_CGO_COMMAND=${DOCKER_CGO_BASE_COMMAND} -e CGO_ENABLED=1 -e GOOS=${OS} -e 
 DOCKER_GINKGO_COMMAND=${DOCKER_GO_COMMAND} /bin/sh -c '${GINKGO_COMMAND}'
 DOCKER_GINKGO_COMMAND_PRIVILEGED=${DOCKER_GO_COMMAND_PRIVILEGED} /bin/sh -c '${GINKGO_COMMAND}'
 
-DOCKER_GO_LINTER_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GOFLAGS="-buildvcs=false" ${DOCKERHUB_PROXY}golangci/golangci-lint:${GOLANGCI_LINT_VERSION}-alpine
+DOCKER_GO_LINTER_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GOFLAGS="-buildvcs=false" --entrypoint /bin/sh ${DOCKERHUB_PROXY}library/golang:${GO_VERSION} -c 'go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} &&
 DOCKER_GO_IMPORTS_COMMAND=${DOCKER_GO_BASE_COMMAND} ${DOCKERHUB_PROXY}cytopia/goimports:latest-0.3
 DOCKER_MOCKERY_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GO111MODULE=on --entrypoint /bin/sh ${DOCKERHUB_PROXY}library/golang:${GO_VERSION} -c 'go install github.com/vektra/mockery/v3@${MOCKERY_VERSION} &&
 
@@ -100,8 +109,7 @@ else
 GINKGO_CAPTURE_FLAGS?=
 endif
 
-GINKGO_COMMAND=go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} && \
-	go run github.com/onsi/ginkgo/v2/ginkgo -r --procs=${GINKGO_PROCS} --compilers=${GINKGO_COMPILERS} --randomize-all --randomize-suites --fail-on-pending --keep-going --timeout=${GINKGO_TIMEOUT} --trace ${GINKGO_CAPTURE_FLAGS}
+GINKGO_COMMAND=go run github.com/onsi/ginkgo/v2/ginkgo -r --procs=${GINKGO_PROCS} --compilers=${GINKGO_COMPILERS} --randomize-all --randomize-suites --fail-on-pending --keep-going --timeout=${GINKGO_TIMEOUT} --trace ${GINKGO_CAPTURE_FLAGS}
 
 GO_ACC_IGNORE?=""
 GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
@@ -110,16 +118,19 @@ GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
 
 GO_LDFLAGS=''
 
-# Optional: restrict golangci-lint to changes since this rev (--new-from-rev).
-# Empty (the default) lints all files. RC services opt in via runai-cluster.mk
-# to preserve the legacy "only flag new code" behavior.
-LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),master)
+# Restrict golangci-lint to changes since the PR's base branch
+# (--new-from-rev), so a PR is judged on the code it actually touched.
+# Override to empty in a service Makefile to lint every file.
+LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),main)
 ifeq ($(GITHUB_REF_TYPE),tag)
+  # GITHUB_REF_NAME is the tag itself here, so --new-from-rev would diff the
+  # tagged commit against itself and report nothing. Lint the whole tree.
   LINT_REV ?= $(LINT_BASE_BRANCH)
+  LINT_NEW_FROM_REV ?=
 else
   LINT_REV ?= origin/$(LINT_BASE_BRANCH)
+  LINT_NEW_FROM_REV ?= $(LINT_REV)
 endif
-LINT_NEW_FROM_REV ?=
 
 ################### OS DEPENDENCY ##########################
 # Build the project
@@ -167,10 +178,48 @@ test-ginkgo-local: git-config-command gocache go-list
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: test-ginkgo-local
 
+test-ginkgo-privileged: DOCKER_RUN_ARGS=${GINKGO_DOCKER_RUN_ARGS}
 test-ginkgo-privileged: git-config-command gocache go-list
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Running gikngo unit-tests for ${SERVICE_NAME}" ${BASE_CONSOLE}
 	@ ${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} Using privileged container, use with caution!" ${BASE_CONSOLE}
-	${DOCKER_GINKGO_COMMAND_PRIVILEGED} || ${FAILURE_MESSAGE_HANDLER}
+	@ remove_ginkgo_container() { \
+		container_ids=$$(docker container ls --all --quiet --filter "name=^/${GINKGO_CONTAINER_NAME}$$") || return $$?; \
+		[ -z "$$container_ids" ] || docker rm -f "${GINKGO_CONTAINER_NAME}" >/dev/null; \
+	}; \
+	teardown_ginkgo_run() { \
+		trap - EXIT INT TERM; \
+		remove_ginkgo_container; \
+	}; \
+	stop_ginkgo_client() { \
+		if [ -n "$${docker_pid:-}" ]; then \
+			kill -TERM "$$docker_pid" >/dev/null 2>&1 || true; \
+			wait "$$docker_pid" >/dev/null 2>&1 || true; \
+		fi; \
+	}; \
+	handle_signal() { \
+		teardown_ginkgo_run; \
+		stop_ginkgo_client; \
+		exit "$$1"; \
+	}; \
+	remove_ginkgo_container; \
+	cleanup_status=$$?; \
+	if [ "$$cleanup_status" -ne 0 ]; then \
+		${FAILURE_MESSAGE_HANDLER}; \
+		exit 1; \
+	fi; \
+	trap 'teardown_ginkgo_run' EXIT; \
+	trap 'handle_signal 130' INT; \
+	trap 'handle_signal 143' TERM; \
+	${DOCKER_GINKGO_COMMAND_PRIVILEGED} & \
+	docker_pid=$$!; \
+	wait "$$docker_pid"; \
+	test_status=$$?; \
+	teardown_ginkgo_run; \
+	cleanup_status=$$?; \
+	if [ "$$test_status" -ne 0 ] || [ "$$cleanup_status" -ne 0 ]; then \
+		${FAILURE_MESSAGE_HANDLER}; \
+		exit 1; \
+	fi
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: test-ginkgo-privileged
 
@@ -188,6 +237,8 @@ generate-mocks: git-config-command
 	fi
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME}" ${BASE_CONSOLE}
 	${DOCKER_MOCKERY_COMMAND} mockery' || ${FAILURE_MESSAGE_HANDLER}
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh .
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: generate-mocks
 
@@ -198,6 +249,8 @@ generate-mocks-client: git-config-command
 	fi
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME} pkg/client" ${BASE_CONSOLE}
 	${DOCKER_MOCKERY_COMMAND} cd pkg/client && mockery' || ${FAILURE_MESSAGE_HANDLER}
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh pkg/client
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: generate-mocks-client
 
@@ -206,7 +259,7 @@ lint-go: git-config-command gocache
 	@ echo $(GREEN_CONSOLE) "${CONSOLE_PREFIX} Running golangci linter for ${SERVICE_NAME}" $(BASE_CONSOLE); \
 		if [ -n "$(LINT_NEW_FROM_REV)" ]; then git fetch origin $(LINT_BASE_BRANCH) --depth=1 2>/dev/null || true; fi; \
 		$(DOCKER_GO_LINTER_COMMAND) \
-		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),) || $(FAILURE_MESSAGE_HANDLER)
+		golangci-lint run -v -c $(GOLANG_LINTER_CONFIG_PATH) $(if $(LINT_NEW_FROM_REV),--new-from-rev=$(LINT_NEW_FROM_REV),)' || $(FAILURE_MESSAGE_HANDLER)
 .PHONY: lint-go
 
 .PHONY: build-go

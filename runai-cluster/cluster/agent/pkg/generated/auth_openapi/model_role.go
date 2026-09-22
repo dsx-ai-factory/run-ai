@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -18,15 +20,15 @@ import (
 
 // Role struct for Role
 type Role struct {
-	Name string `json:"name"`
-	Description string `json:"description"`
-	Permissions []Permission `json:"permissions"`
-	Id int32 `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	DeletedAt NullableTime `json:"deletedAt,omitempty"`
-	TenantId *int32 `json:"tenantId,omitempty"`
-	CreatedBy string `json:"createdBy"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Permissions []Permission           `json:"permissions"`
+	Id          int32                  `json:"id"`
+	CreatedAt   time.Time              `json:"createdAt"`
+	UpdatedAt   time.Time              `json:"updatedAt"`
+	DeletedAt   NullableTime           `json:"deletedAt,omitempty"`
+	TenantId    *int32                 `json:"tenantId,omitempty"`
+	CreatedBy   string                 `json:"createdBy"`
 	Assignments []RoleAllOfAssignments `json:"assignments,omitempty"`
 }
 
@@ -230,6 +232,7 @@ func (o *Role) HasDeletedAt() bool {
 func (o *Role) SetDeletedAt(v time.Time) {
 	o.DeletedAt.Set(&v)
 }
+
 // SetDeletedAtNil sets the value for DeletedAt to be an explicit nil
 func (o *Role) SetDeletedAtNil() {
 	o.DeletedAt.Set(nil)
@@ -398,5 +401,3 @@ func (v *NullableRole) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

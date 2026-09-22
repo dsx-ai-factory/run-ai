@@ -12,6 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/actions"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -55,7 +56,7 @@ func actionForStep(t *testing.T, f *orchestrator2.Flow, stepName string) orchest
 func fullInstallSpec() *spec.Spec {
 	return &spec.Spec{
 		Command:  spec.CommandInstall,
-		Registry: &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"},
+		Registry: &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"},
 		ControlPlane: &spec.ControlPlane{
 			Domain:  "test.runai.local",
 			Version: "2.26.0",
@@ -106,7 +107,115 @@ func TestResolve_Install_ControlPlaneAndCluster(t *testing.T) {
 
 	clusterAction := actionForStep(t, runai.Flows[1], "install-cluster-chart")
 	require.IsType(t, actions.InstallClusterChart{}, clusterAction)
-	assert.Contains(t, clusterAction.(actions.InstallClusterChart).ExtraValues, "global.imagePullSecrets[0].name=runai-reg-creds")
+	assert.Contains(t, clusterAction.(actions.InstallClusterChart).ExtraValues, "global.additionalImagePullSecrets[0]=runai-reg-creds")
+}
+
+func TestResolve_Install_ExternalControlPlane(t *testing.T) {
+	s := &spec.Spec{
+		Command:      spec.CommandInstall,
+		InstallMode:  spec.InstallModeClusterOnly,
+		Connectivity: spec.ConnectivityConnected,
+		Registry:     &spec.Registry{Type: spec.RegistryTypeNGC},
+		Cluster: &spec.Cluster{
+			Name:            "cluster-a",
+			Domain:          "cluster.example.com",
+			Version:         "2.26.0",
+			ControlPlaneURL: "https://cp.example.com",
+			UID:             "cluster-uid",
+			BootstrapToken:  "bootstrap-token",
+		},
+	}
+
+	_, inst, err := Resolve(s, orchestrator2.Deps{})
+	require.NoError(t, err)
+	runai := inst.Pipelines[1]
+	require.Len(t, runai.Flows, 1)
+	clusterFlow := runai.Flows[0]
+	assert.NotContains(t, stepNames(clusterFlow), "register-cluster")
+
+	action := actionForStep(t, clusterFlow, "install-cluster-chart")
+	require.IsType(t, actions.InstallClusterChart{}, action)
+	clusterAction := action.(actions.InstallClusterChart)
+	assert.Equal(t, "https://cp.example.com", clusterAction.ControlPlaneURL)
+	assert.Equal(t, "cluster.example.com", clusterAction.Domain)
+	assert.Equal(t, "cluster-uid", clusterAction.ClusterUID)
+	assert.Equal(t, "bootstrap-token", clusterAction.BootstrapToken)
+}
+
+func TestResolve_Install_ExternalControlPlaneCredentials(t *testing.T) {
+	s := &spec.Spec{
+		Command:      spec.CommandInstall,
+		InstallMode:  spec.InstallModeClusterOnly,
+		Connectivity: spec.ConnectivityConnected,
+		Registry:     &spec.Registry{Type: spec.RegistryTypeNGC},
+		Cluster: &spec.Cluster{
+			Name:                    "cluster-a",
+			Domain:                  "cluster.example.com",
+			Version:                 "2.26.0",
+			TLS:                     &spec.TLS{CAChainPath: "/ca.pem"},
+			ControlPlaneURL:         "https://cp.example.com",
+			ControlPlaneCredentials: &spec.ControlPlaneCredentials{Username: "admin@example.com", Password: "pw"},
+		},
+	}
+	deps := orchestrator2.Deps{RunAIClientWithCredentials: func(string, string, step.ControlPlaneCredentials) (step.RunAIAPIClient, error) { return nil, nil }}
+
+	pre, inst, err := Resolve(s, deps)
+	require.NoError(t, err)
+
+	require.Len(t, pre.Pipelines, 1)
+	require.Len(t, pre.Pipelines[0].Flows, 1)
+	assert.Contains(t, stepNames(pre.Pipelines[0].Flows[0]), "preflight-control-plane-access")
+	access := actionForStep(t, pre.Pipelines[0].Flows[0], "preflight-control-plane-access").(actions.CheckControlPlaneAccess)
+	assert.Equal(t, "cluster-a", access.ClusterName)
+	assert.Equal(t, "https://cp.example.com", access.ControlPlane.URL)
+	assert.Equal(t, "/ca.pem", access.ControlPlane.CACertPath)
+	require.NotNil(t, access.ControlPlane.Credentials)
+	assert.Equal(t, "admin@example.com", access.ControlPlane.Credentials.Username)
+
+	runai := inst.Pipelines[1]
+	require.Len(t, runai.Flows, 1)
+	clusterFlow := runai.Flows[0]
+	assert.Contains(t, stepNames(clusterFlow), "register-cluster", "the installer registers the cluster itself")
+
+	register := actionForStep(t, clusterFlow, "register-cluster").(actions.EnsureCluster)
+	assert.Equal(t, "cluster-a", register.ClusterName)
+	assert.Equal(t, "https://cp.example.com", register.ControlPlane.URL)
+	assert.Equal(t, "cluster.example.com", register.ControlPlane.Domain)
+	assert.Equal(t, "/ca.pem", register.ControlPlane.CACertPath)
+	require.NotNil(t, register.ControlPlane.Credentials)
+	assert.Equal(t, "pw", register.ControlPlane.Credentials.Password)
+
+	clusterAction := actionForStep(t, clusterFlow, "install-cluster-chart").(actions.InstallClusterChart)
+	assert.Equal(t, "https://cp.example.com", clusterAction.ControlPlaneURL)
+	assert.Equal(t, "cluster.example.com", clusterAction.Domain)
+	assert.Empty(t, clusterAction.ClusterUID)
+	assert.Empty(t, clusterAction.BootstrapToken)
+	assert.False(t, clusterAction.UsesSuppliedCredentials())
+	require.NotNil(t, clusterAction.Credentials)
+	assert.Equal(t, "admin@example.com", clusterAction.Credentials.Username)
+}
+
+func TestResolve_Install_ExternalControlPlane_NoAccessCheckWithSuppliedIdentity(t *testing.T) {
+	s := &spec.Spec{
+		Command:      spec.CommandInstall,
+		InstallMode:  spec.InstallModeClusterOnly,
+		Connectivity: spec.ConnectivityConnected,
+		Registry:     &spec.Registry{Type: spec.RegistryTypeNGC},
+		Cluster: &spec.Cluster{
+			Name:            "cluster-a",
+			Domain:          "cluster.example.com",
+			ControlPlaneURL: "https://cp.example.com",
+			UID:             "cluster-uid",
+			BootstrapToken:  "bootstrap-token",
+		},
+	}
+	deps := orchestrator2.Deps{RunAIClientWithCredentials: func(string, string, step.ControlPlaneCredentials) (step.RunAIAPIClient, error) { return nil, nil }}
+
+	pre, _, err := Resolve(s, deps)
+	require.NoError(t, err)
+	for _, f := range pre.Pipelines[0].Flows {
+		assert.NotContains(t, stepNames(f), "preflight-control-plane-access")
+	}
 }
 
 func TestResolve_Install_ControlPlaneOnly_NoOptionalSecrets(t *testing.T) {
@@ -136,7 +245,7 @@ func TestControlPlaneValues_CustomCA(t *testing.T) {
 }
 
 func TestUsesManagedRegistrySecret(t *testing.T) {
-	registry := &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"}
+	registry := &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"}
 
 	assert.True(t, usesManagedRegistrySecret(&spec.Spec{Registry: registry}))
 	assert.True(t, usesManagedRegistrySecret(&spec.Spec{
@@ -179,7 +288,7 @@ func TestResolve_Install_Airgap(t *testing.T) {
 		"push-airgap-images",
 	}, stepNames(runai.Flows[0]))
 
-	// Air-gapped control plane skips the JFrog registry secret.
+	// Air-gapped control plane skips the managed registry secret.
 	assert.Equal(t, []string{
 		"create-control-plane-namespace",
 		"install-control-plane-tls",

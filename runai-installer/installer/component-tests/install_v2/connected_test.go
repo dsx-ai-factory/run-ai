@@ -47,8 +47,10 @@ func connectedConfig(t *testing.T, path string, dryRun bool) (*installconfig.Con
 
 func appliedNames(k8s *harness.FakeK8sExecutor) map[string]bool {
 	out := map[string]bool{}
-	for _, c := range k8s.CallsByVerb("apply") {
-		out[c.Name] = true
+	for _, verb := range []string{"apply", "create", "patch"} {
+		for _, c := range k8s.CallsByVerb(verb) {
+			out[c.Name] = true
+		}
 	}
 	return out
 }
@@ -180,7 +182,7 @@ func TestConnectedInstall_CompatFallbackWarns(t *testing.T) {
 	require.NotNil(t, fb, "an unrecognized Run:ai version must emit a compat_fallback warning")
 	compat := fb["compat"].(map[string]any)
 	assert.Equal(t, "2.23.0", compat["requestedVersion"])
-	assert.Equal(t, "2.26", compat["usingVersion"])
+	assert.Equal(t, "3.0", compat["usingVersion"])
 
 	components := compat["components"].([]any)
 	versions := map[string]string{}
@@ -189,7 +191,7 @@ func TestConnectedInstall_CompatFallbackWarns(t *testing.T) {
 		versions[m["name"].(string)] = m["version"].(string)
 	}
 	assert.Equal(t, "76.2.0", versions["prometheus"], "fallback reports the latest matrix versions")
-	assert.Equal(t, "v25.3.0", versions["gpu-operator"])
+	assert.Equal(t, "v26.7.0", versions["gpu-operator"])
 
 	// The warning does not fail the install: prereqs still install with the
 	// fallback versions and the run succeeds.

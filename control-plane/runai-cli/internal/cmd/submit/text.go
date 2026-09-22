@@ -27,7 +27,7 @@ Command and Arguments:
 - Use --worker-command and --worker-arguments to override worker's command/args`
 
 	BaseExampleMsg = `# Submit a workload
-runai {{.CommandType}} submit <workload-name> -p <project-name> -i runai.jfrog.io/demo/quickstart-demo
+runai {{.CommandType}} submit <workload-name> -p <project-name> -i ubuntu
 
 # Submit a workload with arguments
 runai {{.CommandType}} submit <workload-name> -p <project-name> -i ubuntu -- ls -la

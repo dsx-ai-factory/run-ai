@@ -18,6 +18,7 @@
       :policy-rules="policyRules"
       :is-port-required="isPortRequired"
       :cluster-id="clusterId || ''"
+      :is-distributed-inference="isDistributedInference"
     />
   </section>
 </template>
@@ -88,6 +89,10 @@ export default defineComponent({
     clusterId: {
       type: String as PropType<string>,
       required: false,
+    },
+    isDistributedInference: {
+      type: Boolean as PropType<boolean>,
+      default: false,
     },
   },
   methods: {

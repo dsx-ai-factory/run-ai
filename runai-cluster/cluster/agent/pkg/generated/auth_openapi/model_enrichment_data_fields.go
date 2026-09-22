@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -17,7 +19,7 @@ import (
 
 // EnrichmentDataFields struct for EnrichmentDataFields
 type EnrichmentDataFields struct {
-	RoleName string `json:"roleName"`
+	RoleName  string `json:"roleName"`
 	ScopeName string `json:"scopeName"`
 }
 
@@ -134,5 +136,3 @@ func (v *NullableEnrichmentDataFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

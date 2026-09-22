@@ -70,15 +70,15 @@ func TestConfigurationScreen_InitAndOrder(t *testing.T) {
 	// Expected unique inputs for SH + Ingress
 	expected := []inputs.InstallInputType{
 		inputs.InstallInputClusterName,                // order 0
-		inputs.InstallInputJfrogCreds,                 // order 1
+		inputs.InstallInputRegistryPullSecret,         // order 1
 		inputs.InstallInputFQDN,                       // order 2
 		inputs.InstallInputIngressControllerHTTPSPort, // order 3 (from Ingress)
 		inputs.InstallInputSSLPath,                    // order 4
 		inputs.InstallInputSSLKeyPath,                 // order 5
 		inputs.InstallInputCAChainPath,                // order 6 (optional)
-		inputs.InstallInputWorkloadRouting,             // order 10 (optional)
-		inputs.InstallInputHostRoutingCertPath,         // order 11 (optional when routing!=host)
-		inputs.InstallInputHostRoutingKeyPath,          // order 12 (optional when routing!=host)
+		inputs.InstallInputWorkloadRouting,            // order 10 (optional)
+		inputs.InstallInputHostRoutingCertPath,        // order 11 (optional when routing!=host)
+		inputs.InstallInputHostRoutingKeyPath,         // order 12 (optional when routing!=host)
 	}
 
 	if len(got) != len(expected) {
@@ -219,7 +219,7 @@ func TestConfigurationScreen_InitWithMultiplePrerequisites(t *testing.T) {
 
 	expected := []inputs.InstallInputType{
 		inputs.InstallInputClusterName,
-		inputs.InstallInputJfrogCreds,
+		inputs.InstallInputRegistryPullSecret,
 		inputs.InstallInputFQDN,
 		inputs.InstallInputIngressControllerHTTPSPort,
 		inputs.InstallInputSSLPath,
@@ -266,7 +266,7 @@ func TestConfigurationScreen_AllPrerequisites_NoExtraInputs(t *testing.T) {
 
 	expected := []inputs.InstallInputType{
 		inputs.InstallInputClusterName,
-		inputs.InstallInputJfrogCreds,
+		inputs.InstallInputRegistryPullSecret,
 		inputs.InstallInputFQDN,
 		inputs.InstallInputIngressControllerHTTPSPort,
 		inputs.InstallInputSSLPath,

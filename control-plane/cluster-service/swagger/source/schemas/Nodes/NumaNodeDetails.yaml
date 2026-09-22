@@ -1,5 +1,4 @@
 type: object
-x-internal: true
 required:
   - name
   - totalCpuCores
@@ -11,44 +10,44 @@ required:
 properties:
   name:
     type: string
-    description: The NUMA node zone name reported by NodeResourceTopology.
+    description: The identifier of the NUMA node (for example, node-0).
     example: node-0
   totalCpuCores:
     type: number
     format: double
     minimum: 0
     multipleOf: 0.001
-    description: Total CPU in cores available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    description: Total CPU cores on this NUMA node that are available for allocation.
     example: 63.5
   allocatedCpuCores:
     type: number
     format: double
     minimum: 0
     multipleOf: 0.001
-    description: Allocated CPU in cores, calculated as allocatable minus available.
+    description: CPU cores currently allocated to workloads on this NUMA node.
     example: 8.5
   totalCpuMemoryBytes:
     type: integer
     format: int64
     minimum: 0
-    description: Total CPU memory in bytes available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    description: Total CPU memory on this NUMA node that is available for allocation.
     example: 270582939648
   allocatedCpuMemoryBytes:
     type: integer
     format: int64
     minimum: 0
-    description: Allocated memory in bytes, calculated as allocatable minus available.
+    description: CPU memory currently allocated to workloads on this NUMA node, in bytes.
     example: 34359738368
   totalGpus:
     type: integer
     format: int32
     minimum: 0
-    description: Total GPUs available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    description: Total GPU devices on this NUMA node that are available for allocation.
     example: 4
   allocatedGpus:
     type: integer
     format: int32
     minimum: 0
-    description: Allocated GPUs, calculated as allocatable minus available.
+    description: GPU devices currently allocated to workloads on this NUMA node.
     example: 2
 x-schema-name: NumaNodeDetails

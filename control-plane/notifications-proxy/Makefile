@@ -35,6 +35,7 @@ generate-integration-test-smtp-openapi-client:
 		rm -rf ./git_push.sh  ./test ./go.mod ./go.sum  ./.travis.yml ./.openapi-generator* ./.gitignore && \
 		go mod tidy && \
 		go fmt ./...
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-openapi.sh ./integration_tests/mailhog/mailhogclient
 
 test: build test-go integration-tests ## Run unit and integration tests
 .PHONY: test

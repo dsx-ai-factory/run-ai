@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Backend for Frontend Service
 
@@ -22,6 +24,8 @@ var _ MappedNullable = &BootConfigDocs{}
 
 // BootConfigDocs struct for BootConfigDocs
 type BootConfigDocs struct {
+	// Documentation path catalog. Defaults to v1 when omitted by an older server.
+	CatalogVersion *string `json:"catalogVersion,omitempty"`
 	// Base URL used to resolve documentation links.
 	BaseUrl  string             `json:"baseUrl"`
 	WhatsNew BootConfigWhatsNew `json:"whatsNew"`
@@ -35,6 +39,8 @@ type _BootConfigDocs BootConfigDocs
 // will change when the set of required properties is changed
 func NewBootConfigDocs(baseUrl string, whatsNew BootConfigWhatsNew) *BootConfigDocs {
 	this := BootConfigDocs{}
+	var catalogVersion string = "v1"
+	this.CatalogVersion = &catalogVersion
 	this.BaseUrl = baseUrl
 	this.WhatsNew = whatsNew
 	return &this
@@ -45,7 +51,41 @@ func NewBootConfigDocs(baseUrl string, whatsNew BootConfigWhatsNew) *BootConfigD
 // but it doesn't guarantee that properties required by API are set
 func NewBootConfigDocsWithDefaults() *BootConfigDocs {
 	this := BootConfigDocs{}
+	var catalogVersion string = "v1"
+	this.CatalogVersion = &catalogVersion
 	return &this
+}
+
+// GetCatalogVersion returns the CatalogVersion field value if set, zero value otherwise.
+func (o *BootConfigDocs) GetCatalogVersion() string {
+	if o == nil || IsNil(o.CatalogVersion) {
+		var ret string
+		return ret
+	}
+	return *o.CatalogVersion
+}
+
+// GetCatalogVersionOk returns a tuple with the CatalogVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BootConfigDocs) GetCatalogVersionOk() (*string, bool) {
+	if o == nil || IsNil(o.CatalogVersion) {
+		return nil, false
+	}
+	return o.CatalogVersion, true
+}
+
+// HasCatalogVersion returns a boolean if a field has been set.
+func (o *BootConfigDocs) HasCatalogVersion() bool {
+	if o != nil && !IsNil(o.CatalogVersion) {
+		return true
+	}
+
+	return false
+}
+
+// SetCatalogVersion gets a reference to the given string and assigns it to the CatalogVersion field.
+func (o *BootConfigDocs) SetCatalogVersion(v string) {
+	o.CatalogVersion = &v
 }
 
 // GetBaseUrl returns the BaseUrl field value
@@ -106,6 +146,9 @@ func (o BootConfigDocs) MarshalJSON() ([]byte, error) {
 
 func (o BootConfigDocs) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.CatalogVersion) {
+		toSerialize["catalogVersion"] = o.CatalogVersion
+	}
 	toSerialize["baseUrl"] = o.BaseUrl
 	toSerialize["whatsNew"] = o.WhatsNew
 	return toSerialize, nil

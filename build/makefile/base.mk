@@ -44,10 +44,11 @@ WORKSPACE_HOST_PATH?=${PWD}/../..
 # Service-side workdir inside the container. Default targets control-plane;
 # runai-cluster services override to /local/runai-cluster/<sub>/${SERVICE_NAME}.
 DOCKER_WORK_DIR?=/local/control-plane/${SERVICE_NAME}
-DOCKER_COMMAND=docker run --rm -w ${DOCKER_WORK_DIR} -v "${WORKSPACE_HOST_PATH}:/local${MOUNT_FLAGS}" -u $(shell id -u):$(shell id -g)
-DOCKER_COMMAND_WORK_DIR=docker run --rm -w ${DOCKER_WORK_DIR} -v "${WORKSPACE_HOST_PATH}:/local${MOUNT_FLAGS}" -u $(shell id -u):$(shell id -g)
-DOCKER_COMMAND_PRIVILEGED=docker run --rm -w ${DOCKER_WORK_DIR} -v "${WORKSPACE_HOST_PATH}:/local${MOUNT_FLAGS}" -v ${DOCKER_SOCK_PATH}:${DOCKER_SOCK_PATH} -v ~/.docker/config.json:/root/.docker/config.json:ro -e TESTCONTAINERS_HOST_OVERRIDE=localhost
-DOCKER_COMMAND_PRIVILEGED_WORK_DIR=docker run --rm -w ${DOCKER_WORK_DIR} -v "${WORKSPACE_HOST_PATH}:/local${MOUNT_FLAGS}" -v ${DOCKER_SOCK_PATH}:${DOCKER_SOCK_PATH} -v ~/.docker/config.json:/root/.docker/config.json:ro -e TESTCONTAINERS_HOST_OVERRIDE=localhost
+DOCKER_RUN_ARGS?=
+DOCKER_COMMAND=docker run --rm ${DOCKER_RUN_ARGS} -w ${DOCKER_WORK_DIR} -v "${WORKSPACE_HOST_PATH}:/local${MOUNT_FLAGS}" -u $(shell id -u):$(shell id -g)
+DOCKER_COMMAND_WORK_DIR=docker run --rm ${DOCKER_RUN_ARGS} -w ${DOCKER_WORK_DIR} -v "${WORKSPACE_HOST_PATH}:/local${MOUNT_FLAGS}" -u $(shell id -u):$(shell id -g)
+DOCKER_COMMAND_PRIVILEGED=docker run --rm ${DOCKER_RUN_ARGS} -w ${DOCKER_WORK_DIR} -v "${WORKSPACE_HOST_PATH}:/local${MOUNT_FLAGS}" -v ${DOCKER_SOCK_PATH}:${DOCKER_SOCK_PATH} -v ~/.docker/config.json:/root/.docker/config.json:ro -e TESTCONTAINERS_HOST_OVERRIDE=localhost
+DOCKER_COMMAND_PRIVILEGED_WORK_DIR=docker run --rm ${DOCKER_RUN_ARGS} -w ${DOCKER_WORK_DIR} -v "${WORKSPACE_HOST_PATH}:/local${MOUNT_FLAGS}" -v ${DOCKER_SOCK_PATH}:${DOCKER_SOCK_PATH} -v ~/.docker/config.json:/root/.docker/config.json:ro -e TESTCONTAINERS_HOST_OVERRIDE=localhost
 DOCKER_LINUX_COMMAND=${DOCKER_COMMAND} ${DOCKERHUB_PROXY}library/debian:12.1-slim
 DOCKER_CURL_COMMAND=${DOCKER_COMMAND} ${DOCKERHUB_PROXY}alpine/curl:8.12.1
 DOCKER_YQ_IMG=${DOCKERHUB_PROXY}mikefarah/yq:4.35.1
@@ -119,3 +120,10 @@ docker-push-generic:
 	docker push ${DOCKER_IMAGE_NAME}
 .PHONY: push
 
+# Regenerate this component's NOTICE from its resolved dependency graph.
+# Requires go-licenses for Go components: go install github.com/google/go-licenses@latest
+BASE_MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+
+notice:
+	@python3 ${BASE_MAKEFILE_DIR}../scripts/generate-notice.py ${CURDIR}
+.PHONY: notice

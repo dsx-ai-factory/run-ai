@@ -117,9 +117,8 @@ func (p *PostUpgradeHook) cleanupLegacyDepartments(ctx context.Context, k8sClien
 		if err := clearLegacyFinalizers(ctx, k8sClient, old, "department", logger); err != nil {
 			return err
 		}
-		logger.Info("Deleting legacy department", "name", old.Name)
-		if err := k8sClient.Delete(ctx, old); err != nil && !apierrors.IsNotFound(err) && !meta.IsNoMatchError(err) {
-			return fmt.Errorf("failed to delete legacy department %q: %w", old.Name, err)
+		if err := deleteLegacyObject(ctx, k8sClient, old, "department", logger); err != nil {
+			return err
 		}
 	}
 
@@ -181,9 +180,8 @@ func (p *PostUpgradeHook) cleanupLegacyProjects(ctx context.Context, k8sClient c
 		if err := clearLegacyFinalizers(ctx, k8sClient, old, "project", logger); err != nil {
 			return err
 		}
-		logger.Info("Deleting legacy project", "name", old.Name)
-		if err := k8sClient.Delete(ctx, old); err != nil && !apierrors.IsNotFound(err) && !meta.IsNoMatchError(err) {
-			return fmt.Errorf("failed to delete legacy project %q: %w", old.Name, err)
+		if err := deleteLegacyObject(ctx, k8sClient, old, "project", logger); err != nil {
+			return err
 		}
 	}
 
@@ -332,7 +330,7 @@ func (p *PostUpgradeHook) finalizeResourceManagementMigration(ctx context.Contex
 		// the legacy org units: the agent serves the validate-project webhook that
 		// guards the delete, and the project-controller clears the departments' /
 		// projects' finalizers so the deletes actually complete.
-		for _, name := range []string{hooks.AgentOperandName, hooks.ProjectControllerOperandName} {
+		for _, name := range []string{hooks.AgentOperandName, hooks.ProjectControllerDeploymentName} {
 			if err := waitForDeploymentReady(ctx, resources.LocalClusterClient, name, p.params.OperandDownIntervalMillis, logger); err != nil {
 				return fmt.Errorf("failed waiting for %s before cleanup: %w", name, err)
 			}

@@ -9,8 +9,8 @@ import (
 	"context"
 	"fmt"
 
+	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	runaiclient "github.com/dsx-ai-factory/run-ai/runai-installer/clients/pkg/clients"
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/orgunit"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 )
 

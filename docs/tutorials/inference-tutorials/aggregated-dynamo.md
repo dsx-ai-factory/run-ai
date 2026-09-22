@@ -228,7 +228,7 @@ For more details, see the [NVIDIA Dynamo documentation](https://docs.nvidia.com/
    * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
    * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
    * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-   * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#wildcard-fqdn-for-inference). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
+   * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
 
 ```yaml
 apiVersion: nvidia.com/v1alpha1
@@ -311,7 +311,7 @@ Copy the following command to your terminal. Make sure to update the following p
 * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
 * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-* `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#wildcard-fqdn-for-inference). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
+* `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
@@ -442,7 +442,7 @@ Copy the following command to your terminal. For more details, see [CLI referenc
     * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
     * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
     * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-    * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#wildcard-fqdn-for-inference). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
+    * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
 
     ```yaml
     apiVersion: nvidia.com/v1alpha1

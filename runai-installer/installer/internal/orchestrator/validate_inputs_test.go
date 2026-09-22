@@ -88,31 +88,31 @@ func TestValidateInputs_ModeLib_InvalidInput(t *testing.T) {
 	assert.Error(t, err, "Invalid input should produce an error")
 }
 
-func TestValidateInputs_ModeLib_JfrogCredentials_Valid(t *testing.T) {
+func TestValidateInputs_ModeLib_PullSecret_Valid(t *testing.T) {
 	mockK8s := newFakeK8s(t)
 
 	runaiData := createTestRunAIInstallData(config.ModeCLI)
-	runaiData.Inputs[configinputs.InstallInputJfrogCreds] = "dXNlcm5hbWU6cGFzc3dvcmQ="
+	runaiData.Inputs[configinputs.InstallInputRegistryPullSecret] = "dXNlcm5hbWU6cGFzc3dvcmQ="
 
 	configItemsMap := configinputs.GetConfigInputs()
 
 	err := ValidateInputs(runaiData, mockK8s, configItemsMap)
 	if err != nil {
-		assert.NotContains(t, err.Error(), "invalid value for input JFROG credentials",
-			"Valid Jfrog credentials should not produce validation error")
+		assert.NotContains(t, err.Error(), "invalid value for input Registry pull secret",
+			"Valid pull secret should not produce validation error")
 	}
 }
 
-func TestValidateInputs_ModeLib_JfrogCredentials_Invalid(t *testing.T) {
+func TestValidateInputs_ModeLib_PullSecret_Invalid(t *testing.T) {
 	mockK8s := newFakeK8s(t)
 
 	runaiData := createTestRunAIInstallData(config.ModeCLI)
-	runaiData.Inputs[configinputs.InstallInputJfrogCreds] = "invalid@credentials#"
+	runaiData.Inputs[configinputs.InstallInputRegistryPullSecret] = "invalid@credentials#"
 
 	configItemsMap := configinputs.GetConfigInputs()
 
 	err := ValidateInputs(runaiData, mockK8s, configItemsMap)
-	assert.Error(t, err, "Invalid Jfrog credentials should produce an error")
+	assert.Error(t, err, "Invalid pull secret should produce an error")
 }
 
 func TestValidateInputs_ModeLib_IngressPort_Valid(t *testing.T) {
@@ -217,7 +217,7 @@ func TestValidateInputs_ModeLib_WorkloadRouting_Invalid(t *testing.T) {
 	runaiData.Inputs[configinputs.InstallInputClusterName] = "test-cluster"
 	runaiData.Inputs[configinputs.InstallInputSSLPath] = certFile.Name()
 	runaiData.Inputs[configinputs.InstallInputSSLKeyPath] = keyFile.Name()
-	runaiData.Inputs[configinputs.InstallInputJfrogCreds] = "dGVzdDp0ZXN0"
+	runaiData.Inputs[configinputs.InstallInputRegistryPullSecret] = "dGVzdDp0ZXN0"
 	configItemsMap := configinputs.GetConfigInputs()
 
 	err = ValidateInputs(runaiData, mockK8s, configItemsMap)

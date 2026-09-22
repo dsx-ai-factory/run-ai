@@ -6,7 +6,7 @@
 package steps
 
 import (
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 )
@@ -18,10 +18,12 @@ func NewGetClusterInstallationDetailsPreset(clusterUuid, clientSecret string) *G
 	}
 	createCluster.SetStatus(model.Installed, nil)
 
+	installInfo := cluster.NewClusterInstallationInfoResponse("", "", "", "")
+	installInfo.SetClientSecret(clientSecret)
 	details := &GetClusterInstallationDetails{
 		RunAIInstallStepImpl: step.NewRunAIInstallStepImpl("Get cluster installation details (preset)"),
 		createClusterStep:    createCluster,
-		installInfo:          cluster.NewClusterInstallationInfoResponse("", "", "", clientSecret),
+		installInfo:          installInfo,
 	}
 	details.SetStatus(model.Installed, nil)
 	return details

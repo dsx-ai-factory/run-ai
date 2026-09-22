@@ -28,7 +28,7 @@ The module `Makefile` is self-contained; it does not inherit targets from
 
 ## Key build notes
 
-- Go version: `go.mod` requires Go 1.26.3.
+- Go version: `go.mod` requires Go 1.26.8.
 - Generated code: none. The generated products are YAML lock files under
   `dist/image-locks` and `dist/artifact-locks`, outside this module.
 - Container build: none. There is no `Dockerfile`, runtime base image, Docker

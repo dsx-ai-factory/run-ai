@@ -29,7 +29,7 @@ export const itemDetailsMock: IDrawerListItem = {
   details: [
     {
       title: "Image URL",
-      content: ["gcr.io/run-ai-demo/jupyter-tensorboard"],
+      content: ["quay.io/jupyter/scipy-notebook"],
     },
     {
       title: "Image pull policy",

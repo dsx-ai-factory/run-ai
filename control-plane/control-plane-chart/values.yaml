@@ -1359,6 +1359,37 @@ keycloakx:
         capabilities:
           drop:
             - ALL
+    {{- if ne .Values.global.fipsMode "off" }}
+    # Seeds the image's bundled FIPS provider jars into the shared providers
+    # volume — no-op on the default image, only matters when fipsMode is on.
+    - name: keycloak-copy-fips-providers
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      imagePullPolicy: IfNotPresent
+      command:
+        - /bin/sh
+        - -c
+        - cp -r /opt/keycloak/providers/. /providers/
+      volumeMounts:
+        - mountPath: /providers
+          name: keycloak-providers
+      resources:
+        limits:
+          cpu: 200m
+          memory: 128Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop:
+            - ALL
+    {{- end }}
     - name: keycloak-copy-extensions
       image: {{ .Values.global.image.registry }}/keycloak-extensions:{{ .Values.global.image.tag }}
       imagePullPolicy: IfNotPresent
@@ -1466,8 +1497,9 @@ keycloakx:
     allowedCapabilities: null
     readOnlyRootFilesystem: false
     runAsUser:
-      type: MustRunAs
-      uid: 1000
+      type: MustRunAsRange
+      uidRangeMin: 70
+      uidRangeMax: 65532
     seLinuxContext:
       type: MustRunAs
     seccompProfiles:
@@ -1630,6 +1662,9 @@ thanos:
       enabled: false
     affinity: *affinity
     name: thanos-querier
+    extraEnvVars:
+      - name: GODEBUG
+        value: fips140={{ .Values.global.fipsMode | default "off" }}
     replicaLabel:
       - prometheus_replica
       - tenant_id
@@ -1693,6 +1728,9 @@ thanos:
     enabled: true
     tsdbRetention: 183d
     name: thanos-receive
+    extraEnvVars:
+      - name: GODEBUG
+        value: fips140={{ .Values.global.fipsMode | default "off" }}
     serviceAccount:
       name: runai-backend-thanos-receive
       automountServiceAccountToken: false
@@ -1760,6 +1798,9 @@ nats:
   # Inject the secret as environment variables into NATS pods (same as gen-cache-pubsub)
   # Override this if you want to use your own secret (must contain AUTH_TOKEN key)
   extraEnvVarsSecret: "runai-backend-gen-cache-pubsub"
+  extraEnvVars:
+    - name: GODEBUG
+      value: fips140={{ .Values.global.fipsMode | default "off" }}
   jetstream:
     enabled: true
   replicaCount: 3
@@ -4679,10 +4720,11 @@ bffService:
     distributionAssets:
       profile: cc
     docs:
-      baseUrl: https://run-ai-docs.nvidia.com/self-hosted
+      catalogVersion: v2
+      baseUrl: https://docs.nvidia.com/run-ai/self-hosted
       versioned: true
       whatsNew:
-        urlTemplate: "{docsBaseUrl}/getting-started/whats-new/whats-new"
+        urlTemplate: "{docsBaseUrl}/documentation/getting-started/whats-new/whats-new"
     support:
       url: ""
       label: ""

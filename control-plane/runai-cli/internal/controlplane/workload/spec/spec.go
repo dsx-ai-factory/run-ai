@@ -960,8 +960,8 @@ func (gs *GeneralSpec) setDistributedProperties() error {
 		spec.SetDistributedFramework(*framework)
 	}
 
-	if distributed.Workers > 0 {
-		spec.SetNumWorkers(distributed.Workers)
+	if distributed.Workers.IsSet() && distributed.Workers.Get() != nil {
+		spec.SetNumWorkers(*distributed.Workers.Get())
 	}
 	if distributed.SegmentSize.IsSet() && distributed.SegmentSize.Get() != nil {
 		spec.SetSegmentSize(*distributed.SegmentSize.Get())
@@ -1091,6 +1091,24 @@ func (gs *GeneralSpec) Validate() error {
 	err := gs.validateBackoffRestartPolicy()
 	if err != nil {
 		return err
+	}
+	topologyKeys := []struct {
+		name  string
+		value string
+	}{
+		{consts.AttributeNamePreferredPodAffinityKey, gs.flags.Container.PodAffinityPreferred},
+		{consts.AttributeNameRequiredPodAffinityKey, gs.flags.Container.PodAffinityRequired},
+		{consts.AttributeNameWorkerPreferredPodTopologyKey, gs.flags.DistributedInference.WorkerPreferredPodTopology},
+		{consts.AttributeNameWorkerRequiredPodTopologyKey, gs.flags.DistributedInference.WorkerRequiredPodTopology},
+	}
+	for _, key := range topologyKeys {
+		if strings.Contains(key.value, "=") {
+			return fmt.Errorf(
+				"invalid value %q for --%s: expected a Kubernetes label key only; do not include '=VALUE'",
+				key.value,
+				key.name,
+			)
+		}
 	}
 	return nil
 }

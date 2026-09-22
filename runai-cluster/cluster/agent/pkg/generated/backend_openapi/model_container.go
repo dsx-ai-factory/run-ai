@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -17,7 +19,7 @@ import (
 // Container struct for Container
 type Container struct {
 	Image string `json:"image"`
-	Name string `json:"name"`
+	Name  string `json:"name"`
 }
 
 // NewContainer instantiates a new Container object
@@ -133,5 +135,3 @@ func (v *NullableContainer) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

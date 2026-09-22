@@ -200,6 +200,16 @@ func (s *textSink) renderRunSummary(r *orchestrator2.RunSummary) {
 		s.t.Print("  %s", rollup)
 	}
 	s.t.Print("  Completed in %s%s", duration, warningSuffix(r.Warnings))
+	if cp := r.ControlPlane; cp != nil && cp.Installed && cp.AdminCredentials != nil && !r.DryRun {
+		s.renderAdminCredentials(cp.AdminCredentials)
+	}
+}
+
+func (s *textSink) renderAdminCredentials(c *orchestrator2.AdminCredentialsRef) {
+	s.t.Print("")
+	s.t.Print("  Log in with the admin user:")
+	s.t.Print("    kubectl -n %s get configmap %s -o jsonpath='{.data.%s}'", c.Namespace, c.UsernameConfigMap, c.UsernameKey)
+	s.t.Print("    kubectl -n %s get secret %s -o jsonpath='{.data.%s}' | base64 -d", c.Namespace, c.PasswordSecret, c.PasswordKey)
 }
 
 // failureLocation renders the failing step as humanized pipeline › flow › step.

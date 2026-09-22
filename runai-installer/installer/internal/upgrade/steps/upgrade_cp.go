@@ -14,7 +14,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 )
 
-const cpImagePullSecretValue = "global.imagePullSecrets[0].name=runai-reg-creds"
+const (
+	cpImagePullSecretValue      = "global.imagePullSecrets[0].name=runai-reg-creds"
+	clusterImagePullSecretValue = "global.additionalImagePullSecrets[0]=runai-reg-creds"
+)
 
 type UpgradeCPChart struct {
 	*step.RunAIInstallStepImpl
@@ -44,6 +47,11 @@ func (s *UpgradeCPChart) Execute(ctx context.Context, runaiData *model.RunAIInst
 	)
 
 	repo := step.CPChartRepo(s.upgradeCfg.Env)
+	if repo == "" {
+		err := step.MissingChartRepoError(step.CPChartName)
+		s.SetStatus(model.Failed, err)
+		return err
+	}
 	logging.Infof("[Upgrade] Upgrading CP chart to version %s from %s", version, repo)
 	err := s.helmInstaller.InstallOrUpgradeRelease(ctx,
 		repo, version, step.CPReleaseName, step.CPChartName, step.CPNamespace, false, values)

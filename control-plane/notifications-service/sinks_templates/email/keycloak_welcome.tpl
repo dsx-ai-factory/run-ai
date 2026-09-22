@@ -1,3 +1,7 @@
+{{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
 MIME-Version: 1.0
 Content-Type: text/html; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
@@ -115,7 +119,7 @@ Content-Transfer-Encoding: quoted-printable
     </div>
     <br />
      <div class="highlight">Your invitation is valid for the next 7 days.</div>
-    For more information, check out our <a class="link" href="https://run-ai-docs.nvidia.com/self-hosted">documentation</a> or <a class="link" href="https://www.nvidia.com/en-eu/support/enterprise/#contact-us">contact support</a>
+    For more information, check out our <a class="link" href="https://docs.nvidia.com/run-ai/self-hosted">documentation</a> or <a class="link" href="https://www.nvidia.com/en-eu/support/enterprise/#contact-us">contact support</a>
     <br/><br />
     Thanks,
     <br />

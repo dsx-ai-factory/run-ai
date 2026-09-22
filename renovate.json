@@ -6,113 +6,72 @@
     "skip-env-setup"
   ],
   "baseBranchPatterns": [
-    "NOTE: this list is replaced at run time. runai-actions .github/workflows/renovate.yml runs .github/scripts/renovate-scan-candidates.py, which finds the newest release branches in this repository and starts one Renovate run per branch, each scoped to its own. This line is not a branch pattern and matches nothing, so a run that skips that step scans nothing rather than everything."
+    "NOTE: this list is replaced at run time. runai-actions .github/workflows/renovate.yml runs renovate/scan_candidates, which finds the newest release branches in this repository and starts one Renovate run per branch, each scoped to its own. This line is not a branch pattern and matches nothing, so a run that skips that step scans nothing rather than everything."
   ],
-  "additionalBranchPrefix": "{{{replace '^((?:control-plane|runai-common-packages|runai-application-packages)/[^/]+)/.+$' '$1' packageFileDir}}}-",
-  "commitMessageSuffix": "{{{replace '^((?:control-plane|runai-common-packages|runai-application-packages)/[^/]+)/.+$' '$1' packageFileDir}}} ({{baseBranch}})",
   "extends": [
     "config:recommended",
-    "mergeConfidence:all-badges"
+    "mergeConfidence:all-badges",
+    "github>run-ai/runai-actions//renovate/presets/go-common",
+    "github>run-ai/runai-actions//renovate/presets/runai-internal"
   ],
   "includePaths": [
-    "NOTE: the rest of this list is added at run time. runai-actions .github/workflows/renovate.yml runs .github/scripts/renovate-scan-candidates.py, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
+    "NOTE: the rest of this list is added at run time. runai-actions .github/workflows/renovate.yml runs renovate/scan_candidates, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
     "control-plane/frontend/**"
   ],
   "ignorePaths": [
     "runai-cluster/cluster/runai-crd-upgrader/**"
   ],
- "prConcurrentLimit": 60,
+  "prConcurrentLimit": 60,
   "prHourlyLimit": 40,
-  "vulnerabilityAlerts": {
-    "description": "Renovate gives every vulnerability alert its own branch and ignores groupName, so a service with two open alerts gets two PRs on top of its regular group PR -- all three editing the same go.mod and go.sum, so merging any one forces the other two to rebase. Group the security updates per folder instead: they still bypass the routine group, so a CVE fix never waits behind an unrelated bump, but the alerts for one folder travel together and land in a single tidy.",
-    "dependencyDashboardApproval": false,
-    "enabled": true,
-    "commitMessageSuffix": "{{{replace '^((?:control-plane|runai-common-packages|runai-application-packages)/[^/]+)/.+$' '$1' packageFileDir}}} [SECURITY] ({{baseBranch}})",
-    "groupName": "{{{replace '^((?:control-plane|runai-common-packages|runai-application-packages)/[^/]+)/.+$' '$1' packageFileDir}}} security",
-    "groupSlug": "{{{replace '^((?:control-plane|runai-common-packages|runai-application-packages)/[^/]+)/.+$' '$1' packageFileDir}}}-security"
-  },
   "packageRules": [
     {
-      "description": "Group every nested module with the module folder it sits under, so a folder's modules always travel in one PR. Folders commonly hold several modules with a local replace between them -- a service and its pkg/client, a package and its integration-tests, a service and its integration test helpers -- and the parent resolves the nested one from disk, so splitting them leaves one side stale and every command in that directory fails `go: updates to go.mod needed`. Matching on the folder rather than named suffixes means new nested modules are grouped automatically. Directories that are already a module root are returned unchanged, so their branch names do not move.",
-      "matchPackageNames": ["*"],
-      "groupName": "{{{replace '^((?:control-plane|runai-common-packages|runai-application-packages)/[^/]+)/.+$' '$1' packageFileDir}}} {{manager}} dependencies",
-      "groupSlug": "{{{replace '^((?:control-plane|runai-common-packages|runai-application-packages)/[^/]+)/.+$' '$1' packageFileDir}}}-{{manager}}-deps"
-    },
-    {
       "description": "frontend and frontend-v2 are two separate npm apps that happen to share a folder. Keep them in separate PRs rather than letting the folder-based group key merge them.",
-      "matchFileNames": ["control-plane/frontend/frontend-v2/**"],
+      "matchFileNames": [
+        "control-plane/frontend/frontend-v2/**"
+      ],
       "groupName": "control-plane/frontend/frontend-v2 {{manager}} dependencies",
       "groupSlug": "control-plane-frontend-frontend-v2-{{manager}}-deps",
       "additionalBranchPrefix": "control-plane/frontend/frontend-v2-",
       "commitMessageSuffix": "control-plane/frontend/frontend-v2 ({{baseBranch}})"
     },
     {
-      "matchUpdateTypes": ["patch", "minor"],
-      "automerge": true
-    },
-    {
-      "matchUpdateTypes": ["major"],
-      "enabled": false
-    },
-    {
-      "matchCurrentVersion": "<1.0.0",
-      "matchUpdateTypes": ["minor"],
-      "enabled": false
-    },
-    {
-      "matchManagers": ["gomod"],
-      "postUpdateOptions": ["gomodTidy"]
-    },
-    {
-      "description": "gomodTidy only tidies the module Renovate edited, so a sibling in the same folder that had no dependency change is absent from the branch and its go.mod goes stale, failing with `go: updates to go.mod needed`. Grouping cannot fix that on its own, because Renovate only includes a module that actually had an update. The script tidies every module in the group, and regenerates mocks where a module has a mockery config -- upstream interfaces gain methods between releases and a checked-in mock that no longer satisfies one breaks compilation of the whole test package. fileFilters must cover the generated mock paths or Renovate discards them.",
-      "matchManagers": ["gomod"],
-      "postUpgradeTasks": {
-        "commands": ["bash build/scripts/renovate-tidy-group.sh '{{{replace '^((?:control-plane|runai-common-packages|runai-application-packages)/[^/]+)/.+$' '$1' packageFileDir}}}'"],
-        "fileFilters": ["**/go.mod", "**/go.sum", "**/mocks/**", "**/mock_*.go"],
-        "executionMode": "branch"
-      }
-    },
-    {
       "description": "A prettier bump changes how prettier formats existing, untouched source: 3.4.2 to 3.9.6 collapses short union types onto one line, reformatting 33 files under control-plane/frontend. `npm run format` runs prettier --check, so the upgrade fails its own lint job and can never merge. The script reformats with the version the branch is adopting, so the PR carries the churn its own upgrade causes. It is a no-op for packages that do not depend on prettier.",
-      "matchManagers": ["npm"],
+      "matchManagers": [
+        "npm"
+      ],
       "postUpgradeTasks": {
-        "commands": ["bash build/scripts/renovate-prettier.sh '{{{packageFileDir}}}'"],
-        "fileFilters": ["**/src/**"],
+        "commands": [
+          "bash build/scripts/renovate-prettier.sh '{{{packageFileDir}}}'"
+        ],
+        "fileFilters": [
+          "**/src/**"
+        ],
         "executionMode": "branch"
       }
     },
     {
-      "matchDatasources": ["docker"],
-      "enabled": false
-    },
-    {
-      "description": "In-repo generated API clients are versioned by our own release process, not semver. They ship breaking API changes under patch tags, so a bump can leave a release branch pinned to a client its own source no longer compiles against.",
-      "matchPackageNames": [
-        "github.com/dsx-ai-factory/run-ai/control-plane/*/pkg/client",
-        "github.com/dsx-ai-factory/run-ai/runai-clients/*"
+      "matchDatasources": [
+        "docker"
       ],
       "enabled": false
     },
     {
-      "description": "Internal shared libraries break their SDK under patch and minor alike: runaictx v1.1.5 removed the exported CfRequestId; logging v1.0.13 made Fatalf terminate the process; runaihttp v1.1.3 renamed every ServerConfig key to server_*; setting v1.2.0 swapped the DB accessor and nil-panics. The release tooling cannot emit a major bump (versioning.mk only ever does prod_patch+1), so breaking changes have nowhere to go but patch. Both module paths are listed because v2.24/v2.25 consume these as external modules while v2.26+ consume the in-repo path. Note this disables them as DEPENDENCIES only; it does not stop Renovate scanning their own go.mod, which is governed separately by includePaths.",
-      "matchPackageNames": [
-        "github.com/dsx-ai-factory/run-ai/runai-common-packages/**",
-        "github.com/dsx-ai-factory/run-ai/runai-application-packages/**",
-        "github.com/run-ai/runai-common-packages/**",
-        "github.com/run-ai/runai-application-packages/**",
-        "github.com/run-ai/notifications-service/**"
+      "matchManagers": [
+        "dockerfile"
       ],
-      "enabled": false
-    },
-    {
-      "matchManagers": ["dockerfile"],
-      "matchFileNames": ["control-plane/frontend/Dockerfile"],
+      "matchFileNames": [
+        "control-plane/frontend/Dockerfile"
+      ],
       "enabled": true
     },
     {
       "description": "The frontend takes Dockerfile updates only. npm bumps break it faster than the guild can absorb them: typescript 5.3->5.9 and @vue/test-utils 2.4.6->2.4.11 together produced TS2589/TS2307/TS2339 plus failing vitest suites, and the four resulting PRs sat red for days with no owner. Closing them only made Renovate reopen them, so switch the manager off rather than keep generating work nobody can merge. This is deliberately absolute: it also stops npm vulnerability remediation for the frontend, which is a tradeoff owned outside Renovate. The dockerfile rule above is unaffected, so base-image updates keep flowing.",
-      "matchManagers": ["npm"],
-      "matchFileNames": ["control-plane/frontend/**"],
+      "matchManagers": [
+        "npm"
+      ],
+      "matchFileNames": [
+        "control-plane/frontend/**"
+      ],
       "enabled": false
     }
   ]

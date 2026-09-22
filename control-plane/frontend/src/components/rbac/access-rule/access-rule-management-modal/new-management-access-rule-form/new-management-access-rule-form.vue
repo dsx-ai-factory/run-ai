@@ -52,6 +52,7 @@
             @update:selected-scopes="onScopesSelected"
             counter
             :maxlength="isAllAuthenticatedUsers ? 1 : scopeMaxAmount"
+            :allowed-scopes="allowedScopes"
           />
         </div>
       </q-form>
@@ -91,6 +92,7 @@ import {
   type AccessRuleScopesInner,
   type AccessRuleSubjectsInner,
   type AuthenticatedUsersAccessRuleCreationFields,
+  type PermittedScopes,
   ScopeType,
 } from "@/swagger-models/authorization-client";
 import type { IOrgTreeNodeId } from "@/models/org-tree.model";
@@ -134,6 +136,10 @@ export default defineComponent({
     options: {
       type: Object as PropType<IAccessRuleManagementFormOptions>,
       required: true,
+    },
+    allowedScopes: {
+      type: Object as PropType<PermittedScopes>,
+      required: false,
     },
   },
   data() {

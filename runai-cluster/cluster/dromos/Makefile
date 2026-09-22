@@ -80,6 +80,7 @@ manifests: controller-gen ## Generate WorkloadRunner CRD manifest from the api s
 .PHONY: generate
 generate: controller-gen ## Regenerate zz_generated.deepcopy.go in the api sub-module.
 	cd $(API_MODULE) && $(CONTROLLER_GEN) object paths="./..."
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh $(API_MODULE)
 
 .PHONY: copy-crds
 copy-crds: manifests ## Copy WorkloadRunner CRD to runai-chart and runai-crd-upgrader.

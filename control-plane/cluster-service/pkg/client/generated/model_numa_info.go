@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 ClusterService
 
@@ -17,7 +19,7 @@ import (
 // checks if the NumaInfo type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &NumaInfo{}
 
-// NumaInfo struct for NumaInfo
+// NumaInfo NUMA configuration and per-NUMA-node resource data for the node.
 type NumaInfo struct {
 	TopologyManagerPolicy NullableTopologyManagerPolicy `json:"topologyManagerPolicy,omitempty"`
 }

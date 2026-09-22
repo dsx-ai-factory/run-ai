@@ -13,131 +13,126 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
 
-var _ = Describe("Researcher Service Operand", func() {
-	Context("Resources", func() {
-		It("should have resources", func() {
-			hybridClient := kc.New(k8s, k8s, nil)
-			op := researcher_service.Operand(hybridClient, runaiConfig)
-			resources := op.Resources()
-			Expect(resources).NotTo(BeEmpty())
+// researcher-service was retired in 2.26.0: its source and image build were
+// removed, but the operator kept reconciling its Deployment. These specs pin the
+// retirement — the operand must stay disabled regardless of the RunaiConfig
+// field, and must clean up the objects it used to own.
+var _ = Describe("Researcher Service Operand (retired)", func() {
+	BeforeEach(func() {
+		// The value that reproduces the bug: the product default through 2.25.
+		runaiConfig.Spec.ResearcherService.Enabled = ptr.To[bool](true)
+		EventuallyUpdateResource(kc.New(k8s, k8s, nil), runaiConfig)
+		WaitForDeployedCondition(kc.New(k8s, k8s, nil), runaiConfig)
+	})
+
+	Context("Operand", func() {
+		It("stays disabled even when researcher-service.enabled is true", func() {
+			op := researcher_service.Operand(kc.New(k8s, k8s, nil), runaiConfig)
+			Expect(op.Enabled()).To(BeFalse())
 		})
 
-		It("should create desired resources", func() {
-			hybridClient := kc.New(k8s, k8s, nil)
-			op := researcher_service.Operand(hybridClient, runaiConfig)
+		It("reports every resource disabled", func() {
+			op := researcher_service.Operand(kc.New(k8s, k8s, nil), runaiConfig)
+			Expect(op.Resources()).NotTo(BeEmpty())
 
 			for _, res := range op.Resources() {
-				if !res.Enabled() {
-					continue
-				}
-				obj, err := res.Object(apiCtx)
-				ExpectNoErr(err)
-				ExpectGetResource(k8s, obj)
+				Expect(res.Enabled()).To(BeFalse())
 			}
 		})
 
-		It("should re-create deleted resources", func() {
-			hybridClient := kc.New(k8s, k8s, nil)
-			op := researcher_service.Operand(hybridClient, runaiConfig)
+		// Every resource is routed to deletion, so Object is called on the
+		// delete path. It must yield a bare object identifying what to delete
+		// rather than erroring — the Deployment in particular used to fail here
+		// when the control-plane oauth config was absent.
+		It("builds bare, non-erroring objects for the delete path", func() {
+			op := researcher_service.Operand(kc.New(k8s, k8s, nil), runaiConfig)
 
 			for _, res := range op.Resources() {
-				if !res.Enabled() {
-					continue
-				}
 				obj, err := res.Object(apiCtx)
 				ExpectNoErr(err)
-				DeleteAndPollUntilDeleted(k8s, obj)
+				Expect(obj).NotTo(BeNil())
+				Expect(obj.GetName()).NotTo(BeEmpty())
+				Expect(obj.GetNamespace()).To(Equal(runaiConfig.Namespace))
 			}
+		})
+
+		It("does not create a researcher-service Deployment", func() {
+			ExpectDoesNotExist(k8s, &appsv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      researcher_service_resources.DeploymentName,
+					Namespace: runaiConfig.Namespace,
+				},
+			})
+		})
+	})
+
+	Context("Upgrade cleanup", func() {
+		// The upgrade case from the bug report: a cluster arrives at 2.26 with a
+		// researcher-service Deployment left over from 2.25. The operator must
+		// remove it instead of reconciling it onto a tag that has no image.
+		It("deletes a leftover researcher-service Deployment", func() {
+			leftover := &appsv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      researcher_service_resources.DeploymentName,
+					Namespace: runaiConfig.Namespace,
+				},
+				Spec: appsv1.DeploymentSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{"app": researcher_service_resources.DeploymentName},
+					},
+					Template: v1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{"app": researcher_service_resources.DeploymentName},
+						},
+						Spec: v1.PodSpec{
+							Containers: []v1.Container{
+								{
+									Name:  researcher_service_resources.DeploymentName,
+									Image: "researcher-service:2.25.0",
+								},
+							},
+						},
+					},
+				},
+			}
+
+			ExpectCreateResource(k8s, leftover)
+
+			TriggerController(kc.New(k8s, k8s, nil), runaiConfig)
 
 			EventuallyWithTimeout(func() bool {
-				reCreated := true
-				for _, res := range op.Resources() {
-					if !res.Enabled() {
-						continue
-					}
-					obj, err := res.Object(apiCtx)
-					ExpectNoErr(err)
-					if !ResourceExists(k8s, obj) {
-						reCreated = false
-					}
-				}
-
-				return reCreated
-			}).Should(BeTrue())
-		})
-
-		Context("Deployment", func() {
-			It("should reconcile a modified deployment spec but save editing object meta", func() {
-				hybridClient := kc.New(k8s, k8s, nil)
-				depResource := researcher_service_resources.NewDeploymentResource("researcher-service", hybridClient, runaiConfig)
-				deployment, err := depResource.Object(apiCtx)
-				ExpectNoErr(err)
-
-				deployment.(*appsv1.Deployment).ObjectMeta.Labels = map[string]string{
-					"new/label": "newLabel",
-				}
-
-				changedScheduler := "run.ai/test"
-
-				deployment.(*appsv1.Deployment).Spec.
-					Template.Spec.SchedulerName = changedScheduler
-
-				EventuallyUpdateResource(k8s, deployment)
-
-				EventuallyWithTimeout(func() bool {
-					ExpectGetResource(k8s, deployment)
-					dep := deployment.(*appsv1.Deployment)
-					return dep.Spec.Template.Spec.SchedulerName == changedScheduler
-				}).Should(BeFalse())
-
-				EventuallyWithTimeout(func() bool {
-					ExpectGetResource(k8s, deployment)
-					dep := deployment.(*appsv1.Deployment)
-					return dep.ObjectMeta.Labels["new/label"] == "newLabel"
-				}).Should(BeTrue())
-
-			})
-		})
-
-		Context("Ingress", func() {
-			Context("without ingress configured", func() {
-				It("should not create ingress", func() {
-					hybridClient := kc.New(k8s, k8s, nil)
-					ingressRes := researcher_service_resources.NewIngressResource("researcher-service", hybridClient, runaiConfig)
-					Expect(ingressRes.Enabled()).To(BeFalse())
-
-					status, err := researcher_service_resources.IngressStatus(apiCtx, kc.New(k8s, k8s, nil), runaiConfig)
-					ExpectNoErr(err)
-					Expect(status.Ready).To(BeTrue())
+				return ResourceExists(k8s, &appsv1.Deployment{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      researcher_service_resources.DeploymentName,
+						Namespace: runaiConfig.Namespace,
+					},
 				})
-			})
+			}).Should(BeFalse())
+		})
+	})
 
-			Context("with ingress configured", func() {
-				It("should create ingress", func() {
-					runaiConfig.Spec.Internal.Global.ClusterURL = "https://test.com"
-					runaiConfig.Spec.Internal.ResearcherService.Ingress.Enabled = ptr.To[bool](true)
-					EventuallyUpdateResource(kc.New(k8s, k8s, nil), runaiConfig)
-					WaitForDeployedCondition(kc.New(k8s, k8s, nil), runaiConfig)
+	Context("Ingress", func() {
+		// IngressStatus backs the cluster-wide ingress-controller readiness
+		// check. With the component retired it must report ready rather than
+		// hold the cluster unhealthy.
+		It("reports the ingress status ready", func() {
+			ingressRes := researcher_service_resources.NewIngressResource(
+				"researcher-service", kc.New(k8s, k8s, nil), runaiConfig)
+			Expect(ingressRes.Enabled()).To(BeFalse())
 
-					hybridClient := kc.New(k8s, k8s, nil)
-					ingressRes := researcher_service_resources.NewIngressResource("researcher-service", hybridClient, runaiConfig)
-					Expect(ingressRes.Enabled()).To(BeTrue())
+			runaiConfig.Spec.Internal.Global.ClusterURL = "https://test.com"
+			runaiConfig.Spec.Internal.ResearcherService.Ingress.Enabled = ptr.To[bool](true)
+			EventuallyUpdateResource(kc.New(k8s, k8s, nil), runaiConfig)
+			WaitForDeployedCondition(kc.New(k8s, k8s, nil), runaiConfig)
 
-					obj, err := ingressRes.Object(apiCtx)
-					ExpectNoErr(err)
-					Expect(obj).ShouldNot(BeNil())
-
-					EventuallyWithTimeout(func() bool {
-						status, err := researcher_service_resources.IngressStatus(apiCtx, kc.New(k8s, k8s, nil), runaiConfig)
-						ExpectNoErr(err)
-
-						return status.Ready
-					}).Should(BeTrue())
-				})
-			})
+			status, err := researcher_service_resources.IngressStatus(apiCtx, kc.New(k8s, k8s, nil), runaiConfig)
+			ExpectNoErr(err)
+			Expect(status.Ready).To(BeTrue())
 		})
 	})
 })

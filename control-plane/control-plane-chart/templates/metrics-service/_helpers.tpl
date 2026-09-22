@@ -1,3 +1,7 @@
+{{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
 # Datasource Provider Auth Secret (grafana labs access token)
 {{- define "control-plane.metricsService.config.datasourceProvider.auth.secret.name" -}}
 {{ .Values.metricsService.config.datasourceProvider.auth.existingSecret | default (printf "%s-metrics-service" .Values.fullnameOverride) }}

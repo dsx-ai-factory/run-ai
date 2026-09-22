@@ -66,6 +66,15 @@ type ExternalWorkloadSpec struct {
 	// +listMapKey=specName
 	NodeAffinities []NodeAffinityEntry `json:"nodeAffinities,omitempty" protobuf:"bytes,19,rep,name=nodeAffinities"`
 
+	// ComponentTopologies captures the requested network topology constraints per component,
+	// for workloads whose framework declares them per component rather than only for the whole
+	// workload. Each entry's specName matches the instanceKey of the corresponding
+	// StructureElement, so the constraint can be attached to that element.
+	// +optional
+	// +listType=map
+	// +listMapKey=specName
+	ComponentTopologies []ComponentTopologyEntry `json:"componentTopologies,omitempty" protobuf:"bytes,22,rep,name=componentTopologies"`
+
 	// StorageRefs lists the existing PVCs, Secrets, and ConfigMaps referenced by
 	// this workload's pod template (volumes and imagePullSecrets).
 	// +optional
@@ -102,6 +111,17 @@ type NodeAffinityEntry struct {
 	// NodeAffinity is the scheduling constraint for pods of the named spec.
 	// +optional
 	NodeAffinity *corev1.NodeAffinity `json:"nodeAffinity,omitempty" protobuf:"bytes,2,opt,name=nodeAffinity"`
+}
+
+// ComponentTopologyEntry pairs a network topology constraint with the component
+// SpecName it applies to (e.g. "Frontend", "PrefillWorker").
+type ComponentTopologyEntry struct {
+	// SpecName identifies the component within the owning workload. It matches the
+	// instanceKey of the corresponding StructureElement.
+	SpecName string `json:"specName" protobuf:"bytes,1,opt,name=specName"`
+	// Topology is the network topology constraint requested for the named component.
+	// +optional
+	Topology Topology `json:"topology,omitempty" protobuf:"bytes,2,opt,name=topology"`
 }
 
 // ExternalWorkloadStatus defines the observed state of ExternalWorkload

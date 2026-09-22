@@ -21,9 +21,7 @@ func (e *CPUResourcesQuota) Category() string {
 
 func (e *CPUResourcesQuota) Description() string {
 	return "Enable resource quota based on CPU resources.\nFor more information, see the " +
-		"<a href='https://run-ai-docs.nvidia.com/saas/platform-management/aiinitiatives/organization/" +
-		"departments' target='_blank'>Departments guide</a> and the <a href='https://run-ai-docs.nvidia.com/" +
-		"saas/platform-management/aiinitiatives/organization/projects' target='_blank'>Projects guide</a>"
+		"<a data-doc-key='departments' target='_blank'>Departments guide</a> and the <a data-doc-key='projects' target='_blank'>Projects guide</a>"
 }
 
 func (e *CPUResourcesQuota) DisplayName() string {

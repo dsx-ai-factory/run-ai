@@ -12,7 +12,7 @@ BIN_DIR=${REPO_DIR}/bin
 MAIN_DIR=${REPO_DIR}/cmd/main.go
 
 MOCKERY=$(BIN_DIR)/mockery
-MOCKERY_VERSION=v2.53.5
+MOCKERY_VERSION=v2.53.7
 DOCKER_COMPOSE_FILE=./integration_tests/docker-compose.yaml
 
 OPENAPI_GENERATOR_VERSION_SERVER=v7.12.0
@@ -52,10 +52,10 @@ validate_mockery:
 		echo "existing mockery binary is not of required version ${MOCKERY_VERSION}. Reinstalling it"; \
 		rm -f ${MOCKERY}; \
 	fi
-	GOBIN=${BIN_DIR} GOTOOLCHAIN=go1.26.3 go install github.com/vektra/mockery/v2/...@${MOCKERY_VERSION}
+	GOBIN=${BIN_DIR} GOTOOLCHAIN=go1.26.8 go install github.com/vektra/mockery/v2/...@${MOCKERY_VERSION}
 
 mockery: validate_mockery
-	GOTOOLCHAIN=go1.26.3 ${MOCKERY}
+	GOTOOLCHAIN=go1.26.8 ${MOCKERY}
 
 test: build test-go integration-tests ## Run unit and integration tests
 .PHONY: test
@@ -74,10 +74,12 @@ build: build_arm build_amd
 .PHONY: build
 
 build_arm: git-config-command generate-events-openapi-server generate-config-provider-openapi-server generate-config-provider-openapi-docs generate-events-openapi-client generate-history-openapi-server generate-history-openapi-client build-integration-tests
+	sh "$(shell git rev-parse --show-toplevel)/build/makefile/scripts/spdx-header-openapi.sh" pkg/client/generated
 	env GOOS=linux GOARCH=arm64 GOCACHE=/tmp/.cache GOLANGCI_LINT_CACHE=/tmp/.cache CGO_ENABLED=0 GO111MODULE=on \
 	   go build -o ${BIN_DIR}/notifications-service-arm64 ${MAIN_DIR}
 
 build_amd: git-config-command generate-events-openapi-server generate-config-provider-openapi-server generate-config-provider-openapi-docs generate-events-openapi-client generate-history-openapi-server generate-history-openapi-client build-integration-tests
+	sh "$(shell git rev-parse --show-toplevel)/build/makefile/scripts/spdx-header-openapi.sh" pkg/client/generated
 	env GOOS=linux GOARCH=amd64 GOCACHE=/tmp/.cache GOLANGCI_LINT_CACHE=/tmp/.cache CGO_ENABLED=0 GO111MODULE=on \
 	   go build -o ${BIN_DIR}/notifications-service-amd64 ${MAIN_DIR}
 
@@ -176,7 +178,7 @@ openapi-lint: openapi-lint-generic ## Lint the swagger bundle.
 .PHONY: openapi-lint
 
 generate_mocks: validate_mockery
-	GOTOOLCHAIN=go1.26.3 ${MOCKERY}
+	GOTOOLCHAIN=go1.26.8 ${MOCKERY}
 
 local-deploy: export OS=linux
 local-deploy: export ARCH=amd64
@@ -200,6 +202,7 @@ generate-integration-test-smtp-openapi-client:
 		rm -rf ./git_push.sh  ./test ./go.mod ./go.sum  ./.travis.yml ./.openapi-generator* ./.gitignore && \
 		go mod tidy && \
 		go fmt ./...
+	sh "$(shell git rev-parse --show-toplevel)/build/makefile/scripts/spdx-header-openapi.sh" integration_tests/mailhog/mailhogclient
 
 INTEG_TESTS_PACKAGE=./integration_tests/tests/
 

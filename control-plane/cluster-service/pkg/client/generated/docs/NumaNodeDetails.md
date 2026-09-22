@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Name** | **string** | The NUMA node zone name reported by NodeResourceTopology. | 
-**TotalCpuCores** | **float64** | Total CPU in cores available for allocation, taken from the allocatable value reported by NodeResourceTopology. | 
-**AllocatedCpuCores** | **float64** | Allocated CPU in cores, calculated as allocatable minus available. | 
-**TotalCpuMemoryBytes** | **int64** | Total CPU memory in bytes available for allocation, taken from the allocatable value reported by NodeResourceTopology. | 
-**AllocatedCpuMemoryBytes** | **int64** | Allocated memory in bytes, calculated as allocatable minus available. | 
-**TotalGpus** | **int32** | Total GPUs available for allocation, taken from the allocatable value reported by NodeResourceTopology. | 
-**AllocatedGpus** | **int32** | Allocated GPUs, calculated as allocatable minus available. | 
+**Name** | **string** | The identifier of the NUMA node (for example, node-0). | 
+**TotalCpuCores** | **float64** | Total CPU cores on this NUMA node that are available for allocation. | 
+**AllocatedCpuCores** | **float64** | CPU cores currently allocated to workloads on this NUMA node. | 
+**TotalCpuMemoryBytes** | **int64** | Total CPU memory on this NUMA node that is available for allocation. | 
+**AllocatedCpuMemoryBytes** | **int64** | CPU memory currently allocated to workloads on this NUMA node, in bytes. | 
+**TotalGpus** | **int32** | Total GPU devices on this NUMA node that are available for allocation. | 
+**AllocatedGpus** | **int32** | GPU devices currently allocated to workloads on this NUMA node. | 
 
 ## Methods
 

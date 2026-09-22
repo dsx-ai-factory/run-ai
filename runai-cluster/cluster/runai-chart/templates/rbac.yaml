@@ -70,7 +70,28 @@ rules:
       - httproutes
       - httproutes/status
     verbs:
-      - '*'
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  # Role creation does not include a resource name in the escalate authorization check.
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+    verbs:
+      - escalate
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+    resourceNames:
+      - accessrule-controller
+    verbs:
+      - bind
   - apiGroups:
       - gateway.networking.k8s.io
     resources:

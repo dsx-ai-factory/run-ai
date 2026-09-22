@@ -1,3 +1,7 @@
+{{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
 {{/*
 Generic init container that waits for a TCP service to be reachable.
 Input: dict with ctx (Helm root context), containerName, svcHost, svcPort, svcDisplayName

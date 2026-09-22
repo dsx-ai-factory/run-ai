@@ -11,7 +11,7 @@ info:
     name: NVIDIA Run:ai
     url: https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/
 servers:
-  - url: https://app.run.ai
+  - url: http://localhost:8080
 security:
   - bearerAuth: []
 tags:
@@ -3302,6 +3302,24 @@ components:
         $ref: '#/components/schemas/NetworkTopologyLabel'
       description: A list of Kubernetes node label key/value pairs that represent the node’s position in the cluster’s network topology (for example, region, zone, block, rack, or hostname). The topology is attached to the node pool on which the workload runs. The label order represents the hierarchy, from farthest (first) to closest (last). These labels are used by the NVIDIA Run:ai Scheduler when making placement decisions.
       nullable: true
+    TopologyManagerPolicy:
+      type: string
+      enum:
+        - none
+        - best-effort
+        - restricted
+        - single-numa-node
+      nullable: true
+      description: The Kubernetes topology manager policy configured on the node, controlling how NUMA-aligned resource allocation is enforced. For more details, see [Kubernetes topology manager policies](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/#topology-manager-policies).
+      x-schema-name: TopologyManagerPolicy
+    NumaInfo:
+      type: object
+      nullable: true
+      description: NUMA configuration and per-NUMA-node resource data for the node.
+      properties:
+        topologyManagerPolicy:
+          $ref: '#/components/schemas/TopologyManagerPolicy'
+      x-schema-name: NumaInfo
     NodeInfo:
       type: object
       required:
@@ -3346,6 +3364,8 @@ components:
           nullable: true
         networkTopologyLabels:
           $ref: '#/components/schemas/NetworkTopologyLabelsOptional'
+        numa:
+          $ref: '#/components/schemas/NumaInfo'
       x-schema-name: NodeInfo
     NodeAdditionalFields:
       type: object
@@ -3367,6 +3387,60 @@ components:
             nodeInfo:
               $ref: '#/components/schemas/NodeInfo'
       x-schema-name: NodeForSync
+    NumaNodeDetails:
+      type: object
+      required:
+        - name
+        - totalCpuCores
+        - allocatedCpuCores
+        - totalCpuMemoryBytes
+        - allocatedCpuMemoryBytes
+        - totalGpus
+        - allocatedGpus
+      properties:
+        name:
+          type: string
+          description: The identifier of the NUMA node (for example, node-0).
+          example: node-0
+        totalCpuCores:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.001
+          description: Total CPU cores on this NUMA node that are available for allocation.
+          example: 63.5
+        allocatedCpuCores:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.001
+          description: CPU cores currently allocated to workloads on this NUMA node.
+          example: 8.5
+        totalCpuMemoryBytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total CPU memory on this NUMA node that is available for allocation.
+          example: 270582939648
+        allocatedCpuMemoryBytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: CPU memory currently allocated to workloads on this NUMA node, in bytes.
+          example: 34359738368
+        totalGpus:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Total GPU devices on this NUMA node that are available for allocation.
+          example: 4
+        allocatedGpus:
+          type: integer
+          format: int32
+          minimum: 0
+          description: GPU devices currently allocated to workloads on this NUMA node.
+          example: 2
+      x-schema-name: NumaNodeDetails
     ClusterCreationRequest:
       type: object
       required:
@@ -4110,6 +4184,28 @@ components:
         - $ref: '#/components/schemas/NodeAdditionalFields'
         - $ref: '#/components/schemas/NodeAdditionalReadFields'
       x-schema-name: Node
+    NumaInfoExtended:
+      allOf:
+        - $ref: '#/components/schemas/NumaInfo'
+        - type: object
+          required:
+            - nodes
+          properties:
+            nodes:
+              type: array
+              description: The list of NUMA nodes on the physical machine and their resource availability.
+              items:
+                $ref: '#/components/schemas/NumaNodeDetails'
+      description: NUMA configuration and per-NUMA-node resource data for the node.
+      x-schema-name: NumaInfoExtended
+    NodeExtended:
+      allOf:
+        - $ref: '#/components/schemas/Node'
+        - type: object
+          properties:
+            numa:
+              $ref: '#/components/schemas/NumaInfoExtended'
+      x-schema-name: NodeExtended
     NetworkTopologyUpdateFields:
       type: object
       required:

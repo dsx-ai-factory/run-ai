@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 // NodePoolsApiService NodePoolsApi service
 type NodePoolsApiService service
 
 type ApiCreateNodePoolRequest struct {
-	ctx context.Context
-	ApiService *NodePoolsApiService
-	clusterId string
+	ctx                   context.Context
+	ApiService            *NodePoolsApiService
+	clusterId             string
 	nodePoolCreateRequest *NodePoolCreateRequest
 }
 
@@ -42,24 +43,24 @@ func (r ApiCreateNodePoolRequest) Execute() (*http.Response, error) {
 /*
 CreateNodePool Create a Node Pool
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @return ApiCreateNodePoolRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@return ApiCreateNodePoolRequest
 */
 func (a *NodePoolsApiService) CreateNodePool(ctx context.Context, clusterId string) ApiCreateNodePoolRequest {
 	return ApiCreateNodePoolRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *NodePoolsApiService) CreateNodePoolExecute(r ApiCreateNodePoolRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodePoolsApiService.CreateNodePool")
@@ -135,13 +136,13 @@ func (a *NodePoolsApiService) CreateNodePoolExecute(r ApiCreateNodePoolRequest) 
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -149,10 +150,10 @@ func (a *NodePoolsApiService) CreateNodePoolExecute(r ApiCreateNodePoolRequest) 
 }
 
 type ApiDeleteNodePoolRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *NodePoolsApiService
-	clusterId string
-	id int32
+	clusterId  string
+	id         int32
 }
 
 func (r ApiDeleteNodePoolRequest) Execute() (*http.Response, error) {
@@ -162,26 +163,26 @@ func (r ApiDeleteNodePoolRequest) Execute() (*http.Response, error) {
 /*
 DeleteNodePool Delete a Node Pool by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @param id The unique id identifying the Node Pool.
- @return ApiDeleteNodePoolRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@param id The unique id identifying the Node Pool.
+	@return ApiDeleteNodePoolRequest
 */
 func (a *NodePoolsApiService) DeleteNodePool(ctx context.Context, clusterId string, id int32) ApiDeleteNodePoolRequest {
 	return ApiDeleteNodePoolRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
-		id: id,
+		ctx:        ctx,
+		clusterId:  clusterId,
+		id:         id,
 	}
 }
 
 // Execute executes the request
 func (a *NodePoolsApiService) DeleteNodePoolExecute(r ApiDeleteNodePoolRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodePoolsApiService.DeleteNodePool")
@@ -282,9 +283,9 @@ func (a *NodePoolsApiService) DeleteNodePoolExecute(r ApiDeleteNodePoolRequest) 
 }
 
 type ApiGetNodePoolsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *NodePoolsApiService
-	clusterId string
+	clusterId  string
 }
 
 func (r ApiGetNodePoolsRequest) Execute() ([]NodePool, *http.Response, error) {
@@ -294,26 +295,27 @@ func (r ApiGetNodePoolsRequest) Execute() ([]NodePool, *http.Response, error) {
 /*
 GetNodePools Get all cluster's Node Pools.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @return ApiGetNodePoolsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@return ApiGetNodePoolsRequest
 */
 func (a *NodePoolsApiService) GetNodePools(ctx context.Context, clusterId string) ApiGetNodePoolsRequest {
 	return ApiGetNodePoolsRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
-//  @return []NodePool
+//
+//	@return []NodePool
 func (a *NodePoolsApiService) GetNodePoolsExecute(r ApiGetNodePoolsRequest) ([]NodePool, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []NodePool
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []NodePool
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodePoolsApiService.GetNodePools")
@@ -387,13 +389,13 @@ func (a *NodePoolsApiService) GetNodePoolsExecute(r ApiGetNodePoolsRequest) ([]N
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -410,9 +412,9 @@ func (a *NodePoolsApiService) GetNodePoolsExecute(r ApiGetNodePoolsRequest) ([]N
 }
 
 type ApiSyncNodePoolsRequest struct {
-	ctx context.Context
-	ApiService *NodePoolsApiService
-	clusterId string
+	ctx                   context.Context
+	ApiService            *NodePoolsApiService
+	clusterId             string
 	nodePoolStatusRequest *[]NodePoolStatusRequest
 }
 
@@ -430,25 +432,24 @@ SyncNodePools Sync Node Pools
 
 Sync all Node Pools statuses from k8s cluster to Run:AI backend
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @return ApiSyncNodePoolsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@return ApiSyncNodePoolsRequest
 */
 func (a *NodePoolsApiService) SyncNodePools(ctx context.Context, clusterId string) ApiSyncNodePoolsRequest {
 	return ApiSyncNodePoolsRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *NodePoolsApiService) SyncNodePoolsExecute(r ApiSyncNodePoolsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodePoolsApiService.SyncNodePools")
@@ -514,13 +515,13 @@ func (a *NodePoolsApiService) SyncNodePoolsExecute(r ApiSyncNodePoolsRequest) (*
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -528,10 +529,10 @@ func (a *NodePoolsApiService) SyncNodePoolsExecute(r ApiSyncNodePoolsRequest) (*
 }
 
 type ApiUpdateNodePoolRequest struct {
-	ctx context.Context
-	ApiService *NodePoolsApiService
-	clusterId string
-	id int32
+	ctx                   context.Context
+	ApiService            *NodePoolsApiService
+	clusterId             string
+	id                    int32
 	updateNodePoolRequest *UpdateNodePoolRequest
 }
 
@@ -547,26 +548,26 @@ func (r ApiUpdateNodePoolRequest) Execute() (*http.Response, error) {
 /*
 UpdateNodePool Update Node Pool
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @param id The unique id identifying the Node Pool.
- @return ApiUpdateNodePoolRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@param id The unique id identifying the Node Pool.
+	@return ApiUpdateNodePoolRequest
 */
 func (a *NodePoolsApiService) UpdateNodePool(ctx context.Context, clusterId string, id int32) ApiUpdateNodePoolRequest {
 	return ApiUpdateNodePoolRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
-		id: id,
+		ctx:        ctx,
+		clusterId:  clusterId,
+		id:         id,
 	}
 }
 
 // Execute executes the request
 func (a *NodePoolsApiService) UpdateNodePoolExecute(r ApiUpdateNodePoolRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodePoolsApiService.UpdateNodePool")
@@ -672,10 +673,10 @@ func (a *NodePoolsApiService) UpdateNodePoolExecute(r ApiUpdateNodePoolRequest) 
 }
 
 type ApiUpdateNodePoolLabelsRequest struct {
-	ctx context.Context
-	ApiService *NodePoolsApiService
-	clusterId string
-	id int32
+	ctx                   context.Context
+	ApiService            *NodePoolsApiService
+	clusterId             string
+	id                    int32
 	nodePoolLabelsRequest *NodePoolLabelsRequest
 }
 
@@ -691,26 +692,26 @@ func (r ApiUpdateNodePoolLabelsRequest) Execute() (*http.Response, error) {
 /*
 UpdateNodePoolLabels Update Node Pool labels
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @param id The unique id identifying the Node Pool.
- @return ApiUpdateNodePoolLabelsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@param id The unique id identifying the Node Pool.
+	@return ApiUpdateNodePoolLabelsRequest
 */
 func (a *NodePoolsApiService) UpdateNodePoolLabels(ctx context.Context, clusterId string, id int32) ApiUpdateNodePoolLabelsRequest {
 	return ApiUpdateNodePoolLabelsRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
-		id: id,
+		ctx:        ctx,
+		clusterId:  clusterId,
+		id:         id,
 	}
 }
 
 // Execute executes the request
 func (a *NodePoolsApiService) UpdateNodePoolLabelsExecute(r ApiUpdateNodePoolLabelsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodePoolsApiService.UpdateNodePoolLabels")
@@ -816,10 +817,10 @@ func (a *NodePoolsApiService) UpdateNodePoolLabelsExecute(r ApiUpdateNodePoolLab
 }
 
 type ApiUpdateNodePoolStatusRequest struct {
-	ctx context.Context
-	ApiService *NodePoolsApiService
-	clusterId string
-	name *string
+	ctx                   context.Context
+	ApiService            *NodePoolsApiService
+	clusterId             string
+	name                  *string
 	nodePoolStatusRequest *NodePoolStatusRequest
 }
 
@@ -841,24 +842,24 @@ func (r ApiUpdateNodePoolStatusRequest) Execute() (*http.Response, error) {
 /*
 UpdateNodePoolStatus Update Node Pool status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @return ApiUpdateNodePoolStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@return ApiUpdateNodePoolStatusRequest
 */
 func (a *NodePoolsApiService) UpdateNodePoolStatus(ctx context.Context, clusterId string) ApiUpdateNodePoolStatusRequest {
 	return ApiUpdateNodePoolStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *NodePoolsApiService) UpdateNodePoolStatusExecute(r ApiUpdateNodePoolStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodePoolsApiService.UpdateNodePoolStatus")

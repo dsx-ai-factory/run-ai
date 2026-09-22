@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 // UsersApiService UsersApi service
 type UsersApiService service
 
 type ApiGetClusterUsersRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *UsersApiService
-	uuid string
+	uuid       string
 }
 
 func (r ApiGetClusterUsersRequest) Execute() (*Users, *http.Response, error) {
@@ -36,26 +37,27 @@ func (r ApiGetClusterUsersRequest) Execute() (*Users, *http.Response, error) {
 /*
 GetClusterUsers Get all cluster users.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster.
- @return ApiGetClusterUsersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster.
+	@return ApiGetClusterUsersRequest
 */
 func (a *UsersApiService) GetClusterUsers(ctx context.Context, uuid string) ApiGetClusterUsersRequest {
 	return ApiGetClusterUsersRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return Users
+//
+//	@return Users
 func (a *UsersApiService) GetClusterUsersExecute(r ApiGetClusterUsersRequest) (*Users, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Users
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Users
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersApiService.GetClusterUsers")
@@ -129,13 +131,13 @@ func (a *UsersApiService) GetClusterUsersExecute(r ApiGetClusterUsersRequest) (*
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

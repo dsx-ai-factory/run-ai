@@ -44,7 +44,7 @@ func (c *InferenceWorkloadController) Reconcile(ctx context.Context, req ctrl.Re
 	inferenceWorkload := &infwv2a1.InferenceWorkload{}
 	isObjectFound, err := utils.GetObjectForRequest(ctx, req, "inferenceworkload", inferenceWorkload, c.client)
 	if err != nil {
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	} else if !isObjectFound || !inferenceWorkload.DeletionTimestamp.IsZero() {
 		metrics.ResetWorkloadMetrics(req.Name, req.Namespace, metrics.InferenceSource)
 		return ctrl.Result{Requeue: false}, nil
@@ -54,7 +54,7 @@ func (c *InferenceWorkloadController) Reconcile(ctx context.Context, req ctrl.Re
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for inference workload %s/%s, error: %s",
 			inferenceWorkload.Namespace, inferenceWorkload.Name, err.Error())
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
 }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -18,7 +20,7 @@ import (
 // SharedScopeBase struct for SharedScopeBase
 type SharedScopeBase struct {
 	ScopeType ScopeType `json:"scopeType"`
-	ScopeId string `json:"scopeId"`
+	ScopeId   string    `json:"scopeId"`
 }
 
 // NewSharedScopeBase instantiates a new SharedScopeBase object
@@ -134,5 +136,3 @@ func (v *NullableSharedScopeBase) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -78,72 +78,13 @@ webhooks:
         port: 9443
     rules:
       - operations: ["CREATE", "UPDATE", "DELETE"]
-        apiGroups: ["run.ai"]
+        apiGroups: ["run.ai", "kai.resources"]
         apiVersions: ["*"]
         resources: ["projects"]
       - operations: ["CREATE", "UPDATE", "DELETE"]
-        apiGroups: ["scheduling.run.ai"]
+        apiGroups: ["scheduling.run.ai", "kai.resources"]
         apiVersions: ["*"]
         resources: ["departments"]
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: MutatingWebhookConfiguration
-metadata:
-  name: runai-pod-group-mutation
-  annotations:
-    service.beta.openshift.io/inject-cabundle: "true"
-  labels:
-    app: runai
-webhooks:
-  - name: pod-group-assigner.runai.svc
-    admissionReviewVersions: [ "v1" ]
-    sideEffects: None
-    namespaceSelector:
-      matchExpressions:
-        - key: runai/queue
-          operator: Exists
-    failurePolicy: Fail
-    clientConfig:
-      service:
-        name: pod-group-assigner
-        namespace: runai
-        path: "/mutate-pod-group"
-    rules:
-      - operations: ["CREATE"]
-        apiGroups: ["scheduling.run.ai"]
-        apiVersions: ["*"]
-        resources: ["podgroups"]
-        scope: "Namespaced"
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
-metadata:
-  name: runai-secret-pvc-validation
-  annotations:
-    service.beta.openshift.io/inject-cabundle: "true"
-  labels:
-    app: runai
-webhooks:
-- name: runai-agent.runai.svc
-  admissionReviewVersions: [ "v1" ]
-  sideEffects: None
-  failurePolicy: Ignore
-  objectSelector:
-    matchExpressions:
-    - key: run.ai/asset
-      operator: Exists
-  clientConfig:
-    service:
-      name: runai-agent
-      namespace: runai
-      path: "/validate-secrets-pvc"
-      port: 9443
-  rules:
-  - operations: ["CREATE", "UPDATE", "DELETE"]
-    apiGroups: ["*"]
-    apiVersions: ["*"]
-    resources: ["secrets", "persistentvolumeclaims"]
-    scope: "Namespaced"
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration

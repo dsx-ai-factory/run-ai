@@ -3205,6 +3205,49 @@ describe("inference-workload.util", () => {
     });
   });
 
+  describe("setDistributedUIDefaults", () => {
+    const baseModel: IUISuperWorkloadCreationRequest = {
+      name: "distributed-nim",
+      projectId: "p1",
+      clusterId: "c1",
+      spec: {
+        leader: {},
+        worker: {},
+      },
+    };
+
+    it("adds the NIM identity label to the leader spec for NIM workloads", () => {
+      const result = inferenceWorkloadUtil.setDistributedUIDefaults(
+        JSON.parse(JSON.stringify(baseModel)),
+        false,
+        undefined,
+        EServerType.Nim,
+      );
+
+      expect(result.spec.leader?.labels).toContainEqual({ name: NIM_WORKLOAD_LABEL, value: "true" });
+    });
+
+    it("does not duplicate an existing NIM identity label", () => {
+      const model = JSON.parse(JSON.stringify(baseModel));
+      model.spec.leader.labels = [{ name: NIM_WORKLOAD_LABEL, value: "true" }];
+
+      const result = inferenceWorkloadUtil.setDistributedUIDefaults(model, false, undefined, EServerType.Nim);
+
+      expect(result.spec.leader?.labels).toEqual([{ name: NIM_WORKLOAD_LABEL, value: "true" }]);
+    });
+
+    it("does not add the NIM identity label to custom workloads", () => {
+      const result = inferenceWorkloadUtil.setDistributedUIDefaults(
+        JSON.parse(JSON.stringify(baseModel)),
+        false,
+        undefined,
+        EServerType.Custom,
+      );
+
+      expect(result.spec.leader?.labels).toBeUndefined();
+    });
+  });
+
   describe("_ensureStoragePathEnvVar", () => {
     const ENV_NAME = "MY_PATH_VAR";
 
@@ -3543,6 +3586,59 @@ describe("inference-workload.util", () => {
       expect(envs.filter((e): e is EnvironmentVariableOfAsset => e.name === ENV_NAME)).toHaveLength(1);
     });
   });
+});
+
+describe("distributed inference external access", () => {
+  const makeModel = (clusterLocalAccessOnly: boolean): IUISuperWorkloadCreationRequest => ({
+    name: "distributed-inference",
+    projectId: "1",
+    clusterId: "cluster-1",
+    spec: {
+      servingPort: {
+        container: 8000,
+        protocol: "http",
+        clusterLocalAccessOnly,
+      },
+    },
+  });
+
+  it.each([
+    { clusterLocalAccessOnly: false, exposeExternally: true },
+    { clusterLocalAccessOnly: true, exposeExternally: false },
+  ])(
+    "maps clusterLocalAccessOnly=$clusterLocalAccessOnly to exposeExternally=$exposeExternally",
+    ({ clusterLocalAccessOnly, exposeExternally }) => {
+      const result = inferenceWorkloadUtil.prepareDistributedInferenceFlatRequest(makeModel(clusterLocalAccessOnly), 1);
+
+      expect(result.spec?.servingPort?.exposeExternally).toBe(exposeExternally);
+    },
+  );
+
+  it.each([
+    { exposeExternally: true, clusterLocalAccessOnly: false },
+    { exposeExternally: false, clusterLocalAccessOnly: true },
+  ])(
+    "maps exposeExternally=$exposeExternally to clusterLocalAccessOnly=$clusterLocalAccessOnly",
+    ({ exposeExternally, clusterLocalAccessOnly }) => {
+      const result = inferenceWorkloadUtil.getDistributedInferenceModel({
+        spec: {
+          worker: {
+            servingPort: {
+              port: 8000,
+              protocol: "http",
+              exposeExternally,
+            },
+          },
+        },
+      } as UnifiedWorkload);
+
+      expect(result.spec.servingPort).toMatchObject({
+        container: 8000,
+        clusterLocalAccessOnly,
+      });
+      expect(result.spec.servingPort?.exposeExternally).toBeUndefined();
+    },
+  );
 });
 
 describe("adjustHFWorkloadProperties", () => {

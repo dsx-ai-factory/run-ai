@@ -135,9 +135,9 @@ const (
 	AttributeNameWorkerToleration               = "worker-toleration"
 	AttributeUsageWorkerToleration              = "Add Kubernetes tolerations for worker pods. Format: operator=Equal|Exists,key=KEY,[value=VALUE],[effect=NoSchedule|NoExecute|PreferNoSchedule],[seconds=SECONDS]."
 	AttributeNameWorkerRequiredPodTopologyKey   = "worker-required-pod-topology-key"
-	AttributeUsageWorkerRequiredPodTopologyKey  = "Require scheduling worker pods on nodes with a matching label key and value. Format: key=VALUE."
+	AttributeUsageWorkerRequiredPodTopologyKey  = "Require scheduling worker pods within the same topology domain defined by a Kubernetes node label key. Format: KEY."
 	AttributeNameWorkerPreferredPodTopologyKey  = "worker-preferred-pod-topology-key"
-	AttributeUsageWorkerPreferredPodTopologyKey = "If possible, schedule all worker pods on nodes with a matching label key and value. Format: key=VALUE."
+	AttributeUsageWorkerPreferredPodTopologyKey = "If possible, schedule all worker pods within the same topology domain defined by a Kubernetes node label key. Format: KEY."
 
 	// Worker Container Configuration
 	AttributeNameWorkerImage            = "worker-image"

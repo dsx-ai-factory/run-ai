@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.26.4-alpine AS builder
+FROM golang:1.26.8-alpine AS builder
 
 WORKDIR /app
 

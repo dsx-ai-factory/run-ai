@@ -92,7 +92,20 @@ var (
 				},
 			},
 			Topology: v1alpha1.Topology{
-				Name: "grove-topology",
+				Name:              "grove-topology",
+				RequiredPlacement: "rack",
+			},
+			// Neither component declares its own constraint, so both inherit the
+			// deployment-level pack domain.
+			ComponentTopologies: []v1alpha1.ComponentTopologyEntry{
+				{
+					SpecName: "Frontend",
+					Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "rack"},
+				},
+				{
+					SpecName: "VllmWorker",
+					Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "rack"},
+				},
 			},
 		},
 		Status: v1alpha1.ExternalWorkloadStatus{

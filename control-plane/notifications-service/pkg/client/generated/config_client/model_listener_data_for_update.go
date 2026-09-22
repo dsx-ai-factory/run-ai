@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -21,7 +23,7 @@ var _ MappedNullable = &ListenerDataForUpdate{}
 
 // ListenerDataForUpdate struct for ListenerDataForUpdate
 type ListenerDataForUpdate struct {
-	ListenerType string `json:"listener_type"`
+	ListenerType   string                 `json:"listener_type"`
 	ListenerConfig map[string]interface{} `json:"listener_config"`
 }
 
@@ -95,7 +97,7 @@ func (o *ListenerDataForUpdate) SetListenerConfig(v map[string]interface{}) {
 }
 
 func (o ListenerDataForUpdate) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -123,10 +125,10 @@ func (o *ListenerDataForUpdate) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -182,5 +184,3 @@ func (v *NullableListenerDataForUpdate) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

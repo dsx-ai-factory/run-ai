@@ -14,6 +14,7 @@
       :model-value="model.preemptibility"
       :policy-rules="config.policyRules?.preemptibility || null"
       :disabled="false"
+      :support-semi-preemptibility="config.workloadPriorityData?.supportSemiPreemptibility"
       @update:model-value="onPreemptibilityChanged"
       :show-quota-warning="config.showQuotaWarning"
     />

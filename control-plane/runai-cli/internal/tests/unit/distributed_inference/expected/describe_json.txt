@@ -9,7 +9,7 @@
     "department": "default",
     "createdAt": "2025-12-15T08:58:27.277697Z",
     "updatedAt": "2025-12-15T08:59:44.717168Z",
-    "submittedBy": "test@run.ai",
+    "submittedBy": "test@example.com",
     "priority": "very-high (150)",
     "category": "Deploy",
     "environmentVariables": {
@@ -284,7 +284,7 @@
         "containers": [
           {
             "name": "runai-oauth2-proxy-0",
-            "image": "runai.jfrog.io/op-containers-test-virt/oauth2-proxy:0.0.0-20000585.master-e840618"
+            "image": "quay.io/oauth2-proxy/oauth2-proxy"
           }
         ],
         "role": "Leader"
@@ -317,7 +317,7 @@
         "containers": [
           {
             "name": "runai-oauth2-proxy-0",
-            "image": "runai.jfrog.io/op-containers-test-virt/oauth2-proxy:0.0.0-20000585.master-e840618"
+            "image": "quay.io/oauth2-proxy/oauth2-proxy"
           }
         ],
         "role": "Leader"

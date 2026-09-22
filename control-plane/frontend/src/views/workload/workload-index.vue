@@ -232,6 +232,7 @@ import {
   EWorkloadErrorMessage,
   EWorkloadType,
   ExtendedPhase,
+  getWorkloadPreemptibilityOptions,
   type ICanSubmitWorkload,
   type IWorkloadConnectionsModalOptions,
   type IWorkloadPodsModalOptions,
@@ -286,6 +287,7 @@ import {
   MIN_CLUSTER_VERSION_FOR_TERMINAL,
   MIN_CLUSTER_VERSION_FOR_K8S_OBJECT_API,
   MIN_CLUSTER_VERSION_FOR_ARCHITECTURE_TAB,
+  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
 } from "@/common/version.constant";
 import type { INodePoolModalOptions } from "@/models/project.model";
 import { EIntervalLabels } from "@/models/interval.model";
@@ -538,6 +540,20 @@ const WorkloadIndex = defineComponent({
                 label: priority.name,
                 value: priority.name,
               })),
+            },
+          };
+        }
+        if (col.name === WorkloadSortFilterFields.Preemptibility) {
+          return {
+            ...col,
+            filter: {
+              type: EColumnFilterType.EnumBased,
+              selectOptions: getWorkloadPreemptibilityOptions(
+                this.clusterStore.isClusterVersionSufficient(
+                  this.activeClusterFilterId,
+                  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
+                ),
+              ),
             },
           };
         }
@@ -1491,14 +1507,26 @@ const WorkloadIndex = defineComponent({
       this.loadFilters();
       this.appStore.setPageLoading(false);
     },
-    activeClusterFilterId() {
+    activeClusterFilterId(newClusterId: string) {
       this.loadProjectsCount();
       this.loadIsOnlyDefaultNodePool();
       this.checkConnectivityStatus();
+      if (!this.clusterStore.isClusterVersionSufficient(newClusterId, MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY)) {
+        filterService.removeAdvancedFilter(
+          this.filterBy,
+          WorkloadSortFilterFields.Preemptibility,
+          ETableFilters.WORKLOAD,
+        );
+      }
     },
     "filterBy.clusterUuid"(newClusterUuid?: string, oldClusterUuid?: string) {
       if (oldClusterUuid) {
         filterService.removeAdvancedFilter(this.filterBy, WorkloadSortFilterFields.Priority, ETableFilters.WORKLOAD);
+        filterService.removeAdvancedFilter(
+          this.filterBy,
+          WorkloadSortFilterFields.Preemptibility,
+          ETableFilters.WORKLOAD,
+        );
       }
       if (newClusterUuid) {
         this.loadWorkloadPriorities(newClusterUuid);

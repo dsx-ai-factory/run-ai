@@ -102,7 +102,7 @@ func (p *realRegistryProber) Check(ctx context.Context, req RegistryCheckRequest
 	return res, nil
 }
 
-// tokenFlow handles Bearer-token registries (Docker distribution, Harbor, JFrog,
+// tokenFlow handles Bearer-token registries (Docker distribution, Harbor, Artifactory,
 // NGC): it requests a token scoped to the repo and reads back the granted
 // actions to determine pull/push permission without writing anything.
 func (p *realRegistryProber) tokenFlow(ctx context.Context, client *http.Client, challenge string, req RegistryCheckRequest, res *RegistryCheckResult) {

@@ -14,7 +14,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/specset/parser"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/spf13/pflag"
 )
 

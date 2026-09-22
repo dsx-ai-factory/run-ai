@@ -1,8 +1,8 @@
-# Launching Workloads with GPU Fractions
+# Launching Workloads with GPU Memory Fractions
 
-This quick start provides a step-by-step walkthrough for running a Jupyter Notebook workspace using [GPU fractions](../fractions.md).
+This quick start provides a step-by-step walkthrough for running a Jupyter Notebook workspace using [GPU memory fractions](../memory-fractions.md).
 
-NVIDIA Run:ai’s GPU fractions provides an agile and easy-to-use method to share a GPU or multiple GPUs across workloads. With GPU fractions, you can divide the GPU/s memory into smaller chunks and share the GPU/s compute resources between different workloads and users, resulting in higher GPU utilization and more efficient resource allocation.
+NVIDIA Run:ai’s GPU memory fractions provide an agile and easy-to-use method to share a GPU or multiple GPUs across workloads. With GPU memory fractions, you can divide the GPU memory into smaller chunks and allocate each chunk to a different workload, resulting in higher GPU utilization and more efficient resource allocation. How those workloads share the GPU compute is set separately — refer to [GPU compute modes](../compute-modes.md).
 
 ## Prerequisites
 

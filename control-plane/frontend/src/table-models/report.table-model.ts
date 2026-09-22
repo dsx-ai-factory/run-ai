@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type Report, ReportStatus } from "@/swagger-models/org-unit-service-client";
+import type { Report } from "@/swagger-models/org-unit-service-client";
 import { ECustomCell, type ITableColumn } from "@/models/table.model";
 import { EColumnFilterType } from "@/models/filter.model";
 import { ReportFilterAndSortFields } from "@/swagger-models/metrics-service-client";
-import { filterUtil } from "@/utils/filter.util/filter.util";
 import { autocompleteUtil } from "@/utils/autocomplete.util/autocomplete.util";
 import { dateUtil } from "@/utils/date.util";
 import { reportUtil } from "@/utils/report.util/report.util";
+import { reportStatusFilterOptions } from "@/models/report.model";
 
 export type IReportTable = Report;
 
@@ -64,7 +64,7 @@ export const allReportsColumnsMap: Record<keyof typeof reportColumnName, ITableC
     customCell: ECustomCell.STATUS_COL,
     filter: {
       type: EColumnFilterType.EnumBased,
-      selectOptions: filterUtil.parseEnumToSelectOptions(ReportStatus),
+      selectOptions: reportStatusFilterOptions,
     },
   },
   type: {

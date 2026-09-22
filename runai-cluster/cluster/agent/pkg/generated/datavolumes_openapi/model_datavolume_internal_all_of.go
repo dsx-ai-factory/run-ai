@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -18,8 +20,8 @@ import (
 // DatavolumeInternalAllOf struct for DatavolumeInternalAllOf
 type DatavolumeInternalAllOf struct {
 	// Will be returned only if the user has the required permissions to view those scopes
-	SharedScopes []SharedScope `json:"sharedScopes,omitempty"`
-	Phase *DatavolumePhase `json:"phase,omitempty"`
+	SharedScopes []SharedScope    `json:"sharedScopes,omitempty"`
+	Phase        *DatavolumePhase `json:"phase,omitempty"`
 }
 
 // NewDatavolumeInternalAllOf instantiates a new DatavolumeInternalAllOf object
@@ -149,5 +151,3 @@ func (v *NullableDatavolumeInternalAllOf) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

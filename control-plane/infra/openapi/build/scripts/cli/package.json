@@ -4,8 +4,8 @@
     "build": "./node_modules/.bin/openapi-merge-cli --config ../../config/merge-config.json; npm run cleanups;",
     "lint": "echo 'No linting configured'",
     "test": "./node_modules/.bin/openapi-merge-cli --config ../../config/merge-config.json",
-    "docker-build": "cd ../.. && DOCKER_BUILDKIT=1 docker build --no-cache --build-arg SERVICE_NAME=redoc -f ./Dockerfile -t gcr.io/run-ai-lab/redoc:latest .",
-    "docker-run": "docker run -it --rm -p 8881:8080 gcr.io/run-ai-lab/redoc:latest"
+    "docker-build": "cd ../.. && DOCKER_BUILDKIT=1 docker build --no-cache --build-arg SERVICE_NAME=redoc -f ./Dockerfile -t runai-redoc .",
+    "docker-run": "docker run -it --rm -p 8881:8080 runai-redoc"
   },
   "dependencies": {
     "@redocly/cli": "^2.31.5",

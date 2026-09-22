@@ -187,10 +187,16 @@ func dbUpsertWorkloadElements(ctx context.Context, tx orm.DB, tenantID uint, clu
 		return dbErr.WithDetails(err)
 	}
 
-	// Insert new elements (existing ones are skipped via ON CONFLICT DO NOTHING)
+	// NULL-safe compare — plain inequality would never update a row whose topology is still NULL.
 	if len(elements) > 0 {
 		_, err := tx.Table(models.WorkloadElement{}.TableName()).
-			Clauses(clause.OnConflict{DoNothing: true}).
+			Clauses(clause.OnConflict{
+				Columns:   []clause.Column{{Name: "workload_id"}, {Name: "id"}},
+				DoUpdates: clause.AssignmentColumns([]string{"topology"}),
+				Where: clause.Where{Exprs: []clause.Expression{
+					clause.Expr{SQL: "workload_elements.topology IS DISTINCT FROM excluded.topology"},
+				}},
+			}).
 			Create(&elements)
 		if err != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to insert workload elements for workload %s: %v",

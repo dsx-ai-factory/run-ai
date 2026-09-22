@@ -3,11 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export enum EContractTypes {
-  Normal = "normal",
-  Freemium = "freemium",
-}
-
 export interface ITenantClientConfigInfo {
   airgapped: boolean;
   authFlow: string;

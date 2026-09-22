@@ -4,5 +4,4 @@ allOf:
     properties:
       numa:
         $ref: './NumaInfoExtended.yaml'
-x-internal: true
 x-schema-name: NodeExtended

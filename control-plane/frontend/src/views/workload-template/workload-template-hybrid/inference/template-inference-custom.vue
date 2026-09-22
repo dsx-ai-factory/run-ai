@@ -100,6 +100,7 @@ import {
   MIN_CLUSTER_VERSION_FOR_INFERENCE_VOLUME,
   MIN_CLUSTER_VERSION_FOR_INFERENCE_REQUEST_TIMEOUT,
   MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY,
+  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
 } from "@/common/version.constant";
 import { EHybridFormTypes } from "@/composables/helpers/use-hybrid-templates.mapper";
 import { useHybridTemplates } from "@/composables/use-hybrid-templates.composable";
@@ -340,6 +341,10 @@ export default defineComponent({
         showRequestTimeout: this.showRequestTimeout,
         supportPriorityClass: this.supportPriorityClass,
         supportPreemptibility: this.supportPreemptibility,
+        supportSemiPreemptibility: this.clusterStore.isClusterVersionSufficient(
+          this.inference.clusterId || "",
+          MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
+        ),
       };
     },
     supportPreemptibility(): boolean {
