@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
-import { Quasar } from "quasar";
+import { Quasar, Notify } from "quasar";
 import WorkloadDetailsTab from "./workload-details-tab.vue";
 import { EWorkloadType } from "@/models/workload.model";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
@@ -18,6 +18,7 @@ import {
   type DistributedWorkload,
 } from "@/swagger-models/workloads-client";
 import { ForbiddenError, InternalServerError, NotFoundError } from "@/models/http-response.model";
+import type { IDetailsPanelSectionDef } from "@/models/details-panel.model";
 
 vi.mock("@/services/cluster/workload.service/workload.service", () => ({
   workloadService: {
@@ -38,6 +39,10 @@ vi.mock("vue-router", () => ({
 }));
 
 const PASSTHROUGH_STUB = { template: "<div><slot /></div>" };
+// Notify.create is attached dynamically when the Quasar plugin installs, so it doesn't exist yet
+// for vi.spyOn to wrap — assign the mock directly instead.
+const notifyMock = vi.fn();
+Notify.create = notifyMock;
 
 describe("WorkloadDetailsTab", () => {
   const mockWorkload: Workload = {
@@ -69,10 +74,7 @@ describe("WorkloadDetailsTab", () => {
     mount(WorkloadDetailsTab, {
       props: { workload: mockWorkload, ...props },
       global: {
-        plugins: [
-          [Quasar, { plugins: { Notify: vi.fn() } }],
-          createTestingPinia({ createSpy: vi.fn, stubActions: false }),
-        ],
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn, stubActions: false })],
         stubs: {
           RunaiDetailsPanel: PASSTHROUGH_STUB,
           WorkloadGeneralInfoSection: true,
@@ -81,9 +83,30 @@ describe("WorkloadDetailsTab", () => {
           WorkloadComputeSection: true,
           WorkloadStorageSection: true,
         },
-        mocks: { $q: { notify: vi.fn() } },
       },
     });
+
+  function getDetailsPanelView(wrapper: ReturnType<typeof createWrapper>) {
+    return wrapper.findComponent({ name: "details-panel-view" });
+  }
+
+  function getSections(wrapper: ReturnType<typeof createWrapper>): IDetailsPanelSectionDef[] {
+    return getDetailsPanelView(wrapper).props("sections");
+  }
+
+  // Environment section renders "Image URL" / "Command" / "Arguments" rows derived from the
+  // currently-selected spec — reading them back is how these tests verify which spec resolved,
+  // without reaching into the component's internal currentSpec computed.
+  function getEnvironmentFields(wrapper: ReturnType<typeof createWrapper>): Record<string, unknown> {
+    const environment = getSections(wrapper).find((s) => s.id === "environment");
+    const items = (environment?.data as { items: { label: string; value: unknown }[] } | undefined)?.items ?? [];
+    return Object.fromEntries(items.map((item) => [item.label, item.value]));
+  }
+
+  async function selectSpec(wrapper: ReturnType<typeof createWrapper>, value: string): Promise<void> {
+    getDetailsPanelView(wrapper).vm.$emit("update:selectedSpec", value);
+    await wrapper.vm.$nextTick();
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -106,9 +129,9 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper();
       // The loading UI itself lives in details-panel-view (tested there) — here we only need to
       // confirm this tab feeds it the right loading flag.
-      expect(wrapper.findComponent({ name: "details-panel-view" }).props("loading")).toBe(true);
+      expect(getDetailsPanelView(wrapper).props("loading")).toBe(true);
       await flushPromises();
-      expect(wrapper.findComponent({ name: "details-panel-view" }).props("loading")).toBe(false);
+      expect(getDetailsPanelView(wrapper).props("loading")).toBe(false);
     });
 
     it("renders details for supported (non-native) workloads from WorkloadDetailed alone", async () => {
@@ -118,9 +141,7 @@ describe("WorkloadDetailsTab", () => {
       expect(workloadService.getWorkloadById).toHaveBeenCalledWith("workload-123");
       // Supported workloads have no CRUD/asset representation — the CRUD endpoint must be skipped.
       expect(workloadService.getWorkloadCrudById).not.toHaveBeenCalled();
-      expect(wrapper.vm.workloadDetailed).toMatchObject({ id: "workload-123" });
-      expect(wrapper.vm.workloadCrud).toBeNull();
-      expect(wrapper.vm.accordionSections.length).toBeGreaterThan(0);
+      expect(getSections(wrapper).length).toBeGreaterThan(0);
     });
 
     it("shows the empty state for a supported workload when WorkloadDetailed is unavailable", async () => {
@@ -130,10 +151,9 @@ describe("WorkloadDetailsTab", () => {
       await flushPromises();
 
       expect(workloadService.getWorkloadCrudById).not.toHaveBeenCalled();
-      expect(wrapper.vm.workloadDetailed).toBeNull();
       // The empty-state UI itself lives in details-panel-view (tested there) — here we only need
       // to confirm this tab feeds it an empty sections model when there's nothing to show.
-      expect(wrapper.vm.accordionSections).toEqual([]);
+      expect(getSections(wrapper)).toEqual([]);
     });
 
     it("loads v2 raw manifest details without calling v1 by-id endpoints", async () => {
@@ -162,9 +182,8 @@ describe("WorkloadDetailsTab", () => {
       expect(workloadService.getWorkloadById).not.toHaveBeenCalled();
       expect(workloadService.getWorkloadCrudById).not.toHaveBeenCalled();
       expect(workloadService.getWorkloadV2ById).toHaveBeenCalledWith("workload-123");
-      expect(wrapper.vm.workloadDetailed).toMatchObject({ id: "workload-123" });
-      expect(wrapper.vm.currentSpec).toEqual({ command: "python -m trainer", args: "--epochs 10" });
-      expect(wrapper.vm.$q.notify).not.toHaveBeenCalled();
+      expect(getEnvironmentFields(wrapper)).toEqual({ Command: "python -m trainer", Arguments: "--epochs 10" });
+      expect(notifyMock).not.toHaveBeenCalled();
     });
 
     it("falls back to v1 observed details when active v2 details are no longer available", async () => {
@@ -176,9 +195,8 @@ describe("WorkloadDetailsTab", () => {
       expect(workloadService.getWorkloadV2ById).toHaveBeenCalledWith("workload-123");
       expect(workloadService.getWorkloadById).toHaveBeenCalledWith("workload-123");
       expect(workloadService.getWorkloadCrudById).not.toHaveBeenCalled();
-      expect(wrapper.vm.workloadDetailed).toMatchObject({ id: "workload-123" });
-      expect(wrapper.vm.workloadCrud).toBeNull();
-      expect(wrapper.vm.$q.notify).not.toHaveBeenCalled();
+      expect(getSections(wrapper).length).toBeGreaterThan(0);
+      expect(notifyMock).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -192,8 +210,8 @@ describe("WorkloadDetailsTab", () => {
       await flushPromises();
 
       expect(workloadService.getWorkloadById).not.toHaveBeenCalled();
-      expect(wrapper.vm.workloadDetailed).toBeNull();
-      expect(wrapper.vm.$q.notify).toHaveBeenCalled();
+      expect(getSections(wrapper)).toEqual([]);
+      expect(notifyMock).toHaveBeenCalled();
     });
 
     it("shows the empty state when both v2 details and the v1 fallback are unavailable", async () => {
@@ -205,9 +223,8 @@ describe("WorkloadDetailsTab", () => {
 
       expect(workloadService.getWorkloadV2ById).toHaveBeenCalledWith("workload-123");
       expect(workloadService.getWorkloadById).toHaveBeenCalledWith("workload-123");
-      expect(wrapper.vm.workloadDetailed).toBeNull();
-      expect(wrapper.vm.accordionSections).toEqual([]);
-      expect(wrapper.vm.$q.notify).toHaveBeenCalled();
+      expect(getSections(wrapper)).toEqual([]);
+      expect(notifyMock).toHaveBeenCalled();
     });
 
     it("uses v1 get-by-id for deleted v2 workloads instead of v2", async () => {
@@ -220,7 +237,7 @@ describe("WorkloadDetailsTab", () => {
       expect(workloadService.getWorkloadV2ById).not.toHaveBeenCalled();
       expect(workloadService.getWorkloadCrudById).not.toHaveBeenCalled();
       expect(workloadService.getWorkloadById).toHaveBeenCalledWith("workload-123");
-      expect(wrapper.vm.workloadDetailed).toMatchObject({ id: "workload-123" });
+      expect(getSections(wrapper).length).toBeGreaterThan(0);
     });
 
     it("notifies the user when both API calls fail", async () => {
@@ -230,9 +247,8 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper();
       await flushPromises();
 
-      expect(wrapper.vm.workloadDetailed).toBeNull();
-      expect(wrapper.vm.workloadCrud).toBeNull();
-      expect(wrapper.vm.$q.notify).toHaveBeenCalled();
+      expect(getSections(wrapper)).toEqual([]);
+      expect(notifyMock).toHaveBeenCalled();
     });
 
     it("re-fetches when workload.id changes", async () => {
@@ -266,7 +282,8 @@ describe("WorkloadDetailsTab", () => {
       resolveFirst(["region", "zone"]);
       await flushPromises();
 
-      expect(wrapper.vm.topologyLevels).toEqual(["rack", "host"]);
+      const network = getSections(wrapper).find((s) => s.id === "network");
+      expect((network?.data as { topologyLevels: string[] }).topologyLevels).toEqual(["rack", "host"]);
     });
   });
 
@@ -275,17 +292,16 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper();
       await flushPromises();
 
-      const view = wrapper.findComponent({ name: "details-panel-view" });
+      const view = getDetailsPanelView(wrapper);
       expect(view.exists()).toBe(true);
-      expect(view.props("sections")).toEqual(wrapper.vm.accordionSections);
-      expect(wrapper.vm.accordionSections.find((s) => s.id === "general")).toBeDefined();
+      expect(getSections(wrapper).find((s) => s.id === "general")).toBeDefined();
     });
 
     it("builds the General information section from the fetched workload detail", async () => {
       const wrapper = createWrapper();
       await flushPromises();
 
-      const general = wrapper.vm.accordionSections.find((s) => s.id === "general");
+      const general = getSections(wrapper).find((s) => s.id === "general");
       const labels = (general?.data as { groups: { label: string }[][] }).groups.flat().map((i) => i.label);
       expect(labels).toEqual(
         expect.arrayContaining([
@@ -305,7 +321,7 @@ describe("WorkloadDetailsTab", () => {
     it("includes the CLI Command section when cliCommand is present", async () => {
       const wrapper = createWrapper();
       await flushPromises();
-      expect(wrapper.vm.accordionSections.some((s) => s.id === "cli-command")).toBe(true);
+      expect(getSections(wrapper).some((s) => s.id === "cli-command")).toBe(true);
     });
 
     it("omits the CLI Command section when cliCommand is missing", async () => {
@@ -314,7 +330,7 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper();
       await flushPromises();
 
-      expect(wrapper.vm.accordionSections.some((s) => s.id === "cli-command")).toBe(false);
+      expect(getSections(wrapper).some((s) => s.id === "cli-command")).toBe(false);
     });
   });
 
@@ -331,8 +347,8 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.Distributed } });
       await flushPromises();
 
-      expect(wrapper.vm.showSpecSelect).toBe(true);
-      expect(wrapper.vm.specOptions).toEqual([
+      expect(getDetailsPanelView(wrapper).props("showSpecSelect")).toBe(true);
+      expect(getDetailsPanelView(wrapper).props("specOptions")).toEqual([
         { label: "Master", value: "Master" },
         { label: "Workers", value: "Worker" },
       ]);
@@ -341,14 +357,14 @@ describe("WorkloadDetailsTab", () => {
     it("does not show the spec selector for non-distributed workloads", async () => {
       const wrapper = createWrapper();
       await flushPromises();
-      expect(wrapper.vm.showSpecSelect).toBe(false);
+      expect(getDetailsPanelView(wrapper).props("showSpecSelect")).toBe(false);
     });
 
     describe("workers-only distributed (no master)", () => {
       // TFJob-style workload: masterSpec is null, only a worker spec exists.
       const workersOnly = {
         name: "workers-only",
-        spec: { image: "ubuntu", distributedFramework: "TF" },
+        spec: { image: "ubuntu" },
       } as unknown as DistributedWorkload;
 
       it("offers only the Workers option", async () => {
@@ -357,7 +373,7 @@ describe("WorkloadDetailsTab", () => {
         const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.Distributed } });
         await flushPromises();
 
-        expect(wrapper.vm.specOptions).toEqual([{ label: "Workers", value: "Worker" }]);
+        expect(getDetailsPanelView(wrapper).props("specOptions")).toEqual([{ label: "Workers", value: "Worker" }]);
       });
 
       it("hides the spec selector — a 1-item dropdown adds no value", async () => {
@@ -366,8 +382,7 @@ describe("WorkloadDetailsTab", () => {
         const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.Distributed } });
         await flushPromises();
 
-        expect(wrapper.vm.showSpecSelect).toBe(false);
-        expect(wrapper.find(".spec-selector").exists()).toBe(false);
+        expect(getDetailsPanelView(wrapper).props("showSpecSelect")).toBe(false);
       });
 
       it("snaps selectedSpec to Worker after load (Master is invalid here)", async () => {
@@ -376,7 +391,7 @@ describe("WorkloadDetailsTab", () => {
         const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.Distributed } });
         await flushPromises();
 
-        expect(wrapper.vm.selectedSpec).toBe("Worker");
+        expect(getDetailsPanelView(wrapper).props("selectedSpec")).toBe("Worker");
       });
 
       it("currentSpec still resolves to the worker spec (so details still render)", async () => {
@@ -385,7 +400,7 @@ describe("WorkloadDetailsTab", () => {
         const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.Distributed } });
         await flushPromises();
 
-        expect(wrapper.vm.currentSpec).toEqual({ image: "ubuntu", distributedFramework: "TF" });
+        expect(getEnvironmentFields(wrapper)).toEqual({ "Image URL": "ubuntu" });
       });
     });
 
@@ -395,9 +410,9 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.Distributed } });
       await flushPromises();
 
-      // Default selectedSpec is Master — currentSpec should be the masterSpec only (image=master:latest),
-      // without anything inherited from the worker spec.
-      expect(wrapper.vm.currentSpec).toEqual({ image: "master:latest" });
+      // Default selectedSpec is Master — the environment section should reflect the masterSpec
+      // only (image=master:latest), without anything inherited from the worker spec.
+      expect(getEnvironmentFields(wrapper)).toEqual({ "Image URL": "master:latest" });
     });
 
     it("returns the worker pod spec when Worker is selected", async () => {
@@ -405,9 +420,9 @@ describe("WorkloadDetailsTab", () => {
 
       const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.Distributed } });
       await flushPromises();
-      await wrapper.setData({ selectedSpec: "Worker" });
+      await selectSpec(wrapper, "Worker");
 
-      expect(wrapper.vm.currentSpec).toEqual({ image: "worker:latest" });
+      expect(getEnvironmentFields(wrapper)).toEqual({ "Image URL": "worker:latest" });
     });
 
     it("offers Master + Worker options for v2 distributed workloads from raw manifest", async () => {
@@ -435,15 +450,23 @@ describe("WorkloadDetailsTab", () => {
 
       expect(workloadService.getWorkloadById).not.toHaveBeenCalled();
       expect(workloadService.getWorkloadCrudById).not.toHaveBeenCalled();
-      expect(wrapper.vm.showSpecSelect).toBe(true);
-      expect(wrapper.vm.specOptions).toEqual([
+      expect(getDetailsPanelView(wrapper).props("showSpecSelect")).toBe(true);
+      expect(getDetailsPanelView(wrapper).props("specOptions")).toEqual([
         { label: "Master", value: "Master" },
         { label: "Workers", value: "Worker" },
       ]);
-      expect(wrapper.vm.currentSpec).toEqual({ image: "master:latest", command: "python", args: "--mode master" });
+      expect(getEnvironmentFields(wrapper)).toEqual({
+        "Image URL": "master:latest",
+        Command: "python",
+        Arguments: "--mode master",
+      });
 
-      await wrapper.setData({ selectedSpec: "Worker" });
-      expect(wrapper.vm.currentSpec).toEqual({ image: "worker:latest", command: "python", args: "--mode worker" });
+      await selectSpec(wrapper, "Worker");
+      expect(getEnvironmentFields(wrapper)).toEqual({
+        "Image URL": "worker:latest",
+        Command: "python",
+        Arguments: "--mode worker",
+      });
     });
   });
 
@@ -464,8 +487,8 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.DistributedInference } });
       await flushPromises();
 
-      expect(wrapper.vm.showSpecSelect).toBe(true);
-      expect(wrapper.vm.specOptions).toEqual([
+      expect(getDetailsPanelView(wrapper).props("showSpecSelect")).toBe(true);
+      expect(getDetailsPanelView(wrapper).props("specOptions")).toEqual([
         { label: "Leader", value: "Leader" },
         { label: "Workers", value: "Worker" },
       ]);
@@ -477,7 +500,7 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.DistributedInference } });
       await flushPromises();
 
-      expect(wrapper.vm.selectedSpec).toBe("Leader");
+      expect(getDetailsPanelView(wrapper).props("selectedSpec")).toBe("Leader");
     });
 
     it("returns the leader nested spec when Leader is selected", async () => {
@@ -486,7 +509,11 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.DistributedInference } });
       await flushPromises();
 
-      expect(wrapper.vm.currentSpec).toEqual({ image: "leader:latest", command: "python", args: "--mode leader" });
+      expect(getEnvironmentFields(wrapper)).toEqual({
+        "Image URL": "leader:latest",
+        Command: "python",
+        Arguments: "--mode leader",
+      });
     });
 
     it("returns the worker nested spec when Worker is selected", async () => {
@@ -494,9 +521,13 @@ describe("WorkloadDetailsTab", () => {
 
       const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.DistributedInference } });
       await flushPromises();
-      await wrapper.setData({ selectedSpec: "Worker" });
+      await selectSpec(wrapper, "Worker");
 
-      expect(wrapper.vm.currentSpec).toEqual({ image: "worker:latest", command: "python", args: "--mode worker" });
+      expect(getEnvironmentFields(wrapper)).toEqual({
+        "Image URL": "worker:latest",
+        Command: "python",
+        Arguments: "--mode worker",
+      });
     });
 
     it("offers only Leader and hides the selector when spec.worker is missing (single-pod DI)", async () => {
@@ -508,8 +539,8 @@ describe("WorkloadDetailsTab", () => {
       const wrapper = createWrapper({ workload: { ...mockWorkload, type: EWorkloadType.DistributedInference } });
       await flushPromises();
 
-      expect(wrapper.vm.specOptions).toEqual([{ label: "Leader", value: "Leader" }]);
-      expect(wrapper.vm.showSpecSelect).toBe(false);
+      expect(getDetailsPanelView(wrapper).props("specOptions")).toEqual([{ label: "Leader", value: "Leader" }]);
+      expect(getDetailsPanelView(wrapper).props("showSpecSelect")).toBe(false);
     });
   });
 });

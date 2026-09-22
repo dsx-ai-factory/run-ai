@@ -14,11 +14,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 import type { WorkloadElementResponse } from "@/swagger-models/workloads-client";
 import type { IDetailsPanelSectionDef } from "@/models/details-panel.model";
 import { workloadElementDetailsUtil } from "@/utils/workload-element-details.util";
-import { topologyLevelsFetcherService } from "@/services/topology-levels-fetcher.service/topology-levels-fetcher.service";
+import { useTopologyLevels } from "@/composables/use-topology-levels.composable/use-topology-levels.composable";
 import DetailsPanelView from "@/components/workload/workload-drawer-content/tabs/workload-details-tab/details-panel-view.vue";
 
 defineOptions({ name: "element-details-tab" });
@@ -38,16 +38,12 @@ const props = withDefaults(
   },
 );
 
-const topologyLevels = ref<string[]>([]);
-
-const fetchTopologyLevels = topologyLevelsFetcherService.createTopologyLevelsFetcher();
+const { topologyLevels, fetchTopologyLevels } = useTopologyLevels();
 
 watch(
   () => [props.element?.id, props.element?.topology?.name, props.clusterId] as const,
-  async ([, topologyName, clusterId]) => {
-    topologyLevels.value = [];
-    const levels = await fetchTopologyLevels(topologyName, clusterId);
-    if (levels !== undefined) topologyLevels.value = levels;
+  ([, topologyName, clusterId]) => {
+    fetchTopologyLevels(topologyName, clusterId);
   },
   { immediate: true },
 );
