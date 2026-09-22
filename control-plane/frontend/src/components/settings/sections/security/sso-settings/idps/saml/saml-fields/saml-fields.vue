@@ -119,7 +119,7 @@
         :disable="true"
       />
     </div>
-    <div class="row" v-if="samlSettings?.signingCertificate || metadataFile">
+    <div class="row" v-if="isFileSource ? metadataFile : samlSettings?.signingCertificate">
       <q-tooltip anchor="center middle">
         {{ disabledTooltip }}
       </q-tooltip>
@@ -243,7 +243,8 @@ export default defineComponent({
   methods: {
     async validate(): Promise<boolean> {
       if (this.samlSource === SamlCreationDataMetadataXmlTypeEnum.File) {
-        return !!this.metadataFile;
+        (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
+        return !!this.metadataFile && this.isValidCertificate;
       } else {
         return (this.$refs.samlUrlInput as QInput).validate();
       }
@@ -272,7 +273,7 @@ export default defineComponent({
       return isValidUrl(url) || (!this.isNewIdp && !url) || "Enter a valid URL";
     },
     isValidFile(file: string): boolean | string {
-      return file || !this.isNewIdp || "Upload a file";
+      return !!file || "Upload a file";
     },
     updateMetadataXmlUrl(url: string | null | number): void {
       this.samlFields.metadataXmlUrl = url as string;
@@ -284,11 +285,14 @@ export default defineComponent({
     },
     isValidInput(): boolean {
       return this.isFileSource
-        ? !!this.metadataFile
+        ? !!this.metadataFile && this.isValidCertificate
         : !!this.samlFields.metadataXmlUrl && isValidUrl(this.samlFields.metadataXmlUrl || "");
     },
     iValidCertificateDate(): boolean | string {
-      return this.isValidCertificate || "Certificate expired. To replace it, enter another metadata URL above.";
+      if (this.isValidCertificate) return true;
+      return this.isFileSource
+        ? "Certificate expired. Replace the metadata file above."
+        : "Certificate expired. Replace the metadata URL above.";
     },
     async validateCertificate(certificateOverride?: string | null): Promise<void> {
       const certificate =
@@ -304,10 +308,12 @@ export default defineComponent({
       this.metadataFile = null;
       this.samlFields.metadataXmlUrl = "";
       this.clearFileContent();
+      (this.$refs.metadataFileInput as typeof QFile)?.validate();
       this.onUpdated();
     },
     getFileContent(file: File): void {
       this.metadataFile = file;
+      (this.$refs.metadataFileInput as typeof QFile)?.validate();
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
         const fileContent = e.target?.result as string;
@@ -337,6 +343,7 @@ export default defineComponent({
       this.samlFields.fileName = "";
       this.expirationDate = null;
       this.isValidated = false;
+      (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
       this.onUpdated();
     },
     clearUrlContent(): void {

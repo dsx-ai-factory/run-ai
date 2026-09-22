@@ -101,6 +101,51 @@ describe("saml-settings.vue", () => {
     });
   });
 
+  it("blocks the update when the newly uploaded metadata file has an invalid certificate", async () => {
+    const { wrapper } = factory(mockIdp, false);
+
+    await wrapper.setData({
+      isIdpFieldsChanged: true,
+      isValidIdpFields: false,
+      idpFields: {
+        metadataXmlFile: "base64-file-contents-with-expired-cert",
+        metadataXmlType: "file",
+      },
+    });
+
+    await wrapper.vm.onUpdate();
+
+    expect(wrapper.emitted("update-idp")).toBeFalsy();
+  });
+
+  it("blocks unrelated changes (e.g. mappers) while the stored certificate is invalid", async () => {
+    const { wrapper } = factory(mockIdp, false);
+
+    await wrapper.setData({
+      isIdpFieldsChanged: false,
+      isValidIdpFields: false,
+      idpMappersItems: { email: { value: "email", override: false } },
+    });
+
+    await wrapper.vm.onUpdate();
+
+    expect(wrapper.emitted("update-idp")).toBeFalsy();
+  });
+
+  it("allows unrelated changes (e.g. mappers) while the certificate is valid", async () => {
+    const { wrapper } = factory(mockIdp, false);
+
+    await wrapper.setData({
+      isIdpFieldsChanged: false,
+      isValidIdpFields: true,
+      idpMappersItems: { email: { value: "email", override: false } },
+    });
+
+    await wrapper.vm.onUpdate();
+
+    expect(wrapper.emitted("update-idp")).toBeTruthy();
+  });
+
   describe("certificate expiration warning", () => {
     const now = new Date("2026-01-01T00:00:00.000Z");
     const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);

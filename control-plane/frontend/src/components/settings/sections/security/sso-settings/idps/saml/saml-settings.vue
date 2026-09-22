@@ -78,7 +78,7 @@
       icon-override="ph-bold ph-warning-circle"
       show-h1-content
       :title="certificateWarningTitle"
-      message="Edit the identity provider and update the SAML metadata source with a new certificate."
+      message="Edit the identity provider and replace the metadata XML with an updated file."
     />
     <div v-if="hasIdpAttributes" class="redirect-url-field">
       <div>Use the following if required by the identity provider</div>
@@ -253,7 +253,7 @@ export default defineComponent({
         this.idpFields.entityId = this.defaultEntityId;
         this.$emit("add-idp", this.idpFields, settingsUtil.getMappersFromIdpMapperItems(this.idpMappersItems));
       } else {
-        if (this.hasChanges && (this.isValidIdpFields || !this.isNewIdp)) {
+        if (this.hasChanges && this.isValidIdpFields) {
           this.idpFields.entityId = this.idp?.samlData?.entityId;
           this.$emit("update-idp", this.getIdpData);
         }
