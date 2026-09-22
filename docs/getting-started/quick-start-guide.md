@@ -58,11 +58,17 @@ To create an NVIDIA Enterprise Account:
 
 The installation artifacts of NVIDIA Run:ai are available under the NVIDIA Run:ai collections and resources. Before downloading any NVIDIA Run:ai assets, sign in to NVIDIA NGC from the [NVIDIA NGC Sign In](https://ngc.nvidia.com/signin) page.
 
-* **NVIDIA Run:ai Support-entitled collection** - Fully deployed within your own infrastructure, including both the control plane and connected clusters (connected and air-gapped environments). This deployment model gives you full control over platform configuration, security boundaries, and operational management within your environment. NVIDIA Run:ai self-hosted is included in the NVIDIA AI Enterprise license.
+The NVIDIA Run:ai Support-entitled collection is fully deployed within your own infrastructure, including both the control plane and connected clusters. This deployment model gives you full control over platform configuration, security boundaries, and operational management within your environment. NVIDIA Run:ai self-hosted is included in the NVIDIA AI Enterprise license.
+
+<Note>
+**Note**
+
+From version 3.0, there is no ready-made NVIDIA Run:ai download on NGC for air-gapped sites. Instead, the installer builds the package for you on a machine that has internet access.
+</Note>
 
 ### Installing NVIDIA Run:ai Software
 
-For prerequisites and installation instructions, refer to [Self-hosted installation](../installation-and-configuration/overview.md).
+For prerequisites and installation instructions, refer to [Installation and Configuration](../installation-and-configuration/overview.md).
 
 ## Notices
 
