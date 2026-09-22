@@ -1,6 +1,6 @@
 type: object
 required:
-  - device_class_name
+  - deviceClassName
 properties:
   clusterId:
     $ref: "../../../../../infra/openapi/docs/schemas/scopes/ReportingClusterId.yaml"

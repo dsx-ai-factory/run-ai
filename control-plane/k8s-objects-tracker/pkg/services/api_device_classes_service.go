@@ -98,5 +98,5 @@ func (s *DeviceClassesApiService) GetDeviceClasses(ctx context.Context, clusterI
 		return api.Response(http.StatusInternalServerError, api.NewError(http.StatusInternalServerError, "failed getting device class list", nil)), nil
 	}
 
-	return api.Response(http.StatusOK, deviceClassesDbToApiV2(objects)), nil
+	return api.Response(http.StatusOK, deviceClassesDbToApi(objects)), nil
 }

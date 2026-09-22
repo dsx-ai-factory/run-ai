@@ -34,7 +34,7 @@ func deviceClassesApiToDb(tenantId int32, clusterUuid uuid.UUID, dcs api.DeviceC
 	return result
 }
 
-func deviceClassesDbToApiV2(objects []*models.Object) *api.DeviceClasses {
+func deviceClassesDbToApi(objects []*models.Object) *api.DeviceClasses {
 	result := &api.DeviceClasses{
 		Items: make([]api.DeviceClass, len(objects)),
 	}
