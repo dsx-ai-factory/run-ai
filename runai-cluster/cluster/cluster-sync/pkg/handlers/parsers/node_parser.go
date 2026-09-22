@@ -39,10 +39,6 @@ const (
 	MissingNvidiaDcgmExporter     = "MissingNvidiaDcgmExporter"
 	MissingNrtHealthyPrerequisite = "MissingNrtHealthyPrerequisite"
 
-	// The ConfigMap has no ResourceVersion when it cannot be read, so fail-open results are
-	// cached under a version no real object can have.
-	unreadableClusterInfoVersion = "\x00unreadable"
-
 	gpuStackDependencyName      = "gpu-stack"
 	gpuFractioningComponentName = "gpu-fractioning"
 
