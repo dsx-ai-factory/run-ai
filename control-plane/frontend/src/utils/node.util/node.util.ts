@@ -68,7 +68,9 @@ function getConditionsAsText(node: Node): string {
   node.conditions?.forEach((condition: NodeStatusConditionDetails) => {
     const message = _getConditionMessage(condition);
     if (message) {
-      conditions += message + "<br>";
+      // Each condition is its own multi-line block ending in a consequence and a guide link, so
+      // they need a blank line between them or two blocks read as one paragraph.
+      conditions += (conditions ? "<br>" : "") + message + "<br>";
     }
   });
   return conditions;
