@@ -167,6 +167,17 @@ describe("saml-fields.vue", () => {
 
       expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(true);
     });
+
+    it("does not report changes for an untouched, existing file-sourced IdP right after mount", async () => {
+      const { wrapper } = factory({
+        samlSettings: validSamlSettings,
+        isNewIdp: false,
+        idpResources: { resourceName: "idp.xml", resource: fakeMetadataXml },
+      });
+      await flushPromises();
+
+      expect((wrapper.vm as unknown as { hasChanges: () => boolean }).hasChanges()).toBe(false);
+    });
   });
 
   describe("stale certificate validation guard", () => {

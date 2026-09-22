@@ -205,7 +205,7 @@ export default defineComponent({
       await this.validateCertificate();
     }
     if (!this.isNewIdp && this.idpResources?.resource) {
-      this.setSamlResources();
+      await this.setSamlResources();
     }
     this.originalSamlFields = deepCopy(this.samlFields);
     this.onUpdated();
@@ -262,12 +262,12 @@ export default defineComponent({
     hasChanges(): boolean {
       return !this.isEmpty() && !isEqual(this.samlFields, this.originalSamlFields);
     },
-    setSamlResources() {
+    async setSamlResources(): Promise<void> {
       if (this.idpResources) {
         this.samlSource = this.getSourceType;
         if (this.samlSource === SamlCreationDataMetadataXmlTypeEnum.File) {
-          this.setFileContent(this.idpResources.resourceName as string, this.idpResources.resource as string);
           this.metadataFile = new File([this.idpResources.resource as string], this.idpResources.resourceName as string);
+          await this.setFileContent(this.idpResources.resourceName as string, this.idpResources.resource as string);
         } else {
           this.samlFields.metadataXmlUrl = this.idpResources.resource as string;
           this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.Url;
