@@ -746,6 +746,55 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 
 		})
 	})
+
+	Context("internal telemetry", func() {
+		It("returns the same result as the public endpoint", func() {
+			var groups []string
+			publicResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, groups, []api.Phase{})
+			internalResponse, _ := workloadsService.GetInternalWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, groups, []api.Phase{})
+
+			Expect(internalResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(internalResponse).Values).
+				To(Equal(httpResponseBodyToTelemetryResponse(publicResponse).Values))
+		})
+
+		It("ignores the caller's permitted scopes", func() {
+			var groups []string
+			scopedCtx := testing.SetProjectContext(testing.TestTenant, testing.TestUser, []string{}, DefaultProjectId)
+
+			unscopedResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", AnotherProjectId, groups, []api.Phase{})
+			Expect(unscopedResponse.Code).To(Equal(http.StatusOK))
+			unscopedCount := httpResponseBodyToTelemetryResponse(unscopedResponse).Values[0].Value
+			Expect(unscopedCount).NotTo(Equal("0"))
+
+			publicResponse, _ := workloadsService.GetWorkloadsTelemetry(scopedCtx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", AnotherProjectId, groups, []api.Phase{})
+			Expect(publicResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(publicResponse).Values[0].Value).To(Equal("0"))
+
+			internalResponse, _ := workloadsService.GetInternalWorkloadsTelemetry(scopedCtx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", AnotherProjectId, groups, []api.Phase{})
+			Expect(internalResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(internalResponse).Values[0].Value).To(Equal(unscopedCount))
+		})
+
+		It("still validates the request", func() {
+			apiResponse, _ := workloadsService.GetInternalWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "1", "", []string{CurrentNodepools}, []api.Phase{})
+			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
+		})
+	})
+
+	Context("group by source", func() {
+		It("groups workload count by source", func() {
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, []string{Source}, []api.Phase{})
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
+			telemetryValues := telemetry.Values
+			Expect(len(telemetryValues)).To(Equal(1))
+			Expect(telemetryValues[0].Groups).To(HaveLen(1))
+			Expect(telemetryValues[0].Groups[0].Key).To(Equal(Source))
+			Expect(telemetryValues[0].Groups[0].Value).To(Equal(string(DefaultSource)))
+		})
+	})
+
 })
 
 func validateClusterFilterAllocation(g Gomega, telemetryValues []api.TelemetryResponseValuesInner) {

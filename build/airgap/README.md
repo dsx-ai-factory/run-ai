@@ -167,7 +167,7 @@ make -C build/airgap artifact-lock \
   ARTIFACT_LOCK_IMAGE_LOCKS="\
 dist/image-locks/runai-control-plane-3.0.0-linux-amd64.yaml \
 dist/image-locks/runai-cluster-3.0.0-linux-amd64.yaml \
-dist/image-locks/kai-resource-management-v0.0.1-linux-amd64.yaml \
+dist/image-locks/kai-resource-management-v0.0.3-linux-amd64.yaml \
 dist/image-locks/kai-scheduler-v0.16.9-linux-amd64.yaml \
 dist/image-locks/karta-0.2.6-linux-amd64.yaml"
 ```

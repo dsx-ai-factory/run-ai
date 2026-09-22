@@ -774,7 +774,7 @@ data:
         queries:
             3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
       runai_pod_count_per_workload:
-        cross_version_query: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1) 
+        cross_version_query: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1)
         queries:
             2.16.0: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1)
       runai_running_pod_count_per_workload:
@@ -875,9 +875,9 @@ data:
         queries:
             2.11.0: avg(runai_gpu_utilization_per_node{FILTERS})
       runai_cpu_utilization_per_nodepools:
-        cross_version_query: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100 
+        cross_version_query: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100
         queries:
-            2.16.0: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100 
+            2.16.0: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100
       runai_memory_utilization_per_nodepools:
         cross_version_query: avg(runai_memory_utilization_per_nodepool{FILTERS}) / 100
         queries:

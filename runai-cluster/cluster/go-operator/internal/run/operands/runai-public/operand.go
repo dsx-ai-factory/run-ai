@@ -24,6 +24,7 @@ const (
 
 // RBAC permissions the operand requires for resource management
 //+kubebuilder:rbac:namespace=runai,groups="",resources=configmaps,verbs=get;create;update;watch;patch;delete;list
+//+kubebuilder:rbac:groups=gpu-fractioning.kai.scheduler,resources=gpufractioningconfigs,verbs=get;list
 
 type operand struct {
 	k8sReader   client.Reader

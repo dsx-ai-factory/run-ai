@@ -31,8 +31,9 @@ import (
 )
 
 const (
-	TrueAsString      = "true"
-	WorkloadNameLabel = "workloadName"
+	TrueAsString                = "true"
+	WorkloadNameLabel           = "workloadName"
+	PersonalCredentialCopyLabel = "run.ai/personal-credential-copy"
 )
 
 func GetNamespace(namespace string, cachedReader client.Reader) (*corev1.Namespace, error) {
@@ -104,6 +105,14 @@ func IsAssetRelatedResource(om *metav1.ObjectMeta) bool {
 
 	assetsLabelValue, assetsLabelFound := om.Labels[commonconstants.RunaiAssetLabel]
 	return assetsLabelFound && assetsLabelValue != ""
+}
+
+func IsPersonalCredentialCopy(om *metav1.ObjectMeta) bool {
+	if om == nil || om.Labels == nil {
+		return false
+	}
+
+	return om.Labels[PersonalCredentialCopyLabel] == TrueAsString
 }
 
 func IsWorkloadControllerResource(om *metav1.ObjectMeta) bool {

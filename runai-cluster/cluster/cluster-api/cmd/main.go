@@ -16,8 +16,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	rcpconfig "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/auth/providers/oidc/configuration/wellknown"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/auth/providers/oidc/userinfo/cacheduserinfoendpointprovider"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth/oidc/configuration/wellknown"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth/oidc/userinfo/cacheduserinfoendpointprovider"
 	cache_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 

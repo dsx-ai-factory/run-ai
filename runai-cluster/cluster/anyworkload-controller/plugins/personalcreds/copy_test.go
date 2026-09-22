@@ -113,12 +113,13 @@ var _ = Describe("HandleAdditionalResources", func() {
 
 		Expect(dest.Data).To(HaveKeyWithValue("token", []byte("private-value-1")))
 		Expect(metav1.IsControlledBy(&dest, testRunner)).To(BeTrue())
+		Expect(dest.Labels).To(HaveKeyWithValue(pcreds.CopyLabel, "true"))
 		Expect(state.PluginIssues(plugin)).To(BeEmpty())
 	})
 
 	It("sets destination type to dockerconfigjson when source has the docker-registry asset label", func() {
 		source := encryptedSource("my-token")
-		source.Labels = map[string]string{constants.RunaiAssetLabel: dockerRegistryKindLabel}
+		source.Labels = map[string]string{constants.RunaiAssetLabel: pcreds.DockerRegistryAssetKind}
 		k8sClient = newReconcileClient(scheme, source)
 		plugin = NewPlugin(k8sClient, testRunaiNS)
 
@@ -131,7 +132,7 @@ var _ = Describe("HandleAdditionalResources", func() {
 		}, &dest)).To(Succeed())
 
 		Expect(dest.Type).To(Equal(corev1.SecretTypeDockerConfigJson))
-		Expect(dest.Labels).To(HaveKeyWithValue(constants.RunaiAssetLabel, dockerRegistryKindLabel))
+		Expect(dest.Labels).NotTo(HaveKey(constants.RunaiAssetLabel))
 	})
 
 	It("preserves the source secret type when the source is not a docker-registry credential", func() {

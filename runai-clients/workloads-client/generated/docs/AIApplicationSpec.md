@@ -5,8 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ChartRef** | [**AIApplicationSpecChartRef**](AIApplicationSpecChartRef.md) |  | 
-**Values** | Pointer to **map[string]interface{}** | Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s &#x60;values.yaml&#x60;. This field is mutually exclusive with &#x60;valuesBase64&#x60;. | [optional] 
-**ValuesBase64** | Pointer to **string** | Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with &#x60;values&#x60;. | [optional] 
+**Values** | Pointer to **map[string]interface{}** | Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s &#x60;values.yaml&#x60;. This field is mutually exclusive with &#x60;valuesBase64&#x60;.  A complete string value can reference a personal credential using &#x60;USERCREDENTIAL:&lt;name&gt;&#x60;. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: &#x60;USERCREDENTIAL:&lt;name&gt;,generic-secret&#x60; or &#x60;USERCREDENTIAL:&lt;name&gt;,docker-registry&#x60;. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.  | [optional]
+**ValuesBase64** | Pointer to **string** | Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with &#x60;values&#x60;. When the decoded content contains personal credential references, it must be a YAML object.  String values support the same exact personal credential placeholder grammar as &#x60;values&#x60;: &#x60;USERCREDENTIAL:&lt;name&gt;&#x60; for generic secret and Docker registry credentials, or &#x60;USERCREDENTIAL:&lt;name&gt;,generic-secret&#x60; and &#x60;USERCREDENTIAL:&lt;name&gt;,docker-registry&#x60; for NGC credentials. Embedded or partial placeholders are not supported.  | [optional]
 **Auth** | Pointer to [**AIApplicationAuth**](AIApplicationAuth.md) |  | [optional] 
 
 ## Methods

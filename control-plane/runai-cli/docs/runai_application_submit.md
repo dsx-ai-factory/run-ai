@@ -29,6 +29,7 @@ runai application submit my-grafana -p team-alpha \
   -h, --help                help for submit
   -p, --project string      Specify the project for the command to use. Defaults to the project set in the context, if any. Use 'runai project set <project>' to set the default.
       --set stringArray     Inline key=value overrides (nested keys supported), merged on top of --values
+      --user-credential     Treat --credential as a personal credential owned by the current user
       --values string       Path to a YAML values file for Helm chart overrides
 ```
 

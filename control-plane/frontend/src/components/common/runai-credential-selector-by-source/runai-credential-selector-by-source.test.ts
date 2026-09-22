@@ -328,6 +328,19 @@ describe("runai-credential-selector-by-source.vue", () => {
       expect(wrapper.vm.selectedCredentialSource).toBe(ERunaiCredentialSource.MyCredentials);
       expect(wrapper.vm.credentialSourceOptions).toHaveLength(2);
     });
+
+    it("hides AI Application personal credentials when the cluster is below 3.1", async () => {
+      clusterStore.isClusterVersionSufficient = vi.fn().mockReturnValue(false);
+      const wrapper = createWrapper({
+        clusterId: "cluster-1",
+        personalCredentialsMinClusterVersion: "3.1",
+      });
+
+      await flushPromises();
+
+      expect(clusterStore.isClusterVersionSufficient).toHaveBeenCalledWith("cluster-1", "3.1");
+      expect(wrapper.vm.credentialSourceOptions).toHaveLength(1);
+    });
   });
   describe("isRequired prop functionality", () => {
     it("should set validation rules when isRequired is true (default)", async () => {

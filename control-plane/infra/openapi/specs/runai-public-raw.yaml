@@ -18524,6 +18524,57 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/workloads/telemetry:
+    x-internal: true
+    get:
+      summary: Get the internal workloads telemetry.
+      operationId: get_internal_workloads_telemetry
+      description: >
+        Internal endpoint to retrieve workload data by telemetry type.
+        Optionally filter by specific workload phases.
+
+
+        Telemetry Types:
+
+        - WORKLOADS_COUNT: Count of workloads
+
+        - GPU_ALLOCATION: GPU allocation metrics
+
+        - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current
+        pending time (time since entering Pending phase).
+          For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+        - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across
+        workloads
+      x-internal: true
+      x-no-authorization: true
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/FilterByCluster'
+        - $ref: '#/components/parameters/FilterByNodepoolName'
+        - $ref: '#/components/parameters/FilterByDepartment'
+        - $ref: '#/components/parameters/FilterByProject'
+        - $ref: '#/components/parameters/TelemetryGroupBy1'
+        - $ref: '#/components/parameters/TelemetryType2'
+        - $ref: '#/components/parameters/FilterByPhases'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/workloads/podgroups/sync:
     post:
       x-internal: true
@@ -56421,6 +56472,13 @@ components:
         repository or chart URL. This is used when the chart source requires
         credentials.
       properties:
+        userCredential:
+          type: boolean
+          nullable: true
+          description: >-
+            Indicates whether the asset is a user credential owned by the
+            caller. When omitted or false, the asset is treated as a shared
+            credential.
         assetId:
           type: string
           description: The ID of the asset to use for authentication.
@@ -56434,16 +56492,35 @@ components:
           $ref: '#/components/schemas/AIApplicationSpecChartRef'
         values:
           type: object
-          description: >-
+          description: >
             Inline Helm values used to override the Helm chart’s default
             configuration. These values are merged with the Helm chart’s
             `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+
+
+            A complete string value can reference a personal credential using
+            `USERCREDENTIAL:<name>`. Generic secret and Docker registry
+            credentials use that form. NGC credentials require an explicit
+            representation: `USERCREDENTIAL:<name>,generic-secret` or
+            `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial
+            placeholders are not supported. The resolved value is a Kubernetes
+            Secret name, never credential plaintext.
           additionalProperties: true
         valuesBase64:
           type: string
-          description: >-
+          description: >
             Base64-encoded Helm values used to override the Helm chart’s default
-            configuration. This field is mutually exclusive with `values`.
+            configuration. This field is mutually exclusive with `values`. When
+            the decoded content contains personal credential references, it must
+            be a YAML object.
+
+
+            String values support the same exact personal credential placeholder
+            grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and
+            Docker registry credentials, or
+            `USERCREDENTIAL:<name>,generic-secret` and
+            `USERCREDENTIAL:<name>,docker-registry` for NGC credentials.
+            Embedded or partial placeholders are not supported.
           format: byte
         auth:
           $ref: '#/components/schemas/AIApplicationAuth'
@@ -59680,6 +59757,15 @@ components:
         - baseUrl
         - whatsNew
       properties:
+        catalogVersion:
+          type: string
+          enum:
+            - v1
+            - v2
+          default: v1
+          description: >-
+            Documentation path catalog. Defaults to v1 when omitted by an older
+            server.
         baseUrl:
           type: string
           description: Base URL used to resolve documentation links.
@@ -62720,6 +62806,7 @@ components:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
     TelemetryType2:
       name: telemetryType
       in: query

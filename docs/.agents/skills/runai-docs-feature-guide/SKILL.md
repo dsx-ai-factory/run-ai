@@ -24,7 +24,6 @@ Before drafting anything:
 3. Read these reference pages in full — they are your structural templates:
    - `docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md`
    - `docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md`
-   - `docs/platform-management/runai-scheduler/resource-optimization/memory-swap.md`
 4. Read `docs/AGENTS.md` for writing rules, Fern components, and terminology.
 
 Document only what the code confirms. Mark anything unverifiable as
