@@ -71,6 +71,25 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 			To(Equal(ptr.To(clustercommonconstants.EnforceSchedulerAnnotationName)))
 	})
 
+	// The mode reaches KRM only through this CR: the chart renders no KRMConfig
+	// in external mode, so a mode that does not survive the conversion leaves
+	// every KRM-deployed service on the image default instead of the requested one.
+	DescribeTable("carries the FIPS mode onto the CR",
+		func(fipsMode string, expected *kaiv1alpha1.FipsMode) {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.Internal.Global.FipsMode = fipsMode
+
+			Expect(krmConfigFor(runaiConfig).Spec.Global.FipsMode).To(Equal(expected))
+		},
+		Entry("off", "off", ptr.To(kaiv1alpha1.FipsModeOff)),
+		Entry("on", "on", ptr.To(kaiv1alpha1.FipsModeOn)),
+		Entry("only", "only", ptr.To(kaiv1alpha1.FipsModeOnly)),
+		// Left unset so KRM applies its own default, rather than pinning a mode
+		// the services cannot honour.
+		Entry("unset", "", nil),
+		Entry("unrecognised", "enabled", nil),
+	)
+
 	It("leaves leader election to KRM", func() {
 		Expect(krmConfigFor(defaultRunaiConfig()).Spec.Global.LeaderElection).To(BeNil())
 	})

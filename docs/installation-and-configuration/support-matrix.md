@@ -66,7 +66,7 @@ NVIDIA Run:ai v3.0 supports a wide range of Kubernetes distributions across on-p
 
 **Note**
 
-For a per-version Kubernetes and OpenShift compatibility matrix, see [Kubernetes and OpenShift Version Alignment](upgrade/helm.md#kubernetes-and-openshift-version-alignment). Review this before upgrading to ensure your Kubernetes or OpenShift distribution version is compatible with your target NVIDIA Run:ai version.
+For a per-version Kubernetes and OpenShift compatibility matrix, see [Kubernetes and OpenShift Compatibility](upgrade/plan-the-upgrade.md#kubernetes-and-openshift-compatibility). Review this before upgrading to ensure your Kubernetes or OpenShift distribution version is compatible with your target NVIDIA Run:ai version.
 
 </Note>
 
