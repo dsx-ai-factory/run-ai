@@ -11,6 +11,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers"
 	constants2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -22,6 +23,8 @@ func AddNodeHandlerToCache(backendClient *backendclient.BackendClient, cachedCli
 	backendClient.RegisterSyncHandler(nodeHandler)
 
 	rateLimitedController := cachedClient.NewRateLimitedController(cachedclient.NodeRL, nodeHandler)
+
+	addGpuFractioningVerdictWatch(cachedClient, nodeHandler)
 
 	nodeInformer := cachedClient.GetInformer(cachedclient.NodeType)
 	_, err := nodeInformer.AddEventHandler(clientgocache.ResourceEventHandlerFuncs{
@@ -67,4 +70,29 @@ func AddNodeHandlerToCache(backendClient *backendclient.BackendClient, cachedCli
 	}
 
 	zap.S().Debug("Node handling has started")
+}
+
+// The fractioning verdict lives in the cluster-info ConfigMap, not on the Node objects whose
+// conditions are derived from it, so nothing in the Node informer fires when it flips.
+func addGpuFractioningVerdictWatch(cachedClient cachedclient.CachedClient, nodeHandler *handlers.NodeHandler) {
+	configMapInformer := cachedClient.GetInformer(cachedclient.ConfigMapType)
+	_, err := configMapInformer.AddEventHandler(clientgocache.FilteringResourceEventHandler{
+		FilterFunc: func(obj any) bool {
+			configMap, ok := obj.(*corev1.ConfigMap)
+			return ok && configMap.Name == constants.ClusterInfoConfigMapName &&
+				configMap.Namespace == runaiv1.DefaultNamespace
+		},
+		Handler: clientgocache.ResourceEventHandlerFuncs{
+			AddFunc: func(any) {
+				nodeHandler.ResyncOnGpuFractioningVerdictChange()
+			},
+			UpdateFunc: func(any, any) {
+				nodeHandler.ResyncOnGpuFractioningVerdictChange()
+			},
+		},
+	})
+	if err != nil {
+		zap.S().Fatalf("Failed to watch %s for GPU fractioning changes, error: %s",
+			constants.ClusterInfoConfigMapName, err.Error())
+	}
 }

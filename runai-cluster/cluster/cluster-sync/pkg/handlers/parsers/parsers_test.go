@@ -6,6 +6,7 @@
 package parsers_test
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -1323,6 +1324,22 @@ var _ = Describe("Parsers", Ordered, func() {
 					},
 				}
 			}
+
+			It("detects the cluster verdict flipping, which no Node event would surface", func() {
+				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
+					WithObjects(nvidiaComponentsPod, clusterInfoConfigMap(true))
+				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+				nodeParser = parsers.NewNodeParser(fakeCachedClient)
+
+				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeFalse())
+				nodeParser.ParseNodeToServerScheme(node)
+				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeFalse())
+
+				flipped := clusterInfoConfigMap(false)
+				Expect(fakeCachedClient.Update(context.Background(), flipped)).To(Succeed())
+
+				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeTrue())
+			})
 
 			It("reports nothing on the node when the cluster does not support fractions", func() {
 				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
