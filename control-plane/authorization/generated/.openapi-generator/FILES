@@ -95,7 +95,6 @@ pkg/api/model_scope_type.go
 pkg/api/model_subject_type.go
 pkg/api/model_subject_type_extended.go
 pkg/api/model_submission_error.go
-pkg/api/model_tenant_is_csp_managed_setting.go
 pkg/api/model_update_authorization_setting_by_key_request.go
 pkg/api/model_update_scope_access_rules_request.go
 pkg/api/routers.go

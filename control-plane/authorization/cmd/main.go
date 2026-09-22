@@ -69,9 +69,6 @@ func init() {
 	if err := setting.Register[*settings.EnableScopedAuthorization](); err != nil {
 		logging.Errorf("Failed to register EnableScopedAuthorization setting: %v", err)
 	}
-	if err := setting.Register[*settings.TenantIsCspManaged](); err != nil {
-		logging.Errorf("Failed to register TenantIsCspManaged setting: %v", err)
-	}
 
 	logging.Infof("Initializing cluster capabilities checker")
 	checker.InitClusterCapabilitiesChecker(config.Get[*authorization_config.Server]().ClusterServiceUrl, nil, "info")
@@ -117,9 +114,6 @@ func runSettingsMigration() {
 	var errs []error
 	if err := setting.Migrate[*settings.EnableScopedAuthorization](); err != nil {
 		errs = append(errs, fmt.Errorf("EnableScopedAuthorization: %s", err.Error()))
-	}
-	if err := setting.Migrate[*settings.TenantIsCspManaged](); err != nil {
-		errs = append(errs, fmt.Errorf("TenantIsCspManaged: %s", err.Error()))
 	}
 	if len(errs) > 0 {
 		logging.Fatalf("failed to migrate settings: %v", errors.Join(errs...))
