@@ -19,6 +19,9 @@ func TestPacedTransportSpacesRequests(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) }))
 	t.Cleanup(server.Close)
 	client := &http.Client{Transport: &pacedTransport{limiter: rate.NewLimiter(100, 1), next: http.DefaultTransport}}
+	if burstOf(25) != 100 {
+		t.Fatalf("burst must allow four seconds of requests, got %d", burstOf(25))
+	}
 
 	start := time.Now()
 	for range 5 {

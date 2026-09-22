@@ -26,16 +26,19 @@ import (
 )
 
 const (
-	deploymentType     = "Deployment"
-	trainingType       = "Training"
-	pauseImage         = "registry.k8s.io/pause:3.9"
-	submitWorkers      = 16
-	maxPodsPerWorkload = 10
-	quiescePoll        = 2 * time.Second
-	cleanupGrace       = time.Minute
-	runLabel           = "flowmark/run"
-	roundLabel         = "flowmark/round"
-	sloP90Key          = "p90_ms"
+	deploymentType       = "Deployment"
+	trainingType         = "Training"
+	defaultImage         = "registry.k8s.io/pause:3.9"
+	defaultConcurrency   = 16
+	maxConcurrency       = 64
+	maxRequestsPerSecond = 1000
+	maxPodsPerWorkload   = 10
+	quiescePoll          = 2 * time.Second
+	cleanupGrace         = time.Minute
+	runLabel             = "flowmark/run"
+	roundLabel           = "flowmark/round"
+	roundSizeLabel       = "flowmark/round-size"
+	sloP90Key            = "p90_ms"
 )
 
 type Suite struct{}
@@ -44,6 +47,9 @@ type settings struct {
 	rounds       []int
 	workloadType string
 	pods         int32
+	image        string
+	concurrency  int
+	limits       client.Limits
 	timeout      time.Duration
 	setupTimeout time.Duration
 	settle       time.Duration
@@ -55,6 +61,7 @@ type item struct {
 	name      string
 	namespace string
 	labels    map[string]string
+	image     string
 	pods      int32
 }
 
@@ -69,6 +76,7 @@ type round struct {
 	index          int
 	size           int
 	timings        []measure.Timing
+	unmatched      int
 	submitMakespan time.Duration
 	quiesce        time.Duration
 	err            error
@@ -84,7 +92,7 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 		return core.Section{}, err
 	}
 
-	clients, err := client.New(ctx, env)
+	clients, err := client.NewWithLimits(ctx, env, knobs.limits)
 	if err != nil {
 		return core.Section{}, err
 	}
@@ -115,7 +123,7 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 		return core.Section{}, err
 	}
 
-	path := newFlow(knobs.workloadType, clients, project)
+	path := newFlow(knobs.workloadType, clients, project, knobs.concurrency)
 	var rounds []round
 	for index, size := range knobs.rounds {
 		result := runRound(ctx, path, clients.Kube, project.Namespace, id, index+1, size, knobs)
@@ -123,15 +131,18 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 		if result.err != nil || ctx.Err() != nil {
 			break
 		}
+		if index < len(knobs.rounds)-1 {
+			settle(ctx, knobs.settle)
+		}
 	}
 	return buildSection(path.name(), rounds, knobs), nil
 }
 
-func newFlow(workloadType string, clients *client.Clients, project submit.ProjectRef) flow {
+func newFlow(workloadType string, clients *client.Clients, project submit.ProjectRef, concurrency int) flow {
 	if workloadType == trainingType {
-		return &trainingFlow{clients: clients, project: project, created: map[string]string{}}
+		return &trainingFlow{clients: clients, project: project, concurrency: concurrency, created: map[string]string{}}
 	}
-	return &deploymentFlow{kube: clients.Kube}
+	return &deploymentFlow{kube: clients.Kube, concurrency: concurrency}
 }
 
 func parseSettings(cfg core.Config) (settings, error) {
@@ -145,6 +156,18 @@ func parseSettings(cfg core.Config) (settings, error) {
 	}
 	pods, err := cfg.Int("podsPerWorkload", 1)
 	if err != nil {
+		return settings{}, err
+	}
+	if knobs.image, err = cfg.String("image", defaultImage); err != nil {
+		return settings{}, err
+	}
+	if knobs.concurrency, err = cfg.Int("submitConcurrency", defaultConcurrency); err != nil {
+		return settings{}, err
+	}
+	if knobs.limits.KubeRequestsPerSecond, err = cfg.Int("kubeRequestsPerSecond", client.DefaultLimits.KubeRequestsPerSecond); err != nil {
+		return settings{}, err
+	}
+	if knobs.limits.ControlPlaneRequestsPerSecond, err = cfg.Int("controlPlaneRequestsPerSecond", client.DefaultLimits.ControlPlaneRequestsPerSecond); err != nil {
 		return settings{}, err
 	}
 	if knobs.timeout, err = cfg.Duration("timeout", 15*time.Minute); err != nil {
@@ -179,6 +202,17 @@ func parseSettings(cfg core.Config) (settings, error) {
 			return settings{}, fmt.Errorf("workloads must not repeat a round size, got %d twice", size)
 		}
 		seen[size] = true
+	}
+	if knobs.image == "" {
+		return settings{}, errors.New("image must not be empty")
+	}
+	if knobs.concurrency < 1 || knobs.concurrency > maxConcurrency {
+		return settings{}, fmt.Errorf("submitConcurrency must be between 1 and %d, got %d", maxConcurrency, knobs.concurrency)
+	}
+	for name, value := range map[string]int{"kubeRequestsPerSecond": knobs.limits.KubeRequestsPerSecond, "controlPlaneRequestsPerSecond": knobs.limits.ControlPlaneRequestsPerSecond} {
+		if value < 1 || value > maxRequestsPerSecond {
+			return settings{}, fmt.Errorf("%s must be between 1 and %d, got %d", name, maxRequestsPerSecond, value)
+		}
 	}
 	switch knobs.workloadType {
 	case deploymentType:
@@ -220,13 +254,14 @@ func runRound(ctx context.Context, path flow, kube k8sclient.Client, namespace, 
 	}
 	defer watcher.Stop()
 
-	labels := map[string]string{runLabel: id, roundLabel: strconv.Itoa(index)}
+	labels := map[string]string{runLabel: id, roundLabel: strconv.Itoa(index), roundSizeLabel: strconv.Itoa(size)}
 	var names sync.Map
 	submitStart := time.Now()
-	burst(ctx, path, watcher, &names, namespace, id, index, size, labels, knobs.pods)
+	burst(ctx, path, watcher, &names, namespace, id, index, size, labels, knobs)
 	result.submitMakespan = time.Since(submitStart)
 
 	timings := watcher.WaitAll(knobs.timeout)
+	result.unmatched = watcher.Unmatched()
 	for i := range timings {
 		if name, ok := names.Load(timings[i].Name); ok {
 			timings[i].Name = name.(string)
@@ -238,22 +273,19 @@ func runRound(ctx context.Context, path flow, kube k8sclient.Client, namespace, 
 	quiesceStart := time.Now()
 	result.err = quiesce(ctx, path, kube, namespace, labels, knobs.setupTimeout)
 	result.quiesce = time.Since(quiesceStart)
-	if result.err == nil {
-		settle(ctx, knobs.settle)
-	}
 	return result
 }
 
-func burst(ctx context.Context, path flow, watcher *measure.Watcher, names *sync.Map, namespace, id string, index, size int, labels map[string]string, pods int32) {
+func burst(ctx context.Context, path flow, watcher *measure.Watcher, names *sync.Map, namespace, id string, index, size int, labels map[string]string, knobs settings) {
 	jobs := make(chan int)
 	var wg sync.WaitGroup
-	for range submitWorkers {
+	for range knobs.concurrency {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for i := range jobs {
 				name := fmt.Sprintf("flowmark-burst-%s-r%d-%d", id, index, i+1)
-				key, err := path.create(ctx, item{name: name, namespace: namespace, labels: labels, pods: pods})
+				key, err := path.create(ctx, item{name: name, namespace: namespace, labels: labels, image: knobs.image, pods: knobs.pods})
 				acceptedAt := time.Now()
 				if err != nil {
 					watcher.MarkFailed(name, err)
@@ -304,11 +336,15 @@ func settle(ctx context.Context, pause time.Duration) {
 
 func buildSection(flowName string, rounds []round, knobs settings) core.Section {
 	metrics := map[string]any{
-		"flow":              flowName,
-		"rounds":            knobs.rounds,
-		"workload_type":     knobs.workloadType,
-		"pods_per_workload": knobs.pods,
-		"settle_ms":         knobs.settle.Milliseconds(),
+		"flow":                           flowName,
+		"rounds":                         knobs.rounds,
+		"workload_type":                  knobs.workloadType,
+		"pods_per_workload":              knobs.pods,
+		"image":                          knobs.image,
+		"submit_concurrency":             knobs.concurrency,
+		"kube_requests_per_sec":          knobs.limits.KubeRequestsPerSecond,
+		"control_plane_requests_per_sec": knobs.limits.ControlPlaneRequestsPerSecond,
+		"settle_ms":                      knobs.settle.Milliseconds(),
 	}
 	if knobs.slo != nil {
 		metrics["slo"] = knobs.slo
@@ -325,12 +361,14 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 		metrics["pending_count"+at] = summary.PendingCount
 		metrics["failed_count"+at] = summary.FailedCount
 		metrics["success_rate"+at] = summary.SuccessRate
+		metrics["unmatched_arrivals"+at] = r.unmatched
 		metrics["submit_makespan_ms"+at] = r.submitMakespan.Milliseconds()
 		metrics["quiesce_ms"+at] = r.quiesce.Milliseconds()
 		if summary.SampleSize > 0 {
 			metrics["p50_ms"+at] = summary.P50.Milliseconds()
 			metrics["p90_ms"+at] = summary.P90.Milliseconds()
 			metrics["p99_ms"+at] = summary.P99.Milliseconds()
+			metrics["mean_ms"+at] = summary.Mean.Milliseconds()
 			metrics["max_ms"+at] = summary.Max.Milliseconds()
 			metrics["arrival_makespan_ms"+at] = summary.Makespan.Milliseconds()
 			metrics["throughput_per_sec"+at] = summary.Throughput
@@ -355,6 +393,9 @@ func roundProblems(r round, summary measure.Summary) []string {
 		message := fmt.Sprintf("round %d (%d workloads): %d never reached the cluster within the timeout", r.index, r.size, summary.PendingCount)
 		if err := lastError(r.timings, measure.Pending); err != nil {
 			message += " (" + err.Error() + ")"
+		}
+		if r.unmatched > 0 {
+			message += fmt.Sprintf(" (%d objects arrived that matched no submitted workload; is the correlation field missing?)", r.unmatched)
 		}
 		problems = append(problems, message)
 	}

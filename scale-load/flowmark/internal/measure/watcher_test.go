@@ -39,6 +39,21 @@ func startWatch(t *testing.T) (k8sclient.WithWatch, *Watcher) {
 	return kube, w
 }
 
+func waitForArrival(t *testing.T, w *Watcher, key string) {
+	t.Helper()
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		w.mu.Lock()
+		_, seen := w.arrived[key]
+		w.mu.Unlock()
+		if seen {
+			return
+		}
+		time.Sleep(time.Millisecond)
+	}
+	t.Fatalf("arrival for %q never recorded", key)
+}
+
 func byName(timings []Timing) map[string]Timing {
 	result := map[string]Timing{}
 	for _, timing := range timings {
@@ -73,16 +88,7 @@ func TestEventBeforeMarkStampsDuration(t *testing.T) {
 	if err := kube.Create(context.Background(), runner("w1")); err != nil {
 		t.Fatal(err)
 	}
-	deadline := time.Now().Add(2 * time.Second)
-	for {
-		w.mu.Lock()
-		_, seen := w.arrived["w1"]
-		w.mu.Unlock()
-		if seen || time.Now().After(deadline) {
-			break
-		}
-		time.Sleep(time.Millisecond)
-	}
+	waitForArrival(t, w, "w1")
 	w.MarkCreated("w1", t0)
 
 	got := byName(w.WaitAll(2 * time.Second))["w1"]
@@ -246,7 +252,7 @@ func TestExternalWorkloadArrivalMatchesByUIDInBothOrders(t *testing.T) {
 			}
 			if eventFirst {
 				create()
-				time.Sleep(20 * time.Millisecond)
+				waitForArrival(t, w, "uid-1")
 				w.MarkCreated("uid-1", t0)
 			} else {
 				w.MarkCreated("uid-1", t0)
@@ -261,5 +267,31 @@ func TestExternalWorkloadArrivalMatchesByUIDInBothOrders(t *testing.T) {
 				t.Fatal("the item must be keyed by UID, not by the ExternalWorkload name")
 			}
 		})
+	}
+}
+
+func TestUnmatchedCountsArrivalsNobodyMarked(t *testing.T) {
+	kube := fake.NewClientBuilder().Build()
+	w, err := WatchExternalWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	w.MarkCreated("uid-marked", time.Now())
+	if err := kube.Create(context.Background(), externalWorkload("ew-deployment-marked", "uid-marked", "")); err != nil {
+		t.Fatal(err)
+	}
+	if err := kube.Create(context.Background(), externalWorkload("ew-deployment-orphan", "", "")); err != nil {
+		t.Fatal(err)
+	}
+	waitForArrival(t, w, "uid-marked")
+	waitForArrival(t, w, "orphan")
+
+	if got := w.Unmatched(); got != 1 {
+		t.Fatalf("the object without a source UID must count as unmatched, got %d", got)
+	}
+	if got := byName(w.WaitAll(time.Second))["uid-marked"]; got.Outcome != Arrived {
+		t.Fatalf("the marked item must still arrive: %+v", got)
 	}
 }

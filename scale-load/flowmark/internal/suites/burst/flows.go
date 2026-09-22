@@ -23,7 +23,8 @@ import (
 )
 
 type deploymentFlow struct {
-	kube k8sclient.WithWatch
+	kube        k8sclient.WithWatch
+	concurrency int
 }
 
 func (*deploymentFlow) name() string {
@@ -36,7 +37,7 @@ func (f *deploymentFlow) watch(ctx context.Context, namespace string) (*measure.
 
 func (f *deploymentFlow) create(ctx context.Context, workload item) (string, error) {
 	deployment, err := submit.K8sDeployment(ctx, f.kube, submit.DeploymentSpec{
-		Name: workload.name, Namespace: workload.namespace, Image: pauseImage, Replicas: workload.pods, Labels: workload.labels,
+		Name: workload.name, Namespace: workload.namespace, Image: workload.image, Replicas: workload.pods, Labels: workload.labels,
 	})
 	if err != nil {
 		return "", err
@@ -55,12 +56,12 @@ func (f *deploymentFlow) teardown(ctx context.Context, namespace string, labels 
 			targets = append(targets, &deployments.Items[i])
 		}
 	}
-	if err := deleteAll(ctx, targets, func(ctx context.Context, obj k8sclient.Object) error {
+	if err := deleteAll(ctx, f.concurrency, targets, func(ctx context.Context, obj k8sclient.Object) error {
 		return k8sclient.IgnoreNotFound(f.kube.Delete(ctx, obj))
 	}); err != nil {
 		return len(deployments.Items), err
 	}
-	external, err := count(ctx, f.kube, measure.ExternalWorkloadKind, namespace)
+	external, err := countAllInNamespace(ctx, f.kube, measure.ExternalWorkloadKind, namespace)
 	if err != nil {
 		return len(deployments.Items), err
 	}
@@ -68,8 +69,9 @@ func (f *deploymentFlow) teardown(ctx context.Context, namespace string, labels 
 }
 
 type trainingFlow struct {
-	clients *client.Clients
-	project submit.ProjectRef
+	clients     *client.Clients
+	project     submit.ProjectRef
+	concurrency int
 
 	mu      sync.Mutex
 	created map[string]string
@@ -85,7 +87,7 @@ func (f *trainingFlow) watch(ctx context.Context, namespace string) (*measure.Wa
 
 func (f *trainingFlow) create(ctx context.Context, workload item) (string, error) {
 	ref, err := submit.Training(ctx, f.clients, submit.WorkloadSpec{
-		Name: workload.name, Project: f.project, Image: pauseImage, Labels: workload.labels,
+		Name: workload.name, Project: f.project, Image: workload.image, Labels: workload.labels,
 	})
 	if err != nil {
 		return "", err
@@ -108,7 +110,7 @@ func (f *trainingFlow) teardown(ctx context.Context, namespace string, _ map[str
 	var errsMu sync.Mutex
 	jobs := make(chan string)
 	var wg sync.WaitGroup
-	for range submitWorkers {
+	for range f.concurrency {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -138,18 +140,18 @@ func (f *trainingFlow) teardown(ctx context.Context, namespace string, _ map[str
 	if len(errs) > 0 {
 		return remaining, errors.Join(errs...)
 	}
-	runners, err := count(ctx, f.clients.Kube, measure.WorkloadRunnerKind, namespace)
+	runners, err := countAllInNamespace(ctx, f.clients.Kube, measure.WorkloadRunnerKind, namespace)
 	if err != nil {
 		return remaining, err
 	}
 	return remaining + runners, nil
 }
 
-func deleteAll(ctx context.Context, targets []k8sclient.Object, remove func(context.Context, k8sclient.Object) error) error {
+func deleteAll(ctx context.Context, concurrency int, targets []k8sclient.Object, remove func(context.Context, k8sclient.Object) error) error {
 	jobs := make(chan k8sclient.Object)
 	errs := make(chan error, len(targets))
 	var wg sync.WaitGroup
-	for range submitWorkers {
+	for range concurrency {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -166,13 +168,14 @@ func deleteAll(ctx context.Context, targets []k8sclient.Object, remove func(cont
 	close(jobs)
 	wg.Wait()
 	close(errs)
+	var failures []error
 	for err := range errs {
-		return err
+		failures = append(failures, err)
 	}
-	return nil
+	return errors.Join(failures...)
 }
 
-func count(ctx context.Context, kube k8sclient.Client, kind schema.GroupVersionKind, namespace string) (int, error) {
+func countAllInNamespace(ctx context.Context, kube k8sclient.Client, kind schema.GroupVersionKind, namespace string) (int, error) {
 	list := &unstructured.UnstructuredList{}
 	list.SetGroupVersionKind(schema.GroupVersionKind{Group: kind.Group, Version: kind.Version, Kind: kind.Kind + "List"})
 	if err := kube.List(ctx, list, k8sclient.InNamespace(namespace)); err != nil {

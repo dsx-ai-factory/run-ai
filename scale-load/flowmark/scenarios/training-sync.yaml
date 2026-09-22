@@ -5,6 +5,9 @@ suite: workload-burst
 workloads: [100, 250, 500]
 workloadType: Training
 podsPerWorkload: 1
+submitConcurrency: 16
+kubeRequestsPerSecond: 50
+controlPlaneRequestsPerSecond: 25
 timeout: 15m
 slo:
   p90_ms: 10000

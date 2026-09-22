@@ -11,19 +11,27 @@ import (
 	"golang.org/x/time/rate"
 )
 
-const (
-	controlPlaneQPS   = 25
-	controlPlaneBurst = 50
-)
+type Limits struct {
+	KubeRequestsPerSecond         int
+	ControlPlaneRequestsPerSecond int
+}
+
+var DefaultLimits = Limits{KubeRequestsPerSecond: 50, ControlPlaneRequestsPerSecond: 25}
+
+const burstSeconds = 4
+
+func burstOf(requestsPerSecond int) int {
+	return requestsPerSecond * burstSeconds
+}
 
 type pacedTransport struct {
 	limiter *rate.Limiter
 	next    http.RoundTripper
 }
 
-func paced(client *http.Client) *http.Client {
+func paced(client *http.Client, requestsPerSecond int) *http.Client {
 	client.Transport = &pacedTransport{
-		limiter: rate.NewLimiter(rate.Limit(controlPlaneQPS), controlPlaneBurst),
+		limiter: rate.NewLimiter(rate.Limit(requestsPerSecond), burstOf(requestsPerSecond)),
 		next:    client.Transport,
 	}
 	return client

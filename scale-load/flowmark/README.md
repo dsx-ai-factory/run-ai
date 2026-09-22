@@ -84,10 +84,14 @@ and `scenarios/training-sync.yaml` (Trainings). Knobs:
 | `workloads` | `[100, 250, 500]` | round sizes, each unique; each round creates that many workloads |
 | `workloadType` | `Deployment` | `Deployment` or `Training` |
 | `podsPerWorkload` | 1 | replicas per Deployment, 0 to 10; must be 1 for `Training` |
+| `image` | `registry.k8s.io/pause:3.9` | container image of every workload; point it at a mirror on air-gapped clusters |
+| `submitConcurrency` | 16 | parallel create and delete calls, 1 to 64 |
+| `kubeRequestsPerSecond` | 50 | Kubernetes client rate limit, burst is four seconds' worth |
+| `controlPlaneRequestsPerSecond` | 25 | control-plane client rate limit, burst is four seconds' worth |
 | `timeout` | `15m` | how long a round waits for its workloads to reach the cluster |
 | `setupTimeout` | `5m` | project readiness, quiesce between rounds, cleanup |
-| `settle` | `90s` | extra quiet time after a round's objects are gone, before the next round |
-| `slo` | *(none)* | mapping of whole-number milliseconds copied into the section; `p90_ms` also appears as `slo_p90_ms` |
+| `settle` | `90s` | extra quiet time after a round's objects are gone, before the next round; not paid after the last round |
+| `slo` | *(none)* | mapping of whole-number milliseconds copied into the section for the reader and for the later regression check; `p90_ms` also appears as `slo_p90_ms`. Informational: the suite never fails a round for missing it |
 | `cluster` | *(single cluster)* | cluster name when the control plane has several |
 
 Timing comes from a watch opened before anything is submitted: each
@@ -100,13 +104,20 @@ until the namespace holds no workload objects and no pods at all, pauses for
 a quiet cluster right after hundreds of pods were torn down.
 
 Per round the section reports `p50_ms@N`, `p90_ms@N`, `p99_ms@N`,
-`max_ms@N`, `throughput_per_sec@N`, `arrival_makespan_ms@N`,
+`mean_ms@N`, `max_ms@N`, `throughput_per_sec@N`, `arrival_makespan_ms@N`,
 `submit_makespan_ms@N`, `quiesce_ms@N`, `sample_size@N`, `pending_count@N`,
-`failed_count@N` and `success_rate@N`, plus `flow`, `rounds`,
-`workload_type`, `pods_per_workload`, `settle_ms` and the copied `slo`.
+`failed_count@N`, `unmatched_arrivals@N` and `success_rate@N`, plus `flow`,
+`rounds`, `workload_type`, `pods_per_workload`, `image`,
+`submit_concurrency`, `kube_requests_per_sec`,
+`control_plane_requests_per_sec`, `settle_ms` and the copied `slo`.
 Workloads that never reached the cluster within the timeout are counted in
 `pending_count`, never as zero latency, and fail the section; when nothing
 arrived the latency keys are omitted entirely; a round that cannot quiesce
-stops the run. Submission to the control plane is paced at 25 requests per
-second and to the Kubernetes API at 50, so `submit_makespan_ms@N` shows how
-much of each round's window was FlowMark's own submission.
+stops the run. `unmatched_arrivals@N` counts cluster objects that appeared
+but matched no submitted workload, which is how a run that ends all pending
+tells a missing correlation field from a slow cluster. Every object carries
+`flowmark/run`, `flowmark/round` (the round index) and `flowmark/round-size`
+labels, so a pod on the cluster can be tied to a metric key at a glance.
+`submit_makespan_ms@N` shows how much of each round's window was FlowMark's
+own submission, which the concurrency and rate knobs bound; raising
+`submitConcurrency` alone changes nothing once the rate limits are saturated.

@@ -185,6 +185,22 @@ func (w *Watcher) WaitAll(timeout time.Duration) []Timing {
 	}
 }
 
+// Unmatched reports how many arrivals belong to no marked item. When items are
+// keyed by UID this means the objects lacked the field the watcher keys on, so a
+// run that ends all pending can tell a missing correlation field from a slow
+// cluster. Arrivals for items marked later stop counting as unmatched.
+func (w *Watcher) Unmatched() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	unmatched := 0
+	for key := range w.arrived {
+		if _, marked := w.created[key]; !marked {
+			unmatched++
+		}
+	}
+	return unmatched
+}
+
 // Stop closes the watch and waits for the event loop to exit.
 func (w *Watcher) Stop() {
 	w.cancel()
