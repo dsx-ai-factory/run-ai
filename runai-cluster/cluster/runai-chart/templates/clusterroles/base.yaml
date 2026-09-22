@@ -115,6 +115,13 @@ rules:
     verbs:
       - get
   - apiGroups:
+      - gpu-fractioning.kai.scheduler
+    resources:
+      - gpufractioningconfigs
+    verbs:
+      - get
+      - list
+  - apiGroups:
     - node.k8s.io
     resources:
       - runtimeclasses

@@ -1521,6 +1521,151 @@ paths:
       x-authorize:
         resource-type: workloads
         action: read
+  /internal/workloads/telemetry:
+    get:
+      description: |
+        Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.
+
+        Telemetry Types:
+        - WORKLOADS_COUNT: Count of workloads
+        - GPU_ALLOCATION: GPU allocation metrics
+        - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+          For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+        - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
+      operationId: get_internal_workloads_telemetry
+      parameters:
+      - description: Filter using the Universally Unique Identifier (UUID) of the
+          cluster.
+        explode: true
+        in: query
+        name: clusterId
+        required: false
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: Filter using the nodepool.
+        explode: true
+        in: query
+        name: nodepoolName
+        required: false
+        schema:
+          example: default
+          type: string
+        style: form
+      - description: Filter using the department id.
+        explode: true
+        in: query
+        name: departmentId
+        required: false
+        schema:
+          example: "1"
+          type: string
+        style: form
+      - description: project id to filter by
+        explode: true
+        in: query
+        name: projectId
+        required: false
+        schema:
+          example: "1"
+          type: string
+        style: form
+      - description: Group workloads by field.
+        explode: false
+        in: query
+        name: groupBy
+        required: false
+        schema:
+          items:
+            enum:
+            - ClusterId
+            - DepartmentId
+            - ProjectId
+            - Type
+            - CurrentNodepools
+            - RequestedNodepools
+            - Phase
+            - Category
+            type: string
+          maxItems: 2
+          type: array
+        style: form
+      - description: Specifies the telemetry type.
+        explode: true
+        in: query
+        name: telemetryType
+        required: true
+        schema:
+          $ref: '#/components/schemas/WorkloadTelemetryType'
+        style: form
+      - description: "Filter workloads by specific phases. If not specified, all phases\
+          \ are included."
+        explode: false
+        in: query
+        name: filterByPhases
+        required: false
+        schema:
+          example:
+          - Running
+          - Failed
+          items:
+            $ref: '#/components/schemas/Phase'
+          maxItems: 10
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get the internal workloads telemetry.
+      tags:
+      - Workloads
+      x-no-authorization: true
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+    x-internal: true
   /api/v1/workloads/podgroups/sync:
     post:
       operationId: sync_pod_groups

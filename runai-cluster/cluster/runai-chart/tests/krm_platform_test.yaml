@@ -3,6 +3,8 @@ suite: Test KRM FIPS and OpenShift wiring
 templates:
   - charts/kai-resource-management/templates/krm-config.yaml
   - charts/kai-resource-management/templates/pod-group-assigner/webhook.yaml
+  - charts/kai-resource-management/templates/krm-operator/deployment.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
 
 tests:
   # On OpenShift the platform mints the serving cert, so KRM renders no Secret
@@ -52,3 +54,46 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  # Neither operator's operand pods are rendered by this chart: each operator
+  # deploys them from its own MS_TAG, which kai/v1/common.Image reads. So the
+  # tag on these two env vars is what decides whether the scheduler and the
+  # KRM controllers run FIPS images at all.
+  - it: should hand both operators a -fips operand tag under fipsMode only
+    templates:
+      - charts/kai-resource-management/templates/krm-operator/deployment.yaml
+      - charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
+    set:
+      global.fipsMode: "only"
+      global.fips: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: -fips$
+      - matchRegex:
+          path: spec.template.spec.containers[0].env[?(@.name=="MS_TAG")].value
+          pattern: -fips$
+
+  - it: should run the KRM operator itself in the requested mode
+    template: charts/kai-resource-management/templates/krm-operator/deployment.yaml
+    set:
+      global.fipsMode: "only"
+      global.fips: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: GODEBUG
+            value: "fips140=only"
+
+  - it: should leave both operators on ordinary images by default
+    templates:
+      - charts/kai-resource-management/templates/krm-operator/deployment.yaml
+      - charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: -fips$
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].env[?(@.name=="MS_TAG")].value
+          pattern: -fips$
