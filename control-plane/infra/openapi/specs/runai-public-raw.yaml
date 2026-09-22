@@ -18504,7 +18504,7 @@ paths:
         - $ref: '#/components/parameters/TelemetryGroupBy1'
         - $ref: '#/components/parameters/TelemetryType2'
         - $ref: '#/components/parameters/FilterByPhases'
-        - $ref: '#/components/parameters/TelemetryFilterByCreatedAt'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
       responses:
         '200':
           description: Executed successfully.
@@ -18561,7 +18561,7 @@ paths:
         - $ref: '#/components/parameters/TelemetryGroupBy1'
         - $ref: '#/components/parameters/TelemetryType2'
         - $ref: '#/components/parameters/FilterByPhases'
-        - $ref: '#/components/parameters/TelemetryFilterByCreatedAt'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
       responses:
         '200':
           description: Executed successfully.
@@ -62832,7 +62832,7 @@ components:
         example:
           - Running
           - Failed
-    TelemetryFilterByCreatedAt:
+    TelemetryFilterBy:
       name: filterBy
       in: query
       required: false
@@ -62846,7 +62846,7 @@ components:
         items:
           type: string
           maxLength: 1000
-          pattern: ^(createdAt)(==|!=|<=|>=).+$
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
         example:
           - 'createdAt>=2026-09-01T00:00:00Z'
           - 'createdAt<=2026-09-02T00:00:00Z'

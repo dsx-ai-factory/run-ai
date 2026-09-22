@@ -8,6 +8,6 @@ schema:
   items:
     type: string
     maxLength: 1000
-    pattern: "^(createdAt)(==|!=|<=|>=).+$"
+    pattern: "^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$"
   example: ["createdAt>=2026-09-01T00:00:00Z", "createdAt<=2026-09-02T00:00:00Z"]
 explode: false
