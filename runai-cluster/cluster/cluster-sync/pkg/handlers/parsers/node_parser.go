@@ -41,7 +41,8 @@ const (
 	MissingGpuFractioningPrerequisite = "MissingGpuFractioningPrerequisite"
 	GpuFractioningNotManaged          = "NotManaged"
 
-	gpuFractioningNotManagedMessage = "The node is not covered by the GPU fractioning operator."
+	gpuFractioningNotManagedMessage = "GPU fractions are not supported on this node - " +
+		"it is not covered by the GPU fractioning operator."
 
 	ReadyPhase                = "Ready"
 	NotReadyPhase             = "NotReady"
