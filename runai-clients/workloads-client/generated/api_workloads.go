@@ -897,6 +897,7 @@ type ApiGetInternalWorkloadsTelemetryRequest struct {
 	projectId      *string
 	groupBy        *[]string
 	filterByPhases *[]Phase
+	filterBy       *[]string
 }
 
 // Specifies the telemetry type.
@@ -938,6 +939,12 @@ func (r ApiGetInternalWorkloadsTelemetryRequest) GroupBy(groupBy []string) ApiGe
 // Filter workloads by specific phases. If not specified, all phases are included.
 func (r ApiGetInternalWorkloadsTelemetryRequest) FilterByPhases(filterByPhases []Phase) ApiGetInternalWorkloadsTelemetryRequest {
 	r.filterByPhases = &filterByPhases
+	return r
+}
+
+// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal. Dates are in ISO 8601 timestamp format.
+func (r ApiGetInternalWorkloadsTelemetryRequest) FilterBy(filterBy []string) ApiGetInternalWorkloadsTelemetryRequest {
+	r.filterBy = &filterBy
 	return r
 }
 
@@ -1015,6 +1022,9 @@ func (a *WorkloadsAPIService) GetInternalWorkloadsTelemetryExecute(r ApiGetInter
 	parameterAddToHeaderOrQuery(localVarQueryParams, "telemetryType", r.telemetryType, "form", "")
 	if r.filterByPhases != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "filterByPhases", r.filterByPhases, "form", "csv")
+	}
+	if r.filterBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "filterBy", r.filterBy, "form", "csv")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -2611,6 +2621,7 @@ type ApiGetWorkloadsTelemetryRequest struct {
 	projectId      *string
 	groupBy        *[]string
 	filterByPhases *[]Phase
+	filterBy       *[]string
 }
 
 // Specifies the telemetry type.
@@ -2652,6 +2663,12 @@ func (r ApiGetWorkloadsTelemetryRequest) GroupBy(groupBy []string) ApiGetWorkloa
 // Filter workloads by specific phases. If not specified, all phases are included.
 func (r ApiGetWorkloadsTelemetryRequest) FilterByPhases(filterByPhases []Phase) ApiGetWorkloadsTelemetryRequest {
 	r.filterByPhases = &filterByPhases
+	return r
+}
+
+// Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal. Dates are in ISO 8601 timestamp format.
+func (r ApiGetWorkloadsTelemetryRequest) FilterBy(filterBy []string) ApiGetWorkloadsTelemetryRequest {
+	r.filterBy = &filterBy
 	return r
 }
 
@@ -2729,6 +2746,9 @@ func (a *WorkloadsAPIService) GetWorkloadsTelemetryExecute(r ApiGetWorkloadsTele
 	parameterAddToHeaderOrQuery(localVarQueryParams, "telemetryType", r.telemetryType, "form", "")
 	if r.filterByPhases != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "filterByPhases", r.filterByPhases, "form", "csv")
+	}
+	if r.filterBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "filterBy", r.filterBy, "form", "csv")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

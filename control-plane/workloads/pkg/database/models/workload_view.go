@@ -108,8 +108,16 @@ type WorkloadView struct {
 	K8sObjectVersion              *string                   `gorm:"column:k8s_object_version"`
 }
 
+const createdAtField = "createdAt"
+
 func (WorkloadView) TableName() string {
 	return "workloads_view"
+}
+
+func (WorkloadView) TelemetryFilterFieldsToColumn() queryapi.APIFieldsMapping {
+	return queryapi.APIFieldsMapping{
+		createdAtField: queryapi.NewFieldMapping("created_at", queryapi.DateValidator{}),
+	}
 }
 
 func (WorkloadView) FilterFieldsToColumn() queryapi.APIFieldsMapping {
@@ -117,7 +125,7 @@ func (WorkloadView) FilterFieldsToColumn() queryapi.APIFieldsMapping {
 		"type":                    queryapi.NewFieldMapping("type"),
 		"name":                    queryapi.NewFieldMapping("name"),
 		"projectName":             queryapi.NewFieldMapping("project_name"),
-		"createdAt":               queryapi.NewFieldMapping("created_at"),
+		createdAtField:            queryapi.NewFieldMapping("created_at"),
 		"deletedAt":               queryapi.NewFieldMapping("deleted_at"),
 		"submittedBy":             queryapi.NewFieldMapping("submitted_by"),
 		"phase":                   queryapi.NewFieldMapping("phase"),

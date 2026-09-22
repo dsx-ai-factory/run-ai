@@ -1562,7 +1562,16 @@ func (c *WorkloadsAPIController) GetWorkloadsTelemetry(w http.ResponseWriter, r 
 			filterByPhasesParam = append(filterByPhasesParam, paramEnum)
 		}
 	}
-	result, err := c.service.GetWorkloadsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolNameParam, departmentIdParam, projectIdParam, groupByParam, filterByPhasesParam)
+	var filterByParam []string
+	if query.Has("filterBy") {
+		filterByParam = strings.Split(query.Get("filterBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(filterByParam) == 1 && filterByParam[0] == "" {
+			filterByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	result, err := c.service.GetWorkloadsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolNameParam, departmentIdParam, projectIdParam, groupByParam, filterByPhasesParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
@@ -1682,7 +1691,16 @@ func (c *WorkloadsAPIController) GetInternalWorkloadsTelemetry(w http.ResponseWr
 			filterByPhasesParam = append(filterByPhasesParam, paramEnum)
 		}
 	}
-	result, err := c.service.GetInternalWorkloadsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolNameParam, departmentIdParam, projectIdParam, groupByParam, filterByPhasesParam)
+	var filterByParam []string
+	if query.Has("filterBy") {
+		filterByParam = strings.Split(query.Get("filterBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(filterByParam) == 1 && filterByParam[0] == "" {
+			filterByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	result, err := c.service.GetInternalWorkloadsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolNameParam, departmentIdParam, projectIdParam, groupByParam, filterByPhasesParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
