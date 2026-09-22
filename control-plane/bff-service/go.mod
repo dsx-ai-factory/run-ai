@@ -9,13 +9,13 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.2
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/google/uuid v1.6.0
