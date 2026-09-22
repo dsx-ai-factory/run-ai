@@ -8,6 +8,7 @@ import { CLUSTER_STATUS_TOOLTIP } from "@/models/cluster.model";
 import { splitCamelCaseAndCapitalize } from "@/utils/string.util/string.util";
 import type {
   ClusterDependenciesStatus,
+  ClusterDependencyStatus,
   ClusterDisplayedStatus,
   ClustersMinimalData,
 } from "@/swagger-models/cluster-service-client";
@@ -144,7 +145,7 @@ function getNonFunctioningServices(operands: { [key: string]: ClusterReportedSta
 
 function getMissingPrerequisites(dependencies: ClusterDependenciesStatus): string[] {
   return (
-    Object.entries(dependencies.required)
+    Object.entries(dependencies.required ?? {})
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .filter(([_, dependency]) => !dependency.available)
 
@@ -162,27 +163,36 @@ function getGpuFractioningPrerequisiteReason(dependencies: ClusterDependenciesSt
   return gpuFractioning.reason;
 }
 
+// A dependency can report itself available while a component nested under it is not — the
+// operator does exactly that for nvidia, whose own status stays true when nvidia-metrics fails.
+// So the whole subtree has to be walked, not just the direct children.
+function hasFailureOtherThanFractioning(components: { [key: string]: ClusterDependencyStatus }): boolean {
+  return Object.entries(components).some(([name, component]) => {
+    if (name === "gpu-fractioning") return false;
+    if (!component.available) return true;
+    return component.components ? hasFailureOtherThanFractioning(component.components) : false;
+  });
+}
+
 // gpu-stack is reported by name alone, which says nothing a reader can act on. When fractioning
-// is its only failing part, the dedicated section carries the reason instead; when something else
+// is its only failing part, the dedicated section carries the reason instead; when anything else
 // under gpu-stack is also failing, the name has to stay or that failure goes unreported.
 function isFractioningOnlyGpuStackFailure(dependencies: ClusterDependenciesStatus): boolean {
   const components = dependencies.required?.["gpu-stack"]?.components;
   if (!components) return false;
 
-  const unavailable = Object.entries(components)
-    .filter(([, component]) => !component.available)
-    .map(([name]) => name);
-
-  return unavailable.length === 1 && unavailable[0] === "gpu-fractioning";
+  return !hasFailureOtherThanFractioning(components);
 }
 
 function getMissingPrerequisitesText(status: ClusterDisplayedStatus): string {
   const dependencies = status.dependencies as ClusterDependenciesStatus;
   const gpuFractioningReason = getGpuFractioningPrerequisiteReason(dependencies);
 
+  const suppressGpuStackName = Boolean(gpuFractioningReason) && isFractioningOnlyGpuStackFailure(dependencies);
+
   const missingPrerequisites = clusterUtil
     .getMissingPrerequisites(dependencies)
-    .filter((name) => !(gpuFractioningReason && name === "gpu-stack" && isFractioningOnlyGpuStackFailure(dependencies)));
+    .filter((name) => !(suppressGpuStackName && name === "gpu-stack"));
 
   const sections: string[] = [];
 

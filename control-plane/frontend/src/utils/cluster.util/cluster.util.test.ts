@@ -95,6 +95,33 @@ describe("cluster.util", () => {
     expect(result.tooltipText.match(/As a result,/g)).toHaveLength(2);
   });
 
+  it("keeps gpu-stack named when a nested component under an available one has failed", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            components: {
+              nvidia: {
+                available: true,
+                components: {
+                  "nvidia-metrics": { available: false, reason: "Metrics are missing in the DCGM-exporter." },
+                },
+              },
+              "gpu-fractioning": { available: false, reason: "fractions are not supported on this driver" },
+            },
+          },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain("gpu-stack");
+    expect(result.tooltipText).toContain("As a result, GPU fractions are not supported.");
+  });
+
   it("keeps gpu-stack named when fractioning is not its only failing component", () => {
     const status = {
       state: ClusterState.MissingPrerequisites,
