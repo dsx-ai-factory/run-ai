@@ -5,6 +5,7 @@ suite: workload-burst
 workloads: [100, 250, 500]
 workloadType: Deployment
 podsPerWorkload: 1
+image: registry.k8s.io/pause:3.9
 submitConcurrency: 16
 kubeRequestsPerSecond: 50
 controlPlaneRequestsPerSecond: 25
