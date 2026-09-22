@@ -243,6 +243,7 @@ export default defineComponent({
   methods: {
     async validate(): Promise<boolean> {
       if (this.samlSource === SamlCreationDataMetadataXmlTypeEnum.File) {
+        (this.$refs.metadataFileInput as typeof QFile)?.validate();
         (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
         return !!this.metadataFile && this.isValidCertificate;
       } else {

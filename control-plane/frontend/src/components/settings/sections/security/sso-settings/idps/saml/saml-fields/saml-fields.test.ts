@@ -89,6 +89,15 @@ describe("saml-fields.vue", () => {
       );
     });
 
+    it("shows the required-file message when Save is pressed on a brand-new, untouched form", async () => {
+      const { wrapper } = factory({ isNewIdp: true });
+
+      await (wrapper.vm as unknown as { validate: () => Promise<boolean> }).validate();
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.text()).toContain("Upload a file");
+    });
+
     it("passes once a file is present", () => {
       const { wrapper } = factory({ isNewIdp: true });
 
