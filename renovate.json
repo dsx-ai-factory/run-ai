@@ -12,11 +12,14 @@
     "config:recommended",
     "mergeConfidence:all-badges",
     "github>run-ai/runai-actions//renovate/presets/go-common",
-    "github>run-ai/runai-actions//renovate/presets/runai-internal"
+    "github>run-ai/runai-actions//renovate/presets/runai-internal",
+    "github>run-ai/runai-actions//renovate/presets/mockery"
   ],
   "includePaths": [
     "NOTE: the rest of this list is added at run time. runai-actions .github/workflows/renovate.yml runs renovate/scan_candidates, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
-    "control-plane/frontend/**"
+    "control-plane/frontend/**",
+    "build/makefile/**",
+    "control-plane/infra/makefile/**"
   ],
   "ignorePaths": [
     "runai-cluster/cluster/runai-crd-upgrader/**"
