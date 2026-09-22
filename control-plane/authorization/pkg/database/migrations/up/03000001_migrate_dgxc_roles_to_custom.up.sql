@@ -65,6 +65,22 @@ BEGIN
         WHERE d.role_type = 'DGXC'
           AND d.custom = false
           AND d.scope_type = 'system';
+
+        -- Flatten any chain the rename just created. A custom role could already name
+        -- one of these as its predefined cluster role; getPredefinedRoleForSync
+        -- resolves a single hop, so it would hand the agent the '-Unmanaged' name and
+        -- the binding would find no ClusterRole. Point it at the same target the
+        -- renamed role now uses.
+        UPDATE roles c
+        SET cluster_role_predefined_id = d.cluster_role_predefined_id,
+            updated_at = NOW()
+        FROM roles d
+        WHERE c.cluster_role_predefined_id = d.id
+          AND d.role_type = 'DGXC'
+          AND d.custom = true
+          AND d.scope_type = 'system'
+          AND d.name LIKE '%-Unmanaged'
+          AND d.cluster_role_predefined_id IS NOT NULL;
     ELSE
         -- role_to_permission_set has no ON DELETE clause and would block the delete.
         -- The permission sets themselves are shared and are left alone.
