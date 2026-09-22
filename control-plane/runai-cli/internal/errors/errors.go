@@ -17,7 +17,7 @@ import (
 	ousc "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	cec "github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client/generated"
 	cac "github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client/generated"
-	wsc "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wsc "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	wmc "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 

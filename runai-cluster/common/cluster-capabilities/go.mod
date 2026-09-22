@@ -6,7 +6,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0-20250618145324-1d01c564dfbc
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0-20250618145324-1d01c564dfbc
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
@@ -94,4 +94,4 @@ require (
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../../control-plane/cluster-service/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../../runai-clients/workloads-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../../../control-plane/workloads/pkg/client

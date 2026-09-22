@@ -19,7 +19,7 @@ import (
 	k8sConstants "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/constants"
 	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"gopkg.in/yaml.v3"
 )

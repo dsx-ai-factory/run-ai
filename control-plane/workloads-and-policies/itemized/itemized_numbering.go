@@ -7,7 +7,7 @@ package itemized
 
 import (
 	"fmt"
-	workloadApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"regexp"
 	"strings"
 )

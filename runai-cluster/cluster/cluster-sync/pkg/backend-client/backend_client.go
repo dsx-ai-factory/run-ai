@@ -26,7 +26,7 @@ import (
 	k8strackergenerated "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
 	policies "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client"
 	policiesgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadswagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadswagger "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/metrics"
 	"go.uber.org/zap"

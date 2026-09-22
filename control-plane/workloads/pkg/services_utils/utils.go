@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"strconv"
 
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	authClientApi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"

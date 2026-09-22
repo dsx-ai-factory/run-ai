@@ -29,7 +29,7 @@ import (
 	spec2 "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec/spectype"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workspace"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	"k8s.io/utils/ptr"
 )

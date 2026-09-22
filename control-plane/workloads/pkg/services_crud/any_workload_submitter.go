@@ -22,7 +22,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_integration"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/settings"
 	k8sObjectsApi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	workloadMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"

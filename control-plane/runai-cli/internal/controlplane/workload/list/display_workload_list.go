@@ -17,7 +17,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli/structs"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
 	uitable "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/table"
-	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"gopkg.in/yaml.v3"
 )
 

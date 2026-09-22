@@ -15,7 +15,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/go-chi/chi/v5 v5.3.2
@@ -97,7 +97,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/clie
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client => ../runai-clients/policy-service-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../runai-clients/workloads-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../control-plane/workloads/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client => ../runai-clients/workloads-manager-client
 

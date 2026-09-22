@@ -179,7 +179,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client 
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../../control-plane/workloads/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../cluster-service/pkg/client
 

@@ -8,7 +8,7 @@ package parsers
 import (
 	"fmt"
 
-	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	swagger "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

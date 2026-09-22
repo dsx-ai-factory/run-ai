@@ -39,7 +39,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/telemetry v1.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/versions v1.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
@@ -200,6 +200,6 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clien
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client => ../../runai-clients/datavolumes-service-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../../control-plane/workloads/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities => ../../runai-cluster/common/cluster-capabilities

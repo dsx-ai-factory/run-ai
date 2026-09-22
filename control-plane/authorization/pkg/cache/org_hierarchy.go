@@ -25,7 +25,7 @@ import (
 	org_unit_service_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 	tenants_api "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client"
 	datavolumes_client "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client"
-	workloads_client "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client"
+	workloads_client "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"

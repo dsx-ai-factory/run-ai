@@ -42,7 +42,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0
@@ -257,7 +257,7 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client => ../../../runai-clients/assets-service-client
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client => ../../../runai-clients/k8s-objects-tracker-client
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client => ../../../runai-clients/policy-service-client
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../../runai-clients/workloads-client
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../../../control-plane/workloads/pkg/client
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client => ../../../runai-clients/workloads-manager-client
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../common/constants

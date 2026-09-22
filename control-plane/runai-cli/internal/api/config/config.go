@@ -22,7 +22,7 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client/generated"
 	clusterapi "github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client/generated"
 	datavolumesservice "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
-	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	workloadmanager "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 

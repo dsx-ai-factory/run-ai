@@ -23,7 +23,7 @@ import (
 	assets_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	policy_client "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client"
 	policy_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	workloadsMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/generated/datavolumes_openapi"
 	"github.com/rs/zerolog/log"

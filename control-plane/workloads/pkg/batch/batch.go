@@ -5,7 +5,7 @@
 
 package batch
 
-import openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+import openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 func NewBatchResponseFailure(id string, message string, code int32) openapi.BatchResponseFailureItem {
 	return openapi.BatchResponseFailureItem{

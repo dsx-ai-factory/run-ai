@@ -89,6 +89,7 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [control-plane/org-unit-service/pkg/client](control-plane/org-unit-service/pkg/client)
 - [control-plane/runai-cli](control-plane/runai-cli)
 - [control-plane/workloads-and-policies](control-plane/workloads-and-policies)
+- [control-plane/workloads/pkg/client](control-plane/workloads/pkg/client)
 
 **control-plane** (tooling)
 - [control-plane/fielder](control-plane/fielder) — Python workload field-spec code generator
@@ -150,7 +151,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [runai-clients/datavolumes-service-client](runai-clients/datavolumes-service-client)
 - [runai-clients/k8s-objects-tracker-client](runai-clients/k8s-objects-tracker-client)
 - [runai-clients/policy-service-client](runai-clients/policy-service-client)
-- [runai-clients/workloads-client](runai-clients/workloads-client)
 - [runai-clients/workloads-manager-client](runai-clients/workloads-manager-client)
 
 **runai-common-packages** (go)
