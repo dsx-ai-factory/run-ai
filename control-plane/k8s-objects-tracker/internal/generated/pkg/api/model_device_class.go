@@ -24,28 +24,19 @@ type DeviceClass struct {
 
 	// Cluster ID which has sent the resource info
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//ClusterId string `json:"cluster_id,omitempty"`
-	ClusterId string `json:"cluster_id,omitempty" gorm:"not null;"`
+	//ClusterId string `json:"clusterId,omitempty"`
+	ClusterId string `json:"clusterId,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Device class name
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//DeviceClassName string `json:"device_class_name"`
-	DeviceClassName string `json:"device_class_name" gorm:"not null;"`
+	//DeviceClassName string `json:"deviceClassName,omitempty"`
+	DeviceClassName string `json:"deviceClassName,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertDeviceClassRequired checks if the required fields are not zero-ed
 func AssertDeviceClassRequired(obj DeviceClass) error {
-	elements := map[string]interface{}{
-		"device_class_name": obj.DeviceClassName,
-	}
-	for name, el := range elements {
-		if isZero := IsZeroValue(el); isZero {
-			return &RequiredError{Field: name}
-		}
-	}
-
 	return nil
 }
 

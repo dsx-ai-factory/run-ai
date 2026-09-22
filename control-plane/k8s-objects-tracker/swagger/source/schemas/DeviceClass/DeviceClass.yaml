@@ -2,9 +2,9 @@ type: object
 required:
   - device_class_name
 properties:
-  cluster_id:
+  clusterId:
     $ref: "../../../../../infra/openapi/docs/schemas/scopes/ReportingClusterId.yaml"
-  device_class_name:
+  deviceClassName:
     type: string
     description: Device class name
     example: gpu.nvidia.com

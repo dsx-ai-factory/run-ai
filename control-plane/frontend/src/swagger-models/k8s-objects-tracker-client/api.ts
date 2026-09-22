@@ -341,13 +341,13 @@ export interface DeviceClass {
      * @type {string}
      * @memberof DeviceClass
      */
-    'cluster_id'?: string;
+    'clusterId'?: string;
     /**
      * Device class name
      * @type {string}
      * @memberof DeviceClass
      */
-    'device_class_name': string;
+    'deviceClassName'?: string;
 }
 /**
  * 
@@ -1330,7 +1330,7 @@ export interface StorageClassV2 {
      * @type {string}
      * @memberof StorageClassV2
      */
-    'cluster_id'?: string;
+    'clusterId': string;
     /**
      * Storage class name
      * @type {string}

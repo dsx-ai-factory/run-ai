@@ -4,7 +4,7 @@ required:
   - storageClassName
   - spec
 properties:
-  cluster_id:
+  clusterId:
     $ref: "../../../../../infra/openapi/docs/schemas/scopes/ReportingClusterId.yaml"
   storageClassName:
     type: string

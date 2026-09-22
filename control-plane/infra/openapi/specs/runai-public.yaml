@@ -27319,7 +27319,7 @@ components:
         - storageClassName
         - spec
       properties:
-        cluster_id:
+        clusterId:
           $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string

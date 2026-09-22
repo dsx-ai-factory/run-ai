@@ -8476,7 +8476,6 @@ components:
       type: object
     StorageClassV2:
       example:
-        cluster_id: 550e8400-e29b-41d4-a716-446655440000
         customization:
           attributes:
           - validationRegexp: "^[a-zA-Z0-9.-_]+$"
@@ -8534,12 +8533,13 @@ components:
           allowedForEphemeralVolumes: true
           allowedForPersistentVolumes: true
           allowedForAssets: true
+        clusterId: 550e8400-e29b-41d4-a716-446655440000
         spec:
           provisioner: kubernetes.io/aws-ebs
           isDefault: false
           allowVolumeExpansion: true
       properties:
-        cluster_id:
+        clusterId:
           description: Cluster ID which has sent the resource info
           example: 550e8400-e29b-41d4-a716-446655440000
           format: uuid
@@ -8562,8 +8562,7 @@ components:
     StorageClassesV2:
       example:
         items:
-        - cluster_id: 550e8400-e29b-41d4-a716-446655440000
-          customization:
+        - customization:
             attributes:
             - validationRegexp: "^[a-zA-Z0-9.-_]+$"
               minValue: 100
@@ -8620,12 +8619,12 @@ components:
             allowedForEphemeralVolumes: true
             allowedForPersistentVolumes: true
             allowedForAssets: true
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
           spec:
             provisioner: kubernetes.io/aws-ebs
             isDefault: false
             allowVolumeExpansion: true
-        - cluster_id: 550e8400-e29b-41d4-a716-446655440000
-          customization:
+        - customization:
             attributes:
             - validationRegexp: "^[a-zA-Z0-9.-_]+$"
               minValue: 100
@@ -8682,6 +8681,7 @@ components:
             allowedForEphemeralVolumes: true
             allowedForPersistentVolumes: true
             allowedForAssets: true
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
           spec:
             provisioner: kubernetes.io/aws-ebs
             isDefault: false
@@ -8696,15 +8696,15 @@ components:
       type: object
     DeviceClass:
       example:
-        cluster_id: 550e8400-e29b-41d4-a716-446655440000
-        device_class_name: gpu.nvidia.com
+        deviceClassName: gpu.nvidia.com
+        clusterId: 550e8400-e29b-41d4-a716-446655440000
       properties:
-        cluster_id:
+        clusterId:
           description: Cluster ID which has sent the resource info
           example: 550e8400-e29b-41d4-a716-446655440000
           format: uuid
           type: string
-        device_class_name:
+        deviceClassName:
           description: Device class name
           example: gpu.nvidia.com
           type: string
@@ -8714,10 +8714,10 @@ components:
     DeviceClasses:
       example:
         items:
-        - cluster_id: 550e8400-e29b-41d4-a716-446655440000
-          device_class_name: gpu.nvidia.com
-        - cluster_id: 550e8400-e29b-41d4-a716-446655440000
-          device_class_name: gpu.nvidia.com
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
       properties:
         items:
           items:

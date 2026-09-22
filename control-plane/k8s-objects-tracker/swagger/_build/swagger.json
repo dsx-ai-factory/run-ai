@@ -5829,7 +5829,7 @@
           "spec"
         ],
         "properties": {
-          "cluster_id": {
+          "clusterId": {
             "$ref": "#/components/schemas/ReportingClusterId"
           },
           "storageClassName": {
@@ -5868,10 +5868,10 @@
           "device_class_name"
         ],
         "properties": {
-          "cluster_id": {
+          "clusterId": {
             "$ref": "#/components/schemas/ReportingClusterId"
           },
-          "device_class_name": {
+          "deviceClassName": {
             "type": "string",
             "description": "Device class name",
             "example": "gpu.nvidia.com"

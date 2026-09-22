@@ -5,13 +5,13 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ClusterId** | Pointer to **string** | Cluster ID which has sent the resource info | [optional] 
-**DeviceClassName** | **string** | Device class name | 
+**DeviceClassName** | Pointer to **string** | Device class name | [optional] 
 
 ## Methods
 
 ### NewDeviceClass
 
-`func NewDeviceClass(deviceClassName string, ) *DeviceClass`
+`func NewDeviceClass() *DeviceClass`
 
 NewDeviceClass instantiates a new DeviceClass object
 This constructor will assign default values to properties that have it defined,
@@ -70,6 +70,11 @@ and a boolean to check if the value has been set.
 
 SetDeviceClassName sets DeviceClassName field to given value.
 
+### HasDeviceClassName
+
+`func (o *DeviceClass) HasDeviceClassName() bool`
+
+HasDeviceClassName returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
