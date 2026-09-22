@@ -29,10 +29,11 @@ The module is responsible for:
   the index digest and immutable platform digest.
 - **Third-party image inventory** — resolving component-specific public images
   alongside Run:ai-owned entries in each `ImageLock`.
-- **Artifact aggregation** — validating and combining Run:ai, KAI, and Karta
-  image locks. Every input must use the same profile and platform, lock names
-  must be unique, and conflicting digests for the same image source are
-  rejected.
+- **Artifact aggregation** — validating and combining Run:ai, KRM, KAI, and
+  Karta image locks. KAI Scheduler is packaged as a dependency of KRM but still
+  contributes its own lock, since each lock covers one chart's own inventory.
+  Every input must use the same profile and platform, lock names must be
+  unique, and conflicting digests for the same image source are rejected.
 - **Chart locking** — downloading the release's control-plane and cluster Helm
   charts, verifying their versions, and hashing the root archives and all
   packaged or unpacked chart dependencies.
@@ -166,7 +167,8 @@ make -C build/airgap artifact-lock \
   ARTIFACT_LOCK_IMAGE_LOCKS="\
 dist/image-locks/runai-control-plane-3.0.0-linux-amd64.yaml \
 dist/image-locks/runai-cluster-3.0.0-linux-amd64.yaml \
-dist/image-locks/kai-scheduler-v0.16.8-linux-amd64.yaml \
+dist/image-locks/kai-resource-management-v0.0.1-linux-amd64.yaml \
+dist/image-locks/kai-scheduler-v0.16.9-linux-amd64.yaml \
 dist/image-locks/karta-0.2.6-linux-amd64.yaml"
 ```
 

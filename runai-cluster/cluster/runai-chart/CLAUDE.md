@@ -10,8 +10,9 @@ Umbrella Helm chart for the Run:AI cluster side. Packages the `runai-operator`
 (`go-operator`) Deployment/RBAC, the `crdUpgrader` + `helmHooksHandler` +
 `kartaMigrate` lifecycle Jobs, cluster-scoped ClusterRoles, priority classes,
 `RunaiConfig`/`Cluster` CRs, OpenShift SCC/webhooks, ServiceMonitor, and the
-scheduler stack as dependencies (`kai-scheduler v0.16.7`, `karta 0.2.6`, `crds`
-subchart). Produces `runai-cluster.tgz`.
+scheduler stack as dependencies (`kai-resource-management v0.0.1`, `karta 0.2.6`,
+`crds` subchart; `kai-scheduler` arrives as a sub-dependency of KRM). Produces
+`runai-cluster.tgz`.
 
 ## Make targets
 
@@ -43,8 +44,9 @@ Makefile overrides the shared targets with chart recipes (`VERSION?=0.0.0-dev`,
     to `0.0.0-dev` (runai-operator, crdUpgrader, helmHooksHandler, kartaMigrate),
   - `--set development.includeCRDsInReleaseManifest=true`, sets `controlPlane.*`
     and `cluster.uid`, layers `.local-dev/values-rc.yaml`.
-- **Dependencies** (`Chart.yaml`, vendored tarballs in `charts/`): `kai-scheduler`
-  (`oci://ghcr.io/kai-scheduler/kai-scheduler` v0.16.7), `karta`
+- **Dependencies** (`Chart.yaml`, vendored tarballs in `charts/`):
+  `kai-resource-management` (`oci://ghcr.io/kai-scheduler/kai-resource-management`
+  v0.0.1, which bundles `kai-scheduler` itself), `karta`
   (`oci://ghcr.io/dsx-ai-factory/workload-map/karta` 0.2.6), `crds` (`file://charts/crds` 0.0.0, gated
   by `development.includeCRDsInReleaseManifest`). `runai-engine-*.tgz` is a legacy
   tarball also present.

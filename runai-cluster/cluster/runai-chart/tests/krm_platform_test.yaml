@@ -1,0 +1,54 @@
+suite: Test KRM FIPS and OpenShift wiring
+
+templates:
+  - charts/kai-resource-management/templates/krm-config.yaml
+  - charts/kai-resource-management/templates/pod-group-assigner/webhook.yaml
+
+tests:
+  # On OpenShift the platform mints the serving cert, so KRM renders no Secret
+  # and annotates the webhook instead. openShift.mode does not reach the
+  # subchart, so this knob is what carries an overridden autodetect.
+  - it: should mint its own serving cert off OpenShift
+    template: charts/kai-resource-management/templates/pod-group-assigner/webhook.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: Secret
+        documentIndex: 0
+
+  - it: should defer to OpenShift cert injection when openshift is set
+    set:
+      kai-resource-management.openshift: true
+    template: charts/kai-resource-management/templates/pod-group-assigner/webhook.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: MutatingWebhookConfiguration
+      - equal:
+          path: metadata.annotations["service.beta.openshift.io/inject-cabundle"]
+          value: "true"
+
+  # Helm shares global.* into subcharts, so fipsMode reaches KRM on its own --
+  # but the bundled scheduler reads global.fips, which Helm does not derive.
+  # KRM fails the render rather than letting the scheduler run non-FIPS images.
+  - it: should fail the render when fipsMode is on without the scheduler boolean
+    template: charts/kai-resource-management/templates/krm-config.yaml
+    set:
+      global.fipsMode: "on"
+    asserts:
+      # Matched by pattern, not verbatim: the wording is KRM's to change, and
+      # what this test owns is that the mismatch fails rather than shipping
+      # non-FIPS scheduler images.
+      - failedTemplate:
+          errorPattern: "global\\.fipsMode is enabled but the bundled kai-scheduler"
+
+  - it: should render when fipsMode and the scheduler boolean agree
+    template: charts/kai-resource-management/templates/krm-config.yaml
+    set:
+      global.fipsMode: "on"
+      global.fips: true
+    asserts:
+      - hasDocuments:
+          count: 0

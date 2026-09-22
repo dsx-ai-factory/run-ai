@@ -5220,6 +5220,15 @@ spec:
                       for Knative components in the runai namespace
                     type: boolean
                 type: object
+              krm-operator:
+                description: KRMOperator specifies configuration for the KRM operator
+                  operand
+                properties:
+                  enabled:
+                    description: Enabled specifies whether the KRMConfig singleton
+                      is reconciled.
+                    type: boolean
+                type: object
               limitRange:
                 description: LimitRange TODO
                 properties:

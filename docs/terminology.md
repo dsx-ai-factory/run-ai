@@ -121,11 +121,14 @@ Do not describe cross-project or cross-department resource reclaim as priority-b
 | `GPU fractions` | Feature or plural concept | NVIDIA Run:ai functionality for allocating portions of GPUs to workloads. | fractional GPUs |
 | `GPU memory limit` | Resource property | The maximum GPU memory available to a workload using dynamic GPU fractions. | GPU memory request |
 | `GPU memory request` | Resource property | The amount of GPU memory requested for a workload. | GPU memory limit |
-| `GPU time-slicing` | Resource-optimization concept | Sharing GPU compute time among workloads. | GPU fractions when compute time-sharing is intended |
+| `GPU compute mode` | Resource-optimization concept | How workloads sharing a GPU divide the GPU compute. Either time-slicing or SM-sharing. | GPU memory fraction |
+| `GPU memory fraction` | Resource-optimization concept | A portion of the GPU memory of a physical GPU allocated to a workload. | fractional GPU |
+| `SM-sharing` | Resource-optimization concept | A GPU compute mode in which workloads run concurrently on separate streaming multiprocessors. | MPS |
+| `time-slicing` | Resource-optimization concept | A GPU compute mode in which workloads take sequential turns on the GPU compute engines. | GPU fractions when compute sharing is intended |
 | `multi-GPU fractions` | Resource-optimization concept | Fractional allocations across multiple GPU devices. | multi GPU fractions |
 | `single-GPU fraction` | Resource-optimization concept | A fractional allocation from one GPU device. | single GPU fraction |
 
-Do not use `GPU fractions`, `dynamic GPU fractions`, and `GPU time-slicing` interchangeably.
+Do not use `GPU memory fractions`, `dynamic GPU memory fractions`, and `GPU compute modes` interchangeably. Memory fractions and compute modes are separate settings on a workload.
 
 ## Policies and Scheduling Rules
 

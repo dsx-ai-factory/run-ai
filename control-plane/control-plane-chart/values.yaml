@@ -4720,10 +4720,11 @@ bffService:
     distributionAssets:
       profile: cc
     docs:
-      baseUrl: https://run-ai-docs.nvidia.com/self-hosted
+      catalogVersion: v2
+      baseUrl: https://docs.nvidia.com/run-ai/self-hosted
       versioned: true
       whatsNew:
-        urlTemplate: "{docsBaseUrl}/getting-started/whats-new/whats-new"
+        urlTemplate: "{docsBaseUrl}/documentation/getting-started/whats-new/whats-new"
     support:
       url: ""
       label: ""

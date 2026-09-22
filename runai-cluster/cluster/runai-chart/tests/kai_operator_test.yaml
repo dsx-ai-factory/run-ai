@@ -1,7 +1,7 @@
 suite: Test upstream KAI operator
 
 templates:
-  - charts/kai-scheduler/templates/services/operator.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
 
 tests:
   - it: should render the pinned upstream KAI operator

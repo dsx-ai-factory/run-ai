@@ -18,7 +18,7 @@ tests:
       - templates/ocp/admission-webhooks.yaml
     asserts:
       - hasDocuments:
-          count: 6
+          count: 5
 
   - it: should retain the project validator after retiring the Secret/PVC webhook
     set:
