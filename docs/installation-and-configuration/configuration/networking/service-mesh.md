@@ -45,14 +45,3 @@ Example for [Istio Service Mesh](https://istio.io/latest/docs/setup/additional-s
 helm upgrade -i ... 
 --set-json global.additionalJobLabels='{"sidecar.istio.io/inject":false}'
 ```
-
-### Workloads
-
-To prevent sidecar injection in workloads created at runtime (such as training workloads), update the `runaiconfig` resource. See [Advanced cluster configurations](../cluster-config.md) for more details:
-
-```yaml
-spec:
-  workload-controller:
-    additionalPodLabels:
-      sidecar.istio.io/inject: false
-```
