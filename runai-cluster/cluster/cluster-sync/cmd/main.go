@@ -25,6 +25,7 @@ import (
 	kubeflowv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
 
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	resourcev1 "k8s.io/api/resource/v1"
 	apiruntime "k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -146,6 +147,7 @@ func initSchema() *apiruntime.Scheme {
 	addToScheme(grovev1alpha1.AddToScheme, "grove cluster topology")
 	addToScheme(kartav1alpha1.AddToScheme, "kai bolt resource interface")
 	addToScheme(nrtv1alpha2.AddToScheme, "node resource topology")
+	addToScheme(resourcev1.AddToScheme, "dra resource.k8s.io (device classes)")
 	return scheme
 }
 
@@ -203,6 +205,7 @@ func startWatchClients(kubeConfig *rest.Config, scheme *apiruntime.Scheme, ctx c
 	controllers.AddProjectHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddDepartmentHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddStorageClassHandlerToCache(runaiBackendClient, cachedClient)
+	controllers.AddDeviceClassHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddPriorityClassHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddNetworkTopologyHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddApplicationHandlerToCache(runaiBackendClient, cachedClient)
