@@ -27014,16 +27014,18 @@ components:
       example:
         code: 400
         message: Bad request - Resource should have a name
+    ReportingClusterId:
+      type: string
+      format: uuid
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
     StorageClass:
       type: object
       required:
         - storage_class_name
       properties:
         cluster_id:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storage_class_name:
           type: string
           description: Storage class name
@@ -27317,11 +27319,8 @@ components:
         - storageClassName
         - spec
       properties:
-        clusterId:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+        cluster_id:
+          $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string
           description: Storage class name

@@ -24,8 +24,8 @@ type StorageClassV2 struct {
 
 	// Cluster ID which has sent the resource info
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//ClusterId string `json:"clusterId"`
-	ClusterId string `json:"clusterId" gorm:"not null;"`
+	//ClusterId string `json:"cluster_id,omitempty"`
+	ClusterId string `json:"cluster_id,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Storage class name
@@ -53,7 +53,6 @@ type StorageClassV2 struct {
 // AssertStorageClassV2Required checks if the required fields are not zero-ed
 func AssertStorageClassV2Required(obj StorageClassV2) error {
 	elements := map[string]interface{}{
-		"clusterId":        obj.ClusterId,
 		"storageClassName": obj.StorageClassName,
 		"spec":             obj.Spec,
 	}

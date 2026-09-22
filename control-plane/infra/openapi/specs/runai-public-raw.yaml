@@ -47418,16 +47418,18 @@ components:
       items:
         $ref: '#/components/schemas/V1StorageClass'
       x-schema-name: StorageClasses
+    ReportingClusterId:
+      type: string
+      format: uuid
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
     StorageClass:
       type: object
       required:
         - storage_class_name
       properties:
         cluster_id:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storage_class_name:
           type: string
           description: Storage class name
@@ -47792,11 +47794,8 @@ components:
         - storageClassName
         - spec
       properties:
-        clusterId:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+        cluster_id:
+          $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string
           description: Storage class name
@@ -47816,6 +47815,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StorageClassV2'
+    DeviceClass:
+      type: object
+      required:
+        - device_class_name
+      properties:
+        cluster_id:
+          $ref: '#/components/schemas/ReportingClusterId'
+        device_class_name:
+          type: string
+          description: Device class name
+          example: gpu.nvidia.com
+    DeviceClasses:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceClass'
     ScopeClusterId:
       description: The ID of the cluster.
       type: string
@@ -59680,6 +59699,15 @@ components:
         - baseUrl
         - whatsNew
       properties:
+        catalogVersion:
+          type: string
+          enum:
+            - v1
+            - v2
+          default: v1
+          description: >-
+            Documentation path catalog. Defaults to v1 when omitted by an older
+            server.
         baseUrl:
           type: string
           description: Base URL used to resolve documentation links.

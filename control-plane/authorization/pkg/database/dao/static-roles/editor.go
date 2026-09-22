@@ -154,6 +154,13 @@ var Editor = models.Role{
 			Delete:       true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_DRA,
+			Create:       true,
+			Read:         true,
+			Update:       true,
+			Delete:       true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_CM_VOLUME_ASSETS,
 			Create:       true,
 			Read:         true,

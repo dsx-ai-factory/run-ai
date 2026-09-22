@@ -75,6 +75,7 @@ func isOrgType(resourceType api.ResourceType) bool {
 		api.RESOURCETYPE_TENANT,
 		api.RESOURCETYPE_DATAVOLUMES,
 		api.RESOURCETYPE_STORAGE_CLASS_CONFIGURATION,
+		api.RESOURCETYPE_DRA,
 		api.RESOURCETYPE_PVC_ASSETS:
 		return true
 	default:

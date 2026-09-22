@@ -1,0 +1,30 @@
+get:
+  summary: get device classes for a given cluster
+  operationId: get_device_classes
+  tags:
+    - Device Classes
+  x-audit: false
+  x-authorize:
+    resource-type: dra
+    action: read
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+    - $ref: '../parameters/query/optional/nameFilter.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/DeviceClass/DeviceClasses.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

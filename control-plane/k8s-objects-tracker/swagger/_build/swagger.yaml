@@ -2466,6 +2466,75 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/device-classes:
+    get:
+      summary: get device classes for a given cluster
+      operationId: get_device_classes
+      tags:
+        - Device Classes
+      x-audit: false
+      x-authorize:
+        resource-type: dra
+        action: read
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+        - $ref: '#/components/parameters/nameFilter'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClasses'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/device-classes/sync:
+    post:
+      summary: Sync cluster Device Classes
+      description: Use to sync cluster device classes
+      operationId: sync_device_class
+      x-authorize:
+        resource-type: dra
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-internal: true
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+      tags:
+        - Device Classes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClasses'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClasses'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/storage-class-configuration:
     get:
       summary: List storage class configurations
@@ -3371,16 +3440,18 @@ components:
       items:
         $ref: '#/components/schemas/V1StorageClass'
       x-schema-name: StorageClasses
+    ReportingClusterId:
+      type: string
+      format: uuid
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
     StorageClass:
       type: object
       required:
         - storage_class_name
       properties:
         cluster_id:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storage_class_name:
           type: string
           description: Storage class name
@@ -3708,11 +3779,8 @@ components:
         - storageClassName
         - spec
       properties:
-        clusterId:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+        cluster_id:
+          $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string
           description: Storage class name
@@ -3732,6 +3800,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StorageClassV2'
+    DeviceClass:
+      type: object
+      required:
+        - device_class_name
+      properties:
+        cluster_id:
+          $ref: '#/components/schemas/ReportingClusterId'
+        device_class_name:
+          type: string
+          description: Device class name
+          example: gpu.nvidia.com
+    DeviceClasses:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceClass'
     TenantId:
       description: The id of the tenant.
       type: integer

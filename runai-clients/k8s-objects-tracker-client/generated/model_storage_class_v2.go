@@ -25,7 +25,7 @@ var _ MappedNullable = &StorageClassV2{}
 // StorageClassV2 struct for StorageClassV2
 type StorageClassV2 struct {
 	// Cluster ID which has sent the resource info
-	ClusterId string `json:"clusterId"`
+	ClusterId *string `json:"cluster_id,omitempty"`
 	// Storage class name
 	StorageClassName string                            `json:"storageClassName"`
 	Spec             StorageClassSpec                  `json:"spec"`
@@ -39,9 +39,8 @@ type _StorageClassV2 StorageClassV2
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStorageClassV2(clusterId string, storageClassName string, spec StorageClassSpec) *StorageClassV2 {
+func NewStorageClassV2(storageClassName string, spec StorageClassSpec) *StorageClassV2 {
 	this := StorageClassV2{}
-	this.ClusterId = clusterId
 	this.StorageClassName = storageClassName
 	this.Spec = spec
 	return &this
@@ -55,28 +54,36 @@ func NewStorageClassV2WithDefaults() *StorageClassV2 {
 	return &this
 }
 
-// GetClusterId returns the ClusterId field value
+// GetClusterId returns the ClusterId field value if set, zero value otherwise.
 func (o *StorageClassV2) GetClusterId() string {
-	if o == nil {
+	if o == nil || IsNil(o.ClusterId) {
 		var ret string
 		return ret
 	}
-
-	return o.ClusterId
+	return *o.ClusterId
 }
 
-// GetClusterIdOk returns a tuple with the ClusterId field value
+// GetClusterIdOk returns a tuple with the ClusterId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *StorageClassV2) GetClusterIdOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ClusterId) {
 		return nil, false
 	}
-	return &o.ClusterId, true
+	return o.ClusterId, true
 }
 
-// SetClusterId sets field value
+// HasClusterId returns a boolean if a field has been set.
+func (o *StorageClassV2) HasClusterId() bool {
+	if o != nil && !IsNil(o.ClusterId) {
+		return true
+	}
+
+	return false
+}
+
+// SetClusterId gets a reference to the given string and assigns it to the ClusterId field.
 func (o *StorageClassV2) SetClusterId(v string) {
-	o.ClusterId = v
+	o.ClusterId = &v
 }
 
 // GetStorageClassName returns the StorageClassName field value
@@ -223,7 +230,9 @@ func (o StorageClassV2) MarshalJSON() ([]byte, error) {
 
 func (o StorageClassV2) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["clusterId"] = o.ClusterId
+	if !IsNil(o.ClusterId) {
+		toSerialize["cluster_id"] = o.ClusterId
+	}
 	toSerialize["storageClassName"] = o.StorageClassName
 	toSerialize["spec"] = o.Spec
 	if o.Permissions.IsSet() {
@@ -242,7 +251,6 @@ func (o *StorageClassV2) UnmarshalJSON(data []byte) (err error) {
 	// RUNAI
 	// requiredProperties := []string{
 	//
-	//  	"clusterId",
 	//  	"storageClassName",
 	//  	"spec",
 	// }

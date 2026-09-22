@@ -99,6 +99,10 @@ var Viewer = models.Role{
 			Read:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_DRA,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_CM_VOLUME_ASSETS,
 			Read:         true,
 		},

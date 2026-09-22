@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**ClusterId** | **string** | Cluster ID which has sent the resource info | 
+**ClusterId** | Pointer to **string** | Cluster ID which has sent the resource info | [optional] 
 **StorageClassName** | **string** | Storage class name | 
 **Spec** | [**StorageClassSpec**](StorageClassSpec.md) |  | 
 **Permissions** | Pointer to [**NullableStorageClassPermissions**](StorageClassPermissions.md) |  | [optional] 
@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewStorageClassV2
 
-`func NewStorageClassV2(clusterId string, storageClassName string, spec StorageClassSpec, ) *StorageClassV2`
+`func NewStorageClassV2(storageClassName string, spec StorageClassSpec, ) *StorageClassV2`
 
 NewStorageClassV2 instantiates a new StorageClassV2 object
 This constructor will assign default values to properties that have it defined,
@@ -48,6 +48,11 @@ and a boolean to check if the value has been set.
 
 SetClusterId sets ClusterId field to given value.
 
+### HasClusterId
+
+`func (o *StorageClassV2) HasClusterId() bool`
+
+HasClusterId returns a boolean if a field has been set.
 
 ### GetStorageClassName
 

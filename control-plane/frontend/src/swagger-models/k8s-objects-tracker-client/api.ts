@@ -331,6 +331,38 @@ export interface CreateClusterWidePvcV1Request {
     'unused'?: string | null;
 }
 /**
+ * 
+ * @export
+ * @interface DeviceClass
+ */
+export interface DeviceClass {
+    /**
+     * Cluster ID which has sent the resource info
+     * @type {string}
+     * @memberof DeviceClass
+     */
+    'cluster_id'?: string;
+    /**
+     * Device class name
+     * @type {string}
+     * @memberof DeviceClass
+     */
+    'device_class_name': string;
+}
+/**
+ * 
+ * @export
+ * @interface DeviceClasses
+ */
+export interface DeviceClasses {
+    /**
+     * 
+     * @type {Array<DeviceClass>}
+     * @memberof DeviceClasses
+     */
+    'items': Array<DeviceClass>;
+}
+/**
  * an issue that was found while syncing the resource
  * @export
  * @interface Issue
@@ -1298,7 +1330,7 @@ export interface StorageClassV2 {
      * @type {string}
      * @memberof StorageClassV2
      */
-    'clusterId': string;
+    'cluster_id'?: string;
     /**
      * Storage class name
      * @type {string}
@@ -2532,6 +2564,209 @@ export class ConfigMapsApi extends BaseAPI {
      */
     public syncProjectsConfigmapsV1(clusterUuid: string, namespace: string, configMaps: ConfigMaps, options?: AxiosRequestConfig) {
         return ConfigMapsApiFp(this.configuration).syncProjectsConfigmapsV1(clusterUuid, namespace, configMaps, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * DeviceClassesApi - axios parameter creator
+ * @export
+ */
+export const DeviceClassesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary get device classes for a given cluster
+         * @param {string} clusterId The id of the cluster
+         * @param {string} [name] filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getDeviceClasses: async (clusterId: string, name?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('getDeviceClasses', 'clusterId', clusterId)
+            const localVarPath = `/api/v1/device-classes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to sync cluster device classes
+         * @summary Sync cluster Device Classes
+         * @param {string} clusterId The id of the cluster
+         * @param {DeviceClasses} deviceClasses 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        syncDeviceClass: async (clusterId: string, deviceClasses: DeviceClasses, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('syncDeviceClass', 'clusterId', clusterId)
+            // verify required parameter 'deviceClasses' is not null or undefined
+            assertParamExists('syncDeviceClass', 'deviceClasses', deviceClasses)
+            const localVarPath = `/api/v1/device-classes/sync`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(deviceClasses, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * DeviceClassesApi - functional programming interface
+ * @export
+ */
+export const DeviceClassesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = DeviceClassesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary get device classes for a given cluster
+         * @param {string} clusterId The id of the cluster
+         * @param {string} [name] filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getDeviceClasses(clusterId: string, name?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeviceClasses>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getDeviceClasses(clusterId, name, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to sync cluster device classes
+         * @summary Sync cluster Device Classes
+         * @param {string} clusterId The id of the cluster
+         * @param {DeviceClasses} deviceClasses 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async syncDeviceClass(clusterId: string, deviceClasses: DeviceClasses, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeviceClasses>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.syncDeviceClass(clusterId, deviceClasses, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * DeviceClassesApi - factory interface
+ * @export
+ */
+export const DeviceClassesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = DeviceClassesApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary get device classes for a given cluster
+         * @param {string} clusterId The id of the cluster
+         * @param {string} [name] filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getDeviceClasses(clusterId: string, name?: string, options?: any): AxiosPromise<DeviceClasses> {
+            return localVarFp.getDeviceClasses(clusterId, name, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to sync cluster device classes
+         * @summary Sync cluster Device Classes
+         * @param {string} clusterId The id of the cluster
+         * @param {DeviceClasses} deviceClasses 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        syncDeviceClass(clusterId: string, deviceClasses: DeviceClasses, options?: any): AxiosPromise<DeviceClasses> {
+            return localVarFp.syncDeviceClass(clusterId, deviceClasses, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * DeviceClassesApi - object-oriented interface
+ * @export
+ * @class DeviceClassesApi
+ * @extends {BaseAPI}
+ */
+export class DeviceClassesApi extends BaseAPI {
+    /**
+     * 
+     * @summary get device classes for a given cluster
+     * @param {string} clusterId The id of the cluster
+     * @param {string} [name] filter by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceClassesApi
+     */
+    public getDeviceClasses(clusterId: string, name?: string, options?: AxiosRequestConfig) {
+        return DeviceClassesApiFp(this.configuration).getDeviceClasses(clusterId, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to sync cluster device classes
+     * @summary Sync cluster Device Classes
+     * @param {string} clusterId The id of the cluster
+     * @param {DeviceClasses} deviceClasses 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceClassesApi
+     */
+    public syncDeviceClass(clusterId: string, deviceClasses: DeviceClasses, options?: AxiosRequestConfig) {
+        return DeviceClassesApiFp(this.configuration).syncDeviceClass(clusterId, deviceClasses, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
