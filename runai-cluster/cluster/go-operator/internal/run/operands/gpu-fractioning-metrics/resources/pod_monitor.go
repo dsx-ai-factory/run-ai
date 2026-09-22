@@ -46,9 +46,9 @@ func PodMonitorForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 		return nil, err
 	}
 
-	podMonitor.ObjectMeta.Name = name
-	podMonitor.ObjectMeta.Namespace = namespace
-	podMonitor.ObjectMeta.Labels = map[string]string{
+	podMonitor.Name = name
+	podMonitor.Namespace = namespace
+	podMonitor.Labels = map[string]string{
 		"app": name,
 	}
 

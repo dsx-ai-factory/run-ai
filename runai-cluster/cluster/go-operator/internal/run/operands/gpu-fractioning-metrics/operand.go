@@ -6,7 +6,7 @@
 package gpu_fractioning_metrics
 
 import (
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/gpu-fractioning-metrics/resources"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
