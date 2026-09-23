@@ -5,7 +5,6 @@ go 1.27.1
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/Nerzal/gocloak/v13 v13.9.0
-	github.com/Nerzal/gocloak/v14 v14.0.4
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
