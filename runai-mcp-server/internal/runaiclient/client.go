@@ -16,11 +16,11 @@ import (
 	clusterservice "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	identity "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	workloads "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	assets "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	catalog "github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client/generated"
 	datavolumes "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
 	policy "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloads "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	workloadsv2 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/auth"
