@@ -89,6 +89,11 @@ func enqueueWorkloadsForWorkloadRunner(ctx context.Context, cachedClient client.
 		return
 	}
 
+	if len(ewList.Items) == 0 {
+		enqueueRunnerWithoutWorkloadObject(handler, wlr)
+		return
+	}
+
 	for i := range ewList.Items {
 		ew := &ewList.Items[i]
 		if ew.Spec.OriginalWorkloadName == "" {
@@ -139,4 +144,26 @@ func statusInputSignature(wlr *dromosv1alpha1.WorkloadRunner) string {
 	}
 	sort.Strings(parts)
 	return strings.Join(parts, "\x01")
+}
+
+// runnerFailedPhases are the phases dromos reports once the workload object is not coming:
+// Failed when it is missing, Degraded on a critical issue, Unknown when prerequisites fail.
+var runnerFailedPhases = map[dromosv1alpha1.WorkloadRunnerPhase]bool{
+	dromosv1alpha1.WorkloadRunnerPhaseFailed:   true,
+	dromosv1alpha1.WorkloadRunnerPhaseDegraded: true,
+	dromosv1alpha1.WorkloadRunnerPhaseUnknown:  true,
+}
+
+// enqueueRunnerWithoutWorkloadObject reports a failed runner that never produced a workload
+// object, which would otherwise leave the workload invisible in the control plane.
+func enqueueRunnerWithoutWorkloadObject(handler *ExternalWorkloadHandler, wlr *dromosv1alpha1.WorkloadRunner) {
+	if !runnerFailedPhases[wlr.Status.Phase] {
+		return
+	}
+
+	key := types.NamespacedName{Name: wlr.Name, Namespace: wlr.Namespace}
+	task := utils.NewExternalWorkloadTask(utils.CreateFromRunnerOperation, key,
+		dromosv1alpha1.SchemeGroupVersion.WithKind(dromosv1alpha1.WorkloadRunnerKind)).
+		SetWorkloadRunnerName(wlr.Name)
+	handler.tasksQueue.Add(*task)
 }

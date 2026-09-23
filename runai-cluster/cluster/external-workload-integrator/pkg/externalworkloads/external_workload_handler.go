@@ -1236,3 +1236,12 @@ func fillTopology(annotations map[string]string, externalWorkload *v1alpha1.Exte
 	externalWorkload.Spec.Topology.PreferredPlacement = topologyPreferred
 	externalWorkload.Spec.Topology.RequiredPlacement = topologyRequired
 }
+
+// handleWorkloadRunnerWithoutObject is the entry point for a runner whose workload object was
+// never created. Step 2 builds the ExternalWorkload; for now the task is accepted and logged.
+func (h *ExternalWorkloadHandler) handleWorkloadRunnerWithoutObject(_ context.Context,
+	task utils.ExternalWorkloadTask,
+) {
+	log.Debug().Msgf("WorkloadRunner <%s/%s> has no workload object and no externalworkload",
+		task.Key.Namespace, task.WorkloadRunnerName)
+}

@@ -19,6 +19,9 @@ const (
 	AddOperation    TaskOperation = "add"
 	UpdateOperation TaskOperation = "update"
 	DeleteOperation TaskOperation = "delete"
+	// CreateFromRunnerOperation builds an ExternalWorkload from the runner alone, for a
+	// workload object that was never created
+	CreateFromRunnerOperation TaskOperation = "createFromRunner"
 )
 
 type TaskPayload[T client.Object] interface {
@@ -36,6 +39,9 @@ type ExternalWorkloadTask struct {
 	// set when the task was enqueued for a known ExternalWorkload, so it can still be found
 	// when the workload object it describes is gone
 	ExternalWorkloadName string
+
+	// set when the task is keyed on the runner rather than the workload object
+	WorkloadRunnerName string
 }
 
 func NewExternalWorkloadTask(operation TaskOperation, key types.NamespacedName, gvk schema.GroupVersionKind) *ExternalWorkloadTask {
@@ -54,6 +60,11 @@ func (ew *ExternalWorkloadTask) SetObject(obj client.Object) *ExternalWorkloadTa
 
 func (ew *ExternalWorkloadTask) SetExternalWorkloadName(ewName string) *ExternalWorkloadTask {
 	ew.ExternalWorkloadName = ewName
+	return ew
+}
+
+func (ew *ExternalWorkloadTask) SetWorkloadRunnerName(name string) *ExternalWorkloadTask {
+	ew.WorkloadRunnerName = name
 	return ew
 }
 

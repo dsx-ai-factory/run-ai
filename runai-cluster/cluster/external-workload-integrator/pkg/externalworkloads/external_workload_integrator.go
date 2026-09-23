@@ -152,6 +152,8 @@ func processNextItem(ctx context.Context, ewh *ExternalWorkloadHandler) bool {
 		ewh.handleTask(ctx, obj, task, ewh.HandleWorkloadAddUpdateEvent, utils.AddOperation)
 	case string(utils.DeleteOperation):
 		ewh.handleTask(ctx, task.Object, task, ewh.HandleDeleteEvent, utils.DeleteOperation)
+	case string(utils.CreateFromRunnerOperation):
+		ewh.handleWorkloadRunnerWithoutObject(ctx, task)
 	case string(utils.UpdateOperation):
 		obj, err := ewh.GetFreshObject(ctx, task.Key, task.GVK)
 		if err != nil || utils.IsObjectNilOrEmpty(obj) {
