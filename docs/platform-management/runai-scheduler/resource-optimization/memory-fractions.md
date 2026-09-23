@@ -218,7 +218,7 @@ GPU memory fractions can be assigned to only one container in the pod. An annota
     namespace: test
   spec:
     containers:
-    - image: gcr.io/run-ai-demo/quickstart-cuda
+    - image: <image>
       imagePullPolicy: Always
       name: app
       resources:
