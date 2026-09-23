@@ -2,11 +2,15 @@
 
 NVIDIA Run:ai defines workload priority and preemptibility to determine how workloads are scheduled within a project. These mechanisms influence scheduling order, resource allocation, and whether running workloads may be interrupted when higher-priority workloads require resources.
 
-* **Workload priority** - Determines the workload's position in the project scheduling queue managed by the NVIDIA Run:ai [Scheduler](how-the-scheduler-works.md). By adjusting the priority, you can increase the likelihood that a workload will be scheduled and preferred over others within the same project, ensuring that critical tasks are given higher priority and resources are allocated efficiently.
+## How Priority and Preemptibility Work
+
+* **Workload priority** - Determines the workload's position in the project scheduling queue managed by the NVIDIA Run:ai Scheduler. By adjusting the priority, you can increase the likelihood that a workload will be scheduled and preferred over others within the same project, ensuring that critical tasks are given higher priority and resources are allocated efficiently.
 * **Workload preemptibility** - Determines the workload's resource usage policy and its guarantee against interruption:
   * Preemptible workloads can use opportunistic resources beyond the project’s quota and may be interrupted at any time by higher priority workload, even if running within the project's quota.
-  * Semi-preemptible workloads guarantee their minimum required replicas run without interruption. Any replicas beyond that minimum behave as preemptible replicas - they can use opportunistic resources beyond the project's quota, and may be interrupted at any time by a higher priority workload.
+  * Semi-preemptible workloads guarantee their minimum required replicas run within the project's deserved quota and are not interrupted. Any replicas beyond that minimum behave as preemptible replicas - they can use opportunistic resources beyond the project's quota, and may be interrupted at any time by a higher priority workload.
   * Non-preemptible workloads must run within the project’s deserved quota, cannot use over-quota resources, and will not be interrupted once scheduled.
+
+Refer to the [NVIDIA Run:ai Scheduler: Concepts and Principles](concepts-and-principles.md#priority-and-preemption) doc for more information.
 
 <Info>
 
