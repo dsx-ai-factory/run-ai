@@ -60,7 +60,7 @@ Day 2 covers the ongoing operational tasks that keep NVIDIA Run:ai healthy and y
 
 ### Upgrades
 
-Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. To upgrade NVIDIA Run:ai, see [Upgrade](upgrade/helm.md).
+Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. To upgrade NVIDIA Run:ai, see [Plan the Upgrade](upgrade/plan-the-upgrade.md).
 
 ## Understanding Installation
 
@@ -137,7 +137,7 @@ NVIDIA Run:ai supports three installation paths. Choose based on your tooling, e
 
 During installation, NVIDIA Run:ai pulls platform images, Helm charts, and third-party service images from different sources depending on whether you use Open Source or NVIDIA Run:ai Support-Entitled, and your environment. Understanding these sources helps you plan network access, registry credentials, and air-gapped deployments.
 
-* **NVIDIA Run:ai platform images and Helm charts** are published to NVIDIA NGC. Open Source installations access them without credentials. NVIDIA Run:ai Support-Entitled installations require an NGC API key. Organizations that mirror artifacts to an internal registry (for example, JFrog Artifactory) can configure the installer or Helm charts to pull from that registry instead.
+* **NVIDIA Run:ai platform images and Helm charts** are published to NVIDIA NGC. Open Source installations access them without credentials. NVIDIA Run:ai Support-Entitled installations require an NGC API key. Organizations that mirror artifacts to an internal registry can configure the installer or Helm charts to pull from that registry instead.
 
 * **Third-party service images** (PostgreSQL, Keycloak, and others) are pulled from their official upstream registries on Docker Hub, Quay, and the Kubernetes registry (`registry.k8s.io`) for Open Source and NVIDIA Run:ai Support-Entitled installations.
 

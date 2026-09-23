@@ -192,7 +192,7 @@ To configure SR-IOV InfiniBand support, set the required values via `customHelmV
 
 When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html) is required to enable Dynamic Resource Allocation at the Kubernetes level. The DRA driver is installed with the GPU Operator, for both connected and air-gapped installations.
 
-After the DRA driver is installed, update the cluster configuration using the `GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai workload controller deployment and restarts the controller. Set it via `cluster.customHelmValues` in the installer's configuration file - see [Custom Helm Values](#custom-helm-values) above - or, outside the guided installer, via Helm or `runaiconfig` as described in [Advanced cluster configurations](../../configuration/cluster-config.md).
+After the DRA driver is installed, update the cluster configuration using the `anyworkload-controller.GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai `anyworkload-controller` deployment and restarts the controller. Set it via `cluster.customHelmValues` in the installer's configuration file - see [Custom Helm Values](#custom-helm-values) above - or, outside the guided installer, via Helm or `runaiconfig` as described in [Advanced cluster configurations](../../configuration/cluster-config.md).
 
 ### Prometheus
 

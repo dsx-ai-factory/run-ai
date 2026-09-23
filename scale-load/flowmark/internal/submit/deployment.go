@@ -16,6 +16,8 @@ import (
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const runaiScheduler = "runai-scheduler"
+
 type DeploymentSpec struct {
 	Name      string
 	Namespace string
@@ -45,7 +47,10 @@ func deploymentObject(spec DeploymentSpec) *appsv1.Deployment {
 			Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"app": spec.Name}},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{Labels: podLabels},
-				Spec:       corev1.PodSpec{Containers: []corev1.Container{{Name: "main", Image: spec.Image}}},
+				Spec: corev1.PodSpec{
+					SchedulerName: runaiScheduler,
+					Containers:    []corev1.Container{{Name: "main", Image: spec.Image}},
+				},
 			},
 		},
 	}

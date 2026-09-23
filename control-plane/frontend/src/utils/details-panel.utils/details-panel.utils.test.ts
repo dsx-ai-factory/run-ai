@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import type { IDetailsPanelItem } from "@/models/details-panel.model";
+import type { IDetailsPanelItem, IDetailsPanelTopology } from "@/models/details-panel.model";
 import {
   filterItem,
   filterItems,
@@ -12,6 +12,10 @@ import {
   filterObjects,
   objectMatchesTerm,
   matchesItem,
+  matchAnyItem,
+  filterDefined,
+  topologyMatches,
+  defineSection,
   filterItemsByTerm,
 } from "@/utils/details-panel.utils";
 
@@ -184,5 +188,62 @@ describe("filterItemsByTerm (deprecated alias)", () => {
   it("delegates to filterItems", () => {
     const items = [item({ label: "Project", value: "p100" }), item({ label: "Cluster", value: "us-east" })];
     expect(filterItemsByTerm(items, "p100")).toEqual([items[0]]);
+  });
+});
+
+describe("matchAnyItem", () => {
+  it("returns true when at least one item matches", () => {
+    const items = [item({ label: "Project", value: "p100" }), item({ label: "Cluster", value: "us-east" })];
+    expect(matchAnyItem(items, "east")).toBe(true);
+  });
+
+  it("returns false when no item matches", () => {
+    const items = [item({ label: "Project", value: "p100" }), item({ label: "Cluster", value: "us-east" })];
+    expect(matchAnyItem(items, "zzz")).toBe(false);
+  });
+});
+
+describe("filterDefined", () => {
+  it("drops null and undefined entries", () => {
+    expect(filterDefined([1, null, 2, undefined, 3])).toEqual([1, 2, 3]);
+  });
+
+  it("returns an empty array when everything is null/undefined", () => {
+    expect(filterDefined([null, undefined])).toEqual([]);
+  });
+});
+
+describe("topologyMatches", () => {
+  const topology: IDetailsPanelTopology = { name: "my-gb200-topology", requiredPlacement: "region" };
+
+  it("matches against the topology's own fields", () => {
+    expect(topologyMatches(topology, ["region", "zone"], "gb200")).toBe(true);
+  });
+
+  it("matches against the given levels", () => {
+    expect(topologyMatches(topology, ["region", "zone"], "zone")).toBe(true);
+  });
+
+  it("returns false when nothing matches", () => {
+    expect(topologyMatches(topology, ["region", "zone"], "zzz")).toBe(false);
+  });
+});
+
+describe("defineSection", () => {
+  const def = { id: "compute", title: "Compute" };
+  const customMatch = () => true;
+
+  it("returns undefined when isEmpty is true", () => {
+    expect(defineSection(def, { isEmpty: true, data: { items: [] }, customMatch })).toBeUndefined();
+  });
+
+  it("builds the section-def shape when isEmpty is false", () => {
+    const data = { items: [item()] };
+    expect(defineSection(def, { isEmpty: false, data, customMatch })).toEqual({
+      id: "compute",
+      title: "Compute",
+      data,
+      customMatch,
+    });
   });
 });

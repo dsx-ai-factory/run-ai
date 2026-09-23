@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/s3
 go 1.27.1
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/minio/minio-go/v7 v7.3.0
 )
 

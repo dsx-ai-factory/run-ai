@@ -5,11 +5,11 @@ go 1.27.1
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/MicahParks/keyfunc/v3 v3.8.2
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.17
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0-00010101000000-000000000000

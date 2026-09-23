@@ -6,8 +6,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3 h1:m1zQsIJPsIl5u8wgmL5vhWy9PvB0o4Xd6mXSDMw/VCk=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3/go.mod h1:Fv0cg09zVJrbxG2pkpzQS+pgI7RwMKzsyAXSMTtAnag=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 h1:SfZn20bgPhC83dt7ftKpxKqpXYdT5E+kGMNyAG4GghQ=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4/go.mod h1:sDp7mJn5tIM3Pg6YtuOfaY482uLxZRt+wSsCDIz6p4g=
 github.com/emicklei/go-restful/v3 v3.13.0 h1:C4Bl2xDndpU6nJ4bc1jXd+uTmYPVUwkD6bFY/oTyCes=
 github.com/emicklei/go-restful/v3 v3.13.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=

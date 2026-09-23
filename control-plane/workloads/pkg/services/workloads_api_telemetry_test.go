@@ -117,12 +117,12 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("department filter with one group", func() {
 			var groups []string
 			groups = append(groups, CurrentNodepools)
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, "", "", "1", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, "", "", "1", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
 		})
 		It("nodepool filter", func() {
 			var groups []string
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "lala", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "lala", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION)))
@@ -136,7 +136,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			var groups []string
 			groups = append(groups, DepartmentId, Type)
 			Eventually(func(g Gomega) {
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "", "", "", groups, []api.Phase{})
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "", "", "", groups, []api.Phase{}, nil)
 				g.Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				g.Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION)))
@@ -148,7 +148,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("group by category", func() {
 			var groups []string
 			groups = append(groups, Category)
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION)))
@@ -163,7 +163,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 	Context("workload count", func() {
 		It("department filter", func() {
 			var groups []string
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "1", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "1", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -176,7 +176,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("project filter", func() {
 			var groups []string
 			// DefaultProjectId has 5 workloads on cluster1
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -186,7 +186,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			Expect(telemetryValues[0].Groups).To(BeNil())
 
 			// AnotherProjectId has 6 workloads on cluster2
-			apiResponse, _ = workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", AnotherProjectId, groups, []api.Phase{})
+			apiResponse, _ = workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", AnotherProjectId, groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry = httpResponseBodyToTelemetryResponse(apiResponse)
 			telemetryValues = telemetry.Values
@@ -197,7 +197,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			var groups []string
 			groups = append(groups, Type, DepartmentId)
 			Eventually(func(g Gomega) {
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{})
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{}, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -226,7 +226,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("cluster filter with one group", func() {
 			var groups []string
 			groups = append(groups, DepartmentId)
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -248,13 +248,13 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("cluster filter with bad group", func() {
 			var groups []string
 			groups = append(groups, "Name")
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
 		})
 		It("cluster filter with projectId group", func() {
 			var groups []string
 			groups = append(groups, ProjectId)
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -271,7 +271,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("cluster filter with phase group", func() {
 			var groups []string
 			groups = append(groups, Phase)
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -288,12 +288,12 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("nodepool filter with clusterId group", func() {
 			var groups []string
 			groups = append(groups, ClusterId)
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", DefaultNodepool, "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", DefaultNodepool, "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
 		})
 		It("department bad filter", func() {
 			var groups []string
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "21", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "21", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -355,7 +355,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("cluster filter without groups", func() {
 			var groups []string
 			Eventually(func(g Gomega) {
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, []api.Phase{})
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, []api.Phase{}, nil)
 				g.Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				g.Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS)))
@@ -371,7 +371,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			var groups []string
 			groups = append(groups, DepartmentId)
 			Eventually(func(g Gomega) {
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, []api.Phase{})
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, []api.Phase{}, nil)
 				g.Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				g.Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS)))
@@ -395,7 +395,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			var groups []string
 			groups = append(groups, Type)
 			Eventually(func(g Gomega) {
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, []api.Phase{})
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, []api.Phase{}, nil)
 				g.Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				g.Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS)))
@@ -408,7 +408,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("department filter", func() {
 			var groups []string
 			Eventually(func(g Gomega) {
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, "", "", "1", "", groups, []api.Phase{})
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, "", "", "1", "", groups, []api.Phase{}, nil)
 				g.Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				g.Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS)))
@@ -422,7 +422,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 
 		It("nodepool filter with zero result", func() {
 			var groups []string
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "non-existent-nodepool", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "non-existent-nodepool", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS)))
@@ -437,7 +437,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			var groups []string
 			phases := []api.Phase{api.PHASE_RUNNING}
 			Eventually(func(g Gomega) {
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, phases, nil)
 				g.Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				g.Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS)))
@@ -451,7 +451,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("phase filter - Failed returns zero", func() {
 			var groups []string
 			phases := []api.Phase{api.PHASE_FAILED}
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, phases)
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, phases, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 			Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS)))
@@ -464,14 +464,14 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("invalid phase returns error", func() {
 			var groups []string
 			phases := []api.Phase{api.Phase("InvalidPhase")}
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, phases)
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, phases, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
 		})
 
 		It("bad group returns error", func() {
 			var groups []string
 			groups = append(groups, "InvalidGroup")
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS, testing.ClusterUuid1, "", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
 		})
 	})
@@ -486,7 +486,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		It("nodepool filter with 2 groups", func() {
 			var groups []string
 			groups = append(groups, Type, DepartmentId)
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			csvFile := apiResponse.Body.(runaihttp.CsvFile)
 			telemetry := csvFile.Data
@@ -510,7 +510,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		})
 		It("department filter", func() {
 			var groups []string
-			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "1", "", groups, []api.Phase{})
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "1", "", groups, []api.Phase{}, nil)
 			Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			csvFile := apiResponse.Body.(runaihttp.CsvFile)
 			telemetry := csvFile.Data
@@ -526,7 +526,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			It("should filter by single phase - Running", func() {
 				var groups []string
 				phases := []api.Phase{api.PHASE_RUNNING}
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -539,7 +539,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			It("should filter by multiple phases - Running and Failed", func() {
 				var groups []string
 				phases := []api.Phase{api.PHASE_RUNNING, api.PHASE_FAILED}
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -552,7 +552,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			It("should return empty result for non-existent phase", func() {
 				var groups []string
 				phases := []api.Phase{api.PHASE_FAILED}
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -566,7 +566,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 				var groups []string
 				groups = append(groups, Phase)
 				phases := []api.Phase{api.PHASE_RUNNING}
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -583,7 +583,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			It("should return all phases when no phase filter is provided", func() {
 				var groups []string
 				phases := []api.Phase{} // Empty phases array
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT)))
@@ -598,7 +598,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			It("should filter by single phase - Running", func() {
 				var groups []string
 				phases := []api.Phase{api.PHASE_RUNNING}
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION)))
@@ -612,7 +612,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			It("should return zero allocation for non-existent phase", func() {
 				var groups []string
 				phases := []api.Phase{api.PHASE_FAILED}
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 				telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 				Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION)))
@@ -627,14 +627,14 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			It("should return error for invalid phase", func() {
 				var groups []string
 				phases := []api.Phase{api.Phase("InvalidPhase")}
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
 			})
 
 			It("should accept valid phases", func() {
 				var groups []string
 				phases := []api.Phase{api.PHASE_RUNNING, api.PHASE_PENDING, api.PHASE_FAILED}
-				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases)
+				apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, testing.ClusterUuid2, "", "", "", groups, phases, nil)
 				Expect(apiResponse.Code).To(Equal(http.StatusOK))
 			})
 		})
@@ -746,6 +746,87 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 
 		})
 	})
+
+	Context("internal telemetry", func() {
+		It("returns the same result as the public endpoint", func() {
+			var groups []string
+			publicResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, groups, []api.Phase{}, nil)
+			internalResponse, _ := workloadsService.GetInternalWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, groups, []api.Phase{}, nil)
+
+			Expect(internalResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(internalResponse).Values).
+				To(Equal(httpResponseBodyToTelemetryResponse(publicResponse).Values))
+		})
+
+		It("ignores the caller's permitted scopes", func() {
+			var groups []string
+			scopedCtx := testing.SetProjectContext(testing.TestTenant, testing.TestUser, []string{}, DefaultProjectId)
+
+			unscopedResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", AnotherProjectId, groups, []api.Phase{}, nil)
+			Expect(unscopedResponse.Code).To(Equal(http.StatusOK))
+			unscopedCount := httpResponseBodyToTelemetryResponse(unscopedResponse).Values[0].Value
+			Expect(unscopedCount).NotTo(Equal("0"))
+
+			publicResponse, _ := workloadsService.GetWorkloadsTelemetry(scopedCtx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", AnotherProjectId, groups, []api.Phase{}, nil)
+			Expect(publicResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(publicResponse).Values[0].Value).To(Equal("0"))
+
+			internalResponse, _ := workloadsService.GetInternalWorkloadsTelemetry(scopedCtx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", AnotherProjectId, groups, []api.Phase{}, nil)
+			Expect(internalResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(internalResponse).Values[0].Value).To(Equal(unscopedCount))
+		})
+
+		It("still validates the request", func() {
+			apiResponse, _ := workloadsService.GetInternalWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "1", "", []string{CurrentNodepools}, []api.Phase{}, nil)
+			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
+		})
+	})
+
+	Context("group by source", func() {
+		It("groups workload count by source", func() {
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, []string{Source}, []api.Phase{}, nil)
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
+			telemetryValues := telemetry.Values
+			Expect(len(telemetryValues)).To(Equal(1))
+			Expect(telemetryValues[0].Groups).To(HaveLen(1))
+			Expect(telemetryValues[0].Groups[0].Key).To(Equal(Source))
+			Expect(telemetryValues[0].Groups[0].Value).To(Equal(string(DefaultSource)))
+		})
+	})
+
+	Context("filter by createdAt", func() {
+		It("returns everything for a window that covers all workloads", func() {
+			unfiltered, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, nil)
+			Expect(unfiltered.Code).To(Equal(http.StatusOK))
+			expected := httpResponseBodyToTelemetryResponse(unfiltered).Values[0].Value
+			Expect(expected).NotTo(Equal("0"))
+
+			filtered, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"createdAt>=2000-01-01T00:00:00Z"})
+			Expect(filtered.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(filtered).Values[0].Value).To(Equal(expected))
+		})
+
+		It("excludes workloads created outside the window", func() {
+			future := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"createdAt>=" + future})
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(apiResponse).Values[0].Value).To(Equal("0"))
+		})
+
+		It("applies to the internal endpoint too", func() {
+			future := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
+			apiResponse, _ := workloadsService.GetInternalWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"createdAt>=" + future})
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(apiResponse).Values[0].Value).To(Equal("0"))
+		})
+
+		It("rejects a malformed filter value", func() {
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"createdAt>=not-a-date"})
+			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
+		})
+	})
+
 })
 
 func validateClusterFilterAllocation(g Gomega, telemetryValues []api.TelemetryResponseValuesInner) {
@@ -884,7 +965,7 @@ func createPendingWorkloads(ctx context.Context, service api.WorkloadsAPIService
 }
 
 func getPendingTimeDistributionWithFilters(ctx context.Context, service api.WorkloadsAPIServicer, g Gomega, clusterId, nodepoolName, departmentId string, groups []string) []api.TelemetryResponseValuesInner {
-	apiResponse, _ := service.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_PENDING_TIME_DISTRIBUTION, clusterId, nodepoolName, departmentId, "", groups, []api.Phase{})
+	apiResponse, _ := service.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_PENDING_TIME_DISTRIBUTION, clusterId, nodepoolName, departmentId, "", groups, []api.Phase{}, nil)
 	g.Expect(apiResponse.Code).To(Equal(http.StatusOK))
 	telemetry := httpResponseBodyToTelemetryResponse(apiResponse)
 	g.Expect(telemetry.Type).To(Equal(string(api.WORKLOADTELEMETRYTYPE_PENDING_TIME_DISTRIBUTION)))
