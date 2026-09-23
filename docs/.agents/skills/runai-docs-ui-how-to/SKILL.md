@@ -22,8 +22,8 @@ Before drafting anything:
    in full — this is your structural reference.
 4. Read `docs/AGENTS.md` for writing rules, Fern components, and terminology.
 
-Document only what the code and API spec confirm. Mark anything unverifiable
-as `<!-- TODO: verify with engineering -->`.
+Document only what the code and API spec confirm. Anything you cannot verify
+needs verification before it's included.
 
 ## Page to Create
 
@@ -43,30 +43,21 @@ pattern exactly:
   - Additional sections for any other flows (scheduling rules, access rules,
     policies, metrics)
 - Use `<Warning>` for destructive actions and important caveats — never plain text
-- Use `<Info>` for notes about defaults, limits, or constraints — never plain text
+- Use `<Note>` for notes about defaults, limits, or constraints — never plain text
 - Bold all UI element names: **+NEW RESOURCE**, **SAVE**, **DELETE**
-- **`## Using CLI`** at the end: one line linking to the CLI reference page in `docs/reference/cli/`, if a CLI command exists for this resource. Only include if confirmed in the code.
-- **`## Using API`** after Using CLI: one line linking to the API reference, if the resource has an API.
+- **`## Using CLI`** at the end: one line linking to the specific command page
+  under `docs/reference/cli/runai/`, if a CLI command exists for this
+  resource. Pages are named `runai_<noun>_<verb>.md` (e.g.
+  `runai_department_list.md`) — find the actual file for the resource rather
+  than guessing the filename, and link to that file, not to the directory.
+  Only include if confirmed in the code.
+- **`## Using API`** after Using CLI: one line linking to the API reference, if the resource has an API. Use Fern's `api:` link syntax (e.g. `api:[api-name]:[METHOD path]`), not a hardcoded domain — it resolves at build time regardless of URL pattern or version.
 
 ## Nav Registration
 
 Register the page in the correct product nav files under `fern/products/`.
-Add to every product the resource applies to (`self-hosted.yml`, `saas.yml`,
+Add to every product the resource applies to (`self-hosted.yml`,
 `multi-tenant.yml` as appropriate).
-
-## Open Items
-
-<!-- TBD: How is the API docs reference structured? -->
-<!-- The current Using API section links to run-ai-docs.nvidia.com/api/2.26/... -->
-<!-- but the OSS API reference URL pattern and versioning is not yet confirmed. -->
-<!-- Until resolved: use a placeholder link and mark with TODO. -->
-
-<!-- TBD: How will CLI changes be auto-generated? -->
-<!-- CLI reference pages under docs/reference/cli/ are currently listed as -->
-<!-- auto-generated from control-plane/runai-cli/docs in the engineering repo. -->
-<!-- The pipeline that generates them into runai-docs is not yet set up. -->
-<!-- Until resolved: add a ## Using CLI section with a TODO placeholder -->
-<!-- rather than a live link. -->
 
 ## Quality Checks
 
@@ -74,9 +65,9 @@ Before finishing:
 
 - [ ] All field names, defaults, and behaviors verified against API spec or
   source code — no invented values
-- [ ] `<!-- TODO: verify with engineering -->` on anything unverified
+- [ ] No unverified claims — anything not confirmed by source needs verification first
 - [ ] `<Warning>` used for every destructive action — never plain text
-- [ ] `<Info>` used for every note — never plain text
+- [ ] `<Note>` used for every note — never plain text
 - [ ] All cross-references are markdown links — never plain text
 - [ ] Nav entries added to all applicable product files
 - [ ] `fern docs dev` runs without errors
