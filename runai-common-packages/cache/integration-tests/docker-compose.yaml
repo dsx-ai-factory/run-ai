@@ -81,7 +81,7 @@ services:
 
   redis:
     attach: false
-    image: redis:7.4-alpine
+    image: redis:8.10-alpine
     container_name: redis
     profiles:
       - redis-setup
