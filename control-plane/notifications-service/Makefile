@@ -52,10 +52,10 @@ validate_mockery:
 		echo "existing mockery binary is not of required version ${MOCKERY_VERSION}. Reinstalling it"; \
 		rm -f ${MOCKERY}; \
 	fi
-	GOBIN=${BIN_DIR} GOTOOLCHAIN=go1.26.8 go install github.com/vektra/mockery/v2/...@${MOCKERY_VERSION}
+	GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v2/...@${MOCKERY_VERSION}
 
 mockery: validate_mockery
-	GOTOOLCHAIN=go1.26.8 ${MOCKERY}
+	${MOCKERY}
 
 test: build test-go integration-tests ## Run unit and integration tests
 .PHONY: test
@@ -178,7 +178,7 @@ openapi-lint: openapi-lint-generic ## Lint the swagger bundle.
 .PHONY: openapi-lint
 
 generate_mocks: validate_mockery
-	GOTOOLCHAIN=go1.26.8 ${MOCKERY}
+	${MOCKERY}
 
 local-deploy: export OS=linux
 local-deploy: export ARCH=amd64
