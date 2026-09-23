@@ -22,6 +22,7 @@ require (
 	github.com/shirou/gopsutil v0.0.0-20190731134726-d80c43f9c984
 	github.com/sirupsen/logrus v1.10.2
 	github.com/urfave/cli v1.22.17
+	github.com/urfave/cli/v3 v3.13.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/sync v0.23.0
 	golang.org/x/sys v0.48.0
