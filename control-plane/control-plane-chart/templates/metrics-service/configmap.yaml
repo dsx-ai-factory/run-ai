@@ -279,9 +279,9 @@ data:
             2.18.0: avg(runai_wait_time_seconds_per_workload{FILTERS}) by(clusterId)
             2.9.0: avg(runai_pod_group_total_wait_time{FILTERS}) by(clusterId)
       runai_preempted_pods_count_per_cluster:
-        cross_version_query: increase(sum by (clusterId, action) (runai_pod_group_evicted_pods_total{action=~"preempt|reclaim",FILTERS})[RANGE:5m])
+        cross_version_query: sum by (clusterId, action) (increase(runai_pod_group_evicted_pods_total{action=~"preempt|reclaim",FILTERS}[RANGE:5m]))
         queries:
-            3.0.0: increase(sum by (clusterId, action) (runai_pod_group_evicted_pods_total{action=~"preempt|reclaim",FILTERS})[RANGE:5m])
+            3.0.0: sum by (clusterId, action) (increase(runai_pod_group_evicted_pods_total{action=~"preempt|reclaim",FILTERS}[RANGE:5m]))
       runai_gpu_utilization_per_nodepool:
         cross_version_query: runai_gpu_utilization_per_nodepool{FILTERS}
         queries:
