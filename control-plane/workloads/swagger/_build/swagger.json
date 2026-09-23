@@ -1021,7 +1021,7 @@
             "$ref": "#/components/parameters/FilterByPhases"
           },
           {
-            "$ref": "#/components/parameters/TelemetryFilterByCreatedAt"
+            "$ref": "#/components/parameters/TelemetryFilterBy"
           }
         ],
         "responses": {
@@ -1095,7 +1095,7 @@
             "$ref": "#/components/parameters/FilterByPhases"
           },
           {
-            "$ref": "#/components/parameters/TelemetryFilterByCreatedAt"
+            "$ref": "#/components/parameters/TelemetryFilterBy"
           }
         ],
         "responses": {
@@ -8872,7 +8872,7 @@
           ]
         }
       },
-      "TelemetryFilterByCreatedAt": {
+      "TelemetryFilterBy": {
         "name": "filterBy",
         "in": "query",
         "required": false,
@@ -8883,7 +8883,7 @@
           "items": {
             "type": "string",
             "maxLength": 1000,
-            "pattern": "^(createdAt)(==|!=|<=|>=).+$"
+            "pattern": "^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$"
           },
           "example": [
             "createdAt>=2026-09-01T00:00:00Z",

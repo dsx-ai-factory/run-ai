@@ -1464,7 +1464,7 @@ paths:
           - createdAt<=2026-09-02T00:00:00Z
           items:
             maxLength: 1000
-            pattern: ^(createdAt)(==|!=|<=|>=).+$
+            pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
             type: string
           maxItems: 10
           type: array
@@ -1648,7 +1648,7 @@ paths:
           - createdAt<=2026-09-02T00:00:00Z
           items:
             maxLength: 1000
-            pattern: ^(createdAt)(==|!=|<=|>=).+$
+            pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
             type: string
           maxItems: 10
           type: array
@@ -13584,7 +13584,7 @@ components:
         maxItems: 10
         type: array
       style: form
-    TelemetryFilterByCreatedAt:
+    TelemetryFilterBy:
       description: "Filter results by a parameter. Use the format field-name operator\
         \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
         \ Greater than or equal. Dates are in ISO 8601 timestamp format."
@@ -13598,7 +13598,7 @@ components:
         - createdAt<=2026-09-02T00:00:00Z
         items:
           maxLength: 1000
-          pattern: ^(createdAt)(==|!=|<=|>=).+$
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
           type: string
         maxItems: 10
         type: array

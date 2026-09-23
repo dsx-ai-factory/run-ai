@@ -9,7 +9,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
 	github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.1.2
@@ -330,7 +330,7 @@ replace github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client => 
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client => ../../../runai-clients/datavolumes-service-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client => ../../../runai-clients/workloads-manager-client
 

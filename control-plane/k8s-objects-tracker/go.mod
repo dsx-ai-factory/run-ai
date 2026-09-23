@@ -6,6 +6,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4
@@ -15,7 +16,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/validation v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
@@ -199,7 +199,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clien
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client => ../../runai-clients/k8s-objects-tracker-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
 

@@ -17,10 +17,10 @@ import (
 
 	auth_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	auth_openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+	org_unit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	assets_client "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client"
 	assets_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	org_unit_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
-	org_unit_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	policy_client "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client"
 	policy_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
 	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"

@@ -19,7 +19,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"

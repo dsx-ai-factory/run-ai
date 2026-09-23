@@ -61,7 +61,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 

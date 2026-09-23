@@ -154,6 +154,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../..
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client => ../../runai-clients/datavolumes-service-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities => ../../runai-cluster/common/cluster-capabilities

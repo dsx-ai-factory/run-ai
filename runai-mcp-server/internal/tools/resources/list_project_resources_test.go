@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 

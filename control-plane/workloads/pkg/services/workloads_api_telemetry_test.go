@@ -827,6 +827,61 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 		})
 	})
 
+	Context("filter by phaseUpdatedAt", func() {
+		It("returns everything for a window that covers all workloads", func() {
+			unfiltered, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, nil)
+			expected := httpResponseBodyToTelemetryResponse(unfiltered).Values[0].Value
+			Expect(expected).NotTo(Equal("0"))
+
+			filtered, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"phaseUpdatedAt>=2000-01-01T00:00:00Z"})
+			Expect(filtered.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(filtered).Values[0].Value).To(Equal(expected))
+		})
+
+		It("excludes workloads whose phase changed outside the window", func() {
+			future := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"phaseUpdatedAt>=" + future})
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(apiResponse).Values[0].Value).To(Equal("0"))
+		})
+
+		It("returns everything for a bounded window that spans all workloads", func() {
+			unfiltered, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, nil)
+			expected := httpResponseBodyToTelemetryResponse(unfiltered).Values[0].Value
+			Expect(expected).NotTo(Equal("0"))
+
+			future := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
+			filtered, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"phaseUpdatedAt>=2000-01-01T00:00:00Z", "phaseUpdatedAt<=" + future})
+			Expect(filtered.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(filtered).Values[0].Value).To(Equal(expected))
+		})
+
+		It("excludes everything for a bounded window entirely in the past", func() {
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"phaseUpdatedAt>=2000-01-01T00:00:00Z", "phaseUpdatedAt<=2001-01-01T00:00:00Z"})
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(apiResponse).Values[0].Value).To(Equal("0"))
+		})
+
+		It("combines with a phase filter", func() {
+			future := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", "", nil, []api.Phase{api.PHASE_FAILED}, []string{"phaseUpdatedAt>=" + future})
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(apiResponse).Values[0].Value).To(Equal("0"))
+		})
+
+		It("combines both date fields", func() {
+			future := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"createdAt>=2000-01-01T00:00:00Z", "phaseUpdatedAt<=" + future})
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			Expect(httpResponseBodyToTelemetryResponse(apiResponse).Values[0].Value).NotTo(Equal("0"))
+		})
+
+		It("rejects a malformed value", func() {
+			apiResponse, _ := workloadsService.GetWorkloadsTelemetry(ctx, api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT, "", "", "", DefaultProjectId, nil, []api.Phase{}, []string{"phaseUpdatedAt>=not-a-date"})
+			Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
+		})
+	})
+
 })
 
 func validateClusterFilterAllocation(g Gomega, telemetryValues []api.TelemetryResponseValuesInner) {

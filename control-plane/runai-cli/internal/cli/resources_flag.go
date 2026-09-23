@@ -14,7 +14,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli/parsers"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 )
 
 const (

@@ -411,13 +411,13 @@ export interface AIApplicationSpec {
      */
     'chartRef': AIApplicationSpecChartRef;
     /**
-     * Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.  A complete string value can reference a personal credential using `USERCREDENTIAL:<name>`. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: `USERCREDENTIAL:<name>,generic-secret` or `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.
+     * Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.  A complete string value can reference a personal credential using `USERCREDENTIAL:<name>`. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: `USERCREDENTIAL:<name>,generic-secret` or `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext. 
      * @type {{ [key: string]: any; }}
      * @memberof AIApplicationSpec
      */
     'values'?: { [key: string]: any; };
     /**
-     * Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`. When the decoded content contains personal credential references, it must be a YAML object.  String values support the same exact personal credential placeholder grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and Docker registry credentials, or `USERCREDENTIAL:<name>,generic-secret` and `USERCREDENTIAL:<name>,docker-registry` for NGC credentials. Embedded or partial placeholders are not supported.
+     * Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`. When the decoded content contains personal credential references, it must be a YAML object.  String values support the same exact personal credential placeholder grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and Docker registry credentials, or `USERCREDENTIAL:<name>,generic-secret` and `USERCREDENTIAL:<name>,docker-registry` for NGC credentials. Embedded or partial placeholders are not supported. 
      * @type {string}
      * @memberof AIApplicationSpec
      */

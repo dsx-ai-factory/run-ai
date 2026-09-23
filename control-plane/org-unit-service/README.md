@@ -81,7 +81,7 @@ and bundled into [`swagger/_build/swagger.yaml`](swagger/_build/swagger.yaml).
 ```
 
 The versioned Go **client** for this service lives in a separate module,
-[`runai-clients/org-unit-service-client`](../../runai-clients/org-unit-service-client),
+[`control-plane/org-unit-service/pkg/client`](pkg/client),
 not under `pkg/client/`.
 
 ## Building and running
@@ -249,7 +249,7 @@ bundled spec are up to date.
 ## Go client
 
 Other Run:AI services consume org-unit-service through the versioned Go client in
-the separate [`runai-clients/org-unit-service-client`](../../runai-clients/org-unit-service-client)
+the separate [`control-plane/org-unit-service/pkg/client`](pkg/client)
 module (generated from this service's OpenAPI spec). `cmd/main.go` itself imports
 the sibling clients it depends on (tenants-manager, cluster-service, workloads,
 datavolumes, authorization, audit).

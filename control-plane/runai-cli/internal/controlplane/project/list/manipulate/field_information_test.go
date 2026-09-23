@@ -6,7 +6,7 @@
 package manipulate
 
 import (
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
