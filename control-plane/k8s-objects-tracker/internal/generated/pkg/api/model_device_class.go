@@ -30,13 +30,22 @@ type DeviceClass struct {
 
 	// Device class name
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//DeviceClassName string `json:"deviceClassName,omitempty"`
-	DeviceClassName string `json:"deviceClassName,omitempty" gorm:"not null;"`
+	//DeviceClassName string `json:"deviceClassName"`
+	DeviceClassName string `json:"deviceClassName" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertDeviceClassRequired checks if the required fields are not zero-ed
 func AssertDeviceClassRequired(obj DeviceClass) error {
+	elements := map[string]interface{}{
+		"deviceClassName": obj.DeviceClassName,
+	}
+	for name, el := range elements {
+		if isZero := IsZeroValue(el); isZero {
+			return &RequiredError{Field: name}
+		}
+	}
+
 	return nil
 }
 

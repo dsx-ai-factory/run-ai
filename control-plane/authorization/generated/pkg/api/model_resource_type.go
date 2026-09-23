@@ -65,7 +65,7 @@ const (
 	RESOURCETYPE_DATAVOLUMES                  ResourceType = "datavolumes"
 	RESOURCETYPE_SECRET_VOLUME_ASSETS         ResourceType = "secret-volume-assets"
 	RESOURCETYPE_STORAGE_CLASS_CONFIGURATION  ResourceType = "storage-class-configuration"
-	RESOURCETYPE_DRA                          ResourceType = "dra"
+	RESOURCETYPE_DEVICE_CLASSES               ResourceType = "device-classes"
 	RESOURCETYPE_ACCESS_KEYS                  ResourceType = "access-keys"
 	RESOURCETYPE_WORKLOAD_PROPERTIES          ResourceType = "workload-properties"
 	RESOURCETYPE_NETWORK_TOPOLOGIES           ResourceType = "network-topologies"
@@ -114,7 +114,7 @@ var AllowedResourceTypeEnumValues = []ResourceType{
 	"datavolumes",
 	"secret-volume-assets",
 	"storage-class-configuration",
-	"dra",
+	"device-classes",
 	"access-keys",
 	"workload-properties",
 	"network-topologies",
@@ -163,7 +163,7 @@ var validResourceTypeEnumValues = map[ResourceType]struct{}{
 	"datavolumes":                  {},
 	"secret-volume-assets":         {},
 	"storage-class-configuration":  {},
-	"dra":                          {},
+	"device-classes":               {},
 	"access-keys":                  {},
 	"workload-properties":          {},
 	"network-topologies":           {},

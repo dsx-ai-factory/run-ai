@@ -14,7 +14,9 @@ Contact: support@run.ai
 package openapi
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the DeviceClass type satisfies the MappedNullable interface at compile time
@@ -25,15 +27,18 @@ type DeviceClass struct {
 	// Cluster ID which has sent the resource info
 	ClusterId *string `json:"clusterId,omitempty"`
 	// Device class name
-	DeviceClassName *string `json:"deviceClassName,omitempty"`
+	DeviceClassName string `json:"deviceClassName"`
 }
+
+type _DeviceClass DeviceClass
 
 // NewDeviceClass instantiates a new DeviceClass object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeviceClass() *DeviceClass {
+func NewDeviceClass(deviceClassName string) *DeviceClass {
 	this := DeviceClass{}
+	this.DeviceClassName = deviceClassName
 	return &this
 }
 
@@ -77,36 +82,28 @@ func (o *DeviceClass) SetClusterId(v string) {
 	o.ClusterId = &v
 }
 
-// GetDeviceClassName returns the DeviceClassName field value if set, zero value otherwise.
+// GetDeviceClassName returns the DeviceClassName field value
 func (o *DeviceClass) GetDeviceClassName() string {
-	if o == nil || IsNil(o.DeviceClassName) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.DeviceClassName
+
+	return o.DeviceClassName
 }
 
-// GetDeviceClassNameOk returns a tuple with the DeviceClassName field value if set, nil otherwise
+// GetDeviceClassNameOk returns a tuple with the DeviceClassName field value
 // and a boolean to check if the value has been set.
 func (o *DeviceClass) GetDeviceClassNameOk() (*string, bool) {
-	if o == nil || IsNil(o.DeviceClassName) {
+	if o == nil {
 		return nil, false
 	}
-	return o.DeviceClassName, true
+	return &o.DeviceClassName, true
 }
 
-// HasDeviceClassName returns a boolean if a field has been set.
-func (o *DeviceClass) HasDeviceClassName() bool {
-	if o != nil && !IsNil(o.DeviceClassName) {
-		return true
-	}
-
-	return false
-}
-
-// SetDeviceClassName gets a reference to the given string and assigns it to the DeviceClassName field.
+// SetDeviceClassName sets field value
 func (o *DeviceClass) SetDeviceClassName(v string) {
-	o.DeviceClassName = &v
+	o.DeviceClassName = v
 }
 
 func (o DeviceClass) MarshalJSON() ([]byte, error) {
@@ -122,10 +119,52 @@ func (o DeviceClass) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ClusterId) {
 		toSerialize["clusterId"] = o.ClusterId
 	}
-	if !IsNil(o.DeviceClassName) {
-		toSerialize["deviceClassName"] = o.DeviceClassName
-	}
+	toSerialize["deviceClassName"] = o.DeviceClassName
 	return toSerialize, nil
+}
+
+func (o *DeviceClass) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	// RUNAI
+	// requiredProperties := []string{
+	//
+	//  	"deviceClassName",
+	// }
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	// RUNAI
+	//  for _, requiredProperty := range(requiredProperties) {
+	//  	if _, exists := allProperties[requiredProperty]; !exists {
+	//  		return fmt.Errorf("no value given for required property %v", requiredProperty)
+	//  	}
+	//  }
+	//
+	fmt.Sprintf("dummy")
+
+	varDeviceClass := _DeviceClass{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	// RUNAI
+	// decoder.DisallowUnknownFields()
+	//
+	err = decoder.Decode(&varDeviceClass)
+
+	if err != nil {
+		return err
+	}
+
+	*o = DeviceClass(varDeviceClass)
+
+	return err
 }
 
 type NullableDeviceClass struct {

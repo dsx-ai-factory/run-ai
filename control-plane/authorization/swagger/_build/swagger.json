@@ -2702,7 +2702,7 @@
           "datavolumes",
           "secret-volume-assets",
           "storage-class-configuration",
-          "dra",
+          "device-classes",
           "access-keys",
           "workload-properties",
           "network-topologies",

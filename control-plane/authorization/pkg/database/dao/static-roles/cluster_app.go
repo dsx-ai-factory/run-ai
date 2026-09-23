@@ -125,9 +125,8 @@ var ClusterApp = models.Role{
 			Sync:         true,
 		},
 		{
-			ResourceType: api.RESOURCETYPE_DRA,
+			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
 			Read:         true,
-			Delete:       true,
 			Sync:         true,
 		},
 		{

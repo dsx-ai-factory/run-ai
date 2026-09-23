@@ -47818,7 +47818,7 @@ components:
     DeviceClass:
       type: object
       required:
-        - device_class_name
+        - deviceClassName
       properties:
         clusterId:
           $ref: '#/components/schemas/ReportingClusterId'
@@ -48050,7 +48050,7 @@ components:
         - datavolumes
         - secret-volume-assets
         - storage-class-configuration
-        - dra
+        - device-classes
         - access-keys
         - workload-properties
         - network-topologies

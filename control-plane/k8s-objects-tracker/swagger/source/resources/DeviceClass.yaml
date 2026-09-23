@@ -5,7 +5,7 @@ get:
     - Device Classes
   x-audit: false
   x-authorize:
-    resource-type: dra
+    resource-type: device-classes
     action: read
   x-service: k8s-objects-tracker
   x-test-coverage:

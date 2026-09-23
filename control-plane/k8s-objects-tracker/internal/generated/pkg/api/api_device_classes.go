@@ -114,7 +114,7 @@ func (c *DeviceClassesAPIController) Routes() Routes {
 				func(next http.HandlerFunc) http.HandlerFunc {
 					return c.authorizationClient.AuthorizeMiddleware(
 						next,
-						"dra",
+						"device-classes",
 						"read",
 						false,
 						"",
@@ -136,7 +136,7 @@ func (c *DeviceClassesAPIController) Routes() Routes {
 				func(next http.HandlerFunc) http.HandlerFunc {
 					return c.authorizationClient.AuthorizeMiddleware(
 						next,
-						"dra",
+						"device-classes",
 						"sync",
 						false,
 						"",

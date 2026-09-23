@@ -97,7 +97,7 @@ import (
 
 func main() {
 	clusterId := "d73a738f-fab3-430a-8fa3-5241493d7128" // string | The id of the cluster
-	deviceClasses := *openapiclient.NewDeviceClasses([]openapiclient.DeviceClass{*openapiclient.NewDeviceClass()}) // DeviceClasses | 
+	deviceClasses := *openapiclient.NewDeviceClasses([]openapiclient.DeviceClass{*openapiclient.NewDeviceClass("gpu.nvidia.com")}) // DeviceClasses | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

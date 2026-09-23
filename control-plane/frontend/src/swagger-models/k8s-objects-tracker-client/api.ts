@@ -347,7 +347,7 @@ export interface DeviceClass {
      * @type {string}
      * @memberof DeviceClass
      */
-    'deviceClassName'?: string;
+    'deviceClassName': string;
 }
 /**
  * 

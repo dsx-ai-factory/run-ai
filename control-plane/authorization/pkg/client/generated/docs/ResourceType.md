@@ -75,7 +75,7 @@
 
 * `STORAGE_CLASS_CONFIGURATION` (value: `"storage-class-configuration"`)
 
-* `DRA` (value: `"dra"`)
+* `DEVICE_CLASSES` (value: `"device-classes"`)
 
 * `ACCESS_KEYS` (value: `"access-keys"`)
 

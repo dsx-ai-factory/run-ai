@@ -99,7 +99,7 @@ var Viewer = models.Role{
 			Read:         true,
 		},
 		{
-			ResourceType: api.RESOURCETYPE_DRA,
+			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
 			Read:         true,
 		},
 		{

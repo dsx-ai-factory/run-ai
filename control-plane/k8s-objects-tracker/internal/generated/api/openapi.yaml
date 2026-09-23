@@ -5987,7 +5987,7 @@ paths:
       - Device Classes
       x-audit: false
       x-authorize:
-        resource-type: dra
+        resource-type: device-classes
         action: read
       x-service: k8s-objects-tracker
       x-test-coverage:
@@ -6060,7 +6060,7 @@ paths:
       tags:
       - Device Classes
       x-authorize:
-        resource-type: dra
+        resource-type: device-classes
         action: sync
       x-service: k8s-objects-tracker
       x-audit: false
@@ -8697,7 +8697,7 @@ components:
           example: gpu.nvidia.com
           type: string
       required:
-      - device_class_name
+      - deviceClassName
       type: object
     DeviceClasses:
       example:

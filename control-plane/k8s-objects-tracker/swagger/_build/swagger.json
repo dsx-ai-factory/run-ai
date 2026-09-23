@@ -3982,7 +3982,7 @@
         ],
         "x-audit": false,
         "x-authorize": {
-          "resource-type": "dra",
+          "resource-type": "device-classes",
           "action": "read"
         },
         "x-service": "k8s-objects-tracker",
@@ -4029,7 +4029,7 @@
         "description": "Use to sync cluster device classes",
         "operationId": "sync_device_class",
         "x-authorize": {
-          "resource-type": "dra",
+          "resource-type": "device-classes",
           "action": "sync"
         },
         "x-service": "k8s-objects-tracker",
@@ -5865,7 +5865,7 @@
       "DeviceClass": {
         "type": "object",
         "required": [
-          "device_class_name"
+          "deviceClassName"
         ],
         "properties": {
           "clusterId": {
