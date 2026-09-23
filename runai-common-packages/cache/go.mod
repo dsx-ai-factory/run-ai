@@ -5,13 +5,11 @@ go 1.27.1
 require (
 	github.com/aws/smithy-go v1.28.2
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/cenkalti/backoff/v7 v7.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/lithammer/shortuuid/v4 v4.3.0
-	github.com/lithammer/shortuuid/v5 v5.0.0
 	github.com/maypok86/otter/v2 v2.3.0
 	github.com/nats-io/nats-server/v2 v2.15.0
 	github.com/nats-io/nats.go v1.54.0
