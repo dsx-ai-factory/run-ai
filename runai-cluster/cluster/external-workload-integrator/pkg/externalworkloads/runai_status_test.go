@@ -312,7 +312,7 @@ var _ = Describe("ExternalWorkloadHandler.handleMissingChild", func() {
 			commonconstants.EwiStatusAnnotation: "true",
 		}))
 
-		handler.handleMissingChild(ctx, missingChildTask("ew-pytorchjob-my-job"))
+		Expect(handler.handleMissingChild(ctx, missingChildTask("ew-pytorchjob-my-job"))).To(Succeed())
 
 		stored := &v1alpha1.ExternalWorkload{}
 		Expect(c.Get(ctx, types.NamespacedName{
@@ -328,7 +328,7 @@ var _ = Describe("ExternalWorkloadHandler.handleMissingChild", func() {
 			commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: "cp-id-1",
 		}))
 
-		handler.handleMissingChild(ctx, missingChildTask("ew-pytorchjob-my-job"))
+		Expect(handler.handleMissingChild(ctx, missingChildTask("ew-pytorchjob-my-job"))).To(Succeed())
 
 		stored := &v1alpha1.ExternalWorkload{}
 		Expect(c.Get(ctx, types.NamespacedName{
@@ -344,7 +344,7 @@ var _ = Describe("ExternalWorkloadHandler.handleMissingChild", func() {
 			commonconstants.EwiStatusAnnotation: "true",
 		}))
 
-		handler.handleMissingChild(ctx, missingChildTask(""))
+		Expect(handler.handleMissingChild(ctx, missingChildTask(""))).To(Succeed())
 
 		stored := &v1alpha1.ExternalWorkload{}
 		Expect(c.Get(ctx, types.NamespacedName{
@@ -357,9 +357,7 @@ var _ = Describe("ExternalWorkloadHandler.handleMissingChild", func() {
 		ctx := context.Background()
 		handler, _ := newStatusHandler()
 
-		Expect(func() { handler.handleMissingChild(context.Background(), missingChildTask("gone")) }).
-			NotTo(Panic())
-		_ = ctx
+		Expect(handler.handleMissingChild(ctx, missingChildTask("gone"))).To(Succeed())
 	})
 })
 
