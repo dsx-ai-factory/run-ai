@@ -213,16 +213,21 @@ func lwsNamespace() string {
 	return "lws-system"
 }
 
-// ensureLWSInstalled verifies the LWS controller is running in the namespace the
-// distribution installs it to, and that the installer pointed RunaiConfig at
-// that namespace so the Run:ai cluster detects it.
+// ensureLWSInstalled verifies the LWS controller is available in the namespace
+// the distribution installs it to, that the installer pointed RunaiConfig at
+// that namespace, and that the Run:ai operator consequently reports LWS as an
+// available dependency. The operator republishes runai-public on its own
+// reconcile cadence, so the last check polls.
 func ensureLWSInstalled() {
 	namespace := lwsNamespace()
-	Expect(utils.LWSControllerInstalled(namespace)).To(Succeed(), fmt.Sprintf(
-		"LWS controller must be installed in namespace %q after install", namespace,
-	))
+	Eventually(func() error { return utils.LWSControllerAvailable(namespace) }, 5*time.Minute, 10*time.Second).Should(Succeed(),
+		fmt.Sprintf("LWS controller must be available in namespace %q after install", namespace),
+	)
 	Expect(utils.RunaiConfigLWSNamespace()).To(Equal(namespace),
 		"runaiconfig spec.lws.namespace must point at the installed LWS controller",
+	)
+	Eventually(utils.RunaiPublicLWSAvailable, 5*time.Minute, 10*time.Second).Should(Succeed(),
+		"runai-public must report LWS as available",
 	)
 }
 
