@@ -126,7 +126,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-20250216162349-8ccaf42d0b37
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-20250216162349-8ccaf42d0b37
@@ -164,7 +164,7 @@ require (
 replace (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../control-plane/cluster-service/pkg/client
 	github.com/dsx-ai-factory/run-ai/runai-clients => ../../runai-clients
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../../runai-cluster/cluster/common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/extensions => ../../runai-cluster/cluster/common/extensions

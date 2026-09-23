@@ -86,6 +86,7 @@ service, run `/write-service-docs <path>` to document it and add it below.
 **control-plane** (go — libraries & client packages)
 - [control-plane/authorization/pkg/client](control-plane/authorization/pkg/client)
 - [control-plane/cluster-service/pkg/client](control-plane/cluster-service/pkg/client)
+- [control-plane/org-unit-service/pkg/client](control-plane/org-unit-service/pkg/client)
 - [control-plane/runai-cli](control-plane/runai-cli)
 - [control-plane/workloads-and-policies](control-plane/workloads-and-policies)
 
@@ -148,7 +149,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [runai-clients/cluster-api-client](runai-clients/cluster-api-client)
 - [runai-clients/datavolumes-service-client](runai-clients/datavolumes-service-client)
 - [runai-clients/k8s-objects-tracker-client](runai-clients/k8s-objects-tracker-client)
-- [runai-clients/org-unit-service-client](runai-clients/org-unit-service-client)
 - [runai-clients/policy-service-client](runai-clients/policy-service-client)
 - [runai-clients/workloads-client](runai-clients/workloads-client)
 - [runai-clients/workloads-manager-client](runai-clients/workloads-manager-client)

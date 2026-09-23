@@ -8,7 +8,7 @@ package parsers
 import (
 	"strings"
 
-	org_unit_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	org_unit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 )

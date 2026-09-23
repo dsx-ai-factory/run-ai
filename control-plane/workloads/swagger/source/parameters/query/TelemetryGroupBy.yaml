@@ -17,3 +17,4 @@ schema:
       - RequestedNodepools
       - Phase
       - Category
+      - Source

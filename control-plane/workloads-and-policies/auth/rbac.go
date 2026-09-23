@@ -13,11 +13,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	scope "github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo"
 	assets "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	orgUnitClient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )

@@ -4,8 +4,9 @@ go 1.27.1
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4
@@ -15,7 +16,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/validation v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
@@ -85,7 +85,6 @@ require (
 	github.com/go-sql-driver/mysql v1.10.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-migrate/migrate/v4 v4.20.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -180,8 +179,8 @@ require (
 	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/tools v0.50.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260918162117-cecb64721679 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260918162117-cecb64721679 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260921155816-b14227669459 // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
@@ -189,7 +188,8 @@ require (
 	gorm.io/driver/mysql v1.6.0 // indirect
 	gorm.io/driver/postgres v1.6.3 // indirect
 	gorm.io/plugin/opentelemetry v0.1.16 // indirect
-	k8s.io/apimachinery v0.32.4 // indirect
+	k8s.io/apimachinery v0.37.0 // indirect
+	sigs.k8s.io/json v0.0.0-20260909141634-11ed52e25bc5 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
@@ -199,7 +199,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clien
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client => ../../runai-clients/k8s-objects-tracker-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
 

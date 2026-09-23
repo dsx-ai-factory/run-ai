@@ -11,9 +11,9 @@ import (
 	"net/http"
 	"testing"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/config"

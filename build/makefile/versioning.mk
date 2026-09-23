@@ -150,33 +150,33 @@ _bump-version:
 	echo "$(GREEN)Published tag: $$new_tag$(NC)";
 .PHONY: _bump-version
 
-_validate-master-sync:
+_validate-main-sync:
 	@current_branch=$$(git rev-parse --abbrev-ref HEAD); \
-	if [ "$$current_branch" != "master" ]; then \
-		echo "$(RED)Error: You must be on branch 'master' (currently on '$$current_branch')$(NC)"; \
+	if [ "$$current_branch" != "main" ]; then \
+		echo "$(RED)Error: You must be on branch 'main' (currently on '$$current_branch')$(NC)"; \
 		exit 42; \
 	fi; \
-	git fetch origin master > /dev/null 2>&1; \
-	local_head=$$(git rev-parse master); \
-	remote_head=$$(git rev-parse origin/master); \
+	git fetch origin main > /dev/null 2>&1; \
+	local_head=$$(git rev-parse main); \
+	remote_head=$$(git rev-parse origin/main); \
 	if [ "$$local_head" = "$$remote_head" ]; then \
-		echo "$(GREEN)On branch 'master' and up to date with origin/master.$(NC)"; \
+		echo "$(GREEN)On branch 'main' and up to date with origin/main.$(NC)"; \
 	else \
-		echo "$(RED)Error: Local 'master' is not up to date with 'origin/master'.$(NC)"; \
+		echo "$(RED)Error: Local 'main' is not up to date with 'origin/main'.$(NC)"; \
 		exit 42; \
 	fi
 
 _check-can-tag:
 	@set -e;
-	@$(MAKE) _validate-master-sync >/dev/null 2>&1; \
+	@$(MAKE) _validate-main-sync >/dev/null 2>&1; \
 	EXIT_CODE=$$?; \
 	if [ "$$EXIT_CODE" -eq 0 ]; then \
-		printf "$(GREEN)Branch is up to date with origin/master. You can tag a production release.$(NC)\n"; \
+		printf "$(GREEN)Branch is up to date with origin/main. You can tag a production release.$(NC)\n"; \
 		exit 0; \
 	fi; \
-   printf "$(RED)Branch is not up to date with origin/master. Make sure you are on master branch to tag a prod release.$(NC)\n"; \
+   printf "$(RED)Branch is not up to date with origin/main. Make sure you are on main branch to tag a prod release.$(NC)\n"; \
    printf "$(YELLOW)Use the dev bump target (client-bump-version-dev / package-bump-version-dev)$(NC) to tag a dev release from your local branch.\n"; \
-   printf "$(BLUE)Or checkout and pull master, then run this command again to tag a prod release.$(NC)\n"; \
+   printf "$(BLUE)Or checkout and pull main, then run this command again to tag a prod release.$(NC)\n"; \
 	exit 42;
 
 validate: validate-imports
@@ -187,7 +187,7 @@ validate: validate-imports
 # suffix would otherwise also exempt e.g. .../pkg/client-fork.
 VALIDATE_REPLACE_MODULE_PREFIX := github\.com/dsx-ai-factory/run-ai/
 
-VALIDATE_IMPORTS_REPLACE_EXCEPTIONS = control-plane/authorization/pkg/client|control-plane/cluster-service/pkg/client
+VALIDATE_IMPORTS_REPLACE_EXCEPTIONS = control-plane/authorization/pkg/client|control-plane/cluster-service/pkg/client|control-plane/org-unit-service/pkg/client
 
 VALIDATE_IMPORTS_REPLACE_ALLOWED_MODULES = control-plane/$(SERVICE_NAME)/pkg/client|$(VALIDATE_IMPORTS_REPLACE_EXCEPTIONS)
 

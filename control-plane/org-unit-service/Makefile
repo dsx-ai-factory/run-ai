@@ -10,6 +10,9 @@ OPENAPI_GENERATOR_VERSION_CLIENT_GO=v7.12.0
 # Change for every new service
 SERVICE_NAME=org-unit-service
 OPENAPI_GENERATOR_SERVER_CODE_PATH=generated
+SHARED_PACKAGES_PATH=pkg
+OPENAPI_CLIENT_NAME_GO=client
+SHARED_PACKAGES_PATH_ABS=control-plane/org-unit-service/pkg
 
 
 ##@ Basic Commands

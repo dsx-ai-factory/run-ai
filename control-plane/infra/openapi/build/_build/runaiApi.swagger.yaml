@@ -8470,6 +8470,7 @@ paths:
         - $ref: '#/components/parameters/TelemetryGroupBy1'
         - $ref: '#/components/parameters/TelemetryType2'
         - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
       responses:
         '200':
           description: Executed successfully.
@@ -27014,16 +27015,18 @@ components:
       example:
         code: 400
         message: Bad request - Resource should have a name
+    ReportingClusterId:
+      type: string
+      format: uuid
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
     StorageClass:
       type: object
       required:
         - storage_class_name
       properties:
         cluster_id:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storage_class_name:
           type: string
           description: Storage class name
@@ -27318,10 +27321,7 @@ components:
         - spec
       properties:
         clusterId:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string
           description: Storage class name
@@ -27489,6 +27489,7 @@ components:
         - datavolumes
         - secret-volume-assets
         - storage-class-configuration
+        - device-classes
         - access-keys
         - workload-properties
         - network-topologies
@@ -36815,6 +36816,7 @@ components:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
     TelemetryType2:
       name: telemetryType
       in: query
@@ -36836,6 +36838,22 @@ components:
         example:
           - Running
           - Failed
+    TelemetryFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal. Dates are in ISO 8601 timestamp format.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          maxLength: 1000
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+        example:
+          - createdAt>=2026-09-01T00:00:00Z
+          - createdAt<=2026-09-02T00:00:00Z
+      explode: false
     PodsSort:
       name: sortBy
       in: query

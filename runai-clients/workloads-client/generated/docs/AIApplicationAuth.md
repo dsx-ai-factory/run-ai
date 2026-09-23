@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**UserCredential** | Pointer to **NullableBool** | Indicates whether the asset is a user credential owned by the caller. When omitted or false, the asset is treated as a shared credential. | [optional]
+**UserCredential** | Pointer to **NullableBool** | Indicates whether the asset is a user credential owned by the caller. When omitted or false, the asset is treated as a shared credential. | [optional] 
 **AssetId** | Pointer to **string** | The ID of the asset to use for authentication. | [optional] 
 
 ## Methods

@@ -43,13 +43,16 @@ func distributionCustomization(s *spec.Spec) []Finding {
 		)
 	}
 	if f := s.Features; f != nil {
-		// The NIM operator and LWS install from Helm on every distribution
-		// (lightweight controllers that run under restricted-v2), so they are
+		// The NIM operator installs from Helm on every distribution (a
+		// lightweight controller that runs under restricted-v2), so it is
 		// configured with customHelmValues — the OpenShift OLM surfaces
 		// (customResource, subscriptionConfig) do not apply.
 		entries = append(entries,
 			entry{"features.nimOperator", f.NIMOperator, false, false},
-			entry{"features.lws", f.LWS, false, false},
+			// LWS installs via OperatorHub on OpenShift (the Red Hat Leader
+			// Worker Set operator with a LeaderWorkerSetOperator CR), so its
+			// OpenShift surfaces apply there; off OpenShift it is the Helm chart.
+			entry{"features.lws", f.LWS, s.LWSUsesOLM(), true},
 			// Knative installs via OperatorHub on OpenShift (the OpenShift
 			// Serverless operator with a KnativeServing CR), so its OpenShift
 			// surfaces apply there; off OpenShift it is the Helm flow.

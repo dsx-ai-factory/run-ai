@@ -20,6 +20,7 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	bc_mocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/mocks/pkg/clients/backend"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/assets"
@@ -29,7 +30,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	policyApi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/ghodss/yaml"
