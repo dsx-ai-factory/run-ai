@@ -3,9 +3,9 @@ module github.com/dsx-ai-factory/run-ai/control-plane/metric-stores-migrator
 go 1.27.1
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.17
+	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.19
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5

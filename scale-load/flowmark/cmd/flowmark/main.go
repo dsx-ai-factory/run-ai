@@ -19,7 +19,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/measure"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/runner"
-	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/basicflow"
+	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/burst"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/selfcheck"
 )
 
@@ -46,7 +46,7 @@ func run() error {
 		Password:        os.Getenv("FLOWMARK_CP_PASSWORD"),
 		Token:           os.Getenv("FLOWMARK_CP_TOKEN"),
 	}
-	registry := buildRegistry(selfcheck.Suite{}, basicflow.Suite{})
+	registry := buildRegistry(selfcheck.Suite{}, burst.Suite{})
 	ctx := context.Background()
 
 	results := core.Results{Schema: core.SchemaVersion, Metadata: core.Metadata{StartedAt: time.Now().UTC()}}

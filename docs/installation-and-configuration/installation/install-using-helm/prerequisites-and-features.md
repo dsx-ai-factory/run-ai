@@ -158,7 +158,7 @@ For air-gapped installation, follow the instructions in [Network Operator Deploy
 
 When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html) is required to enable Dynamic Resource Allocation at the Kubernetes level. To install, follow the instructions in [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver). The DRA driver is installed with the GPU Operator, for both connected and air-gapped installations.
 
-After the DRA driver is installed, update the cluster configuration using the `GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai workload controller deployment and restarts the controller. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../configuration/cluster-config.md).
+After the DRA driver is installed, update the cluster configuration using the `anyworkload-controller.GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai `anyworkload-controller` deployment and restarts the controller. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../configuration/cluster-config.md).
 
 ### Prometheus
 

@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2

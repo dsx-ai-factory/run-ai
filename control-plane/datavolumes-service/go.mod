@@ -137,8 +137,8 @@ require (
 	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/tools v0.50.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260918162117-cecb64721679 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260918162117-cecb64721679 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260921155816-b14227669459 // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect
@@ -150,23 +150,23 @@ require (
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.0
@@ -186,7 +186,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client 
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../control-plane/cluster-service/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
 

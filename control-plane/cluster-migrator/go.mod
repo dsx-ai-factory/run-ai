@@ -4,12 +4,12 @@ go 1.27.1
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/lib/pq v1.12.3
@@ -177,7 +177,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service v0.0.0 =>
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client => ../../control-plane/authorization/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
 

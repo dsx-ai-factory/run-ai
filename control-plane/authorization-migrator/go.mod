@@ -5,12 +5,13 @@ go 1.27.1
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/Nerzal/gocloak/v13 v13.9.0
+	github.com/Nerzal/gocloak/v14 v14.0.4
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/onsi/ginkgo/v2 v2.33.0
 	github.com/onsi/gomega v1.43.1
@@ -153,6 +154,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../..
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client => ../../runai-clients/datavolumes-service-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities => ../../runai-cluster/common/cluster-capabilities

@@ -159,21 +159,21 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.50.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260918162117-cecb64721679 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260918162117-cecb64721679 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260921155816-b14227669459 // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
 	gorm.io/driver/postgres v1.6.3 // indirect
 	gorm.io/plugin/opentelemetry v0.1.16 // indirect
-	k8s.io/apimachinery v0.32.0-alpha.3 // indirect
-	k8s.io/client-go v0.32.0-alpha.3 // indirect
+	k8s.io/apimachinery v0.37.0 // indirect
+	k8s.io/client-go v0.37.0 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 )
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2

@@ -19,7 +19,7 @@ import (
 	authorization "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
-	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/pkg/tls"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
