@@ -7,9 +7,9 @@ package workloads_client
 
 import (
 	"context"
-	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/internal"
+	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 )
 
 //go:generate mockery --name IWorkloadsExternalClient
