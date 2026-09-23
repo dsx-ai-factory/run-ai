@@ -15,9 +15,8 @@ import (
 // DeviceClasses are cluster-scoped and tracked by name only.
 func ParseDeviceClassToServerScheme(deviceClass *resourcev1.DeviceClass) trackerclient.DeviceClass {
 	clusterId := config.Config().ClusterUuid
-	name := deviceClass.Name
 	return trackerclient.DeviceClass{
 		ClusterId:       &clusterId,
-		DeviceClassName: &name,
+		DeviceClassName: deviceClass.Name,
 	}
 }
