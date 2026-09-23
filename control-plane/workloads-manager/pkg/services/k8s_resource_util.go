@@ -132,6 +132,10 @@ func (k *K8sResourceUtil) updateTopologyAnnotations(
 	if segmentTarget != nil {
 		return k.applySegmentTopologyDefaults(ctx, resource, annotations, project, segmentTarget, options)
 	}
+	// The v1 service already resolved topology from the requested node pools.
+	if options.trustedConvertedFromNative {
+		return nil
+	}
 	return applyDefaultTopologyAnnotations(ctx, annotations, project)
 }
 

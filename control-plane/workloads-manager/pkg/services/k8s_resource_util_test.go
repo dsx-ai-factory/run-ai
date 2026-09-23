@@ -244,6 +244,19 @@ var _ = Describe("K8sResourceUtil", func() {
 				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationRequiredKey))
 				Expect(metadata["namespace"]).To(Equal("test-namespace"))
 			})
+
+			It("should not add project default topology to converted native resources", func() {
+				modifiedResource, err := util.updateResourceMetadataWithOptions(
+					ctx, validPodMap, workloadId, project,
+					resourceMetadataUpdateOptions{trustedConvertedFromNative: true},
+				)
+				Expect(err).To(BeNil())
+
+				annotations := modifiedResource["metadata"].(map[string]interface{})["annotations"].(map[string]interface{})
+				Expect(annotations[WorkloadIdAnnotation]).To(Equal(workloadId))
+				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationKey))
+				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationPreferredKey))
+			})
 		})
 	})
 
