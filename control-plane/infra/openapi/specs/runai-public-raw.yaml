@@ -59692,6 +59692,15 @@ components:
         - baseUrl
         - whatsNew
       properties:
+        catalogVersion:
+          type: string
+          enum:
+            - v1
+            - v2
+          default: v1
+          description: >-
+            Documentation path catalog. Defaults to v1 when omitted by an older
+            server.
         baseUrl:
           type: string
           description: Base URL used to resolve documentation links.

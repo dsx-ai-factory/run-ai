@@ -36,16 +36,7 @@ func NewTenantSettings() TenantSettingsService {
 
 // IsDGXCManaged checks if the tenant is DGXC (CSP) managed.
 func (ts *TenantSettings) IsDGXCManaged(ctx context.Context) bool {
-	tenantId := tenantIdFromContext(ctx)
-	if tenantId == "" {
-		return false
-	}
-	s, err := setting_pkg.Get[*settings.TenantIsCspManaged](tenantId)
-	if err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to get TenantIsCspManaged setting, assuming the FF is Off. err: %v", err)
-		return false
-	}
-	return s.Enabled
+	return false
 }
 
 // IsScopedAuthorizationEnabled checks if scoped authorization is enabled for the tenant.
