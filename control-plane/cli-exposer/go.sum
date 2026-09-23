@@ -1,3 +1,5 @@
+github.com/DATA-DOG/go-sqlmock v1.5.2 h1:OcvFkGmslmlZibjAjaHm3L//6LiuBgolP7OputlJIzU=
+github.com/DATA-DOG/go-sqlmock v1.5.2/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/Masterminds/semver/v3 v3.5.0 h1:kQceYJfbupGfZOKZQg0kou0DgAKhzDg2NZPAwZ/2OOE=
 github.com/Masterminds/semver/v3 v3.5.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/Rican7/retry v0.3.1 h1:scY4IbO8swckzoA/11HgBwaZRJEyY9vaNJshcdhp1Mc=
@@ -29,8 +31,8 @@ github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middl
 github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1/go.mod h1:DSr8RPeZxAZ4pYxwkx4j5R/PD4AOxuHR0Ph8RM4VSg4=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 h1:ENx7A9OBIBNv1Ku7k0hWYIsg+S1EspjHlCc8H6Yl1GY=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3/go.mod h1:EaselROWsWZGgWY2nsm7aL35/nML1cul54FjYasY2d0=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 h1:Fy946r1JrfkYN5KBZhu+GBLhxuA7EY1Lt10sgDIzDxs=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8/go.mod h1:xAYNpT7DXg6+KXXeNERsHq6fYR605zz2lE+GCE8BKZY=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0 h1:tIxjIoZUYFme1g/DfE5LD9HOXoY7mEa4OmE+218l73k=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0/go.mod h1:7eHCBYbQ9OWPdWD1WP9OmaeEnXKQs5UC4HYjGHm2TXc=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0 h1:D/mXmXAi7r5Ua9ZD1lfR4OXDzsPw6jl8hu8Ap8atIsg=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0/go.mod h1:PBdD9mpQ7MAAbU4rkHhDxDU8VjKbGpn8RaPfdWEBB04=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 h1:ngMQ/W6rCI/3Fl695DqGHByE5abCf3R1JNKd9Wtnv7s=
@@ -39,8 +41,10 @@ github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 h1:SfZn20b
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4/go.mod h1:sDp7mJn5tIM3Pg6YtuOfaY482uLxZRt+wSsCDIz6p4g=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 h1:7vShtDVlUAl+kbFfF8/kopQ7iudfJPFCaOHYknwZIRI=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5/go.mod h1:AQK0wu+zIXkf9lBnxLhIFHVay37vYzRR92qrar+LbVI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5 h1:AzvTvoijYPa4BSMcBuaS+9pMy94nTs2QbkglyQ+DlvI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5/go.mod h1:hyLAxbaNjRsH7GqCiA2Z+y0iwIUU2+DuHJLoSU9bCD4=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11 h1:XbMdxc0ORj/76qTPXc554obdorN1k8WGLBRoMchzclM=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11/go.mod h1:OPUH1UkE2ymD0eI8ZBF1xJy9QUZa8O5iDmC3S/6DRB0=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7 h1:Km7bjSp9yaQuk0JUBPMJA+hFhlDNJwifb3vYtZrXcoQ=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7/go.mod h1:idNI3nAIS5MC8GI9F6kBR7lC+AhoBMax/4Eykhn1Hhw=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3 h1:pgTV2JEs4LSpclKH+4kXdqOYR23t6lJkoOB8SBsXEJE=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3/go.mod h1:OCUJhzqgNGk8hGdOlPASY1ZKzqQUE6Bd5nuEiWHpMuE=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 h1:rAODIpF4QmOa8pgKMNXXIoZWICK1vsyZ1H/nDTp1NEY=
@@ -82,6 +86,8 @@ github.com/go-viper/mapstructure/v2 v2.5.0 h1:vM5IJoUAy3d7zRSVtIwQgBj7BiWtMPfmPE
 github.com/go-viper/mapstructure/v2 v2.5.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
 github.com/goccy/go-yaml v1.18.0 h1:8W7wMFS12Pcas7KU+VVkaiCng+kG8QiFeFwzFb+rwuw=
 github.com/goccy/go-yaml v1.18.0/go.mod h1:XBurs7gK8ATbW4ZPGKgcbrY1Br56PdM69F7LkFRi1kA=
+github.com/golang-migrate/migrate/v4 v4.19.1 h1:OCyb44lFuQfYXYLx1SCxPZQGU7mcaZ7gH9yH4jSFbBA=
+github.com/golang-migrate/migrate/v4 v4.19.1/go.mod h1:CTcgfjxhaUtsLipnLoQRWCrjYXycRz/g5+RWDuYgPrE=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.2/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
@@ -126,6 +132,8 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leodido/go-urn v1.5.0 h1:pLqT2kq1zpHW/1D18QMjMpdtX7cekxqtJJjg5ANyWw0=
 github.com/leodido/go-urn v1.5.0/go.mod h1:9BORnCDhdPBJNDEX+w1bJisa8yOKYi116VeO96s4ifE=
+github.com/lib/pq v1.11.2 h1:x6gxUeu39V0BHZiugWe8LXZYZ+Utk7hSJGThs8sdzfs=
+github.com/lib/pq v1.11.2/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
 github.com/lithammer/shortuuid/v3 v3.0.7 h1:trX0KTHy4Pbwo/6ia8fscyHoGA+mf1jWbPJVuvyJQQ8=
 github.com/lithammer/shortuuid/v3 v3.0.7/go.mod h1:vMk8ke37EmiewwolSO1NLW8vP4ZaKlRuDIi8tWWmAts=
 github.com/lithammer/shortuuid/v4 v4.3.0 h1:XRr80OYPOlqxgnCv2/iuElkl/ZtXtPtLKk2AvpXGdWA=
@@ -317,9 +325,13 @@ gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+gorm.io/driver/postgres v1.6.2 h1:BvXQ/cNUg63q5TFNg672DmDcowZSFrNLkkA3Xe6GXq4=
+gorm.io/driver/postgres v1.6.2/go.mod h1:0c4fQA44XhOklXDkgtuKqysHCycTa5i9e3EIpDGCwXk=
 gorm.io/driver/sqlite v1.6.0 h1:WHRRrIiulaPiPFmDcod6prc4l2VGVWHz80KspNsxSfQ=
 gorm.io/driver/sqlite v1.6.0/go.mod h1:AO9V1qIQddBESngQUKWL9yoH93HIeA1X6V633rBwyT8=
 gorm.io/gorm v1.31.2 h1:3o8FXNo9v9S858gil+3LlZA1LkCOzgb4g5BL64FgaCo=
 gorm.io/gorm v1.31.2/go.mod h1:XyQVbO2k6YkOis7C2437jSit3SsDK72s7n7rsSHd+Gs=
+gorm.io/plugin/opentelemetry v0.1.4 h1:7p0ocWELjSSRI7NCKPW2mVe6h43YPini99sNJcbsTuc=
+gorm.io/plugin/opentelemetry v0.1.4/go.mod h1:tndJHOdvPT0pyGhOb8E2209eXJCUxhC5UpKw7bGVWeI=
 k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 h1:jVkFFVfXdXP74B/zbO3hM3hpSFD0xvhQ5U686DPurkE=
 k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3/go.mod h1:M2s5JB1lIYP3jzZdorPLHXIPJzt9vv2muW5a6L9DtNM=

@@ -97,7 +97,7 @@ func TestStatsEmptyAndAllPending(t *testing.T) {
 				t.Fatalf("no samples must mean no latencies: %+v", got)
 			}
 			metrics := got.Metrics()
-			for _, key := range []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_s"} {
+			for _, key := range []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec"} {
 				if _, present := metrics[key]; present {
 					t.Fatalf("%s must be omitted when nothing arrived", key)
 				}

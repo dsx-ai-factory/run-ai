@@ -18504,6 +18504,7 @@ paths:
         - $ref: '#/components/parameters/TelemetryGroupBy1'
         - $ref: '#/components/parameters/TelemetryType2'
         - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterByCreatedAt'
       responses:
         '200':
           description: Executed successfully.
@@ -18522,6 +18523,58 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '500':
           $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/workloads/telemetry:
+    x-internal: true
+    get:
+      summary: Get the internal workloads telemetry.
+      operationId: get_internal_workloads_telemetry
+      description: >
+        Internal endpoint to retrieve workload data by telemetry type.
+        Optionally filter by specific workload phases.
+
+
+        Telemetry Types:
+
+        - WORKLOADS_COUNT: Count of workloads
+
+        - GPU_ALLOCATION: GPU allocation metrics
+
+        - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current
+        pending time (time since entering Pending phase).
+          For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+        - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across
+        workloads
+      x-internal: true
+      x-no-authorization: true
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/FilterByCluster'
+        - $ref: '#/components/parameters/FilterByNodepoolName'
+        - $ref: '#/components/parameters/FilterByDepartment'
+        - $ref: '#/components/parameters/FilterByProject'
+        - $ref: '#/components/parameters/TelemetryGroupBy1'
+        - $ref: '#/components/parameters/TelemetryType2'
+        - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterByCreatedAt'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/workloads/podgroups/sync:
@@ -62755,6 +62808,7 @@ components:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
     TelemetryType2:
       name: telemetryType
       in: query
@@ -62778,6 +62832,25 @@ components:
         example:
           - Running
           - Failed
+    TelemetryFilterByCreatedAt:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are == Equals, != Not equals, <= Less than or equal, >=
+        Greater than or equal. Dates are in ISO 8601 timestamp format.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          maxLength: 1000
+          pattern: ^(createdAt)(==|!=|<=|>=).+$
+        example:
+          - 'createdAt>=2026-09-01T00:00:00Z'
+          - 'createdAt<=2026-09-02T00:00:00Z'
+      explode: false
     PodsSort:
       name: sortBy
       in: query

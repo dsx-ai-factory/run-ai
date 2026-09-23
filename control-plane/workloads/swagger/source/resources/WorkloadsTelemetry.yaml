@@ -26,6 +26,7 @@ get:
     - $ref: '../parameters/query/TelemetryGroupBy.yaml'
     - $ref: '../parameters/query/TelemetryType.yaml'
     - $ref: '../parameters/query/FilterByPhases.yaml'
+    - $ref: '../parameters/query/TelemetryFilterByCreatedAt.yaml'
   responses:
     200:
       description: Executed successfully.

@@ -63,6 +63,10 @@ paths:
   /api/v1/workloads/telemetry:
     $ref: './resources/WorkloadsTelemetry.yaml'
 
+  /internal/workloads/telemetry:
+    x-internal: true
+    $ref: './resources/WorkloadsTelemetryInternal.yaml'
+
   /api/v1/workloads/podgroups/sync:
     $ref: './resources/PodGroupsSync.yaml'
 

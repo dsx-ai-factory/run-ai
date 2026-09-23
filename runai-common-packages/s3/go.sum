@@ -4,10 +4,10 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 h1:Fy946r1JrfkYN5KBZhu+GBLhxuA7EY1Lt10sgDIzDxs=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8/go.mod h1:xAYNpT7DXg6+KXXeNERsHq6fYR605zz2lE+GCE8BKZY=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.12 h1:jHw10dO8ehzF3AiafP89CXSQp6heqURpZoI84tJ9XBo=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.12/go.mod h1:QnsEWeDrvrQb48V6Y+qvcH8BXM3GoOwxqSlud/eoMpQ=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0 h1:tIxjIoZUYFme1g/DfE5LD9HOXoY7mEa4OmE+218l73k=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0/go.mod h1:7eHCBYbQ9OWPdWD1WP9OmaeEnXKQs5UC4HYjGHm2TXc=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 h1:ngMQ/W6rCI/3Fl695DqGHByE5abCf3R1JNKd9Wtnv7s=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13/go.mod h1:QnsEWeDrvrQb48V6Y+qvcH8BXM3GoOwxqSlud/eoMpQ=
 github.com/dustin/go-humanize v1.1.0 h1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=
 github.com/dustin/go-humanize v1.1.0/go.mod h1:hc1CvRkJMsgxqjmjMQF3QNRAZBwY8AXBAzKYoSX9sFI=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
