@@ -77,7 +77,7 @@ linters:
       # no longer excluded per-team — new SQL injection patterns will be caught.
 
 issues:
-  new-from-rev: origin/master
+  new-from-rev: origin/main
   max-same-issues: 50
   max-issues-per-linter: 100
 
