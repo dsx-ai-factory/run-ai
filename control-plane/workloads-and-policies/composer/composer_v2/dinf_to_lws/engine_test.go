@@ -82,7 +82,7 @@ func newNIMLabel(name, value string, exclude bool) workloadsApi.Label {
 }
 
 func TestComposePropagatesNIMIdentityForDistributedInference(t *testing.T) {
-	spec := newDistributedInferenceSpec("gcr.io/run-ai-lab/nim-cpu:latest")
+	spec := newDistributedInferenceSpec("registry.example.com/nim-cpu:latest")
 	leader := spec.Leader.Get()
 	leader.SetLabels([]workloadsApi.Label{newNIMLabel(constants.LabelNIMWorkload, "true", false)})
 
