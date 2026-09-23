@@ -75,10 +75,6 @@ func NewAuthenticatedDownloaderFactory(chartAuthClient *http.Client) DownloaderF
 }
 
 func (d *Downloader) Download() (string, error) {
-	// A fixed, predictable directory name under the shared system temp dir can be
-	// pre-created by another local user with lax permissions before we get to it.
-	// os.MkdirTemp creates a directory with a random name and 0700 permissions, so
-	// it can't be pre-staged by an attacker.
 	destDir, err := os.MkdirTemp("", ChartsDirName+"-")
 	if err != nil {
 		return "", fmt.Errorf("failed to create chart destination dir: %w", err)
