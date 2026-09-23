@@ -1202,7 +1202,7 @@ func createConnectionsFromUrls(urls []string, ewKind string) ([]models.Connectio
 			return nil, fmt.Errorf("failed to parse URL %s: %w", rawUrl, err)
 		}
 
-		// Extract subdomain from host (e.g., "sub-domain" from "sub-domain.runailabs.com")
+		// Extract subdomain from host (e.g., "sub-domain" from "sub-domain.example.com")
 		var subdomain *string
 		if parsedUrl.Host != "" {
 			hostParts := strings.Split(parsedUrl.Host, ".")

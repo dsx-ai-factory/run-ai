@@ -1968,8 +1968,8 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			baseWorkload.Type = "DynamoGraphDeployment"
 			baseWorkload.ExternalWorkloadName = "external-deployment-" + id
 			baseWorkload.Urls = []string{
-				"https://subdomain1.runailabs.com/path1",
-				"https://subdomain2.runailabs.com:8080/path2",
+				"https://subdomain1.example.com/path1",
+				"https://subdomain2.example.com:8080/path2",
 			}
 
 			apiResponse, _ := workloadsService.SyncWorkloads(ctx, []string{}, api.WorkloadsSyncRequest{
@@ -1988,7 +1988,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 
 			// Validate first connection
 			conn1 := workloadResponse.ExternalConnections[0]
-			Expect(conn1.Url).To(Equal("https://subdomain1.runailabs.com/path1"))
+			Expect(conn1.Url).To(Equal("https://subdomain1.example.com/path1"))
 			Expect(conn1.ConnectionType).To(Equal("ExternalUrl"))
 			Expect(conn1.CorrelationName).To(Equal("url"))
 			Expect(conn1.ExposedUrlSubDomain).ToNot(BeNil())
@@ -1999,7 +1999,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 
 			// Validate second connection
 			conn2 := workloadResponse.ExternalConnections[1]
-			Expect(conn2.Url).To(Equal("https://subdomain2.runailabs.com:8080/path2"))
+			Expect(conn2.Url).To(Equal("https://subdomain2.example.com:8080/path2"))
 			Expect(conn2.Name).To(Equal(baseWorkload.Type + "-2")) // Second URL: name with suffix
 			Expect(conn2.ConnectionType).To(Equal("ExternalUrl"))
 			Expect(conn2.CorrelationName).To(Equal("url"))
@@ -2045,8 +2045,8 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			// Do NOT set ExternalWorkloadName - this is a native workload
 			baseWorkload.ExternalWorkloadName = ""
 			baseWorkload.Urls = []string{
-				"https://native1.runailabs.com/path1",
-				"https://native2.runailabs.com/path2",
+				"https://native1.example.com/path1",
+				"https://native2.example.com/path2",
 			}
 
 			apiResponse, _ := workloadsService.SyncWorkloads(ctx, []string{}, api.WorkloadsSyncRequest{
