@@ -157,10 +157,6 @@ func writeDockerConfigToTempFile(data []byte) (string, error) {
 // writeTempFile writes data to a temporary file and returns the path
 // (TODO) note that those files are not removed by the controller, only by the casual cleanup of /tmp, it's not critical but not ideal
 func writeTempFile(prefix string, data []byte) (string, error) {
-	// A fixed, predictable directory name under the shared system temp dir can be
-	// pre-created by another local user with lax permissions before we get to it,
-	// exposing the credentials written below. os.MkdirTemp creates a directory with
-	// a random name and 0700 permissions, so it can't be pre-staged by an attacker.
 	tempDir, err := os.MkdirTemp("", TempAuthDir+"-")
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp dir: %w", err)
