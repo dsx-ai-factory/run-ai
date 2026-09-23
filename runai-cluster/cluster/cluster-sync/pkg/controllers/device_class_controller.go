@@ -37,7 +37,11 @@ func AddDeviceClassHandlerToCache(backendClient *backendclient.BackendClient, ca
 
 	_, err := deviceClassInformer.AddEventHandler(cache.FilteringResourceEventHandler{
 		FilterFunc: func(obj any) bool {
-			switch obj.(type) {
+			// Unwrap DeletedFinalStateUnknown tombstones so missed deletions still
+			// reach DeleteFunc and trigger the coalesced full-set resync; without
+			// this the informer would silently drop the tombstone here and the
+			// tracker would keep the stale DeviceClass row until the next event.
+			switch filteredObject(obj).(type) {
 			case *resourcev1.DeviceClass:
 				return backendClient.IsRunaiBackendAvailable()
 			default:
