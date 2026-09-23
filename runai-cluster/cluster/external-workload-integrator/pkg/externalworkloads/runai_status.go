@@ -216,23 +216,26 @@ func relevantCriticalIssueMessage(wlr *dromosv1alpha1.WorkloadRunner) *string {
 
 // handleMissingChild reports an ExternalWorkload whose workload object is gone: the runner keeps
 // it alive across a restart, so the object can be absent while the workload is still live.
-func (h *ExternalWorkloadHandler) handleMissingChild(ctx context.Context, task utils.ExternalWorkloadTask) {
+func (h *ExternalWorkloadHandler) handleMissingChild(ctx context.Context,
+	task utils.ExternalWorkloadTask,
+) error {
 	if task.ExternalWorkloadName == "" {
-		return
+		return nil
 	}
 
 	externalWorkload := &v1alpha1.ExternalWorkload{}
 	key := client.ObjectKey{Name: task.ExternalWorkloadName, Namespace: task.Key.Namespace}
 	if err := h.cachedClient.Get(ctx, key, externalWorkload); err != nil {
-		if !errors.IsNotFound(err) {
-			log.Warn().Msgf("runaistatus: failed getting ExternalWorkload <%s/%s>: %s",
-				task.Key.Namespace, task.ExternalWorkloadName, err.Error())
+		if errors.IsNotFound(err) {
+			return nil
 		}
-		return
+		log.Warn().Msgf("runaistatus: failed getting ExternalWorkload <%s/%s>: %s",
+			task.Key.Namespace, task.ExternalWorkloadName, err.Error())
+		return err
 	}
 
 	if _, found := externalWorkload.Annotations[commonconstants.EwiStatusAnnotation]; !found {
-		return
+		return nil
 	}
 
 	// cluster-sync overrides the phase with the runner's only while ewi-status is unset, so
@@ -242,5 +245,7 @@ func (h *ExternalWorkloadHandler) handleMissingChild(ctx context.Context, task u
 	if err := h.cachedClient.Patch(ctx, patched, client.MergeFrom(externalWorkload)); err != nil {
 		log.Warn().Msgf("runaistatus: failed clearing ewi-status on <%s/%s>: %s",
 			externalWorkload.Namespace, externalWorkload.Name, err.Error())
+		return err
 	}
+	return nil
 }

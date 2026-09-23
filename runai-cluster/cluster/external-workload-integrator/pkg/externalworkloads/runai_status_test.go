@@ -8,6 +8,7 @@ package externalworkloads
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"math"
 
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
@@ -19,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -27,6 +29,7 @@ import (
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 type nativeInferenceStatusHandler struct{}
@@ -357,5 +360,53 @@ var _ = Describe("ExternalWorkloadHandler.handleMissingChild", func() {
 		Expect(func() { handler.handleMissingChild(context.Background(), missingChildTask("gone")) }).
 			NotTo(Panic())
 		_ = ctx
+	})
+})
+
+// A transient failure must be retried, not swallowed: a runner that stays Failed produces no
+// further events, so a dropped error leaves the workload reporting its last phase forever.
+var _ = Describe("handleMissingChild error propagation", func() {
+	failingClient := func(objects ...client.Object) client.Client {
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+		return fakeclient.NewClientBuilder().
+			WithScheme(scheme).
+			WithObjects(objects...).
+			WithInterceptorFuncs(interceptor.Funcs{
+				Patch: func(_ context.Context, _ client.WithWatch, _ client.Object,
+					_ client.Patch, _ ...client.PatchOption,
+				) error {
+					return apierrors.NewInternalError(errors.New("boom"))
+				},
+			}).
+			Build()
+	}
+
+	ewWithStatus := func() *v1alpha1.ExternalWorkload {
+		return &v1alpha1.ExternalWorkload{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        "ew-pytorchjob-my-job",
+				Namespace:   testNamespace,
+				Annotations: map[string]string{commonconstants.EwiStatusAnnotation: "true"},
+			},
+		}
+	}
+
+	task := func() utils.ExternalWorkloadTask {
+		return *utils.NewExternalWorkloadTask(utils.UpdateOperation,
+			types.NamespacedName{Name: testJobName, Namespace: testNamespace}, pytorchGVK).
+			SetExternalWorkloadName("ew-pytorchjob-my-job")
+	}
+
+	It("returns the patch error so the task is retried", func() {
+		handler := &ExternalWorkloadHandler{cachedClient: failingClient(ewWithStatus())}
+
+		Expect(handler.handleMissingChild(context.Background(), task())).To(HaveOccurred())
+	})
+
+	It("reports success when the external workload is already gone", func() {
+		handler := &ExternalWorkloadHandler{cachedClient: failingClient()}
+
+		Expect(handler.handleMissingChild(context.Background(), task())).To(Succeed())
 	})
 })

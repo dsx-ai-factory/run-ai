@@ -1240,21 +1240,19 @@ func fillTopology(annotations map[string]string, externalWorkload *v1alpha1.Exte
 
 func (h *ExternalWorkloadHandler) handleWorkloadRunnerWithoutObject(ctx context.Context,
 	task utils.ExternalWorkloadTask,
-) {
+) error {
 	runner := &dromosv1alpha1.WorkloadRunner{}
 	key := client.ObjectKey{Name: task.WorkloadRunnerName, Namespace: task.Key.Namespace}
 	if err := h.cachedClient.Get(ctx, key, runner); err != nil {
-		if !errors.IsNotFound(err) {
-			log.Warn().Msgf("Failed to get WorkloadRunner <%s/%s>, error: %s",
-				key.Namespace, key.Name, err.Error())
+		if errors.IsNotFound(err) {
+			return nil
 		}
-		return
+		log.Warn().Msgf("Failed to get WorkloadRunner <%s/%s>, error: %s",
+			key.Namespace, key.Name, err.Error())
+		return err
 	}
 
-	if err := h.createExternalWorkloadForRunner(ctx, runner); err != nil {
-		log.Error().Msgf("Failed to create external workload for WorkloadRunner <%s/%s>, error: %s",
-			key.Namespace, key.Name, err.Error())
-	}
+	return h.createExternalWorkloadForRunner(ctx, runner)
 }
 
 // createExternalWorkloadForRunner builds an ExternalWorkload for a runner whose workload object
