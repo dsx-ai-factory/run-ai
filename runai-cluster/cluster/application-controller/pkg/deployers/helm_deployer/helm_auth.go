@@ -164,6 +164,7 @@ func writeTempFile(prefix string, data []byte) (string, error) {
 
 	tempFile, err := os.CreateTemp(tempDir, prefix)
 	if err != nil {
+		_ = os.RemoveAll(tempDir)
 		return "", fmt.Errorf("failed to create temp file: %w", err)
 	}
 	defer func(tempFile *os.File) {
@@ -171,6 +172,7 @@ func writeTempFile(prefix string, data []byte) (string, error) {
 	}(tempFile)
 
 	if _, err := tempFile.Write(data); err != nil {
+		_ = os.RemoveAll(tempDir)
 		return "", fmt.Errorf("failed to write temp file: %w", err)
 	}
 
