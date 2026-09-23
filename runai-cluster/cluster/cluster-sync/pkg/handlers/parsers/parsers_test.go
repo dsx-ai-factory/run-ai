@@ -6,7 +6,6 @@
 package parsers_test
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -1325,36 +1324,31 @@ var _ = Describe("Parsers", Ordered, func() {
 				}
 			}
 
-			It("detects the cluster verdict flipping, which no Node event would surface", func() {
-				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
-					WithObjects(nvidiaComponentsPod, clusterInfoConfigMap(true))
-				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
-				nodeParser = parsers.NewNodeParser(fakeCachedClient)
+			withClusterVersion := func(configMap *corev1.ConfigMap) *corev1.ConfigMap {
+				configMap.Data["runai-public"] = "cluster-version: 2.23.0\n" + configMap.Data["runai-public"]
+				return configMap
+			}
 
-				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeFalse())
-				nodeParser.ParseNodeToServerScheme(node)
-				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeFalse())
+			unparsableClusterInfo := func() *corev1.ConfigMap {
+				return &corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{Name: "runai-public", Namespace: "runai"},
+					Data:       map[string]string{"runai-public": "dependencies: ["},
+				}
+			}
 
-				flipped := clusterInfoConfigMap(false)
-				Expect(fakeCachedClient.Update(context.Background(), flipped)).To(Succeed())
-
-				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeTrue())
-			})
-
-			It("detects the verdict flipping back when the cluster info is deleted", func() {
-				unsupported := clusterInfoConfigMap(false)
-				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
-					WithObjects(nvidiaComponentsPod, unsupported)
-				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
-				nodeParser = parsers.NewNodeParser(fakeCachedClient)
-
-				nodeParser.ParseNodeToServerScheme(node)
-				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeFalse())
-
-				Expect(fakeCachedClient.Delete(context.Background(), unsupported)).To(Succeed())
-
-				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeTrue())
-			})
+			DescribeTable("detects a verdict change between two versions of the cluster info",
+				func(before, after *corev1.ConfigMap, expectedChanged bool) {
+					Expect(parsers.GpuFractioningVerdictChanged(before, after)).To(Equal(expectedChanged))
+				},
+				Entry("supported to unsupported", clusterInfoConfigMap(true), clusterInfoConfigMap(false), true),
+				Entry("unsupported to supported", clusterInfoConfigMap(false), clusterInfoConfigMap(true), true),
+				Entry("unrelated fields changing", clusterInfoConfigMap(false), withClusterVersion(clusterInfoConfigMap(false)), false),
+				Entry("created as unsupported", nil, clusterInfoConfigMap(false), true),
+				Entry("created as supported", nil, clusterInfoConfigMap(true), false),
+				Entry("deleted while unsupported", clusterInfoConfigMap(false), nil, true),
+				Entry("deleted while supported", clusterInfoConfigMap(true), nil, false),
+				Entry("becoming unparsable while unsupported", clusterInfoConfigMap(false), unparsableClusterInfo(), true),
+			)
 
 			It("reports nothing on the node when the cluster does not support fractions", func() {
 				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).

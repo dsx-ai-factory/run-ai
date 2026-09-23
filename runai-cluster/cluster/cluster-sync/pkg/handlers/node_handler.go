@@ -126,12 +126,8 @@ func (nodeHandler *NodeHandler) SetNumaNodeHandler(numaNodeHandler *NumaNodeHand
 	nodeHandler.numaNodeHandler = numaNodeHandler
 }
 
-// ResyncOnGpuFractioningVerdictChange pushes every node when the cluster's fractioning verdict
-// flips. The per-node conditions are derived from it, but the Node objects themselves do not
-// change when it does, so the update-diff path sees nothing and would leave the reported
-// conditions stale until the next periodic full sync.
-func (nodeHandler *NodeHandler) ResyncOnGpuFractioningVerdictChange() {
-	if !nodeHandler.nodeParser.GpuFractioningSupportChanged() {
+func (nodeHandler *NodeHandler) ResyncOnGpuFractioningVerdictChange(before, after *corev1.ConfigMap) {
+	if !parsers.GpuFractioningVerdictChanged(before, after) {
 		return
 	}
 	zap.S().Info("Cluster GPU fractioning support changed, resyncing all nodes")
