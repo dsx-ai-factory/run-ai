@@ -28,8 +28,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/settings"
 	clustersync "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/sync"
 	idm_client "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client"
-	tm_client "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
 	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+	tm_client "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/pubsub"
 

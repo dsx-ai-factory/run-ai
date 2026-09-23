@@ -13,6 +13,7 @@ import (
 	nodes "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node"
 
 	clusterOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/nodepool"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/filter"
 	cpmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane"
@@ -21,7 +22,6 @@ import (
 	nodepool2 "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/nodepool"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/project"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli"
-	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	"k8s.io/utils/ptr"
 )

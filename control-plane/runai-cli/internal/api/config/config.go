@@ -17,11 +17,11 @@ import (
 
 	clusterservice "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	loginapi "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
+	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	assetsservice "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client/generated"
 	clusterapi "github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client/generated"
 	datavolumesservice "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
-	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadmanager "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )

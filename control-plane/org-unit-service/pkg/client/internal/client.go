@@ -14,9 +14,9 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 
-	clientutils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
+	clientutils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 	"k8s.io/utils/ptr"
 )
 

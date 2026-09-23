@@ -12,11 +12,11 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/testing"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	scope "github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 )
 
 type SimpleMock struct {

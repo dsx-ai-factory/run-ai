@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	config "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	config "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
 	"go.uber.org/zap"
 
 	"github.com/charmbracelet/bubbles/table"

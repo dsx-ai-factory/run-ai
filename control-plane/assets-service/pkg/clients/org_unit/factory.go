@@ -17,9 +17,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 )
 
 // ClientInterface lists the org unit services that assets service needs

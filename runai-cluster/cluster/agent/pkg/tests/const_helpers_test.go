@@ -14,9 +14,9 @@ import (
 
 	auth_openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	openapi2 "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	org_unit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	assets_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	org_unit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

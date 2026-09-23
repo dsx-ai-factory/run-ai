@@ -8,8 +8,8 @@ package service
 import (
 	"context"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/department/model"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/department/model"
 )
 
 type DepartmentClient interface {

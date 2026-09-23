@@ -18,10 +18,10 @@ import (
 
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"

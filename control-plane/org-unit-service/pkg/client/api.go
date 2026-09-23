@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"time"
 
-	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/internal"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
+	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 )
 
 //go:generate mockery --name IOrgUnitExternalClient

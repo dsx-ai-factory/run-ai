@@ -8,8 +8,8 @@ package plugins
 import (
 	"fmt"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/constants"
 	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/constants"
 )
 
 // DynamoGraphDeploymentPlugin handles DynamoGraphDeployment-specific logic

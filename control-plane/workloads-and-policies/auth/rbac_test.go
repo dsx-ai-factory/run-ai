@@ -10,10 +10,10 @@ import (
 	"net/http"
 
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	scope "github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo"
-	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 
 	. "github.com/onsi/ginkgo/v2"

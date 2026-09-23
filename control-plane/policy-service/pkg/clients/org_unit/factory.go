@@ -11,9 +11,9 @@ import (
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"sync"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/config"
 	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/config"
 )
 
 // ClientInterface lists the assets services that workloads service needs

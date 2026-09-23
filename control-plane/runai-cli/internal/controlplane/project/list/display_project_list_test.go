@@ -11,12 +11,12 @@ import (
 	"text/template"
 	"time"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/filter"
 	cpmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane"
 	apilist "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/list"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/project/list"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/transaction"
-	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

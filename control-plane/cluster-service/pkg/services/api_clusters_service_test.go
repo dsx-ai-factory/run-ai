@@ -57,10 +57,10 @@ import (
 	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	idm_client_api "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	idm_client "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/mocks"
-	tm_client_api "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
-	tm_client_mock "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/mocks"
 	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 	org_unit_service_client_mock "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
+	tm_client_api "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
+	tm_client_mock "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/mocks"
 
 	ext_api "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/api"
 

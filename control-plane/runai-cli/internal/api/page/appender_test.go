@@ -8,8 +8,8 @@ package page_test
 import (
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/page"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/page"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
