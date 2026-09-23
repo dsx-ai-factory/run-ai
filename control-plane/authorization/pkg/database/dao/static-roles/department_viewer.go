@@ -102,10 +102,6 @@ var DepartmentViewer = models.Role{
 			Read:         true,
 		},
 		{
-			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
-			Read:         true,
-		},
-		{
 			ResourceType: api.RESOURCETYPE_CM_VOLUME_ASSETS,
 			Read:         true,
 		},

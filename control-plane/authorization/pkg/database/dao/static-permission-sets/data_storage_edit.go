@@ -36,6 +36,10 @@ var DataStorageEdit = models.PermissionSet{
 			Delete:       true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_GIT_ASSETS,
 			Create:       true,
 			Read:         true,

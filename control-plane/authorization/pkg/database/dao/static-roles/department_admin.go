@@ -178,10 +178,6 @@ var DepartmentAdminLegacy = models.Role{
 			Delete:       true,
 		},
 		{
-			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
-			Read:         true,
-		},
-		{
 			ResourceType: api.RESOURCETYPE_CM_VOLUME_ASSETS,
 			Create:       true,
 			Read:         true,
@@ -457,10 +453,6 @@ var DepartmentAdmin = models.Role{
 			Read:         true,
 			Update:       true,
 			Delete:       true,
-		},
-		{
-			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
-			Read:         true,
 		},
 		{
 			ResourceType: api.RESOURCETYPE_CM_VOLUME_ASSETS,
