@@ -84,21 +84,16 @@ func addGpuFractioningVerdictWatch(cachedClient cachedclient.CachedClient, nodeH
 		},
 		Handler: clientgocache.ResourceEventHandlerDetailedFuncs{
 			AddFunc: func(obj any, isInInitialList bool) {
-				// The startup full sync already reads this state, so it is not a change.
-				if isInInitialList {
-					return
-				}
-				nodeHandler.ResyncOnGpuFractioningVerdictChange(nil, obj.(*corev1.ConfigMap))
+				nodeHandler.UpdateGpuFractioningSupport(obj.(*corev1.ConfigMap), isInInitialList)
 			},
-			UpdateFunc: func(oldObj, newObj any) {
-				nodeHandler.ResyncOnGpuFractioningVerdictChange(oldObj.(*corev1.ConfigMap), newObj.(*corev1.ConfigMap))
+			UpdateFunc: func(_, newObj any) {
+				nodeHandler.UpdateGpuFractioningSupport(newObj.(*corev1.ConfigMap), false)
 			},
 			DeleteFunc: func(obj any) {
-				configMap, ok := deletedObject[*corev1.ConfigMap](obj)
-				if !ok {
+				if _, ok := deletedObject[*corev1.ConfigMap](obj); !ok {
 					return
 				}
-				nodeHandler.ResyncOnGpuFractioningVerdictChange(configMap, nil)
+				nodeHandler.UpdateGpuFractioningSupport(nil, false)
 			},
 		},
 	})

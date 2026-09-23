@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	kaiv1alpha1 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1alpha1"
@@ -109,14 +110,41 @@ type NodeParser struct {
 
 	nodeLabelNvidiaContainerToolkit string
 	nodeLabelNvidiaDcgmExporter     string
+
+	gpuFractioningSupport gpuFractioningSupportState
+}
+
+// Written only when the cluster-info ConfigMap changes, so the per-node parse never unmarshals it.
+type gpuFractioningSupportState struct {
+	mutex     sync.RWMutex
+	supported bool
+}
+
+func (state *gpuFractioningSupportState) get() bool {
+	state.mutex.RLock()
+	defer state.mutex.RUnlock()
+	return state.supported
+}
+
+// set reports whether the verdict differs from the one already held.
+func (state *gpuFractioningSupportState) set(supported bool) bool {
+	state.mutex.Lock()
+	defer state.mutex.Unlock()
+	changed := state.supported != supported
+	state.supported = supported
+	return changed
 }
 
 func NewNodeParser(cachedReader client.Reader) *NodeParser {
-	return &NodeParser{
+	// Defaults to unsupported: nothing has confirmed fractions work yet, and assuming they do
+	// would flash the cluster-wide reason onto every node. The ConfigMap informer seeds the real
+	// verdict before the first full sync, which is what establishes the reported state.
+	nodeParser := &NodeParser{
 		cachedReader:                    cachedReader,
 		nodeLabelNvidiaContainerToolkit: config.Config().NodeLabelNvidiaContainerToolkit,
 		nodeLabelNvidiaDcgmExporter:     config.Config().NodeLabelNvidiaDcgmExporter,
 	}
+	return nodeParser
 }
 
 // Value of label GPUNetworkAccelerationLabelKey should contain another label name - the domainClique label.
@@ -257,7 +285,7 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 
 	result = append(result, calculateUnschedulableCondition(node)...)
 
-	if gpuFractioningEnabled && nodeParser.clusterSupportsGpuFractioning() {
+	if gpuFractioningEnabled && nodeParser.gpuFractioningSupport.get() {
 		result = append(result, calculateGpuFractioningConditions(node)...)
 	}
 
@@ -268,27 +296,20 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 	return result
 }
 
-// The fractioning operator stamps a cluster-wide reason onto every GPU node, so without this
-// every node would repeat what the cluster status already says once.
-func (nodeParser *NodeParser) clusterSupportsGpuFractioning() bool {
-	clusterInfoCm := &corev1.ConfigMap{}
-	err := nodeParser.cachedReader.Get(context.Background(), client.ObjectKey{
-		Name:      constants.ClusterInfoConfigMapName,
-		Namespace: runaiv1.DefaultNamespace,
-	}, clusterInfoCm)
+// UpdateGpuFractioningSupport stores the verdict and reports whether it changed. Gating the node
+// conditions on it is what stops every GPU node repeating the reason the cluster status carries.
+func (nodeParser *NodeParser) UpdateGpuFractioningSupport(clusterInfoCm *corev1.ConfigMap) bool {
+	supported, err := gpuFractioningSupported(clusterInfoCm)
 	if err != nil {
-		zap.S().Debugf("Assuming the cluster supports GPU fractioning, failed to read %s: %v",
-			constants.ClusterInfoConfigMapName, err)
-		return true
+		zap.S().Warnf("Assuming the cluster supports GPU fractioning: %v", err)
 	}
-	supported, _ := gpuFractioningSupported(clusterInfoCm)
-	return supported
+	return nodeParser.gpuFractioningSupport.set(supported)
 }
 
-// gpuFractioningSupported reads the cluster's fractioning verdict from the cluster-info ConfigMap;
-// nil stands for one that does not exist. Absent or unparsable state is treated as supported,
-// matching what the cluster status does with the same input, so the two never disagree. The error
-// only explains a fail-open verdict.
+// gpuFractioningSupported reads the verdict out of the cluster-info ConfigMap; nil stands for one
+// that does not exist. Absent or unparsable state is treated as supported, matching what the
+// cluster status does with the same input, so the two never disagree. The error only explains a
+// fail-open verdict.
 func gpuFractioningSupported(clusterInfoCm *corev1.ConfigMap) (bool, error) {
 	if clusterInfoCm == nil {
 		return true, nil
@@ -307,18 +328,6 @@ func gpuFractioningSupported(clusterInfoCm *corev1.ConfigMap) (bool, error) {
 		}
 	}
 	return true, nil
-}
-
-// GpuFractioningVerdictChanged compares the verdict carried by two versions of the cluster-info
-// ConfigMap. It is rewritten on every operator reconcile with unrelated fields, so node resyncs
-// key off this rather than off the event itself.
-func GpuFractioningVerdictChanged(before, after *corev1.ConfigMap) bool {
-	wasSupported, _ := gpuFractioningSupported(before)
-	isSupported, err := gpuFractioningSupported(after)
-	if err != nil {
-		zap.S().Warnf("Assuming the cluster supports GPU fractioning: %v", err)
-	}
-	return wasSupported != isSupported
 }
 
 func (nodeParser *NodeParser) calculateMissingNvidiaComponentsConditions(node *corev1.Node) []swagger.NodeStatusConditionDetails {
