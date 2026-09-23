@@ -12,7 +12,6 @@ import (
 
 	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
-	ewiconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/supportedhandlers"
 	v2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2"
 	schedulingv2alpha2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v2alpha2"
@@ -362,7 +361,7 @@ var _ = Describe("ExternalWorkloadHandler.createExternalWorkloadForRunner", func
 		runnerNamespace = &corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   testRunnerNamespace,
-				Labels: map[string]string{ewiconstants.RunaiQueueLabel: "proj-1"},
+				Labels: map[string]string{constants.RunaiQueueLabel: "proj-1"},
 			},
 		}
 		project = &kaiorg.Project{
@@ -518,7 +517,7 @@ var _ = Describe("a workload object created after its runner-built external work
 		runnerNamespace := &corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   testRunnerNamespace,
-				Labels: map[string]string{ewiconstants.RunaiQueueLabel: "proj-1"},
+				Labels: map[string]string{constants.RunaiQueueLabel: "proj-1"},
 			},
 		}
 		project := &kaiorg.Project{
@@ -594,7 +593,7 @@ var _ = Describe("createExternalWorkloadForRunner when the workload object alrea
 		runnerNamespace := &corev1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   testRunnerNamespace,
-				Labels: map[string]string{ewiconstants.RunaiQueueLabel: "proj-1"},
+				Labels: map[string]string{constants.RunaiQueueLabel: "proj-1"},
 			},
 		}
 		project := &kaiorg.Project{
