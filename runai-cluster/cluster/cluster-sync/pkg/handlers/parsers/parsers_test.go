@@ -1341,6 +1341,21 @@ var _ = Describe("Parsers", Ordered, func() {
 				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeTrue())
 			})
 
+			It("detects the verdict flipping back when the cluster info is deleted", func() {
+				unsupported := clusterInfoConfigMap(false)
+				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
+					WithObjects(nvidiaComponentsPod, unsupported)
+				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+				nodeParser = parsers.NewNodeParser(fakeCachedClient)
+
+				nodeParser.ParseNodeToServerScheme(node)
+				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeFalse())
+
+				Expect(fakeCachedClient.Delete(context.Background(), unsupported)).To(Succeed())
+
+				Expect(nodeParser.GpuFractioningSupportChanged()).To(BeTrue())
+			})
+
 			It("reports nothing on the node when the cluster does not support fractions", func() {
 				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
 					WithObjects(nvidiaComponentsPod, clusterInfoConfigMap(false))

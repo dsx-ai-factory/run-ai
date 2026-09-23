@@ -79,7 +79,15 @@ func addGpuFractioningVerdictWatch(cachedClient cachedclient.CachedClient, nodeH
 	_, err := configMapInformer.AddEventHandler(clientgocache.FilteringResourceEventHandler{
 		FilterFunc: func(obj any) bool {
 			configMap, ok := obj.(*corev1.ConfigMap)
-			return ok && configMap.Name == constants.ClusterInfoConfigMapName &&
+			if !ok {
+				// FilteringResourceEventHandler runs this before OnDelete, and a delete can
+				// arrive as a tombstone wrapping the last known object rather than the object.
+				configMap, ok = deletedObject[*corev1.ConfigMap](obj)
+				if !ok {
+					return false
+				}
+			}
+			return configMap.Name == constants.ClusterInfoConfigMapName &&
 				configMap.Namespace == runaiv1.DefaultNamespace
 		},
 		Handler: clientgocache.ResourceEventHandlerFuncs{
@@ -87,6 +95,11 @@ func addGpuFractioningVerdictWatch(cachedClient cachedclient.CachedClient, nodeH
 				nodeHandler.ResyncOnGpuFractioningVerdictChange()
 			},
 			UpdateFunc: func(any, any) {
+				nodeHandler.ResyncOnGpuFractioningVerdictChange()
+			},
+			// Deleting the ConfigMap flips the verdict to supported via the fail-open path,
+			// which is a change like any other when it was previously unsupported.
+			DeleteFunc: func(any) {
 				nodeHandler.ResyncOnGpuFractioningVerdictChange()
 			},
 		},
