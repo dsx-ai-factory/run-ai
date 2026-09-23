@@ -7,7 +7,17 @@ package externalworkloads
 
 import (
 	"context"
+	"encoding/json"
 	"time"
+
+	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
+	ewiconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/supportedhandlers"
+	v2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2"
+	schedulingv2alpha2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v2alpha2"
+	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/cachedclient"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
@@ -292,5 +302,338 @@ var _ = Describe("ExternalWorkloadHandler.getOrRebindExternalWorkloadOfObject", 
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(found.UID).To(Equal(testEwUID))
+	})
+})
+
+const testRunnerNamespace = "team-a"
+
+func onlyExternalWorkloadIn(ctx context.Context, c client.Client) *v1alpha1.ExternalWorkload {
+	list := &v1alpha1.ExternalWorkloadList{}
+	Expect(c.List(ctx, list)).To(Succeed())
+	Expect(list.Items).To(HaveLen(1))
+	return &list.Items[0]
+}
+
+func runnerTemplate(name, apiVersion, kind string, labels map[string]string) runtime.RawExtension {
+	metadata := map[string]any{"name": name, "namespace": testRunnerNamespace}
+	if labels != nil {
+		asAny := map[string]any{}
+		for k, v := range labels {
+			asAny[k] = v
+		}
+		metadata["labels"] = asAny
+	}
+	raw, err := json.Marshal(map[string]any{
+		"apiVersion": apiVersion,
+		"kind":       kind,
+		"metadata":   metadata,
+	})
+	Expect(err).NotTo(HaveOccurred())
+	return runtime.RawExtension{Raw: raw}
+}
+
+func failedRunner(template runtime.RawExtension, annotations map[string]string) *dromosv1alpha1.WorkloadRunner {
+	return &dromosv1alpha1.WorkloadRunner{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              testWlrName,
+			Namespace:         testRunnerNamespace,
+			UID:               testWlrUID,
+			CreationTimestamp: originalCreation,
+			Annotations:       annotations,
+		},
+		Spec:   dromosv1alpha1.WorkloadRunnerSpec{Template: template},
+		Status: dromosv1alpha1.WorkloadRunnerStatus{Phase: dromosv1alpha1.WorkloadRunnerPhaseFailed},
+	}
+}
+
+// A workload object that was never created leaves no ExternalWorkload, so the workload is
+// invisible in the control plane until one is built from the runner alone.
+var _ = Describe("ExternalWorkloadHandler.createExternalWorkloadForRunner", func() {
+	var ctx context.Context
+	var runnerNamespace *corev1.Namespace
+	var project *kaiorg.Project
+
+	pytorchTemplate := func(labels map[string]string) runtime.RawExtension {
+		return runnerTemplate(testJobName, "kubeflow.org/v1", "PyTorchJob", labels)
+	}
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		runnerNamespace = &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   testRunnerNamespace,
+				Labels: map[string]string{ewiconstants.RunaiQueueLabel: "proj-1"},
+			},
+		}
+		project = &kaiorg.Project{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "proj-1",
+				Labels: map[string]string{
+					v2.ProjectIdLabel:                    "1",
+					schedulingv2alpha2.DepartmentIdLabel: "2",
+				},
+			},
+			Spec: kaiorg.ProjectSpec{Parent: "dept-1"},
+		}
+	})
+
+	runnerHandler := func(objects ...client.Object) (*ExternalWorkloadHandler, client.Client) {
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+		Expect(corev1.AddToScheme(scheme)).To(Succeed())
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		all := append([]client.Object{runnerNamespace, project}, objects...)
+		c := fakeclient.NewClientBuilder().
+			WithScheme(scheme).
+			WithObjects(all...).
+			WithStatusSubresource(&v1alpha1.ExternalWorkload{}).
+			WithIndex(&v1alpha1.ExternalWorkload{}, constants.ExternalWorkloadByOriginalUIDIndexerName,
+				cachedclient.ExternalWorkloadByOriginalWorkloadUIDIndexer).
+			Build()
+		return &ExternalWorkloadHandler{cachedClient: c}, c
+	}
+
+	onlyExternalWorkload := func(c client.Client) *v1alpha1.ExternalWorkload {
+		return onlyExternalWorkloadIn(ctx, c)
+	}
+
+	It("builds an external workload from the runner", func() {
+		runner := failedRunner(pytorchTemplate(nil), map[string]string{
+			commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: testWorkload,
+		})
+		handler, c := runnerHandler()
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+
+		stored := onlyExternalWorkload(c)
+		Expect(stored.Name).To(Equal(utils.GenerateExternalWorkloadName(pytorchGVK, testJobName)),
+			"must match the name the workload object would have produced")
+		Expect(stored.Namespace).To(Equal(testRunnerNamespace))
+		Expect(stored.Spec.OriginalWorkloadUID).To(Equal(testWlrUID), "there is no workload object uid")
+		Expect(stored.Spec.OriginalWorkloadName).To(Equal(testJobName))
+		Expect(stored.Spec.OriginalWorkloadKind).To(Equal("PyTorchJob"))
+		Expect(stored.Spec.Group).To(Equal("kubeflow.org"))
+		Expect(stored.Spec.Version).To(Equal("v1"))
+		Expect(stored.Spec.Type).To(Equal("PyTorchJob"))
+		Expect(stored.Spec.ProjectName).To(Equal("proj-1"))
+		Expect(stored.Spec.DepartmentName).To(Equal("dept-1"))
+	})
+
+	// A zero createdAt is rejected by the control plane and fails the whole project's sync batch.
+	It("carries the runner creation timestamp", func() {
+		runner := failedRunner(pytorchTemplate(nil), map[string]string{
+			commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: testWorkload,
+		})
+		handler, c := runnerHandler()
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+
+		stored := onlyExternalWorkload(c)
+		Expect(stored.Spec.CreationTimestamp.IsZero()).To(BeFalse())
+		Expect(stored.Spec.CreationTimestamp.UTC()).To(Equal(originalCreation.UTC()))
+	})
+
+	// These are the two guards the re-bind needs when the workload object finally appears.
+	It("carries the runner identity and the control-plane workload id", func() {
+		runner := failedRunner(pytorchTemplate(nil), map[string]string{
+			commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: testWorkload,
+		})
+		handler, c := runnerHandler()
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+
+		stored := onlyExternalWorkload(c)
+		Expect(stored.Labels).To(HaveKeyWithValue(commonconstants.WorkloadRunnerNameLabel, testWlrName))
+		Expect(stored.Labels).To(HaveKeyWithValue(commonconstants.WorkloadRunnerUidLabel, string(testWlrUID)))
+		Expect(stored.Annotations).To(
+			HaveKeyWithValue(commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload, testWorkload))
+		Expect(stored.Annotations).NotTo(HaveKey(commonconstants.EwiStatusAnnotation),
+			"the runner must drive the phase")
+		Expect(stored.OwnerReferences).To(HaveLen(1))
+		Expect(stored.OwnerReferences[0].Kind).To(Equal(dromosv1alpha1.WorkloadRunnerKind))
+		Expect(stored.OwnerReferences[0].UID).To(Equal(testWlrUID))
+	})
+
+	It("uses the logical workload type for a converted-from-native workload", func() {
+		runner := failedRunner(pytorchTemplate(map[string]string{
+			commonconstants.ConvertedFromNativeLabel: "true",
+			clustercommonconstants.LabelWorkloadKind: "Distributed",
+		}), map[string]string{
+			commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: testWorkload,
+		})
+		handler, c := runnerHandler()
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+
+		stored := onlyExternalWorkload(c)
+		Expect(stored.Spec.Type).To(Equal("Distributed"))
+		Expect(stored.Spec.OriginalWorkloadKind).To(Equal("PyTorchJob"), "the kind stays the real one")
+	})
+
+	It("refuses without a control-plane workload id", func() {
+		runner := failedRunner(pytorchTemplate(nil), nil)
+		handler, c := runnerHandler()
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+
+		list := &v1alpha1.ExternalWorkloadList{}
+		Expect(c.List(ctx, list)).To(Succeed())
+		Expect(list.Items).To(BeEmpty(),
+			"without it the control-plane identity would shift when the workload object appears")
+	})
+
+	It("refuses when the runner template cannot be read", func() {
+		runner := failedRunner(runtime.RawExtension{}, map[string]string{
+			commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: testWorkload,
+		})
+		handler, c := runnerHandler()
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+
+		list := &v1alpha1.ExternalWorkloadList{}
+		Expect(c.List(ctx, list)).To(Succeed())
+		Expect(list.Items).To(BeEmpty())
+	})
+
+	It("does not create a second external workload for the same runner", func() {
+		runner := failedRunner(pytorchTemplate(nil), map[string]string{
+			commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: testWorkload,
+		})
+		handler, c := runnerHandler()
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+
+		list := &v1alpha1.ExternalWorkloadList{}
+		Expect(c.List(ctx, list)).To(Succeed())
+		Expect(list.Items).To(HaveLen(1))
+	})
+})
+
+// The workload object may still be created later, by a runner update or a retry. It must adopt
+// the ExternalWorkload built from the runner rather than adding a second one.
+var _ = Describe("a workload object created after its runner-built external workload", func() {
+	It("re-binds the runner-built external workload instead of creating another", func() {
+		ctx := context.Background()
+		runnerNamespace := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   testRunnerNamespace,
+				Labels: map[string]string{ewiconstants.RunaiQueueLabel: "proj-1"},
+			},
+		}
+		project := &kaiorg.Project{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "proj-1",
+				Labels: map[string]string{
+					v2.ProjectIdLabel:                    "1",
+					schedulingv2alpha2.DepartmentIdLabel: "2",
+				},
+			},
+			Spec: kaiorg.ProjectSpec{Parent: "dept-1"},
+		}
+		runner := failedRunner(
+			runnerTemplate(testJobName, "kubeflow.org/v1", "PyTorchJob", nil),
+			map[string]string{commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: testWorkload},
+		)
+
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+		Expect(corev1.AddToScheme(scheme)).To(Succeed())
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		c := fakeclient.NewClientBuilder().
+			WithScheme(scheme).
+			WithObjects(runnerNamespace, project).
+			WithStatusSubresource(&v1alpha1.ExternalWorkload{}).
+			WithIndex(&v1alpha1.ExternalWorkload{}, constants.ExternalWorkloadByOriginalUIDIndexerName,
+				cachedclient.ExternalWorkloadByOriginalWorkloadUIDIndexer).
+			Build()
+		handler := &ExternalWorkloadHandler{cachedClient: c}
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+		built := onlyExternalWorkloadIn(ctx, c)
+		Expect(built.Spec.OriginalWorkloadUID).To(Equal(testWlrUID))
+
+		// the workload object finally shows up, owned by the same runner
+		child := newChildObject(newChildUID, wlrOwnerRefWithUID(testWlrName, testWlrUID))
+		child.Namespace = testRunnerNamespace
+
+		found, err := handler.getOrRebindExternalWorkloadOfObject(ctx, child, newChildUID)
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(found).NotTo(BeNil())
+		Expect(found.Name).To(Equal(built.Name), "the same external workload, not a new one")
+		Expect(found.UID).To(Equal(built.UID))
+
+		stored := onlyExternalWorkloadIn(ctx, c)
+		Expect(stored.Spec.OriginalWorkloadUID).To(Equal(newChildUID),
+			"re-pointed at the workload object that finally appeared")
+		Expect(stored.Annotations).To(
+			HaveKeyWithValue(commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload, testWorkload),
+			"control-plane identity must not change")
+		Expect(stored.Spec.CreationTimestamp.UTC()).To(Equal(originalCreation.UTC()))
+	})
+})
+
+// existingChildHandler reports that the workload object is already in the cluster.
+type existingChildHandler struct{}
+
+func (existingChildHandler) Parse(_ context.Context, _ client.Object, _ *v1alpha1.ExternalWorkload) error {
+	return nil
+}
+
+func (existingChildHandler) GetObject(_ context.Context, name, namespace string) (client.Object, error) {
+	child := newChildObject(newChildUID, wlrOwnerRefWithUID(testWlrName, testWlrUID))
+	child.Name = name
+	child.Namespace = namespace
+	return child, nil
+}
+
+var _ = Describe("createExternalWorkloadForRunner when the workload object already exists", func() {
+	It("leaves creation to the workload object's own handler", func() {
+		ctx := context.Background()
+		runnerNamespace := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   testRunnerNamespace,
+				Labels: map[string]string{ewiconstants.RunaiQueueLabel: "proj-1"},
+			},
+		}
+		project := &kaiorg.Project{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "proj-1",
+				Labels: map[string]string{
+					v2.ProjectIdLabel:                    "1",
+					schedulingv2alpha2.DepartmentIdLabel: "2",
+				},
+			},
+			Spec: kaiorg.ProjectSpec{Parent: "dept-1"},
+		}
+		runner := failedRunner(
+			runnerTemplate(testJobName, "kubeflow.org/v1", "PyTorchJob", nil),
+			map[string]string{commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: testWorkload},
+		)
+
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+		Expect(corev1.AddToScheme(scheme)).To(Succeed())
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		c := fakeclient.NewClientBuilder().
+			WithScheme(scheme).
+			WithObjects(runnerNamespace, project).
+			WithIndex(&v1alpha1.ExternalWorkload{}, constants.ExternalWorkloadByOriginalUIDIndexerName,
+				cachedclient.ExternalWorkloadByOriginalWorkloadUIDIndexer).
+			Build()
+		handler := &ExternalWorkloadHandler{
+			cachedClient: c,
+			supportedGVKsHandlers: map[schema.GroupVersionKind]supportedhandlers.TopOwnerHandler{
+				pytorchGVK: existingChildHandler{},
+			},
+		}
+
+		Expect(handler.createExternalWorkloadForRunner(ctx, runner)).To(Succeed())
+
+		list := &v1alpha1.ExternalWorkloadList{}
+		Expect(c.List(ctx, list)).To(Succeed())
+		Expect(list.Items).To(BeEmpty(),
+			"the workload object is present, so its own handler owns the external workload")
 	})
 })

@@ -45,6 +45,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -1237,11 +1238,128 @@ func fillTopology(annotations map[string]string, externalWorkload *v1alpha1.Exte
 	externalWorkload.Spec.Topology.RequiredPlacement = topologyRequired
 }
 
-// handleWorkloadRunnerWithoutObject is the entry point for a runner whose workload object was
-// never created. Step 2 builds the ExternalWorkload; for now the task is accepted and logged.
-func (h *ExternalWorkloadHandler) handleWorkloadRunnerWithoutObject(_ context.Context,
+func (h *ExternalWorkloadHandler) handleWorkloadRunnerWithoutObject(ctx context.Context,
 	task utils.ExternalWorkloadTask,
 ) {
-	log.Debug().Msgf("WorkloadRunner <%s/%s> has no workload object and no externalworkload",
-		task.Key.Namespace, task.WorkloadRunnerName)
+	runner := &dromosv1alpha1.WorkloadRunner{}
+	key := client.ObjectKey{Name: task.WorkloadRunnerName, Namespace: task.Key.Namespace}
+	if err := h.cachedClient.Get(ctx, key, runner); err != nil {
+		if !errors.IsNotFound(err) {
+			log.Warn().Msgf("Failed to get WorkloadRunner <%s/%s>, error: %s",
+				key.Namespace, key.Name, err.Error())
+		}
+		return
+	}
+
+	if err := h.createExternalWorkloadForRunner(ctx, runner); err != nil {
+		log.Error().Msgf("Failed to create external workload for WorkloadRunner <%s/%s>, error: %s",
+			key.Namespace, key.Name, err.Error())
+	}
+}
+
+// createExternalWorkloadForRunner builds an ExternalWorkload for a runner whose workload object
+// was never created, so the workload is reported with the runner's phase and issues instead of
+// being absent from the control plane. The spec stays minimal: there is nothing to parse.
+func (h *ExternalWorkloadHandler) createExternalWorkloadForRunner(ctx context.Context,
+	runner *dromosv1alpha1.WorkloadRunner,
+) error {
+	// the annotation is what keeps the control-plane identity stable once the workload object
+	// appears and the ExternalWorkload is re-bound to it
+	workloadId := runner.Annotations[commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload]
+	if workloadId == "" {
+		log.Debug().Msgf("Skipping WorkloadRunner <%s/%s>: no control-plane workload id",
+			runner.Namespace, runner.Name)
+		return nil
+	}
+
+	template := parseWorkloadRunnerTemplate(runner)
+	if template == nil {
+		log.Warn().Msgf("Skipping WorkloadRunner <%s/%s>: cannot read the workload object template",
+			runner.Namespace, runner.Name)
+		return nil
+	}
+	gvk := template.GroupVersionKind()
+	if gvk.Kind == "" || template.GetName() == "" {
+		log.Warn().Msgf("Skipping WorkloadRunner <%s/%s>: template has no name or kind",
+			runner.Namespace, runner.Name)
+		return nil
+	}
+
+	// the workload object may have appeared since the runner was enqueued; its own handler
+	// creates the ExternalWorkload, and racing it here would produce a second one
+	key := client.ObjectKey{Name: template.GetName(), Namespace: runner.Namespace}
+	if child, getErr := h.GetFreshObject(ctx, key, gvk); getErr == nil && !utils.IsObjectNilOrEmpty(child) {
+		return nil
+	}
+
+	existing, err := utils.GetExternalWorkloadOfWorkloadRunner(ctx, string(runner.UID),
+		runner.Namespace, h.cachedClient)
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+	if existing != nil {
+		return nil
+	}
+
+	externalWorkload := &v1alpha1.ExternalWorkload{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      utils.GenerateExternalWorkloadName(gvk, template.GetName()),
+			Namespace: runner.Namespace,
+			Annotations: map[string]string{
+				commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: workloadId,
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: dromosv1alpha1.SchemeGroupVersion.String(),
+					Kind:       dromosv1alpha1.WorkloadRunnerKind,
+					Name:       runner.Name,
+					UID:        runner.UID,
+				},
+			},
+		},
+		Spec: v1alpha1.ExternalWorkloadSpec{
+			// the runner uid stands in for the workload object's; the re-bind re-points it
+			OriginalWorkloadUID:  runner.UID,
+			OriginalWorkloadName: template.GetName(),
+			OriginalWorkloadKind: gvk.Kind,
+			Type:                 externalWorkloadTypeFromObjectLabels(template.GetLabels(), gvk.Kind),
+			Group:                gvk.Group,
+			Version:              gvk.Version,
+			// a zero timestamp is rejected by the control plane and fails the whole sync batch
+			CreationTimestamp: runner.CreationTimestamp,
+		},
+	}
+
+	addToLabels(externalWorkload, commonconstants.WorkloadRunnerNameLabel, runner.Name)
+	addToLabels(externalWorkload, commonconstants.WorkloadRunnerUidLabel, string(runner.UID))
+	h.setWorkloadCategory(ctx, template, externalWorkload)
+
+	if err = h.fillHierarchyInfoForTopOwner(ctx, runner, &externalWorkload.Spec); err != nil {
+		return err
+	}
+
+	if err = h.cachedClient.Create(ctx, externalWorkload); err != nil {
+		if errors.IsAlreadyExists(err) {
+			return nil
+		}
+		return err
+	}
+
+	log.Info().Msgf("Created externalworkload <%s/%s> for WorkloadRunner <%s/%s> with no workload object",
+		externalWorkload.Namespace, externalWorkload.Name, runner.Namespace, runner.Name)
+	return nil
+}
+
+// parseWorkloadRunnerTemplate reads the workload object the runner would have created. EWI
+// depends on the runner api module only, so this mirrors cluster-sync rather than importing
+// the dromos template parser.
+func parseWorkloadRunnerTemplate(runner *dromosv1alpha1.WorkloadRunner) *unstructured.Unstructured {
+	if len(runner.Spec.Template.Raw) == 0 {
+		return nil
+	}
+	object := make(map[string]any)
+	if err := json.Unmarshal(runner.Spec.Template.Raw, &object); err != nil {
+		return nil
+	}
+	return &unstructured.Unstructured{Object: object}
 }
