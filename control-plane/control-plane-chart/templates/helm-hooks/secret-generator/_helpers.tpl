@@ -1,4 +1,8 @@
 {{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
+{{- /*
   Helper templates for the secret-generator hook.
   Each component defines a named template that returns its secret
   configurations as JSON ({"items": [...]}).

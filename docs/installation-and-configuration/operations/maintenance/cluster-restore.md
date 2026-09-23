@@ -4,7 +4,7 @@ This guide outlines how to back up and restore an NVIDIA Run:ai deployment, incl
 
 ## Back Up the Cluster
 
-The restoration or backup of NVIDIA Run:ai [advanced cluster configurations](../advanced-setup/cluster-config.md) which are stored locally on the Kubernetes cluster is optional and can be restored and backed up separately. As backup of data is not required, the backup procedure is optional for advanced deployments.
+The restoration or backup of NVIDIA Run:ai [advanced cluster configurations](../../configuration/cluster-config.md) which are stored locally on the Kubernetes cluster is optional and can be restored and backed up separately. As backup of data is not required, the backup procedure is optional for advanced deployments.
 
 ### Save Cluster Configurations
 
@@ -30,13 +30,13 @@ In the event of a critical Kubernetes failure or alternatively, if you want to m
 
 Before restoring the NVIDIA Run:ai cluster, it is essential to validate that it is both disconnected and uninstalled:
 
-1. If the Kubernetes cluster is still available, [uninstall](../../getting-started/installation/install-using-helm/uninstall.md) the NVIDIA Run:ai cluster. Make sure not to remove the cluster from the control plane.
+1. If the Kubernetes cluster is still available, [uninstall](../../installation/install-using-helm/uninstall.md) the NVIDIA Run:ai cluster. Make sure not to remove the cluster from the control plane.
 2. Navigate to the **Clusters** grid in the NVIDIA Run:ai UI
 3. Locate the cluster and verify its status is **Disconnected**
 
 ### Re-install the Cluster
 
-1. Follow the NVIDIA Run:ai cluster [installation](../../getting-started/installation/install-using-helm/helm-install.md) instructions and ensure all [prerequisites](../../getting-started/installation/install-using-helm/system-requirements.md) are met.
+1. Follow the NVIDIA Run:ai cluster [installation](../../installation/install-using-helm/helm-install.md) instructions and ensure all [prerequisites](../../installation/install-using-helm/prerequisites-and-features.md) are met.
 2.  If you have a backup of the cluster configurations, reload it once the installation is complete:
 
     ```bash
@@ -52,7 +52,7 @@ If your cluster configuration disables automatic namespace creation for projects
 * Re-create each project namespace
 * Reapply the required role bindings for access control
 
-For more information, see [Advanced cluster configurations](../advanced-setup/cluster-config.md).
+For more information, see [Advanced cluster configurations](../../configuration/cluster-config.md).
 
 ## Back Up the Control Plane <a href="#database-storage" id="database-storage"></a>
 
@@ -73,14 +73,14 @@ Consider the following methods to back up the PostgreSQL database:
 * **Persistent volume backup** - Back up the entire PV that stores the PostgreSQL data.
 * **Third-Party backup solutions** - Integrate with external backup tools that support Kubernetes and PostgreSQL to automate and manage backups effectively.
 
-<Info>
+<Note>
 
 **Note**
 
 * To obtain your `PGPASSWORD=<password>`, run `helm get values runai-backend -n runai-backend --all`.
-* NVIDIA Run:ai also supports an external PostgreSQL database. If you are using an PostgreSQL database, the above steps do not apply. For more details, see [external PostgreSQL database](../../getting-started/installation/install-using-helm/cp-system-requirements.md#external-postgres-database-optional).
+* NVIDIA Run:ai also supports an external PostgreSQL database. If you are using an PostgreSQL database, the above steps do not apply. For more details, see [Using an External PostgreSQL Instance](../../system-requirements/third-party-services.md#using-an-external-postgresql-instance).
 
-</Info>
+</Note>
 
 ### Metrics Storage <a href="#metrics-storage" id="metrics-storage"></a>
 
@@ -88,7 +88,7 @@ NVIDIA Run:ai stores metrics history using [Thanos](https://github.com/thanos-io
 
 ### Deployment Configurations <a href="#backing-up-control-plane-configuration" id="backing-up-control-plane-configuration"></a>
 
-The NVIDIA Run:ai control plane installation can be [customized](../advanced-setup/control-plane-config.md) using `--set` flags during Helm deployment. These configuration overrides are preserved during upgrades but are **not retained** if Kubernetes is uninstalled or damaged. To ensure recovery, it's recommended to back up the full set of applied Helm customizations.
+The NVIDIA Run:ai control plane installation can be [customized](../../configuration/control-plane-config.md) using `--set` flags during Helm deployment. These configuration overrides are preserved during upgrades but are **not retained** if Kubernetes is uninstalled or damaged. To ensure recovery, it's recommended to back up the full set of applied Helm customizations.
 
 1.  To back up the control plane Helm values:
 
@@ -105,19 +105,19 @@ The NVIDIA Run:ai control plane installation can be [customized](../advanced-set
 
 Follow the steps below to restore the control plane including previously backed-up data and configurations:
 
-1. Recreate the Kubernetes environment - Begin by provisioning a new Kubernetes or OpenShift cluster that meets all NVIDIA Run:ai installation [requirements](../../getting-started/installation/install-using-helm/cp-system-requirements.md).
+1. Recreate the Kubernetes environment - Begin by provisioning a new Kubernetes or OpenShift cluster that meets all NVIDIA Run:ai installation [requirements](../../system-requirements/README.md).
 2. Restore Persistent Volumes - Recover the PVs and ensure these volumes are correctly reattached or restored from your backup solution:
    * PostgreSQL database - Stores control plane metadata
    * Thanos - Stores workload metrics and historical data
-3. Reinstall the control plane - Install the NVIDIA Run:ai [control plane](../../getting-started/installation/install-using-helm/install-control-plane.md) on the newly created cluster. During installation:
+3. Reinstall the control plane - Install the NVIDIA Run:ai [control plane](../../installation/install-using-helm/install-control-plane.md) on the newly created cluster. During installation:
    * Use the saved Helm configuration overrides to preserve custom settings
    * Connect the control plane to the recovered PostgreSQL volume
    * Reconnect Thanos to the restored metrics volume
 
-<Info>
+<Note>
 
 **Note**
 
-For external PostgreSQL databases, ensure the appropriate connection details and credentials are reconfigured. See [External PostgreSQL database](../../getting-started/installation/install-using-helm/cp-system-requirements.md#external-postgres-database-optional) for more details.
+For external PostgreSQL databases, ensure the appropriate connection details and credentials are reconfigured. See [Using an External PostgreSQL Instance](../../system-requirements/third-party-services.md#using-an-external-postgresql-instance) for more details.
 
-</Info>
+</Note>

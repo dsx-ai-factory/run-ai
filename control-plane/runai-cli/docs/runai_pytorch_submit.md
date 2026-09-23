@@ -10,7 +10,7 @@ runai pytorch submit [flags]
 
 ```
 # Submit a workload
-runai training pytorch submit <workload-name> -p <project-name> -i runai.jfrog.io/demo/quickstart-demo
+runai training pytorch submit <workload-name> -p <project-name> -i ubuntu
 
 # Submit a workload with arguments
 runai training pytorch submit <workload-name> -p <project-name> -i ubuntu -- ls -la
@@ -112,12 +112,12 @@ runai training pytorch submit <workload-name> -p <project-name> -i ubuntu --mast
       --pod-running-timeout duration                   Timeout for pod to reach running state (e.g. 5s, 2m, 3h).
       --port stringArray                               Expose ports from the workload container. Format: service-type=NodePort,container=80,external=8080.
       --preemptibility preemptibility                  Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
-      --preferred-pod-topology-key string              If possible, schedule all pods of this workload on nodes with a matching label key and value. Format: key=VALUE.
+      --preferred-pod-topology-key string              If possible, schedule all pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --priority string                                Sets the workload’s scheduling priority. Valid values: very-low, low, medium-low, medium, medium-high, high, very-high. 
                                                        Overrides the default priority for the workload type. Changing priority does not update preemptibility automatically.
       --privileged                                     Grants the container full access to the host, bypassing almost all container isolation; the container acts like root.
   -p, --project string                                 Specify the project for the command to use. Defaults to the project set in the context, if any. Use 'runai project set <project>' to set the default.
-      --required-pod-topology-key string               Require scheduling pods of this workload on nodes with a matching label key and value. Format: key=VALUE.
+      --required-pod-topology-key string               Require scheduling pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --restart-policy restart-policy                  Restart policy for worker pods. Valid values: Always, OnFailure, Never.
       --run-as-gid int                                 Group ID to run the container as.
       --run-as-non-root                                Force the container to run as a non-root user.
@@ -135,7 +135,7 @@ runai training pytorch submit <workload-name> -p <project-name> -i ubuntu --mast
   -t, --tty                                            Allocate a TTY for the container. Useful for interactive workloads.
       --user-group-source string                       How to determine user/group IDs. Valid values: fromTheImage, fromIdpToken.
       --wait-for-submit duration                       How long to wait for the workload to be created in the cluster. Default: 1m.
-      --workers int32                                  the number of workers that will be allocated for running the workload
+      --workers positiveInt                            the number of workers that will be allocated for running the workload
       --working-dir string                             Working directory inside the container. Overrides the default working directory set in the image.
 ```
 

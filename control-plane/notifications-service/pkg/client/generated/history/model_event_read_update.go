@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -72,6 +74,7 @@ func (o *EventReadUpdate) HasRead() bool {
 func (o *EventReadUpdate) SetRead(v bool) {
 	o.Read.Set(&v)
 }
+
 // SetReadNil sets the value for Read to be an explicit nil
 func (o *EventReadUpdate) SetReadNil() {
 	o.Read.Set(nil)
@@ -83,7 +86,7 @@ func (o *EventReadUpdate) UnsetRead() {
 }
 
 func (o EventReadUpdate) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -133,5 +136,3 @@ func (v *NullableEventReadUpdate) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

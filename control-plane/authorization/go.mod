@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/authorization
 
-go 1.26.3
+go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
@@ -14,7 +14,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/versions v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
@@ -197,7 +197,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clien
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client => ../../runai-clients/datavolumes-service-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
 

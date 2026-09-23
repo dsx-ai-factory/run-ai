@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments 
+The aggregated API of Run:AI backend projects and departments
 
 API version: 1.5.1
 */
@@ -24,12 +26,12 @@ type ProjectAllOf struct {
 	// ID of the cluster owning the project
 	ClusterUuid *string `json:"clusterUuid,omitempty"`
 	// Name of the department owning the project
-	DepartmentName *string `json:"departmentName,omitempty"`
+	DepartmentName          *string `json:"departmentName,omitempty"`
 	InteractiveNodeAffinity *string `json:"interactiveNodeAffinity,omitempty"`
-	TrainNodeAffinity *string `json:"trainNodeAffinity,omitempty"`
+	TrainNodeAffinity       *string `json:"trainNodeAffinity,omitempty"`
 	// The creation date of the project
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-	Status *ProjectStatus `json:"status,omitempty"`
+	CreatedAt *time.Time     `json:"createdAt,omitempty"`
+	Status    *ProjectStatus `json:"status,omitempty"`
 	// project's phase
 	Phase *string `json:"phase,omitempty"`
 }
@@ -406,5 +408,3 @@ func (v *NullableProjectAllOf) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

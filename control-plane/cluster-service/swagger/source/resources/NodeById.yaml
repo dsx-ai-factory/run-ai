@@ -2,7 +2,6 @@ get:
   summary: Get a node by ID.
   description: Retrieve a node by its id.
   operationId: get_node
-  x-internal: true
   x-service: cluster-service
   x-test-coverage:
     - control-plane/cluster-service/pkg/test/api_nodes_service_test.go

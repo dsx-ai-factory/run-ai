@@ -5,7 +5,13 @@
 
 package core
 
-import "context"
+import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"time"
+)
 
 type Scenario interface {
 	Name() string
@@ -25,6 +31,89 @@ type Config struct {
 	Knobs map[string]any
 }
 
+func (c Config) Duration(key string, fallback time.Duration) (time.Duration, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	text, ok := raw.(string)
+	if !ok {
+		return 0, fmt.Errorf("knob %q must be a duration string like \"2m\", got %T", key, raw)
+	}
+	parsed, err := time.ParseDuration(text)
+	if err != nil {
+		return 0, fmt.Errorf("knob %q: %w", key, err)
+	}
+	if parsed <= 0 {
+		return 0, fmt.Errorf("knob %q must be a positive duration, got %s", key, parsed)
+	}
+	return parsed, nil
+}
+
+func (c Config) Int(key string, fallback int) (int, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	value, ok := raw.(int)
+	if !ok {
+		return 0, fmt.Errorf("knob %q must be a whole number, got %T", key, raw)
+	}
+	return value, nil
+}
+
+func (c Config) Ints(key string, fallback []int) ([]int, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	items, ok := raw.([]any)
+	if !ok {
+		return nil, fmt.Errorf("knob %q must be a list of whole numbers, got %T", key, raw)
+	}
+	values := make([]int, 0, len(items))
+	for i, item := range items {
+		value, ok := item.(int)
+		if !ok {
+			return nil, fmt.Errorf("knob %q item %d must be a whole number, got %T", key, i+1, item)
+		}
+		values = append(values, value)
+	}
+	return values, nil
+}
+
+func (c Config) Map(key string) (map[string]any, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return nil, nil
+	}
+	value, ok := raw.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("knob %q must be a mapping, got %T", key, raw)
+	}
+	return value, nil
+}
+
+func (c Config) String(key string, fallback string) (string, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	value, ok := raw.(string)
+	if !ok {
+		return "", fmt.Errorf("knob %q must be a string, got %T", key, raw)
+	}
+	return value, nil
+}
+
+func RunID() (string, error) {
+	var raw [4]byte
+	if _, err := rand.Read(raw[:]); err != nil {
+		return "", fmt.Errorf("generate run id: %w", err)
+	}
+	return hex.EncodeToString(raw[:]), nil
+}
+
 type Category string
 
 const (
@@ -33,8 +122,23 @@ const (
 )
 
 type Section struct {
-	Category Category
-	Metrics  map[string]any
-	Failed   bool
-	Error    string
+	Category Category       `json:"category"`
+	Metrics  map[string]any `json:"metrics"`
+	Failed   bool           `json:"failed"`
+	Error    string         `json:"error,omitempty"`
+}
+
+const SchemaVersion = "v1"
+
+type Metadata struct {
+	StartedAt        time.Time `json:"started_at"`
+	FinishedAt       time.Time `json:"finished_at"`
+	ClockOffsetMs    *int64    `json:"clock_offset_ms,omitempty"`
+	ClockOffsetError string    `json:"clock_offset_error,omitempty"`
+}
+
+type Results struct {
+	Schema    string             `json:"schema"`
+	Metadata  Metadata           `json:"metadata"`
+	Scenarios map[string]Section `json:"scenarios"`
 }

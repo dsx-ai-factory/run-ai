@@ -1,9 +1,8 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/identity-manager
 
-go 1.26.3
+go 1.26.8
 
 require (
-	github.com/avast/retry-go/v4 v4.7.0
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
@@ -20,9 +19,12 @@ require (
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
+	github.com/Nerzal/gocloak/v14 v14.0.4
+	github.com/avast/retry-go/v4 v4.7.0
+	github.com/avast/retry-go/v5 v5.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.17
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3

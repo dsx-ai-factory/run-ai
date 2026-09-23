@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments 
+The aggregated API of Run:AI backend projects and departments
 
 API version: 1.5.1
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 // ProjectsApiService ProjectsApi service
 type ProjectsApiService service
 
 type ApiUpdateProjectStatusRequest struct {
-	ctx context.Context
-	ApiService *ProjectsApiService
-	clusterId string
+	ctx                  context.Context
+	ApiService           *ProjectsApiService
+	clusterId            string
 	projectStatusRequest *ProjectStatusRequest
 }
 
@@ -42,24 +43,24 @@ func (r ApiUpdateProjectStatusRequest) Execute() (*http.Response, error) {
 /*
 UpdateProjectStatus Update Project status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId Unique identifier of the cluster
- @return ApiUpdateProjectStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId Unique identifier of the cluster
+	@return ApiUpdateProjectStatusRequest
 */
 func (a *ProjectsApiService) UpdateProjectStatus(ctx context.Context, clusterId string) ApiUpdateProjectStatusRequest {
 	return ApiUpdateProjectStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *ProjectsApiService) UpdateProjectStatusExecute(r ApiUpdateProjectStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectsApiService.UpdateProjectStatus")
@@ -125,11 +126,11 @@ func (a *ProjectsApiService) UpdateProjectStatusExecute(r ApiUpdateProjectStatus
 }
 
 type ApiV1K8sClustersClusterIdProjectsGetRequest struct {
-	ctx context.Context
-	ApiService *ProjectsApiService
-	clusterId string
+	ctx                context.Context
+	ApiService         *ProjectsApiService
+	clusterId          string
 	excludePermissions *bool
-	memoryUnitMb *bool
+	memoryUnitMb       *bool
 }
 
 // filter permissions
@@ -153,26 +154,27 @@ V1K8sClustersClusterIdProjectsGet List all projects.
 
 List all the projects managed by the tenant on a specific cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @return ApiV1K8sClustersClusterIdProjectsGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@return ApiV1K8sClustersClusterIdProjectsGetRequest
 */
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsGet(ctx context.Context, clusterId string) ApiV1K8sClustersClusterIdProjectsGetRequest {
 	return ApiV1K8sClustersClusterIdProjectsGetRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
-//  @return []Project
+//
+//	@return []Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsGetExecute(r ApiV1K8sClustersClusterIdProjectsGetRequest) ([]Project, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Project
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Project
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectsApiService.V1K8sClustersClusterIdProjectsGet")
@@ -248,10 +250,10 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsGetExecute(r ApiV1K8s
 }
 
 type ApiV1K8sClustersClusterIdProjectsIdDeleteRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ProjectsApiService
-	clusterId string
-	id int32
+	clusterId  string
+	id         int32
 }
 
 func (r ApiV1K8sClustersClusterIdProjectsIdDeleteRequest) Execute() (*Project, *http.Response, error) {
@@ -263,28 +265,29 @@ V1K8sClustersClusterIdProjectsIdDelete Delete a project.
 
 Delete a project from the cluster. This endpoint requires EDITOR or RESEARCH MANAGER  role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @param id The unique id identifying the project.
- @return ApiV1K8sClustersClusterIdProjectsIdDeleteRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@param id The unique id identifying the project.
+	@return ApiV1K8sClustersClusterIdProjectsIdDeleteRequest
 */
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdDelete(ctx context.Context, clusterId string, id int32) ApiV1K8sClustersClusterIdProjectsIdDeleteRequest {
 	return ApiV1K8sClustersClusterIdProjectsIdDeleteRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
-		id: id,
+		ctx:        ctx,
+		clusterId:  clusterId,
+		id:         id,
 	}
 }
 
 // Execute executes the request
-//  @return Project
+//
+//	@return Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdDeleteExecute(r ApiV1K8sClustersClusterIdProjectsIdDeleteRequest) (*Project, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Project
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Project
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectsApiService.V1K8sClustersClusterIdProjectsIdDelete")
@@ -355,10 +358,10 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdDeleteExecute(r Api
 }
 
 type ApiV1K8sClustersClusterIdProjectsIdGetRequest struct {
-	ctx context.Context
-	ApiService *ProjectsApiService
-	clusterId string
-	id string
+	ctx                context.Context
+	ApiService         *ProjectsApiService
+	clusterId          string
+	id                 string
 	excludePermissions *bool
 }
 
@@ -377,28 +380,29 @@ V1K8sClustersClusterIdProjectsIdGet Get a specific project.
 
 Get information about a specific project. This endpoint requires view permissions to the requested project.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @param id The unique project-id identifying the project.
- @return ApiV1K8sClustersClusterIdProjectsIdGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@param id The unique project-id identifying the project.
+	@return ApiV1K8sClustersClusterIdProjectsIdGetRequest
 */
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdGet(ctx context.Context, clusterId string, id string) ApiV1K8sClustersClusterIdProjectsIdGetRequest {
 	return ApiV1K8sClustersClusterIdProjectsIdGetRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
-		id: id,
+		ctx:        ctx,
+		clusterId:  clusterId,
+		id:         id,
 	}
 }
 
 // Execute executes the request
-//  @return Project
+//
+//	@return Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdGetExecute(r ApiV1K8sClustersClusterIdProjectsIdGetRequest) (*Project, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Project
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Project
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectsApiService.V1K8sClustersClusterIdProjectsIdGet")
@@ -472,11 +476,11 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdGetExecute(r ApiV1K
 }
 
 type ApiV1K8sClustersClusterIdProjectsIdPutRequest struct {
-	ctx context.Context
-	ApiService *ProjectsApiService
-	id string
-	clusterId string
-	project *Project
+	ctx                context.Context
+	ApiService         *ProjectsApiService
+	id                 string
+	clusterId          string
+	project            *Project
 	excludePermissions *bool
 }
 
@@ -500,28 +504,29 @@ V1K8sClustersClusterIdProjectsIdPut Update a project.
 
 Updates project details. This endpoint requires EDITOR or RESEARCH MANAGER role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param id The unique project-id identifying the project.
- @param clusterId The unique uuid identifying the cluster.
- @return ApiV1K8sClustersClusterIdProjectsIdPutRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id The unique project-id identifying the project.
+	@param clusterId The unique uuid identifying the cluster.
+	@return ApiV1K8sClustersClusterIdProjectsIdPutRequest
 */
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdPut(ctx context.Context, id string, clusterId string) ApiV1K8sClustersClusterIdProjectsIdPutRequest {
 	return ApiV1K8sClustersClusterIdProjectsIdPutRequest{
 		ApiService: a,
-		ctx: ctx,
-		id: id,
-		clusterId: clusterId,
+		ctx:        ctx,
+		id:         id,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
-//  @return Project
+//
+//	@return Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdPutExecute(r ApiV1K8sClustersClusterIdProjectsIdPutRequest) (*Project, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Project
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Project
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectsApiService.V1K8sClustersClusterIdProjectsIdPut")
@@ -600,11 +605,11 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdPutExecute(r ApiV1K
 }
 
 type ApiV1K8sClustersClusterIdProjectsPostRequest struct {
-	ctx context.Context
-	ApiService *ProjectsApiService
-	clusterId string
+	ctx                  context.Context
+	ApiService           *ProjectsApiService
+	clusterId            string
 	projectCreateRequest *ProjectCreateRequest
-	excludePermissions *bool
+	excludePermissions   *bool
 }
 
 func (r ApiV1K8sClustersClusterIdProjectsPostRequest) ProjectCreateRequest(projectCreateRequest ProjectCreateRequest) ApiV1K8sClustersClusterIdProjectsPostRequest {
@@ -627,26 +632,27 @@ V1K8sClustersClusterIdProjectsPost Create a new project.
 
 Create a new project in the cluster. This endpoint requires EDITOR or RESEARCH MANAGER role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterId The unique uuid identifying the cluster.
- @return ApiV1K8sClustersClusterIdProjectsPostRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterId The unique uuid identifying the cluster.
+	@return ApiV1K8sClustersClusterIdProjectsPostRequest
 */
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsPost(ctx context.Context, clusterId string) ApiV1K8sClustersClusterIdProjectsPostRequest {
 	return ApiV1K8sClustersClusterIdProjectsPostRequest{
 		ApiService: a,
-		ctx: ctx,
-		clusterId: clusterId,
+		ctx:        ctx,
+		clusterId:  clusterId,
 	}
 }
 
 // Execute executes the request
-//  @return Project
+//
+//	@return Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsPostExecute(r ApiV1K8sClustersClusterIdProjectsPostRequest) (*Project, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Project
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Project
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProjectsApiService.V1K8sClustersClusterIdProjectsPost")

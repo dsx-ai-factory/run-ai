@@ -90,7 +90,7 @@ type TestPodData struct {
 	expectedPodMetricLabels *ExpectedPodMetricLabels
 	expectedPodMetricValues *ExpectedPodMetricValues
 
-	expectedRequeue bool
+	expectedError bool
 }
 
 type ExpectedPodMetricLabels struct {
@@ -521,8 +521,13 @@ var _ = Describe("TestWorkloadExporter", Ordered, func() {
 			}
 
 			result, err := podController.Reconcile(ctx, getReconcileRequest(testData.pod.Name, testData.pod.Namespace))
-			Expect(err).To(BeNil())
-			Expect(result.Requeue).To(Equal(testData.expectedRequeue), "Test: %s, expected requeue", testData.testName)
+			if testData.expectedError {
+				Expect(err).To(HaveOccurred(), "Test: %s, expected an error", testData.testName)
+			} else {
+				Expect(err).To(BeNil(), "Test: %s, unexpected error", testData.testName)
+			}
+			Expect(result.RequeueAfter).To(BeZero(),
+				"Test: %s, the rate limiter must decide the retry delay", testData.testName)
 
 			podIdentifier := prometheus.Labels{
 				metrics.PodNameLabel:    testData.pod.Name,
@@ -548,7 +553,7 @@ var _ = Describe("TestWorkloadExporter", Ordered, func() {
 				workloadId: "test-workload-id2",
 			},
 			shouldCreatePod: true,
-			expectedRequeue: true,
+			expectedError:   true,
 		}),
 		Entry("Unexisting pod - metrics shouldn't exist", &TestPodData{
 			testName: "Unexisting pod - metrics shouldn't exist",
@@ -557,7 +562,7 @@ var _ = Describe("TestWorkloadExporter", Ordered, func() {
 				workloadId: "test-workload-id3",
 			},
 			shouldCreatePod: false,
-			expectedRequeue: false,
+			expectedError:   false,
 		}),
 	)
 

@@ -9,12 +9,12 @@ To collect NVIDIA Run:ai logs, follow these steps:
 ### Prerequisites
 
 * Ensure that you have administrator-level access to the Kubernetes cluster where NVIDIA Run:ai is installed.
-* The NVIDIA Run:ai [CLI](../../reference/cli/install-cli.md) must be installed.
+* The NVIDIA Run:ai [CLI](../../../reference/cli/install-cli.md) must be installed.
 
 ### Step-by-step Instructions
 
-1. Open a terminal on any machine where the NVIDIA Run:ai CLI is installed and configured with access to the Kubernetes cluster. The user running this command typically requires system administrator [permissions](../authentication/roles.md), including access to pods and namespaces.
-2.  Collect the Logs. Execute the following command to collect the logs. See the [CLI commands reference](../../reference/cli/runai/runai-diagnostics.md) for more details:
+1. Open a terminal on any machine where the NVIDIA Run:ai CLI is installed and configured with access to the Kubernetes cluster. The user running this command typically requires system administrator [permissions](../../../platform-management/authentication/roles.md), including access to pods and namespaces.
+2.  Collect the Logs. Execute the following command to collect the logs. See the [CLI commands reference](../../../reference/cli/runai/runai_diagnostics.md) for more details:
 
     ```bash
     runai diagnostics collect-logs
@@ -30,13 +30,13 @@ This command gathers diagnostic logs from your Kubernetes cluster to facilitate 
 
 3. After the command completes, the CLI displays the path of the generated compressed log file. Send this file to NVIDIA Run:ai Support for troubleshooting.
 
-<Info>
+<Note>
 
 **Note**
 
 The command collects diagnostic logs from Kubernetes namespaces in a NVIDIA Run:ai installation. By default, logs are collected from the following namespaces: `runai`, `runai-reservation`, `runai-backend`, `training-operator`, `knative`, `gpu-operator`, and `nim-operator`. Use the `--namespaces` flag to target specific namespaces.
 
-</Info>
+</Note>
 
 ## Logs Verbosity
 
@@ -47,7 +47,7 @@ Increase log verbosity to capture more detailed information, providing deeper in
 Before you begin, ensure you have the following:
 
 * Access to the Kubernetes cluster where NVIDIA Run:ai is installed
-  * Including [necessary permissions](../authentication/roles.md) to view and modify configurations.
+  * Including [necessary permissions](../../../platform-management/authentication/roles.md) to view and modify configurations.
 * kubectl installed and configured:
   * The Kubernetes command-line tool, `kubectl`, must be installed and configured to interact with the cluster.
   * Sufficient privileges to edit configurations and view logs.

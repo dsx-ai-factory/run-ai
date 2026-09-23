@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -16,16 +18,16 @@ import (
 
 // Event struct for Event
 type Event struct {
-	Uid *string `json:"uid,omitempty"`
-	Type *string `json:"type,omitempty"`
-	Message *string `json:"message,omitempty"`
-	Reason *string `json:"reason,omitempty"`
-	CreationTimestamp *float32 `json:"creationTimestamp,omitempty"`
-	SourceComponent *string `json:"sourceComponent,omitempty"`
-	InvolvedObjUID *string `json:"involvedObjUID,omitempty"`
-	InvolvedObjKind *string `json:"involvedObjKind,omitempty"`
-	InvolvedObjName *string `json:"involvedObjName,omitempty"`
-	InvolvedObjNamespace *string `json:"involvedObjNamespace,omitempty"`
+	Uid                  *string  `json:"uid,omitempty"`
+	Type                 *string  `json:"type,omitempty"`
+	Message              *string  `json:"message,omitempty"`
+	Reason               *string  `json:"reason,omitempty"`
+	CreationTimestamp    *float32 `json:"creationTimestamp,omitempty"`
+	SourceComponent      *string  `json:"sourceComponent,omitempty"`
+	InvolvedObjUID       *string  `json:"involvedObjUID,omitempty"`
+	InvolvedObjKind      *string  `json:"involvedObjKind,omitempty"`
+	InvolvedObjName      *string  `json:"involvedObjName,omitempty"`
+	InvolvedObjNamespace *string  `json:"involvedObjNamespace,omitempty"`
 }
 
 // NewEvent instantiates a new Event object
@@ -435,5 +437,3 @@ func (v *NullableEvent) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

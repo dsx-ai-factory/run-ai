@@ -23,6 +23,11 @@ spec:
         - name: runai-admission-controller
           image: runai/runai-admission-controller:IMAGE_VERSION
           imagePullPolicy: Never
+          resources:
+            requests:
+              memory: 64Mi
+            limits:
+              memory: 2Gi
           volumeMounts:
             - name: webhook-certs
               mountPath: /etc/webhook/certs

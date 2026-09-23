@@ -19,7 +19,8 @@ import (
 // (actions.InstallClusterChart) or local (actions.InstallClusterChartLocal).
 type clusterChartAction interface {
 	chartReleaseAction
-	ClusterRef() (clusterName, domain, caCertPath string)
+	ClusterRef() (clusterName string, controlPlane actions.ControlPlaneRef)
+	UsesSuppliedCredentials() bool
 }
 
 // clusterChartStep installs the Run:ai cluster Helm chart. Detect reports the
@@ -45,9 +46,12 @@ func (s *clusterChartStep) BuildActions(*spec.Spec) ([]orchestrator2.PerformActi
 }
 
 func (s *clusterChartStep) PostValidate(ctx context.Context, _ *spec.Spec) error {
-	clusterName, domain, caCertPath := s.action.ClusterRef()
+	if s.action.UsesSuppliedCredentials() {
+		return nil
+	}
+	clusterName, controlPlane := s.action.ClusterRef()
 	return pollUntil(ctx, func(ctx context.Context) bool {
-		apiClient, err := s.deps.RunAIClientProvider(actions.ControlPlaneURL(domain), caCertPath)
+		apiClient, err := controlPlane.Client(s.deps)
 		if err != nil {
 			return false
 		}

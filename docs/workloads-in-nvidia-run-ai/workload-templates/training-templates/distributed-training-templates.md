@@ -36,7 +36,7 @@ Linking data source assets is currently not supported.
 2. Click **+NEW TEMPLATE** and select **Training** from the dropdown menu**.**
 3. Within the new training template form, select the **scope**.
 4. Set the training workload architecture as **distributed** workload, which consists of multiple processes working together. These processes can run on different nodes. This workload uses environments that support distributed training workloads only.
-5. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../../installation-and-configuration/installation/install-using-helm/system-requirements.md#distributed-training) for details on enabling.
+5. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) for details on enabling.
 6. Set the distributed workload configuration that defines how distributed training workloads are divided across multiple machines or processes. Choose **Workers & master** or **Workers only** based on your training requirements and infrastructure. In distributed training workloads, both **Workers** and **Master** include the same configuration sections. By default, the Master uses the Worker configuration for shared fields. This default behavior can be overridden if different settings are required for the Master.
 7. Enter a unique **name** for the training template. If the name already exists in the project, you will be requested to submit a different name.
 8. Click **CONTINUE**
@@ -124,7 +124,7 @@ Manually configure the settings below as needed.
 **Configure compute resources**
 
 1. Set the number of workers for your workload.
-2. For a PyTorch template, optionally enter a positive integer under **Set the number of workers per segment**. Workers in the same segment are placed as close as possible. Set this value to match your application's parallel segment size, or leave it blank to disable segmentation. For more information, see [Accelerating Workloads with Network Topology-Aware Scheduling](../../../platform-management/aiinitiatives/resources/topology-aware-scheduling.md#segmented-pytorch-workload-behavior).
+2. Set the number of **workers per segment** (PyTorch only). Workers in the same segment are placed as close as possible. Enter a positive integer to match your application's parallel segment size, or leave it blank to disable segmentation. For more information, see [Segment-Level Placement](../../../platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md).
 3. Set the number of **GPU devices** per pod (physical GPUs).
 4. Enable **GPU fractioning** to set the GPU memory per device using either a fraction of a GPU device’s memory **(% of device)** or a GPU memory unit **(MB/GB)**:
    * **Request** - The minimum GPU memory allocated per device. Each pod in the workspace receives at least this amount per device it uses.

@@ -53,7 +53,7 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 		image               = config.Image
 	)
 
-	shardArgs, err := marshalShardArgs(d.runaiConfig.Spec.RunAIScheduler, d.runaiConfig.Spec.Global.NodeAffinity)
+	shardArgs, err := MarshalShardArgs(d.runaiConfig.Spec.RunAIScheduler, d.runaiConfig.Spec.Global.NodeAffinity)
 	if err != nil {
 		return nil, err
 	}

@@ -69,8 +69,8 @@ type TenantRealm struct {
 }
 
 func (tr *TenantRealm) SetDefaults() {
-	tr.AppHost = "https://app.run.ai"
-	tr.TenantDomainTemplate = "https://{{.}}.run.ai"
+	tr.AppHost = "https://app.example.com"
+	tr.TenantDomainTemplate = "https://{{.}}.example.com"
 	tr.Env = "development"
 	tr.DefaultClientId = "runai-admin-ui"
 	tr.Name = ""

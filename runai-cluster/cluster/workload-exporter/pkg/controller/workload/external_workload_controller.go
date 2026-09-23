@@ -44,7 +44,7 @@ func (c *ExternalWorkloadController) Reconcile(ctx context.Context, req ctrl.Req
 	externalWorkload := &v1alpha1.ExternalWorkload{}
 	isObjectFound, err := utils.GetObjectForRequest(ctx, req, "externalworkload", externalWorkload, c.client)
 	if err != nil {
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	} else if !isObjectFound || !externalWorkload.DeletionTimestamp.IsZero() {
 		metrics.ResetWorkloadMetrics(req.Name, req.Namespace, metrics.ExternalSource)
 		return ctrl.Result{Requeue: false}, nil
@@ -54,7 +54,7 @@ func (c *ExternalWorkloadController) Reconcile(ctx context.Context, req ctrl.Req
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for external workload %s/%s, error: %s",
 			externalWorkload.Namespace, externalWorkload.Name, err.Error())
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
 }

@@ -3,10 +3,10 @@
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM golang:1.26.3
+FROM golang:1.26.8
 ARG TARGETARCH
 ENV TARGETARCH=$TARGETARCH
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.2
 WORKDIR /
 
 COPY bin/go-operator-$TARGETARCH go-operator

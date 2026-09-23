@@ -1,13 +1,19 @@
 type: object
 description: >
-  The element's network topology. Returned only when the element's running pods
-  resolve to an actual placement in the topology hierarchy; omitted otherwise
-  (e.g. when the workload has no topology, the cluster doesn't support topology,
-  or there are no running pods to place yet).
+  The element's network topology. Populated whenever the element requested topology constraints,
+  or its running pods resolve to an actual placement in the topology hierarchy.
 nullable: true
 properties:
   name:
     type: string
-    description: The name of the network topology associated with the element — either inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
+    description: The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
+  preferredPlacement:
+    x-internal: true
+    type: string
+    description: The topology level to use as a preferred placement constraint for the element.
+  requiredPlacement:
+    x-internal: true
+    type: string
+    description: The topology level to use as a required placement constraint for the element. If the requirement cannot be satisfied at this topology level, placement will fail.
   actualPlacement:
     $ref: "./WorkloadTopologyActualPlacement.yaml"

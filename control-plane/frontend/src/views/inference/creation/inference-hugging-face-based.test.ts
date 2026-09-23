@@ -9,9 +9,12 @@ import { createTestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
 import { Quasar } from "quasar";
 import { ref, computed } from "vue";
+import { UidGidSource } from "@/swagger-models/workloads-client";
 import InferenceHuggingFaceBased from "./inference-hugging-face-based.vue";
 
 import { policyUtil } from "@/utils/policy.util";
+import { workloadHybridUtil } from "@/utils/workload-hybrid.util/workload-hybrid.util";
+import { getPolicyViewDetails } from "@/utils/policy.util/policy-view.util";
 import { inferenceService } from "@/services/control-plane/inference.service/inference.service";
 import { inferenceWorkloadUtil } from "@/utils/inference-workload.util/inference-workload.util";
 
@@ -120,6 +123,52 @@ describe("inference-hugging-face-based.vue", () => {
   }
 
   describe("submitInference", () => {
+    it.each([UidGidSource.FromIdpToken, UidGidSource.Custom, UidGidSource.FromTheImage])(
+      "serializes %s identity using the real request preparation",
+      async (uidGidSource) => {
+        const actual = await vi.importActual<{ inferenceWorkloadUtil: typeof inferenceWorkloadUtil }>(
+          "@/utils/inference-workload.util/inference-workload.util",
+        );
+        vi.mocked(inferenceWorkloadUtil.prepareInferenceFlatRequest).mockImplementation(
+          actual.inferenceWorkloadUtil.prepareInferenceFlatRequest,
+        );
+        const identity = { runAsUid: 2001, runAsGid: 2002, supplementalGroups: "2003,2004" };
+        const model = {
+          ...mockInferenceModel,
+          spec: {
+            image: "inference-image",
+            servingPort: { protocol: "http", container: 8080 },
+            autoscaling: { minReplicas: 1, maxReplicas: 1 },
+            security: { uidGidSource, hostIpc: true, ...identity },
+          },
+        };
+        vi.mocked(inferenceStore.getFlatFormState).mockReturnValue({
+          projectInfo: {},
+          projectNodePoolsResources: [],
+          selectedTemplates: workloadHybridUtil.getWorkloadHybridTemplatesSetup(),
+          policy: null,
+          policyViewDetails: getPolicyViewDetails({}),
+          selectedProjectNodeTypes: [],
+          workloadModel: model,
+        });
+        wrapper = createWrapper();
+        await flushPromises();
+        const before = JSON.stringify(wrapper.vm.inference);
+
+        await wrapper.vm.submitInference();
+
+        expect(inferenceService.createInferenceFlatApi).toHaveBeenCalledOnce();
+        const request = JSON.parse(JSON.stringify(vi.mocked(inferenceService.createInferenceFlatApi).mock.calls[0][0]));
+        expect(request.spec.security).toEqual({
+          uidGidSource,
+          hostIpc: true,
+          ...(uidGidSource === UidGidSource.FromIdpToken ? {} : identity),
+        });
+        expect(JSON.stringify(wrapper.vm.inference)).toBe(before);
+        wrapper.unmount();
+      },
+    );
+
     it("should call cleanupFlatItemizeBeforeSubmission before submitting", async () => {
       const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       wrapper = createWrapper();

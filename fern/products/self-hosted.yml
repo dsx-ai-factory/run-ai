@@ -36,11 +36,8 @@ navigation:
         path: ../../docs/getting-started/whats-new/whats-new-3-0.md
       - page: Deprecation Notifications
         path: ../../docs/getting-started/whats-new/deprecation-notifications.md
-    - section: About NVIDIA Run:ai Enterprise
-      path: ../../docs/about-enterprise/README.md
-      contents:
-      - page: Support, Lifecycle, and Deprecation Policy
-        path: ../../docs/about-enterprise/product-support-policy.md
+    - page: Support, Lifecycle, and Deprecation Policy
+      path: ../../docs/getting-started/product-support-policy.md
   - section: Installation and Configuration
     contents:
     - page: Overview
@@ -56,10 +53,10 @@ navigation:
         path: ../../docs/installation-and-configuration/system-requirements/infrastructure-requirements.md
       - page: Networking Setup
         path: ../../docs/installation-and-configuration/system-requirements/networking-setup.md
-      - page: External Access to Critical Services
-        path: ../../docs/installation-and-configuration/system-requirements/external-access-to-critical-services.md
       - page: Third-Party Services
         path: ../../docs/installation-and-configuration/system-requirements/third-party-services.md
+      - page: External Access to Critical Services
+        path: ../../docs/installation-and-configuration/system-requirements/external-access-to-critical-services.md
     - section: Installation
       slug: install
       contents:
@@ -67,32 +64,44 @@ navigation:
         slug: guided-installation
         path: ../../docs/installation-and-configuration/installation/guided-installation/README.md
         contents:
-        - page: Same-Cluster Installation
-          path: ../../docs/installation-and-configuration/installation/guided-installation/same-cluster-installation.md
-        - page: Multi-Cluster Installation
-          path: ../../docs/installation-and-configuration/installation/guided-installation/multi-cluster-installation.md
+        - section: Connected Installation
+          contents:
+          - page: Preparations
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected/preparations.md
+          - page: Same-Cluster Installation
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected/same-cluster.md
+          - page: Multi-Cluster Installation
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected/multi-cluster.md
+          - page: Configuration Templates
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected/templates.md
+        - section: Air-Gapped Installation
+          contents:
+          - page: Preparations
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped/preparations.md
+          - page: Same-Cluster Installation
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped/same-cluster.md
+          - page: Multi-Cluster Installation
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped/multi-cluster.md
+          - page: Configuration Templates
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped/templates.md
         - page: Configuration Reference
           path: ../../docs/installation-and-configuration/installation/guided-installation/configuration-reference.md
-        - section: Configuration Templates
-          contents:
-          - page: Connected Templates
-            path: ../../docs/installation-and-configuration/installation/guided-installation/connected.md
-          - page: Air-Gapped Templates
-            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped.md
         - page: Prerequisites and Features
           path: ../../docs/installation-and-configuration/installation/guided-installation/prerequisites-and-features.md
+        - page: Command Reference and Troubleshooting
+          path: ../../docs/installation-and-configuration/installation/guided-installation/command-reference.md
       - section: Manual Helm
         contents:
-        - page: Control Plane System Requirements
-          path: ../../docs/installation-and-configuration/installation/install-using-helm/cp-system-requirements.md
         - page: Preparations
           path: ../../docs/installation-and-configuration/installation/install-using-helm/preparations.md
+        - page: Prerequisites and Features
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md
         - page: Install the Control Plane
           path: ../../docs/installation-and-configuration/installation/install-using-helm/install-control-plane.md
-        - page: Cluster System Requirements
-          path: ../../docs/installation-and-configuration/installation/install-using-helm/system-requirements.md
         - page: Install the Cluster
           path: ../../docs/installation-and-configuration/installation/install-using-helm/helm-install.md
+        - page: Uninstall
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/uninstall.md
       - page: Base Command Manager (BCM)
         slug: bcm-install
         path: ../../docs/installation-and-configuration/installation/bcm-install.md
@@ -164,13 +173,16 @@ navigation:
           path: ../../docs/installation-and-configuration/operations/observability/event-history.md
     - section: Upgrade
       contents:
-      - page: Upgrade via Helm
-        path: ../../docs/installation-and-configuration/upgrade/helm.md
-    - section: Troubleshooting
-      slug: troubleshoot
-      contents:
-      - page: What Gets Deployed
-        path: ../../docs/installation-and-configuration/troubleshooting/what-gets-deployed.md
+      - page: Plan the Upgrade
+        path: ../../docs/installation-and-configuration/upgrade/plan-the-upgrade.md
+      - page: Back Up Before Upgrading
+        path: ../../docs/installation-and-configuration/upgrade/backup-before-upgrading.md
+      - page: Migrate GPU Fractions
+        path: ../../docs/installation-and-configuration/upgrade/migrate-gpu-fractions.md
+      - page: Upgrade NVIDIA Run:ai
+        path: ../../docs/installation-and-configuration/upgrade/upgrade.md
+      - page: Migrate Legacy Workloads
+        path: ../../docs/installation-and-configuration/upgrade/migrate-legacy-workloads.md
   - section: Platform Management
     contents:
     - section: Authentication and Authorization
@@ -225,9 +237,14 @@ navigation:
         - page: Using GB200 NVL72 and Multi-Node NVLink Domains
           slug: using-gb200
           path: ../../docs/platform-management/aiinitiatives/resources/using-gb200.md
-        - page: Accelerating Workloads with Network Topology-Aware Scheduling
+        - section: Accelerating Workloads with Network Topology-Aware Scheduling
           slug: topology-aware-scheduling
-          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling.md
+          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md
+          contents:
+          - page: Workload-Based Topology Placement
+            path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/workload-level-topology.md
+          - page: Segment-Based Topology Placement
+            path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md
         - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
           path: ../../docs/platform-management/aiinitiatives/resources/enabling-spectrum-x-networking-for-nvidia-run-ai-workloads.md
         - page: Configuring NUMA-Aware Scheduling
@@ -258,35 +275,32 @@ navigation:
             path: ../../docs/platform-management/runai-scheduler/scheduling/quick-starts/over-quota.md
       - section: Resource Optimization
         contents:
-        - page: GPU Fractions
-          slug: fractions
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/fractions.md
-        - page: Dynamic GPU Fractions
-          slug: dynamic-fractions
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md
-        - page: Optimize Performance with Node Level Scheduler
-          slug: node-level-scheduler
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md
-        - page: GPU Time-Slicing
-          slug: time-slicing
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/time-slicing.md
-        - page: GPU Memory Swap
-          slug: memory-swap
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-swap.md
+        - section: GPU Fractions
+          slug: gpu-fractions
+          contents:
+          - page: GPU Memory Fractions
+            slug: memory-fractions
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-fractions.md
+          - page: Dynamic GPU Memory Fractions
+            slug: dynamic-memory-fractions
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md
+          - page: GPU Compute Modes
+            slug: compute-modes
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/compute-modes.md
         - page: CPU Compute and Memory Allocation
           slug: allocation-of-cpu-and-memory
           path: ../../docs/platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md
         - section: Quick Starts
           contents:
-          - page: Launching Workloads with GPU Fractions
+          - page: Launching Workloads with GPU Memory Fractions
             slug: gpu-fractions-quickstart
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-fractions-quickstart.md
-          - page: Launching Workloads with Dynamic GPU Fractions
+          - page: Launching Workloads with Dynamic GPU Memory Fractions
             slug: dynamic-gpu-fractions-quickstart
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/dynamic-gpu-fractions-quickstart.md
-          - page: Launching Workloads with GPU Memory Swap
-            slug: gpu-memory-swap-quickstart
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-memory-swap-quickstart.md
+          - page: Launching Workloads with GPU Compute Modes
+            slug: compute-modes-quickstart
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/compute-modes-quickstart.md
     - section: Policies
       contents:
       - page: Policies and Rules

@@ -1,4 +1,6 @@
 @startuml 01-current-lifecycle
+' SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+' SPDX-License-Identifier: Apache-2.0
 !theme plain
 skinparam backgroundColor white
 skinparam shadowing true

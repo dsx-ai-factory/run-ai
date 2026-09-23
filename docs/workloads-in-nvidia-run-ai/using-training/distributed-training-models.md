@@ -74,7 +74,7 @@ You can create a new workload using either the **Flexible** or **Original** subm
      *   Click **Advanced setup** to open the full workload form with fields populated by the template. You can adjust the predefined configuration values before submitting. Any changes you make will apply only to the workload and will not be saved back to the original template.
 
          <Info><p><strong>Note</strong></p><p>You cannot create a workload directly from a template if the template does not include all mandatory fields or if an organizational policy restricts the use of certain fields within that template.</p></Info>
-6. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#distributed-training) for details on enabling.
+6. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) for details on enabling.
 7. Set the distributed workload configuration that defines how distributed training workloads are divided across multiple machines or processes. Choose **Workers & master** or **Workers only** based on your training requirements and infrastructure.
    * In distributed training workloads, both **Workers** and **Master** include the same configuration sections. By default, the Master uses the Worker configuration for shared fields. This default behavior can be overridden if different settings are required for the Master.
    * Workload policies may define different constraints for Workers and Master. If separate policies are configured, the available fields and editable settings in each section are determined by the applicable policy.
@@ -208,7 +208,7 @@ Manually configure the settings below as needed. The changes will apply to this 
    * **Request** - The minimum GPU memory allocated per device. Each pod in the workload receives at least this amount per device it uses.
    * **Limit** - The maximum GPU memory allocated per device. Each pod in the workload receives **at most** this amount of GPU memory for each device(s) the pod utilizes. This is disabled by default, to enable see the above note.
 3. Set the number of workers for your workload.
-4. For a PyTorch workload, optionally enter a positive integer under **Set the number of workers per segment**. Workers in the same segment are placed as close as possible. Set this value to match your application's parallel segment size, or leave it blank to disable segmentation. For more information, see [Accelerating Workloads with Network Topology-Aware Scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling.md#segmented-pytorch-workload-behavior).
+4. Set the number of **workers per segment** (PyTorch only). Workers in the same segment are placed as close as possible. Enter a positive integer to match your application's parallel segment size, or leave it blank to disable segmentation. For more information, see [Segment-Level Placement](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md).
 5. Configure worker elasticity (PyTorch only). Define the **minimum** and **maximum** number of workers your workload can scale between:
 
     * **Minimum** - Enter a value greater than 0, up to the number of workers.

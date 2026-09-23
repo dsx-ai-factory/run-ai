@@ -7,6 +7,7 @@ Method | HTTP request | Description
 [**CountWorkloadElements**](WorkloadsAPI.md#CountWorkloadElements) | **Get** /api/v1/workloads/{workloadId}/elements/count | Count workload structure elements.
 [**CountWorkloads**](WorkloadsAPI.md#CountWorkloads) | **Get** /api/v1/workloads/count | Count workloads.
 [**DeleteWorkload**](WorkloadsAPI.md#DeleteWorkload) | **Delete** /api/v1/workloads/{workloadId} | Delete the workload as is does not exist in the cluster anymore.
+[**GetInternalWorkloadsTelemetry**](WorkloadsAPI.md#GetInternalWorkloadsTelemetry) | **Get** /internal/workloads/telemetry | Get the internal workloads telemetry.
 [**GetWorkload**](WorkloadsAPI.md#GetWorkload) | **Get** /api/v1/workloads/{workloadId} | Get a workload.
 [**GetWorkloadAncestors**](WorkloadsAPI.md#GetWorkloadAncestors) | **Get** /internal/workloads/{workloadId}/ancestors | Get the workload ancestors.
 [**GetWorkloadElement**](WorkloadsAPI.md#GetWorkloadElement) | **Get** /api/v1/workloads/{workloadId}/elements/{elementId} | Get a single workload structure element by element id.
@@ -224,6 +225,86 @@ Name | Type | Description  | Notes
 ### Return type
 
  (empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetInternalWorkloadsTelemetry
+
+> TelemetryResponse GetInternalWorkloadsTelemetry(ctx).TelemetryType(telemetryType).ClusterId(clusterId).NodepoolName(nodepoolName).DepartmentId(departmentId).ProjectId(projectId).GroupBy(groupBy).FilterByPhases(filterByPhases).FilterBy(filterBy).Execute()
+
+Get the internal workloads telemetry.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client"
+)
+
+func main() {
+	telemetryType := openapiclient.WorkloadTelemetryType("WORKLOADS_COUNT") // WorkloadTelemetryType | Specifies the telemetry type.
+	clusterId := "d73a738f-fab3-430a-8fa3-5241493d7128" // string | Filter using the Universally Unique Identifier (UUID) of the cluster. (optional)
+	nodepoolName := "default" // string | Filter using the nodepool. (optional)
+	departmentId := "1" // string | Filter using the department id. (optional)
+	projectId := "1" // string | project id to filter by (optional)
+	groupBy := []string{"GroupBy_example"} // []string | Group workloads by field. (optional)
+	filterByPhases := []openapiclient.Phase{openapiclient.Phase("Creating")} // []Phase | Filter workloads by specific phases. If not specified, all phases are included. (optional)
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal. Dates are in ISO 8601 timestamp format. (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkloadsAPI.GetInternalWorkloadsTelemetry(context.Background()).TelemetryType(telemetryType).ClusterId(clusterId).NodepoolName(nodepoolName).DepartmentId(departmentId).ProjectId(projectId).GroupBy(groupBy).FilterByPhases(filterByPhases).FilterBy(filterBy).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkloadsAPI.GetInternalWorkloadsTelemetry``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetInternalWorkloadsTelemetry`: TelemetryResponse
+	fmt.Fprintf(os.Stdout, "Response from `WorkloadsAPI.GetInternalWorkloadsTelemetry`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetInternalWorkloadsTelemetryRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **telemetryType** | [**WorkloadTelemetryType**](WorkloadTelemetryType.md) | Specifies the telemetry type. | 
+ **clusterId** | **string** | Filter using the Universally Unique Identifier (UUID) of the cluster. | 
+ **nodepoolName** | **string** | Filter using the nodepool. | 
+ **departmentId** | **string** | Filter using the department id. | 
+ **projectId** | **string** | project id to filter by | 
+ **groupBy** | **[]string** | Group workloads by field. | 
+ **filterByPhases** | [**[]Phase**](Phase.md) | Filter workloads by specific phases. If not specified, all phases are included. | 
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal. Dates are in ISO 8601 timestamp format. | 
+
+### Return type
+
+[**TelemetryResponse**](TelemetryResponse.md)
 
 ### Authorization
 
@@ -835,7 +916,7 @@ Name | Type | Description  | Notes
 
 ## GetWorkloadsTelemetry
 
-> TelemetryResponse GetWorkloadsTelemetry(ctx).TelemetryType(telemetryType).ClusterId(clusterId).NodepoolName(nodepoolName).DepartmentId(departmentId).ProjectId(projectId).GroupBy(groupBy).FilterByPhases(filterByPhases).Execute()
+> TelemetryResponse GetWorkloadsTelemetry(ctx).TelemetryType(telemetryType).ClusterId(clusterId).NodepoolName(nodepoolName).DepartmentId(departmentId).ProjectId(projectId).GroupBy(groupBy).FilterByPhases(filterByPhases).FilterBy(filterBy).Execute()
 
 Get the workloads telemetry.
 
@@ -861,10 +942,11 @@ func main() {
 	projectId := "1" // string | project id to filter by (optional)
 	groupBy := []string{"GroupBy_example"} // []string | Group workloads by field. (optional)
 	filterByPhases := []openapiclient.Phase{openapiclient.Phase("Creating")} // []Phase | Filter workloads by specific phases. If not specified, all phases are included. (optional)
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal. Dates are in ISO 8601 timestamp format. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkloadsAPI.GetWorkloadsTelemetry(context.Background()).TelemetryType(telemetryType).ClusterId(clusterId).NodepoolName(nodepoolName).DepartmentId(departmentId).ProjectId(projectId).GroupBy(groupBy).FilterByPhases(filterByPhases).Execute()
+	resp, r, err := apiClient.WorkloadsAPI.GetWorkloadsTelemetry(context.Background()).TelemetryType(telemetryType).ClusterId(clusterId).NodepoolName(nodepoolName).DepartmentId(departmentId).ProjectId(projectId).GroupBy(groupBy).FilterByPhases(filterByPhases).FilterBy(filterBy).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkloadsAPI.GetWorkloadsTelemetry``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -892,6 +974,7 @@ Name | Type | Description  | Notes
  **projectId** | **string** | project id to filter by | 
  **groupBy** | **[]string** | Group workloads by field. | 
  **filterByPhases** | [**[]Phase**](Phase.md) | Filter workloads by specific phases. If not specified, all phases are included. | 
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal. Dates are in ISO 8601 timestamp format. | 
 
 ### Return type
 

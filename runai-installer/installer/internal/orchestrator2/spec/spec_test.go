@@ -17,7 +17,7 @@ import (
 func validInstallSpec() *Spec {
 	return &Spec{
 		Command:      CommandInstall,
-		Registry:     &Registry{Type: RegistryTypeJFrog, Token: "tok"},
+		Registry:     &Registry{Type: RegistryTypeDockerConfig, Token: "tok"},
 		ControlPlane: &ControlPlane{Domain: "runai.example.com"},
 		Cluster:      &Cluster{Name: "cluster01"},
 	}
@@ -37,6 +37,232 @@ func TestValidate_Install_ClusterOnly(t *testing.T) {
 	s := validInstallSpec()
 	s.ControlPlane = nil
 	require.NoError(t, s.Validate())
+}
+
+func TestValidate_Install_ExternalControlPlane(t *testing.T) {
+	s := validInstallSpec()
+	s.InstallMode = InstallModeClusterOnly
+	s.ControlPlane = nil
+	s.Cluster = &Cluster{
+		Name:            "cluster01",
+		Domain:          "cluster.example.com",
+		ControlPlaneURL: "https://cp.example.com",
+		UID:             "cluster-uid",
+		BootstrapToken:  "bootstrap-token",
+	}
+
+	require.NoError(t, s.Validate())
+	assert.True(t, s.Cluster.UsesExternalControlPlane())
+}
+
+func TestValidate_Install_ExternalControlPlaneClientSecret(t *testing.T) {
+	s := validInstallSpec()
+	s.InstallMode = InstallModeClusterOnly
+	s.ControlPlane = nil
+	s.Cluster = &Cluster{
+		Name:            "cluster01",
+		Domain:          "cluster.example.com",
+		ControlPlaneURL: "https://cp.example.com",
+		UID:             "cluster-uid",
+		ClientSecret:    "client-secret",
+	}
+
+	require.NoError(t, s.Validate())
+}
+
+func TestValidate_Install_ExternalControlPlaneInvalid(t *testing.T) {
+	cases := []struct {
+		name   string
+		mutate func(*Spec)
+		match  string
+	}{
+		{
+			name: "missing URL",
+			mutate: func(s *Spec) {
+				s.Cluster.ControlPlaneURL = ""
+			},
+			match: "controlPlaneUrl",
+		},
+		{
+			name: "missing domain",
+			mutate: func(s *Spec) {
+				s.Cluster.Domain = ""
+			},
+			match: "cluster.domain",
+		},
+		{
+			name: "missing UID",
+			mutate: func(s *Spec) {
+				s.Cluster.UID = ""
+			},
+			match: "cluster.uid",
+		},
+		{
+			name: "multiple credentials",
+			mutate: func(s *Spec) {
+				s.Cluster.ClientSecret = "client-secret"
+			},
+			match: "exactly one",
+		},
+		{
+			name: "invalid URL",
+			mutate: func(s *Spec) {
+				s.Cluster.ControlPlaneURL = "cp.example.com"
+			},
+			match: "HTTPS URL",
+		},
+		{
+			name: "full installation",
+			mutate: func(s *Spec) {
+				s.InstallMode = InstallModeFull
+			},
+			match: "runai_cluster_only",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			s := validInstallSpec()
+			s.InstallMode = InstallModeClusterOnly
+			s.ControlPlane = nil
+			s.Cluster = &Cluster{
+				Name:            "cluster01",
+				Domain:          "cluster.example.com",
+				ControlPlaneURL: "https://cp.example.com",
+				UID:             "cluster-uid",
+				BootstrapToken:  "bootstrap-token",
+			}
+			tc.mutate(s)
+			require.ErrorContains(t, s.Validate(), tc.match)
+		})
+	}
+}
+
+func TestValidate_Install_ExternalControlPlaneCredentials(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		creds ControlPlaneCredentials
+	}{
+		{name: "username and password", creds: ControlPlaneCredentials{Username: "admin@example.com", Password: "pw"}},
+		{name: "token", creds: ControlPlaneCredentials{Token: "bearer"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s := validInstallSpec()
+			s.InstallMode = InstallModeClusterOnly
+			s.ControlPlane = nil
+			creds := tc.creds
+			s.Cluster = &Cluster{
+				Name:                    "cluster01",
+				Domain:                  "cluster.example.com",
+				ControlPlaneURL:         "https://cp.example.com",
+				ControlPlaneCredentials: &creds,
+			}
+
+			require.NoError(t, s.Validate())
+			assert.True(t, s.Cluster.UsesExternalControlPlane())
+			assert.True(t, s.Cluster.UsesControlPlaneCredentials())
+			assert.False(t, s.Cluster.UsesSuppliedClusterIdentity())
+		})
+	}
+}
+
+func TestValidate_Install_ExternalControlPlaneCredentialsInvalid(t *testing.T) {
+	cases := []struct {
+		name   string
+		mutate func(*Spec)
+		field  string
+		match  string
+	}{
+		{
+			name:   "combined with uid",
+			mutate: func(s *Spec) { s.Cluster.UID = "cluster-uid" },
+			field:  "cluster.controlPlaneCredentials",
+			match:  "cannot be combined",
+		},
+		{
+			name:   "combined with bootstrap token",
+			mutate: func(s *Spec) { s.Cluster.BootstrapToken = "bootstrap-token" },
+			field:  "cluster.controlPlaneCredentials",
+			match:  "cannot be combined",
+		},
+		{
+			name:   "basic and token",
+			mutate: func(s *Spec) { s.Cluster.ControlPlaneCredentials.Token = "bearer" },
+			field:  "cluster.controlPlaneCredentials",
+			match:  "mutually exclusive",
+		},
+		{
+			name:   "missing password",
+			mutate: func(s *Spec) { s.Cluster.ControlPlaneCredentials.Password = "" },
+			field:  "cluster.controlPlaneCredentials.password",
+			match:  "requires a password",
+		},
+		{
+			name: "missing username",
+			mutate: func(s *Spec) {
+				s.Cluster.ControlPlaneCredentials.Username = ""
+			},
+			field: "cluster.controlPlaneCredentials.username",
+			match: "requires a username",
+		},
+		{
+			name:   "empty block",
+			mutate: func(s *Spec) { s.Cluster.ControlPlaneCredentials = &ControlPlaneCredentials{} },
+			field:  "cluster.controlPlaneCredentials",
+			match:  "set either username and password",
+		},
+		{
+			name:   "missing URL",
+			mutate: func(s *Spec) { s.Cluster.ControlPlaneURL = "" },
+			field:  "cluster.controlPlaneUrl",
+			match:  "required",
+		},
+		{
+			name:   "full installation",
+			mutate: func(s *Spec) { s.InstallMode = InstallModeFull },
+			field:  "install.mode",
+			match:  "runai_cluster_only",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			s := validInstallSpec()
+			s.InstallMode = InstallModeClusterOnly
+			s.ControlPlane = nil
+			s.Cluster = &Cluster{
+				Name:                    "cluster01",
+				Domain:                  "cluster.example.com",
+				ControlPlaneURL:         "https://cp.example.com",
+				ControlPlaneCredentials: &ControlPlaneCredentials{Username: "admin@example.com", Password: "pw"},
+			}
+			tc.mutate(s)
+
+			require.ErrorContains(t, s.Validate(), tc.match)
+			problems := s.ExternalControlPlaneProblems()
+			require.NotEmpty(t, problems)
+			var fields []string
+			for _, p := range problems {
+				fields = append(fields, p.Field)
+			}
+			assert.Contains(t, fields, tc.field)
+		})
+	}
+}
+
+func TestExternalControlPlaneProblems_ReportsAll(t *testing.T) {
+	s := validInstallSpec()
+	s.InstallMode = InstallModeFull
+	s.Cluster = &Cluster{Name: "cluster01", ControlPlaneURL: "cp.example.com"}
+
+	problems := s.ExternalControlPlaneProblems()
+
+	var fields []string
+	for _, p := range problems {
+		fields = append(fields, p.Field)
+	}
+	assert.ElementsMatch(t, []string{"install.mode", "cluster.controlPlaneUrl", "cluster.domain", "cluster.uid", "cluster.bootstrapTokenPath"}, fields)
+	assert.Empty(t, validInstallSpec().ExternalControlPlaneProblems(), "a same-cluster install has no external control plane settings")
 }
 
 func TestValidate_Install_SelfSignedTLS(t *testing.T) {
@@ -155,9 +381,9 @@ func TestValidate_Install_RegistryUnknownType(t *testing.T) {
 	assert.Contains(t, err.Error(), "registry type")
 }
 
-func TestValidate_Install_JFrogTokenRequired(t *testing.T) {
+func TestValidate_Install_DockerConfigTokenRequired(t *testing.T) {
 	s := validInstallSpec()
-	s.Registry = &Registry{Type: RegistryTypeJFrog}
+	s.Registry = &Registry{Type: RegistryTypeDockerConfig}
 	err := s.Validate()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "token")
@@ -192,7 +418,7 @@ func TestValidate_NGCRegistry_OK(t *testing.T) {
 }
 
 func TestRegistry_ChartCredentials(t *testing.T) {
-	u, p := (&Registry{Type: RegistryTypeJFrog, Token: "tok"}).ChartCredentials()
+	u, p := (&Registry{Type: RegistryTypeDockerConfig, Token: "tok"}).ChartCredentials()
 	assert.Empty(t, u)
 	assert.Empty(t, p)
 
@@ -210,7 +436,7 @@ func TestRegistry_ChartCredentials(t *testing.T) {
 }
 
 func TestRegistry_ImagePullConfig(t *testing.T) {
-	cfg, ok := (&Registry{Type: RegistryTypeJFrog, Token: "encoded"}).ImagePullConfig()
+	cfg, ok := (&Registry{Type: RegistryTypeDockerConfig, Token: "encoded"}).ImagePullConfig()
 	assert.True(t, ok)
 	assert.Equal(t, "encoded", cfg)
 

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Notify API
 
@@ -22,8 +24,8 @@ var _ MappedNullable = &NotifyBatch200Response{}
 // NotifyBatch200Response struct for NotifyBatch200Response
 type NotifyBatch200Response struct {
 	Succeed int32 `json:"succeed"`
-	Failed int32 `json:"failed"`
-	Total int32 `json:"total"`
+	Failed  int32 `json:"failed"`
+	Total   int32 `json:"total"`
 }
 
 type _NotifyBatch200Response NotifyBatch200Response
@@ -121,7 +123,7 @@ func (o *NotifyBatch200Response) SetTotal(v int32) {
 }
 
 func (o NotifyBatch200Response) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -151,10 +153,10 @@ func (o *NotifyBatch200Response) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -210,5 +212,3 @@ func (v *NullableNotifyBatch200Response) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

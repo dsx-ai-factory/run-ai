@@ -14,7 +14,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
-	runv1_internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 
 	v1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -95,21 +94,14 @@ func (i *IngressResource) Status(ctx context.Context) error {
 }
 
 func (i *IngressResource) Enabled() bool {
-	spec := i.runaiConfig.Spec
-	global := spec.Global
-	internal := spec.Internal
-	return spec.ResearcherService != nil &&
-		spec.ResearcherService.Enabled != nil &&
-		*spec.ResearcherService.Enabled &&
-		global.Ingress != nil &&
-		global.Ingress.Enabled != nil &&
-		*global.Ingress.Enabled &&
-		internal.Global.ClusterURL != "" &&
-		internal.ResearcherService.Ingress.Enabled != nil &&
-		*internal.ResearcherService.Ingress.Enabled &&
-		!(internal.Global.Platform.KubernetesFlavor == runv1_internal.KubernetesFlavorOpenShift)
+	return componentEnabled
 }
 
+// IngressStatus backs the cluster-wide "ingress-controller" readiness check in
+// controllers/run. It is gated on the researcher-service Ingress, so with the
+// component retired it always reports ready — as it already did on the majority
+// of clusters, where researcher-service defaulted to disabled. Repointing this
+// check at the cluster-api Ingress
 func IngressStatus(ctx context.Context,
 	k8sReader client.Reader, runaiConfig *runv1.RunaiConfig) (operands.Status, error) {
 	r := &IngressResource{k8sReader: k8sReader, runaiConfig: runaiConfig}

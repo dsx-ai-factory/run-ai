@@ -20,6 +20,7 @@ import (
 	external_workload_integrator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/external-workload-integrator"
 	kai_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/kai-operator"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/knative"
+	krm_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/krm-operator"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/lws"
 	metrics_exporter "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/metrics-exporter"
 	node_scale_adjuster "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/node-scale-adjuster"
@@ -276,6 +277,10 @@ type RunaiConfigSpec struct {
 	// +kubebuilder:validation:Optional
 	NodeExporter *runai_node_exporter.NodeExporter `json:"runai-node-exporter,omitempty"`
 
+	// KRMOperator specifies configuration for the KRM operator operand
+	// +kubebuilder:validation:Optional
+	KRMOperator *krm_operator.KRMOperator `json:"krm-operator,omitempty"`
+
 	// KAIOperator specifies configuration for the KAI operator operand
 	// +kubebuilder:validation:Optional
 	KAIOperator *kai_operator.KAIOperator `json:"kai-operator,omitempty"`
@@ -409,6 +414,9 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	if spec.RuntimeRules == nil {
 		spec.RuntimeRules = &runtime_rules.RuntimeRulesConfiguration{}
 	}
+	if spec.KRMOperator == nil {
+		spec.KRMOperator = &krm_operator.KRMOperator{}
+	}
 	if spec.KAIOperator == nil {
 		spec.KAIOperator = &kai_operator.KAIOperator{}
 	}
@@ -473,6 +481,7 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	spec.ClusterSync.SetDefaultsWhereNeeded(spec.Internal, spec.Global.ReplicaCount)
 	spec.MpiOperator.SetDefaultsWhereNeeded()
 	spec.RuntimeRules.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
+	spec.KRMOperator.SetDefaultsWhereNeeded()
 	spec.KAIOperator.SetDefaultsWhereNeeded()
 	spec.QueueController.SetDefaultsWhereNeeded()
 	spec.WorkloadExporter.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)

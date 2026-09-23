@@ -18,7 +18,7 @@ import (
 	"time"
 
 	audit "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client"
-	org_unit_service_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
+	org_unit_service_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

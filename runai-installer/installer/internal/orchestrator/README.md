@@ -57,7 +57,7 @@ func main() {
 
     // Set configuration inputs
     config.Inputs = map[configinputs.InstallInputType]string{
-        configinputs.InstallInputJfrogCreds:  "base64encodedcredentials==",
+        configinputs.InstallInputRegistryPullSecret:  "base64encodedcredentials==",
         configinputs.InstallInputFQDN:        "runai.example.com",
         configinputs.InstallInputClusterName: "my-cluster",
         configinputs.InstallInputSSLPath:     "/path/to/cert.pem",
@@ -254,7 +254,7 @@ Available prerequisites (use constants from `pre_req` package):
 
 Required inputs (use constants from `configinputs` package):
 
-- `InstallInputJfrogCreds` - JFROG credentials (base64 encoded)
+- `InstallInputRegistryPullSecret` - Registry pull secret (base64-encoded docker config)
 - `InstallInputFQDN` - Fully Qualified Domain Name
 - `InstallInputClusterName` - Kubernetes cluster name
 

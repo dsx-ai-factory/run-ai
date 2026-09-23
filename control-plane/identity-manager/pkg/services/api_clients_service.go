@@ -45,7 +45,7 @@ func (s *ClientsApiService) CreateInternalClient(ctx context.Context, clientCrea
 	clientId := clientCreationRequest.ClientId
 	realmName := s.getRealmName(ctx, clientCreationRequest.TenantId)
 
-	client, err := generateClientByType(ctx, clientCreationRequest)
+	client, needsEmailScopeDefault, err := generateClientByType(ctx, clientCreationRequest)
 	if err != nil {
 		errMsg := fmt.Sprintf(`failed creating client. error to generate client by type: %s`, clientCreationRequest.Type)
 		return utils.HandleError(ctx, "", "", "", err, errMsg)
@@ -54,6 +54,12 @@ func (s *ClientsApiService) CreateInternalClient(ctx context.Context, clientCrea
 	if err != nil {
 		errMsg := fmt.Sprintf(`failed creating internal client with client id: %s`, clientId)
 		return utils.HandleError(ctx, utils.InternalClient, utils.ClientId, clientId, err, errMsg)
+	}
+	if needsEmailScopeDefault {
+		if err := s.iamClients.SetEmailScopeDefault(ctx, realmName, id); err != nil {
+			errMsg := fmt.Sprintf(`failed setting email scope default for client id: %s`, clientId)
+			return utils.HandleError(ctx, utils.InternalClient, utils.ClientId, clientId, err, errMsg)
+		}
 	}
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Client with clientId %s was successfully created", clientId)
 	return api.Response(http.StatusCreated, api.CreateInternalClient201Response{Id: id}), nil
@@ -151,32 +157,33 @@ func (s *ClientsApiService) getFilters(input string) *iamModels.ClientFilter {
 	return &clientFilters
 }
 
-func generateClientByType(ctx context.Context, clientCreationRequest api.ClientCreationRequest) (*iamModels.Client, error) {
+func generateClientByType(ctx context.Context, clientCreationRequest api.ClientCreationRequest) (*iamModels.Client, bool, error) {
 	clientType := clientCreationRequest.Type
+	needsEmailScopeDefault := realm_client.ProfileEmailScopeDefault(string(clientType))
 	switch clientType {
 	case api.CLIENTTYPE_AGENT:
 		if clientCreationRequest.TenantId == "" {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Creating agent client failed. TenantId is missing.")
-			return nil, utils.ErrInternal
+			return nil, false, utils.ErrInternal
 		}
 		client := createAgentClient(clientCreationRequest)
-		return client, nil
+		return client, needsEmailScopeDefault, nil
 
 	case api.CLIENTTYPE_WORKLOADS_AUTH:
 		client := createWorkloadAuthClient(clientCreationRequest)
-		return client, nil
+		return client, needsEmailScopeDefault, nil
 
 	case api.CLIENTTYPE_APPLICATION:
 		client := createExternalApplicationClient(clientCreationRequest)
-		return client, nil
+		return client, needsEmailScopeDefault, nil
 
 	case api.CLIENTTYPE_INSTALLER:
 		client := createInstallerClient(clientCreationRequest)
-		return client, nil
+		return client, needsEmailScopeDefault, nil
 
 	default:
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Client type %s is not supported or invalid.", clientType)
-		return nil, utils.ErrInternal
+		return nil, false, utils.ErrInternal
 	}
 }
 

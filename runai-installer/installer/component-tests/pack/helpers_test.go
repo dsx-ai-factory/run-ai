@@ -4,7 +4,7 @@
  */
 
 // Package pack_test drives the airgap pack command end to end
-// (packconfig.Load -> artifactlock.ParseFile -> ToSpec -> specrun.Execute). No
+// (packconfig.Load -> ResolveLock -> ToSpec -> specrun.Execute). No
 // test reaches into the internals; assertions are made against the run's error,
 // the terminal output, the NDJSON events file, and the files on disk.
 package pack_test
@@ -47,6 +47,7 @@ type result struct {
 	events  []map[string]any
 	output  string
 	workDir string
+	source  packconfig.LockSource
 	puller  *harness.FakeImagePuller
 	fetcher *harness.FakeChartFetcher
 	cli     *harness.FakeCLIFetcher
@@ -106,6 +107,16 @@ func runStaged(t *testing.T, configYAML string, lock *artifactlock.ArtifactLock,
 
 func runWith(t *testing.T, configYAML, lockPath string, dryRun bool, f *fakes, adjust ...func(*specrun.ExecOptions)) result {
 	t.Helper()
+	return runResolving(t, configYAML, lockPath, nil, dryRun, f, adjust...)
+}
+
+func runRelease(t *testing.T, configYAML string, fetcher packconfig.LockFetcher, dryRun bool) result {
+	t.Helper()
+	return runResolving(t, configYAML, "", fetcher, dryRun, newFakes())
+}
+
+func runResolving(t *testing.T, configYAML, lockPath string, fetcher packconfig.LockFetcher, dryRun bool, f *fakes, adjust ...func(*specrun.ExecOptions)) result {
+	t.Helper()
 
 	dir := t.TempDir()
 	configPath := filepath.Join(dir, "airgap-pack.yaml")
@@ -117,7 +128,7 @@ func runWith(t *testing.T, configYAML, lockPath string, dryRun bool, f *fakes, a
 		return result{err: err}
 	}
 
-	parsed, err := artifactlock.ParseFile(lockPath)
+	parsed, source, err := cfg.ResolveLock(context.Background(), lockPath, fetcher)
 	if err != nil {
 		return result{err: err}
 	}
@@ -166,6 +177,7 @@ func runWith(t *testing.T, configYAML, lockPath string, dryRun bool, f *fakes, a
 		events:  readEvents(t, eventsPath),
 		output:  s.AirgapPack.OutputPath,
 		workDir: s.AirgapPack.WorkDir,
+		source:  source,
 		puller:  f.puller,
 		fetcher: f.fetcher,
 		cli:     f.cli,

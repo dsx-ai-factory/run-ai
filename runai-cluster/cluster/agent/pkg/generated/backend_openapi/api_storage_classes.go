@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 // StorageClassesApiService StorageClassesApi service
 type StorageClassesApiService service
 
 type ApiCreateStorageClassRequest struct {
-	ctx context.Context
-	ApiService *StorageClassesApiService
-	uuid string
+	ctx          context.Context
+	ApiService   *StorageClassesApiService
+	uuid         string
 	storageClass *StorageClass
 }
 
@@ -42,26 +43,27 @@ func (r ApiCreateStorageClassRequest) Execute() (*StorageClass, *http.Response, 
 /*
 CreateStorageClass create storageClass
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiCreateStorageClassRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiCreateStorageClassRequest
 */
 func (a *StorageClassesApiService) CreateStorageClass(ctx context.Context, uuid string) ApiCreateStorageClassRequest {
 	return ApiCreateStorageClassRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return StorageClass
+//
+//	@return StorageClass
 func (a *StorageClassesApiService) CreateStorageClassExecute(r ApiCreateStorageClassRequest) (*StorageClass, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *StorageClass
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *StorageClass
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.CreateStorageClass")
@@ -150,13 +152,13 @@ func (a *StorageClassesApiService) CreateStorageClassExecute(r ApiCreateStorageC
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -173,9 +175,9 @@ func (a *StorageClassesApiService) CreateStorageClassExecute(r ApiCreateStorageC
 }
 
 type ApiDeleteStorageClassRequest struct {
-	ctx context.Context
-	ApiService *StorageClassesApiService
-	uuid string
+	ctx              context.Context
+	ApiService       *StorageClassesApiService
+	uuid             string
 	storageClassName string
 }
 
@@ -186,16 +188,16 @@ func (r ApiDeleteStorageClassRequest) Execute() (*http.Response, error) {
 /*
 DeleteStorageClass delete storageClass
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param storageClassName Unique identifier of the storageClass
- @return ApiDeleteStorageClassRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param storageClassName Unique identifier of the storageClass
+	@return ApiDeleteStorageClassRequest
 */
 func (a *StorageClassesApiService) DeleteStorageClass(ctx context.Context, uuid string, storageClassName string) ApiDeleteStorageClassRequest {
 	return ApiDeleteStorageClassRequest{
-		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ApiService:       a,
+		ctx:              ctx,
+		uuid:             uuid,
 		storageClassName: storageClassName,
 	}
 }
@@ -203,9 +205,9 @@ func (a *StorageClassesApiService) DeleteStorageClass(ctx context.Context, uuid 
 // Execute executes the request
 func (a *StorageClassesApiService) DeleteStorageClassExecute(r ApiDeleteStorageClassRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.DeleteStorageClass")
@@ -280,13 +282,13 @@ func (a *StorageClassesApiService) DeleteStorageClassExecute(r ApiDeleteStorageC
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -294,9 +296,9 @@ func (a *StorageClassesApiService) DeleteStorageClassExecute(r ApiDeleteStorageC
 }
 
 type ApiGetStorageClassesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *StorageClassesApiService
-	uuid string
+	uuid       string
 }
 
 func (r ApiGetStorageClassesRequest) Execute() ([]StorageClass, *http.Response, error) {
@@ -306,26 +308,27 @@ func (r ApiGetStorageClassesRequest) Execute() ([]StorageClass, *http.Response, 
 /*
 GetStorageClasses get all storageClasses from a specific cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiGetStorageClassesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiGetStorageClassesRequest
 */
 func (a *StorageClassesApiService) GetStorageClasses(ctx context.Context, uuid string) ApiGetStorageClassesRequest {
 	return ApiGetStorageClassesRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []StorageClass
+//
+//	@return []StorageClass
 func (a *StorageClassesApiService) GetStorageClassesExecute(r ApiGetStorageClassesRequest) ([]StorageClass, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []StorageClass
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []StorageClass
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.GetStorageClasses")
@@ -399,13 +402,13 @@ func (a *StorageClassesApiService) GetStorageClassesExecute(r ApiGetStorageClass
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -422,9 +425,9 @@ func (a *StorageClassesApiService) GetStorageClassesExecute(r ApiGetStorageClass
 }
 
 type ApiSyncStorageClassRequest struct {
-	ctx context.Context
-	ApiService *StorageClassesApiService
-	uuid string
+	ctx          context.Context
+	ApiService   *StorageClassesApiService
+	uuid         string
 	storageClass *[]StorageClass
 }
 
@@ -440,26 +443,27 @@ func (r ApiSyncStorageClassRequest) Execute() (*StorageClass, *http.Response, er
 /*
 SyncStorageClass sync storageClass
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiSyncStorageClassRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiSyncStorageClassRequest
 */
 func (a *StorageClassesApiService) SyncStorageClass(ctx context.Context, uuid string) ApiSyncStorageClassRequest {
 	return ApiSyncStorageClassRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return StorageClass
+//
+//	@return StorageClass
 func (a *StorageClassesApiService) SyncStorageClassExecute(r ApiSyncStorageClassRequest) (*StorageClass, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *StorageClass
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *StorageClass
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.SyncStorageClass")
@@ -548,13 +552,13 @@ func (a *StorageClassesApiService) SyncStorageClassExecute(r ApiSyncStorageClass
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -571,11 +575,11 @@ func (a *StorageClassesApiService) SyncStorageClassExecute(r ApiSyncStorageClass
 }
 
 type ApiUpdateStorageClassRequest struct {
-	ctx context.Context
-	ApiService *StorageClassesApiService
-	uuid string
+	ctx              context.Context
+	ApiService       *StorageClassesApiService
+	uuid             string
 	storageClassName string
-	storageClass *StorageClass
+	storageClass     *StorageClass
 }
 
 func (r ApiUpdateStorageClassRequest) StorageClass(storageClass StorageClass) ApiUpdateStorageClassRequest {
@@ -590,28 +594,29 @@ func (r ApiUpdateStorageClassRequest) Execute() ([]StorageClass, *http.Response,
 /*
 UpdateStorageClass update storageClass
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param storageClassName Unique identifier of the storageClass
- @return ApiUpdateStorageClassRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param storageClassName Unique identifier of the storageClass
+	@return ApiUpdateStorageClassRequest
 */
 func (a *StorageClassesApiService) UpdateStorageClass(ctx context.Context, uuid string, storageClassName string) ApiUpdateStorageClassRequest {
 	return ApiUpdateStorageClassRequest{
-		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ApiService:       a,
+		ctx:              ctx,
+		uuid:             uuid,
 		storageClassName: storageClassName,
 	}
 }
 
 // Execute executes the request
-//  @return []StorageClass
+//
+//	@return []StorageClass
 func (a *StorageClassesApiService) UpdateStorageClassExecute(r ApiUpdateStorageClassRequest) ([]StorageClass, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []StorageClass
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []StorageClass
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageClassesApiService.UpdateStorageClass")
@@ -691,13 +696,13 @@ func (a *StorageClassesApiService) UpdateStorageClassExecute(r ApiUpdateStorageC
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

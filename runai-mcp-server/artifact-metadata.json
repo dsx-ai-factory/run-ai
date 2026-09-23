@@ -6,7 +6,7 @@
   "path_to_artifacts": "bin/",
   "notifications": {
     "slack": {
-      "mention": "@sphinx"
+      "mention": "@phoenix"
     }
   },
   "make": {
@@ -15,7 +15,7 @@
     }
   },
   "jira": {
-    "team_name": "Sphinx"
+    "team_name": "Phoenix"
   },
   "ngc": {
     "guest_access": true

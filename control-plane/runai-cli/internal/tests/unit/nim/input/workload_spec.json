@@ -13,7 +13,7 @@
   },
   "desiredPhase": "Running",
   "spec": {
-    "image": "gcr.io/run-ai-lab/nim-cpu:latest",
+    "image": "nvcr.io/nim/meta/llama3-8b-instruct",
     "replicas": 1,
     "ngcAuthSecret": "my-ngc",
     "servingPort": {

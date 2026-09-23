@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -151,8 +152,8 @@ const (
 type RegistryType string
 
 const (
-	RegistryTypeJFrog RegistryType = "jfrog"
-	RegistryTypeNGC   RegistryType = "ngc"
+	RegistryTypeDockerConfig RegistryType = "dockerconfig"
+	RegistryTypeNGC          RegistryType = "ngc"
 )
 
 type Registry struct {
@@ -162,7 +163,7 @@ type Registry struct {
 	Password    string
 	Host        string
 	CAChainPath string
-	// ChartRepository overrides the NGC Helm repository.
+	// ChartRepository overrides the Helm repository both Run:ai charts are pulled from.
 	ChartRepository string
 	// Insecure means the registry is served over plain HTTP (no TLS).
 	Insecure bool
@@ -218,13 +219,102 @@ type ControlPlane struct {
 }
 
 type Cluster struct {
-	Name             string
-	Domain           string
-	Version          string
-	TLS              *TLS
-	WorkloadRouting  string
-	Inference        *Inference
-	CustomHelmValues map[string]string
+	Name                    string
+	Domain                  string
+	Version                 string
+	TLS                     *TLS
+	WorkloadRouting         string
+	Inference               *Inference
+	ControlPlaneURL         string
+	UID                     string
+	BootstrapToken          string
+	ClientSecret            string
+	ControlPlaneCredentials *ControlPlaneCredentials
+	CustomHelmValues        map[string]string
+}
+
+type ControlPlaneCredentials struct {
+	Username string
+	Password string
+	Token    string
+}
+
+func (c *Cluster) UsesExternalControlPlane() bool {
+	return c != nil && c.ControlPlaneURL != ""
+}
+
+func (c *Cluster) UsesControlPlaneCredentials() bool {
+	return c != nil && c.ControlPlaneCredentials != nil
+}
+
+func (c *Cluster) UsesSuppliedClusterIdentity() bool {
+	return c != nil && c.UID != ""
+}
+
+type FieldError struct {
+	Field   string
+	Message string
+}
+
+func (e FieldError) Error() string { return e.Message }
+
+func (s *Spec) ExternalControlPlaneProblems() []FieldError {
+	if s.Cluster == nil {
+		return nil
+	}
+	c := s.Cluster
+	hasExternalFields := c.ControlPlaneURL != "" || c.UID != "" || c.BootstrapToken != "" || c.ClientSecret != "" || c.ControlPlaneCredentials != nil
+	if !hasExternalFields {
+		return nil
+	}
+	var problems []FieldError
+	if s.InstallMode != InstallModeClusterOnly {
+		problems = append(problems, FieldError{"install.mode", "external control plane details are only supported for runai_cluster_only"})
+	}
+	if c.ControlPlaneURL == "" {
+		problems = append(problems, FieldError{"cluster.controlPlaneUrl", "cluster.controlPlaneUrl is required"})
+	} else if u, err := url.ParseRequestURI(c.ControlPlaneURL); err != nil || u.Scheme != "https" || u.Host == "" || u.Path != "" || u.RawQuery != "" || u.User != nil {
+		problems = append(problems, FieldError{"cluster.controlPlaneUrl", "cluster.controlPlaneUrl must be an HTTPS URL without a path"})
+	}
+	if c.Domain == "" {
+		problems = append(problems, FieldError{"cluster.domain", "cluster.domain is required"})
+	}
+	if c.ControlPlaneCredentials != nil {
+		if c.UID != "" || c.BootstrapToken != "" || c.ClientSecret != "" {
+			problems = append(problems, FieldError{"cluster.controlPlaneCredentials", "cluster.controlPlaneCredentials cannot be combined with cluster.uid, cluster.bootstrapTokenPath or cluster.clientSecretPath: either pre-register the cluster and supply its identity, or let the installer register it"})
+		}
+		problems = append(problems, c.ControlPlaneCredentials.problems()...)
+		return problems
+	}
+	if c.UID == "" {
+		problems = append(problems, FieldError{"cluster.uid", "cluster.uid is required (or set cluster.controlPlaneCredentials to let the installer register the cluster)"})
+	}
+	if (c.BootstrapToken == "") == (c.ClientSecret == "") {
+		problems = append(problems, FieldError{"cluster.bootstrapTokenPath", "exactly one of cluster.bootstrapTokenPath or cluster.clientSecretPath is required (or set cluster.controlPlaneCredentials to let the installer register the cluster)"})
+	}
+	return problems
+}
+
+func (cc *ControlPlaneCredentials) problems() []FieldError {
+	const field = "cluster.controlPlaneCredentials"
+	usesBasic := cc.Username != "" || cc.Password != ""
+	switch {
+	case usesBasic && cc.Token != "":
+		return []FieldError{{field, field + ": username/password and token are mutually exclusive"}}
+	case usesBasic:
+		var problems []FieldError
+		if cc.Username == "" {
+			problems = append(problems, FieldError{field + ".username", field + ": a password requires a username"})
+		}
+		if cc.Password == "" {
+			problems = append(problems, FieldError{field + ".password", field + ": a username requires a password or passwordPath"})
+		}
+		return problems
+	case cc.Token != "":
+		return nil
+	default:
+		return []FieldError{{field, field + ": set either username and password (or passwordPath), or token (or tokenPath)"}}
+	}
 }
 
 func (s *Spec) ControlPlaneTLS() *TLS {
@@ -489,6 +579,9 @@ func (s *Spec) validateInstall() error {
 	if s.Cluster != nil && s.Cluster.Name == "" {
 		return errors.New("cluster name is required")
 	}
+	if err := s.validateExternalControlPlane(); err != nil {
+		return err
+	}
 	if s.SelfSignedTLSEnabled() {
 		if len(s.SelfSignedTLS.ConflictingFields) > 0 {
 			return fmt.Errorf("tls.generateSelfSigned cannot be combined with %s", strings.Join(s.SelfSignedTLS.ConflictingFields, ", "))
@@ -504,6 +597,13 @@ func (s *Spec) validateInstall() error {
 		return s.Airgap.validate()
 	}
 	return s.Registry.validate()
+}
+
+func (s *Spec) validateExternalControlPlane() error {
+	if problems := s.ExternalControlPlaneProblems(); len(problems) > 0 {
+		return problems[0]
+	}
+	return nil
 }
 
 func (s *Spec) validateUpgrade() error {
@@ -548,10 +648,10 @@ func (e Env) validate() error {
 
 func (r *Registry) validate() error {
 	if r == nil {
-		return errors.New("registry is required (jfrog or ngc)")
+		return errors.New("registry is required (dockerconfig or ngc)")
 	}
 	switch r.Type {
-	case RegistryTypeJFrog:
+	case RegistryTypeDockerConfig:
 		if r.Token == "" {
 			return errors.New("registry token is required")
 		}
@@ -571,7 +671,7 @@ func (r *Registry) ImagePullConfig() (string, bool) {
 	if r == nil {
 		return "", false
 	}
-	if r.Type == RegistryTypeJFrog {
+	if r.Type == RegistryTypeDockerConfig {
 		return r.Token, r.Token != ""
 	}
 	username, password := r.Username, r.Password

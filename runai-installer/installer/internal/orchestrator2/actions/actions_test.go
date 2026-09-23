@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	runaicluster "github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	runaicluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/component-tests/harness"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
@@ -21,6 +21,9 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 type fakeAPI struct {
@@ -53,7 +56,9 @@ func (f *fakeAPI) GetClusterByUUID(context.Context, string) (*runaicluster.Displ
 }
 
 func (f *fakeAPI) GetClusterInstallInfoByUUID(context.Context, string, string, string) (*runaicluster.ClusterInstallationInfoResponse, int, error) {
-	return runaicluster.NewClusterInstallationInfoResponse("", "", "", f.clientSecret), 200, nil
+	installInfo := runaicluster.NewClusterInstallationInfoResponse("", "", "", "")
+	installInfo.SetClientSecret(f.clientSecret)
+	return installInfo, 200, nil
 }
 
 func providerFor(api step.RunAIAPIClient) step.RunAIAPIClientProvider {
@@ -149,7 +154,7 @@ func TestEnsureCluster_CreatesWhenMissing(t *testing.T) {
 	api := &fakeAPI{}
 	deps := orchestrator2.Deps{RunAIClientProvider: providerFor(api)}
 
-	execOK(t, EnsureCluster{ClusterName: "c1", Domain: "runai.example.com"}, deps)
+	execOK(t, NewEnsureCluster("c1", "runai.example.com", ""), deps)
 
 	require.Len(t, api.created, 1)
 	assert.Equal(t, "c1", api.created[0].Name)
@@ -161,7 +166,7 @@ func TestEnsureCluster_SkipsWhenExists(t *testing.T) {
 	api := &fakeAPI{clusters: []runaicluster.DisplayedCluster{{Name: "c1", Uuid: "u1"}}}
 	deps := orchestrator2.Deps{RunAIClientProvider: providerFor(api)}
 
-	execOK(t, EnsureCluster{ClusterName: "c1", Domain: "d"}, deps)
+	execOK(t, NewEnsureCluster("c1", "d", ""), deps)
 
 	assert.Empty(t, api.created)
 }
@@ -193,6 +198,33 @@ func TestInstallClusterChart_BuildsResolvedValues(t *testing.T) {
 		"cluster.uid=u1",
 		"cluster.url=runai.example.com",
 		"clusterConfig.global.subdomainSupport=true",
+	})
+}
+
+func TestInstallClusterChart_UsesSuppliedConnection(t *testing.T) {
+	fakeHelm := &harness.FakeHelmInstaller{}
+	act := InstallClusterChart{
+		ClusterName:     "c1",
+		Domain:          "cluster.example.com",
+		ControlPlaneURL: "https://cp.example.com",
+		ClusterUID:      "cluster-uid",
+		BootstrapToken:  "bootstrap-token",
+		Repo:            "https://repo",
+		Version:         "2.26.0",
+		ReleaseName:     "runai-cluster",
+		ChartName:       "runai-cluster",
+		Namespace:       "runai",
+	}
+
+	execOK(t, act, orchestrator2.Deps{HelmInstaller: fakeHelm})
+
+	calls := fakeHelm.CallsByRelease("runai-cluster")
+	require.Len(t, calls, 1)
+	assert.Subset(t, calls[0].Values, []string{
+		"controlPlane.url=https://cp.example.com",
+		"controlPlane.bootstrapToken=bootstrap-token",
+		"cluster.uid=cluster-uid",
+		"cluster.url=cluster.example.com",
 	})
 }
 
@@ -229,17 +261,85 @@ func TestCASecret(t *testing.T) {
 
 func TestRegistrySecret(t *testing.T) {
 	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{}}`))
-	fakeK8s := &harness.FakeK8sExecutor{}
-	deps := orchestrator2.Deps{K8sExecutor: fakeK8s}
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1.AddToScheme(scheme))
+	k8s := fake.NewClientBuilder().WithScheme(scheme).Build()
+	deps := orchestrator2.Deps{K8sExecutor: orchestrator2.NewK8sExecutor(k8s)}
 
 	execOK(t, RegistrySecret{SecretName: "runai-reg-creds", Namespace: "runai-backend", Token: token}, deps)
 
-	applies := fakeK8s.CallsByVerb("apply")
-	require.Len(t, applies, 1)
-	sec, ok := applies[0].Object.(*corev1.Secret)
-	require.True(t, ok)
+	sec := &corev1.Secret{}
+	require.NoError(t, k8s.Get(context.Background(), client.ObjectKey{
+		Name:      "runai-reg-creds",
+		Namespace: "runai-backend",
+	}, sec))
 	assert.Equal(t, corev1.SecretTypeDockerConfigJson, sec.Type)
-	assert.Equal(t, []byte(`{"auths":{}}`), sec.Data[".dockerconfigjson"])
+	assert.Equal(t, []byte(`{"auths":{}}`), sec.Data[corev1.DockerConfigJsonKey])
+	assert.Empty(t, sec.Annotations[helmResourcePolicyAnnotation])
+}
+
+func TestRegistrySecretUpdatesDataAndPreservesMetadata(t *testing.T) {
+	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"registry.local":{}}}`))
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1.AddToScheme(scheme))
+	k8s := fake.NewClientBuilder().WithScheme(scheme).WithObjects(&corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "runai-reg-creds",
+			Namespace: "runai",
+			Labels:    map[string]string{"app.kubernetes.io/managed-by": "Helm"},
+			Annotations: map[string]string{
+				"meta.helm.sh/release-name":      "runai-cluster",
+				"meta.helm.sh/release-namespace": "runai",
+			},
+		},
+		Type: corev1.SecretTypeDockerConfigJson,
+		Data: map[string][]byte{
+			corev1.DockerConfigJsonKey: []byte(`{"auths":{"old.registry":{}}}`),
+			"extra":                    []byte("preserved"),
+		},
+	}).Build()
+	deps := orchestrator2.Deps{K8sExecutor: orchestrator2.NewK8sExecutor(k8s)}
+
+	execOK(t, RegistrySecret{SecretName: "runai-reg-creds", Namespace: "runai", Token: token}, deps)
+
+	sec := &corev1.Secret{}
+	require.NoError(t, k8s.Get(context.Background(), client.ObjectKey{
+		Name:      "runai-reg-creds",
+		Namespace: "runai",
+	}, sec))
+	assert.Equal(t, []byte(`{"auths":{"registry.local":{}}}`), sec.Data[corev1.DockerConfigJsonKey])
+	assert.Equal(t, []byte("preserved"), sec.Data["extra"])
+	assert.Equal(t, "Helm", sec.Labels["app.kubernetes.io/managed-by"])
+	assert.Equal(t, "runai-cluster", sec.Annotations["meta.helm.sh/release-name"])
+	assert.Equal(t, "keep", sec.Annotations[helmResourcePolicyAnnotation])
+}
+
+func TestRegistrySecretUpdatesExternalSecretWithoutKeepPolicy(t *testing.T) {
+	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"registry.local":{}}}`))
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1.AddToScheme(scheme))
+	k8s := fake.NewClientBuilder().WithScheme(scheme).WithObjects(&corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "runai-reg-creds",
+			Namespace: "runai",
+			Labels:    map[string]string{"app.kubernetes.io/managed-by": "runai-installer"},
+		},
+		Type: corev1.SecretTypeDockerConfigJson,
+		Data: map[string][]byte{
+			corev1.DockerConfigJsonKey: []byte(`{"auths":{"old.registry":{}}}`),
+		},
+	}).Build()
+	deps := orchestrator2.Deps{K8sExecutor: orchestrator2.NewK8sExecutor(k8s)}
+
+	execOK(t, RegistrySecret{SecretName: "runai-reg-creds", Namespace: "runai", Token: token}, deps)
+
+	sec := &corev1.Secret{}
+	require.NoError(t, k8s.Get(context.Background(), client.ObjectKey{
+		Name:      "runai-reg-creds",
+		Namespace: "runai",
+	}, sec))
+	assert.Equal(t, []byte(`{"auths":{"registry.local":{}}}`), sec.Data[corev1.DockerConfigJsonKey])
+	assert.Empty(t, sec.Annotations[helmResourcePolicyAnnotation])
 }
 
 func TestExtractAirgap(t *testing.T) {
@@ -306,6 +406,31 @@ func TestInstallClusterChartLocal_BuildsResolvedValues(t *testing.T) {
 	})
 }
 
+func TestInstallClusterChartLocal_UsesSuppliedConnection(t *testing.T) {
+	fakeHelm := &harness.FakeHelmInstaller{}
+	act := InstallClusterChartLocal{
+		ClusterName:     "c1",
+		Domain:          "cluster.example.com",
+		ControlPlaneURL: "https://cp.example.com",
+		ClusterUID:      "cluster-uid",
+		ClientSecret:    "client-secret",
+		ChartPath:       "/pkg/charts/runai-cluster-2.20.0.tgz",
+		ReleaseName:     "runai-cluster",
+		Namespace:       "runai",
+	}
+
+	execOK(t, act, orchestrator2.Deps{HelmInstaller: fakeHelm})
+
+	calls := fakeHelm.CallsByRelease("runai-cluster")
+	require.Len(t, calls, 1)
+	assert.Subset(t, calls[0].Values, []string{
+		"controlPlane.url=https://cp.example.com",
+		"controlPlane.clientSecret=client-secret",
+		"cluster.uid=cluster-uid",
+		"cluster.url=cluster.example.com",
+	})
+}
+
 func TestInstallClusterChartLocal_NoHostRouting(t *testing.T) {
 	api := &fakeAPI{clusters: []runaicluster.DisplayedCluster{{Name: "c1", Uuid: "u1"}}, clientSecret: "sekret"}
 	fakeHelm := &harness.FakeHelmInstaller{}
@@ -360,7 +485,7 @@ func TestActionsDescribe(t *testing.T) {
 		TLSSecret{SecretName: "s", Namespace: "n", CertPath: "/c"}.Describe(),
 		CASecret{SecretName: "s", Namespace: "n", CACertPath: "/c"}.Describe(),
 		RegistrySecret{SecretName: "s", Namespace: "n"}.Describe(),
-		EnsureCluster{ClusterName: "c1", Domain: "d"}.Describe(),
+		NewEnsureCluster("c1", "d", "").Describe(),
 		InstallClusterChart{ClusterName: "c1", ReleaseName: "r", ChartName: "ch", Version: "v", Namespace: "n"}.Describe(),
 		ExtractAirgap{BundlePath: "/b.tgz", WorkingDir: "/w"}.Describe(),
 		PushAirgapImages{WorkingDir: "/w", RegistryURL: "mirror.local:5000"}.Describe(),

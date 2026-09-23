@@ -69,7 +69,6 @@ paths:
   /api/v1/org-unit/reports/availability:
     $ref: "./requests/reports/ReportsAvailable.yaml"
   /api/v1/org-unit/reports/batch-delete:
-    x-internal: true
     $ref: "./requests/reports/ReportsBatchDelete.yaml"
   /api/v1/org-unit/reports/{reportId}:
     $ref: "./requests/reports/ReportById.yaml"

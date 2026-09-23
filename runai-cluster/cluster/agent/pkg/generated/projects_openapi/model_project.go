@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments 
+The aggregated API of Run:AI backend projects and departments
 
 API version: 1.5.1
 */
@@ -40,10 +42,10 @@ type Project struct {
 	// A limit for the duration of training jobs from this project in seconds. Available only from cluster version 2.12
 	TrainingJobTimeLimitSecs *float32 `json:"trainingJobTimeLimitSecs,omitempty"`
 	// Maximum time duration in seconds that training job can be idle before it will be terminated
-	TrainingJobMaxIdleDurationSecs *float32 `json:"trainingJobMaxIdleDurationSecs,omitempty"`
-	NodeAffinity *JobsNodeAffinity `json:"nodeAffinity,omitempty"`
-	Permissions *ResourcePermissions `json:"permissions,omitempty"`
-	Resources *AssignedResources `json:"resources,omitempty"`
+	TrainingJobMaxIdleDurationSecs *float32             `json:"trainingJobMaxIdleDurationSecs,omitempty"`
+	NodeAffinity                   *JobsNodeAffinity    `json:"nodeAffinity,omitempty"`
+	Permissions                    *ResourcePermissions `json:"permissions,omitempty"`
+	Resources                      *AssignedResources   `json:"resources,omitempty"`
 	// Resources assigned to this Project per Node Pool
 	NodePoolsResources []NodePoolAssignedResources `json:"nodePoolsResources,omitempty"`
 	// The name of an existing namespace to use for the project in the cluster.
@@ -55,12 +57,12 @@ type Project struct {
 	// ID of the cluster owning the project
 	ClusterUuid *string `json:"clusterUuid,omitempty"`
 	// Name of the department owning the project
-	DepartmentName *string `json:"departmentName,omitempty"`
+	DepartmentName          *string `json:"departmentName,omitempty"`
 	InteractiveNodeAffinity *string `json:"interactiveNodeAffinity,omitempty"`
-	TrainNodeAffinity *string `json:"trainNodeAffinity,omitempty"`
+	TrainNodeAffinity       *string `json:"trainNodeAffinity,omitempty"`
 	// The creation date of the project
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-	Status *ProjectStatus `json:"status,omitempty"`
+	CreatedAt *time.Time     `json:"createdAt,omitempty"`
+	Status    *ProjectStatus `json:"status,omitempty"`
 	// project's phase
 	Phase *string `json:"phase,omitempty"`
 }
@@ -1032,5 +1034,3 @@ func (v *NullableProject) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -568,6 +568,7 @@ const InferenceSubmitForm = defineComponent({
         totalGpuRequest,
         workloadPriorities: this.clusterConfig.workloadPriorities,
         supportPriorityClass: this.features.supportPriorityClass,
+        supportSemiPreemptibility: this.features.supportSemiPreemptibility,
       };
     },
     scopeModel(): IScopeModel {

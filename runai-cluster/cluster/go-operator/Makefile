@@ -113,7 +113,24 @@ check-updated-crds:
 	hack/check-updated-crds.sh
 
 .PHONY: test
-test: validate test-go
+test: validate test-go test-asset-admission-docker
+
+# These standard Go envtests need real API-server binaries. Run them explicitly
+# so neither a missing KUBEBUILDER_ASSETS nor Ginkgo spec discovery skips them.
+.PHONY: test-asset-admission-docker test-asset-admission
+test-asset-admission-docker: git-config-command gocache
+	${DOCKER_GO_COMMAND_LINUX} make test-asset-admission
+
+test-asset-admission:
+	@assets="$${KUBEBUILDER_ASSETS:-}"; \
+	if [ -z "$$assets" ]; then \
+		assets_dir="$$(mktemp -d)"; \
+		trap 'chmod -R u+w "$$assets_dir" && rm -rf "$$assets_dir"' EXIT; \
+		assets="$$(go run sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION) --bin-dir "$$assets_dir" use 1.33.0 -p path)"; \
+	fi; \
+	test -x "$$assets/kube-apiserver" && test -x "$$assets/etcd"; \
+	KUBEBUILDER_ASSETS="$$assets" go test ./internal/run/operands/agent/resources \
+		-run '^TestAssetIdentityAdmissionPolicies$$' -count=1 -timeout=3m -v
 
 .PHONY: test-unit  
 test-unit: test-go ## Run unit tests only

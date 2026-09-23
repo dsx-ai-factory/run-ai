@@ -45,6 +45,40 @@ spec:
                 description: if we have more fields we want to pass to the server,
                   we can use this field
                 type: string
+              componentTopologies:
+                description: |-
+                  ComponentTopologies captures the requested network topology constraints per component,
+                  for workloads whose framework declares them per component rather than only for the whole
+                  workload. Each entry's specName matches the instanceKey of the corresponding
+                  StructureElement, so the constraint can be attached to that element.
+                items:
+                  description: |-
+                    ComponentTopologyEntry pairs a network topology constraint with the component
+                    SpecName it applies to (e.g. "Frontend", "PrefillWorker").
+                  properties:
+                    specName:
+                      description: |-
+                        SpecName identifies the component within the owning workload. It matches the
+                        instanceKey of the corresponding StructureElement.
+                      type: string
+                    topology:
+                      description: Topology is the network topology constraint requested
+                        for the named component.
+                      properties:
+                        name:
+                          type: string
+                        preferredPlacement:
+                          type: string
+                        requiredPlacement:
+                          type: string
+                      type: object
+                  required:
+                  - specName
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - specName
+                x-kubernetes-list-type: map
               creationTimestamp:
                 description: the CreationTimestamp of the associated workload object
                 format: date-time

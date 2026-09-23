@@ -169,7 +169,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -634,6 +634,7 @@ paths:
           - totalPendingTimeSeconds
           - totalRunningTimeSeconds
           - priorityClassName
+          - preemptibility
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName
@@ -654,7 +655,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -739,7 +740,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -1279,7 +1280,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -1422,6 +1423,7 @@ paths:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
             type: string
           maxItems: 2
           type: array
@@ -1446,6 +1448,24 @@ paths:
           - Failed
           items:
             $ref: '#/components/schemas/Phase'
+          maxItems: 10
+          type: array
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal. Dates are in ISO 8601 timestamp format."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - createdAt>=2026-09-01T00:00:00Z
+          - createdAt<=2026-09-02T00:00:00Z
+          items:
+            maxLength: 1000
+            pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+            type: string
           maxItems: 10
           type: array
         style: form
@@ -1520,6 +1540,170 @@ paths:
       x-authorize:
         resource-type: workloads
         action: read
+  /internal/workloads/telemetry:
+    get:
+      description: |
+        Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.
+
+        Telemetry Types:
+        - WORKLOADS_COUNT: Count of workloads
+        - GPU_ALLOCATION: GPU allocation metrics
+        - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+          For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+        - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
+      operationId: get_internal_workloads_telemetry
+      parameters:
+      - description: Filter using the Universally Unique Identifier (UUID) of the
+          cluster.
+        explode: true
+        in: query
+        name: clusterId
+        required: false
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: Filter using the nodepool.
+        explode: true
+        in: query
+        name: nodepoolName
+        required: false
+        schema:
+          example: default
+          type: string
+        style: form
+      - description: Filter using the department id.
+        explode: true
+        in: query
+        name: departmentId
+        required: false
+        schema:
+          example: "1"
+          type: string
+        style: form
+      - description: project id to filter by
+        explode: true
+        in: query
+        name: projectId
+        required: false
+        schema:
+          example: "1"
+          type: string
+        style: form
+      - description: Group workloads by field.
+        explode: false
+        in: query
+        name: groupBy
+        required: false
+        schema:
+          items:
+            enum:
+            - ClusterId
+            - DepartmentId
+            - ProjectId
+            - Type
+            - CurrentNodepools
+            - RequestedNodepools
+            - Phase
+            - Category
+            - Source
+            type: string
+          maxItems: 2
+          type: array
+        style: form
+      - description: Specifies the telemetry type.
+        explode: true
+        in: query
+        name: telemetryType
+        required: true
+        schema:
+          $ref: '#/components/schemas/WorkloadTelemetryType'
+        style: form
+      - description: "Filter workloads by specific phases. If not specified, all phases\
+          \ are included."
+        explode: false
+        in: query
+        name: filterByPhases
+        required: false
+        schema:
+          example:
+          - Running
+          - Failed
+          items:
+            $ref: '#/components/schemas/Phase'
+          maxItems: 10
+          type: array
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal. Dates are in ISO 8601 timestamp format."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - createdAt>=2026-09-01T00:00:00Z
+          - createdAt<=2026-09-02T00:00:00Z
+          items:
+            maxLength: 1000
+            pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get the internal workloads telemetry.
+      tags:
+      - Workloads
+      x-no-authorization: true
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+    x-internal: true
   /api/v1/workloads/podgroups/sync:
     post:
       operationId: sync_pod_groups
@@ -13162,7 +13346,7 @@ components:
         - allocatedGPU>=2
         - createdAt>=2021-01-01T00:00:00Z
         items:
-          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
           type: string
         maxItems: 10
         type: array
@@ -13275,6 +13459,7 @@ components:
         - totalPendingTimeSeconds
         - totalRunningTimeSeconds
         - priorityClassName
+        - preemptibility
         - guaranteedRuntimeEndsAt
         - aiApplicationId
         - aiApplicationName
@@ -13369,6 +13554,7 @@ components:
           - RequestedNodepools
           - Phase
           - Category
+          - Source
           type: string
         maxItems: 2
         type: array
@@ -13395,6 +13581,25 @@ components:
         - Failed
         items:
           $ref: '#/components/schemas/Phase'
+        maxItems: 10
+        type: array
+      style: form
+    TelemetryFilterBy:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
+        \ Greater than or equal. Dates are in ISO 8601 timestamp format."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - createdAt>=2026-09-01T00:00:00Z
+        - createdAt<=2026-09-02T00:00:00Z
+        items:
+          maxLength: 1000
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+          type: string
         maxItems: 10
         type: array
       style: form
@@ -15614,6 +15819,7 @@ components:
         priorityClassName: high-priority
         source: CLI
         type: runai-job
+        preemptibility: non-preemptible
         createdAt: 2022-01-01T03:49:52.531Z
         nodeAffinities:
         - specName: worker
@@ -16309,6 +16515,10 @@ components:
         preemptible:
           nullable: true
           type: boolean
+        preemptibility:
+          example: non-preemptible
+          nullable: true
+          type: string
         fullySaasWorkload:
           type: boolean
           x-internal: true
@@ -16553,10 +16763,49 @@ components:
       - nodePool
       - reason
       type: object
+    WorkloadElementTopology:
+      description: |
+        The element's network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy.
+      example:
+        preferredPlacement: preferredPlacement
+        name: name
+        requiredPlacement: requiredPlacement
+        actualPlacement:
+          level: level
+          value: value
+      nullable: true
+      properties:
+        name:
+          description: "The name of the network topology associated with the element\
+            \ — either as requested via constraints, or inherited from the workload's\
+            \ topology constraints, or inferred from the nodepools the element's running\
+            \ pods are scheduled on."
+          type: string
+        preferredPlacement:
+          description: The topology level to use as a preferred placement constraint
+            for the element.
+          type: string
+          x-internal: true
+        requiredPlacement:
+          description: "The topology level to use as a required placement constraint\
+            \ for the element. If the requirement cannot be satisfied at this topology\
+            \ level, placement will fail."
+          type: string
+          x-internal: true
+        actualPlacement:
+          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
+      type: object
     WorkloadElement:
       example:
         createdAt: 2022-01-01T03:49:52.531Z
         replicaKey: replicaKey
+        topology:
+          preferredPlacement: preferredPlacement
+          name: name
+          requiredPlacement: requiredPlacement
+          actualPlacement:
+            level: level
+            value: value
         hierarchyLevel: 1
         name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -16607,6 +16856,8 @@ components:
           example: 2022-01-01T03:49:52.531Z
           format: date-time
           type: string
+        topology:
+          $ref: '#/components/schemas/WorkloadElementTopology'
         kubernetesRef:
           $ref: '#/components/schemas/WorkloadElement_kubernetesRef'
       required:
@@ -17214,6 +17465,13 @@ components:
         structureElements:
         - createdAt: 2022-01-01T03:49:52.531Z
           replicaKey: replicaKey
+          topology:
+            preferredPlacement: preferredPlacement
+            name: name
+            requiredPlacement: requiredPlacement
+            actualPlacement:
+              level: level
+              value: value
           hierarchyLevel: 1
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -17228,6 +17486,13 @@ components:
           instanceKey: instanceKey
         - createdAt: 2022-01-01T03:49:52.531Z
           replicaKey: replicaKey
+          topology:
+            preferredPlacement: preferredPlacement
+            name: name
+            requiredPlacement: requiredPlacement
+            actualPlacement:
+              level: level
+              value: value
           hierarchyLevel: 1
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -18031,6 +18296,13 @@ components:
           structureElements:
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -18045,6 +18317,13 @@ components:
             instanceKey: instanceKey
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -18650,6 +18929,13 @@ components:
           structureElements:
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -18664,6 +18950,13 @@ components:
             instanceKey: instanceKey
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -20481,6 +20774,13 @@ components:
           structureElements:
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -20495,6 +20795,13 @@ components:
             instanceKey: instanceKey
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -21100,6 +21407,13 @@ components:
           structureElements:
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -21114,6 +21428,13 @@ components:
             instanceKey: instanceKey
           - createdAt: 2022-01-01T03:49:52.531Z
             replicaKey: replicaKey
+            topology:
+              preferredPlacement: preferredPlacement
+              name: name
+              requiredPlacement: requiredPlacement
+              actualPlacement:
+                level: level
+                value: value
             hierarchyLevel: 1
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -21385,6 +21706,7 @@ components:
         priorityClassName: high-priority
         source: CLI
         type: runai-job
+        preemptibility: non-preemptible
         createdAt: 2022-01-01T03:49:52.531Z
         nodeAffinities:
         - specName: worker
@@ -125204,6 +125526,13 @@ components:
         elements:
         - createdAt: 2022-01-01T03:49:52.531Z
           replicaKey: replicaKey
+          topology:
+            preferredPlacement: preferredPlacement
+            name: name
+            requiredPlacement: requiredPlacement
+            actualPlacement:
+              level: level
+              value: value
           hierarchyLevel: 1
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -125218,6 +125547,13 @@ components:
           instanceKey: instanceKey
         - createdAt: 2022-01-01T03:49:52.531Z
           replicaKey: replicaKey
+          topology:
+            preferredPlacement: preferredPlacement
+            name: name
+            requiredPlacement: requiredPlacement
+            actualPlacement:
+              level: level
+              value: value
           hierarchyLevel: 1
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -125245,24 +125581,6 @@ components:
       required:
       - elements
       type: object
-    WorkloadElementTopology:
-      description: |
-        The element's network topology. Returned only when the element's running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn't support topology, or there are no running pods to place yet).
-      example:
-        name: name
-        actualPlacement:
-          level: level
-          value: value
-      nullable: true
-      properties:
-        name:
-          description: "The name of the network topology associated with the element\
-            \ — either inherited from the workload's topology constraints, or inferred\
-            \ from the nodepools the element's running pods are scheduled on."
-          type: string
-        actualPlacement:
-          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
-      type: object
     WorkloadElementResponse:
       allOf:
       - $ref: '#/components/schemas/WorkloadElement'
@@ -125271,8 +125589,6 @@ components:
             $ref: '#/components/schemas/WorkloadRequestResources'
           allocatedResources:
             $ref: '#/components/schemas/WorkloadAllocatedResources'
-          topology:
-            $ref: '#/components/schemas/WorkloadElementTopology'
         required:
         - allocatedResources
         - podsRequestedResources
@@ -125314,7 +125630,9 @@ components:
           gpu: 1.5
         replicaKey: replicaKey
         topology:
+          preferredPlacement: preferredPlacement
           name: name
+          requiredPlacement: requiredPlacement
           actualPlacement:
             level: level
             value: value
@@ -126328,7 +126646,14 @@ components:
         repository or chart URL. This is used when the chart source requires credentials.
       example:
         assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        userCredential: true
       properties:
+        userCredential:
+          description: "Indicates whether the asset is a user credential owned by\
+            \ the caller. When omitted or false, the asset is treated as a shared\
+            \ credential."
+          nullable: true
+          type: boolean
         assetId:
           description: The ID of the asset to use for authentication.
           format: uuid
@@ -126338,6 +126663,7 @@ components:
       example:
         auth:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          userCredential: true
         values:
           key: ""
         chartRef:
@@ -126352,13 +126678,16 @@ components:
           $ref: '#/components/schemas/AIApplicationSpecChartRef'
         values:
           additionalProperties: true
-          description: Inline Helm values used to override the Helm chart’s default
-            configuration. These values are merged with the Helm chart’s `values.yaml`.
-            This field is mutually exclusive with `valuesBase64`.
+          description: |
+            Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+
+            A complete string value can reference a personal credential using `USERCREDENTIAL:<name>`. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: `USERCREDENTIAL:<name>,generic-secret` or `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.
           type: object
         valuesBase64:
-          description: Base64-encoded Helm values used to override the Helm chart’s
-            default configuration. This field is mutually exclusive with `values`.
+          description: |
+            Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`. When the decoded content contains personal credential references, it must be a YAML object.
+
+            String values support the same exact personal credential placeholder grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and Docker registry credentials, or `USERCREDENTIAL:<name>,generic-secret` and `USERCREDENTIAL:<name>,docker-registry` for NGC credentials. Embedded or partial placeholders are not supported.
           format: byte
           type: string
         auth:
@@ -126401,6 +126730,7 @@ components:
         spec:
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           values:
             key: ""
           chartRef:
@@ -126679,6 +127009,7 @@ components:
         phase: phase
         auth:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          userCredential: true
         desiredPhase: desiredPhase
         name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126690,6 +127021,7 @@ components:
         spec:
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           values:
             key: ""
           chartRef:
@@ -126747,6 +127079,7 @@ components:
           phase: phase
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           desiredPhase: desiredPhase
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126758,6 +127091,7 @@ components:
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:
@@ -126790,6 +127124,7 @@ components:
             phase: phase
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             desiredPhase: desiredPhase
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126801,6 +127136,7 @@ components:
             spec:
               auth:
                 assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                userCredential: true
               values:
                 key: ""
               chartRef:
@@ -126815,6 +127151,7 @@ components:
             phase: phase
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             desiredPhase: desiredPhase
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126826,6 +127163,7 @@ components:
             spec:
               auth:
                 assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                userCredential: true
               values:
                 key: ""
               chartRef:
@@ -127099,6 +127437,7 @@ components:
       - category
       - priority
       - priorityClassName
+      - preemptibility
       - guaranteedRuntimeEndsAt
       - aiApplicationId
       - aiApplicationName
@@ -127300,6 +127639,7 @@ components:
           priorityClassName: high-priority
           source: CLI
           type: runai-job
+          preemptibility: non-preemptible
           createdAt: 2022-01-01T03:49:52.531Z
           nodeAffinities:
           - specName: worker
@@ -127926,6 +128266,7 @@ components:
           priorityClassName: high-priority
           source: CLI
           type: runai-job
+          preemptibility: non-preemptible
           createdAt: 2022-01-01T03:49:52.531Z
           nodeAffinities:
           - specName: worker
@@ -130296,6 +130637,7 @@ components:
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:
@@ -130374,6 +130716,7 @@ components:
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:

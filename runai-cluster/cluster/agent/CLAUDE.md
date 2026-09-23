@@ -10,7 +10,7 @@ Applies Run.ai backend state INTO the cluster: pluggable resource handlers
 (departments, projects, access rules, data volumes, priority classes, workloads
 of all kinds, assets, network topologies, applications, KAI node pools) reconcile
 backend state on an interval. Also hosts a TLS validating-webhook server
-(`/validate-project`, `/validate-secrets-pvc`). Inbound half of the cluster↔backend
+(`/validate-project`). Inbound half of the cluster↔backend
 sync; outbound is `cluster-sync`.
 
 ## Make targets
@@ -44,7 +44,7 @@ Includes: `../../../build/makefile/runai-cluster.mk`, `index.mk`.
 - **Base image:** Dockerfile is `ubi9/ubi-minimal` (for certs/passwd/tmp) → final `FROM scratch`, non-root `USER 65532:65532`, `ENTRYPOINT ["./agent"]`. Build arg `TARGETARCH` selects `bin/agent-$TARGETARCH`.
 - **Artifact caching:** `artifact-metadata.json` sets `cache_artifacts: true`, `path_to_artifacts: bin/`.
 - **Config:** env-var driven via `runai-common-packages/config` (uppercase `mapstructure` tags in `pkg/config/config.go`); secrets (`CLUSTER_ID`, `CLIENT_NAME`, `CLIENT_SECRET`) from the mounted secret file `/etc/secret/secret.json` (`constants.SecretMountPath`). `CLUSTER_VERSION` also read via `os.Getenv` in `main.go`. Defaults in `SetDefaults()`.
-- **Webhook:** TLS validating-webhook server on `WEBHOOK_PORT` (9443), cert from `CERT_DIR` (`/etc/webhook/certs`, provisioned by init-ca); paths `/validate-project`, `/validate-secrets-pvc`.
+- **Webhook:** TLS validating-webhook server on `WEBHOOK_PORT` (9443), cert from `CERT_DIR` (`/etc/webhook/certs`, provisioned by init-ca); path `/validate-project`. Secret/PVC identity validation is enforced by operator-managed CEL admission policies.
 - **Adding a handler:** implement `ObjectInspector` + `ResourceHandler` in `pkg/handlers`, register in `handlerInitFuncs` in `pkg/runai_agent.go`, add the API version to the scheme in `cmd/main.go` + `pkg/tests/suite_test.go`.
 
 ## local-dev.sh iteration

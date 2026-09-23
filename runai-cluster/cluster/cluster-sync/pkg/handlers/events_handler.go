@@ -82,6 +82,9 @@ func (h *EventHandler) sendSyncEventsRequestInner(events []corev1.Event) error {
 	zap.S().Infof("Sending %d events to backend", len(events))
 
 	res, err := request.Execute()
+	if res != nil {
+		defer func() { _ = res.Body.Close() }()
+	}
 	logDetailedApiErrorMessageIfNeeded(res, err, "sync events")
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, "Sync events")
 	h.reduceChunkSizeIfRequestTooLarge(statusCode)
@@ -94,6 +97,9 @@ func (h *EventHandler) sendAssetsSyncEventsRequestInner(events []corev1.Event) e
 	zap.S().Infof("Sending %d assets events to backend", len(events))
 
 	res, err := h.backendClient.AssetsClient.SyncEvents(h.backendClient.Context(), *parsers.ParseEventsToAssetsSyncEventsRequest(events))
+	if res != nil {
+		defer func() { _ = res.Body.Close() }()
+	}
 	logDetailedApiErrorMessageIfNeeded(res, err, "Sync assets events")
 	statusCode, err := h.backendClient.HandleHttpResponseGetStatus(res, err, "Sync assets events")
 	h.reduceChunkSizeIfRequestTooLarge(statusCode)

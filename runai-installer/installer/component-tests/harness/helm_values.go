@@ -23,7 +23,7 @@ func HelmValues(release, _ string) (map[string]interface{}, error) {
 	case step.CPReleaseName:
 		return map[string]interface{}{
 			"global": map[string]interface{}{
-				"domain": "test.run.ai",
+				"domain": "test.example.com",
 			},
 		}, nil
 	case step.ClusterReleaseName:
@@ -42,7 +42,7 @@ func HelmValuesOpenShift(release, _ string) (map[string]interface{}, error) {
 	case step.CPReleaseName:
 		return map[string]interface{}{
 			"global": map[string]interface{}{
-				"domain": "test.run.ai",
+				"domain": "test.example.com",
 				"config": map[string]interface{}{
 					"kubernetesDistribution": "openshift",
 				},
@@ -69,7 +69,7 @@ func HelmValuesWithCustomCA(release, _ string) (map[string]interface{}, error) {
 	case step.CPReleaseName:
 		return map[string]interface{}{
 			"global": map[string]interface{}{
-				"domain": "test.run.ai",
+				"domain": "test.example.com",
 				"customCA": map[string]interface{}{
 					"enabled": true,
 					"secret": map[string]interface{}{

@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **TopologyManagerPolicy** | Pointer to [**NullableTopologyManagerPolicy**](TopologyManagerPolicy.md) |  | [optional] 
-**Nodes** | [**[]NumaNodeDetails**](NumaNodeDetails.md) | NUMA nodes reported in the node&#39;s NodeResourceTopology object. | 
+**Nodes** | [**[]NumaNodeDetails**](NumaNodeDetails.md) | The list of NUMA nodes on the physical machine and their resource availability. | 
 
 ## Methods
 

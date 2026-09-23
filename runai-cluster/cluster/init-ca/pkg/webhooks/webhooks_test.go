@@ -14,12 +14,39 @@ import (
 	. "github.com/onsi/gomega"
 	"gotest.tools/assert"
 	registrations "k8s.io/api/admissionregistration/v1"
+	k8serr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/kubernetes/fake"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils/pkg/certificates"
 )
+
+func TestUpgradeRemovesRetiredAssetWebhookAndPreservesProjectWebhook(t *testing.T) {
+	for _, oldVersion := range []string{"previous-version", ""} {
+		t.Run("old-version-"+oldVersion, func(t *testing.T) {
+			ctx := context.Background()
+			client := fake.NewSimpleClientset(
+				&registrations.ValidatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{
+					Name: "runai-secret-pvc-validation", Labels: map[string]string{"app": "runai", deployVersionLabelName: oldVersion},
+				}},
+				&registrations.ValidatingWebhookConfiguration{ObjectMeta: metav1.ObjectMeta{
+					Name: projectControllerWebhookName, Labels: map[string]string{"app": "runai", deployVersionLabelName: oldVersion},
+				}, Webhooks: []registrations.ValidatingWebhook{{Name: "project.runai.svc"}}},
+			)
+			project := &registrations.ValidatingWebhookConfiguration{
+				ObjectMeta: metav1.ObjectMeta{Name: projectControllerWebhookName, Labels: map[string]string{deployVersionLabelName: deployVersionExample}},
+				Webhooks:   []registrations.ValidatingWebhook{{Name: "project.runai.svc", ClientConfig: registrations.WebhookClientConfig{CABundle: cabundleexample}}},
+			}
+			assert.NilError(t, createOrUpdateWebhooks(ctx, client, []*registrations.ValidatingWebhookConfiguration{project}, nil))
+			assert.NilError(t, deleteOldWebhooks(ctx, client, deployVersionExample))
+			_, err := client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Get(ctx, "runai-secret-pvc-validation", metav1.GetOptions{})
+			assert.Assert(t, k8serr.IsNotFound(err))
+			_, err = client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Get(ctx, projectControllerWebhookName, metav1.GetOptions{})
+			assert.NilError(t, err)
+		})
+	}
+}
 
 func TestFilterOwnershipWebhooksForServedLegacyResources(t *testing.T) {
 	client := fake.NewSimpleClientset()
@@ -186,20 +213,19 @@ var _ = Describe("getWebhooksFromFile", func() {
 			Expect(len(mutators[0].Annotations)).To(Equal(0))
 		})
 	})
-	Context("webhooks for pod group assigner and accessrule controller", func() {
-		It("should use other certificate details for pod group assigner and accessrule controller", func() {
+	Context("webhooks for accessrule controller", func() {
+		It("should use other certificate details for accessrule controller", func() {
 			webhookCertificates := &WebhookCertificates{
 				AdmissionControllerCertificateDetails:   certificates.NewCertificateDetails(cabundleexample),
-				PodGroupAssignerCertificateDetails:      certificates.NewCertificateDetails(cabundleexample3),
 				AccessruleControllerCertificateDetails:  certificates.NewCertificateDetails(cabundleexample4),
 				AnyworkloadControllerCertificateDetails: certificates.NewCertificateDetails(cabundleexample4),
 			}
 			validators, mutators, err := getWebhooksFromFile(
-				"./test_input_with_pod_group_assigner_accessrule_controller.yaml", deployVersionExample,
+				"./test_input_with_accessrule_controller.yaml", deployVersionExample,
 				webhookCertificates)
 			Expect(err).To(BeNil())
 			Expect(len(validators)).To(Equal(4))
-			Expect(len(mutators)).To(Equal(2))
+			Expect(len(mutators)).To(Equal(1))
 			for _, validator := range validators {
 				Expect(validator.Labels[deployVersionLabelName]).To(Equal(deployVersionExample))
 				if validator.Name == "runai-accessrule-validation" {
@@ -214,8 +240,6 @@ var _ = Describe("getWebhooksFromFile", func() {
 
 				if strings.Contains(mutator.Name, "workload") || strings.Contains(mutator.Name, "policy") {
 					Expect(mutator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample))
-				} else if mutator.Name == "runai-pod-group-mutation" {
-					Expect(mutator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample3))
 				}
 			}
 		})
@@ -315,9 +339,6 @@ func TestCertificateChoice(t *testing.T) {
 	admissionCert := certificates.CertificateDetails{
 		CaBundle: []byte("admissionCaBundle"),
 	}
-	podGroupAssignerCert := certificates.CertificateDetails{
-		CaBundle: []byte("podGroupAssignerCaBundle"),
-	}
 	accessruleControllerCert := certificates.CertificateDetails{
 		CaBundle: []byte("accessruleControllerCaBundle"),
 	}
@@ -345,19 +366,11 @@ func TestCertificateChoice(t *testing.T) {
 			expectedChoice: admissionCert.CaBundle,
 		},
 		{
-			webhookName:    "runai-pod-group-mutation",
-			expectedChoice: podGroupAssignerCert.CaBundle,
-		},
-		{
 			webhookName:    "runai-accessrule-validation",
 			expectedChoice: accessruleControllerCert.CaBundle,
 		},
 		{
 			webhookName:    "runai-project-validation",
-			expectedChoice: agentCert.CaBundle,
-		},
-		{
-			webhookName:    "runai-secret-pvc-validation",
 			expectedChoice: agentCert.CaBundle,
 		},
 		{
@@ -373,7 +386,6 @@ func TestCertificateChoice(t *testing.T) {
 	for _, curTest := range tests {
 		webhookCertificates := &WebhookCertificates{
 			AdmissionControllerCertificateDetails:     &admissionCert,
-			PodGroupAssignerCertificateDetails:        &podGroupAssignerCert,
 			AccessruleControllerCertificateDetails:    &accessruleControllerCert,
 			AnyworkloadControllerCertificateDetails:   &anyworkloadControllerCert,
 			ApplicationControllerCertificateDetails:   &applicationControllerCert,

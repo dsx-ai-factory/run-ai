@@ -23,6 +23,7 @@ const (
 	controlPlaneGroup = "runai-control-plane"
 	clusterGroup      = "runai-cluster"
 	kaiGroup          = "kai-scheduler"
+	krmGroup          = "kai-resource-management"
 	kartaGroup        = "karta"
 
 	// ControlPlaneValuesFile is the generated control-plane values filename.
@@ -49,9 +50,12 @@ func ControlPlane(registry string, images []Image, chartValues map[string]any) (
 func Cluster(registry string, images []Image, chartValues map[string]any) (map[string]any, error) {
 	v := values{}
 	v.set("global.image.registry", artifacts.RegistryPrefix(registry, clusterGroup))
-	// The KAI subchart composes its own images; a top-level global.registry
-	// would leak into it, so its own key is set instead.
-	v.set("kai-scheduler.global.registry", artifacts.RegistryPrefix(registry, kaiGroup))
+	// KRM and the KAI subchart it bundles each compose their own images, and a
+	// top-level global.registry would leak into both, so each gets its own key.
+	// KRM deliberately exposes no global.registry, hence image.registry here.
+	v.set("kai-resource-management.image.registry", artifacts.RegistryPrefix(registry, krmGroup))
+	v.set("kai-resource-management.kai-scheduler.global.registry",
+		artifacts.RegistryPrefix(registry, kaiGroup))
 	for _, image := range images {
 		if image.Group == kartaGroup && image.Name == "operator" {
 			setFullReferenceImage(v, "karta.image", artifacts.RegistryPrefix(registry, kartaGroup), image)

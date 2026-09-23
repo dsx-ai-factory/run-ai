@@ -3,22 +3,30 @@
 
 # Infrastructure Requirements
 
-The following requirements cover what must be configured in your Kubernetes cluster before installation begins. Requirements are listed separately for the NVIDIA Run:ai control plane and the NVIDIA Run:ai cluster(s) - see [Deployment Model](deployment-model.md) for how each is provisioned. Ensure each item is in place before proceeding with either installation path.
+This page covers the hardware, operating system, Kubernetes, and storage requirements that must be in place in your Kubernetes cluster before installation begins. Where a requirement differs between the NVIDIA Run:ai control plane and the NVIDIA Run:ai cluster, it is called out separately.
 
-| Category | Requirement | Details |
-|---|---|---|
-| Hardware | Control plane nodes, cluster nodes, and worker nodes provisioned | See [Hardware](#hardware) |
-| Operating System | Linux installed on all nodes | See [Operating System](#operating-system) |
-| Time Sync | Nodes synchronized using NTP | See [Network Time Protocol](#network-time-protocol) |
-| Distribution | Supported Kubernetes distribution installed and running | See [Supported Distributions](#supported-distributions) |
-| Runtime | Container runtime configured | See [Container Runtime](#container-runtime) |
-| Permissions | Cluster-admin access | See [Permissions](#permissions) |
-| Storage | Default storage class configured | See [Default Storage Class](#default-storage-class) |
-| Storage | Shared storage accessible from all worker nodes | See [Shared Storage](#shared-storage) |
+<Note>
+
+**Note**
+
+See [Deployment Model](deployment-model.md) for how the control plane and cluster are provisioned relative to each other.
+
+</Note>
+
+| Category | Requirement | Applies To | Details |
+|---|---|---|---|
+| Hardware | Control plane nodes, cluster nodes, and worker nodes provisioned | Control plane, cluster, and worker nodes (sized separately) | See [Hardware](#hardware) |
+| Operating System | Linux installed on all nodes | All nodes | See [Operating System](#operating-system) |
+| Time Sync | Nodes synchronized using NTP | All nodes | See [Network Time Protocol](#network-time-protocol) |
+| Distribution | Supported Kubernetes distribution installed and running | All nodes | See [Supported Distributions](#supported-distributions) |
+| Runtime | Container runtime configured | All nodes | See [Container Runtime](#container-runtime) |
+| Permissions | Cluster-admin access | All nodes | See [Permissions](#permissions) |
+| Storage | Default storage class configured | Control plane | See [Default Storage Class](#default-storage-class) |
+| Storage | Shared storage accessible from all worker nodes | Cluster | See [Shared Storage](#shared-storage) |
 
 ## Hardware
 
-The following hardware requirements apply to all nodes in the deployment. By default, all NVIDIA Run:ai services run on all available nodes. For production deployments, set [node roles](../../configuration/node-roles.md) to separate system nodes from worker nodes, reduce downtime, and avoid consuming CPU cycles on expensive GPU machines. If deploying the NVIDIA Run:ai control plane and NVIDIA Run:ai cluster on the same Kubernetes cluster, the system node requirements are additive - provision nodes that meet both sets of requirements combined.
+The following hardware requirements apply to all nodes in the deployment. By default, all NVIDIA Run:ai services run on all available nodes. For production deployments, set [node roles](../configuration/node-roles.md) to separate system nodes from worker nodes, reduce downtime, and avoid consuming CPU cycles on expensive GPU machines. If deploying the NVIDIA Run:ai control plane and NVIDIA Run:ai cluster on the same Kubernetes cluster, the system node requirements are additive - provision nodes that meet both sets of requirements combined.
 
 ### Supported Architectures
 
@@ -29,7 +37,7 @@ NVIDIA Run:ai supports the following CPU architectures:
 
 ### Control Plane - System Nodes
 
-The following are the minimum requirements for NVIDIA Run:ai control plane system nodes. By default, all control plane services run on all available nodes in the control plane cluster. To designate nodes to NVIDIA Run:ai control plane services, see [System nodes](../../configuration/node-roles.md#system-nodes).
+The following are the minimum requirements for NVIDIA Run:ai control plane system nodes. By default, all control plane services run on all available nodes in the control plane. To designate nodes to NVIDIA Run:ai control plane services, see [System nodes](../configuration/node-roles.md#system-nodes).
 
 | Component  | Required Capacity |
 |------------|-------------------|
@@ -39,7 +47,7 @@ The following are the minimum requirements for NVIDIA Run:ai control plane syste
 
 ### Cluster - System Nodes
 
-The following are the minimum requirements for NVIDIA Run:ai cluster system nodes. By default, all cluster services run on all available nodes in the cluster. To designate nodes to NVIDIA Run:ai cluster services, see [System nodes](../../configuration/node-roles.md#system-nodes).
+The following are the minimum requirements for NVIDIA Run:ai cluster system nodes. By default, all cluster services run on all available nodes in the cluster. To designate nodes to NVIDIA Run:ai cluster services, see [System nodes](../configuration/node-roles.md#system-nodes).
 
 | Component  | Required Capacity |
 |------------|-------------------|
@@ -49,18 +57,18 @@ The following are the minimum requirements for NVIDIA Run:ai cluster system node
 
 ### Cluster - Worker Nodes
 
-The NVIDIA Run:ai cluster supports x86 and ARM CPUs, and any NVIDIA GPUs supported by the NVIDIA GPU Operator. The list of supported GPUs depends on the version of the NVIDIA GPU Operator installed in the cluster. For supported GPU Operator versions, see the [Support Matrix](../../support-matrix.md#operator-and-framework-versions). For the list of supported GPUs, see [Supported NVIDIA Data Center GPUs and Systems](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/platform-support.html#supported-nvidia-data-center-gpus-and-systems).
+The NVIDIA Run:ai cluster supports x86 and ARM CPUs, and any NVIDIA GPUs supported by the NVIDIA GPU Operator. The list of supported GPUs depends on the version of the NVIDIA GPU Operator installed in the cluster. For supported GPU Operator versions, see the [Support Matrix](../support-matrix.md#operator-and-framework-versions). For the list of supported GPUs, see [Supported NVIDIA Data Center GPUs and Systems](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/platform-support.html#supported-nvidia-data-center-gpus-and-systems).
 
-<Info>
+<Note>
 
 **Note**
 
 * NVIDIA DGX Spark, NVIDIA Jetson, and workstations are not supported.
 * vGPU is not supported. NVIDIA Run:ai currently supports GPU passthrough only.
 
-</Info>
+</Note>
 
-The following are the minimum hardware requirements for each worker node. To designate nodes to NVIDIA Run:ai workloads, see [Worker nodes](../../configuration/node-roles.md#worker-nodes).
+The following are the minimum hardware requirements for each worker node. To designate nodes to NVIDIA Run:ai workloads, see [Worker nodes](../configuration/node-roles.md#worker-nodes).
 
 | Component | Required Capacity |
 |-----------|-------------------|
@@ -94,15 +102,15 @@ The following Kubernetes distributions are supported for both the NVIDIA Run:ai 
 * Oracle Kubernetes Engine (OKE)
 * Rancher Kubernetes Engine 2 (RKE2)
 
-<Info>
+<Note>
 
 **Note**
 
 The latest release of NVIDIA Run:ai supports **Kubernetes 1.34 to 1.36** and **OpenShift 4.18 to 4.21**.
 
-</Info>
+</Note>
 
-For the full list of compatible distributions and per-version compatibility, see the [Support Matrix](../support-matrix.md#nvidia-run-ai-compatible-distributions).
+For the full list of compatible distributions and per-version compatibility, see the [Support Matrix](../support-matrix.md#nvidia-runai-compatible-distributions).
 
 ### Partner-Compatible Distributions
 
@@ -126,7 +134,7 @@ NVIDIA Run:ai supports the following [container runtimes](https://kubernetes.io/
 
 ### Permissions
 
-Both the guided installer and the manual Helm path require **cluster-admin** permissions on the target Kubernetes cluster. Ensure your `kubectl` context is configured with a user that has cluster-admin or equivalent rights before proceeding.
+Both the Guided Installation and the Manual Helm path require **cluster-admin** permissions on the target Kubernetes cluster. Ensure your `kubectl` context is configured with a user that has cluster-admin or equivalent rights before proceeding.
 
 ## Storage
 
@@ -134,17 +142,17 @@ Two storage requirements apply before installation: a default storage class for 
 
 ### Default Storage Class
 
-<Info>
+<Note>
 
 **Note**
 
 Applies to Kubernetes only.
 
-</Info>
+</Note>
 
 The NVIDIA Run:ai control plane requires a **default storage class** to create persistent volume claims for NVIDIA Run:ai storage. The storage class, as per Kubernetes standards, controls the reclaim behavior - whether NVIDIA Run:ai persistent data is saved or deleted when the NVIDIA Run:ai control plane is deleted.
 
-<Info>
+<Note>
 
 **Note**
 
@@ -154,7 +162,7 @@ For a simple (non-production) storage class example, see [Kubernetes Local Stora
 kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
-</Info>
+</Note>
 
 ### Shared Storage
 

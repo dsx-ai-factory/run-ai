@@ -8,7 +8,6 @@ package actions
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
@@ -17,26 +16,35 @@ import (
 )
 
 type InstallClusterChart struct {
-	ClusterName string
-	Domain      string
-	CACertPath  string
-	Repo        string
-	Version     string
-	ReleaseName string
-	ChartName   string
-	Namespace   string
-	IsOCI       bool
-	Auth        step.ChartAuth
-	HostRouting bool
-	ExtraValues []string
+	ClusterName     string
+	Domain          string
+	ControlPlaneURL string
+	ClusterUID      string
+	BootstrapToken  string
+	ClientSecret    string
+	Credentials     *step.ControlPlaneCredentials
+	CACertPath      string
+	Repo            string
+	Version         string
+	ReleaseName     string
+	ChartName       string
+	Namespace       string
+	IsOCI           bool
+	Auth            step.ChartAuth
+	HostRouting     bool
+	ExtraValues     []string
 }
 
 func (a InstallClusterChart) Kind() string { return "runai.install_cluster_chart" }
 
 func (a InstallClusterChart) Release() (name, namespace string) { return a.ReleaseName, a.Namespace }
 
-func (a InstallClusterChart) ClusterRef() (clusterName, domain, caCertPath string) {
-	return a.ClusterName, a.Domain, a.CACertPath
+func (a InstallClusterChart) ClusterRef() (clusterName string, controlPlane ControlPlaneRef) {
+	return a.ClusterName, ControlPlaneRef{URL: a.ControlPlaneURL, Domain: a.Domain, CACertPath: a.CACertPath, Credentials: a.Credentials}
+}
+
+func (a InstallClusterChart) UsesSuppliedCredentials() bool {
+	return a.ClusterUID != ""
 }
 
 func (a InstallClusterChart) Args() map[string]any {
@@ -53,35 +61,35 @@ func (a InstallClusterChart) Args() map[string]any {
 func (a InstallClusterChart) Describe() string {
 	base := fmt.Sprintf("helm upgrade --install %s %s --version %s --namespace %s", a.ReleaseName, a.ChartName, a.Version, a.Namespace)
 	cmd := describeHelmCommand(base, a.ExtraValues, nil)
+	if a.UsesSuppliedCredentials() {
+		return cmd
+	}
 	return fmt.Sprintf("%s (resolves cluster %q uid + control-plane credential)", cmd, a.ClusterName)
 }
 
 func (a InstallClusterChart) Execute(ctx context.Context, deps orchestrator2.Deps) (orchestrator2.ActionResult, error) {
-	url := ControlPlaneURL(a.Domain)
-	apiClient, err := deps.RunAIClientProvider(url, a.CACertPath)
-	if err != nil {
-		return orchestrator2.ActionResult{}, err
-	}
-	uuid, err := FindClusterUUID(ctx, apiClient, a.ClusterName)
-	if err != nil {
-		return orchestrator2.ActionResult{}, err
-	}
-	if uuid == "" {
-		return orchestrator2.ActionResult{}, fmt.Errorf("cluster %q not found in control plane", a.ClusterName)
-	}
-	installInfo, statusCode, err := apiClient.GetClusterInstallInfoByUUID(ctx, uuid, a.Version, a.Domain)
-	if err != nil {
-		return orchestrator2.ActionResult{}, err
-	}
-	if statusCode != http.StatusOK {
-		return orchestrator2.ActionResult{}, fmt.Errorf("get cluster install info: unexpected status %d", statusCode)
-	}
-
-	values := []string{
-		"controlPlane.url=" + a.Domain,
-		step.ClusterAuthValue(installInfo),
-		"cluster.uid=" + uuid,
-		"cluster.url=" + a.Domain,
+	var values []string
+	if a.UsesSuppliedCredentials() {
+		values = []string{
+			"controlPlane.url=" + a.ControlPlaneURL,
+			step.ClusterAuthValueFromCredentials(a.BootstrapToken, a.ClientSecret),
+			"cluster.uid=" + a.ClusterUID,
+			"cluster.url=" + a.Domain,
+		}
+	} else {
+		_, controlPlane := a.ClusterRef()
+		apiClient, err := controlPlane.Client(deps)
+		if err != nil {
+			return orchestrator2.ActionResult{}, err
+		}
+		controlPlaneURL := a.Domain
+		if a.ControlPlaneURL != "" {
+			controlPlaneURL = a.ControlPlaneURL
+		}
+		values, err = clusterChartCredentialValues(ctx, apiClient, a.ClusterName, a.Version, controlPlaneURL, a.Domain)
+		if err != nil {
+			return orchestrator2.ActionResult{}, err
+		}
 	}
 	if a.CACertPath != "" {
 		values = append(values, "global.customCA.enabled=true")

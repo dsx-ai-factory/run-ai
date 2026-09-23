@@ -8,6 +8,7 @@ package orchestrator2
 import (
 	"context"
 
+	runaiclient "github.com/dsx-ai-factory/run-ai/runai-installer/clients/pkg/clients"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/apiclient"
 )
@@ -23,5 +24,15 @@ func newRunAIClientProvider(k8s K8sExecutor, version string) step.RunAIAPIClient
 			return nil, err
 		}
 		return clients.ClusterServiceClient, nil
+	}
+}
+
+func newCredentialedRunAIClientProvider() step.RunAIAPICredentialedClientProvider {
+	return func(url, caCertPath string, creds step.ControlPlaneCredentials) (step.RunAIAPIClient, error) {
+		return apiclient.NewClusterServiceClientWithCredentials(url, caCertPath, runaiclient.Credentials{
+			Username: creds.Username,
+			Password: creds.Password,
+			Token:    creds.Token,
+		})
 	}
 }

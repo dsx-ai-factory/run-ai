@@ -1,7 +1,6 @@
 post:
   summary: Delete multiple reports in batch.
   operationId: batch_delete_reports
-  x-internal: true
   x-service: org-unit-service
   description: Deletes multiple reports in a single request. Returns per-report outcomes; deletion is processed asynchronously on the metrics side.
   x-authorize:

@@ -8,6 +8,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	dynamov1alpha1 "github.com/ai-dynamo/dynamo/deploy/operator/api/v1alpha1"
 	dynamov1beta1 "github.com/ai-dynamo/dynamo/deploy/operator/api/v1beta1"
@@ -297,13 +298,8 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseSpecResources(ctx context.Co
 	}
 }
 
-// parseTopology surfaces the deployment-level topology name to the workload.
-// The topology name field is version-specific (v1alpha1 topologyProfile vs
-// v1beta1 clusterTopologyName), so it is read per version. Only the topology
-// name is mapped, since it is the single workload-global value shared by all
-// components. packDomain is intentionally NOT mapped: the deployment-level value
-// is only a default that each component may override (X.topologyConstraint.packDomain),
-// so there is no single placement level that represents the whole workload.
+// packDomain maps to RequiredPlacement: Grove treats it as the deprecated
+// spelling of pack.required, a hard requirement.
 func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 	object client.Object,
 	externalWorkload *v1alpha1.ExternalWorkload,
@@ -311,7 +307,17 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 	switch dgd := object.(type) {
 	case *dynamov1alpha1.DynamoGraphDeployment:
 		if dgd.Spec.TopologyConstraint != nil && dgd.Spec.TopologyConstraint.TopologyProfile != "" {
-			externalWorkload.Spec.Topology.Name = dgd.Spec.TopologyConstraint.TopologyProfile
+			defaultPackDomain := string(dgd.Spec.TopologyConstraint.PackDomain)
+			packDomainByComponent := make(map[string]string, len(dgd.Spec.Services))
+			for serviceName, serviceSpec := range dgd.Spec.Services {
+				packDomain := defaultPackDomain
+				if serviceSpec != nil && serviceSpec.TopologyConstraint != nil {
+					packDomain = string(serviceSpec.TopologyConstraint.PackDomain)
+				}
+				packDomainByComponent[serviceName] = packDomain
+			}
+			applyTopology(externalWorkload, dgd.Spec.TopologyConstraint.TopologyProfile,
+				defaultPackDomain, packDomainByComponent)
 			return
 		}
 		// Legacy path: KAI topology annotations on the per-service specs
@@ -324,13 +330,57 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 		parseTopologyFromServiceAnnotations(serviceAnnotations, externalWorkload)
 	case *dynamov1beta1.DynamoGraphDeployment:
 		if dgd.Spec.TopologyConstraint != nil && dgd.Spec.TopologyConstraint.ClusterTopologyName != "" {
-			externalWorkload.Spec.Topology.Name = dgd.Spec.TopologyConstraint.ClusterTopologyName
+			defaultPackDomain := string(dgd.Spec.TopologyConstraint.PackDomain)
+			packDomainByComponent := make(map[string]string, len(dgd.Spec.Components))
+			for _, component := range dgd.Spec.Components {
+				packDomain := defaultPackDomain
+				if component.TopologyConstraint != nil {
+					packDomain = string(component.TopologyConstraint.PackDomain)
+				}
+				packDomainByComponent[component.ComponentName] = packDomain
+			}
+			applyTopology(externalWorkload, dgd.Spec.TopologyConstraint.ClusterTopologyName,
+				defaultPackDomain, packDomainByComponent)
 			return
 		}
 		// Legacy path: KAI topology annotations. v1beta1 has no per-component
 		// annotations, so the deployment-level annotations are the only source.
 		parseTopologyFromServiceAnnotations([]map[string]string{dgd.Spec.Annotations}, externalWorkload)
 	}
+}
+
+func applyTopology(externalWorkload *v1alpha1.ExternalWorkload, topologyName, defaultPackDomain string,
+	packDomainByComponent map[string]string,
+) {
+	externalWorkload.Spec.Topology.Name = topologyName
+	externalWorkload.Spec.Topology.RequiredPlacement = defaultPackDomain
+	externalWorkload.Spec.ComponentTopologies = buildComponentTopologies(topologyName, packDomainByComponent)
+}
+
+// Entries are sorted by name so a re-parse of an unchanged DGD yields an identical spec.
+func buildComponentTopologies(topologyName string, packDomainByComponent map[string]string) []v1alpha1.ComponentTopologyEntry {
+	componentNames := make([]string, 0, len(packDomainByComponent))
+	for componentName, packDomain := range packDomainByComponent {
+		if componentName != "" && packDomain != "" {
+			componentNames = append(componentNames, componentName)
+		}
+	}
+	if len(componentNames) == 0 {
+		return nil
+	}
+	sort.Strings(componentNames)
+
+	entries := make([]v1alpha1.ComponentTopologyEntry, 0, len(componentNames))
+	for _, componentName := range componentNames {
+		entries = append(entries, v1alpha1.ComponentTopologyEntry{
+			SpecName: componentName,
+			Topology: v1alpha1.Topology{
+				Name:              topologyName,
+				RequiredPlacement: packDomainByComponent[componentName],
+			},
+		})
+	}
+	return entries
 }
 
 // parseTopologyFromServiceAnnotations reads the legacy KAI topology annotations

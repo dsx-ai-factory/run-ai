@@ -9,7 +9,7 @@
     "department": "default",
     "createdAt": "2025-12-15T08:58:24.919632Z",
     "updatedAt": "2025-12-15T09:07:57.791339Z",
-    "submittedBy": "test@run.ai",
+    "submittedBy": "test@example.com",
     "priority": "very-high (150)",
     "category": "Deploy",
     "environmentVariables": {
@@ -22,7 +22,7 @@
   "workloadDetails": {
     "preemptible": false,
     "images": [
-      "gcr.io/run-ai-lab/nim-cpu:latest"
+      "nvcr.io/nim/meta/llama3-8b-instruct"
     ]
   },
   "compute": {
@@ -88,7 +88,7 @@
   },
   "GPUAcceleration": null,
   "nim": {
-    "image": "gcr.io/run-ai-lab/nim-cpu:latest",
+    "image": "nvcr.io/nim/meta/llama3-8b-instruct",
     "ngcAuthSecret": "my-ngc",
     "category": "Deploy",
     "preemptibility": "non-preemptible",

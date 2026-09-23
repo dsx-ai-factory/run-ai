@@ -8,7 +8,7 @@ package step
 import (
 	"context"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/clients/runai/cluster"
+	cluster "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 )
 
 type RunAIAPIClient interface {
@@ -19,3 +19,11 @@ type RunAIAPIClient interface {
 }
 
 type RunAIAPIClientProvider func(fqdn, caCertPath string) (RunAIAPIClient, error)
+
+type ControlPlaneCredentials struct {
+	Username string
+	Password string
+	Token    string
+}
+
+type RunAIAPICredentialedClientProvider func(url, caCertPath string, creds ControlPlaneCredentials) (RunAIAPIClient, error)

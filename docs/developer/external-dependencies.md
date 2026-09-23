@@ -1,39 +1,47 @@
 # External Dependencies
 
-The NVIDIA Run:ai cluster plane pulls in components from external repositories as Helm chart dependencies. These components are not built from the Run:ai source - they are consumed as versioned OCI charts and integrated at deploy time.
+NVIDIA Run:ai's cluster components build on external open-source projects, pulled in as versioned Helm chart dependencies or Go modules rather than built from Run:ai source. NVIDIA Run:ai packages, configures, and manages these dependencies as part of the platform, so no separate installation or maintenance is required to use them. The diagram below shows how these dependencies connect to Run:ai's own cluster components in the workload scheduling pipeline.
 
-The chart dependencies are declared in [`runai-chart/Chart.yaml`](https://github.com/dsx-ai-factory/run-ai/blob/main/runai-cluster/cluster/runai-chart/Chart.yaml) and documented in the [Chart dependencies](https://github.com/dsx-ai-factory/run-ai/blob/main/runai-cluster/cluster/runai-chart/README.md#chart-dependencies) section of the runai-chart README.
+![How open source enables the NVIDIA Run:ai platform](../assets/oss-composition.svg)
+
+Helm chart dependencies are declared in [`runai-chart/Chart.yaml`](https://github.com/dsx-ai-factory/run-ai/blob/main/runai-cluster/cluster/runai-chart/Chart.yaml) and documented in the [Chart dependencies](https://github.com/dsx-ai-factory/run-ai/blob/main/runai-cluster/cluster/runai-chart/README.md#chart-dependencies) section of the runai-chart README.
+
+## KAI Resource Management (KRM)
+
+**Source:** [`kai-scheduler/kai-resource-management`](https://github.com/kai-scheduler/kai-resource-management)
+**Dependency of:** `runai-chart` - a direct Helm chart dependency
+
+KAI Resource Management is a Kubernetes-native resource-management layer for KAI Scheduler, adding organizational abstractions - projects, departments, node pools, queues - and workload placement. Its Helm chart packages `nodepool-controller`, `project-controller`, `pod-group-assigner`, and `krm-operator`, replacing the versions of those controllers previously built from Run:ai's own cluster source, and declares KAI Scheduler as its own sub-chart dependency.
 
 ## KAI Scheduler
 
-**Source:** [`github.com/kai-scheduler/KAI-Scheduler`](https://github.com/kai-scheduler/KAI-Scheduler)
-**Chart:** `oci://ghcr.io/kai-scheduler/kai-scheduler`
+**Source:** [`kai-scheduler/KAI-Scheduler`](https://github.com/kai-scheduler/KAI-Scheduler)
+**Dependency of:** KRM - a sub-chart dependency (`oci://ghcr.io/kai-scheduler/kai-scheduler`, declared in KRM's `Chart.yaml`), not a direct entry in `runai-chart`
 
-The KAI (Kubernetes AI) Scheduler is an open-source, CNCF-donated AI-aware scheduling engine. It applies fair-share, preemption, bin-packing, and multi-node placement rules to GPU workloads.
+KAI (Kubernetes AI) Scheduler is an open-source, CNCF-donated AI-aware scheduling engine. It applies fair-share, preemption, bin-packing, and multi-node placement rules to GPU workloads, and is the engine underlying the NVIDIA Run:ai Scheduler.
 
 NVIDIA Run:ai integrates KAI with specific configuration overrides - the `go-operator` owns `kai-config` and the `kai-nodepool-controller` creates one KAI SchedulingShard per node pool. KAI's default queue, shard, and config-deployer components are disabled.
 
-Once `kai-resource-management` is added as a chart dependency, KAI Scheduler will become a sub-dependency of KRM rather than a direct entry in `runai-chart/Chart.yaml`.
+## kai-gpu-fractioning
+
+**Source:** [`kai-scheduler/kai-gpu-fractioning`](https://github.com/kai-scheduler/kai-gpu-fractioning)
+**Dependency of:** KAI Scheduler - a sub-chart dependency, so it does not need its own entry in `runai-chart/Chart.yaml`
+
+kai-gpu-fractioning is a Kubernetes operator that enables multiple pods to safely share a single GPU with enforced memory boundaries. It runs alongside KAI Scheduler: KAI Scheduler decides which fraction of which GPU a workload gets, and kai-gpu-fractioning enforces that memory boundary on the node and exports per-pod metrics for the resulting fractional GPUs.
+
+## kai-resource-management-api
+
+**Source:** [`kai-scheduler/kai-resource-management-api`](https://github.com/kai-scheduler/kai-resource-management-api)
+**Dependency of:** Run:ai's own cluster services (declared in each service's `go.mod`) - a Go module dependency, not a Helm chart dependency and not a separately running service
+
+The API-only counterpart to KRM: the CRD type definitions (`kai.resources`: Project, Department, NodePool, ManagedNodesConfig, KRMConfig). Any Run:ai service that reads or writes these CRDs imports this module for the typed Go structs, independent of which controller owns reconciling them - today that's a mix of Run:ai's own controllers and, once KRM is adopted, KRM's. Migrating legacy CRDs onto `kai.resources` runs automatically this release and self-gates once complete; it isn't a customer-facing toggle.
 
 ## Karta
 
-**Source:** `oci://ghcr.io/run-ai/karta`
-**Chart:** `oci://ghcr.io/run-ai/karta`
+**Source:** [`run-ai/karta`](https://github.com/run-ai/karta)
+**Dependency of:** `runai-chart` - a direct Helm chart dependency (`oci://ghcr.io/dsx-ai-factory/workload-map/karta`, declared in `Chart.yaml`)
 
 Karta is a CRD-based resource abstraction layer with its own operator. It replaced the legacy `ResourceInterface` (RI) CRD as the way Run:ai represents and reconciles workload resource attachments in the cluster. The `karta-migrate` Helm hook handles the one-time migration from RI to Karta CRs on upgrade.
-
-## KAI Resource Management *(coming)*
-
-**Source:** TBD
-**Chart:** TBD
-
-KAI Resource Management (KRM) is a planned external component that will own node pool management, pod group scheduling coordination, and project-to-namespace reconciliation. When it ships, it replaces the following components currently built from the Run:ai cluster source:
-
-- `nodepool-controller` - manages NodePool CRDs and per-pool scheduler instances
-- `pod-group-assigner` - assigns PodGroups to node pools for multi-node-pool scheduling
-- `project-controller` - reconciles Project CRDs into Namespace, Queue, LimitRange, and RBAC resources
-
-KRM will also take ownership of the Department, Project, and NodePool CRDs (currently in the `run.ai` and `kai.resources` API groups), and will pull in KAI Scheduler as a sub-dependency.
 
 ---
 

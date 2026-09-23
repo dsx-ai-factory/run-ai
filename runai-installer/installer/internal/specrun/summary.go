@@ -10,6 +10,8 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/apiclient"
 )
 
 // This file holds the functions that fold a recorded event stream into the
@@ -173,15 +175,13 @@ func runaiSummary(evs []orchestrator2.Event, s *spec.Spec) orchestrator2.RunaiSu
 	cpInstalled := runaiStepDone(evs, "install-control-plane-chart")
 	clusterInstalled := runaiStepDone(evs, "install-cluster-chart")
 	clusterRegistered := runaiStepDone(evs, "register-cluster")
+	if s.Cluster != nil && s.Cluster.UsesSuppliedClusterIdentity() {
+		clusterRegistered = true
+	}
 
 	var sum orchestrator2.RunaiSummary
 	if s.ControlPlane != nil {
-		sum.ControlPlane = &orchestrator2.RunaiControlPlane{
-			Installed: cpInstalled,
-			Version:   cpVersion,
-			Domain:    s.ControlPlane.Domain,
-			URL:       httpsURL(s.ControlPlane.Domain),
-		}
+		sum.ControlPlane = controlPlaneSummary(s, cpVersion, cpInstalled)
 	}
 	if s.Cluster != nil {
 		sum.Cluster = &orchestrator2.RunaiCluster{
@@ -225,23 +225,41 @@ func runSummary(evs []orchestrator2.Event, s *spec.Spec, duration time.Duration,
 	}
 	if s.ControlPlane != nil {
 		cpVersion, _ := runaiVersions(s)
-		sum.ControlPlane = &orchestrator2.RunaiControlPlane{
-			Installed: runaiStepDone(evs, "install-control-plane-chart"),
-			Version:   cpVersion,
-			Domain:    s.ControlPlane.Domain,
-			URL:       httpsURL(s.ControlPlane.Domain),
-		}
+		sum.ControlPlane = controlPlaneSummary(s, cpVersion, runaiStepDone(evs, "install-control-plane-chart"))
 	}
 	if s.Cluster != nil {
 		_, clusterVersion := runaiVersions(s)
+		clusterRegistered := runaiStepDone(evs, "register-cluster")
+		if s.Cluster.UsesSuppliedClusterIdentity() {
+			clusterRegistered = true
+		}
 		sum.Cluster = &orchestrator2.RunaiCluster{
 			Installed:  runaiStepDone(evs, "install-cluster-chart"),
-			Registered: runaiStepDone(evs, "register-cluster"),
+			Registered: clusterRegistered,
 			Name:       s.Cluster.Name,
 			Version:    clusterVersion,
 		}
 	}
 	return sum
+}
+
+func controlPlaneSummary(s *spec.Spec, version string, installed bool) *orchestrator2.RunaiControlPlane {
+	cp := &orchestrator2.RunaiControlPlane{
+		Installed: installed,
+		Version:   version,
+		Domain:    s.ControlPlane.Domain,
+		URL:       httpsURL(s.ControlPlane.Domain),
+	}
+	if installed {
+		cp.AdminCredentials = &orchestrator2.AdminCredentialsRef{
+			Namespace:         step.CPNamespace,
+			UsernameConfigMap: apiclient.AdminConfigMapName(step.CPReleaseName),
+			UsernameKey:       apiclient.AdminUsernameKey,
+			PasswordSecret:    apiclient.AdminSecretName(step.CPReleaseName, version),
+			PasswordKey:       apiclient.AdminPasswordKey,
+		}
+	}
+	return cp
 }
 
 // runPipelines rolls up each pipeline's own summary, including only the

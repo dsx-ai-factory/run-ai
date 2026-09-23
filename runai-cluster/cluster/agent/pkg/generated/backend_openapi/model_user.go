@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -16,10 +18,10 @@ import (
 
 // User struct for User
 type User struct {
-	UserId string `json:"userId"`
-	Email *string `json:"email,omitempty"`
-	Role string `json:"role"`
-	Roles []string `json:"roles,omitempty"`
+	UserId string   `json:"userId"`
+	Email  *string  `json:"email,omitempty"`
+	Role   string   `json:"role"`
+	Roles  []string `json:"roles,omitempty"`
 	Groups []string `json:"groups,omitempty"`
 }
 
@@ -241,5 +243,3 @@ func (v *NullableUser) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

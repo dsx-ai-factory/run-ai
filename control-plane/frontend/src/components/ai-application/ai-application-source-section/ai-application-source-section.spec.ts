@@ -9,6 +9,10 @@ import { Quasar } from "quasar";
 import AiApplicationSourceSection from "./ai-application-source-section.vue";
 import { aiApplicationService } from "@/services/cluster/ai-application.service/ai-application.service";
 import { errorMessages } from "@/common/error-message.constant";
+import {
+  ERunaiCredentialSource,
+  ERunaiCredentialType,
+} from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
 
 vi.mock("@/services/control-plane/catalog.service/catalog.service", () => ({
   catalogService: {
@@ -66,6 +70,62 @@ describe("ai-application-source-section upload file", () => {
   it("offers Upload file as a source option", () => {
     const vm = mountComponent().vm as Vm;
     expect(vm.aiApplicationSourceOptions.map((o: { value: string }) => o.value)).toContain("upload-file");
+  });
+
+  it("emits the selected credential source with chart authentication", async () => {
+    const wrapper = mountComponent();
+    const vm = wrapper.vm as Vm;
+
+    await vm.handleCredentialChange({
+      source: ERunaiCredentialSource.MyCredentials,
+      type: ERunaiCredentialType.GenericSecret,
+      credentialName: "registry-login",
+      id: "asset-1",
+    });
+
+    expect(wrapper.emitted("update:auth")?.at(-1)?.[0]).toEqual({
+      assetId: "asset-1",
+      userCredential: true,
+    });
+  });
+
+  it("allows generic or NGC authentication for HTTP custom URLs", () => {
+    const vm = mountComponent().vm as Vm;
+
+    expect(vm.customUrlTypeSelectConfig.allowedTypes).toEqual([
+      ERunaiCredentialType.NgcApiKey,
+      ERunaiCredentialType.GenericSecret,
+    ]);
+  });
+
+  it("switches OCI custom URLs to Docker registry or NGC authentication", async () => {
+    const wrapper = mountComponent();
+    const vm = wrapper.vm as Vm;
+
+    await wrapper.setProps({
+      chartRef: { repo: "", chartName: "", chartVersion: "", chartURL: "oci://registry.example.com/chart" },
+    });
+
+    expect(vm.customUrlTypeSelectConfig.allowedTypes).toEqual([
+      ERunaiCredentialType.NgcApiKey,
+      ERunaiCredentialType.DockerRegistry,
+    ]);
+  });
+
+  it("clears incompatible authentication when custom URL transport changes", () => {
+    const wrapper = mountComponent();
+    const vm = wrapper.vm as Vm;
+    vm.credentialSelectorModel = {
+      source: ERunaiCredentialSource.MyCredentials,
+      type: ERunaiCredentialType.GenericSecret,
+      credentialName: "http-secret",
+      id: "asset-1",
+    };
+
+    vm.handleChartURLChange("oci://registry.example.com/chart");
+
+    expect(wrapper.emitted("update:auth")?.at(-1)?.[0]).toBeUndefined();
+    expect(vm.credentialSelectorModel.id).toBeUndefined();
   });
 
   it("uploads a selected file and syncs the returned chart id", async () => {

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -30,7 +32,7 @@ type Pod struct {
 	ImageName string `json:"imageName"`
 	// Unique identifier of the node.
 	NodeId *string `json:"nodeId,omitempty"`
-	Phase string `json:"phase"`
+	Phase  string  `json:"phase"`
 	Status *string `json:"status,omitempty"`
 	// Creation time of the pod.
 	Created int64 `json:"created"`
@@ -39,11 +41,11 @@ type Pod struct {
 	// The time when the pod started executing.
 	Started *int64 `json:"started,omitempty"`
 	// Last time the pod details were updated.
-	LastUpdated int64 `json:"lastUpdated"`
-	DynamicData map[string]interface{} `json:"dynamicData,omitempty"`
-	ExistsInCluster *bool `json:"existsInCluster,omitempty"`
-	ResourceRequest *map[string]float32 `json:"resourceRequest,omitempty"`
-	ResourceAllocation *map[string]float32 `json:"resourceAllocation,omitempty"`
+	LastUpdated        int64                  `json:"lastUpdated"`
+	DynamicData        map[string]interface{} `json:"dynamicData,omitempty"`
+	ExistsInCluster    *bool                  `json:"existsInCluster,omitempty"`
+	ResourceRequest    *map[string]float32    `json:"resourceRequest,omitempty"`
+	ResourceAllocation *map[string]float32    `json:"resourceAllocation,omitempty"`
 	// The node pool of the pod.
 	NodePool *string `json:"nodePool,omitempty"`
 	// The namespace of the pod.
@@ -709,5 +711,3 @@ func (v *NullablePod) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

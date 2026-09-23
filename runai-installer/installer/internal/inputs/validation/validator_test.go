@@ -20,19 +20,19 @@ import (
 
 func TestValidateNGCCredentials(t *testing.T) {
 	// Test valid base64
-	result := ValidateJfrogCredentials("dGVzdDp0ZXN0")
+	result := ValidatePullSecret("dGVzdDp0ZXN0")
 	if !result.Status {
 		t.Errorf("Expected valid status, got %v", result.Status)
 	}
 
 	// Test invalid base64
-	result = ValidateJfrogCredentials("invalid@base64!")
+	result = ValidatePullSecret("invalid@base64!")
 	if result.Status {
 		t.Errorf("Expected invalid status, got %v", result.Status)
 	}
 
 	// Test empty
-	result = ValidateJfrogCredentials("")
+	result = ValidatePullSecret("")
 	if result.Status {
 		t.Errorf("Expected invalid status for empty, got %v", result.Status)
 	}

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -21,7 +23,7 @@ type DatavolumeRequestType string
 
 // List of DatavolumeRequestType
 const (
-	DATAVOLUMEREQUESTTYPE_ORIGINATED DatavolumeRequestType = "Originated"
+	DATAVOLUMEREQUESTTYPE_ORIGINATED        DatavolumeRequestType = "Originated"
 	DATAVOLUMEREQUESTTYPE_USABLE_IN_PROJECT DatavolumeRequestType = "UsableInProject"
 )
 
@@ -109,4 +111,3 @@ func (v *NullableDatavolumeRequestType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

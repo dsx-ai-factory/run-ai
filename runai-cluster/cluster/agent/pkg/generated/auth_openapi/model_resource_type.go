@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -21,37 +23,37 @@ type ResourceType string
 
 // List of ResourceType
 const (
-	RESOURCETYPE_DEPARTMENT ResourceType = "department"
-	RESOURCETYPE_TENANT ResourceType = "tenant"
-	RESOURCETYPE_PROJECT ResourceType = "project"
-	RESOURCETYPE_CLUSTER ResourceType = "cluster"
-	RESOURCETYPE_CLUSTER_CONFIG ResourceType = "cluster-config"
-	RESOURCETYPE_NODEPOOLS ResourceType = "nodepools"
-	RESOURCETYPE_NODES ResourceType = "nodes"
-	RESOURCETYPE_SETTINGS ResourceType = "settings"
-	RESOURCETYPE_USERS ResourceType = "users"
-	RESOURCETYPE_GROUPS ResourceType = "groups"
-	RESOURCETYPE_APPS ResourceType = "apps"
-	RESOURCETYPE_DASHBOARDS_OVERVIEW ResourceType = "dashboards-overview"
-	RESOURCETYPE_DASHBOARDS_ANALYTICS ResourceType = "dashboards-analytics"
+	RESOURCETYPE_DEPARTMENT             ResourceType = "department"
+	RESOURCETYPE_TENANT                 ResourceType = "tenant"
+	RESOURCETYPE_PROJECT                ResourceType = "project"
+	RESOURCETYPE_CLUSTER                ResourceType = "cluster"
+	RESOURCETYPE_CLUSTER_CONFIG         ResourceType = "cluster-config"
+	RESOURCETYPE_NODEPOOLS              ResourceType = "nodepools"
+	RESOURCETYPE_NODES                  ResourceType = "nodes"
+	RESOURCETYPE_SETTINGS               ResourceType = "settings"
+	RESOURCETYPE_USERS                  ResourceType = "users"
+	RESOURCETYPE_GROUPS                 ResourceType = "groups"
+	RESOURCETYPE_APPS                   ResourceType = "apps"
+	RESOURCETYPE_DASHBOARDS_OVERVIEW    ResourceType = "dashboards-overview"
+	RESOURCETYPE_DASHBOARDS_ANALYTICS   ResourceType = "dashboards-analytics"
 	RESOURCETYPE_DASHBOARDS_CONSUMPTION ResourceType = "dashboards-consumption"
-	RESOURCETYPE_ROLES ResourceType = "roles"
-	RESOURCETYPE_ACCESS_RULES ResourceType = "access_rules"
-	RESOURCETYPE_JOBS ResourceType = "jobs"
-	RESOURCETYPE_DEPLOYMENTS ResourceType = "deployments"
-	RESOURCETYPE_TRAININGS ResourceType = "trainings"
-	RESOURCETYPE_WORKSPACES ResourceType = "workspaces"
-	RESOURCETYPE_ENVIRONMENTS ResourceType = "environments"
-	RESOURCETYPE_PVC_ASSETS ResourceType = "pvc-assets"
-	RESOURCETYPE_GIT_ASSETS ResourceType = "git-assets"
-	RESOURCETYPE_HOST_PATH_ASSETS ResourceType = "host-path-assets"
-	RESOURCETYPE_NFS_ASSETS ResourceType = "nfs-assets"
-	RESOURCETYPE_S3_ASSETS ResourceType = "s3-assets"
-	RESOURCETYPE_COMPUTE_RESOURCES ResourceType = "compute-resources"
-	RESOURCETYPE_TEMPLATES ResourceType = "templates"
-	RESOURCETYPE_CREDENTIALS ResourceType = "credentials"
-	RESOURCETYPE_EVENTS_HISTORY ResourceType = "events-history"
-	RESOURCETYPE_SERVICES ResourceType = "services"
+	RESOURCETYPE_ROLES                  ResourceType = "roles"
+	RESOURCETYPE_ACCESS_RULES           ResourceType = "access_rules"
+	RESOURCETYPE_JOBS                   ResourceType = "jobs"
+	RESOURCETYPE_DEPLOYMENTS            ResourceType = "deployments"
+	RESOURCETYPE_TRAININGS              ResourceType = "trainings"
+	RESOURCETYPE_WORKSPACES             ResourceType = "workspaces"
+	RESOURCETYPE_ENVIRONMENTS           ResourceType = "environments"
+	RESOURCETYPE_PVC_ASSETS             ResourceType = "pvc-assets"
+	RESOURCETYPE_GIT_ASSETS             ResourceType = "git-assets"
+	RESOURCETYPE_HOST_PATH_ASSETS       ResourceType = "host-path-assets"
+	RESOURCETYPE_NFS_ASSETS             ResourceType = "nfs-assets"
+	RESOURCETYPE_S3_ASSETS              ResourceType = "s3-assets"
+	RESOURCETYPE_COMPUTE_RESOURCES      ResourceType = "compute-resources"
+	RESOURCETYPE_TEMPLATES              ResourceType = "templates"
+	RESOURCETYPE_CREDENTIALS            ResourceType = "credentials"
+	RESOURCETYPE_EVENTS_HISTORY         ResourceType = "events-history"
+	RESOURCETYPE_SERVICES               ResourceType = "services"
 )
 
 // All allowed values of ResourceType enum
@@ -167,4 +169,3 @@ func (v *NullableResourceType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

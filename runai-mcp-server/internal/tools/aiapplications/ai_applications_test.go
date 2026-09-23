@@ -53,6 +53,12 @@ func TestSubmitAIApplicationInputValidate(t *testing.T) {
 			in.Spec.ChartRef = aiApplicationChartRef{ChartID: testApplicationID}
 		}},
 		{name: "values base64", mutate: func(in *submitAIApplicationInput) { in.Spec.ValuesBase64 = &encodedValues }},
+		{name: "shared chart credential", mutate: func(in *submitAIApplicationInput) {
+			in.Spec.Auth = &aiApplicationAuth{AssetID: testApplicationID}
+		}},
+		{name: "personal chart credential", mutate: func(in *submitAIApplicationInput) {
+			in.Spec.Auth = &aiApplicationAuth{AssetID: testApplicationID, UserCredential: true}
+		}},
 		{name: "missing source", mutate: func(in *submitAIApplicationInput) { in.Spec.ChartRef = aiApplicationChartRef{} }, wantErr: "exactly one source"},
 		{name: "multiple sources", mutate: func(in *submitAIApplicationInput) { in.Spec.ChartRef.ChartID = testApplicationID }, wantErr: "exactly one source"},
 		{name: "partial repository", mutate: func(in *submitAIApplicationInput) {
@@ -63,6 +69,9 @@ func TestSubmitAIApplicationInputValidate(t *testing.T) {
 			in.Spec.ValuesBase64 = &encodedValues
 		}, wantErr: "mutually exclusive"},
 		{name: "invalid base64", mutate: func(in *submitAIApplicationInput) { invalid := "%%%"; in.Spec.ValuesBase64 = &invalid }, wantErr: "valid base64"},
+		{name: "missing auth asset", mutate: func(in *submitAIApplicationInput) {
+			in.Spec.Auth = &aiApplicationAuth{UserCredential: true}
+		}, wantErr: "assetId is required"},
 	}
 
 	for _, tt := range tests {
@@ -142,6 +151,9 @@ func TestSubmitAIApplicationCreatesAfterConfirmation(t *testing.T) {
 		assert.Equal(t, "nemo-app", body["name"])
 		assert.Equal(t, testClusterID, body["clusterId"])
 		assert.Equal(t, testProjectID, body["projectId"])
+		spec := body["spec"].(map[string]any)
+		auth := spec["auth"].(map[string]any)
+		assert.Equal(t, true, auth["userCredential"])
 		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
 			"id": testApplicationID, "name": "nemo-app", "projectId": testProjectID,
 			"desiredPhase": "deployed", "phase": "Pending", "actionStatus": "creating",
@@ -151,6 +163,7 @@ func TestSubmitAIApplicationCreatesAfterConfirmation(t *testing.T) {
 	in := validSubmitInput()
 	in.Confirm = true
 	in.Spec.Values = map[string]any{"password": "do-not-return"}
+	in.Spec.Auth = &aiApplicationAuth{AssetID: testApplicationID, UserCredential: true}
 	out, err := submitAIApplicationRun(context.Background(), client, in)
 	require.NoError(t, err)
 	assert.Equal(t, testApplicationID, out.ID)

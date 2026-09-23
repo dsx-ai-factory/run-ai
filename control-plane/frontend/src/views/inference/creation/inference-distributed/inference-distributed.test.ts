@@ -9,6 +9,9 @@ import { Quasar } from "quasar";
 import { ref } from "vue";
 import InferenceDistributed from "./inference-distributed.vue";
 import { EDistributedInferenceType } from "./inference-distributed.model";
+import { EServerType } from "@/models/inference.model";
+import { UidGidSource, WorkloadDesiredPhase } from "@/swagger-models/workloads-client";
+import { inferenceService } from "@/services/control-plane/inference.service/inference.service";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyWrapper = VueWrapper<any>;
@@ -37,6 +40,7 @@ vi.mock("@/stores/inference.store", () => ({
     saveDistributedFormState: mockSaveDistributedFormState,
     clearDistributedFormState: vi.fn(),
     clearInferenceFormUIState: vi.fn(),
+    clearPresetFormModel: vi.fn(),
   }),
 }));
 
@@ -44,11 +48,12 @@ vi.mock("@/stores/cluster.store", () => ({
   useClusterStore: () => ({
     isClusterVersionSufficient: vi.fn(() => true),
     clusterList: [],
+    setSelectedClusterById: vi.fn(),
   }),
 }));
 
 vi.mock("@/stores/auth.store", () => ({
-  useAuthStore: () => ({}),
+  useAuthStore: () => ({ tenant: { id: 1 } }),
 }));
 
 vi.mock("@/stores/data-source.store", () => ({
@@ -56,7 +61,7 @@ vi.mock("@/stores/data-source.store", () => ({
 }));
 
 vi.mock("@/stores/workload.store", () => ({
-  useWorkloadStore: () => ({}),
+  useWorkloadStore: () => ({ setWorkloadAdded: vi.fn() }),
 }));
 
 // Mock services
@@ -77,7 +82,7 @@ vi.mock("@/services/cluster/workload.service/workload.service", () => ({
 }));
 
 vi.mock("@/services/control-plane/inference.service/inference.service", () => ({
-  inferenceService: {},
+  inferenceService: { createDistributedInference: vi.fn() },
 }));
 
 // Mock composables
@@ -89,6 +94,7 @@ interface MockWorkloadModel {
     leader?: Record<string, unknown>;
     worker?: Record<string, unknown>;
     nodePools?: string[];
+    servingPort?: { protocol: string; container: number };
   };
 }
 
@@ -239,6 +245,74 @@ describe("inference-distributed.vue", () => {
           nodePools: [],
         },
       };
+    });
+
+    it.each([
+      [UidGidSource.FromIdpToken, UidGidSource.FromIdpToken],
+      [UidGidSource.FromIdpToken, UidGidSource.Custom],
+      [UidGidSource.Custom, UidGidSource.FromIdpToken],
+    ])("submits leader=%s and worker=%s through the real serializer", async (leaderSource, workerSource) => {
+      wrapper = createWrapper();
+      await flushPromises();
+      const identity = { runAsUid: 2001, runAsGid: 2002, supplementalGroups: "2003,2004" };
+      mockLeaderModel.value.spec.servingPort = { protocol: "http", container: 8080 };
+      mockLeaderModel.value.spec.leader = {
+        ...mockLeaderModel.value.spec.leader,
+        security: { uidGidSource: leaderSource, ...identity },
+      };
+      mockWorkerModel.value.spec.worker = {
+        ...mockWorkerModel.value.spec.worker,
+        security: { uidGidSource: workerSource, ...identity },
+      };
+      vi.mocked(inferenceService.createDistributedInference).mockResolvedValue({
+        name: "created-inference",
+        requestedName: "created-inference",
+        workloadId: "inference-id",
+        createdBy: "user",
+        createdAt: "2026-09-01T00:00:00Z",
+        desiredPhase: WorkloadDesiredPhase.Running,
+        clusterId: "cluster-1",
+        projectId: "project-1",
+        spec: {},
+      });
+      const before = JSON.stringify([mockLeaderModel.value, mockWorkerModel.value]);
+
+      await wrapper.vm.createInference();
+
+      expect(inferenceService.createDistributedInference).toHaveBeenCalledOnce();
+      const request = JSON.parse(
+        JSON.stringify(vi.mocked(inferenceService.createDistributedInference).mock.calls[0][0]),
+      );
+      expect(request.spec.leader.security).toEqual({
+        uidGidSource: leaderSource,
+        ...(leaderSource === UidGidSource.FromIdpToken ? {} : identity),
+      });
+      expect(request.spec.worker.security).toEqual({
+        uidGidSource: workerSource,
+        ...(workerSource === UidGidSource.FromIdpToken ? {} : identity),
+      });
+      expect(JSON.stringify([mockLeaderModel.value, mockWorkerModel.value])).toBe(before);
+      wrapper.unmount();
+    });
+
+    describe("parseServerType", () => {
+      it("accepts a valid server type", () => {
+        wrapper = createWrapper();
+
+        expect(wrapper.vm.parseServerType(EServerType.Nim)).toBe(EServerType.Nim);
+      });
+
+      it("uses the first value when the query parameter is repeated", () => {
+        wrapper = createWrapper();
+
+        expect(wrapper.vm.parseServerType([EServerType.Nim, EServerType.Custom])).toBe(EServerType.Nim);
+      });
+
+      it("rejects an unknown server type", () => {
+        wrapper = createWrapper();
+
+        expect(wrapper.vm.parseServerType("unknown")).toBeUndefined();
+      });
     });
 
     describe("when policy is null or undefined", () => {

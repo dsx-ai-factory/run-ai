@@ -524,8 +524,9 @@ func TestGetRequestedMigDevices(t *testing.T) {
 	podGroup.Annotations[requestedMigDevicesAnnotation] = "{\"1g.5gb\":1, \"2g.10gb\":2}"
 	exporter := NewPodGroupExporter(context.TODO(), nil, podGroup)
 
-	migDevices, err := exporter.GetRequestedMigDevices()
+	migDevices, found, err := exporter.GetRequestedMigDevices()
 	assert.Nil(t, err)
+	assert.True(t, found)
 	assert.Equal(t, 2, len(migDevices))
 	assert.Equal(t, map[string]int64{"1g.5gb": 1, "2g.10gb": 2}, migDevices)
 }
@@ -535,8 +536,9 @@ func TestGetRequestedMigDevicesEmptyRequest(t *testing.T) {
 	podGroup.Annotations[requestedMigDevicesAnnotation] = "{}"
 	exporter := NewPodGroupExporter(context.TODO(), nil, podGroup)
 
-	migDevices, err := exporter.GetRequestedMigDevices()
+	migDevices, found, err := exporter.GetRequestedMigDevices()
 	assert.Nil(t, err)
+	assert.True(t, found)
 	assert.Equal(t, 0, len(migDevices))
 	assert.Equal(t, map[string]int64{}, migDevices)
 }
@@ -546,8 +548,9 @@ func TestGetRequestedMigDevicesInvalid(t *testing.T) {
 	podGroup.Annotations[requestedMigDevicesAnnotation] = ""
 	exporter := NewPodGroupExporter(context.TODO(), nil, podGroup)
 
-	migDevices, err := exporter.GetRequestedMigDevices()
+	migDevices, found, err := exporter.GetRequestedMigDevices()
 	assert.Nil(t, migDevices)
+	assert.True(t, found)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "could not unmarshal value")
 }
@@ -556,10 +559,10 @@ func TestGetRequestedMigDevicesAnnotationNotFound(t *testing.T) {
 	podGroup := createPodGroup()
 	exporter := NewPodGroupExporter(context.TODO(), nil, podGroup)
 
-	migDevices, err := exporter.GetRequestedMigDevices()
+	migDevices, found, err := exporter.GetRequestedMigDevices()
 	assert.Nil(t, migDevices)
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "could not find annotation")
+	assert.False(t, found)
+	assert.Nil(t, err)
 }
 
 func createPodGroup() *kaiv2alpha2.PodGroup {

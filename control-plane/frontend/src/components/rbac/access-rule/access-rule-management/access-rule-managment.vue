@@ -107,6 +107,7 @@
           :options="formOptions"
           :role-options="rolesOptions"
           :is-sso="isSso"
+          :allowed-scopes="allowedCreateScopes"
           @close="toggleNewAccessRuleForm"
           @save="onAccessRulesSaved"
         />
@@ -135,12 +136,14 @@ import {
   type AccessRule,
   AccessRulesSortFilterFields,
   type AccessRulesBatchCreateResponse,
+  type PermittedScopes,
 } from "@/swagger-models/authorization-client";
 import type { ISelectOption } from "@/models/global.model";
 
 // Services
 import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
 import { rolesService } from "@/services/control-plane/rbac/roles.service/roles.service";
+import { permissionService } from "@/services/authorization/permission.service/permission.service";
 
 // Stores
 import { usePermissionStore } from "@/stores/permissions.store";
@@ -188,6 +191,7 @@ const allAuthAccessRulesRaw = ref<AccessRule[]>([]);
 const infiniteScrollRef = ref<QInfiniteScroll>();
 const totalAccessRulesCount = ref(100);
 const newAccessRuleFormRef = ref<InstanceType<typeof NewManagementAccessRuleForm> | null>(null);
+const allowedCreateScopes = ref<PermittedScopes>({});
 
 // Computed
 const subheader = computed(() => accessRuleUtil.getAccessRuleModalSubHeader(props.formOptions.page));
@@ -222,6 +226,10 @@ const noAccessRules = computed(
 const disableAccessRuleBtn = computed(() => !hasReadRolesPermission.value);
 
 const hasReadRolesPermission = computed(() => permissionStore.hasPermission(ResourceType.Roles, Action.Read));
+
+const hasCreateAccessRulesPermission = computed(() =>
+  permissionStore.hasPermission(ResourceType.AccessRules, Action.Create),
+);
 
 const subjects = computed<ISelectOption[]>(() => (isSso.value ? subjectTypeOptionsWithSSO : subjectTypeOptions));
 
@@ -359,12 +367,8 @@ function onAccessRulesSaved(createdAccessRules: AccessRulesBatchCreateResponse):
 }
 
 function notifyCreatedAccessRules(succeededCount: number, totalCount: number): void {
-  const message =
-    succeededCount === totalCount
-      ? `${succeededCount} access rule(s) created`
-      : `${succeededCount}/${totalCount} access rule(s) created`;
-
-  $q.notify(alertUtil.getSuccess(message));
+  const failedCount = totalCount - succeededCount;
+  $q.notify(accessRuleUtil.getCreatedAccessRulesNotification(succeededCount, failedCount, "Access rule created"));
 }
 
 function toggleNewAccessRuleForm() {
@@ -385,6 +389,10 @@ async function initialize() {
     initialLoader.value = true;
     if (hasReadRolesPermission.value && roleStore.roleList.length === 0) {
       await roleStore.loadRoles();
+    }
+    if (hasCreateAccessRulesPermission.value) {
+      const permittedScopesByAction = await permissionService.getPermittedScopesForAction(ResourceType.AccessRules);
+      allowedCreateScopes.value = permittedScopesByAction?.[Action.Create] || {};
     }
     if (props.hideSearch) {
       totalAccessRulesCount.value = 0;

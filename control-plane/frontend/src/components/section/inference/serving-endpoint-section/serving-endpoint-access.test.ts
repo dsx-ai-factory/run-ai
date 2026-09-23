@@ -45,6 +45,7 @@ interface IServingEndpointAccessProps {
   disabled?: boolean;
   disabledInfo?: string;
   policyRules?: SupersetServingPortRules | null;
+  isDistributedInference?: boolean;
 }
 
 describe("serving-endpoint-access.vue", () => {
@@ -257,6 +258,36 @@ describe("serving-endpoint-access.vue", () => {
       expect(wrapper.vm.isExternalAccessAvailable).toBe(true);
       expect(wrapper.vm.endpointTypeOptions[0].disable).toBe(false); // External option enabled
       expect(wrapper.vm.endpointTypeOptions[1].disable).toBeFalsy(); // Internal option enabled
+    });
+
+    it("shows external access option as enabled for distributed inference without config-domain", () => {
+      const props: IServingEndpointAccessProps = {
+        ...requiredProps,
+        clusterId: "cluster-without-config-domain",
+        isDistributedInference: true,
+      };
+      const wrapper = getMountedComponent(props);
+
+      expect(wrapper.vm.isExternalAccessAvailable).toBe(true);
+      expect(wrapper.vm.endpointTypeOptions[0].disable).toBe(false);
+      expect(wrapper.vm.endpointTypeOptions[0].disabledTooltip).toBeUndefined();
+    });
+
+    it("initializes distributed inference with external access without config-domain", () => {
+      const props: IServingEndpointAccessProps = {
+        modelValue: {
+          access: { accessOption: EAccessOptions.PUBLIC, authorizedUsers: null, authorizedGroups: null },
+        },
+        title: "Test Title",
+        clusterId: "cluster-v2.24",
+        isDistributedInference: true,
+      };
+      const wrapper = getMountedComponent(props);
+
+      const emitted: TTestEmit<IServingEndpointAccessData> = wrapper.emitted(
+        EServingEndpointAccessEvents.UpdateModelValue,
+      ) || [[]];
+      expect(emitted[0][0].clusterLocalAccessOnly).toBe(false);
     });
 
     it("displays 'external' as selected when clusterLocalAccessOnly is false and external access is available", () => {

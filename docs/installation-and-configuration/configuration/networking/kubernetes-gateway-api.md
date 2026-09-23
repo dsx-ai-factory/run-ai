@@ -2,15 +2,15 @@
 
 NVIDIA Run:ai supports the Kubernetes Gateway API as an alternative to Ingress for routing external traffic. Gateway API provides a flexible and extensible model for defining how traffic is exposed and routed within the cluster.
 
-This page builds on the concepts described in [Routing Traffic to and from NVIDIA Run:ai Services](../../getting-started/installation/install-using-helm/system-requirements.md), including FQDN configuration, TLS certificates, and routing behavior.
+This page builds on the concepts described in [Routing Traffic to and from NVIDIA Run:ai Services](../../system-requirements/networking-setup.md#routing-traffic-to-and-from-nvidia-runai-services), including FQDN configuration, TLS certificates, and routing behavior.
 
-<Info>
+<Note>
 
 **Note**
 
 Gateway API support in NVIDIA Run:ai is **optional**. If you are currently using HAProxy Ingress or other ingress controllers, no action is required. Customers who wish to adopt Gateway API may do so using the instructions on this page.
 
-</Info>
+</Note>
 
 ## Scope and Prerequisites
 
@@ -24,7 +24,7 @@ Before proceeding, ensure that the following prerequisites are already configure
   * Inference workloads
 * TLS certificates associated with the configured FQDNs
 
-These configurations are described in the [Routing Traffic to and from NVIDIA Run:ai Services](../../getting-started/installation/install-using-helm/system-requirements.md) section.
+These configurations are described in the [Routing Traffic to and from NVIDIA Run:ai Services](../../system-requirements/networking-setup.md#routing-traffic-to-and-from-nvidia-runai-services) section.
 
 ## Routing Modes in NVIDIA Run:ai
 
@@ -97,13 +97,13 @@ In this configuration:
 
 ### Gateway Configuration
 
-<Info>
+<Note>
 
 **Note**
 
 Routing is based on hostnames (subdomains). HTTPRoute resources for the control plane and workloads are created automatically by NVIDIA Run:ai and bind to the configured Gateway.
 
-</Info>
+</Note>
 
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -144,7 +144,7 @@ In this configuration:
 * A wildcard TLS certificate is **not required** for workspace and training workloads
 * The Gateway uses a single domain listener for these services
 
-Ensure that host-based routing is disabled using the following. For more details, see [Advanced cluster configurations](cluster-config.md).
+Ensure that host-based routing is disabled using the following. For more details, see [Advanced cluster configurations](../cluster-config.md).
 
 ```
 clusterConfig.global.subdomainSupport: false
@@ -152,13 +152,13 @@ clusterConfig.global.subdomainSupport: false
 
 ### Gateway Configuration
 
-<Info>
+<Note>
 
 **Note**
 
 Routing is based on URL paths under a shared domain. HTTPRoute resources for the control plane and workloads are created automatically by NVIDIA Run:ai and bind to the configured Gateway.
 
-</Info>
+</Note>
 
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -214,13 +214,13 @@ kubectl create secret tls runai-cluster-inference-tls-secret -n runai \
 
 ### Gateway Configuration
 
-<Info>
+<Note>
 
 **Note**
 
 Routing to inference workloads is based on hostnames (subdomains).
 
-</Info>
+</Note>
 
 Add an inference listener to the existing Gateway resource:
 
@@ -255,7 +255,7 @@ NVIDIA Run:ai supports Knative-based inference workloads. Inference traffic arri
     ```bash
     kubectl create ns knative-serving
     ```
-3.  Create a YAML file named `knative-serving.yaml` and replace the placeholder FQDN with your wildcard [inference FQDN](../../getting-started/installation/install-using-helm/system-requirements.md#fully-qualified-domain-name-fqdn) (for example, `runai-inference.mycorp.local`):
+3.  Create a YAML file named `knative-serving.yaml` and replace the placeholder FQDN with your wildcard [inference FQDN](../../system-requirements/networking-setup.md#fqdn-and-dns) (for example, `runai-inference.mycorp.local`):
 
     ```yaml
     apiVersion: operator.knative.dev/v1beta1
@@ -299,7 +299,7 @@ NVIDIA Run:ai supports Knative-based inference workloads. Inference traffic arri
     ```bash
     kubectl apply -f knative-serving.yaml
     ```
-5.  Create a YAML file named `knative-httproute.yaml` to route inference traffic from the Gateway to the Kourier service. Replace the FQDN placeholder with your wildcard [inference FQDN](../../getting-started/installation/install-using-helm/system-requirements.md#fully-qualified-domain-name-fqdn):
+5.  Create a YAML file named `knative-httproute.yaml` to route inference traffic from the Gateway to the Kourier service. Replace the FQDN placeholder with your wildcard [inference FQDN](../../system-requirements/networking-setup.md#fqdn-and-dns):
 
     ```yaml
     apiVersion: gateway.networking.k8s.io/v1
@@ -374,7 +374,7 @@ NVIDIA Run:ai supports Knative-based inference workloads. Inference traffic arri
     ```bash
     oc apply -f knative-serving.yaml
     ```
-5.  Create a YAML file named `knative-httproute.yaml` to route inference traffic from the Gateway to the Kourier service. Replace the FQDN placeholder with your wildcard [inference FQDN](../../getting-started/installation/install-using-helm/system-requirements.md#fully-qualified-domain-name-fqdn):
+5.  Create a YAML file named `knative-httproute.yaml` to route inference traffic from the Gateway to the Kourier service. Replace the FQDN placeholder with your wildcard [inference FQDN](../../system-requirements/networking-setup.md#fqdn-and-dns):
 
     <Info><p><strong>Note</strong></p><p>OpenShift's Ingress Operator automatically creates DNS records for Gateway listeners, so no manual DNS configuration is required for the inference subdomain.</p></Info>
 

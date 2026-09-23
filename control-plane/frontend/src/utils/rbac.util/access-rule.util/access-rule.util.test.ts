@@ -140,4 +140,44 @@ describe("accessRuleUtil", () => {
       }
     });
   });
+
+  describe("getCreatedAccessRulesNotification", () => {
+    it("shows the given single-success message when exactly one rule is created", () => {
+      const notification = accessRuleUtil.getCreatedAccessRulesNotification(
+        1,
+        0,
+        "Access rule for alice@run.ai created",
+      );
+      expect(notification).toMatchObject({ type: "positive", message: "Access rule for alice@run.ai created" });
+    });
+
+    it("shows a pluralized success message for multiple created rules", () => {
+      const notification = accessRuleUtil.getCreatedAccessRulesNotification(3, 0, "Access rule created");
+      expect(notification).toMatchObject({ type: "positive", message: "3 access rule(s) created" });
+    });
+
+    it("shows an error toast instead of a fractional success count when the only rule fails", () => {
+      const notification = accessRuleUtil.getCreatedAccessRulesNotification(0, 1, "Access rule created");
+      expect(notification).toMatchObject({ type: "negative", message: "Access rule couldn't be created" });
+    });
+
+    it("shows a pluralized error toast reporting the failed count for multiple failures", () => {
+      const notification = accessRuleUtil.getCreatedAccessRulesNotification(0, 2, "Access rule created");
+      expect(notification).toMatchObject({ type: "negative", message: "2 access rule(s) couldn't be created" });
+    });
+
+    it("shows the failed count, not the succeeded count, on partial failure", () => {
+      const notification = accessRuleUtil.getCreatedAccessRulesNotification(
+        1,
+        1,
+        "Access rule for alice@run.ai created",
+      );
+      expect(notification).toMatchObject({ type: "negative", message: "Access rule couldn't be created" });
+    });
+
+    it("pluralizes the failed count on partial failure with multiple failures", () => {
+      const notification = accessRuleUtil.getCreatedAccessRulesNotification(1, 2, "Access rule created");
+      expect(notification).toMatchObject({ type: "negative", message: "2 access rule(s) couldn't be created" });
+    });
+  });
 });

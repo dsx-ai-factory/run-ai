@@ -66,12 +66,7 @@
           <workload-yaml-tab :workload="workload" />
         </runai-tab-panel>
         <runai-tab-panel class="q-pa-none" :name="drawerTabsOptions.Details">
-          <workload-details-tab
-            v-if="workload"
-            :workload="workload"
-            :is-deleted-view-type="isDeletedViewType"
-            :show-element-empty-state="Boolean(selectedStructureElementId)"
-          />
+          <workload-details-tab v-if="workload" :workload="workload" :is-deleted-view-type="isDeletedViewType" />
         </runai-tab-panel>
         <runai-tab-panel v-if="!hideArchitectureTab" class="q-pa-none" :name="drawerTabsOptions.Structure">
           <workload-architecture-tab

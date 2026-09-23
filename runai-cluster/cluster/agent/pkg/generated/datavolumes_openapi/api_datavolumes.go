@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -20,17 +22,16 @@ import (
 	"strings"
 )
 
-
 // DatavolumesApiService DatavolumesApi service
 type DatavolumesApiService service
 
 type ApiCountDatavolumesRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
-	requestType *DatavolumeRequestType
+	ctx               context.Context
+	ApiService        *DatavolumesApiService
+	requestType       *DatavolumeRequestType
 	usableInProjectId *string
-	filterBy *[]string
-	search *string
+	filterBy          *[]string
+	search            *string
 }
 
 // Which datavolumes would be returned in the response. Originated - datavolumes that are originated in the permitted scopes of the caller. UsableInProject - datavolumes that can be used in a specific project; if you use this value, you must also provide the project ID in the \&quot;usableInProjectId\&quot; query param.
@@ -66,24 +67,25 @@ CountDatavolumes Count data volumes.
 
 Retrieve the number of data volumes.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCountDatavolumesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCountDatavolumesRequest
 */
 func (a *DatavolumesApiService) CountDatavolumes(ctx context.Context) ApiCountDatavolumesRequest {
 	return ApiCountDatavolumesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return CountDatavolumes200Response
+//
+//	@return CountDatavolumes200Response
 func (a *DatavolumesApiService) CountDatavolumesExecute(r ApiCountDatavolumesRequest) (*CountDatavolumes200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CountDatavolumes200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CountDatavolumes200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.CountDatavolumes")
@@ -214,8 +216,8 @@ func (a *DatavolumesApiService) CountDatavolumesExecute(r ApiCountDatavolumesReq
 }
 
 type ApiCreateDatavolumeRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
+	ctx                      context.Context
+	ApiService               *DatavolumesApiService
 	datavolumeCreationFields *DatavolumeCreationFields
 }
 
@@ -232,24 +234,25 @@ func (r ApiCreateDatavolumeRequest) Execute() (*Datavolume, *http.Response, erro
 /*
 CreateDatavolume Create a datavolume
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateDatavolumeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateDatavolumeRequest
 */
 func (a *DatavolumesApiService) CreateDatavolume(ctx context.Context) ApiCreateDatavolumeRequest {
 	return ApiCreateDatavolumeRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Datavolume
+//
+//	@return Datavolume
 func (a *DatavolumesApiService) CreateDatavolumeExecute(r ApiCreateDatavolumeRequest) (*Datavolume, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Datavolume
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Datavolume
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.CreateDatavolume")
@@ -372,10 +375,10 @@ func (a *DatavolumesApiService) CreateDatavolumeExecute(r ApiCreateDatavolumeReq
 }
 
 type ApiDatavolumeNameAvailabilityRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DatavolumesApiService
-	dataName *string
-	clusterId *string
+	dataName   *string
+	clusterId  *string
 }
 
 // the name of the datavolume
@@ -399,22 +402,22 @@ DatavolumeNameAvailability Data volumes name availability.
 
 Check if a given data volume name creates naming conflicts under the given scope. Returns conflict (409) in case the name is not available, or 204 (no content) if it is ok.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiDatavolumeNameAvailabilityRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiDatavolumeNameAvailabilityRequest
 */
 func (a *DatavolumesApiService) DatavolumeNameAvailability(ctx context.Context) ApiDatavolumeNameAvailabilityRequest {
 	return ApiDatavolumeNameAvailabilityRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *DatavolumesApiService) DatavolumeNameAvailabilityExecute(r ApiDatavolumeNameAvailabilityRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.DatavolumeNameAvailability")
@@ -524,8 +527,8 @@ func (a *DatavolumesApiService) DatavolumeNameAvailabilityExecute(r ApiDatavolum
 }
 
 type ApiDeleteDatavolumeRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
+	ctx          context.Context
+	ApiService   *DatavolumesApiService
 	datavolumeId string
 }
 
@@ -536,26 +539,27 @@ func (r ApiDeleteDatavolumeRequest) Execute() (*HttpResponse, *http.Response, er
 /*
 DeleteDatavolume Delete datavolume
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param datavolumeId The id of the datavolume to retrieve
- @return ApiDeleteDatavolumeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param datavolumeId The id of the datavolume to retrieve
+	@return ApiDeleteDatavolumeRequest
 */
 func (a *DatavolumesApiService) DeleteDatavolume(ctx context.Context, datavolumeId string) ApiDeleteDatavolumeRequest {
 	return ApiDeleteDatavolumeRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datavolumeId: datavolumeId,
 	}
 }
 
 // Execute executes the request
-//  @return HttpResponse
+//
+//	@return HttpResponse
 func (a *DatavolumesApiService) DeleteDatavolumeExecute(r ApiDeleteDatavolumeRequest) (*HttpResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *HttpResponse
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *HttpResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.DeleteDatavolume")
@@ -674,8 +678,8 @@ func (a *DatavolumesApiService) DeleteDatavolumeExecute(r ApiDeleteDatavolumeReq
 }
 
 type ApiGetDatavolumeRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
+	ctx          context.Context
+	ApiService   *DatavolumesApiService
 	datavolumeId string
 }
 
@@ -686,26 +690,27 @@ func (r ApiGetDatavolumeRequest) Execute() (*Datavolume, *http.Response, error) 
 /*
 GetDatavolume Get datavolume
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param datavolumeId The id of the datavolume to retrieve
- @return ApiGetDatavolumeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param datavolumeId The id of the datavolume to retrieve
+	@return ApiGetDatavolumeRequest
 */
 func (a *DatavolumesApiService) GetDatavolume(ctx context.Context, datavolumeId string) ApiGetDatavolumeRequest {
 	return ApiGetDatavolumeRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datavolumeId: datavolumeId,
 	}
 }
 
 // Execute executes the request
-//  @return Datavolume
+//
+//	@return Datavolume
 func (a *DatavolumesApiService) GetDatavolumeExecute(r ApiGetDatavolumeRequest) (*Datavolume, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Datavolume
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Datavolume
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.GetDatavolume")
@@ -824,8 +829,8 @@ func (a *DatavolumesApiService) GetDatavolumeExecute(r ApiGetDatavolumeRequest) 
 }
 
 type ApiGetDatavolumeAncestorsRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
+	ctx          context.Context
+	ApiService   *DatavolumesApiService
 	datavolumeId string
 }
 
@@ -836,26 +841,27 @@ func (r ApiGetDatavolumeAncestorsRequest) Execute() (*Ancestors, *http.Response,
 /*
 GetDatavolumeAncestors Get the datavolume ancestors
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param datavolumeId The id of the datavolume to retrieve
- @return ApiGetDatavolumeAncestorsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param datavolumeId The id of the datavolume to retrieve
+	@return ApiGetDatavolumeAncestorsRequest
 */
 func (a *DatavolumesApiService) GetDatavolumeAncestors(ctx context.Context, datavolumeId string) ApiGetDatavolumeAncestorsRequest {
 	return ApiGetDatavolumeAncestorsRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datavolumeId: datavolumeId,
 	}
 }
 
 // Execute executes the request
-//  @return Ancestors
+//
+//	@return Ancestors
 func (a *DatavolumesApiService) GetDatavolumeAncestorsExecute(r ApiGetDatavolumeAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Ancestors
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Ancestors
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.GetDatavolumeAncestors")
@@ -954,8 +960,8 @@ func (a *DatavolumesApiService) GetDatavolumeAncestorsExecute(r ApiGetDatavolume
 }
 
 type ApiGetDatavolumeSharedScopesRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
+	ctx          context.Context
+	ApiService   *DatavolumesApiService
 	datavolumeId string
 }
 
@@ -966,26 +972,27 @@ func (r ApiGetDatavolumeSharedScopesRequest) Execute() ([]SharedScope, *http.Res
 /*
 GetDatavolumeSharedScopes Get the datavolume's shared scopes
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param datavolumeId The id of the datavolume to retrieve
- @return ApiGetDatavolumeSharedScopesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param datavolumeId The id of the datavolume to retrieve
+	@return ApiGetDatavolumeSharedScopesRequest
 */
 func (a *DatavolumesApiService) GetDatavolumeSharedScopes(ctx context.Context, datavolumeId string) ApiGetDatavolumeSharedScopesRequest {
 	return ApiGetDatavolumeSharedScopesRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datavolumeId: datavolumeId,
 	}
 }
 
 // Execute executes the request
-//  @return []SharedScope
+//
+//	@return []SharedScope
 func (a *DatavolumesApiService) GetDatavolumeSharedScopesExecute(r ApiGetDatavolumeSharedScopesRequest) ([]SharedScope, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []SharedScope
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []SharedScope
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.GetDatavolumeSharedScopes")
@@ -1104,17 +1111,17 @@ func (a *DatavolumesApiService) GetDatavolumeSharedScopesExecute(r ApiGetDatavol
 }
 
 type ApiGetDatavolumesRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
-	requestType *DatavolumeRequestType
+	ctx               context.Context
+	ApiService        *DatavolumesApiService
+	requestType       *DatavolumeRequestType
 	usableInProjectId *string
-	offset *int32
-	limit *int32
-	sortBy *string
-	sortOrder *string
-	filterBy *[]string
-	search *string
-	includeInternal *bool
+	offset            *int32
+	limit             *int32
+	sortBy            *string
+	sortOrder         *string
+	filterBy          *[]string
+	search            *string
+	includeInternal   *bool
 }
 
 // Which datavolumes would be returned in the response. Originated - datavolumes that are originated in the permitted scopes of the caller. UsableInProject - datavolumes that can be used in a specific project; if you use this value, you must also provide the project ID in the \&quot;usableInProjectId\&quot; query param.
@@ -1180,24 +1187,25 @@ GetDatavolumes List datavolumes in permitted scopes
 
 Get requested datavolumes.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetDatavolumesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetDatavolumesRequest
 */
 func (a *DatavolumesApiService) GetDatavolumes(ctx context.Context) ApiGetDatavolumesRequest {
 	return ApiGetDatavolumesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GetDatavolumes200Response
+//
+//	@return GetDatavolumes200Response
 func (a *DatavolumesApiService) GetDatavolumesExecute(r ApiGetDatavolumesRequest) (*GetDatavolumes200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetDatavolumes200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetDatavolumes200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.GetDatavolumes")
@@ -1343,11 +1351,11 @@ func (a *DatavolumesApiService) GetDatavolumesExecute(r ApiGetDatavolumesRequest
 }
 
 type ApiGetDatavolumesInternalRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DatavolumesApiService
-	clusterId *string
-	offset *int32
-	limit *int32
+	clusterId  *string
+	offset     *int32
+	limit      *int32
 }
 
 // The id of the cluster
@@ -1377,24 +1385,25 @@ GetDatavolumesInternal List datavolumes in cluster.
 
 Get all datavolumes in cluster with all shared scopes - used by the agent for the k8s cluster.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetDatavolumesInternalRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetDatavolumesInternalRequest
 */
 func (a *DatavolumesApiService) GetDatavolumesInternal(ctx context.Context) ApiGetDatavolumesInternalRequest {
 	return ApiGetDatavolumesInternalRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GetDatavolumesInternal200Response
+//
+//	@return GetDatavolumesInternal200Response
 func (a *DatavolumesApiService) GetDatavolumesInternalExecute(r ApiGetDatavolumesInternalRequest) (*GetDatavolumesInternal200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetDatavolumesInternal200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetDatavolumesInternal200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.GetDatavolumesInternal")
@@ -1522,9 +1531,9 @@ func (a *DatavolumesApiService) GetDatavolumesInternalExecute(r ApiGetDatavolume
 }
 
 type ApiGetUsedPvcsFromDatavolumesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DatavolumesApiService
-	projectId *string
+	projectId  *string
 }
 
 // The id of the project
@@ -1542,24 +1551,25 @@ GetUsedPvcsFromDatavolumes Get list of PVC names used by DataVolumes in the spec
 
 Returns a list of PVCs that are currently referenced by at least one DataVolume within the specified project scope.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetUsedPvcsFromDatavolumesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetUsedPvcsFromDatavolumesRequest
 */
 func (a *DatavolumesApiService) GetUsedPvcsFromDatavolumes(ctx context.Context) ApiGetUsedPvcsFromDatavolumesRequest {
 	return ApiGetUsedPvcsFromDatavolumesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GetUsedPvcsFromDatavolumes200Response
+//
+//	@return GetUsedPvcsFromDatavolumes200Response
 func (a *DatavolumesApiService) GetUsedPvcsFromDatavolumesExecute(r ApiGetUsedPvcsFromDatavolumesRequest) (*GetUsedPvcsFromDatavolumes200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetUsedPvcsFromDatavolumes200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetUsedPvcsFromDatavolumes200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.GetUsedPvcsFromDatavolumes")
@@ -1651,8 +1661,8 @@ func (a *DatavolumesApiService) GetUsedPvcsFromDatavolumesExecute(r ApiGetUsedPv
 }
 
 type ApiInternalCreateDatavolumeRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
+	ctx                              context.Context
+	ApiService                       *DatavolumesApiService
 	internalDatavolumeCreationFields *InternalDatavolumeCreationFields
 }
 
@@ -1669,24 +1679,25 @@ func (r ApiInternalCreateDatavolumeRequest) Execute() (*InternalDatavolume, *htt
 /*
 InternalCreateDatavolume Create a datavolume
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiInternalCreateDatavolumeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiInternalCreateDatavolumeRequest
 */
 func (a *DatavolumesApiService) InternalCreateDatavolume(ctx context.Context) ApiInternalCreateDatavolumeRequest {
 	return ApiInternalCreateDatavolumeRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return InternalDatavolume
+//
+//	@return InternalDatavolume
 func (a *DatavolumesApiService) InternalCreateDatavolumeExecute(r ApiInternalCreateDatavolumeRequest) (*InternalDatavolume, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *InternalDatavolume
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *InternalDatavolume
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.InternalCreateDatavolume")
@@ -1809,9 +1820,9 @@ func (a *DatavolumesApiService) InternalCreateDatavolumeExecute(r ApiInternalCre
 }
 
 type ApiPatchDatavolumeRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
-	datavolumeId string
+	ctx                   context.Context
+	ApiService            *DatavolumesApiService
+	datavolumeId          string
 	datavolumePatchFields *DatavolumePatchFields
 }
 
@@ -1828,26 +1839,27 @@ func (r ApiPatchDatavolumeRequest) Execute() (*DatavolumeNoSharedScopes, *http.R
 /*
 PatchDatavolume Patch datavolume
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param datavolumeId The id of the datavolume to retrieve
- @return ApiPatchDatavolumeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param datavolumeId The id of the datavolume to retrieve
+	@return ApiPatchDatavolumeRequest
 */
 func (a *DatavolumesApiService) PatchDatavolume(ctx context.Context, datavolumeId string) ApiPatchDatavolumeRequest {
 	return ApiPatchDatavolumeRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datavolumeId: datavolumeId,
 	}
 }
 
 // Execute executes the request
-//  @return DatavolumeNoSharedScopes
+//
+//	@return DatavolumeNoSharedScopes
 func (a *DatavolumesApiService) PatchDatavolumeExecute(r ApiPatchDatavolumeRequest) (*DatavolumeNoSharedScopes, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DatavolumeNoSharedScopes
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DatavolumeNoSharedScopes
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.PatchDatavolume")
@@ -1981,9 +1993,9 @@ func (a *DatavolumesApiService) PatchDatavolumeExecute(r ApiPatchDatavolumeReque
 }
 
 type ApiPatchDatavolumeSharedScopesRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
-	datavolumeId string
+	ctx                      context.Context
+	ApiService               *DatavolumesApiService
+	datavolumeId             string
 	sharedScopesPatchRequest *SharedScopesPatchRequest
 }
 
@@ -2000,26 +2012,27 @@ func (r ApiPatchDatavolumeSharedScopesRequest) Execute() ([]SharedScope, *http.R
 /*
 PatchDatavolumeSharedScopes Patch the datavolume's shared scopes
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param datavolumeId The id of the datavolume to retrieve
- @return ApiPatchDatavolumeSharedScopesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param datavolumeId The id of the datavolume to retrieve
+	@return ApiPatchDatavolumeSharedScopesRequest
 */
 func (a *DatavolumesApiService) PatchDatavolumeSharedScopes(ctx context.Context, datavolumeId string) ApiPatchDatavolumeSharedScopesRequest {
 	return ApiPatchDatavolumeSharedScopesRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datavolumeId: datavolumeId,
 	}
 }
 
 // Execute executes the request
-//  @return []SharedScope
+//
+//	@return []SharedScope
 func (a *DatavolumesApiService) PatchDatavolumeSharedScopesExecute(r ApiPatchDatavolumeSharedScopesRequest) ([]SharedScope, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []SharedScope
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []SharedScope
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.PatchDatavolumeSharedScopes")
@@ -2153,8 +2166,8 @@ func (a *DatavolumesApiService) PatchDatavolumeSharedScopesExecute(r ApiPatchDat
 }
 
 type ApiSyncDatavolumesRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
+	ctx                    context.Context
+	ApiService             *DatavolumesApiService
 	datavolumesSyncRequest *DatavolumesSyncRequest
 }
 
@@ -2173,22 +2186,22 @@ SyncDatavolumes Sync the statuses of the datavolumes in the cluster
 
 Sync all datavolumes statuses from k8s cluster to Run:AI control-plane.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiSyncDatavolumesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSyncDatavolumesRequest
 */
 func (a *DatavolumesApiService) SyncDatavolumes(ctx context.Context) ApiSyncDatavolumesRequest {
 	return ApiSyncDatavolumesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *DatavolumesApiService) SyncDatavolumesExecute(r ApiSyncDatavolumesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.SyncDatavolumes")
@@ -2309,9 +2322,9 @@ func (a *DatavolumesApiService) SyncDatavolumesExecute(r ApiSyncDatavolumesReque
 }
 
 type ApiUpdateDatavolumeStatusRequest struct {
-	ctx context.Context
-	ApiService *DatavolumesApiService
-	datavolumeId string
+	ctx                      context.Context
+	ApiService               *DatavolumesApiService
+	datavolumeId             string
 	datavolumeStatusInternal *DatavolumeStatusInternal
 }
 
@@ -2328,14 +2341,14 @@ func (r ApiUpdateDatavolumeStatusRequest) Execute() (*http.Response, error) {
 /*
 UpdateDatavolumeStatus Update the status of the datavolume form the cluster
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param datavolumeId The id of the datavolume to retrieve
- @return ApiUpdateDatavolumeStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param datavolumeId The id of the datavolume to retrieve
+	@return ApiUpdateDatavolumeStatusRequest
 */
 func (a *DatavolumesApiService) UpdateDatavolumeStatus(ctx context.Context, datavolumeId string) ApiUpdateDatavolumeStatusRequest {
 	return ApiUpdateDatavolumeStatusRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:   a,
+		ctx:          ctx,
 		datavolumeId: datavolumeId,
 	}
 }
@@ -2343,9 +2356,9 @@ func (a *DatavolumesApiService) UpdateDatavolumeStatus(ctx context.Context, data
 // Execute executes the request
 func (a *DatavolumesApiService) UpdateDatavolumeStatusExecute(r ApiUpdateDatavolumeStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatavolumesApiService.UpdateDatavolumeStatus")

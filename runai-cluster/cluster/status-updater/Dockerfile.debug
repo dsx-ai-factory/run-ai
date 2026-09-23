@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.26.3
+FROM golang:1.26.8
 
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.2
 
 COPY bin/status-updater-$TARGETARCH /usr/local/bin/status-updater
 RUN chgrp -R 0 /usr/local/bin/status-updater && chmod -R g=u /usr/local/bin/status-updater

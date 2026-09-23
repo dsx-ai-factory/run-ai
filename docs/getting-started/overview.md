@@ -40,7 +40,7 @@ NVIDIA Run:ai simplifies AI infrastructure management by providing a structured 
 NVIDIA Run:ai empowers data scientists and ML engineers by providing:
 
 * [**Optimized workload scheduling**](../platform-management/runai-scheduler/scheduling/how-the-scheduler-works.md) - Ensure high-priority jobs get GPU resources. Workloads dynamically receive resources based on demand.
-* [**Fractional GPU usage**](../platform-management/runai-scheduler/resource-optimization/fractions.md) - Request and utilize only a fraction of a GPU's memory, ensuring efficient resource allocation and leaving room for other workloads.
+* [**Fractional GPU usage**](../platform-management/runai-scheduler/resource-optimization/memory-fractions.md) - Request and utilize only a fraction of a GPU's memory, ensuring efficient resource allocation and leaving room for other workloads.
 * [**AI initiatives lifecycle support**](../workloads-in-nvidia-run-ai/introduction-to-workloads.md) - Run your entire AI initiatives lifecycle – Jupyter Notebooks, training jobs, and inference workloads efficiently.
 * [**Interactive session** ](../workloads-in-nvidia-run-ai/workload-types/native-workloads.md#workspaces-the-experimentation-phase)- Ensure an uninterrupted experience when working on Jupyter Notebooks without taking away GPUs.
 * [**Scalability for training and inference**](../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) - Support for distributed training across multiple GPUs and auto-scales inference workloads.
@@ -74,12 +74,3 @@ The NVIDIA Run:ai control plane provides a centralized management interface for 
 * [**Multi-cluster management**](../installation-and-configuration/operations/clusters.md) - Manages multiple NVIDIA Run:ai clusters for a single tenant across different locations and subnets from a single unified interface.
 * [**Resource and access management**](../platform-management/aiinitiatives/adapting-ai-initiatives.md) - Allows administrators to define Projects, Departments and user roles, enforcing policies for fair resource distribution.
 * [**Workload submission and monitoring**](../workloads-in-nvidia-run-ai/workloads.md) - Allows teams to submit workloads, track usage, and monitor GPU performance in real time.
-
-## Installation Types
-NVIDIA Run:ai is deployed as a self-hosted installation:
-
-| Installation Type | Description                                                                                                                                                                                                                                                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Self-hosted       | NVIDIA Run:ai is installed on the customer's data science GPU clusters, with the control plane running in the customer's data center                                                                                                                                                                                                                                           |
-
-<figure><img src="../assets/installation-types.png" alt=""/><figcaption></figcaption></figure>

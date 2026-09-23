@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 // ServicesApiService ServicesApi service
 type ServicesApiService service
 
 type ApiCreateServiceRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServicesApiService
-	uuid string
-	service *Service
+	uuid       string
+	service    *Service
 }
 
 func (r ApiCreateServiceRequest) Service(service Service) ApiCreateServiceRequest {
@@ -42,24 +43,24 @@ func (r ApiCreateServiceRequest) Execute() (*http.Response, error) {
 /*
 CreateService Create a service
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiCreateServiceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiCreateServiceRequest
 */
 func (a *ServicesApiService) CreateService(ctx context.Context, uuid string) ApiCreateServiceRequest {
 	return ApiCreateServiceRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
 func (a *ServicesApiService) CreateServiceExecute(r ApiCreateServiceRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServicesApiService.CreateService")
@@ -125,13 +126,13 @@ func (a *ServicesApiService) CreateServiceExecute(r ApiCreateServiceRequest) (*h
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -139,10 +140,10 @@ func (a *ServicesApiService) CreateServiceExecute(r ApiCreateServiceRequest) (*h
 }
 
 type ApiDeleteServiceRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServicesApiService
-	uuid string
-	serviceId string
+	uuid       string
+	serviceId  string
 }
 
 func (r ApiDeleteServiceRequest) Execute() (*http.Response, error) {
@@ -152,26 +153,26 @@ func (r ApiDeleteServiceRequest) Execute() (*http.Response, error) {
 /*
 DeleteService Delete a service by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param serviceId the unique Id of the service (UUID)
- @return ApiDeleteServiceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param serviceId the unique Id of the service (UUID)
+	@return ApiDeleteServiceRequest
 */
 func (a *ServicesApiService) DeleteService(ctx context.Context, uuid string, serviceId string) ApiDeleteServiceRequest {
 	return ApiDeleteServiceRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
-		serviceId: serviceId,
+		ctx:        ctx,
+		uuid:       uuid,
+		serviceId:  serviceId,
 	}
 }
 
 // Execute executes the request
 func (a *ServicesApiService) DeleteServiceExecute(r ApiDeleteServiceRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServicesApiService.DeleteService")
@@ -272,10 +273,10 @@ func (a *ServicesApiService) DeleteServiceExecute(r ApiDeleteServiceRequest) (*h
 }
 
 type ApiGetServiceRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServicesApiService
-	uuid string
-	serviceId string
+	uuid       string
+	serviceId  string
 }
 
 func (r ApiGetServiceRequest) Execute() (*Service, *http.Response, error) {
@@ -285,28 +286,29 @@ func (r ApiGetServiceRequest) Execute() (*Service, *http.Response, error) {
 /*
 GetService Get a service by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param serviceId the unique Id of the service (UUID)
- @return ApiGetServiceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param serviceId the unique Id of the service (UUID)
+	@return ApiGetServiceRequest
 */
 func (a *ServicesApiService) GetService(ctx context.Context, uuid string, serviceId string) ApiGetServiceRequest {
 	return ApiGetServiceRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
-		serviceId: serviceId,
+		ctx:        ctx,
+		uuid:       uuid,
+		serviceId:  serviceId,
 	}
 }
 
 // Execute executes the request
-//  @return Service
+//
+//	@return Service
 func (a *ServicesApiService) GetServiceExecute(r ApiGetServiceRequest) (*Service, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Service
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Service
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServicesApiService.GetService")
@@ -406,9 +408,9 @@ func (a *ServicesApiService) GetServiceExecute(r ApiGetServiceRequest) (*Service
 }
 
 type ApiGetServicesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServicesApiService
-	uuid string
+	uuid       string
 }
 
 func (r ApiGetServicesRequest) Execute() ([]Service, *http.Response, error) {
@@ -418,26 +420,27 @@ func (r ApiGetServicesRequest) Execute() ([]Service, *http.Response, error) {
 /*
 GetServices Get all cluster's services.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiGetServicesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiGetServicesRequest
 */
 func (a *ServicesApiService) GetServices(ctx context.Context, uuid string) ApiGetServicesRequest {
 	return ApiGetServicesRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return []Service
+//
+//	@return []Service
 func (a *ServicesApiService) GetServicesExecute(r ApiGetServicesRequest) ([]Service, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Service
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Service
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServicesApiService.GetServices")
@@ -511,13 +514,13 @@ func (a *ServicesApiService) GetServicesExecute(r ApiGetServicesRequest) ([]Serv
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -534,9 +537,9 @@ func (a *ServicesApiService) GetServicesExecute(r ApiGetServicesRequest) ([]Serv
 }
 
 type ApiGetServicesCountRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServicesApiService
-	uuid string
+	uuid       string
 }
 
 func (r ApiGetServicesCountRequest) Execute() (float32, *http.Response, error) {
@@ -546,26 +549,27 @@ func (r ApiGetServicesCountRequest) Execute() (float32, *http.Response, error) {
 /*
 GetServicesCount Get the number of services
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiGetServicesCountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiGetServicesCountRequest
 */
 func (a *ServicesApiService) GetServicesCount(ctx context.Context, uuid string) ApiGetServicesCountRequest {
 	return ApiGetServicesCountRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return float32
+//
+//	@return float32
 func (a *ServicesApiService) GetServicesCountExecute(r ApiGetServicesCountRequest) (float32, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  float32
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue float32
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServicesApiService.GetServicesCount")
@@ -639,13 +643,13 @@ func (a *ServicesApiService) GetServicesCountExecute(r ApiGetServicesCountReques
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -662,10 +666,10 @@ func (a *ServicesApiService) GetServicesCountExecute(r ApiGetServicesCountReques
 }
 
 type ApiSyncServicesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServicesApiService
-	uuid string
-	service *[]Service
+	uuid       string
+	service    *[]Service
 }
 
 func (r ApiSyncServicesRequest) Service(service []Service) ApiSyncServicesRequest {
@@ -682,18 +686,17 @@ SyncServices Sync services
 
 Sync all services from k8s cluster to Run:AI backend
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiSyncServicesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiSyncServicesRequest
 
 Deprecated
 */
 func (a *ServicesApiService) SyncServices(ctx context.Context, uuid string) ApiSyncServicesRequest {
 	return ApiSyncServicesRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
@@ -701,9 +704,9 @@ func (a *ServicesApiService) SyncServices(ctx context.Context, uuid string) ApiS
 // Deprecated
 func (a *ServicesApiService) SyncServicesExecute(r ApiSyncServicesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServicesApiService.SyncServices")
@@ -769,13 +772,13 @@ func (a *ServicesApiService) SyncServicesExecute(r ApiSyncServicesRequest) (*htt
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -783,11 +786,11 @@ func (a *ServicesApiService) SyncServicesExecute(r ApiSyncServicesRequest) (*htt
 }
 
 type ApiUpdateServiceRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ServicesApiService
-	uuid string
-	serviceId string
-	service *Service
+	uuid       string
+	serviceId  string
+	service    *Service
 }
 
 func (r ApiUpdateServiceRequest) Service(service Service) ApiUpdateServiceRequest {
@@ -802,26 +805,26 @@ func (r ApiUpdateServiceRequest) Execute() (*http.Response, error) {
 /*
 UpdateService Update a service by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param serviceId the unique Id of the service (UUID)
- @return ApiUpdateServiceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param serviceId the unique Id of the service (UUID)
+	@return ApiUpdateServiceRequest
 */
 func (a *ServicesApiService) UpdateService(ctx context.Context, uuid string, serviceId string) ApiUpdateServiceRequest {
 	return ApiUpdateServiceRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
-		serviceId: serviceId,
+		ctx:        ctx,
+		uuid:       uuid,
+		serviceId:  serviceId,
 	}
 }
 
 // Execute executes the request
 func (a *ServicesApiService) UpdateServiceExecute(r ApiUpdateServiceRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServicesApiService.UpdateService")
@@ -927,9 +930,9 @@ func (a *ServicesApiService) UpdateServiceExecute(r ApiUpdateServiceRequest) (*h
 }
 
 type ApiUpdateServicesRequest struct {
-	ctx context.Context
-	ApiService *ServicesApiService
-	uuid string
+	ctx          context.Context
+	ApiService   *ServicesApiService
+	uuid         string
 	servicesSync *ServicesSync
 }
 
@@ -947,27 +950,27 @@ UpdateServices Sync services
 
 Sync all services in a namespace from k8s cluster to Run:AI backend
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiUpdateServicesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiUpdateServicesRequest
 */
 func (a *ServicesApiService) UpdateServices(ctx context.Context, uuid string) ApiUpdateServicesRequest {
 	return ApiUpdateServicesRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return IdsResponse
+//
+//	@return IdsResponse
 func (a *ServicesApiService) UpdateServicesExecute(r ApiUpdateServicesRequest) (*IdsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *IdsResponse
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *IdsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServicesApiService.UpdateServices")

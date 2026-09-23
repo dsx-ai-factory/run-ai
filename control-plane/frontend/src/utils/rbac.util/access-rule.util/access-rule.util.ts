@@ -32,6 +32,9 @@ import type { IAccessRuleTable } from "@/table-models/access-rule.table-model";
 import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import commonUtil from "@/utils/common.util/common.util";
 import { docsUtil } from "@/utils/docs.util/docs.util";
+import type { QNotifyCreateOptions } from "quasar";
+import { alertUtil } from "@/utils/alert.util";
+import { ErrorAlert } from "@/utils/error-alert.util";
 
 export const accessRuleUtil = {
   getAccessRuleModalDisplayConfig,
@@ -42,6 +45,7 @@ export const accessRuleUtil = {
   sortAndGroupPermissionsByGroupId,
   getStatusColOptions,
   addStatusExplanationToAccessRules,
+  getCreatedAccessRulesNotification,
 };
 
 const CLOUD_OPERATOR_ROLE_NAME = "Cloud operator";
@@ -245,4 +249,31 @@ function addStatusExplanationToAccessRules(
     }
     return accessRule;
   });
+}
+
+/**
+ * Builds the notification for a batch access-rule creation result. Surfaces the failed count
+ * instead of a fractional success count (e.g. "0/1 created") when any rule was rejected, since
+ * the API can return HTTP 200 with a non-empty `failed` array.
+ *
+ * @param succeededCount - number of rules created successfully
+ * @param failedCount - number of rules that failed to create
+ * @param singleSuccessMessage - message to show when exactly one rule is created (callers vary in
+ *   whether they name the subject, e.g. "Access rule for alice@run.ai created" vs "Access rule created")
+ */
+function getCreatedAccessRulesNotification(
+  succeededCount: number,
+  failedCount: number,
+  singleSuccessMessage: string,
+): QNotifyCreateOptions {
+  if (failedCount > 0) {
+    const message =
+      failedCount === 1
+        ? ErrorAlert.failedCreateMessage("access rule")
+        : `${failedCount} access rule(s) couldn't be created`;
+    return alertUtil.getError(message);
+  }
+
+  const message = succeededCount === 1 ? singleSuccessMessage : `${succeededCount} access rule(s) created`;
+  return alertUtil.getSuccess(message);
 }

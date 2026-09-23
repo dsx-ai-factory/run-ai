@@ -1,13 +1,16 @@
 global:
     image:
         registry: registry.local:5000/runai/runai-cluster
-kai-scheduler:
-    global:
-        registry: registry.local:5000/runai/kai-scheduler
+kai-resource-management:
+    image:
+        registry: registry.local:5000/runai/kai-resource-management
+    kai-scheduler:
+        global:
+            registry: registry.local:5000/runai/kai-scheduler
 karta:
     image:
         repository: registry.local:5000/runai/karta/operator
-        tag: 0.2.3
+        tag: 0.2.6
 thirdPartyImages:
     git-sync:
         registry: registry.local:5000/runai/runai-cluster

@@ -170,7 +170,7 @@ const environmentModel = {
             value: "./",
           },
         ],
-        image: "gcr.io/run-ai-demo/jupyter-tensorboard",
+        image: "quay.io/jupyter/scipy-notebook",
         imagePullPolicy: "IfNotPresent",
         connections: [
           {
@@ -210,7 +210,7 @@ const environmentModel = {
       },
       spec: {
         environmentVariables: [],
-        image: "gcr.io/run-ai-demo/quickstart-demo",
+        image: "ubuntu",
         imagePullPolicy: "IfNotPresent",
         uidGidSource: "fromTheImage",
         capabilities: [],

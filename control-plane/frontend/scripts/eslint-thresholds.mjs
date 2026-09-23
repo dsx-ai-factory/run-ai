@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 /* eslint-env node */
 /**
  * Runs ESLint once on all source files and enforces three checks from the
@@ -22,7 +26,7 @@ import { relative } from "path";
 
 // Update these whenever you fix a11y warnings or migrate a component to <script setup>.
 const A11Y_DEFAULT_THRESHOLD = 0;
-const SCRIPT_SETUP_DEFAULT_THRESHOLD = 655;
+const SCRIPT_SETUP_DEFAULT_THRESHOLD = 654;
 
 const SCRIPT_PATH = "control-plane/frontend/scripts/eslint-thresholds.mjs";
 

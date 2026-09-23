@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -21,8 +23,8 @@ var _ MappedNullable = &APIError{}
 
 // APIError struct for APIError
 type APIError struct {
-	Code int32 `json:"code"`
-	Message string `json:"message"`
+	Code    int32   `json:"code"`
+	Message string  `json:"message"`
 	Details *string `json:"details,omitempty"`
 }
 
@@ -128,7 +130,7 @@ func (o *APIError) SetDetails(v string) {
 }
 
 func (o APIError) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -159,10 +161,10 @@ func (o *APIError) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -218,5 +220,3 @@ func (v *NullableAPIError) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

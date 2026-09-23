@@ -69,7 +69,7 @@ export type TInferenceServerSelection = EServerType.Custom | EServerType.Nim | E
 
 // old values
 export const OLD_LLM_ENVIRONMENT_FOR_HUGGING_FACE = "llm-server";
-export const OLD_LLM_IMAGE_FOR_HUGGING_FACE = "runai.jfrog.io/core-llm/runai-vllm";
+export const OLD_LLM_IMAGE_FOR_HUGGING_FACE = "runai-vllm";
 
 export interface IInferenceList extends Inference {
   connections?: Array<IToolItem>;

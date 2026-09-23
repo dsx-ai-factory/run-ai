@@ -6,10 +6,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { Quasar } from "quasar";
+import { VueDOMPurifyHTML, VueDOMPurifyHTMLOptions } from "@/plugins/vue-dom-purify-html";
 import { createTestingPinia } from "@pinia/testing";
 import ToggleSetting from "./toggle-setting.vue";
 import { usePermissionStore } from "@/stores/permissions.store";
 import { useSettingStore } from "@/stores/setting.store";
+import { getDocsLink } from "@/constants/docs";
 import { SettingKeys, type Setting } from "@/models/setting.model";
 import { Action, ResourceType, ResourceTypeGroupId, type Permission } from "@/swagger-models/authorization-client";
 
@@ -47,7 +49,7 @@ function createWrapper({
 
   const wrapper = mount(ToggleSetting, {
     global: {
-      plugins: [Quasar, pinia],
+      plugins: [Quasar, pinia, [VueDOMPurifyHTML, VueDOMPurifyHTMLOptions]],
       stubs: {
         QToggle: {
           name: "QToggle",
@@ -78,15 +80,14 @@ describe("toggle-setting.vue", () => {
       const { wrapper } = createWrapper({
         props: {
           setting: buildSetting({
-            description:
-              'See <a href="https://run-ai-docs.nvidia.com/self-hosted/2.24/platform-management/policies">policies</a>.',
+            description: 'See <a aid="policies-guide-link" data-doc-key="policies">policies</a>.',
           }),
         },
       });
 
-      expect(wrapper.vm.resolvedDescription).toBe(
-        'See <a href="https://run-ai-docs.nvidia.com/self-hosted/platform-management/policies">policies</a>.',
-      );
+      expect(wrapper.find(".description a").attributes("href")).toBe(getDocsLink("policies"));
+      expect(wrapper.find(".description a").attributes("data-doc-key")).toBeUndefined();
+      expect(wrapper.find(".description a").attributes("aid")).toBe("policies-guide-link");
     });
   });
 

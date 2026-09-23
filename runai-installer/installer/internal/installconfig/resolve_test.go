@@ -22,13 +22,13 @@ func writeToken(t *testing.T, contents string) string {
 	return path
 }
 
-func TestResolveRegistry_JFrogFlag(t *testing.T) {
-	path := writeToken(t, "  jfrog-token\n")
+func TestResolveRegistry_RegistryTokenFlag(t *testing.T) {
+	path := writeToken(t, "  registry-token\n")
 
 	reg, err := ResolveRegistry(&Config{}, path, "")
 	require.NoError(t, err)
-	assert.Equal(t, spec.RegistryTypeJFrog, reg.Type)
-	assert.Equal(t, "jfrog-token", reg.Token)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, reg.Type)
+	assert.Equal(t, "registry-token", reg.Token)
 }
 
 func TestResolveRegistry_NGCFlag(t *testing.T) {
@@ -66,14 +66,14 @@ func TestResolveRegistry_FlagOverridesConfig(t *testing.T) {
 
 	reg, err := ResolveRegistry(cfg, flagPath, "")
 	require.NoError(t, err)
-	assert.Equal(t, spec.RegistryTypeJFrog, reg.Type)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, reg.Type)
 	assert.Equal(t, "flag-token", reg.Token)
 }
 
 func TestResolveRegistry_FlagCarriesConfigHostAndCA(t *testing.T) {
 	flagPath := writeToken(t, "flag-token")
 	// Only Host and CAChainPath carry over from the config; the type and token
-	// come from the --jfrog-token-path flag, which takes precedence.
+	// come from the --registry-token-path flag, which takes precedence.
 	cfg := &Config{Registry: &Registry{
 		Host:        "mirror.local:5000",
 		CAChainPath: "/etc/runai/registry-ca.crt",
@@ -81,7 +81,7 @@ func TestResolveRegistry_FlagCarriesConfigHostAndCA(t *testing.T) {
 
 	reg, err := ResolveRegistry(cfg, flagPath, "")
 	require.NoError(t, err)
-	assert.Equal(t, spec.RegistryTypeJFrog, reg.Type)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, reg.Type)
 	assert.Equal(t, "flag-token", reg.Token)
 	assert.Equal(t, "mirror.local:5000", reg.Host, "host carries over from config when a token flag is used")
 	assert.Equal(t, "/etc/runai/registry-ca.crt", reg.CAChainPath, "CA chain carries over from config when a token flag is used")
@@ -123,7 +123,7 @@ func TestValidateRegistryAuth(t *testing.T) {
 		wantErr string
 	}{
 		{name: "host only is unauthenticated", reg: Registry{Host: "h"}, want: authNone},
-		{name: "token inline", reg: Registry{Type: "jfrog", Token: "t"}, want: authToken},
+		{name: "token inline", reg: Registry{Type: "dockerconfig", Token: "t"}, want: authToken},
 		{name: "token path", reg: Registry{Type: "ngc", TokenPath: "/p"}, want: authToken},
 		{name: "basic inline", reg: Registry{Username: "u", Password: "p"}, want: authBasic},
 		{name: "basic path", reg: Registry{Username: "u", PasswordPath: "/p"}, want: authBasic},
@@ -169,11 +169,11 @@ func TestResolveRegistry_BasicPasswordPath(t *testing.T) {
 }
 
 func TestResolveRegistry_TokenInline(t *testing.T) {
-	cfg := &Config{Registry: &Registry{Type: "jfrog", Token: "inline-token"}}
+	cfg := &Config{Registry: &Registry{Type: "dockerconfig", Token: "inline-token"}}
 
 	reg, err := ResolveRegistry(cfg, "", "")
 	require.NoError(t, err)
-	assert.Equal(t, spec.RegistryTypeJFrog, reg.Type)
+	assert.Equal(t, spec.RegistryTypeDockerConfig, reg.Type)
 	assert.Equal(t, "inline-token", reg.Token)
 }
 
@@ -200,4 +200,76 @@ func TestResolveRegistry_BasicMissingPasswordFile(t *testing.T) {
 
 	_, err := ResolveRegistry(cfg, "", "")
 	require.Error(t, err)
+}
+
+func TestResolveClusterCredentials(t *testing.T) {
+	tokenPath := writeToken(t, "  bootstrap-token\n")
+	cfg := &Config{Cluster: &Cluster{BootstrapTokenPath: tokenPath}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "bootstrap-token", cfg.Cluster.bootstrapToken)
+}
+
+func TestResolveClusterCredentials_ClientSecret(t *testing.T) {
+	secretPath := writeToken(t, "client-secret")
+	cfg := &Config{Cluster: &Cluster{ClientSecretPath: secretPath}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "client-secret", cfg.Cluster.clientSecret)
+}
+
+func TestResolveClusterCredentials_RejectsMultipleCredentials(t *testing.T) {
+	cfg := &Config{Cluster: &Cluster{
+		BootstrapTokenPath: "/bootstrap-token",
+		ClientSecretPath:   "/client-secret",
+	}}
+
+	err := ResolveClusterCredentials(cfg)
+	require.ErrorContains(t, err, "mutually exclusive")
+}
+
+func TestResolveClusterCredentials_ControlPlanePasswordPath(t *testing.T) {
+	passwordPath := writeToken(t, "  s3cret\n")
+	cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &ControlPlaneCredentials{Username: "admin@example.com", PasswordPath: passwordPath}}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "s3cret", cfg.Cluster.ControlPlaneCredentials.password)
+	assert.Empty(t, cfg.Cluster.ControlPlaneCredentials.token)
+}
+
+func TestResolveClusterCredentials_ControlPlaneTokenPath(t *testing.T) {
+	tokenPath := writeToken(t, "bearer-token")
+	cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &ControlPlaneCredentials{TokenPath: tokenPath}}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "bearer-token", cfg.Cluster.ControlPlaneCredentials.token)
+}
+
+func TestResolveClusterCredentials_ControlPlaneInline(t *testing.T) {
+	cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &ControlPlaneCredentials{Username: "admin@example.com", Password: "inline"}}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "inline", cfg.Cluster.ControlPlaneCredentials.password)
+}
+
+func TestResolveClusterCredentials_ControlPlaneRejectsInlineAndPath(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		creds ControlPlaneCredentials
+	}{
+		{name: "password", creds: ControlPlaneCredentials{Username: "u", Password: "p", PasswordPath: "/p"}},
+		{name: "token", creds: ControlPlaneCredentials{Token: "t", TokenPath: "/t"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			creds := tc.creds
+			cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &creds}}
+			require.ErrorContains(t, ResolveClusterCredentials(cfg), "not both")
+		})
+	}
+}
+
+func TestResolveClusterCredentials_ControlPlaneMissingFile(t *testing.T) {
+	cfg := &Config{Cluster: &Cluster{ControlPlaneCredentials: &ControlPlaneCredentials{TokenPath: "/does/not/exist"}}}
+
+	require.ErrorContains(t, ResolveClusterCredentials(cfg), "control plane token")
 }

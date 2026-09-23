@@ -71,7 +71,7 @@ Classify the complete check, including its dependencies. A username check plus a
 
 | The check needs | Verdict | Concrete criterion / repo pattern |
 |---|---|---|
-| fields or transitions of a CRD whose schema we own | **CRD-CEL** `XValidation` | `Application.HelmSpec` chart source XOR; `NodePoolSpec` immutable labels |
+| fields or transitions of a CRD whose schema we own | **CRD-CEL** `XValidation` | `Application.HelmSpec` chart source XOR; transition recipes below |
 | fields of a built-in resource or a CRD whose schema we cannot change | **VAP** | Deployment replica limit; built-ins cannot acquire CRD markers |
 | caller username or request context | **VAP** | application-controller identity policy; preserve the intended set of writers |
 | an authorization decision for the caller | **VAP** with `authorizer` | supported authorization checks, not arbitrary Kubernetes reads |
@@ -238,7 +238,7 @@ The CRD message uses the bounded image string so Kubernetes 1.30 can estimate co
 
 A valid instance has `minReplicas: 1`, `maxReplicas: 3`, `stableID: batch-a`, and `members: [{name: worker}]`; image is optional. Reject `minReplicas: 4` with maximum 3, maximum 11, an empty member list, uppercase names, or an update changing `stableID`.
 
-`oldSelf` is available without `optionalOldSelf` on Kubernetes 1.30. A transition rule normally runs only when both old and new values exist. The required field above therefore cannot be removed. To freeze the presence of an **optional** field, put the rule on its persistent parent, as the existing NodePool does:
+`oldSelf` is available without `optionalOldSelf` on Kubernetes 1.30. A transition rule normally runs only when both old and new values exist. The required field above therefore cannot be removed. To freeze the presence of an **optional** field, put the rule on its persistent parent:
 
 ```go
 // +kubebuilder:validation:XValidation:rule="has(self.labelKey) == has(oldSelf.labelKey) && (!has(self.labelKey) || self.labelKey == oldSelf.labelKey)",message="labelKey presence and value are immutable"
@@ -611,13 +611,12 @@ When Step 3 fails on already-CEL code, print only the `Gate:` line with ✗ and 
 | 4 | `runai-cluster/cluster/go-operator/internal/run/operands/application-controller/resources/validating_admission_policy.go` | canonical identity VAP |
 | 5 | `runai-cluster/cluster/go-operator/internal/run/operands/application-controller/resources/validating_admission_policy_envtest_test.go` | canonical API-server-backed test |
 | 6 | `runai-cluster/cluster/sdk/apis/run/v1alpha1/application_types.go` | canonical `XValidation` marker |
-| 7 | `runai-cluster/cluster/sdk/apis/kai/v1alpha1/nodepool_types.go` | canonical `oldSelf` immutability rule |
-| 8 | `runai-cluster/cluster/common/utils/validator/service_account_validator.go` | legacy identity check being replaced |
-| 9 | `runai-cluster/cluster/go-operator/internal/run/operands/init-ca/resources/config_maps.go` | current webhook registrations |
-| 10 | `runai-cluster/cluster/go-operator/controllers/run/utils.go` | `minimumKubernetesVersion`, `isVAPSupported` |
-| 11 | `runai-cluster/cluster/runai-chart/Chart.yaml` | `kubeVersion` floor |
-| 12 | `runai-cluster/cluster/runai-crd-upgrader/crds/` | shipped CRD copies to regenerate |
-| 13 | `runai-cluster/cluster/go-operator/internal/run/operands/anyworkload-controller/resources/validating_admission_policy.go` | existing named ServiceAccount parameter and UID comparison |
+| 7 | `runai-cluster/cluster/common/utils/validator/service_account_validator.go` | legacy identity check being replaced |
+| 8 | `runai-cluster/cluster/go-operator/internal/run/operands/init-ca/resources/config_maps.go` | current webhook registrations |
+| 9 | `runai-cluster/cluster/go-operator/controllers/run/utils.go` | `minimumKubernetesVersion`, `isVAPSupported` |
+| 10 | `runai-cluster/cluster/runai-chart/Chart.yaml` | `kubeVersion` floor |
+| 11 | `runai-cluster/cluster/runai-crd-upgrader/crds/` | shipped CRD copies to regenerate |
+| 12 | `runai-cluster/cluster/go-operator/internal/run/operands/anyworkload-controller/resources/validating_admission_policy.go` | existing named ServiceAccount parameter and UID comparison |
 
 ## 🧠 Remember it as
 

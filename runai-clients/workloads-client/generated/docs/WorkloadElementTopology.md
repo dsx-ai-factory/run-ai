@@ -4,7 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Name** | Pointer to **string** | The name of the network topology associated with the element — either inherited from the workload&#39;s topology constraints, or inferred from the nodepools the element&#39;s running pods are scheduled on. | [optional] 
+**Name** | Pointer to **string** | The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload&#39;s topology constraints, or inferred from the nodepools the element&#39;s running pods are scheduled on. | [optional] 
+**PreferredPlacement** | Pointer to **string** | The topology level to use as a preferred placement constraint for the element. | [optional] 
+**RequiredPlacement** | Pointer to **string** | The topology level to use as a required placement constraint for the element. If the requirement cannot be satisfied at this topology level, placement will fail. | [optional] 
 **ActualPlacement** | Pointer to [**NullableWorkloadTopologyActualPlacement**](WorkloadTopologyActualPlacement.md) |  | [optional] 
 
 ## Methods
@@ -50,6 +52,56 @@ SetName sets Name field to given value.
 `func (o *WorkloadElementTopology) HasName() bool`
 
 HasName returns a boolean if a field has been set.
+
+### GetPreferredPlacement
+
+`func (o *WorkloadElementTopology) GetPreferredPlacement() string`
+
+GetPreferredPlacement returns the PreferredPlacement field if non-nil, zero value otherwise.
+
+### GetPreferredPlacementOk
+
+`func (o *WorkloadElementTopology) GetPreferredPlacementOk() (*string, bool)`
+
+GetPreferredPlacementOk returns a tuple with the PreferredPlacement field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPreferredPlacement
+
+`func (o *WorkloadElementTopology) SetPreferredPlacement(v string)`
+
+SetPreferredPlacement sets PreferredPlacement field to given value.
+
+### HasPreferredPlacement
+
+`func (o *WorkloadElementTopology) HasPreferredPlacement() bool`
+
+HasPreferredPlacement returns a boolean if a field has been set.
+
+### GetRequiredPlacement
+
+`func (o *WorkloadElementTopology) GetRequiredPlacement() string`
+
+GetRequiredPlacement returns the RequiredPlacement field if non-nil, zero value otherwise.
+
+### GetRequiredPlacementOk
+
+`func (o *WorkloadElementTopology) GetRequiredPlacementOk() (*string, bool)`
+
+GetRequiredPlacementOk returns a tuple with the RequiredPlacement field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRequiredPlacement
+
+`func (o *WorkloadElementTopology) SetRequiredPlacement(v string)`
+
+SetRequiredPlacement sets RequiredPlacement field to given value.
+
+### HasRequiredPlacement
+
+`func (o *WorkloadElementTopology) HasRequiredPlacement() bool`
+
+HasRequiredPlacement returns a boolean if a field has been set.
 
 ### GetActualPlacement
 

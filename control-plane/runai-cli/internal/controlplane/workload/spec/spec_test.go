@@ -810,6 +810,19 @@ var _ = Describe("Spec", func() {
 		})
 	})
 
+	Describe("Preferred pod topology key validation", func() {
+		It("rejects a label value passed with the topology key", func() {
+			gs := NewTrainingSpec()
+			gs.flags.Container.PodAffinityPreferred = "nvidia.com/gpu.clique=11111111-2222-3333-4444-555555555555.32766"
+
+			Expect(gs.Validate()).To(MatchError(And(
+				ContainSubstring("--preferred-pod-topology-key"),
+				ContainSubstring("expected a Kubernetes label key only"),
+				ContainSubstring("do not include '=VALUE'"),
+			)))
+		})
+	})
+
 	Describe("CheckLifeCycleFlags", func() {
 		var (
 			gs                     *GeneralSpec

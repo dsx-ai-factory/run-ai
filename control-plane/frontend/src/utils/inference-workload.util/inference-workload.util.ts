@@ -1322,6 +1322,7 @@ function setDistributedUIDefaults(
   uiModel: IUISuperWorkloadCreationRequest,
   isSSO: boolean,
   policy?: UnifiedPolicyInfo | null,
+  serverType?: EServerType,
 ): IUISuperWorkloadCreationRequest {
   const uidGidSourceDefault: UidGidSource | null = isSSO ? UidGidSource.FromIdpToken : UidGidSource.FromTheImage;
   const leaderSpec = getDistributedSpec(
@@ -1334,6 +1335,10 @@ function setDistributedUIDefaults(
     uiModel.spec.worker,
     policy?.worker?.rules?.worker || undefined,
   );
+
+  if (serverType === EServerType.Nim && !leaderSpec.labels?.some((label) => label.name === NIM_WORKLOAD_LABEL)) {
+    leaderSpec.labels = [...(leaderSpec.labels || []), { name: NIM_WORKLOAD_LABEL, value: "true" }];
+  }
 
   if (uiModel.spec.workers === undefined) {
     uiModel.spec.workers = 1;
@@ -1378,9 +1383,15 @@ function getServingPortFieldForDistributed(
   servingPort: SupersetServingPort | null | undefined,
 ): SupersetServingPort | null | undefined {
   if (!servingPort) return undefined;
+  const clusterLocalAccessOnly =
+    servingPort.exposeExternally === null || servingPort.exposeExternally === undefined
+      ? servingPort.clusterLocalAccessOnly
+      : !servingPort.exposeExternally;
+
   return {
-    ...omit(servingPort, ["port"]),
+    ...omit(servingPort, ["port", "exposeExternally"]),
     container: servingPort.port,
+    clusterLocalAccessOnly,
   };
 }
 
@@ -1513,7 +1524,8 @@ function prepareInferenceFlatRequest(model: IUISuperWorkloadCreationRequest): In
   const specFields = _getFlatInferenceSpecData(model.spec);
 
   return {
-    ...model,
+    // The template is already expanded; sending its ID would restore omitted identity defaults.
+    ...omit(model, ["templateId"]),
     spec: specFields,
   };
 }
@@ -1549,6 +1561,10 @@ function _getDistributedLeaderWorkerSpecData(
 
 function _getDistributedSpecData(spec: IUISuperWorkloadSpec): Omit<DistributedInferenceSpecSpec, "leader" | "worker"> {
   const servingPort = spec.servingPort || { protocol: null };
+  const exposeExternally =
+    servingPort.clusterLocalAccessOnly === null || servingPort.clusterLocalAccessOnly === undefined
+      ? servingPort.exposeExternally
+      : !servingPort.clusterLocalAccessOnly;
 
   let authorizationType = servingPort.authorizationType;
 
@@ -1572,6 +1588,7 @@ function _getDistributedSpecData(spec: IUISuperWorkloadSpec): Omit<DistributedIn
       authorizationType: authorizationType as unknown as DistributedInferenceServingPortAccessAuthorizationTypeEnum,
       authorizedUsers: servingPort.authorizedUsers || undefined,
       authorizedGroups: servingPort.authorizedGroups || undefined,
+      exposeExternally,
     },
     priorityClass: spec.priorityClass || null,
     preemptibility: spec.preemptibility || undefined,

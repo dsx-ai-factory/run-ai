@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -22,10 +24,10 @@ type Action string
 // List of Action
 const (
 	ACTION_CREATE Action = "create"
-	ACTION_READ Action = "read"
+	ACTION_READ   Action = "read"
 	ACTION_UPDATE Action = "update"
 	ACTION_DELETE Action = "delete"
-	ACTION_SYNC Action = "sync"
+	ACTION_SYNC   Action = "sync"
 )
 
 // All allowed values of Action enum
@@ -115,4 +117,3 @@ func (v *NullableAction) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

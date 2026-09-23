@@ -671,6 +671,7 @@ paths:
         - $ref: '#/components/parameters/TelemetryGroupBy'
         - $ref: '#/components/parameters/TelemetryType'
         - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
       responses:
         '200':
           description: Executed successfully.
@@ -689,6 +690,51 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '500':
           $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/workloads/telemetry:
+    x-internal: true
+    get:
+      summary: Get the internal workloads telemetry.
+      operationId: get_internal_workloads_telemetry
+      description: |
+        Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.
+
+        Telemetry Types:
+        - WORKLOADS_COUNT: Count of workloads
+        - GPU_ALLOCATION: GPU allocation metrics
+        - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+          For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+        - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
+      x-internal: true
+      x-no-authorization: true
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/FilterByCluster'
+        - $ref: '#/components/parameters/FilterByNodepoolName'
+        - $ref: '#/components/parameters/FilterByDepartment'
+        - $ref: '#/components/parameters/FilterByProject'
+        - $ref: '#/components/parameters/TelemetryGroupBy'
+        - $ref: '#/components/parameters/TelemetryType'
+        - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/workloads/podgroups/sync:
@@ -5427,7 +5473,7 @@ components:
         maxItems: 10
         items:
           type: string
-          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
         example:
           - name!=some-workload-name
           - allocatedGPU>=2
@@ -5526,6 +5572,7 @@ components:
           - totalPendingTimeSeconds
           - totalRunningTimeSeconds
           - priorityClassName
+          - preemptibility
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName
@@ -5605,6 +5652,7 @@ components:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
     TelemetryType:
       name: telemetryType
       in: query
@@ -5626,6 +5674,22 @@ components:
         example:
           - Running
           - Failed
+    TelemetryFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal. Dates are in ISO 8601 timestamp format.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          maxLength: 1000
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+        example:
+          - createdAt>=2026-09-01T00:00:00Z
+          - createdAt<=2026-09-02T00:00:00Z
+      explode: false
     PodsSort:
       name: sortBy
       in: query
@@ -6890,6 +6954,10 @@ components:
         preemptible:
           type: boolean
           nullable: true
+        preemptibility:
+          type: string
+          example: non-preemptible
+          nullable: true
         fullySaasWorkload:
           x-internal: true
           type: boolean
@@ -7115,6 +7183,25 @@ components:
               $ref: '#/components/schemas/QueueResources'
             podGroupRequestedNonPreemptibleResources:
               $ref: '#/components/schemas/QueueResources'
+    WorkloadElementTopology:
+      type: object
+      description: |
+        The element's network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy.
+      nullable: true
+      properties:
+        name:
+          type: string
+          description: The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
+        preferredPlacement:
+          x-internal: true
+          type: string
+          description: The topology level to use as a preferred placement constraint for the element.
+        requiredPlacement:
+          x-internal: true
+          type: string
+          description: The topology level to use as a required placement constraint for the element. If the requirement cannot be satisfied at this topology level, placement will fail.
+        actualPlacement:
+          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElement:
       type: object
       required:
@@ -7156,6 +7243,8 @@ components:
           format: date-time
           example: '2022-01-01T03:49:52.531Z'
           description: The timestamp when the structure element was created.
+        topology:
+          $ref: '#/components/schemas/WorkloadElementTopology'
         kubernetesRef:
           type: object
           nullable: true
@@ -15643,17 +15732,6 @@ components:
             A flat list of structure elements for this workload, ordered by hierarchy level. This page may contain fewer elements than are stored in the database — use the "next" field to retrieve additional pages. Use the /elements/count endpoint to retrieve total and stored counts.
           items:
             $ref: '#/components/schemas/WorkloadElement'
-    WorkloadElementTopology:
-      type: object
-      description: |
-        The element's network topology. Returned only when the element's running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn't support topology, or there are no running pods to place yet).
-      nullable: true
-      properties:
-        name:
-          type: string
-          description: The name of the network topology associated with the element — either inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
-        actualPlacement:
-          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElementResponse:
       allOf:
         - $ref: '#/components/schemas/WorkloadElement'
@@ -15666,8 +15744,6 @@ components:
               $ref: '#/components/schemas/WorkloadRequestResources'
             allocatedResources:
               $ref: '#/components/schemas/WorkloadAllocatedResources'
-            topology:
-              $ref: '#/components/schemas/WorkloadElementTopology'
     ElementMetricType:
       type: string
       description: Specify which metric data to request for an element.
@@ -16269,6 +16345,10 @@ components:
       type: object
       description: Authentication configuration required to access a private Helm repository or chart URL. This is used when the chart source requires credentials.
       properties:
+        userCredential:
+          type: boolean
+          nullable: true
+          description: Indicates whether the asset is a user credential owned by the caller. When omitted or false, the asset is treated as a shared credential.
         assetId:
           type: string
           description: The ID of the asset to use for authentication.
@@ -16282,11 +16362,17 @@ components:
           $ref: '#/components/schemas/AIApplicationSpecChartRef'
         values:
           type: object
-          description: Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+          description: |
+            Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+
+            A complete string value can reference a personal credential using `USERCREDENTIAL:<name>`. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: `USERCREDENTIAL:<name>,generic-secret` or `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.
           additionalProperties: true
         valuesBase64:
           type: string
-          description: Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`.
+          description: |
+            Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`. When the decoded content contains personal credential references, it must be a YAML object.
+
+            String values support the same exact personal credential placeholder grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and Docker registry credentials, or `USERCREDENTIAL:<name>,generic-secret` and `USERCREDENTIAL:<name>,docker-registry` for NGC credentials. Embedded or partial placeholders are not supported.
           format: byte
         auth:
           $ref: '#/components/schemas/AIApplicationAuth'
@@ -16696,6 +16782,7 @@ components:
         - category
         - priority
         - priorityClassName
+        - preemptibility
         - guaranteedRuntimeEndsAt
         - aiApplicationId
         - aiApplicationName

@@ -288,7 +288,7 @@ func ParseNodeMetricResultToTelemetryResponse(ctx context.Context, nodeTelemetry
 		return telemetryResponse
 	}
 
-	var telemetryGroups []api.TelemetryResponseValuesInner
+	telemetryGroups := make([]api.TelemetryResponseValuesInner, 0, len(results))
 	for _, result := range results {
 		measurements, ok := result.GetMeasurementsOk()
 		if !ok {
