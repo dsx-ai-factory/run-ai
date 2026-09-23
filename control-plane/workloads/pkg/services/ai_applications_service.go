@@ -219,11 +219,15 @@ func (s *AIApplicationsService) CreateApplication(ctx context.Context, createApp
 		return NewErrorResponse(api.NewError(int(capErr.GetCode()), capErr.GetMessage(), nil)), nil
 	}
 
+	usesPersonalBindings, bindingsErr := processAIApplicationCredentialBindings(ctx, &createApplicationRequest, project.ParentId)
+	if bindingsErr != nil {
+		return NewErrorResponse(bindingsErr), nil
+	}
 	usesPersonalCredentials, credentialsErr := processAIApplicationCredentials(ctx, createApplicationRequest.Name, &createApplicationRequest.Spec)
 	if credentialsErr != nil {
 		return NewErrorResponse(credentialsErr), nil
 	}
-	if usesPersonalCredentials {
+	if usesPersonalCredentials || usesPersonalBindings {
 		if capabilityErr := validateApplicationPersonalCredentialsCapability(ctx, createApplicationRequest.ClusterId); capabilityErr != nil {
 			return NewErrorResponse(capabilityErr), nil
 		}

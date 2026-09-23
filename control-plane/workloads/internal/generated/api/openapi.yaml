@@ -126562,6 +126562,51 @@ components:
         kind: PersistentVolumeClaim
         workloadId: null
         name: my-data-pvc
+    AIApplicationCredentialBinding:
+      example:
+        credentialType: ngc-api-key
+        existingSecretName: existingSecretName
+        assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        variable: variable
+        userCredential: true
+      properties:
+        variable:
+          description: |
+            Destination in Helm values. Supports dotted keys, escaped literal characters, array indexes,
+            and double-quoted bracket keys. Destinations must not overlap.
+            global.imagePullSecret.name and global.ngcApiSecret.name also set the sibling create value to false.
+          maxLength: 1024
+          minLength: 1
+          type: string
+        assetId:
+          description: Selected Run:ai credential asset ID. Never a credential value
+            or a Kubernetes Secret name.
+          format: uuid
+          type: string
+        credentialType:
+          description: |
+            ngc-api-key selects an NGC asset's generic Secret. image-pull-secret selects a registry asset
+            or the registry representation of an NGC asset. generic selects a generic Secret asset or
+            an NGC asset's generic representation.
+          enum:
+          - ngc-api-key
+          - image-pull-secret
+          - generic
+          type: string
+        userCredential:
+          description: Set by the server from the selected asset's ownership and visibility.
+          readOnly: true
+          type: boolean
+        existingSecretName:
+          description: Set by the server when the authorized credential asset references
+            an existing Kubernetes Secret.
+          readOnly: true
+          type: string
+      required:
+      - assetId
+      - credentialType
+      - variable
+      type: object
     AIApplicationChartRepo:
       description: The HTTP or HTTPS URL of the Helm repository that hosts the chart.
         This must match a repository that is accessible. Used together with `name`
@@ -126661,6 +126706,32 @@ components:
       type: object
     AIApplicationSpec:
       example:
+        credentialBindings:
+        - credentialType: ngc-api-key
+          existingSecretName: existingSecretName
+          assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          variable: variable
+          userCredential: true
+        - credentialType: ngc-api-key
+          existingSecretName: existingSecretName
+          assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          variable: variable
+          userCredential: true
+        - credentialType: ngc-api-key
+          existingSecretName: existingSecretName
+          assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          variable: variable
+          userCredential: true
+        - credentialType: ngc-api-key
+          existingSecretName: existingSecretName
+          assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          variable: variable
+          userCredential: true
+        - credentialType: ngc-api-key
+          existingSecretName: existingSecretName
+          assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          variable: variable
+          userCredential: true
         auth:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           userCredential: true
@@ -126674,6 +126745,16 @@ components:
           chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
         valuesBase64: valuesBase64
       properties:
+        credentialBindings:
+          description: |
+            Active runtime credential selections, separate from Helm values and chart-download authentication.
+            Each selected asset is authorized for the target project and resolved to a Kubernetes Secret name.
+            Bindings override the corresponding values after chart defaults and user overrides are merged.
+            The caller supplies only active selections; this API does not interpret questions.yaml.
+          items:
+            $ref: '#/components/schemas/AIApplicationCredentialBinding'
+          maxItems: 128
+          type: array
         chartRef:
           $ref: '#/components/schemas/AIApplicationSpecChartRef'
         values:
@@ -126728,6 +126809,32 @@ components:
         source: source
         type: type
         spec:
+          credentialBindings:
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             userCredential: true
@@ -127019,6 +127126,32 @@ components:
         projectName: project-a
         projectId: "1"
         spec:
+          credentialBindings:
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
+          - credentialType: ngc-api-key
+            existingSecretName: existingSecretName
+            assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            variable: variable
+            userCredential: true
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             userCredential: true
@@ -127089,6 +127222,32 @@ components:
           projectName: project-a
           projectId: "1"
           spec:
+            credentialBindings:
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
               userCredential: true
@@ -127134,6 +127293,32 @@ components:
             projectName: project-a
             projectId: "1"
             spec:
+              credentialBindings:
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
               auth:
                 assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
                 userCredential: true
@@ -127161,6 +127346,32 @@ components:
             projectName: project-a
             projectId: "1"
             spec:
+              credentialBindings:
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
+              - credentialType: ngc-api-key
+                existingSecretName: existingSecretName
+                assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                variable: variable
+                userCredential: true
               auth:
                 assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
                 userCredential: true
@@ -130635,6 +130846,32 @@ components:
           source: source
           type: type
           spec:
+            credentialBindings:
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
               userCredential: true
@@ -130714,6 +130951,32 @@ components:
           source: source
           type: type
           spec:
+            credentialBindings:
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
+            - credentialType: ngc-api-key
+              existingSecretName: existingSecretName
+              assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              variable: variable
+              userCredential: true
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
               userCredential: true

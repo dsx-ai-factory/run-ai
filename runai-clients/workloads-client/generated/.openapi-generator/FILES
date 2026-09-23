@@ -29,6 +29,7 @@ docs/AIApplicationAllocatedResources.md
 docs/AIApplicationAuth.md
 docs/AIApplicationChartUploadResponse.md
 docs/AIApplicationCreationRequest.md
+docs/AIApplicationCredentialBinding.md
 docs/AIApplicationForSync.md
 docs/AIApplicationRequestResources.md
 docs/AIApplicationResource.md
@@ -639,6 +640,7 @@ model_ai_application_allocated_resources.go
 model_ai_application_auth.go
 model_ai_application_chart_upload_response.go
 model_ai_application_creation_request.go
+model_ai_application_credential_binding.go
 model_ai_application_endpoint.go
 model_ai_application_for_sync.go
 model_ai_application_request_resources.go

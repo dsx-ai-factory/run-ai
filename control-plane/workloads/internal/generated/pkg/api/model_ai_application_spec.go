@@ -22,6 +22,12 @@ var dummyAiApplicationSpec = runaihttp.AssertPattern
 
 type AiApplicationSpec struct {
 
+	// Active runtime credential selections, separate from Helm values and chart-download authentication. Each selected asset is authorized for the target project and resolved to a Kubernetes Secret name. Bindings override the corresponding values after chart defaults and user overrides are merged. The caller supplies only active selections; this API does not interpret questions.yaml.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//CredentialBindings []AiApplicationCredentialBinding `json:"credentialBindings,omitempty"`
+	CredentialBindings []AiApplicationCredentialBinding `json:"credentialBindings,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ChartRef AiApplicationSpecChartRef `json:"chartRef"`
 	ChartRef AiApplicationSpecChartRef `json:"chartRef" gorm:"serializer:json; type:jsonb;not null;"`
@@ -56,6 +62,11 @@ func AssertAiApplicationSpecRequired(obj AiApplicationSpec) error {
 		}
 	}
 
+	for _, el := range obj.CredentialBindings {
+		if err := AssertAiApplicationCredentialBindingRequired(el); err != nil {
+			return err
+		}
+	}
 	if err := AssertAiApplicationSpecChartRefRequired(obj.ChartRef); err != nil {
 		return err
 	}
@@ -67,6 +78,19 @@ func AssertAiApplicationSpecRequired(obj AiApplicationSpec) error {
 
 // AssertAiApplicationSpecConstraints checks if the values respects the defined constraints
 func AssertAiApplicationSpecConstraints(obj AiApplicationSpec) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.CredentialBindings, "CredentialBindings", 128); maxItemsErr != nil {
+		return &ParsingError{Param: "CredentialBindings", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	for _, el := range obj.CredentialBindings {
+		if err := AssertAiApplicationCredentialBindingConstraints(el); err != nil {
+			return err
+		}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

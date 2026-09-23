@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**CredentialBindings** | Pointer to [**[]AIApplicationCredentialBinding**](AIApplicationCredentialBinding.md) | Active runtime credential selections, separate from Helm values and chart-download authentication. Each selected asset is authorized for the target project and resolved to a Kubernetes Secret name. Bindings override the corresponding values after chart defaults and user overrides are merged. The caller supplies only active selections; this API does not interpret questions.yaml.  | [optional] 
 **ChartRef** | [**AIApplicationSpecChartRef**](AIApplicationSpecChartRef.md) |  | 
 **Values** | Pointer to **map[string]interface{}** | Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s &#x60;values.yaml&#x60;. This field is mutually exclusive with &#x60;valuesBase64&#x60;.  A complete string value can reference a personal credential using &#x60;USERCREDENTIAL:&lt;name&gt;&#x60;. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: &#x60;USERCREDENTIAL:&lt;name&gt;,generic-secret&#x60; or &#x60;USERCREDENTIAL:&lt;name&gt;,docker-registry&#x60;. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.  | [optional] 
 **ValuesBase64** | Pointer to **string** | Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with &#x60;values&#x60;. When the decoded content contains personal credential references, it must be a YAML object.  String values support the same exact personal credential placeholder grammar as &#x60;values&#x60;: &#x60;USERCREDENTIAL:&lt;name&gt;&#x60; for generic secret and Docker registry credentials, or &#x60;USERCREDENTIAL:&lt;name&gt;,generic-secret&#x60; and &#x60;USERCREDENTIAL:&lt;name&gt;,docker-registry&#x60; for NGC credentials. Embedded or partial placeholders are not supported.  | [optional] 
@@ -27,6 +28,31 @@ will change when the set of required properties is changed
 NewAIApplicationSpecWithDefaults instantiates a new AIApplicationSpec object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetCredentialBindings
+
+`func (o *AIApplicationSpec) GetCredentialBindings() []AIApplicationCredentialBinding`
+
+GetCredentialBindings returns the CredentialBindings field if non-nil, zero value otherwise.
+
+### GetCredentialBindingsOk
+
+`func (o *AIApplicationSpec) GetCredentialBindingsOk() (*[]AIApplicationCredentialBinding, bool)`
+
+GetCredentialBindingsOk returns a tuple with the CredentialBindings field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCredentialBindings
+
+`func (o *AIApplicationSpec) SetCredentialBindings(v []AIApplicationCredentialBinding)`
+
+SetCredentialBindings sets CredentialBindings field to given value.
+
+### HasCredentialBindings
+
+`func (o *AIApplicationSpec) HasCredentialBindings() bool`
+
+HasCredentialBindings returns a boolean if a field has been set.
 
 ### GetChartRef
 

@@ -295,6 +295,12 @@ func sanitizeAIApplicationResponse(ctx context.Context, application *api.AiAppli
 	if isPersonalAIApplicationAuth(application.Spec.Auth) {
 		application.Spec.Auth.AssetId = ""
 	}
+	for i := range application.Spec.CredentialBindings {
+		binding := &application.Spec.CredentialBindings[i]
+		if binding.UserCredential {
+			binding.AssetId = ""
+		}
+	}
 	if application.Spec.Values != nil {
 		application.Spec.Values = convutils.MapMe(redactPersonalCredentialValue(application.Spec.Values))
 	}

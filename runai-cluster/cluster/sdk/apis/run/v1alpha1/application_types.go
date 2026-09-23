@@ -43,9 +43,24 @@ type HelmSpec struct {
 	// +optional
 	// +kubebuilder:pruning:PreserveUnknownFields
 	Values map[string]apiextensionsv1.JSON `json:"values,omitempty"`
+	// CredentialBindings override effective chart values with resolved Secret names after chart loading.
+	// +optional
+	// +kubebuilder:validation:MaxItems=128
+	CredentialBindings []HelmCredentialBinding `json:"credentialBindings,omitempty"`
 	// Auth contains authentication configuration for private repositories
 	// +optional
 	Auth *HelmAuthSpec `json:"auth,omitempty"`
+}
+
+// HelmCredentialBinding references a runtime Secret in the application's namespace.
+type HelmCredentialBinding struct {
+	// Variable is a dotted or indexed path in the chart's values.
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=1024
+	Variable string `json:"variable"`
+	// SecretName is a reference only; credential contents never enter Helm values.
+	// +kubebuilder:validation:MinLength=1
+	SecretName string `json:"secretName"`
 }
 
 type ChartRef struct {

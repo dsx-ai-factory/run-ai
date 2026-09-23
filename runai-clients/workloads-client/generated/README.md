@@ -239,6 +239,7 @@ Class | Method | HTTP request | Description
  - [AIApplicationAuth](docs/AIApplicationAuth.md)
  - [AIApplicationChartUploadResponse](docs/AIApplicationChartUploadResponse.md)
  - [AIApplicationCreationRequest](docs/AIApplicationCreationRequest.md)
+ - [AIApplicationCredentialBinding](docs/AIApplicationCredentialBinding.md)
  - [AIApplicationForSync](docs/AIApplicationForSync.md)
  - [AIApplicationRequestResources](docs/AIApplicationRequestResources.md)
  - [AIApplicationResource](docs/AIApplicationResource.md)

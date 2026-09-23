@@ -7,6 +7,12 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strconv"
+	"strings"
 
 	_ "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/tests/helper"
 
@@ -14,6 +20,7 @@ import (
 	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	runaiBackendClient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config"
+	configmaps "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config-maps"
 	clusterCommonConstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	runaiv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2"
@@ -30,6 +37,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
+
+type applicationSyncTransport func(*http.Request) (*http.Response, error)
+
+func (f applicationSyncTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+	return f(request)
+}
+
+type applicationDeleteFailureClient struct{ client.Client }
+
+func (applicationDeleteFailureClient) Delete(context.Context, client.Object, ...client.DeleteOption) error {
+	return fmt.Errorf("test deletion failure")
+}
 
 var _ = Describe("ApplicationsHandler", func() {
 	Describe("ApplicationSpecCopier", func() {
@@ -599,6 +618,100 @@ var _ = Describe("ApplicationsHandler", func() {
 
 			_ = rcpconfig.Set(&config.AgentConfig{ClusterUuid: "test-cluster-uuid"})
 		})
+
+		DescribeTable("retries pending credentials across restarts without losing later updates", func(deleted, deletionFails bool) {
+			ctx := context.Background()
+			Expect(fakeClient.Create(ctx, &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{
+				Name: configmaps.AgentConfigName, Namespace: clusterCommonConstants.NamespaceRunAi,
+			}, Data: map[string]string{configmaps.ApplicationsSyncCounter: "0"}})).To(Succeed())
+			waiting := workloads_openapi.AIApplicationSyncInfo{
+				UpdateCount: convutils.Ref(int64(1)),
+				Application: &workloads_openapi.AIApplicationSyncItem{
+					Id: convutils.Ref("waiting-id"), Name: convutils.Ref("waiting"), ProjectId: convutils.Ref("proj-1"),
+					Spec: &workloads_openapi.AIApplicationSpec{CredentialBindings: []workloads_openapi.AIApplicationCredentialBinding{{
+						Variable: "custom.name", AssetId: "asset-id", CredentialType: "generic",
+					}}},
+				},
+			}
+			other := workloads_openapi.AIApplicationSyncInfo{
+				UpdateCount: convutils.Ref(int64(2)),
+				Application: &workloads_openapi.AIApplicationSyncItem{
+					Id: convutils.Ref("other-id"), Name: convutils.Ref("other"), ProjectId: convutils.Ref("proj-1"),
+				},
+			}
+			updates := []workloads_openapi.AIApplicationSyncInfo{waiting, other}
+			var requested []int64
+			var messages []string
+			cfg := workloads_openapi.NewConfiguration()
+			cfg.HTTPClient = &http.Client{Transport: applicationSyncTransport(func(request *http.Request) (*http.Response, error) {
+				after, err := strconv.ParseInt(request.URL.Query().Get("updatesAfter"), 10, 64)
+				Expect(err).NotTo(HaveOccurred())
+				requested = append(requested, after)
+				if request.Body != nil {
+					var report workloads_openapi.ClusterSyncReport
+					Expect(json.NewDecoder(request.Body).Decode(&report)).To(Succeed())
+					for _, update := range report.Updates {
+						if message := update.Message.Get(); message != nil {
+							messages = append(messages, *message)
+						}
+					}
+				}
+				response := workloads_openapi.AIApplicationSyncResponse{
+					SystemInfo: &workloads_openapi.SystemInfo{HighestUpdate: updates[len(updates)-1].UpdateCount},
+				}
+				for _, update := range updates {
+					if update.GetUpdateCount() > after {
+						response.Applications = []workloads_openapi.AIApplicationSyncInfo{update}
+						response.ResponseInfo = &workloads_openapi.ResponseInfo{HighestUpdate: update.UpdateCount}
+						break
+					}
+				}
+				raw, err := json.Marshal(response)
+				Expect(err).NotTo(HaveOccurred())
+				return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(string(raw)))}, nil
+			})}
+			handler.backendClient.WorkloadsClient = workloads_openapi.NewAPIClient(cfg)
+			Expect(handler.Handle()).To(Succeed())
+			Expect(requested).To(Equal([]int64{0, 1}))
+			Expect(messages).To(ContainElement(ContainSubstring("check credential synchronization")))
+			Expect(fakeClient.Get(ctx, client.ObjectKey{Name: "other", Namespace: "proj-namespace"}, &runv1alpha1.Application{})).To(Succeed())
+			Expect(errors.IsNotFound(fakeClient.Get(ctx, client.ObjectKey{Name: "waiting", Namespace: "proj-namespace"}, &runv1alpha1.Application{}))).To(BeTrue())
+			persisted, err := configmaps.GetAgentConfig(fakeClient)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(persisted.ApplicationsSyncCounter).To(BeZero())
+			handler = &ApplicationsHandler{CommonHandler: handler.CommonHandler, syncCounter: persisted.ApplicationsSyncCounter}
+			if deleted {
+				waiting.UpdateCount = convutils.Ref(int64(3))
+				waiting.Application.DesiredPhase = convutils.Ref(applicationDesiredPhaseDeleted)
+				updates = []workloads_openapi.AIApplicationSyncInfo{other, waiting}
+				if deletionFails {
+					other.UpdateCount = convutils.Ref(int64(4))
+					updates = []workloads_openapi.AIApplicationSyncInfo{waiting, other}
+					Expect(fakeClient.Create(ctx, &runv1alpha1.Application{ObjectMeta: metav1.ObjectMeta{Name: "waiting", Namespace: "proj-namespace"}})).To(Succeed())
+					handler.runaiClient = applicationDeleteFailureClient{Client: fakeClient}
+					Expect(handler.Handle()).To(MatchError(ContainSubstring("test deletion failure")))
+					// A higher page cursor would tell the backend to prune this failed delete.
+					Expect(requested).To(Equal([]int64{0, 1, 0}))
+					Expect(handler.syncCounter).To(BeZero())
+					handler.runaiClient = fakeClient
+				}
+			} else {
+				Expect(fakeClient.Create(ctx, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{
+					Name: "selected", Namespace: "proj-namespace", Labels: map[string]string{assetIdLabel: "asset-id", clusterCommonConstants.RunaiAssetLabel: genericSecretKindLabel},
+				}})).To(Succeed())
+			}
+			Expect(handler.Handle()).To(Succeed())
+			app := &runv1alpha1.Application{}
+			err = fakeClient.Get(ctx, client.ObjectKey{Name: "waiting", Namespace: "proj-namespace"}, app)
+			if deleted {
+				Expect(errors.IsNotFound(err)).To(BeTrue())
+				Expect(handler.syncCounter).To(Equal(updates[len(updates)-1].GetUpdateCount()))
+			} else {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(app.Spec.Helm.CredentialBindings[0].SecretName).To(Equal("selected"))
+				Expect(handler.syncCounter).To(Equal(int64(2)))
+			}
+		}, Entry("when the Secret arrives", false, false), Entry("when the pending application is deleted", true, false), Entry("when a deletion fails before later updates", true, true))
 
 		It("should create applications in the cluster", func() {
 			response := &workloads_openapi.AIApplicationSyncResponse{

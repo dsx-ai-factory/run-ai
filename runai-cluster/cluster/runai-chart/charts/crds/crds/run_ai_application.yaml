@@ -122,6 +122,30 @@ spec:
                       URL pointing to the chart to be installed.
                       ChartUrl and ChartRef are mutually exclusive.
                     type: string
+                  credentialBindings:
+                    description: CredentialBindings override effective chart values
+                      with resolved Secret names after chart loading.
+                    items:
+                      description: HelmCredentialBinding references a runtime Secret
+                        in the application's namespace.
+                      properties:
+                        secretName:
+                          description: SecretName is a reference only; credential
+                            contents never enter Helm values.
+                          minLength: 1
+                          type: string
+                        variable:
+                          description: Variable is a dotted or indexed path in the
+                            chart's values.
+                          maxLength: 1024
+                          minLength: 1
+                          type: string
+                      required:
+                      - secretName
+                      - variable
+                      type: object
+                    maxItems: 128
+                    type: array
                   requiresControlPlaneAuth:
                     description: |-
                       RequiresControlPlaneAuth indicates the chart is hosted by the control plane (an uploaded

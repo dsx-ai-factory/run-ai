@@ -24084,6 +24084,46 @@
           }
         ]
       },
+      "AIApplicationCredentialBinding": {
+        "type": "object",
+        "required": [
+          "variable",
+          "assetId",
+          "credentialType"
+        ],
+        "properties": {
+          "variable": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Destination in Helm values. Supports dotted keys, escaped literal characters, array indexes,\nand double-quoted bracket keys. Destinations must not overlap.\nglobal.imagePullSecret.name and global.ngcApiSecret.name also set the sibling create value to false.\n"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Selected Run:ai credential asset ID. Never a credential value or a Kubernetes Secret name."
+          },
+          "credentialType": {
+            "type": "string",
+            "enum": [
+              "ngc-api-key",
+              "image-pull-secret",
+              "generic"
+            ],
+            "description": "ngc-api-key selects an NGC asset's generic Secret. image-pull-secret selects a registry asset\nor the registry representation of an NGC asset. generic selects a generic Secret asset or\nan NGC asset's generic representation.\n"
+          },
+          "userCredential": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Set by the server from the selected asset's ownership and visibility."
+          },
+          "existingSecretName": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Set by the server when the authorized credential asset references an existing Kubernetes Secret."
+          }
+        }
+      },
       "AIApplicationChartRepo": {
         "type": "string",
         "description": "The HTTP or HTTPS URL of the Helm repository that hosts the chart. This must match a repository that is accessible. Used together with `name` and `version`.",
@@ -24157,6 +24197,14 @@
           "chartRef"
         ],
         "properties": {
+          "credentialBindings": {
+            "type": "array",
+            "maxItems": 128,
+            "description": "Active runtime credential selections, separate from Helm values and chart-download authentication.\nEach selected asset is authorized for the target project and resolved to a Kubernetes Secret name.\nBindings override the corresponding values after chart defaults and user overrides are merged.\nThe caller supplies only active selections; this API does not interpret questions.yaml.\n",
+            "items": {
+              "$ref": "#/components/schemas/AIApplicationCredentialBinding"
+            }
+          },
           "chartRef": {
             "$ref": "#/components/schemas/AIApplicationSpecChartRef"
           },

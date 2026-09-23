@@ -18,7 +18,9 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/storage/driver"
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -36,6 +38,7 @@ type InstallParams struct {
 	chartRef                 *v1alpha1.ChartRef
 	chartUrl                 string
 	values                   map[string]interface{}
+	credentialBindings       []v1alpha1.HelmCredentialBinding
 	authOpts                 *AuthOptions
 	requiresControlPlaneAuth bool
 }
@@ -101,6 +104,12 @@ func NewInstallParams(ctx context.Context, k8sClient client.Client, application 
 	}
 
 	helmSpec := application.Spec.Helm
+	for _, binding := range helmSpec.CredentialBindings {
+		secret := &corev1.Secret{}
+		if err := k8sClient.Get(ctx, types.NamespacedName{Namespace: application.Namespace, Name: binding.SecretName}, secret); err != nil {
+			return nil, fmt.Errorf("credential Secret for %q is unavailable in namespace %q; check credential synchronization and retry: %w", binding.Variable, application.Namespace, err)
+		}
+	}
 
 	values, err := convertHelmValues(helmSpec.Values)
 	if err != nil {
@@ -112,6 +121,7 @@ func NewInstallParams(ctx context.Context, k8sClient client.Client, application 
 		chartUrl: helmSpec.ChartUrl,
 		// Convert Helm values from JSON map to map[string]interface{}
 		values:                   values,
+		credentialBindings:       helmSpec.CredentialBindings,
 		requiresControlPlaneAuth: helmSpec.RequiresControlPlaneAuth,
 	}
 
@@ -156,6 +166,10 @@ func (t *TaskInstall) Execute(ctx context.Context, reportProgress func(*AppStatu
 	if err != nil {
 		return NewAppStatus().TaskFailed(t, err)
 	}
+	values, err := applyCredentialBindings(chartRequested, t.values, t.credentialBindings)
+	if err != nil {
+		return NewAppStatus().TaskFailed(t, err)
+	}
 
 	reportProgress(NewAppStatus().TaskRunning(t))
 
@@ -168,7 +182,7 @@ func (t *TaskInstall) Execute(ctx context.Context, reportProgress func(*AppStatu
 	installClient.Wait = false // Don't wait for resources to be ready
 
 	// Run the installation
-	rel, err := installClient.RunWithContext(ctx, chartRequested, t.values)
+	rel, err := installClient.RunWithContext(ctx, chartRequested, values)
 	if err != nil {
 		log.Error().Err(err).Msgf("HelmTask --> failed to install release %s", t.ReleaseId.String())
 		return NewAppStatus().TaskFailed(t, err)
@@ -191,6 +205,10 @@ func (t *TaskUpgrade) Execute(ctx context.Context, reportProgress func(*AppStatu
 	if err != nil {
 		return NewAppStatus().TaskFailed(t, err)
 	}
+	values, err := applyCredentialBindings(chartRequested, t.values, t.credentialBindings)
+	if err != nil {
+		return NewAppStatus().TaskFailed(t, err)
+	}
 
 	reportProgress(NewAppStatus().TaskRunning(t))
 
@@ -200,7 +218,7 @@ func (t *TaskUpgrade) Execute(ctx context.Context, reportProgress func(*AppStatu
 	upgradeClient.Wait = false // Don't wait for resources to be ready
 
 	// Run the upgrade
-	rel, err := upgradeClient.RunWithContext(ctx, t.ReleaseId.Name, chartRequested, t.values)
+	rel, err := upgradeClient.RunWithContext(ctx, t.ReleaseId.Name, chartRequested, values)
 	if err != nil {
 		log.Error().Err(err).Msgf("HelmTask --> failed to upgrade release %s", t.ReleaseId.String())
 		return NewAppStatus().TaskFailed(t, err)

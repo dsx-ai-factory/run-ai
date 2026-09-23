@@ -2,6 +2,16 @@ type: object
 required: 
   - chartRef
 properties:
+  credentialBindings:
+    type: array
+    maxItems: 128
+    description: |
+      Active runtime credential selections, separate from Helm values and chart-download authentication.
+      Each selected asset is authorized for the target project and resolved to a Kubernetes Secret name.
+      Bindings override the corresponding values after chart defaults and user overrides are merged.
+      The caller supplies only active selections; this API does not interpret questions.yaml.
+    items:
+      $ref: "./AIApplicationCredentialBinding.yaml"
   chartRef:
     $ref: "./AIApplicationSpecChartRef.yaml"
   values:

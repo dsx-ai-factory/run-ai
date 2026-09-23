@@ -266,6 +266,52 @@ export interface AIApplicationCreationRequest {
 /**
  * 
  * @export
+ * @interface AIApplicationCredentialBinding
+ */
+export interface AIApplicationCredentialBinding {
+    /**
+     * Destination in Helm values. Supports dotted keys, escaped literal characters, array indexes, and double-quoted bracket keys. Destinations must not overlap. global.imagePullSecret.name and global.ngcApiSecret.name also set the sibling create value to false. 
+     * @type {string}
+     * @memberof AIApplicationCredentialBinding
+     */
+    'variable': string;
+    /**
+     * Selected Run:ai credential asset ID. Never a credential value or a Kubernetes Secret name.
+     * @type {string}
+     * @memberof AIApplicationCredentialBinding
+     */
+    'assetId': string;
+    /**
+     * ngc-api-key selects an NGC asset\'s generic Secret. image-pull-secret selects a registry asset or the registry representation of an NGC asset. generic selects a generic Secret asset or an NGC asset\'s generic representation. 
+     * @type {string}
+     * @memberof AIApplicationCredentialBinding
+     */
+    'credentialType': AIApplicationCredentialBindingCredentialTypeEnum;
+    /**
+     * Set by the server from the selected asset\'s ownership and visibility.
+     * @type {boolean}
+     * @memberof AIApplicationCredentialBinding
+     */
+    'userCredential'?: boolean;
+    /**
+     * Set by the server when the authorized credential asset references an existing Kubernetes Secret.
+     * @type {string}
+     * @memberof AIApplicationCredentialBinding
+     */
+    'existingSecretName'?: string;
+}
+
+export const AIApplicationCredentialBindingCredentialTypeEnum = {
+    NgcApiKey: 'ngc-api-key',
+    ImagePullSecret: 'image-pull-secret',
+    Generic: 'generic'
+} as const;
+
+export type AIApplicationCredentialBindingCredentialTypeEnum = typeof AIApplicationCredentialBindingCredentialTypeEnum[keyof typeof AIApplicationCredentialBindingCredentialTypeEnum];
+
+/**
+ * 
+ * @export
  * @interface AIApplicationForSync
  */
 export interface AIApplicationForSync {
@@ -404,6 +450,12 @@ export interface AIApplicationResource {
  * @interface AIApplicationSpec
  */
 export interface AIApplicationSpec {
+    /**
+     * Active runtime credential selections, separate from Helm values and chart-download authentication. Each selected asset is authorized for the target project and resolved to a Kubernetes Secret name. Bindings override the corresponding values after chart defaults and user overrides are merged. The caller supplies only active selections; this API does not interpret questions.yaml. 
+     * @type {Array<AIApplicationCredentialBinding>}
+     * @memberof AIApplicationSpec
+     */
+    'credentialBindings'?: Array<AIApplicationCredentialBinding>;
     /**
      * 
      * @type {AIApplicationSpecChartRef}

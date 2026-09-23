@@ -32,6 +32,7 @@ import (
 	"github.com/rs/zerolog/log"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
@@ -105,8 +106,10 @@ func (h *ApplicationsHandler) Handle() error {
 		h.syncReport = &ApplicationSyncReportInfo{}
 	}
 
+	nextUpdate := h.syncCounter
+	var retryAfter *int64
 	for {
-		backendApplications, innerErr := h.getBackendApplications()
+		backendApplications, innerErr := h.getBackendApplications(nextUpdate)
 		if innerErr != nil {
 			log.Error().Msgf("Had an error while getting backend applications, sync counter: %d, error: %s", h.syncCounter, innerErr.Error())
 			return innerErr
@@ -139,15 +142,40 @@ func (h *ApplicationsHandler) Handle() error {
 		h.syncReport.theReport.Updates = make([]workloads_openapi.ClusterSyncReportUpdate, numApplications)
 
 		innerErr = h.processApplications(context.Background(), backendApplications)
+		checkpoint := highestUpdate
 		if innerErr != nil {
 			log.Error().Msgf("Had an error while processing applications, error: %s", innerErr.Error())
 			err = multierror.Append(err, innerErr)
+			checkpoint = h.syncCounter
 		}
 
-		innerErr = h.setSyncCounter(highestUpdate)
+		// Retry failed conversions (for example, Secrets still synchronizing) after restart too.
+		// Keep fetching later updates while credentials are unavailable.
+		failedDeletion := false
+		for i, update := range h.syncReport.theReport.Updates {
+			if message := update.Message.Get(); message != nil && *message != "" {
+				checkpoint = min(checkpoint, max(0, ptr.Deref(update.UpdateCount, h.syncCounter+1)-1))
+			}
+			if backendApplications.Applications[i].Application.GetDesiredPhase() == applicationDesiredPhaseDeleted && (innerErr != nil || update.Message.Get() != nil) {
+				failedDeletion = true
+			}
+		}
+		if retryAfter != nil {
+			checkpoint = min(checkpoint, *retryAfter)
+		}
+		if checkpoint < highestUpdate {
+			retryAfter = ptr.To(checkpoint)
+		}
+		nextUpdate = highestUpdate
+		innerErr = h.setSyncCounter(checkpoint)
 		if innerErr != nil {
 			log.Error().Msgf("Had an error while updating applications sync counter, error: %s", innerErr.Error())
 			err = multierror.Append(err, innerErr)
+		}
+
+		// The backend also uses updatesAfter to prune acknowledged deletes.
+		if failedDeletion {
+			break
 		}
 
 		if highestUpdate == highestSysUpdate {
@@ -238,7 +266,10 @@ func (h *ApplicationsHandler) processApplications(ctx context.Context, response 
 		}
 		for i, objectErr := range perObjectError {
 			toIndex := clusterUpdates.DeleteRef[i]
-			allObjectsErrors[toIndex] = objectErr
+			// Deleting an absent Application has already achieved the desired state.
+			if !apierrors.IsNotFound(objectErr) {
+				allObjectsErrors[toIndex] = objectErr
+			}
 		}
 	}
 
@@ -330,6 +361,11 @@ func (h *ApplicationsHandler) convertHelmSpec(
 		}
 		helmSpec.Values = helmValues
 	}
+	bindings, err := h.resolveCredentialBindings(ctx, applicationName, namespace, spec.CredentialBindings, credentialSources)
+	if err != nil {
+		return nil, nil, err
+	}
+	helmSpec.CredentialBindings = bindings
 
 	auth := spec.Auth
 	if auth != nil && auth.GetAssetId() != "" {
@@ -488,10 +524,10 @@ func (h *ApplicationsHandler) validatePersonalCredentialSource(ctx context.Conte
 	return nil
 }
 
-func (h *ApplicationsHandler) getBackendApplications() (*workloads_openapi.AIApplicationSyncResponse, error) {
+func (h *ApplicationsHandler) getBackendApplications(updatesAfter int64) (*workloads_openapi.AIApplicationSyncResponse, error) {
 	request := h.backendClient.WorkloadsClient.AIApplicationsAPI.RequestApplicationsUpdates(h.backendClient.Context())
 	request = request.ClusterId(config.Config().ClusterUuid)
-	request = request.UpdatesAfter(h.syncCounter)
+	request = request.UpdatesAfter(updatesAfter)
 	if h.syncReport != nil && h.syncReport.numApplications > 0 {
 		request = request.ClusterSyncReport(h.syncReport.theReport)
 	}
@@ -515,11 +551,11 @@ func (h *ApplicationsHandler) getBackendApplications() (*workloads_openapi.AIApp
 }
 
 func (h *ApplicationsHandler) setSyncCounter(highestUpdate int64) error {
-	h.syncCounter = highestUpdate
 	err := configmaps.UpdateApplicationsSyncCounter(h.runaiClient, h.cachedClient, highestUpdate)
 	if err != nil {
 		return err
 	}
+	h.syncCounter = highestUpdate
 	log.Info().Msgf("Updated applications sync counter to: %d", highestUpdate)
 	return nil
 }

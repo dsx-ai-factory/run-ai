@@ -11,6 +11,7 @@ import (
 	"crypto/cipher"
 	"testing"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/application-controller/pkg/deployers/helm_deployer"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	personalcreds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds"
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
@@ -43,13 +44,25 @@ func TestPersonalCredentialLifecycle(t *testing.T) {
 				personalcreds.Annotation: "- sourceSecret: source\n",
 			},
 		},
+		Spec: runv1alpha1.ApplicationSpec{Helm: &runv1alpha1.HelmSpec{
+			ChartUrl: "https://example.test/chart.tgz",
+			CredentialBindings: []runv1alpha1.HelmCredentialBinding{{
+				Variable: "custom.name", SecretName: personalcreds.DestName("app", "source"),
+			}},
+		}},
 	}
 	source := credentialSource(t, "source", "first", []byte(encryptionKey))
 	k8sClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(app, source).Build()
 	controller := NewApplicationController(k8sClient)
+	if _, err := helm_deployer.NewInstallParams(context.Background(), k8sClient, app); err == nil {
+		t.Fatal("Helm preparation must wait for the personal destination")
+	}
 
 	if err := controller.materializePersonalCredentials(context.Background(), app); err != nil {
 		t.Fatalf("initial materialization failed: %v", err)
+	}
+	if _, err := helm_deployer.NewInstallParams(context.Background(), k8sClient, app); err != nil {
+		t.Fatalf("materialized binding must be ready for Helm: %v", err)
 	}
 	destKey := types.NamespacedName{
 		Name: personalcreds.DestName(app.Name, source.Name), Namespace: app.Namespace,
@@ -136,6 +149,9 @@ func TestPersonalCredentialLifecycle(t *testing.T) {
 	}
 	if err := k8sClient.Get(context.Background(), destKey, &dest); !apierrors.IsNotFound(err) {
 		t.Fatalf("revoked destination still exists: %v", err)
+	}
+	if _, err := helm_deployer.NewInstallParams(context.Background(), k8sClient, app); err == nil {
+		t.Fatal("Helm preparation must reject the revoked personal destination")
 	}
 }
 

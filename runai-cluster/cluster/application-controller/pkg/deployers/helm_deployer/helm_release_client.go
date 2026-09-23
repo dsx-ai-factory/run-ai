@@ -170,13 +170,23 @@ func ChartUrl(helmSpec *v1alpha1.HelmSpec) string {
 // ReleaseMatchesDesired returns true if the current release already matches the desired spec
 // (chart URL and values). Uses status.DeployedChartUrl when set; otherwise falls back to release metadata.
 func ReleaseMatchesDesired(rel *release.Release, spec *v1alpha1.HelmSpec, status *v1alpha1.HelmStatus) bool {
+	if rel == nil || spec == nil {
+		return false
+	}
 	desiredChartUrl := ChartUrl(spec)
 	if desiredChartUrl == "" {
 		return false
 	}
 
 	// the values were already checked in NewInstallParams so we assume there is no conversion issues
-	desiredValues, _ := convertHelmValues(spec.Values)
+	desiredValues, err := convertHelmValues(spec.Values)
+	if err != nil {
+		return false
+	}
+	desiredValues, err = applyCredentialBindings(rel.Chart, desiredValues, spec.CredentialBindings)
+	if err != nil {
+		return false
+	}
 
 	deployedChartUrl := ""
 	if status != nil {

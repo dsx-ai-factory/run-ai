@@ -24,7 +24,9 @@ var _ MappedNullable = &AIApplicationSpec{}
 
 // AIApplicationSpec struct for AIApplicationSpec
 type AIApplicationSpec struct {
-	ChartRef AIApplicationSpecChartRef `json:"chartRef"`
+	// Active runtime credential selections, separate from Helm values and chart-download authentication. Each selected asset is authorized for the target project and resolved to a Kubernetes Secret name. Bindings override the corresponding values after chart defaults and user overrides are merged. The caller supplies only active selections; this API does not interpret questions.yaml.
+	CredentialBindings []AIApplicationCredentialBinding `json:"credentialBindings,omitempty"`
+	ChartRef           AIApplicationSpecChartRef        `json:"chartRef"`
 	// Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.  A complete string value can reference a personal credential using `USERCREDENTIAL:<name>`. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: `USERCREDENTIAL:<name>,generic-secret` or `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.
 	Values map[string]interface{} `json:"values,omitempty"`
 	// Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`. When the decoded content contains personal credential references, it must be a YAML object.  String values support the same exact personal credential placeholder grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and Docker registry credentials, or `USERCREDENTIAL:<name>,generic-secret` and `USERCREDENTIAL:<name>,docker-registry` for NGC credentials. Embedded or partial placeholders are not supported.
@@ -50,6 +52,38 @@ func NewAIApplicationSpec(chartRef AIApplicationSpecChartRef) *AIApplicationSpec
 func NewAIApplicationSpecWithDefaults() *AIApplicationSpec {
 	this := AIApplicationSpec{}
 	return &this
+}
+
+// GetCredentialBindings returns the CredentialBindings field value if set, zero value otherwise.
+func (o *AIApplicationSpec) GetCredentialBindings() []AIApplicationCredentialBinding {
+	if o == nil || IsNil(o.CredentialBindings) {
+		var ret []AIApplicationCredentialBinding
+		return ret
+	}
+	return o.CredentialBindings
+}
+
+// GetCredentialBindingsOk returns a tuple with the CredentialBindings field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AIApplicationSpec) GetCredentialBindingsOk() ([]AIApplicationCredentialBinding, bool) {
+	if o == nil || IsNil(o.CredentialBindings) {
+		return nil, false
+	}
+	return o.CredentialBindings, true
+}
+
+// HasCredentialBindings returns a boolean if a field has been set.
+func (o *AIApplicationSpec) HasCredentialBindings() bool {
+	if o != nil && !IsNil(o.CredentialBindings) {
+		return true
+	}
+
+	return false
+}
+
+// SetCredentialBindings gets a reference to the given []AIApplicationCredentialBinding and assigns it to the CredentialBindings field.
+func (o *AIApplicationSpec) SetCredentialBindings(v []AIApplicationCredentialBinding) {
+	o.CredentialBindings = v
 }
 
 // GetChartRef returns the ChartRef field value
@@ -182,6 +216,9 @@ func (o AIApplicationSpec) MarshalJSON() ([]byte, error) {
 
 func (o AIApplicationSpec) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.CredentialBindings) {
+		toSerialize["credentialBindings"] = o.CredentialBindings
+	}
 	toSerialize["chartRef"] = o.ChartRef
 	if !IsNil(o.Values) {
 		toSerialize["values"] = o.Values
