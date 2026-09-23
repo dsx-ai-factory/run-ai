@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ClusterId** | Pointer to **string** | Cluster ID which has sent the resource info | [optional] 
-**DeviceClassName** | **string** | Device class name | 
+**DeviceClassName** | **string** | DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, &#x60;-&#x60;, and &#x60;.&#x60;, starting and ending with an alphanumeric character), up to 253 characters.  | 
 
 ## Methods
 

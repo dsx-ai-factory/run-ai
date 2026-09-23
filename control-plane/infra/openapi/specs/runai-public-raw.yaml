@@ -47824,7 +47824,13 @@ components:
           $ref: '#/components/schemas/ReportingClusterId'
         deviceClassName:
           type: string
-          description: Device class name
+          description: >
+            DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules
+            (lowercase alphanumeric, `-`, and `.`, starting and ending with an
+            alphanumeric character), up to 253 characters.
+          minLength: 1
+          maxLength: 253
+          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
           example: gpu.nvidia.com
     DeviceClasses:
       type: object
@@ -47833,6 +47839,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 1000
           items:
             $ref: '#/components/schemas/DeviceClass'
     ScopeClusterId:

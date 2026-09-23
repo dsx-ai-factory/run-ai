@@ -26,8 +26,8 @@ var _ MappedNullable = &DeviceClass{}
 type DeviceClass struct {
 	// Cluster ID which has sent the resource info
 	ClusterId *string `json:"clusterId,omitempty"`
-	// Device class name
-	DeviceClassName string `json:"deviceClassName"`
+	// DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+	DeviceClassName string `json:"deviceClassName" validate:"regexp=^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"`
 }
 
 type _DeviceClass DeviceClass

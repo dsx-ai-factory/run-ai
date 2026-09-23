@@ -8705,8 +8705,12 @@ components:
           format: uuid
           type: string
         deviceClassName:
-          description: Device class name
+          description: |
+            DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
           example: gpu.nvidia.com
+          maxLength: 253
+          minLength: 1
+          pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
           type: string
       required:
       - deviceClassName
@@ -8718,10 +8722,17 @@ components:
           clusterId: 550e8400-e29b-41d4-a716-446655440000
         - deviceClassName: gpu.nvidia.com
           clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
       properties:
         items:
           items:
             $ref: '#/components/schemas/DeviceClass'
+          maxItems: 1000
           type: array
       required:
       - items

@@ -343,7 +343,7 @@ export interface DeviceClass {
      */
     'clusterId'?: string;
     /**
-     * Device class name
+     * DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters. 
      * @type {string}
      * @memberof DeviceClass
      */

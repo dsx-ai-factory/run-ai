@@ -26,6 +26,8 @@ const (
 	deviceClassesSyncUrl = "/api/v1/device-classes/sync?clusterId="
 )
 
+const otherClusterId = "22222222-2222-2222-2222-222222222222"
+
 var _ = Describe("device classes test", func() {
 	BeforeEach(func() {
 		backendMock := NewRandomsBasedBackendMockClient()
@@ -34,14 +36,18 @@ var _ = Describe("device classes test", func() {
 		router = CreateRouter()
 		dbtesting.CleanTables()
 
-		clusters.SetMock(clusters.NewSimpleMock().WithCluster(clusterId, &clustersApi.DisplayedCluster{}))
+		clusters.SetMock(clusters.NewSimpleMock().
+			WithCluster(clusterId, &clustersApi.DisplayedCluster{}).
+			WithCluster(otherClusterId, &clustersApi.DisplayedCluster{}))
 	})
 
 	Context("Device Class API test", func() {
 		getUrl := deviceClassesUrl + clusterId
 		syncUrl := deviceClassesSyncUrl + clusterId
+		otherGetUrl := deviceClassesUrl + otherClusterId
+		otherSyncUrl := deviceClassesSyncUrl + otherClusterId
 
-		It("sync 2, list, sync only 1, list (stale is pruned)", func() {
+		It("sync 2, list, sync only 1, list (stale is pruned; other clusters are untouched)", func() {
 			dcsList := api.DeviceClasses{Items: []api.DeviceClass{
 				{DeviceClassName: "gpu.nvidia.com"},
 				{DeviceClassName: "mrdma.google.com"},
@@ -52,6 +58,14 @@ var _ = Describe("device classes test", func() {
 			Expect(len(unmarshalDeviceClasses(respRecorder.Body).Items)).To(Equal(0))
 
 			respRecorder = syncDeviceClasses(dcsList, syncUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			// Seed a device class in a different cluster so we can verify that
+			// pruning the target cluster does not touch other clusters' records.
+			otherDcsList := api.DeviceClasses{Items: []api.DeviceClass{
+				{DeviceClassName: "gpu.nvidia.com"},
+			}}
+			respRecorder = syncDeviceClasses(otherDcsList, otherSyncUrl)
 			Expect(respRecorder.Code).To(Equal(http.StatusOK))
 
 			respRecorder = getDeviceClasses(getUrl)
@@ -72,6 +86,14 @@ var _ = Describe("device classes test", func() {
 			dcs = unmarshalDeviceClasses(respRecorder.Body)
 			Expect(len(dcs.Items)).To(Equal(1))
 			Expect(dcs.Items[0].DeviceClassName).To(Equal("gpu.nvidia.com"))
+
+			// The other cluster's record must survive the prune of clusterId.
+			respRecorder = getDeviceClasses(otherGetUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+			otherDcs := unmarshalDeviceClasses(respRecorder.Body)
+			Expect(len(otherDcs.Items)).To(Equal(1))
+			Expect(otherDcs.Items[0].DeviceClassName).To(Equal("gpu.nvidia.com"))
+			Expect(otherDcs.Items[0].ClusterId).To(Equal(otherClusterId))
 		})
 
 		It("filters by name", func() {

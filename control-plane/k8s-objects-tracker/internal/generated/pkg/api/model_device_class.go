@@ -28,10 +28,10 @@ type DeviceClass struct {
 	ClusterId string `json:"clusterId,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Device class name
+	// DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//DeviceClassName string `json:"deviceClassName"`
-	DeviceClassName string `json:"deviceClassName" gorm:"not null;"`
+	//DeviceClassName string `json:"deviceClassName" validate:"regexp=^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"`
+	DeviceClassName string `json:"deviceClassName" gorm:"not null;" validate:"regexp=^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
@@ -57,6 +57,15 @@ func AssertDeviceClassConstraints(obj DeviceClass) error {
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.DeviceClassName, "DeviceClassName", "/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/"); patternErr != nil {
+		return &ParsingError{Param: "DeviceClassName", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.DeviceClassName, "DeviceClassName", 1); minLengthErr != nil {
+		return &ParsingError{Param: "DeviceClassName", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.DeviceClassName, "DeviceClassName", 253); maxLengthErr != nil {
+		return &ParsingError{Param: "DeviceClassName", Err: maxLengthErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

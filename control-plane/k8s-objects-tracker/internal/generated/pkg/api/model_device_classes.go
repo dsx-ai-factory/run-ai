@@ -50,6 +50,9 @@ func AssertDeviceClassesRequired(obj DeviceClasses) error {
 // AssertDeviceClassesConstraints checks if the values respects the defined constraints
 func AssertDeviceClassesConstraints(obj DeviceClasses) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.Items, "Items", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "Items", Err: maxItemsErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
