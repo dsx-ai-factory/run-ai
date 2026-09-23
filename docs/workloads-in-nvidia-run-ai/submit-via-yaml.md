@@ -59,18 +59,7 @@ GPU fractions can be assigned to only one container in the pod. By default, GPU 
 
 ## Setting DRA Resource Claims
 
-To request hardware managed via Kubernetes [Dynamic Resource Allocation (DRA)](../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#dynamic-resource-allocation-dra), declare a `ResourceClaim` at the pod level, then opt in each container that needs access to the claimed device under `resources.claims`. Containers without a matching entry cannot access the device.
-
-```yaml
-spec:
-  resourceClaims:
-  - name: gpu-claim
-  containers:
-  - name: training
-    resources:
-      claims:
-      - name: gpu-claim
-```
+To request hardware managed via Kubernetes [Dynamic Resource Allocation (DRA)](../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#dynamic-resource-allocation-dra), reference a `ResourceClaim` or `ResourceClaimTemplate` in the pod spec. For the field reference and a full example, see the Kubernetes documentation on [scheduling DRA resources](https://kubernetes.io/docs/tasks/configure-pod-container/assign-resources/allocate-devices-dra/).
 
 ## Setting Stale Gang Eviction Timeout
 
