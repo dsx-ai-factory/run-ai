@@ -171,7 +171,9 @@ func installablePrereqReleases(cfg installconfig.Config) []prereqRelease {
 		add(p.NetworkOperator, "nvidia-network-operator", "network-operator")
 	}
 	if f := cfg.Features; f != nil {
-		add(f.LWS, "lws-system", "lws")
+		if testEnv.KubernetesDistribution != pkgvalidation.KubernetesDistributionOpenShift {
+			add(f.LWS, lwsNamespace(), "lws")
+		}
 		add(f.NIMOperator, "nim-operator", "nim-operator")
 		add(f.Grove, "grove-system", "grove")
 	}
@@ -196,6 +198,32 @@ func ensurePrereqsInstalled(cfg installconfig.Config) {
 			r.release, r.namespace,
 		))
 	}
+	if f := cfg.Features; f != nil && f.LWS != nil && f.LWS.Mode == "install" {
+		ensureLWSInstalled()
+	}
+}
+
+// lwsNamespace is where the installer runs the LWS controller: the Red Hat
+// Leader Worker Set operator's namespace on OpenShift, the upstream Helm
+// chart's namespace elsewhere.
+func lwsNamespace() string {
+	if testEnv.KubernetesDistribution == pkgvalidation.KubernetesDistributionOpenShift {
+		return "openshift-lws-operator"
+	}
+	return "lws-system"
+}
+
+// ensureLWSInstalled verifies the LWS controller is running in the namespace the
+// distribution installs it to, and that the installer pointed RunaiConfig at
+// that namespace so the Run:ai cluster detects it.
+func ensureLWSInstalled() {
+	namespace := lwsNamespace()
+	Expect(utils.LWSControllerInstalled(namespace)).To(Succeed(), fmt.Sprintf(
+		"LWS controller must be installed in namespace %q after install", namespace,
+	))
+	Expect(utils.RunaiConfigLWSNamespace()).To(Equal(namespace),
+		"runaiconfig spec.lws.namespace must point at the installed LWS controller",
+	)
 }
 
 // writeInstallNewConfig marshals the config to YAML, prints it, and writes it to
