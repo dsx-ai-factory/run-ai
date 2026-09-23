@@ -56,7 +56,7 @@ func (s *passwordGrantSource) Token() (*oauth2.Token, error) {
 }
 
 func (s *passwordGrantSource) login() (*oauth2.Token, error) {
-	body, err := json.Marshal(tokenRequest{Username: s.username, Password: s.password, GrantType: "password"})
+	body, err := json.Marshal(tokenRequest{Username: s.username, Password: s.password, GrantType: "password"}) //nolint:gosec
 	if err != nil {
 		return nil, err
 	}
