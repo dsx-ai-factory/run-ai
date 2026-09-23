@@ -102,8 +102,6 @@ func handleRequest(w http.ResponseWriter, r *http.Request, handler Handler) {
 	applyAdmissionResultToResponse(w, result)
 }
 
-// sanitizeForLog strips newlines from an error derived from request data so it
-// can't be used to forge or split log entries when written to the log stream.
 func sanitizeForLog(err error) string {
 	replacer := strings.NewReplacer("\n", "", "\r", "")
 	return replacer.Replace(err.Error())
