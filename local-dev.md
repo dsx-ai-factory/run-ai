@@ -10,7 +10,7 @@ local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine
 |---|---|
 | **OS / Architecture** | `macOS` or `Linux`, `amd64` or `arm64` — the only four supported combinations. Any other platform, such as Windows, stops the script with a clear error before setup begins. |
 | **Container Runtime** | Use docker or podman. On Linux, enable the containerd image store. See more info on Podman settings for MacOS below. |
-| **Linux host: ≥ 4 CPUs, ≥ 16 GB RAM, ≥ 50 GB free disk** | Linux only. Kind nodes, ~50 services, and parallel builds all share the host directly, with no VM to size. Disk is measured where the container runtime stores data (usually `/var/lib/docker`), and covers images, build cache, and the copies loaded into each Kind node. The script warns at startup if the host is below any of these; it does not stop. On a tight host, use `--parallel 2` and `--skip-frontend`. |
+| **Linux host: ≥ 4 CPUs, ≥ 16 GB RAM, ≥ 100 GB free disk** | Linux only. Kind nodes, ~50 services, and parallel builds all share the host directly, with no VM to size. Disk is measured where the container runtime stores data (usually `/var/lib/docker`). One full build leaves about 44 GB of caches: roughly 11 GB of Docker build cache, and 33 GB of Go module and build caches in `~/.cache`. It also needs about 8 GB of images, which are stored both in the registry and in the Kind nodes. The script warns at startup if the host is below any of these; it does not stop. On a tight host, use `--parallel 2` and `--skip-frontend`. |
 | **Podman VM ≥ 12 GB RAM** | macOS only. The full stack (NATS×3, PostgreSQL, Keycloak, ~50 services) requires at least 12 GB. With 8 GB the API server starves under QEMU overhead and the cluster never stabilises. Resize with `podman machine stop && podman machine set --memory 12288 && podman machine start`. |
 | **`GITHUB_TOKEN`** | Only needed while the repo is private — Go builds pull modules from `github.com/run-ai/*`. Not required with `--skip-build` or once the repo is public. Set it before running: `export GITHUB_TOKEN=ghp_...` |
 | **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.31.0`, node image `v1.32.5`); `kubectl` and `helm` always install the latest release. |
@@ -53,7 +53,7 @@ The script runs these phases in order. Each phase is independently skippable.
 - Validates `GITHUB_TOKEN` — warns, but does not fail, if it is unset and a build is about to run.
 - Auto-installs `kind`, `kubectl`, and `helm` if they are not already on `$PATH`.
 - Stops if `make`, `git`, `curl`, `python3`, or `openssl` is missing.
-- On Linux, warns if the host has fewer than 4 CPUs, less than 16 GB RAM, or less than 50 GB free for container storage.
+- On Linux, warns if the host has fewer than 4 CPUs, less than 16 GB RAM, or less than 100 GB free for container storage.
 - With `--gpu-operator`, checks the NVIDIA host setup, and configures Docker's `nvidia` runtime if needed. See [Real GPUs](#real-gpus---gpu-operator).
 
 ### TLS Certificate + `/etc/hosts`

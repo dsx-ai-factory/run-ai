@@ -74,10 +74,11 @@ KIND_NODE_IMAGE="kindest/node:v1.32.5"
 GPU_OPERATOR_VERSION="${GPU_OPERATOR_VERSION:-v26.7.1}"
 
 # Linux host floor: 5 Kind nodes + ~50 services + parallel builds share the host
-# directly (no VM to size). Disk covers images, build cache, and the in-node copies.
+# directly (no VM to size). Disk: a full build leaves ~44 GB of caches (Docker build
+# cache ~11 GB, Go module + build caches ~33 GB) plus ~8 GB of images stored twice.
 MIN_LINUX_CPUS=4
 MIN_LINUX_RAM_GB=16
-MIN_LINUX_DISK_GB=50
+MIN_LINUX_DISK_GB=100
 
 DOMAIN="${RUNAI_DOMAIN:-runai.local}"
 ADMIN_EMAIL="${RUNAI_ADMIN_EMAIL:-test@run.ai}"
@@ -2473,14 +2474,27 @@ ${DOMAIN}:53 {
   # tarball in charts/, so leftovers are not inert: two tarballs named kai-scheduler make
   # the resolved subchart ambiguous, and an undeclared one (e.g. runai-engine) has no
   # condition to gate it, so it renders unconditionally.
+  # Placeholders from an earlier failed fetch are dropped too: they satisfy the
+  # missing-dependency check below, so otherwise the real chart is never fetched again.
   local stale_chart
   while read -r stale_chart; do
     [[ -z "${stale_chart}" ]] && continue
     log "  Removing stale subchart tarball: $(basename "${stale_chart}")"
     rm -f "${stale_chart}"
   done < <(python3 - "${rc_chart}/Chart.yaml" "${charts_dir}" <<'PYEOF'
-import sys, re, os, glob
+import sys, re, os, glob, tarfile
 chart_yaml, charts_dir = sys.argv[1], sys.argv[2]
+
+def is_placeholder(path):
+    try:
+        with tarfile.open(path) as tar:
+            for member in tar.getmembers():
+                if member.name.count("/") == 1 and member.name.endswith("/Chart.yaml"):
+                    return "Placeholder — real chart could not be fetched" in tar.extractfile(member).read().decode()
+    except (tarfile.TarError, OSError):
+        return True
+    return False
+
 wanted = set()
 block = re.search(r'^dependencies:\s*\n(.*?)(?=^\S|\Z)', open(chart_yaml).read(), re.S | re.M)
 if block:
@@ -2490,7 +2504,7 @@ if block:
         if name and version:
             wanted.add(f"{name.group(1)}-{version.group(1)}.tgz")
 for path in sorted(glob.glob(os.path.join(charts_dir, "*.tgz"))):
-    if os.path.basename(path) not in wanted:
+    if os.path.basename(path) not in wanted or is_placeholder(path):
         print(path)
 PYEOF
 )
@@ -2522,7 +2536,9 @@ PYEOF
     log "  Fetching runai-cluster chart dependencies..."
     # Pulls the real subcharts from their OCI repositories. Needs network access, and
     # credentials for any private registry — hence the placeholder fallback below.
-    helm dependency build "${rc_chart}" 2>&1 \
+    # `update`, not `build`: Chart.lock is gitignored, so a local copy left over from an
+    # older Chart.yaml makes `build` refuse to run ("lock file is out of sync").
+    helm dependency update "${rc_chart}" 2>&1 \
       | grep -v '^Saving\|^Deleting\|^$' || true
   fi
 
@@ -2535,7 +2551,7 @@ PYEOF
     [[ -z "${dep_name}" ]] && continue
     warn "  Could not fetch ${dep_name}@${dep_version} — installing an EMPTY placeholder."
     warn "    '${dep_name}' will be enabled but deploy nothing. Fix with:"
-    warn "      helm dependency build ${rc_chart}"
+    warn "      helm dependency update ${rc_chart}"
     local tmpdir
     tmpdir="$(mktemp -d)"
     mkdir -p "${tmpdir}/${dep_name}"
@@ -2623,7 +2639,7 @@ print_access_info() {
   echo ""
   echo "  Scheduler:  kai-resource-management (bundles kai-scheduler) + karta enabled"
   echo "    If no KRM/kai-scheduler/karta pods are running, charts/ holds placeholder"
-  echo "    subcharts. Fix with: helm dependency build ${REPO_ROOT}/runai-cluster/cluster/runai-chart"
+  echo "    subcharts. Fix with: helm dependency update ${REPO_ROOT}/runai-cluster/cluster/runai-chart"
   echo "  Re-deploy cluster with updated credentials:"
   echo "    helm upgrade runai-cluster ${REPO_ROOT}/runai-cluster/cluster/runai-chart \\"
   echo "      -n ${RC_NAMESPACE} \\"
