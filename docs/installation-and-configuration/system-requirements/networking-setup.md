@@ -232,14 +232,6 @@ The number of certificates required depends on your deployment model and Kuberne
 
 TLS certificates secure communication between NVIDIA Run:ai components and enable HTTPS access to exposed services. Obtain the certificate and private key files for each domain before installation. How they are applied depends on the installation path - [Guided Installation](../installation/guided-installation/README.md) accepts file paths in the configuration file; [Manual Helm](../installation/install-using-helm/preparations.md) requires creating Kubernetes secrets manually.
 
-<Note>
-
-**Note**
-
-If certificates from a trusted CA are not available, [Guided Installation](../installation/guided-installation/README.md) can generate self-signed certificates instead.
-
-</Note>
-
 NVIDIA Run:ai requires up to four TLS certificates, each aligned with a specific domain:
 
 * Control plane certificate

@@ -4,7 +4,6 @@ In this section you will install the NVIDIA Run:ai control plane on your Kuberne
 
 This procedure includes:
 
-* Adding the NVIDIA Run:ai Helm repository from NGC - without credentials for Open Source, or with an NGC Personal Key for Support-Entitled Release installations
 * Configuring key settings such as domain name, ingress, and administrator credentials
 * Deploying the control plane into the `runai-backend` namespace
 
@@ -28,27 +27,6 @@ As part of the installation, you will be required to install the NVIDIA Run:ai c
 * PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Third-Party Services](../../system-requirements/third-party-services.md).
 
 </Note>
-
-### Open Source and Support-Entitled Release
-
-The installation steps below cover both Open Source and Support-Entitled Release, using the same control plane Helm chart. Support-Entitled Release installations authenticate to the Helm registry (`helm.ngc.nvidia.com/nvidia/runai`) with an [NGC Personal Key](preparations.md#registry-credentials) and add `--set supportEntitled=true` to the `helm upgrade` command.
-
-Setting `--set supportEntitled=true` also enables telemetry - usage metrics the control plane periodically sends to NVIDIA, including cluster utilization, allocation, adoption, and workload submission types. Sharing an NGC [Service Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) lets NVIDIA associate this data with your account, so support can help you faster; without one, data is still sent anonymously.
-
-Setting `--set supportEntitled=true` also switches the UI branding and support contact link shown in the control plane to the NVIDIA enterprise variant. For air-gapped Support-Entitled installations, this flag is still required, but authentication uses your internal registry credentials instead of an NGC Personal Key.
-
-<Warning>
-
-**TODO**
-
-Confirm and document the actual Helm value/flag for supplying the Service Key. Per Jira (RUN-35049 epic; RUN-39433 HL design: "provide the nca id or a token in the values file for authentication, should be stored as a secret"; RUN-41574: "call-home chart - pass customer-provided SAK Secret to diagnostics service TelemetryToken" - Done), this is implemented, but the field lives in the external `runai-telemetry` chart (see `telemetryService` dependency in `control-plane-chart/Chart.yaml`, pulled from `runai.jfrog.io/artifactory/api/helm/diagnostics`), which isn't in the `runai` monorepo clone. The LL design doc is on `nvidia.atlassian.net` (RUN-41063), a different Atlassian site than our Jira access covers.
-
-</Warning>
-
-| Type | Registry Authentication | `supportEntitled` | Telemetry |
-| ---- | ------------------------ | ------------------ | --------- |
-| Open Source | Not required | Unset (`false`) | Not sent |
-| Support-Entitled Release | NGC Personal Key | `true` | Sent by default; opt out with `--set telemetryService.enabled=false` |
 
 ### Kubernetes
 
@@ -148,7 +126,7 @@ Use the Helm command for the release type you are installing and update the valu
 * Replace `global.domain=<DOMAIN>` with the fully qualified domain name (FQDN) obtained in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns).
 * Set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
 * The recommended ingress controller is HAProxy. If you are using a different ingress controller, set `--set global.ingress.ingressClass=<INGRESS_CLASS>` to the ingress class configured for your environment.
-* If your internal registry requires authentication, create the `runai-reg-creds` secret as described in [Software Artifacts](preparations.md#software-artifacts), then add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference it.
+* If your internal registry requires authentication, add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
 * Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
   * Be at least 8 characters long.
@@ -303,7 +281,7 @@ Use the Helm command for the release type you are installing and update the valu
 * Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml` during [Preparations](preparations.md#software-artifacts) - this is where `control-plane-airgap-values.yaml` was written.
 * Replace `<OPENSHIFT-CLUSTER-DOMAIN>` with the domain configured for the OpenShift cluster. To determine the OpenShift cluster domain, run `oc get routes -A`.
 * Set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
-* If your internal registry requires authentication, create the `runai-reg-creds` secret as described in [Software Artifacts](preparations.md#software-artifacts), then add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference it.
+* If your internal registry requires authentication, add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
 * Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
   * Be at least 8 characters long.
@@ -364,19 +342,19 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 ## Enable Telemetry Service (Support-Entitled)
 
-This section applies to Connected installations only. Air-gapped environments have no outbound connectivity to NVIDIA, so telemetry is not applicable.
-
-The control plane can export authenticated telemetry to NVIDIA using an NGC Service API Key (SAK).
+NVIDIA Run:ai includes telemetry for Support-Entitled deployments, reporting initial metrics including platform usage and adoption signals, GPU utilization and allocation, and cluster health signals to support proactive troubleshooting and continued product improvement. By default, telemetry is not associated with your organization. You can opt in to identified telemetry by providing an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) (SAK) during installation, which associates the telemetry with your NCA ID.
 
 <Note>
 
 **Note**
 
-Enabling telemetry requires setting `supportEntitled=true`. You must also provide the SAK using one of the two methods below.
+This section applies to Connected installations only. Air-gapped environments have no outbound connectivity to NVIDIA, so telemetry is not applicable.
 
 </Note>
 
-### Scenario 1: Pass the SAK Value Directly
+<Accordion title="Pass the SAK Value Directly">
+
+**Pass the SAK Value Directly**
 
 Pass the SAK as a plaintext Helm value. The chart creates and manages the Kubernetes Secret for you.
 
@@ -387,6 +365,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
   --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
   --set supportEntitled=true \
+  --set global.imagePullSecrets[0].name=runai-reg-creds \
   --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
 ```
 
@@ -398,7 +377,11 @@ The SAK value is passed as a `--set` flag, which may be visible in shell history
 
 </Warning>
 
-### Scenario 2: Reference a Pre-Created Secret
+</Accordion>
+
+<Accordion title="Reference a Pre-Created Secret">
+
+**Reference a Pre-Created Secret**
 
 Create the Secret containing the SAK yourself before installing:
 
@@ -417,9 +400,12 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
   --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
   --set supportEntitled=true \
+  --set global.imagePullSecrets[0].name=runai-reg-creds \
   --set telemetryService.telemetryAuth.existingSecret=runai-telemetry-sak \
   --set telemetryService.telemetryAuth.secretKey=TELEMETRY_TOKEN
 ```
+
+</Accordion>
 
 ## Connect to NVIDIA Run:ai User Interface
 

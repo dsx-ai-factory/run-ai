@@ -10,8 +10,10 @@ Each service's table below has a **Supports External Instance** column indicatin
 
 ## Image Registry
 
-* **Connected installations** - All third-party service images are pulled from the official upstream registries on Docker Hub (`docker.io`), Quay (`quay.io`), and the Kubernetes registry (`registry.k8s.io`), for Open Source and NVIDIA Run:ai Support-Entitled installations. No registry credentials are required for these images. Ensure that your cluster nodes can reach these registries, see [External Access to Critical Services](external-access-to-critical-services.md) for the required outbound access.
-* **Air-gapped installations** - For Open Source and NVIDIA Run:ai Support-Entitled installations, third-party service images are packed into the same tarball as the platform images on a connected machine, then loaded into your internal registry along with the rest.
+Third-party service images (PostgreSQL, Keycloak, and others) are sourced from their official upstream registries: Docker Hub (`docker.io`), Quay (`quay.io`), and the Kubernetes registry (`registry.k8s.io`).
+
+* **Connected installations** - Images are pulled directly from these registries during installation, for Open Source and NVIDIA Run:ai Support-Entitled installations. No registry credentials are required. Ensure that your cluster nodes can reach these registries, see [External Access to Critical Services](external-access-to-critical-services.md) for the required outbound access.
+* **Air-gapped installations** - For Open Source and NVIDIA Run:ai Support-Entitled installations, images are pulled from these registries on a connected machine, packed into a tarball along with the platform images, then loaded into your internal registry.
 
 ## NVIDIA Run:ai Control Plane Services
 

@@ -17,7 +17,7 @@ See [Deployment Model](deployment-model.md) for how the control plane and cluste
 |---|---|---|---|
 | Hardware | Control plane nodes, cluster nodes, and worker nodes provisioned | NVIDIA Run:ai control plane, NVIDIA Run:ai cluster, and worker nodes (sized separately) | See [Hardware](#hardware) |
 | Operating System | Linux installed on all nodes | NVIDIA Run:ai control plane and NVIDIA Run:ai cluster (requirements differ) | See [Operating System](#operating-system) |
-| Time Sync | Nodes synchronized using NTP | NVIDIA Run:ai control plane | See [Network Time Protocol](#network-time-protocol) |
+| Time Sync | Nodes synchronized using NTP | All nodes | See [Network Time Protocol](#network-time-protocol) |
 | Distribution | Supported Kubernetes distribution installed and running | All nodes | See [Supported Distributions](#supported-distributions) |
 | Runtime | Container runtime configured | All nodes | See [Container Runtime](#container-runtime) |
 | Permissions | Cluster-admin access | All nodes | See [Permissions](#permissions) |
@@ -93,7 +93,7 @@ The following are the minimum hardware requirements for each worker node. To des
 
 ## Network Time Protocol
 
-NVIDIA Run:ai control plane nodes must be synchronized using NTP (Network Time Protocol) for proper system functionality.
+All nodes must be synchronized using NTP (Network Time Protocol) for proper system functionality.
 
 ## Kubernetes
 
