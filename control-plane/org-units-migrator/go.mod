@@ -31,6 +31,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.18 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
@@ -39,7 +40,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/telemetry v1.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/versions v1.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
@@ -167,8 +167,8 @@ require (
 	gorm.io/driver/mysql v1.6.0 // indirect
 	gorm.io/driver/postgres v1.6.3 // indirect
 	gorm.io/plugin/opentelemetry v0.1.16 // indirect
-	k8s.io/apimachinery v0.37.0 // indirect
-	k8s.io/client-go v0.37.0 // indirect
+	k8s.io/apimachinery v0.37.1 // indirect
+	k8s.io/client-go v0.37.1 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 )
 
