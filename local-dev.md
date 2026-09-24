@@ -54,7 +54,7 @@ The script runs these phases in order. Each phase is independently skippable.
 - Auto-installs `kind`, `kubectl`, and `helm` if they are not already on `$PATH`.
 - Stops if `make`, `git`, `curl`, `python3`, or `openssl` is missing.
 - On Linux, warns if the host has fewer than 4 CPUs, less than 16 GB RAM, or less than 50 GB free for container storage.
-- With `--gpu-operator`, checks the NVIDIA host setup. See [Real GPUs](#real-gpus---gpu-operator).
+- With `--gpu-operator`, checks the NVIDIA host setup, and configures Docker's `nvidia` runtime if needed. See [Real GPUs](#real-gpus---gpu-operator).
 
 ### TLS Certificate + `/etc/hosts`
 
@@ -68,7 +68,7 @@ The script runs these phases in order. Each phase is independently skippable.
 
 - Creates a 5-node Kind cluster (1 control-plane + 4 workers) named `runai-local`, pinned to Kubernetes `v1.32.5`.
 - The control-plane node maps host ports 80/443 for ingress, and is labeled `ingress-ready=true`.
-- containerd is pre-configured to mirror `localhost:5001` to the local registry container, so all 5 nodes can pull from it once it exists — set up here even though the registry itself is not created until the next phase.
+- containerd on each node is pointed at `/etc/containerd/certs.d` for registry settings. In the next phase, each node gets a `hosts.toml` there that sends `localhost:5001` pulls to the local registry container.
 
 ### Local Registry
 
@@ -204,7 +204,9 @@ Kind nodes are containers, so GPUs must first be passed from the host into a nod
 
 ### Host driver (default)
 
-**Host requirements:** Linux, Docker (Podman is not supported), an NVIDIA GPU with a working NVIDIA driver (`nvidia-smi` runs), and the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). Configure Docker once:
+**Host requirements:** Linux, Docker (Podman is not supported), an NVIDIA GPU with a working NVIDIA driver (`nvidia-smi` runs), and the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). The script checks these before it starts and stops if any is missing.
+
+Docker must also use the `nvidia` runtime by default and accept GPU requests through volume mounts. If it does not, the script configures it for you, prompting for `sudo`, and **restarts Docker**, which stops any running containers. It lists them first. It runs:
 
 ```bash
 sudo nvidia-ctk runtime configure --runtime=docker --set-as-default
@@ -212,7 +214,7 @@ sudo nvidia-ctk config --set accept-nvidia-visible-devices-as-volume-mounts=true
 sudo systemctl restart docker
 ```
 
-The script checks all of this before it starts and stops with these commands if anything is missing.
+If you prefer, run these yourself before the script. It then skips this step.
 
 **What the script does differently:**
 
@@ -220,6 +222,7 @@ The script checks all of this before it starts and stops with these commands if 
 - **Node prep:** inside the GPU node, the script symlinks `/sbin/ldconfig.real` and unmounts `/proc/driver/nvidia`, which the operator's container toolkit needs inside a Kind node.
 - **Other nodes:** labeled `nvidia.com/gpu.deploy.operands=false`, because NFD sees the host PCI bus from every node.
 - **Install:** installs `nvidia/gpu-operator` with `driver.enabled=false`. When Prometheus is installed, the DCGM exporter `ServiceMonitor` is enabled too. The script then waits until the node advertises `nvidia.com/gpu`.
+- **Registry fix on the GPU node:** the operator's toolkit adds `/etc/containerd/conf.d/99-nvidia.toml`, which uses containerd config version 3. Once any loaded file is version 3, containerd ignores the node's older-format `io.containerd.grpc.v1.cri` section, including the local-registry setting. Without a fix, the GPU node fails every `localhost:5001` pull with `connection refused`. After the operator is ready, the script adds `zz-runai-registry.toml`, which loads after the nvidia file and restores the registry setting. It then restarts containerd on that node and checks the setting is in effect.
 
 The GPU mount can only be added when the cluster is created. To switch an existing fake-GPU cluster to real GPUs, recreate it:
 

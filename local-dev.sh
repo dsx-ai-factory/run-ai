@@ -767,6 +767,20 @@ setup_local_registry() {
   fi
   # Connect registry into the Kind network so nodes resolve it by name.
   "${CONTAINER_TOOL}" network connect kind "${REGISTRY_NAME}" 2>/dev/null || true
+  configure_node_registry_hosts
+}
+
+# Route localhost:REGISTRY_PORT pulls to the registry container via certs.d/hosts.toml
+# (Kind's documented local-registry setup). Unlike registry.mirrors, the certs.d path can
+# be re-declared in a v3 drop-in, which GPU nodes need — see restore_gpu_node_registry.
+configure_node_registry_hosts() {
+  local node
+  for node in $(kind get nodes --name "${KIND_CLUSTER}" 2>/dev/null); do
+    "${CONTAINER_TOOL}" exec "${node}" sh -c "
+      mkdir -p '/etc/containerd/certs.d/localhost:${REGISTRY_PORT}' &&
+      printf '[host.\"http://${REGISTRY_NAME}:5000\"]\n' > '/etc/containerd/certs.d/localhost:${REGISTRY_PORT}/hosts.toml'
+    " || warn "Could not configure registry mirror on node ${node}"
+  done
 }
 
 create_cluster() {
@@ -826,10 +840,8 @@ kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
 - |-
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${REGISTRY_PORT}"]
-    endpoint = ["http://${REGISTRY_NAME}:5000"]
-  [plugins."io.containerd.grpc.v1.cri".registry.configs."${REGISTRY_NAME}:5000".tls]
-    insecure_skip_verify = true
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = "/etc/containerd/certs.d"
 nodes:
 - role: control-plane
   image: ${KIND_NODE_IMAGE}
@@ -983,16 +995,30 @@ check_gpu_host_prereqs() {
   nvidia-smi -L &>/dev/null || die "nvidia-smi failed — install the NVIDIA driver on the host, or use --gpu-driver to let the GPU Operator install it."
   command -v nvidia-ctk &>/dev/null || die "nvidia-ctk not found — install the NVIDIA Container Toolkit: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html"
 
+  # Kind node containers receive GPUs only when Docker's default runtime is nvidia and
+  # the runtime honours the /var/run/nvidia-container-devices volume-mount request.
   local default_runtime
   default_runtime="$(docker info --format '{{.DefaultRuntime}}' 2>/dev/null || true)"
   if [[ "${default_runtime}" != "nvidia" ]] || \
      ! grep -qE '^\s*accept-nvidia-visible-devices-as-volume-mounts\s*=\s*true' /etc/nvidia-container-runtime/config.toml 2>/dev/null; then
-    warn "Docker must use the nvidia runtime by default and accept GPU requests via volume mounts"
-    warn "(this is how Kind node containers receive GPUs). Run once, then re-run this script:"
-    warn "  sudo nvidia-ctk runtime configure --runtime=docker --set-as-default"
-    warn "  sudo nvidia-ctk config --set accept-nvidia-visible-devices-as-volume-mounts=true --in-place"
-    warn "  sudo systemctl restart docker"
-    die "Host is not configured for GPUs in Kind (default runtime: '${default_runtime:-unknown}')."
+    log "  Configuring Docker for GPUs in Kind (requires sudo; restarts Docker)..."
+    local running
+    running="$(docker ps --format '{{.Names}}' 2>/dev/null | paste -sd, - || true)"
+    [[ -n "${running}" ]] && warn "  Restarting Docker stops running containers: ${running}"
+    if ! { sudo nvidia-ctk runtime configure --runtime=docker --set-as-default >/dev/null && \
+           sudo nvidia-ctk config --set accept-nvidia-visible-devices-as-volume-mounts=true --in-place && \
+           sudo systemctl restart docker; }; then
+      warn "Automatic configuration failed. Run once, then re-run this script:"
+      warn "  sudo nvidia-ctk runtime configure --runtime=docker --set-as-default"
+      warn "  sudo nvidia-ctk config --set accept-nvidia-visible-devices-as-volume-mounts=true --in-place"
+      warn "  sudo systemctl restart docker"
+      die "Host is not configured for GPUs in Kind (default runtime: '${default_runtime:-unknown}')."
+    fi
+    local _i
+    for _i in $(seq 1 30); do docker info &>/dev/null && break; sleep 1; done
+    default_runtime="$(docker info --format '{{.DefaultRuntime}}' 2>/dev/null || true)"
+    [[ "${default_runtime}" == "nvidia" ]] \
+      || die "Docker restarted but its default runtime is '${default_runtime:-unknown}', not nvidia. Check /etc/docker/daemon.json."
   fi
   log "  GPUs: $(nvidia-smi -L | wc -l | tr -d ' ') detected, nvidia runtime is Docker default"
 }
@@ -1044,6 +1070,33 @@ install_gpu_operator() {
   done
   [[ -n "${gpus}" && "${gpus}" != "0" ]] || die "GPU Operator installed but ${gpu_node} advertises no GPUs. Check: kubectl get pods -n gpu-operator"
   log "GPU Operator ready — ${gpu_node} advertises ${gpus} GPU(s)"
+
+  restore_gpu_node_registry "${gpu_node}"
+}
+
+# The toolkit adds /etc/containerd/conf.d/99-nvidia.toml in config version 3. Once any
+# imported file is v3, containerd ignores the node's v2 "io.containerd.grpc.v1.cri"
+# section, including registry config_path, so the GPU node can no longer pull
+# localhost:5001 images. A v3 drop-in sorting after 99-nvidia.toml restores it. It must
+# be written after the toolkit, or it would disable the v2 section before nvidia's exists.
+restore_gpu_node_registry() {
+  local node="$1"
+  log "  Restoring local-registry access on ${node} (toolkit containerd drop-in)..."
+  docker exec -i "${node}" sh -s <<'EOF' || die "Could not update containerd config on ${node}"
+cat > /etc/containerd/conf.d/zz-runai-registry.toml <<'TOML'
+version = 3
+[plugins.'io.containerd.cri.v1.images'.registry]
+  config_path = '/etc/containerd/certs.d'
+TOML
+systemctl restart containerd
+for i in $(seq 1 30); do crictl info >/dev/null 2>&1 && exit 0; sleep 1; done
+exit 1
+EOF
+
+  docker exec "${node}" containerd config dump 2>/dev/null \
+    | grep -q "config_path = '/etc/containerd/certs.d'" \
+    || die "${node}: registry config_path not in effect. Check: docker exec ${node} containerd config dump | grep config_path"
+  log "  ${node} pulls from localhost:${REGISTRY_PORT} again"
 }
 
 # ─── Build cache ──────────────────────────────────────────────────────────────
