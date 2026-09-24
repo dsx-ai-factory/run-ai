@@ -1,8 +1,3 @@
----
-vars:
-  version: '2.22'
----
-
 # Upgrade NVIDIA Run:ai
 
 This page walks through the NVIDIA Run:ai upgrade procedure: preparing software artifacts, upgrading the control plane, upgrading the cluster, and verifying the result.
@@ -39,7 +34,7 @@ NVIDIA Run:ai artifacts are available on NVIDIA NGC. Use the tab that matches yo
 
 <Tab title="Connected (NGC)">
 
-Both Open Source and Support-Entitled Release upgrades pull artifacts from NGC. Open Source images are served publicly from `nvcr.io` with no authentication. Support-Entitled Release requires an NGC Personal Key to authenticate below; the `runai-reg-creds` image pull secret from your original installation (see [Software Artifacts](preparations.md#software-artifacts)) does not need to be recreated - the upgrade command below reuses it automatically.
+Both Open Source and Support-Entitled Release upgrades pull artifacts from NGC. Open Source images are served publicly from `nvcr.io` with no authentication. Support-Entitled Release requires an NGC Personal Key to authenticate below. The `supportEntitled` flag was introduced in v3.0, so no upgrade to v3.0 can already have it set - create the `runai-reg-creds` secret and add the `supportEntitled` and `imagePullSecrets` flags to the upgrade command, as described in [Software Artifacts](preparations.md#software-artifacts).
 
 Add the NVIDIA Run:ai Helm repository and browse the available versions:
 
@@ -73,7 +68,7 @@ The same preparations apply to both Open Source and Support-Entitled Release upg
 
 ## Upgrade the Control Plane
 
-### System and Network Requirements
+### Before You Upgrade
 
 Before upgrading the NVIDIA Run:ai control plane, review the [System Requirements](../../system-requirements/README.md) and complete the applicable steps in [Preparations](../installation/install-using-helm/preparations.md).
 
@@ -85,6 +80,8 @@ Before upgrading the NVIDIA Run:ai control plane, review the [System Requirement
 helm get values runai-backend -n runai-backend > runai_control_plane_values.yaml
 helm upgrade runai-backend -n runai-backend runai/control-plane --version "<VERSION>" -f runai_control_plane_values.yaml --reset-then-reuse-values
 ```
+
+For a Support-Entitled Release, add `--set global.imagePullSecrets[0].name=runai-reg-creds --set supportEntitled=true` to the command above - the `supportEntitled` flag was introduced in v3.0, so no upgrade to v3.0 can already have it set.
 
 </Tab>
 
@@ -98,13 +95,68 @@ helm upgrade runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend
   --reset-then-reuse-values
 ```
 
+For a Support-Entitled Release, add `--set supportEntitled=true` to the command above - the `supportEntitled` flag was introduced in v3.0, so no upgrade to v3.0 can already have it set. If your internal registry requires authentication, also create the `runai-reg-creds` secret and add `--set global.imagePullSecrets[0].name=runai-reg-creds`, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts) - this is not included in `control-plane-airgap-values.yaml` automatically.
+
 </Tab>
 
 </Tabs>
 
+### Enable Telemetry Service (Support-Entitled)
+
+This section applies to Connected installations only. Air-gapped environments have no outbound connectivity to NVIDIA, so telemetry is not applicable.
+
+Telemetry was introduced in v3.0, so no upgrade to v3.0 can already have it configured.
+
+The control plane can export authenticated telemetry to NVIDIA using an NGC Service API Key (SAK).
+
+<Note>
+
+**Note**
+
+Enabling telemetry requires setting `supportEntitled=true`. You must also provide the SAK using one of the two methods below.
+
+</Note>
+
+**Scenario 1: Pass the SAK Value Directly**
+
+Pass the SAK as a plaintext Helm value. The chart creates and manages the Kubernetes Secret for you.
+
+```bash
+helm upgrade runai-backend -n runai-backend runai/control-plane --version "<VERSION>" -f runai_control_plane_values.yaml --reset-then-reuse-values \
+  --set supportEntitled=true \
+  --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
+```
+
+<Warning>
+
+**Warning**
+
+The SAK value is passed as a `--set` flag, which may be visible in shell history and process listings.
+
+</Warning>
+
+**Scenario 2: Reference a Pre-Created Secret**
+
+Create the Secret containing the SAK yourself before upgrading:
+
+```bash
+kubectl create secret generic runai-telemetry-sak \
+  --namespace runai-backend \
+  --from-literal=TELEMETRY_TOKEN=<SAK_TOKEN>
+```
+
+Then reference it by name in the upgrade command - the chart does not create or manage this Secret. Always set the secret key name explicitly, even if it matches the default (`TELEMETRY_TOKEN`):
+
+```bash
+helm upgrade runai-backend -n runai-backend runai/control-plane --version "<VERSION>" -f runai_control_plane_values.yaml --reset-then-reuse-values \
+  --set supportEntitled=true \
+  --set telemetryService.telemetryAuth.existingSecret=runai-telemetry-sak \
+  --set telemetryService.telemetryAuth.secretKey=TELEMETRY_TOKEN
+```
+
 ## Upgrade the Cluster
 
-### System and Network Requirements
+### Before You Upgrade
 
 Before upgrading the NVIDIA Run:ai cluster, review the [System Requirements](../../system-requirements/README.md) and complete the applicable steps in [Preparations](../installation/install-using-helm/preparations.md) and [Prerequisites and Features](../installation/install-using-helm/prerequisites-and-features.md).
 
@@ -118,14 +170,17 @@ It is highly recommended to upgrade the Kubernetes version together with the NVI
 
 ### Setup
 
-1. In the NVIDIA Run:ai UI, go to Resources -> Clusters
+1. In the NVIDIA Run:ai UI, go to **Resources -> Clusters**
 2. Select the cluster you want to upgrade
 3. Click **INSTALLATION INSTRUCTIONS**
-4. Select **Manual Helm** as the installation type
-5. Optional: Select the NVIDIA Run:ai cluster version (latest, by default)
-6. Click **CONTINUE**
+4. Optional: Select the NVIDIA Run:ai cluster version (latest, by default)
+5. Select **Manual Helm** as the installation type
+6. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
+7. Click **CONTINUE**
 
 ### Run the Upgrade Command
+
+The command below is the same for both Open Source and Support-Entitled Release upgrades. Registry authentication with your NGC Personal Key already happened during the control plane upgrade above - the cluster upgrade does not require it again.
 
 <Tabs>
 
@@ -143,7 +198,7 @@ It is highly recommended to upgrade the Kubernetes version together with the NVI
     helm repo update
     helm upgrade -i runai-cluster runai/runai-cluster -n runai \
       --set controlPlane.url=... \
-      --set controlPlane.bootstrapToken=... \
+      --set cluster.bootstrapToken=... \
       --set cluster.uid=... \
       --set cluster.url=... --version="<VERSION>" --create-namespace \
       --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -170,7 +225,7 @@ It is highly recommended to upgrade the Kubernetes version together with the NVI
     ```bash
     helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
       --set controlPlane.url=... \
-      --set controlPlane.bootstrapToken=... \
+      --set cluster.bootstrapToken=... \
       --set cluster.uid=... \
       --set cluster.url=... --create-namespace \
       --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \
@@ -198,7 +253,7 @@ This section applies to Kubernetes only. OpenShift includes a pre-installed ingr
 
 NVIDIA Run:ai recommends using [HAProxy Kubernetes Ingress Controller](https://www.haproxy.com/documentation/kubernetes-ingress/) as the ingress controller. This change aligns with the announced retirement of the upstream NGINX Ingress Controller project.
 
-Clusters upgraded from earlier versions typically already have NGINX installed. After upgrading to v2.26, follow the steps below to migrate ingress traffic from NGINX Ingress Controller to HAProxy Kubernetes Ingress Controller.
+Clusters upgraded from earlier versions typically already have NGINX installed. After upgrading to `<VERSION>`, follow the steps below to migrate ingress traffic from NGINX Ingress Controller to HAProxy Kubernetes Ingress Controller.
 
 <Note>
 
@@ -277,7 +332,7 @@ helm repo update
 helm install haproxy-kubernetes-ingress haproxytech/kubernetes-ingress \
  --create-namespace \
  --namespace haproxy-controller \
- --set controller.service.type=LoadBalancer \
+ --set controller.service.type=LoadBalancer
 ```
 
 </Accordion>
@@ -366,7 +421,7 @@ To run the test, identify the IP address that should reach the cluster’s nodes
 2.  Run the following command:
 
     ```yaml
-    kubectl apply -f ha-proxy-test.yml
+    kubectl apply -f haproxy-test.yml
     ```
 
 Once the application is deployed, access the cluster’s IP address in a browser. If the page displays **“hello from haproxy-ingress”**, HAProxy is functioning correctly and you can proceed with upgrading NVIDIA Run:ai.
@@ -377,7 +432,7 @@ Run the following Helm command to update the NVIDIA Run:ai control plane to use 
 
 ```bash
 helm upgrade runai-backend -n runai-backend runai/control-plane \
-  --version "~2.26.0" \
+  --version "<VERSION>" \
   --reuse-values \
   --set-string global.ingress.ingressClass=haproxy
 ```
@@ -386,10 +441,13 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 
 #### Setup
 
-1. In the NVIDIA Run:ai UI, go to Resources -> Clusters
+1. In the NVIDIA Run:ai UI, go to **Resources -> Clusters**
 2. Select the cluster you want to upgrade
 3. Click **INSTALLATION INSTRUCTIONS**
-4. Click **CONTINUE**
+4. Optional: Select the NVIDIA Run:ai cluster version (latest, by default)
+5. Select **Manual Helm** as the installation type
+6. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
+7. Click **CONTINUE**
 
 #### Installation Instructions
 

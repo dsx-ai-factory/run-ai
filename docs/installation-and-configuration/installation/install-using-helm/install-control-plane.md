@@ -348,6 +348,65 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 </Accordion>
 
+## Enable Telemetry Service (Support-Entitled)
+
+This section applies to Connected installations only. Air-gapped environments have no outbound connectivity to NVIDIA, so telemetry is not applicable.
+
+The control plane can export authenticated telemetry to NVIDIA using an NGC Service API Key (SAK).
+
+<Note>
+
+**Note**
+
+Enabling telemetry requires setting `supportEntitled=true`. You must also provide the SAK using one of the two methods below.
+
+</Note>
+
+### Scenario 1: Pass the SAK Value Directly
+
+Pass the SAK as a plaintext Helm value. The chart creates and manages the Kubernetes Secret for you.
+
+```bash
+helm upgrade -i runai-backend -n runai-backend runai/control-plane \
+  --set global.domain=<DOMAIN> \
+  --set global.ingress.ingressClass=haproxy \
+  --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
+  --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
+  --set supportEntitled=true \
+  --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
+```
+
+<Warning>
+
+**Warning**
+
+The SAK value is passed as a `--set` flag, which may be visible in shell history and process listings.
+
+</Warning>
+
+### Scenario 2: Reference a Pre-Created Secret
+
+Create the Secret containing the SAK yourself before installing:
+
+```bash
+kubectl create secret generic runai-telemetry-sak \
+  --namespace runai-backend \
+  --from-literal=TELEMETRY_TOKEN=<SAK_TOKEN>
+```
+
+Then reference it by name at install time - the chart does not create or manage this Secret. Always set the secret key name explicitly, even if it matches the default (`TELEMETRY_TOKEN`):
+
+```bash
+helm upgrade -i runai-backend -n runai-backend runai/control-plane \
+  --set global.domain=<DOMAIN> \
+  --set global.ingress.ingressClass=haproxy \
+  --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
+  --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
+  --set supportEntitled=true \
+  --set telemetryService.telemetryAuth.existingSecret=runai-telemetry-sak \
+  --set telemetryService.telemetryAuth.secretKey=TELEMETRY_TOKEN
+```
+
 ## Connect to NVIDIA Run:ai User Interface
 
 <Note>
