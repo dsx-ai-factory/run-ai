@@ -67,8 +67,8 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
 	github.com/ebitengine/purego v0.10.2 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
@@ -188,7 +188,7 @@ require (
 	gorm.io/driver/mysql v1.6.0 // indirect
 	gorm.io/driver/postgres v1.6.3 // indirect
 	gorm.io/plugin/opentelemetry v0.1.16 // indirect
-	k8s.io/apimachinery v0.37.0 // indirect
+	k8s.io/apimachinery v0.37.1 // indirect
 	sigs.k8s.io/json v0.0.0-20260909141634-11ed52e25bc5 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
