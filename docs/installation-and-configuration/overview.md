@@ -60,7 +60,7 @@ Day 2 covers the ongoing operational tasks that keep NVIDIA Run:ai healthy and y
 
 ### Upgrades
 
-Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. To upgrade NVIDIA Run:ai, see [Plan the Upgrade](upgrade/plan-the-upgrade.md).
+Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. To upgrade NVIDIA Run:ai, see [Upgrade](upgrade/plan-the-upgrade.md).
 
 ## Understanding Installation
 
@@ -80,7 +80,7 @@ The NVIDIA Run:ai control plane and NVIDIA Run:ai clusters can be deployed acros
 
 NVIDIA Run:ai operates under a shared responsibility model. NVIDIA provides and manages the NVIDIA Run:ai software, while the customer provides and operates the underlying infrastructure. This distinction defines which components the customer prepares and operates, and which are delivered and maintained as part of the NVIDIA Run:ai platform.
 
-When using the recommended [guided installer](installation/guided-installation/README.md#what-the-installer-does), several customer-owned prerequisites in this table are set up for you. When installing manually via Helm, all customer-owned items must be in place before the Helm charts are applied. Third-party services are the exception: they are deployed by the NVIDIA Run:ai Helm charts in both installation paths and do not need to be installed beforehand.
+Since you own the infrastructure, you can apply OS and Kubernetes security patches and hardening independently, without coordinating with NVIDIA, provided the environment stays within the [support matrix](support-matrix.md) and the permissions, connectivity, and configuration that NVIDIA Run:ai requires remain intact.
 
 | Category                  | Components                                                                                                       | Owner    |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------- |
@@ -95,11 +95,9 @@ When using the recommended [guided installer](installation/guided-installation/R
 
 **Note**
 
-Third-party services are deployed by the NVIDIA Run:ai Helm charts, but the customer is responsible for operating and maintaining them after installation.
+When using the recommended [guided installer](installation/guided-installation/README.md#what-the-installer-does), several customer-owned prerequisites in this table are set up for you. When installing manually via Helm, all customer-owned items must be in place before the Helm charts are applied. Third-party services are the exception: they are deployed by the NVIDIA Run:ai Helm charts in both installation paths and do not need to be installed beforehand.
 
 </Note>
-
-Since you own the infrastructure, you can apply OS and Kubernetes security patches and hardening independently, without coordinating with NVIDIA, provided the environment stays within the [support matrix](support-matrix.md) and the permissions, connectivity, and configuration that NVIDIA Run:ai requires remain intact.
 
 ### Installation Options
 
@@ -121,27 +119,25 @@ NVIDIA Run:ai can be deployed in either a connected or air-gapped environment, r
 
 #### Kubernetes and OpenShift
 
-NVIDIA Run:ai runs on both Kubernetes and OpenShift, and the installation model is the same for both. Where they differ is in how certain infrastructure pieces work: OpenShift routes traffic through its built-in router rather than an ingress controller, installs operators like the GPU Operator through OLM rather than Helm, and manages TLS at the router level rather than through Kubernetes secrets. These differences are handled within each installation guide, and the overall flow remains the same.
+NVIDIA Run:ai runs on both Kubernetes and OpenShift, and the installation model is the same for both. Where they differ is in how certain infrastructure pieces work: OpenShift routes traffic through its built-in router rather than an ingress controller, installs operators such as the GPU Operator through OLM rather than Helm, and manages TLS at the router level rather than through Kubernetes secrets. These differences are handled within each installation guide, and the overall flow remains the same.
 
 ### Installation Paths
 
 NVIDIA Run:ai supports three installation paths. Choose based on your tooling, environment, and the balance you want between installation convenience and fine-grained control over configuration values.
 
-| Path | Tooling | Best For |
-| ---- | ------- | -------- |
-| **[Guided Installation](installation/guided-installation/README.md)** (recommended) | `runai-installer` CLI - reads a single configuration YAML file and performs the full installation | Most deployments |
-| **[Manual Helm](installation/install-using-helm/preparations.md)** | NVIDIA Run:ai Helm charts, deployed directly | Organizations managing deployments through their own tooling (for example, Argo CD), or needing granular control over Helm values |
-| **[BCM](installation/bcm-install.md)** (NVIDIA Run:ai Support-Entitled only) | NVIDIA Base Command Manager | DGX SuperPOD environments managed by BCM |
+| Path | Tooling | Best For | Type |
+| ---- | ------- | -------- | ---- |
+| **[Guided Installation](installation/guided-installation/README.md)** (recommended) | `runai-installer` CLI - reads a single configuration YAML file and performs the full installation | Most deployments | Open Source, NVIDIA Run:ai Support-Entitled |
+| **[Manual Helm](installation/install-using-helm/preparations.md)** | NVIDIA Run:ai Helm charts, deployed directly | Organizations managing deployments through their own tooling (for example, Argo CD), or needing granular control over Helm values | Open Source, NVIDIA Run:ai Support-Entitled |
+| **[BCM](installation/bcm-install.md)** | NVIDIA Base Command Manager | DGX SuperPOD environments managed by BCM | NVIDIA Run:ai Support-Entitled only |
 
 ### Artifact Sources
 
-During installation, NVIDIA Run:ai pulls platform images, Helm charts, and third-party service images from different sources depending on whether you use Open Source or NVIDIA Run:ai Support-Entitled, and your environment. Understanding these sources helps you plan network access, registry credentials, and air-gapped deployments.
+Understanding where installation artifacts come from helps you plan network access and registry credentials.
 
-* **NVIDIA Run:ai platform images and Helm charts** are published to NVIDIA NGC. Open Source installations access them without credentials. NVIDIA Run:ai Support-Entitled installations require an NGC API key. Organizations that mirror artifacts to an internal registry can configure the installer or Helm charts to pull from that registry instead.
+* **NVIDIA Run:ai platform images and Helm charts** are published to NVIDIA NGC. Open Source installations access them without credentials. NVIDIA Run:ai Support-Entitled installations require an NGC API key.
 
 * **Third-party service images** (PostgreSQL, Keycloak, and others) are pulled from their official upstream registries on Docker Hub, Quay, and the Kubernetes registry (`registry.k8s.io`) for Open Source and NVIDIA Run:ai Support-Entitled installations.
-
-* **Air-gapped installations** do not pull from NGC or upstream registries directly. On a connected machine, every required image - platform, third-party, and any overrides you provide - is packed into a single tarball. After transferring the tarball into the air-gapped network, the images are loaded into your own internal registry, and the installation pulls from there instead.
 
 ### What an Installation Includes
 

@@ -37,6 +37,14 @@ Open Source installations set `registry.type: ngc` in the configuration, with no
 
 Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password.
 
+<Note>
+
+**Note**
+
+The installer does not yet expose a dedicated field for Support-Entitled Release branding (the UI branding and support contact link shown in the control plane). Set it yourself via `controlPlane.customHelmValues.supportEntitled: true`. See [`customHelmValues`](../configuration-reference.md#controlplane) in the Configuration Reference.
+
+</Note>
+
 ## Download the Installer
 
 <Warning>

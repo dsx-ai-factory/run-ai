@@ -20,8 +20,8 @@ Before proceeding, ensure that the following prerequisites are already configure
 
 * Fully Qualified Domain Names (FQDN) for:
   * Control plane access
-  * Development workspaces and training workloads
-  * Inference workloads
+  * Development workspaces, training, and distributed inference workloads
+  * Standard inference (Knative) workloads
 * TLS certificates associated with the configured FQDNs
 
 These configurations are described in the [Routing Traffic to and from NVIDIA Run:ai Services](../../system-requirements/networking-setup.md#routing-traffic-to-and-from-nvidia-runai-services) section.
@@ -35,8 +35,8 @@ Different NVIDIA Run:ai services use these routing approaches as follows:
 | Service                         | Routing Mode                     | Example                                          |
 | ------------------------------- | -------------------------------- | ------------------------------------------------ |
 | Control plane                   | Host-based (single domain)       | `https://runai.mycorp.local`                     |
-| Inference workloads             | Host-based (wildcard subdomains) | `https://<service>.runai-inference.mycorp.local` |
-| Workspaces & training workloads | Host-based or path-based         | See section below                                |
+| Standard inference (Knative) workloads | Host-based (wildcard subdomains) | `https://<service>.runai-inference.mycorp.local` |
+| Workspaces, training, and distributed inference workloads | Host-based or path-based         | See section below                                |
 
 ## Installing a Gateway Controller
 
@@ -65,18 +65,18 @@ NVIDIA Run:ai supports any [conformant Gateway API implementation](https://gatew
 
 Ensure that the Gateway controller is running before proceeding.
 
-## Routing Traffic for Workspaces and Training Workloads
+## Routing Traffic for Workspaces, Training, and Distributed Inference Workloads
 
-The following sections describe how development workspaces and training workloads are exposed using Gateway API.
+The following sections describe how development workspaces, training, and distributed inference workloads are exposed using Gateway API.
 
 Depending on the selected routing mode, these workloads are accessed differently:
 
-*   In **host-based routing**, each development workspace and training workload is exposed using its own subdomain:
+*   In **host-based routing**, each development workspace, training, and distributed inference workload is exposed using its own subdomain:
 
     ```bash
     https://<project>-<workload>.<CLUSTER_URL>
     ```
-*   In **path-based routing**, development workspaces and training workloads are exposed under a shared domain using URL paths:
+*   In **path-based routing**, development workspaces, training, and distributed inference workloads are exposed under a shared domain using URL paths:
 
     ```bash
     https://runai.mycorp.local/<project>/<workload>
@@ -88,12 +88,12 @@ This distinction determines the required FQDN structure, TLS certificates, and G
 
 In this configuration:
 
-* Development workspaces and training workloads are exposed using subdomains
+* Development workspaces, training, and distributed inference workloads are exposed using subdomains
 * A wildcard FQDN is required (e.g., `*.runai.mycorp.local`)
 * A wildcard TLS certificate is required for those workloads
 * The Gateway includes listeners for:
   * The cluster domain (control plane access)
-  * Wildcard subdomains (workspace and training workloads)
+  * Wildcard subdomains (workspaces, training, and distributed inference workloads)
 
 ### Gateway Configuration
 
@@ -139,9 +139,9 @@ spec:
 
 In this configuration:
 
-* Development workspaces and training workloads are exposed under a single domain using URL paths
-* A wildcard FQDN is **not required** for workspace and training workloads
-* A wildcard TLS certificate is **not required** for workspace and training workloads
+* Development workspaces, training, and distributed inference workloads are exposed under a single domain using URL paths
+* A wildcard FQDN is **not required** for workspaces, training, and distributed inference workloads
+* A wildcard TLS certificate is **not required** for workspaces, training, and distributed inference workloads
 * The Gateway uses a single domain listener for these services
 
 Ensure that host-based routing is disabled using the following. For more details, see [Advanced cluster configurations](../cluster-config.md).
@@ -180,17 +180,25 @@ spec:
         name: runai-cluster-domain-tls-secret
 ```
 
-## Inference Routing with Gateway API
+## Standard Inference Routing with Gateway API
 
-Inference workloads are always exposed using **host-based routing**, regardless of the selected routing mode for development workspaces and training workloads.
+<Note>
 
-Inference endpoints are accessed via dedicated subdomains, for example:
+**Note**
+
+This section applies to standard inference (Knative, single-node) only. Other inference workloads (for example, distributed inference using serving frameworks such as LWS, Dynamo, KServe, or others) do not use the inference subdomain and do not require the configuration described in this section.
+
+</Note>
+
+Standard inference (Knative) workloads are always exposed using host-based routing via a dedicated inference subdomain, regardless of the selected routing mode for development workspaces, training, and distributed inference workloads.
+
+Standard inference endpoints are accessed via dedicated subdomains, for example:
 
 ```bash
 https://<service>.runai-inference.mycorp.local
 ```
 
-To enable inference routing with Gateway API:
+To enable standard inference routing with Gateway API:
 
 * A wildcard FQDN must be configured for inference (e.g., `*.runai-inference.mycorp.local`)
 * A wildcard TLS certificate must be configured for that domain
@@ -199,7 +207,7 @@ To enable inference routing with Gateway API:
 
 ### TLS Certificate
 
-Ensure that a wildcard TLS certificate for inference is created:
+Ensure that a wildcard TLS certificate for standard inference is created:
 
 * Secret name: `runai-cluster-inference-tls-secret`
 * Namespace: `runai`
@@ -222,7 +230,7 @@ Routing to inference workloads is based on hostnames (subdomains).
 
 </Note>
 
-Add an inference listener to the existing Gateway resource:
+Add a standard inference listener to the existing Gateway resource:
 
 ```yaml
 - name: https-inference
@@ -238,8 +246,7 @@ Add an inference listener to the existing Gateway resource:
 
 ### Configure Knative Serving
 
-NVIDIA Run:ai supports Knative-based inference workloads. Inference traffic arrives at the Gateway and is forwarded to Knative Serving through Kourier, which routes it to the individual inference endpoints. Knative versions 1.19 to 1.21 are supported.
-
+NVIDIA Run:ai uses Knative Serving to support standard inference workloads. Inference traffic arrives at the Gateway and is forwarded to Knative Serving through Kourier, which routes it to the individual inference endpoints.
 <Tabs>
 
 <Tab title="Guided Installation">
@@ -258,11 +265,11 @@ The following steps install Knative Serving and configure the HTTPRoute to conne
 
 <Tab title="Kubernetes">
 
-1.  Install Knative Serving. Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run:
+1.  Install Knative Serving. Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release that supports the Knative Serving version you are using:
 
     ```bash
     helm repo add knative-operator https://knative.github.io/operator
-    helm install knative-operator --create-namespace --namespace knativeoperator --version 1.18.2 knative-operator/knative-operator
+    helm install knative-operator --create-namespace --namespace knativeoperator --version {VERSION} knative-operator/knative-operator
     ```
 2.  Create the `knative-serving` namespace:
 
@@ -296,6 +303,10 @@ The following steps install Knative Serving and configure the HTTPRoute to conne
           multi-container: enabled
           kubernetes.podspec-hostipc: enabled
           kubernetes.podspec-hostnetwork: enabled
+        observability:
+          metrics-protocol: "prometheus"
+          request-metrics-protocol: "http/protobuf"
+          request-metrics-endpoint: "http://prometheus-operated.runai.svc.cluster.local:9090/api/v1/otlp/v1/metrics"
         domain:
           runai-inference.mycorp.local: "" # replace with the wildcard FQDN for Inference
         network:
@@ -378,6 +389,10 @@ The following steps install Knative Serving and configure the HTTPRoute to conne
           kubernetes.podspec-securitycontext: enabled
           kubernetes.podspec-affinity: enabled
           kubernetes.containerspec-addcapabilities: enabled
+        observability:
+          metrics-protocol: "prometheus"
+          request-metrics-protocol: "http/protobuf"
+          request-metrics-endpoint: "http://prometheus-operated.runai.svc.cluster.local:9090/api/v1/otlp/v1/metrics"
       controller-custom-certs:
         name: ''
         type: ''

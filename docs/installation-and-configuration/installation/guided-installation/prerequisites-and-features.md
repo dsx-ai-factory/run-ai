@@ -19,9 +19,9 @@ The installer does not support installing prerequisites or features in air-gappe
 | Network Operator | Prerequisite | RDMA or Multi-Node NVLink (MNNVL)-capable nodes |
 | DRA Driver | Prerequisite | Multi-Node NVLink (e.g. GB200) |
 | Prometheus | Prerequisite | Every installation |
-| Knative Serving | Feature | Standard (single-node) inference |
 | Kubeflow Training Operator | Feature | Distributed training |
 | MPI Operator | Feature | MPI-based distributed training |
+| Knative Serving | Feature | Standard (single-node) inference |
 | LeaderWorkerSet (LWS) | Feature | Distributed (multi-node) inference |
 | NIM Operator | Feature | NVIDIA Inference Microservices |
 | Grove | Feature | Multi-component, gang-scheduled workload orchestration (for example, disaggregated Dynamo deployments) |
@@ -228,24 +228,6 @@ Features already default to `mode: skip`, so air-gapped installations need no ch
 
 Each feature also accepts its own `version` field - omit it to install the latest version, or see [Support Matrix](../../support-matrix.md) for the supported version range if you want to set it explicitly.
 
-### Standard Inference
-
-NVIDIA Run:ai uses [Knative Serving](https://knative.dev/docs/serving/) to enable standard (single-node) inference. Knative Serving lets you serve AI models as production workloads, using NVIDIA NIM, vLLM, or custom inference servers. It provides serverless, dynamic autoscaling (including scale to zero when idle), rolling updates without disrupting served traffic, and endpoints reachable via external access (a wildcard FQDN) or internal, cluster-local access.
-
-Setting `features.knative.mode: install` installs the Knative operator and applies a `KnativeServing` custom resource that configures scale-to-zero autoscaling, the wildcard inference domain, Kourier as the ingress class, and the Kubernetes pod-spec features NVIDIA Run:ai workloads require.
-
-For air-gapped installation instructions, see [Standard Inference](../install-using-helm/prerequisites-and-features.md#standard-inference) in the Manual Helm path.
-
-<Warning>
-
-**TODO**
-
-NVIDIA Run:ai also supports autoscaling on Latency, Throughput, or Concurrency metrics. Using a custom metric like Latency requires separately installing the Knative Horizontal Pod Autoscaler (HPA) extension. Per the 2026-08-30 sync, this is planned to become a native installer capability rather than a manual step - not yet implemented, so this section will need updating once that lands.
-
-Exporting inference request metrics to the NVIDIA Run:ai Prometheus instance via OTLP is also not yet configured automatically - the `KnativeServing` CR the installer applies has no `observability` block. This is in the works; until it lands, configure it manually as described in [Inference Request Metrics (OTLP)](../install-using-helm/prerequisites-and-features.md#inference-request-metrics-otlp) in the Manual Helm path.
-
-</Warning>
-
 ### Distributed Training
 
 NVIDIA Run:ai supports distributed training - training AI models across multiple nodes - using the [Kubeflow Training Operator](https://www.kubeflow.org/docs/components/training/installation/) for [TensorFlow](https://www.tensorflow.org/), [PyTorch](https://pytorch.org/), [XGBoost](https://xgboost.readthedocs.io/), and [JAX](https://docs.jax.dev/en/latest/index.html) workloads, and the [MPI Operator](https://github.com/kubeflow/mpi-operator) for [MPI v2](https://docs.open-mpi.org/)-based workloads. Both are required for compatibility with advanced workload capabilities such as [stopping a workload](../../../workloads-in-nvidia-run-ai/workloads.md) and [scheduling rules](../../../platform-management/policies/scheduling-rules.md).
@@ -254,21 +236,39 @@ The Kubeflow Training Operator ships with MPI v1 support built in, which conflic
 
 For air-gapped installation instructions, see [Distributed Training](../install-using-helm/prerequisites-and-features.md#distributed-training) in the Manual Helm path.
 
+### Standard Inference
+
+NVIDIA Run:ai uses [Knative Serving](https://knative.dev/docs/serving/) to enable standard (single-node) inference. Knative Serving lets you serve AI models as production workloads, using NVIDIA NIM, vLLM, or custom inference servers. It provides serverless, dynamic autoscaling (including scale to zero when idle), rolling updates without disrupting served traffic, and endpoints reachable via external access (a wildcard FQDN) or internal, cluster-local access. For an overview of the request flow, see [Workload Architecture](../../../workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md#workload-architecture).
+
+Setting `features.knative.mode: install` installs the Knative operator and applies a `KnativeServing` custom resource that configures scale-to-zero autoscaling, the wildcard inference domain, Kourier as the ingress class, and the Kubernetes pod-spec features NVIDIA Run:ai workloads require.
+
+For air-gapped installation instructions, see [Standard Inference](../install-using-helm/prerequisites-and-features.md#standard-inference) in the Manual Helm path.
+
+<Note>
+
+**Note**
+
+By default, Knative pulls its `queue-proxy` sidecar image from the public registry. In air-gapped environments, update the `queue-sidecar-image` field in the `config-deployment` ConfigMap (in the `knative-serving` namespace) to point to your local registry instead. See the [Knative `config-deployment` ConfigMap](https://knative.dev/docs/serving/configuration/deployment/) for the field definition.
+
+</Note>
+
+#### Autoscaling
+
+NVIDIA Run:ai allows for autoscaling a deployment according to the metrics below:
+
+* Latency (milliseconds)
+* Throughput (requests/sec)
+* Concurrency (requests)
+
+Using a custom metric (for example, Latency) requires the Knative Horizontal Pod Autoscaler (HPA) extension. Setting `features.knative.mode: install` installs this extension automatically alongside Knative Serving, so no additional step is needed.
+
 ### Distributed Inference
 
 NVIDIA Run:ai uses [LeaderWorkerSet (LWS)](https://lws.sigs.k8s.io/) to enable distributed (multi-node) inference - serving large language models that do not fit on a single node by distributing them across multiple nodes.
 
-Setting `features.lws.mode: install` installs the LWS Helm chart into the `lws-system` namespace.
+Setting `features.lws.mode: install` installs LWS: on Kubernetes, the LWS Helm chart into the `lws-system` namespace; on OpenShift, the OpenShift LWS Operator (via OperatorHub) into the `openshift-lws-operator` namespace. Either way, the installer automatically points NVIDIA Run:ai (`clusterConfig.lws.namespace`) at the namespace LWS runs in, so no manual configuration is needed for NVIDIA Run:ai to detect it.
 
 For air-gapped installation instructions, see [Distributed Inference](../install-using-helm/prerequisites-and-features.md#distributed-inference) in the Manual Helm path.
-
-<Warning>
-
-**TODO**
-
-The Manual Helm path notes that on OpenShift, LWS installs via the OpenShift LWS Operator into the `openshift-lws-operator` namespace by default - not the namespace NVIDIA Run:ai expects - so `clusterConfig.lws.namespace` must be set for NVIDIA Run:ai to detect it. See [Distributed Inference](https://run-ai-docs.nvidia.com/self-hosted/getting-started/installation/install-using-helm/system-requirements#distributed-inference). Need to confirm whether the guided installer sets this automatically when `features.lws.mode: install` on OpenShift, or whether users still need to set it themselves (and if so, through which field).
-
-</Warning>
 
 ### NIM Operator
 

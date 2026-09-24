@@ -69,13 +69,13 @@ Applies to Kubernetes only. On OpenShift, the domain is derived from the cluster
 | Component | Same-cluster | Multi-cluster |
 |---|---|---|
 | Control plane domain | Single | Single |
-| Cluster domain | Not required | Per cluster |
+| Cluster domain<sup>1</sup> | Not required | Per cluster |
 | Workspace and training wildcard domain | Single | Per cluster |
-| Inference wildcard domain | Single* | Per cluster* |
+| Inference wildcard domain<sup>2</sup> | Single | Per cluster |
 
-> Cluster domain is only needed when the NVIDIA Run:ai cluster is installed on a different Kubernetes cluster than the control plane. In a same-cluster deployment, the cluster uses the control plane domain and does not need its own.
+<sup>1</sup> Only needed when the NVIDIA Run:ai cluster is installed on a different Kubernetes cluster than the control plane. In a same-cluster deployment, the cluster uses the control plane domain and does not need its own.
 
-> *Required only if inference workloads are exposed externally.
+<sup>2</sup> Required only if inference workloads are exposed externally.
 
 ### TLS Certificates
 
@@ -86,9 +86,9 @@ Applies to Kubernetes only. On OpenShift, the domain is derived from the cluster
 | Control plane certificate | Single | Single |
 | Cluster domain certificate | Single | Per cluster |
 | Workspace and training wildcard certificate | Single | Per cluster |
-| Inference wildcard certificate | Single* | Per cluster* |
+| Inference wildcard certificate<sup>1</sup> | Single | Per cluster |
 
-> *Required only if inference workloads are exposed externally.
+<sup>1</sup> Required only if inference workloads are exposed externally.
 
 #### OpenShift
 

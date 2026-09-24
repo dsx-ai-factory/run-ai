@@ -8,9 +8,9 @@ Prerequisites and features are additional infrastructure required by the NVIDIA 
 | Network Operator | Prerequisite | RDMA or Multi-Node NVLink (MNNVL)-capable nodes |
 | DRA Driver | Prerequisite | Multi-Node NVLink (e.g. GB200) |
 | Prometheus | Prerequisite | Every installation |
-| Knative Serving | Feature | Standard (single-node) inference |
 | Kubeflow Training Operator | Feature | Distributed training |
 | MPI Operator | Feature | MPI-based distributed training |
+| Knative Serving | Feature | Standard (single-node) inference |
 | LeaderWorkerSet (LWS) | Feature | Distributed (multi-node) inference |
 | NIM Operator | Feature | NVIDIA Inference Microservices |
 | Grove | Feature | Multi-component, gang-scheduled workload orchestration (for example, disaggregated Dynamo deployments) |
@@ -190,9 +190,49 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
 
 To enable NVIDIA Run:ai capabilities such as Distributed Training and Inference, additional Kubernetes applications (frameworks) must be installed on the cluster. Only install what you need for the workload types you plan to run.
 
+### Distributed Training
+
+NVIDIA Run:ai supports distributed training - training AI models across multiple nodes - using the [Kubeflow Training Operator](https://www.kubeflow.org/docs/components/training/installation/) for [TensorFlow](https://www.tensorflow.org/), [PyTorch](https://pytorch.org/), [XGBoost](https://xgboost.readthedocs.io/), and [JAX](https://docs.jax.dev/en/latest/index.html) workloads, and the [MPI Operator](https://github.com/kubeflow/mpi-operator) for [MPI v2](https://docs.open-mpi.org/)-based workloads. Both are required for compatibility with advanced workload capabilities such as [Stopping a workload](../../../workloads-in-nvidia-run-ai/workloads.md) and [Scheduling rules](../../../platform-management/policies/scheduling-rules.md).
+
+*   To install the Kubeflow Training Operator for TensorFlow, PyTorch, XGBoost and JAX frameworks, run the following command:
+
+    ```bash
+    kubectl apply --server-side -k "github.com/kubeflow/training-operator.git/manifests/overlays/standalone?ref=v1.9.2"
+    ```
+*   To install the MPI Operator for MPI v2, run the following command:
+
+    ```bash
+    kubectl apply --server-side -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.6.0/deploy/v2beta1/mpi-operator.yaml
+    ```
+
+<Note>
+
+**Note**
+
+If you require both the MPI Operator and Kubeflow Training Operator, follow the steps below:
+
+* Install the Kubeflow Training Operator as described above.
+*   Disable and delete MPI v1 in the Kubeflow Training Operator by running:
+
+    ```bash
+    kubectl patch deployment training-operator -n kubeflow --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args", "value": ["--enable-scheme=tfjob", "--enable-scheme=pytorchjob", "--enable-scheme=xgboostjob", "--enable-scheme=jaxjob"]}]'
+    kubectl delete crd mpijobs.kubeflow.org
+    ```
+* Install the MPI Operator as described above.
+
+</Note>
+
 ### Standard Inference
 
-NVIDIA Run:ai uses [Knative Serving](https://knative.dev/docs/serving/) to enable standard (single-node) inference. Knative Serving lets you serve AI models as production workloads, using NVIDIA NIM, vLLM, or custom inference servers. It provides serverless, dynamic autoscaling (including scale to zero when idle), rolling updates without disrupting served traffic, and endpoints reachable via external access (a wildcard FQDN) or internal, cluster-local access.
+NVIDIA Run:ai uses [Knative Serving](https://knative.dev/docs/serving/) to enable standard (single-node) inference. Knative Serving lets you serve AI models as production workloads, using NVIDIA NIM, vLLM, or custom inference servers. It provides serverless, dynamic autoscaling (including scale to zero when idle), rolling updates without disrupting served traffic, and endpoints reachable via external access (a wildcard FQDN) or internal, cluster-local access. For an overview of the request flow, see [Workload Architecture](../../../workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md#workload-architecture).
+
+<Note>
+
+**Note**
+
+By default, Knative pulls its `queue-proxy` sidecar image from the public registry. In air-gapped environments, update the `queue-sidecar-image` field in the `config-deployment` ConfigMap (in the `knative-serving` namespace) to point to your local registry instead. See the [Knative `config-deployment` ConfigMap](https://knative.dev/docs/serving/configuration/deployment/) for the field definition.
+
+</Note>
 
 To configure inference:
 
@@ -215,9 +255,9 @@ With external access, inference services are reachable from outside the cluster.
 
 <Tab title="Kubernetes">
 
-On Kubernetes, external access exposes inference services through a wildcard FQDN (for example, `*.runai-inference.mycorp.local`). This requires the wildcard DNS record (see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns)), the inference wildcard certificate (see [Cluster TLS Certificates](preparations.md#cluster-tls-certificates)), and an HAProxy ingress to handle TLS termination.
+On Kubernetes, external access exposes inference services through a wildcard FQDN (for example, `*.runai-inference.mycorp.local`). This requires the wildcard DNS record (see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns)), the standard inference wildcard certificate (see [Cluster TLS Certificates](preparations.md#cluster-tls-certificates)), and an HAProxy ingress to handle TLS termination.
 
-Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run:
+Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release that supports the Knative Serving version you are using:
 
 ```bash
 helm repo add knative-operator https://knative.github.io/operator
@@ -381,7 +421,7 @@ On OpenShift Serverless, external access is the platform default; cluster-local 
 
 On Kubernetes, cluster-local access does not require an external DNS record, a wildcard certificate, or an HAProxy ingress because traffic does not leave the cluster.
 
-Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run:
+Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release that supports the Knative Serving version you are using:
 
 ```bash
 helm repo add knative-operator https://knative.github.io/operator
@@ -517,38 +557,6 @@ Using a custom metric (for example, Latency) requires installing the [Kubernetes
 kubectl apply -f https://github.com/knative/serving/releases/download/knative-{VERSION}/serving-hpa.yaml
 ```
 
-### Distributed Training
-
-NVIDIA Run:ai supports distributed training - training AI models across multiple nodes - using the [Kubeflow Training Operator](https://www.kubeflow.org/docs/components/training/installation/) for [TensorFlow](https://www.tensorflow.org/), [PyTorch](https://pytorch.org/), [XGBoost](https://xgboost.readthedocs.io/), and [JAX](https://docs.jax.dev/en/latest/index.html) workloads, and the [MPI Operator](https://github.com/kubeflow/mpi-operator) for [MPI v2](https://docs.open-mpi.org/)-based workloads. Both are required for compatibility with advanced workload capabilities such as [Stopping a workload](../../../workloads-in-nvidia-run-ai/workloads.md) and [Scheduling rules](../../../platform-management/policies/scheduling-rules.md).
-
-*   To install the Kubeflow Training Operator for TensorFlow, PyTorch, XGBoost and JAX frameworks, run the following command:
-
-    ```bash
-    kubectl apply --server-side -k "github.com/kubeflow/training-operator.git/manifests/overlays/standalone?ref=v1.9.2"
-    ```
-*   To install the MPI Operator for MPI v2, run the following command:
-
-    ```bash
-    kubectl apply --server-side -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.6.0/deploy/v2beta1/mpi-operator.yaml
-    ```
-
-<Note>
-
-**Note**
-
-If you require both the MPI Operator and Kubeflow Training Operator, follow the steps below:
-
-* Install the Kubeflow Training Operator as described above.
-*   Disable and delete MPI v1 in the Kubeflow Training Operator by running:
-
-    ```bash
-    kubectl patch deployment training-operator -n kubeflow --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args", "value": ["--enable-scheme=tfjob", "--enable-scheme=pytorchjob", "--enable-scheme=xgboostjob", "--enable-scheme=jaxjob"]}]'
-    kubectl delete crd mpijobs.kubeflow.org
-    ```
-* Install the MPI Operator as described above.
-
-</Note>
-
 ### Distributed Inference
 
 NVIDIA Run:ai uses [LeaderWorkerSet (LWS)](https://lws.sigs.k8s.io/) to enable distributed (multi-node) inference - serving large language models that do not fit on a single node by distributing them across multiple nodes.
@@ -559,10 +567,10 @@ To enable this capability, install LWS on your cluster:
 
 <Tab title="Kubernetes">
 
-Install the [LWS Helm chart](https://lws.sigs.k8s.io/docs/installation/#install-by-helm) in version 0.7.0 or higher:
+Install the [LWS Helm chart](https://lws.sigs.k8s.io/docs/installation/#install-by-helm), updating `{VERSION}` with a [supported LWS version](../../support-matrix.md):
 
 ```bash
-CHART_VERSION=0.7.0
+CHART_VERSION={VERSION}
 helm install lws oci://registry.k8s.io/lws/charts/lws \
   --version=$CHART_VERSION \
   --namespace lws-system \

@@ -27,7 +27,7 @@ In Kubernetes, services of type `LoadBalancer` are used to expose applications o
 
 MetalLB fulfills this role by allocating external IP addresses from a predefined pool and advertising them on the external network, enabling access to services running inside the cluster.
 
-In NVIDIA Run:ai, this is required to support north-south traffic, including access to the NVIDIA Run:ai control plane, APIs, UI, inference endpoints, and externally exposed development workspaces and training workloads.
+In NVIDIA Run:ai, this is required to support north-south traffic, including access to the NVIDIA Run:ai control plane, APIs, and UI, as well as externally exposed workloads - standard inference (Knative) endpoints, development workspaces, training, and distributed inference workloads.
 
 1. Reserve a range of IP addresses (recommended a full 32 subnet) for example: `172.20.10.0-172.20.10.255`
 2. Install MetalLB:
@@ -76,7 +76,7 @@ Install the ingress controller once for a same-cluster deployment, or on each cl
 
 </Note>
 
-NVIDIA Run:ai requires a [Kubernetes Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) to be installed on the Kubernetes cluster. OpenShift and RKE2 come with a pre-installed ingress controller. Once installed, you'll reference this controller when configuring NVIDIA Run:ai - Guided Installation accepts it as a configuration field, while Manual Helm sets it via a Helm value. See the installation guide for your chosen path for the exact syntax.
+NVIDIA Run:ai requires a [Kubernetes Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) to be installed on the Kubernetes cluster. OpenShift and RKE2 come with a pre-installed ingress controller. Once installed, you'll reference this controller when configuring NVIDIA Run:ai - [Guided Installation](../installation/guided-installation/README.md) accepts it as a configuration field, while [Manual Helm](../installation/install-using-helm/preparations.md) sets it via a Helm value. See the installation guide for your chosen path for the exact syntax.
 
 There are multiple ways to install and configure an ingress controller. The following example demonstrates how to install and configure the [HAProxy Kubernetes Ingress Controller](https://www.haproxy.com/documentation/kubernetes-ingress/) using [helm](https://helm.sh/).
 
@@ -149,7 +149,7 @@ NVIDIA Run:ai uses host-based routing by default, which relies on DNS and TLS co
 
 * A Fully Qualified Domain Name (FQDN) structure
 * TLS certificates for secure communication
-* Ingress rules connecting the FQDN and TLS certificates to route traffic by hostname - Guided Installation creates these automatically as part of installation, while Manual Helm requires you to create the Ingress resource yourself; see the installation guide for your chosen path for details
+* Ingress rules connecting the FQDN and TLS certificates to route traffic by hostname - [Guided Installation](../installation/guided-installation/README.md) creates these automatically as part of installation, while [Manual Helm](../installation/install-using-helm/preparations.md) requires you to create the Ingress resource yourself; see the installation guide for your chosen path for details
 
 Together, these components ensure that traffic is routed correctly and securely across all NVIDIA Run:ai services: host-based routing binds together the configured domains (FQDN), TLS certificates, and ingress rules to expose workloads externally, with each workload assigned its own subdomain and URL. For example:
 
@@ -161,7 +161,7 @@ https://<project>-<workload>.<CLUSTER_URL>
 
 **Note**
 
-NVIDIA Run:ai also supports path-based routing, which you can use instead of the default host-based routing if it better fits your environment - Guided Installation accepts it as a configuration field, while Manual Helm sets it via a Helm value; see the installation guide for your chosen path for the exact syntax. In this case, the workspace and training wildcard certificate is not required.
+NVIDIA Run:ai also supports path-based routing, which you can use instead of the default host-based routing if it better fits your environment - [Guided Installation](../installation/guided-installation/README.md) accepts it as a configuration field, while [Manual Helm](../installation/install-using-helm/preparations.md) sets it via a Helm value; see the installation guide for your chosen path for the exact syntax.
 
 </Note>
 
@@ -178,24 +178,24 @@ NVIDIA Run:ai also supports path-based routing, which you can use instead of the
 
 NVIDIA Run:ai services rely on Fully Qualified Domain Names (FQDNs) to route traffic between system components and to expose workloads externally. FQDNs are needed for:
 
-* Enabling communication between the NVIDIA Run:ai control plane and the NVIDIA Run:ai cluster
-* Exposing development workspaces and training workloads via subdomains
-* Exposing inference workloads via dedicated subdomains
+* Enabling communication between the control plane and the cluster
+* Exposing development workspaces, training, and distributed inference workloads via subdomains
+* Exposing standard inference workloads (Knative) via dedicated subdomains
 
-Configure domain names for each of the following, and create the DNS records in your own DNS provider before installation. You then supply the domain values to NVIDIA Run:ai as part of installation - Guided Installation accepts them as fields in the configuration file, while Manual Helm applies them via Helm values.
+Configure domain names for each of the following, and create the DNS records in your own DNS provider before installation. You then supply the domain values to NVIDIA Run:ai as part of installation - [Guided Installation](../installation/guided-installation/README.md) accepts them as fields in the configuration file, while [Manual Helm](../installation/install-using-helm/preparations.md) applies them via Helm values.
 
 | Domain | Purpose | Example |
 |---|---|---|
 | Control plane domain | Access to the NVIDIA Run:ai control plane UI and API. | `runai.mycorp.local` |
-| Cluster domain | Control plane ↔ cluster communication. The IP address of this domain must be resolvable within the organization's private network. Only needed when the NVIDIA Run:ai cluster is installed on a different Kubernetes cluster than the control plane - in a same-cluster deployment, the cluster uses the control plane domain instead. | `runai-a.mycorp.local` for cluster A in a multi-cluster deployment |
-| Workspace and training workloads | External access | `*.runai.mycorp.local`, or `*.runai-a.mycorp.local` for cluster A in a multi-cluster deployment |
-| Inference workloads | External access | `*.runai-inference.mycorp.local`, or `*.runai-a-inference.mycorp.local` for cluster A in a multi-cluster deployment |
+| Cluster domain | Control plane ↔ cluster communication. The IP address of this domain must be resolvable within the organization's private network. Only needed when the NVIDIA Run:ai cluster is installed on a different Kubernetes cluster than the control plane - in a same-cluster deployment, the cluster uses the control plane domain instead. | `runai.mycorp.local` (same as the control plane domain) in a same-cluster deployment, or `runai-a.mycorp.local` for cluster A in a multi-cluster deployment |
+| Workspaces, training, and distributed inference workloads | External access | `*.runai.mycorp.local`, or `*.runai-a.mycorp.local` for cluster A in a multi-cluster deployment |
+| Standard inference workloads (Knative) | External access | `*.runai-inference.mycorp.local`, or `*.runai-a-inference.mycorp.local` for cluster A in a multi-cluster deployment |
 
 <Note>
 
 **Note**
 
-The inference wildcard (`*.runai-inference.mycorp.local`) is only required if you plan to expose inference workloads outside the cluster. For cluster-local inference, skip the inference wildcard record and the matching inference wildcard certificate.
+The inference wildcard (`*.runai-inference.mycorp.local`) is only required for standard inference (Knative, single-node) workloads exposed outside the cluster. Other inference workloads (for example, distributed inference using serving frameworks such as LWS, Dynamo, KServe, or others) do not use this domain. For cluster-local standard inference, skip the inference wildcard record and the matching inference wildcard certificate.
 
 </Note>
 
@@ -223,13 +223,13 @@ The number of certificates required depends on your deployment model and Kuberne
 
 </Note>
 
-TLS certificates secure communication between NVIDIA Run:ai components and enable HTTPS access to exposed services. Obtain the certificate and private key files for each domain before installation. How they are applied depends on the installation path - Guided Installation accepts file paths in the configuration file; Manual Helm requires creating Kubernetes secrets manually.
+TLS certificates secure communication between NVIDIA Run:ai components and enable HTTPS access to exposed services. Obtain the certificate and private key files for each domain before installation. How they are applied depends on the installation path - [Guided Installation](../installation/guided-installation/README.md) accepts file paths in the configuration file; [Manual Helm](../installation/install-using-helm/preparations.md) requires creating Kubernetes secrets manually.
 
 <Note>
 
 **Note**
 
-If certificates from a trusted CA are not available, Guided Installation can generate self-signed certificates instead.
+If certificates from a trusted CA are not available, [Guided Installation](../installation/guided-installation/README.md) can generate self-signed certificates instead.
 
 </Note>
 
@@ -237,18 +237,18 @@ NVIDIA Run:ai requires up to four TLS certificates, each aligned with a specific
 
 * Control plane certificate
 * Cluster domain certificate
-* Workspace and training wildcard certificate
-* Inference wildcard certificate
+* Workspaces, training, and distributed inference workload certificate
+* Standard inference certificate (wildcard)
 
 ### Control Plane Certificate
 
 Secures HTTPS access to the NVIDIA Run:ai UI and API. On OpenShift, NVIDIA Run:ai uses the OpenShift default Ingress router for serving. The TLS certificate configured for this router must be issued by a trusted CA. For more details, see the OpenShift documentation on [configuring certificates](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/security_and_compliance/configuring-certificates#replacing-default-ingress).
 
-### Cluster Domain Certificate
+### Cluster Domain Certificates (Single-Domain)
 
 To enable secure communication between the NVIDIA Run:ai control plane and the cluster, configure a TLS certificate associated with the cluster's main domain (e.g. `runai.mycorp.local`). On OpenShift, NVIDIA Run:ai uses the OpenShift default Ingress router for serving. The TLS certificate configured for this router must be issued by a trusted CA. For more details, see the OpenShift documentation on [configuring certificates](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/security_and_compliance/configuring-certificates#replacing-default-ingress).
 
-### Workspace and Training Wildcard Certificate
+### Workspaces, Training, and Distributed Inference Wildcard Certificate
 
 <Note>
 
@@ -260,13 +260,13 @@ For path-based routing, this certificate is not required.
 
 To allow secure access to workspace and training workloads via subdomains, configure a wildcard TLS certificate that matches the cluster domain (e.g. `*.runai.mycorp.local`). On OpenShift, a wildcard TLS certificate for Workspace and Training workloads is not required. OpenShift Routes handle TLS termination for workspace and training endpoints using the platform's built-in routing and certificate management.
 
-### Inference Wildcard Certificate
+### Standard Inference Wildcard Certificate
 
 <Note>
 
 **Note**
 
-The inference wildcard certificate is only required if inference services are exposed externally via wildcard FQDN. For cluster-local inference, skip this subsection.
+The inference wildcard certificate is only required for standard inference (Knative, single-node) workloads exposed externally via wildcard FQDN. Other inference workloads (for example, distributed inference using serving frameworks such as LWS, Dynamo, KServe, or others) do not require this certificate. For cluster-local standard inference, skip this section.
 
 </Note>
 
@@ -278,4 +278,4 @@ A local certificate authority (CA) serves as the root certificate for organizati
 
 In air-gapped environments, you must configure and install the local CA's public key in the Kubernetes cluster. This is required for the installation to succeed.
 
-How you provide the CA chain depends on the installation path - Guided Installation accepts a `tls.caChainPath` field in the configuration file; Manual Helm requires creating a Kubernetes secret manually. See the installation guide for your chosen path for the exact procedure.
+How you provide the CA chain depends on the installation path - [Guided Installation](../installation/guided-installation/README.md) accepts a `tls.caChainPath` field in the configuration file; [Manual Helm](../installation/install-using-helm/preparations.md) requires creating a Kubernetes secret manually. See the installation guide for your chosen path for the exact procedure.

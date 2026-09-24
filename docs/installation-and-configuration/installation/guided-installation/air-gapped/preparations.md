@@ -37,6 +37,14 @@ NGC credentials are not needed to build the air-gapped bundle, for either Open S
 
 Once the bundle is loaded, the `registry` section in your configuration file authenticates to your own private mirror registry (populated from the bundle) using basic authentication (`username` and `password` or `passwordPath`). See [`registry`](../configuration-reference.md#registry) and [`airgap`](../configuration-reference.md#airgap) in the Configuration Reference.
 
+<Note>
+
+**Note**
+
+The installer does not yet expose a dedicated field for Support-Entitled Release branding (the UI branding and support contact link shown in the control plane). Set it yourself via `controlPlane.customHelmValues.supportEntitled: true`. See [`customHelmValues`](../configuration-reference.md#controlplane) in the Configuration Reference. No NGC credentials are needed for this - air-gapped installations authenticate to your own mirror registry, not NGC.
+
+</Note>
+
 ## Download the Installer
 
 <Warning>

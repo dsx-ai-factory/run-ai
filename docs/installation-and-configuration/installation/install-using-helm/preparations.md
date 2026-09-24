@@ -165,7 +165,7 @@ For NVIDIA Run:ai on OpenShift to run with PSA `restricted` policy:
 
 ### Cluster TLS Certificates
 
-These certificates secure the NVIDIA Run:ai cluster, workspace and training, and inference FQDNs you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns). Before creating the secrets below, see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificates you need and why. The workspace and training wildcard certificate is only needed for the default host-based routing - see [Host-Based Routing (Ingress Resource)](#host-based-routing-ingress-resource) below for the matching Ingress setup. If you're using path-based routing instead, skip that certificate.
+These certificates secure the NVIDIA Run:ai cluster, workspaces, training, distributed inference, and standard inference FQDNs you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns). Before creating the secrets below, see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificates you need and why. The workspaces, training, and distributed inference wildcard certificate is only needed for the default host-based routing - see [Host-Based Routing (Ingress Resource)](#host-based-routing-ingress-resource) below for the matching Ingress setup. If you're using path-based routing instead, skip that certificate.
 
 #### Cluster Domain Certificates (Single-Domain)
 
@@ -181,13 +181,13 @@ These certificates secure the NVIDIA Run:ai cluster, workspace and training, and
     ```
 * **OpenShift** - NVIDIA Run:ai uses the OpenShift default Ingress router for serving. The TLS certificate configured for this router must be issued by a trusted CA. For more details, see the OpenShift documentation on [configuring certificates](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/security_and_compliance/configuring-certificates#replacing-default-ingress).
 
-#### Workspace and Training Wildcard Certificate
+#### Workspaces, Training, and Distributed Inference Wildcard Certificate
 
 <Note>
 
 **Note**
 
-For path-based routing, ignore this configuration and move to the next step.
+For path-based routing, this certificate is not required.
 
 </Note>
 
@@ -202,13 +202,13 @@ For path-based routing, ignore this configuration and move to the next step.
       ```
 * **OpenShift** - A wildcard TLS certificate for Workspace and Training workloads is not required. OpenShift Routes handle TLS termination for workspace and training endpoints using the platform's built-in routing and certificate management.
 
-#### Inference Wildcard Certificate
+#### Standard Inference Wildcard Certificate
 
 <Note>
 
 **Note**
 
-The inference wildcard certificate is only required if inference services are exposed externally via wildcard FQDN. For cluster-local inference, skip this subsection.
+The inference wildcard certificate is only required for standard inference (Knative, single-node) workloads exposed externally via wildcard FQDN. Other inference workloads (for example, distributed inference using serving frameworks such as LWS, Dynamo, KServe, or others) do not require this certificate. For cluster-local standard inference, skip this section.
 
 </Note>
 
@@ -226,6 +226,16 @@ The inference wildcard certificate is only required if inference services are ex
 
 ### Host-Based Routing (Ingress Resource)
 
+<Note>
+
+**Note**
+
+* The following steps are required for Kubernetes only. For OpenShift, no additional configuration is required.
+* NVIDIA Run:ai also supports path-based routing. If you prefer to use it instead of the default host-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during the Helm installation. See [Advanced cluster configurations](../../configuration/cluster-config.md).
+* If you choose path-based routing, skip the steps below.
+
+</Note>
+
 Host-based routing binds together the configured domains (FQDN), TLS certificates, and ingress rules to expose workloads externally. With NVIDIA Run:ai host-based routing, workloads are exposed using subdomains, so each workload is assigned its own URL. For example:
 
 ```bash
@@ -236,16 +246,6 @@ Host-based routing relies on:
 
 * The FQDN structure defined earlier
 * The TLS certificates configured for those domains
-
-<Note>
-
-**Note**
-
-* The following steps are required for Kubernetes only. For OpenShift, no additional configuration is required.
-* NVIDIA Run:ai also supports path-based routing. If you prefer to use it instead of the default host-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during the Helm installation. See [Advanced cluster configurations](../../configuration/cluster-config.md).
-* If you choose path-based routing, skip the steps below.
-
-</Note>
 
 1. Ensure that:
    * Wildcard DNS records are configured (see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns))
