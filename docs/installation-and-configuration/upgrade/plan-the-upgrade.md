@@ -6,7 +6,13 @@ This page helps you plan an existing NVIDIA Run:ai deployment upgrade. Review th
 
 NVIDIA Run:ai supports a **maximum gap of four versions** per upgrade; attempting to skip more than four versions in a single upgrade may fail. If your target version is more than four versions ahead of your current version, perform multiple upgrades. Each upgrade can span a maximum of four versions, and each upgrade must complete successfully before you begin the next.
 
-Upgrades are officially supported and tested only for versions within the current [product version life cycle](../../../support-policy/product-version-life-cycle.md).
+<Note>
+
+**Note**
+
+For Support-Entitled Releases, upgrades are officially supported and tested only for versions within the current [Supported Versions](../../getting-started/product-support-policy.md#supported-versions).
+
+</Note>
 
 To ensure a smooth and supported upgrade process:
 
@@ -61,8 +67,6 @@ The node-level scheduler was deprecated in v2.25 and GPU memory swap in v2.26. I
 * Other `gpuResourceOptimization` fields, such as `cpuSwapMemorySize` and `reservedGpuMemoryForSwapOperations`, can still be set through the API, but their values are ignored and not sent to the cluster.
 * Node pools no longer shows the **Resource utilization optimization** section.
 
-Snapshot, the planned replacement capability, is targeted for v3.1 and is not available in v3.0 - no replacement exists for the duration of the v3.0 release.
-
 Before upgrading, identify any workloads or node pools relying on GPU memory swap or the node-level scheduler, since neither is available after the upgrade and there is no post-upgrade action that restores them:
 
 * **Workloads** - GPU memory swap workloads are dynamic fractions workloads under the hood. After upgrading, they continue running as standard dynamic fractions workloads, but without swap they no longer serve their original purpose. Delete these workloads before upgrading.
@@ -70,7 +74,7 @@ Before upgrading, identify any workloads or node pools relying on GPU memory swa
 
 ### Dynamic Resource Allocation (DRA) Driver
 
-A fresh GPU Operator installation installs the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html) automatically, but upgrading an existing GPU Operator deployment does not. If your cluster requires the DRA driver (for example, Multi-Node NVLink deployments such as GB200), install it manually after upgrading the GPU Operator. See [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver) in the NVIDIA GPU Operator documentation.
+A fresh GPU Operator installation installs the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html) automatically, but upgrading an existing GPU Operator deployment does not. If your cluster requires the DRA driver (for example, Multi-Node NVLink deployments such as GB200), install it manually after upgrading the GPU Operator. See [Install](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#) in the NVIDIA GPU Operator documentation.
 
 ## Upgrade Workflow
 

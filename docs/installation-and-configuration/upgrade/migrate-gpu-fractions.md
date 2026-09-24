@@ -31,7 +31,7 @@ Every supported workload type that sets `RUNAI_GPU_MEMORY_LIMIT` must be migrate
 
 </Warning>
 
-Fraction request annotations (`gpu-fraction`, `gpu-memory`, `gpu-fraction-num-devices`, `gpu-fraction-container-name`) are unchanged in v3.0 - see [Dynamic Fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md) for their definitions.
+Fraction request annotations (`gpu-fraction`, `gpu-memory`, `gpu-fraction-num-devices`, `gpu-fraction-container-name`) are unchanged in v3.0 - see [Dynamic Fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md) for their definitions.
 
 The fraction limit replaces the environment variable with one of two annotations, depending on whether the request uses an absolute size or a portion:
 

@@ -153,11 +153,11 @@ An NVIDIA Run:ai installation relies on several categories of software and infra
 
   | Component | Required for |
   | --------- | ------------ |
-  | Knative Serving | Standard inference |
   | Kubeflow Training Operator | Distributed training |
   | MPI Operator | MPI-based distributed training |
-  | LeaderWorkerSet (LWS) | Distributed inference |
-  | NIM Operator | NVIDIA NIM microservices |
+  | Knative Serving | Standard (single-node) inference |
+  | LeaderWorkerSet (LWS) | Distributed (multi-node) inference |
+  | NIM Operator | NVIDIA Inference Microservices |
   | Grove | Multi-component, gang-scheduled workload orchestration (for example, disaggregated Dynamo deployments) |
   | Dynamo | Inference pipeline optimization |
 

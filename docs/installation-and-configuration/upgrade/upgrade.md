@@ -20,21 +20,30 @@ Complete the following before starting the upgrade:
 
 ## Prepare Software Artifacts
 
-<Info>
+<Note>
 
 **Note**
 
 Following a deprecation that started in v2.25, JFrog is no longer supported as a software artifact source. NGC is the only supported path for upgrading NVIDIA Run:ai.
 
-</Info>
+</Note>
 
-NVIDIA Run:ai artifacts are available on NVIDIA NGC. Use the tab that matches your environment:
+<Accordion title="Connected (NGC)">
 
-<Tabs>
+**Connected (NGC)**
 
-<Tab title="Connected (NGC)">
+Both Open Source and Support-Entitled Release upgrades pull artifacts from NGC:
 
-Both Open Source and Support-Entitled Release upgrades pull artifacts from NGC. Open Source images are served publicly from `nvcr.io` with no authentication. Support-Entitled Release requires an NGC Personal Key to authenticate below. The `supportEntitled` flag was introduced in v3.0, so no upgrade to v3.0 can already have it set - create the `runai-reg-creds` secret and add the `supportEntitled` and `imagePullSecrets` flags to the upgrade command, as described in [Software Artifacts](preparations.md#software-artifacts).
+* **Open Source** - Images are served publicly from `nvcr.io`, no authentication required.
+* **Support-Entitled** - Requires an NGC Personal Key to authenticate `helm repo add` below.
+
+<Note>
+
+**Note**
+
+Prepare the NGC-based `runai-reg-creds` secret as described in [Software Artifacts](preparations.md#software-artifacts). This is required for every Support-Entitled Connected upgrade to v3.0, not just those migrating off JFrog.
+
+</Note>
 
 Add the NVIDIA Run:ai Helm repository and browse the available versions:
 
@@ -56,15 +65,15 @@ helm repo update
 helm search repo -l runai/control-plane
 ```
 
-</Tab>
+</Accordion>
 
-<Tab title="Air-gapped">
+<Accordion title="Air-gapped">
 
-The same preparations apply to both Open Source and Support-Entitled Release upgrades. Air-gapped upgrades reuse the same `airgap pack` and `airgap load` procedure as a fresh install - the only thing that changes is the target version: set `runaiVersion` in your `airgap-pack.yaml` to the version you're upgrading to, then run `airgap pack` and `airgap load` again. On a connected machine, `airgap pack` builds a tarball containing every image the target version needs; after transferring it into the air-gapped network, `airgap load` pushes those images to your private registry and generates `control-plane-airgap-values.yaml` and `cluster-airgap-values.yaml`. Complete this pack-and-load flow for the target version before upgrading the control plane and cluster below. See [Software Artifacts](preparations.md#software-artifacts) for the full procedure.
+**Air-gapped**
 
-</Tab>
+The same preparations apply to both Open Source and Support-Entitled Release upgrades. Set `runaiVersion` in your `airgap-pack.yaml` to the version you are upgrading to, then complete the `airgap pack` and `airgap load` flow as described in [Software Artifacts](preparations.md#software-artifacts) before upgrading the control plane and cluster below.
 
-</Tabs>
+</Accordion>
 
 ## Upgrade the Control Plane
 
@@ -72,22 +81,51 @@ The same preparations apply to both Open Source and Support-Entitled Release upg
 
 Before upgrading the NVIDIA Run:ai control plane, review the [System Requirements](../../system-requirements/README.md) and complete the applicable steps in [Preparations](../installation/install-using-helm/preparations.md).
 
-<Tabs>
+### Upgrade
 
-<Tab title="Connected (NGC)">
+<Accordion title="Connected (NGC)">
+
+**Connected (NGC)**
+
+The same `helm upgrade` command upgrades the control plane for both Open Source and Support-Entitled Release. Update the values as described below - see the examples below.
+
+* Support-Entitled Release upgrades add `--set supportEntitled=true` to the `helm upgrade` command.
+* Support-Entitled Release upgrades must reference the `runai-reg-creds` secret created in [Software Artifacts](#prepare-software-artifacts): add `--set global.imagePullSecrets[0].name=runai-reg-creds`.
+
+Open Source:
 
 ```bash
 helm get values runai-backend -n runai-backend > runai_control_plane_values.yaml
-helm upgrade runai-backend -n runai-backend runai/control-plane --version "<VERSION>" -f runai_control_plane_values.yaml --reset-then-reuse-values
+helm upgrade runai-backend -n runai-backend runai/control-plane \
+  --version "<VERSION>" \
+  -f runai_control_plane_values.yaml \
+  --reset-then-reuse-values
 ```
 
-For a Support-Entitled Release, add `--set global.imagePullSecrets[0].name=runai-reg-creds --set supportEntitled=true` to the command above - the `supportEntitled` flag was introduced in v3.0, so no upgrade to v3.0 can already have it set.
+Support-Entitled:
 
-</Tab>
+```bash
+helm get values runai-backend -n runai-backend > runai_control_plane_values.yaml
+helm upgrade runai-backend -n runai-backend runai/control-plane \
+  --version "<VERSION>" \
+  -f runai_control_plane_values.yaml \
+  --reset-then-reuse-values \
+  --set supportEntitled=true \
+  --set global.imagePullSecrets[0].name=runai-reg-creds
+```
 
-<Tab title="Air-gapped">
+</Accordion>
 
-Use the `control-plane-airgap-values.yaml` file generated by `airgap load`. Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml`:
+<Accordion title="Air-gapped">
+
+**Air-gapped**
+
+The same `helm upgrade` command upgrades the control plane for both Open Source and Support-Entitled Release. Update the values as described below. Use the `control-plane-airgap-values.yaml` file generated by `airgap load`. Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml`.
+
+* Support-Entitled Release upgrades add `--set supportEntitled=true` to the `helm upgrade` command.
+* If your internal registry requires authentication, you must create the `runai-reg-creds` secret before proceeding, as described in [Software Artifacts](#prepare-software-artifacts) - this is not included in `control-plane-airgap-values.yaml` automatically. Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference it.
+
+Open Source:
 
 ```bash
 helm upgrade runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
@@ -95,11 +133,16 @@ helm upgrade runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend
   --reset-then-reuse-values
 ```
 
-For a Support-Entitled Release, add `--set supportEntitled=true` to the command above - the `supportEntitled` flag was introduced in v3.0, so no upgrade to v3.0 can already have it set. If your internal registry requires authentication, also create the `runai-reg-creds` secret and add `--set global.imagePullSecrets[0].name=runai-reg-creds`, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts) - this is not included in `control-plane-airgap-values.yaml` automatically.
+Support-Entitled:
 
-</Tab>
+```bash
+helm upgrade runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
+  -f <VALUES_DIR>/control-plane-airgap-values.yaml \
+  --reset-then-reuse-values \
+  --set supportEntitled=true
+```
 
-</Tabs>
+</Accordion>
 
 ### Enable Telemetry Service (Support-Entitled)
 
@@ -182,9 +225,9 @@ It is highly recommended to upgrade the Kubernetes version together with the NVI
 
 The command below is the same for both Open Source and Support-Entitled Release upgrades. Registry authentication with your NGC Personal Key already happened during the control plane upgrade above - the cluster upgrade does not require it again.
 
-<Tabs>
+<Accordion title="Connected (NGC)">
 
-<Tab title="Connected (NGC)">
+**Connected (NGC)**
 
 1. The NVIDIA Run:ai platform displays the Helm upgrade command in the cluster wizard.
 2.  Modify the UI-generated command as follows:
@@ -205,10 +248,11 @@ The command below is the same for both Open Source and Support-Entitled Release 
     ```
 3. Click **DONE**
 
+</Accordion>
 
-</Tab>
+<Accordion title="Air-gapped">
 
-<Tab title="Air-gapped">
+**Air-gapped**
 
 1. The NVIDIA Run:ai platform displays the Helm upgrade command in the cluster wizard.\
    **Do not run the command exactly as shown in the UI.**
@@ -235,9 +279,7 @@ The command below is the same for both Open Source and Support-Entitled Release 
     ```
 3. Click **DONE**
 
-</Tab>
-
-</Tabs>
+</Accordion>
 
 Once installation is complete, validate the cluster is **Connected** and listed with the new cluster version. Once you have done this, the cluster is upgraded to the latest version. If the cluster does not appear as expected, see the [cluster troubleshooting scenarios](../operations/clusters.md#troubleshooting-scenarios).
 

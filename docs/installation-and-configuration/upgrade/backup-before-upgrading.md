@@ -51,14 +51,14 @@ Use one of the following methods to back up the PostgreSQL database before upgra
 
 * **Third-party backup solutions** - Integrate with external backup tools that support Kubernetes and PostgreSQL to automate and manage backups effectively.
 
-<Info>
+<Note>
 
 **Note**
 
 * To obtain your `PGPASSWORD=<password>`, run `helm get values runai-backend -n runai-backend --all`.
 * NVIDIA Run:ai also supports an external PostgreSQL database. If you are using an external PostgreSQL database, the above steps do not apply. For more details, see [external PostgreSQL database](../system-requirements/third-party-services.md#using-an-external-postgresql-instance).
 
-</Info>
+</Note>
 
 ### Metrics Storage
 

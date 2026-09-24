@@ -11,7 +11,14 @@ NVIDIA Run:ai relies on your Kubernetes cluster's networking to route traffic be
 * [TLS Certificates](#tls-certificates) - Secures HTTPS access to exposed services.
 * [Local Certificate Authority (CA)](#local-certificate-authority-ca) - Required if your certificates are signed by a private CA.
 
-As per the [deployment model](deployment-model.md), each component is installed once or once per NVIDIA Run:ai cluster.
+<Note>
+
+**Note**
+
+* As per the [deployment model](deployment-model.md), each component is installed once or once per NVIDIA Run:ai cluster.
+* FQDN, TLS certificates, and the Local Certificate Authority are not provisioned automatically by NVIDIA Run:ai. These must be prepared beforehand and applied when installing the NVIDIA Run:ai control plane and NVIDIA Run:ai cluster, according to the installation path - [Guided Installation](../installation/guided-installation/README.md) or [Manual Helm](../installation/install-using-helm/preparations.md).
+
+</Note>
 
 ## Load Balancer
 

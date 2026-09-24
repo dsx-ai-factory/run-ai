@@ -16,8 +16,8 @@ See [Deployment Model](deployment-model.md) for how the control plane and cluste
 | Category | Requirement | Applies To | Details |
 |---|---|---|---|
 | Hardware | Control plane nodes, cluster nodes, and worker nodes provisioned | NVIDIA Run:ai control plane, NVIDIA Run:ai cluster, and worker nodes (sized separately) | See [Hardware](#hardware) |
-| Operating System | Linux installed on all nodes | All nodes | See [Operating System](#operating-system) |
-| Time Sync | Nodes synchronized using NTP | All nodes | See [Network Time Protocol](#network-time-protocol) |
+| Operating System | Linux installed on all nodes | NVIDIA Run:ai control plane and NVIDIA Run:ai cluster (requirements differ) | See [Operating System](#operating-system) |
+| Time Sync | Nodes synchronized using NTP | NVIDIA Run:ai control plane | See [Network Time Protocol](#network-time-protocol) |
 | Distribution | Supported Kubernetes distribution installed and running | All nodes | See [Supported Distributions](#supported-distributions) |
 | Runtime | Container runtime configured | All nodes | See [Container Runtime](#container-runtime) |
 | Permissions | Cluster-admin access | All nodes | See [Permissions](#permissions) |
@@ -77,16 +77,23 @@ The following are the minimum hardware requirements for each worker node. To des
 
 ## Operating System
 
+### NVIDIA Run:ai Control Plane
+
+* Any **Linux** operating system supported by both Kubernetes and NVIDIA GPU Operator.
+* Internal tests are performed on **Ubuntu 22.04** and **CoreOS** for OpenShift.
+
+### NVIDIA Run:ai Cluster
+
 * Any **Linux** operating system supported by both Kubernetes and NVIDIA GPU Operator.
 * NVIDIA Run:ai on Google Kubernetes Engine (GKE) supports both Ubuntu and Container Optimized OS (COS).
   * COS is supported only with NVIDIA GPU Operator 24.6 and above, and NVIDIA Run:ai cluster version 2.19 and above.
 * NVIDIA Run:ai on Elastic Kubernetes Service (EKS) does not support Bottlerocket or Amazon Linux.
 * NVIDIA Run:ai on Oracle Kubernetes Engine (OKE) supports only Ubuntu.
-* Internal tests are performed on **Ubuntu 22.04** and **CoreOS** for OpenShift.
+* Internal tests are performed on **Ubuntu** and **CoreOS** for OpenShift.
 
 ## Network Time Protocol
 
-Nodes must be synchronized using NTP (Network Time Protocol) for proper system functionality.
+NVIDIA Run:ai control plane nodes must be synchronized using NTP (Network Time Protocol) for proper system functionality.
 
 ## Kubernetes
 

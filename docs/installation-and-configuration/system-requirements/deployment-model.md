@@ -37,7 +37,12 @@ The following diagram shows the traffic flows in a multi-cluster deployment, whe
 
 ## Infrastructure by Deployment Model
 
-Use the tables below to determine how many of each networking, DNS, and TLS component to provision before you begin installation, based on the deployment model you chose. "Single" means one component shared across the whole deployment; "Per cluster" means one component is required for each additional NVIDIA Run:ai cluster beyond the control plane. For setup instructions, see [Networking Setup](networking-setup.md).
+Use the tables below to determine how many of each networking, DNS, and TLS component to provision before you begin installation, based on the deployment model you chose:
+
+* **Single** - One component shared across the whole deployment.
+* **Per cluster** - One component required for each additional NVIDIA Run:ai cluster beyond the control plane.
+
+For setup instructions, see [Networking Setup](networking-setup.md).
 
 ### Load Balancer and Ingress
 
