@@ -167,8 +167,8 @@ require (
 	gorm.io/driver/mysql v1.6.0 // indirect
 	gorm.io/driver/postgres v1.6.3 // indirect
 	gorm.io/plugin/opentelemetry v0.1.16 // indirect
-	k8s.io/apimachinery v0.37.0 // indirect
-	k8s.io/client-go v0.37.0 // indirect
+	k8s.io/apimachinery v0.37.1 // indirect
+	k8s.io/client-go v0.37.1 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 )
 
