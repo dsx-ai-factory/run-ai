@@ -363,7 +363,7 @@ kubectl create secret docker-registry runai-reg-creds \
 
 **Note**
 
-Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation). The NVIDIA Run:ai cluster does not need its own copy of this secret - the control plane automatically provisions it in the `runai` namespace at cluster install.
+Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation).
 
 </Note>
 
@@ -499,7 +499,7 @@ oc create secret docker-registry runai-reg-creds \
 
 **Note**
 
-Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation). The NVIDIA Run:ai cluster does not need its own copy of this secret - the control plane automatically provisions it in the `runai` namespace at cluster install.
+Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation).
 
 </Note>
 

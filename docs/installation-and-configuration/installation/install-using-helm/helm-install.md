@@ -6,7 +6,6 @@ Once the control plane is installed and you access the NVIDIA Run:ai UI for the 
 
 This procedure includes:
 
-* Adding the NVIDIA Run:ai Helm repository from NGC
 * Installing the NVIDIA Run:ai cluster into the `runai` namespace
 * Registering the NVIDIA Run:ai cluster with the NVIDIA Run:ai control plane using the provided connection details
 
@@ -93,14 +92,6 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 <Accordion title="Air-gapped">
 
 **Air-gapped**
-
-<Warning>
-
-**Prerequisite**
-
-If your internal registry requires authentication, you must create the `runai-reg-creds` imagePullSecret before proceeding. See [Software Artifacts](preparations.md#software-artifacts) in Preparations.
-
-</Warning>
 
 When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created. For additional clusters, use the Clusters form instead. See [Clusters](../../operations/clusters.md).
 
@@ -207,14 +198,6 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 **Air-gapped**
 
-<Warning>
-
-**Prerequisite**
-
-If your internal registry requires authentication, you must create the `runai-reg-creds` imagePullSecret before proceeding. See [Software Artifacts](preparations.md#software-artifacts) in Preparations.
-
-</Warning>
-
 When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created. For additional clusters, use the Clusters form instead. See [Clusters](../../operations/clusters.md).
 
 1. Enter a unique name for your cluster.
@@ -236,7 +219,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
     **- Do not run the command exactly as shown in the UI -**
 3.  Update the UI-generated Helm command as follows (see example command below) and use the `cluster-airgap-values.yaml` file written by the `airgap load` step in [Preparations](preparations.md#software-artifacts), instead of using helm repositories:
 
-    * Do not add the helm repository and do not run `helm repo update`.
+    * Do not add the helm repository, `helm repo add`, and do not run `helm repo update`.
     * Instead, edit the `helm upgrade` command:
       * Replace `runai/runai-cluster` with `./charts/runai-cluster-<VERSION>.tgz`, where `<VERSION>` is the full version number (e.g., `runai-cluster-3.0.2.tgz`). This file is located in the `charts` folder of the working directory you specified to `airgap load`.
       * Add `-f <VALUES_DIR>/cluster-airgap-values.yaml`. Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml` during [Preparations](preparations.md#software-artifacts) - this is where `cluster-airgap-values.yaml` was written.

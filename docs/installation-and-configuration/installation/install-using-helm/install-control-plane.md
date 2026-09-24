@@ -56,21 +56,20 @@ Confirm and document the actual Helm value/flag for supplying the Service Key. P
 
 **Connected**
 
-The same `helm upgrade` command installs the control plane for both Open Source and Support-Entitled Release. Update the values as described below; Support-Entitled Release installations additionally authenticate `helm repo add` with an [NGC Personal Key](preparations.md#registry-credentials) (`helm.ngc.nvidia.com/nvidia/runai`) and add `--set supportEntitled=true` to the `helm upgrade` command - see the examples below.
+Use the Helm command for the release type you are installing and update the values as follows.
 
-* Replace `global.domain=<DOMAIN>` with the fully qualified domain name (FQDN) obtained in the [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) section.
-* The recommended ingress controller is HAProxy. If you are using a different ingress controller, update the ingress class: `--set global.ingress.ingressClass=<ingress class>`
-* If you are using a local certificate authority, add `--set global.customCA.enabled=true` to the Helm command as described in the [Control Plane Local CA](preparations.md#control-plane-local-ca) section.
-* Support-Entitled Release installations must reference the `runai-reg-creds` secret created in [Software Artifacts](preparations.md#software-artifacts): add `--set global.imagePullSecrets[0].name=runai-reg-creds`.
-* Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator's email address.
-* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
-  * Minimum Length: Passwords must be at least 8 characters long.
-  * Digits: Must contain at least 1 numeric digit (0-9).
-  * Lowercase Characters: Must contain at least 1 lowercase letter (a-z).
-  * Uppercase Characters: Must contain at least 1 uppercase letter (A-Z).
-  * Special Characters: Must contain at least 1 special character (e.g., !, @, #, $).
+* Replace `global.domain=<DOMAIN>` with the fully qualified domain name (FQDN) obtained in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns).
+* The recommended ingress controller is HAProxy. If you are using a different ingress controller, set `--set global.ingress.ingressClass=<INGRESS_CLASS>` to the ingress class configured for your environment.
+* If you are using a local certificate authority, add `--set global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
+* Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
+* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
+  * Be at least 8 characters long.
+  * Contain at least one digit.
+  * Contain at least one lowercase letter.
+  * Contain at least one uppercase letter.
+  * Contain at least one special character.
 
-Open Source:
+**Open Source**
 
 ```bash
 helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
@@ -82,12 +81,18 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>"
 ```
 
-Support-Entitled, using your NGC Personal Key:
+**Support-Entitled**
+
+In addition to the values above, update the Helm commands as follows:
+
+* Authenticate `helm repo add` using your NGC Personal Key.
+* Add `--set supportEntitled=true` to the `helm upgrade` command.
+* Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 
 ```bash
 helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update \
   --username='$oauthtoken' \
-  --password=<NGC_PERSONAL_KEY>
+  --password=<NGC_API_KEY>
 helm repo update
 helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set global.domain=<DOMAIN> \
@@ -136,23 +141,23 @@ If your internal registry requires authentication, you must create the `runai-re
 
 </Warning>
 
-The same `helm upgrade` command installs the control plane for both Open Source and Support-Entitled Release. Update the values as described below; Support-Entitled Release installations additionally add `--set supportEntitled=true` to the `helm upgrade` command. The `control-plane-airgap-values.yaml` file is written by the `airgap load` step in [Preparations](preparations.md#software-artifacts):
+Use the Helm command for the release type you are installing and update the values as follows. The `control-plane-airgap-values.yaml` file is written by the `airgap load` step in [Preparations](preparations.md#software-artifacts).
 
 * Replace `control-plane-<VERSION>.tgz` with the full filename of the control plane Helm chart (e.g., `control-plane-3.0.2.tgz`), located in the `charts` folder of the working directory you specified to `airgap load`.
 * Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml` during [Preparations](preparations.md#software-artifacts) - this is where `control-plane-airgap-values.yaml` was written.
+* Replace `global.domain=<DOMAIN>` with the fully qualified domain name (FQDN) obtained in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns).
+* Set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
+* The recommended ingress controller is HAProxy. If you are using a different ingress controller, set `--set global.ingress.ingressClass=<INGRESS_CLASS>` to the ingress class configured for your environment.
+* If your internal registry requires authentication, create the `runai-reg-creds` secret as described in [Software Artifacts](preparations.md#software-artifacts), then add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference it.
+* Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
+* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
+  * Be at least 8 characters long.
+  * Contain at least one digit.
+  * Contain at least one lowercase letter.
+  * Contain at least one uppercase letter.
+  * Contain at least one special character.
 
-* Replace `global.domain=<DOMAIN>` with the fully qualified domain name (FQDN) obtained in the [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) section.
-* Set `global.customCA.enabled=true` as described in the [Control Plane Local CA](preparations.md#control-plane-local-ca) section.
-* The recommended ingress controller is HAProxy. If you are using a different ingress controller, update the ingress class: `--set global.ingress.ingressClass=<ingress class>`
-* Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator's email address.
-* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
-  * Minimum Length: Passwords must be at least 8 characters long.
-  * Digits: Must contain at least 1 numeric digit (0-9).
-  * Lowercase Characters: Must contain at least 1 lowercase letter (a-z).
-  * Uppercase Characters: Must contain at least 1 uppercase letter (A-Z).
-  * Special Characters: Must contain at least 1 special character (e.g., !, @, #, $).
-
-Open Source:
+**Open Source**
 
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
@@ -164,7 +169,9 @@ helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
     -n runai-backend -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
-Support-Entitled Release:
+**Support-Entitled**
+
+In addition to the values above, add `--set supportEntitled=true` to the `helm upgrade` command:
 
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
@@ -206,20 +213,19 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 **Connected**
 
-The same `helm upgrade` command installs the control plane for both Open Source and Support-Entitled Release. Update the values as described below; Support-Entitled Release installations additionally authenticate `helm repo add` with an [NGC Personal Key](preparations.md#registry-credentials) (`helm.ngc.nvidia.com/nvidia/runai`) and add `--set supportEntitled=true` to the `helm upgrade` command - see the examples below.
+Use the Helm command for the release type you are installing and update the values as follows.
 
 * Replace the `<OPENSHIFT-CLUSTER-DOMAIN>` with the domain configured for the OpenShift cluster. To determine the OpenShift cluster domain, run `oc get routes -A`.
-* If you are using a local certificate authority, add `--set global.customCA.enabled=true` to the Helm command as described in the [Control Plane Local CA](preparations.md#control-plane-local-ca) section.
-* Support-Entitled Release installations must reference the `runai-reg-creds` secret created in [Software Artifacts](preparations.md#software-artifacts): add `--set global.imagePullSecrets[0].name=runai-reg-creds`.
-* Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator's email address.
-* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
-  * Minimum Length: Passwords must be at least 8 characters long.
-  * Digits: Must contain at least 1 numeric digit (0-9).
-  * Lowercase Characters: Must contain at least 1 lowercase letter (a-z).
-  * Uppercase Characters: Must contain at least 1 uppercase letter (A-Z).
-  * Special Characters: Must contain at least 1 special character (e.g., !, @, #, $).
+* If you are using a local certificate authority, add `--set global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
+* Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
+* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
+  * Be at least 8 characters long.
+  * Contain at least one digit.
+  * Contain at least one lowercase letter.
+  * Contain at least one uppercase letter.
+  * Contain at least one special character.
 
-Open Source:
+**Open Source**
 
 ```bash
 helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
@@ -231,12 +237,18 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>"
 ```
 
-Support-Entitled, using your NGC Personal Key:
+**Support-Entitled**
+
+In addition to the values above, update the Helm commands as follows:
+
+* Authenticate `helm repo add` using your NGC Personal Key.
+* Add `--set supportEntitled=true` to the `helm upgrade` command.
+* Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 
 ```bash
 helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update \
   --username='$oauthtoken' \
-  --password=<NGC_PERSONAL_KEY>
+  --password=<NGC_API_KEY>
 helm repo update
 helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set global.domain=runai.apps.<OPENSHIFT-CLUSTER-DOMAIN> \
@@ -285,22 +297,22 @@ If your internal registry requires authentication, you must create the `runai-re
 
 </Warning>
 
-The same `helm upgrade` command installs the control plane for both Open Source and Support-Entitled Release. Update the values as described below; Support-Entitled Release installations additionally add `--set supportEntitled=true` to the `helm upgrade` command. The `control-plane-airgap-values.yaml` file is written by the `airgap load` step in [Preparations](preparations.md#software-artifacts):
+Use the Helm command for the release type you are installing and update the values as follows. The `control-plane-airgap-values.yaml` file is written by the `airgap load` step in [Preparations](preparations.md#software-artifacts).
 
 * Replace `control-plane-<VERSION>.tgz` with the full filename of the control plane Helm chart (e.g., `control-plane-3.0.2.tgz`), located in the `charts` folder of the working directory you specified to `airgap load`.
 * Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml` during [Preparations](preparations.md#software-artifacts) - this is where `control-plane-airgap-values.yaml` was written.
-
 * Replace `<OPENSHIFT-CLUSTER-DOMAIN>` with the domain configured for the OpenShift cluster. To determine the OpenShift cluster domain, run `oc get routes -A`.
-* Set `global.customCA.enabled=true` as described in the [Control Plane Local CA](preparations.md#control-plane-local-ca) section.
-* Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator's email address.
-* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
-  * Minimum Length: Passwords must be at least 8 characters long.
-  * Digits: Must contain at least 1 numeric digit (0-9).
-  * Lowercase Characters: Must contain at least 1 lowercase letter (a-z).
-  * Uppercase Characters: Must contain at least 1 uppercase letter (A-Z).
-  * Special Characters: Must contain at least 1 special character (e.g., !, @, #, $).
+* Set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
+* If your internal registry requires authentication, create the `runai-reg-creds` secret as described in [Software Artifacts](preparations.md#software-artifacts), then add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference it.
+* Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
+* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
+  * Be at least 8 characters long.
+  * Contain at least one digit.
+  * Contain at least one lowercase letter.
+  * Contain at least one uppercase letter.
+  * Contain at least one special character.
 
-Open Source:
+**Open Source**
 
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
@@ -312,7 +324,9 @@ helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-back
     -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
-Support-Entitled Release:
+**Support-Entitled**
+
+In addition to the values above, add `--set supportEntitled=true` to the `helm upgrade` command:
 
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
