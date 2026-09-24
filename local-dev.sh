@@ -43,7 +43,7 @@
 #   --teardown             Remove the cluster, registry (+ its volume), kind network,
 #                          built images, and the /etc/hosts entry, then exit
 #   --purge                With --teardown: also clear the build cache, Go/Gradle
-#                          caches, and .local-dev/ (implies --teardown)
+#                          caches, and generated .local-dev/ files (implies --teardown)
 #   --force-rebuild        Ignore build cache; rebuild and reload all images
 #   --help                 Show this help
 
@@ -313,7 +313,10 @@ do_teardown() {
     "${HOME}/.cache/go-build-docker-gopath"
     "${HOME}/.cache/go-build-docker-gocache"
     "${REPO_ROOT}/control-plane/keycloak-extensions/.gradle"
-    "${REPO_ROOT}/.local-dev"
+    # Not all of .local-dev/: values-cp.yaml and values-rc.yaml there are tracked in git.
+    "${CERT_DIR}"
+    "${LOG_DIR}"
+    "${REPO_ROOT}/.local-dev/bin"
   )
 
   if [[ $PURGE -eq 1 ]]; then
@@ -1045,11 +1048,6 @@ install_gpu_operator() {
     | grep -vx "${gpu_node}" \
     | xargs -I{} kubectl label node {} nvidia.com/gpu.deploy.operands=false --overwrite >/dev/null
 
-  local -a extra_args=()
-  if [[ $SKIP_PROMETHEUS -eq 0 ]]; then
-    extra_args+=(--set dcgmExporter.serviceMonitor.enabled=true)
-  fi
-
   helm repo add nvidia https://helm.ngc.nvidia.com/nvidia 2>/dev/null || true
   helm repo update nvidia
   helm upgrade --install gpu-operator nvidia/gpu-operator \
@@ -1057,7 +1055,6 @@ install_gpu_operator() {
     --namespace gpu-operator \
     --create-namespace \
     --set driver.enabled="${driver_enabled}" \
-    "${extra_args[@]+"${extra_args[@]}"}" \
     --wait \
     --timeout 10m
 

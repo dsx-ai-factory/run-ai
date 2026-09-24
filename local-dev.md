@@ -172,7 +172,7 @@ Names and versions are read from `Chart.yaml`, so bumping a dependency cannot le
 | `--gpu-operator-version VER` | GPU Operator chart version (default: `v26.7.1`). Implies `--gpu-operator` |
 | `--force-rebuild` | Ignore the build cache — rebuild and re-push every image |
 | `--teardown` | Remove the Kind cluster, local registry and its volume, `kind` network, built images, and the `/etc/hosts` entry, then exit. See [Teardown](#teardown) |
-| `--purge` | With `--teardown`: also clear the build cache, Go/Gradle caches, and `.local-dev/`. Implies `--teardown` |
+| `--purge` | With `--teardown`: also clear the build cache, Go/Gradle caches, and the generated files in `.local-dev/` (certs, logs). Implies `--teardown` |
 | `--help` | Print usage |
 
 ### Environment Variables
@@ -221,7 +221,7 @@ If you prefer, run these yourself before the script. It then skips this step.
 - **Cluster creation:** the first worker (`runai-local-worker`) mounts `/dev/null` at `/var/run/nvidia-container-devices/all`, which makes the nvidia runtime inject all host GPUs into that node. Only one node gets GPUs, because every node would otherwise advertise the same physical devices.
 - **Node prep:** inside the GPU node, the script symlinks `/sbin/ldconfig.real` and unmounts `/proc/driver/nvidia`, which the operator's container toolkit needs inside a Kind node.
 - **Other nodes:** labeled `nvidia.com/gpu.deploy.operands=false`, because NFD sees the host PCI bus from every node.
-- **Install:** installs `nvidia/gpu-operator` with `driver.enabled=false`. When Prometheus is installed, the DCGM exporter `ServiceMonitor` is enabled too. The script then waits until the node advertises `nvidia.com/gpu`.
+- **Install:** installs `nvidia/gpu-operator` with `driver.enabled=false`. The operator's own DCGM exporter `ServiceMonitor` stays off, because the runai-cluster chart creates one; enabling both would scrape GPU metrics twice. The script then waits until the node advertises `nvidia.com/gpu`.
 - **Registry fix on the GPU node:** the operator's toolkit adds `/etc/containerd/conf.d/99-nvidia.toml`, which uses containerd config version 3. Once any loaded file is version 3, containerd ignores the node's older-format `io.containerd.grpc.v1.cri` section, including the local-registry setting. Without a fix, the GPU node fails every `localhost:5001` pull with `connection refused`. After the operator is ready, the script adds `zz-runai-registry.toml`, which loads after the nvidia file and restores the registry setting. It then restarts containerd on that node and checks the setting is in effect.
 
 The GPU mount can only be added when the cluster is created. To switch an existing fake-GPU cluster to real GPUs, recreate it:
@@ -549,7 +549,9 @@ Caches that make the next run faster are **kept**, and the script prints each on
 - Docker's build cache, which is shared with your other projects;
 - `~/.cache/go-build-docker-*`;
 - `control-plane/keycloak-extensions/.gradle`;
-- `.local-dev/`, which holds certs and logs.
+- `.local-dev/certs/`, `.local-dev/logs/`, and `.local-dev/bin/`.
+
+`.local-dev/values-cp.yaml` and `.local-dev/values-rc.yaml` are tracked in git and are never removed, even with `--purge`.
 
 To remove those too:
 
