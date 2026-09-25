@@ -12,6 +12,13 @@ Gateway API support in NVIDIA Run:ai is **optional**. If you are currently using
 
 </Note>
 
+## Choose Your Installation Path
+
+The networking concepts and Gateway API requirements on this page apply to both installation paths. Where configuration differs, follow the instructions for your installation method:
+
+* **Guided Installation** - Configure NVIDIA Run:ai using `runai-installer` and `config.yaml`.
+* **Manual Helm** - Configure NVIDIA Run:ai directly using Helm values and Kubernetes resources.
+
 ## Scope and Prerequisites
 
 This guide assumes a self-hosted deployment where the NVIDIA Run:ai control plane and cluster services are installed on the same Kubernetes cluster.
@@ -144,11 +151,34 @@ In this configuration:
 * A wildcard TLS certificate is **not required** for workspaces, training, and distributed inference workloads
 * The Gateway uses a single domain listener for these services
 
-Ensure that host-based routing is disabled using the following. For more details, see [Advanced cluster configurations](../cluster-config.md).
+Ensure that host-based routing is disabled. For more details, see [Advanced cluster configurations](../cluster-config.md).
 
+<Tabs>
+
+<Tab title="Guided Installation">
+
+Set workload routing to `path` in your `config.yaml`:
+
+```yaml
+cluster:
+  workloadRouting: path
 ```
+
+Re-run `runai-installer install` to apply the change.
+
+</Tab>
+
+<Tab title="Manual Helm">
+
+Disable host-based routing:
+
+```yaml
 clusterConfig.global.subdomainSupport: false
 ```
+
+</Tab>
+
+</Tabs>
 
 ### Gateway Configuration
 
@@ -247,13 +277,30 @@ Add a standard inference listener to the existing Gateway resource:
 ### Configure Knative Serving
 
 NVIDIA Run:ai uses Knative Serving to support standard inference workloads. Inference traffic arrives at the Gateway and is forwarded to Knative Serving through Kourier, which routes it to the individual inference endpoints.
+
 <Tabs>
 
 <Tab title="Guided Installation">
 
-Set `features.knative.mode: install` and `cluster.inference.wildcardDomain` in your `config.yaml`. With `externalConnection.type: gatewayApi` already configured, the installer installs Knative Serving and automatically attaches it to the Gateway with an HTTPRoute - no manual YAML is needed, and no wildcard certificate is required for Knative itself under Gateway API. See [`features`](../../installation/guided-installation/configuration-reference.md#features) and [Fields Available Under Each Prerequisite and Feature](../../installation/guided-installation/configuration-reference.md#fields-available-under-each-prerequisite-and-feature).
+Configure standard inference in your `config.yaml`:
 
-Re-run `runai-installer install` with the updated `config.yaml` to apply the change.
+```yaml
+cluster:
+  inference:
+    wildcardDomain: "*.<INFERENCE_WILDCARD_DOMAIN>"
+
+features:
+  knative:
+    mode: install
+
+externalConnection:
+  type: gatewayApi
+  gatewayApi:
+    name: <GATEWAY_NAME>
+    namespace: <GATEWAY_NAMESPACE>
+```
+
+Re-run `runai-installer install` to apply the change. The installer installs Knative Serving and attaches it to the Gateway with an HTTPRoute automatically - no manual YAML is needed, and no wildcard certificate is required for Knative itself under Gateway API. See [`features`](../../installation/guided-installation/configuration-reference.md#features) and [Fields Available Under Each Prerequisite and Feature](../../installation/guided-installation/configuration-reference.md#fields-available-under-each-prerequisite-and-feature).
 
 </Tab>
 
@@ -458,8 +505,8 @@ Set `externalConnection.type: gatewayApi` in your `config.yaml`, for both the co
 externalConnection:
   type: gatewayApi
   gatewayApi:
-    name: <gateway-name>
-    namespace: <gateway-namespace>
+    name: <GATEWAY_NAME>
+    namespace: <GATEWAY_NAMESPACE>
 ```
 
 Re-run `runai-installer install` with the updated `config.yaml` against the control plane cluster and each NVIDIA Run:ai cluster to apply the change. See [`externalConnection`](../../installation/guided-installation/configuration-reference.md#externalconnection).
@@ -527,7 +574,7 @@ nslookup <CLUSTER_DOMAIN>
 curl https://<CLUSTER_DOMAIN>/
 ```
 
-Disable Ingress on both the cluster and the control plane. There's no dedicated `externalConnection` field for this - Ingress and Gateway API can be enabled together, so disabling Ingress is a separate step.
+Disable Ingress on both the cluster and the control plane. There is no dedicated `externalConnection` field for this - Ingress and Gateway API can be enabled together, so disabling Ingress is a separate step.
 
 <Tabs>
 

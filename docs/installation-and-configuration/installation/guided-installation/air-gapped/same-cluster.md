@@ -13,9 +13,7 @@ Complete [Preparations](preparations.md) before continuing, including the system
 
 **Note**
 
-GPU Operator and Prometheus are required for every installation, but the installer does not install them in air-gapped environments - they are skipped by default. Install both yourself beforehand, using each vendor's own air-gapped installation instructions. Features such as Knative, Kubeflow, MPI Operator, LWS, NIM Operator, Dynamo, and Grove are also skipped by default and follow the same pattern - if your workloads require any of these, install them yourself beforehand. See [Prerequisites and Features](preparations.md#prerequisites-and-features).
-
-Some features require additional networking configuration. For example, externally exposed standard inference with Knative requires an additional inference wildcard FQDN and TLS certificate. See [Networking Setup](../../../system-requirements/networking-setup.md).
+The installer does not install prerequisites or features in air-gapped environments. Install each required component yourself beforehand, on each target Kubernetes cluster, using that component's air-gapped installation instructions. See [Prerequisites and Features](preparations.md#prerequisites-and-features).
 
 </Note>
 
