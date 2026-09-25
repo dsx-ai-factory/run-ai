@@ -610,9 +610,9 @@ For air-gapped installation instructions, see [Installation](https://github.com/
 
 ### Dynamo
 
-The [Dynamo Operator](https://docs.nvidia.com/dynamo/latest/kubernetes/dynamo_operator.html) is a Kubernetes operator that simplifies the deployment, configuration, and lifecycle management of DynamoGraphs. NVIDIA Run:ai provides out-of-the-box support for submitting Dynamo workloads [via YAML](../../../workloads-in-nvidia-run-ai/submit-via-yaml.md).
+The [Dynamo Operator](https://docs.nvidia.com/dynamo) is a Kubernetes operator that simplifies the deployment, configuration, and lifecycle management of DynamoGraphs. NVIDIA Run:ai provides out-of-the-box support for submitting Dynamo workloads [via YAML](../../../workloads-in-nvidia-run-ai/submit-via-yaml.md).
 
-For air-gapped installation instructions, see the [Installation Guide for Dynamo Kubernetes Platform](https://docs.nvidia.com/dynamo/latest/kubernetes/installation_guide.html).
+For air-gapped installation instructions, see the [Installation Guide for Dynamo Kubernetes Platform](https://docs.nvidia.com/dynamo/kubernetes/getting-started/introduction).
 
 ## Next Steps
 

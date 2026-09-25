@@ -5,19 +5,17 @@
 
 This page describes how to prepare for installing NVIDIA Run:ai using the `runai-installer` CLI in an air-gapped environment, with no outbound internet access. Images and Helm charts are pulled from your own private mirror registry, populated in advance from an air-gapped bundle. For internet-connected environments, see [Connected Installation](../connected/preparations.md).
 
-NVIDIA Run:ai supports two deployment models - see [Same-Cluster Installation](same-cluster.md) to install the control plane and cluster together on one Kubernetes cluster, or [Multi-Cluster Installation](multi-cluster.md) to install the control plane and one or more clusters on separate Kubernetes clusters. For a complete list of configuration fields, see the [Configuration Reference](../configuration-reference.md).
-
 ## System Requirements
 
 Complete [System Requirements](../../../system-requirements/README.md) before running the installer, for each Kubernetes cluster you install onto. It covers the infrastructure you must provision yourself beforehand - hardware and Kubernetes distribution, networking and DNS, TLS certificates, and access to your private mirror registry - as well as the third-party services the installation deploys for you. The installer deploys and configures NVIDIA Run:ai itself; it does not provision this underlying infrastructure for you.
 
-Have the following at hand for the installation:
+Have the following at hand for the installation. Make sure you have the domains, TLS certificates, and other values required for your deployment - these depend on your deployment model, workload routing, and the workload features you plan to enable. See [Networking Setup](../../../system-requirements/networking-setup.md) and [Prerequisites and Features](../prerequisites-and-features.md).
 
 | Requirement | Details |
 |---|---|
 | Kubernetes access | `kubectl` configured with cluster-admin or equivalent permissions on the target cluster - on the control plane cluster and on each NVIDIA Run:ai cluster, in a multi-cluster deployment |
 | FQDNs | A resolvable domain name for the NVIDIA Run:ai control plane, and a wildcard FQDN for externally exposed workloads - per cluster, in a multi-cluster deployment. See [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) |
-| TLS certificates | A certificate and private key for each of your FQDNs, or set `tls.generateSelfSigned: true` to have the installer generate self-signed certificates automatically (non-production environments only). See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) |
+| TLS certificates | A certificate and private key for each of your FQDNs. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) |
 
 Multi-cluster deployments also need:
 
@@ -36,14 +34,6 @@ Identify the NVIDIA Run:ai cluster to the control plane using one of two methods
 NGC credentials are not needed to build the air-gapped bundle, for either Open Source or Support-Entitled Release - `airgap pack` pulls NVIDIA Run:ai container images and charts without authentication. Registry credentials are only needed for a registry you introduce yourself, such as your own registry hosting an `imageOverrides` source.
 
 Once the bundle is loaded, the `registry` section in your configuration file authenticates to your own private mirror registry (populated from the bundle) using basic authentication (`username` and `password` or `passwordPath`). See [`registry`](../configuration-reference.md#registry) and [`airgap`](../configuration-reference.md#airgap) in the Configuration Reference.
-
-<Note>
-
-**Note**
-
-The installer does not yet expose a dedicated field for Support-Entitled Release branding (the UI branding and support contact link shown in the control plane). Set it yourself via `controlPlane.customHelmValues.supportEntitled: true`. See [`customHelmValues`](../configuration-reference.md#controlplane) in the Configuration Reference. No NGC credentials are needed for this - air-gapped installations authenticate to your own mirror registry, not NGC.
-
-</Note>
 
 ## Download the Installer
 
@@ -151,6 +141,9 @@ The installer does not install prerequisites or features at all in air-gapped en
 
 ## Next Steps
 
+[Same-Cluster Installation](same-cluster.md) and [Multi-Cluster Installation](multi-cluster.md) walk you through the minimum configuration needed for your deployment model. [Configuration Templates](templates.md) has complete, ready-to-use configurations for specific use cases - use one instead if it matches yours. The [Configuration Reference](../configuration-reference.md) covers every supported field, for building a configuration from scratch.
+
 * [Same-Cluster Installation](same-cluster.md) - Install the control plane and cluster together, on one Kubernetes cluster.
 * [Multi-Cluster Installation](multi-cluster.md) - Install the control plane and one or more clusters on separate Kubernetes clusters.
 * [Configuration Templates](templates.md) - Complete, ready-to-use configurations for specific use cases.
+* [Configuration Reference](../configuration-reference.md) - All supported configuration fields, for building a configuration from scratch.

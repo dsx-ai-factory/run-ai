@@ -40,12 +40,12 @@ Use the Helm command for the release type you are installing and update the valu
 * The recommended ingress controller is HAProxy. If you are using a different ingress controller, set `--set global.ingress.ingressClass=<INGRESS_CLASS>` to the ingress class configured for your environment.
 * If you are using a local certificate authority, add `--set global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
-* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
-  * Be at least 8 characters long.
-  * Contain at least one digit.
-  * Contain at least one lowercase letter.
-  * Contain at least one uppercase letter.
-  * Contain at least one special character.
+* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
+  * **Minimum Length**: At least 8 characters long.
+  * **Digits**: At least 1 numeric digit (0-9).
+  * **Lowercase Characters**: At least 1 lowercase letter (a-z).
+  * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
+  * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
 
 **Open Source**
 
@@ -63,7 +63,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 
 In addition to the values above, update the Helm commands as follows:
 
-* Authenticate `helm repo add` using your NGC Personal Key.
+* Authenticate `helm repo add` using your [NGC Personal Key](preparations.md#registry-credentials).
 * Add `--set supportEntitled=true` to the `helm upgrade` command.
 * Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 
@@ -128,12 +128,12 @@ Use the Helm command for the release type you are installing and update the valu
 * The recommended ingress controller is HAProxy. If you are using a different ingress controller, set `--set global.ingress.ingressClass=<INGRESS_CLASS>` to the ingress class configured for your environment.
 * If your internal registry requires authentication, add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
-* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
-  * Be at least 8 characters long.
-  * Contain at least one digit.
-  * Contain at least one lowercase letter.
-  * Contain at least one uppercase letter.
-  * Contain at least one special character.
+* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
+  * **Minimum Length**: At least 8 characters long.
+  * **Digits**: At least 1 numeric digit (0-9).
+  * **Lowercase Characters**: At least 1 lowercase letter (a-z).
+  * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
+  * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
 
 **Open Source**
 
@@ -196,12 +196,12 @@ Use the Helm command for the release type you are installing and update the valu
 * Replace the `<OPENSHIFT-CLUSTER-DOMAIN>` with the domain configured for the OpenShift cluster. To determine the OpenShift cluster domain, run `oc get routes -A`.
 * If you are using a local certificate authority, add `--set global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
-* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
-  * Be at least 8 characters long.
-  * Contain at least one digit.
-  * Contain at least one lowercase letter.
-  * Contain at least one uppercase letter.
-  * Contain at least one special character.
+* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
+  * **Minimum Length**: At least 8 characters long.
+  * **Digits**: At least 1 numeric digit (0-9).
+  * **Lowercase Characters**: At least 1 lowercase letter (a-z).
+  * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
+  * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
 
 **Open Source**
 
@@ -219,7 +219,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 
 In addition to the values above, update the Helm commands as follows:
 
-* Authenticate `helm repo add` using your NGC Personal Key.
+* Authenticate `helm repo add` using your [NGC Personal Key](preparations.md#registry-credentials).
 * Add `--set supportEntitled=true` to the `helm upgrade` command.
 * Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 
@@ -283,12 +283,12 @@ Use the Helm command for the release type you are installing and update the valu
 * Set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
 * If your internal registry requires authentication, add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
-* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must:
-  * Be at least 8 characters long.
-  * Contain at least one digit.
-  * Contain at least one lowercase letter.
-  * Contain at least one uppercase letter.
-  * Contain at least one special character.
+* Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
+  * **Minimum Length**: At least 8 characters long.
+  * **Digits**: At least 1 numeric digit (0-9).
+  * **Lowercase Characters**: At least 1 lowercase letter (a-z).
+  * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
+  * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
 
 **Open Source**
 

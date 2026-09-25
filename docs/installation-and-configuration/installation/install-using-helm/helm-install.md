@@ -35,10 +35,6 @@ Using a Kubernetes user with the `cluster-admin` role to ensure a successful ins
 
 </Note>
 
-### Open Source and Support-Entitled Release
-
-The installation steps below are the same for both Open Source and Support-Entitled Release. Registry authentication with your NGC Personal Key happens once, during the [control plane installation](install-control-plane.md#open-source-and-support-entitled-release) - the NVIDIA Run:ai cluster install does not require it again.
-
 ### Kubernetes
 
 <Accordion title="Connected">
