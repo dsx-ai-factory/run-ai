@@ -99,7 +99,7 @@ Basic authentication:
 
 ```yaml
 registry:
-  host: harbor.mycorp.local
+  host: <REGISTRY_HOST>
   username: runai
   passwordPath: /path/to/password
   caChainPath: /path/to/ca-chain.pem
@@ -109,7 +109,7 @@ No authentication:
 
 ```yaml
 registry:
-  host: registry.mycorp.local
+  host: <REGISTRY_HOST>
 ```
 
 | Field | Type | Required | Description |
@@ -228,7 +228,7 @@ controlPlane:
   enabled: true
   version: ""
   multiTenant: false
-  domain: runai.mycorp.local
+  domain: <DOMAIN>
   tls:
     certPath: /path/to/cert.pem
     keyPath: /path/to/key.pem
@@ -254,14 +254,14 @@ Configures the NVIDIA Run:ai cluster component.
 cluster:
   enabled: true
   version: ""
-  name: my-cluster
+  name: <CLUSTER_NAME>
   domain: ""
   workloadRouting: path
   tls:
     certPath: /path/to/cert.pem
     keyPath: /path/to/key.pem
   inference:
-    wildcardDomain: "*.runai-inference.mycorp.local"
+    wildcardDomain: "*.<INFERENCE_WILDCARD_DOMAIN>"
     wildcardTls:
       certPath: /path/to/wildcard-cert.pem
       keyPath: /path/to/wildcard-key.pem
@@ -350,7 +350,7 @@ features:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `skip` | bool | No | Skips installation of all optional features. |
+| `skip` | bool | No | Skips installation of all features. |
 | `knative` | object | No | Knative Serving. Required for standard (single-node) inference workloads. Installing it requires `cluster.inference.wildcardDomain` to be set (plus a resolvable wildcard certificate, unless using Gateway API or OpenShift), or validation fails. |
 | `kubeflow` | object | No | Kubeflow Training Operator. Required for distributed training workloads (TensorFlow, PyTorch, XGBoost, and JAX). Installs from pinned manifests - `customHelmValues` is not supported. |
 | `mpiOperator` | object | No | MPI Operator. Required for MPI v2-based distributed training, alongside the frameworks the Kubeflow Training Operator provides. Installs from pinned manifests - `customHelmValues` is not supported. |

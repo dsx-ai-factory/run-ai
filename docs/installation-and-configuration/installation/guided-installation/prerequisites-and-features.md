@@ -81,7 +81,7 @@ For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/usi
 
 **OpenShift Container Platform (OCP)**
 
-The Node Feature Discovery (NFD) Operator is a prerequisite for the NVIDIA GPU Operator in OpenShift. Install the NFD Operator using the Red Hat OperatorHub catalog in the OpenShift Container Platform web console. For more information, see [Installing the Node Feature Discovery (NFD) Operator](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/install-nfd.html).
+The Node Feature Discovery (NFD) Operator is a prerequisite for the NVIDIA GPU Operator in OpenShift. For connected installs, `runai-installer` installs the NFD Operator automatically as part of the GPU Operator prerequisite. For air-gapped installs, install the NFD Operator yourself beforehand, using the Red Hat OperatorHub catalog in the OpenShift Container Platform web console. For more information, see [Installing the Node Feature Discovery (NFD) Operator](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/install-nfd.html).
 
 </Accordion>
 

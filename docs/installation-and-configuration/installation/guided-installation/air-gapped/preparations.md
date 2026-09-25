@@ -3,31 +3,26 @@
 
 # Preparations
 
-This page describes how to prepare for installing NVIDIA Run:ai using the `runai-installer` CLI in an air-gapped environment, with no outbound internet access. Images and Helm charts are pulled from your own private mirror registry, populated in advance from an air-gapped bundle. For internet-connected environments, see [Connected Installation](../connected/preparations.md).
+This page describes how to prepare for installing NVIDIA Run:ai using the `runai-installer` CLI in an air-gapped environment, with no outbound internet access. For internet-connected environments, see [Connected Installation](../connected/preparations.md).
 
 ## System Requirements
 
-Complete [System Requirements](../../../system-requirements/README.md) before running the installer, for each Kubernetes cluster you install onto. It covers the infrastructure you must provision yourself beforehand - hardware and Kubernetes distribution, networking and DNS, TLS certificates, and access to your private mirror registry - as well as the third-party services the installation deploys for you. The installer deploys and configures NVIDIA Run:ai itself; it does not provision this underlying infrastructure for you.
+Complete [System Requirements](../../../system-requirements/README.md) before running the installer, for each Kubernetes cluster you install onto - hardware and Kubernetes distribution, networking and DNS, TLS certificates, and the third-party services the installation deploys for you. The installer deploys and configures NVIDIA Run:ai itself; it does not provision this infrastructure.
 
 Have the following at hand for the installation. Make sure you have the domains, TLS certificates, and other values required for your deployment - these depend on your deployment model, workload routing, and the workload features you plan to enable. See [Networking Setup](../../../system-requirements/networking-setup.md) and [Prerequisites and Features](../prerequisites-and-features.md).
 
 | Requirement | Details |
 |---|---|
 | Kubernetes access | `kubectl` configured with cluster-admin or equivalent permissions on the target cluster - on the control plane cluster and on each NVIDIA Run:ai cluster, in a multi-cluster deployment |
-| FQDNs | A resolvable domain name for the NVIDIA Run:ai control plane, and a wildcard FQDN for externally exposed workloads - per cluster, in a multi-cluster deployment. See [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) |
-| TLS certificates | A certificate and private key for each of your FQDNs. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) |
+| FQDNs | The FQDNs and DNS records required for your deployment. Requirements depend on your deployment model, workload routing, and enabled workload features. See [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) |
+| TLS certificates | The TLS certificates and private keys required for your configured domains. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) |
 
 Multi-cluster deployments also need:
 
 | Requirement | Details |
 |---|---|
-| Control plane access | The control plane's FQDN (`cluster.controlPlaneUrl`), reachable over HTTPS from each NVIDIA Run:ai cluster, and a way to identify the cluster to the control plane - see below |
+| Control plane access | The control plane's FQDN (`cluster.controlPlaneUrl`), reachable over HTTPS from each NVIDIA Run:ai cluster, and a way to identify the cluster to the control plane - see [Install Each NVIDIA Run:ai Cluster](multi-cluster.md#install-each-nvidia-runai-cluster) |
 | Network connectivity | Outbound HTTPS (port 443) from the nodes of each NVIDIA Run:ai cluster to the control plane FQDN. See [Control Plane and Cluster Sync](../../../system-requirements/external-access-to-critical-services.md#control-plane-and-cluster-sync) |
-
-Identify the NVIDIA Run:ai cluster to the control plane using one of two methods:
-
-- Let the installer add the cluster - The default for a new installation. Provide a control plane login, and the installer creates the cluster in the control plane for you (or reuses it, if a cluster with that name already exists there). Set `cluster.controlPlaneCredentials` to either a username and password (`username`, plus `passwordPath` or inline `password`) or a token (`tokenPath` or inline `token`). The control plane's own admin login works here - the installer prints it after installing the control plane. See [Install the Control Plane](multi-cluster.md#install-the-control-plane).
-- Cluster already added in the control plane - Use this method if someone already added the cluster in the control plane UI or API beforehand, where it now shows status **Waiting to connect**. Provide the identity the control plane issued for it: `cluster.uid`, plus one of `cluster.bootstrapTokenPath` or `cluster.clientSecretPath`.
 
 ## Registry Credentials
 
@@ -141,9 +136,7 @@ The installer does not install prerequisites or features at all in air-gapped en
 
 ## Next Steps
 
-[Same-Cluster Installation](same-cluster.md) and [Multi-Cluster Installation](multi-cluster.md) walk you through the minimum configuration needed for your deployment model. [Configuration Templates](templates.md) has complete, ready-to-use configurations for specific use cases - use one instead if it matches yours. The [Configuration Reference](../configuration-reference.md) covers every supported field, for building a configuration from scratch.
-
-* [Same-Cluster Installation](same-cluster.md) - Install the control plane and cluster together, on one Kubernetes cluster.
-* [Multi-Cluster Installation](multi-cluster.md) - Install the control plane and one or more clusters on separate Kubernetes clusters.
-* [Configuration Templates](templates.md) - Complete, ready-to-use configurations for specific use cases.
+* [Same-Cluster Installation](same-cluster.md) - The minimum configuration to install the control plane and cluster together, on one Kubernetes cluster.
+* [Multi-Cluster Installation](multi-cluster.md) - The minimum configuration to install the control plane and one or more clusters on separate Kubernetes clusters.
+* [Configuration Templates](templates.md) - Complete, ready-to-use configurations for specific use cases - use one instead of the minimum configuration if it matches yours.
 * [Configuration Reference](../configuration-reference.md) - All supported configuration fields, for building a configuration from scratch.

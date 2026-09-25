@@ -26,7 +26,9 @@ If your use case matches one of the [Configuration Templates](templates.md), use
 
 </Note>
 
-Create a `cp-config.yaml` file for the control plane cluster. At a minimum, configure:
+Create a `cp-config.yaml` file for the control plane cluster. Use the domains, TLS certificates, and networking values you prepared in [Networking Setup](../../../system-requirements/networking-setup.md) when completing the configuration below.
+
+At a minimum, configure:
 
 1. Define the installation:
 
@@ -53,7 +55,7 @@ Create a `cp-config.yaml` file for the control plane cluster. At a minimum, conf
 3. Define the control plane:
 
    - `controlPlane.domain` - The FQDN for the NVIDIA Run:ai UI and API. See [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns).
-   - `controlPlane.tls` - A certificate and private key for that FQDN, as `certPath` and `keyPath`. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates). If a single certificate covers every FQDN you're using (control plane, cluster, and inference), you can set it once at the root-level `tls` field instead of repeating it under each component - see [`tls`](../configuration-reference.md#tls).
+   - `controlPlane.tls` - The certificate and private key for the control plane FQDN, as `certPath` and `keyPath`. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates).
    - `controlPlane.version` - The control plane version to install. Omit it to install the latest supported version.
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
    - `controlPlane.customHelmValues.supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, set to `true`.
@@ -61,7 +63,7 @@ Create a `cp-config.yaml` file for the control plane cluster. At a minimum, conf
    ```yaml
    controlPlane:
      enabled: true
-     domain: runai.mycorp.local
+     domain: <DOMAIN>
      tls:
        certPath: /path/to/cp-cert.pem
        keyPath: /path/to/cp-key.pem
@@ -72,13 +74,13 @@ Create a `cp-config.yaml` file for the control plane cluster. At a minimum, conf
 
 4. Configure the networking:
 
-   - `externalConnection` - Configures how traffic reaches NVIDIA Run:ai's own services - the control plane UI/API and the cluster endpoint - through a Kubernetes Ingress Controller or Gateway API implementation already running on your cluster. Required on standard Kubernetes; omit this section entirely on OpenShift, where Routes are configured automatically. See [Networking Setup](../../../system-requirements/networking-setup.md).
+   - `externalConnection` - Configures how traffic reaches NVIDIA Run:ai's own services - the control plane UI/API and the cluster endpoint - through a Kubernetes Ingress Controller or Gateway API implementation already running on your cluster. See [Networking Setup](../../../system-requirements/networking-setup.md).
 
    ```yaml
    externalConnection:
      type: ingress
      ingress:
-       className: <your-ingress-class>
+       className: <YOUR_INGRESS_CLASS>
    ```
 
 The following example combines these settings to install the NVIDIA Run:ai control plane:
@@ -94,7 +96,7 @@ registry:
 
 controlPlane:
   enabled: true
-  domain: runai.mycorp.local
+  domain: <DOMAIN>
   tls:
     certPath: /path/to/cp-cert.pem
     keyPath: /path/to/cp-key.pem
@@ -105,7 +107,7 @@ controlPlane:
 externalConnection:
   type: ingress
   ingress:
-    className: <your-ingress-class>
+    className: <YOUR_INGRESS_CLASS>
 ```
 
 - **Validate first** - Before applying any changes, check your configuration against the control plane cluster:
@@ -137,11 +139,18 @@ externalConnection:
 
 When the installation completes, verify that the control plane is reachable at its FQDN (for example, `https://runai.mycorp.local`) before continuing.
 
+## Retrieve Control Plane Credentials
+
+Retrieve the generated control plane administrator username and password - use these when installing NVIDIA Run:ai clusters below:
+
+```bash
+kubectl get configmap runai-backend-tenants-manager -n runai-backend -o jsonpath='{.data.ADMIN_USERNAME}'
+kubectl get secret runai-backend-gen-tenants-manager -n runai-backend -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d
+```
+
 ## Install Each NVIDIA Run:ai Cluster
 
-Create a `cluster-config.yaml` file for each NVIDIA Run:ai cluster. The control plane must already be installed and reachable at its FQDN.
-
-You can also generate this configuration from the NVIDIA Run:ai UI instead of writing it by hand - the onboarding wizard or the Clusters form walks through the same choices and generates a starter `config.yaml` and `runai-installer` command for you. See [Clusters](../../../operations/clusters.md).
+Create a `cluster-config.yaml` file for each NVIDIA Run:ai cluster. The control plane must already be installed and reachable at its FQDN. Use the domains, TLS certificates, and networking values you prepared in [Networking Setup](../../../system-requirements/networking-setup.md) when completing the configuration below.
 
 At a minimum, configure:
 
@@ -170,10 +179,10 @@ At a minimum, configure:
 3. Define the cluster:
 
    - `cluster.name` - The name of the NVIDIA Run:ai cluster as it appears in the control plane.
-   - `cluster.domain` - The FQDN for this cluster. Required when the cluster component is installed on a different Kubernetes cluster than the control plane. The installer also uses this domain to reach the control plane when registering the cluster.
+   - `cluster.domain` - The FQDN for this cluster. See [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns). Required when the cluster component is installed on a different Kubernetes cluster than the control plane. The installer also uses this domain to reach the control plane when registering the cluster.
    - `cluster.controlPlaneUrl` - The control plane's FQDN, reachable over HTTPS from this cluster.
-   - `cluster.uid` plus one of `cluster.bootstrapTokenPath`/`cluster.clientSecretPath`, or `cluster.controlPlaneCredentials` - Identifies this cluster to the control plane. See [Preparations](preparations.md#system-requirements) for the two available methods.
-   - `cluster.workloadRouting` - `host` (the default) or `path`. This determines which certificate you need for `cluster.tls`, below.
+   - `cluster.controlPlaneCredentials` - Identifies this cluster to the control plane. Use the control plane administrator username and password generated during control plane installation - the installer uses these to register the cluster and fetch its bootstrap token automatically, in the same run. See [Retrieve Control Plane Credentials](#retrieve-control-plane-credentials).
+   - `cluster.workloadRouting` - `host` (the default) or `path`. This determines which certificate you need for `cluster.tls` below.
    - `cluster.tls` - A certificate and private key for the cluster domain, as `certPath` and `keyPath`. Which certificate you need depends on `workloadRouting` and the workload types you plan to support - see [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates).
    - `cluster.version` - The cluster version to install. Omit it to install the latest supported version.
    - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
@@ -181,12 +190,13 @@ At a minimum, configure:
    ```yaml
    cluster:
      enabled: true
-     name: cluster-a
-     domain: runai-a.mycorp.local
+     name: <CLUSTER_NAME>
+     domain: <CLUSTER_DOMAIN>
      workloadRouting: host # Default; determines the certificate cluster.tls needs
-     controlPlaneUrl: https://runai.mycorp.local
+     controlPlaneUrl: https://<DOMAIN>
      controlPlaneCredentials:
-       tokenPath: /path/to/cp-token
+       username: <ADMIN_EMAIL>
+       passwordPath: /path/to/cp-password
      tls:
        certPath: /path/to/cluster-a-cert.pem
        keyPath: /path/to/cluster-a-key.pem
@@ -216,26 +226,26 @@ At a minimum, configure:
 
    **Features**
 
-   The minimum configuration does not include optional features such as Knative, Kubeflow, MPI Operator, LWS, NIM Operator, Dynamo, or Grove. These are skipped by default.
+   The minimum configuration does not include features such as Knative, Kubeflow, MPI Operator, LWS, NIM Operator, Dynamo, or Grove. These are skipped by default.
 
    If your workloads require any of these features, add the corresponding `features` configuration. See [Prerequisites and Features](../prerequisites-and-features.md#features).
 
-   Some features also affect your networking requirements. For example, enabling externally exposed standard inference with Knative requires an inference wildcard FQDN and TLS certificate.
+   Some features require additional networking configuration. For example, externally exposed standard inference with Knative requires an additional inference wildcard FQDN and TLS certificate. See [Networking Setup](../../../system-requirements/networking-setup.md).
 
    </Note>
 
 5. Configure the networking:
 
-   - `externalConnection` - Configures how traffic reaches NVIDIA Run:ai's own services - the control plane UI/API and the cluster endpoint - through a Kubernetes Ingress Controller or Gateway API implementation already running on your cluster. This is separate from `cluster.workloadRouting`, which controls how the workloads you submit are exposed. Required on standard Kubernetes; omit this section entirely on OpenShift, where Routes are configured automatically. See [Networking Setup](../../../system-requirements/networking-setup.md).
+   - `externalConnection` - Configures how traffic reaches NVIDIA Run:ai's own services - the control plane UI/API and the cluster endpoint - through a Kubernetes Ingress Controller or Gateway API implementation already running on your cluster. This is separate from `cluster.workloadRouting`, which controls how the workloads you submit are exposed. See [Networking Setup](../../../system-requirements/networking-setup.md).
 
    ```yaml
    externalConnection:
      type: ingress
      ingress:
-       className: <your-ingress-class>
+       className: <YOUR_INGRESS_CLASS>
    ```
 
-The following example combines these settings to install the NVIDIA Run:ai cluster component on a separate Kubernetes cluster, and has the installer register it with the control plane using a control plane token:
+The following example combines these settings to install the NVIDIA Run:ai cluster component on a separate Kubernetes cluster, and has the installer register it with the control plane using the control plane administrator username and password:
 
 ```yaml
 install:
@@ -248,12 +258,13 @@ registry:
 
 cluster:
   enabled: true
-  name: cluster-a
-  domain: runai-a.mycorp.local
+  name: <CLUSTER_NAME>
+  domain: <CLUSTER_DOMAIN>
   workloadRouting: host
-  controlPlaneUrl: https://runai.mycorp.local
+  controlPlaneUrl: https://<DOMAIN>
   controlPlaneCredentials:
-    tokenPath: /path/to/cp-token
+    username: <ADMIN_EMAIL>
+    passwordPath: /path/to/cp-password
   tls:
     certPath: /path/to/cluster-a-cert.pem
     keyPath: /path/to/cluster-a-key.pem
@@ -273,7 +284,7 @@ prerequisites:
 externalConnection:
   type: ingress
   ingress:
-    className: <your-ingress-class>
+    className: <YOUR_INGRESS_CLASS>
 ```
 
 - **Validate first** - Before applying any changes, check your configuration against the target cluster:
@@ -319,7 +330,19 @@ kubectl get pods -n runai
 
 All pods should reach `Running` or `Completed` status.
 
-Then log-in to the NVIDIA Run:ai UI at the control plane domain and verify that each installed cluster appears under its configured `cluster.name` with a **Connected** status. If a cluster does not show as **Connected**, see [Troubleshooting scenarios](../../../operations/clusters.md#troubleshooting-scenarios).
+## Connect to NVIDIA Run:ai User Interface
+
+<Note>
+
+**Note**
+
+After installation, it may take a few minutes for the UI to become accessible (up to 15 minutes). Accessing it too early may result in a "server cannot be reached" error.
+
+</Note>
+
+1. Open your browser and go to the control plane domain (for example, `https://runai.mycorp.local`).
+2. Log in using the control plane administrator username and password retrieved earlier. It is recommended to change the password after the first login.
+3. Verify that each installed cluster appears under its configured `cluster.name` with a **Connected** status. If a cluster does not show as **Connected**, see [Troubleshooting scenarios](../../../operations/clusters.md#troubleshooting-scenarios).
 
 ## Command Reference and Troubleshooting
 
