@@ -300,7 +300,7 @@ externalConnection:
     namespace: <GATEWAY_NAMESPACE>
 ```
 
-Re-run `runai-installer install` to apply the change. The installer installs Knative Serving and attaches it to the Gateway with an HTTPRoute automatically - no manual YAML is needed, and no wildcard certificate is required for Knative itself under Gateway API. See [`features`](../../installation/guided-installation/configuration-reference.md#features) and [Fields Available Under Each Prerequisite and Feature](../../installation/guided-installation/configuration-reference.md#fields-available-under-each-prerequisite-and-feature).
+Re-run `runai-installer install` to apply the change. The installer installs Knative Serving and attaches it to the Gateway with an HTTPRoute automatically - no manual YAML is needed, and no wildcard certificate is required for Knative itself under Gateway API. See [`features`](../../installation/guided-installation/configuration-reference.md#feature-configuration) and [Common Prerequisite and Feature Fields](../../installation/guided-installation/configuration-reference.md#common-prerequisite-and-feature-fields).
 
 </Tab>
 
@@ -509,7 +509,7 @@ externalConnection:
     namespace: <GATEWAY_NAMESPACE>
 ```
 
-Re-run `runai-installer install` with the updated `config.yaml` against the control plane cluster and each NVIDIA Run:ai cluster to apply the change. See [`externalConnection`](../../installation/guided-installation/configuration-reference.md#externalconnection).
+Re-run `runai-installer install` with the updated `config.yaml` against the control plane cluster and each NVIDIA Run:ai cluster to apply the change. See [`externalConnection`](../../installation/guided-installation/configuration-reference.md#external-connection).
 
 </Tab>
 
@@ -596,7 +596,7 @@ controlPlane:
         enabled: false
 ```
 
-Re-run `runai-installer install` with the updated `config.yaml` to apply the change. See [`cluster`](../../installation/guided-installation/configuration-reference.md#cluster) / [`controlPlane`](../../installation/guided-installation/configuration-reference.md#controlplane).
+Re-run `runai-installer install` with the updated `config.yaml` to apply the change. See [`cluster`](../../installation/guided-installation/configuration-reference.md#cluster-configuration) / [`controlPlane`](../../installation/guided-installation/configuration-reference.md#control-plane-configuration).
 
 </Tab>
 

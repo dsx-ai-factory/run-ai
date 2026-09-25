@@ -53,7 +53,7 @@ To use path-based routing:
 
 <Tab title="Guided Installation">
 
-Set `cluster.workloadRouting: path` in your `config.yaml` - see [`cluster`](../../installation/guided-installation/configuration-reference.md#cluster):
+Set `cluster.workloadRouting: path` in your `config.yaml` - see [`cluster`](../../installation/guided-installation/configuration-reference.md#cluster-configuration):
 
 ```yaml
 cluster:

@@ -1,8 +1,15 @@
 # Advanced Control Plane Configurations
 
+Use this page to customize the NVIDIA Run:ai control plane beyond the default installation settings.
+
+The settings on this page use NVIDIA Run:ai control plane Helm chart values. You can provide the same values through either installation path:
+
+- Manual Helm - Set the values in a Helm values file or pass them as Helm flags.
+- Guided Installation - Set the same values under `controlPlane.customHelmValues` in `config.yaml`. See [`controlPlane`](../installation/guided-installation/configuration-reference.md#control-plane-configuration).
+
 ## Helm Chart Values
 
-The NVIDIA Run:ai control plane installation can be customized to support your environment via Helm [values files](https://helm.sh/docs/chart_template_guide/values_files/) or [Helm install](https://helm.sh/docs/helm/helm_install/) flags. Make sure to restart the relevant NVIDIA Run:ai pods so they can fetch the new configurations. If you are using [Guided Installation](../installation/guided-installation/README.md), set the same keys under `controlPlane.customHelmValues` in your `config.yaml` instead of a Helm values file - see [`controlPlane`](../installation/guided-installation/configuration-reference.md#controlplane).
+The following Helm chart values can be used to customize the control plane for your environment. After changing a value, restart the relevant NVIDIA Run:ai pods so they can load the updated configuration.
 
 | Key                                                                                                                                                                                                                                                       | Change                           | Description                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

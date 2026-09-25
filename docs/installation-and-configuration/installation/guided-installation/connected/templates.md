@@ -155,6 +155,10 @@ cluster:
   version: ""
   name: <CLUSTER_NAME>
   domain: <CLUSTER_DOMAIN>
+  controlPlaneUrl: https://<DOMAIN>
+  controlPlaneCredentials:
+    username: <ADMIN_EMAIL>
+    passwordPath: /path/to/cp-password
   tls:
     certPath: /path/to/cluster-cert.pem
     keyPath: /path/to/cluster-key.pem

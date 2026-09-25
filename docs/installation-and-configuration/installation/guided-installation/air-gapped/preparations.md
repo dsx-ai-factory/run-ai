@@ -20,87 +20,19 @@ Your [deployment model](../../../system-requirements/deployment-model.md) determ
 
 Each domain and certificate you prepared in [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) maps to a specific `config.yaml` field under `controlPlane` or `cluster`. Which ones you need depends on your deployment model (same-cluster or multi-cluster), your workload routing, and the workload types you plan to support - use this section as a reference for where each one goes. You supply the actual values when you write your `config.yaml` in [Same-Cluster Installation](same-cluster.md) or [Multi-Cluster Installation](multi-cluster.md).
 
-### Control Plane Domain and Certificate
-
-This certificate secures the NVIDIA Run:ai control plane FQDN you prepared in [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns), protecting access to the NVIDIA Run:ai UI and API. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificate you need and why.
-
-```yaml
-controlPlane:
-  domain: runai.mycorp.local
-  tls:
-    certPath: /path/to/fullchain.pem
-    keyPath: /path/to/private.pem
-```
-
-### Cluster Domain and Certificate
-
-This certificate secures communication between the NVIDIA Run:ai control plane and the cluster, associated with the cluster's domain. In a same-cluster deployment, omit `cluster.domain` - the cluster reuses `controlPlane.domain`, since both run on the same Kubernetes cluster. `cluster.tls` is still required for both same-cluster and multi-cluster deployments.
-
-```yaml
-cluster:
-  domain: runai-a.mycorp.local # Multi-cluster only; omit for same-cluster
-  tls:
-    certPath: /path/to/fullchain.pem
-    keyPath: /path/to/private.pem
-```
-
-### Workspaces, Training, and Distributed Inference Wildcard Certificate
-
-<Note>
-
-**Note**
-
-For path-based routing, this certificate is not required.
-
-</Note>
-
-To allow secure access to workspace, training, and distributed inference workloads via subdomains, configure a wildcard TLS certificate that matches the cluster domain - `*.runai.mycorp.local` in a same-cluster deployment, or `*.runai-a.mycorp.local` for cluster A in a multi-cluster deployment. Required for both same-cluster and multi-cluster deployments.
-
-```yaml
-cluster:
-  domain: runai-a.mycorp.local # Multi-cluster only; omit for same-cluster - see Cluster Domain and Certificate above
-  tls:
-    certPath: /path/to/wildcard-fullchain.pem # matches *.runai.mycorp.local (same-cluster) or *.runai-a.mycorp.local (multi-cluster, cluster A)
-    keyPath: /path/to/wildcard-private.pem
-```
-
-### Standard Inference Wildcard Domain and Certificate
-
-<Note>
-
-**Note**
-
-The inference wildcard certificate is only required for standard inference (Knative, single-node) workloads exposed externally via wildcard FQDN. Other inference workloads (for example, distributed inference using serving frameworks such as LWS, Dynamo, KServe, or others) do not require this certificate. For cluster-local standard inference, skip this section.
-
-</Note>
-
-To securely expose inference services over HTTPS, configure a wildcard TLS certificate for the inference domain (e.g. `*.runai-inference.mycorp.local`).
-
-```yaml
-cluster:
-  inference:
-    wildcardDomain: "*.runai-inference.mycorp.local"
-    wildcardTls:
-      certPath: /path/to/wildcard-fullchain.pem
-      keyPath: /path/to/wildcard-private.pem
-```
-
-### Local Certificate Authority (CA)
-
-If your certificates are signed by a private or local CA rather than a publicly trusted one, provide the CA chain. Set this at the top level, or override it per-component under `controlPlane.tls.caChainPath` / `cluster.tls.caChainPath` if different components use different CAs:
-
-```yaml
-tls:
-  caChainPath: /path/to/ca-chain.pem
-```
-
-See [`tls`](../configuration-reference.md#tls), [`controlPlane`](../configuration-reference.md#controlplane), and [`cluster`](../configuration-reference.md#cluster) in the Configuration Reference for all fields.
+| Domain / Certificate | Config Field(s) | Required When | Notes |
+| --- | --- | --- | --- |
+| Control Plane Domain and Certificate | `controlPlane.domain`, `controlPlane.tls` | Always | Secures the NVIDIA Run:ai UI and API. |
+| Cluster Domain and Certificate | `cluster.domain`, `cluster.tls` | `cluster.domain`: multi-cluster only (same-cluster reuses `controlPlane.domain`). `cluster.tls`: always. | Secures communication between the control plane and the cluster. |
+| Workspaces, Training, and Distributed Inference Wildcard Certificate | `cluster.tls` (same field as above) | Required unless using path-based routing | Must be a wildcard matching the cluster domain (for example, `*.runai-a.mycorp.local`). Shares `cluster.tls` with the row above - not a separate field. |
+| Standard Inference Wildcard Domain and Certificate | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Only for standard inference (Knative) exposed externally via a wildcard FQDN | Not required for distributed inference (LWS, Dynamo, KServe, and other serving frameworks) or cluster-local standard inference. |
+| Local Certificate Authority (CA) | `tls.caChainPath` (or `controlPlane.tls.caChainPath` / `cluster.tls.caChainPath` per component) | If your certificates are signed by a private or local CA | Set once at the top level, or override per component if different components use different CAs. |
 
 ## Registry Credentials
 
 NGC credentials are not needed to build the air-gapped bundle, for either Open Source or Support-Entitled Release - `airgap pack` pulls NVIDIA Run:ai container images and charts without authentication. Registry credentials are only needed for a registry you introduce yourself, such as your own registry hosting an `imageOverrides` source.
 
-Once the bundle is loaded, the `registry` section in your configuration file authenticates to your own private mirror registry (populated from the bundle) using basic authentication (`username` and `password` or `passwordPath`). See [`registry`](../configuration-reference.md#registry) and [`airgap`](../configuration-reference.md#airgap) in the Configuration Reference.
+Once the bundle is loaded, the `registry` section in your configuration file authenticates to your own private mirror registry (populated from the bundle) using basic authentication (`username` and `password` or `passwordPath`). See [`registry`](../configuration-reference.md#registry-configuration) and [`airgap`](../configuration-reference.md#air-gapped-installation-configuration) in the Configuration Reference.
 
 ## Download the Installer
 
@@ -146,7 +78,7 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 2. Create a pack configuration file (`airgap-pack.yaml`) and run `airgap pack` against it:
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
-   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../configuration-reference.md#airgap-pack) in the Configuration Reference.
+   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
 
    ```bash

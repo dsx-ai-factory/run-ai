@@ -405,7 +405,7 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 2. Create a pack configuration file (`airgap-pack.yaml`) and run `airgap pack` against it:
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
-   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#airgap-pack) in the Configuration Reference.
+   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
 
    ```bash
@@ -541,7 +541,7 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 2. Create a pack configuration file (`airgap-pack.yaml`) and run `airgap pack` against it:
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
-   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#airgap-pack) in the Configuration Reference.
+   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
 
    ```bash
