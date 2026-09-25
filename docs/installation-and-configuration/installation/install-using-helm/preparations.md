@@ -2,15 +2,16 @@
 
 This page prepares your environment for installing the NVIDIA Run:ai control plane and cluster: setting up your installer machine, creating the namespaces and TLS/CA secrets each install needs, and retrieving software artifacts and registry access.
 
-## Before You Start
+## System Requirements
 
-Complete the entire [System Requirements](../../system-requirements/README.md) section before starting here. It covers:
+Complete the [System Requirements](../../system-requirements/README.md) section before starting. It covers:
 
-* Infrastructure you configure in your Kubernetes cluster - hardware, OS, Kubernetes distribution, load balancer, ingress controller, storage class.
-* Items you obtain or decide on ahead of time and bring with you - FQDNs, TLS certificate and private key files, and a local CA chain. Whether certain items apply, such as the inference wildcard certificate, depends on the workload types you plan to support - see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates).
-* [Third-party services](../../system-requirements/third-party-services.md) the installation deploys for you, and the [outbound/inbound access](../../system-requirements/external-access-to-critical-services.md) your cluster needs to reach them and NVIDIA's registries.
+* [Infrastructure Requirements](../../system-requirements/infrastructure-requirements.md) - Hardware, operating system, Kubernetes distribution, storage, and permissions required in your Kubernetes environment.
+* [Networking Setup](../../system-requirements/networking-setup.md) - Load balancer and ingress requirements, FQDNs, TLS certificates and private keys, and a local CA chain if your certificates are privately signed. The exact requirements depend on your deployment model, routing configuration, and the workload types you plan to support.
+* [Third-Party Services](../../system-requirements/third-party-services.md) - The third-party services deployed as part of the installation.
+* [External Access to Critical Services](../../system-requirements/external-access-to-critical-services.md) - The inbound and outbound connectivity required to reach those services and NVIDIA registries.
 
-Your [deployment model](../../system-requirements/deployment-model.md) - same-cluster or multi-cluster - determines how many times you repeat the steps below: control plane setup is always one-time, and cluster setup repeats once per NVIDIA Run:ai cluster in a multi-cluster deployment.
+Your [deployment model](../../system-requirements/deployment-model.md) determines how the installation steps are applied. In a same-cluster deployment, the control plane and NVIDIA Run:ai cluster are installed on the same Kubernetes cluster. In a multi-cluster deployment, control plane setup is completed once, and cluster setup is repeated for each NVIDIA Run:ai cluster.
 
 ## General Setup
 
@@ -191,7 +192,7 @@ For path-based routing, this certificate is not required.
 
 </Note>
 
-* **Kubernetes** - To allow secure access to workspace and training workloads via subdomains, configure a wildcard TLS certificate that matches the cluster domain (e.g. `*.runai.mycorp.local`). This certificate should be stored as a secret named `runai-cluster-domain-star-tls-secret` in the `runai` namespace.
+* **Kubernetes** - To allow secure access to workspace, training, and distributed inference workloads via subdomains, configure a wildcard TLS certificate that matches the cluster domain (e.g. `*.runai.mycorp.local`). This certificate should be stored as a secret named `runai-cluster-domain-star-tls-secret` in the `runai` namespace.
   * Replace `/path/to/fullchain.pem` with the actual path to your TLS certificate.
   *   Replace `/path/to/private.pem` with the actual path to your private key.
 

@@ -7,30 +7,22 @@ This page describes how to prepare for installing NVIDIA Run:ai using the `runai
 
 ## System Requirements
 
-Complete [System Requirements](../../../system-requirements/README.md) before running the installer, for each Kubernetes cluster you install onto - hardware and Kubernetes distribution, networking and DNS, TLS certificates, outbound firewall/registry access, and the third-party services the installation deploys for you. The installer deploys and configures NVIDIA Run:ai itself; it does not provision this infrastructure.
+Complete the [System Requirements](../../../system-requirements/README.md) section before starting. It covers:
 
-Have the following at hand for the installation. Make sure you have the domains, TLS certificates, and other values required for your deployment - these depend on your deployment model, workload routing, and the workload features you plan to enable. See [Networking Setup](../../../system-requirements/networking-setup.md) and [Prerequisites and Features](../prerequisites-and-features.md).
+* [Infrastructure Requirements](../../../system-requirements/infrastructure-requirements.md) - Hardware, operating system, Kubernetes distribution, storage, and permissions required in your Kubernetes environment.
+* [Networking Setup](../../../system-requirements/networking-setup.md) - Load balancer and ingress requirements, FQDNs, TLS certificates and private keys, and a local CA chain if your certificates are privately signed. The exact requirements depend on your deployment model, routing configuration, and the workload types you plan to support.
+* [Third-Party Services](../../../system-requirements/third-party-services.md) - The third-party services deployed as part of the installation.
+* [External Access to Critical Services](../../../system-requirements/external-access-to-critical-services.md) - The inbound and outbound connectivity required to reach those services and NVIDIA registries.
 
-| Requirement | Details |
-|---|---|
-| Kubernetes access | `kubectl` configured with cluster-admin or equivalent permissions on the target cluster - on the control plane cluster and on each NVIDIA Run:ai cluster, in a multi-cluster deployment |
-| FQDNs | The FQDNs and DNS records required for your deployment. Requirements depend on your deployment model, workload routing, and enabled workload features. See [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) and [Domains and TLS Certificates](#domains-and-tls-certificates) below |
-| TLS certificates | The TLS certificates and private keys required for your configured domains. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) and [Domains and TLS Certificates](#domains-and-tls-certificates) below |
+Your [deployment model](../../../system-requirements/deployment-model.md) determines how the installation steps are applied. In a same-cluster deployment, the control plane and NVIDIA Run:ai cluster are installed on the same Kubernetes cluster. In a multi-cluster deployment, control plane setup is completed once, and cluster setup is repeated for each NVIDIA Run:ai cluster.
 
-Multi-cluster deployments also need:
+## Domains and TLS Certificates
 
-| Requirement | Details |
-|---|---|
-| Control plane access | The control plane's FQDN (`cluster.controlPlaneUrl`), reachable over HTTPS from each NVIDIA Run:ai cluster, and a way to identify the cluster to the control plane - see [Install Each NVIDIA Run:ai Cluster](multi-cluster.md#install-each-nvidia-runai-cluster) |
-| Network connectivity | Outbound HTTPS (port 443) from the nodes of each NVIDIA Run:ai cluster to the control plane FQDN. See [Control Plane and Cluster Sync](../../../system-requirements/external-access-to-critical-services.md#control-plane-and-cluster-sync) |
+Each domain and certificate you prepared in [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) maps to a specific `config.yaml` field under `controlPlane` or `cluster`. Which ones you need depends on your deployment model (same-cluster or multi-cluster), your workload routing, and the workload types you plan to support - use this section as a reference for where each one goes. You supply the actual values when you write your `config.yaml` in [Same-Cluster Installation](same-cluster.md) or [Multi-Cluster Installation](multi-cluster.md).
 
-### Domains and TLS Certificates
+### Control Plane Domain and Certificate
 
-Create the DNS records and obtain the certificate and private key files described in [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) before installation, then supply them in your `config.yaml` as follows.
-
-#### Control Plane Domain and Certificate
-
-Secures access to the NVIDIA Run:ai UI and API:
+This certificate secures the NVIDIA Run:ai control plane FQDN you prepared in [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns), protecting access to the NVIDIA Run:ai UI and API. See [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificate you need and why.
 
 ```yaml
 controlPlane:
@@ -40,33 +32,49 @@ controlPlane:
     keyPath: /path/to/private.pem
 ```
 
-#### Cluster Domain and Certificate
+### Cluster Domain and Certificate
 
-Only needed when the NVIDIA Run:ai cluster is installed on a different Kubernetes cluster than the control plane (multi-cluster deployment). In a same-cluster deployment, omit `cluster.domain` and `cluster.tls` - the cluster uses the control plane's domain and certificate instead. See [Workspaces, Training, and Distributed Inference Wildcard Certificate](#workspaces-training-and-distributed-inference-wildcard-certificate) below for the host-based routing wildcard certificate.
+This certificate secures communication between the NVIDIA Run:ai control plane and the cluster, associated with the cluster's domain. In a same-cluster deployment, omit `cluster.domain` - the cluster reuses `controlPlane.domain`, since both run on the same Kubernetes cluster. `cluster.tls` is still required for both same-cluster and multi-cluster deployments.
 
 ```yaml
 cluster:
-  domain: runai-a.mycorp.local
+  domain: runai-a.mycorp.local # Multi-cluster only; omit for same-cluster
   tls:
     certPath: /path/to/fullchain.pem
     keyPath: /path/to/private.pem
 ```
 
-#### Workspaces, Training, and Distributed Inference Wildcard Certificate
+### Workspaces, Training, and Distributed Inference Wildcard Certificate
 
-Required for the default host-based routing, to expose workspace, training, and distributed inference workloads via subdomains. Not required for path-based routing (`cluster.workloadRouting: path`).
+<Note>
 
-<Warning>
+**Note**
 
-**TODO**
+For path-based routing, this certificate is not required.
 
-It is not yet confirmed whether this wildcard certificate is set via `cluster.tls` (the same field as the Cluster Domain and Certificate above) or a separate field. Confirm with engineering before publishing.
+</Note>
 
-</Warning>
+To allow secure access to workspace, training, and distributed inference workloads via subdomains, configure a wildcard TLS certificate that matches the cluster domain - `*.runai.mycorp.local` in a same-cluster deployment, or `*.runai-a.mycorp.local` for cluster A in a multi-cluster deployment. Required for both same-cluster and multi-cluster deployments.
 
-#### Standard Inference Wildcard Domain and Certificate
+```yaml
+cluster:
+  domain: runai-a.mycorp.local # Multi-cluster only; omit for same-cluster - see Cluster Domain and Certificate above
+  tls:
+    certPath: /path/to/wildcard-fullchain.pem # matches *.runai.mycorp.local (same-cluster) or *.runai-a.mycorp.local (multi-cluster, cluster A)
+    keyPath: /path/to/wildcard-private.pem
+```
 
-Required when the `knative` feature is installed, to expose standard inference workloads externally. Not required for cluster-local standard inference, or for other inference workloads such as distributed inference using LWS, Dynamo, or KServe.
+### Standard Inference Wildcard Domain and Certificate
+
+<Note>
+
+**Note**
+
+The inference wildcard certificate is only required for standard inference (Knative, single-node) workloads exposed externally via wildcard FQDN. Other inference workloads (for example, distributed inference using serving frameworks such as LWS, Dynamo, KServe, or others) do not require this certificate. For cluster-local standard inference, skip this section.
+
+</Note>
+
+To securely expose inference services over HTTPS, configure a wildcard TLS certificate for the inference domain (e.g. `*.runai-inference.mycorp.local`).
 
 ```yaml
 cluster:
@@ -77,7 +85,7 @@ cluster:
       keyPath: /path/to/wildcard-private.pem
 ```
 
-#### Local Certificate Authority (CA)
+### Local Certificate Authority (CA)
 
 If your certificates are signed by a private or local CA rather than a publicly trusted one, provide the CA chain. Set this at the top level, or override it per-component under `controlPlane.tls.caChainPath` / `cluster.tls.caChainPath` if different components use different CAs:
 
