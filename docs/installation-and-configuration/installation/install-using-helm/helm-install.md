@@ -1,6 +1,6 @@
 # Install the Cluster
 
-In this section you will install the NVIDIA Run:ai cluster on your Kubernetes environment using Helm. The cluster extends Kubernetes with NVIDIA Run:ai orchestration capabilities - scheduling and workload management - and connects to the previously installed [control plane](install-control-plane.md) for centralized management.
+This page describes how to install the NVIDIA Run:ai cluster on your Kubernetes environment using Helm. The cluster extends Kubernetes with NVIDIA Run:ai orchestration capabilities - scheduling and workload management - and connects to the previously installed [control plane](install-control-plane.md) for centralized management.
 
 Once the control plane is installed and you access the NVIDIA Run:ai UI for the first time, an onboarding wizard opens automatically. The wizard guides you through the cluster setup and generates a Helm installation command. Follow the instructions below to modify and run the command based on your artifact source and environment.
 

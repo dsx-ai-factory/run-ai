@@ -73,7 +73,7 @@ For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/usi
 
 </Note>
 
-* Use the default `gpu-operator` namespace. Otherwise, you must specify the target namespace using the flag `runai-operator.config.nvidiaDcgmExporter.namespace` as described in [Advanced cluster configurations](../../configuration/cluster-config.md).
+* The installer uses the default namespace for your platform - `gpu-operator` on Kubernetes, `nvidia-gpu-operator` on OpenShift. Otherwise, you must specify the target namespace using the flag `clusterConfig.global.nvidiaDcgmExporter.namespace` as described in [Advanced cluster configurations](../../configuration/cluster-config.md).
 * NVIDIA drivers may already be installed on the nodes. In such cases, use the NVIDIA GPU Operator flags `--set driver.enabled=false`. [DGX OS](https://docs.nvidia.com/dgx/dgx-os-6-user-guide/release_notes.html) is one such example as it comes bundled with NVIDIA Drivers.
 * For distribution-specific requirements and additional instructions, see the sections below:
 
@@ -82,6 +82,8 @@ For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/usi
 **OpenShift Container Platform (OCP)**
 
 The Node Feature Discovery (NFD) Operator is a prerequisite for the NVIDIA GPU Operator in OpenShift. For connected installs, `runai-installer` installs the NFD Operator automatically as part of the GPU Operator prerequisite. For air-gapped installs, install the NFD Operator yourself beforehand, using the Red Hat OperatorHub catalog in the OpenShift Container Platform web console. For more information, see [Installing the Node Feature Discovery (NFD) Operator](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/install-nfd.html).
+
+The installer installs the GPU Operator into the `nvidia-gpu-operator` namespace via OperatorHub (OLM), rather than the `gpu-operator` namespace used on Kubernetes.
 
 </Accordion>
 
@@ -240,7 +242,10 @@ For air-gapped installation instructions, see [Distributed Training](../install-
 
 NVIDIA Run:ai uses [Knative Serving](https://knative.dev/docs/serving/) to enable standard (single-node) inference. Knative Serving lets you serve AI models as production workloads, using NVIDIA NIM, vLLM, or custom inference servers. It provides serverless, dynamic autoscaling (including scale to zero when idle), rolling updates without disrupting served traffic, and endpoints reachable via external access (a wildcard FQDN) or internal, cluster-local access. For an overview of the request flow, see [Workload Architecture](../../../workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md#workload-architecture).
 
-Setting `features.knative.mode: install` installs the Knative operator and applies a `KnativeServing` custom resource that configures scale-to-zero autoscaling, the wildcard inference domain, Kourier as the ingress class, and the Kubernetes pod-spec features NVIDIA Run:ai workloads require.
+Setting `features.knative.mode: install` installs the Knative operator and applies a `KnativeServing` custom resource:
+
+- **Kubernetes** - Installs Knative Serving via the Knative Operator, and configures scale-to-zero autoscaling, the wildcard inference domain, Kourier as the ingress class, and the Kubernetes pod-spec features NVIDIA Run:ai workloads require.
+- **OpenShift** - Installs Knative Serving via the OpenShift Serverless operator (OperatorHub), and configures the wildcard inference domain and the Kubernetes pod-spec features NVIDIA Run:ai workloads require. External access goes through OpenShift Routes instead of Kourier, and scale-to-zero uses the operator's default.
 
 For air-gapped installation instructions, see [Standard Inference](../install-using-helm/prerequisites-and-features.md#standard-inference) in the Manual Helm path.
 
@@ -266,7 +271,12 @@ Using a custom metric (for example, Latency) requires the Knative Horizontal Pod
 
 NVIDIA Run:ai uses [LeaderWorkerSet (LWS)](https://lws.sigs.k8s.io/) to enable distributed (multi-node) inference - serving large language models that do not fit on a single node by distributing them across multiple nodes.
 
-Setting `features.lws.mode: install` installs LWS: on Kubernetes, the LWS Helm chart into the `lws-system` namespace; on OpenShift, the OpenShift LWS Operator (via OperatorHub) into the `openshift-lws-operator` namespace. Either way, the installer automatically points NVIDIA Run:ai (`clusterConfig.lws.namespace`) at the namespace LWS runs in, so no manual configuration is needed for NVIDIA Run:ai to detect it.
+Setting `features.lws.mode: install` installs LWS:
+
+- **Kubernetes** - Installs the LWS Helm chart into the `lws-system` namespace.
+- **OpenShift** - Installs the OpenShift LWS Operator (via OperatorHub) into the `openshift-lws-operator` namespace.
+
+Either way, the installer automatically points NVIDIA Run:ai (`clusterConfig.lws.namespace`) at the namespace LWS runs in, so no manual configuration is needed for NVIDIA Run:ai to detect it.
 
 For air-gapped installation instructions, see [Distributed Inference](../install-using-helm/prerequisites-and-features.md#distributed-inference) in the Manual Helm path.
 

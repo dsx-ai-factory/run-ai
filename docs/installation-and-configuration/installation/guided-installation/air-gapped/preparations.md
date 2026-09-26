@@ -16,6 +16,12 @@ Complete the [System Requirements](../../../system-requirements/README.md) secti
 
 Your [deployment model](../../../system-requirements/deployment-model.md) determines how the installation steps are applied. In a same-cluster deployment, the control plane and NVIDIA Run:ai cluster are installed on the same Kubernetes cluster. In a multi-cluster deployment, control plane setup is completed once, and cluster setup is repeated for each NVIDIA Run:ai cluster.
 
+## Prerequisites and Features
+
+GPU Operator and Prometheus are required for every installation. Network Operator, and features such as Knative and Kubeflow, apply only if your environment or planned workload types need them. Your planned workload types may also affect the networking configuration required for the installation, including wildcard domains and TLS certificates. See [Prerequisites and Features](../prerequisites-and-features.md) for what each one does and when you need it.
+
+The installer does not install prerequisites or features at all in air-gapped environments - you must install them yourself beforehand, directly on each target Kubernetes cluster, using each vendor's own air-gapped installation instructions.
+
 ## Domains and TLS Certificates
 
 Each domain and certificate you prepared in [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) maps to a specific `config.yaml` field under `controlPlane` or `cluster`. Which ones you need depends on your deployment model (same-cluster or multi-cluster), your workload routing, and the workload types you plan to support - use this section as a reference for where each one goes. You supply the actual values when you write your `config.yaml` in [Same-Cluster Installation](same-cluster.md) or [Multi-Cluster Installation](multi-cluster.md).
@@ -131,12 +137,6 @@ EOF
 This extracts the bundle, pushes every image to your internal mirror registry, and writes `control-plane-airgap-values.yaml` and `cluster-airgap-values.yaml` into `valuesDir` - the values the installer applies to the control plane and cluster charts.
 
 To run the install command, see [Same-Cluster Installation](same-cluster.md) or [Multi-Cluster Installation](multi-cluster.md).
-
-## Prerequisites and Features
-
-GPU Operator and Prometheus are required for every installation. Network Operator, and features such as Knative and Kubeflow, apply only if your environment or planned workload types need them. See [Prerequisites and Features](../prerequisites-and-features.md) for what each one does and when you need it.
-
-The installer does not install prerequisites or features at all in air-gapped environments - you must install them yourself beforehand, directly on each target Kubernetes cluster, using each vendor's own air-gapped installation instructions.
 
 ## Next Steps
 

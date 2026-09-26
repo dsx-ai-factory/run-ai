@@ -1,6 +1,6 @@
 # Install the Control Plane
 
-In this section you will install the NVIDIA Run:ai control plane on your Kubernetes cluster using Helm. The control plane provides the central management layer for NVIDIA Run:ai handling multi-cluster management, resource and access management as well as workload submission and monitoring.
+This page describes how to install the NVIDIA Run:ai control plane on your Kubernetes cluster using Helm. The control plane provides the central management layer for NVIDIA Run:ai handling multi-cluster management, resource and access management as well as workload submission and monitoring.
 
 This procedure includes:
 
@@ -24,7 +24,7 @@ As part of the installation, you will be required to install the NVIDIA Run:ai c
 **Note**
 
 * To customize the installation based on your environment, see [Advanced control plane configurations](../../configuration/control-plane-config.md).
-* PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Third-Party Services](../../system-requirements/third-party-services.md).
+* PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Changing PostgreSQL Passwords](../../configuration/control-plane-config.md#changing-postgresql-passwords) and [Changing the Keycloak Admin Password](../../configuration/control-plane-config.md#changing-the-keycloak-admin-password) in Advanced Control Plane Configurations.
 
 </Note>
 

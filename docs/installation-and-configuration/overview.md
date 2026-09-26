@@ -101,12 +101,12 @@ When using the recommended [guided installer](installation/guided-installation/R
 
 ### Installation Options
 
-NVIDIA Run:ai is an open source platform, with NVIDIA Run:ai Support-Entitled available as a supported version of the same platform. Both share the same installation model and support both connected and air-gapped environments. NVIDIA Run:ai Support-Entitled requires an NGC API key to pull platform images and Helm charts.
+NVIDIA Run:ai is an open source platform, with the NVIDIA Run:ai Support-Entitled Release available as a supported version of the same platform. Both share the same installation model and support both connected and air-gapped environments. NVIDIA Run:ai Support-Entitled requires an NGC API key to pull platform images and Helm charts.
 
 | Type                            | Description                                          | NGC API Key Required |
 | ------------------------------- | ----------------------------------------------------- | --------------------- |
 | Open Source                    | Full platform functionality, community-supported.     | No                    |
-| NVIDIA Run:ai Support-Entitled | Support-entitled version with support SLAs and other entitlements.    | Yes                   |
+| NVIDIA Run:ai Support-Entitled Release | Support-entitled version with support SLAs and other entitlements.    | Yes                   |
 
 #### Connected and Air-Gapped Environments
 

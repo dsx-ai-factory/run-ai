@@ -139,6 +139,69 @@ externalConnection:
 
 When the installation completes, verify that the control plane is reachable at its FQDN (for example, `https://runai.mycorp.local`) before continuing.
 
+## Enable Telemetry Service (Support-Entitled)
+
+NVIDIA Run:ai includes telemetry for Support-Entitled Release installations, reporting initial metrics including platform usage and adoption signals, GPU utilization and allocation, and cluster health signals to support proactive troubleshooting and continued product improvement. By default, telemetry is not associated with your organization. You can opt in to identified telemetry by providing an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) (SAK) in your configuration file, which associates the telemetry with your NCA ID.
+
+Configure the SAK through `controlPlane.customHelmValues`, using one of the following approaches:
+
+<Accordion title="Pass the SAK Value Directly">
+
+**Pass the SAK Value Directly**
+
+Set the SAK as a plaintext value in the configuration file. The chart creates and manages the Kubernetes Secret for you.
+
+```yaml
+controlPlane:
+  ...
+  customHelmValues:
+    supportEntitled: true
+    telemetryService:
+      telemetryAuth:
+        token: <SAK_TOKEN>
+```
+
+<Warning>
+
+**Warning**
+
+The SAK value is stored in plaintext in the configuration file. Protect the file accordingly, or use the pre-created Secret approach below.
+
+</Warning>
+
+Re-run the installer against the control plane cluster to apply the configuration.
+
+</Accordion>
+
+<Accordion title="Reference a Pre-Created Secret">
+
+**Reference a Pre-Created Secret**
+
+Create the Secret containing the SAK yourself before running the installer:
+
+```bash
+kubectl create secret generic runai-telemetry-sak \
+  --namespace runai-backend \
+  --from-literal=TELEMETRY_TOKEN=<SAK_TOKEN>
+```
+
+Then reference it by name in the configuration file - the installer does not create or manage this Secret. Always set the secret key name explicitly, even if it matches the default (`TELEMETRY_TOKEN`):
+
+```yaml
+controlPlane:
+  ...
+  customHelmValues:
+    supportEntitled: true
+    telemetryService:
+      telemetryAuth:
+        existingSecret: runai-telemetry-sak
+        secretKey: TELEMETRY_TOKEN
+```
+
+Re-run the installer against the control plane cluster to apply the configuration.
+
+</Accordion>
+
 ## Retrieve Control Plane Credentials
 
 Retrieve the generated control plane administrator username and password - use these when installing NVIDIA Run:ai clusters below:
