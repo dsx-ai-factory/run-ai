@@ -146,10 +146,8 @@ navigation:
           path: ../../docs/multi-tenant/installation-and-configuration/operations/observability/logs-collection.md
         - page: Audit Logs API
           path: ../../docs/multi-tenant/infrastructure-setup/procedures/event-history.md
-    - section: Upgrade
-      contents:
-      - page: Upgrade
-        path: ../../docs/multi-tenant/installation-and-configuration/upgrade.md
+    - page: Upgrade
+      path: ../../docs/multi-tenant/installation-and-configuration/upgrade.md
   - section: Development
     contents:
     - link: Local Development
