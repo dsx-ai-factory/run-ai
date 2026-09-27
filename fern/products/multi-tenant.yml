@@ -99,23 +99,23 @@ navigation:
     - section: Configuration
       contents:
       - page: Node Roles
-        path: ../../docs/installation-and-configuration/configuration/node-roles.md
+        path: ../../docs/multi-tenant/installation-and-configuration/configuration/node-roles.md
       - page: Control Plane Configuration
-        path: ../../docs/installation-and-configuration/configuration/control-plane-config.md
+        path: ../../docs/multi-tenant/installation-and-configuration/configuration/control-plane-config.md
       - page: Cluster Configuration
-        path: ../../docs/installation-and-configuration/configuration/cluster-config.md
+        path: ../../docs/multi-tenant/installation-and-configuration/configuration/cluster-config.md
       - section: Networking
         contents:
         - page: Kubernetes Gateway API
-          path: ../../docs/installation-and-configuration/configuration/networking/kubernetes-gateway-api.md
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/networking/kubernetes-gateway-api.md
         - page: Service Mesh
-          path: ../../docs/installation-and-configuration/configuration/networking/service-mesh.md
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/networking/service-mesh.md
         - page: External Access to Containers
-          path: ../../docs/installation-and-configuration/configuration/networking/external-access-to-containers.md
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/networking/external-access-to-containers.md
       - section: Security
         contents:
         - page: Secure Your Cluster
-          path: ../../docs/installation-and-configuration/configuration/security/secure-your-cluster.md
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/security/secure-your-cluster.md
       - section: Authentication and Authorization
         contents:
         - page: Roles
@@ -130,26 +130,26 @@ navigation:
         path: ../../docs/multi-tenant/infrastructure-setup/procedures/monitoring.md
       - page: Vertical Pod Autoscaling (VPA)
         slug: vpa
-        path: ../../docs/installation-and-configuration/operations/vpa.md
+        path: ../../docs/multi-tenant/installation-and-configuration/operations/vpa.md
       - section: Maintenance
         contents:
         - page: Nodes Maintenance
-          path: ../../docs/installation-and-configuration/operations/maintenance/nodes-maintenance.md
+          path: ../../docs/multi-tenant/installation-and-configuration/operations/maintenance/nodes-maintenance.md
         - page: Cluster Restore
           path: ../../docs/multi-tenant/infrastructure-setup/procedures/cluster-restore.md
           hidden: true
       - section: Observability
         contents:
         - page: NVIDIA Run:ai System Monitoring
-          path: ../../docs/installation-and-configuration/operations/observability/system-monitoring.md
+          path: ../../docs/multi-tenant/installation-and-configuration/operations/observability/system-monitoring.md
         - page: Logs Collection
-          path: ../../docs/installation-and-configuration/operations/observability/logs-collection.md
+          path: ../../docs/multi-tenant/installation-and-configuration/operations/observability/logs-collection.md
         - page: Audit Logs API
           path: ../../docs/multi-tenant/infrastructure-setup/procedures/event-history.md
     - section: Upgrade
       contents:
       - page: Upgrade
-        path: ../../docs/multi-tenant/installation-and-configuration/upgrade/upgrade.md
+        path: ../../docs/multi-tenant/installation-and-configuration/upgrade.md
   - section: Development
     contents:
     - link: Local Development

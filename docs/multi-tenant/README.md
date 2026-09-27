@@ -77,7 +77,7 @@ NVIDIA Run:ai multi-tenant is available as open source. The NVIDIA Run:ai Suppor
   <Card
     title="Upgrade"
     icon="arrow-up"
-    href="installation-and-configuration/upgrade/upgrade.md"
+    href="installation-and-configuration/upgrade.md"
   >
     Upgrade an existing NVIDIA Run:ai multi-tenant deployment to a new version.
   </Card>

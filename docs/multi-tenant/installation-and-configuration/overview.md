@@ -14,7 +14,7 @@ To prepare your environment and install NVIDIA Run:ai, go to the [Next Steps](#n
 
 ## Platform Components
 
-NVIDIA Run:ai multi-tenant is made up of two components:
+NVIDIA Run:ai is made up of two components, both installed on a Kubernetes cluster. See [Architecture and Components](../../developer/architecture.md) for a deeper look at how they fit together:
 
 * **NVIDIA Run:ai control plane** - Installed once by the host organization, in multi-tenant mode. Provides centralized resource management, tenant management, and access control across every tenant, and delivers cluster monitoring and analytics.
 * **NVIDIA Run:ai cluster** - Installed on each tenant's own Kubernetes cluster, and registered against the host organization's control plane. Extends Kubernetes native scheduling with Run:ai's GPU-aware capabilities for that tenant.
