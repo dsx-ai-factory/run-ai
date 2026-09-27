@@ -19,6 +19,14 @@ Before installing the NVIDIA Run:ai cluster, complete the entire [System Require
 
 NVIDIA Run:ai requires [Helm](https://helm.sh/) 3.14 or later. To install Helm, see [Installing Helm](https://helm.sh/docs/intro/install/). If you are installing an air-gapped version of NVIDIA Run:ai, the NVIDIA Run:ai tar file contains the [helm binary](preparations.md#software-artifacts).
 
+<Note>
+
+**Note**
+
+Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-side-apply) when installing a new chart release, which can conflict with resources managed by the NVIDIA Run:ai operator. Append `--server-side=false` to your `helm upgrade` command. NVIDIA Run:ai clusters originally installed with Helm 3.x are unaffected.
+
+</Note>
+
 ## Permissions <a href="#permissions" id="permissions"></a>
 
 Using a Kubernetes user with the `cluster-admin` role to ensure a successful installation is recommended. For more information, see [Using RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).

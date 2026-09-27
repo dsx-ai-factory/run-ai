@@ -33,6 +33,14 @@ If you're installing air-gapped, the machine running `airgap pack` and the machi
 
 </Note>
 
+<Note>
+
+**Note**
+
+Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-side-apply) when installing a new chart release, which can conflict with resources managed by the NVIDIA Run:ai operator. Append `--server-side=false` to your `helm upgrade` command. NVIDIA Run:ai clusters originally installed with Helm 3.x are unaffected.
+
+</Note>
+
 ### Registry Credentials
 
 NVIDIA Run:ai Support-Entitled Release installations require an NGC Personal Key to authenticate to the NVIDIA Run:ai container registry (`nvcr.io`) and Helm registry (`helm.ngc.nvidia.com/nvidia/runai`), for connected installs. Generate a Personal Key from the [NGC Personal Keys](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#ngc-api-keys) page.

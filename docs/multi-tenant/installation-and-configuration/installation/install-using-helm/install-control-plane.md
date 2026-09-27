@@ -1,11 +1,12 @@
 # Install the Control Plane
 
-## System and Network Requirements
-Before installing the NVIDIA Run:ai control plane, validate that the [system requirements](cp-system-requirements.md) and [network requirements ](network-requirements.md)are met.
+## System Requirements
+
+Before installing the NVIDIA Run:ai control plane, complete [Preparations](preparations.md) and validate that the [System Requirements](../../system-requirements/README.md) are met.
 
 ## Permissions
 
-As part of the installation, you will be required to install the NVIDIA Run:ai control plane [Helm chart](https://helm.sh/). The Helm charts require Kubernetes administrator permissions. You can review the exact objects that are created by the charts using the `--dry-run` on both helm charts.
+As part of the installation, you will be required to install the NVIDIA Run:ai control plane [Helm chart](https://helm.sh/). The Helm chart requires Kubernetes administrator permissions. You can review the exact objects that are created by the chart using the `--dry-run` flag.
 
 ## Installation
 
@@ -13,12 +14,12 @@ As part of the installation, you will be required to install the NVIDIA Run:ai c
 
 **Note**
 
-* To customize the installation based on your environment, see [Advanced control plane configurations](../../infrastructure-setup/advanced-setup/control-plane-config.md).
-* PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Additional third-party configurations](../../infrastructure-setup/advanced-setup/control-plane-config.md#additional-third-party-configurations).
+* To customize the installation based on your environment, see [Control Plane Configuration](../../../../installation-and-configuration/configuration/control-plane-config.md).
+* PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Control Plane Configuration](../../../../installation-and-configuration/configuration/control-plane-config.md).
 
 </Info>
 
-1. Create a `values.yaml` file using the appropriate example below based on your [metrics backend](metrics-store-requirements/#supported-backend):
+1. Create a `values.yaml` file using the appropriate example below based on your [metrics backend](../../system-requirements/metrics-store-requirements/README.md#supported-backends):
 
 <Tabs>
 
@@ -119,3 +120,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 * Use the `--dry-run` flag to gain an understanding of what is being installed before the actual installation.
 
 </Info>
+
+## Next Steps
+
+Set up [API Access](../guided-installation/api-access-setup.md) to authenticate your API requests, then onboard your first tenant. See [Onboard a Tenant](onboard-a-tenant.md).

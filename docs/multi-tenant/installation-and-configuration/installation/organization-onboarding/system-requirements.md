@@ -6,7 +6,7 @@ The NVIDIA Run:ai cluster is deployed as a Kubernetes application. This section 
 
 ## Hardware Requirements
 
-The following hardware requirements are for the Kubernetes cluster nodes. By default, all NVIDIA Run:ai cluster services run on all available nodes. For production deployments, you may want to set [node roles](../../infrastructure-setup/advanced-setup/node-roles.md), to separate between system and worker nodes, reduce downtime and save CPU cycles on expensive GPU Machines.
+The following hardware requirements are for the Kubernetes cluster nodes. By default, all NVIDIA Run:ai cluster services run on all available nodes. For production deployments, you may want to set [node roles](../../../infrastructure-setup/advanced-setup/node-roles.md), to separate between system and worker nodes, reduce downtime and save CPU cycles on expensive GPU Machines.
 
 ### Architecture
 
@@ -27,7 +27,7 @@ This configuration is the minimum requirement you need to install and use NVIDIA
 
 **Note**
 
-To designate nodes to NVIDIA Run:ai system services, follow the instructions as described in [System nodes](../../infrastructure-setup/advanced-setup/node-roles.md#system-nodes).
+To designate nodes to NVIDIA Run:ai system services, follow the instructions as described in [System nodes](../../../infrastructure-setup/advanced-setup/node-roles.md#system-nodes).
 
 </Info>
 
@@ -57,7 +57,7 @@ The following configuration represents the minimum hardware requirements for ins
 
 **Note**
 
-To designate nodes to NVIDIA Run:ai workloads, follow the instructions as described in [Worker nodes](../../infrastructure-setup/advanced-setup/node-roles.md#worker-nodes).
+To designate nodes to NVIDIA Run:ai workloads, follow the instructions as described in [Worker nodes](../../../infrastructure-setup/advanced-setup/node-roles.md#worker-nodes).
 
 </Info>
 
@@ -79,7 +79,6 @@ NVIDIA Run:ai cluster requires Kubernetes. The following Kubernetes distribution
 
 * Vanilla Kubernetes
 * OpenShift Container Platform (OCP)
-* NVIDIA Base Command Manager (BCM)
 * Rancher Kubernetes Engine 2 (RKE2)
 
 <Info>
@@ -87,7 +86,7 @@ NVIDIA Run:ai cluster requires Kubernetes. The following Kubernetes distribution
 **Note**
 
 * The latest release of the NVIDIA Run:ai cluster supports **Kubernetes 1.34 to 1.36** and **OpenShift 4.18 to 4.21**.
-* For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/using-gb200.md) support (e.g. GB200), Kubernetes 1.32 and above is required.
+* For [Multi-Node NVLink](../../../../platform-management/aiinitiatives/resources/using-gb200.md) support (e.g. GB200), Kubernetes 1.32 and above is required.
 
 </Info>
 
@@ -198,7 +197,7 @@ In NVIDIA Run:ai, this is required to support north-south traffic, including acc
 NVIDIA Run:ai cluster requires [Kubernetes Ingress Controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) to be installed on the Kubernetes cluster.
 
 * OpenShift and RKE2 come with a pre-installed ingress controller.
-* Make sure that a default ingress controller, `global.ingress.ingressClass` is set. For more details, see [Advanced cluster configurations](../../infrastructure-setup/advanced-setup/cluster-config.md).
+* Make sure that a default ingress controller, `global.ingress.ingressClass` is set. For more details, see [Advanced cluster configurations](../../../infrastructure-setup/advanced-setup/cluster-config.md).
 
 There are many ways to install and configure different ingress controllers. The following provides a simple example to install and configure the [HAProxy Kubernetes Ingress Controller](https://www.haproxy.com/documentation/kubernetes-ingress/) using [helm](https://helm.sh/):
 
@@ -220,7 +219,7 @@ The NVIDIA Run:ai cluster requires NVIDIA GPU Operator to be installed on the Ku
 
 **Note**
 
-For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/using-gb200.md) support (e.g. GB200), GPU Operator 25.3 and above is required.
+For [Multi-Node NVLink](../../../../platform-management/aiinitiatives/resources/using-gb200.md) support (e.g. GB200), GPU Operator 25.3 and above is required.
 
 </Info>
 
@@ -288,7 +287,7 @@ The Network Operator must be installed and configured as follows:
 
 When deploying on clusters with Multi-Node NVLink (e.g. GB200), the NVIDIA DRA driver is essential to enable Dynamic Resource Allocation at the Kubernetes level. To install, follow the instructions in [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver). DRA driver versions 25.8 to 25.12 are supported.
 
-After the DRA driver is installed, update `runaiconfig` using the `GPUNetworkAccelerationEnabled=True` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai workload-controller deployment and restarts the controller. See [Advanced cluster configurations](../../infrastructure-setup/advanced-setup/cluster-config.md) for more details.
+After the DRA driver is installed, update `runaiconfig` using the `GPUNetworkAccelerationEnabled=True` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai workload-controller deployment and restarts the controller. See [Advanced cluster configurations](../../../infrastructure-setup/advanced-setup/cluster-config.md) for more details.
 
 ### Prometheus
 
@@ -335,7 +334,7 @@ Together, these components ensure that traffic is routed correctly and securely 
 **Note**
 
 * NVIDIA Run:ai also supports path-based routing. If this approach better fits your environment, you can use it instead of the default host-based routing. In this case, the [workspace and training wildcard certificate](system-requirements.md#workspaces-and-training-workload-certificate) is not required.
-* To use path-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during Helm installation. See [Advanced cluster configurations](../../infrastructure-setup/advanced-setup/cluster-config.md).
+* To use path-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during Helm installation. See [Advanced cluster configurations](../../../infrastructure-setup/advanced-setup/cluster-config.md).
 
 </Info>
 
@@ -456,7 +455,7 @@ The inference wildcard certificate is only required if inference services are ex
 **Note**
 
 * The following steps are required for Kubernetes only. For OpenShift, no additional configuration is required.
-* NVIDIA Run:ai also support path-based routing. If you prefer to use it instead of the default host-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during the Helm installation. See [Advanced cluster configurations](../../infrastructure-setup/advanced-setup/cluster-config.md).
+* NVIDIA Run:ai also support path-based routing. If you prefer to use it instead of the default host-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during the Helm installation. See [Advanced cluster configurations](../../../infrastructure-setup/advanced-setup/cluster-config.md).
 * If you choose path-based routing, skip the below steps.
 
 </Info>
@@ -562,7 +561,7 @@ To surface inference request metrics in the NVIDIA Run:ai API and UI, configure 
 
 The OTLP receiver on the NVIDIA Run:ai Prometheus instance is enabled by default.
 
-To disable it, set `spec.prometheus.config.enableOTLPReceiver: false`. See [Advanced cluster configurations](../../infrastructure-setup/advanced-setup/cluster-config.md) for more details.
+To disable it, set `spec.prometheus.config.enableOTLPReceiver: false`. See [Advanced cluster configurations](../../../infrastructure-setup/advanced-setup/cluster-config.md) for more details.
 
 #### External-Access Inference
 

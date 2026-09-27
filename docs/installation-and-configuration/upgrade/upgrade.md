@@ -18,6 +18,18 @@ Complete the following before starting the upgrade:
 * [Back Up Before Upgrading](backup-before-upgrading.md)
 * [Migrate GPU Fractions](migrate-gpu-fractions.md), if your cluster uses GPU fractions
 
+## Helm
+
+NVIDIA Run:ai requires [Helm](https://helm.sh/) 3.14 or later. Before you continue, validate your installed Helm client version. To install or upgrade Helm, see [Installing Helm](https://helm.sh/docs/intro/install/).
+
+<Note>
+
+**Note**
+
+Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-side-apply) when installing a new chart release, which can conflict with resources managed by the NVIDIA Run:ai operator. Append `--server-side=false` to your `helm upgrade` command. NVIDIA Run:ai clusters originally installed with Helm 3.x are unaffected.
+
+</Note>
+
 ## Prepare Software Artifacts
 
 <Note>

@@ -4,7 +4,7 @@ To interact with the NVIDIA Run:ai platform programmatically, configure API acce
 
 ## Authenticate with Admin Credentials
 
-Before registering a service account, authenticate using administrator credentials. Use the credentials configured via `global.management.user` and `global.management.password` as detailed in [Install the Control Plane](../../../docs/multi-tenant/getting-started/installation/install-control-plane.md).
+Before registering a service account, authenticate using administrator credentials. Use the credentials configured via `global.management.user` and `global.management.password` as detailed in [Install the Control Plane](../../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/install-control-plane.md).
 
 Send a `POST` request to the `/api/v1/token` endpoint with `grantType: password` to generate a token.
 

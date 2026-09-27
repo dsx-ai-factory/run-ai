@@ -34,8 +34,8 @@ Day 0 covers the planning and preparation before installing NVIDIA Run:ai on you
 * Choose your deployment model - same-cluster or multi-cluster
 * Meet infrastructure requirements - hardware, Kubernetes distribution, and prerequisites such as the GPU Operator
 * Set up networking - load balancer, ingress controller, FQDNs, DNS, and TLS certificates
-* Enable external access for administrators and users to reach the NVIDIA Run:ai control plane and clusters
 * Review third-party services deployed as part of the installation, such as Keycloak and PostgreSQL
+* Enable external access for administrators and users to reach the NVIDIA Run:ai control plane and clusters
 
 ### Day 1: Installation and Configuration
 

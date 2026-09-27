@@ -64,7 +64,7 @@
   <rect x="82" y="376" width="536" height="50" rx="8" fill="#FAF5FF" stroke="#A855F7" stroke-width="1.5"/>
   <rect x="82" y="376" width="5" height="50" rx="4" fill="#A855F7"/>
   <text x="350" y="396" text-anchor="middle" font-size="12" font-weight="700" fill="#3B0764">Third-Party Service Registries</text>
-  <text x="350" y="414" text-anchor="middle" font-size="10" fill="#64748B">docker.io · quay.io (most services) · registry.k8s.io (git-sync) · Chainguard (Gov-ready)</text>
+  <text x="350" y="414" text-anchor="middle" font-size="10" fill="#64748B">docker.io · quay.io (most services) · registry.k8s.io (git-sync)</text>
 
   <!-- Prerequisite and Feature Registries -->
   <rect x="82" y="436" width="536" height="50" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>

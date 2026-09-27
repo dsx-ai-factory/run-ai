@@ -1,5 +1,7 @@
 # Create a Tenant
 
+Creating a tenant requires an authenticated Bearer token - see [API Access Setup](../guided-installation/api-access-setup.md) if you haven't generated one yet.
+
 ## Prepare Tenant Information
 
 Prepare the required details for the tenant you want to create:

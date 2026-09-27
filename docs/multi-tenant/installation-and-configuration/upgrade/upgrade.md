@@ -29,14 +29,14 @@ NVIDIA Run:ai artifacts are available on both NVIDIA NGC and JFrog. Deployments 
 
 Use the tab that matches your environment:
 
-* **NGC (Recommended)** - To upgrade using NGC, complete the [Preparations](preparations.md) section first and make sure you have NGC API key.
+* **NGC (Recommended)** - To upgrade using NGC, complete the [Preparations](../installation/install-using-helm/preparations.md) section first and make sure you have NGC API key.
 * **JFrog** - Existing customers may chose to continue upgrading from JFrog or to upgrade from NGC.
 
 <Tabs>
 
 <Tab title="NGC">
 
-Before upgrading, complete the steps in the [Preparations](preparations.md) section to set up your image pull secret.
+Before upgrading, complete the steps in the [Preparations](../installation/install-using-helm/preparations.md) section to set up your image pull secret.
 
 Run the following commands to add the NVIDIA Run:ai Helm repository and browse the available versions:
 
@@ -68,7 +68,7 @@ helm search repo -l runai-backend
 
 ### System and Network Requirements
 
-Before upgrading the NVIDIA Run:ai control plane, validate that the latest [system requirements](cp-system-requirements.md) and [network requirements](network-requirements.md) are met, as they can change from time to time.
+Before upgrading the NVIDIA Run:ai control plane, validate that the latest [system requirements](../system-requirements/infrastructure-requirements.md) and [networking setup](../system-requirements/networking-setup.md) are met, as they can change from time to time.
 
 ### Upgrade
 

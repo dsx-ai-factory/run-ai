@@ -26,7 +26,7 @@ To connect NVIDIA Run:ai to Grafana Labs (hosted Prometheus), you need a Grafana
 
 1. Create an access token following the [Create access policies and tokens – Grafana Cloud Docs](https://grafana.com/docs/grafana-cloud/security-and-account-management/authentication-and-permissions/access-policies/create-access-policies/).
 2. Create a values file (e.g., `grafanalabs-values.yaml`) with your hosted Prometheus endpoint and access token.
-3. Add the file during [control plane installation](../install-control-plane.md#installation):
+3. Add the file during [control plane installation](../../installation/install-using-helm/install-control-plane.md#installation):
 
 ```yaml
 thanos:
@@ -60,7 +60,7 @@ NVIDA Run:ai provides a tested `values.yaml` configuration for Helm-based Mimir 
 
 ### Connecting Mimir to the NVIDIA Run:ai Control Plane
 
-To integrate Mimir with the NVIDIA Run:ai control plane, include the required Mimir specific configuration values in your `values.yaml` file when installing or upgrading the control plane. See [Install the control plane](../install-control-plane.md) for more details:
+To integrate Mimir with the NVIDIA Run:ai control plane, include the required Mimir specific configuration values in your `values.yaml` file when installing or upgrading the control plane. See [Install the control plane](../../installation/install-using-helm/install-control-plane.md) for more details:
 
 ```yaml
 metricsService:
