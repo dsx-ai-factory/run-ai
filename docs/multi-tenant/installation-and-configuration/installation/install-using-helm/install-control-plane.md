@@ -1,8 +1,17 @@
-# Install the Control Plane
+# Control Plane Installation
 
-## System Requirements
+This page describes how to install the NVIDIA Run:ai control plane on your Kubernetes cluster using Helm. The control plane provides the central management layer for NVIDIA Run:ai multi-tenant, handling tenant management, resource and access management, as well as workload submission and monitoring across tenant clusters.
 
-Before installing the NVIDIA Run:ai control plane, complete [Preparations](preparations.md) and validate that the [System Requirements](../../system-requirements/README.md) are met.
+This procedure includes:
+
+* Configuring key settings such as domain name, ingress, and administrator credentials
+* Deploying the control plane into the `runai-backend` namespace
+
+By completing this process, the NVIDIA Run:ai control plane will be running in your cluster and accessible via the configured domain, ready to onboard tenants.
+
+## Before You Start
+
+Before installing the NVIDIA Run:ai control plane, complete the entire [System Requirements](../../system-requirements/README.md) section and [Preparations](preparations.md).
 
 ## Permissions
 
@@ -10,14 +19,14 @@ As part of the installation, you will be required to install the NVIDIA Run:ai c
 
 ## Installation
 
-<Info>
+<Note>
 
 **Note**
 
 * To customize the installation based on your environment, see [Control Plane Configuration](../../../../installation-and-configuration/configuration/control-plane-config.md).
 * PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Control Plane Configuration](../../../../installation-and-configuration/configuration/control-plane-config.md).
 
-</Info>
+</Note>
 
 1. Create a `values.yaml` file using the appropriate example below based on your [metrics backend](../../system-requirements/metrics-store-requirements/README.md#supported-backends):
 
@@ -112,15 +121,15 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
     -f /path/to/your/values.yaml 
 ```
 
-<Info>
+<Note>
 
 **Note**
 
 * To install a specific version, add `--version <VERSION>` to the install command. You can find all available versions by using the `helm search repo runai/control-plane --versions` command.
 * Use the `--dry-run` flag to gain an understanding of what is being installed before the actual installation.
 
-</Info>
+</Note>
 
 ## Next Steps
 
-Set up [API Access](../guided-installation/api-access-setup.md) to authenticate your API requests, then onboard your first tenant. See [Onboard a Tenant](onboard-a-tenant.md).
+Set up [API Access](../guided-installation/api-access-setup.md) to authenticate your API requests, then onboard your first tenant. See [Create a Tenant and Cluster](create-a-tenant-and-cluster.md).

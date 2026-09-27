@@ -32,9 +32,10 @@ Setting up NVIDIA Run:ai follows a three-phase lifecycle that reflects the natur
 Day 0 covers the planning and preparation before installing NVIDIA Run:ai on your Kubernetes cluster.
 
 * Choose your deployment model - same-cluster or multi-cluster
-* Meet infrastructure requirements - hardware, Kubernetes distribution, and prerequisites such as the GPU Operator
+* Meet infrastructure requirements - hardware, OS, Kubernetes distribution, storage, and permissions
 * Set up networking - load balancer, ingress controller, FQDNs, DNS, and TLS certificates
 * Review third-party services deployed as part of the installation, such as Keycloak and PostgreSQL
+* Review prerequisites required for your environment, such as the GPU Operator and Prometheus
 * Enable external access for administrators and users to reach the NVIDIA Run:ai control plane and clusters
 
 ### Day 1: Installation and Configuration
@@ -149,7 +150,7 @@ An NVIDIA Run:ai installation relies on several categories of software and infra
 
 * **Prerequisites** - Components that NVIDIA Run:ai requires: GPU Operator (provisions and manages GPUs on worker nodes) and Prometheus (required for metrics collection and monitoring). The Network Operator is required only if you are using Multi-Node NVLink (MNNVL) workloads. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#prerequisites).
 
-* **Feature-specific components** - Optional components required only for specific NVIDIA Run:ai features. When using the guided installer, these components can be enabled in the configuration file and installed alongside NVIDIA Run:ai. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#features).
+* **Feature-specific components** - Components required only for specific NVIDIA Run:ai features. When using the guided installer, these components can be enabled in the configuration file and installed alongside NVIDIA Run:ai. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#features).
 
   | Component | Required for |
   | --------- | ------------ |

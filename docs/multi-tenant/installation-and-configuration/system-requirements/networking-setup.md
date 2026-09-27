@@ -15,7 +15,7 @@ NVIDIA Run:ai relies on your Kubernetes clusters' networking to route traffic be
 **Note**
 
 * A multi-tenant deployment is always multi-cluster: the control plane runs on its own dedicated Kubernetes cluster, and each tenant is connected to its own separate Kubernetes cluster. Every component below is installed once for the control plane cluster, and again for each tenant cluster. For more information, see [Deployment Model](deployment-model.md).
-* FQDN and TLS certificates are not provisioned automatically by NVIDIA Run:ai. These must be prepared beforehand - for the control plane, before [installing the control plane](../installation/install-using-helm/install-control-plane.md); for a tenant cluster, before [installing the cluster](../installation/guided-installation/onboard-a-tenant.md#install-the-cluster).
+* FQDN and TLS certificates are not provisioned automatically by NVIDIA Run:ai. These must be prepared beforehand - for the control plane, before [installing the control plane](../installation/guided-installation/installation.md); for a tenant cluster, before [installing the cluster](../installation/guided-installation/create-a-tenant-and-cluster.md#install-the-cluster).
 
 </Note>
 
@@ -193,7 +193,7 @@ NVIDIA Run:ai multi-tenant relies on Fully Qualified Domain Names (FQDNs) at two
 
 ### Control Plane Domain (Wildcard)
 
-Tenants are created after the control plane is already installed and running - a host organization sends a `POST` request to the [`/api/v1/tenants`](../installation/guided-installation/onboard-a-tenant.md#create-a-tenant) endpoint at any time to onboard a new tenant. At that point, NVIDIA Run:ai automatically assigns the new tenant a subdomain of the control plane's domain - there is no manual DNS or certificate step per tenant.
+Tenants are created after the control plane is already installed and running - a host organization sends a `POST` request to the [`/api/v1/tenants`](../installation/guided-installation/create-a-tenant-and-cluster.md#create-a-tenant) endpoint at any time to onboard a new tenant. At that point, NVIDIA Run:ai automatically assigns the new tenant a subdomain of the control plane's domain - there is no manual DNS or certificate step per tenant.
 
 Because tenant subdomains are minted on demand, the control plane domain must be backed by a **wildcard** DNS record, not a single fixed domain, so that every tenant subdomain that will ever be created already resolves. You supply this domain as part of control plane installation - [Guided Installation](../installation/guided-installation/README.md) accepts it as the `controlPlane.domain` configuration field, while [Manual Helm](../installation/install-using-helm/install-control-plane.md) applies it via the `global.domain` Helm value.
 
@@ -201,7 +201,7 @@ Because tenant subdomains are minted on demand, the control plane domain must be
 |---|---|---|
 | Control plane domain (wildcard) | Access to the NVIDIA Run:ai control plane UI and API, for every tenant. | `*.runai.hostorg.com`, resolving requests such as `tenant-a.runai.hostorg.com` and `tenant-b.runai.hostorg.com` |
 
-Configure the wildcard DNS record to resolve to the control plane cluster's load balancer IP address before [installing the control plane](../installation/install-using-helm/install-control-plane.md).
+Configure the wildcard DNS record to resolve to the control plane cluster's load balancer IP address before [installing the control plane](../installation/guided-installation/installation.md).
 
 ```bash
 *.runai.hostorg.com → <control plane cluster IP>
@@ -209,7 +209,7 @@ Configure the wildcard DNS record to resolve to the control plane cluster's load
 
 ### Tenant Cluster Domain
 
-Each tenant cluster has its own domain, independent of that tenant's control plane subdomain above. You supply these domains as part of the cluster installation - [Guided Installation](../installation/guided-installation/README.md) accepts the cluster domain as the `cluster.domain` configuration field, while [Manual Helm](../installation/install-using-helm/onboard-a-tenant.md) applies it via the Helm command returned by the platform when the cluster is registered.
+Each tenant cluster has its own domain, independent of that tenant's control plane subdomain above. You supply these domains as part of the cluster installation - [Guided Installation](../installation/guided-installation/README.md) accepts the cluster domain as the `cluster.domain` configuration field, while [Manual Helm](../installation/install-using-helm/create-a-tenant-and-cluster.md) applies it via the Helm command returned by the platform when the cluster is registered.
 
 | Domain | Purpose | Example |
 |---|---|---|

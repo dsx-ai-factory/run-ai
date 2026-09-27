@@ -31,7 +31,7 @@ The installer is not a one-time step - rerunning it against an already-installed
 
 **Note**
 
-The installer runs once for the control plane, and once for each tenant's NVIDIA Run:ai cluster. A tenant cluster is registered with its tenant through the control plane's Management API first - see [Onboard a Tenant](onboard-a-tenant.md) - the installer itself does not create tenants or associate a cluster with one.
+The installer runs once for the control plane, and once for each tenant's NVIDIA Run:ai cluster. A tenant cluster is registered with its tenant through the control plane's Management API first - see [Create a Tenant and Cluster](create-a-tenant-and-cluster.md) - the installer itself does not create tenants or associate a cluster with one.
 
 </Note>
 
@@ -85,7 +85,7 @@ Continue with:
 
 * **[Preparations](preparations.md)** - System requirements, external metrics store, registry credentials, and downloading the installer.
 * **[Control Plane Installation](installation.md)** - Install the control plane.
-* **[Onboard a Tenant](onboard-a-tenant.md)** - Create a tenant, provision and register its cluster, and install that cluster.
+* **[Create a Tenant and Cluster](create-a-tenant-and-cluster.md)** - Create a tenant, provision and register its cluster, and install that cluster.
 * **[Configuration Templates](templates.md)** - Complete, ready-to-use configurations for specific use cases.
 
 See also the [Configuration Reference](configuration-reference.md) for all configuration YAML fields and their accepted values, to build your own configuration from scratch.

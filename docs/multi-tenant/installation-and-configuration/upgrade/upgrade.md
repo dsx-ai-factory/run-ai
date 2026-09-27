@@ -15,13 +15,13 @@ To ensure a smooth and supported upgrade process:
 
 NVIDIA Run:ai requires [Helm](https://helm.sh/) 3.14 or later. Before you continue, validate your installed helm client version. To install or upgrade Helm, see [Installing Helm](https://helm.sh/docs/intro/install/).
 
-<Info>
+<Note>
 
 **Note**
 
 Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-side-apply) when installing a new chart release, which can conflict with resources managed by the NVIDIA Run:ai operator. Append `--server-side=false` to your `helm upgrade` command. NVIDIA Run:ai clusters originally installed with Helm 3.x are unaffected.
 
-</Info>
+</Note>
 
 ## Software Files
 
@@ -79,23 +79,23 @@ helm get values runai-backend -n runai-backend > runai_control_plane_values.yaml
 helm upgrade runai-backend -n runai-backend runai/control-plane --version "<VERSION>" -f runai_control_plane_values.yaml --reset-then-reuse-values
 ```
 
-<Info>
+<Note>
 
 **Note**
 
 To upgrade to a specific version, modify the `--version` flag by specifying the desired `<VERSION>`. You can find all available versions by using the `helm search repo runai/control-plane --versions` command.
 
-</Info>
+</Note>
 
 ## Migrate from NGINX to HAProxy Kubernetes Ingress Controller
 
-<Info>
+<Note>
 
 **Note**
 
 This section applies to Kubernetes only. OpenShift includes a pre-installed ingress controller by default and does not require this migration.
 
-</Info>
+</Note>
 
 NVIDIA Run:ai recommends using [HAProxy Kubernetes Ingress Controller](https://www.haproxy.com/documentation/kubernetes-ingress/) as the ingress controller. This change aligns with the announced retirement of the upstream NGINX Ingress Controller project.
 
@@ -119,13 +119,13 @@ kubectl get svc -n <nginx-namespace>
 
 If the existing ingress controller uses **NodePort**, note the HTTP/HTTPS NodePort values to ensure HAProxy is configured with non-overlapping ports.
 
-<Info>
+<Note>
 
 **Note**
 
 If your setup differs from the examples above, adjust the configuration accordingly. When using external LoadBalancer on top of Ingress with service type NodePort, you may need to update external resources to route traffic to HAProxy’s configured NodePort values.
 
-</Info>
+</Note>
 
 ### Install and Configure HAProxy Kubernetes Ingress Controller
 

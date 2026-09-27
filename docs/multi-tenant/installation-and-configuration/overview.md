@@ -31,9 +31,10 @@ Setting up NVIDIA Run:ai multi-tenant follows a three-phase lifecycle, repeated 
 
 Day 0 covers the planning and preparation before installing the control plane, and before onboarding each new tenant.
 
-* Meet infrastructure requirements for the control plane cluster and for each tenant's cluster - hardware, Kubernetes distribution, and prerequisites such as the GPU Operator
+* Meet infrastructure requirements for the control plane cluster and for each tenant's cluster - hardware, OS, Kubernetes distribution, storage, and permissions
 * Set up networking for the control plane and for each tenant cluster - load balancer, ingress controller, FQDNs, DNS, and TLS certificates
 * Review third-party services deployed as part of the installation, such as Keycloak and PostgreSQL
+* Review prerequisites required for each tenant cluster, such as the GPU Operator and Prometheus
 * Provision an external metrics store (Grafana Labs or Mimir) for the control plane
 * Enable external access for administrators, users, and tenant clusters to reach the NVIDIA Run:ai control plane
 
@@ -127,7 +128,7 @@ An NVIDIA Run:ai multi-tenant installation relies on several categories of softw
 
 * **Prerequisites** - Components that NVIDIA Run:ai requires on each tenant cluster: GPU Operator (provisions and manages GPUs on worker nodes) and Prometheus (required for metrics collection and monitoring). The Network Operator is required only if you are using Multi-Node NVLink (MNNVL) workloads. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#prerequisites).
 
-* **Feature-specific components** - Optional components required only for specific NVIDIA Run:ai features on a tenant cluster. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#features).
+* **Feature-specific components** - Components required only for specific NVIDIA Run:ai features on a tenant cluster. When using the guided installer, these components can be enabled in the configuration file and installed alongside NVIDIA Run:ai. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#features).
 
   | Component | Required for |
   | --------- | ------------ |
@@ -143,7 +144,6 @@ An NVIDIA Run:ai multi-tenant installation relies on several categories of softw
 
 * Check the [Support Matrix](support-matrix.md) to know which Kubernetes/OpenShift versions, operating system, GPU and other operators, and third-party service versions NVIDIA Run:ai multi-tenant supports - this determines what to prepare and install in your environment.
 * Complete [System Requirements](system-requirements/README.md) to plan your deployment and prepare your infrastructure, networking, and more, before installation begins.
-* Install the control plane using the path that fits your environment:
-  * **[Guided Installation](installation/guided-installation/README.md)** - Recommended for most deployments.
-  * **[Manual Helm](installation/install-using-helm/install-control-plane.md)** - For organizations managing deployments through their own tooling, or needing granular control over Helm values.
-* [Onboard your first tenant](installation/guided-installation/onboard-a-tenant.md) - create the tenant, provision its cluster, and install and register the NVIDIA Run:ai cluster.
+* Install the control plane and onboard your first tenant using the path that fits your environment:
+  * **[Guided Installation](installation/guided-installation/README.md)** - Recommended for most deployments. Install the control plane, then [onboard your first tenant](installation/guided-installation/create-a-tenant-and-cluster.md) - create the tenant, provision its cluster, and install and register the NVIDIA Run:ai cluster.
+  * **[Manual Helm](installation/install-using-helm/install-control-plane.md)** - For organizations managing deployments through their own tooling, or needing granular control over Helm values. Install the control plane, then [onboard your first tenant](installation/install-using-helm/create-a-tenant-and-cluster.md) - create the tenant, provision its cluster, and install and register the NVIDIA Run:ai cluster.

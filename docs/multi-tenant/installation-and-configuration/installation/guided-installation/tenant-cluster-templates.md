@@ -15,7 +15,7 @@ Use these templates to start with a complete tenant cluster `config.yaml` instea
 
 ## Before You Use a Template
 
-Complete [Preparations](preparations.md) before using a template. This includes completing the applicable [System Requirements](../../system-requirements/README.md), [registering the cluster](onboard-a-tenant.md#register-the-cluster), and having the required domain, TLS certificates, networking values, and registry credentials ready.
+Complete [Preparations](preparations.md) before using a template. This includes completing the applicable [System Requirements](../../system-requirements/README.md), [registering the cluster](create-a-tenant-and-cluster.md#register-the-cluster), and having the required domain, TLS certificates, networking values, and registry credentials ready.
 
 <Note>
 

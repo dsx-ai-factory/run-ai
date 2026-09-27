@@ -34,7 +34,7 @@ By default, NVIDIA Run:ai cluster services are deployed with a single replica. F
 
 ## Metrics Collection
 
-NVIDIA Run:ai relies on [Prometheus](../../installation-and-configuration/installation/organization-onboarding/system-requirements.md#prometheus) to scrape cluster metrics and forward them to the NVIDIA Run:ai control plane. The volume of metrics generated is directly proportional to the number of nodes, workloads, and projects in the system. When operating at scale—reaching hundreds, and thousands of nodes and projects—the system generates a significant volume of metrics which can place a strain on the cluster and the network bandwidth.
+NVIDIA Run:ai relies on [Prometheus](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#prometheus) to scrape cluster metrics and forward them to the NVIDIA Run:ai control plane. The volume of metrics generated is directly proportional to the number of nodes, workloads, and projects in the system. When operating at scale—reaching hundreds, and thousands of nodes and projects—the system generates a significant volume of metrics which can place a strain on the cluster and the network bandwidth.
 
 To mitigate this impact, it is recommended to tune the Prometheus [remote-write](https://prometheus.io/docs/specs/remote_write_spec/) configurations. See [remote write tuning](https://prometheus.io/docs/practices/remote_write/#remote-write-tuning) to read more about the tuning parameters available via the remote write configuration and refer to this [article](https://last9.io/blog/optimizing-prometheus-remote-write-performance-guide/) for optimizing Prometheus remote write performance.
 

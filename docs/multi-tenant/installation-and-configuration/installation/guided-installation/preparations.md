@@ -25,14 +25,14 @@ The installer can install supported prerequisites and features for you. By defau
 
 ## Domains and TLS Certificates
 
-The domains and certificates you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) map to specific `config.yaml` fields. You supply the control plane values when you write your `config.yaml` in [Control Plane Installation](installation.md), and each tenant cluster's values when you [install that cluster](onboard-a-tenant.md#install-the-cluster).
+The domains and certificates you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) map to specific `config.yaml` fields. You supply the control plane values when you write your `config.yaml` in [Control Plane Installation](installation.md), and each tenant cluster's values when you [install that cluster](create-a-tenant-and-cluster.md#install-the-cluster).
 
-| Domain / Certificate | Config Field(s) | Notes |
-| --- | --- | --- |
-| Control Plane Domain and Certificate (wildcard) | `controlPlane.domain`, `controlPlane.tls` | Secures the NVIDIA Run:ai UI and API for every tenant. Must be a wildcard matching the control plane domain (for example, `*.runai.hostorg.com`). |
-| Tenant Cluster Domain and Certificate | `cluster.domain`, `cluster.tls` | Secures communication between the control plane and that tenant's cluster. |
-| Tenant Cluster Workspaces, Training, and Distributed Inference Wildcard Certificate | `cluster.tls` (same field as above) | Required unless using path-based routing. Must be a wildcard matching the tenant cluster's domain (for example, `*.runai.tenant-a-corp.com`). Shares `cluster.tls` with the row above - not a separate field. |
-| Tenant Cluster Standard Inference Wildcard Domain and Certificate | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Only for standard inference (Knative) exposed externally via a wildcard FQDN. Not required for distributed inference (LWS, Dynamo, KServe, and other serving frameworks) or cluster-local standard inference. |
+| Domain / Certificate | Config Field(s) | Required When | Notes |
+| --- | --- | --- | --- |
+| Control Plane Domain and Certificate (wildcard) | `controlPlane.domain`, `controlPlane.tls` | Always | Secures the NVIDIA Run:ai UI and API for every tenant. Must be a wildcard matching the control plane domain (for example, `*.runai.hostorg.com`). |
+| Tenant Cluster Domain and Certificate | `cluster.domain`, `cluster.tls` | Always | Secures communication between the control plane and that tenant's cluster. |
+| Tenant Cluster Workspaces, Training, and Distributed Inference Wildcard Certificate | `cluster.tls` (same field as above) | Required unless using path-based routing | Must be a wildcard matching the tenant cluster's domain (for example, `*.runai.tenant-a-corp.com`). Shares `cluster.tls` with the row above - not a separate field. |
+| Tenant Cluster Standard Inference Wildcard Domain and Certificate | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Only for standard inference (Knative) exposed externally via a wildcard FQDN | Not required for distributed inference (LWS, Dynamo, KServe, and other serving frameworks) or cluster-local standard inference. |
 
 ## Registry Credentials
 

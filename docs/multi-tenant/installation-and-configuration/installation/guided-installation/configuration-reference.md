@@ -162,7 +162,7 @@ controlPlane:
 
 ### Cluster Configuration
 
-Configures a tenant's NVIDIA Run:ai cluster component. This section is applied once per tenant cluster, in its own configuration file. The cluster must already be [registered with its tenant](onboard-a-tenant.md#register-the-cluster) through the control plane's Management API before running the installer - the installer consumes that registration, it does not perform it.
+Configures a tenant's NVIDIA Run:ai cluster component. This section is applied once per tenant cluster, in its own configuration file. The cluster must already be [registered with its tenant](create-a-tenant-and-cluster.md#register-the-cluster) through the control plane's Management API before running the installer - the installer consumes that registration, it does not perform it.
 
 ```yaml
 cluster:
@@ -192,7 +192,7 @@ cluster:
 | `name` | string | Yes | Cluster name as it appears in the NVIDIA Run:ai control plane. Must follow Kubernetes naming conventions (lowercase letters, numbers, and hyphens; maximum 63 characters). |
 | `domain` | string | Yes | Fully qualified domain name (FQDN) for this tenant cluster. |
 | `controlPlaneUrl` | string | Yes | URL of the NVIDIA Run:ai control plane, reachable over HTTPS from this cluster, so the installer can complete registration using the identity below. |
-| `uid` | string | Yes | Unique identifier of the cluster, obtained by [registering it with its tenant](onboard-a-tenant.md#register-the-cluster) through the Management API. Used together with `bootstrapTokenPath` or `clientSecretPath`. |
+| `uid` | string | Yes | Unique identifier of the cluster, obtained by [registering it with its tenant](create-a-tenant-and-cluster.md#register-the-cluster) through the Management API. Used together with `bootstrapTokenPath` or `clientSecretPath`. |
 | `bootstrapTokenPath` | string | Conditional | Path to a file containing the bootstrap token for the cluster identified by `uid`, obtained from the same Management API call. Mutually exclusive with `clientSecretPath`; exactly one is required. |
 | `clientSecretPath` | string | Conditional | Path to a file containing the client secret for the cluster identified by `uid`, obtained from the Management API. Mutually exclusive with `bootstrapTokenPath`. |
 | `workloadRouting` | string | No | Workload routing method. Supported values: `host` (subdomain-based routing, default) and `path` (path-based routing). |

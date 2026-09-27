@@ -21,7 +21,7 @@ Prerequisites and features are additional infrastructure required by a tenant's 
 
 ## Before You Start
 
-Complete [Preparations](preparations.md) before starting here. The operators and frameworks described on this page must be installed before you [onboard the tenant](onboard-a-tenant.md), on that tenant's own Kubernetes cluster.
+Complete [Preparations](preparations.md) before starting here. The operators and frameworks described on this page must be installed before you [create the tenant and cluster](create-a-tenant-and-cluster.md), on that tenant's own Kubernetes cluster.
 
 ## Prerequisites
 
@@ -520,4 +520,4 @@ The [Dynamo Operator](https://docs.nvidia.com/dynamo) is a Kubernetes operator t
 
 ## Next Steps
 
-With the tenant cluster's environment prepared, continue to [Onboard a Tenant](onboard-a-tenant.md) to register and install the cluster.
+With the tenant cluster's environment prepared, continue to [Create a Tenant and Cluster](create-a-tenant-and-cluster.md) to register and install the cluster.

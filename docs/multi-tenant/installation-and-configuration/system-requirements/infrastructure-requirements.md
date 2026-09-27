@@ -132,6 +132,14 @@ A default storage class is required for the NVIDIA Run:ai control plane before i
 
 ### Default Storage Class
 
+<Note>
+
+**Note**
+
+Applies to Kubernetes only.
+
+</Note>
+
 The NVIDIA Run:ai control plane requires a **default storage class** to create persistent volume claims for NVIDIA Run:ai storage. The storage class, as per Kubernetes standards, controls the reclaim behavior - whether NVIDIA Run:ai persistent data is saved or deleted when the NVIDIA Run:ai control plane is deleted.
 
 <Note>

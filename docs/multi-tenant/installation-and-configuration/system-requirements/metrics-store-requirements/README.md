@@ -60,7 +60,7 @@ NVIDA Run:ai provides a tested `values.yaml` configuration for Helm-based Mimir 
 
 ### Connecting Mimir to the NVIDIA Run:ai Control Plane
 
-To integrate Mimir with the NVIDIA Run:ai control plane, include the required Mimir specific configuration values in your `values.yaml` file when installing or upgrading the control plane. See [Install the control plane](../../installation/install-using-helm/install-control-plane.md) for more details:
+To integrate Mimir with the NVIDIA Run:ai control plane, include the required Mimir specific configuration values in your `values.yaml` file when installing or upgrading the control plane. See [Control Plane Installation](../../installation/install-using-helm/install-control-plane.md) for more details:
 
 ```yaml
 metricsService:

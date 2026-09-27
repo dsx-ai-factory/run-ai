@@ -1,7 +1,7 @@
 ---
 ---
 
-# Onboard a Tenant
+# Create a Tenant and Cluster
 
 This page describes how to onboard a new tenant end to end: create the tenant, provision and register its Kubernetes cluster, install the cluster using the `runai-installer` CLI, and share access details with the tenant.
 
@@ -254,7 +254,7 @@ At a minimum, configure:
 
 4. Enable the prerequisites:
 
-   - `prerequisites.gpuOperator.mode` / `prerequisites.prometheus.mode` - Set both to `install`; required for every tenant cluster. See [NVIDIA GPU Operator](prerequisites-and-features.md#nvidia-gpu-operator) and [Prometheus](prerequisites-and-features.md#prometheus).
+   - `prerequisites.gpuOperator.mode` / `prerequisites.prometheus.mode` - Set both to `install`; required for every tenant cluster.
    - `version` - Each also accepts its own `version` field. Omit it to install the latest version.
    - `customHelmValues` - Merges Helm values into the component's own Helm chart, for settings not otherwise exposed by the installer.
 

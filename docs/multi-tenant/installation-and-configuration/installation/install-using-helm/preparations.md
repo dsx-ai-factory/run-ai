@@ -224,7 +224,7 @@ Host-based routing relies on:
 
 ## Software Artifacts
 
-This section describes how to prepare the software artifacts required for installing the NVIDIA Run:ai [control plane](install-control-plane.md) and [onboarding a tenant](onboard-a-tenant.md).
+This section describes how to prepare the software artifacts required for installing the NVIDIA Run:ai [control plane](install-control-plane.md) and [onboarding a tenant](create-a-tenant-and-cluster.md).
 
 ### Kubernetes
 
@@ -253,7 +253,7 @@ kubectl create secret docker-registry runai-reg-creds \
 
 **Note**
 
-Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation).
+Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Control Plane Installation](install-control-plane.md#installation).
 
 </Note>
 
@@ -284,10 +284,10 @@ oc create secret docker-registry runai-reg-creds \
 
 **Note**
 
-Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation).
+Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Control Plane Installation](install-control-plane.md#installation).
 
 </Note>
 
 ## Next Steps
 
-With your environment prepared, continue to [Prerequisites and Features](prerequisites-and-features.md) to install the GPU Operator, Prometheus, and any workload-specific features (such as distributed training or inference) a tenant cluster needs.
+With your environment prepared, continue to [Control Plane Installation](install-control-plane.md). Once the control plane is running, onboarding each tenant includes installing the GPU Operator, Prometheus, and any workload-specific features (such as distributed training or inference) that tenant's cluster needs - see [Prerequisites and Features](prerequisites-and-features.md).

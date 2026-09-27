@@ -1,7 +1,7 @@
 ---
 ---
 
-# Onboard a Tenant
+# Create a Tenant and Cluster
 
 This page describes how to onboard a new tenant end to end: create the tenant, provision and register its Kubernetes cluster, install the cluster using the Helm command returned by the platform, and share access details with the tenant.
 

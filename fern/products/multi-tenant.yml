@@ -15,6 +15,9 @@ navigation:
     contents:
     - page: Overview
       path: ../../docs/multi-tenant/getting-started/overview.md
+    - page: Architecture and Components
+      slug: architecture
+      path: ../../docs/developer/architecture.md
     - page: Support, Lifecycle, and Deprecation Policy
       path: ../../docs/getting-started/product-support-policy.md
   - section: Installation and Configuration
@@ -62,7 +65,7 @@ navigation:
         - section: Onboard a Tenant
           contents:
           - page: Create a Tenant and Cluster
-            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/onboard-a-tenant.md
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/create-a-tenant-and-cluster.md
           - page: Prerequisites and Features
             path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/prerequisites-and-features.md
           - page: Configuration Templates
@@ -79,16 +82,16 @@ navigation:
           path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/preparations.md
         - section: Control Plane Setup
           contents:
-          - page: Install the Control Plane
+          - page: Control Plane Installation
             path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/install-control-plane.md
           - page: API Access Setup
             path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/api-access-setup.md
         - section: Onboard a Tenant
           contents:
-          - page: Create a Tenant and Cluster
-            path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/onboard-a-tenant.md
           - page: Prerequisites and Features
             path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md
+          - page: Create a Tenant and Cluster
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/create-a-tenant-and-cluster.md
           - page: Delete a Tenant
             path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/delete-a-tenant.md
         - page: Uninstall
@@ -147,50 +150,63 @@ navigation:
       contents:
       - page: Upgrade
         path: ../../docs/multi-tenant/installation-and-configuration/upgrade/upgrade.md
+  - section: Development
+    contents:
+    - link: Local Development
+      href: https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md
+      target: _blank
+    - page: Service Reference
+      path: ../../docs/developer/services.md
+    - page: CRD Reference
+      path: ../../docs/developer/crds.md
+    - page: External Dependencies
+      path: ../../docs/developer/external-dependencies.md
 
 - tab: reference
   layout:
   - page: Home
     path: ../../docs/rest-api/multi-tenant/README.md
-  - section: Getting Started
+  - section: REST API
     contents:
-    - page: About the REST API
-      path: ../../docs/rest-api/multi-tenant/about-the-rest-api.md
-    - section: Using the REST API
+    - section: Getting Started
       contents:
-      - page: Making REST API Requests
-        path: ../../docs/rest-api/multi-tenant/making-rest-api-requests.md
-      - page: Pagination
-        path: ../../docs/rest-api/multi-tenant/pagination.md
-      - page: HTTP Status Codes
-        path: ../../docs/rest-api/http-status-codes.md
-    - page: API Access Setup
-      path: ../../docs/rest-api/multi-tenant/api-access-setup.md
-    - page: NVIDIA Run:ai API Policy
-      path: ../../docs/rest-api/api-policy.md
-  - api: Endpoints
-    api-name: multi-tenant-api
-    flattened: true
-    tag-description-pages: true
-    layout:
-      - section: Organizations
+      - page: About the REST API
+        path: ../../docs/rest-api/multi-tenant/about-the-rest-api.md
+      - section: Using the REST API
         contents:
-        - tenant
-        - clusters
-      - section: Authentication and Authorization
-        contents:
-        - idps
-        - users
-        - applications
-        - serviceAccounts
-        - accessKeys
-        - userApplications
-        - tokens
-        - settings
-        - roles
-        - permissions
-        - accessRules
-        - me
-      - section: Audit
-        contents:
-        - auditLogs
+        - page: Making REST API Requests
+          path: ../../docs/rest-api/multi-tenant/making-rest-api-requests.md
+        - page: Pagination
+          path: ../../docs/rest-api/multi-tenant/pagination.md
+        - page: HTTP Status Codes
+          path: ../../docs/rest-api/http-status-codes.md
+      - page: API Access Setup
+        path: ../../docs/rest-api/multi-tenant/api-access-setup.md
+      - page: NVIDIA Run:ai API Policy
+        path: ../../docs/rest-api/api-policy.md
+    - api: Endpoints
+      api-name: multi-tenant-api
+      flattened: true
+      tag-description-pages: true
+      layout:
+        - section: Organizations
+          contents:
+          - tenant
+          - clusters
+        - section: Authentication and Authorization
+          contents:
+          - idps
+          - users
+          - applications
+          - serviceAccounts
+          - accessKeys
+          - userApplications
+          - tokens
+          - settings
+          - roles
+          - permissions
+          - accessRules
+          - me
+        - section: Audit
+          contents:
+          - auditLogs
