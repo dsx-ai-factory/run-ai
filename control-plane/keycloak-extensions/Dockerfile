@@ -1,18 +1,34 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-FROM docker.io/library/alpine:3.21
+FROM registry.access.redhat.com/ubi9/ubi-minimal AS base
 
-RUN mkdir -p /extensions/providers /extensions/themes /extensions/agent /providers /themes /agent /scripts && \
-    chown -R 65532:65532 /extensions /providers /themes /agent /scripts
+# Wrap the shared-volume mount points inside /temp so they land as *children*
+# during COPY. Docker BuildKit resets the mode of any destination directory
+# it creates to 0755, but preserves modes on children.
+RUN mkdir -p /temp/providers /temp/themes /temp/agent && \
+    chown -R 65532:0 /temp && \
+    chmod -R 770 /temp
+
+FROM scratch
+
+ARG TARGETARCH
+
+# Identity & permissions for the non-root UID this image runs as.
+COPY --from=base /etc/passwd /etc/passwd
+COPY --from=base /etc/group /etc/group
+
+# Writable shared-volume mount points (770 mode preserved from the base stage).
+COPY --from=base /temp /
+
+WORKDIR /
 
 COPY bin/runai-custom-providers.jar /extensions/providers/
 COPY bin/opentelemetry-javaagent.jar /extensions/agent/
 COPY runai-theme/ /extensions/themes/runai-theme/
 COPY NOTICE /extensions/
-COPY scripts/ /scripts/
-RUN chmod +x /scripts/*
+COPY bin/keycloak-extensions-$TARGETARCH keycloak-extensions-init
 
 USER 65532:65532
 
-CMD ["sh", "-c", "sh /scripts/copy-extensions.sh && sh /scripts/write-keycloak-conf.sh"]
+ENTRYPOINT ["./keycloak-extensions-init"]
