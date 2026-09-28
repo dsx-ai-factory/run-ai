@@ -1,7 +1,7 @@
 name: Bug report
 description: Report a reproducible bug in Run:ai.
 title: "[bug] "
-labels: ["kind/bug", "triage/needs-triage"]
+labels: ["bug"]
 body:
   - type: markdown
     attributes:
@@ -89,9 +89,13 @@ body:
       required: false
 
   - type: checkboxes
-    id: terms
+    id: checks
     attributes:
-      label: Code of Conduct
+      label: Submission checks
       options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: I removed secrets, credentials, private links, and other sensitive data from this report.
+          required: true
         - label: I agree to follow this project's [Code of Conduct](../blob/HEAD/CODE_OF_CONDUCT.md).
           required: true

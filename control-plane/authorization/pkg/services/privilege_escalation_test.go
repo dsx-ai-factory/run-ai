@@ -24,7 +24,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/test"
 	sharedCache "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
-	"golang.org/x/exp/slices"
 	"k8s.io/utils/ptr"
 )
 
@@ -36,14 +35,12 @@ type ValidateCurrentUserHasPrivilegeTestArgs struct {
 	ShouldAllow      bool
 	Tenant           uint
 	AssignedRole     *models.Role
-	DgxcRole         bool
 }
 
 const SuperAdmin = "super-admin"
 
 var _ = Describe("Privilege escalation tests", Ordered, func() {
 	const (
-		AppAdmin          = "app-admin"
 		OrgManager        = "org-manager"
 		Researcher        = "researcher"
 		ClusterAdmin      = "cluster-admin"
@@ -62,7 +59,6 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 
 	ctx := context.Background()
 	testTenant := fmt.Sprintf("%d", testing.TestTenant)
-	testDGXCTenant := fmt.Sprintf("%d", testing.DGXCTestTenant)
 	createdAccessRules := []*models.AccessRule{}
 	createdAccessRulesForNewUser := []*models.AccessRule{}
 	tenantSettings := NewMockTenantSettingsService(map[string]bool{})
@@ -84,13 +80,13 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 		role := args.AssignedRole
 		var err *api.Error
 		if role == nil {
-			role, err = dao.DbGetRoleByIdWithInternal(ctx, fmt.Sprintf("%d", args.Tenant), dao.MapStaticRoleNameToRoleId[args.AssignedRoleName], nil)
+			role, err = dao.DbGetRoleByIdWithInternal(ctx, fmt.Sprintf("%d", args.Tenant), dao.MapStaticRoleNameToRoleId[args.AssignedRoleName])
 			Expect(err).To(BeNil())
 		} else {
 			// roles are override (in DescribeTable) so we want the new id
 			filters, _ := queryapi.NewParser(models.Role{}.SortAndFilterFieldsToColumn()).
 				Filters([]string{fmt.Sprintf("name=^%s", args.AssignedRoleName)})
-			roles, err := dao.DbGetRoles(ctx, fmt.Sprintf("%d", testing.TestTenant), args.DgxcRole, 0, 0, "", "", filters, "", false)
+			roles, err := dao.DbGetRoles(ctx, fmt.Sprintf("%d", testing.TestTenant), 0, 0, "", "", filters, "", false)
 			Expect(err).To(BeNil())
 			Expect(roles).NotTo(BeNil())
 			Expect(len(*roles)).To(BeNumerically(">=", 1)) // at least one role with the name, could be more due legacy and non-legacy roles
@@ -168,24 +164,16 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 		createInitialAccessRule(dao.MapStaticRoleNameToRoleId[static_legacy_roles.Researcher.Name], Researcher, testTenant, testTenant, "", api.SCOPETYPE_TENANT, testing.TestTenant)
 
 		createInitialAccessRule(dao.MapStaticRoleNameToRoleId[static_roles.SystemAdmin.Name], OrgManager, testTenant, testTenant, "", api.SCOPETYPE_TENANT, testing.TestTenant)
-
-		createInitialAccessRule(dao.MapStaticRoleNameToRoleId[static_roles.ApplicationAdmin.Name], AppAdmin, testDGXCTenant, testDGXCTenant, "", api.SCOPETYPE_TENANT, testing.DGXCTestTenant)
 	})
 
 	AfterAll(func() {
 		for _, accessRule := range createdAccessRules {
 			err := dao.DbDeleteAccessRule(ctx, testing.TestTenant, accessRule.ID)
-			if err != nil {
-				err = dao.DbDeleteAccessRule(ctx, testing.DGXCTestTenant, accessRule.ID)
-			}
 			Expect(err).To(BeNil())
 		}
 		createdAccessRules = []*models.AccessRule{}
 		for _, accessRule := range createdAccessRulesForNewUser {
 			err := dao.DbDeleteAccessRule(ctx, testing.TestTenant, accessRule.ID)
-			if err != nil {
-				err = dao.DbDeleteAccessRule(ctx, testing.DGXCTestTenant, accessRule.ID)
-			}
 			Expect(err).To(BeNil())
 		}
 		createdAccessRulesForNewUser = []*models.AccessRule{}
@@ -293,31 +281,6 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 			}))
 	}
 	DescribeTable("Scoped", runValidateCurrentUserHasPrivilegeTest, entries)
-
-	skippedRoles := []string{
-		static_roles.SystemAdmin.Name,
-		static_roles.CloudOperator.Name,
-		static_roles.IntegrationMetricsCollector.Name,
-	}
-
-	managedRoles, err := dao.DbGetRoles(ctx, fmt.Sprintf("%d", testing.TestTenant), true, 0, 0, "", "", nil, "", false)
-	Expect(err).To(BeNil())
-
-	for _, roleAssigned := range *managedRoles {
-		entries = append(entries,
-			Entry(fmt.Sprintf("%s assign %s role", AppAdmin, roleAssigned.Name), ValidateCurrentUserHasPrivilegeTestArgs{
-				SubjectId:        AppAdmin,
-				AssignedRoleName: roleAssigned.Name,
-				AssignedRole:     &roleAssigned,
-				ShouldAllow:      !slices.Contains(skippedRoles, roleAssigned.Name),
-				ScopeId:          testDGXCTenant,
-				ScopeType:        api.SCOPETYPE_TENANT,
-				Tenant:           testing.DGXCTestTenant,
-				DgxcRole:         true,
-			}))
-	}
-
-	DescribeTable("DGXC Tenant", runValidateCurrentUserHasPrivilegeTest, entries)
 	entries = []TableEntry{}
 
 	// A System administrator must be able to assign a custom role that

@@ -57,6 +57,7 @@ func (c *ApplicationController) helmWorker(ctx context.Context, jobs <-chan Helm
 
 		err := c.client.Get(ctx, appKey, app)
 		if err != nil {
+			dropTask(appKey, job.Task)
 			c.helmWorkers.runningTasks.Delete(appKey)
 			if ctx.Err() != nil {
 				log.Warn().Msgf("context cancelled while fetching %s, stopping worker", appKey)

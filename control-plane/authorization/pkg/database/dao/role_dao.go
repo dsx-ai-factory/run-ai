@@ -129,14 +129,13 @@ func rolePermissionsFromPermissions(permissions []*models.Permission, permission
 	rolePermissions := []models.RolePermission{}
 	for _, permission := range permissions {
 		rolePermission := models.RolePermission{
-			ResourceType:           permission.ResourceType,
-			Create:                 permission.Create,
-			Read:                   permission.Read,
-			Update:                 permission.Update,
-			Delete:                 permission.Delete,
-			Sync:                   permission.Sync,
-			ReadOnlyForDGXCManaged: permission.ReadOnlyForDGXCManaged,
-			ReadOnlyForCSP:         permission.ReadOnlyForCSP,
+			ResourceType:   permission.ResourceType,
+			Create:         permission.Create,
+			Read:           permission.Read,
+			Update:         permission.Update,
+			Delete:         permission.Delete,
+			Sync:           permission.Sync,
+			ReadOnlyForCSP: permission.ReadOnlyForCSP,
 		}
 		if permissionSetId != nil {
 			rolePermission.PermissionSetID = *permissionSetId
@@ -166,7 +165,7 @@ func findRolePermissionsToDelete(resourceTypes []api.ResourceType, rolePermissio
 }
 
 func getRoleForUpdateAndValidate(ctx context.Context, tenantId string, roleId int32, roleSpec models.Role) (*models.Role, *api.Error) {
-	existingRole, err := dbGetRoleById(ctx, tenantId, uint(roleId), nil, nil)
+	existingRole, err := dbGetRoleById(ctx, tenantId, uint(roleId), nil)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to retrieve role %d. err: %+v", roleId, err)
 		return nil, err
@@ -309,8 +308,6 @@ func setStaticData(roleSpec *models.Role, existingRole *models.Role) {
 	roleSpec.TenantId = existingRole.TenantId
 	roleSpec.InternalOnly = existingRole.InternalOnly
 	roleSpec.Custom = existingRole.Custom
-	roleSpec.ShowForDGXC = existingRole.ShowForDGXC
-	roleSpec.RoleType = existingRole.RoleType
 	roleSpec.NoPermissionSet = existingRole.NoPermissionSet
 }
 
@@ -381,7 +378,7 @@ func DbCreateRole(ctx context.Context, subjectId string, roleSpec models.Role) (
 func DbDeleteRole(ctx context.Context, tenantId string, roleId uint) *api.Error {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to delete role", nil)
 
-	role, err := DbGetRoleById(ctx, tenantId, roleId, nil)
+	role, err := DbGetRoleById(ctx, tenantId, roleId)
 	if err != nil {
 		return err
 	}
@@ -441,7 +438,6 @@ func DbDeleteRole(ctx context.Context, tenantId string, roleId uint) *api.Error 
 func DbGetRoles(
 	ctx context.Context,
 	tenantId string,
-	isDGXC bool,
 	limit int32,
 	offset int32,
 	sortOrder string,
@@ -451,15 +447,13 @@ func DbGetRoles(
 	includeInternal bool,
 ) (*[]models.Role, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get roles", nil)
-	roleTypeFilter := getRoleTypeFilter(&isDGXC)
 
 	tx := runaidb.DB().WithContext(ctx)
 	roles := &[]models.Role{}
 	query := tx.
 		Preload("PermissionSets").
 		Preload("PermissionSets.Permissions").
-		Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId).
-		Where("role_type <> ?", roleTypeFilter)
+		Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId)
 	query = query.WithEnricher(querydbenrich.Filters(filterBy))
 	if !includeInternal {
 		query = query.Where("internal_only = false")
@@ -545,25 +539,23 @@ func getAggregatedPermissions(permissionSets *[]models.PermissionSet) []*models.
 	return aggregatedPermissions
 }
 
-func DbGetRoleById(ctx context.Context, tenantId string, roleId uint, isDGXC *bool) (*models.Role, *api.Error) {
-	return dbGetRoleById(ctx, tenantId, roleId, ptr.To(false), isDGXC)
+func DbGetRoleById(ctx context.Context, tenantId string, roleId uint) (*models.Role, *api.Error) {
+	return dbGetRoleById(ctx, tenantId, roleId, ptr.To(false))
 }
 
-func DbGetRoleByIdWithInternal(ctx context.Context, tenantId string, roleId uint, isDGXC *bool) (*models.Role, *api.Error) {
-	return dbGetRoleById(ctx, tenantId, roleId, nil, isDGXC)
+func DbGetRoleByIdWithInternal(ctx context.Context, tenantId string, roleId uint) (*models.Role, *api.Error) {
+	return dbGetRoleById(ctx, tenantId, roleId, nil)
 }
 
-func dbGetRoleById(ctx context.Context, tenantId string, roleId uint, internalOnly *bool, isDGXC *bool) (*models.Role, *api.Error) {
+func dbGetRoleById(ctx context.Context, tenantId string, roleId uint, internalOnly *bool) (*models.Role, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get role", nil)
-	roleTypeFilter := getRoleTypeFilter(isDGXC)
 
 	tx := runaidb.DB().WithContext(ctx)
 	role := &models.Role{}
 	query := tx.
 		Preload("PermissionSets").
 		Preload("PermissionSets.Permissions").
-		Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId).
-		Where("role_type <> ?", roleTypeFilter)
+		Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId)
 	if internalOnly != nil {
 		query = query.
 			Where("internal_only = ?", *internalOnly)
@@ -588,19 +580,6 @@ func dbGetRoleById(ctx context.Context, tenantId string, roleId uint, internalOn
 	role.Permissions = getAggregatedPermissions(role.PermissionSets)
 
 	return role, nil
-}
-
-// Its a filter-out filter, since we have 3 types. All, DGXC and NonDGXC then we need to filter out a single type each time
-func getRoleTypeFilter(isDGXC *bool) (roleTypeFilter string) {
-	if isDGXC != nil {
-		if *isDGXC {
-			roleTypeFilter = string(models.NonDGXC)
-		} else {
-			roleTypeFilter = string(models.DGXC)
-		}
-	}
-
-	return roleTypeFilter
 }
 
 func IsRoleInUse(ctx context.Context, roleId uint) (bool, *api.Error) {
