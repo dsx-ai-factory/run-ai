@@ -112,11 +112,14 @@ services:
   minio:
     profiles:
       - run-setup
-    image: quay.io/minio/minio
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
     container_name: minio
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
+      # The image runs as UID 1001 with HOME=/, which it cannot write to, so mc
+      # needs a writable location for its config.
+      HOME: /tmp
     ports:
       - "9000:9000"    # Exposing MinIO API port
       - "9001:9001"    # Exposing MinIO Console port
@@ -128,7 +131,7 @@ services:
       start_period: 5s
     entrypoint: >
       /bin/sh -c "
-        minio server /data --console-address ":9001" & 
+        minio server /bitnami/minio/data --console-address ":9001" & 
         sleep 5;
         echo 'Waiting for MinIO to be ready...';
         mc alias set temp http://localhost:9000 minioadmin minioadmin &&

@@ -1,7 +1,7 @@
 name: Failing test
 description: Report a CI / e2e / unit test that is failing or flaky.
 title: "[flake] "
-labels: ["kind/flake", "triage/needs-triage"]
+labels: ["bug"]
 body:
   - type: markdown
     attributes:

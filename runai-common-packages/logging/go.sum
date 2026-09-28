@@ -1,7 +1,7 @@
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0 h1:tIxjIoZUYFme1g/DfE5LD9HOXoY7mEa4OmE+218l73k=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0/go.mod h1:7eHCBYbQ9OWPdWD1WP9OmaeEnXKQs5UC4HYjGHm2TXc=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 h1:7vShtDVlUAl+kbFfF8/kopQ7iudfJPFCaOHYknwZIRI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5/go.mod h1:AQK0wu+zIXkf9lBnxLhIFHVay37vYzRR92qrar+LbVI=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 h1:Ov1I7x8ZUcgC9yzgtUO7bOuVHvejBEphZT8GlQ2q8Uk=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1/go.mod h1:hDzQ3k8G0AiU88ODxROMfPpkNkvrBskZ1kJvgnSY+ao=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6 h1:ZIFCaaOrtuiBxSrG47DBMN/SqCrbw8LwcCboRZejwAs=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6/go.mod h1:p92ZFxba+dpnLsTz0MpacEkRVhCfr/nTwpvfV7q6FAg=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.10.1 h1:b0/UzAf9yR5rhf3RPm9gf3ehBPpf0oZKIjtpKrx59Ho=
@@ -40,10 +40,8 @@ github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZV
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/rs/zerolog v1.35.1 h1:m7xQeoiLIiV0BCEY4Hs+j2NG4Gp2o2KPKmhnnLiazKI=
 github.com/rs/zerolog v1.35.1/go.mod h1:EjML9kdfa/RMA7h/6z6pYmq1ykOuA8/mjWaEvGI+jcw=
-github.com/sagikazarmark/locafero v0.11.0 h1:1iurJgmM9G3PA/I+wWYIOw/5SyBtxapeHDcg+AAIFXc=
-github.com/sagikazarmark/locafero v0.11.0/go.mod h1:nVIGvgyzw595SUSUE6tvCp3YYTeHs15MvlmU87WwIik=
-github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 h1:+jumHNA0Wrelhe64i8F6HNlS8pkoyMv5sreGx2Ry5Rw=
-github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8/go.mod h1:3n1Cwaq1E1/1lhQhtRK2ts/ZwZEhjcQeJQ1RuC6Q/8U=
+github.com/sagikazarmark/locafero v0.12.0 h1:/NQhBAkUb4+fH1jivKHWusDYFjMOOKU88eegjfxfHb4=
+github.com/sagikazarmark/locafero v0.12.0/go.mod h1:sZh36u/YSZ918v0Io+U9ogLYQJ9tLLBmM4eneO6WwsI=
 github.com/spf13/afero v1.15.0 h1:b/YBCLWAJdFWJTN9cLhiXXcD7mzKn9Dm86dNnfyQw1I=
 github.com/spf13/afero v1.15.0/go.mod h1:NC2ByUVxtQs4b3sIUphxK0NioZnmxgyCrfzeuq8lxMg=
 github.com/spf13/cast v1.10.0 h1:h2x0u2shc1QuLHfxi+cTJvs30+ZAHOGRic8uyGTDWxY=

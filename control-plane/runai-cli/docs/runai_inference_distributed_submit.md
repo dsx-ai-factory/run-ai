@@ -82,7 +82,7 @@ runai inference distributed submit <workload-name> -p <project-name> -i tiangolo
       --node-pools stringArray                                Node pools to use for scheduling the job, ordered by priority. Format: --node-pools pool-a --node-pools pool-b
       --node-type string                                      Enforce node type affinity by setting a node-type label.
       --pod-running-timeout duration                          Timeout for pod to reach running state (e.g. 5s, 2m, 3h).
-      --preemptibility preemptibility                         Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
+      --preemptibility preemptibility                         Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, semi-preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
       --preferred-pod-topology-key string                     If possible, schedule all pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --priority string                                       Sets the workload’s scheduling priority. Valid values: very-low, low, medium-low, medium, medium-high, high, very-high. 
                                                               Overrides the default priority for the workload type. Changing priority does not update preemptibility automatically.
