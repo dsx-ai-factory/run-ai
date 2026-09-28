@@ -1,6 +1,6 @@
 # local-dev.sh — Local Development Guide
 
-local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine — control plane, cluster services, and UI — so you can develop and test against the real product instead of individual services in isolation. It builds ~50 Go services from source, creates a self-contained [Kind](https://kind.sigs.k8s.io/) cluster, loads images directly into it via `kind load docker-image`, and deploys the full stack behind a self-signed TLS certificate. Everything runs locally — no external registry, no cloud cluster.
+local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine — control plane, cluster services, UI and Command-line interface (CLI). As such, you can develop and test against the real product instead of individual services in isolation. The script builds ~50 Go services from source, creates a self-contained [Kind](https://kind.sigs.k8s.io/) cluster, loads images directly into it via `kind load docker-image`, and deploys the full stack behind a self-signed TLS certificate. Everything runs locally — no external registry, no cloud cluster.
 
 ---
 
