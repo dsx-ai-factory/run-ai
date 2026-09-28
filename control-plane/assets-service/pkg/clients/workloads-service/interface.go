@@ -8,7 +8,7 @@ package workloads_service
 import (
 	"context"
 
-	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // FactoryInterface defines and interface for client factory

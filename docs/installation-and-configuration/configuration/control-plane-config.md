@@ -1,8 +1,15 @@
 # Advanced Control Plane Configurations
 
+Use this page to customize the NVIDIA Run:ai control plane beyond the default installation settings.
+
+The settings on this page use NVIDIA Run:ai control plane Helm chart values. You can provide the same values through either installation path:
+
+- Manual Helm - Set the values in a Helm values file or pass them as Helm flags.
+- Guided Installation - Set the same values under `controlPlane.customHelmValues` in `config.yaml`. See [`controlPlane`](../installation/guided-installation/configuration-reference.md#control-plane-configuration).
+
 ## Helm Chart Values
 
-The NVIDIA Run:ai control plane installation can be customized to support your environment via Helm [values files](https://helm.sh/docs/chart_template_guide/values_files/) or [Helm install](https://helm.sh/docs/helm/helm_install/) flags. Make sure to restart the relevant NVIDIA Run:ai pods so they can fetch the new configurations.
+The following Helm chart values can be used to customize the control plane for your environment. After changing a value, restart the relevant NVIDIA Run:ai pods so they can load the updated configuration.
 
 | Key                                                                                                                                                                                                                                                       | Change                           | Description                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -56,3 +63,94 @@ notificationsService:
         auth_type: auth_login
 ```
 
+## Third-Party Services
+
+The NVIDIA Run:ai control plane bundles third-party services it depends on - Keycloak for authentication, PostgreSQL as its database, and Thanos for metrics storage - and deploys them for you by default. This section covers tuning those built-in deployments and rotating their credentials. For what each service does, supported versions, and replacing one with an externally managed instance instead, see [Third-Party Services](../system-requirements/third-party-services.md).
+
+### Keycloak
+
+Keycloak provides authentication and identity management for the NVIDIA Run:ai control plane. The Helm chart uses [Keycloakx](https://artifacthub.io/packages/helm/codecentric/keycloakx) (`keycloakx`).
+
+<Note>
+
+**Note**
+
+The `keycloakx.adminUser` can only be set during the initial installation. The admin password can be changed later through the Keycloak UI, but you must also update `keycloakx.adminPassword` in the Helm chart using `helm upgrade`.
+
+</Note>
+
+| Key | Change | Description |
+| --- | ------ | ----------- |
+| `keycloakx.adminUser` | Admin username | Defines the username for the Keycloak administrator. Can only be set during initial installation. |
+| `keycloakx.adminPassword` | Admin password | Defines the password for the Keycloak administrator. |
+| `keycloakx.existingSecret` | Credentials secret | Existing secret name with authentication credentials. |
+| `global.keycloakx.host` | Keycloak host path | Overrides the DNS for Keycloak. Use this to access Keycloak externally to the cluster. |
+
+#### Changing the Keycloak Admin Password
+
+1. Open the Keycloak UI at: `https://<runai-domain>/auth`
+2. Sign in with your existing admin credentials
+3. Go to **Users** and select **admin** (or your admin username)
+4. Open **Credentials** and select **Reset password**
+5. Set the new password and click **Save**
+6. Run `helm upgrade` and set `keycloakx.adminPassword` to the new password
+
+<Note>
+
+**Note**
+
+Failing to update the Helm values after changing the password can cause control plane services to encounter errors.
+
+</Note>
+
+### PostgreSQL
+
+PostgreSQL is the centralized database for the NVIDIA Run:ai control plane, deployed as part of the control plane Helm chart using [Bitnami PostgreSQL](https://artifacthub.io/packages/helm/bitnami/postgresql) (`postgresql`).
+
+The following values tune the built-in PostgreSQL deployment:
+
+| Key | Change | Description |
+| --- | ------ | ----------- |
+| `global.postgresql.auth.postgresPassword` | PostgreSQL admin password | Password for the built-in PostgreSQL superuser (`postgres`). |
+| `postgresql.primary.initdb.password` | PostgreSQL admin password | Set the same password as `global.postgresql.auth.postgresPassword` if changed. |
+| `postgresql.primary.persistence.storageClass` | Storage class | Use a specific storage class instead of the default. |
+
+#### Changing PostgreSQL Passwords
+
+1. Connect to the PostgreSQL pod:
+
+   ```bash
+   kubectl exec -it runai-backend-postgresql-0 -n runai-backend -- bash
+   psql -U postgres
+   ```
+
+2. Update the passwords:
+
+   ```sql
+   ALTER USER "postgres" WITH PASSWORD '<new-postgres-password>';
+   ALTER USER "user" WITH PASSWORD '<new-user-password>';
+   ```
+
+3. Find the Kubernetes secret (default name: `runai-backend-gen-postgresql`) and update it with the new base64-encoded passwords. The keys are typically `postgres-password` and `password`.
+
+4. Restart all deployments to apply the changes:
+
+   ```bash
+   kubectl rollout restart deployment -n runai-backend
+   ```
+
+<Note>
+
+**Note**
+
+Failing to restart the pods after updating the secret can cause control plane services to encounter errors.
+
+</Note>
+
+### Thanos
+
+Thanos provides long-term metrics storage for the NVIDIA Run:ai control plane, deployed using [Bitnami Thanos](https://artifacthub.io/packages/helm/bitnami/thanos) (`thanos`).
+
+| Key | Change | Description |
+| --- | ------ | ----------- |
+| `thanos.receive.persistence.storageClass` | Storage class | Use a specific storage class instead of the default. |

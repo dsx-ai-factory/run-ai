@@ -31,7 +31,7 @@ const (
 
 	ClusterOneUuid   = "uuid-cluster-1"
 	ClusterOneName   = "name-cluster-1"
-	ClusterOneDomain = "http://localhost.runailabs.com/"
+	ClusterOneDomain = "http://localhost.example.com/"
 	ClusterTwoUuid   = "uuid-cluster-2"
 	ClusterTwoName   = "name-cluster-2"
 

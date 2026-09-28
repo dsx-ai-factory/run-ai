@@ -18,6 +18,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/assets"
 	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
@@ -27,9 +29,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	policyApi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/jinzhu/copier"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"

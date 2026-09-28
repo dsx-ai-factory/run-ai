@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/topology"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/stretchr/testify/require"
 )
 

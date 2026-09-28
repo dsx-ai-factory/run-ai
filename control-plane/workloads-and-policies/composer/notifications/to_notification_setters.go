@@ -10,9 +10,9 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 func servingPortToConnection(src *composer.ServingPortInfo, target any, _ any) *workloadsApi.Error {

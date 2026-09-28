@@ -4,10 +4,10 @@ go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
 	github.com/go-chi/chi/v5 v5.3.2
@@ -15,7 +15,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
-	github.com/sethvargo/go-retry v0.3.0
+	github.com/sethvargo/go-retry v0.4.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
@@ -126,7 +126,7 @@ require (
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/pkg/client v1.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3

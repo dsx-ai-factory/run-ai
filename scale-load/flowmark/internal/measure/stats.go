@@ -108,6 +108,6 @@ func (s Summary) Metrics() map[string]any {
 	metrics["mean_ms"] = s.Mean.Milliseconds()
 	metrics["max_ms"] = s.Max.Milliseconds()
 	metrics["makespan_ms"] = s.Makespan.Milliseconds()
-	metrics["throughput_per_s"] = s.Throughput
+	metrics["throughput_per_sec"] = s.Throughput
 	return metrics
 }

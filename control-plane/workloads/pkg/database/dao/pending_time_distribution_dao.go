@@ -8,6 +8,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	"net/http"
 	"strings"
 
@@ -33,6 +34,7 @@ func (w *WorkloadsDao) DbGetPendingTimeDistribution(
 	projectId string,
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get pending time distribution", nil)
 
@@ -44,7 +46,7 @@ func (w *WorkloadsDao) DbGetPendingTimeDistribution(
 
 	buckets := services_utils.CalculatePendingTimeBuckets(p95PendingTime)
 
-	telemetryValues, err := w.getPendingWorkloadCountsByBucket(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, buckets)
+	telemetryValues, err := w.getPendingWorkloadCountsByBucket(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, buckets, filterBy)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get all bucket counts, err: %v", err)
 		return nil, dbErr.WithDetails(err)
@@ -63,7 +65,7 @@ func (w *WorkloadsDao) getClusterP95PendingTime(
 	var p95PendingTime float64
 
 	phases := []api.Phase{api.PHASE_PENDING}
-	query := w.buildTelemetryQuery(ctx, tenantId, clusterId, nodepoolName, "", "", nil, [][]string{}, phases).
+	query := w.buildTelemetryQuery(ctx, tenantId, clusterId, nodepoolName, "", "", nil, [][]string{}, phases, nil).
 		Select("COALESCE(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (NOW() - phase_updated_at))::BIGINT), 0) as p95_pending")
 
 	err := query.Row().Scan(&p95PendingTime)
@@ -86,6 +88,7 @@ func (w *WorkloadsDao) getPendingWorkloadCountsByBucket(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	buckets []services_utils.Bucket,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, error) {
 	// Build bucket CASE statements for SELECT
 	selectFields := []string{}
@@ -112,7 +115,7 @@ func (w *WorkloadsDao) getPendingWorkloadCountsByBucket(
 	}
 
 	phases := []api.Phase{api.PHASE_PENDING}
-	query := w.buildTelemetryQuery(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases).
+	query := w.buildTelemetryQuery(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases, filterBy).
 		Select(strings.Join(selectFields, ", "))
 
 	var results []map[string]interface{}

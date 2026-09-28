@@ -4,6 +4,10 @@ Read this file before editing, creating, or reviewing any page under `docs/`.
 For repository-wide context — products, sources of truth, and the
 documentation-impact trigger — see the root `AGENTS.md`.
 
+**Never edit these, even if explicitly asked:** `docs/reference/cli/runai/`
+(generated CLI command pages) and `fern/apis/` (generated OpenAPI specs). See
+Auto-Generated Content below.
+
 ## How to Approach Documentation Work
 
 Before drafting any page:
@@ -30,7 +34,7 @@ Before drafting any page:
 3. **Use the page type that matches the content.** Refer to the Page Types
    section below to select the right type, then read an existing page of that
    type as your reference pattern.
-4. **Determine product scope.** Confirm which products (Self-hosted, SaaS,
+4. **Determine product scope.** Confirm which products (Self-hosted,
    Multi-tenant) the page applies to. Register or update the page in every
    applicable nav file under `fern/products/`.
 
@@ -43,9 +47,10 @@ Use this table to determine the documentation action before starting work.
 | New UI resource (object with add/edit/delete/metrics) | Load `docs/.agents/skills/runai-docs-ui-how-to/SKILL.md` | — |
 | New quick start (single feature or workload type walkthrough) | Load `docs/.agents/skills/runai-docs-quickstart/SKILL.md` | `docs/workloads-in-nvidia-run-ai/using-training/quick-starts/standard-training-quickstart.md` |
 | New feature guide (scheduler feature, GPU optimization, topology, NUMA) | Load `docs/.agents/skills/runai-docs-feature-guide/SKILL.md` | `docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md` |
-| New CLI flag or command | Do not edit — CLI reference is auto-generated. Add `<!-- TODO: CLI ref update needed -->` to the related page and flag for engineering. | — |
-| New or changed API endpoint or field | Do not edit — REST API reference is auto-generated. Flag for engineering. | — |
+| New CLI flag or command | Never edit `docs/reference/cli/runai/` — it is generated. | — |
+| New or changed API endpoint or field | Never edit `fern/apis/` — the OpenAPI specs are generated. | — |
 | New or changed MCP server tool | Load `docs/.agents/skills/update-mcp-server-docs/SKILL.md` | `docs/installation-and-configuration/mcp-server.md` |
+| Installation flow, prerequisites/features, or installer config reference | Load `docs/.agents/skills/runai-docs-installation/SKILL.md` | `docs/installation-and-configuration/installation/guided-installation/README.md` |
 | New feature, enhancement, or behavior change with no dedicated skill above | See How to Approach Documentation Work above | — |
 
 When no exact match exists, find the most similar existing page in `docs/` and follow its structure.
@@ -86,7 +91,7 @@ Each page serves one purpose. Match the type to the content:
 | Type | Use when |
 |---|---|
 | Conceptual | Background and behavior, no steps |
-| How-to | Step-by-step procedure for a single task |
+| How-to | Step-by-step procedure for a single task, including UI resource pages (Projects, Departments, Node Pools) covering their create/edit/delete flows |
 | Feature guide | Background is inseparable from configuration |
 | Infrastructure guide | Infrastructure setup (Helm, Kubernetes manifests) |
 | Tutorial | Multi-task end-to-end workflow |
@@ -98,9 +103,12 @@ Each page serves one purpose. Match the type to the content:
 Decision rules:
 - Use a feature guide when background is inseparable from configuration. Use a
   how-to when the concept lives on a separate page and the page is purely
-  procedural.
-- Use an infrastructure guide for Kubernetes-level setup (Gateway API, Karpenter,
-  node roles). Use a feature guide for Run:ai UI or platform configuration.
+  procedural — this includes a UI resource page (an object with its own table
+  and create/edit/delete flows, e.g. Projects, Departments, Node Pools):
+  follow the `departments.md` pattern via
+  `docs/.agents/skills/runai-docs-ui-how-to/SKILL.md`.
+- Use an infrastructure guide for Kubernetes-level setup (Gateway API, node
+  roles). Use a feature guide for Run:ai UI or platform configuration.
 - A feature quick start demonstrates one feature end-to-end. A tutorial
   connects multiple features into a complete workflow.
 - A persona quick start onboards a role to the platform. A feature quick start
@@ -123,13 +131,13 @@ title. Add frontmatter only when a Fern-specific key is needed:
 
 ## Auto-Generated Content
 
-Do not edit these sections directly — changes must be made at the source
-location elsewhere in this repo:
+Never edit these directly, even if explicitly asked — changes must be made at
+the source location elsewhere in this repo:
 
 | Section | Source location |
 |---|---|
-| CLI reference (`docs/reference/cli/`) | `control-plane/runai-cli/docs` |
-| REST API reference | Swagger source files at `control-plane/<service>/swagger/source` |
+| CLI reference (`docs/reference/cli/runai/`) | `control-plane/runai-cli/docs` |
+| OpenAPI specs (`fern/apis/`) | Swagger source files at `control-plane/<service>/swagger/source` |
 
 ## Fern Components
 
@@ -143,8 +151,7 @@ is unreachable:
 
 | Content applies to | Nav file |
 |---|---|
-| Self-hosted + SaaS | `fern/products/self-hosted.yml` + `fern/products/saas.yml` |
-| SaaS-specific | `fern/products/saas.yml` |
+| Self-hosted | `fern/products/self-hosted.yml` |
 | Multi-tenant | `fern/products/multi-tenant.yml` |
 
 ## Links

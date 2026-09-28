@@ -21,7 +21,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/overtime_metrics_writer"
 
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
-	workloads_client "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client"
+	workloads_client "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
 
 	"github.com/google/uuid"
 

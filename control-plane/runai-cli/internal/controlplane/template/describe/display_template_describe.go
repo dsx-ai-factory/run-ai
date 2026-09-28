@@ -16,7 +16,7 @@ import (
 	instancecfg "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/field"
 	uitable "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/table"
-	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/samber/lo"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"

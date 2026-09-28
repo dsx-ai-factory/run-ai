@@ -63,6 +63,7 @@ var ResourceTypesDisplayName = map[api.ResourceType]string{
 	api.RESOURCETYPE_CREDENTIALS:                  "Credentials",
 	api.RESOURCETYPE_DATAVOLUMES:                  "Data volumes",
 	api.RESOURCETYPE_STORAGE_CLASS_CONFIGURATION:  "Storage class configuration",
+	api.RESOURCETYPE_DEVICE_CLASSES:               "Device classes",
 	api.RESOURCETYPE_ACCESS_KEYS:                  "Access Keys",
 	api.RESOURCETYPE_WORKLOAD_PROPERTIES:          "Workload properties",
 	api.RESOURCETYPE_NETWORK_TOPOLOGIES:           "Network topologies",
@@ -117,6 +118,7 @@ var ResourceTypesGroupId = map[api.ResourceType]api.ResourceTypeGroupId{
 	api.RESOURCETYPE_CREDENTIALS:                  api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_DATAVOLUMES:                  api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_STORAGE_CLASS_CONFIGURATION:  api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
+	api.RESOURCETYPE_DEVICE_CLASSES:               api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_REGISTRIES:                   api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 }
 

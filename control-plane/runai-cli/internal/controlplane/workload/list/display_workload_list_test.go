@@ -25,7 +25,7 @@ import (
 	cpworkloadmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane/workload"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/transaction"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -946,7 +946,7 @@ func generateWorkloadFullSpec(id, name string, createdAt time.Time) openapi.Work
           "containerPort": 8888,
           "name": "Jupyter",
           "toolType": "jupyter-notebook",
-          "url": "https://fox-demo.runailabs.com/team-one/jup-01"
+          "url": "https://fox-demo.example.com/team-one/jup-01"
         }
       ],
       "id": "ab6b7bac-922c-4dea-964e-288e28ae1804",
@@ -998,7 +998,7 @@ func generateWorkloadFullSpec(id, name string, createdAt time.Time) openapi.Work
   "type": "Workspace",
   "updatedAt": "2025-04-10T06:28:43.632927Z",
   "urls": [
-    "https://fox-demo.runailabs.com/team-one/jup-01"
+    "https://fox-demo.example.com/team-one/jup-01"
   ],
   "workloadRequestedResources": {
     "cpu": {

@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	authz "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
-	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaimcp"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/common"

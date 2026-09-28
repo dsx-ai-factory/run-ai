@@ -20,7 +20,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/helper"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/transaction"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
-	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 var _ = Describe("List Command with Deleted Flag", func() {
