@@ -141,36 +141,6 @@ metrics-exporter:
     - *no-integration_tests-dir
     - *no-mocks-dir
 
-nodepool-controller:
-- changed-files:
-  - all-globs-to-any-file:
-    - 'runai-cluster/cluster/nodepool-controller/**/*.{go,sql}'
-    - *no-test-go
-    - *no-tests-dir
-    - *no-integration-tests-dir
-    - *no-integration_tests-dir
-    - *no-mocks-dir
-
-pod-group-assigner:
-- changed-files:
-  - all-globs-to-any-file:
-    - 'runai-cluster/cluster/pod-group-assigner/**/*.{go,sql}'
-    - *no-test-go
-    - *no-tests-dir
-    - *no-integration-tests-dir
-    - *no-integration_tests-dir
-    - *no-mocks-dir
-
-project-controller:
-- changed-files:
-  - all-globs-to-any-file:
-    - 'runai-cluster/cluster/project-controller/**/*.{go,sql}'
-    - *no-test-go
-    - *no-tests-dir
-    - *no-integration-tests-dir
-    - *no-integration_tests-dir
-    - *no-mocks-dir
-
 
 runai-chart:
 - changed-files:

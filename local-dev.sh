@@ -170,9 +170,6 @@ RC_GO_SERVICES=(
   init-ca
   karta-migrate
   metrics-exporter
-  nodepool-controller
-  pod-group-assigner
-  project-controller
   runai-crd-upgrader
   shared-objects-controller
   status-updater
