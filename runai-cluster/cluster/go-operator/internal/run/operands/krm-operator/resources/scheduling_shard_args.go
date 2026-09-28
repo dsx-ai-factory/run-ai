@@ -14,7 +14,7 @@ import (
 	runai_scheduler "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-scheduler"
 )
 
-// MarshalShardArgs builds the cluster-wide SchedulingShard args from RunaiConfig
+// marshalShardArgs builds the cluster-wide SchedulingShard args from RunaiConfig
 // - both the RunAIScheduler settings and the global NodeAffinity policy - and
 // JSON-encodes them in KAI vocabulary for the --scheduling-shard-args flag.
 //
@@ -24,9 +24,7 @@ import (
 // operator side lets nodepool-controller receive already-KAI args and stay
 // free of run.ai types. The controller owns the base worker-node-label args,
 // so they are intentionally not produced here.
-//
-// Exported so the KRMConfig operand builds the same args rather than drifting.
-func MarshalShardArgs(schedulerConfig *runai_scheduler.RunAIScheduler, nodeAffinity *global.NodeAffinity) (string, error) {
+func marshalShardArgs(schedulerConfig *runai_scheduler.RunAIScheduler, nodeAffinity *global.NodeAffinity) (string, error) {
 	args := buildShardArgs(schedulerConfig, nodeAffinity)
 	argsBytes, err := json.Marshal(args)
 	if err != nil {
