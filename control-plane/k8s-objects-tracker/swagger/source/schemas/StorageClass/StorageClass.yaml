@@ -3,10 +3,7 @@ required:
   - storage_class_name
 properties:
   cluster_id:
-    type: string
-    format: uuid
-    description: Cluster ID which has sent the resource info
-    example: 550e8400-e29b-41d4-a716-446655440000
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ReportingClusterId.yaml"
   storage_class_name:
     type: string
     description: Storage class name

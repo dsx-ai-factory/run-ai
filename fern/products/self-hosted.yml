@@ -246,7 +246,7 @@ navigation:
           - page: Segment-Based Topology Placement
             path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md
         - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
-          path: ../../docs/platform-management/aiinitiatives/resources/enabling-spectrum-x-networking-for-nvidia-run-ai-workloads.md
+          path: ../../docs/platform-management/aiinitiatives/resources/spectrum-x-networking.md
         - page: Configuring NUMA-Aware Scheduling
           slug: numa-aware-scheduling
           path: ../../docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md
@@ -532,9 +532,10 @@ navigation:
       path: ../../docs/agents/agent-skills.md
   - section: Development
     contents:
-    - link: Local Development
-      href: https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md
-      target: _blank
+    - page: Local Development
+      path: ../../local-dev.md
+    - page: Contributing
+      path: ../../CONTRIBUTING.md
     - page: Service Reference
       path: ../../docs/developer/services.md
     - page: CRD Reference

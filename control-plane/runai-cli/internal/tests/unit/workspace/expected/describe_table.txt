@@ -56,10 +56,10 @@ Storage
 
 Network
 
- Name             Tool Type        Connection Type  Container Port   URL                                                             
-─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
- url              custom           ExternalUrl      8888             https://nael-env-001.runailabs.com/team-b/my-workspace-demo-123 
- port                              NodePort         8888             172.18.0.2:31888                                                
+ Name             Tool Type        Connection Type  Container Port   URL                                                           
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ url              custom           ExternalUrl      8888             https://nael-env-001.example.com/team-b/my-workspace-demo-123 
+ port                              NodePort         8888             172.18.0.2:31888                                              
 
   Access Control:
   url (Port 8888):

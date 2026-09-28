@@ -1,9 +1,7 @@
 global:
+  # Quote it: a bare `on` is a YAML bool, which KAI rejects. Being global it
+  # reaches KRM and the bundled kai-scheduler on its own.
   fipsMode: "off"
-  # The bundled kai-scheduler reads this boolean rather than fipsMode, and Helm
-  # derives neither from the other, so set both together or KRM fails the render.
-  # Being global it reaches the scheduler through KRM, without naming either.
-  fips: false
   customCA:
     enabled: false
     secret:
@@ -222,8 +220,12 @@ kai-resource-management:
       enabled: false
     defaultPriorityClasses:
       enabled: false
+    # go-operator owns the KAIConfig singleton too, so neither of KAI's own
+    # managers may create it. Both off is KAI's "external" mode.
     kaiConfigDeployer:
       enabled: false
+    kaiConfig:
+      render: false
     nodescaleadjuster:
       scalingPodNamespace: runai-scale-adjust
 karta:

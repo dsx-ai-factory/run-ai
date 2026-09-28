@@ -16,8 +16,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/pubsub"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/structs"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"k8s.io/utils/ptr"
@@ -121,9 +121,7 @@ func (i *InternalApiService) DeleteScopeAccessRules(ctx context.Context, scopeTy
 
 	rolesList := normalizeList(roles)
 
-	isDGXC := i.TenantSettings.IsDGXCManaged(ctx)
-
-	err = dao.DbDeleteScopeAccessRules(ctx, isDGXC, tenantId, scopeType, scopeId, lastUpdated, rolesList)
+	err = dao.DbDeleteScopeAccessRules(ctx, tenantId, scopeType, scopeId, lastUpdated, rolesList)
 	if err != nil {
 		return NewErrorResponse(err), nil
 	}
@@ -160,9 +158,7 @@ func (i *InternalApiService) GetScopeAccessRules(ctx context.Context, clusterId 
 	departmentIdsList := normalizeList(departmentIds)
 	projectIdsList := normalizeList(projectIds)
 
-	isDGXC := i.TenantSettings.IsDGXCManaged(ctx)
-
-	accessRules, err := dao.DbGetAccessRulesByScopes(ctx, isDGXC, rolesList, tenantId, clusterId, departmentIdsList, projectIdsList)
+	accessRules, err := dao.DbGetAccessRulesByScopes(ctx, rolesList, tenantId, clusterId, departmentIdsList, projectIdsList)
 	if err != nil {
 		return NewErrorResponse(err), nil
 	}

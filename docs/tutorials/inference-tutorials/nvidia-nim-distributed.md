@@ -25,8 +25,8 @@ Before you start, make sure the following requirements are met:
 
 * Your administrator has:
   * Created a [project](../../platform-management/aiinitiatives/organization/projects.md) for you.
-  * Installed and configured [LWS](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-inference) (Leader-Worker Set) on the cluster.
-  * Configured external access if needed. Endpoints ending with `.svc.cluster.local` are accessible only inside the cluster; external access must be enabled by your administrator as described in the [inference requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section.
+  * Installed and configured [LWS](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-inference) (Leader-Worker Set) on the cluster.
+  * Configured external access if needed. Endpoints ending with `.svc.cluster.local` are accessible only inside the cluster; external access must be enabled by your administrator as described in the [inference requirements](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) section.
 * You have:
   * An NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key.
 

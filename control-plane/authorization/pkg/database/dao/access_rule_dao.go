@@ -95,7 +95,7 @@ func DbCreateAccessRule(
 		cache.Del[[]string](ctx, groupsCacheKey(tenantId))
 	}
 
-	role, apiErr := dbGetRoleById(ctx, fmt.Sprintf("%d", tenantId), accessRuleSpec.RoleID, nil, nil)
+	role, apiErr := dbGetRoleById(ctx, fmt.Sprintf("%d", tenantId), accessRuleSpec.RoleID, nil)
 	if apiErr != nil {
 		return nil, apiErr
 	}
@@ -465,7 +465,7 @@ func DbGetGroupNames(ctx context.Context, tenantId uint) ([]string, *api.Error) 
 	return *names, nil
 }
 
-func DbGetAccessRulesByScopes(ctx context.Context, isDGXC bool, roles []string, tenantId uint, clusterId string, departmentIds []string, projectIds []string) (*[]models.AccessRule, *api.Error) {
+func DbGetAccessRulesByScopes(ctx context.Context, roles []string, tenantId uint, clusterId string, departmentIds []string, projectIds []string) (*[]models.AccessRule, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get access rules", nil)
 	accessRules := &[]models.AccessRule{}
 	db := runaidb.DB().WithContext(ctx)
@@ -473,7 +473,7 @@ func DbGetAccessRulesByScopes(ctx context.Context, isDGXC bool, roles []string, 
 	query := db.Preload(clause.Associations).
 		Where("access_rules.tenant_id = ?", tenantId)
 
-	query, apiErr := filterByRoles(ctx, tenantId, query, roles, isDGXC)
+	query, apiErr := filterByRoles(ctx, tenantId, query, roles)
 	if apiErr != nil {
 		return nil, apiErr
 	}
@@ -488,9 +488,9 @@ func DbGetAccessRulesByScopes(ctx context.Context, isDGXC bool, roles []string, 
 	return accessRules, nil
 }
 
-func filterByRoles(ctx context.Context, tenantId uint, query orm.DB, roleNames []string, isDGXC bool) (orm.DB, *api.Error) {
+func filterByRoles(ctx context.Context, tenantId uint, query orm.DB, roleNames []string) (orm.DB, *api.Error) {
 	if len(roleNames) > 0 {
-		roles, err := DbGetRoles(ctx, fmt.Sprintf("%d", tenantId), isDGXC, 0, 0, "", "", nil, "", false)
+		roles, err := DbGetRoles(ctx, fmt.Sprintf("%d", tenantId), 0, 0, "", "", nil, "", false)
 		if err != nil {
 			return nil, err
 		}
@@ -629,7 +629,7 @@ func DbCreateInternalUserAccessRule(
 		return nil, dbErr.WithDetails(err)
 	}
 
-	role, apiErr := dbGetRoleById(ctx, fmt.Sprintf("%d", tenantId), accessRuleSpec.RoleID, nil, nil)
+	role, apiErr := dbGetRoleById(ctx, fmt.Sprintf("%d", tenantId), accessRuleSpec.RoleID, nil)
 	if apiErr != nil {
 		return nil, apiErr
 	}
@@ -658,7 +658,7 @@ func DbDeleteSubjectAccessRules(ctx context.Context, tenantId uint, subjectType 
 	return nil
 }
 
-func DbDeleteScopeAccessRules(ctx context.Context, isDGXC bool, tenantId uint, scopeType string, scopeId string, lastUpdated string, roles []string) *api.Error {
+func DbDeleteScopeAccessRules(ctx context.Context, tenantId uint, scopeType string, scopeId string, lastUpdated string, roles []string) *api.Error {
 	dbErr := api.NewError(http.StatusInternalServerError, fmt.Sprintf("Failed to delete scope access rules of %s-%s", scopeType, scopeId), nil)
 
 	var apiErr *api.Error
@@ -674,7 +674,7 @@ func DbDeleteScopeAccessRules(ctx context.Context, isDGXC bool, tenantId uint, s
 		if lastUpdated != "" {
 			query = query.Where("access_rules.updated_at < ?", lastUpdated)
 		}
-		query, apiErr = filterByRoles(ctx, tenantId, query, roles, isDGXC)
+		query, apiErr = filterByRoles(ctx, tenantId, query, roles)
 		if apiErr != nil {
 			return apiErr
 		}

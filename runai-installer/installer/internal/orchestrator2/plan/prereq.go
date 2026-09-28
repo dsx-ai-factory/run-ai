@@ -175,15 +175,29 @@ func buildFeatureFlows(s *spec.Spec, deps orchestrator2.Deps) ([]*orchestrator2.
 		version := locks.VersionFor(compat.MPIOperator, dep.Version)
 		add("mpi-operator", "MPI Operator", version, steps.NewMPIOperator(version, deps))
 	}
-	// LWS and the NIM operator are lightweight, non-root controllers whose Helm
-	// charts run cleanly under OpenShift's restricted-v2 SCC, so they install
-	// from Helm on every distribution. Only operators that genuinely cannot
-	// install via Helm on OpenShift (the GPU and network operators, which need
-	// driver/SCC/NFD/SR-IOV handling) use the OperatorHub path.
+	// On OpenShift LWS installs through the Red Hat Leader Worker Set operator
+	// (with the cert-manager operator it requires); elsewhere from the upstream
+	// Helm chart. The cluster chart is pointed at the resulting namespace via
+	// lwsClusterValues.
 	if dep := f.LWS; dep.IsInstall() {
-		version := locks.VersionFor(compat.LWS, dep.Version)
-		add("lws", "LeaderWorkerSet", version, steps.NewLWS(version, dep.CustomHelmValues, deps))
+		if s.LWSUsesOLM() {
+			version := locks.VersionFor(compat.LWSOperator, "")
+			addMulti("lws", "LeaderWorkerSet", version, steps.NewLWSOpenShift(steps.LWSOpenShiftParams{
+				Channel:             version,
+				CertManagerChannel:  locks.VersionFor(compat.CertManagerOperator, ""),
+				InstallPlanApproval: olmInstallPlanApproval(dep.OpenShiftInstallPlanApproval),
+				CRSpec:              dep.OpenShiftCR,
+				SubscriptionEnv:     dep.OpenShiftSubscriptionEnv,
+				Catalog:             olmCatalog(s, steps.RedHatOperatorsCatalog()),
+			}, deps)...)
+		} else {
+			version := locks.VersionFor(compat.LWS, dep.Version)
+			add("lws", "LeaderWorkerSet", version, steps.NewLWS(version, dep.CustomHelmValues, deps))
+		}
 	}
+	// The NIM operator is a lightweight, non-root controller whose Helm chart
+	// runs cleanly under OpenShift's restricted-v2 SCC, so it installs from
+	// Helm on every distribution.
 	if dep := f.NIMOperator; dep.IsInstall() {
 		version := locks.VersionFor(compat.NIMOperator, dep.Version)
 		add("nim-operator", "NVIDIA NIM Operator", version, steps.NewNIMOperator(version, dep.CustomHelmValues, deps))

@@ -9,8 +9,8 @@ Use when documenting a new platform feature that requires both explanation
 and configuration steps — not a pure UI resource page, not an installation
 procedure, but a capability that administrators enable and configure.
 
-Examples: GPU memory swap, dynamic GPU fractions, topology-aware scheduling,
-NUMA-aware scheduling, time-slicing, new scheduling policies.
+Examples: dynamic GPU fractions, topology-aware scheduling, NUMA-aware
+scheduling, time-slicing, new scheduling policies.
 
 ## On Activation
 
@@ -26,14 +26,14 @@ Before drafting anything:
    - `docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md`
 4. Read `docs/AGENTS.md` for writing rules, Fern components, and terminology.
 
-Document only what the code confirms. Mark anything unverifiable as
-`<!-- TODO: verify with engineering -->`.
+Document only what the code confirms. Anything you cannot verify needs
+verification before it's included.
 
 ## Page to Create
 
 One page at the most relevant path under `docs/platform-management/` or
 `docs/installation-and-configuration/`. File name: kebab-case, descriptive of the
-feature (`gpu-memory-swap.md`, `numa-aware-scheduling.md`).
+feature (`numa-aware-scheduling.md`).
 
 ### Title
 
@@ -111,21 +111,19 @@ memory overhead, incompatibility with certain workload types.
 
 ### Using API
 
+Use Fern's `api:` link syntax, not a hardcoded domain — it resolves to the
+correct endpoint page at build time regardless of URL pattern or version:
+
 ```markdown
 ## Using API
 
-To view the available actions, go to the [Feature Name](https://run-ai-docs.nvidia.com/api/2.26/[path]) API reference.
+To view the available actions, go to the [Feature Name](api:[api-name]:[METHOD path]) API reference.
 ```
-
-<!-- TBD: Confirm OSS API reference URL pattern — current links use
-run-ai-docs.nvidia.com/api/2.26/ but OSS URL is not yet confirmed. Use a
-placeholder and mark with TODO until resolved. -->
 
 ## Nav Registration
 
 Add a nav entry in `fern/products/self-hosted.yml` under the most relevant
-section. For infrastructure features, also add to `fern/products/saas.yml`
-if applicable. For scheduler optimization features, place under
+section. For scheduler optimization features, place under
 `Managing Your Resources` or the relevant scheduler section.
 
 ## Quality Checks
@@ -133,9 +131,9 @@ if applicable. For scheduler optimization features, place under
 Before finishing:
 
 - [ ] All Helm values, kubectl commands, and UI paths verified against source
-- [ ] No invented defaults — `<!-- TODO -->` for anything unverified
+- [ ] No invented defaults — anything unconfirmed needs verification first
 - [ ] `<Warning>` used for any destructive or irreversible configuration
-- [ ] `<Info>` used for notes and tips — never plain text
+- [ ] `<Note>` used for notes and tips — never plain text
 - [ ] Deployment Considerations covers known interactions with other features
 - [ ] Nav entry added to applicable product files
 - [ ] `fern docs dev` runs without errors

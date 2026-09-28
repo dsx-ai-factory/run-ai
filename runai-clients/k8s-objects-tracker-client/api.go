@@ -51,6 +51,8 @@ type IK8SObjectTrackerExternalClient interface {
 	UpdateStorageClass(ctx context.Context, storageClass openapi.StorageClass) (*openapi.StorageClass, *http.Response, error)
 	SyncStorageClass(ctx context.Context, clusterId string, storageClasses []openapi.StorageClass) (*openapi.StorageClasses, *http.Response, error)
 
+	SyncDeviceClass(ctx context.Context, clusterId string, deviceClasses []openapi.DeviceClass) (*openapi.DeviceClasses, *http.Response, error)
+
 	ListSecrets(ctx context.Context, clusterId string) (*openapi.SecretListResponse, *http.Response, error)
 	ListSecretsByScope(ctx context.Context, scopeType string, scopeId string) (*openapi.SecretListResponse, *openapi.Error)
 	ListSecretsByScopeAndName(ctx context.Context, scopeType string, scopeId string, name string) (*openapi.SecretListResponse, *openapi.Error)

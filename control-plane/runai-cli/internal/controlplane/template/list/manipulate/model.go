@@ -6,7 +6,7 @@
 package manipulate
 
 import (
-	wcgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wcgenerated "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // Data represents the raw template list response

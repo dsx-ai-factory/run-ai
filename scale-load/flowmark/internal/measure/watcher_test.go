@@ -11,7 +11,9 @@ import (
 	"testing"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
@@ -20,7 +22,7 @@ const testNamespace = "runai-flowmark"
 
 func runner(name string) *unstructured.Unstructured {
 	obj := &unstructured.Unstructured{}
-	obj.SetGroupVersionKind(workloadRunnerKind)
+	obj.SetGroupVersionKind(WorkloadRunnerKind)
 	obj.SetNamespace(testNamespace)
 	obj.SetName(name)
 	return obj
@@ -35,6 +37,21 @@ func startWatch(t *testing.T) (k8sclient.WithWatch, *Watcher) {
 	}
 	t.Cleanup(w.Stop)
 	return kube, w
+}
+
+func waitForArrival(t *testing.T, w *Watcher, key string) {
+	t.Helper()
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		w.mu.Lock()
+		_, seen := w.arrived[key]
+		w.mu.Unlock()
+		if seen {
+			return
+		}
+		time.Sleep(time.Millisecond)
+	}
+	t.Fatalf("arrival for %q never recorded", key)
 }
 
 func byName(timings []Timing) map[string]Timing {
@@ -71,16 +88,7 @@ func TestEventBeforeMarkStampsDuration(t *testing.T) {
 	if err := kube.Create(context.Background(), runner("w1")); err != nil {
 		t.Fatal(err)
 	}
-	deadline := time.Now().Add(2 * time.Second)
-	for {
-		w.mu.Lock()
-		_, seen := w.arrived["w1"]
-		w.mu.Unlock()
-		if seen || time.Now().After(deadline) {
-			break
-		}
-		time.Sleep(time.Millisecond)
-	}
+	waitForArrival(t, w, "w1")
 	w.MarkCreated("w1", t0)
 
 	got := byName(w.WaitAll(2 * time.Second))["w1"]
@@ -187,17 +195,103 @@ func TestArrivalBeforeMarkIsZeroNotNegative(t *testing.T) {
 	}
 }
 
-func TestExternalWorkloadSourceName(t *testing.T) {
-	cases := map[string]string{
-		"ew-deployment-flowmark-basic-1a2b3c4d-w1": "flowmark-basic-1a2b3c4d-w1",
-		"ew-tfjob-train": "train",
-		"plain-name":     "plain-name",
+func externalWorkload(name, sourceUID, ownerUID string) *unstructured.Unstructured {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(ExternalWorkloadKind)
+	obj.SetNamespace(testNamespace)
+	obj.SetName(name)
+	if sourceUID != "" {
+		_ = unstructured.SetNestedField(obj.Object, sourceUID, "spec", "originalWorkloadUID")
 	}
-	for in, want := range cases {
-		obj := &unstructured.Unstructured{}
-		obj.SetName(in)
-		if got := externalWorkloadSource(obj); got != want {
-			t.Errorf("%s: got %q want %q", in, got, want)
+	if ownerUID != "" {
+		obj.SetOwnerReferences([]metav1.OwnerReference{{APIVersion: "apps/v1", Kind: "Deployment", Name: "dep", UID: types.UID(ownerUID)}})
+	}
+	return obj
+}
+
+func TestExternalWorkloadSourcePrefersUIDThenOwnerThenName(t *testing.T) {
+	cases := []struct {
+		name string
+		obj  *unstructured.Unstructured
+		want string
+	}{
+		{"spec uid wins", externalWorkload("ew-deployment-dep", "uid-spec", "uid-owner"), "uid-spec"},
+		{"owner uid fallback", externalWorkload("ew-deployment-dep", "", "uid-owner"), "uid-owner"},
+		{"name fallback", externalWorkload("ew-deployment-flowmark-ew-1a2b3c4d-r100-7", "", ""), "flowmark-ew-1a2b3c4d-r100-7"},
+		{"name fallback other kind", externalWorkload("ew-tfjob-train", "", ""), "train"},
+		{"name fallback no prefix", externalWorkload("plain-name", "", ""), "plain-name"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := externalWorkloadSource(tc.obj); got != tc.want {
+				t.Fatalf("got %q want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestExternalWorkloadArrivalMatchesByUIDInBothOrders(t *testing.T) {
+	for _, eventFirst := range []bool{false, true} {
+		name := "mark first"
+		if eventFirst {
+			name = "event first"
 		}
+		t.Run(name, func(t *testing.T) {
+			kube := fake.NewClientBuilder().Build()
+			w, err := WatchExternalWorkloads(context.Background(), kube, testNamespace)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(w.Stop)
+
+			t0 := time.Now()
+			create := func() {
+				if err := kube.Create(context.Background(), externalWorkload("ew-deployment-dep-1", "uid-1", "uid-1")); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if eventFirst {
+				create()
+				waitForArrival(t, w, "uid-1")
+				w.MarkCreated("uid-1", t0)
+			} else {
+				w.MarkCreated("uid-1", t0)
+				create()
+			}
+
+			got := byName(w.WaitAll(2 * time.Second))
+			if got["uid-1"].Outcome != Arrived || got["uid-1"].Duration <= 0 {
+				t.Fatalf("event must be matched to the deployment UID, got %+v", got)
+			}
+			if _, byEWName := got["dep-1"]; byEWName {
+				t.Fatal("the item must be keyed by UID, not by the ExternalWorkload name")
+			}
+		})
+	}
+}
+
+func TestUnmatchedCountsArrivalsNobodyMarked(t *testing.T) {
+	kube := fake.NewClientBuilder().Build()
+	w, err := WatchExternalWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	w.MarkCreated("uid-marked", time.Now())
+	if err := kube.Create(context.Background(), externalWorkload("ew-deployment-marked", "uid-marked", "")); err != nil {
+		t.Fatal(err)
+	}
+	if err := kube.Create(context.Background(), externalWorkload("ew-deployment-orphan", "", "")); err != nil {
+		t.Fatal(err)
+	}
+	waitForArrival(t, w, "uid-marked")
+	waitForArrival(t, w, "orphan")
+
+	if got := w.Unmatched(); got != 1 {
+		t.Fatalf("the object without a source UID must count as unmatched, got %d", got)
+	}
+	if got := byName(w.WaitAll(time.Second))["uid-marked"]; got.Outcome != Arrived {
+		t.Fatalf("the marked item must still arrive: %+v", got)
 	}
 }

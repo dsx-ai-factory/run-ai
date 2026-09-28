@@ -91,7 +91,7 @@ There is no leader-over-worker precedence and no field-level merge between the t
 
 ## Code references
 
-- Typed DistInf model: [`model_distributed_inference_spec_spec.go`](../../runai-clients/workloads-client/generated/model_distributed_inference_spec_spec.go)
+- Typed DistInf model: [`model_distributed_inference_spec_spec.go`](../../control-plane/workloads/pkg/client/generated/model_distributed_inference_spec_spec.go)
 - Current inference V2 composer: [`inference_workloads`](../../control-plane/workloads-and-policies/composer_v2/inference_workloads)
 - Current native DistInf composer: [`to_dinf_workload.go`](../../control-plane/workloads-and-policies/composer_v2/runai_workloads/to_dinf_workload.go)
 - Native LWS behavior: [`lws_build.go`](../../runai-cluster/cluster/inference-workload-controller/internal/builders/lws_build.go)

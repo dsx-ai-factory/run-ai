@@ -278,6 +278,10 @@ data:
         queries:
             2.18.0: avg(runai_wait_time_seconds_per_workload{FILTERS}) by(clusterId)
             2.9.0: avg(runai_pod_group_total_wait_time{FILTERS}) by(clusterId)
+      runai_preempted_pods_count_per_cluster:
+        cross_version_query: sum by (clusterId, action) (increase(runai_pod_group_evicted_pods_total{action=~"preempt|reclaim",FILTERS}[RANGE:5m]))
+        queries:
+            3.0.0: sum by (clusterId, action) (increase(runai_pod_group_evicted_pods_total{action=~"preempt|reclaim",FILTERS}[RANGE:5m]))
       runai_gpu_utilization_per_nodepool:
         cross_version_query: runai_gpu_utilization_per_nodepool{FILTERS}
         queries:
@@ -1244,4 +1248,12 @@ data:
         cross_version_query: sum(runai_used_memory_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
         queries:
           2.25.0: sum(runai_used_memory_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_component_availability:
+        cross_version_query: sum by (clusterId, container) (sum_over_time(kube_pod_container_status_ready{FILTERS}[RANGE])) / sum by (clusterId, container) (count_over_time(kube_pod_container_status_ready{FILTERS}[RANGE]))
+        queries:
+          2.25.0: sum by (clusterId, container) (sum_over_time(kube_pod_container_status_ready{FILTERS}[RANGE])) / sum by (clusterId, container) (count_over_time(kube_pod_container_status_ready{FILTERS}[RANGE]))
+      runai_component_restarts:
+        cross_version_query: round(sum by (clusterId, container) (increase(kube_pod_container_status_restarts_total{FILTERS}[RANGE])))
+        queries:
+          2.25.0: round(sum by (clusterId, container) (increase(kube_pod_container_status_restarts_total{FILTERS}[RANGE])))
   {{- end }}

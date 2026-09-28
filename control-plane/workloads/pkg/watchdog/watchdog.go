@@ -10,10 +10,10 @@ import (
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"time"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"

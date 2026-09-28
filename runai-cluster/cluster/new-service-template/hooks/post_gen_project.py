@@ -15,7 +15,7 @@ OPERANDS_COMMON_PATH = os.path.realpath(os.path.join(PROJECT_DIRECTORY, '..', 'g
 MANAGED_OPERANDS_PATH = os.path.realpath(os.path.join(PROJECT_DIRECTORY, '..', 'go-operator/controllers/run/managed_operands.go'))
 GO_OPERATOR_MAKEFILE = os.path.realpath(os.path.join(PROJECT_DIRECTORY, '..', 'go-operator/Makefile'))
 CLUSTERROLES_DIR = os.path.realpath(os.path.join(PROJECT_DIRECTORY, '..', 'runai-chart/templates/clusterroles'))
-PROJECT_CONTROLLER_CONFIG_MAP_PATH = os.path.realpath(os.path.join(PROJECT_DIRECTORY, '..', 'go-operator/internal/run/operands/project-controller/resources/config_maps.go'))
+PROJECT_ROLE_BINDINGS_PATH = os.path.realpath(os.path.join(PROJECT_DIRECTORY, '..', 'go-operator/internal/run/operands/krm-operator/resources/project_role_bindings.go'))
 WORKFLOW_CI_PATH = os.path.realpath(os.path.join(PROJECT_DIRECTORY, '..', '..', '..', '.github/workflows'))
 
 APP_STRUCT_FIELD_TO_ADD_IN_RUNAICONFIG_STRUCT = '''
@@ -32,38 +32,11 @@ APP_ADD_TO_MANAGED_OPERANDS_LOCAL = '	mo.addOldLocalCluster({{cookiecutter.__app
 APP_ADD_TO_MANAGED_OPERANDS_REMOTE = '	mo.addOldRemoteCluster({{cookiecutter.__app_name_underscore}}.Operand(), *spec.{{cookiecutter.__app_name_camel_case_upper}}.Enabled)'
 APP_IMPORT_IN_MANAGED_OPERANDS = '	{{cookiecutter.__app_name_underscore}} "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/{{cookiecutter.app_name}}"'
 APP_PATH_FOR_OPERATOR_WORKFLOW_CI = '    runai-cluster/cluster/{{cookiecutter.app_name}}'
-APP_PROJECT_BASED_ROLEBINDING_TO_ADD_IN_PROJECT_CONTROLLER_CONFIGMAP = '''		data["{{cookiecutter.app_name}}.yaml"] = func() string {
-			roleBinding := &rbacv1.RoleBinding{
-				TypeMeta: metav1.TypeMeta{
-					APIVersion: fmt.Sprintf("%s/%s",
-						rbacv1.SchemeGroupVersion.Group, rbacv1.SchemeGroupVersion.Version),
-					Kind: utils.ResourceStructType(&rbacv1.RoleBinding{}),
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "{{cookiecutter.app_name}}",
-				},
-				RoleRef: rbacv1.RoleRef{
-					APIGroup: rbacv1.SchemeGroupVersion.Group,
-					Kind:     utils.ResourceStructType(&rbacv1.ClusterRole{}),
-					Name:     "runai-{{cookiecutter.app_name}}-project",
-				},
-				Subjects: []rbacv1.Subject{
-					{
-						Kind:      utils.ResourceStructType(&v1.ServiceAccount{}),
-						Name:      "{{cookiecutter.app_name}}",
-						Namespace: namespace,
-					},
-				},
-			}
-
-			roleBindingYAML, err := yaml.Marshal(roleBinding)
-			if err != nil {
-				panic(err)
-			}
-
-			return string(roleBindingYAML)
-		}()
-'''
+APP_PROJECT_BASED_ROLEBINDING_TO_ADD_IN_PROJECT_ROLE_BINDINGS = '''		{
+			Name:               "{{cookiecutter.app_name}}",
+			ClusterRoleName:    "runai-{{cookiecutter.app_name}}-project",
+			ServiceAccountName: "{{cookiecutter.app_name}}",
+		},'''
 
 
 def _move_directory(src, dst):
@@ -219,15 +192,14 @@ def add_app_to_go_operator_operands():
 
 def add_project_based_rbac_if_needed():
     if not {{cookiecutter.add_project_based_rolebinding}}:
-        print('Skipping project-based RoleBinding to project-controller configmap')
+        print('Skipping project-based RoleBinding in project_role_bindings.go')
         return
-    print('Adding project-based RoleBinding to project-controller configmap')
+    print('Adding project-based RoleBinding in project_role_bindings.go')
 
-    res = _insert_lines_to_file_after_line_with_str(PROJECT_CONTROLLER_CONFIG_MAP_PATH, APP_PROJECT_BASED_ROLEBINDING_TO_ADD_IN_PROJECT_CONTROLLER_CONFIGMAP,
-                                                    'data["cluster-sync.yaml"] = func() string {',
-                                                    -1)
+    res = _insert_lines_to_file_after_line_with_str(PROJECT_ROLE_BINDINGS_PATH, APP_PROJECT_BASED_ROLEBINDING_TO_ADD_IN_PROJECT_ROLE_BINDINGS,
+                                                    '{Name: "cluster-sync", ClusterRoleName: "cluster-sync-project", ServiceAccountName: "cluster-sync"},')
     if not res:
-        raise Exception('Failed to add project-based RoleBinding to project-controller configmap')
+        raise Exception('Failed to add project-based RoleBinding in project_role_bindings.go')
 
 def run_make_generate_manifests_copycrds():
     os.chdir(GO_OPERATOR_DIR)

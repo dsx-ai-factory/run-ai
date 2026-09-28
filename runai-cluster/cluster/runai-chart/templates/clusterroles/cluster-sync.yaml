@@ -145,6 +145,14 @@ rules:
       - list
       - watch
   - apiGroups:
+      - resource.k8s.io
+    resources:
+      - deviceclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
       - machinelearning.seldon.io
     resources:
       - seldondeployments

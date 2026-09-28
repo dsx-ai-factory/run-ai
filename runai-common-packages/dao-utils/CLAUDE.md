@@ -13,7 +13,7 @@
 | `purify` | `go fmt ./...` + `go vet ./...` + `go mod tidy` |
 | `build` | No-op (library) |
 | `validate` | No-op recipe; shared makefile adds `validate-package-imports/replaces` prerequisites |
-| `package-bump-version` | Tag production release `dao-utils/vX.Y.Z` (must be on master, in sync with origin) |
+| `package-bump-version` | Tag production release `dao-utils/vX.Y.Z` (must be on main, in sync with origin) |
 | `package-bump-version-dev` | Tag dev release `dao-utils/vX.Y.Z-dev.N` |
 
 ## Key build notes
@@ -31,5 +31,5 @@
 ## Releasing
 
 Versioned by git tag `dao-utils/vX.Y.Z`. Use `make package-bump-version` (production,
-from master) or `make package-bump-version-dev` (any branch) — see the
+from main) or `make package-bump-version-dev` (any branch) — see the
 [runai-common-packages README](../README.md).

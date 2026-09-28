@@ -1,12 +1,11 @@
 # Install the Cluster
 
-In this section you will install the NVIDIA Run:ai cluster on your Kubernetes environment using Helm. The cluster extends Kubernetes with NVIDIA Run:ai orchestration capabilities - scheduling and workload management - and connects to the previously installed [control plane](install-control-plane.md) for centralized management.
+This page describes how to install the NVIDIA Run:ai cluster on your Kubernetes environment using Helm. The cluster extends Kubernetes with NVIDIA Run:ai orchestration capabilities - scheduling and workload management - and connects to the previously installed [control plane](install-control-plane.md) for centralized management.
 
 Once the control plane is installed and you access the NVIDIA Run:ai UI for the first time, an onboarding wizard opens automatically. The wizard guides you through the cluster setup and generates a Helm installation command. Follow the instructions below to modify and run the command based on your artifact source and environment.
 
 This procedure includes:
 
-* Adding the NVIDIA Run:ai Helm repository from NGC
 * Installing the NVIDIA Run:ai cluster into the `runai` namespace
 * Registering the NVIDIA Run:ai cluster with the NVIDIA Run:ai control plane using the provided connection details
 
@@ -19,6 +18,14 @@ Before installing the NVIDIA Run:ai cluster, complete the entire [System Require
 ## Helm
 
 NVIDIA Run:ai requires [Helm](https://helm.sh/) 3.14 or later. To install Helm, see [Installing Helm](https://helm.sh/docs/intro/install/). If you are installing an air-gapped version of NVIDIA Run:ai, the NVIDIA Run:ai tar file contains the [helm binary](preparations.md#software-artifacts).
+
+<Note>
+
+**Note**
+
+Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-side-apply) when installing a new chart release, which can conflict with resources managed by the NVIDIA Run:ai operator. Append `--server-side=false` to your `helm upgrade` command. NVIDIA Run:ai clusters originally installed with Helm 3.x are unaffected.
+
+</Note>
 
 ## Permissions <a href="#permissions" id="permissions"></a>
 
@@ -36,25 +43,22 @@ Using a Kubernetes user with the `cluster-admin` role to ensure a successful ins
 
 </Note>
 
-### Open Source and Support-Entitled Release
-
-The installation steps below are the same for both Open Source and Support-Entitled Release. Registry authentication with your NGC Personal Key happens once, during the [control plane installation](install-control-plane.md#open-source-and-support-entitled-release) - the NVIDIA Run:ai cluster install does not require it again.
-
 ### Kubernetes
 
 <Accordion title="Connected">
 
 **Connected**
 
-When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created.
+When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created. For additional clusters, use the Clusters form instead. See [Clusters](../../operations/clusters.md).
 
 1. Enter a unique name for your cluster.
-2. Set the cluster location. Choose where the NVIDIA Run:ai cluster will be installed:
+2. Select **Manual Helm** as the installation type.
+3. Set the cluster location. Choose where the NVIDIA Run:ai cluster will be installed:
    * Same as the control plane - Install the NVIDIA Run:ai cluster on the same Kubernetes cluster as the NVIDIA Run:ai control plane.
    *   Remote control plane - Install the NVIDIA Run:ai cluster on a different Kubernetes cluster than the NVIDIA Run:ai control plane.
 
        <Note><p><strong>Note</strong></p><p>This selection depends on your <a href="../../system-requirements/deployment-model.md">deployment model</a> - the NVIDIA Run:ai cluster system requirements differ depending on whether the NVIDIA Run:ai cluster is installed on the same Kubernetes cluster as the NVIDIA Run:ai control plane (same-cluster deployment) or on a separate one (multi-cluster deployment).</p></Note>
-3. If you selected Remote control plane, enter the Cluster URL. For more information, see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
+4. If you selected Remote control plane, enter the Cluster URL. For more information, see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
 
 **Install NVIDIA Run:ai on Your Cluster**
 
@@ -71,7 +75,7 @@ helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
     --set controlPlane.url=... \
-    --set controlPlane.bootstrapToken=... \
+    --set cluster.bootstrapToken=... \
     --set cluster.uid=... \
     --set cluster.url=... --version="<VERSION>" --create-namespace \
     --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -93,23 +97,16 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 **Air-gapped**
 
-<Warning>
-
-**Prerequisite**
-
-If your internal registry requires authentication, you must create the `runai-reg-creds` imagePullSecret before proceeding. See [Software Artifacts](preparations.md#software-artifacts) in Preparations.
-
-</Warning>
-
-When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created.
+When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created. For additional clusters, use the Clusters form instead. See [Clusters](../../operations/clusters.md).
 
 1. Enter a unique name for your cluster.
-2. Set the cluster location. Choose where the NVIDIA Run:ai cluster will be installed:
+2. Select **Manual Helm** as the installation type.
+3. Set the cluster location. Choose where the NVIDIA Run:ai cluster will be installed:
    * Same as the control plane - Install the NVIDIA Run:ai cluster on the same Kubernetes cluster as the NVIDIA Run:ai control plane.
    *   Remote control plane - Install the NVIDIA Run:ai cluster on a different Kubernetes cluster than the NVIDIA Run:ai control plane.
 
        <Note><p><strong>Note</strong></p><p>This selection depends on your <a href="../../system-requirements/deployment-model.md">deployment model</a> - the NVIDIA Run:ai cluster system requirements differ depending on whether the NVIDIA Run:ai cluster is installed on the same Kubernetes cluster as the NVIDIA Run:ai control plane (same-cluster deployment) or on a separate one (multi-cluster deployment).</p></Note>
-3. If you selected Remote control plane, enter the Cluster URL. For more information, see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
+4. If you selected Remote control plane, enter the Cluster URL. For more information, see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
 
 **Install NVIDIA Run:ai on Your Cluster**
 
@@ -132,7 +129,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
 ```bash
 helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
     --set controlPlane.url=... \
-    --set controlPlane.bootstrapToken=... \
+    --set cluster.bootstrapToken=... \
     --set cluster.uid=... \
     --set cluster.url=... --create-namespace \
     --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \
@@ -159,15 +156,16 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 **Connected**
 
-When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created.
+When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created. For additional clusters, use the Clusters form instead. See [Clusters](../../operations/clusters.md).
 
 1. Enter a unique name for your cluster.
-2. Set the cluster location. Choose where the NVIDIA Run:ai cluster will be installed:
+2. Select **Manual Helm** as the installation type.
+3. Set the cluster location. Choose where the NVIDIA Run:ai cluster will be installed:
    * Same as the control plane - Install the NVIDIA Run:ai cluster on the same Kubernetes cluster as the NVIDIA Run:ai control plane.
    *   Remote control plane - Install the NVIDIA Run:ai cluster on a different Kubernetes cluster than the NVIDIA Run:ai control plane.
 
        <Note><p><strong>Note</strong></p><p>This selection depends on your <a href="../../system-requirements/deployment-model.md">deployment model</a> - the NVIDIA Run:ai cluster system requirements differ depending on whether the NVIDIA Run:ai cluster is installed on the same Kubernetes cluster as the NVIDIA Run:ai control plane (same-cluster deployment) or on a separate one (multi-cluster deployment).</p></Note>
-3. If you selected Remote control plane, enter the Cluster URL. For more information, see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
+4. If you selected Remote control plane, enter the Cluster URL. For more information, see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
 
 **Install NVIDIA Run:ai on Your Cluster**
 
@@ -183,7 +181,7 @@ helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
   --set controlPlane.url=... \
-  --set controlPlane.bootstrapToken=... \
+  --set cluster.bootstrapToken=... \
   --set cluster.uid=... \
   --set cluster.url=... --version="<VERSION>" --create-namespace
 ```
@@ -204,23 +202,16 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 **Air-gapped**
 
-<Warning>
-
-**Prerequisite**
-
-If your internal registry requires authentication, you must create the `runai-reg-creds` imagePullSecret before proceeding. See [Software Artifacts](preparations.md#software-artifacts) in Preparations.
-
-</Warning>
-
-When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created.
+When adding a cluster for the first time, the onboarding wizard opens automatically when you log in to the NVIDIA Run:ai platform. You cannot perform other actions in the platform until the cluster is created. For additional clusters, use the Clusters form instead. See [Clusters](../../operations/clusters.md).
 
 1. Enter a unique name for your cluster.
-2. Set the cluster location. Choose where the NVIDIA Run:ai cluster will be installed:
+2. Select **Manual Helm** as the installation type.
+3. Set the cluster location. Choose where the NVIDIA Run:ai cluster will be installed:
    * Same as the control plane - Install the NVIDIA Run:ai cluster on the same Kubernetes cluster as the NVIDIA Run:ai control plane.
    *   Remote control plane - Install the NVIDIA Run:ai cluster on a different Kubernetes cluster than the NVIDIA Run:ai control plane.
 
        <Note><p><strong>Note</strong></p><p>This selection depends on your <a href="../../system-requirements/deployment-model.md">deployment model</a> - the NVIDIA Run:ai cluster system requirements differ depending on whether the NVIDIA Run:ai cluster is installed on the same Kubernetes cluster as the NVIDIA Run:ai control plane (same-cluster deployment) or on a separate one (multi-cluster deployment).</p></Note>
-3. If you selected Remote control plane, enter the Cluster URL. For more information, see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
+4. If you selected Remote control plane, enter the Cluster URL. For more information, see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
 
 **Install NVIDIA Run:ai on Your Cluster**
 
@@ -232,7 +223,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
     **- Do not run the command exactly as shown in the UI -**
 3.  Update the UI-generated Helm command as follows (see example command below) and use the `cluster-airgap-values.yaml` file written by the `airgap load` step in [Preparations](preparations.md#software-artifacts), instead of using helm repositories:
 
-    * Do not add the helm repository and do not run `helm repo update`.
+    * Do not add the helm repository, `helm repo add`, and do not run `helm repo update`.
     * Instead, edit the `helm upgrade` command:
       * Replace `runai/runai-cluster` with `./charts/runai-cluster-<VERSION>.tgz`, where `<VERSION>` is the full version number (e.g., `runai-cluster-3.0.2.tgz`). This file is located in the `charts` folder of the working directory you specified to `airgap load`.
       * Add `-f <VALUES_DIR>/cluster-airgap-values.yaml`. Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml` during [Preparations](preparations.md#software-artifacts) - this is where `cluster-airgap-values.yaml` was written.
@@ -243,7 +234,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
     ```bash
     helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
         --set controlPlane.url=... \
-        --set controlPlane.bootstrapToken=... \
+        --set cluster.bootstrapToken=... \
         --set cluster.uid=... \
         --set cluster.url=... --create-namespace \
         --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \

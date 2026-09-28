@@ -56,7 +56,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 	managementTenant := fmt.Sprintf("%d", testing.ManagementTestTenant)
 	ctxManagement := context.WithValue(setContext(managementTenant, TestUserId, testAdminsGroups), runaictx.CfIsManagementTenant, "true")
 
-	tenantSettings := NewMockTenantSettingsService(map[string]bool{CSPSettingKey: false})
+	tenantSettings := NewMockTenantSettingsService(map[string]bool{})
 
 	clustersClient := cluster_service_client.NewAPIClient(&cluster_service_client.Configuration{
 		Servers: cluster_service_client.ServerConfigurations{

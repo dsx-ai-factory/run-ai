@@ -30,11 +30,15 @@ const (
 	Failed  Outcome = "failed"
 )
 
-var (
-	workloadRunnerKind   = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
-	externalWorkloadKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "ExternalWorkload"}
-	errWatchClosed       = errors.New("watch closed by the server")
-)
+// WorkloadRunnerKind is the object Run:ai creates on the cluster for every
+// workload submitted through the control plane.
+var WorkloadRunnerKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
+
+// ExternalWorkloadKind is the object Run:ai creates for every plain Kubernetes
+// workload it integrates.
+var ExternalWorkloadKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "ExternalWorkload"}
+
+var errWatchClosed = errors.New("watch closed by the server")
 
 // Timing is the measurement of one item. Duration is only meaningful when
 // Outcome is Arrived; pending and failed items carry no duration so they can
@@ -97,17 +101,30 @@ func Watch(ctx context.Context, kube k8sclient.WithWatch, kind schema.GroupVersi
 // workloads submitted through the control plane. The item name is the
 // workload name.
 func WatchWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
-	return Watch(ctx, kube, workloadRunnerKind, namespace, (*unstructured.Unstructured).GetName)
+	return Watch(ctx, kube, WorkloadRunnerKind, namespace, (*unstructured.Unstructured).GetName)
 }
 
 // WatchExternalWorkloads watches the ExternalWorkload objects Run:ai creates
-// for plain Kubernetes workloads. Run:ai names them ew-<kind>-<name>; the item
-// name is the original object name.
+// for plain Kubernetes workloads. The item key is the UID of the source object
+// as recorded in spec.originalWorkloadUID, so callers mark each item with the
+// UID the API server returned on create. The owner reference UID and, last,
+// the ew-<kind>-<name> naming rule are fallbacks for objects missing that
+// field; they never override it.
 func WatchExternalWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
-	return Watch(ctx, kube, externalWorkloadKind, namespace, externalWorkloadSource)
+	return Watch(ctx, kube, ExternalWorkloadKind, namespace, externalWorkloadSource)
 }
 
 func externalWorkloadSource(obj *unstructured.Unstructured) string {
+	if uid, _, _ := unstructured.NestedString(obj.Object, "spec", "originalWorkloadUID"); uid != "" {
+		return uid
+	}
+	if owners := obj.GetOwnerReferences(); len(owners) > 0 && owners[0].UID != "" {
+		return string(owners[0].UID)
+	}
+	return externalWorkloadSourceName(obj)
+}
+
+func externalWorkloadSourceName(obj *unstructured.Unstructured) string {
 	rest, ok := strings.CutPrefix(obj.GetName(), "ew-")
 	if !ok {
 		return obj.GetName()
@@ -166,6 +183,22 @@ func (w *Watcher) WaitAll(timeout time.Duration) []Timing {
 		case <-timer.C:
 		}
 	}
+}
+
+// Unmatched reports how many arrivals belong to no marked item. When items are
+// keyed by UID this means the objects lacked the field the watcher keys on, so a
+// run that ends all pending can tell a missing correlation field from a slow
+// cluster. Arrivals for items marked later stop counting as unmatched.
+func (w *Watcher) Unmatched() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	unmatched := 0
+	for key := range w.arrived {
+		if _, marked := w.created[key]; !marked {
+			unmatched++
+		}
+	}
+	return unmatched
 }
 
 // Stop closes the watch and waits for the event loop to exit.

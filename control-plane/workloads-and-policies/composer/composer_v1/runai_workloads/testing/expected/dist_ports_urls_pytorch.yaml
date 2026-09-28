@@ -83,7 +83,7 @@ MasterSpec:
         value:
           containerPort: 443
           customUrl: true
-          url: https://ofer-test-f.runailabs.com/secret
+          url: https://ofer-test-f.example.com/secret
       url-master-name-url-mauto:
         value:
           containerPort: 8080
@@ -212,7 +212,7 @@ Notification:
       correlationName: url-master-name-url-cust
       name: tool-url-mcust
       toolType: custom
-      url: https://ofer-test-f.runailabs.com/secret
+      url: https://ofer-test-f.example.com/secret
     - connectionType: ExternalUrl
       containerPort: 8080
       correlationName: url-master-name-url-mauto
