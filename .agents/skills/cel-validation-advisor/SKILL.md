@@ -1,11 +1,11 @@
 ---
 name: cel-validation-advisor
-description: Use when writing, editing, or explicitly asking for Kubernetes admission validation, CRD XValidation rules, ValidatingAdmissionPolicy, webhook matchConditions, or CEL expressions in the Run:ai monorepo.
+description: Use when adding or registering any Kubernetes webhook (validating, mutating, or conversion), or writing, editing, or explicitly asking for admission validation, CRD XValidation rules, ValidatingAdmissionPolicy, webhook matchConditions, or CEL expressions in the Run:ai monorepo.
 ---
 
 ## TL;DR (the whole thing in 3 lines)
 
-- You are writing admission-time validation for a Kubernetes object. Before continuing, decide whether it belongs in **CEL** instead of a webhook.
+- Whenever adding a Kubernetes webhook, assess **CEL** before implementing it and offer a recommendation once, even if the conclusion is to keep the webhook. Also assess new or changed admission validation.
 - Use CRD CEL for schema-owned constraints; VAP for built-in resources, request context, authorization, or named parameters; keep webhooks for arbitrary lookups and plugins.
 - Every CEL feature you use must be **GA in Kubernetes ≤ 1.30** (chart floor `kubeVersion: '>=1.30.0-0'`). Advise during unrelated work; implement CEL when the user requests it.
 
@@ -41,20 +41,22 @@ Setup references: [Claude Code](https://code.claude.com/docs/en/skills), [Gemini
 
 ## Behavior
 
-1. For an explicit CEL question or implementation request, use the relevant guide sections directly. For unsolicited advice during other work, run the three steps below silently.
-2. If a step yields an alert, print the **Alert block** once, then continue the user's original task unchanged.
+1. For an explicit CEL question or implementation request, use the relevant guide sections directly. Whenever the task adds a Kubernetes webhook, run DETECT → CLASSIFY → GATE before implementing it; do not wait for validation code or an explicit request to use this skill. For other admission work, run the three steps silently.
+2. For every new webhook, report the CEL assessment once: use the **Alert block** for an applicable opportunity, or briefly explain why the webhook must stay when CEL is unsuitable. For other admission work, print the **Alert block** only if a step yields an alert. Then continue the user's original task unchanged.
 3. If the user already asked to implement CEL, proceed within that request using **Patterns**, **Rollout** and **Tests**. Otherwise offer the recommendation without changing the implementation. `go CEL` is one way to accept, not a required password.
-4. Never post the alert twice for the same validation in one session.
+4. Never repeat the assessment for the same webhook or validation in one session just because both its handler and registration are edited.
 
 ## Step 1: DETECT
 
-Fire when the code being written or edited matches a signal. Stay silent otherwise.
+Fire when the task requests a new Kubernetes webhook, or the code or configuration being written or edited matches a signal. Registration alone is enough, including Go, YAML, Helm templates, or generated configuration. Stay silent otherwise.
 
-| Signal in code | Meaning |
+| Signal in task, code, or configuration | Meaning |
 |---|---|
-| `admission.Handler`, `CustomValidator`, `ValidateCreate`/`ValidateUpdate`/`ValidateDelete`, `admission.Denied(` | new or changed webhook logic |
+| request to add a Kubernetes webhook, even before its handler exists | assess CEL before implementation |
+| `admission.Handler`, `CustomValidator`, `CustomDefaulter`, `ValidateCreate`/`ValidateUpdate`/`ValidateDelete`, `Default`, `admission.Denied(` in webhook code | new or changed admission webhook logic |
 | `ServiceAccountValidator`, `HasPrefix(username, "system:serviceaccount:")`, `request.UserInfo`, `AdmissionRequest.UserInfo` | caller identity check |
-| new rule in a `ValidatingWebhookConfiguration` (init-ca `config_maps.go`) | registering a webhook |
+| new entry or rule in a `ValidatingWebhookConfiguration` or `MutatingWebhookConfiguration`, or new webhook server registration (including init-ca `config_maps.go`) | registering an admission webhook, even without handler changes |
+| new CRD conversion webhook (`spec.conversion.strategy: Webhook`) | assess and explain why conversion still needs a webhook |
 | Go `if` checks on a CR: required field, mutually exclusive fields, immutable field, unique list items | object-shape check written in Go |
 | `+kubebuilder:validation:XValidation`, `x-kubernetes-validations`, `admissionv1.ValidatingAdmissionPolicy{`, any CEL string | already CEL → run **Step 3** only |
 
@@ -63,11 +65,11 @@ Fire when the code being written or edited matches a signal. Stay silent otherwi
 - REST input validation in `control-plane/` services. It is not Kubernetes admission.
 - Checks inside `Reconcile` that only set status or conditions.
 - Existing webhook code that is read or reviewed but not changed.
-- Mutating webhooks and defaulting. `MutatingAdmissionPolicy` is GA only in 1.36.
+- Non-Kubernetes webhooks, such as GitHub or payment callbacks.
 
 ## Step 2: CLASSIFY
 
-Classify the complete check, including its dependencies. A username check plus an arbitrary lookup is not a username-only check.
+Classify the complete check, including its dependencies. A username check plus an arbitrary lookup is not a username-only check. For a mutating webhook, assess any separate validation and invocation filtering, but keep mutation/defaulting in the webhook at the 1.30 floor; `MutatingAdmissionPolicy` is GA only in 1.36. Do not suggest validating CEL as a replacement for mutation or CRD version conversion.
 
 | The check needs | Verdict | Concrete criterion / repo pattern |
 |---|---|---|
@@ -77,8 +79,9 @@ Classify the complete check, including its dependencies. A username check plus a
 | an authorization decision for the caller | **VAP** with `authorizer` | supported authorization checks, not arbitrary Kubernetes reads |
 | a known parameter object | **VAP** with `paramKind` + binding `paramRef` | WorkloadRunner policy uses a named ServiceAccount and compares `request.userInfo.uid` to `params.metadata.uid` |
 | arbitrary `Get`/`List`, custom UID resolution, external APIs, or plugin execution | **webhook stays** | a `ServiceAccountValidator` callback may resolve data that cannot be represented by a fixed parameter |
-| filter whether an existing webhook is called | webhook **`matchConditions`** | move an established bypass to the API server only if it skips the same checks |
+| filter whether an admission webhook is called | webhook **`matchConditions`** | express the intended invocation conditions for a new webhook, or preserve the same checks when moving an established bypass |
 | mutation or defaulting | **mutating webhook stays** at the 1.30 floor | validating CEL cannot change objects |
+| CRD version conversion | **conversion webhook stays** | admission CEL does not convert between API versions |
 
 For label-scoped VAP enforcement, put the selector on `Binding.Spec.MatchResources`. A user-editable opt-in label is not an authorization boundary.
 
@@ -590,14 +593,16 @@ Print exactly this shape, once:
 
 ```text
 💡 CEL opportunity
-What:    <the validation being written, one line>
+What:    <the webhook or validation being added or changed, one line>
 Move to: VAP | CRD-CEL | webhook matchConditions
-Because: <request context | owned schema | established webhook bypass>
+Because: <request context | owned schema | webhook invocation conditions>
 Gate:    <CEL feature> GA <version> ≤ 1.30 ✓   (or ✗ and the alternative)
 Pattern: <repo file to copy from>
-Rollout: Audit → Deny → remove webhook   (VAP only)
+Rollout: Audit → Deny → remove webhook   (replacing an existing webhook with VAP only)
 Say "go CEL" to switch, or keep going as is.
 ```
+
+For a new webhook with no applicable CEL opportunity, use a short assessment instead: `CEL assessment: keep the webhook because <concrete dependency or unsupported operation>.` Do not invent an opportunity or invite a switch to an unsupported feature. For a new validation implemented directly in CEL, there is no existing webhook to remove; follow the requested enforcement semantics and the Tests section.
 
 When Step 3 fails on already-CEL code, print only the `Gate:` line with ✗ and the allowed alternative. Omit the invitation to switch when implementation is already authorized.
 

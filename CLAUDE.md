@@ -183,4 +183,4 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - `/list-services` — show all services grouped by type
 - `/write-service-docs` — generate README + CLAUDE.md for a service
 - `/validate-service-docs` — check a service's README against its Makefile
-- `cel-validation-advisor` — auto-triggers while writing admission validation; guides CEL implementation (paired CRD examples, parameterized VAP, webhook filters), advises on migration, and gates features against Kubernetes 1.30
+- `cel-validation-advisor` — auto-triggers whenever adding or registering a Kubernetes webhook, and while writing admission validation; proposes applicable CEL options or explains why the webhook must stay; guides CEL implementation (paired CRD examples, parameterized VAP, webhook filters), advises on migration, and gates features against Kubernetes 1.30
