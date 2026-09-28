@@ -88,6 +88,7 @@ var _ = Describe("Describe Service", func() {
 				ProjectName:    "test-project",
 				DepartmentName: "test-department",
 				CreatedAt:      time.Now(),
+				Preemptibility: *openapi.NewNullableString(ptr.To("semi-preemptible")),
 			}
 
 			mockTraining := &openapi.Training{
@@ -110,6 +111,7 @@ var _ = Describe("Describe Service", func() {
 			Expect(result.General.Phase).To(Equal(displayer.Running))
 			Expect(result.General.Project).To(Equal("test-project"))
 			Expect(result.General.Department).To(Equal("test-department"))
+			Expect(result.General.Preemptibility).To(Equal(ptr.To("semi-preemptible")))
 			Expect(result.PodsInfo.Pods).To(HaveLen(1))
 			Expect(result.Events).To(HaveLen(1))
 		})

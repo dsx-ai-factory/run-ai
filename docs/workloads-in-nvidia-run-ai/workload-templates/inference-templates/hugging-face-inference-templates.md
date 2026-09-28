@@ -270,9 +270,10 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 
 </Info>
 
-1. Set whether the workload may be interrupted by selecting **Preemptible** or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
+1. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+   * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 2. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 3. Set the **workload initialization timeout.** This is the maximum amount of time the system will wait for the workload to start and become ready. If the workload does not start within this time, it will automatically fail. Enter a value between 5 seconds and 720 minutes. If you do not set a value, the default is taken from [Knative’s max-revision-timeout-seconds](https://knative.dev/docs/serving/configuration/config-defaults/#max-revision-timeout-seconds).
 4. Set the **request timeout.** This defines the maximum time allowed to process an end-user request. If the system does not receive a response within this time, the request will be ignored. Enter a value between 5 seconds and 10 minutes. If you do not set a value, the default is taken from [Knative’s revision-timeout-seconds](https://knative.dev/docs/serving/configuration/config-defaults/#revision-timeout-seconds).

@@ -272,6 +272,22 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Global.ImagePullSecrets).To(ContainElement(controlPlaneImagePullSecretName))
 	})
 
+	// The chart puts KAI on -fips images for both "on" and "only", so this flag is
+	// the only thing separating the two: without it "only" silently degrades to the
+	// image default on every operator-managed KAI pod.
+	DescribeTable("carries FIPS run-time strictness onto the CR",
+		func(fipsMode string, expected bool) {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.Internal.Global.FipsMode = fipsMode
+
+			Expect(buildKAIConfig(runaiConfig).Spec.Global.FIPSOnly).To(Equal(ptr.To(expected)))
+		},
+		Entry("only", "only", true),
+		Entry("on", "on", false),
+		Entry("off", "off", false),
+		Entry("unset", "", false),
+	)
+
 	It("sets reservation identity and admission/webhook fields like the engine adapter", func() {
 		kaiConfig := buildKAIConfig(defaultRunaiConfig())
 

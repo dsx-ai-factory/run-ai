@@ -301,9 +301,7 @@ func TestGuaranteedRuntimeEndsAtValue(t *testing.T) {
 					lastStartTimestampAnnotation: startTime.Format(time.RFC3339),
 				},
 			},
-			Status: kaiv2alpha2.PodGroupStatus{
-				Running: 1,
-			},
+			Status: kaiv2alpha2.PodGroupStatus{},
 		}
 
 		// Add objects to fake client
@@ -409,9 +407,7 @@ func TestGuaranteedRuntimeEndsAtValue(t *testing.T) {
 					lastStartTimestampAnnotation: startTime.Format(time.RFC3339),
 				},
 			},
-			Status: kaiv2alpha2.PodGroupStatus{
-				Running: 1,
-			},
+			Status: kaiv2alpha2.PodGroupStatus{},
 		}
 
 		err := fakeClient.Create(context.Background(), namespace)
@@ -508,9 +504,7 @@ func TestGuaranteedRuntimeEndsAtValue(t *testing.T) {
 					lastStartTimestampAnnotation: startTime.Format(time.RFC3339),
 				},
 			},
-			Status: kaiv2alpha2.PodGroupStatus{
-				Running: 1,
-			},
+			Status: kaiv2alpha2.PodGroupStatus{},
 		}
 
 		err := fakeClient.Create(context.Background(), namespace)
@@ -558,18 +552,14 @@ func TestGetGuaranteedRuntimeTimestampEdgeCases(t *testing.T) {
 				Name:      "test-podgroup-1",
 				Namespace: "test-namespace",
 			},
-			Status: kaiv2alpha2.PodGroupStatus{
-				Running: 1,
-			},
+			Status: kaiv2alpha2.PodGroupStatus{},
 		}
 		podGroup2 := &kaiv2alpha2.PodGroup{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-podgroup-2",
 				Namespace: "test-namespace",
 			},
-			Status: kaiv2alpha2.PodGroupStatus{
-				Running: 1,
-			},
+			Status: kaiv2alpha2.PodGroupStatus{},
 		}
 
 		pod := &corev1.Pod{
@@ -600,9 +590,7 @@ func TestGetGuaranteedRuntimeTimestampEdgeCases(t *testing.T) {
 				Name:      "test-podgroup",
 				Namespace: "test-namespace",
 			},
-			Status: kaiv2alpha2.PodGroupStatus{
-				Running: 1,
-			},
+			Status: kaiv2alpha2.PodGroupStatus{},
 		}
 
 		podGroups := []*kaiv2alpha2.PodGroup{podGroup}
@@ -623,9 +611,7 @@ func TestGetGuaranteedRuntimeTimestampEdgeCases(t *testing.T) {
 				Name:      "test-podgroup",
 				Namespace: "test-namespace",
 			},
-			Status: kaiv2alpha2.PodGroupStatus{
-				Running: 1,
-			},
+			Status: kaiv2alpha2.PodGroupStatus{},
 		}
 
 		podGroups := []*kaiv2alpha2.PodGroup{podGroup}
