@@ -354,11 +354,25 @@ do_teardown() {
 }
 
 # ─── Phase 1: Prerequisites ───────────────────────────────────────────────────
+ensure_gitconfig_file() {
+  local f="${HOME}/.gitconfig"
+  # Build containers bind-mount ~/.gitconfig. If it does not exist, Docker creates it as
+  # a directory (root-owned on Linux), which breaks git for this user in every repo.
+  if [[ -d "${f}" && ! -L "${f}" ]]; then
+    rmdir "${f}" 2>/dev/null \
+      || die "${f} is a directory (left by a Docker bind mount), which breaks git. Fix with: sudo rmdir ${f}"
+    warn "Removed ${f}, an empty directory left by an earlier Docker bind mount"
+  fi
+  [[ -e "${f}" ]] || touch "${f}"
+}
+
 check_prereqs() {
   log "Checking prerequisites..."
 
   detect_os_arch
   log "Platform: ${OS}/${ARCH}"
+
+  ensure_gitconfig_file
 
   # Podman without a real `docker` command (common on macOS, where `docker` is
   # often just a shell alias that scripts can't see). Create a shim so the prereq
@@ -1121,10 +1135,14 @@ get_cluster_stamp() {
 # uncommitted changes.  openssl is already a required dependency.
 compute_dir_hash() {
   local dir
+  # git's stderr is left visible and its failure is fatal: this runs before any
+  # per-service log exists, so a swallowed error (e.g. a broken ~/.gitconfig) used to
+  # surface only as "check the logs" pointing at an empty directory.
   for dir in "$@"; do
-    git -C "${REPO_ROOT}" ls-files -s -- "${dir}" 2>/dev/null
-    git -C "${REPO_ROOT}" diff HEAD -- "${dir}" 2>/dev/null
-  done | openssl dgst -sha256 | awk '{print $NF}'
+    git -C "${REPO_ROOT}" ls-files -s -- "${dir}" || exit
+    git -C "${REPO_ROOT}" diff HEAD -- "${dir}" || exit
+  done | openssl dgst -sha256 | awk '{print $NF}' \
+    || die "git failed while hashing ${*} — see the git error above"
 }
 
 should_skip_build() {
