@@ -141,10 +141,16 @@ metrics-exporter:
     - *no-integration_tests-dir
     - *no-mocks-dir
 
+# KRM ships these controllers; the labels still select their e2e suites, so
+# they fire on the KRM chart dependency and the KRMConfig conversion.
 nodepool-controller:
 - changed-files:
+  - any-glob-to-any-file:
+    - 'runai-cluster/cluster/runai-chart/Chart.yaml'
+    - 'runai-cluster/cluster/runai-chart/templates/clusterroles/nodepool-controller.yaml'
+- changed-files:
   - all-globs-to-any-file:
-    - 'runai-cluster/cluster/nodepool-controller/**/*.{go,sql}'
+    - 'runai-cluster/cluster/go-operator/internal/run/operands/krm-operator/**/*.go'
     - *no-test-go
     - *no-tests-dir
     - *no-integration-tests-dir
@@ -153,8 +159,11 @@ nodepool-controller:
 
 pod-group-assigner:
 - changed-files:
+  - any-glob-to-any-file:
+    - 'runai-cluster/cluster/runai-chart/Chart.yaml'
+- changed-files:
   - all-globs-to-any-file:
-    - 'runai-cluster/cluster/pod-group-assigner/**/*.{go,sql}'
+    - 'runai-cluster/cluster/go-operator/internal/run/operands/krm-operator/**/*.go'
     - *no-test-go
     - *no-tests-dir
     - *no-integration-tests-dir
@@ -163,8 +172,11 @@ pod-group-assigner:
 
 project-controller:
 - changed-files:
+  - any-glob-to-any-file:
+    - 'runai-cluster/cluster/runai-chart/Chart.yaml'
+- changed-files:
   - all-globs-to-any-file:
-    - 'runai-cluster/cluster/project-controller/**/*.{go,sql}'
+    - 'runai-cluster/cluster/go-operator/internal/run/operands/krm-operator/**/*.go'
     - *no-test-go
     - *no-tests-dir
     - *no-integration-tests-dir
