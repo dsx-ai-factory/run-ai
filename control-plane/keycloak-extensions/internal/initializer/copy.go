@@ -13,9 +13,8 @@ import (
 	"path/filepath"
 )
 
-// CopyExtensions recursively copies each source directory tree onto its
-// destination, merging into any existing content the way `cp -r src/. dst/`
-// does rather than replacing the destination directory outright.
+// CopyExtensions merges each source directory tree into its destination,
+// the way `cp -r src/. dst/` does.
 func CopyExtensions(pairs map[string]string) error {
 	for src, dst := range pairs {
 		if err := copyTree(src, dst); err != nil {
@@ -62,8 +61,7 @@ func copyFile(src, dst string) error {
 		return fmt.Errorf("create %s: %w", dst, err)
 	}
 
-	// Check both Close errors rather than discarding them: a failed flush on
-	// Close can surface a write failure that io.Copy itself didn't see.
+	// A failed flush on Close can surface a write error io.Copy didn't see.
 	_, copyErr := io.Copy(out, in)
 	closeOutErr := out.Close()
 	closeInErr := in.Close()

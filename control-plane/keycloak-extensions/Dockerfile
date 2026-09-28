@@ -14,11 +14,8 @@ FROM scratch
 
 ARG TARGETARCH
 
-# Identity & permissions for the non-root UID this image runs as.
 COPY --from=base /etc/passwd /etc/passwd
 COPY --from=base /etc/group /etc/group
-
-# Writable shared-volume mount points (770 mode preserved from the base stage).
 COPY --from=base /temp /
 
 WORKDIR /

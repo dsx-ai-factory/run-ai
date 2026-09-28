@@ -30,11 +30,8 @@ services:
       dockerfile: Dockerfile
       args:
         TARGETARCH: amd64
-    # No command/user/healthcheck overrides: the scratch image has no shell,
-    # so it must run its own ENTRYPOINT (the Go init binary) as its default
-    # non-root user, which stages the providers/theme/agent payloads and
-    # exits 0 — a run-to-completion job, not a long-lived process. See the
-    # `keycloak` service's `service_completed_successfully` depends_on below.
+    # scratch has no shell, so no command/user/healthcheck override here —
+    # it runs its own ENTRYPOINT and exits; see service_completed_successfully below.
     volumes:
       - keycloak-providers:/providers
       - keycloak-themes:/themes

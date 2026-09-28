@@ -7,10 +7,7 @@ package initializer
 
 import "fmt"
 
-// Paths is the set of filesystem locations Run operates on. Production code
-// uses DefaultPaths — Keycloak's fixed volume layout inside the pod; tests
-// substitute a temp-dir-rooted set to exercise the full flow without
-// touching the real filesystem root.
+// Paths is the set of filesystem locations Run operates on.
 type Paths struct {
 	ExtensionsProvidersDir string
 	ExtensionsThemesDir    string
@@ -24,9 +21,8 @@ type Paths struct {
 	ConfPath   string
 }
 
-// DefaultPaths is the fixed contract this binary runs under inside the
-// keycloak-extensions container: the shared volumes it and Keycloak mount
-// into the pod.
+// DefaultPaths is the fixed volume layout this binary runs under in the
+// keycloak-extensions container.
 func DefaultPaths() Paths {
 	return Paths{
 		ExtensionsProvidersDir: "/extensions/providers",
@@ -41,9 +37,7 @@ func DefaultPaths() Paths {
 }
 
 // Run stages the provider/theme/agent payloads into the shared volumes
-// Keycloak reads from, then generates keycloak.conf from the mounted secret
-// files — the combined behavior of the former copy-extensions.sh and
-// write-keycloak-conf.sh scripts.
+// Keycloak reads from, then generates keycloak.conf from the secret files.
 func Run(p Paths) error {
 	if err := CopyExtensions(map[string]string{
 		p.ExtensionsProvidersDir: p.ProvidersDir,
