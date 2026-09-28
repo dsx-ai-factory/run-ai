@@ -81,8 +81,8 @@ github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4 h1:BKviUk
 github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4/go.mod h1:rOI0KGJYAODmIbtbFZ+EHu1RdBF/SnjxRxcp8+Y0NR0=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 h1:Ov1I7x8ZUcgC9yzgtUO7bOuVHvejBEphZT8GlQ2q8Uk=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1/go.mod h1:hDzQ3k8G0AiU88ODxROMfPpkNkvrBskZ1kJvgnSY+ao=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0 h1:D/mXmXAi7r5Ua9ZD1lfR4OXDzsPw6jl8hu8Ap8atIsg=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0/go.mod h1:PBdD9mpQ7MAAbU4rkHhDxDU8VjKbGpn8RaPfdWEBB04=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1 h1:teSyZs83f5HJbtG+qzs5All7xmJQhGJINu8DYz3zahM=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1/go.mod h1:dMC5sXV9Xy9UjXng72vDlLhHEc0KlHGvw7WEE1GG4vE=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2 h1:2oNaltpz+CTTDPhPoZGjlJbDDfzfhCBIZPOw+YA2vjE=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2/go.mod h1:tXpIAWdJLzQSq4pE3q6gc76JIyEcR+J0WL1oiMcNUVg=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15 h1:yrLkxHIinSqJVCcfvigBSJW7qvvG1XXRy9kwToi3ir8=
