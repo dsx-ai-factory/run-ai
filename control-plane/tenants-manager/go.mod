@@ -4,23 +4,23 @@ go 1.27.1
 
 require (
 	github.com/aws/smithy-go v1.28.2
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.8
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.15
-	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.17
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.18
+	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.20
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.15
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-resty/resty/v2 v2.17.2
@@ -121,7 +121,7 @@ require (
 	github.com/prometheus/client_golang v1.24.1 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.71.0 // indirect
-	github.com/prometheus/procfs v0.21.1 // indirect
+	github.com/prometheus/procfs v0.22.0 // indirect
 	github.com/redis/go-redis/v9 v9.22.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
@@ -137,8 +137,8 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/testcontainers/testcontainers-go v0.43.0 // indirect
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.43.0 // indirect
+	github.com/testcontainers/testcontainers-go v0.44.0 // indirect
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
