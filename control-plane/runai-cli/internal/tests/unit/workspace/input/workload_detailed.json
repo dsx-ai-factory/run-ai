@@ -101,7 +101,7 @@
     "jupyter/scipy-notebook"
   ],
   "urls": [
-    "https://nael-env-001.runailabs.com/team-b/my-workspace-demo-123",
+    "https://nael-env-001.example.com/team-b/my-workspace-demo-123",
     "172.18.0.2:31888"
   ],
   "environments": [
@@ -111,7 +111,7 @@
           "name": "url",
           "toolType": "custom",
           "connectionType": "ExternalUrl",
-          "url": "https://nael-env-001.runailabs.com/team-b/my-workspace-demo-123",
+          "url": "https://nael-env-001.example.com/team-b/my-workspace-demo-123",
           "authorizedUsers": [
             "user1",
             "user2",

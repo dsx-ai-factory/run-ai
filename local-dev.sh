@@ -32,7 +32,18 @@
 #   --skip-deploy-rc       Skip deploying runai-cluster only
 #   --skip-prometheus      Skip prometheus-operator install
 #   --skip-fake-gpu        Skip fake-gpu-operator install
-#   --teardown             Destroy cluster + registry and exit
+#   --gpu-operator         Use real NVIDIA GPUs: install NVIDIA GPU Operator instead
+#                          of fake-gpu-operator (Linux + Docker + NVIDIA GPUs only)
+#   --gpu-driver           Let the GPU Operator install the NVIDIA driver
+#                          (driver.enabled=true; default uses the host driver).
+#                          Implies --gpu-operator
+#   --gpu-operator-version VER
+#                          GPU Operator chart version (default: v26.7.1).
+#                          Implies --gpu-operator
+#   --teardown             Remove the cluster, registry (+ its volume), kind network,
+#                          built images, and the /etc/hosts entry, then exit
+#   --purge                With --teardown: also clear the build cache, Go/Gradle
+#                          caches, and generated .local-dev/ files (implies --teardown)
 #   --force-rebuild        Ignore build cache; rebuild and reload all images
 #   --help                 Show this help
 
@@ -60,6 +71,14 @@ KIND_CLUSTER="${KIND_CLUSTER:-runai-local}"
 KIND_VERSION="v0.31.0"
 # Pin to K8s 1.32 — kind 0.31 defaults to 1.35 which drops cgroup v1 (breaks Docker Desktop on Mac)
 KIND_NODE_IMAGE="kindest/node:v1.32.5"
+GPU_OPERATOR_VERSION="${GPU_OPERATOR_VERSION:-v26.7.1}"
+
+# Linux host floor: 5 Kind nodes + ~50 services + parallel builds share the host
+# directly (no VM to size). Disk: a full build leaves ~44 GB of caches (Docker build
+# cache ~11 GB, Go module + build caches ~33 GB) plus ~8 GB of images stored twice.
+MIN_LINUX_CPUS=4
+MIN_LINUX_RAM_GB=16
+MIN_LINUX_DISK_GB=100
 
 DOMAIN="${RUNAI_DOMAIN:-runai.local}"
 ADMIN_EMAIL="${RUNAI_ADMIN_EMAIL:-test@run.ai}"
@@ -91,7 +110,10 @@ SKIP_DEPLOY_CP=0
 SKIP_DEPLOY_RC=0
 SKIP_PROMETHEUS=0
 SKIP_FAKE_GPU=0
+GPU_OPERATOR=0
+GPU_DRIVER=0
 TEARDOWN=0
+PURGE=0
 FORCE_REBUILD=0
 
 # Set to "podman" by check_prereqs when a Podman-backed socket is detected.
@@ -117,7 +139,11 @@ while [[ $# -gt 0 ]]; do
     --skip-deploy-rc)  SKIP_DEPLOY_RC=1;    shift ;;
     --skip-prometheus) SKIP_PROMETHEUS=1;   shift ;;
     --skip-fake-gpu)   SKIP_FAKE_GPU=1;     shift ;;
+    --gpu-operator)    GPU_OPERATOR=1;      shift ;;
+    --gpu-driver)      GPU_OPERATOR=1; GPU_DRIVER=1; shift ;;
+    --gpu-operator-version) GPU_OPERATOR=1; GPU_OPERATOR_VERSION="$2"; shift 2 ;;
     --teardown)        TEARDOWN=1;          shift ;;
+    --purge)           TEARDOWN=1; PURGE=1; shift ;;
     --force-rebuild)   FORCE_REBUILD=1;      shift ;;
     --help)            usage; exit 0 ;;
     *) echo "Unknown flag: $1"; usage; exit 1 ;;
@@ -243,20 +269,110 @@ install_helm() {
 
 # ─── Phase 0: Teardown ────────────────────────────────────────────────────────
 do_teardown() {
+  if ! command -v docker &>/dev/null && command -v podman &>/dev/null; then
+    CONTAINER_TOOL=podman
+  fi
+  local ct="${CONTAINER_TOOL}"
   log "Tearing down local dev environment..."
+
   kind delete cluster --name "${KIND_CLUSTER}" 2>/dev/null || true
-  "${CONTAINER_TOOL}" rm -f "${REGISTRY_NAME}" 2>/dev/null || true
+  # -v: registry:2 keeps every pushed image in an anonymous volume (~1 GB).
+  "${ct}" rm -fv "${REGISTRY_NAME}" >/dev/null 2>&1 || true
+
+  local other_clusters
+  other_clusters="$(kind get clusters 2>/dev/null || true)"
+  local -a images=("registry:2")
+  if [[ -z "${other_clusters}" ]]; then
+    "${ct}" network rm kind >/dev/null 2>&1 || true
+    images+=("${KIND_NODE_IMAGE}")
+  else
+    log "  Other Kind clusters exist (${other_clusters//$'\n'/, }) — keeping the kind network and node image"
+  fi
+
+  local img
+  while IFS= read -r img; do images+=("${img}"); done < <(
+    "${ct}" images --format '{{.Repository}}:{{.Tag}}' 2>/dev/null \
+      | grep -E "(^|/)${LOCAL_IMAGE_REPO}/" || true)
+  log "  Removing ${#images[@]} images..."
+  for img in "${images[@]}"; do
+    "${ct}" rmi -f "${img}" >/dev/null 2>&1 || true
+  done
+
+  local hosts_line="127.0.0.1 ${DOMAIN}"
+  if grep -qxF "${hosts_line}" /etc/hosts 2>/dev/null; then
+    log "  Removing '${hosts_line}' from /etc/hosts (requires sudo)..."
+    local hosts_tmp
+    hosts_tmp="$(mktemp)"
+    grep -vxF "${hosts_line}" /etc/hosts > "${hosts_tmp}" || true
+    sudo cp "${hosts_tmp}" /etc/hosts || warn "Could not update /etc/hosts — remove '${hosts_line}' manually"
+    rm -f "${hosts_tmp}"
+  fi
+
   rm -rf "${HASH_DIR}" "${CLUSTER_STAMP_FILE}"
-  log "Done. Cert/log files remain in .local-dev/ — remove manually if needed."
+
+  local -a caches=(
+    "${HOME}/.cache/go-build-docker-gopath"
+    "${HOME}/.cache/go-build-docker-gocache"
+    "${REPO_ROOT}/control-plane/keycloak-extensions/.gradle"
+    # Not all of .local-dev/: values-cp.yaml and values-rc.yaml there are tracked in git.
+    "${CERT_DIR}"
+    "${LOG_DIR}"
+    "${REPO_ROOT}/.local-dev/bin"
+  )
+
+  if [[ $PURGE -eq 1 ]]; then
+    log "  Purging build caches..."
+    if [[ "${ct}" == "docker" ]]; then
+      docker builder prune -af >/dev/null 2>&1 || true
+    else
+      podman image prune -f >/dev/null 2>&1 || true
+    fi
+    local dir
+    for dir in "${caches[@]}"; do
+      [[ -e "${dir}" ]] || continue
+      # Go's module cache is read-only, and builds can leave root-owned files behind.
+      chmod -R u+w "${dir}" 2>/dev/null || true
+      rm -rf "${dir}" 2>/dev/null || true
+      if [[ -e "${dir}" ]]; then
+        "${ct}" run --rm -v "$(dirname "${dir}"):/p" busybox rm -rf "/p/$(basename "${dir}")" >/dev/null 2>&1 || true
+      fi
+      [[ -e "${dir}" ]] && warn "  Could not remove ${dir} — try: sudo rm -rf ${dir}"
+    done
+    log "Done. Everything local-dev.sh created has been removed."
+  else
+    log "Done. Kept for faster rebuilds (remove with --teardown --purge):"
+    if [[ "${ct}" == "docker" ]]; then
+      log "  build cache: $(docker system df --format '{{.Type}}\t{{.Size}}' 2>/dev/null | awk -F'\t' '/Build Cache/{print $2}') (Docker's build cache is shared with other projects)"
+    fi
+    local dir
+    for dir in "${caches[@]}"; do
+      [[ -e "${dir}" ]] && log "  $(du -sh "${dir}" 2>/dev/null | cut -f1)	${dir}"
+    done
+  fi
+  log "Base images pulled for builds (golang, node, gradle, ...) are not removed."
   exit 0
 }
 
 # ─── Phase 1: Prerequisites ───────────────────────────────────────────────────
+ensure_gitconfig_file() {
+  local f="${HOME}/.gitconfig"
+  # Build containers bind-mount ~/.gitconfig. If it does not exist, Docker creates it as
+  # a directory (root-owned on Linux), which breaks git for this user in every repo.
+  if [[ -d "${f}" && ! -L "${f}" ]]; then
+    rmdir "${f}" 2>/dev/null \
+      || die "${f} is a directory (left by a Docker bind mount), which breaks git. Fix with: sudo rmdir ${f}"
+    warn "Removed ${f}, an empty directory left by an earlier Docker bind mount"
+  fi
+  [[ -e "${f}" ]] || touch "${f}"
+}
+
 check_prereqs() {
   log "Checking prerequisites..."
 
   detect_os_arch
   log "Platform: ${OS}/${ARCH}"
+
+  ensure_gitconfig_file
 
   # Podman without a real `docker` command (common on macOS, where `docker` is
   # often just a shell alias that scripts can't see). Create a shim so the prereq
@@ -290,6 +406,10 @@ SHIM
   fi
 
   require_cmd docker "Install Docker Desktop from https://docs.docker.com/get-docker/, or install Podman"
+  local _tool
+  for _tool in make git curl python3; do
+    require_cmd "${_tool}" "Install ${_tool} via brew (macOS) or your package manager"
+  done
 
   if ! docker info &>/dev/null; then
     die "Docker daemon is not running. Start Docker Desktop and retry."
@@ -467,6 +587,8 @@ SHIM
 
   require_cmd openssl "Install openssl via brew (macOS) or your package manager"
 
+  [[ $GPU_OPERATOR -eq 1 ]] && check_gpu_host_prereqs
+
   # GITHUB_TOKEN is only needed when building Go services (private modules from github.com/run-ai/*).
   # Once the repo is public this check becomes unnecessary.
   if [[ $SKIP_BUILD -eq 0 && ( $SKIP_BUILD_CP -eq 0 || $SKIP_BUILD_RC -eq 0 ) && -z "${GITHUB_TOKEN:-}" ]]; then
@@ -496,6 +618,30 @@ SHIM
     fi
     if (( vm_avail_gb < 5 )); then
       die "Less than 5 GB free in container VM — builds will fail. Free space first."
+    fi
+  fi
+
+  if [[ "${OS}" == "linux" ]]; then
+    local host_cpus host_ram_gb
+    local -a below_floor=()
+    host_cpus=$(nproc 2>/dev/null || echo 0)
+    host_ram_gb=$(awk '/^MemTotal/{printf "%d", $2/1024/1024}' /proc/meminfo 2>/dev/null || echo 0)
+    if (( host_cpus > 0 && host_cpus < MIN_LINUX_CPUS )); then
+      below_floor+=("CPU:  ${host_cpus} cores (minimum ${MIN_LINUX_CPUS})")
+    fi
+    # MemTotal excludes kernel-reserved memory, so a 16 GB host reports ~15 GB.
+    if (( host_ram_gb > 0 && host_ram_gb < MIN_LINUX_RAM_GB - 1 )); then
+      below_floor+=("RAM:  ${host_ram_gb} GB (minimum ${MIN_LINUX_RAM_GB} GB)")
+    fi
+    if (( vm_avail_gb != 999 && vm_avail_gb < MIN_LINUX_DISK_GB )); then
+      below_floor+=("Disk: ${vm_avail_gb} GB free for container storage (minimum ${MIN_LINUX_DISK_GB} GB)")
+    fi
+    if (( ${#below_floor[@]} > 0 )); then
+      warn "Host is below the documented minimum for the full stack:"
+      local _item
+      for _item in "${below_floor[@]}"; do warn "  ${_item}"; done
+      warn "  Expect OOM-killed builds or NotReady nodes. Continuing anyway;"
+      warn "  --parallel 2 and --skip-frontend reduce peak CPU/RAM during builds."
     fi
   fi
 
@@ -639,6 +785,20 @@ setup_local_registry() {
   fi
   # Connect registry into the Kind network so nodes resolve it by name.
   "${CONTAINER_TOOL}" network connect kind "${REGISTRY_NAME}" 2>/dev/null || true
+  configure_node_registry_hosts
+}
+
+# Route localhost:REGISTRY_PORT pulls to the registry container via certs.d/hosts.toml
+# (Kind's documented local-registry setup). Unlike registry.mirrors, the certs.d path can
+# be re-declared in a v3 drop-in, which GPU nodes need — see restore_gpu_node_registry.
+configure_node_registry_hosts() {
+  local node
+  for node in $(kind get nodes --name "${KIND_CLUSTER}" 2>/dev/null); do
+    "${CONTAINER_TOOL}" exec "${node}" sh -c "
+      mkdir -p '/etc/containerd/certs.d/localhost:${REGISTRY_PORT}' &&
+      printf '[host.\"http://${REGISTRY_NAME}:5000\"]\n' > '/etc/containerd/certs.d/localhost:${REGISTRY_PORT}/hosts.toml'
+    " || warn "Could not configure registry mirror on node ${node}"
+  done
 }
 
 create_cluster() {
@@ -683,16 +843,23 @@ create_cluster() {
     fi
   fi
 
+  # With accept-nvidia-visible-devices-as-volume-mounts=true on the host, this mount
+  # makes the nvidia runtime inject every host GPU into this one node container.
+  # Only one worker gets it: each node would otherwise advertise the same GPUs.
+  # Not used with --gpu-driver: there is no host driver for the runtime to inject.
+  local gpu_worker_mounts=""
+  if [[ $GPU_OPERATOR -eq 1 && $GPU_DRIVER -eq 0 ]]; then
+    gpu_worker_mounts=$'\n  extraMounts:\n  - hostPath: /dev/null\n    containerPath: /var/run/nvidia-container-devices/all'
+  fi
+
   local kind_config
   kind_config=$(cat <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
 - |-
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${REGISTRY_PORT}"]
-    endpoint = ["http://${REGISTRY_NAME}:5000"]
-  [plugins."io.containerd.grpc.v1.cri".registry.configs."${REGISTRY_NAME}:5000".tls]
-    insecure_skip_verify = true
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = "/etc/containerd/certs.d"
 nodes:
 - role: control-plane
   image: ${KIND_NODE_IMAGE}
@@ -710,7 +877,7 @@ nodes:
     hostPort: 443
     protocol: TCP
 - role: worker
-  image: ${KIND_NODE_IMAGE}
+  image: ${KIND_NODE_IMAGE}${gpu_worker_mounts}
 - role: worker
   image: ${KIND_NODE_IMAGE}
 - role: worker
@@ -829,6 +996,121 @@ install_fake_gpu_operator() {
   log "fake-gpu-operator ready"
 }
 
+check_gpu_host_prereqs() {
+  log "Checking host prerequisites for --gpu-operator..."
+  [[ "${OS}" == "linux" ]] || die "--gpu-operator requires a Linux host with NVIDIA GPUs (got ${OS})."
+  [[ "${CONTAINER_TOOL}" == "docker" ]] || die "--gpu-operator requires Docker; Podman is not supported for GPU passthrough into Kind."
+  grep -qx 0x10de /sys/bus/pci/devices/*/vendor 2>/dev/null \
+    || die "No NVIDIA GPU found on this host. Only NVIDIA GPUs are supported; use the default fake GPUs instead."
+
+  if [[ $GPU_DRIVER -eq 1 ]]; then
+    [[ ! -d /sys/module/nvidia ]] \
+      || die "--gpu-driver: the NVIDIA driver is already loaded on the host. Drop --gpu-driver to use it, or unload it first."
+    log "  NVIDIA GPU present, no host driver loaded — the GPU Operator will install the driver"
+    return 0
+  fi
+
+  nvidia-smi -L &>/dev/null || die "nvidia-smi failed — install the NVIDIA driver on the host, or use --gpu-driver to let the GPU Operator install it."
+  command -v nvidia-ctk &>/dev/null || die "nvidia-ctk not found — install the NVIDIA Container Toolkit: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html"
+
+  # Kind node containers receive GPUs only when Docker's default runtime is nvidia and
+  # the runtime honours the /var/run/nvidia-container-devices volume-mount request.
+  local default_runtime
+  default_runtime="$(docker info --format '{{.DefaultRuntime}}' 2>/dev/null || true)"
+  if [[ "${default_runtime}" != "nvidia" ]] || \
+     ! grep -qE '^\s*accept-nvidia-visible-devices-as-volume-mounts\s*=\s*true' /etc/nvidia-container-runtime/config.toml 2>/dev/null; then
+    log "  Configuring Docker for GPUs in Kind (requires sudo; restarts Docker)..."
+    local running
+    running="$(docker ps --format '{{.Names}}' 2>/dev/null | paste -sd, - || true)"
+    [[ -n "${running}" ]] && warn "  Restarting Docker stops running containers: ${running}"
+    if ! { sudo nvidia-ctk runtime configure --runtime=docker --set-as-default >/dev/null && \
+           sudo nvidia-ctk config --set accept-nvidia-visible-devices-as-volume-mounts=true --in-place && \
+           sudo systemctl restart docker; }; then
+      warn "Automatic configuration failed. Run once, then re-run this script:"
+      warn "  sudo nvidia-ctk runtime configure --runtime=docker --set-as-default"
+      warn "  sudo nvidia-ctk config --set accept-nvidia-visible-devices-as-volume-mounts=true --in-place"
+      warn "  sudo systemctl restart docker"
+      die "Host is not configured for GPUs in Kind (default runtime: '${default_runtime:-unknown}')."
+    fi
+    local _i
+    for _i in $(seq 1 30); do docker info &>/dev/null && break; sleep 1; done
+    default_runtime="$(docker info --format '{{.DefaultRuntime}}' 2>/dev/null || true)"
+    [[ "${default_runtime}" == "nvidia" ]] \
+      || die "Docker restarted but its default runtime is '${default_runtime:-unknown}', not nvidia. Check /etc/docker/daemon.json."
+  fi
+  log "  GPUs: $(nvidia-smi -L | wc -l | tr -d ' ') detected, nvidia runtime is Docker default"
+}
+
+install_gpu_operator() {
+  local gpu_node="${KIND_CLUSTER}-worker"
+  local driver_enabled=false wait_minutes=10
+  if [[ $GPU_DRIVER -eq 1 ]]; then
+    driver_enabled=true
+    wait_minutes=30   # driver container compiles kernel modules before anything else starts
+  fi
+  log "Installing NVIDIA GPU Operator ${GPU_OPERATOR_VERSION} (GPUs on ${gpu_node}, driver.enabled=${driver_enabled})..."
+
+  if [[ $GPU_DRIVER -eq 0 ]] && ! docker exec "${gpu_node}" nvidia-smi -L &>/dev/null; then
+    die "No GPUs visible inside ${gpu_node}. The Kind cluster was probably created without --gpu-operator; recreate it: ./local-dev.sh --teardown && ./local-dev.sh --gpu-operator"
+  fi
+
+  # The toolkit the operator installs inside the node expects Ubuntu's ldconfig.real, and
+  # needs to mount /proc/driver/nvidia itself rather than inherit the outer runtime's mount.
+  docker exec "${gpu_node}" sh -c 'ln -sf /sbin/ldconfig /sbin/ldconfig.real; umount -R /proc/driver/nvidia 2>/dev/null || true'
+
+  # NFD sees the host PCI bus from every node, so it would mark all of them as GPU nodes.
+  kubectl get nodes --no-headers -o custom-columns=NAME:.metadata.name \
+    | grep -vx "${gpu_node}" \
+    | xargs -I{} kubectl label node {} nvidia.com/gpu.deploy.operands=false --overwrite >/dev/null
+
+  helm repo add nvidia https://helm.ngc.nvidia.com/nvidia 2>/dev/null || true
+  helm repo update nvidia
+  helm upgrade --install gpu-operator nvidia/gpu-operator \
+    --version "${GPU_OPERATOR_VERSION}" \
+    --namespace gpu-operator \
+    --create-namespace \
+    --set driver.enabled="${driver_enabled}" \
+    --wait \
+    --timeout 10m
+
+  log "  Waiting for ${gpu_node} to advertise nvidia.com/gpu..."
+  local i gpus=""
+  for i in $(seq 1 $(( wait_minutes * 6 ))); do
+    gpus="$(kubectl get node "${gpu_node}" -o jsonpath='{.status.allocatable.nvidia\.com/gpu}' 2>/dev/null || true)"
+    [[ -n "${gpus}" && "${gpus}" != "0" ]] && break
+    sleep 10
+  done
+  [[ -n "${gpus}" && "${gpus}" != "0" ]] || die "GPU Operator installed but ${gpu_node} advertises no GPUs. Check: kubectl get pods -n gpu-operator"
+  log "GPU Operator ready — ${gpu_node} advertises ${gpus} GPU(s)"
+
+  restore_gpu_node_registry "${gpu_node}"
+}
+
+# The toolkit adds /etc/containerd/conf.d/99-nvidia.toml in config version 3. Once any
+# imported file is v3, containerd ignores the node's v2 "io.containerd.grpc.v1.cri"
+# section, including registry config_path, so the GPU node can no longer pull
+# localhost:5001 images. A v3 drop-in sorting after 99-nvidia.toml restores it. It must
+# be written after the toolkit, or it would disable the v2 section before nvidia's exists.
+restore_gpu_node_registry() {
+  local node="$1"
+  log "  Restoring local-registry access on ${node} (toolkit containerd drop-in)..."
+  docker exec -i "${node}" sh -s <<'EOF' || die "Could not update containerd config on ${node}"
+cat > /etc/containerd/conf.d/zz-runai-registry.toml <<'TOML'
+version = 3
+[plugins.'io.containerd.cri.v1.images'.registry]
+  config_path = '/etc/containerd/certs.d'
+TOML
+systemctl restart containerd
+for i in $(seq 1 30); do crictl info >/dev/null 2>&1 && exit 0; sleep 1; done
+exit 1
+EOF
+
+  docker exec "${node}" containerd config dump 2>/dev/null \
+    | grep -q "config_path = '/etc/containerd/certs.d'" \
+    || die "${node}: registry config_path not in effect. Check: docker exec ${node} containerd config dump | grep config_path"
+  log "  ${node} pulls from localhost:${REGISTRY_PORT} again"
+}
+
 # ─── Build cache ──────────────────────────────────────────────────────────────
 # Each built service writes a hash file: "<svc>:<cluster-stamp>:<src-hash>".
 # On re-runs we skip build+load when both the source and the target cluster
@@ -853,10 +1135,14 @@ get_cluster_stamp() {
 # uncommitted changes.  openssl is already a required dependency.
 compute_dir_hash() {
   local dir
+  # git's stderr is left visible and its failure is fatal: this runs before any
+  # per-service log exists, so a swallowed error (e.g. a broken ~/.gitconfig) used to
+  # surface only as "check the logs" pointing at an empty directory.
   for dir in "$@"; do
-    git -C "${REPO_ROOT}" ls-files -s -- "${dir}" 2>/dev/null
-    git -C "${REPO_ROOT}" diff HEAD -- "${dir}" 2>/dev/null
-  done | openssl dgst -sha256 | awk '{print $NF}'
+    git -C "${REPO_ROOT}" ls-files -s -- "${dir}" || exit
+    git -C "${REPO_ROOT}" diff HEAD -- "${dir}" || exit
+  done | openssl dgst -sha256 | awk '{print $NF}' \
+    || die "git failed while hashing ${*} — see the git error above"
 }
 
 should_skip_build() {
@@ -1110,13 +1396,11 @@ build_keycloak_extensions() {
   local log_file="${LOG_DIR}/${svc_name}.log"
   log "  Building ${svc_name} (Gradle + Docker)..."
 
-  # Retried, unlike before, and with a longer backoff than retry_build's flat 10s.
-  # This build resolves org.keycloak:*:26.6.+, jackson-databind:2.+ and other dynamic
-  # ranges, so Gradle must fetch maven-metadata.xml for each one on every resolve.
-  # Maven Central rate-limits per source IP, so on a shared/NAT egress this fails with:
-  #   Could not GET '.../maven-metadata.xml'. Received status code 429 from server
-  # That is transient and usually clears within a minute, but it used to kill the whole
-  # run — every other build here already retries.
+  # Retried with a longer backoff than retry_build's flat 10s. Maven Central
+  # rate-limits per source IP, so on a shared/NAT egress downloads can fail with
+  # "Received status code 429 from server". Dependencies in build.gradle are pinned
+  # (no dynamic ranges) to avoid the per-build maven-metadata.xml lookups that
+  # used to trigger it; a cold cache can still hit it.
   local _kc_attempt _kc_delay=20
   for _kc_attempt in 1 2 3; do
     if (cd "${svc_dir}" && make build DOCKERHUB_PROXY= >"${log_file}" 2>&1); then
@@ -2208,14 +2492,27 @@ ${DOMAIN}:53 {
   # tarball in charts/, so leftovers are not inert: two tarballs named kai-scheduler make
   # the resolved subchart ambiguous, and an undeclared one (e.g. runai-engine) has no
   # condition to gate it, so it renders unconditionally.
+  # Placeholders from an earlier failed fetch are dropped too: they satisfy the
+  # missing-dependency check below, so otherwise the real chart is never fetched again.
   local stale_chart
   while read -r stale_chart; do
     [[ -z "${stale_chart}" ]] && continue
     log "  Removing stale subchart tarball: $(basename "${stale_chart}")"
     rm -f "${stale_chart}"
   done < <(python3 - "${rc_chart}/Chart.yaml" "${charts_dir}" <<'PYEOF'
-import sys, re, os, glob
+import sys, re, os, glob, tarfile
 chart_yaml, charts_dir = sys.argv[1], sys.argv[2]
+
+def is_placeholder(path):
+    try:
+        with tarfile.open(path) as tar:
+            for member in tar.getmembers():
+                if member.name.count("/") == 1 and member.name.endswith("/Chart.yaml"):
+                    return "Placeholder — real chart could not be fetched" in tar.extractfile(member).read().decode()
+    except (tarfile.TarError, OSError):
+        return True
+    return False
+
 wanted = set()
 block = re.search(r'^dependencies:\s*\n(.*?)(?=^\S|\Z)', open(chart_yaml).read(), re.S | re.M)
 if block:
@@ -2225,7 +2522,7 @@ if block:
         if name and version:
             wanted.add(f"{name.group(1)}-{version.group(1)}.tgz")
 for path in sorted(glob.glob(os.path.join(charts_dir, "*.tgz"))):
-    if os.path.basename(path) not in wanted:
+    if os.path.basename(path) not in wanted or is_placeholder(path):
         print(path)
 PYEOF
 )
@@ -2257,7 +2554,9 @@ PYEOF
     log "  Fetching runai-cluster chart dependencies..."
     # Pulls the real subcharts from their OCI repositories. Needs network access, and
     # credentials for any private registry — hence the placeholder fallback below.
-    helm dependency build "${rc_chart}" 2>&1 \
+    # `update`, not `build`: Chart.lock is gitignored, so a local copy left over from an
+    # older Chart.yaml makes `build` refuse to run ("lock file is out of sync").
+    helm dependency update "${rc_chart}" 2>&1 \
       | grep -v '^Saving\|^Deleting\|^$' || true
   fi
 
@@ -2270,7 +2569,7 @@ PYEOF
     [[ -z "${dep_name}" ]] && continue
     warn "  Could not fetch ${dep_name}@${dep_version} — installing an EMPTY placeholder."
     warn "    '${dep_name}' will be enabled but deploy nothing. Fix with:"
-    warn "      helm dependency build ${rc_chart}"
+    warn "      helm dependency update ${rc_chart}"
     local tmpdir
     tmpdir="$(mktemp -d)"
     mkdir -p "${tmpdir}/${dep_name}"
@@ -2358,7 +2657,7 @@ print_access_info() {
   echo ""
   echo "  Scheduler:  kai-resource-management (bundles kai-scheduler) + karta enabled"
   echo "    If no KRM/kai-scheduler/karta pods are running, charts/ holds placeholder"
-  echo "    subcharts. Fix with: helm dependency build ${REPO_ROOT}/runai-cluster/cluster/runai-chart"
+  echo "    subcharts. Fix with: helm dependency update ${REPO_ROOT}/runai-cluster/cluster/runai-chart"
   echo "  Re-deploy cluster with updated credentials:"
   echo "    helm upgrade runai-cluster ${REPO_ROOT}/runai-cluster/cluster/runai-chart \\"
   echo "      -n ${RC_NAMESPACE} \\"
@@ -2405,7 +2704,9 @@ main() {
     if [[ $SKIP_PROMETHEUS -eq 0 ]]; then
       install_prometheus_operator
     fi
-    if [[ $SKIP_FAKE_GPU -eq 0 ]]; then
+    if [[ $GPU_OPERATOR -eq 1 ]]; then
+      install_gpu_operator
+    elif [[ $SKIP_FAKE_GPU -eq 0 ]]; then
       install_fake_gpu_operator
     fi
   fi

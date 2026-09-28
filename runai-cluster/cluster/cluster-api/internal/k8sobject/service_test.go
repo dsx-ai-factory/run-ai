@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	workloadsapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/generated/pkg/api"
 	. "github.com/onsi/ginkgo/v2"

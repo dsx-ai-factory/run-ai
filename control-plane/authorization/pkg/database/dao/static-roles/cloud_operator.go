@@ -17,8 +17,6 @@ var CloudOperator = models.Role{
 		"Manage: clusters, settings, nodepools.\n" +
 		"View: nodes, users, roles, event history.",
 	InternalOnly:            true,
-	ShowForDGXC:             true,
-	RoleType:                models.NonDGXC,
 	ScopeType:               models.ROLE_SCOPE_SYSTEM,
 	Custom:                  false,
 	Enabled:                 true,
@@ -42,12 +40,11 @@ var CloudOperator = models.Role{
 	},
 	Permissions: []*models.Permission{
 		{
-			ResourceType:           api.RESOURCETYPE_TENANT,
-			Create:                 true,
-			Read:                   true,
-			Update:                 true,
-			Delete:                 true,
-			ReadOnlyForDGXCManaged: true,
+			ResourceType: api.RESOURCETYPE_TENANT,
+			Create:       true,
+			Read:         true,
+			Update:       true,
+			Delete:       true,
 		},
 		{
 			ResourceType: api.RESOURCETYPE_CLUSTER,

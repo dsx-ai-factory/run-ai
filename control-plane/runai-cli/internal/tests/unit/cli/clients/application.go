@@ -14,8 +14,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/filter"
 	cpmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane"
 	applicationservice "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/application"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	assetsopenapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/golang/mock/gomock"
 	"k8s.io/utils/ptr"
 )

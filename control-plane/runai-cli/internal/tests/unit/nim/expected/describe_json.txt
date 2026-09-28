@@ -57,7 +57,7 @@
       "name": "NIMService",
       "toolType": "NIMService",
       "connectionType": "ExternalUrl",
-      "url": "https://aviados-dev.runailabs.com/test-nim/my-nim-service",
+      "url": "https://aviados-dev.example.com/test-nim/my-nim-service",
       "port": 8080
     }
   ],

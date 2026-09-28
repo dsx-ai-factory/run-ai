@@ -5,8 +5,8 @@ go 1.27.1
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20260923122257-765cf2428c46
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20260923122257-765cf2428c46
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20260928070753-dd757355914a
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20260928070753-dd757355914a
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
@@ -56,7 +56,7 @@ require (
 	github.com/go-openapi/swag/stringutils v0.25.4 // indirect
 	github.com/go-openapi/swag/typeutils v0.25.4 // indirect
 	github.com/go-openapi/swag/yamlutils v0.25.4 // indirect
-	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
 	github.com/go-playground/validator/v10 v10.30.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
