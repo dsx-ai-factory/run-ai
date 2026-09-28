@@ -70,11 +70,5 @@ func CollectImageLocks(paths []string) (ImageCollection, error) {
 	sort.Slice(collection.Locks, func(i, j int) bool {
 		return collection.Locks[i].Name < collection.Locks[j].Name
 	})
-	// An image shared by several components (e.g. the ubi-minimal wait image
-	// used by both the cluster and the control plane) is kept under every
-	// component that declares it. Consumers such as the installer resolve
-	// third-party images per component and would otherwise never mirror the
-	// image for the components that lost the entry. The conflicting-digest
-	// check above still guarantees a shared source resolves to one digest.
 	return collection, nil
 }
