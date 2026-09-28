@@ -58,6 +58,10 @@ GPU fractions can be assigned to only one container in the pod. By default, GPU 
 | `gpu-fraction-container-name` | By default, GPU fraction allocation is applied to the first container (index 0) in the pod. Set this annotation to specify a different container to receive the GPU allocation. | Pod annotation (`metadata.annotations`) |
 | `nvidia.com/container.<container-name>.gpu-memory.request` | Memory size in Kubernetes resource quantity format. Example: `40G`. This is the official NVIDIA alternative to `gpu-memory`, and names the container directly instead of relying on `gpu-fraction-container-name`. | Pod annotation (`metadata.annotations`) |
 
+## Setting DRA Resource Claims
+
+To request hardware managed via Kubernetes [Dynamic Resource Allocation (DRA)](../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#dynamic-resource-allocation-dra), reference a `ResourceClaim` or `ResourceClaimTemplate` in the pod spec. For the field reference and a full example, see the Kubernetes documentation on [scheduling DRA resources](https://kubernetes.io/docs/tasks/configure-pod-container/assign-resources/allocate-devices-dra/).
+
 ## Setting Stale Gang Eviction Timeout
 
 For gang-scheduled workloads (for example, distributed training or distributed inference), set the `kai.scheduler/staleness-grace-period` annotation to override the cluster-wide default grace period before the Scheduler evicts a stale pod group. For concept details, see [Stale Gang Eviction](../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#stale-gang-eviction).
@@ -87,8 +91,8 @@ The value is a duration string, a number followed by a unit (`s`, `m`, or `h`), 
        metadata:
          namespace: my-project-name
        ```
-6. Set whether the **workload may be interrupted**. Change this setting only if you want to override the default preemptibility defined for the workload type. Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running. Preemptible workloads may be interrupted if resources are needed for higher priority workloads:
-   * In the UI, select **Preemptible** or **Non-preemptible** from the dropdown.
+6. Set whether the **workload may be interrupted**. Change this setting only if you want to override the default preemptibility defined for the workload type. Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running. Preemptible workloads may be interrupted if resources are needed for higher priority workloads. Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas:
+   * In the UI, select **Preemptible**, **Semi-preemptible**, or **Non-preemptible** from the dropdown.
    *   In the YAML, set the following label under `metadata.labels`:
 
        ```yaml

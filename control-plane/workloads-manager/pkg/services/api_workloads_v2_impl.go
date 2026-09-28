@@ -249,6 +249,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		project,
 		workloadId,
 		trustedConvertedFromNative,
+		nodePoolsKarta(ctx, workloadType, manifestResourceInfo.Version),
 	)
 	if editErr != nil {
 		return nil, SingleError(NewManifestError(fmt.Sprintf("failed to edit manifest: %v", editErr)))
@@ -756,6 +757,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		project,
 		workloadId,
 		qRecord.TranslatedFromV1,
+		nodePoolsKarta(ctx, workloadType, manifestResourceInfo.Version),
 	)
 	if editErr != nil {
 		return nil, api.NewError(http.StatusBadRequest, fmt.Sprintf("failed to edit manifest: %v", editErr), nil)

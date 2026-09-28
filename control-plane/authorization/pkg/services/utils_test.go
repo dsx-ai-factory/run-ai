@@ -75,7 +75,7 @@ func Invalidate(ctx context.Context, resourceId string, resourceType api.Resourc
 func SetMockBackendServer() {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, "setting") {
-			jsonResponse, err := json.Marshal(r.Header.Get("X-Runai-Tenant-Id") == fmt.Sprintf("%d", testing.DGXCTestTenant))
+			jsonResponse, err := json.Marshal(false)
 			Expect(err).To(BeNil())
 
 			w.Header().Set("Content-Type", "application/json")

@@ -27,13 +27,19 @@ jobs:
   get-charts-version:
     name: Get charts version
     runs-on: ubuntu-latest
+    env:
+      RUNAI_CHARTS_TEST_REPOSITORY_URL: ${{ vars.RUNAI_CHARTS_TEST_REPOSITORY_URL }}
     outputs:
       charts_version: ${{ steps.get-charts-version.outputs.charts_version }}
     steps:
       - name: Get charts version
         id: get-charts-version
         run: |
-          helm repo add run-ai-charts-test https://runai.jfrog.io/artifactory/api/helm/run-ai-charts-test
+          if [ -z "${RUNAI_CHARTS_TEST_REPOSITORY_URL}" ]; then
+            echo "::error::RUNAI_CHARTS_TEST_REPOSITORY_URL repository variable is required"
+            exit 1
+          fi
+          helm repo add run-ai-charts-test "${RUNAI_CHARTS_TEST_REPOSITORY_URL}"
           helm repo update run-ai-charts-test
 
           charts_version=$(helm search repo run-ai-charts-test/runai-cluster --devel | sort -V -k2 | tail -n2 | head -n1 | awk '{print $2}')
@@ -79,4 +85,3 @@ jobs:
           SLACK_COLOR: "danger"
           SLACK_TITLE: "Integration tests failed"
           SLACK_MESSAGE: "Please check the logs to investigate the reason for failure.\nLink to pipeline: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
-

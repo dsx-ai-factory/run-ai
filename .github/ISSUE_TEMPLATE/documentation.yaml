@@ -1,7 +1,7 @@
 name: Documentation issue
 description: Report a problem with or suggest an improvement to the documentation.
 title: "[docs] "
-labels: ["kind/documentation", "triage/needs-triage"]
+labels: ["documentation"]
 body:
   - type: markdown
     attributes:
@@ -12,7 +12,7 @@ body:
     id: page-url
     attributes:
       label: Documentation page URL
-      description: Link to the docs page where the issue appears. If it's a docstring or in-repo markdown, paste the file path instead.
+      description: Link to the docs page where the issue appears. If it's a docstring or in-repo markdown, paste the file path instead. Write "Missing" if requesting new documentation.
       placeholder: "https://docs.run.ai/..."
     validations:
       required: true
@@ -42,9 +42,11 @@ body:
       required: false
 
   - type: checkboxes
-    id: terms
+    id: checks
     attributes:
-      label: Code of Conduct
+      label: Submission checks
       options:
+        - label: I searched existing issues for the same documentation problem.
+          required: true
         - label: I agree to follow this project's [Code of Conduct](../blob/HEAD/CODE_OF_CONDUCT.md).
           required: true

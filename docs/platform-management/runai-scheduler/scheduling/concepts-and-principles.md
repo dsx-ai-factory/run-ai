@@ -123,6 +123,8 @@ This time-based fairshare calculation ensures that each project and department r
 
 ### Priority and Preemption
 
+TBD: Hagay to update this section to account for semi-preemptible workloads.
+
 NVIDIA Run:ai supports scheduling workloads using different priority and preemption policies:
 
 * Workload's priority and preemption are two distinct parameters set in a workload. Workload's priority sets the scheduling precedence within a project, while workload's preemption sets whether the workload is preemptible or non-preemptible.
@@ -222,8 +224,8 @@ In both scenarios, the platform schedules the workloads, accounts for the reques
 
 **Note**
 
-* When submitting NVIDIA Run:ai native workloads, the platform continues using extended resources. Both extended resources and DRA are supported during the transition period.
-* Using DRA and extended resources on the same underlying nodes can cause resource inconsistencies and allocation collisions. It is recommended to separate nodes by splitting them into different node pools - one for extended resources and one for DRA. This allows you to adopt DRA incrementally while maintaining the legacy 'extended resources’ workloads and nodes unaffected.
+* A translation layer in the Scheduler translates legacy extended-resource requests (for example, `nvidia.com/gpu: 2`) into DRA `ResourceClaim` requests automatically, so NVIDIA Run:ai native workloads can use DRA without submitting a claim directly.
+* Extended resources and DRA workloads can share the same node pool.
 
 </Info>
 

@@ -106,7 +106,6 @@ git push origin your-branch-name
 - Open the PR against `main` (preferred) or the release branch (`release-3.0`).
 - Fill in the PR template.
 - Reference the issue with `Fixes #123`.
-- Add a `/kind` line.
 
 ### Step 7: Wait for CI
 
