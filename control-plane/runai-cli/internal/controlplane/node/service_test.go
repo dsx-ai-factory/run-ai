@@ -8,13 +8,17 @@ package node
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"testing"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node/list"
 	nodesManipulate "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node/list/manipulate"
 
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli/structs"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api"
+	apilist "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/list"
 
 	cpmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane"
 	"github.com/golang/mock/gomock"
@@ -29,9 +33,10 @@ func TestJobs(t *testing.T) {
 
 var _ = Describe("Node Service Test", func() {
 	var (
-		ctrl   *gomock.Controller
-		mocknc *cpmocks.MockNodeClient
-		nbs    *BackendNodeService
+		ctrl           *gomock.Controller
+		mocknc         *cpmocks.MockNodeClient
+		nbs            *BackendNodeService
+		nodeListResult openapi.Nodes
 	)
 
 	const (
@@ -57,8 +62,7 @@ var _ = Describe("Node Service Test", func() {
 			ClusterUuid: ClusterUuid,
 			NodePool:    Nodepool,
 		}}
-		nodes := openapi.Nodes{Nodes: nodeList}
-		mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid).Return(&nodes, nil).AnyTimes()
+		nodeListResult = openapi.Nodes{Nodes: nodeList}
 	})
 
 	AfterEach(func() {
@@ -67,11 +71,15 @@ var _ = Describe("Node Service Test", func() {
 	})
 
 	Context("Service get nodes", func() {
+		BeforeEach(func() {
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, gomock.Any(), gomock.Any()).Return(&nodeListResult, nil).AnyTimes()
+		})
+
 		It("Check brief match", func() {
 			nodeTelemetryResponse := getMockTelemetryResponse(map[string]string{NodeName: FreeGpu})
 			mocknc.EXPECT().GetNodesTelemetry(gomock.Any(), ClusterUuid, RequiredNodeTelemetryTypes).Return(nodeTelemetryResponse, nil).AnyTimes()
 
-			handler, err := nbs.List(context.Background(), ClusterUuid)
+			handler, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{})
 			Expect(err).To(BeNil())
 			response, err := handler.GenerateJson()
 			Expect(err).To(BeNil())
@@ -94,7 +102,7 @@ var _ = Describe("Node Service Test", func() {
 			nodeTelemetryResponse := getMockTelemetryResponse(map[string]string{"wrong node name": "1"})
 			mocknc.EXPECT().GetNodesTelemetry(gomock.Any(), ClusterUuid, RequiredNodeTelemetryTypes).Return(nodeTelemetryResponse, nil).AnyTimes()
 
-			handler, err := nbs.List(context.Background(), ClusterUuid)
+			handler, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{})
 			Expect(err).To(BeNil())
 			nodes := handler.GetList()
 			Expect(nodes).To(HaveLen(1))
@@ -110,6 +118,10 @@ var _ = Describe("Node Service Test", func() {
 		const (
 			NonExistingNodeName = "bla"
 		)
+
+		BeforeEach(func() {
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, gomock.Any(), gomock.Any()).Return(&nodeListResult, nil).AnyTimes()
+		})
 
 		It("returns existing and non-existing, without duplicates", func() {
 			toCheck := []string{NodeName, NonExistingNodeName, NonExistingNodeName, NonExistingNodeName, NodeName}
@@ -131,7 +143,192 @@ var _ = Describe("Node Service Test", func() {
 			Expect(nonExisting).To(BeNil())
 		})
 	})
+
+	Context("List pagination", func() {
+		makeNode := func(name string) openapi.Node {
+			return openapi.Node{Name: name, ClusterUuid: ClusterUuid}
+		}
+
+		BeforeEach(func() {
+			mocknc.EXPECT().GetNodesTelemetry(gomock.Any(), ClusterUuid, RequiredNodeTelemetryTypes).Return(api.NodeTelemetriesByType{}, nil).AnyTimes()
+		})
+
+		It("returns the full list by default and emits no next token when the data is exhausted", func() {
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), int32(101)).
+				Return(&openapi.Nodes{Nodes: []openapi.Node{makeNode("a"), makeNode("b")}}, nil)
+
+			handler, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(handler.GetList()).To(HaveLen(2))
+		})
+
+		It("stops after a single page when NoPagination is set and emits a next token", func() {
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), int32(3)).
+				Return(&openapi.Nodes{Nodes: []openapi.Node{makeNode("a"), makeNode("b"), makeNode("c")}}, nil)
+
+			handler, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: 2, NoPagination: true})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(handler.GetList()).To(HaveLen(2))
+
+			resumeOffset, err := resumeOffsetFromOutput(handler)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resumeOffset).NotTo(BeNil())
+			Expect(*resumeOffset).To(Equal(int32(2)))
+		})
+
+		It("loops across pages until MaxItems is reached and emits a next token", func() {
+			gomock.InOrder(
+				mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), int32(3)).
+					Return(&openapi.Nodes{Nodes: []openapi.Node{makeNode("a"), makeNode("b"), makeNode("c")}}, nil),
+				mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(2), int32(2)).
+					Return(&openapi.Nodes{Nodes: []openapi.Node{makeNode("c"), makeNode("d")}}, nil),
+			)
+
+			handler, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: 2, MaxItems: 3})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(handler.GetList()).To(HaveLen(3))
+
+			resumeOffset, err := resumeOffsetFromOutput(handler)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resumeOffset).NotTo(BeNil())
+			Expect(*resumeOffset).To(Equal(int32(3)))
+		})
+
+		It("never requests more than the API's max limit when --page-size is 500", func() {
+			fullPage := make([]openapi.Node, maxNodePageSize)
+			for i := range fullPage {
+				fullPage[i] = makeNode(fmt.Sprintf("node-%d", i))
+			}
+
+			// GetNodeList must be called with exactly maxNodePageSize (500),
+			// never maxNodePageSize+1 — the over-fetch-by-one trick must not
+			// push the requested limit past the API's documented maximum.
+			// gomock's exact-args matching means a call with limit=501 would
+			// fail this expectation outright.
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), maxNodePageSize).
+				Return(&openapi.Nodes{Nodes: fullPage}, nil)
+
+			handler, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: maxNodePageSize, NoPagination: true})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(handler.GetList()).To(HaveLen(int(maxNodePageSize)))
+
+			// A full page at the API's cap can't be over-fetched to prove
+			// there's more, so it must conservatively assume there is.
+			resumeOffset, err := resumeOffsetFromOutput(handler)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resumeOffset).NotTo(BeNil())
+			Expect(*resumeOffset).To(Equal(maxNodePageSize))
+		})
+
+		It("starts from the offset encoded in NextToken", func() {
+			token, err := structs.OffsetToNextToken(5)
+			Expect(err).NotTo(HaveOccurred())
+
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(5), int32(3)).
+				Return(&openapi.Nodes{Nodes: []openapi.Node{makeNode("a")}}, nil)
+
+			handler, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: 2, NoPagination: true, NextToken: *token})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(handler.GetList()).To(HaveLen(1))
+		})
+
+		It("starts from Offset when no NextToken is set", func() {
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(5), int32(3)).
+				Return(&openapi.Nodes{Nodes: []openapi.Node{makeNode("a")}}, nil)
+
+			handler, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: 2, NoPagination: true, Offset: 5})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(handler.GetList()).To(HaveLen(1))
+		})
+
+		It("propagates errors from the client", func() {
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), int32(3)).
+				Return(nil, fmt.Errorf("boom"))
+
+			_, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: 2, NoPagination: true})
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
+	Context("FetchAllNodes", func() {
+		makeNode := func(name string) openapi.Node {
+			return openapi.Node{Name: name, ClusterUuid: ClusterUuid}
+		}
+
+		It("collects every page when the cluster has more nodes than one page holds", func() {
+			firstPage := make([]openapi.Node, maxNodePageSize)
+			for i := range firstPage {
+				firstPage[i] = makeNode(fmt.Sprintf("node-%d", i))
+			}
+			secondPage := []openapi.Node{makeNode("extra-1"), makeNode("extra-2")}
+
+			gomock.InOrder(
+				mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), maxNodePageSize).Return(&openapi.Nodes{Nodes: firstPage}, nil),
+				mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, maxNodePageSize, maxNodePageSize).Return(&openapi.Nodes{Nodes: secondPage}, nil),
+			)
+
+			nodes, err := FetchAllNodes(context.Background(), mocknc, ClusterUuid)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nodes).To(HaveLen(int(maxNodePageSize) + 2))
+		})
+
+		It("stops at the first partial page", func() {
+			page := []openapi.Node{makeNode("a"), makeNode("b")}
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), maxNodePageSize).Return(&openapi.Nodes{Nodes: page}, nil)
+
+			nodes, err := FetchAllNodes(context.Background(), mocknc, ClusterUuid)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nodes).To(HaveLen(2))
+		})
+
+		It("returns no nodes for an empty cluster", func() {
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), maxNodePageSize).Return(&openapi.Nodes{Nodes: []openapi.Node{}}, nil)
+
+			nodes, err := FetchAllNodes(context.Background(), mocknc, ClusterUuid)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nodes).To(BeEmpty())
+		})
+
+		It("gives up instead of looping forever when the server ignores offset", func() {
+			fullPage := make([]openapi.Node, maxNodePageSize)
+			for i := range fullPage {
+				fullPage[i] = makeNode(fmt.Sprintf("node-%d", i))
+			}
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, gomock.Any(), maxNodePageSize).Return(&openapi.Nodes{Nodes: fullPage}, nil).Times(maxNodePages)
+
+			_, err := FetchAllNodes(context.Background(), mocknc, ClusterUuid)
+			Expect(err).To(MatchError(ContainSubstring("keeps returning full pages")))
+		})
+
+		It("propagates a failure from any page", func() {
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, int32(0), maxNodePageSize).Return(nil, fmt.Errorf("boom"))
+
+			_, err := FetchAllNodes(context.Background(), mocknc, ClusterUuid)
+			Expect(err).To(HaveOccurred())
+		})
+	})
 })
+
+func resumeOffsetFromOutput(handler *list.Output) (*int32, error) {
+	response, err := handler.GenerateJson()
+	if err != nil {
+		return nil, err
+	}
+
+	var data nodesManipulate.BriefData
+	if err := json.Unmarshal([]byte(response), &data); err != nil {
+		return nil, err
+	}
+	if data.NextToken == nil {
+		return nil, nil
+	}
+
+	token, err := structs.NextTokenFromValue(*data.NextToken)
+	if err != nil {
+		return nil, err
+	}
+	return structs.NextTokenToOffset(token)
+}
 
 func getMockTelemetryResponse(nodeNameToFreeGpu map[string]string) api.NodeTelemetriesByType {
 	values := make([]openapi.TelemetryResponseValuesInner, 0)

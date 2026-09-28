@@ -105,30 +105,23 @@ func (cs *ClusterService) GetNodepoolMinimalList(ctx context.Context, filters []
 	return &openapi.GetNodepoolsMinimal200Response{Nodepools: nodepools}, nil
 }
 
-func (cs *ClusterService) GetNodeList(ctx context.Context, clusterUuid string) (*openapi.Nodes, error) {
+func (cs *ClusterService) GetNodeList(ctx context.Context, clusterUuid string, offset, limit int32) (*openapi.Nodes, error) {
 	filters := []string{fmt.Sprintf("clusterUuid==%s", clusterUuid)}
 
-	nodes, err := fetchAllPages(func(offset int32) ([]openapi.Node, error) {
-		// Unordered without sortBy, which would make pages skip and repeat nodes.
-		request := cs.apiClient.NodesAPI.GetTenantNodes(ctx).
-			FilterBy(filters).
-			SortBy(openapi.NODEFILTERSORTFIELDS_NAME).
-			Offset(offset).
-			Limit(maxPageSize)
+	// Unordered without sortBy, which would make pages skip and repeat nodes.
+	request := cs.apiClient.NodesAPI.GetTenantNodes(ctx).
+		FilterBy(filters).
+		SortBy(openapi.NODEFILTERSORTFIELDS_NAME).
+		Offset(offset).
+		Limit(limit)
 
-		nodeList, response, err := request.Execute()
-		closeResponseBody(response)
-		if err != nil {
-			return nil, clierrors.HandleResponseError(response, err)
-		}
-
-		return nodeList.GetNodes(), nil
-	})
+	nodeList, response, err := request.Execute()
+	closeResponseBody(response)
 	if err != nil {
-		return nil, err
+		return nil, clierrors.HandleResponseError(response, err)
 	}
 
-	return &openapi.Nodes{Nodes: nodes}, nil
+	return &openapi.Nodes{Nodes: nodeList.GetNodes()}, nil
 }
 
 func (cs *ClusterService) GetNodesTelemetry(ctx context.Context, clusterUuid string, telemetryTypes []openapi.NodeTelemetryType) (api.NodeTelemetriesByType, error) {

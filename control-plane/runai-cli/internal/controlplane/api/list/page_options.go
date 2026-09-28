@@ -20,7 +20,7 @@ const (
 	pageSizeAttribute     = "page-size"
 	noPaginationAttribute = "no-pagination"
 
-	limitDeprecationMsg  = "Warning: The `--limit` flag is deprecated. Please use `--page-size` instead."
+	limitDeprecationMsg  = "Warning: The `--limit` flag is deprecated. Please use `--max-items` instead."
 	offsetDeprecationMsg = "Warning: The `--offset` flag is deprecated. Please use `--continue-token` instead."
 
 	nextTokenUsage    = "set the token for requesting the next page" //nolint:gosec // just text
