@@ -113,3 +113,45 @@ func TestGpuMemoryUsedPerFractionalPod_FromMetricsd(t *testing.T) {
 		},
 	})
 }
+
+func TestPodGpuInfoFixed_ValueIsOnePerPodGpuRegardlessOfSeriesCount(t *testing.T) {
+	// Downstream rules multiply by this value — runai_allocated_gpu_count_per_gpu divides by
+	// count(...) by(pod_uuid) and then multiplies the mapping back in — so several metricsd
+	// series for one pod and GPU must still yield 1, not their count.
+	newTester(t).Test(TestCase{
+		Interval: "1m",
+		Inputs: []Input{
+			{Series: `runai_pod_gpu_utilization{pod_uuid="pod-1", gpu="3", gpu_uuid="gpu-3", namespace="team-a", pod="frac-1", container="a"}`, Values: "10x3"},
+			{Series: `runai_pod_gpu_utilization{pod_uuid="pod-1", gpu="3", gpu_uuid="gpu-3", namespace="team-a", pod="frac-1", container="b"}`, Values: "20x3"},
+		},
+		Tests: []Test{
+			{
+				Expr:     `runai_pod_gpu_info_fixed`,
+				EvalTime: "2m",
+				Samples:  []Sample{{Labels: `runai_pod_gpu_info_fixed{pod_uuid="pod-1", gpu="3", UUID="gpu-3"}`, Value: 1}},
+			},
+		},
+	})
+}
+
+func TestPodGpuInfoFixed_WholeGpuPodReportedByMetricsdKeepsNoGpuLabel(t *testing.T) {
+	// A whole-GPU pod carries runai_pod_gpu_info with an empty gpu label, which is what
+	// wholePodFilter keys on. If metricsd ever reported such a pod, the fallback branch would
+	// hand it a gpu label and it would be rolled up as fractional, losing its DCGM-based
+	// whole-pod series. Observed on a live cluster: metricsd only reports containers fractiond
+	// mapped, so a whole-GPU pod produces nothing — this pins that assumption.
+	newTester(t).Test(TestCase{
+		Interval: "1m",
+		Inputs: []Input{
+			{Series: `runai_pod_gpu_info{pod_uuid="whole-1", gpu=""}`, Values: "1x3"},
+			{Series: `runai_dcgm_gpu_utilization{UUID="gpu-0", gpu="0"}`, Values: "50x3"},
+		},
+		Tests: []Test{
+			{
+				Expr:     `runai_pod_gpu_info_fixed{pod_uuid="whole-1"}`,
+				EvalTime: "2m",
+				Samples:  []Sample{},
+			},
+		},
+	})
+}
