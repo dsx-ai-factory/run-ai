@@ -35,9 +35,9 @@ type getTemplateOutput struct {
 	TemplateID          string         `json:"templateId"              jsonschema:"Template UUID to pass to manage_template."`
 	Name                string         `json:"name"                    jsonschema:"Template name."`
 	WorkloadType        string         `json:"workloadType"            jsonschema:"Native workload type to pass to manage_template."`
-	Template            map[string]any `json:"template,omitempty"      jsonschema:"Complete read-only template returned by the Get Template by ID API, with credential values such as awsSessionToken removed. Present unless forUpdate is true."`
+	Template            map[string]any `json:"template,omitempty"      jsonschema:"Complete read-only template returned by the Get Template by ID API, with credential values such as awsSessionToken removed. Present unless forUpdate is true."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	UpdateRequest       map[string]any `json:"updateRequest,omitempty" jsonschema:"Complete request body accepted by manage_template update, with read-only response fields removed. Present when forUpdate is true."`
-	ExpectedFingerprint string         `json:"expectedFingerprint,omitempty" jsonschema:"Best-effort stale-snapshot fingerprint to pass unchanged to manage_template with updateRequest. It detects changes visible before the update request but is not an atomic API precondition."`
+	ExpectedFingerprint string         `json:"expectedFingerprint,omitempty" jsonschema:"Best-effort stale-snapshot fingerprint to pass unchanged to manage_template with updateRequest. It detects changes visible before the update request but is not an atomic API precondition."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 }
 
 func registerGetTemplate(r *runaimcp.Registry, client *runaiclient.Client) {
@@ -83,7 +83,13 @@ func getTemplateRun(ctx context.Context, client *runaiclient.Client, in getTempl
 	return out, nil
 }
 
-const templateFingerprintPrefix = "sha256:"
+const (
+	templateFingerprintPrefix = "sha256:"
+	templateFieldDepartmentID = "departmentId"
+	templateFieldName         = "name"
+	templateFieldScopeType    = "scopeType"
+	templateFieldWorkloadType = "workloadType"
+)
 
 var knownTemplateResponseFields = map[string]struct{}{
 	"assets":                 {},
@@ -98,19 +104,19 @@ var knownTemplateResponseFields = map[string]struct{}{
 }
 
 var knownTemplateMetaFields = map[string]struct{}{
-	"clusterId":    {},
-	"createdAt":    {},
-	"createdBy":    {},
-	"departmentId": {},
-	"description":  {},
-	"id":           {},
-	"name":         {},
-	"projectId":    {},
-	"scopeId":      {},
-	"scopeType":    {},
-	"updatedAt":    {},
-	"updatedBy":    {},
-	"workloadType": {},
+	"clusterId":               {},
+	"createdAt":               {},
+	"createdBy":               {},
+	templateFieldDepartmentID: {},
+	"description":             {},
+	"id":                      {},
+	templateFieldName:         {},
+	"projectId":               {},
+	"scopeId":                 {},
+	templateFieldScopeType:    {},
+	"updatedAt":               {},
+	"updatedBy":               {},
+	templateFieldWorkloadType: {},
 }
 
 func rawTemplateResponse(resp *http.Response, templateID string) (map[string]any, error) {
@@ -152,7 +158,8 @@ func templateUpdateSnapshot(workloadType string, raw map[string]any) (map[string
 
 	request := buildTemplateUpdateRequest(workloadType, raw)
 	if templateContainsSecret(request) {
-		return nil, "", fmt.Errorf("template update request contains awsSessionToken, which cannot be exposed or safely round-tripped by manage_template; remove or rotate the session token through the API before updating the template: %w",
+		return nil, "", fmt.Errorf("template update request contains awsSessionToken, which cannot be exposed or safely "+
+			"round-tripped by manage_template; remove or rotate the session token through the API before updating the template: %w",
 			runaimcp.ErrConflict)
 	}
 	// A nullable credential field carries no secret and must not block the
@@ -173,7 +180,7 @@ func templateUpdateSnapshot(workloadType string, raw map[string]any) (map[string
 	}
 	if meta, ok := raw["meta"].(map[string]any); ok {
 		identity := make(map[string]any, 4)
-		for _, field := range []string{"id", "scopeId", "scopeType", "workloadType"} {
+		for _, field := range []string{"id", "scopeId", templateFieldScopeType, templateFieldWorkloadType} {
 			if value, exists := meta[field]; exists {
 				identity[field] = value
 			}

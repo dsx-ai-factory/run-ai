@@ -26,6 +26,8 @@ const (
 	workloadMetricsDefaultSamples = int32(20)
 	workloadMetricsMaxSamples     = int32(1000)
 	workloadMetricsDefaultWindow  = time.Hour
+	metricGroupResource           = "resource"
+	metricGroupInferenceServing   = "inference serving"
 )
 
 // Resource metrics every supported workload API version provides.
@@ -84,8 +86,8 @@ func (in getWorkloadMetricsInput) Validate() error {
 type getWorkloadMetricsOutput struct {
 	WorkloadID   string            `json:"workloadId"   jsonschema:"Echo of the input workloadId"`
 	Type         string            `json:"type"         jsonschema:"Workload type (Training | Workspace | Distributed | Inference | DistributedInference | non-native types)"`
-	Measurements []measurement     `json:"measurements" jsonschema:"Scalar time-series measurements for the window. Inference LATENCY is a scalar series; NIM_E2E_REQUEST_LATENCY_SECONDS is returned under histograms instead."`
-	Histograms   []metricHistogram `json:"histograms,omitempty" jsonschema:"Histogram time series with timestamped bucket or percentile data. NIM_E2E_REQUEST_LATENCY_SECONDS is returned here, not under scalar measurements."`
+	Measurements []measurement     `json:"measurements" jsonschema:"Scalar time-series measurements for the window. Inference LATENCY is a scalar series; NIM_E2E_REQUEST_LATENCY_SECONDS is returned under histograms instead."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Histograms   []metricHistogram `json:"histograms,omitempty" jsonschema:"Histogram time series with timestamped bucket or percentile data. NIM_E2E_REQUEST_LATENCY_SECONDS is returned here, not under scalar measurements."`  //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	Warnings     []string          `json:"warnings,omitempty" jsonschema:"Non-fatal warnings that identify expected metric groups or metric types that could not be retrieved. When present, metrics are partial."`
 }
 
@@ -146,7 +148,7 @@ func getWorkloadMetricsRun(ctx context.Context, client *runaiclient.Client, in g
 	} else {
 		resourceMetrics := fetchMetricsBatch(ctx, client, in.WorkloadID, workloadResourceMetricTypes, start, end, samples)
 		batches = []workloadMetricBatch{
-			{name: "resource", metricFetchResult: resourceMetrics},
+			{name: metricGroupResource, metricFetchResult: resourceMetrics},
 			{name: "NVLink", metricFetchResult: resourceAndNVLinkMetrics},
 		}
 	}
@@ -164,7 +166,7 @@ func getWorkloadMetricsRun(ctx context.Context, client *runaiclient.Client, in g
 	if isInferenceType(wl.Type) {
 		servingMetrics := fetchInferenceWorkloadMetrics(ctx, client, in.WorkloadID, start, end, samples)
 		batches = append(batches, workloadMetricBatch{
-			name:              "inference serving",
+			name:              metricGroupInferenceServing,
 			metricFetchResult: servingMetrics,
 		})
 	}

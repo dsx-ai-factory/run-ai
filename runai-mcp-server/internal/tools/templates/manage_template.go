@@ -24,7 +24,7 @@ type manageTemplateInput struct {
 	WorkloadType        string         `json:"workloadType"           jsonschema:"Native workload type. One of: Training, Workspace, Distributed, Inference, DistributedInference."`
 	TemplateID          string         `json:"templateId,omitempty"   jsonschema:"Template UUID. Required for update and delete; use list_templates to resolve it. Must not be set for create."`
 	Request             map[string]any `json:"request,omitempty"      jsonschema:"Complete API request for create or update. Create requires meta.name and meta.scopeType; update requires meta.name. Supports every field of the selected workload type's template request model, including assets, spec, and distributed master fields where the API accepts them."` //nolint:lll // complete polymorphic request description
-	ExpectedFingerprint string         `json:"expectedFingerprint,omitempty" jsonschema:"Required for update. Pass unchanged from get_template with forUpdate=true for a best-effort stale-snapshot check. The API has no atomic conditional-update support."`
+	ExpectedFingerprint string         `json:"expectedFingerprint,omitempty" jsonschema:"Required for update. Pass unchanged from get_template with forUpdate=true for a best-effort stale-snapshot check. The API has no atomic conditional-update support."`                                                                                                         //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	Confirm             bool           `json:"confirm,omitempty"      jsonschema:"Required for update and delete when the client cannot show an interactive confirmation prompt. Create does not require confirmation."`
 }
 

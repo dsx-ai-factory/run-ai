@@ -61,7 +61,7 @@ type getWorkloadPodsInput struct {
 	Limit                  int32  `json:"limit,omitempty"                  jsonschema:"Maximum number of pods to return. Defaults to 20, max 500."`
 	Offset                 int32  `json:"offset,omitempty"                 jsonschema:"Pagination cursor from a previous response's nextOffset. Defaults to 0."`
 	IncludeMetrics         bool   `json:"includeMetrics,omitempty"         jsonschema:"When true, fetch the latest baseline CPU, GPU, memory, and inference measurements for every returned pod. Defaults to false."`
-	IncludeAdvancedMetrics bool   `json:"includeAdvancedMetrics,omitempty" jsonschema:"When true, also request advanced per-GPU profiling metrics for non-inference pods. Requires includeMetrics=true and may return a warning when the cluster or tenant does not support these metrics. Defaults to false."`
+	IncludeAdvancedMetrics bool   `json:"includeAdvancedMetrics,omitempty" jsonschema:"When true, also request advanced per-GPU profiling metrics for non-inference pods. Requires includeMetrics=true and may return a warning when the cluster or tenant does not support these metrics. Defaults to false."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 }
 
 func (in getWorkloadPodsInput) Validate() error {
@@ -281,18 +281,18 @@ func fetchPodMetricBatches(ctx context.Context, client *runaiclient.Client, work
 			Execute()
 		if err != nil {
 			return []podMetricBatch{{
-				name: "inference serving",
+				name: metricGroupInferenceServing,
 				metricFetchResult: metricFetchResult{err: fmt.Errorf(
 					"get inference pod metrics for workload %q pod %q: %w", workloadID, podID, runaimcp.MapHTTPError(httpResp, err))},
 			}}
 		}
-		return []podMetricBatch{{name: "inference serving", metricFetchResult: mapMeasurementFetchResult(resp, httpResp)}}
+		return []podMetricBatch{{name: metricGroupInferenceServing, metricFetchResult: mapMeasurementFetchResult(resp, httpResp)}}
 	}
 
 	if !includeAdvancedMetrics {
 		return []podMetricBatch{{
-			name:              "resource",
-			metricFetchResult: fetchPodMetricsBatch(ctx, client, workloadID, podID, "resource", basicPodMetricTypes, start, end),
+			name:              metricGroupResource,
+			metricFetchResult: fetchPodMetricsBatch(ctx, client, workloadID, podID, metricGroupResource, basicPodMetricTypes, start, end),
 		}}
 	}
 
@@ -308,8 +308,8 @@ func fetchPodMetricBatches(ctx context.Context, client *runaiclient.Client, work
 	// response and preserve the original failure as the advanced-metrics warning.
 	return []podMetricBatch{
 		{
-			name:              "resource",
-			metricFetchResult: fetchPodMetricsBatch(ctx, client, workloadID, podID, "resource", basicPodMetricTypes, start, end),
+			name:              metricGroupResource,
+			metricFetchResult: fetchPodMetricsBatch(ctx, client, workloadID, podID, metricGroupResource, basicPodMetricTypes, start, end),
 		},
 		{name: "advanced GPU", metricFetchResult: combined},
 	}

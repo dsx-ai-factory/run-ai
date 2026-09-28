@@ -25,6 +25,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/common"
 )
 
+const (
+	workloadSpecFieldDistributedFramework = "distributedFramework"
+	workloadSpecFieldPreemptibility       = "preemptibility"
+)
+
 type getWorkloadSpecInput struct {
 	WorkloadID      string `json:"workloadId"                jsonschema:"Workload ID (UUID)"`
 	IncludeFullSpec bool   `json:"includeFullSpec,omitempty" jsonschema:"Return the complete submitted spec instead of the default compact summary."`
@@ -203,9 +208,9 @@ func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, 
 
 var workloadSpecSummaryFields = map[string]struct{}{
 	"image": {}, "compute": {}, "storage": {},
-	"distributedFramework": {}, "cleanPodPolicy": {}, "mpiLauncherCreationPolicy": {},
+	workloadSpecFieldDistributedFramework: {}, "cleanPodPolicy": {}, "mpiLauncherCreationPolicy": {},
 	"nodePools": {}, "nodeAffinityRequired": {}, "nodeType": {}, "podAffinity": {}, "tolerations": {},
-	"priorityClass": {}, "preemptibility": {}, "restartPolicy": {},
+	"priorityClass": {}, workloadSpecFieldPreemptibility: {}, "restartPolicy": {},
 	"replicas": {}, "workers": {}, "numWorkers": {}, "minReplicas": {}, "maxReplicas": {}, "segmentSize": {},
 	"parallelism": {}, "completions": {}, "slotsPerWorker": {}, "autoscaling": {},
 	"servingConfiguration": {}, "servingPort": {}, "startupPolicy": {},
