@@ -8,6 +8,17 @@ body:
       value: |
         Thanks for proposing a feature. Please describe the use case first — that helps reviewers evaluate the proposal even if the suggested solution turns out not to be the right shape.
 
+  - type: dropdown
+    id: request-type
+    attributes:
+      label: Request type
+      description: Select the option that best describes the requested change.
+      options:
+        - New feature
+        - Improvement to existing functionality
+        - Change to existing functionality
+    validations:
+      required: true
 
   - type: textarea
     id: use-case
@@ -44,9 +55,11 @@ body:
       required: false
 
   - type: checkboxes
-    id: terms
+    id: checks
     attributes:
-      label: Code of Conduct
+      label: Submission checks
       options:
+        - label: I searched existing issues for a similar request.
+          required: true
         - label: I agree to follow this project's [Code of Conduct](../blob/HEAD/CODE_OF_CONDUCT.md).
           required: true
