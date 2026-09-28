@@ -78,7 +78,7 @@ var _ = Describe("Login Test", Ordered, func() {
 		})
 
 		It("config set", func() {
-			output, err := cli.RunCommand("config set --auth-url=http://localhost.runailabs.com/ --cp-url=http://localhost.runailabs.com/", envMap)
+			output, err := cli.RunCommand("config set --auth-url=http://localhost.example.com/ --cp-url=http://localhost.example.com/", envMap)
 			Expect(err).To(BeNil())
 			Expect(output).To(Equal("Config set successfully\n"))
 			instance := config.GetInstance()
@@ -114,7 +114,7 @@ var _ = Describe("Login Test", Ordered, func() {
 			Expect(test.Credentials.Type).To(Equal("AccessKeyIDLogin"))
 			Expect(test.Cluster.Name).To(Equal("name-cluster-1"))
 			Expect(test.Cluster.Uuid).To(Equal("uuid-cluster-1"))
-			Expect(test.Cluster.Domain).To(Equal("http://localhost.runailabs.com/"))
+			Expect(test.Cluster.Domain).To(Equal("http://localhost.example.com/"))
 		})
 
 		It("set application login credentials (using deprecated --name)", func() {
@@ -132,7 +132,7 @@ var _ = Describe("Login Test", Ordered, func() {
 		})
 
 		It("reset config - should clean the cluster config", func() {
-			output, err := cli.RunCommand("config set --cp-url=http://localhost.runailabs.com/", envMap)
+			output, err := cli.RunCommand("config set --cp-url=http://localhost.example.com/", envMap)
 			Expect(err).To(BeNil())
 			Expect(output).To(Equal("Config set successfully\n"))
 			instance := config.GetInstance()

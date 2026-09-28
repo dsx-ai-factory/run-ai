@@ -21,7 +21,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/validation"
 	"github.com/stretchr/testify/assert"
 
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"

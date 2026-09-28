@@ -23,7 +23,7 @@ In this tutorial, you will learn how to:
 Before you start, make sure the following requirements are met:
 
 * Your administrator has:
-  * Installed the [NVIDIA NIM Operator](https://docs.nvidia.com/nim-operator/latest/) on the cluster.
+  * Installed the [NVIDIA NIM Operator](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nim-operator) on the cluster.
   * Created a [project](../../platform-management/aiinitiatives/organization/projects.md) for you.
 * You have:
   * An NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key.

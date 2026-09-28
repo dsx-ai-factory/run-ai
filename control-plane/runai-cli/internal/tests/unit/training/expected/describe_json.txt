@@ -105,7 +105,7 @@
       "name": "url",
       "toolType": "custom",
       "connectionType": "ExternalUrl",
-      "url": "https://nael-env-001.runailabs.com/team-b/my-training-demo-123",
+      "url": "https://nael-env-001.example.com/team-b/my-training-demo-123",
       "authorizedGroups": [
         "ml-team",
         "data-scientists",

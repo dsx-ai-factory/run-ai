@@ -15,7 +15,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli/structs"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/application/list"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // tableHeader is the fixed header row produced by the default 8-column layout.

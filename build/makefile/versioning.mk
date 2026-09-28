@@ -187,7 +187,7 @@ validate: validate-imports
 # suffix would otherwise also exempt e.g. .../pkg/client-fork.
 VALIDATE_REPLACE_MODULE_PREFIX := github\.com/dsx-ai-factory/run-ai/
 
-VALIDATE_IMPORTS_REPLACE_EXCEPTIONS = control-plane/authorization/pkg/client|control-plane/cluster-service/pkg/client|control-plane/org-unit-service/pkg/client
+VALIDATE_IMPORTS_REPLACE_EXCEPTIONS = control-plane/authorization/pkg/client|control-plane/cluster-service/pkg/client|control-plane/org-unit-service/pkg/client|control-plane/workloads/pkg/client
 
 VALIDATE_IMPORTS_REPLACE_ALLOWED_MODULES = control-plane/$(SERVICE_NAME)/pkg/client|$(VALIDATE_IMPORTS_REPLACE_EXCEPTIONS)
 

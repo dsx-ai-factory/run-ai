@@ -17,7 +17,7 @@ import (
 	"github.com/rs/zerolog"
 
 	clusterservice "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	workloads "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaimcp"

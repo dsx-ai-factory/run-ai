@@ -38,7 +38,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0-20260205082336-62820b5e4517
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
@@ -208,7 +208,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client 
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../../control-plane/workloads/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ./pkg/client
 

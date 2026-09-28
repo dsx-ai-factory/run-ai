@@ -156,6 +156,11 @@ func applyDefaultTopologyAnnotations(ctx context.Context, annotations map[string
 	}
 
 	found, topologyName, err := topology.CheckNodePoolsTopology(ctx, actualNodePools.GetNodepools(), nodePoolsNames)
+	if err == topology.ErrTopologyNameDoesNotMatch {
+		// Mixed project defaults have no common topology to inject. Let the
+		// pod-group-assigner derive it from the node pool selected for the workload.
+		return nil
+	}
 	if err != nil {
 		return err
 	}

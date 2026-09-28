@@ -13,12 +13,12 @@ import (
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	policyApi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
