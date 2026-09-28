@@ -8,12 +8,12 @@ Without a Karta, NVIDIA Run:ai cannot reliably schedule, monitor, or optimize a 
 
 ## Workload Types API
 
-Use this endpoint `POST /api/v1/workload-types` to register a new workload type. Each request must include the workload’s metadata and one or more Karta definitions, one per supported CRD version (for example, `v1`, `v1beta1`). See [Workload Types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types) API for more details.
+Use this endpoint `POST /api/v1/workload-types` to register a new workload type. Each request must include the workload’s metadata and one or more Karta definitions, one per supported CRD version (for example, `v1`, `v1beta1`). See [Workload Types](api:main-api:POST/api/v1/workload-types) API for more details.
 
 | Field                | Description                                                                                                                                                                                                                                                                                                                                                                                 | Example                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `categoryId`         | The unique identifier of the workload category. See [List workload categories](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#get-api-v1-workload-categories) API.                                                                                                                                                                                            | `046b6c7f-...`                                                                    |
-| `priorityId`         | The unique identifier of the workload priority. See [Get workload priorities](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#get-api-v1-workload-priorities) API.                                                                                                                                                                                             | `046b6c7f-...`                                                                    |
+| `categoryId`         | The unique identifier of the workload category. See [List workload categories](api:main-api:GET/api/v1/workload-categories) API.                                                                                                                                                                                            | `046b6c7f-...`                                                                    |
+| `priorityId`         | The unique identifier of the workload priority. See [Get workload priorities](api:main-api:GET/api/v1/workload-priorities) API.                                                                                                                                                                                             | `046b6c7f-...`                                                                    |
 | `preemptibility`     | The preemptibility value of the workload - `non-preemptible` / `preemptible`.                                                                                                                                                                                                                                                                                                               | `non-preemptible`                                                                 |
 | `name`               | The unique name of the workload type. This value must match the Kubernetes Kind that represents the workload type.                                                                                                                                                                                                                                                                          | `Deployment`                                                                      |
 | `group`              | The Kubernetes API group associated with the workload resource.                                                                                                                                                                                                                                                                                                                             | `apps`                                                                            |
@@ -31,13 +31,13 @@ A Karta enables NVIDIA Run:ai to interpret, schedule, monitor, and optimize cust
 * How to map status conditions to unified states
 * How to interpret component hierarchy and scheduling rules
 
-<Info>
+<Note>
 
 **Note**
 
 The Karta defines the contract between a CRD and the NVIDIA Run:ai platform. It does not create the CRD; it explains how NVIDIA Run:ai should treat it.
 
-</Info>
+</Note>
 
 ## Karta Structure
 

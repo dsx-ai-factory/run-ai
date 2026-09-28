@@ -51,7 +51,7 @@ The Roles table consists of the following columns:
 
 NVIDIA Run:ai supports the following roles and their permissions. Under each role is a detailed list of the actions that the role assignee is authorized to perform for each entity.
 
-<Info>
+<Note>
 
 **Note**
 
@@ -61,7 +61,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 * Data source administrator, Data volume administrator → consider using Data & storage administrator
 * Research manager → consider using Project administrator
 
-</Info>
+</Note>
 
 <Accordion title="AI practitioner">
 
@@ -71,15 +71,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✓ | ✓ | ✓ |
-| [Branding settings](../../settings/general-settings/#branding) | ✗ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✗ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✗ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✗ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -102,7 +102,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✓ | ✓ | ✓ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -115,15 +115,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/#security) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md#security) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -146,7 +146,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✗ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✗ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -159,15 +159,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -190,7 +190,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✗ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✗ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -203,15 +203,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✗ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✗ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✗ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✗ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✗ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -234,7 +234,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -247,15 +247,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -278,7 +278,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -291,15 +291,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -322,7 +322,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✗ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✗ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -335,15 +335,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✓ | ✓ | ✓ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✓ | ✓ | ✓ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✓ | ✓ | ✓ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -366,7 +366,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✓ | ✓ | ✓ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -379,15 +379,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✓ | ✓ | ✓ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✓ | ✓ | ✓ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✓ | ✓ | ✓ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -410,7 +410,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✓ | ✓ | ✓ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -423,15 +423,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -454,7 +454,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -467,15 +467,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✓ | ✓ | ✓ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✓ | ✓ | ✓ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✓ | ✓ | ✓ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✓ | ✓ | ✓ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -498,7 +498,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✓ | ✓ | ✓ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -511,15 +511,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -542,7 +542,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✗ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✗ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -555,15 +555,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✗ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -586,7 +586,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -599,15 +599,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✗ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -630,7 +630,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -643,15 +643,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -674,7 +674,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
@@ -687,15 +687,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✓ | ✓ | ✓ |
-| [Branding settings](../../settings/general-settings/#branding) | ✗ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✗ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✓ | ✓ | ✓ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -718,7 +718,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✓ | ✓ | ✓ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -731,15 +731,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✓ | ✓ | ✓ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -762,7 +762,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -775,15 +775,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✓ | ✓ | ✓ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✓ | ✓ | ✓ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✓ | ✓ | ✓ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✓ | ✓ | ✓ |
-| [Event history](../procedures/event-history.md) | ✓ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✓ | ✓ | ✓ | ✓ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✓ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✓ | ✓ | ✓ | ✓ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✓ | ✓ | ✓ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✓ | ✓ | ✓ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✓ | ✓ | ✓ |
-| [Settings](../../settings/general-settings/) | ✓ | ✓ | ✓ | ✓ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✓ | ✓ | ✓ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✓ | ✓ | ✓ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✓ | ✓ | ✓ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✓ | ✓ | ✓ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✓ | ✓ | ✓ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -806,7 +806,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✓ | ✓ | ✓ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✓ | ✓ | ✓ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✓ | ✓ | ✓ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✓ | ✓ | ✓ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -819,15 +819,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✗ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✗ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✗ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✗ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -850,7 +850,7 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✓ | ✓ | ✓ |
 
 </Accordion>
@@ -863,15 +863,15 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | --- | --- | --- | --- | --- |
 | Account | ✓ | ✗ | ✗ | ✗ |
 | [AI Applications](../../ai-applications/ai-applications.md) | ✓ | ✗ | ✗ | ✗ |
-| [Branding settings](../../settings/general-settings/#branding) | ✓ | ✗ | ✗ | ✗ |
+| [Branding settings](../../settings/general-settings/README.md#branding) | ✓ | ✗ | ✗ | ✗ |
 | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | ✓ | ✗ | ✗ | ✗ |
-| [Event history](../procedures/event-history.md) | ✗ | ✗ | ✗ | ✗ |
-| [Network topologies](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Event history](../../installation-and-configuration/operations/observability/event-history.md) | ✗ | ✗ | ✗ | ✗ |
+| [Network topologies](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | [Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✗ | ✗ | ✗ |
 | [Projects](../../platform-management/aiinitiatives/organization/projects.md) | ✓ | ✗ | ✗ | ✗ |
-| [Security settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Settings](../../settings/general-settings/) | ✓ | ✗ | ✗ | ✗ |
-| [Clusters](../procedures/clusters.md) | ✓ | ✗ | ✗ | ✗ |
+| [Security settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Settings](../../settings/general-settings/README.md) | ✓ | ✗ | ✗ | ✗ |
+| [Clusters](../../installation-and-configuration/operations/clusters.md) | ✓ | ✗ | ✗ | ✗ |
 | Clusters minimal | ✓ | ✗ | ✗ | ✗ |
 | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | ✓ | ✗ | ✗ | ✗ |
 | Node pools minimal | ✓ | ✗ | ✗ | ✗ |
@@ -894,24 +894,24 @@ Legacy roles are **deprecated** and will be removed in a future release. Review 
 | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | ✓ | ✗ | ✗ | ✗ |
 | [PVC](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | ✓ | ✗ | ✗ | ✗ |
 | [Registries](../../workloads-in-nvidia-run-ai/workload-assets/environments.md#adding-a-new-environment) | ✓ | ✗ | ✗ | ✗ |
-| [Storage class configurations](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
+| [Storage class configurations](api:main-api:GET/api/v1/storage-class-configuration) | ✓ | ✗ | ✗ | ✗ |
 | [Templates](../../workloads-in-nvidia-run-ai/workload-templates/README.md) | ✓ | ✗ | ✗ | ✗ |
 
 </Accordion>
 
 ## Custom Roles (API Only)
 
-Administrators can create and manage custom roles to meet specific organizational access requirements using the [Roles](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/roles) API.
+Administrators can create and manage custom roles to meet specific organizational access requirements using the [Roles](api:main-api:POST/api/v2/authorization/roles) API.
 
 A custom role defines access by combining one or more **permission sets**, which together determine the actions that can be performed across NVIDIA Run:ai resources. By selecting the appropriate permission sets, administrators can tailor roles to match their organization’s access model while maintaining consistent and controlled authorization across the platform.
 
-<Info>
+<Note>
 
 **Note**
 
 Custom roles can be created and managed via API only. Once created, they are available for viewing in the Roles grid and can be selected when assigning access rules in the UI and API.
 
-</Info>
+</Note>
 
 ### Permission Sets
 
@@ -922,11 +922,11 @@ A permission set is constructed from a collection of permissions. Each permissio
 * a **resource type**, and
 * the allowed **actions** on that resource: `create`, `read`, `update`, or `delete`
 
-The Permission sets API provides a catalog of all available permission sets in the NVIDIA Run:ai platform. Permission sets may overlap in the resource types or actions they include. For more details, see the [Permissions](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/permissions) API.
+The Permission sets API provides a catalog of all available permission sets in the NVIDIA Run:ai platform. Permission sets may overlap in the resource types or actions they include. For more details, see the [Permissions](api:main-api:GET/api/v1/authorization/permissions) API.
 
 #### Permission Set Naming and Scope
 
-Permission sets are designed to group actions logically, following a clear pattern to define scope. To view the complete list of permission sets and understand how each is defined, see the [Permissions](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/permissions) API:
+Permission sets are designed to group actions logically, following a clear pattern to define scope. To view the complete list of permission sets and understand how each is defined, see the [Permissions](api:main-api:GET/api/v1/authorization/permissions) API:
 
 * Edit Access (`EditAccess`) - These sets grant full CRUD (Create, Read, Update, Delete) permissions over the specified resource type, along with Read access to any associated data or dependencies required for management. For example, **workspaceEditAccess** grants full permissions to `create`, `read`, `update`, and `delete` workspaces, and `read` access all related data and resources required for their management, such as:
   * `workloads`

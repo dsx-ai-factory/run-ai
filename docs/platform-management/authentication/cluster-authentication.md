@@ -20,24 +20,24 @@ To allow users to securely submit workloads using `kubectl`, you must configure 
 * `--oidc-issuer-url` - The URL of the NVIDIA Run:ai identity provider
 * `--oidc-username-prefix` - Prefix prepended to username claims to prevent clashes with existing names (e.g., `-user@example.com`).
 
-<Info>
+<Note>
 
 **Note**
 
 These flags must be configured in the API server startup parameters for each cluster in your environment.
 
-</Info>
+</Note>
 
 ## Kubernetes Distribution-Specific Configuration
 
-<Info>
+<Note>
 
 **Note**
 
 * Azure Kubernetes Service (AKS) is not supported.
 * For other Kubernetes distributions, refer to specific instructions in the documentation.
 
-</Info>
+</Note>
 
 <Accordion title="Vanilla Kubernetes">
 
