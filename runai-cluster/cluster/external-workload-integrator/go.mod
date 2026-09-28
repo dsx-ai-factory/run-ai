@@ -46,7 +46,7 @@ require (
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
 	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a
 	knative.dev/serving v0.48.1
-	kubevirt.io/api v1.8.4
+	kubevirt.io/api v1.9.0
 	sigs.k8s.io/controller-runtime v0.23.3
 	sigs.k8s.io/gateway-api v1.5.1
 	sigs.k8s.io/gateway-api-inference-extension v1.3.0
