@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
