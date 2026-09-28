@@ -1,7 +1,6 @@
 name: Security vulnerability — STOP, use private reporting
 description: Do NOT report security vulnerabilities here. This template only exists to redirect you to the private process.
 title: "[STOP — use private reporting] "
-labels: ["security"]
 body:
   - type: markdown
     attributes:
