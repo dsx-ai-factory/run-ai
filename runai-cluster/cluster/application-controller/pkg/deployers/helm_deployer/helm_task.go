@@ -30,6 +30,10 @@ type Task interface {
 	// Execute runs the task and return status.
 	// reportProgress is a function that the task can call to update the status with the task progress.
 	Execute(ctx context.Context, reportProgress func(*AppStatus)) *AppStatus
+
+	// Cleanup removes temp files created for the task. It must be called when the task is dropped
+	// without being executed; calling it more than once is safe.
+	Cleanup() error
 }
 
 type InstallParams struct {
@@ -48,6 +52,8 @@ type AuthOptions struct {
 	KeyFile               string // KeyFile path to client key
 	InsecureSkipTLSVerify bool   // InsecureSkipTLSVerify skips TLS verification
 	RegistryConfigFile    string // RegistryConfigFile path to docker config for OCI registries
+
+	tempDir string // tempDir holds the files written from the auth secret; removed by Cleanup
 }
 
 type TaskActionType string
@@ -127,6 +133,14 @@ func NewInstallParams(ctx context.Context, k8sClient client.Client, application 
 	}
 
 	return &result, nil
+}
+
+// Cleanup removes the auth files written for the install params.
+func (p *InstallParams) Cleanup() error {
+	if p == nil {
+		return nil
+	}
+	return p.authOpts.Cleanup()
 }
 
 type TaskInstall struct {
@@ -212,6 +226,10 @@ func (t *TaskUpgrade) Execute(ctx context.Context, reportProgress func(*AppStatu
 
 func (t *TaskUninstall) Action() TaskActionType {
 	return TaskActionUninstall
+}
+
+func (t *TaskUninstall) Cleanup() error {
+	return nil
 }
 
 func (t *TaskUninstall) Execute(_ context.Context, reportProgress func(*AppStatus)) *AppStatus {

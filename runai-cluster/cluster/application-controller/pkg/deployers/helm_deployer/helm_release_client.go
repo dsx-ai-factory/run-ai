@@ -92,6 +92,13 @@ func (hrc *ReleaseClient) GetRelease() (*release.Release, error) {
 func (hrc *ReleaseClient) prepareToInstall(params *InstallParams) (*chart.Chart, error) {
 	log.Info().Msgf("HelmTask --> preparing to install %s started", hrc.ReleaseId.String())
 
+	// Auth files are only read while downloading the chart, so they can go once this returns.
+	defer func() {
+		if err := params.authOpts.Cleanup(); err != nil {
+			log.Warn().Err(err).Msgf("HelmTask --> failed to clean up auth files of %s", hrc.ReleaseId.String())
+		}
+	}()
+
 	chartDownloader := hrc.DownloaderFactory(hrc, params)
 
 	chartPath, err := chartDownloader.Download()
