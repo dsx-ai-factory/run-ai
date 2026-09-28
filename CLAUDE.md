@@ -73,7 +73,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [control-plane/metrics-service](control-plane/metrics-service)
 - [control-plane/notifications-proxy](control-plane/notifications-proxy)
 - [control-plane/org-unit-service](control-plane/org-unit-service)
-- [control-plane/org-units-migrator](control-plane/org-units-migrator)
 - [control-plane/policy-service](control-plane/policy-service)
 - [control-plane/secret-generator](control-plane/secret-generator)
 - [control-plane/temp-backend-settings](control-plane/temp-backend-settings)
