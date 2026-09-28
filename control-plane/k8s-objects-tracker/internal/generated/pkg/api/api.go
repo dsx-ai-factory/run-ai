@@ -49,6 +49,14 @@ type ConfigMapsAPIRouter interface {
 	DeleteProjectsConfigmapV1(http.ResponseWriter, *http.Request)
 }
 
+// DeviceClassesAPIRouter defines the required methods for binding the api requests to a responses for the DeviceClassesAPI
+// The DeviceClassesAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a DeviceClassesAPIServicer to perform the required actions, then write the service results to the http response.
+type DeviceClassesAPIRouter interface {
+	GetDeviceClasses(http.ResponseWriter, *http.Request)
+	SyncDeviceClass(http.ResponseWriter, *http.Request)
+}
+
 // HealthAPIRouter defines the required methods for binding the api requests to a responses for the HealthAPI
 // The HealthAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a HealthAPIServicer to perform the required actions, then write the service results to the http response.
@@ -182,6 +190,15 @@ type ConfigMapsAPIServicer interface {
 	SyncProjectsConfigmapsV1(context.Context, string, string, ConfigMaps) (ImplResponse, error)
 	CreateProjectsConfigmapV1(context.Context, string, string, string, ConfigMap) (ImplResponse, error)
 	DeleteProjectsConfigmapV1(context.Context, string, string, string) (ImplResponse, error)
+}
+
+// DeviceClassesAPIServicer defines the api actions for the DeviceClassesAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type DeviceClassesAPIServicer interface {
+	GetDeviceClasses(context.Context, string, string) (ImplResponse, error)
+	SyncDeviceClass(context.Context, string, DeviceClasses) (ImplResponse, error)
 }
 
 // HealthAPIServicer defines the api actions for the HealthAPI service

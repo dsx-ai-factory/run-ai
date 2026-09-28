@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli/structs"
-	wcgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wcgenerated "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // TemplateLister defines the interface for fetching templates from the API

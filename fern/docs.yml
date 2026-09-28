@@ -1,10 +1,11 @@
 # yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json
 
 instances:
-- url: nvidia-runai-self-hosted-staging.docs.buildwithfern.com/run-ai
+- url: nvidia-run-ai.docs.buildwithfern.com/run-ai
   custom-domain: docs.nvidia.com/run-ai
+  multi-source: true
 title: NVIDIA Run:ai Self-Hosted Product Documentation
-global-theme: nvidia-product
+global-theme: nvidia
 logo:
   right-text: Run:ai
 navbar-links:

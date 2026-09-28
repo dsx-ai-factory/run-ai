@@ -7,13 +7,13 @@ package org_unit
 
 import (
 	"context"
-	"github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/structs"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"sync"
 
+	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/config"
-	orgUnitService "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 )
 
 // ClientInterface lists the assets services that workloads service needs

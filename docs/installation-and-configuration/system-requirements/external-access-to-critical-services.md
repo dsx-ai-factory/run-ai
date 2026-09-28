@@ -30,7 +30,7 @@ Ensure the inbound and outbound rules below are correctly applied to your firewa
 
 ## Inbound Rules
 
-To allow your organization's NVIDIA Run:ai users to interact with the cluster using the [NVIDIA Run:ai Command-line interface](../../reference/cli/runai/runai.md), or access specific UI features, certain inbound ports need to be open:
+To allow your organization's NVIDIA Run:ai users to interact with the cluster using the [NVIDIA Run:ai Command-line interface](../../reference/cli/install-cli.md), or access specific UI features, certain inbound ports need to be open:
 
 | Name                        | Description       | Source  | Destination                | Port |
 | --------------------------- | ----------------- | ------- | --------------------------- | ---- |

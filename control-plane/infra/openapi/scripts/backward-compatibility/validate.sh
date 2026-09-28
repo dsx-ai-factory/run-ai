@@ -7,9 +7,9 @@
 
 # Function to determine base branch
 determine_base_branch() {
-    # Check if the base branch is 'master', if so, find the latest version branch
-    if [[ "$BASE_BRANCH_NAME" == "master" ]]; then
-        echo "Base branch is 'master', looking for the latest version branch."
+    # Check if the base branch is 'main', if so, find the latest version branch
+    if [[ "$BASE_BRANCH_NAME" == "main" ]]; then
+        echo "Base branch is 'main', looking for the latest version branch."
         
         # In PR context, we need to fetch version branches first
         echo "Fetching version branches from remote..."
@@ -36,11 +36,11 @@ determine_base_branch() {
             echo "No version branches found after fetching."
             echo "Available branches matching version pattern:"
             git branch -r | grep -E 'origin/v[0-9]+\.[0-9]+' || echo "No version branches available"
-            echo "Using master as fallback"
-            BASE_BRANCH_NAME="master"
+            echo "Using main as fallback"
+            BASE_BRANCH_NAME="main"
         fi
     else
-        # If base is not 'master', we just use the base branch
+        # If base is not 'main', we just use the base branch
         echo "Using base branch: $BASE_BRANCH_NAME"
     fi
 }

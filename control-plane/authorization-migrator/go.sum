@@ -14,6 +14,7 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/Nerzal/gocloak/v13 v13.9.0 h1:YWsJsdM5b0yhM2Ba3MLydiOlujkBry4TtdzfIzSVZhw=
 github.com/Nerzal/gocloak/v13 v13.9.0/go.mod h1:YYuDcXZ7K2zKECyVP7pPqjKxx2AzYSpKDj8d6GuyM10=
+github.com/Nerzal/gocloak/v14 v14.0.4/go.mod h1:tUcVh1t5gqGtEeHrtQs375zc2wSdIo6mCl8hnBXpizY=
 github.com/Rican7/retry v0.3.1 h1:scY4IbO8swckzoA/11HgBwaZRJEyY9vaNJshcdhp1Mc=
 github.com/Rican7/retry v0.3.1/go.mod h1:CxSDrhAyXmTMeEuRAnArMu1FHu48vtfjLREWqVl7Vw0=
 github.com/ThreeDotsLabs/watermill v1.5.3 h1:GoTR7fW1ZT+itzUv/w3VB6Um1B7oTBrOWjJ8sOA9XqU=
@@ -63,8 +64,8 @@ github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2 h1:e
 github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2/go.mod h1:YBoIgKSc1OJeRrQTERdrzQL3ank++7UrXxiEsZkuIYM=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 h1:ENx7A9OBIBNv1Ku7k0hWYIsg+S1EspjHlCc8H6Yl1GY=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3/go.mod h1:EaselROWsWZGgWY2nsm7aL35/nML1cul54FjYasY2d0=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 h1:Fy946r1JrfkYN5KBZhu+GBLhxuA7EY1Lt10sgDIzDxs=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8/go.mod h1:xAYNpT7DXg6+KXXeNERsHq6fYR605zz2lE+GCE8BKZY=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0 h1:tIxjIoZUYFme1g/DfE5LD9HOXoY7mEa4OmE+218l73k=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0/go.mod h1:7eHCBYbQ9OWPdWD1WP9OmaeEnXKQs5UC4HYjGHm2TXc=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0 h1:D/mXmXAi7r5Ua9ZD1lfR4OXDzsPw6jl8hu8Ap8atIsg=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0/go.mod h1:PBdD9mpQ7MAAbU4rkHhDxDU8VjKbGpn8RaPfdWEBB04=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 h1:ngMQ/W6rCI/3Fl695DqGHByE5abCf3R1JNKd9Wtnv7s=
@@ -73,8 +74,8 @@ github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 h1:SfZn20b
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4/go.mod h1:sDp7mJn5tIM3Pg6YtuOfaY482uLxZRt+wSsCDIz6p4g=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 h1:7vShtDVlUAl+kbFfF8/kopQ7iudfJPFCaOHYknwZIRI=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5/go.mod h1:AQK0wu+zIXkf9lBnxLhIFHVay37vYzRR92qrar+LbVI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11 h1:XbMdxc0ORj/76qTPXc554obdorN1k8WGLBRoMchzclM=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11/go.mod h1:OPUH1UkE2ymD0eI8ZBF1xJy9QUZa8O5iDmC3S/6DRB0=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13 h1:OnCb2hgnV69obRYYEIYMjKX/cxL2FuFdaPNWYgfTGd8=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13/go.mod h1:ROawBxH+invwjJMjCdS5qpgkFPGEFim+YoqHNrjQejI=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5 h1:AzvTvoijYPa4BSMcBuaS+9pMy94nTs2QbkglyQ+DlvI=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5/go.mod h1:hyLAxbaNjRsH7GqCiA2Z+y0iwIUU2+DuHJLoSU9bCD4=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3 h1:pgTV2JEs4LSpclKH+4kXdqOYR23t6lJkoOB8SBsXEJE=

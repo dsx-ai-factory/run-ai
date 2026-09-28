@@ -37,7 +37,12 @@ The following diagram shows the traffic flows in a multi-cluster deployment, whe
 
 ## Infrastructure by Deployment Model
 
-Use the tables below to determine how many of each networking, DNS, and TLS component to provision before you begin installation, based on the deployment model you chose. "Single" means one component shared across the whole deployment; "Per cluster" means one component is required for each additional NVIDIA Run:ai cluster beyond the control plane. For setup instructions, see [Networking Setup](networking-setup.md).
+Use the tables below to determine how many of each networking, DNS, and TLS component to provision before you begin installation, based on the deployment model you chose:
+
+* **Single** - One component shared across the whole deployment.
+* **Per cluster** - One component required for each additional NVIDIA Run:ai cluster beyond the control plane.
+
+For setup instructions, see [Networking Setup](networking-setup.md).
 
 ### Load Balancer and Ingress
 
@@ -69,13 +74,13 @@ Applies to Kubernetes only. On OpenShift, the domain is derived from the cluster
 | Component | Same-cluster | Multi-cluster |
 |---|---|---|
 | Control plane domain | Single | Single |
-| Cluster domain | Not required | Per cluster |
+| Cluster domain<sup>1</sup> | Not required | Per cluster |
 | Workspace and training wildcard domain | Single | Per cluster |
-| Inference wildcard domain | Single* | Per cluster* |
+| Inference wildcard domain<sup>2</sup> | Single | Per cluster |
 
-> Cluster domain is only needed when the NVIDIA Run:ai cluster is installed on a different Kubernetes cluster than the control plane. In a same-cluster deployment, the cluster uses the control plane domain and does not need its own.
+<sup>1</sup> Only needed when the NVIDIA Run:ai cluster is installed on a different Kubernetes cluster than the control plane. In a same-cluster deployment, the cluster uses the control plane domain and does not need its own.
 
-> *Required only if inference workloads are exposed externally.
+<sup>2</sup> Required only if inference workloads are exposed externally.
 
 ### TLS Certificates
 
@@ -86,9 +91,9 @@ Applies to Kubernetes only. On OpenShift, the domain is derived from the cluster
 | Control plane certificate | Single | Single |
 | Cluster domain certificate | Single | Per cluster |
 | Workspace and training wildcard certificate | Single | Per cluster |
-| Inference wildcard certificate | Single* | Per cluster* |
+| Inference wildcard certificate<sup>1</sup> | Single | Per cluster |
 
-> *Required only if inference workloads are exposed externally.
+<sup>1</sup> Required only if inference workloads are exposed externally.
 
 #### OpenShift
 

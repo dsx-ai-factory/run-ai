@@ -15,137 +15,196 @@ navigation:
     contents:
     - page: Overview
       path: ../../docs/multi-tenant/getting-started/overview.md
-    - section: Installation
-      contents:
-      - page: Control Plane System Requirements
-        path: ../../docs/multi-tenant/getting-started/installation/cp-system-requirements.md
-      - section: Metrics Store Requirements
-        path: ../../docs/multi-tenant/getting-started/installation/metrics-store-requirements/README.md
-        contents:
-        - page: NVIDIA Run:ai Mimir Helm Chart
-          path: ../../docs/multi-tenant/getting-started/installation/metrics-store-requirements/nvidia-run-ai-mimir-helm-chart.md
-          hidden: true
-      - page: Preparations
-        path: ../../docs/multi-tenant/getting-started/installation/preparations.md
-      - page: Network Requirements
-        path: ../../docs/multi-tenant/getting-started/installation/network-requirements.md
-      - page: Install the Control Plane
-        path: ../../docs/multi-tenant/getting-started/installation/install-control-plane.md
-      - page: Customized Installation
-        path: ../../docs/multi-tenant/getting-started/installation/custom-install.md
-        hidden: true
-      - page: Upgrade
-        path: ../../docs/multi-tenant/getting-started/installation/upgrade.md
-      - page: Uninstall
-        path: ../../docs/multi-tenant/getting-started/installation/uninstall.md
-    - page: API Access Setup
-      path: ../../docs/multi-tenant/getting-started/api-access-setup.md
+    - page: Architecture and Components
+      slug: architecture
+      path: ../../docs/developer/architecture.md
     - page: Support, Lifecycle, and Deprecation Policy
       path: ../../docs/getting-started/product-support-policy.md
-  - section: Organization Life Cycle
+  - section: Installation and Configuration
     contents:
-    - section: Organization Onboarding
+    - page: Overview
+      path: ../../docs/multi-tenant/installation-and-configuration/overview.md
+    - page: Support Matrix
+      path: ../../docs/multi-tenant/installation-and-configuration/support-matrix.md
+    - section: System Requirements
+      path: ../../docs/multi-tenant/installation-and-configuration/system-requirements/README.md
       contents:
-      - page: Create a Tenant
-        path: ../../docs/multi-tenant/organization-life-cycle/organization-onboarding/create-a-tenant.md
-      - page: Provision Kubernetes Clusters
-        path: ../../docs/multi-tenant/organization-life-cycle/organization-onboarding/provision-kubernetes-clusters.md
-      - page: Cluster System Requirements
-        path: ../../docs/multi-tenant/organization-life-cycle/organization-onboarding/system-requirements.md
-      - page: Create and Install Clusters
-        path: ../../docs/multi-tenant/organization-life-cycle/organization-onboarding/create-and-install-clusters.md
-      - page: Share Tenant Access Details
-        path: ../../docs/multi-tenant/organization-life-cycle/organization-onboarding/share-tenant-access-details.md
-    - page: Organization Offboarding
-      path: ../../docs/multi-tenant/organization-life-cycle/organization-offboarding.md
-  - section: Infrastructure setup
-    contents:
-    - section: Authentication and Authorization
+      - page: Deployment Model
+        path: ../../docs/multi-tenant/installation-and-configuration/system-requirements/deployment-model.md
+      - page: Infrastructure Requirements
+        path: ../../docs/multi-tenant/installation-and-configuration/system-requirements/infrastructure-requirements.md
+      - page: Networking Setup
+        path: ../../docs/multi-tenant/installation-and-configuration/system-requirements/networking-setup.md
+      - page: Third-Party Services
+        path: ../../docs/multi-tenant/installation-and-configuration/system-requirements/third-party-services.md
+      - section: Metrics Store Requirements
+        path: ../../docs/multi-tenant/installation-and-configuration/system-requirements/metrics-store-requirements/README.md
+        contents:
+        - page: NVIDIA Run:ai Mimir Helm Chart
+          path: ../../docs/multi-tenant/installation-and-configuration/system-requirements/metrics-store-requirements/nvidia-run-ai-mimir-helm-chart.md
+          hidden: true
+      - page: External Access to Critical Services
+        path: ../../docs/multi-tenant/installation-and-configuration/system-requirements/external-access-to-critical-services.md
+    - section: Installation
+      slug: install
       contents:
-      - page: Roles
-        path: ../../docs/multi-tenant/infrastructure-setup/authentication-and-authorization/roles.md
-      - page: Access Rules
-        path: ../../docs/multi-tenant/infrastructure-setup/authentication-and-authorization/access-rules.md
-    - section: Advanced Setup
+      - section: Guided Installation (Recommended)
+        slug: guided-installation
+        path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/README.md
+        contents:
+        - page: Preparations
+          path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/preparations.md
+        - section: Control Plane Setup
+          contents:
+          - page: Control Plane Installation
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/installation.md
+          - page: API Access Setup
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/api-access-setup.md
+          - page: Configuration Templates
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/templates.md
+        - section: Onboard a Tenant
+          contents:
+          - page: Create a Tenant and Cluster
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/create-a-tenant-and-cluster.md
+          - page: Prerequisites and Features
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/prerequisites-and-features.md
+          - page: Configuration Templates
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/tenant-cluster-templates.md
+          - page: Delete a Tenant
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/delete-a-tenant.md
+        - page: Configuration Reference
+          path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/configuration-reference.md
+        - page: Command Reference and Troubleshooting
+          path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/command-reference.md
+      - section: Manual Helm
+        contents:
+        - page: Preparations
+          path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/preparations.md
+        - section: Control Plane Setup
+          contents:
+          - page: Control Plane Installation
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/install-control-plane.md
+          - page: API Access Setup
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/guided-installation/api-access-setup.md
+        - section: Onboard a Tenant
+          contents:
+          - page: Prerequisites and Features
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md
+          - page: Create a Tenant and Cluster
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/create-a-tenant-and-cluster.md
+          - page: Delete a Tenant
+            path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/delete-a-tenant.md
+        - page: Uninstall
+          path: ../../docs/multi-tenant/installation-and-configuration/installation/install-using-helm/uninstall.md
+    - section: Configuration
       contents:
       - page: Node Roles
-        path: ../../docs/installation-and-configuration/configuration/node-roles.md
-      - page: Advanced Control Plane Configurations
-        path: ../../docs/multi-tenant/infrastructure-setup/advanced-setup/control-plane-config.md
-      - page: Advanced Cluster Configurations
-        path: ../../docs/installation-and-configuration/configuration/cluster-config.md
-      - page: Vertical Pod Autoscaling (VPA)
-        slug: vpa
-        path: ../../docs/installation-and-configuration/operations/vpa.md
-      - page: Kubernetes Gateway API
-        path: ../../docs/installation-and-configuration/configuration/networking/kubernetes-gateway-api.md
-      - page: External Access to Containers
-        path: ../../docs/installation-and-configuration/configuration/networking/external-access-to-containers.md
-      - page: Service Mesh
-        path: ../../docs/installation-and-configuration/configuration/networking/service-mesh.md
-    - section: Infrastructure Procedures
+        path: ../../docs/multi-tenant/installation-and-configuration/configuration/node-roles.md
+      - page: Control Plane Configuration
+        path: ../../docs/multi-tenant/installation-and-configuration/configuration/control-plane-config.md
+      - page: Cluster Configuration
+        path: ../../docs/multi-tenant/installation-and-configuration/configuration/cluster-config.md
+      - section: Networking
+        contents:
+        - page: Kubernetes Gateway API
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/networking/kubernetes-gateway-api.md
+        - page: Service Mesh
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/networking/service-mesh.md
+        - page: External Access to Containers
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/networking/external-access-to-containers.md
+      - section: Security
+        contents:
+        - page: Secure Your Cluster
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/security/secure-your-cluster.md
+      - section: Authentication and Authorization
+        contents:
+        - page: Roles
+          path: ../../docs/multi-tenant/infrastructure-setup/authentication-and-authorization/roles.md
+        - page: Access Rules
+          path: ../../docs/multi-tenant/infrastructure-setup/authentication-and-authorization/access-rules.md
+    - section: Operations
       contents:
       - page: NVIDIA Run:ai at Scale
         path: ../../docs/multi-tenant/infrastructure-setup/procedures/scaling.md
       - page: Infrastructure Monitoring
         path: ../../docs/multi-tenant/infrastructure-setup/procedures/monitoring.md
-      - page: NVIDIA Run:ai System Monitoring
-        path: ../../docs/installation-and-configuration/operations/observability/system-monitoring.md
-      - page: Nodes Maintenance
-        path: ../../docs/installation-and-configuration/operations/maintenance/nodes-maintenance.md
-      - page: Cluster Restore
-        path: ../../docs/multi-tenant/infrastructure-setup/procedures/cluster-restore.md
-        hidden: true
-      - page: Secure Your Cluster
-        path: ../../docs/installation-and-configuration/configuration/security/secure-your-cluster.md
-      - page: Logs Collection
-        path: ../../docs/installation-and-configuration/operations/observability/logs-collection.md
-      - page: Audit Logs API
-        path: ../../docs/multi-tenant/infrastructure-setup/procedures/event-history.md
+      - page: Vertical Pod Autoscaling (VPA)
+        slug: vpa
+        path: ../../docs/multi-tenant/installation-and-configuration/operations/vpa.md
+      - section: Maintenance
+        contents:
+        - page: Nodes Maintenance
+          path: ../../docs/multi-tenant/installation-and-configuration/operations/maintenance/nodes-maintenance.md
+        - page: Cluster Restore
+          path: ../../docs/multi-tenant/infrastructure-setup/procedures/cluster-restore.md
+          hidden: true
+      - section: Observability
+        contents:
+        - page: NVIDIA Run:ai System Monitoring
+          path: ../../docs/multi-tenant/installation-and-configuration/operations/observability/system-monitoring.md
+        - page: Logs Collection
+          path: ../../docs/multi-tenant/installation-and-configuration/operations/observability/logs-collection.md
+        - page: Audit Logs API
+          path: ../../docs/multi-tenant/infrastructure-setup/procedures/event-history.md
+    - page: Upgrade
+      path: ../../docs/multi-tenant/installation-and-configuration/upgrade.md
+  - section: Development
+    contents:
+    - link: Local Development
+      href: https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md
+      target: _blank
+    - page: Service Reference
+      path: ../../docs/developer/services.md
+    - page: CRD Reference
+      path: ../../docs/developer/crds.md
+    - page: External Dependencies
+      path: ../../docs/developer/external-dependencies.md
 
 - tab: reference
   layout:
   - page: Home
     path: ../../docs/rest-api/multi-tenant/README.md
-  - section: Getting Started
+  - section: REST API
     contents:
-    - page: About the REST API
-      path: ../../docs/rest-api/multi-tenant/about-the-rest-api.md
-    - section: Using the REST API
+    - section: Getting Started
       contents:
-      - page: Making REST API Requests
-        path: ../../docs/rest-api/multi-tenant/making-rest-api-requests.md
-      - page: Pagination
-        path: ../../docs/rest-api/multi-tenant/pagination.md
-      - page: HTTP Status Codes
-        path: ../../docs/rest-api/http-status-codes.md
-    - page: API Access Setup
-      path: ../../docs/rest-api/multi-tenant/api-access-setup.md
-    - page: NVIDIA Run:ai API Policy
-      path: ../../docs/rest-api/api-policy.md
-  - api: Endpoints
-    api-name: multi-tenant-api
-    flattened: true
-    tag-description-pages: true
-    layout:
-      - section: Organizations
+      - page: About the REST API
+        path: ../../docs/rest-api/multi-tenant/about-the-rest-api.md
+      - section: Using the REST API
         contents:
-        - tenant
-        - clusters
-      - section: Authentication and Authorization
-        contents:
-        - idps
-        - users
-        - applications
-        - serviceAccounts
-        - accessKeys
-        - userApplications
-        - tokens
-        - settings
-        - roles
-        - permissions
-        - accessRules
-        - me
-      - section: Audit
-        contents:
-        - auditLogs
+        - page: Making REST API Requests
+          path: ../../docs/rest-api/multi-tenant/making-rest-api-requests.md
+        - page: Pagination
+          path: ../../docs/rest-api/multi-tenant/pagination.md
+        - page: HTTP Status Codes
+          path: ../../docs/rest-api/http-status-codes.md
+      - page: API Access Setup
+        path: ../../docs/rest-api/multi-tenant/api-access-setup.md
+      - page: NVIDIA Run:ai API Policy
+        path: ../../docs/rest-api/api-policy.md
+    - api: Endpoints
+      api-name: multi-tenant-api
+      flattened: true
+      tag-description-pages: true
+      layout:
+        - section: Organizations
+          contents:
+          - tenant
+          - clusters
+        - section: Authentication and Authorization
+          contents:
+          - idps
+          - users
+          - applications
+          - serviceAccounts
+          - accessKeys
+          - userApplications
+          - tokens
+          - settings
+          - roles
+          - permissions
+          - accessRules
+          - me
+        - section: Audit
+          contents:
+          - auditLogs

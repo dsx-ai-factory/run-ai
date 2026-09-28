@@ -26,9 +26,10 @@ export GITHUB_TOKEN=ghp_...   # needed for private Go modules
 ./local-dev.sh --skip-build-cp --skip-cluster     # rebuild RC only, reuse cluster
 ./local-dev.sh --force-rebuild                    # ignore build cache
 ./local-dev.sh --teardown && ./local-dev.sh       # nuke and restart
+./local-dev.sh --gpu-operator                     # real NVIDIA GPUs instead of fake-gpu-operator (Linux)
 ```
 
-**All flags:** `--domain`, `--admin-email`, `--admin-password`, `--parallel N`, `--skip-build`, `--skip-build-cp`, `--skip-build-rc`, `--skip-frontend`, `--skip-cluster`, `--skip-deploy`, `--skip-deploy-cp`, `--skip-deploy-rc`, `--skip-prometheus`, `--skip-fake-gpu`, `--force-rebuild`, `--teardown`
+**All flags:** `--domain`, `--admin-email`, `--admin-password`, `--parallel N`, `--skip-build`, `--skip-build-cp`, `--skip-build-rc`, `--skip-frontend`, `--skip-cluster`, `--skip-deploy`, `--skip-deploy-cp`, `--skip-deploy-rc`, `--skip-prometheus`, `--skip-fake-gpu`, `--gpu-operator`, `--gpu-driver`, `--gpu-operator-version`, `--force-rebuild`, `--teardown`, `--purge`
 
 After first run: `sudo sh -c 'echo "127.0.0.1 runai.local" >> /etc/hosts'` → https://runai.local (admin@run.ai / Admin@1234!)
 
@@ -86,8 +87,10 @@ service, run `/write-service-docs <path>` to document it and add it below.
 **control-plane** (go — libraries & client packages)
 - [control-plane/authorization/pkg/client](control-plane/authorization/pkg/client)
 - [control-plane/cluster-service/pkg/client](control-plane/cluster-service/pkg/client)
+- [control-plane/org-unit-service/pkg/client](control-plane/org-unit-service/pkg/client)
 - [control-plane/runai-cli](control-plane/runai-cli)
 - [control-plane/workloads-and-policies](control-plane/workloads-and-policies)
+- [control-plane/workloads/pkg/client](control-plane/workloads/pkg/client)
 
 **control-plane** (tooling)
 - [control-plane/fielder](control-plane/fielder) — Python workload field-spec code generator
@@ -148,9 +151,7 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [runai-clients/cluster-api-client](runai-clients/cluster-api-client)
 - [runai-clients/datavolumes-service-client](runai-clients/datavolumes-service-client)
 - [runai-clients/k8s-objects-tracker-client](runai-clients/k8s-objects-tracker-client)
-- [runai-clients/org-unit-service-client](runai-clients/org-unit-service-client)
 - [runai-clients/policy-service-client](runai-clients/policy-service-client)
-- [runai-clients/workloads-client](runai-clients/workloads-client)
 - [runai-clients/workloads-manager-client](runai-clients/workloads-manager-client)
 
 **runai-common-packages** (go)

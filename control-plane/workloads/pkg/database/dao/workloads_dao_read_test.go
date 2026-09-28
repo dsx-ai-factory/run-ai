@@ -404,7 +404,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryCountSelect).Returns([]wlReadSimpleTelemetryRow{{Data: "9"}})
 
-		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -415,7 +415,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryCountSelect).Returns([]wlReadSimpleTelemetryRow{})
 
-		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", wlReadScopes(true), nil, nil)
+		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", wlReadScopes(true), nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(BeEmpty())
@@ -431,7 +431,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		}})
 
 		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "c1", "np1", "d1", "p1", wlReadScopes(false),
-			[][]string{{"cluster_id", "cluster_name"}, {"project_id"}}, []api.Phase{api.PHASE_RUNNING})
+			[][]string{{"cluster_id", "cluster_name"}, {"project_id"}}, []api.Phase{api.PHASE_RUNNING}, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -443,7 +443,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryCountPendingNpSel).Returns([]wlReadSimpleTelemetryRow{{Data: "1"}})
 
-		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "np1", "", "", nil, nil, []api.Phase{api.PHASE_PENDING})
+		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "np1", "", "", nil, nil, []api.Phase{api.PHASE_PENDING}, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -453,7 +453,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryCountSelect).ReturnsError(errors.New("boom"))
 
-		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).ToNot(BeNil())
 		Expect(*values).To(BeEmpty())
@@ -465,7 +465,7 @@ var _ = Describe("DbGetGpuAllocation", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryGpuSelect).Returns([]wlReadSimpleTelemetryRow{{Data: "2.5"}})
 
-		values, apiErr := wlReadDao().DbGetGpuAllocation(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetGpuAllocation(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -476,7 +476,7 @@ var _ = Describe("DbGetGpuAllocation", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryGpuSelect).ReturnsError(errors.New("boom"))
 
-		values, apiErr := wlReadDao().DbGetGpuAllocation(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetGpuAllocation(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).ToNot(BeNil())
 		Expect(*values).To(BeEmpty())
@@ -488,7 +488,7 @@ var _ = Describe("DbGetIdleAllocatedGpus", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryIdleGpuSelect).Returns([]wlReadSimpleTelemetryRow{{Data: "0"}})
 
-		values, apiErr := wlReadDao().DbGetIdleAllocatedGpus(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetIdleAllocatedGpus(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -498,7 +498,7 @@ var _ = Describe("DbGetIdleAllocatedGpus", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryIdleGpuSelect).ReturnsError(errors.New("boom"))
 
-		values, apiErr := wlReadDao().DbGetIdleAllocatedGpus(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetIdleAllocatedGpus(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).ToNot(BeNil())
 		Expect(*values).To(BeEmpty())

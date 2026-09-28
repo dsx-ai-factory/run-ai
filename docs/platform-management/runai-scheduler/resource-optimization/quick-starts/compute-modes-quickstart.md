@@ -10,7 +10,7 @@ Before you start, make sure:
 
 * You have created a [project](../../../aiinitiatives/organization/projects.md) or have one created for you.
 * The project has an assigned quota of at least 1 GPU.
-* A GPU is available that is not currently running other fractional workloads.
+* A GPU is available that is not currently running other workloads using GPU fractions.
 
 <Info>
 

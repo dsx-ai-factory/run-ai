@@ -149,23 +149,34 @@ func validateNodepoolFilterGroups(clusterFilter string, nodepoolFilter string, g
 
 func (s *WorkloadsService) GetWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
 	clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, phases []api.Phase,
+	filterBy []string,
 ) (api.ImplResponse, error) {
 	permittedScopes, scopesErr := authorization_client.ParsePermittedScopes(ctx)
 	if scopesErr != nil {
 		permittedScopes = nil
 	}
-	return s.getWorkloadsTelemetry(ctx, telemetryType, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases)
+	filters, filterErr := queryapi.NewParser(models.WorkloadView{}.TelemetryFilterFieldsToColumn()).Filters(filterBy)
+	if filterErr != nil {
+		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
+	}
+	return s.getWorkloadsTelemetry(ctx, telemetryType, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases, filters)
 }
 
 func (s *WorkloadsService) GetInternalWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
 	clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, phases []api.Phase,
+	filterBy []string,
 ) (api.ImplResponse, error) {
-	return s.getWorkloadsTelemetry(ctx, telemetryType, clusterId, nodepoolName, departmentId, projectId, nil, groupBy, phases)
+	filters, filterErr := queryapi.NewParser(models.WorkloadView{}.TelemetryFilterFieldsToColumn()).Filters(filterBy)
+	if filterErr != nil {
+		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
+	}
+	return s.getWorkloadsTelemetry(ctx, telemetryType, clusterId, nodepoolName, departmentId, projectId, nil, groupBy, phases, filters)
 }
 
 func (s *WorkloadsService) getWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
 	clusterId string, nodepoolName string, departmentId string, projectId string,
 	permittedScopes *authorization_api.PermittedScopes, groupBy []string, phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (api.ImplResponse, error) {
 	err := validateNodepoolFilterGroups(clusterId, nodepoolName, groupBy, ClusterId, CurrentNodepools)
 	if err != nil {
@@ -203,16 +214,16 @@ func (s *WorkloadsService) getWorkloadsTelemetry(ctx context.Context, telemetryT
 	timestamp := time.Now()
 	switch telemetryType {
 	case api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT:
-		telemetryGroups, dbErr = s.WorkloadsDao.DbGetWorkloadCount(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases)
+		telemetryGroups, dbErr = s.WorkloadsDao.DbGetWorkloadCount(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases, filterBy)
 
 	case api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION:
-		telemetryGroups, dbErr = s.WorkloadsDao.DbGetGpuAllocation(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases)
+		telemetryGroups, dbErr = s.WorkloadsDao.DbGetGpuAllocation(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases, filterBy)
 
 	case api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS:
-		telemetryGroups, dbErr = s.WorkloadsDao.DbGetIdleAllocatedGpus(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases)
+		telemetryGroups, dbErr = s.WorkloadsDao.DbGetIdleAllocatedGpus(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases, filterBy)
 
 	case api.WORKLOADTELEMETRYTYPE_PENDING_TIME_DISTRIBUTION:
-		telemetryGroups, dbErr = s.WorkloadsDao.DbGetPendingTimeDistribution(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy)
+		telemetryGroups, dbErr = s.WorkloadsDao.DbGetPendingTimeDistribution(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, filterBy)
 
 	// case AllocationRatioTelemetryType:
 
@@ -1191,7 +1202,7 @@ func createConnectionsFromUrls(urls []string, ewKind string) ([]models.Connectio
 			return nil, fmt.Errorf("failed to parse URL %s: %w", rawUrl, err)
 		}
 
-		// Extract subdomain from host (e.g., "sub-domain" from "sub-domain.runailabs.com")
+		// Extract subdomain from host (e.g., "sub-domain" from "sub-domain.example.com")
 		var subdomain *string
 		if parsedUrl.Host != "" {
 			hostParts := strings.Split(parsedUrl.Host, ".")

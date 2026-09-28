@@ -36,10 +36,10 @@ Trusted tenants, such as internal teams or departments, can be separated within 
 
 To onboard a new tenant environment, the host organization follows these steps:
 
-1. [**Tenant creation**](../organization-life-cycle/organization-onboarding/create-a-tenant.md) - Set up a dedicated NVIDIA Run:ai tenant for each external organization. This tenant links to the external organization's cluster for identity, access, and resource segmentation.
-2. [**Kubernetes cluster provisioning**](../organization-life-cycle/organization-onboarding/provision-kubernetes-clusters.md) - Provision a dedicated Kubernetes cluster using your infrastructure management tools such as NVIDIA Base Command Manager or OpenStack.
-3. [**NVIDIA Run:ai system requirements installation**](../organization-life-cycle/organization-onboarding/system-requirements.md) - Install necessary components such as storage integrations, ingress controllers, Knative, and the Kubeflow training operator and configure TLS certificates and DNS resolutions.
-4. [**NVIDIA Run:ai cluster installation**](../organization-life-cycle/organization-onboarding/create-and-install-clusters.md) - Deploy the NVIDIA Run:ai cluster on the external organization's Kubernetes environment and establish connectivity to the assigned tenant.
+1. [**Tenant creation**](../installation-and-configuration/installation/guided-installation/create-a-tenant-and-cluster.md#create-a-tenant) - Set up a dedicated NVIDIA Run:ai tenant for each external organization. This tenant links to the external organization's cluster for identity, access, and resource segmentation.
+2. [**Kubernetes cluster provisioning**](../installation-and-configuration/installation/guided-installation/create-a-tenant-and-cluster.md#provision-the-tenants-kubernetes-cluster) - Provision a dedicated Kubernetes cluster using your infrastructure management tools such as NVIDIA Base Command Manager or OpenStack.
+3. [**Prerequisites and features installation**](../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md) - Install necessary components such as the GPU Operator, Prometheus, and workload-specific features such as Knative and the Kubeflow training operator, and configure TLS certificates and DNS resolutions.
+4. [**NVIDIA Run:ai cluster installation**](../installation-and-configuration/installation/guided-installation/create-a-tenant-and-cluster.md#register-the-cluster) - Deploy the NVIDIA Run:ai cluster on the external organization's Kubernetes environment and establish connectivity to the assigned tenant.
 
 Once these steps are complete, the external organization's environment will be production-ready, enabling them to deploy and manage AI workloads on the NVIDIA Run:ai platform without infrastructure overhead.
 

@@ -14,7 +14,7 @@ import (
 
 	"github.com/MicahParks/keyfunc"
 	authzclient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
-	workloadsapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/api"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/attach"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth"
