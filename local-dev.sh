@@ -1350,7 +1350,7 @@ build_cli_exposer() {
         -e GOCACHE=/tmp/.cache \
         library/golang:1.26.8 \
         go build \
-          -ldflags "-X github.com/run-ai/runai-oss-test/control-plane/runai-cli/pkg/version.version=${cli_version} -extldflags -static -s -w" \
+          -ldflags "-X github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/version.version=${cli_version} -extldflags -static -s -w" \
           -o bin/dist/linux/amd64/runai \
           . \
         >>"${log_file}" 2>&1; then
@@ -2642,6 +2642,14 @@ print_access_info() {
   echo "  Trust the self-signed CA (Linux):"
   echo "    sudo cp ${CERT_DIR}/ca.crt /usr/local/share/ca-certificates/runai-local.crt"
   echo "    sudo update-ca-certificates"
+  echo ""
+  local cli_bin="${REPO_ROOT}/control-plane/runai-cli/bin/dist/${OS}/${ARCH}/runai"
+  echo "  runai CLI (the UI download is linux/amd64 only, so build one for this machine):"
+  echo "    make -C ${REPO_ROOT}/control-plane/runai-cli cli-${OS}-${ARCH}"
+  echo "    ${cli_bin} config set --cp-url https://${DOMAIN}"
+  echo "    ${cli_bin} login user -u ${ADMIN_EMAIL}"
+  echo "    Requires the trusted CA above (the CLI has no skip-TLS option)."
+  echo "    Usage: ${REPO_ROOT}/control-plane/runai-cli/docs/runai.md"
   echo ""
   echo "  Teardown:  ./local-dev.sh --teardown"
   echo "  Logs:      ${LOG_DIR}/"
