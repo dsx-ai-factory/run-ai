@@ -48,7 +48,6 @@ var (
 		static_roles.SystemAdmin,
 		static_roles.IntegrationMetricsCollector,
 		static_roles.DepartmentAdminLegacy,
-		static_roles.DepartmentAdminDgxcLegacy,
 		static_roles.Editor,
 		static_roles.Viewer,
 		static_roles.DepartmentViewer,
@@ -62,8 +61,6 @@ var (
 		static_roles.DataAndStorageAdmin,
 		static_roles.ProjectAdmin,
 		static_roles.DepartmentAdmin,
-		static_roles.DepartmentAdminDgxc,
-		static_roles.CloudOperatorDgxc,
 	}
 	CspRoleChange = map[string]map[string]string{
 		static_roles.SystemAdmin.Name: {
@@ -88,29 +85,16 @@ func renameRoleIfLegacyNotExists(oldName, newName string) {
 
 func migrateDeprecatedRoleNames() {
 	renameRoleIfLegacyNotExists("Department administrator", "Department administrator (Legacy)")
-	renameRoleIfLegacyNotExists("Department administrator-DGXC", "Department administrator-DGXC (Legacy)")
 }
 
 func InitStaticLegacyRoles() {
 	migrateDeprecatedRoleNames()
 	logging.Infof("Initializing static legacy roles")
 	initializerDao := RoleDaoInitializer{}
-	dgxcRoles := []models.Role{
-		static_roles.ApplicationAdmin,
-		static_roles.CloudSupport,
-	}
 
 	for _, role := range LegacyRoles {
-		var added bool
 		if config.Get[*authorization_config.Server]().IsCSP {
 			role.Permissions = updateCSPPermissions(role.Permissions)
-		}
-
-		dgxcRoles, added = addToDGXCRolesIfNeeded(dgxcRoles, &role)
-		if added {
-			role.RoleType = models.NonDGXC
-		} else {
-			role.RoleType = models.ALL
 		}
 
 		id, err := initializerDao.DbUpsertLegacyRole(context.Background(), role)
@@ -142,10 +126,6 @@ func updatePermissionSetsWithIds(role models.Role) []models.PermissionSet {
 
 func InitStaticRoles() {
 	migrateDeprecatedRoleNames()
-	dgxcRoles := []models.Role{
-		static_roles.ApplicationAdmin,
-		static_roles.CloudSupport,
-	}
 	logging.Infof("Initializing static roles")
 	initializerDao := RoleDaoInitializer{}
 	InitPermissionSetsMap(&MapStaticPermissionSetNameToId)
@@ -167,16 +147,6 @@ func InitStaticRoles() {
 		}
 		MapStaticRoleNameToRoleId[role.Name] = id
 	}
-	for _, role := range dgxcRoles {
-		newPermissionSet := updatePermissionSetsWithIds(role)
-		role.PermissionSets = &newPermissionSet
-
-		id, err := initializerDao.DbUpsertRole(context.Background(), role)
-		if err != nil {
-			logging.Warnf("Error in initializing dgxc role %s. err: %+v", role.Name, err)
-		}
-		MapStaticRoleNameToRoleId[role.Name] = id
-	}
 
 	logging.Infof("Initializing static roles completed")
 }
@@ -194,41 +164,6 @@ func getCspPermissionSets(original *[]models.PermissionSet, changeMap map[string
 		}
 	}
 	return newPermissionSets
-}
-
-func addToDGXCRolesIfNeeded(roles []models.Role, role *models.Role) ([]models.Role, bool) {
-	role.RoleType = models.ALL
-	dgxcRole := models.Role{
-		ScopeType: models.ROLE_SCOPE_SYSTEM,
-	}
-	for _, permission := range role.Permissions {
-		if permission.ReadOnlyForDGXCManaged && (permission.Create || permission.Update || permission.Delete) {
-			role.RoleType = models.NonDGXC
-			dgxcRole.Permissions = append(dgxcRole.Permissions, &models.Permission{
-				ResourceType: permission.ResourceType,
-				Read:         permission.Read,
-			})
-		} else {
-			dgxcRole.Permissions = append(dgxcRole.Permissions, permission)
-		}
-	}
-
-	// Marking the dgxcRole as DGXC and adding it to the roles to create since the base role had at least one permission that should be duplicated
-	if role.RoleType == models.NonDGXC {
-		dgxcRole.Name = fmt.Sprintf("%s%s", role.Name, models.DGXCManagedPostfix)
-		dgxcRole.Description = role.Description
-		dgxcRole.RoleType = models.DGXC
-		dgxcRole.InternalOnly = role.InternalOnly
-		dgxcRole.Enabled = role.Enabled
-
-		if role.ShowForDGXC {
-			dgxcRole.InternalOnly = false
-		}
-
-		roles = append(roles, dgxcRole)
-	}
-
-	return roles, role.RoleType == models.NonDGXC
 }
 
 func updateCSPPermissions(permissions []*models.Permission) []*models.Permission {
@@ -283,7 +218,7 @@ func InitAccessRulesForTests(tenantId uint, managementTenantId uint) (*models.Ac
 
 func InitRolesMap(rolesMap *map[string]uint) {
 	logging.Infof("Initializing roles map")
-	roles, _ := DbGetRoles(context.Background(), fmt.Sprintf("%d", testing.TestTenant), testing.TestTenant == testing.DGXCTestTenant, 0, 0, "", "", nil, "", false)
+	roles, _ := DbGetRoles(context.Background(), fmt.Sprintf("%d", testing.TestTenant), 0, 0, "", "", nil, "", false)
 
 	for _, role := range *roles {
 		(*rolesMap)[role.Name] = role.ID

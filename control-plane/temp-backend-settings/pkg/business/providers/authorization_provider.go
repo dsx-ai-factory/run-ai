@@ -42,11 +42,6 @@ func (p *AuthorizationProvider) FetchSettings(ctx context.Context, tenantID int)
 			result[settings.SettingKeyEnableScopedAuthorization] = settings.SettingOverride{Value: *enabled}
 		}
 	}
-	if resp.TenantIsCspManaged != nil {
-		if enabled, ok := resp.TenantIsCspManaged.GetEnabledOk(); ok && enabled != nil {
-			result[settings.SettingKeyTenantIsCspManaged] = settings.SettingOverride{Value: *enabled}
-		}
-	}
 
 	return result, nil
 }

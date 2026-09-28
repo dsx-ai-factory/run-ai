@@ -49,7 +49,7 @@ import (
 
 	policy_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
 
-	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg"
 
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/backend-client"

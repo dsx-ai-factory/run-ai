@@ -5,7 +5,7 @@
 
 package topology
 
-import workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+import workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 // ActiveAnnotationValue returns the effective value of the named annotation.
 // Later entries override earlier entries, and an excluded entry removes the

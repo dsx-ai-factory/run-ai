@@ -256,6 +256,41 @@ var _ = Describe("Run:ai status pod watcher", func() {
 		Expect(q.Len()).To(BeZero())
 	})
 
+	It("resolves the child gvk from the spec, not the owner reference", func() {
+		ew := &v1alpha1.ExternalWorkload{
+			ObjectMeta: metav1.ObjectMeta{
+				OwnerReferences: []metav1.OwnerReference{
+					{APIVersion: "run.ai/v1alpha1", Kind: "WorkloadRunner"},
+				},
+			},
+			Spec: v1alpha1.ExternalWorkloadSpec{
+				Group:                kubeflowGroup,
+				Version:              "v1",
+				OriginalWorkloadKind: "PyTorchJob",
+			},
+		}
+
+		gvk, ok := resolveChildGVK(ew)
+
+		Expect(ok).To(BeTrue())
+		Expect(gvk).To(Equal(schema.GroupVersionKind{Group: kubeflowGroup, Version: "v1", Kind: "PyTorchJob"}))
+	})
+
+	It("reports no child gvk when neither the spec kind nor a matching owner reference is present", func() {
+		ew := &v1alpha1.ExternalWorkload{
+			ObjectMeta: metav1.ObjectMeta{
+				OwnerReferences: []metav1.OwnerReference{
+					{APIVersion: "run.ai/v1alpha1", Kind: "WorkloadRunner"},
+				},
+			},
+			Spec: v1alpha1.ExternalWorkloadSpec{Group: kubeflowGroup, Version: "v1"},
+		}
+
+		_, ok := resolveChildGVK(ew)
+
+		Expect(ok).To(BeFalse())
+	})
+
 	It("uses only owner references whose APIVersion matches the ExternalWorkload group and version", func() {
 		ew := &v1alpha1.ExternalWorkload{
 			ObjectMeta: metav1.ObjectMeta{
@@ -270,7 +305,7 @@ var _ = Describe("Run:ai status pod watcher", func() {
 			},
 		}
 
-		gvk, ok := gvkFromExternalWorkloadOwner(ew)
+		gvk, ok := resolveChildGVK(ew)
 
 		Expect(ok).To(BeTrue())
 		Expect(gvk).To(Equal(schema.GroupVersionKind{Group: kubeflowGroup, Version: "v1", Kind: "PyTorchJob"}))

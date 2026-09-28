@@ -13,7 +13,7 @@ To learn more about the inference workload type in NVIDIA Run:ai and determine t
 ## Before You Start
 
 * Make sure you have created a [project](../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
-* Make sure [LWS](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-inference) is properly installed by your administrator.
+* Make sure [LWS](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-inference) is properly installed by your administrator.
 * If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../settings/user-settings/user-credentials.md) (created under User settings).
 
 ## Workload Priority and Preemption
@@ -108,7 +108,7 @@ Manually configure the settings below as needed. The changes will apply to this 
      * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
      * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 4. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 5. Set the **command and arguments** for the container running the workload. If no command is added, the container will use the image’s default command (entry-point).
    * Modify the existing command or click **+COMMAND & ARGUMENTS** to add a new command.
@@ -239,9 +239,10 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 ### Configuring Workload Setup
 
 1. Set the number of replicas for your workload. Each replica consists of one leader pod and its associated worker pods.
-2. Set whether the workload may be interrupted by selecting **Preemptible** or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
+2. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+   * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 3. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 4. Set when the workers' pod should be created:
    * **When the leader pod is created** - Create the workers’ pods alongside the leader pod to reduce startup time. This may cause the deployment to fail if the leader isn't ready.

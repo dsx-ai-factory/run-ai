@@ -281,12 +281,21 @@ func isPersonalCredentialFailure(application *v1alpha1.Application) bool {
 // HelmStatus error field is updated.
 func (c *ApplicationController) submitTask(ctx context.Context, appKey types.NamespacedName, status *helm_deployer.AppStatus, task helm_deployer.Task) {
 	if err := c.helmWorkers.reserve(appKey, task); err != nil {
+		dropTask(appKey, task)
 		c.updateHelmStatus(ctx, appKey, status.WithError(err))
 		return
 	}
 	c.updateHelmStatus(ctx, appKey, status.TaskQueued(task))
 	if err := c.helmWorkers.dispatch(appKey, task); err != nil {
+		dropTask(appKey, task)
 		c.updateHelmStatus(ctx, appKey, status.WithError(err))
+	}
+}
+
+// dropTask releases the temp files of a task that will never be executed.
+func dropTask(appKey types.NamespacedName, task helm_deployer.Task) {
+	if err := task.Cleanup(); err != nil {
+		log.Warn().Err(err).Msgf("failed to clean up dropped %s task of %s", task.Action(), appKey.String())
 	}
 }
 

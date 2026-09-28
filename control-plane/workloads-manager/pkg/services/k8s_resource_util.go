@@ -22,6 +22,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/topology"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
+	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 )
 
 var (
@@ -34,6 +35,7 @@ type K8sResourceUtil struct {
 
 type resourceMetadataUpdateOptions struct {
 	trustedConvertedFromNative bool
+	karta                      *kartav1alpha1.Karta
 }
 
 // NewK8sResourceUtil creates a new instance of K8sResourceUtil
@@ -132,10 +134,20 @@ func (k *K8sResourceUtil) updateTopologyAnnotations(
 	if segmentTarget != nil {
 		return k.applySegmentTopologyDefaults(ctx, resource, annotations, project, segmentTarget, options)
 	}
-	return applyDefaultTopologyAnnotations(ctx, annotations, project)
+	// The v1 service already resolved topology from the requested node pools.
+	if options.trustedConvertedFromNative {
+		return nil
+	}
+	return applyDefaultTopologyAnnotations(ctx, resource, annotations, project, options.karta)
 }
 
-func applyDefaultTopologyAnnotations(ctx context.Context, annotations map[string]interface{}, project *openapi.Project) error {
+func applyDefaultTopologyAnnotations(
+	ctx context.Context,
+	resource map[string]interface{},
+	annotations map[string]interface{},
+	project *openapi.Project,
+	karta *kartav1alpha1.Karta,
+) error {
 	if checkExistTopologyAnnotations(annotations) {
 		return nil
 	}
@@ -155,7 +167,17 @@ func applyDefaultTopologyAnnotations(ctx context.Context, annotations map[string
 		return fmt.Errorf("no node pools found for cluster %s", project.ClusterId)
 	}
 
+	// Pods that select their own node pools are not scheduled on the project defaults.
+	if requested := requestedWorkloadNodePools(ctx, karta, resource, actualNodePools.GetNodepools()); len(requested) > 0 {
+		nodePoolsNames = requested
+	}
+
 	found, topologyName, err := topology.CheckNodePoolsTopology(ctx, actualNodePools.GetNodepools(), nodePoolsNames)
+	if err == topology.ErrTopologyNameDoesNotMatch {
+		// Mixed project defaults have no common topology to inject. Let the
+		// pod-group-assigner derive it from the node pool selected for the workload.
+		return nil
+	}
 	if err != nil {
 		return err
 	}

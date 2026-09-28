@@ -10,6 +10,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -122,15 +123,18 @@ func StartExternalWorkloadIntegrator(ctx context.Context, stopCh <-chan struct{}
 }
 
 func (h *ExternalWorkloadHandler) handleTask(ctx context.Context, obj client.Object, task utils.ExternalWorkloadTask, handler utils.HandleFunc, operation utils.TaskOperation) {
-	err := handler(ctx, obj, task.GVK, operation)
+	h.retryOrForget(task, handler(ctx, obj, task.GVK, operation))
+}
+
+func (h *ExternalWorkloadHandler) retryOrForget(task utils.ExternalWorkloadTask, err error) {
 	// If succeeded or Already used all attempts - Forget()
 	if err == nil || h.tasksQueue.NumRequeues(task) > TaskHandlingMaxRetryAttempts {
 		h.tasksQueue.Forget(task)
-	} else {
-		h.metricsExporter.AddErrorCounter(err)
-		// Add back to Queue
-		h.tasksQueue.AddRateLimited(task)
+		return
 	}
+	h.metricsExporter.AddErrorCounter(err)
+	// Add back to Queue
+	h.tasksQueue.AddRateLimited(task)
 }
 
 func processNextItem(ctx context.Context, ewh *ExternalWorkloadHandler) bool {
@@ -152,9 +156,17 @@ func processNextItem(ctx context.Context, ewh *ExternalWorkloadHandler) bool {
 		ewh.handleTask(ctx, obj, task, ewh.HandleWorkloadAddUpdateEvent, utils.AddOperation)
 	case string(utils.DeleteOperation):
 		ewh.handleTask(ctx, task.Object, task, ewh.HandleDeleteEvent, utils.DeleteOperation)
+	case string(utils.CreateFromRunnerOperation):
+		ewh.retryOrForget(task, ewh.handleWorkloadRunnerWithoutObject(ctx, task))
 	case string(utils.UpdateOperation):
 		obj, err := ewh.GetFreshObject(ctx, task.Key, task.GVK)
-		if err != nil || utils.IsObjectNilOrEmpty(obj) {
+		switch {
+		case (err != nil && errors.IsNotFound(err)) || (err == nil && utils.IsObjectNilOrEmpty(obj)):
+			ewh.retryOrForget(task, ewh.handleMissingChild(ctx, task))
+			return true
+		case err != nil:
+			// a transient failure must not be read as a deleted workload object
+			ewh.retryOrForget(task, err)
 			return true
 		}
 		ewh.handleTask(ctx, obj, task, ewh.HandleWorkloadAddUpdateEvent, utils.UpdateOperation)

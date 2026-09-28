@@ -76,11 +76,11 @@ var _ = Describe("Permissions API tests", Ordered, func() {
 		rolesPermissionsMap := make(map[api.ResourceType][]api.Action)
 		for _, role := range assignRoles {
 			if role.PermissionSets != nil && len(*role.PermissionSets) > 0 {
-				dbRole, apiErr := dao.DbGetRoleById(ctx, "", dao.MapStaticRoleNameToRoleId[role.Name], nil)
+				dbRole, apiErr := dao.DbGetRoleById(ctx, "", dao.MapStaticRoleNameToRoleId[role.Name])
 				Expect(apiErr).To(BeNil())
 				role = *dbRole
 			}
-			permissionsDaoToApi := PermissionsDaoToApi(RemoveDGXCReadOnlyPermissions(role.Permissions))
+			permissionsDaoToApi := PermissionsDaoToApi(role.Permissions)
 			rolePermissionsMap := createPermissionsMapping(permissionsDaoToApi)
 			rolesPermissionsMap = concatMaps(rolesPermissionsMap, rolePermissionsMap)
 		}
@@ -100,11 +100,11 @@ var _ = Describe("Permissions API tests", Ordered, func() {
 
 		noGroupCtx := setContext(tenantId, TestUserId, []string{})
 		if assignRole.PermissionSets != nil && len(*assignRole.PermissionSets) > 0 {
-			dbRole, apiErr := dao.DbGetRoleById(ctx, "", dao.MapStaticRoleNameToRoleId[assignRole.Name], nil)
+			dbRole, apiErr := dao.DbGetRoleById(ctx, "", dao.MapStaticRoleNameToRoleId[assignRole.Name])
 			Expect(apiErr).To(BeNil())
 			assignRole = *dbRole
 		}
-		for _, permission := range RemoveDGXCReadOnlyPermissions(assignRole.Permissions) {
+		for _, permission := range assignRole.Permissions {
 			for _, action := range []api.Action{api.ACTION_CREATE, api.ACTION_UPDATE, api.ACTION_DELETE, api.ACTION_READ} {
 				actionStr := string(action)
 				response, err := permissionsApiService.GetPermittedScopes(noGroupCtx,
@@ -208,10 +208,6 @@ type EvaluationTestArgs struct {
 }
 
 func calculateHasPermission(permission *models.Permission, action api.Action) bool {
-	if testing.TestTenant == testing.DGXCTestTenant && permission.ReadOnlyForDGXCManaged && action != api.ACTION_READ {
-		return false
-	}
-
 	switch action {
 	case api.ACTION_CREATE:
 		return permission.Create
@@ -371,10 +367,6 @@ var _ = Describe("Evaluation API tests", Ordered, func() {
 			for _, requestAction := range requestActions {
 				expectedStatus := http.StatusNoContent
 				if resourceType == api.RESOURCETYPE_EVENTS_HISTORY {
-					expectedStatus = http.StatusForbidden
-				}
-
-				if testing.TestTenant == testing.DGXCTestTenant && requestAction != api.ACTION_READ && resourceType != api.RESOURCETYPE_EVENTS_HISTORY {
 					expectedStatus = http.StatusForbidden
 				}
 
@@ -614,7 +606,7 @@ var _ = Describe("Evaluation API tests", Ordered, func() {
 			}
 
 			if role.PermissionSets != nil && len(*role.PermissionSets) > 0 {
-				dbRole, apiErr := dao.DbGetRoleById(ctx, "", dao.MapStaticRoleNameToRoleId[role.Name], nil)
+				dbRole, apiErr := dao.DbGetRoleById(ctx, "", dao.MapStaticRoleNameToRoleId[role.Name])
 				Expect(apiErr).To(BeNil())
 				role = *dbRole
 			}
@@ -1024,20 +1016,4 @@ func httpResponseBodyToPermissions(httpResponse api.ImplResponse) []api.Permissi
 	err = json.Unmarshal(bytes, permissions)
 	Expect(err).To(BeNil())
 	return *permissions
-}
-
-func RemoveDGXCReadOnlyPermissions(permissions []*models.Permission) []*models.Permission {
-	result := []*models.Permission{}
-	for _, permission := range permissions {
-		if testing.DGXCTestTenant == testing.TestTenant && permission.ReadOnlyForDGXCManaged {
-			result = append(result, &models.Permission{
-				ResourceType: permission.ResourceType,
-				Read:         permission.Read,
-			})
-		} else {
-			result = append(result, permission)
-		}
-	}
-
-	return result
 }

@@ -74,7 +74,7 @@ You can create a new workload using either the **Flexible** or **Original** subm
      *   Click **Advanced setup** to open the full workload form with fields populated by the template. You can adjust the predefined configuration values before submitting. Any changes you make will apply only to the workload and will not be saved back to the original template.
 
          <Info><p><strong>Note</strong></p><p>You cannot create a workload directly from a template if the template does not include all mandatory fields or if an organizational policy restricts the use of certain fields within that template.</p></Info>
-6. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) for details on enabling.
+6. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
 7. Set the distributed workload configuration that defines how distributed training workloads are divided across multiple machines or processes. Choose **Workers & master** or **Workers only** based on your training requirements and infrastructure.
    * In distributed training workloads, both **Workers** and **Master** include the same configuration sections. By default, the Master uses the Worker configuration for shared fields. This default behavior can be overridden if different settings are required for the Master.
    * Workload policies may define different constraints for Workers and Master. If separate policies are configured, the available fields and editable settings in each section are determined by the applicable policy.
@@ -380,9 +380,10 @@ The fields in the **Workload setup** section (flexible submission only) are opti
 
 </Info>
 
-1. Set whether the workload may be interrupted by selecting **Preemptible** or **Non-preemptible**:
-   1. Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
-   2. Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+1. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
+   * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+   * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 2. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 3. Set the **grace period** for workload preemption. This is a buffer that allows a preempted workload to reach a safe checkpoint before it is forcibly preempted. Enter a timeframe between 0 sec and 5 min.
 4. Set the **backoff limit** before workload failure. The backoff limit is the maximum number of retry attempts for failed workloads. After reaching the limit, the workload status will change to "Failed." Enter a value between 0 and 100.

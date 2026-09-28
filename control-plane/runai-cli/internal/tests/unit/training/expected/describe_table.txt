@@ -9,7 +9,7 @@ Department:                         default
 Submitted By:                       test@example.com
 Priority:                           low (40)
 Category:                           Train
-Preemptible:                        true
+Preemptibility:                     Semi-preemptible
 Requested Node Pool:                default
 Image:                              gcr.io/knative-samples/helloworld-go
 Image Pull Policy:                  IfNotPresent
@@ -55,9 +55,9 @@ Storage
 
 Network
 
- Name             Tool Type        Connection Type  Container Port   URL                                                            
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
- url              custom           ExternalUrl      8080             https://nael-env-001.runailabs.com/team-b/my-training-demo-123 
+ Name             Tool Type        Connection Type  Container Port   URL                                                          
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ url              custom           ExternalUrl      8080             https://nael-env-001.example.com/team-b/my-training-demo-123 
 
   Access Control:
   url (Port 8080):

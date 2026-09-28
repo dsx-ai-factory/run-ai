@@ -23,7 +23,6 @@ var _ MappedNullable = &AuthorizationSettingsGetResponse{}
 // AuthorizationSettingsGetResponse struct for AuthorizationSettingsGetResponse
 type AuthorizationSettingsGetResponse struct {
 	EnableScopedAuthorization *EnableScopedAuthorizationSetting `json:"enableScopedAuthorization,omitempty"`
-	TenantIsCspManaged        *TenantIsCspManagedSetting        `json:"tenantIsCspManaged,omitempty"`
 }
 
 // NewAuthorizationSettingsGetResponse instantiates a new AuthorizationSettingsGetResponse object
@@ -75,38 +74,6 @@ func (o *AuthorizationSettingsGetResponse) SetEnableScopedAuthorization(v Enable
 	o.EnableScopedAuthorization = &v
 }
 
-// GetTenantIsCspManaged returns the TenantIsCspManaged field value if set, zero value otherwise.
-func (o *AuthorizationSettingsGetResponse) GetTenantIsCspManaged() TenantIsCspManagedSetting {
-	if o == nil || IsNil(o.TenantIsCspManaged) {
-		var ret TenantIsCspManagedSetting
-		return ret
-	}
-	return *o.TenantIsCspManaged
-}
-
-// GetTenantIsCspManagedOk returns a tuple with the TenantIsCspManaged field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *AuthorizationSettingsGetResponse) GetTenantIsCspManagedOk() (*TenantIsCspManagedSetting, bool) {
-	if o == nil || IsNil(o.TenantIsCspManaged) {
-		return nil, false
-	}
-	return o.TenantIsCspManaged, true
-}
-
-// HasTenantIsCspManaged returns a boolean if a field has been set.
-func (o *AuthorizationSettingsGetResponse) HasTenantIsCspManaged() bool {
-	if o != nil && !IsNil(o.TenantIsCspManaged) {
-		return true
-	}
-
-	return false
-}
-
-// SetTenantIsCspManaged gets a reference to the given TenantIsCspManagedSetting and assigns it to the TenantIsCspManaged field.
-func (o *AuthorizationSettingsGetResponse) SetTenantIsCspManaged(v TenantIsCspManagedSetting) {
-	o.TenantIsCspManaged = &v
-}
-
 func (o AuthorizationSettingsGetResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -119,9 +86,6 @@ func (o AuthorizationSettingsGetResponse) ToMap() (map[string]interface{}, error
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.EnableScopedAuthorization) {
 		toSerialize["enableScopedAuthorization"] = o.EnableScopedAuthorization
-	}
-	if !IsNil(o.TenantIsCspManaged) {
-		toSerialize["tenantIsCspManaged"] = o.TenantIsCspManaged
 	}
 	return toSerialize, nil
 }

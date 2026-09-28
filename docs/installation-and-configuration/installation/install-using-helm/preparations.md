@@ -2,15 +2,16 @@
 
 This page prepares your environment for installing the NVIDIA Run:ai control plane and cluster: setting up your installer machine, creating the namespaces and TLS/CA secrets each install needs, and retrieving software artifacts and registry access.
 
-## Before You Start
+## System Requirements
 
-Complete the entire [System Requirements](../../system-requirements/README.md) section before starting here. It covers:
+Complete the [System Requirements](../../system-requirements/README.md) section before starting. It covers:
 
-* Infrastructure you configure in your Kubernetes cluster - hardware, OS, Kubernetes distribution, load balancer, ingress controller, storage class.
-* Items you obtain or decide on ahead of time and bring with you - FQDNs, TLS certificate and private key files, and a local CA chain. Whether certain items apply, such as the inference wildcard certificate, depends on the workload types you plan to support - see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates).
-* [Third-party services](../../system-requirements/third-party-services.md) the installation deploys for you, and the [outbound/inbound access](../../system-requirements/external-access-to-critical-services.md) your cluster needs to reach them and NVIDIA's registries.
+* [Infrastructure Requirements](../../system-requirements/infrastructure-requirements.md) - Hardware, operating system, Kubernetes distribution, storage, and permissions required in your Kubernetes environment.
+* [Networking Setup](../../system-requirements/networking-setup.md) - Load balancer and ingress requirements, FQDNs, TLS certificates and private keys, and a local CA chain if your certificates are privately signed. The exact requirements depend on your deployment model, routing configuration, and the workload types you plan to support.
+* [Third-Party Services](../../system-requirements/third-party-services.md) - The third-party services deployed as part of the installation.
+* [External Access to Critical Services](../../system-requirements/external-access-to-critical-services.md) - The inbound and outbound connectivity required to reach those services and NVIDIA registries.
 
-Your [deployment model](../../system-requirements/deployment-model.md) - same-cluster or multi-cluster - determines how many times you repeat the steps below: control plane setup is always one-time, and cluster setup repeats once per NVIDIA Run:ai cluster in a multi-cluster deployment.
+Your [deployment model](../../system-requirements/deployment-model.md) determines how the installation steps are applied. In a same-cluster deployment, the control plane and NVIDIA Run:ai cluster are installed on the same Kubernetes cluster. In a multi-cluster deployment, control plane setup is completed once, and cluster setup is repeated for each NVIDIA Run:ai cluster.
 
 ## General Setup
 
@@ -29,6 +30,14 @@ The machine you run Helm from needs:
 **Note**
 
 If you're installing air-gapped, the machine running `airgap pack` and the machine running `airgap load` each need at least 20GB of free space.
+
+</Note>
+
+<Note>
+
+**Note**
+
+Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-side-apply) when installing a new chart release, which can conflict with resources managed by the NVIDIA Run:ai operator. Append `--server-side=false` to your `helm upgrade` command. NVIDIA Run:ai clusters originally installed with Helm 3.x are unaffected.
 
 </Note>
 
@@ -165,7 +174,7 @@ For NVIDIA Run:ai on OpenShift to run with PSA `restricted` policy:
 
 ### Cluster TLS Certificates
 
-These certificates secure the NVIDIA Run:ai cluster, workspace and training, and inference FQDNs you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns). Before creating the secrets below, see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificates you need and why. The workspace and training wildcard certificate is only needed for the default host-based routing - see [Host-Based Routing (Ingress Resource)](#host-based-routing-ingress-resource) below for the matching Ingress setup. If you're using path-based routing instead, skip that certificate.
+These certificates secure the NVIDIA Run:ai cluster, workspaces, training, distributed inference, and standard inference FQDNs you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns). Before creating the secrets below, see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificates you need and why. The workspaces, training, and distributed inference wildcard certificate is only needed for the default host-based routing - see [Host-Based Routing (Ingress Resource)](#host-based-routing-ingress-resource) below for the matching Ingress setup. If you're using path-based routing instead, skip that certificate.
 
 #### Cluster Domain Certificates (Single-Domain)
 
@@ -181,17 +190,17 @@ These certificates secure the NVIDIA Run:ai cluster, workspace and training, and
     ```
 * **OpenShift** - NVIDIA Run:ai uses the OpenShift default Ingress router for serving. The TLS certificate configured for this router must be issued by a trusted CA. For more details, see the OpenShift documentation on [configuring certificates](https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/security_and_compliance/configuring-certificates#replacing-default-ingress).
 
-#### Workspace and Training Wildcard Certificate
+#### Workspaces, Training, and Distributed Inference Wildcard Certificate
 
 <Note>
 
 **Note**
 
-For path-based routing, ignore this configuration and move to the next step.
+For path-based routing, this certificate is not required.
 
 </Note>
 
-* **Kubernetes** - To allow secure access to workspace and training workloads via subdomains, configure a wildcard TLS certificate that matches the cluster domain (e.g. `*.runai.mycorp.local`). This certificate should be stored as a secret named `runai-cluster-domain-star-tls-secret` in the `runai` namespace.
+* **Kubernetes** - To allow secure access to workspace, training, and distributed inference workloads via subdomains, configure a wildcard TLS certificate that matches the cluster domain (e.g. `*.runai.mycorp.local`). This certificate should be stored as a secret named `runai-cluster-domain-star-tls-secret` in the `runai` namespace.
   * Replace `/path/to/fullchain.pem` with the actual path to your TLS certificate.
   *   Replace `/path/to/private.pem` with the actual path to your private key.
 
@@ -202,13 +211,13 @@ For path-based routing, ignore this configuration and move to the next step.
       ```
 * **OpenShift** - A wildcard TLS certificate for Workspace and Training workloads is not required. OpenShift Routes handle TLS termination for workspace and training endpoints using the platform's built-in routing and certificate management.
 
-#### Inference Wildcard Certificate
+#### Standard Inference Wildcard Certificate
 
 <Note>
 
 **Note**
 
-The inference wildcard certificate is only required if inference services are exposed externally via wildcard FQDN. For cluster-local inference, skip this subsection.
+The inference wildcard certificate is only required for standard inference (Knative, single-node) workloads exposed externally via wildcard FQDN. Other inference workloads (for example, distributed inference using serving frameworks such as LWS, Dynamo, KServe, or others) do not require this certificate. For cluster-local standard inference, skip this section.
 
 </Note>
 
@@ -226,6 +235,16 @@ The inference wildcard certificate is only required if inference services are ex
 
 ### Host-Based Routing (Ingress Resource)
 
+<Note>
+
+**Note**
+
+* The following steps are required for Kubernetes only. For OpenShift, no additional configuration is required.
+* NVIDIA Run:ai also supports path-based routing. If you prefer to use it instead of the default host-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during the Helm installation. See [Advanced cluster configurations](../../configuration/cluster-config.md).
+* If you choose path-based routing, skip the steps below.
+
+</Note>
+
 Host-based routing binds together the configured domains (FQDN), TLS certificates, and ingress rules to expose workloads externally. With NVIDIA Run:ai host-based routing, workloads are exposed using subdomains, so each workload is assigned its own URL. For example:
 
 ```bash
@@ -236,16 +255,6 @@ Host-based routing relies on:
 
 * The FQDN structure defined earlier
 * The TLS certificates configured for those domains
-
-<Note>
-
-**Note**
-
-* The following steps are required for Kubernetes only. For OpenShift, no additional configuration is required.
-* NVIDIA Run:ai also supports path-based routing. If you prefer to use it instead of the default host-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during the Helm installation. See [Advanced cluster configurations](../../configuration/cluster-config.md).
-* If you choose path-based routing, skip the steps below.
-
-</Note>
 
 1. Ensure that:
    * Wildcard DNS records are configured (see [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns))
@@ -363,7 +372,7 @@ kubectl create secret docker-registry runai-reg-creds \
 
 **Note**
 
-Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation). The NVIDIA Run:ai cluster does not need its own copy of this secret - the control plane automatically provisions it in the `runai` namespace at cluster install.
+Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation).
 
 </Note>
 
@@ -404,7 +413,7 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 2. Create a pack configuration file (`airgap-pack.yaml`) and run `airgap pack` against it:
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
-   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#airgap-pack) in the Configuration Reference.
+   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
 
    ```bash
@@ -499,7 +508,7 @@ oc create secret docker-registry runai-reg-creds \
 
 **Note**
 
-Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation). The NVIDIA Run:ai cluster does not need its own copy of this secret - the control plane automatically provisions it in the `runai` namespace at cluster install.
+Creating this secret alone does not configure the control plane to use it - you must also add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command. See [Install the Control Plane](install-control-plane.md#installation).
 
 </Note>
 
@@ -540,7 +549,7 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 2. Create a pack configuration file (`airgap-pack.yaml`) and run `airgap pack` against it:
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
-   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#airgap-pack) in the Configuration Reference.
+   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
 
    ```bash

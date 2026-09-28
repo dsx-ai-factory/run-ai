@@ -16,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/templates"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/common/shared_data"
+	gpu_fractioning_metrics "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/gpu-fractioning-metrics"
 	init_ca "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/init-ca"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/knative"
 	legacy_workload_cleanup "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-workload-cleanup"
@@ -140,18 +141,17 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addRemoteCluster(legacy_runtime_runner.Operand(remoteClusterClient, runaiConfig))
 	// KRM supplies the project-controller now; registering it disabled deletes
 	// the Deployment left behind.
-	mo.addOldRemoteCluster(project_controller.Operand(), false)
+	mo.addRemoteCluster(project_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(accessrule_controller.Operand(), *spec.AccessRuleController.Enabled && *spec.ProjectController.CreateRoleBindings)
 	mo.addOldRemoteCluster(mpi_operator.Operand(), true)
+	// Inert until gpu-fractioning is installed: the PodMonitor simply selects no pods.
+	mo.addOldRemoteCluster(gpu_fractioning_metrics.Operand(), true)
 	mo.addOldRemoteCluster(training_operator.Operand(), true)
 	mo.addOldRemoteCluster(admission_controller.Operand(), *spec.AdmissionController.Enabled)
 	// mps-server is no longer configurable; registering it disabled deletes the
 	// DaemonSet left behind on clusters that had opted in.
 	mo.addOldRemoteCluster(mps_server.Operand(), false)
 	mo.addRemoteCluster(queue_controller.Operand(remoteClusterClient, runaiConfig))
-	// pod-group-assigner is deliberately not registered: KRM supplies it and names
-	// every object it owns identically, so KRM adopts them all. Registering it
-	// disabled would delete what KRM recreates seconds later.
 	mo.addRemoteCluster(cluster_api.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(knative.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(cluster_redis.Operand(remoteClusterClient, runaiConfig))

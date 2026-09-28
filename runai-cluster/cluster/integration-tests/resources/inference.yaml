@@ -7,7 +7,7 @@ spec:
   name:
     value: {{POD_NAME_PREFIX}}
   image:
-    value: gcr.io/run-ai-lab/knative-helloworld-go
+    value: ghcr.io/knative/helloworld-go
   maxScale:
     value: 1
   minScale:

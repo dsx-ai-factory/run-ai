@@ -13,7 +13,7 @@ import (
 
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
-	workloads_api "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads_api "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 type OrgUnitWithWorkloadCounts interface {

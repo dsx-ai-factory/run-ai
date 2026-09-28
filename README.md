@@ -90,7 +90,7 @@ The [`local-dev.sh`](local-dev.sh) script builds the NVIDIA Run:ai control plane
 ./local-dev.sh --teardown                       # tear the environment down
 ```
 
-See [Local Development Guide](local-dev.md) for prerequisites (Docker/Podman, `kind`, `kubectl`, `helm`, Go, Node) and all available flags.
+See [Local Development Guide](local-dev.md) for prerequisites (Docker/Podman, `make`, `git`, `curl`, `python3`, `openssl`, and minimum CPU/RAM/disk; `kind`, `kubectl`, and `helm` are installed automatically) and all available flags. Go, Node, and Java are not needed on the host: all builds run inside containers.
 
 ### Building Individual Services
 

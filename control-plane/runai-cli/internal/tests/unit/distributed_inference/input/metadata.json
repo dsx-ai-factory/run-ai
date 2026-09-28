@@ -3,7 +3,7 @@
     "workloadType": "DistributedInference",
     "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
     "workloadName": "my-dist-inference-full-123",
-    "apiUrl": "https://nael-env-001.runailabs.com",
+    "apiUrl": "https://nael-env-001.example.com",
     "files": {
         "workloadList": "workload_list.json",
         "workloadDetailed": "workload_detailed.json",

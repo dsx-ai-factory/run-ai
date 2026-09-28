@@ -221,7 +221,6 @@ func TestWebhookNamesInClusterRoleResourceNames(t *testing.T) {
 
 	runaiConfig.Spec.AdviceRestartController.Enabled = ptr.To(true)
 	runaiConfig.Spec.Global.EnableWorkloadOwnershipProtection = ptr.To(true)
-	runaiConfig.Spec.PodGroupAssigner.Enabled = ptr.To(true)
 	runaiConfig.Spec.Internal.Development.Headless = false
 
 	data := webhooksFile(runaiConfig)

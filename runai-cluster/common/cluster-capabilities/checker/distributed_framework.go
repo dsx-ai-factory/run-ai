@@ -7,7 +7,7 @@ package checker
 
 import (
 	"fmt"
-	workloadsService "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 const (

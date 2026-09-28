@@ -20,7 +20,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/workspace"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli/clients"
 

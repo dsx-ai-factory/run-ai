@@ -6,7 +6,13 @@ This page helps you plan an existing NVIDIA Run:ai deployment upgrade. Review th
 
 NVIDIA Run:ai supports a **maximum gap of four versions** per upgrade; attempting to skip more than four versions in a single upgrade may fail. If your target version is more than four versions ahead of your current version, perform multiple upgrades. Each upgrade can span a maximum of four versions, and each upgrade must complete successfully before you begin the next.
 
-Upgrades are officially supported and tested only for versions within the current [product version life cycle](../../../support-policy/product-version-life-cycle.md).
+<Note>
+
+**Note**
+
+For Support-Entitled Releases, upgrades are officially supported and tested only for versions within the current [Supported Versions](../../getting-started/product-support-policy.md#supported-versions).
+
+</Note>
 
 To ensure a smooth and supported upgrade process:
 
@@ -36,7 +42,7 @@ The following v3.0 changes can affect your upgrade. Review each one and determin
 
 GPU fractions remain supported in v3.0, now powered by NVIDIA CUDA instead of the previous proprietary engine. This affects every cluster running fractional GPU workloads:
 
-* Fractional workloads must be suspended (native workload types) or deleted (supported workload types) before the NVIDIA Run:ai upgrade begins.
+* Workloads using GPU fractions must be suspended (native workload types) or deleted (supported workload types) before the NVIDIA Run:ai upgrade begins.
 * CUDA 13.4 or later, CUDA driver r615 or later, and GPU Operator 26.7.1 or later are required for fractions to work on v3.0.
 * GPU Operator 26.7.1 does not default to CUDA driver r615. Set the driver version explicitly - see [Migrate GPU Fractions](migrate-gpu-fractions.md).
 * For [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), Kubernetes manifests using dynamic fractions (a fraction request with a memory limit) require migration to a new annotation. [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) keep the same UI, API, and CLI fields - NVIDIA Run:ai converts them to the new annotation format automatically.
@@ -61,8 +67,6 @@ The node-level scheduler was deprecated in v2.25 and GPU memory swap in v2.26. I
 * Other `gpuResourceOptimization` fields, such as `cpuSwapMemorySize` and `reservedGpuMemoryForSwapOperations`, can still be set through the API, but their values are ignored and not sent to the cluster.
 * Node pools no longer shows the **Resource utilization optimization** section.
 
-Snapshot, the planned replacement capability, is targeted for v3.1 and is not available in v3.0 - no replacement exists for the duration of the v3.0 release.
-
 Before upgrading, identify any workloads or node pools relying on GPU memory swap or the node-level scheduler, since neither is available after the upgrade and there is no post-upgrade action that restores them:
 
 * **Workloads** - GPU memory swap workloads are dynamic fractions workloads under the hood. After upgrading, they continue running as standard dynamic fractions workloads, but without swap they no longer serve their original purpose. Delete these workloads before upgrading.
@@ -70,12 +74,12 @@ Before upgrading, identify any workloads or node pools relying on GPU memory swa
 
 ### Dynamic Resource Allocation (DRA) Driver
 
-A fresh GPU Operator installation installs the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html) automatically, but upgrading an existing GPU Operator deployment does not. If your cluster requires the DRA driver (for example, Multi-Node NVLink deployments such as GB200), install it manually after upgrading the GPU Operator. See [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver) in the NVIDIA GPU Operator documentation.
+A fresh GPU Operator installation installs the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html) automatically, but upgrading an existing GPU Operator deployment does not. If your cluster requires the DRA driver (for example, Multi-Node NVLink deployments such as GB200), install it manually after upgrading the GPU Operator. See [Install](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#) in the NVIDIA GPU Operator documentation.
 
 ## Upgrade Workflow
 
 1. [Back up your deployment](backup-before-upgrading.md), including cluster and control plane configuration and any third-party services such as PostgreSQL and metrics storage.
-2. If you use GPU fractions, suspend or delete fractional workloads and migrate any dynamic fractions YAML as described in [Migrate GPU Fractions](migrate-gpu-fractions.md).
+2. If you use GPU fractions, suspend or delete workloads using GPU fractions and migrate any dynamic fractions YAML as described in [Migrate GPU Fractions](migrate-gpu-fractions.md).
 3. [Upgrade NVIDIA Run:ai](upgrade.md): prepare the software artifacts, then upgrade the control plane followed by the cluster.
 4. [Migrate legacy workloads](migrate-legacy-workloads.md) if they apply to your environment, including resubmitting workloads on legacy types and resubmitting any GPU fraction workloads suspended or deleted in step 2.
 5. Verify affected functionality - confirm the cluster is **Connected**, GPU fractions are enforcing their limits, and resubmitted workloads behave as expected.

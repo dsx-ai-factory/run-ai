@@ -11,7 +11,8 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
 	cliutils "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/utils"
-	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/field"
+	workloadservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"k8s.io/utils/ptr"
 )
 
@@ -23,6 +24,7 @@ var ColumnMap = map[WorkloadColumn]FieldInformation{
 	ColumnKeyStatus:              StatusField,
 	ColumnKeyProject:             ProjectField,
 	ColumnKeyPreemptible:         PreemptibleField,
+	ColumnKeyPreemptibility:      PreemptibilityField,
 	ColumnKeyPods:                PodsField,
 	ColumnKeyGPUAlloc:            GPUAllocationField,
 	ColumnKeyCategory:            CategoryField,
@@ -46,7 +48,7 @@ var defaultColumns = []WorkloadColumn{
 	ColumnKeyFramework,
 	ColumnKeyStatus,
 	ColumnKeyProject,
-	ColumnKeyPreemptible,
+	ColumnKeyPreemptibility,
 	ColumnKeyPods,
 	ColumnKeyGPUAlloc,
 }
@@ -177,6 +179,24 @@ func extractPreemptibleData(workload *workloadservice.Workload, workloadRow *Wor
 	}
 }
 
+func getPreemptibility(workload *workloadservice.Workload) *string {
+	if workload.Preemptibility.IsSet() && workload.Preemptibility.Get() != nil {
+		return workload.Preemptibility.Get()
+	}
+	if workload.Preemptible.IsSet() && workload.Preemptible.Get() != nil {
+		value := string(workloadservice.PREEMPTIBILITY_NON_PREEMPTIBLE)
+		if *workload.Preemptible.Get() {
+			value = string(workloadservice.PREEMPTIBILITY_PREEMPTIBLE)
+		}
+		return &value
+	}
+	return nil
+}
+
+func extractPreemptibilityData(workload *workloadservice.Workload, workloadRow *WorkloadsAlignedRow) {
+	workloadRow.Preemptibility = getPreemptibility(workload)
+}
+
 // Non-trivial format functions
 func formatTypeValue(workloadRow *WorkloadsAlignedRow) string {
 	workloadType := workloadRow.Type
@@ -203,6 +223,13 @@ func formatPreemptibleValue(workloadRow *WorkloadsAlignedRow) string {
 		return "No"
 	}
 
+}
+
+func formatPreemptibilityValue(workloadRow *WorkloadsAlignedRow) string {
+	if workloadRow.Preemptibility == nil {
+		return noDataFormat
+	}
+	return field.CapitalizeFirst(*workloadRow.Preemptibility)
 }
 
 func formatPodsValue(workloadRow *WorkloadsAlignedRow) string {

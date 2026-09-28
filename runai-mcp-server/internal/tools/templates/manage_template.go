@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	workloads "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
-	workloads "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaimcp"

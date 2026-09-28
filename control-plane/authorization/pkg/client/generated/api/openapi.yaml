@@ -3232,9 +3232,6 @@ paths:
               enableScopedAuthorization:
                 value:
                   enabled: false
-              tenantIsCspManaged:
-                value:
-                  enabled: false
             schema:
               $ref: '#/components/schemas/UpdateAuthorizationSettingByKeyRequest'
         required: true
@@ -5325,30 +5322,17 @@ components:
           nullable: true
           type: boolean
       type: object
-    TenantIsCspManagedSetting:
-      example:
-        enabled: false
-      properties:
-        enabled:
-          nullable: true
-          type: boolean
-      type: object
     AuthorizationSettingsGetResponse:
       example:
         enableScopedAuthorization:
           enabled: false
-        tenantIsCspManaged:
-          enabled: false
       properties:
         enableScopedAuthorization:
           $ref: '#/components/schemas/EnableScopedAuthorizationSetting'
-        tenantIsCspManaged:
-          $ref: '#/components/schemas/TenantIsCspManagedSetting'
       type: object
     AuthorizationSettingsKeyEnum:
       enum:
       - enableScopedAuthorization
-      - tenantIsCspManaged
       type: string
     UpdateAuthorizationSettingByKeyRequest:
       example:

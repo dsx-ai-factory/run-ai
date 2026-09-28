@@ -13,7 +13,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli"
-	openapi2 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi2 "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/spf13/cobra"
 )
 
@@ -35,6 +35,7 @@ var lowercaseToPascalCase = map[manipulate.WorkloadColumn]string{
 	manipulate.ColumnKeyAllocatedCPUMemory:  "AllocatedCPUMemory",
 	manipulate.ColumnKeyCompletedAt:         "CompletedAt",
 	manipulate.ColumnKeyPreemptible:         "Preemptible",
+	manipulate.ColumnKeyPreemptibility:      "Preemptibility",
 	manipulate.ColumnKeyPods:                "Pods",
 	manipulate.ColumnKeyGPUAlloc:            "AllocatedGPU",
 	manipulate.ColumnKeyUrls:                "URLs",
@@ -89,6 +90,7 @@ func LauncherCreationPolicyFlagCompletion(_ *cobra.Command, _ []string, _ string
 func PreemptibilityFlagCompletion(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return []string{
 		string(openapi2.PREEMPTIBILITY_PREEMPTIBLE),
+		string(openapi2.PREEMPTIBILITY_SEMI_PREEMPTIBLE),
 		string(openapi2.PREEMPTIBILITY_NON_PREEMPTIBLE),
 	}, cobra.ShellCompDirectiveNoFileComp
 }

@@ -36,7 +36,7 @@ Linking data source assets is currently not supported.
 2. Click **+NEW TEMPLATE** and select **Training** from the dropdown menu**.**
 3. Within the new training template form, select the **scope**.
 4. Set the training workload architecture as **distributed** workload, which consists of multiple processes working together. These processes can run on different nodes. This workload uses environments that support distributed training workloads only.
-5. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) for details on enabling.
+5. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
 6. Set the distributed workload configuration that defines how distributed training workloads are divided across multiple machines or processes. Choose **Workers & master** or **Workers only** based on your training requirements and infrastructure. In distributed training workloads, both **Workers** and **Master** include the same configuration sections. By default, the Master uses the Worker configuration for shared fields. This default behavior can be overridden if different settings are required for the Master.
 7. Enter a unique **name** for the training template. If the name already exists in the project, you will be requested to submit a different name.
 8. Click **CONTINUE**
@@ -223,9 +223,10 @@ The fields in the **Workload setup** section are optional and apply to the entir
 
 </Info>
 
-1. Set whether the workload may be interrupted by selecting **Preemptible** or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
+1. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+   * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 2. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 3. Set the **grace period** for workload preemption. This is a buffer that allows a preempted workload to reach a safe checkpoint before it is forcibly preempted. Enter a timeframe between 0 sec and 5 min.
 4. Set the **backoff limit** before workload failure. The backoff limit is the maximum number of retry attempts for failed workloads. After reaching the limit, the workload status will change to "Failed." Enter a value between 0 and 100.

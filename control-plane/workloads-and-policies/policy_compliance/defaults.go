@@ -15,9 +15,9 @@ import (
 	policyApi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/conjungo"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 var distPolicyJsonCracker = jsonutils.NewJsonCracker(policyApi.DistributedPolicyDefaultsV2{})

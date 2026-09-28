@@ -1073,12 +1073,6 @@ export interface AuthorizationSettingsGetResponse {
      * @memberof AuthorizationSettingsGetResponse
      */
     'enableScopedAuthorization'?: EnableScopedAuthorizationSetting;
-    /**
-     * 
-     * @type {TenantIsCspManagedSetting}
-     * @memberof AuthorizationSettingsGetResponse
-     */
-    'tenantIsCspManaged'?: TenantIsCspManagedSetting;
 }
 /**
  * 
@@ -1087,8 +1081,7 @@ export interface AuthorizationSettingsGetResponse {
  */
 
 export const AuthorizationSettingsKeyEnum = {
-    EnableScopedAuthorization: 'enableScopedAuthorization',
-    TenantIsCspManaged: 'tenantIsCspManaged'
+    EnableScopedAuthorization: 'enableScopedAuthorization'
 } as const;
 
 export type AuthorizationSettingsKeyEnum = typeof AuthorizationSettingsKeyEnum[keyof typeof AuthorizationSettingsKeyEnum];
@@ -2462,19 +2455,6 @@ export interface SubmissionError {
      * @memberof SubmissionError
      */
     'complianceIssues'?: Array<ComplianceIssuesComplianceIssuesInner>;
-}
-/**
- * 
- * @export
- * @interface TenantIsCspManagedSetting
- */
-export interface TenantIsCspManagedSetting {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TenantIsCspManagedSetting
-     */
-    'enabled'?: boolean | null;
 }
 /**
  * 
