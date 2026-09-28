@@ -35,6 +35,7 @@ var lowercaseToPascalCase = map[manipulate.WorkloadColumn]string{
 	manipulate.ColumnKeyAllocatedCPUMemory:  "AllocatedCPUMemory",
 	manipulate.ColumnKeyCompletedAt:         "CompletedAt",
 	manipulate.ColumnKeyPreemptible:         "Preemptible",
+	manipulate.ColumnKeyPreemptibility:      "Preemptibility",
 	manipulate.ColumnKeyPods:                "Pods",
 	manipulate.ColumnKeyGPUAlloc:            "AllocatedGPU",
 	manipulate.ColumnKeyUrls:                "URLs",
@@ -89,6 +90,7 @@ func LauncherCreationPolicyFlagCompletion(_ *cobra.Command, _ []string, _ string
 func PreemptibilityFlagCompletion(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return []string{
 		string(openapi2.PREEMPTIBILITY_PREEMPTIBLE),
+		string(openapi2.PREEMPTIBILITY_SEMI_PREEMPTIBLE),
 		string(openapi2.PREEMPTIBILITY_NON_PREEMPTIBLE),
 	}, cobra.ShellCompDirectiveNoFileComp
 }

@@ -812,6 +812,16 @@ func setGeneralInformation(
 		generalBuilder.Priority(priority)
 	}
 
+	if workload.Preemptibility.IsSet() && workload.Preemptibility.Get() != nil {
+		generalBuilder.Preemptibility(*workload.Preemptibility.Get())
+	} else if workload.Preemptible.IsSet() && workload.Preemptible.Get() != nil {
+		if *workload.Preemptible.Get() {
+			generalBuilder.Preemptibility(string(openapi.PREEMPTIBILITY_PREEMPTIBLE))
+		} else {
+			generalBuilder.Preemptibility(string(openapi.PREEMPTIBILITY_NON_PREEMPTIBLE))
+		}
+	}
+
 	if workload.Topology.IsSet() {
 		topology := workload.GetTopology()
 		if topology.Name != nil && *topology.Name != "" {
