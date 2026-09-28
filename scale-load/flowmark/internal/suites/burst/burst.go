@@ -41,6 +41,8 @@ const (
 	sloP90Key            = "p90_ms"
 )
 
+var knownKnobs = []string{"workloads", "workloadType", "podsPerWorkload", "image", "submitConcurrency", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "timeout", "setupTimeout", "settle", "cluster", "slo"}
+
 type Suite struct{}
 
 type settings struct {
@@ -146,6 +148,9 @@ func newFlow(workloadType string, clients *client.Clients, project submit.Projec
 }
 
 func parseSettings(cfg core.Config) (settings, error) {
+	if unknown := cfg.Unknown(knownKnobs...); len(unknown) > 0 {
+		return settings{}, fmt.Errorf("unknown knob %q; known knobs: %s", unknown[0], strings.Join(knownKnobs, ", "))
+	}
 	var knobs settings
 	var err error
 	if knobs.rounds, err = cfg.Ints("workloads", []int{100, 250, 500}); err != nil {

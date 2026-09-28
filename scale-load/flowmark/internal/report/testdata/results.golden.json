@@ -1,0 +1,33 @@
+{
+  "schema": "v1",
+  "regression_detected": false,
+  "metadata": {
+    "date": "2026-09-28T01:00:00Z",
+    "finished_at": "2026-09-28T01:12:30Z",
+    "provider": "ci",
+    "cluster_type": "kind-fake-gpu",
+    "control_plane_version": "3.1.0",
+    "cluster_version": "2.26.5",
+    "clock_offset_ms": -296
+  },
+  "sections": {
+    "external-workload": {
+      "category": "scale",
+      "metrics": {
+        "flow": "deployment_to_external_workload",
+        "p90_ms@100": 5754,
+        "pending_count@100": 0,
+        "slo_p90_ms": 5000
+      },
+      "failed": false
+    },
+    "selfcheck": {
+      "category": "scale",
+      "metrics": {
+        "selfcheck_duration_seconds": 0.1
+      },
+      "failed": true,
+      "error": "example failure text"
+    }
+  }
+}
