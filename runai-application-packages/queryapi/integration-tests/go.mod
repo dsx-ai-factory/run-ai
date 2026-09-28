@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/inte
 go 1.27.1
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.14
 	github.com/stretchr/testify v1.12.1
 )

@@ -51,8 +51,8 @@ github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4
 github.com/docker/go-units v0.5.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 h1:Ov1I7x8ZUcgC9yzgtUO7bOuVHvejBEphZT8GlQ2q8Uk=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1/go.mod h1:hDzQ3k8G0AiU88ODxROMfPpkNkvrBskZ1kJvgnSY+ao=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2 h1:2oNaltpz+CTTDPhPoZGjlJbDDfzfhCBIZPOw+YA2vjE=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2/go.mod h1:tXpIAWdJLzQSq4pE3q6gc76JIyEcR+J0WL1oiMcNUVg=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.3 h1:xOu/jiGfWl16CVJIYGHaJFh+Grpk0IcGUqLG7MSM6Mo=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.3/go.mod h1:x5nVN+lvL9XR7Nd+cE6qaFd1XHC2llpsQ/e4bd1G/k8=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5 h1:VW9VpIKde5c9ATV9XE2pz6vhIjL+82S2MwYIYtzAq+o=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5/go.mod h1:9hjg4OEtK3FRgwQrSVVg+FoZS655NKhdAD0OPZrkB9o=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26 h1:hRBDSzatoGF4vDaVRcAhJ4hNkrknBVExajUgd0xed+s=

@@ -4,8 +4,8 @@ go 1.27.1
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.14
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/stretchr/testify v1.12.1
 )

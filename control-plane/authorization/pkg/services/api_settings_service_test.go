@@ -46,7 +46,6 @@ var _ = Describe("SettingsService", func() {
 		It("should return all settings successfully", func() {
 			mockSettingsList := []settingPkgManager.Settinger{
 				&settings.EnableScopedAuthorization{Enabled: true},
-				&settings.TenantIsCspManaged{Enabled: true},
 			}
 			settingPkgMock.On("GetAll", mock.Anything, settingsTestTenantId, settings.AuthorizationCategory).Return(mockSettingsList, nil)
 
@@ -58,8 +57,6 @@ var _ = Describe("SettingsService", func() {
 			Expect(ok).To(BeTrue())
 			Expect(responseBody.EnableScopedAuthorization.Enabled).NotTo(BeNil())
 			Expect(*responseBody.EnableScopedAuthorization.Enabled).To(BeTrue())
-			Expect(responseBody.TenantIsCspManaged.Enabled).NotTo(BeNil())
-			Expect(*responseBody.TenantIsCspManaged.Enabled).To(BeTrue())
 
 			settingPkgMock.AssertExpectations(GinkgoT())
 		})
@@ -123,18 +120,6 @@ var _ = Describe("SettingsService", func() {
 			settingPkgMock.AssertExpectations(GinkgoT())
 		})
 
-		It("should return TenantIsCspManaged successfully", func() {
-			mockSetting := &settings.TenantIsCspManaged{Enabled: true}
-			settingPkgMock.On("Get", mock.Anything, settingsTestTenantId, string(api.AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED)).
-				Return(mockSetting, nil)
-
-			response, err := testSubject.GetAuthorizationSettingByKey(ctx, api.AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED, "")
-			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusOK))
-
-			settingPkgMock.AssertExpectations(GinkgoT())
-		})
-
 		It("should return 400 when tenant id is missing from context", func() {
 			emptyCtx := context.Background()
 
@@ -172,20 +157,6 @@ var _ = Describe("SettingsService", func() {
 				string(api.AUTHORIZATIONSETTINGSKEYENUM_ENABLE_SCOPED_AUTHORIZATION), true, expectedValue).Return(nil)
 
 			response, err := testSubject.UpdateAuthorizationSettingByKey(ctx, api.AUTHORIZATIONSETTINGSKEYENUM_ENABLE_SCOPED_AUTHORIZATION, updateRequest, "")
-			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusOK))
-
-			settingPkgMock.AssertExpectations(GinkgoT())
-		})
-
-		It("should update TenantIsCspManaged successfully", func() {
-			updateRequest := api.UpdateAuthorizationSettingByKeyRequest{Enabled: ptr.To(false)}
-			expectedValue := settings.TenantIsCspManaged{Enabled: false}
-
-			settingPkgMock.On("Update", mock.Anything, settingsTestTenantId,
-				string(api.AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED), true, expectedValue).Return(nil)
-
-			response, err := testSubject.UpdateAuthorizationSettingByKey(ctx, api.AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED, updateRequest, "")
 			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusOK))
 
