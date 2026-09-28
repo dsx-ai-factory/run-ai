@@ -9,6 +9,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.18
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.2
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
@@ -19,7 +20,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/telemetry v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/versions v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
@@ -109,7 +109,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.18.6 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
@@ -122,12 +122,12 @@ require (
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
-	github.com/moby/go-archive v0.2.0 // indirect
+	github.com/moby/go-archive v0.3.3 // indirect
 	github.com/moby/moby/api v1.55.0 // indirect
 	github.com/moby/moby/client v0.5.0 // indirect
 	github.com/moby/patternmatcher v0.6.1 // indirect
-	github.com/moby/sys/sequential v0.6.0 // indirect
-	github.com/moby/sys/user v0.4.0 // indirect
+	github.com/moby/sys/sequential v0.7.0 // indirect
+	github.com/moby/sys/user v0.4.1 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
