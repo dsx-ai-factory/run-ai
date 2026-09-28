@@ -6,7 +6,7 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal AS base
 # Wrap the shared-volume mount points inside /temp so they land as *children*
 # during COPY. Docker BuildKit resets the mode of any destination directory
 # it creates to 0755, but preserves modes on children.
-RUN mkdir -p /temp/providers /temp/themes /temp/agent && \
+RUN mkdir -p /temp/providers /temp/themes /temp/agent /temp/conf && \
     chown -R 65532:0 /temp && \
     chmod -R 770 /temp
 

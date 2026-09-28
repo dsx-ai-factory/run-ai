@@ -106,3 +106,31 @@ func TestWriteKeycloakConf(t *testing.T) {
 		})
 	}
 }
+
+// TestWriteKeycloakConf_SymlinkedSecrets reproduces the layout Kubernetes'
+// Secret volume atomic writer uses: every key under the mount is a symlink
+// into a timestamped data directory (plus a `..data` symlink to that
+// directory itself), not a regular file. `os.DirEntry.Type()` never follows
+// symlinks, so filtering on it would skip every real secret in production;
+// WriteKeycloakConf must instead resolve each entry (as POSIX `[ -f ]`,
+// which the original shell script used, does).
+func TestWriteKeycloakConf_SymlinkedSecrets(t *testing.T) {
+	dir := t.TempDir()
+
+	dataDir := filepath.Join(dir, "..2024_01_01_00_00_00.000000000")
+	mustWriteFile(t, filepath.Join(dataDir, "KC_HTTP_PORT"), "8080")
+
+	if err := os.Symlink(dataDir, filepath.Join(dir, "..data")); err != nil {
+		t.Fatalf("symlink ..data: %v", err)
+	}
+	if err := os.Symlink(filepath.Join("..data", "KC_HTTP_PORT"), filepath.Join(dir, "KC_HTTP_PORT")); err != nil {
+		t.Fatalf("symlink KC_HTTP_PORT: %v", err)
+	}
+
+	confPath := filepath.Join(t.TempDir(), "keycloak.conf")
+	if err := WriteKeycloakConf(dir, confPath); err != nil {
+		t.Fatalf("WriteKeycloakConf() error = %v", err)
+	}
+
+	assertFileContent(t, confPath, "http-port=8080\n")
+}

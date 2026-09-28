@@ -33,9 +33,20 @@ func WriteKeycloakConf(secretsDir, confPath string) error {
 		return fmt.Errorf("read secrets dir %s: %w", secretsDir, err)
 	}
 
+	// Stat (not e.Type(), which uses Lstat and never follows symlinks) each
+	// entry: Kubernetes Secret volumes present every key as a symlink into a
+	// timestamped data directory, the same way POSIX `[ -f "$file" ]` (used
+	// by the original script) follows symlinks to test the resolved target.
 	names := make([]string, 0, len(entries))
 	for _, e := range entries {
-		if e.Type().IsRegular() {
+		info, err := os.Stat(filepath.Join(secretsDir, e.Name()))
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue // dangling symlink; not a secret key
+			}
+			return fmt.Errorf("stat secret %s: %w", e.Name(), err)
+		}
+		if info.Mode().IsRegular() {
 			names = append(names, e.Name())
 		}
 	}
