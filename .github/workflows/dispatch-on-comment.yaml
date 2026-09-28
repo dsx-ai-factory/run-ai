@@ -71,7 +71,7 @@ jobs:
             core.setOutput('base_ref', pr.base.ref);
             core.setOutput('number',   String(pr.number));
 
-      # ── Step 2: verify run-ai/maintainers membership ──────────────────────
+      # ── Step 2: verify <repo owner>/maintainers membership ────────────────
       - name: Verify maintainers membership
         if: steps.parse.outputs.skip != 'true'
         id: verify
@@ -83,14 +83,14 @@ jobs:
             const commenter = context.payload.comment.user.login;
             try {
               const resp = await github.rest.teams.getMembershipForUserInOrg({
-                org:       'run-ai',
+                org:       context.repo.owner,
                 team_slug: 'maintainers',
                 username:  commenter,
               });
               return resp.data.state === 'active' ? 'true' : 'false';
             } catch (error) {
               if (error.status === 404) { return 'false'; }
-              core.error(`Could not verify run-ai/maintainers membership (status ${error.status ?? 'unknown'})`);
+              core.error(`Could not verify ${context.repo.owner}/maintainers membership (status ${error.status ?? 'unknown'})`);
               return 'unknown';
             }
 
@@ -109,7 +109,7 @@ jobs:
             const unknown   = process.env.VERIFY_RESULT !== 'false';
             const body = unknown
               ? `@${commenter} CI was not triggered: the maintainers check could not run. This is a CI configuration problem, not a permissions decision — please contact a maintainer.`
-              : `@${commenter} Only members of the [run-ai/maintainers](https://github.com/orgs/run-ai/teams/maintainers) team can trigger CI.`;
+              : `@${commenter} Only members of the [${context.repo.owner}/maintainers](https://github.com/orgs/${context.repo.owner}/teams/maintainers) team can trigger CI.`;
             await github.rest.reactions.createForIssueComment({
               owner:      context.repo.owner,
               repo:       context.repo.repo,
@@ -124,7 +124,7 @@ jobs:
             });
             core.setFailed(unknown
               ? 'Maintainers membership could not be verified — failing closed'
-              : `@${commenter} is not in run-ai/maintainers`);
+              : `@${commenter} is not in ${context.repo.owner}/maintainers`);
 
       # ── Step 2c: refuse when the authorised SHA is no longer the head ──────
       - name: Reject stale SHA
