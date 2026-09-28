@@ -90,6 +90,8 @@ Class | Method | HTTP request | Description
 *ConfigMapsAPI* | [**SyncClusterWideConfigmapsV1**](docs/ConfigMapsAPI.md#syncclusterwideconfigmapsv1) | **Post** /api/v1/config-maps/{clusterUuid} | sync the details of cluster-wide ConfigMaps to the control plane
 *ConfigMapsAPI* | [**SyncDepartmentsWideConfigmapV1**](docs/ConfigMapsAPI.md#syncdepartmentswideconfigmapv1) | **Post** /api/v1/config-maps/{clusterUuid}/departments/{departmentId} | sync the details of department-wide ConfigMaps to the control plane
 *ConfigMapsAPI* | [**SyncProjectsConfigmapsV1**](docs/ConfigMapsAPI.md#syncprojectsconfigmapsv1) | **Post** /api/v1/config-maps/{clusterUuid}/namespaces/{namespace} | sync the details of project ConfigMaps to the control plane
+*DeviceClassesAPI* | [**GetDeviceClasses**](docs/DeviceClassesAPI.md#getdeviceclasses) | **Get** /api/v1/device-classes | get device classes for a given cluster
+*DeviceClassesAPI* | [**SyncDeviceClass**](docs/DeviceClassesAPI.md#syncdeviceclass) | **Post** /api/v1/device-classes/sync | Sync cluster Device Classes
 *HealthAPI* | [**Health**](docs/HealthAPI.md#health) | **Get** / | health check
 *PVCsAPI* | [**CreateClusterWidePvcV1**](docs/PVCsAPI.md#createclusterwidepvcv1) | **Post** /api/v1/pvcs/{clusterUuid}/{pvcName} | upload the name of cluster-wide pvc to the control plane
 *PVCsAPI* | [**CreateClusterWidePvcV2**](docs/PVCsAPI.md#createclusterwidepvcv2) | **Post** /api/v2/pvcs/{clusterUuid}/{pvcName} | upload the details of cluster-wide pvc to the control plane
@@ -174,6 +176,8 @@ Class | Method | HTTP request | Description
  - [ConfigMaps](docs/ConfigMaps.md)
  - [ConfigMapsListResponse](docs/ConfigMapsListResponse.md)
  - [CreateClusterWidePvcV1Request](docs/CreateClusterWidePvcV1Request.md)
+ - [DeviceClass](docs/DeviceClass.md)
+ - [DeviceClasses](docs/DeviceClasses.md)
  - [Error](docs/Error.md)
  - [Issue](docs/Issue.md)
  - [Origin](docs/Origin.md)

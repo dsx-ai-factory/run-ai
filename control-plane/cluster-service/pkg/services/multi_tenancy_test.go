@@ -30,7 +30,7 @@ import (
 	csc_mocks "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/mocks/pkg/services/cluster-state-calculator"
 	cluster_config "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/config"
 	idm_client "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/mocks"
-	org_unit_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/mocks"
+	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

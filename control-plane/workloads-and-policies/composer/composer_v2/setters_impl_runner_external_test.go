@@ -16,7 +16,7 @@ import (
 var _ = Describe("buildExternalAccess", func() {
 	const (
 		svcName     = "kf-py1-url-master"
-		urlStr      = "https://ofer-py1.demotest.runailabs.com/"
+		urlStr      = "https://ofer-py1.demotest.example.com/"
 		servicePort = int32(80)
 	)
 
@@ -56,7 +56,7 @@ var _ = Describe("buildExternalAccess", func() {
 			Expect(meta["name"]).To(Equal(svcName))
 
 			spec := route["spec"].(map[string]interface{})
-			Expect(spec["host"]).To(Equal("ofer-py1.demotest.runailabs.com"))
+			Expect(spec["host"]).To(Equal("ofer-py1.demotest.example.com"))
 			Expect(spec["path"]).To(Equal("/"))
 
 			to := spec["to"].(map[string]interface{})
@@ -73,13 +73,13 @@ var _ = Describe("buildExternalAccess", func() {
 			cfg.SetIsOpenshift(true)
 			cfg.SetSubdomainSupportEnabled(true)
 
-			subdomainURL := "https://runai.ofer-py1.demotest.runailabs.com/"
+			subdomainURL := "https://runai.ofer-py1.demotest.example.com/"
 
 			ea, err := buildExternalAccess(cfg, svcName, subdomainURL, servicePort)
 			Expect(err).To(BeNil())
 
 			spec := ea.GetRoute()["spec"].(map[string]interface{})
-			Expect(spec["host"]).To(Equal("ofer-py1.demotest.runailabs.com"))
+			Expect(spec["host"]).To(Equal("ofer-py1.demotest.example.com"))
 		})
 
 		It("uses passthrough termination when the cluster opts in via openshiftRouteConfiguration", func() {
@@ -127,7 +127,7 @@ var _ = Describe("buildExternalAccess", func() {
 			Expect(parents[0]["name"]).To(Equal("runai-gateway"))
 			Expect(parents[0]["namespace"]).To(Equal("runai"))
 
-			Expect(spec["hostnames"]).To(Equal([]string{"ofer-py1.demotest.runailabs.com"}))
+			Expect(spec["hostnames"]).To(Equal([]string{"ofer-py1.demotest.example.com"}))
 
 			rules := spec["rules"].([]map[string]interface{})
 			Expect(rules).To(HaveLen(1))
@@ -164,13 +164,13 @@ var _ = Describe("buildExternalAccess", func() {
 			cfg.SetGatewayName("runai-gateway")
 			cfg.SetGatewayNamespace("runai")
 
-			subdomainURL := "https://runai.ofer-py1.demotest.runailabs.com/"
+			subdomainURL := "https://runai.ofer-py1.demotest.example.com/"
 
 			ea, err := buildExternalAccess(cfg, svcName, subdomainURL, servicePort)
 			Expect(err).To(BeNil())
 
 			spec := ea.GetHttpRoute()["spec"].(map[string]interface{})
-			Expect(spec["hostnames"]).To(Equal([]string{"ofer-py1.demotest.runailabs.com"}))
+			Expect(spec["hostnames"]).To(Equal([]string{"ofer-py1.demotest.example.com"}))
 		})
 
 		It("does NOT strip the runai. host prefix from the HTTPRoute on a non-OpenShift cluster", func() {
@@ -180,13 +180,13 @@ var _ = Describe("buildExternalAccess", func() {
 			cfg.SetGatewayName("runai-gateway")
 			cfg.SetGatewayNamespace("runai")
 
-			subdomainURL := "https://runai.ofer-py1.demotest.runailabs.com/"
+			subdomainURL := "https://runai.ofer-py1.demotest.example.com/"
 
 			ea, err := buildExternalAccess(cfg, svcName, subdomainURL, servicePort)
 			Expect(err).To(BeNil())
 
 			spec := ea.GetHttpRoute()["spec"].(map[string]interface{})
-			Expect(spec["hostnames"]).To(Equal([]string{"runai.ofer-py1.demotest.runailabs.com"}))
+			Expect(spec["hostnames"]).To(Equal([]string{"runai.ofer-py1.demotest.example.com"}))
 		})
 
 		It("omits namespace from parentRefs when GatewayNamespace is empty", func() {

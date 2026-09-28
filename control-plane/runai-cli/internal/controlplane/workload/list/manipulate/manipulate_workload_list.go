@@ -11,7 +11,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
 	cliutils "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/utils"
-	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"k8s.io/utils/ptr"
 )
 

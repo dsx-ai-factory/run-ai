@@ -4,6 +4,7 @@ go 1.27.1
 
 require (
 	github.com/puzpuzpuz/xsync/v2 v2.5.1
+	github.com/puzpuzpuz/xsync/v4 v4.5.0
 	github.com/stretchr/testify v1.12.1
 )
 

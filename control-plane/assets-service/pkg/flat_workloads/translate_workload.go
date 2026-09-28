@@ -28,9 +28,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	utils2 "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/utils"
+	workloadsService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	policyconstants "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/constants"
-	workloadsService "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )

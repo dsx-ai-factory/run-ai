@@ -2240,6 +2240,7 @@ k8sObjectsTracker:
     - PathPrefix(`/api/v1/config-maps`)
     - PathPrefix(`/api/v1/storage-class`)
     - PathPrefix(`/api/v2/storage-class`)
+    - PathPrefix(`/api/v1/device-classes`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/storage-classes.*`) # legacy
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/(namespace:[^/]+)/pvcs`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/(namespace:[^/]+)/secrets`)

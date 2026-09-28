@@ -23,18 +23,18 @@ import (
 )
 
 const (
-	crudWorkloadUpsertUpdate    = "UPDATE crud_workloads SET created_at=?,created_by=?,updated_at=?,updated_by=?,deleted_at=?,deleted_by=?,update_count=?,tenant_id=?,cluster_id=?,department_id=?,project_id=?,workload_type=?,requested_name=?,name=?,namespace=?,spec=?,master_spec=?,master_same_as_worker=?,desired_phase=?,assets_mapping=? WHERE crud_workloads.deleted_at IS NULL AND id = ?"
-	crudWorkloadDesiredUpdate   = "UPDATE crud_workloads SET desired_phase=?,updated_at=?,updated_by=? WHERE tenant_id = ? AND id = ?"
-	crudWorkloadGetPrefix       = "SELECT * FROM crud_workloads WHERE tenant_id = ? AND id = ? AND workload_type = ?"
-	crudWorkloadGetSuffix       = " ORDER BY crud_workloads.id LIMIT ?"
-	crudWorkloadListSelect      = "SELECT * FROM crud_workloads WHERE tenant_id = ? AND workload_type = ? AND cluster_id = ? AND update_count > ? ORDER BY update_count LIMIT ?"
-	crudWorkloadCleanupDelete   = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ? AND workload_type = ? AND desired_phase = ? AND update_count < ?"
-	crudWorkloadProjectUpdate   = "UPDATE crud_workloads SET desired_phase=? WHERE tenant_id = ? AND cluster_id = ? AND project_id = ?"
-	crudWorkloadTenantDelete    = "DELETE FROM crud_workloads WHERE tenant_id = ?"
-	crudWorkloadClusterDelete   = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ?"
-	crudWorkloadByIdDelete      = "DELETE FROM crud_workloads WHERE crud_workloads.id = ? AND crud_workloads.tenant_id = ?"
-	crudWorkloadSyncProject     = "DELETE FROM crud_workloads WHERE tenant_id = ? AND project_id = ?"
-	crudWorkloadSyncFull        = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ? AND id >= ? AND id <= ? AND NOT id IN (?,?) AND workload_type = ?"
+	crudWorkloadUpsertUpdate  = "UPDATE crud_workloads SET created_at=?,created_by=?,updated_at=?,updated_by=?,deleted_at=?,deleted_by=?,update_count=?,tenant_id=?,cluster_id=?,department_id=?,project_id=?,workload_type=?,requested_name=?,name=?,namespace=?,spec=?,master_spec=?,master_same_as_worker=?,desired_phase=?,assets_mapping=? WHERE crud_workloads.deleted_at IS NULL AND id = ?"
+	crudWorkloadDesiredUpdate = "UPDATE crud_workloads SET desired_phase=?,updated_at=?,updated_by=? WHERE tenant_id = ? AND id = ?"
+	crudWorkloadGetPrefix     = "SELECT * FROM crud_workloads WHERE tenant_id = ? AND id = ? AND workload_type = ?"
+	crudWorkloadGetSuffix     = " ORDER BY crud_workloads.id LIMIT ?"
+	crudWorkloadListSelect    = "SELECT * FROM crud_workloads WHERE tenant_id = ? AND workload_type = ? AND cluster_id = ? AND update_count > ? ORDER BY update_count LIMIT ?"
+	crudWorkloadCleanupDelete = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ? AND workload_type = ? AND desired_phase = ? AND update_count < ?"
+	crudWorkloadProjectUpdate = "UPDATE crud_workloads SET desired_phase=? WHERE tenant_id = ? AND cluster_id = ? AND project_id = ?"
+	crudWorkloadTenantDelete  = "DELETE FROM crud_workloads WHERE tenant_id = ?"
+	crudWorkloadClusterDelete = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ?"
+	crudWorkloadByIdDelete    = "DELETE FROM crud_workloads WHERE crud_workloads.id = ? AND crud_workloads.tenant_id = ?"
+	crudWorkloadSyncProject   = "DELETE FROM crud_workloads WHERE tenant_id = ? AND project_id = ?"
+	crudWorkloadSyncFull      = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ? AND id >= ? AND id <= ? AND NOT id IN (?,?) AND workload_type = ?"
 )
 
 type crudWorkloadRow struct {

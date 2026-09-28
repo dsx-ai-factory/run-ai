@@ -16,13 +16,13 @@ Administrators can create and manage custom roles to meet specific organizationa
 
 A custom role defines access by combining one or more **permission sets**, which together determine the actions that can be performed across NVIDIA Run:ai resources. By selecting the appropriate permission sets, administrators can tailor roles to match their organization’s access model while maintaining consistent and controlled authorization across the platform.
 
-<Info>
+<Note>
 
 **Note**
 
 Custom roles can be created and managed via API only. Once created, they are available for viewing in the Roles grid and can be selected when assigning access rules in the UI and API.
 
-</Info>
+</Note>
 
 ### Permission Sets
 

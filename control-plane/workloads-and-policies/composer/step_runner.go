@@ -5,7 +5,7 @@
 
 package composer
 
-import workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+import workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 // StepRunner is a utility class for running sequentially a set of functions that are
 // all return workloadsApi.Error. it stops running the set on the first function that

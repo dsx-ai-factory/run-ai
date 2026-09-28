@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	cliutils "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/utils"
-	wcgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wcgenerated "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // TemplateColumn represents a column in the template list

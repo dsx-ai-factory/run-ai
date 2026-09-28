@@ -52,6 +52,6 @@ Compute Resources
 
 Network
 
- Name             Tool Type        Connection Type  Container Port   URL                                                       
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
- NIMService       NIMService       ExternalUrl      8080             https://aviados-dev.runailabs.com/test-nim/my-nim-service 
+ Name             Tool Type        Connection Type  Container Port   URL                                                     
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ NIMService       NIMService       ExternalUrl      8080             https://aviados-dev.example.com/test-nim/my-nim-service 

@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"strings"
 
-	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )

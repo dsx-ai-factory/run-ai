@@ -315,5 +315,9 @@ export default defineComponent({
 }
 :deep(.download-icon) {
   color: var(--icon-default);
+
+  .q-icon {
+    font-size: 20px;
+  }
 }
 </style>

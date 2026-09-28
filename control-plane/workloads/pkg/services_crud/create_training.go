@@ -14,7 +14,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
-	workloadApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 func CreateTraining(ctx context.Context, tenantSettingsClient clients.TenantSettingsClient, request api.TrainingCreationRequest) (api.ImplResponse, error) {

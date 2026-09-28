@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/template/describe"
-	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

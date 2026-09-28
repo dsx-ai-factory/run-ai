@@ -18,9 +18,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 
 	workloadsServerApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	workloadsMgr "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/workloads_mgr"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_integration"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 
