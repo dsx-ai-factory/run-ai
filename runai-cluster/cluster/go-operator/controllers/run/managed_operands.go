@@ -140,7 +140,7 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addRemoteCluster(legacy_runtime_runner.Operand(remoteClusterClient, runaiConfig))
 	// KRM supplies the project-controller now; registering it disabled deletes
 	// the Deployment left behind.
-	mo.addOldRemoteCluster(project_controller.Operand(), false)
+	mo.addRemoteCluster(project_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(accessrule_controller.Operand(), *spec.AccessRuleController.Enabled && *spec.ProjectController.CreateRoleBindings)
 	mo.addOldRemoteCluster(mpi_operator.Operand(), true)
 	mo.addOldRemoteCluster(training_operator.Operand(), true)
@@ -149,9 +149,6 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	// DaemonSet left behind on clusters that had opted in.
 	mo.addOldRemoteCluster(mps_server.Operand(), false)
 	mo.addRemoteCluster(queue_controller.Operand(remoteClusterClient, runaiConfig))
-	// pod-group-assigner is deliberately not registered: KRM supplies it and names
-	// every object it owns identically, so KRM adopts them all. Registering it
-	// disabled would delete what KRM recreates seconds later.
 	mo.addRemoteCluster(cluster_api.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(knative.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(cluster_redis.Operand(remoteClusterClient, runaiConfig))

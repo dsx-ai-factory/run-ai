@@ -129,10 +129,7 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 
 # Suricata
 /runai-cluster/cluster/cluster-sync/ @dsx-ai-factory/resource-mgmt
-/runai-cluster/cluster/project-controller/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/agent/ @dsx-ai-factory/resource-mgmt
-/runai-cluster/cluster/pod-group-assigner/ @dsx-ai-factory/resource-mgmt
-/runai-cluster/cluster/nodepool-controller/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/accessrule-controller/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/external-workload-integrator/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/workload-exporter/ @dsx-ai-factory/resource-mgmt
@@ -186,7 +183,6 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 /runai-cluster/cluster/go-operator/internal/run/operands/external-workload-integrator/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/go-operator/internal/run/operands/managed-nodes-config/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/go-operator/internal/run/operands/nodepool-controller/ @dsx-ai-factory/resource-mgmt
-/runai-cluster/cluster/go-operator/internal/run/operands/pod-group-assigner/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/go-operator/internal/run/operands/project-controller/ @dsx-ai-factory/resource-mgmt
 /runai-cluster/cluster/go-operator/internal/run/operands/workload-exporter/ @dsx-ai-factory/resource-mgmt
 
