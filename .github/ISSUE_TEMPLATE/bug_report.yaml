@@ -1,7 +1,7 @@
 name: Bug report
 description: Report a reproducible bug in Run:ai.
 title: "[bug] "
-labels: ["kind/bug", "triage/needs-triage"]
+labels: ["bug"]
 body:
   - type: markdown
     attributes:
