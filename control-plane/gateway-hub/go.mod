@@ -7,14 +7,14 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/stretchr/testify v1.12.1
@@ -68,7 +68,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.24.1 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.70.1 // indirect
+	github.com/prometheus/common v0.71.0 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/redis/go-redis/v9 v9.22.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect

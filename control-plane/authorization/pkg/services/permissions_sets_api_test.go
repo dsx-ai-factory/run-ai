@@ -34,7 +34,7 @@ var _ = Describe("Permissions sets API tests", Ordered, func() {
 	ctx := setContext(tenantId, TestUserId, []string{dao.SuperAdmins})
 	PermissionSetMap := map[string]uuid.UUID{}
 	permissionSetLength := 57
-	workspaceEditPermissionsLen := 21
+	workspaceEditPermissionsLen := 22
 
 	permissionsApiService := NewPermissionsApiService()
 
@@ -162,29 +162,42 @@ var _ = Describe("Permissions sets API tests", Ordered, func() {
 			{resourceType: api.RESOURCETYPE_CLUSTERS_MINIMAL, read: true},
 			{resourceType: api.RESOURCETYPE_NODEPOOLS_MINIMAL, read: true},
 		}
-		granularSet := func(ps models.PermissionSet, resourceType api.ResourceType, editable bool) (models.PermissionSet, []expectedPermission) {
-			return ps, append([]expectedPermission{
-				{resourceType: resourceType, create: editable, read: true, update: editable, delete: editable},
-			}, minimals...)
+		// granularSet builds the expected shape of an asset-granular permission
+		// set: one or more primary asset resource types (all sharing the same
+		// editability), followed by the cluster/nodepool minimals. Compute
+		// resources and resource-claim-templates are managed as a paired asset
+		// grant, so ComputeResourcesOnly{Read,Edit} declares both primaries.
+		granularSet := func(ps models.PermissionSet, resourceTypes []api.ResourceType, editable bool) (models.PermissionSet, []expectedPermission) {
+			primaries := make([]expectedPermission, 0, len(resourceTypes))
+			for _, rt := range resourceTypes {
+				primaries = append(primaries, expectedPermission{
+					resourceType: rt,
+					create:       editable,
+					read:         true,
+					update:       editable,
+					delete:       editable,
+				})
+			}
+			return ps, append(primaries, minimals...)
 		}
 
 		granularSets := map[string][]expectedPermission{}
 		granularDefinitions := []models.PermissionSet{}
 		for _, entry := range []struct {
-			ps           models.PermissionSet
-			resourceType api.ResourceType
-			editable     bool
+			ps            models.PermissionSet
+			resourceTypes []api.ResourceType
+			editable      bool
 		}{
-			{static_permission_sets.TemplatesOnlyRead, api.RESOURCETYPE_TEMPLATES, false},
-			{static_permission_sets.TemplatesOnlyEdit, api.RESOURCETYPE_TEMPLATES, true},
-			{static_permission_sets.EnvironmentsOnlyRead, api.RESOURCETYPE_ENVIRONMENTS, false},
-			{static_permission_sets.EnvironmentsOnlyEdit, api.RESOURCETYPE_ENVIRONMENTS, true},
-			{static_permission_sets.ComputeResourcesOnlyRead, api.RESOURCETYPE_COMPUTE_RESOURCES, false},
-			{static_permission_sets.ComputeResourcesOnlyEdit, api.RESOURCETYPE_COMPUTE_RESOURCES, true},
-			{static_permission_sets.CredentialsOnlyRead, api.RESOURCETYPE_CREDENTIALS, false},
-			{static_permission_sets.CredentialsOnlyEdit, api.RESOURCETYPE_CREDENTIALS, true},
+			{static_permission_sets.TemplatesOnlyRead, []api.ResourceType{api.RESOURCETYPE_TEMPLATES}, false},
+			{static_permission_sets.TemplatesOnlyEdit, []api.ResourceType{api.RESOURCETYPE_TEMPLATES}, true},
+			{static_permission_sets.EnvironmentsOnlyRead, []api.ResourceType{api.RESOURCETYPE_ENVIRONMENTS}, false},
+			{static_permission_sets.EnvironmentsOnlyEdit, []api.ResourceType{api.RESOURCETYPE_ENVIRONMENTS}, true},
+			{static_permission_sets.ComputeResourcesOnlyRead, []api.ResourceType{api.RESOURCETYPE_COMPUTE_RESOURCES, api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES}, false},
+			{static_permission_sets.ComputeResourcesOnlyEdit, []api.ResourceType{api.RESOURCETYPE_COMPUTE_RESOURCES, api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES}, true},
+			{static_permission_sets.CredentialsOnlyRead, []api.ResourceType{api.RESOURCETYPE_CREDENTIALS}, false},
+			{static_permission_sets.CredentialsOnlyEdit, []api.ResourceType{api.RESOURCETYPE_CREDENTIALS}, true},
 		} {
-			ps, expected := granularSet(entry.ps, entry.resourceType, entry.editable)
+			ps, expected := granularSet(entry.ps, entry.resourceTypes, entry.editable)
 			granularSets[ps.Name] = expected
 			granularDefinitions = append(granularDefinitions, ps)
 		}
@@ -218,8 +231,8 @@ var _ = Describe("Permissions sets API tests", Ordered, func() {
 		})
 
 		It("leaves the bundled templates sets untouched", func() {
-			Expect(static_permission_sets.TemplatesRead.Permissions).To(HaveLen(13))
-			Expect(static_permission_sets.TemplatesEdit.Permissions).To(HaveLen(13))
+			Expect(static_permission_sets.TemplatesRead.Permissions).To(HaveLen(14))
+			Expect(static_permission_sets.TemplatesEdit.Permissions).To(HaveLen(14))
 		})
 	})
 
