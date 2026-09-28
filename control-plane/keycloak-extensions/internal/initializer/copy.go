@@ -49,21 +49,33 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("open %s: %w", src, err)
 	}
-	defer in.Close()
 
 	info, err := in.Stat()
 	if err != nil {
+		in.Close()
 		return fmt.Errorf("stat %s: %w", src, err)
 	}
 
 	out, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, info.Mode())
 	if err != nil {
+		in.Close()
 		return fmt.Errorf("create %s: %w", dst, err)
 	}
-	defer out.Close()
 
-	if _, err := io.Copy(out, in); err != nil {
-		return fmt.Errorf("write %s: %w", dst, err)
+	// Check both Close errors rather than discarding them: a failed flush on
+	// Close can surface a write failure that io.Copy itself didn't see.
+	_, copyErr := io.Copy(out, in)
+	closeOutErr := out.Close()
+	closeInErr := in.Close()
+
+	if copyErr != nil {
+		return fmt.Errorf("write %s: %w", dst, copyErr)
+	}
+	if closeOutErr != nil {
+		return fmt.Errorf("close %s: %w", dst, closeOutErr)
+	}
+	if closeInErr != nil {
+		return fmt.Errorf("close %s: %w", src, closeInErr)
 	}
 	return nil
 }
