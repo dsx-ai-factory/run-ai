@@ -7,6 +7,7 @@ package helm_deployer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -31,6 +32,9 @@ type DownloaderFactory func(*ReleaseClient, *InstallParams) ChartDownloader
 
 type ChartDownloader interface {
 	Download() (string, error)
+
+	// Cleanup removes files Download wrote for the chart. Call it once the chart is loaded.
+	Cleanup() error
 }
 
 // Downloader is responsible for downloading charts or helm related stuff
@@ -48,6 +52,9 @@ type Downloader struct {
 	// nil, a flagged chart fails fast rather than downloading unauthenticated.
 	RequiresControlPlaneAuth bool
 	ChartAuthClient          *http.Client
+
+	// tempDir holds a chart Download fetched itself; charts located by Helm stay in Helm's cache.
+	tempDir string
 }
 
 func NewDownloader(releaseClient *ReleaseClient, params *InstallParams) ChartDownloader {
@@ -75,30 +82,25 @@ func NewAuthenticatedDownloaderFactory(chartAuthClient *http.Client) DownloaderF
 }
 
 func (d *Downloader) Download() (string, error) {
-	destDir, err := os.MkdirTemp("", ChartsDirName+"-")
-	if err != nil {
-		return "", fmt.Errorf("failed to create chart destination dir: %w", err)
-	}
-
 	// ChartURL: direct download from URL (supports auth)
 	if d.ChartUrl != "" {
 		if d.RequiresControlPlaneAuth {
-			return d.downloadControlPlaneChart(destDir)
+			return d.downloadControlPlaneChart()
 		}
-		return d.downloadChartFromURL(destDir)
+		return d.downloadChartFromURL()
 	}
 	if d.ChartRef == nil {
 		return "", fmt.Errorf("either chartUrl or chartRef must be set")
 	}
 	if strings.HasPrefix(d.ChartRef.Repository, "oci://") {
-		return d.downloadOCIChart(destDir)
+		return d.downloadOCIChart()
 	}
-	return d.downloadHTTPChart(destDir)
+	return d.downloadHTTPChart()
 }
 
 // downloadChartFromURL downloads a chart from a direct URL using Helm's LocateChart
 // (same getter + auth path as HTTP repos; supports basic auth, TLS, insecure skip).
-func (d *Downloader) downloadChartFromURL(_ string) (string, error) {
+func (d *Downloader) downloadChartFromURL() (string, error) {
 	chartURL := strings.TrimSpace(d.ChartUrl)
 	if chartURL == "" {
 		return "", fmt.Errorf("chartUrl is empty")
@@ -127,7 +129,7 @@ func (d *Downloader) downloadChartFromURL(_ string) (string, error) {
 // bearer token and writes it to a temp .tgz for Helm to load. Helm's ChartPathOptions can only
 // carry basic-auth/TLS, not a bearer token, so this path bypasses LocateChart and downloads the
 // packaged chart directly. HTTPS is required so the token is never sent in the clear.
-func (d *Downloader) downloadControlPlaneChart(destDir string) (string, error) {
+func (d *Downloader) downloadControlPlaneChart() (_ string, err error) {
 	chartURL := strings.TrimSpace(d.ChartUrl)
 	if chartURL == "" {
 		return "", fmt.Errorf("chartUrl is empty")
@@ -158,18 +160,41 @@ func (d *Downloader) downloadControlPlaneChart(destDir string) (string, error) {
 		return "", fmt.Errorf("download control-plane chart: unexpected status %s", resp.Status)
 	}
 
+	destDir, err := os.MkdirTemp("", ChartsDirName+"-")
+	if err != nil {
+		return "", fmt.Errorf("create control-plane chart temp dir: %w", err)
+	}
+	d.tempDir = destDir
+	defer func() {
+		if err != nil {
+			err = errors.Join(err, d.Cleanup())
+		}
+	}()
+
 	chartFile, err := os.CreateTemp(destDir, "cp-chart-*.tgz")
 	if err != nil {
 		return "", fmt.Errorf("create control-plane chart temp file: %w", err)
 	}
-	defer func() { _ = chartFile.Close() }()
 
-	if _, err := io.Copy(chartFile, resp.Body); err != nil {
+	_, copyErr := io.Copy(chartFile, resp.Body)
+	if err := errors.Join(copyErr, chartFile.Close()); err != nil {
 		return "", fmt.Errorf("write control-plane chart temp file: %w", err)
 	}
 
 	log.Info().Msgf("Download --> control-plane chart fetched with bearer token -> %s", chartFile.Name())
 	return chartFile.Name(), nil
+}
+
+// Cleanup removes the temp dir of a chart fetched by downloadControlPlaneChart, if any.
+func (d *Downloader) Cleanup() error {
+	if d.tempDir == "" {
+		return nil
+	}
+	if err := os.RemoveAll(d.tempDir); err != nil {
+		return fmt.Errorf("failed to remove chart temp dir %s: %w", d.tempDir, err)
+	}
+	d.tempDir = ""
+	return nil
 }
 
 // downloadOCIChart downloads a chart from an OCI registry using LocateChart.
@@ -180,7 +205,7 @@ func (d *Downloader) downloadControlPlaneChart(destDir string) (string, error) {
 // are set on ChartPathOptions for LocateChart, but the OCI pull uses the registry client;
 // custom TLS for OCI would require building the registry client with ClientOptHTTPClient
 // and is not wired here.
-func (d *Downloader) downloadOCIChart(_ string) (string, error) {
+func (d *Downloader) downloadOCIChart() (string, error) {
 	clientOpts := []registry.ClientOption{
 		registry.ClientOptDebug(d.Settings.Debug),
 	}
@@ -231,7 +256,7 @@ func (d *Downloader) downloadOCIChart(_ string) (string, error) {
 
 // downloadHTTPChart downloads a chart from an HTTP/HTTPS repository using Helm's
 // LocateChart (index fetch, version resolution, and download with auth/TLS).
-func (d *Downloader) downloadHTTPChart(_ string) (string, error) {
+func (d *Downloader) downloadHTTPChart() (string, error) {
 	cpo := d.buildChartPathOptions(strings.TrimSuffix(d.ChartRef.Repository, "/"), d.ChartRef.Version)
 
 	chartPath, err := cpo.LocateChart(d.ChartRef.Name, d.Settings)
@@ -278,6 +303,10 @@ func NewDownloaderForTest(_ *ReleaseClient, params *InstallParams) ChartDownload
 	return &DownloaderForTest{
 		ChartUrl: params.chartUrl,
 	}
+}
+
+func (d *DownloaderForTest) Cleanup() error {
+	return nil
 }
 
 func (d *DownloaderForTest) Download() (string, error) {

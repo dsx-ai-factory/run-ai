@@ -98,6 +98,12 @@ func (hrc *ReleaseClient) prepareToInstall(params *InstallParams) (*chart.Chart,
 	if err != nil {
 		return nil, fmt.Errorf("failed to download chart %v", err)
 	}
+	// loader.Load reads the chart into memory, so the downloaded copy is not needed past this call.
+	defer func() {
+		if err := chartDownloader.Cleanup(); err != nil {
+			log.Warn().Err(err).Msgf("HelmTask --> failed to clean up downloaded chart of %s", hrc.ReleaseId.String())
+		}
+	}()
 
 	log.Info().Msgf("HelmTask --> chart of %s downloaded to %s", hrc.ReleaseId.String(), chartPath)
 
