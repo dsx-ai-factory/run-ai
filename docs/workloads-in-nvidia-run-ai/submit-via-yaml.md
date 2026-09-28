@@ -4,13 +4,13 @@ This guide describes how to run supported workload types using the NVIDIA Run:ai
 
 To learn more about workload types in NVIDIA Run:ai and determine what is the most suitable workload type for your goals, see [Workload types and features](workload-types/supported-workload-types.md).
 
-<Info>
+<Note>
 
 **Note**
 
 Workloads can be submitted using YAML outside of NVIDIA Run:ai (for example, with `kubectl`). For details, see [Supported features](workload-types/supported-features.md#externally-submitted-kubernetes-workloads).
 
-</Info>
+</Note>
 
 <figure><img src="../assets/via-Yaml-submission.png" alt=""/><figcaption></figcaption></figure>
 
@@ -18,13 +18,13 @@ Workloads can be submitted using YAML outside of NVIDIA Run:ai (for example, wit
 
 Make sure you have created a [project](../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
 
-<Info>
+<Note>
 
 **Note**
 
 Via YAML submission is enabled by default. If you do not see it in the menu, contact your administrator to enable it under **General settings** → Workloads → Submit supported workload types via YAML.
 
-</Info>
+</Note>
 
 ## Supported Workload Types
 
@@ -33,13 +33,13 @@ Supported workload types include a broad range of workloads from the ML and Kube
 * Your administrator can also register additional workload types for your organization. See [Registering new workload types](workload-types/extending-workload-support/#registering-new-workload-types) for more details.
 * By default, workload types are grouped into Build, Train and Deploy categories. These categories determine how the workload is scheduled and prioritized within a project and how they are grouped for monitoring and reporting.
 
-<Info>
+<Note>
 
 **Note**
 
 Some supported workload types require additional installation or cluster preparation before they can be used. Refer to the documentation for each workload type for specific prerequisites.
 
-</Info>
+</Note>
 
 ## Workload Priority and Preemption
 By default, supported workload types are assigned a priority and preemptibility based on their workload type. These defaults determine how workloads are scheduled relative to others within the same project, whether they can use over-quota resources, and whether they may be interrupted once running. You can override the defaults by configuring priority and preemptibility. For more details on the default values per workload type, see [Workload types default](workload-types/supported-workload-types.md#workload-types-defaults).
@@ -165,11 +165,11 @@ If no endpoints appear, the workload may not yet be in a running state, or the n
 
 ## Using CLI
 
-To view the available actions, see the [CLI v2 reference](../reference/cli/runai/).
+To view the available actions, see the [CLI v2 reference](../reference/cli/runai/runai.md).
 
 ## Using API
 
-To view the available actions, see the [Workloads V2](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads-v2) API reference.
+To view the available actions, see the [Workloads V2](api:main-api:POST/api/v2/workloads) API reference.
 
 ## Troubleshooting
 

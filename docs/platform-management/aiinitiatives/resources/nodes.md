@@ -8,14 +8,14 @@ The Nodes table can be found under **Resources** in the NVIDIA Run:ai platform.
 
 The Nodes table displays a list of predefined nodes available to users in the NVIDIA Run:ai platform.
 
-<Info>
+<Note>
 
 **Note**
 
 * It is not possible to create additional nodes, or edit, or delete existing nodes.
 * Only users with relevant permissions can view the table.
 
-</Info>
+</Note>
 
 <figure><img src="../../../assets/nodes-new.png" alt=""/><figcaption></figcaption></figure>
 
@@ -60,13 +60,13 @@ Click one of the values in the GPU devices column, to view the list of GPU devic
 
 Click the value in the NUMA nodes column to view the resource breakdown per NUMA node on this node.
 
-<Info>
+<Note>
 
 **Note**
 
 The list is empty when the node's NUMA topology data is missing or invalid. See [NUMA-aware scheduling](numa-aware-scheduling.md) for the prerequisites for NUMA-aware scheduling.
 
-</Info>
+</Note>
 
 | Column                | Description                                                                    |
 | ---------------------- | -------------------------------------------------------------------------------- |
@@ -82,13 +82,13 @@ The list is empty when the node's NUMA topology data is missing or invalid. See 
 
 Click one of the values in the Pod(s) column, to view the list of pods and their parameters.
 
-<Info>
+<Note>
 
 **Note**
 
 This column is only viewable if your role in the NVIDIA Run:ai platform gives you read access to workloads, even if you are allowed to view workloads, you can only view the workloads within your allowed scope. This means, there might be more pods running on this node then appear in the list you are viewing.
 
-</Info>
+</Note>
 
 | Column                | Description                                                                                                                                                                                                                |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -120,13 +120,13 @@ Click a row in the Nodes table, then click the Show details button at the upper 
 * **Resource utilization** - Displays general GPU, CPU and network metrics
 * **GPU profiling** - Shows additional NVIDIA-specific metrics
 
-<Info>
+<Note>
 
 **Note**
 
 GPU profiling metrics are disabled by default. If unavailable, your administrator must enable it under **General settings** → Analytics → GPU profiling metrics. Before enabling, the administrator must configure GPU profiling through the DCGM Exporter and NVIDIA Run:ai Prometheus integration. For configuration steps, see [GPU profiling metrics](../../monitor-performance/gpu-profiling-metrics.md).
 
-</Info>
+</Note>
 
 #### Resource Utilization
 
@@ -159,4 +159,8 @@ Select **GPU profiling** from the dropdown to view extended GPU device-level met
 
 ## Using API
 
-To view the available actions, go to the [Nodes](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodes) API reference.
+To view the available actions, go to the [Nodes](api:main-api:GET/api/v1/nodes) API reference.
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes the [`get_node_pods`](../../../agents/tools-reference.md#cluster-and-infrastructure) tool to see which pods are running on a specific node, and which workloads they belong to, via natural language. See [AI Agents](../../../agents/overview.md) for setup.

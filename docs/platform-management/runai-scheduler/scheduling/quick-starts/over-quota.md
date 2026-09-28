@@ -10,13 +10,13 @@ This quick start provides a step-by-step walkthrough of the core scheduling conc
 * You have created two [projects](../../../aiinitiatives/organization/projects.md) - team-a and team-b - or have them created for you.
 * Each project has an assigned quota of 2 GPUs. In this example, we have 4 GPUs on 2 machines with 2 GPUs each.
 
-<Info>
+<Note>
 
 **Note**
 
 Flexible workload submission is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload submission.
 
-</Info>
+</Note>
 
 ## Step 1: Logging In
 
@@ -40,7 +40,7 @@ runai login --help
 
 <Tab title="API">
 
-To use the API, you will need to obtain a token as shown in [API authentication](https://run-ai-docs.nvidia.com/api/2.26/getting-started/how-to-authenticate-to-the-api).
+To use the API, you will need to obtain a token as shown in [API authentication](../../../../rest-api/how-to-authenticate-to-the-api.md).
 
 </Tab>
 
@@ -107,7 +107,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/):
+Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
 runai training submit a1 -i runai.jfrog.io/demo/quickstart -g 1 -p team-a
@@ -117,7 +117,7 @@ runai training submit a1 -i runai.jfrog.io/demo/quickstart -g 1 -p team-a
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Trainings](https://run-ai-docs.nvidia.com/api/2.26/workloads/trainings) API.
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Trainings](api:main-api:POST/api/v1/workloads/trainings) API.
 
 ```bash
 curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
@@ -138,16 +138,16 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](over-quota.md#a13adq7eth7w)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 
@@ -206,7 +206,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/):
+Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
 runai training submit a2 -i runai.jfrog.io/demo/quickstart -g 2 -p team-a
@@ -216,7 +216,7 @@ runai training submit a2 -i runai.jfrog.io/demo/quickstart -g 2 -p team-a
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Trainings](https://run-ai-docs.nvidia.com/api/2.26/workloads/trainings) API.
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Trainings](api:main-api:POST/api/v1/workloads/trainings) API.
 
 ```bash
 curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
@@ -237,16 +237,16 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](over-quota.md#a13adq7eth7w)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 
@@ -313,7 +313,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/):
+Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
 runai training submit b1 -i runai.jfrog.io/demo/quickstart -g 1 -p team-b
@@ -323,7 +323,7 @@ runai training submit b1 -i runai.jfrog.io/demo/quickstart -g 1 -p team-b
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Trainings](https://run-ai-docs.nvidia.com/api/2.26/workloads/trainings) API.
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Trainings](api:main-api:POST/api/v1/workloads/trainings) API.
 
 ```bash
 curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
@@ -344,16 +344,16 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](over-quota.md#a13adq7eth7w)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 
@@ -445,7 +445,7 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads' \
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/):
+Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
 runai training submit b2 -i runai.jfrog.io/demo/quickstart -g 1 -p team-b
@@ -455,7 +455,7 @@ runai training submit b2 -i runai.jfrog.io/demo/quickstart -g 1 -p team-b
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Trainings](https://run-ai-docs.nvidia.com/api/2.26/workloads/trainings) API.
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Trainings](api:main-api:POST/api/v1/workloads/trainings) API.
 
 ```bash
 curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
@@ -476,16 +476,16 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](over-quota.md#a13adq7eth7w)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 

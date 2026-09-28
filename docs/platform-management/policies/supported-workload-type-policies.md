@@ -2,7 +2,7 @@
 
 NVIDIA Run:ai workload policies can target any supported workload type registered in the platform (such as PyTorchJob, Deployment, and others). When you create a policy for a supported workload type, you can define its rules using the **Rule builder**, an interactive interface that maps the fields of the selected workload type, or by writing the policy YAML directly. For the list of workload types you can target, see [Supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md).
 
-<Info>
+<Note>
 
 **Note**
 
@@ -11,7 +11,7 @@ NVIDIA Run:ai workload policies can target any supported workload type registere
 * For policies targeting native workload types (Workspace, Training, and Inference), see [NVIDIA Run:ai native workload policies](native-workload-policies.md).
 * To apply policies to a new [workload type](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md) your organization has registered, you must first map it to the policy engine using the mapping APIs. See [Workload types policy mapping](workload-type-policy-mapping.md).
 
-</Info>
+</Note>
 
 ## Workload Policies Table
 
@@ -96,13 +96,13 @@ To add a rule:
 6. Click **SAVE RULE**
 7. Repeat for additional rules, then click **SAVE POLICY**
 
-<Info>
+<Note>
 
 **Note**
 
 All fields in a rule are mandatory. If a rule has unresolved issues when you save it, the form prompts you to review and fix them, and the rule cannot be saved until they are resolved.
 
-</Info>
+</Note>
 
 ### Overriding Rules Across Scopes
 
@@ -141,8 +141,8 @@ rules:
 
 To discover the fields and spec selectors available for a specific workload type, use the following APIs:
 
-* [`POST /api/v1/policies/mappings/minimal`](https://run-ai-docs.nvidia.com/api/policies/policy#post-api-v1-policies-mappings-minimal) - returns minimal information about the mapping for the workload type, including the list of fields and the spec selectors for each field
-* [`POST /api/v1/policies/mappings/field-info`](https://run-ai-docs.nvidia.com/api/policies/policy#post-api-v1-policies-mappings-field-info) - returns detailed field information including item selectors and formatter information
+* [`POST /api/v1/policies/mappings/minimal`](api:main-api:POST/api/v1/policies/mappings/minimal) - returns minimal information about the mapping for the workload type, including the list of fields and the spec selectors for each field
+* [`POST /api/v1/policies/mappings/field-info`](api:main-api:POST/api/v1/policies/mappings/field-info) - returns detailed field information including item selectors and formatter information
 
 See [Enforcement types](supported-workload-type-policies.md#enforcement-types) for the full list of enforcement types and their value formats. For worked examples, see [Policy YAML examples](policy-yaml-examples-supported.md).
 
@@ -179,4 +179,4 @@ To view a policy:
 
 ## Using API
 
-Go to the [Policies](https://run-ai-docs.nvidia.com/api/2.26/policies/policy) API reference to view the available actions.
+Go to the [Policies](api:main-api:GET/api/v2/policy) API reference to view the available actions.

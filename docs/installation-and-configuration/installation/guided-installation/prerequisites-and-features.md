@@ -47,7 +47,7 @@ Each prerequisite or feature's `customHelmValues` accepts keys from that compone
 Each prerequisite is configured under `prerequisites` in the configuration file, with a `mode` field controlling how the installer handles it.
 
 * `install` (default) - Installs and configures the component for you.
-* `skip` - Does not install or check for the component. Use this when the component is already installed on your cluster, or when the prerequisite doesn't apply to your environment (for example, the Network Operator on a cluster without RDMA or Multi-Node NVLink nodes).
+* `skip` - Does not install or check for the component. Use this when the component is already installed on your cluster, or when the prerequisite does not apply to your environment (for example, the Network Operator on a cluster without RDMA or Multi-Node NVLink nodes).
 
 <Note>
 
@@ -218,7 +218,7 @@ For air-gapped installation instructions, see [Prometheus](../install-using-helm
 Each feature is configured under `features` in the configuration file, and only needs to be enabled for the workload types you plan to run, with a `mode` field controlling how the installer handles it.
 
 * `install` - Installs and configures the component for you.
-* `skip` (default) - Does not install or check for the component. Use this when the component is already installed on your cluster, or when the feature doesn't apply to the workload types you plan to run.
+* `skip` (default) - Does not install or check for the component. Use this when the component is already installed on your cluster, or when the feature does not apply to the workload types you plan to run.
 
 <Note>
 

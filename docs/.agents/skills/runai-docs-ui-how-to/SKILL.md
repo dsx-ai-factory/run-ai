@@ -52,6 +52,15 @@ pattern exactly:
   than guessing the filename, and link to that file, not to the directory.
   Only include if confirmed in the code.
 - **`## Using API`** after Using CLI: one line linking to the API reference, if the resource has an API. Use Fern's `api:` link syntax (e.g. `api:[api-name]:[METHOD path]`), not a hardcoded domain — it resolves at build time regardless of URL pattern or version.
+- **`## Using MCP`** after Using API: one line naming the relevant MCP tool
+  from `docs/agents/tools-reference.md`, if the resource has a real,
+  confirmed tool there — check the domain tables (Identity, Credentials,
+  Workloads, Cluster and Infrastructure, Resources and Organization) rather
+  than guessing a tool name. MCP tools are not individually addressable
+  pages, so link to the domain section anchor (e.g.
+  `../../agents/tools-reference.md#workloads`), not a per-tool anchor, and
+  name the tool itself in backticks. Only include if confirmed in
+  `tools-reference.md`.
 
 ## Nav Registration
 

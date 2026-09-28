@@ -58,4 +58,4 @@ System notifications allow administrators to broadcast custom messages that are 
 
 ## Using APIs
 
-To view the available actions, see the [Notification Channels](https://run-ai-docs.nvidia.com/api/2.26/notifications/notificationchannels) API reference.
+To view the available actions, see the [Notification Channels](api:main-api:GET/api/v1/notification-channels) API reference.

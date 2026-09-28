@@ -2,13 +2,13 @@
 
 The `runai kubeconfig set` command allows users to configure their kubeconfig file with NVIDIA Run:ai authorization token. This setup enables users to gain access to the Kubernetes (K8s) cluster seamlessly.
 
-<Info>
+<Note>
 
 **Note**
 
 Setting kubeconfig is not required in order to use the CLI. This command is used to enable third-party workloads under NVIDIA Run:ai authorization.
 
-</Info>
+</Note>
 
 ## Usage
 
