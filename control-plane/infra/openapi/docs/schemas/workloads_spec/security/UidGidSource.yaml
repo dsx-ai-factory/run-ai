@@ -5,7 +5,7 @@ description: Indicate the way to determine the user and group ids of the contain
   b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request.
   c. `idpToken` - user and group IDs are automatically taken from the identity 
   provider (IdP) token (available only in SSO-enabled installations).
-  For more information, see [User Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers).
+  For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/config/security/user-identity-in-containers).
 type: string
 enum: [ fromTheImage, fromIdpToken, custom ]
 nullable: true
