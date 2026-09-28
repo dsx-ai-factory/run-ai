@@ -8,8 +8,8 @@ github.com/PaesslerAG/jsonpath v0.1.1 h1:c1/AToHQMVsduPAa4Vh6xp2U0evy4t8SWp8imEs
 github.com/PaesslerAG/jsonpath v0.1.1/go.mod h1:lVboNxFGal/VwW6d9JzIy56bUsYAP6tH/x80vjnCseY=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5 h1:VsVvUhPY9OCcgO32NnAhjz+oyGOgZ/CWa08CZqrfnBc=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5/go.mod h1:jqO0+q1TnbjpcyoyDQ4bSrsixa8Ld522tIWdYc7bJiU=
-github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2 h1:NhxiElE7Mc8DFzVNLkBl8ySJbtMWeWhVv9tQjt1KGz4=
-github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2/go.mod h1:yUX6YVj41VwyX85Lgu8Nk524JEMsV58xz3U+87rvIqQ=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.3 h1:MHiLCu+XLPGzJUj/g8gSlcZLL291xECJ1UCsObaC+BU=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.3/go.mod h1:HYSssZFHbHzC8h2yaMuBqhYvdDdAoSmm8amTKAjFXh4=
 github.com/gkampitakis/ciinfo v0.3.2 h1:JcuOPk8ZU7nZQjdUhctuhQofk7BGHuIy0c9Ez8BNhXs=
 github.com/gkampitakis/ciinfo v0.3.2/go.mod h1:1NIwaOcFChN4fa/B0hEBdAb6npDlFL8Bwx4dfRLRqAo=
 github.com/gkampitakis/go-diff v1.3.2 h1:Qyn0J9XJSDTgnsgHRdz9Zp24RaJeKMUHg2+PDZZdC4M=
