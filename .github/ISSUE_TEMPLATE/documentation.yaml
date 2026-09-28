@@ -1,7 +1,7 @@
 name: Documentation issue
 description: Report a problem with or suggest an improvement to the documentation.
 title: "[docs] "
-labels: ["kind/documentation", "triage/needs-triage"]
+labels: ["documentation"]
 body:
   - type: markdown
     attributes:
