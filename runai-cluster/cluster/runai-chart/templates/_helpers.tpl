@@ -204,9 +204,6 @@ nodeAffinity:
 
 {{- define "globalFipsMode" -}}
 {{- $fipsMode := .Values.global.fipsMode | default "off" -}}
-{{- if kindIs "bool" $fipsMode -}}
-{{- $fipsMode = ternary "on" "off" $fipsMode -}}
-{{- end -}}
 {{- if not (has $fipsMode (list "off" "on" "only")) -}}
 {{- fail (printf "global.fipsMode must be one of: off, on, only (got %q)" $fipsMode) -}}
 {{- end -}}

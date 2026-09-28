@@ -32,28 +32,17 @@ tests:
           path: metadata.annotations["service.beta.openshift.io/inject-cabundle"]
           value: "true"
 
-  # Helm shares global.* into subcharts, so fipsMode reaches KRM on its own --
-  # but the bundled scheduler reads global.fips, which Helm does not derive.
-  # KRM fails the render rather than letting the scheduler run non-FIPS images.
-  - it: should fail the render when fipsMode is on without the scheduler boolean
-    template: charts/kai-resource-management/templates/krm-config.yaml
+  # Helm shares global.* into subcharts, and since KAI v0.18 the scheduler reads
+  # the same fipsMode key, so this one value is the whole story: no second
+  # scheduler-side flag to keep in step.
+  - it: should carry fipsMode to the scheduler without a second flag
+    template: charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
     set:
       global.fipsMode: "on"
     asserts:
-      # Matched by pattern, not verbatim: the wording is KRM's to change, and
-      # what this test owns is that the mismatch fails rather than shipping
-      # non-FIPS scheduler images.
-      - failedTemplate:
-          errorPattern: "global\\.fipsMode is enabled but the bundled kai-scheduler"
-
-  - it: should render when fipsMode and the scheduler boolean agree
-    template: charts/kai-resource-management/templates/krm-config.yaml
-    set:
-      global.fipsMode: "on"
-      global.fips: true
-    asserts:
-      - hasDocuments:
-          count: 0
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: -fips$
 
   # Neither operator's operand pods are rendered by this chart: each operator
   # deploys them from its own MS_TAG, which kai/v1/common.Image reads. So the
@@ -65,7 +54,6 @@ tests:
       - charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
     set:
       global.fipsMode: "only"
-      global.fips: true
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].image
@@ -78,13 +66,14 @@ tests:
     template: charts/kai-resource-management/templates/krm-operator/deployment.yaml
     set:
       global.fipsMode: "only"
-      global.fips: true
     asserts:
+      # tlsmlkem=0 rides along under "only": the default TLS curve calls plain
+      # X25519 internally, which fails every client-go handshake under fips140=only.
       - contains:
           path: spec.template.spec.containers[0].env
           content:
             name: GODEBUG
-            value: "fips140=only"
+            value: "fips140=only,tlsmlkem=0"
 
   - it: should leave both operators on ordinary images by default
     templates:

@@ -36,9 +36,7 @@ type WorkloadObjects struct {
 type WorkloadMetadata struct {
 	Status string
 
-	RunningPods int64
-	PendingPods int64
-	UsedNodes   string
+	UsedNodes string
 
 	RequestedGPUs              float64
 	RequestedGPUsMemory        int64

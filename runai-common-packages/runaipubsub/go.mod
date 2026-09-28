@@ -7,10 +7,10 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.5.3
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5
 	github.com/aws/smithy-go v1.28.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
 	github.com/google/uuid v1.6.0
 	github.com/nats-io/nats.go v1.54.0
 	github.com/pkg/errors v0.9.1

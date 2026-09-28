@@ -21,6 +21,7 @@ import (
 	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	"gopkg.in/yaml.v3"
 )
 
@@ -196,14 +197,14 @@ func (w *WorkloadsV2Impl) applyDefaultMutations(metadata api.WorkloadV2MetadataC
 
 func (w *WorkloadsV2Impl) editManifestWithMetadata(ctx context.Context, manifest map[string]interface{},
 	metadata api.WorkloadV2MetadataCreateParams, project *orgUnitApi.Project, workloadId string,
-	trustedConvertedFromNative bool,
+	trustedConvertedFromNative bool, karta *kartav1alpha1.Karta,
 ) (map[string]interface{}, string, *api.Error) {
 	modifiedManifest, err := w.k8sUtil.updateResourceMetadataWithOptions(
 		ctx,
 		manifest,
 		workloadId,
 		project,
-		resourceMetadataUpdateOptions{trustedConvertedFromNative: trustedConvertedFromNative},
+		resourceMetadataUpdateOptions{trustedConvertedFromNative: trustedConvertedFromNative, karta: karta},
 	)
 	if err != nil {
 		return nil, "", api.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to add workload ID to resource: %v", err), err)
