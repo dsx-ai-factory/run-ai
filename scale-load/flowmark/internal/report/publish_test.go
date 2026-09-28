@@ -19,13 +19,14 @@ import (
 
 type fakeStore struct {
 	objects map[string][]byte
+	written map[string]bool
 	failPut map[string]error
 	failGet map[string]error
 	corrupt map[string][]byte
 }
 
 func newFakeStore() *fakeStore {
-	return &fakeStore{objects: map[string][]byte{}, failPut: map[string]error{}, failGet: map[string]error{}, corrupt: map[string][]byte{}}
+	return &fakeStore{objects: map[string][]byte{}, written: map[string]bool{}, failPut: map[string]error{}, failGet: map[string]error{}, corrupt: map[string][]byte{}}
 }
 
 func (f *fakeStore) Put(_ context.Context, name string, data []byte) error {
@@ -33,6 +34,7 @@ func (f *fakeStore) Put(_ context.Context, name string, data []byte) error {
 		return err
 	}
 	f.objects[name] = append([]byte(nil), data...)
+	f.written[name] = true
 	return nil
 }
 
@@ -40,7 +42,7 @@ func (f *fakeStore) Get(_ context.Context, name string) ([]byte, error) {
 	if err := f.failGet[name]; err != nil {
 		return nil, err
 	}
-	if data, ok := f.corrupt[name]; ok {
+	if data, ok := f.corrupt[name]; ok && f.written[name] {
 		return data, nil
 	}
 	data, ok := f.objects[name]
@@ -102,7 +104,11 @@ func TestPublishFailsLoudNamingTheStep(t *testing.T) {
 		{name: "existing manifest is corrupt", prepare: func(f *fakeStore) { f.objects[ManifestName] = []byte("{oops") }, wantErr: "parse manifest:"},
 		{name: "manifest write fails", prepare: func(f *fakeStore) { f.failPut[ManifestName] = errors.New("permission denied") }, wantErr: "write manifest: permission denied"},
 		{name: "results read back differ", prepare: func(f *fakeStore) { f.corrupt[name] = []byte("{}") }, wantErr: "verify results " + name + ": stored content differs"},
-		{name: "manifest lost the entry", prepare: func(f *fakeStore) { f.corrupt[ManifestName] = []byte(`{"runs":[]}`) }, wantErr: "verify manifest: " + name + " is missing"},
+		{name: "manifest lost the entry", prepare: func(f *fakeStore) { f.corrupt[ManifestName] = []byte(`{"runs":[]}`) }, wantErr: "verify manifest: stored manifest.json differs"},
+		{name: "manifest lost another run", prepare: func(f *fakeStore) {
+			f.objects[ManifestName] = []byte("{\n  \"runs\": [\n    \"results-older.json\"\n  ]\n}\n")
+			f.corrupt[ManifestName] = []byte("{\n  \"runs\": [\n    \"" + name + "\"\n  ]\n}\n")
+		}, wantErr: "verify manifest: stored manifest.json differs"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -134,6 +140,19 @@ func TestLocalStoreRoundTripAndNotFound(t *testing.T) {
 	}
 	if info, err := os.Stat(filepath.Join(dir, "a.json")); err != nil || info.Mode().Perm() != 0o600 {
 		t.Fatalf("files must be private to the user: %v %v", info, err)
+	}
+	if err := store.Put(context.Background(), "a.json", []byte(`{"v":2}`)); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Name() != "a.json" {
+		t.Fatalf("an overwrite must leave exactly the target file behind, got %v", entries)
+	}
+	if got, _ := store.Get(context.Background(), "a.json"); string(got) != `{"v":2}` {
+		t.Fatalf("overwrite must replace the content, got %q", got)
 	}
 }
 

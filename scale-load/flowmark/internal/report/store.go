@@ -34,7 +34,25 @@ func NewLocal(dir string) (*Local, error) {
 }
 
 func (l *Local) Put(_ context.Context, name string, data []byte) error {
-	return os.WriteFile(filepath.Join(l.dir, filepath.Base(name)), data, 0o600)
+	target := filepath.Join(l.dir, filepath.Base(name))
+	temp, err := os.CreateTemp(l.dir, filepath.Base(name)+".*.tmp")
+	if err != nil {
+		return err
+	}
+	if _, err := temp.Write(data); err != nil {
+		_ = temp.Close()
+		_ = os.Remove(temp.Name())
+		return err
+	}
+	if err := temp.Close(); err != nil {
+		_ = os.Remove(temp.Name())
+		return err
+	}
+	if err := os.Rename(temp.Name(), target); err != nil {
+		_ = os.Remove(temp.Name())
+		return err
+	}
+	return nil
 }
 
 func (l *Local) Get(_ context.Context, name string) ([]byte, error) {

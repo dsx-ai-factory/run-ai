@@ -64,12 +64,8 @@ func Publish(ctx context.Context, store Store, document Document) (Receipt, erro
 	if err != nil {
 		return Receipt{}, fmt.Errorf("verify manifest: %w", err)
 	}
-	verified, err := parseManifest(storedManifest)
-	if err != nil {
-		return Receipt{}, fmt.Errorf("verify manifest: %w", err)
+	if !bytes.Equal(storedManifest, encoded) {
+		return Receipt{}, fmt.Errorf("verify manifest: stored %s differs from what was written", ManifestName)
 	}
-	if !verified.contains(name) {
-		return Receipt{}, fmt.Errorf("verify manifest: %s is missing from %s", name, ManifestName)
-	}
-	return Receipt{File: name, Runs: len(verified.Runs)}, nil
+	return Receipt{File: name, Runs: len(updated.Runs)}, nil
 }
