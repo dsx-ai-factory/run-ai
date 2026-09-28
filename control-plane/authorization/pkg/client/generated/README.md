@@ -199,7 +199,6 @@ Class | Method | HTTP request | Description
  - [SubjectType](docs/SubjectType.md)
  - [SubjectTypeExtended](docs/SubjectTypeExtended.md)
  - [SubmissionError](docs/SubmissionError.md)
- - [TenantIsCspManagedSetting](docs/TenantIsCspManagedSetting.md)
  - [UpdateAuthorizationSettingByKeyRequest](docs/UpdateAuthorizationSettingByKeyRequest.md)
  - [UpdateScopeAccessRulesRequest](docs/UpdateScopeAccessRulesRequest.md)
 
