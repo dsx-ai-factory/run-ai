@@ -66,5 +66,30 @@ func (rh *ClientReconcilerHelper) ReconcileClient(ctx context.Context, realm str
 			return err
 		}
 	}
+	if client.NeedsGeneratedSecret() {
+		if err := rh.ensureClientSecret(ctx, realm, clientID, *newClient.ID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ensureClientSecret regenerates the client's secret if it doesn't have one yet.
+// A client that transitions from public to confidential via an update does not
+// get a secret automatically from Keycloak; it has to be generated explicitly.
+func (rh *ClientReconcilerHelper) ensureClientSecret(ctx context.Context, realm string, clientID string, internalID string) error {
+	secret, err := rh.iamServices.ClientService.GetClientSecret(ctx, realm, internalID)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get secret for client %s in realm %s: %v", clientID, realm, err)
+		return err
+	}
+	if secret != "" {
+		return nil
+	}
+	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Client %s in realm %s has no secret, regenerating", clientID, realm)
+	if _, err := rh.iamServices.ClientService.RegenerateClientSecret(ctx, realm, internalID); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to regenerate secret for client %s in realm %s: %v", clientID, realm, err)
+		return err
+	}
 	return nil
 }

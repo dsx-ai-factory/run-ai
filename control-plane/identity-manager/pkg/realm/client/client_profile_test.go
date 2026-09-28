@@ -74,7 +74,7 @@ func TestApplyClientProfile(t *testing.T) {
 				PublicClient:              ptr.To(false),
 				DirectAccessGrantsEnabled: ptr.To(false),
 				StandardFlowEnabled:       ptr.To(false),
-				ServiceAccountsEnabled:    ptr.To(false),
+				ServiceAccountsEnabled:    ptr.To(true),
 			},
 			expectedEmailScopeDefault: true,
 		},

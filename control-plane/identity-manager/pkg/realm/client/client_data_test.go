@@ -63,7 +63,7 @@ func TestRunaiClient_GetClientData_NilExisting(t *testing.T) {
 	assert.False(t, *result.ClientConfig.PublicClient)
 	assert.False(t, *result.ClientConfig.DirectAccessGrantsEnabled)
 	assert.False(t, *result.ClientConfig.StandardFlowEnabled)
-	assert.False(t, *result.ClientConfig.ServiceAccountsEnabled)
+	assert.True(t, *result.ClientConfig.ServiceAccountsEnabled)
 }
 
 func TestRunaiClient_GetClientData_ExistingClient(t *testing.T) {
