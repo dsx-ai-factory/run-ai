@@ -1789,17 +1789,24 @@ prefetch_go_modules() {
   mkdir -p "${gopath_vol}" "${gocache_vol}"
 
   # Build a script that runs go mod download in each service directory.
-  local cmds=""
+  local -a mod_dirs=()
   for base_dir in "${REPO_ROOT}/control-plane" "${REPO_ROOT}/runai-cluster/cluster"; do
     while IFS= read -r -d '' go_mod; do
       local rel
       rel="$(dirname "${go_mod}")"
-      rel="${rel#${REPO_ROOT}/}"
-      cmds+="(cd /repo/${rel} && go mod download all 2>/dev/null) || true; "
+      mod_dirs+=("${rel#${REPO_ROOT}/}")
     done < <(find "${base_dir}" -maxdepth 2 -name "go.mod" -print0 2>/dev/null)
   done
 
-  [[ -z "${cmds}" ]] && return 0
+  [[ ${#mod_dirs[@]} -eq 0 ]] && return 0
+
+  # A cold cache is several GB and takes a long time; print one line per module so the
+  # step does not look hung.
+  local cmds="" i=0
+  for rel in "${mod_dirs[@]}"; do
+    i=$((i + 1))
+    cmds+="echo '[${i}/${#mod_dirs[@]}] ${rel}'; (cd /repo/${rel} && go mod download all 2>/dev/null) || true; "
+  done
 
   local af_args=()
   [[ "${CONTAINER_TOOL}" == "podman" && -f "${HOME}/.docker/config.json" ]] && \
@@ -1830,7 +1837,8 @@ prefetch_go_modules() {
     -e CGO_ENABLED=0 \
     -e GO111MODULE=on \
     library/golang:1.26.8 \
-    bash -c "${cmds}" >/dev/null 2>&1 || \
+    bash -c "${cmds}" 2>/dev/null \
+    | while IFS= read -r line; do log "  ${line}"; done || \
     warn "Module pre-warm incomplete — remaining modules will download during build"
 
   log "Go module cache warm"
