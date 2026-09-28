@@ -21,6 +21,8 @@ on:
       - 'docs/**'
       - 'fern/**'
       - 'tools/check-fern-nav.py'
+      - 'local-dev.md'
+      - 'CONTRIBUTING.md'
       - '.github/workflows/fern-docs-ci.yaml'
   workflow_dispatch: {}
 
@@ -56,6 +58,8 @@ jobs:
             /fern/
             /docs/
             /tools/
+            /local-dev.md
+            /CONTRIBUTING.md
 
       # Catches nav entries pointing at files that were moved, renamed, or never
       # migrated — which `fern check` does not validate (see docs/AGENTS.md:310).
