@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
@@ -93,17 +94,19 @@ func podNodePools(instance kartaresource.ExtractedInstance, actualNodePools []cl
 	return nodePoolsFromNodeAffinity(nodeAffinity, actualNodePools)
 }
 
-func knownNodePools(names []string, actualNodePools []clusterApi.Nodepool) []string {
+func knownNodePools(names []string, nodePools []clusterApi.Nodepool) []string {
+	actualNodePools := datastructs.NewSet[string]()
+	for _, nodePool := range nodePools {
+		actualNodePools.Add(nodePool.GetName())
+	}
+
 	var known []string
 	for _, name := range names {
-		for _, nodePool := range actualNodePools {
-			if nodePool.GetName() == name {
-				known = mergeNodePoolNames(known, []string{name})
-				break
-			}
+		if actualNodePools.Has(name) {
+			known = append(known, name)
 		}
 	}
-	return known
+	return mergeNodePoolNames(nil, known)
 }
 
 func nodePoolsFromNodeAffinity(nodeAffinity *corev1.NodeAffinity, actualNodePools []clusterApi.Nodepool) []string {
