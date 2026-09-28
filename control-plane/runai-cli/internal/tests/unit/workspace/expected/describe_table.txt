@@ -9,7 +9,7 @@ Department:                         default
 Submitted By:                       test@example.com
 Priority:                           high (125)
 Category:                           Build
-Preemptible:                        false
+Preemptibility:                     Non-preemptible
 Requested Node Pool:                default
 Image:                              jupyter/scipy-notebook
 Image Pull Policy:                  IfNotPresent
