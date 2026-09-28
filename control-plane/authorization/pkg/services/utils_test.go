@@ -20,7 +20,7 @@ import (
 	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/dao"
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/test"
-	orgunit_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"k8s.io/utils/ptr"
 
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
@@ -75,7 +75,7 @@ func Invalidate(ctx context.Context, resourceId string, resourceType api.Resourc
 func SetMockBackendServer() {
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, "setting") {
-			jsonResponse, err := json.Marshal(r.Header.Get("X-Runai-Tenant-Id") == fmt.Sprintf("%d", testing.DGXCTestTenant))
+			jsonResponse, err := json.Marshal(false)
 			Expect(err).To(BeNil())
 
 			w.Header().Set("Content-Type", "application/json")

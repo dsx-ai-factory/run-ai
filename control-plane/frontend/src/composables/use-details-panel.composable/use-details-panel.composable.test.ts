@@ -7,13 +7,13 @@ import { describe, it, expect } from "vitest";
 import { ref } from "vue";
 import { useDetailsPanel } from "./use-details-panel.composable";
 import type { IDetailsPanelItem, IDetailsPanelSectionDef } from "@/models/details-panel.model";
-import { matchesItem } from "@/utils/details-panel.utils";
+import { matchAnyItem } from "@/utils/details-panel.utils";
 
 function makeSection(id: string, title: string, items: IDetailsPanelItem[]): IDetailsPanelSectionDef {
   return {
     id,
     title,
-    customMatch: (term) => items.some((it) => matchesItem(it, term)),
+    customMatch: (term) => matchAnyItem(items, term),
     data: { items },
   };
 }

@@ -15,13 +15,11 @@ import (
 )
 
 const (
-	CSPSettingKey                = "tenant.is_csp_managed"
 	EnableScopedAuthorizationKey = "tenant.enable_scoped_authorization"
 )
 
 // TenantSettingsService defines the interface for tenant settings operations
 type TenantSettingsService interface {
-	IsDGXCManaged(ctx context.Context) bool
 	IsScopedAuthorizationEnabled(ctx context.Context) bool
 }
 
@@ -32,11 +30,6 @@ type TenantSettings struct{}
 // NewTenantSettings creates a new instance of TenantSettings
 func NewTenantSettings() TenantSettingsService {
 	return &TenantSettings{}
-}
-
-// IsDGXCManaged checks if the tenant is DGXC (CSP) managed.
-func (ts *TenantSettings) IsDGXCManaged(ctx context.Context) bool {
-	return false
 }
 
 // IsScopedAuthorizationEnabled checks if scoped authorization is enabled for the tenant.

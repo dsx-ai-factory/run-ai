@@ -18,10 +18,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/clusters"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/constants"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/topology"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 )
 
 var (
@@ -156,6 +156,11 @@ func applyDefaultTopologyAnnotations(ctx context.Context, annotations map[string
 	}
 
 	found, topologyName, err := topology.CheckNodePoolsTopology(ctx, actualNodePools.GetNodepools(), nodePoolsNames)
+	if err == topology.ErrTopologyNameDoesNotMatch {
+		// Mixed project defaults have no common topology to inject. Let the
+		// pod-group-assigner derive it from the node pool selected for the workload.
+		return nil
+	}
 	if err != nil {
 		return err
 	}

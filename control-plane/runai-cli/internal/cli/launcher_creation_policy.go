@@ -5,7 +5,7 @@
 
 package cli
 
-import openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+import openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 const (
 	typeNullableLauncherCreationPolicy = "launcher-creation-policy"

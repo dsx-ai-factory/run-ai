@@ -6,9 +6,9 @@
 package composer_v2
 
 import (
+	workloadApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	workloadApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 var workloadStorageCracker = jsonutils.NewJsonCracker(workloadApi.WorkspaceSpecSpecAllOfStorage{})

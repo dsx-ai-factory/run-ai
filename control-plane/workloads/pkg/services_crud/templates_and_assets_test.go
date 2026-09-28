@@ -24,6 +24,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	bc_mocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/mocks/pkg/clients/backend"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/assets"
 	assetsClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/assets"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/clusterservice"
@@ -34,7 +35,6 @@ import (
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	k8sObjectsTrackerMock "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/mocks"
 	policyService "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 )

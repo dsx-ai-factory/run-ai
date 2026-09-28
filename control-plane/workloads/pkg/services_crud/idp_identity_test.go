@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	policy "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/policy_compliance"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 

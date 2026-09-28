@@ -1817,6 +1817,7 @@ components:
         - datavolumes
         - secret-volume-assets
         - storage-class-configuration
+        - device-classes
         - access-keys
         - workload-properties
         - network-topologies

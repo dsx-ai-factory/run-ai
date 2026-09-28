@@ -35,7 +35,7 @@ metadata:
   namespace: test
 spec:
   containers:
-  - image: gcr.io/run-ai-demo/quickstart-cuda
+  - image: <image>
     imagePullPolicy: Always
     name: job
     env:

@@ -1814,6 +1814,7 @@ export const ResourceType = {
     Datavolumes: 'datavolumes',
     SecretVolumeAssets: 'secret-volume-assets',
     StorageClassConfiguration: 'storage-class-configuration',
+    DeviceClasses: 'device-classes',
     AccessKeys: 'access-keys',
     WorkloadProperties: 'workload-properties',
     NetworkTopologies: 'network-topologies',

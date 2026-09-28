@@ -15,7 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/settings"
-	org_unit_service_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
+	org_unit_service_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	setting_pkg "github.com/dsx-ai-factory/run-ai/runai-common-packages/setting"

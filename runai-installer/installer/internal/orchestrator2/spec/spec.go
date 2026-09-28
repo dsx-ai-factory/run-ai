@@ -532,6 +532,13 @@ func (s *Spec) KnativeUsesOLM() bool {
 	return s.IsOpenShift() && s.Features != nil && s.Features.Knative.IsInstall()
 }
 
+// LWSUsesOLM reports whether LWS installs via OperatorHub: on OpenShift it
+// installs through the Red Hat Leader Worker Set operator. Off OpenShift it
+// installs from the upstream Helm chart.
+func (s *Spec) LWSUsesOLM() bool {
+	return s.IsOpenShift() && s.Features != nil && s.Features.LWS.IsInstall()
+}
+
 func (s *Spec) Validate() error {
 	if s == nil {
 		return errors.New("spec is required")

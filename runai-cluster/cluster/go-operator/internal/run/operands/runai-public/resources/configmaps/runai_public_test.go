@@ -22,6 +22,7 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
 	kcfake "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client/fake"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
@@ -29,6 +30,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 
 	fakediscovery "k8s.io/client-go/discovery/fake"
@@ -448,5 +450,103 @@ var _ = Describe("getGatewayAPIStatus", func() {
 			Expect(gwStatus.Reason).To(ContainSubstring("failed to get Gateway"))
 			Expect(gwStatus.Reason).To(ContainSubstring("forbidden"))
 		})
+	})
+})
+
+var gpuFractioningConfigGVK = schema.GroupVersionKind{
+	Group:   "gpu-fractioning.kai.scheduler",
+	Version: "v1alpha1",
+	Kind:    "GpuFractioningConfig",
+}
+
+func newDCGMExporterService() *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      consts.DCGMExporterServiceName,
+			Namespace: consts.GPUOperatorNamespace,
+			Labels:    map[string]string{"app": "nvidia-dcgm-exporter"},
+		},
+		Spec: corev1.ServiceSpec{
+			ClusterIP: "100.0.0.127",
+			Ports:     []corev1.ServicePort{{Port: 12345}},
+		},
+	}
+}
+
+func newGpuFractioningConfigWithReadyCondition(status, message string) *unstructured.Unstructured {
+	obj := &unstructured.Unstructured{}
+	obj.SetGroupVersionKind(gpuFractioningConfigGVK)
+	obj.SetName("default")
+	Expect(unstructured.SetNestedSlice(obj.Object, []interface{}{
+		map[string]interface{}{
+			"type":    "Ready",
+			"status":  status,
+			"message": message,
+		},
+	}, "status", "conditions")).To(Succeed())
+	return obj
+}
+
+var _ = Describe("getGpuStackStatus", func() {
+	var (
+		ctx      context.Context
+		kbClient client.Client
+		scheme   *runtime.Scheme
+	)
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		scheme = runtime.NewScheme()
+		Expect(corev1.AddToScheme(scheme)).To(Succeed())
+		scheme.AddKnownTypeWithName(gpuFractioningConfigGVK, &unstructured.Unstructured{})
+		scheme.AddKnownTypeWithName(
+			gpuFractioningConfigGVK.GroupVersion().WithKind(gpuFractioningConfigGVK.Kind+"List"),
+			&unstructured.UnstructuredList{},
+		)
+	})
+
+	It("reports available when both the nvidia stack and gpu-fractioning readiness pass", func() {
+		kbClient = fake.NewClientBuilder().WithScheme(scheme).WithObjects(
+			newDCGMExporterService(),
+			newGpuFractioningConfigWithReadyCondition("True", "all components are healthy"),
+		).Build()
+
+		status := getGpuStackStatus(ctx, kbClient)
+		Expect(*status.Available).To(BeTrue())
+		Expect(status.Reason).To(BeEmpty())
+	})
+
+	It("reports unavailable with the gpu-fractioning reason when only gpu-fractioning readiness fails", func() {
+		kbClient = fake.NewClientBuilder().WithScheme(scheme).WithObjects(
+			newDCGMExporterService(),
+			newGpuFractioningConfigWithReadyCondition("False", "NVIDIA GPU Operator version v25.3.0 is below minimum supported version v26.7.1"),
+		).Build()
+
+		status := getGpuStackStatus(ctx, kbClient)
+		Expect(*status.Available).To(BeFalse())
+		Expect(status.Reason).To(Equal("NVIDIA GPU Operator version v25.3.0 is below minimum supported version v26.7.1"))
+	})
+
+	It("prefers the gpu-fractioning reason when both sub-checks fail", func() {
+		kbClient = fake.NewClientBuilder().WithScheme(scheme).WithObjects(
+			newGpuFractioningConfigWithReadyCondition("False", "gpu-fractioning failure reason"),
+		).Build()
+
+		status := getGpuStackStatus(ctx, kbClient)
+		Expect(*status.Available).To(BeFalse())
+		Expect(status.Reason).To(Equal("gpu-fractioning failure reason"))
+
+		nvidiaStatus := status.Components["nvidia"]
+		Expect(*nvidiaStatus.Available).To(BeFalse())
+	})
+
+	It("reports unavailable with the nvidia reason when only the nvidia stack check fails", func() {
+		kbClient = fake.NewClientBuilder().WithScheme(scheme).WithObjects(
+			newGpuFractioningConfigWithReadyCondition("True", "all components are healthy"),
+		).Build()
+
+		status := getGpuStackStatus(ctx, kbClient)
+		Expect(*status.Available).To(BeFalse())
+		Expect(status.Reason).To(ContainSubstring("dcgm-exporter service not found"))
 	})
 })

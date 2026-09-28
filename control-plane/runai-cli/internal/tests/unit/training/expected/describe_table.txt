@@ -55,9 +55,9 @@ Storage
 
 Network
 
- Name             Tool Type        Connection Type  Container Port   URL                                                            
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
- url              custom           ExternalUrl      8080             https://nael-env-001.runailabs.com/team-b/my-training-demo-123 
+ Name             Tool Type        Connection Type  Container Port   URL                                                          
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ url              custom           ExternalUrl      8080             https://nael-env-001.example.com/team-b/my-training-demo-123 
 
   Access Control:
   url (Port 8080):

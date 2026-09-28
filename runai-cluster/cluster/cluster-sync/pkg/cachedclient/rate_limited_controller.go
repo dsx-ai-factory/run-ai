@@ -79,6 +79,7 @@ var (
 	PVCRL                           RateLimiterName = "PVC"
 	SecretRL                        RateLimiterName = "Secret"
 	StorageClassRL                  RateLimiterName = "StorageClass"
+	DeviceClassRL                   RateLimiterName = "DeviceClass"
 	PriorityClassRL                 RateLimiterName = "PriorityClass"
 	ApplicationRL                   RateLimiterName = "Application"
 	KartaRL                         RateLimiterName = "Karta"
@@ -115,6 +116,7 @@ var (
 		PVCRL:                           {},
 		SecretRL:                        {},
 		StorageClassRL:                  {},
+		DeviceClassRL:                   {},
 		PriorityClassRL:                 {},
 		ApplicationRL:                   {},
 		KartaRL:                         {},

@@ -30,16 +30,16 @@ The support matrix outlines the verified compatibility standards for NVIDIA Run:
 
 Each NVIDIA Run:ai release is tested and validated against a single minor version of each dependency.
 
-| Component    | Deployed On   | Supported Version |
-| ------------ | ------------- | ----------------- |
-| Keycloak     | Control plane | 26.6              |
-| PostgreSQL   | Control plane | 16                |
-| Traefik      | Control plane | 3.7               |
-| NATS         | Control plane | 2.11.8            |
-| Thanos       | Control plane | 0.38.0            |
-| Valkey       | Cluster       | 9.1.1             |
-| oauth2-proxy | Cluster       | v7.15.3           |
-| git-sync     | Cluster       | v4.7.1            |
+| Component    | Deployed On                | Supported Version |
+| ------------ | --------------------------- | ----------------- |
+| Keycloak     | NVIDIA Run:ai control plane | 26.6              |
+| PostgreSQL   | NVIDIA Run:ai control plane | 16                |
+| Traefik      | NVIDIA Run:ai control plane | 3.7               |
+| NATS         | NVIDIA Run:ai control plane | 2.11.8            |
+| Thanos       | NVIDIA Run:ai control plane | 0.38.0            |
+| Valkey       | NVIDIA Run:ai cluster       | 9.0.4             |
+| oauth2-proxy | NVIDIA Run:ai cluster       | v7.15.4           |
+| git-sync     | NVIDIA Run:ai cluster       | v4.7.0            |
 
 ## Supported NVIDIA GPUs
 
@@ -66,7 +66,7 @@ NVIDIA Run:ai v3.0 supports a wide range of Kubernetes distributions across on-p
 
 **Note**
 
-For a per-version Kubernetes and OpenShift compatibility matrix, see [Kubernetes and OpenShift Version Alignment](upgrade/helm.md#kubernetes-and-openshift-version-alignment). Review this before upgrading to ensure your Kubernetes or OpenShift distribution version is compatible with your target NVIDIA Run:ai version.
+For a per-version Kubernetes and OpenShift compatibility matrix, see [Kubernetes and OpenShift Compatibility](upgrade/plan-the-upgrade.md#kubernetes-and-openshift-compatibility). Review this before upgrading to ensure your Kubernetes or OpenShift distribution version is compatible with your target NVIDIA Run:ai version.
 
 </Note>
 

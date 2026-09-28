@@ -70,7 +70,7 @@
           <div class="row items-center q-mt-md q-mb-lg q-mx-md" v-if="shouldShowHelp">
             <span class="text-italic"
               >For more information, see the
-              <a :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
+              <a aid="sso-guide-link" :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
             >
           </div>
         </template>
@@ -119,7 +119,7 @@
   <div class="row items-center q-my-md" v-if="!isSamlIdp && shouldShowHelp">
     <span class="text-italic"
       >For more information, see the
-      <a :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
+      <a aid="sso-guide-link" :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
     >
   </div>
 </template>
@@ -362,6 +362,13 @@ export default defineComponent({
     cancelEditIdp(): void {
       this.isNewIdp = false;
       this.idpNewAlias = "";
+    },
+  },
+  watch: {
+    isSamlIdp(newValue: boolean): void {
+      if (!newValue) {
+        this.onCertificateStatus({ expired: false, expiringSoon: false });
+      }
     },
   },
 });

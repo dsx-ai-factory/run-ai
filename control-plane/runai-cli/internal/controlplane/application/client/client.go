@@ -12,7 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/httputils"
 	clierrors "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/errors"
 	instancecfg "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"go.uber.org/zap"
 )
 

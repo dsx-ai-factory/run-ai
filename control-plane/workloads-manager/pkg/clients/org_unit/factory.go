@@ -12,8 +12,8 @@ import (
 
 	ourConfig "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/config"
 
-	orgUnitService "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 )
 
 // ClientInterface lists the assets services that workloads service needs

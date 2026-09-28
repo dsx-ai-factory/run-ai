@@ -10,6 +10,7 @@ export const docsUtil = {
   getSupportAnchor,
   getTroubleshootingHTMLLink,
   getNumaAwareSchedulingHTMLLink,
+  getPrerequisitesHTMLLink,
 };
 
 function getSupportAnchor(text = DOCS.SUPPORT.LABEL): string {
@@ -30,6 +31,14 @@ function getTroubleshootingHTMLLink(href: string): string {
 function getNumaAwareSchedulingHTMLLink(): string {
   const numaGuideURL = escapeHTML(DOCS.NODE_POOLS.NUMA_AWARE_SCHEDULING);
   return `For more information see the <a href="${numaGuideURL}" target="_blank" rel="noopener noreferrer">Configuring NUMA-Aware Scheduling guide.</a>`;
+}
+
+function getPrerequisitesHTMLLink(): string {
+  // The docs catalog in use may have no destination for this page, in which case it is rendered
+  // without a link rather than pointing nowhere.
+  if (!DOCS.INSTALLATION.PREREQUISITES) return "";
+  const prerequisitesURL = escapeHTML(DOCS.INSTALLATION.PREREQUISITES);
+  return `For more information, see the <a href="${prerequisitesURL}" target="_blank" rel="noopener noreferrer">Prerequisites guide.</a>`;
 }
 
 function escapeHTML(value: string): string {
