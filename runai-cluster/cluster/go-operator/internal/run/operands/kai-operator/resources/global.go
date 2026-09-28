@@ -34,6 +34,7 @@ func convertKAIGlobal(runaiConfig *runaiv1.RunaiConfig) *kaiv1.GlobalConfig {
 		NodePoolLabelKey:                  ptr.To(clustercommonconstants.NodePoolNameLabel),
 		RequireDefaultPodAntiAffinityTerm: ptr.To(runaiConfig.Spec.Global.RequireDefaultPodAntiAffinity),
 		VPA:                               convertVPA(runaiConfig.Spec.Global.VPA),
+		FIPSOnly:                          ptr.To(runaiConfig.Spec.Internal.Global.FipsMode == "only"),
 	}
 
 	if runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor == runv1internal.KubernetesFlavorOpenShift {
