@@ -140,7 +140,7 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addRemoteCluster(legacy_runtime_runner.Operand(remoteClusterClient, runaiConfig))
 	// KRM supplies the project-controller now; registering it disabled deletes
 	// the Deployment left behind.
-	mo.addOldRemoteCluster(project_controller.Operand(), false)
+	mo.addRemoteCluster(project_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(accessrule_controller.Operand(), *spec.AccessRuleController.Enabled && *spec.ProjectController.CreateRoleBindings)
 	mo.addOldRemoteCluster(mpi_operator.Operand(), true)
 	mo.addOldRemoteCluster(training_operator.Operand(), true)
