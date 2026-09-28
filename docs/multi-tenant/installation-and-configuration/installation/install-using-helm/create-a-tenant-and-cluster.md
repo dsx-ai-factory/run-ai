@@ -5,7 +5,7 @@
 
 This page describes how to onboard a new tenant end to end: create the tenant, provision and register its Kubernetes cluster, install the cluster using the Helm command returned by the platform, and share access details with the tenant.
 
-Onboarding a tenant requires an authenticated Bearer token - see [API Access Setup](../guided-installation/api-access-setup.md) if you haven't generated one yet.
+Onboarding a tenant requires an authenticated Bearer token - see [API Access Setup](../guided-installation/api-access-setup.md) if you have not generated one yet.
 
 ## Create a Tenant
 

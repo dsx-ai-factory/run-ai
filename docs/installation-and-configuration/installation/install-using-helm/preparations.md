@@ -15,7 +15,7 @@ Your [deployment model](../../system-requirements/deployment-model.md) determine
 
 ## General Setup
 
-This section covers what you set up once, before installing anything: your installer machine and the registry credentials needed to pull NVIDIA Run:ai images. None of it depends on your deployment model or on whether you're installing the control plane, the cluster, or both.
+This section covers what you set up once, before installing anything: your installer machine and the registry credentials needed to pull NVIDIA Run:ai images. None of it depends on your deployment model or on whether you are installing the control plane, the cluster, or both.
 
 ### Installer Machine
 
@@ -29,7 +29,7 @@ The machine you run Helm from needs:
 
 **Note**
 
-If you're installing air-gapped, the machine running `airgap pack` and the machine running `airgap load` each need at least 20GB of free space.
+If you are installing air-gapped, the machine running `airgap pack` and the machine running `airgap load` each need at least 20GB of free space.
 
 </Note>
 
@@ -174,7 +174,7 @@ For NVIDIA Run:ai on OpenShift to run with PSA `restricted` policy:
 
 ### Cluster TLS Certificates
 
-These certificates secure the NVIDIA Run:ai cluster, workspaces, training, distributed inference, and standard inference FQDNs you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns). Before creating the secrets below, see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificates you need and why. The workspaces, training, and distributed inference wildcard certificate is only needed for the default host-based routing - see [Host-Based Routing (Ingress Resource)](#host-based-routing-ingress-resource) below for the matching Ingress setup. If you're using path-based routing instead, skip that certificate.
+These certificates secure the NVIDIA Run:ai cluster, workspaces, training, distributed inference, and standard inference FQDNs you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns). Before creating the secrets below, see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificates you need and why. The workspaces, training, and distributed inference wildcard certificate is only needed for the default host-based routing - see [Host-Based Routing (Ingress Resource)](#host-based-routing-ingress-resource) below for the matching Ingress setup. If you are using path-based routing instead, skip that certificate.
 
 #### Cluster Domain Certificates (Single-Domain)
 

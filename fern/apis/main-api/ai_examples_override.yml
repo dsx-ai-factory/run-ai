@@ -5457,65 +5457,6 @@ paths:
                         step: 5
                         validationError: Invalid URL
               next: 2
-    post:
-      x-fern-examples:
-        - request:
-            scopeType: cluster
-            scopeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-            name: Standard
-          response:
-            body:
-              id: 7b9c9f1e-8d3a-4f2a-9f3b-1a2b3c4d5e6f
-              tenantId: 1001
-              scopeType: cluster
-              scopeId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-              name: Standard
-              permissions:
-                allowedForAssets: true
-                allowedForWorkloads: true
-                allowedForEphemeralVolumes: true
-                allowedForPersistentVolumes: true
-                allowDataSharing: true
-              customization:
-                accessMode:
-                  required: true
-                  default:
-                    readWriteOnce: true
-                    readOnlyMany: false
-                    readWriteMany: false
-                  supportedValues:
-                    readWriteOnce: true
-                    readOnlyMany: true
-                    readWriteMany: true
-                volumeMode:
-                  required: true
-                  default: Filesystem
-                  supportedValues:
-                    filesystem: true
-                    block: true
-                claimSize:
-                  default: 10Gi
-                  supportedUnits:
-                    - MB
-                    - MiB
-                    - GB
-                    - GiB
-                  min: 1Gi
-                  max: 100Gi
-                  step: 1Gi
-                attributes:
-                  - key: dnsname
-                    format: text
-                    display: DNS Name
-                    description: The host name of the DNS
-                    placeholder: enter hostname or IP address
-                    required: 'true'
-                    defaultValue: my.dns.com
-                    validationRegexp: ^[a-zA-Z0-9.-_]+$
-                    minValue: 100
-                    maxValue: 200
-                    step: 5
-                    validationError: Invalid URL
   /api/v2/authorization/roles/32/enable:
     post:
       x-fern-examples:

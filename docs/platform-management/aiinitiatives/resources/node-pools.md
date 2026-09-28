@@ -16,13 +16,13 @@ The Node pools table can be found under **Resources** in the NVIDIA Run:ai platf
 
 The Node pools table lists all the node pools defined in the NVIDIA Run:ai platform and allows you to manage them.
 
-<Info>
+<Note>
 
 **Note**
 
 By default, the NVIDIA Run:ai platform includes a single node pool named ‘default’. When no other node pool is defined, all existing and new nodes are associated with the ‘default’ node pool. When deleting a node pool, if no other node pool matches any of the nodes’ labels, the node will be included in the default node pool.
 
-</Info>
+</Note>
 
 <figure><img src="../../../assets/nodepools-new.png" alt=""/><figcaption></figcaption></figure>
 
@@ -57,13 +57,13 @@ The Node pools table consists of the following columns:
 
 Click one of the values in the Workload(s) column, to view the list of workloads and their parameters.
 
-<Info>
+<Note>
 
 **Note**
 
 This column is only viewable if your role in the NVIDIA Run:ai platform gives you read access to workloads, even if you are allowed to view workloads, you can only view the workloads within your allowed scope. This means, there might be more pods running on this node than appear in the list your are viewing.
 
-</Info>
+</Note>
 
 | Column                        | Description                                                                                                                                                                                |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -116,7 +116,7 @@ To create a new node pool:
    * A node pool is defined by a single key-value pair. You must not use different labels that are set on the same node by different node pools, this situation may lead to unexpected results.
 4. Define **scheduling** configurations:
    * Set the **minimum guaranteed runtime**. The minimum guaranteed runtime is the time that a workload will run before it can be preempted by a higher priority workload. If the workload runs for less than the time you set, it will not be preempted. You can set the value in days, hours, minutes, and seconds. Default is 0.
-   *   **Allow time-based fairshare** - When enabled, the Scheduler adjusts fairshare scores based on each project’s weight and historical resource usage. Historical usage data is not persisted by default. When disabled, the Scheduler uses the default fairshare, where scheduling fairness is based on the project’s current weight and resource usage. For more details, see [Time-based fairshare](../../runai-scheduler/scheduling/concepts-and-principles.md#time-based-fairshare). To persist historical usage data across restarts, enable persistent data at the cluster level. For details, see [Advanced cluster configurations](../../../installation-and-configuration/post-installation-configuration/cluster-config.md#time-based-fairshare).
+   *   **Allow time-based fairshare** - When enabled, the Scheduler adjusts fairshare scores based on each project’s weight and historical resource usage. Historical usage data is not persisted by default. When disabled, the Scheduler uses the default fairshare, where scheduling fairness is based on the project’s current weight and resource usage. For more details, see [Time-based fairshare](../../runai-scheduler/scheduling/concepts-and-principles.md#time-based-fairshare). To persist historical usage data across restarts, enable persistent data at the cluster level. For details, see [Advanced cluster configurations](../../../installation-and-configuration/configuration/cluster-config.md#time-based-fairshare).
 
        * **Historical usage weight** - Sets the weight of historical resource usage in the fairshare calculation. Default is 1.0:
          * **0.0** - Historical usage data is ignored; fairshare is based entirely on current weight.
@@ -125,7 +125,7 @@ To create a new node pool:
          * **Greater than 1.0** - Historical usage has a greater effect on fairshare, making it the dominant factor in the fairshare calculation.
        * **Historical usage window** - Sets the duration of the sliding time window used to calculate historical resource usage. Default is 7 days. Only usage within this window is considered; anything outside the window is no longer counted.
 
-       Administrators can customize additional time-based fairshare configuration parameters at the node pool level using the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API.
+       Administrators can customize additional time-based fairshare configuration parameters at the node pool level using the [Node pools](api:main-api:GET/api/v1/node-pools) API.
    * **NUMA-aware scheduling** - When enabled, the Scheduler places workloads so that GPU, CPU, and CPU memory are allocated within the same NUMA node where possible, minimizing cross-NUMA fragmentation and improving performance. There are cluster prerequisites for enabling this feature. When disabled, the Scheduler places workloads using aggregate node capacity only, without considering NUMA topology. See [Configuring NUMA-Aware Scheduling](../../../platform-management/aiinitiatives/resources/numa-aware-scheduling.md) for more details.
    * Configure the **GPU pods** placement strategy. GPU workloads are workloads that request both GPU and CPU resources.
      * Set the **node placement strategy** - Determines how workloads are distributed across nodes in the node pool:
@@ -204,14 +204,24 @@ Refer to the provider-specific documentation below for guidance on how to config
 2. Click **DELETE**
 3. On the dialog, click **DELETE** to confirm the deletion
 
-<Info>
+<Note>
 
 **Note**
 
 The default node pool cannot be deleted. When deleting a node pool, if no other node pool matches any of the nodes’ labels, the node will be included in the default node pool.
 
-</Info>
+</Note>
 
 ## Using API
 
-To view the available actions, go to the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API reference.
+To view the available actions, go to the [Node pools](api:main-api:GET/api/v1/node-pools) API reference.
+
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes [Cluster and Infrastructure](../../../agents/tools-reference.md#cluster-and-infrastructure) tools to manage node pools via natural language:
+
+* `list_node_pools` - list a cluster's node pools, their default status, lifecycle phase, and network topology
+* `manage_node_pool` - create, update, or delete a node pool
+
+See [AI Agents](../../../agents/overview.md) for setup.

@@ -128,7 +128,7 @@ externalConnection:
     --dry-run
   ```
 
-- **Run the installer** - Once you're ready, run it against the control plane cluster:
+- **Run the installer** - Once you are ready, run it against the control plane cluster:
 
   ```bash
   ./runai-installer install \
@@ -368,7 +368,7 @@ externalConnection:
     --dry-run
   ```
 
-- **Run the installer** - Once you're ready, run it against the target cluster:
+- **Run the installer** - Once you are ready, run it against the target cluster:
 
   ```bash
   ./runai-installer install \

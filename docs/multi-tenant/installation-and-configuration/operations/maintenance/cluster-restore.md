@@ -9,7 +9,7 @@ This section explains how to restore a NVIDIA Run:ai cluster on a different Kube
 
 In the event of a critical Kubernetes failure or alternatively, if you want to migrate a NVIDIA Run:ai cluster to a new Kubernetes environment, simply reinstall the NVIDIA Run:ai cluster. Once you have reinstalled and reconnected the cluster - projects, workloads and other cluster data is synced automatically.
 
-The restoration or back-up of NVIDIA Run:ai cluster [Advanced features](../advanced-setup/cluster-config.md) which are stored locally on the Kubernetes cluster is optional and they can be restored and backed-up separately.
+The restoration or back-up of NVIDIA Run:ai cluster [Advanced features](../../configuration/cluster-config.md) which are stored locally on the Kubernetes cluster is optional and they can be restored and backed-up separately.
 
 ## Backup
 
@@ -34,7 +34,7 @@ Follow the steps below to restore the NVIDIA Run:ai cluster on a new Kubernetes 
 
 Before restoring the NVIDIA Run:ai cluster, it is essential to validate that it is both disconnected and uninstalled.
 
-1. If the Kubernetes cluster is still available, [uninstall](../../installation-and-configuration/installation/install-using-helm/uninstall.md) the NVIDIA Run:ai cluster - make sure not to remove the cluster from the Control Plane
+1. If the Kubernetes cluster is still available, [uninstall](../../installation/install-using-helm/uninstall.md) the NVIDIA Run:ai cluster - make sure not to remove the cluster from the Control Plane
 2. Navigate to the Cluster page in the NVIDIA Run:ai platform
 3. Search for the cluster, and make sure its status is **Disconnected**
 

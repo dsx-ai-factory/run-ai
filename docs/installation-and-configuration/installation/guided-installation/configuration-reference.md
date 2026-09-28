@@ -153,7 +153,7 @@ tls:
 
 ### Control Plane Configuration
 
-Configures the NVIDIA Run:ai control plane. The NVIDIA Run:ai control plane is installed once, regardless of deployment model - in a same-cluster deployment it runs alongside the NVIDIA Run:ai cluster component; in a multi-cluster deployment it's installed on its own, separately from each NVIDIA Run:ai cluster.
+Configures the NVIDIA Run:ai control plane. The NVIDIA Run:ai control plane is installed once, regardless of deployment model - in a same-cluster deployment it runs alongside the NVIDIA Run:ai cluster component; in a multi-cluster deployment it is installed on its own, separately from each NVIDIA Run:ai cluster.
 
 ```yaml
 controlPlane:
@@ -320,7 +320,7 @@ gpuOperator:
 | `type` | string | No | `gpuOperator` only. GPU Operator variant: `real` (default) for physical GPUs, or `fake` for testing without GPU hardware. |
 | `version` | string | No | Component version. Omit to install the latest version. To set it explicitly, see [Support Matrix](../../support-matrix.md) for the supported version range. |
 | `customHelmValues` | map | No | Custom Helm values merged into the component's Helm chart. Not supported for `kubeflow` or `mpiOperator`, which install from pinned manifests rather than a Helm chart - setting it there is rejected. On OpenShift, also rejected for components that install via OLM instead of Helm (see `openshift`, below). |
-| `openshift` | object | No | OpenShift-specific settings - see [Per-Component OpenShift Fields](#per-component-openshift-fields), below. Used only when `install.kubernetesDistribution` is `openshift`, and only for components that install via OLM on OpenShift. Setting it for a component that doesn't is rejected. |
+| `openshift` | object | No | OpenShift-specific settings - see [Per-Component OpenShift Fields](#per-component-openshift-fields), below. Used only when `install.kubernetesDistribution` is `openshift`, and only for components that install via OLM on OpenShift. Setting it for a component that does not is rejected. |
 
 ---
 
@@ -398,7 +398,7 @@ openshift:
 
 ### Per-Component OpenShift Fields
 
-Set under any prerequisite's or feature's own `openshift` block (for example, `gpuOperator.openshift`) when that component installs via OperatorHub (OLM) instead of Helm. This is separate from the [OpenShift Configuration](#openshift-configuration) section, above, which determines the catalog source these operators are pulled from in the first place - these fields configure how each operator behaves once it's installed from that catalog.
+Set under any prerequisite's or feature's own `openshift` block (for example, `gpuOperator.openshift`) when that component installs via OperatorHub (OLM) instead of Helm. This is separate from the [OpenShift Configuration](#openshift-configuration) section, above, which determines the catalog source these operators are pulled from in the first place - these fields configure how each operator behaves once it is installed from that catalog.
 
 | Field | Type | Required | Description |
 |---|---|---|---|

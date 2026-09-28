@@ -60,7 +60,7 @@ Day 2 covers the ongoing operational tasks that keep the control plane and every
 
 ### Upgrades
 
-Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. Upgrade the control plane first, then each tenant's cluster. To upgrade NVIDIA Run:ai, see [Upgrade](upgrade/upgrade.md).
+Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. Upgrade the control plane first, then each tenant's cluster. To upgrade NVIDIA Run:ai, see [Upgrade](upgrade.md).
 
 ## Understanding Installation
 
@@ -128,17 +128,7 @@ An NVIDIA Run:ai multi-tenant installation relies on several categories of softw
 
 * **Prerequisites** - Components that NVIDIA Run:ai requires on each tenant cluster: GPU Operator (provisions and manages GPUs on worker nodes) and Prometheus (required for metrics collection and monitoring). The Network Operator is required only if you are using Multi-Node NVLink (MNNVL) workloads. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#prerequisites).
 
-* **Feature-specific components** - Components required only for specific NVIDIA Run:ai features on a tenant cluster. When using the guided installer, these components can be enabled in the configuration file and installed alongside NVIDIA Run:ai. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#features).
-
-  | Component | Required for |
-  | --------- | ------------ |
-  | Kubeflow Training Operator | Distributed training |
-  | MPI Operator | MPI-based distributed training |
-  | Knative Serving | Standard (single-node) inference |
-  | LeaderWorkerSet (LWS) | Distributed (multi-node) inference |
-  | NIM Operator | NVIDIA Inference Microservices |
-  | Grove | Multi-component, gang-scheduled workload orchestration (for example, disaggregated Dynamo deployments) |
-  | Dynamo | Inference pipeline optimization |
+* **Feature-specific components** - Components required only for specific NVIDIA Run:ai workload types on a tenant cluster, such as distributed training or inference. When using the guided installer, these components can be enabled in the configuration file and installed alongside NVIDIA Run:ai. See [Prerequisites and Features](installation/guided-installation/prerequisites-and-features.md#features).
 
 ## Next Steps
 

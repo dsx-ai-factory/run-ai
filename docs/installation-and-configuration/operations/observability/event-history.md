@@ -2,13 +2,13 @@
 
 The NVIDIA Run:ai control plane provides the audit log API and event history table in the NVIDIA Run:ai UI. Both reflect the same information regarding changes to business objects: clusters, projects and assets etc.
 
-<Info>
+<Note>
 
 **Note**
 
 Only system administrator users with tenant-wide permissions can access Audit log.
 
-</Info>
+</Note>
 
 ## Event History Table
 
@@ -52,7 +52,7 @@ You can also refine your search by clicking and using ADD FILTER accordingly.
 
 ## Using API
 
-Go to the [Audit log](https://run-ai-docs.nvidia.com/api/2.26/audit/auditlogs) API reference to view the available actions.\
+Go to the [Audit log](api:main-api:GET/api/v1/audit/log) API reference to view the available actions.\
 Since the amount of data is not trivial, the API is based on paging. It retrieves a specified number of items for each API call. You can get more data by using subsequent calls.
 
 ## Limitations

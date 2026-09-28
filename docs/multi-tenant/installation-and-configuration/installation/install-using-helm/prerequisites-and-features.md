@@ -38,7 +38,7 @@ For [Multi-Node NVLink](../../../../platform-management/aiinitiatives/resources/
 </Note>
 
 * For installation instructions, see [Installing the NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html).
-* Use the default `gpu-operator` namespace. Otherwise, you must specify the target namespace using the flag `clusterConfig.global.nvidiaDcgmExporter.namespace` as described in [Cluster Configuration](../../../../installation-and-configuration/configuration/cluster-config.md).
+* Use the default `gpu-operator` namespace. Otherwise, you must specify the target namespace using the flag `clusterConfig.global.nvidiaDcgmExporter.namespace` as described in [Advanced Cluster Configurations](../../../../installation-and-configuration/configuration/cluster-config.md).
 * NVIDIA drivers may already be installed on the nodes. In such cases, use the NVIDIA GPU Operator flags `--set driver.enabled=false`. [DGX OS](https://docs.nvidia.com/dgx/dgx-os-6-user-guide/release_notes.html) is one such example as it comes bundled with NVIDIA Drivers.
 * For distribution-specific requirements and additional instructions, see the sections below:
 
@@ -100,7 +100,7 @@ The Network Operator must be installed and configured as follows:
 
 When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html) is required to enable Dynamic Resource Allocation at the Kubernetes level. To install, follow the instructions in [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver). The DRA driver is installed with the GPU Operator.
 
-After the DRA driver is installed, update the cluster configuration using the `anyworkload-controller.GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai `anyworkload-controller` deployment and restarts the controller. For details on how to configure this value using Helm or `runaiconfig`, see [Cluster Configuration](../../../../installation-and-configuration/configuration/cluster-config.md).
+After the DRA driver is installed, update the cluster configuration using the `anyworkload-controller.GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai `anyworkload-controller` deployment and restarts the controller. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced Cluster Configurations](../../../../installation-and-configuration/configuration/cluster-config.md).
 
 ### Prometheus
 
@@ -181,7 +181,7 @@ To surface inference request metrics in the NVIDIA Run:ai API and UI, configure 
 
 The OTLP receiver on the NVIDIA Run:ai Prometheus instance is enabled by default.
 
-To disable it, set `spec.prometheus.config.enableOTLPReceiver: false`. See [Cluster Configuration](../../../../installation-and-configuration/configuration/cluster-config.md) for more details.
+To disable it, set `spec.prometheus.config.enableOTLPReceiver: false`. See [Advanced Cluster Configurations](../../../../installation-and-configuration/configuration/cluster-config.md) for more details.
 
 #### External-Access Inference
 

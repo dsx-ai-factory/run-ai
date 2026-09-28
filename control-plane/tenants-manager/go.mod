@@ -13,7 +13,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5

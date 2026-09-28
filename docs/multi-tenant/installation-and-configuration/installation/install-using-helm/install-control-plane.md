@@ -23,8 +23,8 @@ As part of the installation, you will be required to install the NVIDIA Run:ai c
 
 **Note**
 
-* To customize the installation based on your environment, see [Control Plane Configuration](../../../../installation-and-configuration/configuration/control-plane-config.md).
-* PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Control Plane Configuration](../../../../installation-and-configuration/configuration/control-plane-config.md).
+* To customize the installation based on your environment, see [Advanced Control Plane Configurations](../../../../installation-and-configuration/configuration/control-plane-config.md).
+* PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Advanced Control Plane Configurations](../../../../installation-and-configuration/configuration/control-plane-config.md).
 
 </Note>
 

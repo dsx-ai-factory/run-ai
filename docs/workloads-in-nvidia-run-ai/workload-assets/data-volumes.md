@@ -6,13 +6,13 @@ Acting as a central repository for organizational data resources, data volumes c
 
 Once a data volume is created, it can be shared with additional multiple scopes and easily utilized by AI practitioners when submitting workloads. Shared data volumes are mounted with read-only permissions, ensuring data integrity. Any modifications to the data in a shared DV must be made by writing to the original volume of the PVC used to create the data volume.
 
-<Info>
+<Note>
 
 **Note**
 
 Data volumes is enabled by default and applies only to flexible workload submission (enabled by default). If unavailable, contact your administrator to enable it under **General Settings** → Workloads → Data volumes.
 
-</Info>
+</Note>
 
 ## Why Use a Data Volume?
 
@@ -111,14 +111,18 @@ To delete a data volume:
 2. Click **DELETE**
 3. Confirm you want to delete the data volume
 
-<Info>
+<Note>
 
 **Note**
 
 It is not possible to delete a data volume being used by an existing workload.
 
-</Info>
+</Note>
+
+## Using CLI
+
+To view the available actions on data volumes, see the data volume [CLI v2 reference](../../reference/cli/runai/runai_datavolume.md).
 
 ## Using API
 
-To view the available actions, go to the [Data volumes](https://run-ai-docs.nvidia.com/api/2.26/datavolumes/datavolumes) API reference.
+To view the available actions, go to the [Data volumes](api:main-api:GET/api/v1/datavolumes) API reference.

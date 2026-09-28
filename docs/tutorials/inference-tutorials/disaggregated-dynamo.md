@@ -2,13 +2,13 @@
 
 This tutorial demonstrates how to run a multi-node, [disaggregated](https://docs.nvidia.com/dynamo/design-docs/disaggregated-serving) inference workload using the RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic model with [NVIDIA Dynamo](https://docs.nvidia.com/dynamo/getting-started/quickstart), vLLM, and [NVIDIA Grove](https://developer.nvidia.com/grove) on the NVIDIA Run:ai platform. You can use this workflow as a reference and adapt it for your own models, container images, and hardware configurations.
 
-<Info>
+<Note>
 
 **Note**
 
 Verify the specific version of Dynamo is supported on your target hardware according to the [Dynamo support matrix](https://docs.nvidia.com/dynamo/dev/resources/support-matrix).
 
-</Info>
+</Note>
 
 In this tutorial, you will learn how to:
 
@@ -90,13 +90,13 @@ runai login --help
 
 ## Step 2: Creating a User Access Key
 
-<Info>
+<Note>
 
 **Note**
 
 This step is only required if you intend to follow the API steps in this tutorial.
 
-</Info>
+</Note>
 
 Access keys are used for API integrations with NVIDIA Run:ai. An access key contains a client ID and a client secret. With the client credentials, you can obtain a token and use it within subsequent API calls.
 
@@ -108,7 +108,7 @@ In the NVIDIA Run:ai user interface:
 4. Copy the **Client ID** and **Client secret** and store securely
 5. Click **DONE**
 
-To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API. For example:
+To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
 curl -X POST \ 
@@ -128,13 +128,13 @@ curl -X POST \
 
 To reduce cold-start latency and cache model weights across runs, create a data source in the form of a Persistent Volume Claim (PVC). The PVC can be mounted to workloads and will persist after the workload completes, allowing any data it contains to be reused.
 
-<Info>
+<Note>
 
 **Note**
 
 The first time a workload is launched using a new PVC, it will take longer to start as the storage gets provisioned only once the first claim to the PVC is made.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -144,13 +144,13 @@ The first time a workload is launched using a new PVC, it will take longer to st
 2. Click +**NEW DATA SOURCE** and select **PVC** from the dropdown menu.
 3. Within the new form, set the [scope](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope).
 
-<Info>
+<Note>
 
 **Important**
 
 PVC data sources created at the cluster or department level do not replicate data across projects or namespaces. Each project or namespace will be provisioned as a separate PVC replica with different underlying PVs; therefore, the data in each PVC is not replicated.
 
-</Info>
+</Note>
 
 4. Enter a **name** for the data source. The name must be unique.
 5. For the data options, select **New PVC** and the **storage class** that suits your needs:
@@ -171,9 +171,9 @@ Copy the following command to your terminal. Make sure to update the following p
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](disaggregated-dynamo.md#step-2-creating-a-user-access-key).
 
-For all other parameters within the JSON body, refer to the [PVC](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/pvc) API.
+For all other parameters within the JSON body, refer to the [PVC](api:main-api:POST/api/v1/asset/datasource/pvc) API.
 
-After creating the data source, wait for the PVC to be provisioned. Use the [List PVC asset](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/pvc#get-api-v1-asset-datasource-pvc) API to retrieve the claim name. This claim name is the exact value that will be used for the `<pvc-claim-name>` when submitting the workload.
+After creating the data source, wait for the PVC to be provisioned. Use the [List PVC asset](api:main-api:GET/api/v1/asset/datasource/pvc) API to retrieve the claim name. This claim name is the exact value that will be used for the `<pvc-claim-name>` when submitting the workload.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/asset/datasource/pvc' \
@@ -235,7 +235,7 @@ For more details, see the [NVIDIA Dynamo documentation](https://docs.nvidia.com/
    * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
    * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
    * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-   * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
+   * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
 ```yaml
 apiVersion: nvidia.com/v1alpha1
@@ -340,16 +340,16 @@ spec:
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Workload V2](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads-v2#post-api-v2-workloads) API:
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Workload V2](api:main-api:POST/api/v2/workloads) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](disaggregated-dynamo.md#step-2-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
 * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 3](disaggregated-dynamo.md#step-3-creating-a-pvc-data-source).
 * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
 * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
 * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-* `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
+* `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
@@ -532,7 +532,7 @@ Follow the below steps. For more details, see [CLI reference](../../reference/cl
     * `<your-hf-token>` - Required only for gated Hugging Face models. Generate a token from your [Hugging Face account](https://huggingface.co/) and provide it to the workload as an environment variable.
     * `<INGRESS-CLASS>` - The ingress controller class name configured in your cluster (for example, `haproxy`). Contact your administrator to obtain the correct value.
     * `<DEPLOYMENT-PREFIX>` - A unique prefix for the deployment endpoint (for example, `llama3-agg`).
-    * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters-minimal) API - use the `domain` field in the response.
+    * `<INFERENCE-DOMAIN>` - The suffix including the cluster [FQDN](../../installation-and-configuration/system-requirements/networking-setup.md#fqdn-and-dns). Combined with the prefix, this forms the full hostname for the workload endpoint (for example, `inference.mycorp.com` if your DNS wildcard covers `*.inference.mycorp.com`). You can retrieve the cluster domain via the [Get Clusters Minimal](api:main-api:GET/api/v1/clusters/minimal) API - use the `domain` field in the response.
 
     ```yaml
     apiVersion: nvidia.com/v1alpha1
@@ -653,15 +653,15 @@ Once the workload reaches **Running** and shows an available **Connection**, you
 
 ## Step 6: Accessing the Inference Workload
 
-You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads#get-api-v1-workloads) API. The endpoint URL will be available in the response body under `endpoints`.
+You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
 
-<Info>
+<Note>
 
 **Note**
 
 For clusters below version 2.25, the endpoint URL will be available in the response body under `urls`.
 
-</Info>
+</Note>
 
 ```bash
 #replace <serving-endpoint-url> and <model-name> (e.g. "meta-llama/Llama-3.1-8B-Instruct")
@@ -676,7 +676,7 @@ curl <serving-endpoint-url>/v1/chat/completions \
   }'
 ```
 
-<Info>
+<Note>
 
 **Note**
 
@@ -684,4 +684,4 @@ Configuring access to the inference endpoint is not supported for Dynamo-based d
 
 Access control for inference endpoints (such as restricting access to authenticated users, service accounts, or groups) is planned for a future release.
 
-</Info>
+</Note>

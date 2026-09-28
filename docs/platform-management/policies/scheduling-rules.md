@@ -10,13 +10,13 @@ This rule limits the duration of a workload run time. Workload run time is calcu
 
 This rule limits the total GPU time of a workload. Workload idle time is counted from the first time the workload is in status Running and the GPU was idle. Idleness is calculated by employing the `runai_gpu_idle_seconds_per_workload` metric. This metric determines the total duration of zero GPU utilization within each 30-second interval. If the GPU remains idle throughout the 30-second window, 30 seconds are added to the idleness sum; otherwise, the idleness count is reset. You can apply a single rule per workload type - “Preemptible” Workspaces, “Non-preemptible” Workspaces, and Training.
 
-<Info>
+<Note>
 
 **Note**
 
 To make Idle GPU timeout effective, it must be set to a shorter duration than the workload duration of the same workload type.
 
-</Info>
+</Note>
 
 ## Node Type (Affinity)
 
