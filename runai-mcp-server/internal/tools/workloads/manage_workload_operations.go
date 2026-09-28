@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	workloadsapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	workloadsv2 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"

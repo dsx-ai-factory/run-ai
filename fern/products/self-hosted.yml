@@ -532,9 +532,10 @@ navigation:
       path: ../../docs/agents/agent-skills.md
   - section: Development
     contents:
-    - link: Local Development
-      href: https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md
-      target: _blank
+    - page: Local Development
+      path: ../../local-dev.md
+    - page: Contributing
+      path: ../../CONTRIBUTING.md
     - page: Service Reference
       path: ../../docs/developer/services.md
     - page: CRD Reference

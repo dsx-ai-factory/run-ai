@@ -5,7 +5,7 @@
 
 package checker
 
-import workloadsService "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+import workloadsService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 type DistributedFrameworkStatus struct {
 	Available   bool

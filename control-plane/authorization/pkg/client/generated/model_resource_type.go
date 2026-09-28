@@ -51,6 +51,7 @@ const (
 	RESOURCETYPE_NFS_ASSETS                   ResourceType = "nfs-assets"
 	RESOURCETYPE_S3_ASSETS                    ResourceType = "s3-assets"
 	RESOURCETYPE_COMPUTE_RESOURCES            ResourceType = "compute-resources"
+	RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES     ResourceType = "resource-claim-templates"
 	RESOURCETYPE_TEMPLATES                    ResourceType = "templates"
 	RESOURCETYPE_CREDENTIALS                  ResourceType = "credentials"
 	RESOURCETYPE_EVENTS_HISTORY               ResourceType = "events-history"
@@ -59,6 +60,7 @@ const (
 	RESOURCETYPE_DATAVOLUMES                  ResourceType = "datavolumes"
 	RESOURCETYPE_SECRET_VOLUME_ASSETS         ResourceType = "secret-volume-assets"
 	RESOURCETYPE_STORAGE_CLASS_CONFIGURATION  ResourceType = "storage-class-configuration"
+	RESOURCETYPE_DEVICE_CLASSES               ResourceType = "device-classes"
 	RESOURCETYPE_ACCESS_KEYS                  ResourceType = "access-keys"
 	RESOURCETYPE_WORKLOAD_PROPERTIES          ResourceType = "workload-properties"
 	RESOURCETYPE_NETWORK_TOPOLOGIES           ResourceType = "network-topologies"
@@ -99,6 +101,7 @@ var AllowedResourceTypeEnumValues = []ResourceType{
 	"nfs-assets",
 	"s3-assets",
 	"compute-resources",
+	"resource-claim-templates",
 	"templates",
 	"credentials",
 	"events-history",
@@ -107,6 +110,7 @@ var AllowedResourceTypeEnumValues = []ResourceType{
 	"datavolumes",
 	"secret-volume-assets",
 	"storage-class-configuration",
+	"device-classes",
 	"access-keys",
 	"workload-properties",
 	"network-topologies",

@@ -13,7 +13,7 @@ import (
 	_ "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/tests/helper"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 
-	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"

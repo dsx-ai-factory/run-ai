@@ -62,7 +62,7 @@ import (
 
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/workloadutils"

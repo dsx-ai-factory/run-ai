@@ -19,7 +19,7 @@
         "number": 1
       },
       "category": "Deploy",
-      "urls": ["https://test-cluster.runailabs.com/testnim/mynim-auto"],
+      "urls": ["https://test-cluster.example.com/testnim/mynim-auto"],
       "environments": []
     }
   ],

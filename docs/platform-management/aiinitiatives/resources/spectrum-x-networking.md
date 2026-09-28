@@ -8,7 +8,7 @@ Leveraging Spectrum-X with NVIDIA Run:ai extends these benefits into day-to-day 
 
 Before using Spectrum-X with NVIDIA Run:ai, ensure the following components are installed and configured:
 
-* NVIDIA Network Operator version 26.1.0. See the [NVIDIA Network Operator](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#nvidia-network-operator) section for installation instructions.
+* NVIDIA Network Operator version 26.1.0. See the [NVIDIA Network Operator](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nvidia-network-operator) section for installation instructions.
 * NVIDIA Spectrum-X Operator version 2.1, installed via the Network Operator.
 
 ## Submitting a Workload with Spectrum-X

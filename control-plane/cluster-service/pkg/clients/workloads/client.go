@@ -8,8 +8,8 @@ package workloads
 import (
 	"context"
 
-	workloads_client "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads_client "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 type WorkloadsClient interface {

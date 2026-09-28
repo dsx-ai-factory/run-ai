@@ -106,8 +106,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 		allStaticRoles = append(allStaticRoles, dao.LegacyRoles...)
 		allStaticRoles = append(allStaticRoles, dao.RolesMigrated...)
 		allStaticRoles = append(allStaticRoles, dao.RolesNew...)
-		allStaticRoles = append(allStaticRoles, static_roles.ApplicationAdmin)
-		allStaticRoles = append(allStaticRoles, static_roles.CloudSupport)
 
 		// Check all static roles
 		for _, role := range allStaticRoles {
@@ -810,7 +808,7 @@ var _ = Describe("Roles API tests", Ordered, func() {
 			Expect(upsertErr).To(BeNil())
 			Expect(created.ID).To(Equal(updateId))
 
-			dbRole, apiErr := dao.DbGetRoleById(ctx, tenantId, updateId, nil)
+			dbRole, apiErr := dao.DbGetRoleById(ctx, tenantId, updateId)
 			Expect(apiErr).To(BeNil())
 			for _, permission := range dbRole.Permissions {
 				Expect(permission.Create).To(Equal(false))

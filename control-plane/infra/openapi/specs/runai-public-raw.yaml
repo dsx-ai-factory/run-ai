@@ -15165,9 +15165,6 @@ paths:
               enableScopedAuthorization:
                 value:
                   enabled: false
-              tenantIsCspManaged:
-                value:
-                  enabled: false
       responses:
         '200':
           description: Setting successfully updated
@@ -47471,16 +47468,18 @@ components:
       items:
         $ref: '#/components/schemas/V1StorageClass'
       x-schema-name: StorageClasses
+    ReportingClusterId:
+      type: string
+      format: uuid
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
     StorageClass:
       type: object
       required:
         - storage_class_name
       properties:
         cluster_id:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storage_class_name:
           type: string
           description: Storage class name
@@ -47846,10 +47845,7 @@ components:
         - spec
       properties:
         clusterId:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string
           description: Storage class name
@@ -47869,6 +47865,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StorageClassV2'
+    DeviceClass:
+      type: object
+      required:
+        - deviceClassName
+      properties:
+        clusterId:
+          $ref: '#/components/schemas/ReportingClusterId'
+        deviceClassName:
+          type: string
+          description: >
+            DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules
+            (lowercase alphanumeric, `-`, and `.`, starting and ending with an
+            alphanumeric character), up to 253 characters.
+          minLength: 1
+          maxLength: 253
+          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+          example: gpu.nvidia.com
+    DeviceClasses:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/DeviceClass'
     ScopeClusterId:
       description: The ID of the cluster.
       type: string
@@ -48076,6 +48099,7 @@ components:
         - nfs-assets
         - s3-assets
         - compute-resources
+        - resource-claim-templates
         - templates
         - credentials
         - events-history
@@ -48084,6 +48108,7 @@ components:
         - datavolumes
         - secret-volume-assets
         - storage-class-configuration
+        - device-classes
         - access-keys
         - workload-properties
         - network-topologies
@@ -49147,26 +49172,15 @@ components:
           nullable: true
       example:
         enabled: false
-    TenantIsCspManagedSetting:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          nullable: true
-      example:
-        enabled: false
     AuthorizationSettingsGetResponse:
       type: object
       properties:
         enableScopedAuthorization:
           $ref: '#/components/schemas/EnableScopedAuthorizationSetting'
-        tenantIsCspManaged:
-          $ref: '#/components/schemas/TenantIsCspManagedSetting'
     AuthorizationSettingsKeyEnum:
       type: string
       enum:
         - enableScopedAuthorization
-        - tenantIsCspManaged
     UpdateAuthorizationSettingByKeyRequest:
       type: object
       properties:

@@ -312,6 +312,8 @@ spec:
                 x-kubernetes-list-map-keys:
                 - specName
                 x-kubernetes-list-type: map
+              originalWorkloadKind:
+                type: string
               originalWorkloadName:
                 type: string
               originalWorkloadUID:
@@ -461,7 +463,8 @@ spec:
                     type: string
                 type: object
               type:
-                description: the type of the workload - usually the k8s object's kind
+                description: the type of the workload - usually the k8s object's kind,
+                  may hold the "logical" legacy type instead
                 type: string
               urls:
                 description: urls of the workload, if exist

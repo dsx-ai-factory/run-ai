@@ -27,7 +27,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/distributedinference"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/inference"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/nim"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 const (
@@ -810,6 +810,16 @@ func setGeneralInformation(
 			priority = fmt.Sprintf("%s (%d)", workload.PriorityClassName, *workload.Priority.Get())
 		}
 		generalBuilder.Priority(priority)
+	}
+
+	if workload.Preemptibility.IsSet() && workload.Preemptibility.Get() != nil {
+		generalBuilder.Preemptibility(*workload.Preemptibility.Get())
+	} else if workload.Preemptible.IsSet() && workload.Preemptible.Get() != nil {
+		if *workload.Preemptible.Get() {
+			generalBuilder.Preemptibility(string(openapi.PREEMPTIBILITY_PREEMPTIBLE))
+		} else {
+			generalBuilder.Preemptibility(string(openapi.PREEMPTIBILITY_NON_PREEMPTIBLE))
+		}
 	}
 
 	if workload.Topology.IsSet() {

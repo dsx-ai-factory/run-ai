@@ -42,6 +42,7 @@ const (
 	ColumnKeyCompletedAt         WorkloadColumn = "completedat"
 	ColumnKeyUrls                WorkloadColumn = "urls"
 	ColumnKeyPreemptible         WorkloadColumn = "preemptible"
+	ColumnKeyPreemptibility      WorkloadColumn = "preemptibility"
 	ColumnKeyPods                WorkloadColumn = "pods"
 	ColumnKeyGPUAlloc            WorkloadColumn = "allocatedgpu"
 	ColumnKeyImage               WorkloadColumn = "image"

@@ -7,7 +7,7 @@ This tutorial demonstrates how to run a distributed training workload with PyTor
 **Note**
 
 * Before running the example, verify the supported[ CUDA version of PyTorch](https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix) is compatible with your target [GPU hardware](https://developer.nvidia.com/cuda/gpus).
-* While the walkthrough uses PyTorch as the framework, the same principles apply to other distributed training [frameworks](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) supported by NVIDIA Run:ai.
+* While the walkthrough uses PyTorch as the framework, the same principles apply to other distributed training [frameworks](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) supported by NVIDIA Run:ai.
 
 </Info>
 
@@ -275,7 +275,7 @@ Flexible workload submission is enabled by default. If unavailable, contact your
 3. Within the new training form, select the **cluster** and **project**.
 4. Set the training workload **architecture** to **Distributed** workload**.** This runs multiple processes that can span across different nodes. Distributed workloads are supported only in environments where distributed training is enabled.
 5. Select **Start from scratch** to launch a new workload quickly.
-6. Set the framework for the distributed workload to **PyTorch**. If PyTorch isn’t available, see [Distributed training prerequisites](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) for details on enabling.
+6. Set the framework for the distributed workload to **PyTorch**. If PyTorch isn’t available, see [Distributed training prerequisites](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
 7. Set the **distributed workload configuration**, which defines how distributed training workloads are divided across multiple machines or processes. For this example, select **Workers & master**, which enables coordination between pods during distributed training.
    * Choose **Workers & master** or **Workers only** based on training requirements and infrastructure.
    * A **master pod** is typically required for multi-node training workloads that must coordinate across nodes, such as workloads that perform `all_reduce` operations.
@@ -307,7 +307,7 @@ Flexible workload submission is enabled by default. If unavailable, contact your
 2. Click **+NEW WORKLOAD** and select **Training** from the dropdown menu**.**
 3. Within the new training form, select the **cluster** and **project**.
 4. Set the training workload **architecture** to **Distributed** workload**.** This runs multiple processes that can span across different nodes. Distributed workloads are supported only in environments where distributed training is enabled.
-5. Set the framework for the distributed workload to **PyTorch**. If PyTorch isn’t available, see [Distributed training prerequisites](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) for details on enabling.
+5. Set the framework for the distributed workload to **PyTorch**. If PyTorch isn’t available, see [Distributed training prerequisites](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
 6. Set the **distributed workload configuration**, which defines how distributed training workloads are divided across multiple machines or processes. For this example, select **Workers & master**, which enables coordination between pods during distributed training.
    * Choose **Workers & master** or **Workers only** based on training requirements and infrastructure.
    * A **master pod** is typically required for multi-node training workloads that must coordinate across nodes, such as workloads that perform `all_reduce` operations.

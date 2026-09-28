@@ -6,7 +6,7 @@
 package workloads
 
 import (
-	workloads "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/common"
 )

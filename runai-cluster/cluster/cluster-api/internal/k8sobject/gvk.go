@@ -8,7 +8,7 @@ package k8sobject
 import (
 	"fmt"
 
-	workloadsapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 

@@ -29,8 +29,8 @@ import (
 
 	clustersOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/mocks"
-	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
-	workloadsMocks "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/mocks"
+	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	workloadsMocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/mocks"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/utils/ptr"

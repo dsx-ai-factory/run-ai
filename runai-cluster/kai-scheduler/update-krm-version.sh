@@ -12,7 +12,7 @@ set -euo pipefail
 # drift ahead of the scheduler that is actually deployed. Resolving the Go
 # version from the KRM release is what keeps them in lockstep.
 krm_version="${1:?usage: $0 <KRM chart version, for example v0.1.0>}"
-krm_chart="oci://ghcr.io/kai-scheduler/kai-resource-management"
+krm_chart="oci://ghcr.io/kai-scheduler/kai-resource-management/kai-resource-management"
 module="github.com/kai-scheduler/KAI-scheduler"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "${script_dir}/../.." && pwd)"

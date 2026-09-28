@@ -27,6 +27,10 @@ var TemplatesRead = models.PermissionSet{
 			Read:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_GIT_ASSETS,
 			Read:         true,
 		},

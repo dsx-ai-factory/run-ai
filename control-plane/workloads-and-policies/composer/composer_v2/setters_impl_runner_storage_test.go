@@ -9,8 +9,8 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

@@ -5,10 +5,7 @@ required:
   - spec
 properties:
   clusterId:
-    type: string
-    format: uuid
-    description: Cluster ID which has sent the resource info
-    example: 550e8400-e29b-41d4-a716-446655440000
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ReportingClusterId.yaml"
   storageClassName:
     type: string
     description: Storage class name

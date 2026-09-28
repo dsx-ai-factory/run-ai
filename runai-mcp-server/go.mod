@@ -9,15 +9,15 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.3
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.17
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/jsonschema-go v0.4.3
@@ -36,21 +36,20 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
 	github.com/go-playground/validator/v10 v10.30.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/klauspost/compress v1.20.0 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
@@ -97,7 +96,7 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/clie
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client => ../runai-clients/policy-service-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../runai-clients/workloads-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../control-plane/workloads/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client => ../runai-clients/workloads-manager-client
 

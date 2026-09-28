@@ -12,7 +12,7 @@
   <rect width="720" height="520" fill="#FFFFFF" rx="6"/>
 
   <!-- Users and API clients -->
-  <rect x="260" y="10" width="200" height="46" rx="8" fill="#F1F5F9" stroke="#64748B" stroke-width="1.5"/>
+  <rect x="260" y="10" width="200" height="46" rx="8" fill="#F1F3F4" stroke="#94A3B8" stroke-width="1.5"/>
   <text x="360" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">Users and API Clients</text>
   <text x="360" y="46" text-anchor="middle" font-size="10" fill="#64748B">UI · CLI · API</text>
 
@@ -21,15 +21,15 @@
   <text x="416" y="76" text-anchor="middle" font-size="10" fill="#64748B">Inbound · 443</text>
 
   <!-- Control Plane box -->
-  <rect x="130" y="92" width="230" height="64" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
-  <rect x="130" y="92" width="5" height="64" rx="4" fill="#3B82F6"/>
-  <text x="245" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A5F">NVIDIA Run:ai Control Plane</text>
+  <rect x="130" y="92" width="230" height="64" rx="8" fill="#B2D380" stroke="#8BB85B" stroke-width="1.5"/>
+  <rect x="130" y="92" width="5" height="64" rx="4" fill="#8BB85B"/>
+  <text x="245" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai Control Plane</text>
   <text x="245" y="136" text-anchor="middle" font-size="10" fill="#64748B">system nodes</text>
 
   <!-- Cluster box -->
-  <rect x="360" y="92" width="230" height="64" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
-  <rect x="360" y="92" width="5" height="64" rx="4" fill="#22C55E"/>
-  <text x="475" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">NVIDIA Run:ai Cluster</text>
+  <rect x="360" y="92" width="230" height="64" rx="8" fill="#F1F8E9" stroke="#AED581" stroke-width="1.5"/>
+  <rect x="360" y="92" width="5" height="64" rx="4" fill="#AED581"/>
+  <text x="475" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai Cluster</text>
   <text x="475" y="136" text-anchor="middle" font-size="10" fill="#64748B">system nodes</text>
 
   <!-- Cluster sync arrow (dashed, curved beneath both boxes) -->
@@ -64,7 +64,7 @@
   <rect x="82" y="376" width="536" height="50" rx="8" fill="#FAF5FF" stroke="#A855F7" stroke-width="1.5"/>
   <rect x="82" y="376" width="5" height="50" rx="4" fill="#A855F7"/>
   <text x="350" y="396" text-anchor="middle" font-size="12" font-weight="700" fill="#3B0764">Third-Party Service Registries</text>
-  <text x="350" y="414" text-anchor="middle" font-size="10" fill="#64748B">docker.io · quay.io (most services) · registry.k8s.io (git-sync) · Chainguard (Gov-ready)</text>
+  <text x="350" y="414" text-anchor="middle" font-size="10" fill="#64748B">docker.io · quay.io (most services) · registry.k8s.io (git-sync)</text>
 
   <!-- Prerequisite and Feature Registries -->
   <rect x="82" y="436" width="536" height="50" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>

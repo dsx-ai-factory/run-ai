@@ -4,13 +4,13 @@ This section provides details about NVIDIA Run:ai’s Audit log.
 
 The NVIDIA Run:ai control plane provides the audit log API to reflect the information regarding changes to business objects: clusters, projects and assets etc. Go to the [Audit Logs](api:multi-tenant-api:GET/api/v1/audit/log) API reference to view the available actions. Since the amount of data is not trivial, the API is based on paging. It retrieves a specified number of items for each API call. You can get more data by using subsequent calls.
 
-<Info>
+<Note>
 
 **Note**
 
 Only system administrator users with tenant-wide permissions can access Audit log.
 
-</Info>
+</Note>
 
 ## Retrieve Audit Logs
 

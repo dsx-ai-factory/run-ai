@@ -94,7 +94,6 @@ docs/SettingsAPI.md
 docs/SubjectType.md
 docs/SubjectTypeExtended.md
 docs/SubmissionError.md
-docs/TenantIsCspManagedSetting.md
 docs/UpdateAuthorizationSettingByKeyRequest.md
 docs/UpdateScopeAccessRulesRequest.md
 git_push.sh
@@ -175,7 +174,6 @@ model_scope_type.go
 model_subject_type.go
 model_subject_type_extended.go
 model_submission_error.go
-model_tenant_is_csp_managed_setting.go
 model_update_authorization_setting_by_key_request.go
 model_update_scope_access_rules_request.go
 response.go

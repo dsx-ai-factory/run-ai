@@ -115,7 +115,6 @@ func TestUpdateSystemSettingsInput_Validate(t *testing.T) {
 		{name: "bad_category", in: updateSystemSettingsInput{Category: "nope", Key: "x", Enabled: bptr(true)}, wantErr: "category must be one of"},
 		{name: "key_not_in_category", in: updateSystemSettingsInput{Category: "workloads", Key: "enableScopedAuthorization", Enabled: bptr(true)}, wantErr: "not a workloads setting"},
 		{name: "key_wrong_service", in: updateSystemSettingsInput{Category: "catalog", Key: "enableDataVolumes", Enabled: bptr(true)}, wantErr: "not a catalog setting"},
-		{name: "read_only_key", in: updateSystemSettingsInput{Category: "authorization", Key: "tenantIsCspManaged", Enabled: bptr(true)}, wantErr: "read-only"},
 		{name: "missing_enabled", in: updateSystemSettingsInput{Category: "workloads", Key: "enablePolicies"}, wantErr: "enabled is required"},
 	}
 	for _, tc := range cases {
@@ -247,7 +246,7 @@ func TestUpdateSystemSettings_SetWhenUnset(t *testing.T) {
 func listAllHandlers(mux *http.ServeMux) {
 	mux.HandleFunc(wlSettingsAll, settingsGetAll(true, true, true,
 		"enablePolicies", "workloadSubmissionV2Enabled", "enableTemplatesV2", "enableHybridSubmission", "gpuOverProvisioning", "applicationSubmission"))
-	mux.HandleFunc(authzSettingsAll, settingsGetAll(false, false, false, "enableScopedAuthorization", "tenantIsCspManaged"))
+	mux.HandleFunc(authzSettingsAll, settingsGetAll(false, false, false, "enableScopedAuthorization"))
 	mux.HandleFunc(clusterSettingAll, settingsGetAll(false, true, true, "enableAdvancedGpuMetrics"))
 	mux.HandleFunc(orgUnitSettingAll, settingsGetAll(false, false, true, "limitQuotaOverSubscription"))
 	mux.HandleFunc(catalogSettingAll, settingsGetAll(true, true, true, "enableNgcIntegration"))
@@ -264,8 +263,8 @@ func TestListSystemSettings(t *testing.T) {
 	out, err := listSystemSettingsRun(context.Background(), client, listSystemSettingsInput{})
 	require.NoError(t, err)
 	assert.Empty(t, out.Warnings)
-	// 6 workloads + 2 authorization + 1 cluster + 1 org-unit + 1 catalog + 1 datavolumes + 2 node-pool + 4 workloads-manager
-	assert.Len(t, out.Settings, 18)
+	// 6 workloads + 1 authorization + 1 cluster + 1 org-unit + 1 catalog + 1 datavolumes + 2 node-pool + 4 workloads-manager
+	assert.Len(t, out.Settings, 17)
 	byKey := map[string]systemSetting{}
 	for _, s := range out.Settings {
 		byKey[s.Key] = s
@@ -281,9 +280,6 @@ func TestListSystemSettings(t *testing.T) {
 	// deletedWorkloadsView is now surfaced alongside the other workloads-manager keys
 	_, hasDeletedView := byKey["deletedWorkloadsView"]
 	assert.True(t, hasDeletedView)
-	// tenantIsCspManaged is listable even though it is not updatable
-	_, listed := byKey["tenantIsCspManaged"]
-	assert.True(t, listed)
 
 	// metadata surfaces for wrapped (workloads) and flat (cluster) shapes alike, now that the
 	// get-all endpoint populates it — including cluster, which the by-key endpoint left bare.

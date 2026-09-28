@@ -11,6 +11,7 @@
     "submittedBy": "test@example.com",
     "priority": "high (125)",
     "category": "Build",
+    "preemptibility": "non-preemptible",
     "environmentVariables": {
       "JUPYTER_ENABLE_LAB": "yes",
       "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
@@ -104,7 +105,7 @@
       "name": "url",
       "toolType": "custom",
       "connectionType": "ExternalUrl",
-      "url": "https://nael-env-001.runailabs.com/team-b/my-workspace-demo-123",
+      "url": "https://nael-env-001.example.com/team-b/my-workspace-demo-123",
       "authorizedUsers": [
         "user1",
         "user2",

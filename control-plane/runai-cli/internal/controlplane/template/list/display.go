@@ -17,7 +17,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/template/list/manipulate"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/settings"
 	uitable "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/table"
-	wcgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wcgenerated "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"gopkg.in/yaml.v3"
 )
 

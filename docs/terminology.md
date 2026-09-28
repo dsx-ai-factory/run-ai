@@ -40,8 +40,9 @@ Qualify `control plane` when necessary to distinguish the NVIDIA Run:ai control 
 | `inference workload` | Workload type | A workload used to serve a model for inference. | inference job |
 | `native workload` | Product concept | A workload created using a workload type natively supported by NVIDIA Run:ai. | — |
 | `non-preemptible` | Scheduling property | Describes a workload protected from scheduling preemption after it starts. | non-preemptive |
-| `preemptibility` | Scheduling property | The property that determines whether a workload is preemptible or non-preemptible. | — |
+| `preemptibility` | Scheduling property | The property that determines whether a workload is preemptible, semi-preemptible, or non-preemptible. | — |
 | `preemptible` | Scheduling property | Describes a workload that can be interrupted by the Scheduler. | preemptive |
+| `semi-preemptible` | Scheduling property | Describes a workload whose minimum required replicas are protected from interruption, while any additional replicas behave as preemptible replicas. | — |
 | `standard training workload` | Workload type | A non-distributed training workload. | standard training job |
 | `supported workload type` | Product concept | A Kubernetes or ML workload type integrated with NVIDIA Run:ai. | native workload when the distinction matters |
 | `training workload` | Workload type | A workload used to train a model. | training job |

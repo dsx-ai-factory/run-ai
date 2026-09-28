@@ -44,12 +44,9 @@
   <!-- Load Balancer (left) -->
   <rect x="37" y="97" width="258" height="52"
         fill="#FFF7ED" stroke="#F97316" stroke-width="1.5" rx="3"/>
-  <text x="166" y="118"
+  <text x="166" y="127"
         font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
         fill="#C2410C" text-anchor="middle">Load Balancer</text>
-  <text x="166" y="135"
-        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
-        fill="#EA580C" text-anchor="middle">TLS termination</text>
   <!-- Arrow: Load Balancer → Ingress Controller -->
   <line x1="166" y1="149" x2="166" y2="167"
         stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
@@ -69,21 +66,21 @@
 
   <!-- Control Plane box (blue, with left accent bar) -->
   <rect x="37" y="241" width="258" height="150"
-        fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5" rx="3"/>
+        fill="#B2D380" stroke="#8BB85B" stroke-width="1.5" rx="3"/>
   <rect x="37" y="241" width="6" height="150"
-        fill="#3B82F6" rx="2"/>
+        fill="#8BB85B" rx="2"/>
   <text x="169" y="272"
         font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
-        fill="#1D4ED8" text-anchor="middle">NVIDIA Run:ai</text>
+        fill="#000000" fill-opacity="0.87" text-anchor="middle">NVIDIA Run:ai</text>
   <text x="169" y="290"
         font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
-        fill="#1D4ED8" text-anchor="middle">Control Plane</text>
+        fill="#000000" fill-opacity="0.87" text-anchor="middle">Control Plane</text>
   <text x="169" y="316"
         font-family="'Segoe UI', Arial, sans-serif" font-size="10"
-        fill="#2563EB" text-anchor="middle">management · scheduling</text>
+        fill="#64748B" text-anchor="middle">management · scheduling</text>
   <text x="169" y="331"
         font-family="'Segoe UI', Arial, sans-serif" font-size="10"
-        fill="#2563EB" text-anchor="middle">UI · metrics · auth</text>
+        fill="#64748B" text-anchor="middle">UI · metrics · auth</text>
 
   <!-- ================================================================== -->
   <!-- RIGHT CLUSTER: Kubernetes Cluster A                                 -->
@@ -116,12 +113,9 @@
   <!-- Load Balancer (right) -->
   <rect x="408" y="97" width="290" height="52"
         fill="#FFF7ED" stroke="#F97316" stroke-width="1.5" rx="3"/>
-  <text x="553" y="118"
+  <text x="553" y="127"
         font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
         fill="#C2410C" text-anchor="middle">Load Balancer</text>
-  <text x="553" y="135"
-        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
-        fill="#EA580C" text-anchor="middle">TLS termination</text>
   <!-- Arrow: Load Balancer → Ingress Controller -->
   <line x1="553" y1="149" x2="553" y2="167"
         stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
@@ -141,12 +135,12 @@
 
   <!-- Run:ai Cluster box (green, with left accent bar) -->
   <rect x="408" y="241" width="290" height="150"
-        fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" rx="3"/>
+        fill="#F1F8E9" stroke="#AED581" stroke-width="1.5" rx="3"/>
   <rect x="408" y="241" width="6" height="150"
-        fill="#22C55E" rx="2"/>
+        fill="#AED581" rx="2"/>
   <text x="555" y="264"
         font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
-        fill="#15803D" text-anchor="middle">NVIDIA Run:ai Cluster</text>
+        fill="#000000" fill-opacity="0.87" text-anchor="middle">NVIDIA Run:ai Cluster</text>
 
   <!-- Sub-box: Workloads -->
   <rect x="420" y="276" width="122" height="50"

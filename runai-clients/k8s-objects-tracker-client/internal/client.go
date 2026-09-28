@@ -208,6 +208,13 @@ func (c *K8SObjectTrackerClient) SyncStorageClass(ctx context.Context, clusterId
 		}).ClusterId(clusterId).Execute()
 }
 
+func (c *K8SObjectTrackerClient) SyncDeviceClass(ctx context.Context, clusterId string, deviceClasses []openapi.DeviceClass) (*openapi.DeviceClasses, *http.Response, error) {
+	return c.ApiClient.DeviceClassesAPI.SyncDeviceClass(ctx).DeviceClasses(
+		openapi.DeviceClasses{
+			Items: deviceClasses,
+		}).ClusterId(clusterId).Execute()
+}
+
 func (c *K8SObjectTrackerClient) ListSecrets(ctx context.Context, clusterId string) (*openapi.SecretListResponse, *http.Response, error) {
 	return c.ApiClient.SecretsAPI.ListSecrets(ctx).ClusterId(clusterId).Origin(originAll).Execute()
 }

@@ -42,11 +42,19 @@ var WorkspaceEdit = models.PermissionSet{
 			Read:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_POLICIES,
 			Read:         true,
 		},
 		{
 			ResourceType: api.RESOURCETYPE_PVC_ASSETS,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
 			Read:         true,
 		},
 		{

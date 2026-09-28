@@ -34,6 +34,7 @@ type ObjectType string
 
 const (
 	ObjectTypeStorageClass = "StorageClass"
+	ObjectTypeDeviceClass  = "DeviceClass"
 )
 
 // ObjectFilters is a set of filters we can filter by.
@@ -42,7 +43,7 @@ type ObjectFilters struct {
 	Type         string
 	ProjectId    string
 	ClusterId    uuid.UUID
-	DepartmentId uuid.UUID
+	DepartmentId string
 	ScopeType    authorizationClient.ScopeType
 	Name         *string
 }

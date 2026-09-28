@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+suite: Test RunAI-owned KAI operator webhook permissions
+templates:
+  - clusterroles/kai-operator-runai-webhooks.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/rbac/operator.yaml
+
+tests:
+  - it: grants only the four RunAI webhook names and scoped verbs
+    template: clusterroles/kai-operator-runai-webhooks.yaml
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ClusterRole
+      - equal:
+          path: metadata.name
+          value: kai-operator-runai-webhooks
+      - equal:
+          path: rules
+          value:
+            - apiGroups: [admissionregistration.k8s.io]
+              resources: [mutatingwebhookconfigurations, validatingwebhookconfigurations]
+              resourceNames:
+                - mutating-engine-admission
+                - validating-engine-admission
+                - runai-queue-validation-v2
+                - runai-podgroup-validation-v2alpha2
+              verbs: [delete, patch, update]
+
+  - it: binds the RunAI supplemental role to KAI in the release namespace
+    template: clusterroles/kai-operator-runai-webhooks.yaml
+    documentIndex: 1
+    release:
+      namespace: custom-runai
+    asserts:
+      - equal:
+          path: subjects
+          value:
+            - kind: ServiceAccount
+              name: kai-operator
+              namespace: custom-runai
+      - equal:
+          path: roleRef
+          value:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: kai-operator-runai-webhooks
+
+  - it: preserves the upstream generated webhook permissions
+    template: charts/kai-resource-management/charts/kai-scheduler/templates/rbac/operator.yaml
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [admissionregistration.k8s.io]
+            resources: [mutatingwebhookconfigurations, validatingwebhookconfigurations]
+            resourceNames:
+              - kai-podgroup-validation-v2alpha2
+              - kai-queue-validation-v2
+              - mutating-kai-admission
+              - validating-kai-admission
+            verbs: [delete, patch, update]
+
+  - it: omits the supplemental permissions when KAI is disabled
+    template: clusterroles/kai-operator-runai-webhooks.yaml
+    set:
+      kai-resource-management.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

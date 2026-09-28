@@ -83,7 +83,7 @@ linters:
           - noctx
 
 issues:
-  new-from-rev: origin/master
+  new-from-rev: origin/main
   max-same-issues: 50
   max-issues-per-linter: 100
 

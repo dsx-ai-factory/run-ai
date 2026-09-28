@@ -5917,6 +5917,155 @@ paths:
       x-audit: false
       x-test-coverage:
       - k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go
+  /api/v1/device-classes:
+    get:
+      operationId: get_device_classes
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: filter by name
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClasses'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: get device classes for a given cluster
+      tags:
+      - Device Classes
+      x-audit: false
+      x-authorize:
+        resource-type: device-classes
+        action: read
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  /api/v1/device-classes/sync:
+    post:
+      description: Use to sync cluster device classes
+      operationId: sync_device_class
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClasses'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClasses'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Sync cluster Device Classes
+      tags:
+      - Device Classes
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
   /api/v1/storage-class-configuration:
     get:
       description: Retrieves a list of storage class configurations defined in the
@@ -7802,6 +7951,11 @@ components:
         $ref: '#/components/schemas/V1StorageClass'
       type: array
       x-schema-name: StorageClasses
+    ReportingClusterId:
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
+      format: uuid
+      type: string
     StorageClass:
       example:
         cluster_id: 550e8400-e29b-41d4-a716-446655440000
@@ -8536,6 +8690,49 @@ components:
         items:
           items:
             $ref: '#/components/schemas/StorageClassV2'
+          type: array
+      required:
+      - items
+      type: object
+    DeviceClass:
+      example:
+        deviceClassName: gpu.nvidia.com
+        clusterId: 550e8400-e29b-41d4-a716-446655440000
+      properties:
+        clusterId:
+          description: Cluster ID which has sent the resource info
+          example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
+          type: string
+        deviceClassName:
+          description: |
+            DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+          example: gpu.nvidia.com
+          maxLength: 253
+          minLength: 1
+          pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+          type: string
+      required:
+      - deviceClassName
+      type: object
+    DeviceClasses:
+      example:
+        items:
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/DeviceClass'
+          maxItems: 1000
           type: array
       required:
       - items

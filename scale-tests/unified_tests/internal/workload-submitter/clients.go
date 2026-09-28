@@ -13,7 +13,7 @@ import (
 	clusterclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
-	workloadclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
 	"k8s.io/client-go/dynamic"

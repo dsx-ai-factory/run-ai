@@ -3,7 +3,7 @@
     "workloadType": "Workspace",
     "workloadId": "eeaac0d9-db0b-4053-9839-86b808e4a7c5",
     "workloadName": "my-workspace-demo-123",
-    "apiUrl": "https://nael-env-001.runailabs.com",
+    "apiUrl": "https://nael-env-001.example.com",
     "files": {
         "workloadList": "workload_list.json",
         "workloadDetailed": "workload_detailed.json",
