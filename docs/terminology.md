@@ -22,7 +22,6 @@ This list is not a general English dictionary.
 | `NVIDIA Run:ai OSS` | Product name | The open source edition. Spell out "Open Source Software" on first mention. | OSS alone without first spelling it out |
 | `NVIDIA Run:ai Support-entitled Release` | Product name | The supported, non-OSS release. | NVIDIA Run:ai Enterprise (retired term) |
 | `Self-hosted` | Deployment type | Customer-managed deployment. | Self-Hosted (use sentence case, not title case, for this compound term) |
-| `SaaS` | Deployment type | NVIDIA-hosted, software-as-a-service deployment. | — |
 | `Multi-tenant` | Deployment type | A host-organization-managed deployment serving multiple tenants. | Multi-Tenant (use sentence case, not title case, for this compound term) |
 | `NVIDIA Run:ai control plane` | Architecture concept | The central NVIDIA Run:ai management layer. Use `control plane` when the full name is already clear. | Omitting "NVIDIA Run:ai" on first mention |
 | `NVIDIA Run:ai cluster` | Architecture concept | Full form on first mention; "the cluster" after. | Omitting "NVIDIA Run:ai" on first mention |
