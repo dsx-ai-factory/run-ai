@@ -7,6 +7,7 @@ package dao_utils
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +15,13 @@ import (
 
 func TestCreateServiceDbUser_PGLock(t *testing.T) {
 	os.Setenv(EnvServiceName, "test-service")
-	SetPostgresEnv("public", "")
+	// Init runs migrations and exits the process if they cannot be loaded, so
+	// give it a no-op migration; this test only needs the connection.
+	migrationsDir := t.TempDir()
+	assert.Nil(t, os.Mkdir(filepath.Join(migrationsDir, "up"), 0700))
+	err := os.WriteFile(filepath.Join(migrationsDir, "up", "1_noop.up.sql"), []byte("SELECT 1;"), 0600)
+	assert.Nil(t, err)
+	SetPostgresEnv("public", "file://"+migrationsDir)
 	config := ConstructConfig("")
 	OpenPostgresForTesting(t, config)
 	pgLock := NewPGLock(config.Schema)
