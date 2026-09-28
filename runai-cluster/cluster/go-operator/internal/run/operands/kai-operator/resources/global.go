@@ -36,9 +36,8 @@ func convertKAIGlobal(runaiConfig *runaiv1.RunaiConfig) *kaiv1.GlobalConfig {
 		RequireDefaultPodAntiAffinityTerm: ptr.To(runaiConfig.Spec.Global.RequireDefaultPodAntiAffinity),
 		VPA:                               convertVPA(runaiConfig.Spec.Global.VPA),
 		FIPSOnly:                          ptr.To(runaiConfig.Spec.Internal.Global.FipsMode == "only"),
-		// From 3.0 fractions are always the CUDA-native ones. A node that cannot run them keeps
-		// the workload Pending rather than silently falling back to the unenforced legacy
-		// fractions, so this is deliberately not exposed as a user choice.
+		// Deliberately not configurable: a node that cannot run CUDA-native fractions keeps
+		// the workload Pending rather than falling back to the unenforced legacy ones.
 		GpuSharingMode: ptr.To(kaicommon.GpuSharingModeNvFractions),
 	}
 
