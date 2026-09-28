@@ -298,7 +298,7 @@ The `bootstrapToken` in the generated Helm command is a short-lived token that e
     helm repo update
     helm upgrade -i runai-cluster runai/runai-cluster -n runai \
       --set controlPlane.url=... \
-      --set cluster.bootstrapToken=... \
+      --set controlPlane.bootstrapToken=... \
       --set cluster.uid=... \
       --set cluster.url=... --version="<VERSION>" --create-namespace \
       --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -326,7 +326,7 @@ The `bootstrapToken` in the generated Helm command is a short-lived token that e
     ```bash
     helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
       --set controlPlane.url=... \
-      --set cluster.bootstrapToken=... \
+      --set controlPlane.bootstrapToken=... \
       --set cluster.uid=... \
       --set cluster.url=... --create-namespace \
       --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \
