@@ -268,7 +268,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/gorm v1.31.2
 	k8s.io/apimachinery v0.36.2
-	k8s.io/kube-openapi v0.0.0-20260512234627-ef417d054102
+	k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a
 	sigs.k8s.io/yaml v1.6.0
 )
 
