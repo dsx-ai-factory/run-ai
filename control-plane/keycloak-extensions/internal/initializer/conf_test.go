@@ -107,13 +107,8 @@ func TestWriteKeycloakConf(t *testing.T) {
 	}
 }
 
-// TestWriteKeycloakConf_SymlinkedSecrets reproduces the layout Kubernetes'
-// Secret volume atomic writer uses: every key under the mount is a symlink
-// into a timestamped data directory (plus a `..data` symlink to that
-// directory itself), not a regular file. `os.DirEntry.Type()` never follows
-// symlinks, so filtering on it would skip every real secret in production;
-// WriteKeycloakConf must instead resolve each entry (as POSIX `[ -f ]`,
-// which the original shell script used, does).
+// Reproduces the Kubernetes Secret volume layout: every key is a symlink
+// into a timestamped data directory, not a regular file.
 func TestWriteKeycloakConf_SymlinkedSecrets(t *testing.T) {
 	dir := t.TempDir()
 

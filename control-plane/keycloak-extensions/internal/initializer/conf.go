@@ -13,36 +13,33 @@ import (
 	"strings"
 )
 
-// skippedSecretNames are secret files Keycloak's bootstrap-admin bootstrap
-// consumes directly; they must not be written into keycloak.conf.
+// skippedSecretNames are consumed by Keycloak's bootstrap-admin bootstrap
+// directly and must not be written into keycloak.conf.
 var skippedSecretNames = map[string]bool{
 	"KEYCLOAK_ADMIN":          true,
 	"KEYCLOAK_ADMIN_PASSWORD": true,
 }
 
-// WriteKeycloakConf reads every regular file directly under secretsDir and
-// writes confPath as `key=value` lines, one per file: KC_-prefixed names
-// become Keycloak's kebab-case config keys, other names pass through
-// unchanged, and the bootstrap admin credentials are skipped.
+// WriteKeycloakConf writes confPath as `key=value` lines, one per regular
+// file under secretsDir: KC_-prefixed names become Keycloak's kebab-case
+// config keys, other names pass through unchanged.
 func WriteKeycloakConf(secretsDir, confPath string) error {
-	// A missing secrets dir is not an error: the original shell script's
-	// unexpanded `"$S"/*` glob never matches `[ -f "$file" ]` either, so it
-	// silently produced an empty conf file in that case too.
+	// The original shell script's unexpanded `"$S"/*` glob never matches
+	// `[ -f "$file" ]` either, so a missing dir isn't an error here.
 	entries, err := os.ReadDir(secretsDir)
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("read secrets dir %s: %w", secretsDir, err)
 	}
 
-	// Stat (not e.Type(), which uses Lstat and never follows symlinks) each
-	// entry: Kubernetes Secret volumes present every key as a symlink into a
-	// timestamped data directory, the same way POSIX `[ -f "$file" ]` (used
-	// by the original script) follows symlinks to test the resolved target.
+	// os.Stat, not e.Type() (which uses Lstat and never follows symlinks):
+	// Kubernetes Secret volumes present every key as a symlink, the same way
+	// POSIX `[ -f "$file" ]` in the original script follows symlinks.
 	names := make([]string, 0, len(entries))
 	for _, e := range entries {
 		info, err := os.Stat(filepath.Join(secretsDir, e.Name()))
 		if err != nil {
 			if os.IsNotExist(err) {
-				continue // dangling symlink; not a secret key
+				continue
 			}
 			return fmt.Errorf("stat secret %s: %w", e.Name(), err)
 		}
@@ -61,7 +58,7 @@ func WriteKeycloakConf(secretsDir, confPath string) error {
 		if err != nil {
 			return fmt.Errorf("read secret %s: %w", name, err)
 		}
-		// Matches bash `$(cat "$file")`, which strips trailing newlines.
+		// bash `$(cat "$file")` strips trailing newlines; match it.
 		fmt.Fprintf(&b, "%s=%s\n", confKey(name), strings.TrimRight(string(value), "\n"))
 	}
 
@@ -74,8 +71,7 @@ func WriteKeycloakConf(secretsDir, confPath string) error {
 	return nil
 }
 
-// confKey converts a KC_-prefixed secret name into Keycloak's kebab-case
-// config key (KC_HTTP_PORT -> http-port); other names are left unchanged.
+// confKey converts KC_HTTP_PORT -> http-port; other names are unchanged.
 func confKey(name string) string {
 	if !strings.HasPrefix(name, "KC_") {
 		return name
