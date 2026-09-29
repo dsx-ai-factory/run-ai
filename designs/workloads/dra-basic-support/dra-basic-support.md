@@ -492,7 +492,7 @@ No need to change the `workloads_view` as we do not have this information in the
 | 1 | `k8s-objects-tracker` tracks `DeviceClass`es (incl. APIs) | DoD 2; §4.3 — cluster-scoped, storage-class pattern (`v2` read + `v1` sync). Precondition for DeviceClass validation. | Done |
 | 2 | New asset support — management | DoD 4 (incl. 4.4); §3 (Assets), §4.1 — enhanced-assets k8s-object: generic JSON spec table, CRUD APIs, and surfacing the templates in the **compute asset list**. | — |
 | 3 | Modern filtering for the new asset list APIs | §3 (Filtering), §4.1 — adopt the `queryapi` `filterBy` standard; scope-hierarchy expansion via `includeAncestors`/`includeDescendants`; denormalize `departmentId`/`clusterId` onto project-scoped rows so descendants is a column predicate. | — |
-| 4 | New RBAC resource type + permission sets | DoD 3 — new `ResourceClaimTemplate` resource type with **Edit Access** and **View Access** permission sets. | — |
+| 4 | New RBAC resource type + permission sets | DoD 3 — new `ResourceClaimTemplate` resource type with **Edit Access** and **View Access** permission sets. | Done |
 | 5 | New asset support — `DeviceClass` validation | DoD 4.3 — reject creation when `deviceClassName` is absent from the cluster's tracked `DeviceClass`es. | — |
 | 6 | New asset sync + replicate | DoD 5; §3 (Sync and Replication Issues Reporting) — apply to the cluster, replicate to target namespaces, report sync/replication issues to the CP. | — |
 | 7 | `k8s-objects-tracker` tracks `ResourceClaimTemplate`s (incl. APIs) | DoD 1; §4.2 — managed + unmanaged, storage-class pattern (`v2` read + `v1` sync). | — |

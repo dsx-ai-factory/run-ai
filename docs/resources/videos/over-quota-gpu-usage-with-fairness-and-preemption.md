@@ -4,11 +4,11 @@ See how NVIDIA Run:ai manages over-quota GPU usage while maintaining fairness an
 
 <iframe width="700" height="394" src="https://www.youtube.com/embed/i7ufKl6_8jc" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
 
-<Info>
+<Note>
 **Note**
 
 This video was recorded using NVIDIA Run:ai version 2.25.9. The user interface, features, and workflows may differ in newer releases. For the latest information, refer to the current documentation.
-</Info>
+</Note>
 
 ## What You'll Learn:
 * How teams can temporarily use extra GPU capacity when available
@@ -17,4 +17,4 @@ This video was recorded using NVIDIA Run:ai version 2.25.9. The user interface, 
 * How over-quota scheduling helps maximize GPU utilization without compromising guarantees
 
 ## Related Documentation:
-Follow the validated quickstart in the product documentation: [Over Quota, Fairness and Preemption](https://run-ai-docs.nvidia.com/self-hosted/platform-management/runai-scheduler/scheduling/quick-starts/over-quota)
+Follow the validated quickstart in the product documentation: [Over Quota, Fairness and Preemption](../../platform-management/runai-scheduler/scheduling/quick-starts/over-quota.md)

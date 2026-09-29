@@ -2,14 +2,14 @@
 
 This tutorial demonstrates how to run a distributed training workload with PyTorch on the NVIDIA Run:ai platform. Distributed training enables you to scale model training across multiple GPUs and nodes, improving performance and reducing training time. The example configurations provided here can be adapted to fit your own models, datasets, and training workflows.
 
-<Info>
+<Note>
 
 **Note**
 
 * Before running the example, verify the supported[ CUDA version of PyTorch](https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix) is compatible with your target [GPU hardware](https://developer.nvidia.com/cuda/gpus).
 * While the walkthrough uses PyTorch as the framework, the same principles apply to other distributed training [frameworks](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) supported by NVIDIA Run:ai.
 
-</Info>
+</Note>
 
 In this tutorial, you will learn how to:
 
@@ -62,7 +62,7 @@ In this tutorial, you will learn how to:
     docker build -t <your-reg>/pytorch-ddp-example:24.07-py3 .
     ```
 
-<Info>
+<Note>
 
 **Note**
 
@@ -72,7 +72,7 @@ If you are building the container on a machine with a different CPU architecture
 docker buildx build --platform linux/amd64 -t <your-image>
 ```
 
-</Info>
+</Note>
 
 7.  Once the build has finished, push the image to your private or public registry with:
 
@@ -112,13 +112,13 @@ runai login --help
 
 ## Step 3: Creating a User Access Key
 
-<Info>
+<Note>
 
 **Note**
 
 This step is only required if you intend to follow the API steps in this tutorial.
 
-</Info>
+</Note>
 
 Access keys are used for API integrations with NVIDIA Run:ai. An access key contains a client ID and a client secret. With the client credentials, you can obtain a token and use it within subsequent API calls.
 
@@ -130,7 +130,7 @@ In the NVIDIA Run:ai user interface:
 4. Copy the **Client ID** and **Client secret** and store securely
 5. Click **DONE**
 
-To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API. For example:
+To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
 curl -X POST \ 
@@ -148,14 +148,14 @@ curl -X POST \
 
 ## Step 4: Creating a User Credential
 
-<Info>
+<Note>
 
 **Note**
 
 * Creating Docker registry user credentials is supported via UI only.
 * Pulling images from a private Docker registry using a user credential is supported in the UI (Flexible submission) and API.
 
-</Info>
+</Note>
 
 User credentials allow users to securely store private authentication secrets, which are accessible only to the user who created them. See [User credentials](../../settings/user-settings/user-credentials.md) for more details.
 
@@ -172,13 +172,13 @@ In the NVIDIA Run:ai user interface:
 
 To make it easier to reuse code and checkpoints in future workloads, create a data source in the form of a Persistent Volume Claim (PVC). The PVC can be mounted to workloads and will persist after the workload completes, allowing any data it contains to be reused.
 
-<Info>
+<Note>
 
 **Note**
 
 The first time a workload is launched using a new PVC, it will take longer to start as the storage gets provisioned only once the first claim to the PVC is made.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -188,13 +188,13 @@ The first time a workload is launched using a new PVC, it will take longer to st
 2. Click +**NEW DATA SOURCE** and select **PVC** from the dropdown menu.
 3. Within the new form, set the [scope](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope).
 
-<Info>
+<Note>
 
 **Important**
 
 PVC data sources created at the cluster or department level do not replicate data across projects or namespaces. Each project or namespace will be provisioned as a separate PVC replica with different underlying PVs; therefore, the data in each PVC is not replicated.
 
-</Info>
+</Note>
 
 4. Enter a **name** for the data source. The name must be unique.
 5. For the data options, select **New PVC** and the **storage class** that suits your needs:
@@ -213,9 +213,9 @@ Copy the following command to your terminal. Make sure to update the following p
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 3](distributed-pytorch.md#step-3-creating-a-user-access-key).
 
-For all other parameters within the JSON body, refer to the [PVC](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/pvc) API.
+For all other parameters within the JSON body, refer to the [PVC](api:main-api:POST/api/v1/asset/datasource/pvc) API.
 
-After creating the data source, wait for the PVC to be provisioned. Use the [List PVC asset](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/pvc#get-api-v1-asset-datasource-pvc) API to retrieve the claim name. This claim name is the exact value that will be used for the `<pvc-claim-name>` when submitting the workload.
+After creating the data source, wait for the PVC to be provisioned. Use the [List PVC asset](api:main-api:GET/api/v1/asset/datasource/pvc) API to retrieve the claim name. This claim name is the exact value that will be used for the `<pvc-claim-name>` when submitting the workload.
 
 ```shellscript
 curl -L 'https://<COMPANY-URL>/api/v1/asset/datasource/pvc' \
@@ -247,13 +247,13 @@ curl -L 'https://<COMPANY-URL>/api/v1/asset/datasource/pvc' \
 
 ## Step 6: Creating the Workload
 
-<Info>
+<Note>
 
 **Note**
 
 Flexible workload submission is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload submission.
 
-</Info>
+</Note>
 
 ### How the Configuration Works
 
@@ -348,12 +348,12 @@ Flexible workload submission is enabled by default. If unavailable, contact your
 
 <Tab title="API">
 
-Copy the following example request and update the parameters as needed. For more details, see [Distributed](https://run-ai-docs.nvidia.com/api/2.26/workloads/distributed) API:
+Copy the following example request and update the parameters as needed. For more details, see [Distributed](api:main-api:POST/api/v1/workloads/distributed) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 3](distributed-pytorch.md#step-3-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 * `<dockerreg-name>` - The name of the user credential created in [Step 4](distributed-pytorch.md#step-4-creating-a-user-credential). Replace this with the name of the credential preceded by the system prefix `dockerreg-`.
 * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 5](distributed-pytorch.md#step-5-creating-a-pvc-data-source).
 

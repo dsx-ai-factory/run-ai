@@ -2,13 +2,13 @@
 
 This tutorial demonstrates how to run a distributed inference workload using the DeepSeek-R1 model on the NVIDIA Run:ai platform. You can use this workflow as a reference and adapt it for your own models, container images, and hardware configurations.
 
-<Info>
+<Note>
 
 **Note**
 
 For the NIM example, verify that the selected NIM is supported on your target hardware according to the [NIM support matrix](https://docs.nvidia.com/nim/large-language-models/latest/supported-models.html#gpushttps://docs.nvidia.com/nim/large-language-models/latest/supported-models.html#gpus).
 
-</Info>
+</Note>
 
 In this tutorial, you will learn how to:
 
@@ -60,13 +60,13 @@ runai login --help
 
 ## Step 2: Creating a User Access Key
 
-<Info>
+<Note>
 
 **Note**
 
 This step is only required if you intend to follow the API steps in this tutorial.
 
-</Info>
+</Note>
 
 Access keys are used for API integrations with NVIDIA Run:ai. An access key contains a client ID and a client secret. With the client credentials, you can obtain a token and use it within subsequent API calls.
 
@@ -78,7 +78,7 @@ In the NVIDIA Run:ai user interface:
 4. Copy the **Client ID** and **Client secret** and store securely
 5. Click **DONE**
 
-To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API. For example:
+To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
 curl -X POST \ 
@@ -96,13 +96,13 @@ curl -X POST \
 
 ## Step 3: Creating a User Credential
 
-<Info>
+<Note>
 
 **Note**
 
 Creating user credentials is not available via API.
 
-</Info>
+</Note>
 
 User credentials allow users to securely store private authentication secrets, which are accessible only to the user who created them. See [User credentials](../../settings/user-settings/user-credentials.md) for more details.
 
@@ -119,13 +119,13 @@ In the NVIDIA Run:ai user interface:
 
 To make it easier to reuse code and checkpoints in future workloads, create a data source in the form of a Persistent Volume Claim (PVC). The PVC can be mounted to workloads and will persist after the workload completes, allowing any data it contains to be reused.
 
-<Info>
+<Note>
 
 **Note**
 
 The first time a workload is launched using a new PVC, it will take longer to start as the storage gets provisioned only once the first claim to the PVC is made.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -135,13 +135,13 @@ The first time a workload is launched using a new PVC, it will take longer to st
 2. Click +**NEW DATA SOURCE** and select **PVC** from the dropdown menu.
 3. Within the new form, set the [scope](../../workloads-in-nvidia-run-ai/workload-assets/overview.md#asset-scope).
 
-<Info>
+<Note>
 
 **Important**
 
 PVC data sources created at the cluster or department level do not replicate data across projects or namespaces. Each project or namespace will be provisioned as a separate PVC replica with different underlying PVs; therefore, the data in each PVC is not replicated.
 
-</Info>
+</Note>
 
 4. Enter a **name** for the data source. The name must be unique.
 5. For the data options, select **New PVC** and the **storage class** that suits your needs:
@@ -162,9 +162,9 @@ Copy the following command to your terminal. Make sure to update the following p
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](nvidia-nim-distributed.md#step-2-creating-a-user-access-key).
 
-For all other parameters within the JSON body, refer to the [PVC](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/pvc) API.
+For all other parameters within the JSON body, refer to the [PVC](api:main-api:POST/api/v1/asset/datasource/pvc) API.
 
-After creating the data source, wait for the PVC to be provisioned. Use the [List PVC asset](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/pvc#get-api-v1-asset-datasource-pvc) API to retrieve the claim name. This claim name is the exact value that will be used for the `<pvc-claim-name>` when submitting the workload.
+After creating the data source, wait for the PVC to be provisioned. Use the [List PVC asset](api:main-api:GET/api/v1/asset/datasource/pvc) API to retrieve the claim name. This claim name is the exact value that will be used for the `<pvc-claim-name>` when submitting the workload.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/asset/datasource/pvc' \
@@ -276,12 +276,12 @@ The configuration below defines how the workload is distributed across nodes, ho
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Distributed Inferences](https://run-ai-docs.nvidia.com/api/2.26/workloads/distributed-inferences) API:
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [Distributed Inferences](api:main-api:POST/api/v1/workloads/distributed-inferences) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](nvidia-nim-distributed.md#step-2-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 * `<ngc-credential-name>` - The name of the user credential created in [Step 3](nvidia-nim-distributed.md#step-3-creating-a-user-credential).
 * `<pvc-claim-name>` - The claim name associated with the PVC created in [Step 4](nvidia-nim-distributed.md#step-4-creating-a-pvc-data-source).
 * `security` - The security parameters are required for OpenShift environments only.
@@ -511,15 +511,15 @@ Once the workload reaches **Running** and shows an available **Connection**, you
 
 ## Step 7: Accessing the Inference Workload
 
-You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads#get-api-v1-workloads) API. The endpoint URL will be available in the response body under `endpoints`.
+You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
 
-<Info>
+<Note>
 
 **Note**
 
 For clusters below version 2.25, the endpoint URL will be available in the response body under `urls`.
 
-</Info>
+</Note>
 
 By default, inference endpoints in NVIDIA Run:ai are configured with public access, meaning no authentication is required to send requests. In this tutorial, the `servingPort` is configured with the `authenticatedUsers` as the `authorizationType`. This means only authenticated users with a valid access token can call the inference endpoint.
 

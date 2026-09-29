@@ -65,13 +65,13 @@ Click one of the values in the Workload(s) column to view the list of workloads 
 
 When installing NVIDIA Run:ai, you automatically get the environments created by NVIDIA Run:ai to ease up the onboarding process and support different use cases out of the box. These environments are created at the [scope](overview.md#asset-scope) of the account.
 
-<Info>
+<Note>
 
 **Note**
 
 The environments listed below are available based on your cluster settings. Some environments, such as vscode and rstudio, are only available in clusters with [host-based routing](../../installation-and-configuration/configuration/networking/external-access-to-containers.md#host-based-routing).
 
-</Info>
+</Note>
 
 | Environment                                                                                     | Image                                              | Description                                                                                                                                                                            |
 | ----------------------------------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -88,14 +88,14 @@ The environments listed below are available based on your cluster settings. Some
 
 ## Adding a New Environment
 
-<Info>
+<Note>
 
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
 * To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
-</Info>
+</Note>
 
 Environment creation is limited to [specific roles](overview.md#who-can-create-an-asset)
 
@@ -175,13 +175,13 @@ To add a new environment:
 16. Optional: Select **Linux capabilities** - Grant certain privileges to a container without granting all the privileges of the root user.
 17. Click **CREATE ENVIRONMENT**
 
-<Info>
+<Note>
 
 **Note**
 
 It is also possible to add environments directly when creating a specific [workspace](../using-workspaces/running-workspace.md), [training](../using-training/train-models.md) or [inference](../using-inference/nvidia-run-ai-inference-overview.md) workload.
 
-</Info>
+</Note>
 
 ## Editing an Environment
 
@@ -191,14 +191,14 @@ To edit an existing environment:
 2. Click **Edit**
 3. Update the environment and click **SAVE ENVIRONMENT**
 
-<Info>
+<Note>
 
 **Note**
 
 * The already bound workload that is using this asset will not be affected.
 * llm-server and chatbot-ui environments cannot be edited.
 
-</Info>
+</Note>
 
 ## Copying an Environment
 
@@ -217,14 +217,18 @@ To delete an environment:
 2. Click **DELETE**
 3. On the dialog, click **DELETE** to confirm
 
-<Info>
+<Note>
 
 **Note**
 
 The already bound workload that is using this asset will not be affected.
 
-</Info>
+</Note>
+
+## Using CLI
+
+To view the available actions on environments, see the environment [CLI v2 reference](../../reference/cli/runai/runai_environment.md).
 
 ## Using API
 
-Go to the [Environment](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/environment) API reference to view the available actions
+Go to the [Environment](api:main-api:GET/api/v1/asset/environment) API reference to view the available actions

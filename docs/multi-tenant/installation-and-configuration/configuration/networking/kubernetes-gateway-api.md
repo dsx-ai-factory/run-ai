@@ -452,7 +452,7 @@ The following steps install Knative Serving and configure the HTTPRoute to conne
     ```
 5.  Create a YAML file named `knative-httproute.yaml` to route inference traffic from the Gateway to the Kourier service. Replace the FQDN placeholder with your wildcard [inference FQDN](../../system-requirements/networking-setup.md#fqdn-and-dns):
 
-    <Info><p><strong>Note</strong></p><p>OpenShift's Ingress Operator automatically creates DNS records for Gateway listeners, so no manual DNS configuration is required for the inference subdomain.</p></Info>
+    <Note><p><strong>Note</strong></p><p>OpenShift's Ingress Operator automatically creates DNS records for Gateway listeners, so no manual DNS configuration is required for the inference subdomain.</p></Note>
 
     ```yaml
     apiVersion: gateway.networking.k8s.io/v1

@@ -15,7 +15,7 @@ The NVIDIA Run:ai Agent is an intelligent interface that streamlines how users i
 
 The architecture consists of three primary pillars:
 
-* **REST API executor:** This component interacts with the NVIDIA Run:ai control plane. It translates high-level requests—such as "list my running jobs"—into authenticated REST calls, fetching real-time data without requiring the user to parse JSON outputs.
+* **REST API executor:** This component interacts with the NVIDIA Run:ai control plane. It translates high-level requests (such as "list my running jobs") into authenticated REST calls, fetching real-time data without requiring the user to parse JSON outputs.
 * **Kubectl integration:** For deep-stack operations, the agent communicates with the underlying Kubernetes nodes. This enables it to verify pod health, check node affinity, and ensure that the requested resources, like specific NVIDIA GPUs, are available.
 * **Unified control plane:** The agent acts as a client to the NVIDIA Run:ai control plane, ensuring all actions respect the multi-tenancy and RBAC policies defined by the organization.
 
@@ -25,7 +25,6 @@ Before engaging with the agent, the environment must be bootstrapped with the NV
 
 Download and install the CLI to your local machine or jump host. This utility handles the authentication and low-level communication with the [NVIDIA Run:ai](https://www.nvidia.com/en-us/software/run-ai/) platform.
 
-{% code overflow="wrap" %}
 ```shellscript
 git clone https://github.com/runai-professional-services/runai-agent.git
 # 1. Create namespace and secrets
@@ -67,7 +66,6 @@ runai-cli ask "Show me all projects"
 runai-cli submit "Create a training job with 2 GPUs"
 runai-cli chat  # Interactive mode
 ```
-{% endcode %}
 
 ### Infrastructure as Conversation: From Idea to Running Workload
 
@@ -82,7 +80,6 @@ The transition from intent to execution is where the NVIDIA Run:ai Agent truly s
 
 For instance, if a researcher needs to launch a training task but doesn’t remember the exact syntax, they can submit the request to the agent in natural language, as shown:
 
-{% code overflow="wrap" %}
 ```shellscript
 runai-cli submit "Submit a training job called training-job-01 with image runai.jfrog.io/demo/quickstart-demo in project-01 with 1 GPU"
 ℹ 🚀 Processing your request...
@@ -104,7 +101,6 @@ Your training job **training-job-01** is now running in project **project-01** w
 
 Let me know if you need further assistance!
 ```
-{% endcode %}
 
 ### Making Resource Governance Transparent and Easy to Manage
 
@@ -112,20 +108,17 @@ As AI teams scale, resource governance becomes mission-critical. Without clear q
 
 For an MLOps engineer, creating a new GPU-scoped project becomes a single request:
 
-{% code overflow="wrap" %}
 ```shellscript
 runai-cli ask "Please create a project named project-02 with 4 GPU quota."
 ✔ Processing query...
 
 The project "project-02" has been successfully created with a GPU quota of 4. The project ID is "4500003" and it is associated with the cluster ID "72f2930b-9cac-4ae2-b391-0174cec2cb22". The project is currently in the "Creating" phase.
 ```
-{% endcode %}
 
 ### Diagnosing Failures at Scale Instantly
 
 Failed jobs silently drain productivity and compute budgets. Instead of parsing logs across dozens of workloads, the same conversational layer provides structured failure analysis:
 
-{% code overflow="wrap" %}
 ```shellscript
 runai-cli ask "Can you share with me the failure statistics?"
 ✔ Processing query...
@@ -141,13 +134,11 @@ Here are the failure statistics from the last 7 days:
 
 Would you like me to investigate specific jobs further or check for patterns in failures?
 ```
-{% endcode %}
 
 ### Performance Analytics
 
 To understand how effectively GPUs are being utilized, a user can simply query the agent:
 
-{% code overflow="wrap" %}
 ```shellscript
 runai-cli ask "Can you share with me the performance analysis?"
 ✔ Processing query...
@@ -176,13 +167,11 @@ Here's the performance analysis for the last 7 days across all projects:
 
 Would you like me to investigate the failed jobs further or provide more specific details about any particular aspect?
 ```
-{% endcode %}
 
 ### Utilization Visibility
 
 Users can check their standing within a project to see if they are nearing their GPU limits.
 
-{% code overflow="wrap" %}
 ```shellscript
 runai-cli ask "please list all of the projects with their quota."
 ✔ Processing query...
@@ -195,7 +184,6 @@ Here are the projects with their GPU quotas:
 
 The cluster has a total quota of 12 GPUs, with 4 currently in use (33.3% utilization).
 ```
-{% endcode %}
 
 ### How NVIDIA Run:ai Agent Accelerates the AI Lifecycle
 
@@ -220,32 +208,16 @@ If an agent says it cannot find resources.
 
 ### Get Started
 
-With deeper integration with the NVIDIA NeMo Agent toolkit, the possibilities for automated hyperparameter tuning and proactive cluster optimization are just beginning. The future of AI development isn't just about more performant GPUs—it's about a more intelligent way to use them.\
+With deeper integration with the NVIDIA NeMo Agent toolkit, the possibilities for automated hyperparameter tuning and proactive cluster optimization are just beginning. The future of AI development isn't just about more performant GPUs: it's about a more intelligent way to use them.\
 \
 Give the NVIDIA Run:ai Agent a try on [GitHub](https://github.com/runai-professional-services/runai-agent). Explore the agent, push its boundaries, and help shape the future of intent-driven AI orchestration. Whether you have questions, feature requests, or would like to contribute, we’d love to hear from you through [GitHub issues](https://github.com/runai-professional-services/runai-agent/issues/new/choose).
 
 ### About the Authors
 
-{% columns %}
-{% column %}
 **About Vivek Kolasani**
 
-<figure><img src="../../assets/runai-agent-image.png" alt="" width="160"><figcaption></figcaption></figure>
-{% endcolumn %}
+Vivek Kolasani is a solutions architect at NVIDIA, helping customers deploy and optimize AI models in production. He works across the AI lifecycle: from distributed training with PyTorch to inference optimization using frameworks like Dynamo, TensorRT, and NGC containers. Previously at Run:ai, he focused on maximizing GPU efficiency and scaling AI workloads. Vivek holds a master’s degree in computer information science from Cleveland State University. He is based in Dallas
 
-{% column %}
-Vivek Kolasani is a solutions architect at NVIDIA, helping customers deploy and optimize AI models in production. He works across the AI lifecycle—from distributed training with PyTorch to inference optimization using frameworks like Dynamo, TensorRT, and NGC containers. Previously at Run:ai, he focused on maximizing GPU efficiency and scaling AI workloads. Vivek holds a master’s degree in computer information science from Cleveland State University. He is based in Dallas
-{% endcolumn %}
-{% endcolumns %}
-
-{% columns %}
-{% column width="50%" %}
 **About Brad Soper**
 
-<figure><img src="../../assets/runai-agent-unknown.png" alt="" width="160"><figcaption></figcaption></figure>
-{% endcolumn %}
-
-{% column width="50%" %}
 Brad Soper is a solutions architect at NVIDIA. He has over 20 years of experience in infrastructure, cloud, Kubernetes, and MLOps engineering. His focus has been enabling teams with the skills required to manage, deploy and scale AI workloads. He is based in the greater Seattle, WA area.
-{% endcolumn %}
-{% endcolumns %}

@@ -111,9 +111,9 @@ navigation:
       contents:
       - page: Node Roles
         path: ../../docs/installation-and-configuration/configuration/node-roles.md
-      - page: Control Plane Configuration
+      - page: Advanced Control Plane Configuration
         path: ../../docs/installation-and-configuration/configuration/control-plane-config.md
-      - page: Cluster Configuration
+      - page: Advanced Cluster Configuration
         path: ../../docs/installation-and-configuration/configuration/cluster-config.md
       - page: Cluster Authentication
         path: ../../docs/installation-and-configuration/configuration/cluster-authentication.md
@@ -149,7 +149,7 @@ navigation:
       contents:
       - page: Clusters
         path: ../../docs/installation-and-configuration/operations/clusters.md
-      - page: Scaling
+      - page: NVIDIA Run:ai at Scale
         path: ../../docs/installation-and-configuration/operations/scaling.md
       - page: High Availability
         path: ../../docs/installation-and-configuration/operations/high-availability.md
@@ -246,6 +246,7 @@ navigation:
           - page: Segment-Based Topology Placement
             path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md
         - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
+          slug: spectrum-x-networking
           path: ../../docs/platform-management/aiinitiatives/resources/spectrum-x-networking.md
         - page: Configuring NUMA-Aware Scheduling
           slug: numa-aware-scheduling
@@ -454,6 +455,7 @@ navigation:
       slug: using-inference
       contents:
       - page: NVIDIA Run:ai Inference Overview
+        slug: inference-overview
         path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md
       - page: Deploy Inference Workloads with NVIDIA NIM
         slug: nim-inference
@@ -483,6 +485,7 @@ navigation:
     - page: Introduction to AI Applications
       path: ../../docs/ai-applications/introduction-to-ai-applications.md
     - page: AI Applications
+      slug: submit-ai-applications
       path: ../../docs/ai-applications/ai-applications.md
   - section: Tutorials
     contents:
@@ -632,12 +635,10 @@ navigation:
         - accessKeys
         - accessRules
         - permissions
-        - applications
         - serviceAccounts
         - roles
         - tokens
         - users
-        - userApplications
         - idps
         - me
         - settings
@@ -647,12 +648,12 @@ navigation:
         - auditLogs
       - section: Datavolumes
         contents:
-        - datavolumesApi
+        - datavolumes
       - section: Workloads
         contents:
         - events
         - pods
-        - workloadsApi
+        - workloads
         - workloadsV2
         - nvidiaNim
         - workspaces
@@ -694,7 +695,7 @@ navigation:
         - subscriptions
       - section: AI Applications
         contents:
-        - aiApplicationsApi
+        - ai-applications
     - section: API Guides
       contents:
       - page: Interacting with Workloads Using the Cluster API

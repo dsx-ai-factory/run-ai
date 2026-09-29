@@ -17,6 +17,21 @@ _CHECK_BC_PKG_DIR = $(RUNAI_REPO_ROOT)/$(TAG_FORMAT)
 _VERSIONING_ENV = TAG_FORMAT="$(TAG_FORMAT)" MAX_PATCH="$(MAX_PATCH)"
 _SOURCE_VERSIONING_HELPERS = . "$(VERSIONING_HELPERS)"
 
+# versioning-helpers.sh uses bash-only syntax (<<<, read -p), so these
+# recipes run explicitly under bash instead of make's default $(SHELL)
+# (/bin/sh, which is dash on Debian/Ubuntu and would fail on it).
+define _run_versioning
+@bash -c 'set -e; $(_VERSIONING_ENV); $(_SOURCE_VERSIONING_HELPERS); $(1)'
+endef
+
+_require-client:
+	@if [ ! -f "$(CURDIR)/pkg/client/go.mod" ] || [ "$(_CHECK_BC_PKG_DIR)" != "$(CURDIR)/pkg/client" ]; then \
+		printf "$(RED)Error: client version bumping is only supported from a service with a pkg/client module.$(NC)\n"; \
+		printf "$(YELLOW)TAG_FORMAT='$(TAG_FORMAT)' is not this service's pkg/client.$(NC)\n"; \
+		exit 1; \
+	fi
+.PHONY: _require-client
+
 _require-package:
 	@case "$(TAG_FORMAT)" in \
 		runai-common-packages/*|runai-application-packages/*) ;; \
@@ -27,128 +42,25 @@ _require-package:
 	esac
 .PHONY: _require-package
 
-client-bump-version: _check-can-tag _bump-version
+client-bump-version: _require-client _check-can-tag
+	$(call _run_versioning,versioning_bump prod "$(_CHECK_BC_PKG_DIR)")
 .PHONY: client-bump-version
 
-client-bump-version-dev: _bump-version-dev
+client-bump-version-dev: _require-client
+	$(call _run_versioning,versioning_bump dev "$(_CHECK_BC_PKG_DIR)")
 .PHONY: client-bump-version-dev
 
-# versioning-helpers.sh uses bash-only syntax (<<<, read -p), so these two
-# recipes run explicitly under bash instead of make's default $(SHELL)
-# (/bin/sh, which is dash on Debian/Ubuntu and would fail on it).
 package-bump-version: _require-package _check-can-tag
-	@bash -c ' \
-	set -e; \
-	$(_VERSIONING_ENV); \
-	$(_SOURCE_VERSIONING_HELPERS); \
-	versioning_refresh_tags; \
-	latest_prod_tag=$$(versioning_latest_prod_tag); \
-	echo "Latest prod tag: $$latest_prod_tag"; \
-	set +e; \
-	$(RUNAI_REPO_ROOT)/build/scripts/check-breaking-changes.sh "$(TAG_FORMAT)" "$(_CHECK_BC_PKG_DIR)" "$$latest_prod_tag"; \
-	RESULT=$$?; \
-	set -e; \
-	bump_kind=$$(versioning_bump_kind_from_result $$RESULT); \
-	versioning_publish_prod_bump "$$bump_kind" "$$latest_prod_tag"; \
-	'
+	$(call _run_versioning,versioning_bump prod "$(_CHECK_BC_PKG_DIR)")
 .PHONY: package-bump-version
 
 package-bump-version-dev: _require-package
-	@bash -c ' \
-	set -e; \
-	$(_VERSIONING_ENV); \
-	$(_SOURCE_VERSIONING_HELPERS); \
-	versioning_refresh_tags; \
-	latest_prod_tag=$$(versioning_latest_prod_tag); \
-	latest_dev_tag=$$(versioning_latest_dev_tag); \
-	echo "Latest prod tag: $$latest_prod_tag"; \
-	echo "Latest dev tag: $$latest_dev_tag"; \
-	set +e; \
-	$(RUNAI_REPO_ROOT)/build/scripts/check-breaking-changes.sh "$(TAG_FORMAT)" "$(_CHECK_BC_PKG_DIR)" "$$latest_prod_tag"; \
-	RESULT=$$?; \
-	set -e; \
-	bump_kind=$$(versioning_bump_kind_from_result $$RESULT); \
-	target_version=$$(versioning_next_dev_target_version "$$bump_kind" "$$latest_prod_tag" "$$latest_dev_tag"); \
-	new_tag=$$(versioning_next_dev_tag "$$target_version"); \
-	versioning_create_tag "$$new_tag" "Dev release $$new_tag"; \
-	'
+	$(call _run_versioning,versioning_bump dev "$(_CHECK_BC_PKG_DIR)")
 .PHONY: package-bump-version-dev
 
 check-breaking-changes: _require-package
 	@$(RUNAI_REPO_ROOT)/build/scripts/check-breaking-changes.sh "$(TAG_FORMAT)" "$(_CHECK_BC_PKG_DIR)"
 .PHONY: check-breaking-changes
-
-_bump-version-dev:
-	@set -e; \
-	git tag -l '$(TAG_FORMAT)*' | xargs -r git tag -d > /dev/null 2>&1; \
-	git fetch --tags --force origin > /dev/null 2>&1; \
-	latest_tag=$$(git tag -l '$(TAG_FORMAT)/v*' | sort -V | tail -1); \
-	echo "Latest tag: $$latest_tag"; \
-	if [ -z "$$latest_tag" ]; then \
-		new_tag="$(TAG_FORMAT)/v0.0.0-dev.0"; \
-	elif echo "$$latest_tag" | grep -Eq '^$(TAG_FORMAT)/v[0-9]+\.[0-9]+\.[0-9]+-dev\.[0-9]+$$'; then \
-		base=$$(echo $$latest_tag | sed -E 's#(.*-dev\.)([0-9]+)$$#\1#'); \
-		dev_ver=$$(echo $$latest_tag | sed -E 's#.*-dev\.([0-9]+)$$#\1#'); \
-		new_dev_ver=$$((dev_ver + 1)); \
-		new_tag="$$base$$new_dev_ver"; \
-	else \
-		ver=$$(echo $$latest_tag | sed -E 's#^$(TAG_FORMAT)/v([0-9]+)\.([0-9]+)\.([0-9]+).*#\1.\2.\3#'); \
-		major=$$(echo $$ver | cut -d. -f1); \
-		minor=$$(echo $$ver | cut -d. -f2); \
-		patch=$$(echo $$ver | cut -d. -f3); \
-		new_patch=$$((patch + 1)); \
-		if [ "$$new_patch" -ge $(MAX_PATCH) ]; then \
-			new_patch=0; \
-			minor=$$((minor + 1)); \
-		fi; \
-		new_tag="$(TAG_FORMAT)/v$${major}.$${minor}.$${new_patch}-dev.0"; \
-	fi; \
-	git tag $$new_tag -m "Dev release $$new_tag"; \
-	git push origin $$new_tag > /dev/null 2>&1; \
-	echo "$(GREEN)Published tag: $$new_tag$(NC)";
-.PHONY: _bump-version-dev
-
-_bump-version:
-	@set -e; \
-	git tag -l '*$(TAG_FORMAT)*' | xargs -r git tag -d > /dev/null 2>&1; \
-	git fetch --tags --force origin > /dev/null 2>&1; \
-	echo '$(TAG_FORMAT)/v*'; \
-	latest_dev_tag=$$(git tag -l '$(TAG_FORMAT)/v*-dev*' | sort -V | tail -1); \
-	latest_prod_tag=$$(git tag -l '$(TAG_FORMAT)/v*' | sort -V | grep -v dev | tail -1); \
-	echo "Latest dev tag: $$latest_dev_tag"; \
-	echo "Latest prod tag: $$latest_prod_tag"; \
-	prod_version=$$(echo $$latest_prod_tag | sed -E 's#^$(TAG_FORMAT)/v([0-9]+\.[0-9]+\.[0-9]+).*#\1#'); \
-	if [ -z "$$latest_dev_tag" ]; then \
-	  dev_version="0.0.0"; \
-	else \
-	  dev_version=$$(echo $$latest_dev_tag | sed -E 's#^$(TAG_FORMAT)/v([0-9]+\.[0-9]+\.[0-9]+)-dev\.[0-9]+#\1#'); \
-	fi; \
-	prod_major=$$(echo $$prod_version | cut -d. -f1); \
-	prod_minor=$$(echo $$prod_version | cut -d. -f2); \
-	prod_patch=$$(echo $$prod_version | cut -d. -f3); \
-	dev_major=$$(echo $$dev_version | cut -d. -f1); \
-	dev_minor=$$(echo $$dev_version | cut -d. -f2); \
-	dev_patch=$$(echo $$dev_version | cut -d. -f3); \
-	if [ "$$dev_major" -gt "$$prod_major" ] || \
-	   ([ "$$dev_major" -eq "$$prod_major" ] && [ "$$dev_minor" -gt "$$prod_minor" ]) || \
-	   ([ "$$dev_major" -eq "$$prod_major" ] && [ "$$dev_minor" -eq "$$prod_minor" ] && [ "$$dev_patch" -gt "$$prod_patch" ]); then \
-		cand_major=$$dev_major; \
-		cand_minor=$$dev_minor; \
-		cand_patch=$$dev_patch; \
-	else \
-		cand_major=$$prod_major; \
-		cand_minor=$$prod_minor; \
-		cand_patch=$$((prod_patch + 1)); \
-	fi; \
-	if [ "$$cand_patch" -ge $(MAX_PATCH) ]; then \
-		cand_patch=0; \
-		cand_minor=$$((cand_minor + 1)); \
-	fi; \
-	new_tag="$(TAG_FORMAT)/v$${cand_major}.$${cand_minor}.$${cand_patch}"; \
-	git tag $$new_tag -m "Prod release $$new_tag"; \
-	git push origin $$new_tag > /dev/null 2>&1; \
-	echo "$(GREEN)Published tag: $$new_tag$(NC)";
-.PHONY: _bump-version
 
 _validate-main-sync:
 	@current_branch=$$(git rev-parse --abbrev-ref HEAD); \

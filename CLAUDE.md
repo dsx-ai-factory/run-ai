@@ -31,7 +31,7 @@ export GITHUB_TOKEN=ghp_...   # needed for private Go modules
 
 **All flags:** `--domain`, `--admin-email`, `--admin-password`, `--parallel N`, `--skip-build`, `--skip-build-cp`, `--skip-build-rc`, `--skip-frontend`, `--skip-cluster`, `--skip-deploy`, `--skip-deploy-cp`, `--skip-deploy-rc`, `--skip-prometheus`, `--skip-fake-gpu`, `--gpu-operator`, `--gpu-driver`, `--gpu-operator-version`, `--force-rebuild`, `--teardown`, `--purge`
 
-After first run: `sudo sh -c 'echo "127.0.0.1 runai.local" >> /etc/hosts'` → https://runai.local (admin@run.ai / Admin@1234!)
+After first run: `sudo sh -c 'echo "127.0.0.1 runai.local" >> /etc/hosts'` → https://runai.local (login `test@run.ai`; password is auto-generated and printed in the final summary unless `--admin-password` is passed)
 
 ## Service structure
 Each service has `artifact-metadata.json` (`artifact_type`: container | go | cli | helm) and standard Makefile targets: `build`, `test`, `lint`, `validate`.

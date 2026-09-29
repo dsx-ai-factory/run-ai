@@ -14,6 +14,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// ConstructConfig fails when the secrets folder is missing, and the default
+// /etc/secrets does not exist on CI runners. Point it at an empty folder so
+// tests never read the host's secrets; tests that mount their own secrets
+// still override it with t.Setenv.
+func TestMain(m *testing.M) {
+	secretsDir, err := os.MkdirTemp("", "dao-utils-secrets")
+	if err != nil {
+		panic(err)
+	}
+	os.Setenv(EnvSecretsMountPath, secretsDir)
+	code := m.Run()
+	os.RemoveAll(secretsDir)
+	os.Exit(code)
+}
+
 func TestConstructConfig_SetsDefaultsAsExpected(t *testing.T) {
 	defer config.FlushAll()
 	conf := ConstructConfig("")

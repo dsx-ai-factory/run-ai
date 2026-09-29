@@ -62,7 +62,7 @@ SM-sharing runs the workloads through a shared context, so the workloads sharing
 
 **Note**
 
-NVIDIA Run:ai installs and operates normally without these prerequisites in place, and workloads not using GPU fractions are unaffected. GPU compute modes apply only to workloads using GPU fractions, and those are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
+NVIDIA Run:ai installs and operates normally without these prerequisites in place, and workloads not using GPU fractions are unaffected. GPU compute modes apply only to workloads using GPU fractions, and those are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
 
 </Note>
 
@@ -93,7 +93,7 @@ If the annotation is omitted, time-slicing applies.
 
 **Note**
 
-Clusters upgraded from the proprietary GPU sharing implementation keep running workloads using GPU fractions on time-slicing behavior after the upgrade, with no annotation required. See [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for upgrade details.
+Clusters upgraded from the proprietary GPU sharing implementation keep running workloads using GPU fractions on time-slicing behavior after the upgrade, with no annotation required. See [Migrate GPU Fractions](../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for upgrade details.
 
 </Note>
 
@@ -134,8 +134,8 @@ spec:
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/runai.md) and run according to your workload.
 
 ## Using API
 
-To view the available actions, go to the [API reference](https://run-ai-docs.nvidia.com/api/2.26/) and run according to your workload.
+To view the available actions, go to the [API reference](../../../rest-api/about-the-rest-api.md) and run according to your workload.

@@ -1,16 +1,16 @@
 # Extending Workload Support with Karta
 
-Karta in NVIDIA Run:ai provides a declarative way to extend platform support for new workload types. It enables organizations to quickly incorporate emerging ML frameworks, tools, or Kubernetes resources without requiring platform updates or code changes. Administrators can introduce new workload types at any time through the [Workload Types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types) API.
+Karta in NVIDIA Run:ai provides a declarative way to extend platform support for new workload types. It enables organizations to quickly incorporate emerging ML frameworks, tools, or Kubernetes resources without requiring platform updates or code changes. Administrators can introduce new workload types at any time through the [Workload Types](api:main-api:POST/api/v1/workload-types) API.
 
 Once registered, these workloads become available across the organization, enabling teams to innovate and collaborate. Practitioners can then submit them using the [via YAML](../../submit-via-yaml.md) submission and manage them with the same orchestration, monitoring, and scheduling capabilities as native workloads. For details on feature support, see [Supported features](../supported-features.md).
 
-<Info>
+<Note>
 
 **Note**
 
 NVIDIA Run:ai supports a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. See [Supported workload types](../supported-workload-types.md).
 
-</Info>
+</Note>
 
 ## Karta <a href="#karta-overview" id="karta-overview"></a>
 
@@ -33,7 +33,7 @@ A typical Karta manifest includes the following primary sections:
 
 ## Registering New Workload Types
 
-The [Workload Types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types) API allows administrators to register and manage new workload types by providing the required details, such as workload name, supported CRD versions, category, priority, and Kubernetes group. For more details on registering new workload types, see [Defining a Karta](defining-a-karta.md).
+The [Workload Types](api:main-api:POST/api/v1/workload-types) API allows administrators to register and manage new workload types by providing the required details, such as workload name, supported CRD versions, category, priority, and Kubernetes group. For more details on registering new workload types, see [Defining a Karta](defining-a-karta.md).
 
 `POST /api/v1/workload-types` with the following:
 

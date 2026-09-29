@@ -114,7 +114,17 @@ After creating the network topology, the administrator must associate it with th
 
 ## Using the API
 
-Go to the [Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters) API reference to view the available actions
+Go to the [Clusters](api:main-api:GET/api/v1/clusters) API reference to view the available actions
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes [Cluster and Infrastructure](../../agents/tools-reference.md#cluster-and-infrastructure) tools to inspect clusters via natural language:
+
+* `get_cluster_physical_inventory` - see a cluster's GPU nodes, GPU models, and total, allocatable, allocated, and free GPUs, CPU cores, and memory
+* `get_cluster_infrastructure_health` - see nodes that are NotReady or Unknown, with their conditions, taints, and GPU counts
+* `get_cluster_metrics` - track a cluster's GPU and CPU capacity and utilization over time
+
+See [AI Agents](../../agents/overview.md) for setup.
 
 ## Troubleshooting
 

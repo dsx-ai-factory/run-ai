@@ -100,9 +100,9 @@ navigation:
       contents:
       - page: Node Roles
         path: ../../docs/multi-tenant/installation-and-configuration/configuration/node-roles.md
-      - page: Control Plane Configuration
+      - page: Advanced Control Plane Configuration
         path: ../../docs/multi-tenant/installation-and-configuration/configuration/control-plane-config.md
-      - page: Cluster Configuration
+      - page: Advanced Cluster Configuration
         path: ../../docs/multi-tenant/installation-and-configuration/configuration/cluster-config.md
       - section: Networking
         contents:
@@ -116,18 +116,18 @@ navigation:
         contents:
         - page: Secure Your Cluster
           path: ../../docs/multi-tenant/installation-and-configuration/configuration/security/secure-your-cluster.md
-      - section: Authentication and Authorization
+      - section: Authentication
         contents:
         - page: Roles
-          path: ../../docs/multi-tenant/infrastructure-setup/authentication-and-authorization/roles.md
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/authentication/roles.md
         - page: Access Rules
-          path: ../../docs/multi-tenant/infrastructure-setup/authentication-and-authorization/access-rules.md
+          path: ../../docs/multi-tenant/installation-and-configuration/configuration/authentication/access-rules.md
     - section: Operations
       contents:
       - page: NVIDIA Run:ai at Scale
-        path: ../../docs/multi-tenant/infrastructure-setup/procedures/scaling.md
+        path: ../../docs/multi-tenant/installation-and-configuration/operations/scaling.md
       - page: Infrastructure Monitoring
-        path: ../../docs/multi-tenant/infrastructure-setup/procedures/monitoring.md
+        path: ../../docs/multi-tenant/installation-and-configuration/operations/monitoring.md
       - page: Vertical Pod Autoscaling (VPA)
         slug: vpa
         path: ../../docs/multi-tenant/installation-and-configuration/operations/vpa.md
@@ -136,7 +136,7 @@ navigation:
         - page: Nodes Maintenance
           path: ../../docs/multi-tenant/installation-and-configuration/operations/maintenance/nodes-maintenance.md
         - page: Cluster Restore
-          path: ../../docs/multi-tenant/infrastructure-setup/procedures/cluster-restore.md
+          path: ../../docs/multi-tenant/installation-and-configuration/operations/maintenance/cluster-restore.md
           hidden: true
       - section: Observability
         contents:
@@ -145,7 +145,7 @@ navigation:
         - page: Logs Collection
           path: ../../docs/multi-tenant/installation-and-configuration/operations/observability/logs-collection.md
         - page: Audit Logs API
-          path: ../../docs/multi-tenant/infrastructure-setup/procedures/event-history.md
+          path: ../../docs/multi-tenant/installation-and-configuration/operations/observability/event-history.md
     - page: Upgrade
       path: ../../docs/multi-tenant/installation-and-configuration/upgrade.md
   - section: Development

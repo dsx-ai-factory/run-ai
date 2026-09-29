@@ -4,8 +4,8 @@ go 1.27.1
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.14
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/stretchr/testify v1.12.1
 )
@@ -113,8 +113,8 @@ require (
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260921155816-b14227669459 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect

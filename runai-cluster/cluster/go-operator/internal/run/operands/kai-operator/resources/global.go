@@ -7,6 +7,7 @@ package resources
 
 import (
 	kaiv1 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1"
+	kaicommon "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1/common"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 
@@ -35,6 +36,9 @@ func convertKAIGlobal(runaiConfig *runaiv1.RunaiConfig) *kaiv1.GlobalConfig {
 		RequireDefaultPodAntiAffinityTerm: ptr.To(runaiConfig.Spec.Global.RequireDefaultPodAntiAffinity),
 		VPA:                               convertVPA(runaiConfig.Spec.Global.VPA),
 		FIPSOnly:                          ptr.To(runaiConfig.Spec.Internal.Global.FipsMode == "only"),
+		// Deliberately not configurable: a node that cannot run CUDA-native fractions keeps
+		// the workload Pending rather than falling back to the unenforced legacy ones.
+		GpuSharingMode: ptr.To(kaicommon.GpuSharingModeNvFractions),
 	}
 
 	if runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor == runv1internal.KubernetesFlavorOpenShift {

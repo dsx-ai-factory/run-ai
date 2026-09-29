@@ -8,7 +8,7 @@ This guide outlines the best practices for optimizing NVIDIA Run:ai for high-per
 
 ### Vertical Scaling
 
-Each of the NVIDIA Run:ai containers has default resource requirements that reflect an average customer load. With significantly larger cluster loads, certain NVIDIA Run:ai services will require more CPU and memory resources. NVIDIA Run:ai supports configuring these resources for each NVIDIA Run:ai service group separately. For instructions and more information, see [NVIDIA Run:ai services resource management](../advanced-setup/cluster-config.md#nvidia-run-ai-services-resource-management).
+Each of the NVIDIA Run:ai containers has default resource requirements that reflect an average customer load. With significantly larger cluster loads, certain NVIDIA Run:ai services will require more CPU and memory resources. NVIDIA Run:ai supports configuring these resources for each NVIDIA Run:ai service group separately. For instructions and more information, see [NVIDIA Run:ai services resource management](../configuration/cluster-config.md#nvidia-run-ai-services-resource-management).
 
 #### Scheduling Services
 
@@ -30,15 +30,15 @@ The sync and workload service groups are less sensitive for scale. The recommend
 
 ### Horizontal Scaling
 
-By default, NVIDIA Run:ai cluster services are deployed with a single replica. For large scale and intensive environments it is recommended to scale the NVIDIA Run:ai services horizontally by increasing the number of replicas. For more information, see [NVIDIA Run:ai services replicas](../advanced-setup/cluster-config.md#nvidia-run-ai-services-replicas).
+By default, NVIDIA Run:ai cluster services are deployed with a single replica. For large scale and intensive environments it is recommended to scale the NVIDIA Run:ai services horizontally by increasing the number of replicas. For more information, see [NVIDIA Run:ai services replicas](../configuration/cluster-config.md#nvidia-run-ai-services-replicas).
 
 ## Metrics Collection
 
-NVIDIA Run:ai relies on [Prometheus](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#prometheus) to scrape cluster metrics and forward them to the NVIDIA Run:ai control plane. The volume of metrics generated is directly proportional to the number of nodes, workloads, and projects in the system. When operating at scale—reaching hundreds, and thousands of nodes and projects—the system generates a significant volume of metrics which can place a strain on the cluster and the network bandwidth.
+NVIDIA Run:ai relies on [Prometheus](../installation/guided-installation/prerequisites-and-features.md#prometheus) to scrape cluster metrics and forward them to the NVIDIA Run:ai control plane. The volume of metrics generated is directly proportional to the number of nodes, workloads, and projects in the system. When operating at scale, reaching hundreds and thousands of nodes and projects, the system generates a significant volume of metrics which can place a strain on the cluster and the network bandwidth.
 
 To mitigate this impact, it is recommended to tune the Prometheus [remote-write](https://prometheus.io/docs/specs/remote_write_spec/) configurations. See [remote write tuning](https://prometheus.io/docs/practices/remote_write/#remote-write-tuning) to read more about the tuning parameters available via the remote write configuration and refer to this [article](https://last9.io/blog/optimizing-prometheus-remote-write-performance-guide/) for optimizing Prometheus remote write performance.
 
-You can apply the remote-write configurations required as described in [advanced cluster configurations.](../advanced-setup/cluster-config.md#prometheus)
+You can apply the remote-write configurations required as described in [advanced cluster configurations.](../configuration/cluster-config.md#prometheus)
 
 The following example demonstrates the recommended approach in NVIDIA Run:ai for tuning **Prometheus remote-write** configurations:
 
