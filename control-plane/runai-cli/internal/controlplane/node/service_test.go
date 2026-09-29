@@ -250,11 +250,18 @@ var _ = Describe("Node Service Test", func() {
 		})
 
 		It("gives up instead of looping forever when the server ignores offset", func() {
-			fullPage := []openapi.Node{makeNode("a"), makeNode("b"), makeNode("c")}
-			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, gomock.Any(), int32(3)).
+			// The iteration cap is derived from a fixed total-node budget
+			// divided by the page size, so use a large page size here (the
+			// max) to keep the derived cap—and thus this test—fast: the
+			// same maxNodePages call count as before.
+			fullPage := make([]openapi.Node, maxNodePageSize)
+			for i := range fullPage {
+				fullPage[i] = makeNode(fmt.Sprintf("node-%d", i))
+			}
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, gomock.Any(), maxNodePageSize).
 				Return(&openapi.Nodes{Nodes: fullPage}, nil).Times(maxNodePages)
 
-			_, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: 2})
+			_, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: maxNodePageSize})
 			Expect(err).To(MatchError(ContainSubstring("keeps returning full pages")))
 		})
 	})

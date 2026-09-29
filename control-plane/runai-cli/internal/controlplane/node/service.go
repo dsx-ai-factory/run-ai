@@ -120,8 +120,17 @@ func (bns *BackendNodeService) fetchNodesPaged(ctx context.Context, clusterUuid 
 	var nodes []openapi.Node
 
 	// Bounded like FetchAllNodes, as a safety net against a server that
-	// ignores offset and keeps returning full pages forever.
-	for page := 0; page < maxNodePages; page++ {
+	// ignores offset and keeps returning full pages forever. FetchAllNodes's
+	// effective budget is maxNodePages pages of maxNodePageSize items each;
+	// derive an equivalent total-node budget here so a smaller --page-size
+	// doesn't shrink how many real nodes we're willing to read before
+	// giving up.
+	maxIterations := (maxNodePages * maxNodePageSize) / pageSize
+	if maxIterations < 1 {
+		maxIterations = 1
+	}
+
+	for page := int32(0); page < maxIterations; page++ {
 		limit := pageSize
 		if opts.MaxItems > 0 {
 			if remaining := opts.MaxItems - int32(len(nodes)); remaining < limit {
@@ -172,7 +181,7 @@ func (bns *BackendNodeService) fetchNodesPaged(ctx context.Context, clusterUuid 
 		}
 	}
 
-	return nil, nil, fmt.Errorf("stopped after reading %d pages: the server keeps returning full pages", maxNodePages)
+	return nil, nil, fmt.Errorf("stopped after reading %d pages: the server keeps returning full pages", maxIterations)
 }
 
 func resolveStartOffset(opts *apilist.PageOptions) (int32, error) {
