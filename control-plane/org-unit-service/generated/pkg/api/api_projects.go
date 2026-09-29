@@ -135,6 +135,19 @@ func (c *ProjectsAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
+		"CountInternalProjects": Route{
+			strings.ToUpper("Get"),
+			"/internal/org-unit/projects/count",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.CountInternalProjects
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
 		"GetProjects": Route{
 			strings.ToUpper("Get"),
 			"/api/v1/org-unit/projects",
@@ -736,6 +749,81 @@ func (c *ProjectsAPIController) GetInternalProjectsTelemetry(w http.ResponseWrit
 		////////////////////////// RUNAI END /////////////////////////////////
 	}
 	result, err := c.service.GetInternalProjectsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolIdParam, departmentIdParam, projectIdParam, filterByParam, groupByParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// CountInternalProjects - Count internal projects
+func (c *ProjectsAPIController) CountInternalProjects(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	var filterByParam []string
+	if query.Has("filterBy") {
+		filterByParam = strings.Split(query.Get("filterBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(filterByParam) == 1 && filterByParam[0] == "" {
+			filterByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	var searchParam string
+	if query.Has("search") {
+		param := query.Get("search")
+
+		searchParam = param
+	} else {
+	}
+	result, err := c.service.CountInternalProjects(r.Context(), filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
