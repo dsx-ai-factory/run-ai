@@ -25396,7 +25396,7 @@ components:
     AllowPrivilegeEscalation:
       description: "Allow the container running the workload and all launched processes\
         \ to gain additional privileges after the workload starts. For more information\
-        \ consult the User Identity in Container guide at [/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
+        \ consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
       example: false
       nullable: true
       type: boolean
@@ -123842,7 +123842,7 @@ components:
         allowPrivilegeEscalation:
           description: "Allow the container running the workload and all launched\
             \ processes to gain additional privileges after the workload starts. For\
-            \ more information consult the User Identity in Container guide at [/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
+            \ more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
           example: false
           nullable: true
           type: boolean
@@ -131549,7 +131549,7 @@ components:
         allowPrivilegeEscalation:
           description: "Allow the container running the workload and all launched\
             \ processes to gain additional privileges after the workload starts. For\
-            \ more information consult the User Identity in Container guide at [/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
+            \ more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
           example: false
           nullable: true
           type: boolean
