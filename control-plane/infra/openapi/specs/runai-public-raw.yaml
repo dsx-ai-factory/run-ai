@@ -36161,7 +36161,7 @@ components:
         Allow the container running the workload and all launched processes to
         gain additional privileges after the workload starts. For more
         information consult the User Identity in Container guide at
-        /run-ai/self-hosted/documentation/installation-and-configuration/config/security/user-identity-in-containers
+        [/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
       type: boolean
       example: false
       nullable: true
@@ -36387,7 +36387,7 @@ components:
         are automatically taken from the identity provider (IdP) token
         (available only in SSO-enabled installations). For more information, see
         [User
-        Identity](/run-ai/self-hosted/documentation/installation-and-configuration/config/security/user-identity-in-containers).
+        Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).
       type: string
       enum:
         - fromTheImage
