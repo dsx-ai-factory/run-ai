@@ -83,7 +83,6 @@ func TestReconcileClient_UpdatesExistingClient(t *testing.T) {
 	clientMock.On("GetClientID").Return(clientID)
 	clientMock.On("GetClientData", mock.Anything, existingClient).Return(updatedClient)
 	clientMock.On("NeedsEmailScopeDefault").Return(false)
-	clientMock.On("NeedsGeneratedSecret").Return(false)
 
 	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
 
@@ -141,7 +140,6 @@ func TestReconcileClient_CreatesNewClient(t *testing.T) {
 	clientMock.On("GetClientID").Return(clientID)
 	clientMock.On("GetClientData", mock.Anything, (*iamModels.Client)(nil)).Return(newClient)
 	clientMock.On("NeedsEmailScopeDefault").Return(false)
-	clientMock.On("NeedsGeneratedSecret").Return(false)
 
 	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
 
@@ -176,7 +174,6 @@ func TestReconcileClient_SetsEmailScopeDefaultWhenProfileRequiresIt(t *testing.T
 	clientMock.On("GetClientID").Return(clientID)
 	clientMock.On("GetClientData", mock.Anything, existingClient).Return(updatedClient)
 	clientMock.On("NeedsEmailScopeDefault").Return(true)
-	clientMock.On("NeedsGeneratedSecret").Return(false)
 
 	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
 
@@ -208,7 +205,6 @@ func TestReconcileClient_DoesNotSetEmailScopeDefaultWhenProfileDoesNotRequireIt(
 	clientMock.On("GetClientID").Return(clientID)
 	clientMock.On("GetClientData", mock.Anything, existingClient).Return(updatedClient)
 	clientMock.On("NeedsEmailScopeDefault").Return(false)
-	clientMock.On("NeedsGeneratedSecret").Return(false)
 
 	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
 
@@ -218,7 +214,7 @@ func TestReconcileClient_DoesNotSetEmailScopeDefaultWhenProfileDoesNotRequireIt(
 	mockContainer.MockClientService.AssertNotCalled(t, "SetEmailScopeDefault")
 }
 
-func TestReconcileClient_RegeneratesSecretWhenClientHasNone(t *testing.T) {
+func TestDeleteClientIfExists_DeletesExistingClient(t *testing.T) {
 	const (
 		realm      = "test-realm"
 		clientID   = "runai"
@@ -226,107 +222,61 @@ func TestReconcileClient_RegeneratesSecretWhenClientHasNone(t *testing.T) {
 	)
 
 	existingClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
-	updatedClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
 
 	mockContainer := iamMock.NewMockServicesContainer()
 	mockContainer.MockClientService.On(
 		"GetClientByClientId", context.Background(), realm, clientID,
 	).Return(existingClient, nil)
 	mockContainer.MockClientService.On(
-		"UpdateClient", context.Background(), realm, updatedClient,
+		"DeleteClient", context.Background(), realm, internalID,
 	).Return(nil)
-	mockContainer.MockClientService.On(
-		"GetClientSecret", context.Background(), realm, internalID,
-	).Return("", nil)
-	mockContainer.MockClientService.On(
-		"RegenerateClientSecret", context.Background(), realm, internalID,
-	).Return("new-secret", nil)
-
-	clientMock := client_mocks.NewClient(t)
-	clientMock.On("GetClientID").Return(clientID)
-	clientMock.On("GetClientData", mock.Anything, existingClient).Return(updatedClient)
-	clientMock.On("NeedsEmailScopeDefault").Return(false)
-	clientMock.On("NeedsGeneratedSecret").Return(true)
 
 	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
 
-	err := helper.ReconcileClient(context.Background(), realm, clientMock)
+	err := helper.DeleteClientIfExists(context.Background(), realm, clientID)
 
 	assert.NoError(t, err)
-	mockContainer.MockClientService.AssertCalled(t, "RegenerateClientSecret", context.Background(), realm, internalID)
+	mockContainer.MockClientService.AssertCalled(t, "DeleteClient", context.Background(), realm, internalID)
 }
 
-func TestReconcileClient_DoesNotRegenerateSecretWhenClientAlreadyHasOne(t *testing.T) {
+func TestDeleteClientIfExists_NoopWhenClientDoesNotExist(t *testing.T) {
 	const (
-		realm      = "test-realm"
-		clientID   = "runai"
-		internalID = "some-internal-id"
+		realm    = "test-realm"
+		clientID = "runai"
 	)
-
-	existingClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
-	updatedClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
 
 	mockContainer := iamMock.NewMockServicesContainer()
 	mockContainer.MockClientService.On(
 		"GetClientByClientId", context.Background(), realm, clientID,
-	).Return(existingClient, nil)
-	mockContainer.MockClientService.On(
-		"UpdateClient", context.Background(), realm, updatedClient,
-	).Return(nil)
-	mockContainer.MockClientService.On(
-		"GetClientSecret", context.Background(), realm, internalID,
-	).Return("existing-secret", nil)
-
-	clientMock := client_mocks.NewClient(t)
-	clientMock.On("GetClientID").Return(clientID)
-	clientMock.On("GetClientData", mock.Anything, existingClient).Return(updatedClient)
-	clientMock.On("NeedsEmailScopeDefault").Return(false)
-	clientMock.On("NeedsGeneratedSecret").Return(true)
+	).Return(nil, nil)
 
 	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
 
-	err := helper.ReconcileClient(context.Background(), realm, clientMock)
+	err := helper.DeleteClientIfExists(context.Background(), realm, clientID)
 
 	assert.NoError(t, err)
-	mockContainer.MockClientService.AssertNotCalled(t, "RegenerateClientSecret", mock.Anything, mock.Anything, mock.Anything)
+	mockContainer.MockClientService.AssertNotCalled(t, "DeleteClient", mock.Anything, mock.Anything, mock.Anything)
 }
 
-func TestReconcileClient_GetClientSecretErrorPreventsRegenerate(t *testing.T) {
+func TestDeleteClientIfExists_GetClientByClientIdError(t *testing.T) {
 	const (
-		realm      = "test-realm"
-		clientID   = "runai"
-		internalID = "some-internal-id"
+		realm    = "test-realm"
+		clientID = "runai"
 	)
-
-	existingClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
-	updatedClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
 
 	mockContainer := iamMock.NewMockServicesContainer()
 	mockContainer.MockClientService.On(
 		"GetClientByClientId", context.Background(), realm, clientID,
-	).Return(existingClient, nil)
-	mockContainer.MockClientService.On(
-		"UpdateClient", context.Background(), realm, updatedClient,
-	).Return(nil)
-	mockContainer.MockClientService.On(
-		"GetClientSecret", context.Background(), realm, internalID,
-	).Return("", errors.New("iam unavailable"))
-
-	clientMock := client_mocks.NewClient(t)
-	clientMock.On("GetClientID").Return(clientID)
-	clientMock.On("GetClientData", mock.Anything, existingClient).Return(updatedClient)
-	clientMock.On("NeedsEmailScopeDefault").Return(false)
-	clientMock.On("NeedsGeneratedSecret").Return(true)
+	).Return(nil, errors.New("iam unavailable"))
 
 	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
 
-	err := helper.ReconcileClient(context.Background(), realm, clientMock)
+	err := helper.DeleteClientIfExists(context.Background(), realm, clientID)
 
 	assert.ErrorContains(t, err, "iam unavailable")
-	mockContainer.MockClientService.AssertNotCalled(t, "RegenerateClientSecret", mock.Anything, mock.Anything, mock.Anything)
 }
 
-func TestReconcileClient_RegenerateClientSecretError(t *testing.T) {
+func TestDeleteClientIfExists_DeleteClientError(t *testing.T) {
 	const (
 		realm      = "test-realm"
 		clientID   = "runai"
@@ -334,33 +284,20 @@ func TestReconcileClient_RegenerateClientSecretError(t *testing.T) {
 	)
 
 	existingClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
-	updatedClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
 
 	mockContainer := iamMock.NewMockServicesContainer()
 	mockContainer.MockClientService.On(
 		"GetClientByClientId", context.Background(), realm, clientID,
 	).Return(existingClient, nil)
 	mockContainer.MockClientService.On(
-		"UpdateClient", context.Background(), realm, updatedClient,
-	).Return(nil)
-	mockContainer.MockClientService.On(
-		"GetClientSecret", context.Background(), realm, internalID,
-	).Return("", nil)
-	mockContainer.MockClientService.On(
-		"RegenerateClientSecret", context.Background(), realm, internalID,
-	).Return("", errors.New("regenerate failed"))
-
-	clientMock := client_mocks.NewClient(t)
-	clientMock.On("GetClientID").Return(clientID)
-	clientMock.On("GetClientData", mock.Anything, existingClient).Return(updatedClient)
-	clientMock.On("NeedsEmailScopeDefault").Return(false)
-	clientMock.On("NeedsGeneratedSecret").Return(true)
+		"DeleteClient", context.Background(), realm, internalID,
+	).Return(errors.New("delete failed"))
 
 	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
 
-	err := helper.ReconcileClient(context.Background(), realm, clientMock)
+	err := helper.DeleteClientIfExists(context.Background(), realm, clientID)
 
-	assert.ErrorContains(t, err, "regenerate failed")
+	assert.ErrorContains(t, err, "delete failed")
 }
 
 func TestReconcileClient_CreateClientError(t *testing.T) {

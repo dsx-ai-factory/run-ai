@@ -624,22 +624,6 @@ func TestKeycloakClientRepository_GetClientSecret(t *testing.T) {
 			expectedSecret: "",
 			expectedError:  true,
 		},
-		{
-			name:     "client has no secret credential yet",
-			realm:    "test-realm",
-			clientID: "client-id-123",
-			mockSetup: func(authMock *authmocks.Auth, kcMock *gocloakmocks.GoCloak) {
-				token := "admin-token"
-				authMock.On("GetAdminToken", mock.Anything).Return(&token, nil)
-				credentialData := &gocloak.CredentialRepresentation{
-					Value: nil,
-				}
-				kcMock.On("GetClientSecret", mock.Anything, token, "test-realm", "client-id-123").
-					Return(credentialData, nil)
-			},
-			expectedSecret: "",
-			expectedError:  false,
-		},
 	}
 
 	for _, tt := range tests {

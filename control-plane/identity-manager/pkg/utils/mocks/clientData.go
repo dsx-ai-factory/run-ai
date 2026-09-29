@@ -130,12 +130,6 @@ func GetBasicReconcilerClientWithTenantIdMapperArray() []*iamModels.Client {
 		},
 		{
 			Enabled:  ptr.To(true),
-			ID:       ptr.To("runai"),
-			Name:     ptr.To("runai"),
-			ClientID: ptr.To("runai"),
-		},
-		{
-			Enabled:  ptr.To(true),
 			ID:       ptr.To("runai-internal.installer"),
 			Name:     ptr.To("runai-internal.installer"),
 			ClientID: ptr.To("runai-internal.installer"),

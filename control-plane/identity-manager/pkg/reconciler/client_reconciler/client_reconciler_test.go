@@ -13,7 +13,10 @@ import (
 	iamModels "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	reconciler_mocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/reconciler/client_reconciler/mocks"
 	tenant_mocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/reconciler/mocks"
+	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/utils"
 	test_utils "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/utils/mocks"
+
+	"errors"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -64,11 +67,13 @@ func TestNonSSOMappersWithExistsClients(t *testing.T) {
 	defaultIamMockSetup(iamMock, clients, realmName, true)
 	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	reconcilerHelperMock.AssertNumberOfCalls(t, "ReconcileClient", len(clients))
+	reconcilerHelperMock.AssertNumberOfCalls(t, "DeleteClientIfExists", 1)
 }
 
 func TestNonSSOMappersWithoutPreCreatedTenantIdMapper(t *testing.T) {
@@ -86,10 +91,25 @@ func TestSSOMappersWithExistsClients(t *testing.T) {
 	defaultIamMockSetup(iamMock, clients, realmName, true)
 	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
 
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	reconcilerHelperMock.AssertNumberOfCalls(t, "ReconcileClient", len(clients))
+	reconcilerHelperMock.AssertNumberOfCalls(t, "DeleteClientIfExists", 1)
+}
+
+func TestReconcileDefaultClients_DeleteClientIfExistsError(t *testing.T) {
+	iamMock, tenantResolverMock, reconcilerHelperMock, testSubject := initClientReconcilerTest(t)
+	clients := test_utils.GetBasicReconcilerClientWithTenantIdMapperArray()
+	realmName := "test-realm"
+	defaultIamMockSetup(iamMock, clients, realmName, true)
+	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
+	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(errors.New("delete failed"))
+
+	err := testSubject.Reconcile(context.Background(), realmName, true)
+	assert.ErrorContains(t, err, "delete failed")
 }

@@ -47,7 +47,6 @@ type clientProfile struct {
 	pkceCodeChallengeMethod string
 	tokenLifespan           *time.Duration
 	secretlessUserGrant     bool
-	needsGeneratedSecret    bool
 
 	clientID           string
 	redirect           redirectStrategy
@@ -108,13 +107,13 @@ var clientProfiles = map[string]clientProfile{
 		secretlessUserGrant: true,
 	},
 	ClientTypeRunai: {
-		clientID:             utils.RUNAI_CLIENT_ID,
-		emailScopeDefault:    true,
-		redirect:             redirectDefault,
-		webOrigins:           true,
-		secretlessUserGrant:  false,
-		serviceAccount:       true,
-		needsGeneratedSecret: true,
+		clientID:            utils.RUNAI_CLIENT_ID,
+		publicClient:        true,
+		directAccessGrants:  true,
+		emailScopeDefault:   true,
+		redirect:            redirectDefault,
+		webOrigins:          true,
+		secretlessUserGrant: false,
 	},
 	ClientTypeTokenExchange: {
 		clientID:            utils.RUNAI_TOKEN_EXCHANGE_CLIENT_ID,
@@ -170,10 +169,6 @@ func ProfileClientID(clientType string) string {
 
 func ProfileEmailScopeDefault(clientType string) bool {
 	return clientProfiles[clientType].emailScopeDefault
-}
-
-func ProfileNeedsGeneratedSecret(clientType string) bool {
-	return clientProfiles[clientType].needsGeneratedSecret
 }
 
 var secretlessUserGrantClientIDs = buildSecretlessUserGrantClientIDs()

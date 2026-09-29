@@ -18,6 +18,24 @@ type ClientReconcilerHelperInterface struct {
 	mock.Mock
 }
 
+// DeleteClientIfExists provides a mock function with given fields: ctx, realm, clientID
+func (_m *ClientReconcilerHelperInterface) DeleteClientIfExists(ctx context.Context, realm string, clientID string) error {
+	ret := _m.Called(ctx, realm, clientID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteClientIfExists")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, realm, clientID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ReconcileClient provides a mock function with given fields: ctx, realm, _a2
 func (_m *ClientReconcilerHelperInterface) ReconcileClient(ctx context.Context, realm string, _a2 client.Client) error {
 	ret := _m.Called(ctx, realm, _a2)

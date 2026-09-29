@@ -16,7 +16,6 @@ type Client interface {
 	GetClientID() string
 	GetClientData(ctx context.Context, client *iamModels.Client) *iamModels.Client
 	NeedsEmailScopeDefault() bool
-	NeedsGeneratedSecret() bool
 }
 
 type profileClient struct {
@@ -43,10 +42,6 @@ func (c *profileClient) GetClientData(ctx context.Context, client *iamModels.Cli
 
 func (c *profileClient) NeedsEmailScopeDefault() bool {
 	return ProfileEmailScopeDefault(c.clientType)
-}
-
-func (c *profileClient) NeedsGeneratedSecret() bool {
-	return ProfileNeedsGeneratedSecret(c.clientType)
 }
 
 func NewAdminUiClient(realm, tenantId, appHost, hostTemplate string) Client {

@@ -249,9 +249,6 @@ func (r *KeycloakClientRepository) GetClientSecret(ctx context.Context, realm st
 	if err != nil {
 		return "", errors.HandleKeyCloakError(err)
 	}
-	if credentialData.Value == nil {
-		return "", nil
-	}
 	return *credentialData.Value, nil
 }
 

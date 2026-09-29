@@ -60,10 +60,10 @@ func TestRunaiClient_GetClientData_NilExisting(t *testing.T) {
 	assert.Equal(t, ClientTypeRunai, *result.Attributes.ClientType)
 	assert.Equal(t, []string{testTenantUrl, testAppHost}, *result.WebOrigins)
 	assert.Equal(t, defaultRedirectURIs(), *result.RedirectURIs)
-	assert.False(t, *result.ClientConfig.PublicClient)
-	assert.False(t, *result.ClientConfig.DirectAccessGrantsEnabled)
+	assert.True(t, *result.ClientConfig.PublicClient)
+	assert.True(t, *result.ClientConfig.DirectAccessGrantsEnabled)
 	assert.False(t, *result.ClientConfig.StandardFlowEnabled)
-	assert.True(t, *result.ClientConfig.ServiceAccountsEnabled)
+	assert.False(t, *result.ClientConfig.ServiceAccountsEnabled)
 }
 
 func TestRunaiClient_GetClientData_ExistingClient(t *testing.T) {
