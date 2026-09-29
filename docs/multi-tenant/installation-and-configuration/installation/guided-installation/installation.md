@@ -15,9 +15,11 @@ Complete [Preparations](preparations.md) before continuing, including the system
 
 **Configuration Templates**
 
-The steps below build the minimum configuration for a multi-tenant control plane installation on standard Kubernetes. Depending on your Kubernetes distribution, workload routing, networking setup, and the prerequisites and workload features you need, you may require additional configuration.
+The steps below build the minimum configuration for a multi-tenant control plane installation on standard Kubernetes. Depending on your Kubernetes distribution and networking setup, you may require additional configuration.
 
-If your use case matches one of the [Configuration Templates](templates.md), use that template instead of building the configuration from scratch. See [Prerequisites and Features](prerequisites-and-features.md) for the components required by different workload types, and the [Configuration Reference](configuration-reference.md) for all supported fields and options.
+* Once you understand the minimum configuration, see [Configuration Templates](templates.md) - if your use case matches one, use it as your starting point instead of building the configuration from scratch.
+* See [Prerequisites and Features](prerequisites-and-features.md) to understand the components required, depending on the workload types you plan to enable.
+* See [Configuration Reference](configuration-reference.md) for the full set of supported fields and descriptions, to build a configuration from scratch.
 
 </Note>
 
@@ -49,12 +51,15 @@ At a minimum, configure:
 
 3. Define the control plane:
 
-   - `controlPlane.domain` - The wildcard FQDN for the NVIDIA Run:ai UI and API. See [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns).
-   - `controlPlane.tls` - The wildcard certificate and private key for the control plane domain, as `certPath` and `keyPath`. See [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates).
+   - `controlPlane.domain` - The wildcard FQDN for the NVIDIA Run:ai UI and API. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
+   - `controlPlane.tls` - The wildcard certificate and private key for the control plane domain, as `certPath` and `keyPath`. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
    - `controlPlane.multiTenant` - Set to `true` to install the control plane in multi-tenant mode.
    - `controlPlane.version` - The control plane version to install. Omit it to install the latest supported version.
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer - including the control plane administrator credentials and the external metrics store connection. See [Advanced Control Plane Configurations](../../../../installation-and-configuration/configuration/control-plane-config.md) for the full set of keys.
-   - `controlPlane.customHelmValues.supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, set to `true`.
+   - `controlPlane.customHelmValues.supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
+   - `controlPlane.customHelmValues.telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the SAK. Provide it one of two ways:
+     - `token: <SAK_TOKEN>` - Sets the SAK directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
+     - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
    - The external metrics store connection - required for every multi-tenant control plane. The example below configures Grafana Labs; for Mimir, see the [Mimir Metrics Store](templates.md#mimir-metrics-store) template. See [Metrics Store Requirements](../../system-requirements/metrics-store-requirements/README.md) for both.
 
    ```yaml
@@ -68,6 +73,9 @@ At a minimum, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
+       telemetryService: # Optional, Support-Entitled Release only
+         telemetryAuth:
+           token: <SAK_TOKEN>
        metricsService:
          config:
            datasourceUrl: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom
@@ -94,9 +102,9 @@ At a minimum, configure:
            isCSPEnv: true
    ```
 
-4. Configure the networking:
+4. Configure external access to the control plane:
 
-   - `externalConnection` - Configures how traffic reaches the control plane's UI and API through a Kubernetes Ingress Controller or Gateway API implementation already running on your cluster. See [Networking Setup](../../system-requirements/networking-setup.md).
+   - `externalConnection` - Configures how traffic reaches the control plane's UI and API from outside the cluster, through a Kubernetes Ingress Controller or Gateway API implementation already running on your cluster. See [Networking Setup](../../system-requirements/networking-setup.md).
 
    ```yaml
    externalConnection:
@@ -197,69 +205,6 @@ kubectl get pods -n runai-backend
 ```
 
 All pods should reach `Running` or `Completed` status.
-
-## Enable Telemetry Service (Support-Entitled)
-
-NVIDIA Run:ai includes telemetry for Support-Entitled Release installations, reporting initial metrics including platform usage and adoption signals, GPU utilization and allocation, and cluster health signals to support proactive troubleshooting and continued product improvement. By default, telemetry is not associated with your organization. You can opt in to identified telemetry by providing an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) (SAK) in your configuration file, which associates the telemetry with your NCA ID.
-
-Configure the SAK through `controlPlane.customHelmValues`, using one of the following approaches:
-
-<Accordion title="Pass the SAK Value Directly">
-
-**Pass the SAK Value Directly**
-
-Set the SAK as a plaintext value in the configuration file. The chart creates and manages the Kubernetes Secret for you.
-
-```yaml
-controlPlane:
-  ...
-  customHelmValues:
-    supportEntitled: true
-    telemetryService:
-      telemetryAuth:
-        token: <SAK_TOKEN>
-```
-
-<Warning>
-
-**Warning**
-
-The SAK value is stored in plaintext in the configuration file. Protect the file accordingly, or use the pre-created Secret approach below.
-
-</Warning>
-
-Re-run the installer against the control plane cluster to apply the configuration.
-
-</Accordion>
-
-<Accordion title="Reference a Pre-Created Secret">
-
-**Reference a Pre-Created Secret**
-
-Create the Secret containing the SAK yourself before running the installer:
-
-```bash
-kubectl create secret generic runai-telemetry-sak \
-  --namespace runai-backend \
-  --from-literal=TELEMETRY_TOKEN=<SAK_TOKEN>
-```
-
-Then reference it by name in the configuration file - the installer does not create or manage this Secret. Always set the secret key name explicitly, even if it matches the default (`TELEMETRY_TOKEN`):
-
-```yaml
-controlPlane:
-  ...
-  customHelmValues:
-    supportEntitled: true
-    telemetryService:
-      telemetryAuth:
-        existingSecret: runai-telemetry-sak
-        secretKey: TELEMETRY_TOKEN
-```
-
-Re-run the installer against the control plane cluster to apply the configuration.
-
-</Accordion>
 
 ## Retrieve Control Plane Credentials
 

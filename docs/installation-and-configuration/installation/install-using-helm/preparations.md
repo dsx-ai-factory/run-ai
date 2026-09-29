@@ -47,6 +47,14 @@ NVIDIA Run:ai Support-Entitled Release installations require an NGC Personal Key
 
 Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password. Use this key to create the `runai-reg-creds` secret described in [Software Artifacts](#software-artifacts) below.
 
+For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) (SAK). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. Pass the resulting key as `telemetryService.telemetryAuth.token` during installation, or reference a secret you create yourself beforehand via `telemetryService.telemetryAuth.existingSecret`/`secretKey`:
+
+```bash
+kubectl create secret generic <SECRET_NAME> \
+  --namespace runai-backend \
+  --from-literal=<KEY_NAME>=<SAK_TOKEN>
+```
+
 ## Control Plane Setup
 
 This section covers what you set up for the NVIDIA Run:ai control plane: its namespace and TLS certificate and local CA secrets. A deployment has only one control plane, whether same-cluster or multi-cluster. Set it up on the control plane's own Kubernetes cluster - the same Kubernetes cluster as the first NVIDIA Run:ai cluster in a same-cluster deployment, or a dedicated Kubernetes cluster in a multi-cluster deployment. See [Deployment Model](../../system-requirements/deployment-model.md).

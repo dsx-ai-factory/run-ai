@@ -75,7 +75,7 @@ helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
     --set controlPlane.url=... \
-    --set cluster.bootstrapToken=... \
+    --set controlPlane.bootstrapToken=... \
     --set cluster.uid=... \
     --set cluster.url=... --version="<VERSION>" --create-namespace \
     --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -129,7 +129,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
 ```bash
 helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
     --set controlPlane.url=... \
-    --set cluster.bootstrapToken=... \
+    --set controlPlane.bootstrapToken=... \
     --set cluster.uid=... \
     --set cluster.url=... --create-namespace \
     --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \
@@ -181,7 +181,7 @@ helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
   --set controlPlane.url=... \
-  --set cluster.bootstrapToken=... \
+  --set controlPlane.bootstrapToken=... \
   --set cluster.uid=... \
   --set cluster.url=... --version="<VERSION>" --create-namespace
 ```
@@ -234,7 +234,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
     ```bash
     helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
         --set controlPlane.url=... \
-        --set cluster.bootstrapToken=... \
+        --set controlPlane.bootstrapToken=... \
         --set cluster.uid=... \
         --set cluster.url=... --create-namespace \
         --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \

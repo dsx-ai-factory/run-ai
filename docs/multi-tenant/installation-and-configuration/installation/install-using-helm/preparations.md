@@ -43,6 +43,14 @@ NVIDIA Run:ai Support-Entitled Release installations require an NGC Personal Key
 
 Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password. Use this key to create the `runai-reg-creds` secret described in [Software Artifacts](#software-artifacts) below.
 
+For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) (SAK). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. Pass the resulting key as `telemetryService.telemetryAuth.token` during installation, or reference a secret you create yourself beforehand via `telemetryService.telemetryAuth.existingSecret`/`secretKey`:
+
+```bash
+kubectl create secret generic <SECRET_NAME> \
+  --namespace runai-backend \
+  --from-literal=<KEY_NAME>=<SAK_TOKEN>
+```
+
 ## Control Plane Setup
 
 This section covers what you set up for the NVIDIA Run:ai control plane: its namespace and TLS certificate. A multi-tenant deployment has only one control plane, always on its own dedicated Kubernetes cluster. See [Deployment Model](../../system-requirements/deployment-model.md).
@@ -290,4 +298,7 @@ Creating this secret alone does not configure the control plane to use it - you 
 
 ## Next Steps
 
-With your environment prepared, continue to [Control Plane Installation](install-control-plane.md). Once the control plane is running, onboarding each tenant includes installing the GPU Operator, Prometheus, and any workload-specific features (such as distributed training or inference) that tenant's cluster needs - see [Prerequisites and Features](prerequisites-and-features.md).
+* [Control Plane Installation](install-control-plane.md) - Install the control plane.
+* [API Access Setup](../guided-installation/api-access-setup.md) - Configure programmatic API access using service account credentials.
+* [Prerequisites and Features](prerequisites-and-features.md) - Install the GPU Operator, Prometheus, and any workload-specific features (such as distributed training or inference) that tenant's cluster needs.
+* [Create a Tenant and Cluster](create-a-tenant-and-cluster.md) - Create a tenant, provision and register its cluster, and install that cluster.
