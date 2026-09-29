@@ -21,6 +21,7 @@
 #   --domain FQDN          Domain to use (default: runai.local)
 #   --admin-email EMAIL    Admin account email (default: test@run.ai)
 #   --admin-password PASS  Admin password — must meet complexity requirements
+#                          (default: auto-generated, shown in the final summary)
 #   --parallel N           Parallel build jobs (default: 4)
 #   --skip-build           Skip building Docker images
 #   --skip-build-cp        Skip building control-plane images only
@@ -82,7 +83,9 @@ MIN_LINUX_DISK_GB=100
 
 DOMAIN="${RUNAI_DOMAIN:-runai.local}"
 ADMIN_EMAIL="${RUNAI_ADMIN_EMAIL:-test@run.ai}"
-ADMIN_PASSWORD="${RUNAI_ADMIN_PASSWORD:-Abcd!234}"
+# Empty means the chart's secret-generator hook picks a random password; it is read
+# back from runai-backend-gen-tenants-manager after deploy.
+ADMIN_PASSWORD="${RUNAI_ADMIN_PASSWORD:-}"
 CP_NAMESPACE="runai-backend"
 RC_NAMESPACE="runai"
 CP_TENANT_NAME="runai"
@@ -2190,16 +2193,26 @@ deploy_control_plane() {
   if kubectl get secret runai-backend-gen-keycloakx -n "${CP_NAMESPACE}" &>/dev/null; then
     cp_no_hooks="--no-hooks"
     log "Existing secrets detected — skipping helm hooks (passwords preserved)"
-    # Patch the tenants-manager secret so ADMIN_PASSWORD matches our configured value.
-    # When hooks are skipped the secret keeps its old auto-generated value; tenants-manager
+    # Patch the tenants-manager secret so ADMIN_PASSWORD matches an explicitly requested
+    # value. When hooks are skipped the secret keeps its old value; tenants-manager
     # creates the admin user with whatever is in this secret, so we must keep them in sync.
-    local encoded_pw
-    encoded_pw="$(printf '%s' "${ADMIN_PASSWORD}" | base64)"
-    kubectl patch secret runai-backend-gen-tenants-manager \
-      -n "${CP_NAMESPACE}" \
-      --type=merge \
-      -p "{\"data\":{\"ADMIN_PASSWORD\":\"${encoded_pw}\"}}" \
-      2>/dev/null || true
+    if [[ -n "${ADMIN_PASSWORD}" ]]; then
+      local encoded_pw
+      encoded_pw="$(printf '%s' "${ADMIN_PASSWORD}" | base64)"
+      kubectl patch secret runai-backend-gen-tenants-manager \
+        -n "${CP_NAMESPACE}" \
+        --type=merge \
+        -p "{\"data\":{\"ADMIN_PASSWORD\":\"${encoded_pw}\"}}" \
+        2>/dev/null || true
+    fi
+  fi
+
+  local password_args=()
+  if [[ -n "${ADMIN_PASSWORD}" ]]; then
+    password_args=(
+      --set-string "global.management.password=${ADMIN_PASSWORD}"
+      --set-string "tenantsManager.config.adminPassword=${ADMIN_PASSWORD}"
+    )
   fi
 
   # Skip helm dep build when all tarballs are already present locally.
@@ -2258,9 +2271,8 @@ PYEOF
     --set global.ingress.tlsSecretName=runai-backend-tls \
     --set global.customCA.enabled=true \
     --set "global.management.user=${ADMIN_EMAIL}" \
-    --set "global.management.password=${ADMIN_PASSWORD}" \
     --set "tenantsManager.config.adminUsername=${ADMIN_EMAIL}" \
-    --set "tenantsManager.config.adminPassword=${ADMIN_PASSWORD}" \
+    ${password_args[@]+"${password_args[@]}"} \
     --set global.config.kubernetesDistribution=kubernetes \
     --set nats.jetstream.maxMemory=4G \
     --set nats.resources.requests.cpu=250m \
@@ -2283,7 +2295,17 @@ PYEOF
   fi
 
   log "Control-plane deployed successfully"
+  resolve_admin_password || die "Could not read ADMIN_PASSWORD from secret runai-backend-gen-tenants-manager in ${CP_NAMESPACE}"
   wait_for_cp_health
+}
+
+# Fills ADMIN_PASSWORD from the tenants-manager secret when it wasn't passed explicitly.
+resolve_admin_password() {
+  [[ -n "${ADMIN_PASSWORD}" ]] && return 0
+  ADMIN_PASSWORD="$(kubectl get secret runai-backend-gen-tenants-manager \
+    -n "${CP_NAMESPACE}" -o jsonpath='{.data.ADMIN_PASSWORD}' 2>/dev/null \
+    | base64 --decode 2>/dev/null || true)"
+  [[ -n "${ADMIN_PASSWORD}" ]]
 }
 
 # Fetches an admin access token from Keycloak. Prints the token on stdout and
@@ -2642,7 +2664,7 @@ print_access_info() {
   echo ""
   echo "  URL:      https://${DOMAIN}"
   echo "  Admin:    ${ADMIN_EMAIL}"
-  echo "  Password: ${ADMIN_PASSWORD}"
+  echo "  Password: ${ADMIN_PASSWORD:-<unavailable — control plane not deployed>}"
   echo "  Trust the self-signed CA (macOS):"
   echo "    sudo security add-trusted-cert -d -r trustRoot \\"
   echo "      -k /Library/Keychains/System.keychain ${CERT_DIR}/ca.crt"
@@ -2746,12 +2768,16 @@ main() {
 
     if [[ $SKIP_DEPLOY_RC -eq 0 ]]; then
       # CP must be healthy before we can register the cluster and get credentials.
-      [[ $SKIP_DEPLOY_CP -eq 1 ]] && wait_for_cp_health
+      if [[ $SKIP_DEPLOY_CP -eq 1 ]]; then
+        resolve_admin_password || die "Could not read ADMIN_PASSWORD from secret runai-backend-gen-tenants-manager in ${CP_NAMESPACE} — is the control plane deployed?"
+        wait_for_cp_health
+      fi
       provision_cluster_credentials
       deploy_runai_cluster
     fi
   fi
 
+  resolve_admin_password || true
   print_access_info
 
   local _elapsed=$(( $(date +%s) - _start_ts ))

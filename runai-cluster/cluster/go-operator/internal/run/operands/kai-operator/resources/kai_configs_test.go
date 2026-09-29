@@ -302,6 +302,7 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(rr.RuntimeClassName).To(Equal(ptr.To("")))
 
 		adm := kaiConfig.Spec.Admission
+		Expect(adm.ServiceName).To(Equal(ptr.To("engine-admission")))
 		Expect(adm.GPUSharing).To(Equal(ptr.To(true)))
 		Expect(adm.QueueLabelSelector).To(Equal(ptr.To(true)))
 		Expect(adm.ValidatingWebhookConfigurationName).To(Equal(ptr.To("validating-engine-admission")))
