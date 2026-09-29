@@ -55,6 +55,14 @@ For [Multi-Node NVLink](../../../../platform-management/aiinitiatives/resources/
 
 </Note>
 
+<Note>
+
+**Note**
+
+To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), GPU Operator 26.7.1 or later is required - the installer installs this version automatically, so `prerequisites.gpuOperator.version` does not need to be set. CUDA driver r615 or later is also required; GPU Operator 26.7.1 does not default to it, so set the driver version explicitly via `prerequisites.gpuOperator.customHelmValues.driver.version` rather than relying on the default. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
+
+</Note>
+
 * The installer uses the default namespace for your platform - `gpu-operator` on Kubernetes, `nvidia-gpu-operator` on OpenShift. Otherwise, you must specify the target namespace using the flag `clusterConfig.global.nvidiaDcgmExporter.namespace` as described in [Advanced Cluster Configurations](../../configuration/cluster-config.md).
 * NVIDIA drivers may already be installed on the nodes. In such cases, use the NVIDIA GPU Operator flags `--set driver.enabled=false`. [DGX OS](https://docs.nvidia.com/dgx/dgx-os-6-user-guide/release_notes.html) is one such example as it comes bundled with NVIDIA Drivers.
 * For distribution-specific requirements and additional instructions, see the sections below:
@@ -110,7 +118,12 @@ The Network Operator works alongside the NVIDIA GPU Operator to provide:
 * Kubernetes device plugins to expose high-speed network hardware to workloads.
 * Secondary network components to support network-intensive applications.
 
-To configure SR-IOV InfiniBand support, set the required values via `customHelmValues` - see [Network Operator Deployment with an SR-IOV InfiniBand Network](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-with-an-sr-iov-infiniband-network) for which values to set.
+Setting `prerequisites.networkOperator.mode: install` installs the Network Operator:
+
+- **Kubernetes** - Installs the Network Operator Helm chart.
+- **OpenShift** - Installs the Network Operator via OperatorHub (OLM), along with the SR-IOV Network Operator and the Node Feature Discovery (NFD) Operator, if not already present.
+
+To configure SR-IOV InfiniBand support on Kubernetes, set the required values via `customHelmValues` - see [Network Operator Deployment with an SR-IOV InfiniBand Network](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-with-an-sr-iov-infiniband-network) for which values to set. This does not apply to OpenShift - configure SR-IOV support via the SR-IOV Network Operator directly.
 
 ### NVIDIA Dynamic Resource Allocation (DRA) Driver
 

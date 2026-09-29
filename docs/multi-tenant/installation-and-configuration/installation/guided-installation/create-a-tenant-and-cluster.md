@@ -194,7 +194,9 @@ Save the `bootstrapToken` to a local file - the installer reads it from disk rat
 
 The steps below build the minimum configuration to install a tenant cluster on standard Kubernetes. Depending on your Kubernetes distribution, workload routing, networking setup, and the prerequisites and workload features you need, you may require additional configuration.
 
-If your use case matches one of the [Configuration Templates](tenant-cluster-templates.md), use that template instead of building the configuration from scratch. See [Prerequisites and Features](prerequisites-and-features.md) for the components required by different workload types, and the [Configuration Reference](configuration-reference.md) for all supported fields and options.
+* Once you understand the minimum configuration, see [Configuration Templates](tenant-cluster-templates.md) - if your use case matches one, use it as your starting point instead of building the configuration from scratch.
+* See [Prerequisites and Features](prerequisites-and-features.md) to understand the components required, depending on the workload types that tenant plans to run.
+* See [Configuration Reference](configuration-reference.md) for the full set of supported fields and descriptions, to build a configuration from scratch.
 
 </Note>
 
@@ -227,12 +229,12 @@ At a minimum, configure:
 3. Define the cluster:
 
    - `cluster.name` - The name of the cluster as it appears in the control plane.
-   - `cluster.domain` - The tenant cluster's own FQDN. See [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns).
+   - `cluster.domain` - The tenant cluster's own FQDN. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
    - `cluster.controlPlaneUrl` - The control plane's domain, reachable over HTTPS from this cluster.
    - `cluster.uid` - The cluster `uuid` returned when you [registered the cluster](#register-the-cluster).
    - `cluster.bootstrapTokenPath` - Path to the `bootstrapToken` file you saved when you [registered the cluster](#register-the-cluster). Mutually exclusive with `cluster.controlPlaneCredentials` - the installer does not register tenant clusters itself, since doing so requires a `tenantId` that only the Management API accepts.
    - `cluster.workloadRouting` - `host` (the default) or `path`. This determines which certificate you need for `cluster.tls` below.
-   - `cluster.tls` - A certificate and private key for the cluster domain, as `certPath` and `keyPath`. Which certificate you need depends on `workloadRouting` and the workload types you plan to support - see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates).
+   - `cluster.tls` - A certificate and private key for the cluster domain, as `certPath` and `keyPath`. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates) for which certificate you need.
    - `cluster.version` - The cluster version to install. Omit it to install the latest supported version.
    - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../../installation-and-configuration/configuration/cluster-config.md) for the full set of keys.
 
@@ -254,9 +256,14 @@ At a minimum, configure:
 
 4. Enable the prerequisites:
 
-   - `prerequisites.gpuOperator.mode` / `prerequisites.prometheus.mode` - Set both to `install`; required for every tenant cluster.
-   - `version` - Each also accepts its own `version` field. Omit it to install the latest version.
-   - `customHelmValues` - Merges Helm values into the component's own Helm chart, for settings not otherwise exposed by the installer.
+   - `prerequisites.gpuOperator` - Required for every tenant cluster. See [Prerequisites and Features](prerequisites-and-features.md#prerequisites) for more details.
+     - `mode` - Set to `install`.
+     - `version` - Omit to install the latest version, or see [Support Matrix](../../support-matrix.md) for the supported range if you want to set it explicitly. GPU fractions (memory fractions, dynamic memory fractions, or compute modes) require 26.7.1 or later, installed automatically when omitted.
+     - `customHelmValues` - Merges Helm values into the GPU Operator's own Helm chart. Set `driver.version` to r615 or later if this tenant plans to use GPU fractions, since GPU Operator 26.7.1 does not default to this driver version. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites).
+   - `prerequisites.prometheus` - Required for every tenant cluster. See [Prerequisites and Features](prerequisites-and-features.md#prerequisites) for more details.
+     - `mode` - Set to `install`. On OpenShift, `install` is rejected - set to `skip` instead and use the cluster's built-in monitoring stack.
+     - `version` - Omit to install the latest version, or see [Support Matrix](../../support-matrix.md) for the supported range.
+     - `customHelmValues` - Merges Helm values into Prometheus's own Helm chart.
 
    ```yaml
    prerequisites:
@@ -282,9 +289,9 @@ At a minimum, configure:
 
    </Note>
 
-5. Configure the networking:
+5. Configure external access to the cluster:
 
-   - `externalConnection` - Configures how traffic reaches this cluster's endpoints through a Kubernetes Ingress Controller or Gateway API implementation already running on the cluster. This is separate from `cluster.workloadRouting`, which controls how the workloads you submit are exposed. See [Networking Setup](../../system-requirements/networking-setup.md).
+   - `externalConnection` - Configures how traffic reaches this cluster's endpoints from outside the cluster, through a Kubernetes Ingress Controller or Gateway API implementation already running on the cluster. This is separate from `cluster.workloadRouting`, which controls how the workloads you submit are exposed. See [Networking Setup](../../system-requirements/networking-setup.md).
 
    ```yaml
    externalConnection:

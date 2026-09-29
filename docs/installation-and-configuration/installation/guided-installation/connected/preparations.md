@@ -30,7 +30,7 @@ Each domain and certificate you prepared in [FQDN and DNS](../../../system-requi
 | --- | --- | --- | --- |
 | Control Plane Domain and Certificate | `controlPlane.domain`, `controlPlane.tls` | Always | Secures the NVIDIA Run:ai UI and API. |
 | Cluster Domain and Certificate | `cluster.domain`, `cluster.tls` | `cluster.domain`: multi-cluster only (same-cluster reuses `controlPlane.domain`). `cluster.tls`: always. | Secures communication between the control plane and the cluster. |
-| Workspaces, Training, and Distributed Inference Wildcard Certificate | `cluster.tls` (same field as above) | Required unless using path-based routing | Must be a wildcard matching the cluster domain (for example, `*.runai-a.mycorp.local`). Shares `cluster.tls` with the row above - not a separate field. |
+| Workspaces, Training, and Distributed Inference Wildcard Certificate | `cluster.tls` (same field as above) | Required unless using path-based routing | Shares `cluster.tls` with the row above - not a separate field. That one certificate must cover both the exact cluster domain and its wildcard as Subject Alternative Names (for example, both `runai-a.mycorp.local` and `*.runai-a.mycorp.local`), since it secures both the cluster's own domain and every workload exposed on a subdomain beneath it. |
 | Standard Inference Wildcard Domain and Certificate | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Only for standard inference (Knative) exposed externally via a wildcard FQDN | Not required for distributed inference (LWS, Dynamo, KServe, and other serving frameworks) or cluster-local standard inference. |
 | Local Certificate Authority (CA) | `tls.caChainPath` (or `controlPlane.tls.caChainPath` / `cluster.tls.caChainPath` per component) | If your certificates are signed by a private or local CA | Set once at the top level, or override per component if different components use different CAs. |
 
@@ -39,6 +39,14 @@ Each domain and certificate you prepared in [FQDN and DNS](../../../system-requi
 Open Source installations set `registry.type: ngc` in the configuration, with no credentials needed. NVIDIA Run:ai Support-Entitled Release installations set the same field, plus an NGC Personal Key to authenticate to the NVIDIA Run:ai container registry (`nvcr.io`) and Helm registry (`helm.ngc.nvidia.com/nvidia/runai`) for pulling NVIDIA Run:ai container images and charts. Generate a Personal Key from the [NGC Personal Keys](https://org.ngc.nvidia.com/setup/personal-keys) page.
 
 Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password.
+
+For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) (SAK). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. Provide the resulting key in `telemetryService.telemetryAuth` during installation, either directly as `token`, or by referencing a secret you create yourself beforehand:
+
+```bash
+kubectl create secret generic <SECRET_NAME> \
+  --namespace runai-backend \
+  --from-literal=<KEY_NAME>=<SAK_TOKEN>
+```
 
 ## Download the Installer
 

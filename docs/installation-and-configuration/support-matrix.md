@@ -8,12 +8,14 @@ The support matrix outlines the verified compatibility standards for NVIDIA Run:
 
 | Component                            | Supported Versions   |
 | ------------------------------------- | -------------------- |
-| NVIDIA GPU Operator                   | 25.10 - 26.7         |
-| NVIDIA DRA driver<sup>1</sup>         | 25.8 - 25.12         |
+| NVIDIA GPU Operator<sup>1</sup>       | 25.10 - 26.7.1        |
+| NVIDIA DRA driver<sup>2</sup>         | 25.8 - 25.12          |
 | NVIDIA Network Operator               | 25.10 - 26.7         |
 | Prometheus / Kube‑Prometheus Stack    | 3.13.1 / 88.6.5 and above |
 
-<sup>1</sup> Applies to GPU Operator 25.10 - 26.3, where the DRA driver is installed separately. For GPU Operator 26.7, the DRA driver is installed by the GPU Operator.
+<sup>1</sup> GPU Operator 26.7.1 is required to use GPU fractions, alongside CUDA driver r615 or later. GPU Operator 26.7.1 does not default to CUDA driver r615, so the driver version must be set explicitly. See [GPU Memory Fractions](../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites).
+
+<sup>2</sup> Applies to GPU Operator 25.10 - 26.3, where the DRA driver is installed separately. For GPU Operator 26.7, the DRA driver is installed by the GPU Operator.
 
 ### Features
 
@@ -45,7 +47,7 @@ Each NVIDIA Run:ai release is tested and validated against a single minor versio
 
 NVIDIA Run:ai v3.0 is compatible with all Data Center GPUs supported by the NVIDIA GPU Operator. Hardware compatibility is determined by the specific version of the GPU Operator deployed within your cluster.
 
-* Supported operator range - NVIDIA Run:ai v3.0 supports GPU Operator versions 25.10 through 26.7.
+* Supported operator range - NVIDIA Run:ai v3.0 supports GPU Operator versions 25.10 through 26.7.1.
 * Hardware verification - To confirm if a specific GPU model is supported, please cross-reference your Operator version with the [Supported NVIDIA Data Center GPUs and Systems](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/platform-support.html#supported-nvidia-data-center-gpus-and-systems) documentation.
 
 <Note>
