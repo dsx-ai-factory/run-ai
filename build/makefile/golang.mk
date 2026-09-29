@@ -28,10 +28,7 @@ MOCKERY_VERSION=v3.8.0
 # Must be new enough to decode the Go release's export data: v2.9.0 fails
 # every package on Go 1.27 with "export data version 4 ... (typecheck)".
 GOLANGCI_LINT_VERSION=v2.13.2
-# Both orgs: the repository moved to dsx-ai-factory and still pulls modules from
-# run-ai. With only run-ai listed, Go looks dsx-ai-factory modules up on the public
-# checksum database, which has never seen this internal repository and answers 404.
-GOPRIVATE=github.com/run-ai/*,github.com/dsx-ai-factory/*
+GOPRIVATE=github.com/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.
 GINKGO_TIMEOUT?=15m
