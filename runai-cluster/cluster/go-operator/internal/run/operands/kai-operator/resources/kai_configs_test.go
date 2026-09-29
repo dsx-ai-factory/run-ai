@@ -70,8 +70,6 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Admission.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.Scheduler.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.Binder.Service.Image).To(BeNil())
-		// The reservation image name is ours to supply: KAI's own default points at a
-		// repository that does not exist.
 		Expect(kaiConfig.Spec.Binder.ResourceReservation.Image).To(Equal(
 			&kaicommon.Image{Name: ptr.To("resourcereservation")}))
 		Expect(kaiConfig.Spec.PodGrouper.Service.Image).To(BeNil())

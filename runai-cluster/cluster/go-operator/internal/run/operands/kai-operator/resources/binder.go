@@ -39,9 +39,7 @@ func convertBinderConfig(runaiConfig *runaiv1.RunaiConfig) *kaibinder.Binder {
 	}
 }
 
-// KAI's chart normally supplies this name. We render the KAIConfig ourselves, so leaving it
-// unset drops the binder onto a built-in default whose repository does not exist, and every
-// fractional workload then fails to bind on the reservation pod's image pull.
+// Not a typo: the hyphenated spelling is KAI's own default and no such repository exists.
 const resourceReservationImageName = "resourcereservation"
 
 func convertBinderResourceReservationImage(binderConfig *binder.Binder) *kaicommon.Image {
