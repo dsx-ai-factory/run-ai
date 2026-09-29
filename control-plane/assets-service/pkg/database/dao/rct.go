@@ -189,7 +189,7 @@ func updateRctInTransaction(ctx context.Context, tx orm.DB, id string, request a
 		Spec: specMap,
 	}
 
-	saveRows, saveErr := tx.Where(recId).Save(&update)
+	saveRows, saveErr := tx.Model(&dbmodel.AssetSpecRec{}).Where(&recId).Updates(&update)
 	if saveErr != nil || saveRows != 1 {
 		return nil, assetMeta, database.Error(database.UPDATE, api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE).WithDetailsFromDbResult(saveRows, saveErr)
 	}

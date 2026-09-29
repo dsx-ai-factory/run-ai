@@ -112,6 +112,9 @@ func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreation
 			}
 
 			kubeVer := platformInfo.KubeVersion.Get()
+			if kubeVer == nil {
+				return api.NewError(http.StatusServiceUnavailable, "cluster did not report a kubernetes version", nil)
+			}
 
 			parsed, err := version.ParseGeneric(*kubeVer)
 			if err != nil {
