@@ -1,0 +1,23 @@
+suite: Test anyworkload-controller OAuth2 proxy templates RBAC
+
+templates:
+  - templates/clusterroles/anyworkload-controller.yaml
+
+tests:
+  - it: watches ConfigMaps cluster-wide without granting cluster-wide writes
+    documentSelector:
+      path: rules[0].resources[0]
+      value: namespaces
+    asserts:
+      - equal:
+          path: rules[?(@.resources[0]=="configmaps")].verbs
+          value: ["get", "list", "watch"]
+
+  - it: creates and repairs templates through the existing project namespace binding
+    documentSelector:
+      path: metadata.name
+      value: runai-anyworkload-controller-project
+    asserts:
+      - equal:
+          path: rules[?(@.resources[0]=="configmaps")].verbs
+          value: ["create", "update", "patch"]

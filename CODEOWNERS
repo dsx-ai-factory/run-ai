@@ -138,7 +138,6 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 # Viper
 /runai-cluster/cluster/application-controller/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/assets-sync/ @dsx-ai-factory/workloads
-/runai-cluster/cluster/oauth2-proxy/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/application-controller/pkg/deployers/ @dsx-ai-factory/workloads
 /runai-cluster/common/flat-workloads/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/workload-common/ @dsx-ai-factory/workload-runtime @dsx-ai-factory/workloads

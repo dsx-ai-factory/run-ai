@@ -37,6 +37,10 @@ thirdPartyImages:
     registry: registry.k8s.io
     repository: git-sync/git-sync
     tag: v4.7.0
+  oauth2-proxy:
+    registry: quay.io
+    repository: oauth2-proxy/oauth2-proxy
+    tag: v7.15.4
   valkey:
     registry: docker.io
     repository: valkey/valkey
