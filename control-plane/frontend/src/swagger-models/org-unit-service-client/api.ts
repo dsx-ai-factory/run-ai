@@ -3435,7 +3435,7 @@ export interface NonNullResource {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof NonNullResource
      */
@@ -6447,7 +6447,7 @@ export interface Resource {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof Resource
      */
@@ -6566,7 +6566,7 @@ export interface ResourcesCpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesCpu
      */
@@ -6641,7 +6641,7 @@ export interface ResourcesGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesGpu
      */
@@ -6666,7 +6666,7 @@ export interface ResourcesMemory {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesMemory
      */
@@ -6773,7 +6773,7 @@ export interface ResourcesNullableGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesNullableGpu
      */
@@ -6823,7 +6823,7 @@ export interface ResourcesPerNodePoolGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesPerNodePoolGpu
      */
@@ -6873,7 +6873,7 @@ export interface ResourcesPerNodePoolNullableGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesPerNodePoolNullableGpu
      */
@@ -6958,7 +6958,7 @@ export interface ResourcesSyncGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesSyncGpu
      */
@@ -6983,7 +6983,7 @@ export interface ResourcesSyncMemory {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesSyncMemory
      */
