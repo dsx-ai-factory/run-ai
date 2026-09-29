@@ -19,6 +19,7 @@ import (
 	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/workloads-service"
 	dbTesting "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/testing"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/testing"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	policies "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -343,6 +344,64 @@ var _ = Describe("Rct API tests", func() {
 		return postRctWithObjectSpec(validRctObjectSpec())
 	}
 
+	// buildClusterWithKubeVersion returns a DisplayedCluster at the requested
+	// cluster version with Status.Platform present. If kubeVer is non-nil,
+	// Platform.KubeVersion is populated; if nil, Platform is present but
+	// KubeVersion is left unset (exercises the "cluster did not report a
+	// kubernetes version" 503 branch that BuildDisplayedCluster's default
+	// kube 1.34.0 always satisfies).
+	buildClusterWithKubeVersion := func(clusterVer string, kubeVer *string) openapi.DisplayedCluster {
+		dc := openapi.DisplayedCluster{Uuid: randoms.ClusterId, TenantId: int32(randoms.TenantId)}
+		dc.Version.Set(&clusterVer)
+		config := openapi.NewClusterReportedConfig()
+		sub := false
+		config.SubdomainEnabled.Set(&sub)
+		status := openapi.NewClusterDisplayedStatus()
+		status.SetConfig(*config)
+		platform := openapi.NewClusterReportedStatusPlatform()
+		if kubeVer != nil {
+			platform.KubeVersion.Set(kubeVer)
+		}
+		status.SetPlatform(*platform)
+		dc.Status.Set(status)
+		return dc
+	}
+
+	// postRctToClusterWithKubeVersion installs a cluster mock at the given
+	// cluster version + kube version (nil kubeVer = Platform present but
+	// KubeVersion unset) and issues a valid RCT creation POST.
+	postRctToClusterWithKubeVersion := func(clusterVer string, kubeVer *string) *httptest.ResponseRecorder {
+		checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
+			WithCluster(randoms.ClusterId, buildClusterWithKubeVersion(clusterVer, kubeVer)))
+		checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
+		return postRctWithObjectSpec(validRctObjectSpec())
+	}
+
+	// postRctWithObjectMeta issues a cluster-scoped RCT creation POST with
+	// the given ObjectMeta and a valid ObjectSpec. Used by the ObjectMeta
+	// validation tests.
+	postRctWithObjectMeta := func(meta *api.K8sObjectMeta) *httptest.ResponseRecorder {
+		req := api.RctCreationRequest{
+			Meta: api.AssetCreationRequest{
+				Name:      testutils.RandString(5),
+				Scope:     api.SCOPE_CLUSTER,
+				ClusterId: convutils.Ref(randoms.ClusterId),
+			},
+			Spec: api.RctSpec{
+				ObjectMeta: meta,
+				ObjectSpec: validRctObjectSpec(),
+			},
+		}
+		payload, err := json.Marshal(req)
+		Expect(err).To(BeNil())
+		httpReq, err := http.NewRequest("POST", urlRct, bytes.NewReader(payload))
+		Expect(err).To(BeNil())
+		httpReq.Header = *headerForAdmin(randoms)
+		recorder := httptest.NewRecorder()
+		router.ServeHTTP(recorder, httpReq)
+		return recorder
+	}
+
 	Context("cluster capability check (MinVersionResourceClaimTemplates = 3.1.0)", func() {
 		It("accepts a cluster at exactly the minimum supported version", func() {
 			resp := postRctToClusterVersion("3.1.0")
@@ -362,6 +421,143 @@ var _ = Describe("Rct API tests", func() {
 			resp := postRctToClusterVersion("2.15.0")
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
 			Expect(resp.Body.String()).To(ContainSubstring("not supported for this cluster version"))
+		})
+	})
+
+	Context("kubernetes version check (MinDraK8sVersion = 1.34.0)", func() {
+		It("rejects a cluster reporting kube below the DRA floor (1.33.0)", func() {
+			resp := postRctToClusterWithKubeVersion("3.1.0", convutils.Ref("1.33.0"))
+			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			// JSON response bodies HTML-escape `>` as `\u003e`; the backtick
+			// raw string matches the escaped form verbatim.
+			Expect(resp.Body.String()).To(ContainSubstring(`require kubernetes \u003e= 1.34.0`))
+		})
+
+		It("returns 503 when the cluster reports Platform but no KubeVersion", func() {
+			resp := postRctToClusterWithKubeVersion("3.1.0", nil)
+			Expect(resp.Code).To(Equal(http.StatusServiceUnavailable))
+			Expect(resp.Body.String()).To(ContainSubstring("did not report a kubernetes version"))
+		})
+
+		It("returns 503 when the cluster reports an unparseable kube version", func() {
+			resp := postRctToClusterWithKubeVersion("3.1.0", convutils.Ref("not-a-version"))
+			Expect(resp.Code).To(Equal(http.StatusServiceUnavailable))
+			Expect(resp.Body.String()).To(ContainSubstring("unrecognized kubernetes version"))
+		})
+	})
+
+	Context("cross-kind id guard (Update/Delete against a non-RCT asset id)", func() {
+		// Uses HostPath as the "wrong kind" — any non-RCT project-scoped asset
+		// would work. The test proves that dao.GetAssetMetaById (which is
+		// kind-agnostic) doesn't let a caller drive foreign-kind data through
+		// the RCT service by targeting the RCT URL with a non-RCT id.
+		It("returns 404 on PUT when the id belongs to a different asset kind", func() {
+			hostPath, _, _ := createHostPathAsset(buildRandomProjectHostPathAsset(randoms), router, headerForAdmin(randoms))
+
+			updateReq := api.RctUpdateRequest{
+				Meta: api.AssetUpdateRequest{Name: testutils.RandString(5)},
+				Spec: api.RctSpec{ObjectSpec: validRctObjectSpec()},
+			}
+			payload, err := json.Marshal(updateReq)
+			Expect(err).To(BeNil())
+			httpReq, err := http.NewRequest("PUT", fmt.Sprintf("%s/%s", urlRct, hostPath.Meta.Id), bytes.NewReader(payload))
+			Expect(err).To(BeNil())
+			httpReq.Header = *headerForAdmin(randoms)
+			recorder := httptest.NewRecorder()
+			router.ServeHTTP(recorder, httpReq)
+
+			Expect(recorder.Code).To(Equal(http.StatusNotFound), recorder.Body.String())
+			Expect(recorder.Body.String()).To(ContainSubstring("resource claim template with id"))
+			Expect(recorder.Body.String()).To(ContainSubstring("not found"))
+		})
+
+		It("returns 404 on DELETE when the id belongs to a different asset kind", func() {
+			hostPath, _, _ := createHostPathAsset(buildRandomProjectHostPathAsset(randoms), router, headerForAdmin(randoms))
+
+			httpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlRct, hostPath.Meta.Id), nil)
+			Expect(err).To(BeNil())
+			httpReq.Header = *headerForAdmin(randoms)
+			recorder := httptest.NewRecorder()
+			router.ServeHTTP(recorder, httpReq)
+
+			Expect(recorder.Code).To(Equal(http.StatusNotFound), recorder.Body.String())
+			Expect(recorder.Body.String()).To(ContainSubstring("resource claim template with id"))
+			Expect(recorder.Body.String()).To(ContainSubstring("not found"))
+		})
+	})
+
+	Context("ObjectMeta validation (K8s label/annotation syntax)", func() {
+		It("accepts a valid label + annotation payload", func() {
+			meta := &api.K8sObjectMeta{
+				Labels:      &map[string]string{"app": "my-app", "example.com/tier": "gpu"},
+				Annotations: &map[string]string{"example.com/owner": "team-a"},
+			}
+			resp := postRctWithObjectMeta(meta)
+			Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+		})
+
+		It("accepts an empty label value (K8s spec allows it)", func() {
+			meta := &api.K8sObjectMeta{Labels: &map[string]string{"app": ""}}
+			Expect(postRctWithObjectMeta(meta).Code).To(Equal(http.StatusAccepted))
+		})
+
+		It("rejects an invalid label key character", func() {
+			meta := &api.K8sObjectMeta{Labels: &map[string]string{"my@label": "v"}}
+			resp := postRctWithObjectMeta(meta)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Body.String()).To(ContainSubstring("spec.objectMeta.labels"))
+			Expect(resp.Body.String()).To(ContainSubstring("valid Kubernetes qualified name"))
+		})
+
+		It("rejects a label key name longer than 63 characters", func() {
+			meta := &api.K8sObjectMeta{Labels: &map[string]string{strings.Repeat("a", 64): "v"}}
+			resp := postRctWithObjectMeta(meta)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Body.String()).To(ContainSubstring("spec.objectMeta.labels"))
+		})
+
+		It("rejects a label key prefix longer than 253 characters", func() {
+			meta := &api.K8sObjectMeta{Labels: &map[string]string{strings.Repeat("a", 254) + "/name": "v"}}
+			resp := postRctWithObjectMeta(meta)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Body.String()).To(ContainSubstring("prefix component"))
+		})
+
+		It("rejects an invalid label value character", func() {
+			meta := &api.K8sObjectMeta{Labels: &map[string]string{"app": "bad@value"}}
+			resp := postRctWithObjectMeta(meta)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Body.String()).To(ContainSubstring("valid Kubernetes label value"))
+		})
+
+		It("rejects an invalid annotation key character", func() {
+			meta := &api.K8sObjectMeta{Annotations: &map[string]string{"my@ann": "v"}}
+			resp := postRctWithObjectMeta(meta)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			Expect(resp.Body.String()).To(ContainSubstring("spec.objectMeta.annotations"))
+		})
+
+		It("enforces the same label rules on the update path", func() {
+			// Create a valid RCT first, then PUT with a bad label.
+			created, _, _ := createRctAsset(buildRandomClusterRctAsset(randoms), router, headerForAdmin(randoms))
+
+			badUpdate := api.RctUpdateRequest{
+				Meta: api.AssetUpdateRequest{Name: testutils.RandString(5)},
+				Spec: api.RctSpec{
+					ObjectMeta: &api.K8sObjectMeta{Labels: &map[string]string{"bad@key": "v"}},
+					ObjectSpec: validRctObjectSpec(),
+				},
+			}
+			payload, err := json.Marshal(badUpdate)
+			Expect(err).To(BeNil())
+			httpReq, err := http.NewRequest("PUT", fmt.Sprintf("%s/%s", urlRct, created.Meta.Id), bytes.NewReader(payload))
+			Expect(err).To(BeNil())
+			httpReq.Header = *headerForAdmin(randoms)
+			recorder := httptest.NewRecorder()
+			router.ServeHTTP(recorder, httpReq)
+
+			Expect(recorder.Code).To(Equal(http.StatusBadRequest), recorder.Body.String())
+			Expect(recorder.Body.String()).To(ContainSubstring("spec.objectMeta.labels"))
 		})
 	})
 })

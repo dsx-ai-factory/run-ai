@@ -8414,7 +8414,7 @@
           "annotations": {
             "type": "object",
             "nullable": true,
-            "description": "Free-form annotations attached to the resource.",
+            "description": "Free-form annotations attached to the resource. Keys must conform\nto Kubernetes qualified-name syntax\n(https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set):\nan optional DNS-subdomain prefix (≤253 chars) followed by \"/\" and a\nrequired name component ([A-Za-z0-9] with `.`, `_`, `-` allowed\ninside, ≤63 chars). Key syntax is enforced at runtime on both\ncreate and update; annotation values have no format constraint\nbeyond the length limit below.\n",
             "additionalProperties": {
               "type": "string",
               "maxLength": 10000
@@ -8428,10 +8428,11 @@
           "labels": {
             "type": "object",
             "nullable": true,
-            "description": "Free-form labels attached to the resource.",
+            "description": "Free-form labels attached to the resource. Keys and values must\nconform to Kubernetes label syntax\n(https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set):\nkeys are qualified names (optional DNS-subdomain prefix ≤253 chars\n+ \"/\" + name component ≤63 chars); values are ≤63 chars matching\nthe same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are\nallowed). Key syntax is validated at runtime; the value pattern\nbelow is enforced by the schema as well as at runtime.\n",
             "additionalProperties": {
               "type": "string",
-              "maxLength": 63
+              "maxLength": 63,
+              "pattern": "^([A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?)?$"
             },
             "maxProperties": 1000,
             "example": {
@@ -8442,6 +8443,9 @@
       },
       "RctSpec": {
         "type": "object",
+        "required": [
+          "objectSpec"
+        ],
         "properties": {
           "objectMeta": {
             "$ref": "#/components/schemas/K8sObjectMeta"

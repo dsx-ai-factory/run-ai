@@ -29,13 +29,22 @@ type RctSpec struct {
 
 	// The raw Kubernetes spec of the ResourceClaimTemplate.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//ObjectSpec map[string]interface{} `json:"objectSpec,omitempty"`
-	ObjectSpec map[string]interface{} `json:"objectSpec,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//ObjectSpec map[string]interface{} `json:"objectSpec"`
+	ObjectSpec map[string]interface{} `json:"objectSpec" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertRctSpecRequired checks if the required fields are not zero-ed
 func AssertRctSpecRequired(obj RctSpec) error {
+	elements := map[string]interface{}{
+		"objectSpec": obj.ObjectSpec,
+	}
+	for name, el := range elements {
+		if isZero := IsZeroValue(el); isZero {
+			return &RequiredError{Field: name}
+		}
+	}
+
 	if obj.ObjectMeta != nil {
 		if err := AssertK8sObjectMetaRequired(*obj.ObjectMeta); err != nil {
 			return err

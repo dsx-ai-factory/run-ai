@@ -7989,13 +7989,13 @@ export interface ItemRules {
  */
 export interface K8sObjectMeta {
     /**
-     * Free-form annotations attached to the resource.
+     * Free-form annotations attached to the resource. Keys must conform to Kubernetes qualified-name syntax (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set): an optional DNS-subdomain prefix (≤253 chars) followed by \"/\" and a required name component ([A-Za-z0-9] with `.`, `_`, `-` allowed inside, ≤63 chars). Key syntax is enforced at runtime on both create and update; annotation values have no format constraint beyond the length limit below. 
      * @type {{ [key: string]: string; }}
      * @memberof K8sObjectMeta
      */
     'annotations'?: { [key: string]: string; } | null;
     /**
-     * Free-form labels attached to the resource.
+     * Free-form labels attached to the resource. Keys and values must conform to Kubernetes label syntax (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set): keys are qualified names (optional DNS-subdomain prefix ≤253 chars + \"/\" + name component ≤63 chars); values are ≤63 chars matching the same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are allowed). Key syntax is validated at runtime; the value pattern below is enforced by the schema as well as at runtime. 
      * @type {{ [key: string]: string; }}
      * @memberof K8sObjectMeta
      */
@@ -10591,7 +10591,7 @@ export interface RctSpec {
      * @type {{ [key: string]: any; }}
      * @memberof RctSpec
      */
-    'objectSpec'?: { [key: string]: any; };
+    'objectSpec': { [key: string]: any; };
 }
 /**
  * 

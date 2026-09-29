@@ -33,7 +33,7 @@ import (
 )
 
 func main() {
-	rctCreationRequest := *openapiclient.NewRctCreationRequest(*openapiclient.NewAssetCreationRequest("my-asset", openapiclient.Scope("system")), *openapiclient.NewRctSpec()) // RctCreationRequest |  (optional)
+	rctCreationRequest := *openapiclient.NewRctCreationRequest(*openapiclient.NewAssetCreationRequest("my-asset", openapiclient.Scope("system")), *openapiclient.NewRctSpec(map[string]interface{}{"key": interface{}(123)})) // RctCreationRequest |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -308,7 +308,7 @@ import (
 
 func main() {
 	assetId := "38400000-8cf0-11bd-b23e-10b96e4ef00d" // string | Unique identifier of the asset.
-	rctUpdateRequest := *openapiclient.NewRctUpdateRequest(*openapiclient.NewAssetUpdateRequest("my-asset"), *openapiclient.NewRctSpec()) // RctUpdateRequest |  (optional)
+	rctUpdateRequest := *openapiclient.NewRctUpdateRequest(*openapiclient.NewAssetUpdateRequest("my-asset"), *openapiclient.NewRctSpec(map[string]interface{}{"key": interface{}(123)})) // RctUpdateRequest |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

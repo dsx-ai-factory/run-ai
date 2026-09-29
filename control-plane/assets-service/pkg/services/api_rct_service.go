@@ -13,6 +13,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
+	"strings"
 
 	jsschema "github.com/santhosh-tekuri/jsonschema/v6"
 	resourcev1 "k8s.io/api/resource/v1"
@@ -87,6 +89,10 @@ func (s *RctApiService) CreateRct(ctx context.Context, request api.RctCreationRe
 	rbacErr := auth.ValidateAccessByActionAndAssetKind(ctx, ScopeInfoOfCreateRequest(&request.Meta), string(assetKind), backend.ACTION_CREATE, convutils.Deref(request.Meta.Private, false))
 	if rbacErr != nil {
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
+	}
+
+	if metaErr := validateK8sObjectMeta(request.Spec.ObjectMeta); metaErr != nil {
+		return NewErrorResponse(metaErr), nil
 	}
 
 	if specErr := validateRctObjectSpec(request.Spec.ObjectSpec); specErr != nil {
@@ -171,6 +177,10 @@ func (s *RctApiService) UpdateRctById(ctx context.Context, id string, request ap
 	assetKind := api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE
 	audit.AuditFromCtx(ctx).WithEntityType(string(assetKind)).WithEntityId(id).WithEntityName(request.Meta.Name)
 
+	if metaErr := validateK8sObjectMeta(request.Spec.ObjectMeta); metaErr != nil {
+		return NewErrorResponse(metaErr), nil
+	}
+
 	if specErr := validateRctObjectSpec(request.Spec.ObjectSpec); specErr != nil {
 		return NewErrorResponse(specErr), nil
 	}
@@ -251,6 +261,92 @@ func requireRctKind(assetMeta *dbmodel.AssetMeta, id string) *api.Error {
 	}
 	return api.NewError(http.StatusNotFound,
 		fmt.Sprintf("resource claim template with id %s not found", id), nil)
+}
+
+// Kubernetes label/annotation key + label value syntax. Reproduced here rather
+// than importing k8s.io/apimachinery/pkg/util/validation (not vendored in this
+// service) — the two regexes are stable and well-documented:
+//
+//   Qualified-name key: [prefix/]name where
+//     prefix (optional) is a DNS subdomain (≤253 chars)
+//     name     (required) is [A-Za-z0-9] with `.` `_` `-` inside (≤63 chars)
+//   Label value: empty OR same character class as name (≤63 chars)
+//
+// See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set
+var (
+	dnsLabelSubsetRegex = regexp.MustCompile(`^[A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?$`)
+	dnsSubdomainRegex   = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
+)
+
+// validateK8sObjectMeta enforces Kubernetes-compatible key syntax on labels
+// and annotations, and value syntax on labels. The K8sObjectMeta payload is
+// sync'd to the cluster as-is, so rejecting invalid entries at asset-create /
+// asset-update time surfaces the error to the user before the sync agent
+// tries to POST the malformed ResourceClaimTemplate to the K8s API server.
+// OpenAPI 3.0 can't express key patterns on map types (that's a 3.1
+// propertyNames feature), so this is where key validation lives.
+func validateK8sObjectMeta(meta *api.K8sObjectMeta) *api.Error {
+	if meta == nil {
+		return nil
+	}
+	if meta.Labels != nil {
+		for key, value := range *meta.Labels {
+			if err := validateQualifiedName(key, "spec.objectMeta.labels"); err != nil {
+				return err
+			}
+			if err := validateLabelValue(key, value); err != nil {
+				return err
+			}
+		}
+	}
+	if meta.Annotations != nil {
+		// Annotation values have no syntactic constraint (arbitrary strings
+		// up to the maxLength enforced by the generated model constraints);
+		// only the key is validated here.
+		for key := range *meta.Annotations {
+			if err := validateQualifiedName(key, "spec.objectMeta.annotations"); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func validateQualifiedName(key, path string) *api.Error {
+	if len(key) == 0 {
+		return api.NewValidationError(fmt.Sprintf("%s: key must not be empty", path))
+	}
+	var prefix, name string
+	if p, n, found := strings.Cut(key, "/"); found {
+		prefix, name = p, n
+	} else {
+		name = key
+	}
+	if len(name) == 0 || len(name) > 63 || !dnsLabelSubsetRegex.MatchString(name) {
+		return api.NewValidationError(fmt.Sprintf(
+			"%s: key %q name component is not a valid Kubernetes qualified name (must be [A-Za-z0-9] with `.`, `_`, `-` allowed inside, ≤63 chars)",
+			path, key))
+	}
+	if prefix != "" {
+		if len(prefix) > 253 || !dnsSubdomainRegex.MatchString(prefix) {
+			return api.NewValidationError(fmt.Sprintf(
+				"%s: key %q prefix component is not a valid DNS subdomain (≤253 chars, lowercase alphanumeric + `-`, dot-separated)",
+				path, key))
+		}
+	}
+	return nil
+}
+
+func validateLabelValue(key, value string) *api.Error {
+	if value == "" {
+		return nil // empty label value is valid per K8s spec
+	}
+	if len(value) > 63 || !dnsLabelSubsetRegex.MatchString(value) {
+		return api.NewValidationError(fmt.Sprintf(
+			"spec.objectMeta.labels[%q]: value %q is not a valid Kubernetes label value (must be [A-Za-z0-9] with `.`, `_`, `-` allowed inside, ≤63 chars)",
+			key, value))
+	}
+	return nil
 }
 
 // validateRctObjectSpec checks that the free-form objectSpec conforms to the

@@ -14,7 +14,9 @@ Contact: support@run.ai
 package openapi
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the RctSpec type satisfies the MappedNullable interface at compile time
@@ -24,15 +26,18 @@ var _ MappedNullable = &RctSpec{}
 type RctSpec struct {
 	ObjectMeta NullableK8sObjectMeta `json:"objectMeta,omitempty"`
 	// The raw Kubernetes spec of the ResourceClaimTemplate.
-	ObjectSpec map[string]interface{} `json:"objectSpec,omitempty"`
+	ObjectSpec map[string]interface{} `json:"objectSpec"`
 }
+
+type _RctSpec RctSpec
 
 // NewRctSpec instantiates a new RctSpec object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRctSpec() *RctSpec {
+func NewRctSpec(objectSpec map[string]interface{}) *RctSpec {
 	this := RctSpec{}
+	this.ObjectSpec = objectSpec
 	return &this
 }
 
@@ -87,34 +92,26 @@ func (o *RctSpec) UnsetObjectMeta() {
 	o.ObjectMeta.Unset()
 }
 
-// GetObjectSpec returns the ObjectSpec field value if set, zero value otherwise.
+// GetObjectSpec returns the ObjectSpec field value
 func (o *RctSpec) GetObjectSpec() map[string]interface{} {
-	if o == nil || IsNil(o.ObjectSpec) {
+	if o == nil {
 		var ret map[string]interface{}
 		return ret
 	}
+
 	return o.ObjectSpec
 }
 
-// GetObjectSpecOk returns a tuple with the ObjectSpec field value if set, nil otherwise
+// GetObjectSpecOk returns a tuple with the ObjectSpec field value
 // and a boolean to check if the value has been set.
 func (o *RctSpec) GetObjectSpecOk() (map[string]interface{}, bool) {
-	if o == nil || IsNil(o.ObjectSpec) {
+	if o == nil {
 		return map[string]interface{}{}, false
 	}
 	return o.ObjectSpec, true
 }
 
-// HasObjectSpec returns a boolean if a field has been set.
-func (o *RctSpec) HasObjectSpec() bool {
-	if o != nil && !IsNil(o.ObjectSpec) {
-		return true
-	}
-
-	return false
-}
-
-// SetObjectSpec gets a reference to the given map[string]interface{} and assigns it to the ObjectSpec field.
+// SetObjectSpec sets field value
 func (o *RctSpec) SetObjectSpec(v map[string]interface{}) {
 	o.ObjectSpec = v
 }
@@ -132,10 +129,52 @@ func (o RctSpec) ToMap() (map[string]interface{}, error) {
 	if o.ObjectMeta.IsSet() {
 		toSerialize["objectMeta"] = o.ObjectMeta.Get()
 	}
-	if !IsNil(o.ObjectSpec) {
-		toSerialize["objectSpec"] = o.ObjectSpec
-	}
+	toSerialize["objectSpec"] = o.ObjectSpec
 	return toSerialize, nil
+}
+
+func (o *RctSpec) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	// RUNAI
+	// requiredProperties := []string{
+	//
+	//  	"objectSpec",
+	// }
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	// RUNAI
+	//  for _, requiredProperty := range(requiredProperties) {
+	//  	if _, exists := allProperties[requiredProperty]; !exists {
+	//  		return fmt.Errorf("no value given for required property %v", requiredProperty)
+	//  	}
+	//  }
+	//
+	fmt.Sprintf("dummy")
+
+	varRctSpec := _RctSpec{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	// RUNAI
+	// decoder.DisallowUnknownFields()
+	//
+	err = decoder.Decode(&varRctSpec)
+
+	if err != nil {
+		return err
+	}
+
+	*o = RctSpec(varRctSpec)
+
+	return err
 }
 
 type NullableRctSpec struct {

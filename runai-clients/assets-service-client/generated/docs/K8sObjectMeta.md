@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Annotations** | Pointer to **map[string]string** | Free-form annotations attached to the resource. | [optional] 
-**Labels** | Pointer to **map[string]string** | Free-form labels attached to the resource. | [optional] 
+**Annotations** | Pointer to **map[string]string** | Free-form annotations attached to the resource. Keys must conform to Kubernetes qualified-name syntax (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set): an optional DNS-subdomain prefix (≤253 chars) followed by \&quot;/\&quot; and a required name component ([A-Za-z0-9] with &#x60;.&#x60;, &#x60;_&#x60;, &#x60;-&#x60; allowed inside, ≤63 chars). Key syntax is enforced at runtime on both create and update; annotation values have no format constraint beyond the length limit below.  | [optional] 
+**Labels** | Pointer to **map[string]string** | Free-form labels attached to the resource. Keys and values must conform to Kubernetes label syntax (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set): keys are qualified names (optional DNS-subdomain prefix ≤253 chars + \&quot;/\&quot; + name component ≤63 chars); values are ≤63 chars matching the same [A-Za-z0-9]/&#x60;.&#x60;/&#x60;_&#x60;/&#x60;-&#x60; character set (empty values are allowed). Key syntax is validated at runtime; the value pattern below is enforced by the schema as well as at runtime.  | [optional] 
 
 ## Methods
 

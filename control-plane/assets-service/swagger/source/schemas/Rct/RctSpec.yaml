@@ -1,4 +1,6 @@
 type: object
+required:
+  - objectSpec
 properties:
   objectMeta:
     $ref: "../K8sObject/K8sObjectMeta.yaml"

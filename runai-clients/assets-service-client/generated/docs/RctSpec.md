@@ -5,13 +5,13 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ObjectMeta** | Pointer to [**NullableK8sObjectMeta**](K8sObjectMeta.md) |  | [optional] 
-**ObjectSpec** | Pointer to **map[string]interface{}** | The raw Kubernetes spec of the ResourceClaimTemplate. | [optional] 
+**ObjectSpec** | **map[string]interface{}** | The raw Kubernetes spec of the ResourceClaimTemplate. | 
 
 ## Methods
 
 ### NewRctSpec
 
-`func NewRctSpec() *RctSpec`
+`func NewRctSpec(objectSpec map[string]interface{}, ) *RctSpec`
 
 NewRctSpec instantiates a new RctSpec object
 This constructor will assign default values to properties that have it defined,
@@ -80,11 +80,6 @@ and a boolean to check if the value has been set.
 
 SetObjectSpec sets ObjectSpec field to given value.
 
-### HasObjectSpec
-
-`func (o *RctSpec) HasObjectSpec() bool`
-
-HasObjectSpec returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
