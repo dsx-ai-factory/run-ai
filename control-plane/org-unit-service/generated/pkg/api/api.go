@@ -116,6 +116,7 @@ type OrgUnitAPIRouter interface {
 type ProjectsAPIRouter interface {
 	GetProjectAncestors(http.ResponseWriter, *http.Request)
 	GetInternalProjectsTelemetry(http.ResponseWriter, *http.Request)
+	CountInternalProjects(http.ResponseWriter, *http.Request)
 	GetProjects(http.ResponseWriter, *http.Request)
 	CreateProject(http.ResponseWriter, *http.Request)
 	GetProjectsMetadata(http.ResponseWriter, *http.Request)
@@ -273,6 +274,7 @@ type OrgUnitAPIServicer interface {
 type ProjectsAPIServicer interface {
 	GetProjectAncestors(context.Context, string) (ImplResponse, error)
 	GetInternalProjectsTelemetry(context.Context, OrgUnitTelemetryTypeInternal, string, string, string, string, []string, []string) (ImplResponse, error)
+	CountInternalProjects(context.Context, []string, string) (ImplResponse, error)
 	GetProjects(context.Context, []string, ProjectFilterSortFields, string, int32, int32, string) (ImplResponse, error)
 	CreateProject(context.Context, ProjectCreationRequest) (ImplResponse, error)
 	GetProjectsMetadata(context.Context, []string, string, string, int32, int32, string) (ImplResponse, error)

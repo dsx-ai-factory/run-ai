@@ -36,6 +36,10 @@ paths:
   /internal/org-unit/projects/telemetry:
     x-internal: true
     $ref: './requests/projects/GetProjectTelemetryInternal.yaml'
+
+  /internal/org-unit/projects/count:
+    x-internal: true
+    $ref: './requests/projects/ProjectsCountInternal.yaml'
   /internal/org-unit/names:
     x-internal: true
     $ref: './requests/org/OrgUnitName.yaml'

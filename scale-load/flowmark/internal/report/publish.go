@@ -17,11 +17,6 @@ type Receipt struct {
 	Runs int
 }
 
-// Publish writes the results file, adds it to manifest.json and then reads
-// both back from the store; any difference or a missing manifest entry is an
-// error, so a run whose numbers did not land fails like any other failed run.
-// It assumes a single writer per destination: two publishers updating the
-// manifest at the same moment could lose one entry.
 func Publish(ctx context.Context, store Store, document Document) (Receipt, error) {
 	data, err := document.Encode()
 	if err != nil {
@@ -29,6 +24,12 @@ func Publish(ctx context.Context, store Store, document Document) (Receipt, erro
 	}
 	name := document.FileName()
 
+	switch existing, err := store.Get(ctx, name); {
+	case err == nil && !bytes.Equal(existing, data):
+		return Receipt{}, fmt.Errorf("results %s already exist in %s with different content; refusing to overwrite an earlier run", name, store)
+	case err != nil && !errors.Is(err, ErrNotFound):
+		return Receipt{}, fmt.Errorf("check results %s: %w", name, err)
+	}
 	if err := store.Put(ctx, name, data); err != nil {
 		return Receipt{}, fmt.Errorf("write results %s: %w", name, err)
 	}

@@ -19,7 +19,7 @@ import (
 func exampleDocument() Document {
 	offset := int64(-296)
 	return Build(map[string]core.Section{
-		"external-workload": {Category: core.CategoryScale, Metrics: map[string]any{
+		"deployment-burst": {Category: core.CategoryScale, Metrics: map[string]any{
 			"flow": "deployment_to_external_workload", "p90_ms@100": int64(5754), "pending_count@100": 0, "slo_p90_ms": 5000,
 		}},
 		"selfcheck": {Category: core.CategoryScale, Metrics: map[string]any{"selfcheck_duration_seconds": 0.1}, Failed: true, Error: "example failure text"},
