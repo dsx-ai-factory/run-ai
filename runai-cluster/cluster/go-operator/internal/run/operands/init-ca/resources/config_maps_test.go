@@ -221,7 +221,6 @@ func TestWebhookNamesInClusterRoleResourceNames(t *testing.T) {
 
 	runaiConfig.Spec.AdviceRestartController.Enabled = ptr.To(true)
 	runaiConfig.Spec.Global.EnableWorkloadOwnershipProtection = ptr.To(true)
-	runaiConfig.Spec.PodGroupAssigner.Enabled = ptr.To(true)
 	runaiConfig.Spec.Internal.Development.Headless = false
 
 	data := webhooksFile(runaiConfig)
@@ -320,7 +319,6 @@ func TestWebhooksFileContainsOnlySurvivingConfigurations(t *testing.T) {
 		"runai-inference-workload-ownership-protection-validation",
 		"runai-pod",
 		"runai-pod-controller-mutation",
-		"runai-pod-group-mutation",
 		"runai-project-validation",
 		"runai-restartrequest-validation",
 		"runai-workload-ownership-mutation",

@@ -13,8 +13,8 @@ import (
 
 	ourConfig "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/config"
 
-	workloadsClient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // ClientInterface lists the workloads services that workloads-manager service needs

@@ -225,7 +225,7 @@ Other Run:ai services consume Cluster Service through the versioned Go client at
 [`pkg/client/README.md`](pkg/client/README.md) for the full usage and versioning
 policy, including the `make client-bump-version` (production) and
 `make client-bump-version-dev` (feature-branch) workflow. Dev-versioned
-references may not be merged to `master` — CI enforces this.
+references may not be merged to `main` — CI enforces this.
 
 ## Further reading
 

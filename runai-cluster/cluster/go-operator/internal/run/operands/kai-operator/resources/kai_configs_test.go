@@ -259,6 +259,11 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Global.QueueLabelKey).To(Equal(ptr.To(clustercommonconstants.RunaiQueueLabel)))
 	})
 
+	It("always selects the CUDA-native fractions mode", func() {
+		kaiConfig := buildKAIConfig(defaultRunaiConfig())
+		Expect(kaiConfig.Spec.Global.GpuSharingMode).To(Equal(ptr.To(kaicommon.GpuSharingModeNvFractions)))
+	})
+
 	It("sets the RunAI scheduler vocabulary on global, matching the engine adapter", func() {
 		runaiConfig := defaultRunaiConfig()
 		// The chart delivers the control-plane pull secret through this list.
@@ -272,6 +277,22 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Global.ImagePullSecrets).To(ContainElement(controlPlaneImagePullSecretName))
 	})
 
+	// The chart puts KAI on -fips images for both "on" and "only", so this flag is
+	// the only thing separating the two: without it "only" silently degrades to the
+	// image default on every operator-managed KAI pod.
+	DescribeTable("carries FIPS run-time strictness onto the CR",
+		func(fipsMode string, expected bool) {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.Internal.Global.FipsMode = fipsMode
+
+			Expect(buildKAIConfig(runaiConfig).Spec.Global.FIPSOnly).To(Equal(ptr.To(expected)))
+		},
+		Entry("only", "only", true),
+		Entry("on", "on", false),
+		Entry("off", "off", false),
+		Entry("unset", "", false),
+	)
+
 	It("sets reservation identity and admission/webhook fields like the engine adapter", func() {
 		kaiConfig := buildKAIConfig(defaultRunaiConfig())
 
@@ -281,6 +302,7 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(rr.RuntimeClassName).To(Equal(ptr.To("")))
 
 		adm := kaiConfig.Spec.Admission
+		Expect(adm.ServiceName).To(Equal(ptr.To("engine-admission")))
 		Expect(adm.GPUSharing).To(Equal(ptr.To(true)))
 		Expect(adm.QueueLabelSelector).To(Equal(ptr.To(true)))
 		Expect(adm.ValidatingWebhookConfigurationName).To(Equal(ptr.To("validating-engine-admission")))

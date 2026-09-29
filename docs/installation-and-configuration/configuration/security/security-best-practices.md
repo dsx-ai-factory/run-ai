@@ -13,7 +13,7 @@ This guide provides actionable best practices for administrators to securely con
 
 ## Access Control (RBAC)
 
-NVIDIA Run:ai uses Role‑Based Access Control to define what each user, group, or service account can do, and where. Roles are assigned within a scope, such as a project, department, or cluster, and permissions cover actions like viewing, creating, editing, or deleting entities. Unlike Kubernetes RBAC, NVIDIA Run:ai’s RBAC works across multiple clusters, giving you a single place to manage access rules. See [Role Based Access Control (RBAC)](../authentication/overview.md#role-based-access-control-rbac-in-nvidia-run-ai) for more details.
+NVIDIA Run:ai uses Role‑Based Access Control to define what each user, group, or service account can do, and where. Roles are assigned within a scope, such as a project, department, or cluster, and permissions cover actions like viewing, creating, editing, or deleting entities. Unlike Kubernetes RBAC, NVIDIA Run:ai’s RBAC works across multiple clusters, giving you a single place to manage access rules. See [Role Based Access Control (RBAC)](../../../platform-management/authentication/overview.md#role-based-access-control-rbac-in-nvidia-run-ai) for more details.
 
 ### Best Practices
 
@@ -31,7 +31,7 @@ These cluster roles define permissions for the entities NVIDIA Run:ai manages an
 
 NVIDIA Run:ai supports several authentication methods to control platform access. You can use single sign-on (SSO) for unified enterprise logins, traditional username/password accounts if SSO isn’t an option, and API secret keys for automated application access. Authentication is mandatory for all interfaces, including the UI, CLI, and APIs, ensuring only verified users or applications can interact with your environment.
 
-Administrators can also configure session timeout. This refers to the period of inactivity before a user is automatically logged out. Once the timeout is reached, the session ends and re‑authentication is required, helping protect against risks from unattended or abandoned sessions. See [Authentication and authorization](../authentication/overview.md) for more details.
+Administrators can also configure session timeout. This refers to the period of inactivity before a user is automatically logged out. Once the timeout is reached, the session ends and re‑authentication is required, helping protect against risks from unattended or abandoned sessions. See [Authentication and authorization](../../../platform-management/authentication/overview.md) for more details.
 
 ### Best Practices
 
@@ -42,11 +42,11 @@ Administrators can also configure session timeout. This refers to the period of 
 
 ### Kubernetes Connection
 
-Configure the Kubernetes API server to validate tokens via NVIDIA Run:ai’s identity service, ensuring unified authentication across the platform. For more information, see [Cluster authentication](../authentication/cluster-authentication.md).
+Configure the Kubernetes API server to validate tokens via NVIDIA Run:ai’s identity service, ensuring unified authentication across the platform. For more information, see [Cluster authentication](../cluster-authentication.md).
 
 ## Workload Policies: Enforcing Security at Submission
 
-Workload policies allow administrators to define and enforce how AI workloads are submitted and controlled across projects and teams. With these policies, you can set clear rules and defaults for workload parameters such as which resources can be requested, required security settings, and which defaults should apply. Policies are enforced whether workloads are submitted via the UI, CLI, API or Kubernetes YAML, and can be scoped to specific projects, departments, or clusters for fine-grained control. See [Policies and rules](../../platform-management/policies/policies-and-rules.md) for more details.
+Workload policies allow administrators to define and enforce how AI workloads are submitted and controlled across projects and teams. With these policies, you can set clear rules and defaults for workload parameters such as which resources can be requested, required security settings, and which defaults should apply. Policies are enforced whether workloads are submitted via the UI, CLI, API or Kubernetes YAML, and can be scoped to specific projects, departments, or clusters for fine-grained control. See [Policies and rules](../../../platform-management/policies/policies-and-rules.md) for more details.
 
 ### Best Practices
 
@@ -65,7 +65,7 @@ Map these policies to `PodSecurityContext` settings in Kubernetes, and enforce t
 
 ## Managing Namespace and Resource Creation
 
-NVIDIA Run:ai offers flexible controls for how namespaces and resources are created and managed within your clusters. When a new project is set up, you can choose whether Kubernetes namespaces are created automatically, and whether users are auto-assigned to those projects. There are also options to manage how secrets are propagated across namespaces and to enable or disable resource limit enforcement using Kubernetes LimitRange objects. See [Advanced cluster configurations](cluster-config.md) for more details.
+NVIDIA Run:ai offers flexible controls for how namespaces and resources are created and managed within your clusters. When a new project is set up, you can choose whether Kubernetes namespaces are created automatically, and whether users are auto-assigned to those projects. There are also options to manage how secrets are propagated across namespaces and to enable or disable resource limit enforcement using Kubernetes LimitRange objects. See [Advanced cluster configurations](../cluster-config.md) for more details.
 
 ### Best Practices
 
@@ -99,7 +99,7 @@ Use Kubernetes `NetworkPolicies` to limit inter-pod and external traffic to mode
 
 ## Secure Installation and Maintenance
 
-A secure deployment is the foundation on which all other controls rest, and NVIDIA Run:ai’s installation procedures are built to align with organizational policies such as OpenShift Security Context Constraints (SCC). See [Advanced cluster configurations](cluster-config.md) for more details.
+A secure deployment is the foundation on which all other controls rest, and NVIDIA Run:ai’s installation procedures are built to align with organizational policies such as OpenShift Security Context Constraints (SCC). See [Advanced cluster configurations](../cluster-config.md) for more details.
 
 * Deploy NVIDIA Run:ai cluster following secure installation guides (including IT compliance mandates such as SCC for OpenShift).
 * Run regular security scans and patch/update NVIDIA Run:ai deployments promptly when vulnerabilities are reported.

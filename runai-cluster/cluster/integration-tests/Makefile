@@ -42,7 +42,11 @@ pod-group-assigner-test: git-config-command install-ginkgo
 	$(MAKE) TEST_PATH=./suites/pod-group-assigner run-ginkgo-tests
 .PHONY: pod-group-assigner-test
 
+# Ensure ~/.gitconfig exists before any container bind-mounts it. Docker creates a
+# root-owned DIRECTORY at the mount source when the path is missing, which then breaks
+# every git command for the user (see DOCKER_GO_BASE_COMMAND in golang.mk).
 git-config-command:
+	@touch ${HOME}/.gitconfig
 ifdef GITHUB_TOKEN
 	echo Creating gitconfig with github token
 	git config --file ${HOME}/.gitconfig url.https://${GITHUB_TOKEN}@github.com/.insteadOf https://github.com/

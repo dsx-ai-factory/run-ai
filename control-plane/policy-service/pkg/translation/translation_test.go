@@ -11,8 +11,8 @@ import (
 	"os"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/utils"
 	"github.com/ghodss/yaml"
 	. "github.com/onsi/ginkgo/v2"

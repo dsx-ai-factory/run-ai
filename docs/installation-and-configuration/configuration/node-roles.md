@@ -36,14 +36,14 @@ To set a system role for a node in your Kubernetes cluster using Kubectl, follow
     kubectl label nodes <node-name> node-role.kubernetes.io/runai-system=false
     ```
 
-<Info>
+<Note>
 
 **Note**
 
-* To ensure [high availability](../procedures/high-availability.md) and prevent a single point of failure, it is recommended to configure at least three system nodes in your cluster.
+* To ensure [high availability](../operations/high-availability.md) and prevent a single point of failure, it is recommended to configure at least three system nodes in your cluster.
 * By default, Kubernetes master nodes are configured to prevent workloads from running on them as a best-practice measure to safeguard control plane stability. While this restriction is generally recommended, certain NVIDIA reference architectures allow adding tolerations to the NVIDIA Run:ai deployment so critical system services can run on these nodes.
 
-</Info>
+</Note>
 
 ### Worker Nodes
 
@@ -56,7 +56,7 @@ By default, GPU workloads are scheduled on GPU nodes based on the `nvidia.com/gp
 
 To set a worker role for a node in your Kubernetes cluster using Kubectl, follow these steps:
 
-1. Validate the `clusterConfig.global.nodeAffinity.restrictScheduling` is set to true in the cluster’s [Configurations](cluster-config.md).
+1. Validate the `clusterConfig.global.nodeAffinity.restrictScheduling` is set to true in the [advanced cluster configurations](cluster-config.md).
 2. Use the `kubectl get nodes` command to list all the nodes in your cluster and identify the name of the node you want to modify.
 3.  Run one of the following commands to label the node with its role. Replace the label and value (`true`/`false`) to enable or disable GPU/CPU roles as needed:
 

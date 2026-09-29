@@ -28,12 +28,21 @@
         </div>
         <div
           class="flex-1 runai-expansion-header-content-right justify-between text-weight-regular"
-          v-if="!isOpen || showSubHeader"
+          v-if="!isOpen || showSubHeader || hasStatusIcon"
         >
           <div class="flex-1 subheader" :aid="aidSubheader">
-            <slot name="subheader">{{ subheader }}</slot>
+            <template v-if="!isOpen || showSubHeader">
+              <slot name="subheader">{{ subheader }}</slot>
+            </template>
           </div>
           <q-icon v-if="isInvalid" class="q-mr-md" name="ph-bold ph-warning-circle" color="red" size="20px"></q-icon>
+          <q-icon
+            v-else-if="isWarning"
+            class="q-mr-md"
+            name="ph-bold ph-warning-circle"
+            color="warning"
+            size="20px"
+          ></q-icon>
         </div>
       </div>
     </template>
@@ -119,6 +128,11 @@ export default defineComponent({
       required: false,
       default: false,
     },
+    sectionWarning: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: false,
+    },
     loading: {
       type: Boolean as PropType<boolean>,
       default: false,
@@ -196,6 +210,12 @@ export default defineComponent({
         return this.hasError || this.sectionInvalid;
       }
       return this.sectionInvalid || false;
+    },
+    isWarning(): boolean {
+      return this.sectionWarning || false;
+    },
+    hasStatusIcon(): boolean {
+      return this.isInvalid || this.isWarning;
     },
   },
   methods: {

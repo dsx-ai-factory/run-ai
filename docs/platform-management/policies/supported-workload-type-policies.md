@@ -2,16 +2,16 @@
 
 NVIDIA Run:ai workload policies can target any supported workload type registered in the platform (such as PyTorchJob, Deployment, and others). When you create a policy for a supported workload type, you can define its rules using the **Rule builder**, an interactive interface that maps the fields of the selected workload type, or by writing the policy YAML directly. For the list of workload types you can target, see [Supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md).
 
-<Info>
+<Note>
 
 **Note**
 
 * Workload policies are enabled by default. If you do not see it in the menu, contact your administrator to enable it under **General settings** → Workloads → Policies.
-* Supported workload type policies can only be scoped to a project. Cluster, department, and system scopes are not available for these policies.
+* Supported workload type policies can be scoped to a tenant, cluster, department, or project. System scope is not available for these policies. Tenant scope is available via API only.
 * For policies targeting native workload types (Workspace, Training, and Inference), see [NVIDIA Run:ai native workload policies](native-workload-policies.md).
 * To apply policies to a new [workload type](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md) your organization has registered, you must first map it to the policy engine using the mapping APIs. See [Workload types policy mapping](workload-type-policy-mapping.md).
 
-</Info>
+</Note>
 
 ## Workload Policies Table
 
@@ -75,7 +75,7 @@ Each enforcement defines how the selected field is controlled during workload su
 To create a new supported workload type policy:
 
 1. Click **+NEW POLICY**
-2. In the **Scope** section, select a **project**
+2. In the **Scope** section, select a **cluster**, **department**, or **project**
 3. In the **Workload type** section, select a [supported workload type](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md)
 4. Under **Set how the policy should be configured**, select:
    * **Rule builder** - Configure rules interactively using an interface that maps the fields of the selected workload type. See [Adding rules](supported-workload-type-policies.md#adding-rules).
@@ -96,13 +96,28 @@ To add a rule:
 6. Click **SAVE RULE**
 7. Repeat for additional rules, then click **SAVE POLICY**
 
-<Info>
+<Note>
 
 **Note**
 
 All fields in a rule are mandatory. If a rule has unresolved issues when you save it, the form prompts you to review and fix them, and the rule cannot be saved until they are resolved.
 
-</Info>
+</Note>
+
+### Overriding Rules Across Scopes
+
+When a policy is scoped to a tenant, cluster, or department, each rule can specify whether a policy at a narrower scope is allowed to override it. See [Scope of Effectiveness](policies-and-rules.md#scope-of-effectiveness) for how the scope hierarchy is structured. For cluster- and department-scoped policies, the override setting is exposed in the Rule builder as an **Override by descendant scope** setting:
+
+* **Descendant scopes cannot override this rule** (default) - the rule from this scope always applies, regardless of any rule for the same field defined at a narrower scope.
+* **Any descendant scope can define a policy that overrides this rule** - a policy at a narrower scope can define a rule for the same field, and that rule takes effect instead.
+
+For tenant-scoped policies, the same behavior is controlled directly by the `allowOverride` field in the rule YAML. See [Using the YAML Editor](supported-workload-type-policies.md#using-the-yaml-editor).
+
+This setting is not available for project-scoped policies, since a project has no narrower scope.
+
+If you create a rule for a field that is already locked by a non-overridable rule at an ancestor scope, the rule is saved but remains inactive until the ancestor rule is removed or changed to allow override.
+
+When viewing a policy's effective rules, each rule shows its **Source** - the scope at which the rule was defined (cluster, department, or project) - so you can trace which policy in the hierarchy is currently in effect for a given field. See [Viewing a policy](supported-workload-type-policies.md#viewing-a-policy).
 
 ### Using the YAML Editor
 
@@ -117,14 +132,17 @@ rules:
     itemSelector: <item-selector>    # optional; only for list-type fields
     selectorParams:                   # optional; required by some selectors
       <param>: <value>
+    allowOverride: <boolean>          # optional; tenant/cluster/department scope only, defaults to false
     enforcements:
       - <enforcement-type>: <value>
 ```
 
+`allowOverride` controls whether a policy at a narrower scope can override this rule. It applies to rules in tenant-, cluster-, or department-scoped policies; it has no effect for project-scoped policies, since a project has no narrower scope. See [Overriding rules across scopes](supported-workload-type-policies.md#overriding-rules-across-scopes).
+
 To discover the fields and spec selectors available for a specific workload type, use the following APIs:
 
-* [`POST /api/v1/policies/mappings/minimal`](https://run-ai-docs.nvidia.com/api/policies/policy#post-api-v1-policies-mappings-minimal) - returns minimal information about the mapping for the workload type, including the list of fields and the spec selectors for each field
-* [`POST /api/v1/policies/mappings/field-info`](https://run-ai-docs.nvidia.com/api/policies/policy#post-api-v1-policies-mappings-field-info) - returns detailed field information including item selectors and formatter information
+* [`POST /api/v1/policies/mappings/minimal`](api:main-api:POST/api/v1/policies/mappings/minimal) - returns minimal information about the mapping for the workload type, including the list of fields and the spec selectors for each field
+* [`POST /api/v1/policies/mappings/field-info`](api:main-api:POST/api/v1/policies/mappings/field-info) - returns detailed field information including item selectors and formatter information
 
 See [Enforcement types](supported-workload-type-policies.md#enforcement-types) for the full list of enforcement types and their value formats. For worked examples, see [Policy YAML examples](policy-yaml-examples-supported.md).
 
@@ -150,6 +168,8 @@ To view a policy:
      The specific item within a list-type field the rule targets. Shown only when the field is a list-type field.
    * **Rule**\
      The enforcements applied to the field
+   * **Source**\
+     The scope at which the rule was defined (tenant, cluster, department, or project). Rules inherited from a broader scope are shown alongside rules defined at the policy's own scope.
 
 ## Deleting a Policy
 
@@ -159,4 +179,4 @@ To view a policy:
 
 ## Using API
 
-Go to the [Policies](https://run-ai-docs.nvidia.com/api/2.26/policies/policy) API reference to view the available actions.
+Go to the [Policies](api:main-api:GET/api/v2/policy) API reference to view the available actions.

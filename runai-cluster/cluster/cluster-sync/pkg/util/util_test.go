@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	swagger "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -84,4 +85,36 @@ func TestCompareNullables(t *testing.T) {
 		})
 	}
 
+}
+
+func TestIsPersonalCredentialCopy(t *testing.T) {
+	tests := []struct {
+		name   string
+		meta   *metav1.ObjectMeta
+		marked bool
+	}{
+		{name: "nil metadata"},
+		{name: "no labels", meta: &metav1.ObjectMeta{}},
+		{
+			name: "canonical marker",
+			meta: &metav1.ObjectMeta{Labels: map[string]string{
+				PersonalCredentialCopyLabel: TrueAsString,
+			}},
+			marked: true,
+		},
+		{
+			name: "non-canonical marker value",
+			meta: &metav1.ObjectMeta{Labels: map[string]string{
+				PersonalCredentialCopyLabel: "false",
+			}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsPersonalCredentialCopy(tt.meta); got != tt.marked {
+				t.Errorf("IsPersonalCredentialCopy() = %v, expected %v", got, tt.marked)
+			}
+		})
+	}
 }

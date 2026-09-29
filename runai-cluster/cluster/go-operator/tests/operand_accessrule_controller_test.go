@@ -11,7 +11,7 @@ import (
 	"k8s.io/utils/ptr"
 
 	accessrule_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/accessrule-controller"
-	nodepool_controller_resources "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/nodepool-controller/resources"
+	accessrule_controller_resources "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/accessrule-controller/resources"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
 	. "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/tests/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
@@ -81,8 +81,7 @@ var _ = Describe("Access Rule Controller Operand", func() {
 		Context("Deployment", func() {
 			It("should reconcile a modified deployment", func() {
 				hybridClient := kc.New(k8s, k8s, nil)
-				depResource := nodepool_controller_resources.NewDeploymentResource("nodepool-controller", hybridClient, runaiConfig)
-				deployment, err := depResource.Object(apiCtx)
+				deployment, err := accessrule_controller_resources.DeploymentForRunaiConfig(apiCtx, hybridClient, runaiConfig)
 				ExpectNoErr(err)
 
 				badServiceAccountName := "bad-service-account-name"

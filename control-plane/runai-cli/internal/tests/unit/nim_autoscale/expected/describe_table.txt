@@ -33,7 +33,7 @@ Serving Configuration
 
  Serving Port:                       8000
  Expose Externally:                  true
- Serving URL:                        https://test-cluster.runailabs.com/testnim/mynim-auto
+ Serving URL:                        https://test-cluster.example.com/testnim/mynim-auto
  Service Type:                       ClusterIP
 
 
@@ -57,6 +57,6 @@ Compute Resources
 
 Network
 
- Name             Tool Type        Connection Type  Container Port   URL                                                   
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
- NIMService       NIMService       ExternalUrl      8080             https://test-cluster.runailabs.com/testnim/mynim-auto 
+ Name             Tool Type        Connection Type  Container Port   URL                                                 
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ NIMService       NIMService       ExternalUrl      8080             https://test-cluster.example.com/testnim/mynim-auto 

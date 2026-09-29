@@ -60,13 +60,13 @@ A department’s max GPU device allocation effectively limits the total number o
 
 ### Project and Department Rank
 
-<Info>
+<Note>
 
 **Note**
 
 NVIDIA Run:ai terminology for project priority and department priority has changed to project rank and department rank, across the UI and API.
 
-</Info>
+</Note>
 
 Administrators can assign each project/node pool pair a rank. The rank determines the project’s relative precedence for resources compared to its siblings within the same department and node pool pair. Projects with a higher rank are allocated resources first, both within their quota and over quota, and may also reclaim (preempt) resources from lower-ranked projects within the same department/node pool pair.
 
@@ -123,6 +123,8 @@ This time-based fairshare calculation ensures that each project and department r
 
 ### Priority and Preemption
 
+TBD: Hagay to update this section to account for semi-preemptible workloads.
+
 NVIDIA Run:ai supports scheduling workloads using different priority and preemption policies:
 
 * Workload's priority and preemption are two distinct parameters set in a workload. Workload's priority sets the scheduling precedence within a project, while workload's preemption sets whether the workload is preemptible or non-preemptible.
@@ -154,7 +156,7 @@ During the grace period, the running pods are not evicted. If enough pods return
 
 The grace period has a cluster-wide default and can be overridden per workload:
 
-* **Cluster-wide default** - Configured with the `defaultStalenessGracePeriod` [cluster configuration](../../../installation-and-configuration/post-installation-configuration/cluster-config.md) parameter. Default: 60 seconds.
+* **Cluster-wide default** - Configured with the `defaultStalenessGracePeriod` [advanced cluster configuration](../../../installation-and-configuration/configuration/cluster-config.md) parameter. Default: 60 seconds.
 * **Per-workload override** - Set the `kai.scheduler/staleness-grace-period` annotation on the workload. The value is a duration string, a number followed by a unit (`s`, `m`, or `h`), for example `30s`, `5m`, or `1h`:
   * An invalid value is ignored, and the cluster-wide default applies.
   * A negative value disables stale gang eviction for that pod group entirely.
@@ -194,13 +196,13 @@ The primary function of the NVIDIA Run:ai Scheduler is to match workloads with a
 * **Kubernetes Extended Resources** - Non-native Kubernetes resources such as GPUs, FPGAs, or networking adapters. Historically requested as static "extended resources" (for example, `nvidia.com/gpu: 2`). Starting with Kubernetes v1.34, workloads can leverage [Dynamic Resource Allocation (DRA)](concepts-and-principles.md#dynamic-resource-allocation-dra).
 * **Kubernetes Storage Resources** - Persistent Volumes (PVs) and Persistent Volume Claims (PVCs), managed by the Kubernetes CSI subsystem.
 
-<Info>
+<Note>
 
 **Note**
 
 With Kubernetes v1.34, DRA is GA. You can also use earlier Kubernetes version v1.33 where DRA was Beta.
 
-</Info>
+</Note>
 
 ### Dynamic Resource Allocation (DRA)
 
@@ -218,14 +220,14 @@ The NVIDIA Run:ai platform supports scheduling and presentation of workloads usi
 
 In both scenarios, the platform schedules the workloads, accounts for the requested resources in quota management, and surfaces workload status and other parameters via the UI, API, and CLI.
 
-<Info>
+<Note>
 
 **Note**
 
-* When submitting NVIDIA Run:ai native workloads, the platform continues using extended resources. Both extended resources and DRA are supported during the transition period.
-* Using DRA and extended resources on the same underlying nodes can cause resource inconsistencies and allocation collisions. It is recommended to separate nodes by splitting them into different node pools - one for extended resources and one for DRA. This allows you to adopt DRA incrementally while maintaining the legacy 'extended resources’ workloads and nodes unaffected.
+* A translation layer in the Scheduler translates legacy extended-resource requests (for example, `nvidia.com/gpu: 2`) into DRA `ResourceClaim` requests automatically, so NVIDIA Run:ai native workloads can use DRA without submitting a claim directly.
+* Extended resources and DRA workloads can share the same node pool.
 
-</Info>
+</Note>
 
 ## Next Steps
 

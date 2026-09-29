@@ -13,7 +13,7 @@ To learn more about the inference workload type in NVIDIA Run:ai and determine t
 ## Before You Start
 
 * Make sure you have created a [project](../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
-* Make sure [LWS](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#distributed-inference) is properly installed by your administrator.
+* Make sure [LWS](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-inference) is properly installed by your administrator.
 * If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../settings/user-settings/user-credentials.md) (created under User settings).
 
 ## Workload Priority and Preemption
@@ -60,14 +60,14 @@ Distributed inference workloads are based on a [Leader Worker Set (LWS)](https:/
 
 ### Setting Up an Environment
 
-<Info>
+<Note>
 
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
 * To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -108,7 +108,7 @@ Manually configure the settings below as needed. The changes will apply to this 
      * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
      * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 4. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 5. Set the **command and arguments** for the container running the workload. If no command is added, the container will use the image’s default command (entry-point).
    * Modify the existing command or click **+COMMAND & ARGUMENTS** to add a new command.
@@ -125,13 +125,13 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 ### Setting Up Compute Resources
 
-<Info>
+<Note>
 
 **Note**
 
 GPU memory limit is disabled by default. If unavailable, your administrator must enable it under **General Settings** → Resources → GPU resource optimization.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -174,13 +174,13 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 ### Setting Up Data & Storage
 
-<Info>
+<Note>
 
 **Note**
 
 S3 data sources are not supported for inference workloads.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -192,13 +192,13 @@ S3 data sources are not supported for inference workloads.
 
 **Configure data sources for a one-time configuration**
 
-<Info>
+<Note>
 
 **Note**
 
 [PVCs](../workload-assets/data-volumes.md), [Secrets](../workload-assets/credentials.md), and [ConfigMaps](../workload-assets/environments.md) cannot be added as a one-time configuration.
 
-</Info>
+</Note>
 
 1. Click the **➕** icon and choose the data source from the dropdown menu. You can add multiple data sources.
 2. Once selected, set the **data origin** according to the required fields and enter the **container path** to set the **data target location**.
@@ -239,9 +239,10 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 ### Configuring Workload Setup
 
 1. Set the number of replicas for your workload. Each replica consists of one leader pod and its associated worker pods.
-2. Set whether the workload may be interrupted by selecting **Preemptible** or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
+2. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+   * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 3. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 4. Set when the workers' pod should be created:
    * **When the leader pod is created** - Create the workers’ pods alongside the leader pod to reduce startup time. This may cause the deployment to fail if the leader isn't ready.
@@ -270,7 +271,7 @@ Access to the inference serving API depends on how the serving endpoint access w
 
 Follow the below steps to obtain a token:
 
-1. Use the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API with:
+1. Use the [Tokens](api:main-api:POST/api/v2/token) API with:
    * `grantType: password` for specific users or groups
    * `grantType: client_credentials` for service accounts and user access keys
 2.  Use the obtained token to make API calls to the inference serving endpoint. For example:
@@ -295,4 +296,8 @@ To view the available actions, see the inference workload [CLI v2 reference](../
 
 ## Using API
 
-To view the available actions for creating an inference workload, see the [Distributed Inferences](https://run-ai-docs.nvidia.com/api/2.26/workloads/distributed-inferences) API reference.
+To view the available actions for creating an inference workload, see the [Distributed Inferences](api:main-api:POST/api/v1/workloads/distributed-inferences) API reference.
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes the [`submit_workload`](../../agents/tools-reference.md#workloads) tool to submit a new workload via natural language. See [AI Agents](../../agents/overview.md) for setup.

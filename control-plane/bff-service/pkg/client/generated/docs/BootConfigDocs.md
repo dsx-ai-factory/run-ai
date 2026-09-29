@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**CatalogVersion** | Pointer to **string** | Documentation path catalog. Defaults to v1 when omitted by an older server. | [optional] [default to "v1"]
 **BaseUrl** | **string** | Base URL used to resolve documentation links. | 
 **WhatsNew** | [**BootConfigWhatsNew**](BootConfigWhatsNew.md) |  | 
 
@@ -25,6 +26,31 @@ will change when the set of required properties is changed
 NewBootConfigDocsWithDefaults instantiates a new BootConfigDocs object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetCatalogVersion
+
+`func (o *BootConfigDocs) GetCatalogVersion() string`
+
+GetCatalogVersion returns the CatalogVersion field if non-nil, zero value otherwise.
+
+### GetCatalogVersionOk
+
+`func (o *BootConfigDocs) GetCatalogVersionOk() (*string, bool)`
+
+GetCatalogVersionOk returns a tuple with the CatalogVersion field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCatalogVersion
+
+`func (o *BootConfigDocs) SetCatalogVersion(v string)`
+
+SetCatalogVersion sets CatalogVersion field to given value.
+
+### HasCatalogVersion
+
+`func (o *BootConfigDocs) HasCatalogVersion() bool`
+
+HasCatalogVersion returns a boolean if a field has been set.
 
 ### GetBaseUrl
 

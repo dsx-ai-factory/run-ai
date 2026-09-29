@@ -25,7 +25,7 @@ import (
 	cpworkloadmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane/workload"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/transaction"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -40,6 +40,7 @@ const (
       "phase": "Running",
       "projectName": "team-one",
       "preemptible": false,
+      "preemptibility": "semi-preemptible",
       "runningPods": 1,
       "requestedPods": {
         "number": 1
@@ -54,6 +55,7 @@ const (
       phase: Running
       project: team-one
       preemptible: false
+      preemptibility: semi-preemptible
       runningpods: 1
       requestedpods:
         number: {}
@@ -89,8 +91,10 @@ var _ = Describe("Workload Display", Ordered, func() {
 		)
 
 		BeforeAll(func() {
+			workload1 := generateWorkloadFullSpec("1", "workload-01", time.Time{})
+			workload1.SetPreemptibility("semi-preemptible")
 			response := &openapi.GetWorkloads200Response{Workloads: []openapi.Workload{
-				generateWorkloadFullSpec("1", "workload-01", time.Time{}),
+				workload1,
 				generateWorkloadFullSpec("2", "workload-02", time.Time{}),
 				generateWorkloadFullSpec("3", "workload-03", time.Unix(10, 0)),
 			}}
@@ -104,8 +108,8 @@ var _ = Describe("Workload Display", Ordered, func() {
 		It("Table", func() {
 			outputStr, err = out.GenerateTable()
 			Expect(err).ToNot(HaveOccurred())
-			Expect(outputStr).To(ContainSubstring("workload-01  Workspace   Runai       Running     team-one    No               1/1                 1.00"))
-			Expect(outputStr).To(ContainSubstring("workload-02  Workspace   Runai       Running     team-one    No               1/1                 1.00"))
+			Expect(outputStr).To(ContainSubstring("workload-01  Workspace   Runai       Running     team-one    Semi-preemptible  1/1                 1.00"))
+			Expect(outputStr).To(ContainSubstring("workload-02  Workspace   Runai       Running     team-one    Non-preemptible   1/1                 1.00"))
 			Expect(outputStr).To(ContainSubstring("next token: MTk3MC0wMS0wMVQ"))
 		})
 
@@ -198,7 +202,7 @@ var _ = Describe("Workload Display", Ordered, func() {
 			for _, col := range columns {
 				columnTitles = append(columnTitles, col.Title)
 			}
-			Expect(columnTitles).To(Equal([]string{manipulate.NameField.GetColumnTitle(), manipulate.TypeField.GetColumnTitle(), manipulate.FrameworkField.GetColumnTitle(), manipulate.ProjectField.GetColumnTitle(), manipulate.PreemptibleField.GetColumnTitle(), manipulate.PodsField.GetColumnTitle(), manipulate.GPUAllocationField.GetColumnTitle()}))
+			Expect(columnTitles).To(Equal([]string{manipulate.NameField.GetColumnTitle(), manipulate.TypeField.GetColumnTitle(), manipulate.FrameworkField.GetColumnTitle(), manipulate.ProjectField.GetColumnTitle(), manipulate.PreemptibilityField.GetColumnTitle(), manipulate.PodsField.GetColumnTitle(), manipulate.GPUAllocationField.GetColumnTitle()}))
 			Expect(columnTitles).ToNot(ContainElement(manipulate.StatusField.GetColumnTitle()))
 		})
 
@@ -232,7 +236,7 @@ var _ = Describe("Workload Display", Ordered, func() {
 				}
 			}
 			// Verify the row format matches expected pattern without status
-			Expect(outputStr).To(MatchRegexp(`deleted-workload-01\s+Workspace\s+Runai\s+team-one\s+No\s+1/1\s+1\.00`))
+			Expect(outputStr).To(MatchRegexp(`deleted-workload-01\s+Workspace\s+Runai\s+team-one\s+Non-preemptible\s+1/1\s+1\.00`))
 		})
 
 		It("JSON should not contain phase field", func() {
@@ -476,6 +480,8 @@ var _ = Describe("Workload Display", Ordered, func() {
 			Expect(brief1).To(HaveLen(2))
 			Expect(brief1[0].Name).To(Equal("memory-test-1"))
 			Expect(brief1[0].Id).To(Equal("test-1"))
+			Expect(brief1[0].Preemptibility).ToNot(BeNil())
+			Expect(*brief1[0].Preemptibility).To(Equal("non-preemptible"))
 
 			// Second call - should convert again (no caching)
 			brief2 := out.getBriefWorkloads()
@@ -946,7 +952,7 @@ func generateWorkloadFullSpec(id, name string, createdAt time.Time) openapi.Work
           "containerPort": 8888,
           "name": "Jupyter",
           "toolType": "jupyter-notebook",
-          "url": "https://fox-demo.runailabs.com/team-one/jup-01"
+          "url": "https://fox-demo.example.com/team-one/jup-01"
         }
       ],
       "id": "ab6b7bac-922c-4dea-964e-288e28ae1804",
@@ -998,7 +1004,7 @@ func generateWorkloadFullSpec(id, name string, createdAt time.Time) openapi.Work
   "type": "Workspace",
   "updatedAt": "2025-04-10T06:28:43.632927Z",
   "urls": [
-    "https://fox-demo.runailabs.com/team-one/jup-01"
+    "https://fox-demo.example.com/team-one/jup-01"
   ],
   "workloadRequestedResources": {
     "cpu": {

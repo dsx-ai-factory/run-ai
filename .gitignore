@@ -73,4 +73,7 @@ runai-application-packages/validation/coverage.out
 **/bin/*-amd64
 **/bin/*-arm64
 
+# Generated swagger is used for debugging purposes, not needed for production
+**/swagger/_build/swagger.html
+
 **/.gradle

@@ -87,7 +87,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		projectControllerServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.RunaiProjectControllerName,
+				Name:      operands.KRMProjectControllerName,
 				UID:       types.UID(projectControllerUID),
 			},
 		}

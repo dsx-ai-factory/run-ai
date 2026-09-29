@@ -34,6 +34,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	schedulingv1 "k8s.io/api/scheduling/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -175,6 +176,11 @@ var (
 		Version: storagev1.SchemeGroupVersion.Version,
 		Kind:    "StorageClass",
 	}
+	DeviceClassType = SupportedType{
+		Group:   resourcev1.SchemeGroupVersion.Group,
+		Version: resourcev1.SchemeGroupVersion.Version,
+		Kind:    "DeviceClass",
+	}
 	ExternalWorkloadType = SupportedType{
 		Group:   v1alpha1.SchemeGroupVersion.Group,
 		Version: v1alpha1.SchemeGroupVersion.Version,
@@ -251,6 +257,7 @@ var (
 		RevisionType,
 		InteractiveWorkloadType,
 		StorageClassType,
+		DeviceClassType,
 		ExternalWorkloadType,
 		InteractivePolicyType,
 		TrainingPolicyType,
@@ -319,6 +326,7 @@ func isOptionalInformer(gvk SupportedType) bool {
 	return gvk == ServiceType ||
 		gvk == RevisionType ||
 		gvk == NodeResourceTopologyType ||
+		gvk == DeviceClassType ||
 		isLegacyWorkloadType(gvk) ||
 		isLegacyPolicyType(gvk)
 }

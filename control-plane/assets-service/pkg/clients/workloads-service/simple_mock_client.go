@@ -9,7 +9,7 @@ import (
 	"context"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 
-	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/google/uuid"

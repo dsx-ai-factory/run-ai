@@ -14,8 +14,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/init_containers"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )

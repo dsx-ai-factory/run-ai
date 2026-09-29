@@ -6,6 +6,8 @@
 package core
 
 import (
+	"slices"
+	"strings"
 	"testing"
 	"time"
 )
@@ -98,5 +100,76 @@ func TestConfigDuration(t *testing.T) {
 				t.Fatalf("got %s (%v), want %s", got, err, tc.want)
 			}
 		})
+	}
+}
+
+func TestConfigInts(t *testing.T) {
+	cases := []struct {
+		name    string
+		knobs   map[string]any
+		want    []int
+		wantErr string
+	}{
+		{name: "absent uses fallback", knobs: nil, want: []int{1, 2}},
+		{name: "yaml list", knobs: map[string]any{"workloads": []any{100, 250, 500}}, want: []int{100, 250, 500}},
+		{name: "not a list", knobs: map[string]any{"workloads": 100}, wantErr: "must be a list"},
+		{name: "item not a number", knobs: map[string]any{"workloads": []any{100, "many"}}, wantErr: "item 2 must be a whole number"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := (Config{Knobs: tc.knobs}).Ints("workloads", []int{1, 2})
+			if tc.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+					t.Fatalf("expected error containing %q, got %v", tc.wantErr, err)
+				}
+				return
+			}
+			if err != nil || !slices.Equal(got, tc.want) {
+				t.Fatalf("got %v (%v), want %v", got, err, tc.want)
+			}
+		})
+	}
+}
+
+func TestConfigMap(t *testing.T) {
+	got, err := (Config{Knobs: map[string]any{"slo": map[string]any{"create_to_ew_p90_ms": 5000}}}).Map("slo")
+	if err != nil || got["create_to_ew_p90_ms"] != 5000 {
+		t.Fatalf("got %v (%v)", got, err)
+	}
+	if got, err := (Config{}).Map("slo"); err != nil || got != nil {
+		t.Fatalf("absent map must be nil without error, got %v (%v)", got, err)
+	}
+	if _, err := (Config{Knobs: map[string]any{"slo": "fast"}}).Map("slo"); err == nil || !strings.Contains(err.Error(), "must be a mapping") {
+		t.Fatalf("expected mapping error, got %v", err)
+	}
+}
+
+func TestRunIDIsShortUniqueHex(t *testing.T) {
+	first, err := RunID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := RunID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first) != 8 || strings.Trim(first, "0123456789abcdef") != "" {
+		t.Fatalf("run id must be 8 lowercase hex characters, got %q", first)
+	}
+	if first == second {
+		t.Fatalf("two run ids must differ, both were %q", first)
+	}
+}
+
+func TestConfigUnknown(t *testing.T) {
+	cfg := Config{Knobs: map[string]any{"workloads": []any{1}, "workloadTipe": "Training", "slos": nil}}
+
+	got := cfg.Unknown("workloads", "workloadType", "slo")
+
+	if !slices.Equal(got, []string{"slos", "workloadTipe"}) {
+		t.Fatalf("unknown knobs must be reported sorted, got %v", got)
+	}
+	if got := (Config{}).Unknown("workloads"); len(got) != 0 {
+		t.Fatalf("no knobs means nothing unknown, got %v", got)
 	}
 }

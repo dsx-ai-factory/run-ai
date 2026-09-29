@@ -7,7 +7,10 @@ package core
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -60,6 +63,53 @@ func (c Config) Int(key string, fallback int) (int, error) {
 	return value, nil
 }
 
+func (c Config) Unknown(known ...string) []string {
+	allowed := make(map[string]bool, len(known))
+	for _, key := range known {
+		allowed[key] = true
+	}
+	var unknown []string
+	for key := range c.Knobs {
+		if !allowed[key] {
+			unknown = append(unknown, key)
+		}
+	}
+	sort.Strings(unknown)
+	return unknown
+}
+
+func (c Config) Ints(key string, fallback []int) ([]int, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return fallback, nil
+	}
+	items, ok := raw.([]any)
+	if !ok {
+		return nil, fmt.Errorf("knob %q must be a list of whole numbers, got %T", key, raw)
+	}
+	values := make([]int, 0, len(items))
+	for i, item := range items {
+		value, ok := item.(int)
+		if !ok {
+			return nil, fmt.Errorf("knob %q item %d must be a whole number, got %T", key, i+1, item)
+		}
+		values = append(values, value)
+	}
+	return values, nil
+}
+
+func (c Config) Map(key string) (map[string]any, error) {
+	raw, ok := c.Knobs[key]
+	if !ok || raw == nil {
+		return nil, nil
+	}
+	value, ok := raw.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("knob %q must be a mapping, got %T", key, raw)
+	}
+	return value, nil
+}
+
 func (c Config) String(key string, fallback string) (string, error) {
 	raw, ok := c.Knobs[key]
 	if !ok || raw == nil {
@@ -70,6 +120,14 @@ func (c Config) String(key string, fallback string) (string, error) {
 		return "", fmt.Errorf("knob %q must be a string, got %T", key, raw)
 	}
 	return value, nil
+}
+
+func RunID() (string, error) {
+	var raw [4]byte
+	if _, err := rand.Read(raw[:]); err != nil {
+		return "", fmt.Errorf("generate run id: %w", err)
+	}
+	return hex.EncodeToString(raw[:]), nil
 }
 
 type Category string

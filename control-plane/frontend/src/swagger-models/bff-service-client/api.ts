@@ -134,6 +134,12 @@ export type BootConfigDistributionAssetsProfileEnum = typeof BootConfigDistribut
  */
 export interface BootConfigDocs {
     /**
+     * Documentation path catalog. Defaults to v1 when omitted by an older server.
+     * @type {string}
+     * @memberof BootConfigDocs
+     */
+    'catalogVersion'?: BootConfigDocsCatalogVersionEnum;
+    /**
      * Base URL used to resolve documentation links.
      * @type {string}
      * @memberof BootConfigDocs
@@ -146,6 +152,14 @@ export interface BootConfigDocs {
      */
     'whatsNew': BootConfigWhatsNew;
 }
+
+export const BootConfigDocsCatalogVersionEnum = {
+    V1: 'v1',
+    V2: 'v2'
+} as const;
+
+export type BootConfigDocsCatalogVersionEnum = typeof BootConfigDocsCatalogVersionEnum[keyof typeof BootConfigDocsCatalogVersionEnum];
+
 /**
  * 
  * @export

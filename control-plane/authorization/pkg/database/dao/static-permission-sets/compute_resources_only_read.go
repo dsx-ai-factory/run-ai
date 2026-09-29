@@ -19,6 +19,10 @@ var ComputeResourcesOnlyRead = models.PermissionSet{
 			Read:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_CLUSTERS_MINIMAL,
 			Read:         true,
 		},

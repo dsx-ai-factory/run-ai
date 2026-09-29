@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	nodepools "github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/node-pools"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/sampler_actions"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/scale"

@@ -9,7 +9,7 @@ Explore the latest NVIDIA technical blogs featuring NVIDIA Run:ai, including tec
   <Card title="Numa-Aware Scheduling in NVIDIA Run:ai" src="../assets/blog-kai-scheduler-ray.webp" imagePosition="top" href="blogs/numa-aware-scheduling-in-nvidia-run-ai.md">
     July 17, 2026
   </Card>
-  <Card title="NVIDIA Run:ai Agent Simplifies GPU Provisioning, Job Management, and Troubleshooting" src="../assets/blog-gpu-optimization.webp" imagePosition="top" href="blogs/nvidia-run-ai-agent-simplifies-gpu-provisioning-job-management-and-troubleshooting.md">
+  <Card title="NVIDIA Run:ai Agent Simplifies GPU Provisioning, Job Management, and Troubleshooting" src="../assets/blog-gpu-optimization.webp" imagePosition="top" href="blogs/nvidia-run-ai-agent.md">
     June 16, 2026
   </Card>
   <Card title="NVIDIA DSX OS Delivers Open, Modular Software for Operating AI Factories at Scale" src="../assets/blog-dsx-os.jpg" imagePosition="top" href="https://developer.nvidia.com/blog/nvidia-dsx-os-delivers-open-modular-software-for-operating-ai-factories-at-scale/">
@@ -50,9 +50,6 @@ Explore the latest NVIDIA technical blogs featuring NVIDIA Run:ai, including tec
   </Card>
   <Card title="Reducing Cold Start Latency for LLM Inference with NVIDIA Run:ai Model Streamer" src="../assets/blog-model-streamer-cold-start.webp" imagePosition="top" href="https://developer.nvidia.com/blog/reducing-cold-start-latency-for-llm-inference-with-nvidia-runai-model-streamer/">
     September 16, 2025
-  </Card>
-  <Card title="Cut Model Deployment Costs While Keeping Performance With GPU Memory Swap" src="../assets/blog-gpu-optimization.webp" imagePosition="top" href="https://developer.nvidia.com/blog/cut-model-deployment-costs-while-keeping-performance-with-gpu-memory-swap/">
-    September 2, 2025
   </Card>
   <Card title="Accelerate AI Model Orchestration with NVIDIA Run:ai on AWS" src="../assets/blog-runai-on-aws.webp" imagePosition="top" href="https://developer.nvidia.com/blog/accelerate-ai-model-orchestration-with-nvidia-runai-on-aws/">
     July 15, 2025

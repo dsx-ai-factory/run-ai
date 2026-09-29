@@ -24,8 +24,10 @@ GO_VERSION_BASE?=$(or $(strip $(if $(wildcard go.mod),$(shell awk '$$1=="go"{pri
 # Use the default tagged version which should be ubuntu-based
 GO_VERSION?=$(GO_VERSION_BASE)
 GO_ALPINE_VERSION?=$(GO_VERSION_BASE)-alpine
-MOCKERY_VERSION=v3.2.5
-GOLANGCI_LINT_VERSION=v2.9.0
+MOCKERY_VERSION=v3.8.0
+# Must be new enough to decode the Go release's export data: v2.9.0 fails
+# every package on Go 1.27 with "export data version 4 ... (typecheck)".
+GOLANGCI_LINT_VERSION=v2.13.2
 GOPRIVATE=github.com/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.
@@ -116,16 +118,19 @@ GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
 
 GO_LDFLAGS=''
 
-# Optional: restrict golangci-lint to changes since this rev (--new-from-rev).
-# Empty (the default) lints all files. RC services opt in via runai-cluster.mk
-# to preserve the legacy "only flag new code" behavior.
-LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),master)
+# Restrict golangci-lint to changes since the PR's base branch
+# (--new-from-rev), so a PR is judged on the code it actually touched.
+# Override to empty in a service Makefile to lint every file.
+LINT_BASE_BRANCH ?= $(or $(GITHUB_BASE_REF),$(GITHUB_REF_NAME),main)
 ifeq ($(GITHUB_REF_TYPE),tag)
+  # GITHUB_REF_NAME is the tag itself here, so --new-from-rev would diff the
+  # tagged commit against itself and report nothing. Lint the whole tree.
   LINT_REV ?= $(LINT_BASE_BRANCH)
+  LINT_NEW_FROM_REV ?=
 else
   LINT_REV ?= origin/$(LINT_BASE_BRANCH)
+  LINT_NEW_FROM_REV ?= $(LINT_REV)
 endif
-LINT_NEW_FROM_REV ?=
 
 ################### OS DEPENDENCY ##########################
 # Build the project
@@ -236,6 +241,25 @@ generate-mocks: git-config-command
 	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh .
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: generate-mocks
+
+# Same as generate-mocks, without Docker. The Renovate post-upgrade hook runs
+# inside the Renovate container, which has no Docker socket, so the containerised
+# target fails there with "Cannot connect to the Docker daemon". No GOTOOLCHAIN
+# override: the toolchain has to follow the module, or mockery is built by one Go
+# and shells out to the `go list` of another.
+generate-mocks-local: git-config-command
+	@if [ ! -f .mockery.yml ] && [ ! -f .mockery.yaml ]; then \
+		${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} No .mockery.yml in ${SERVICE_NAME}; nothing to generate" ${BASE_CONSOLE}; \
+		exit 0; \
+	fi
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME} (no container)" ${BASE_CONSOLE}
+	@mkdir -p ${BIN_DIR}
+	GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v3@${MOCKERY_VERSION}
+	${BIN_DIR}/mockery
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh .
+	${SUCCESS_MESSAGE_HANDLER}
+.PHONY: generate-mocks-local
 
 generate-mocks-client: git-config-command
 	@if [ ! -f pkg/client/.mockery.yml ] && [ ! -f pkg/client/.mockery.yaml ]; then \

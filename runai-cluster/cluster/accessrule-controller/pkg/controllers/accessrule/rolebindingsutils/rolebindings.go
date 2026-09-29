@@ -34,11 +34,7 @@ const (
 )
 
 var (
-	TrueRef          = true
-	RoleNamesMapping = map[string]string{
-		"application-administrator": "editor",
-		"cloud-support":             "viewer",
-	}
+	TrueRef = true
 )
 
 func getRoleBindingObject(
@@ -124,7 +120,6 @@ func GetSubjectKind(subjectType v1alpha1.AccessRuleSubjectType) string {
 func GetClusterRoleBindingName(roleName string) string {
 	result := strings.ReplaceAll(roleName, " ", "-")
 	result = strings.ToLower(result)
-	result = getRoleNameForRoleBinding(result)
 	return fmt.Sprintf("%s-%s", allRolesRunaiPrefix, result)
 }
 
@@ -161,12 +156,4 @@ func GetAccessRuleAddedSubjectLabelKey(accessRule *v1alpha1.AccessRule, projectR
 		result = fmt.Sprintf("%s%s", result, labelSuffixIfNeeded)
 	}
 	return result
-}
-
-func getRoleNameForRoleBinding(roleName string) string {
-	if mappedToName, exists := RoleNamesMapping[roleName]; exists {
-		return mappedToName
-	}
-
-	return roleName
 }

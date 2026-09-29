@@ -22,7 +22,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	featuregate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/feature-gate"

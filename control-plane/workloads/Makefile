@@ -9,6 +9,9 @@ OPENAPI_GENERATOR_VERSION_CLIENT_GO=v7.12.0
 
 # Change for every new service
 SERVICE_NAME=workloads
+SHARED_PACKAGES_PATH=pkg
+OPENAPI_CLIENT_NAME_GO=client
+SHARED_PACKAGES_PATH_ABS=control-plane/workloads/pkg
 
 ##@ Basic Commands 
 

@@ -1423,6 +1423,7 @@ paths:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
             type: string
           maxItems: 2
           type: array
@@ -1447,6 +1448,24 @@ paths:
           - Failed
           items:
             $ref: '#/components/schemas/Phase'
+          maxItems: 10
+          type: array
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal. Dates are in ISO 8601 timestamp format."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - createdAt>=2026-09-01T00:00:00Z
+          - createdAt<=2026-09-02T00:00:00Z
+          items:
+            maxLength: 1000
+            pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+            type: string
           maxItems: 10
           type: array
         style: form
@@ -1521,6 +1540,170 @@ paths:
       x-authorize:
         resource-type: workloads
         action: read
+  /internal/workloads/telemetry:
+    get:
+      description: |
+        Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.
+
+        Telemetry Types:
+        - WORKLOADS_COUNT: Count of workloads
+        - GPU_ALLOCATION: GPU allocation metrics
+        - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+          For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+        - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
+      operationId: get_internal_workloads_telemetry
+      parameters:
+      - description: Filter using the Universally Unique Identifier (UUID) of the
+          cluster.
+        explode: true
+        in: query
+        name: clusterId
+        required: false
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: Filter using the nodepool.
+        explode: true
+        in: query
+        name: nodepoolName
+        required: false
+        schema:
+          example: default
+          type: string
+        style: form
+      - description: Filter using the department id.
+        explode: true
+        in: query
+        name: departmentId
+        required: false
+        schema:
+          example: "1"
+          type: string
+        style: form
+      - description: project id to filter by
+        explode: true
+        in: query
+        name: projectId
+        required: false
+        schema:
+          example: "1"
+          type: string
+        style: form
+      - description: Group workloads by field.
+        explode: false
+        in: query
+        name: groupBy
+        required: false
+        schema:
+          items:
+            enum:
+            - ClusterId
+            - DepartmentId
+            - ProjectId
+            - Type
+            - CurrentNodepools
+            - RequestedNodepools
+            - Phase
+            - Category
+            - Source
+            type: string
+          maxItems: 2
+          type: array
+        style: form
+      - description: Specifies the telemetry type.
+        explode: true
+        in: query
+        name: telemetryType
+        required: true
+        schema:
+          $ref: '#/components/schemas/WorkloadTelemetryType'
+        style: form
+      - description: "Filter workloads by specific phases. If not specified, all phases\
+          \ are included."
+        explode: false
+        in: query
+        name: filterByPhases
+        required: false
+        schema:
+          example:
+          - Running
+          - Failed
+          items:
+            $ref: '#/components/schemas/Phase'
+          maxItems: 10
+          type: array
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal. Dates are in ISO 8601 timestamp format."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - createdAt>=2026-09-01T00:00:00Z
+          - createdAt<=2026-09-02T00:00:00Z
+          items:
+            maxLength: 1000
+            pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get the internal workloads telemetry.
+      tags:
+      - Workloads
+      x-no-authorization: true
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+    x-internal: true
   /api/v1/workloads/podgroups/sync:
     post:
       operationId: sync_pod_groups
@@ -13371,6 +13554,7 @@ components:
           - RequestedNodepools
           - Phase
           - Category
+          - Source
           type: string
         maxItems: 2
         type: array
@@ -13397,6 +13581,25 @@ components:
         - Failed
         items:
           $ref: '#/components/schemas/Phase'
+        maxItems: 10
+        type: array
+      style: form
+    TelemetryFilterBy:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
+        \ Greater than or equal. Dates are in ISO 8601 timestamp format."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - createdAt>=2026-09-01T00:00:00Z
+        - createdAt<=2026-09-02T00:00:00Z
+        items:
+          maxLength: 1000
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+          type: string
         maxItems: 10
         type: array
       style: form
@@ -126443,7 +126646,14 @@ components:
         repository or chart URL. This is used when the chart source requires credentials.
       example:
         assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        userCredential: true
       properties:
+        userCredential:
+          description: "Indicates whether the asset is a user credential owned by\
+            \ the caller. When omitted or false, the asset is treated as a shared\
+            \ credential."
+          nullable: true
+          type: boolean
         assetId:
           description: The ID of the asset to use for authentication.
           format: uuid
@@ -126453,6 +126663,7 @@ components:
       example:
         auth:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          userCredential: true
         values:
           key: ""
         chartRef:
@@ -126467,13 +126678,16 @@ components:
           $ref: '#/components/schemas/AIApplicationSpecChartRef'
         values:
           additionalProperties: true
-          description: Inline Helm values used to override the Helm chart’s default
-            configuration. These values are merged with the Helm chart’s `values.yaml`.
-            This field is mutually exclusive with `valuesBase64`.
+          description: |
+            Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+
+            A complete string value can reference a personal credential using `USERCREDENTIAL:<name>`. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: `USERCREDENTIAL:<name>,generic-secret` or `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.
           type: object
         valuesBase64:
-          description: Base64-encoded Helm values used to override the Helm chart’s
-            default configuration. This field is mutually exclusive with `values`.
+          description: |
+            Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`. When the decoded content contains personal credential references, it must be a YAML object.
+
+            String values support the same exact personal credential placeholder grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and Docker registry credentials, or `USERCREDENTIAL:<name>,generic-secret` and `USERCREDENTIAL:<name>,docker-registry` for NGC credentials. Embedded or partial placeholders are not supported.
           format: byte
           type: string
         auth:
@@ -126516,6 +126730,7 @@ components:
         spec:
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           values:
             key: ""
           chartRef:
@@ -126794,6 +127009,7 @@ components:
         phase: phase
         auth:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          userCredential: true
         desiredPhase: desiredPhase
         name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126805,6 +127021,7 @@ components:
         spec:
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           values:
             key: ""
           chartRef:
@@ -126862,6 +127079,7 @@ components:
           phase: phase
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           desiredPhase: desiredPhase
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126873,6 +127091,7 @@ components:
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:
@@ -126905,6 +127124,7 @@ components:
             phase: phase
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             desiredPhase: desiredPhase
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126916,6 +127136,7 @@ components:
             spec:
               auth:
                 assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                userCredential: true
               values:
                 key: ""
               chartRef:
@@ -126930,6 +127151,7 @@ components:
             phase: phase
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             desiredPhase: desiredPhase
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126941,6 +127163,7 @@ components:
             spec:
               auth:
                 assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                userCredential: true
               values:
                 key: ""
               chartRef:
@@ -130414,6 +130637,7 @@ components:
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:
@@ -130492,6 +130716,7 @@ components:
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:

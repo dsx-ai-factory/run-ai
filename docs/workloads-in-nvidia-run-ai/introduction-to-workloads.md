@@ -40,4 +40,4 @@ NVIDIA Run:ai enables support for workload types that originate from any ML fram
 
 Some workload types are already available in the platform, ready to use with default category and priority mappings applied. See [Supported workload types](workload-types/supported-workload-types.md) for a full list.
 
-Administrators can extend workload support by introducing new workload types at any time using the [Workload Types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types) API. The Karta infrastructure interprets and manages these workloads, enabling advanced orchestration, scheduling, and monitoring. See [Extending workload support with Karta](workload-types/extending-workload-support/) for more details.
+Administrators can extend workload support by introducing new workload types at any time using the [Workload Types](api:main-api:POST/api/v1/workload-types) API. The Karta infrastructure interprets and manages these workloads, enabling advanced orchestration, scheduling, and monitoring. See [Extending workload support with Karta](workload-types/extending-workload-support/) for more details.

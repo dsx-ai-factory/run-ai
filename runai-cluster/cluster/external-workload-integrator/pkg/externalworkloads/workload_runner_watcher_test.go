@@ -19,6 +19,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/util/workqueue"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -141,5 +142,67 @@ var _ = Describe("enqueueWorkloadsForWorkloadRunner", func() {
 			"dinf":      {Group: "leaderworkerset.x-k8s.io", Version: "v1", Kind: "LeaderWorkerSet"},
 			"dist":      {Group: kubeflowGroup, Version: "v1", Kind: "PyTorchJob"},
 		}))
+	})
+})
+
+// A runner whose workload object was never created has no ExternalWorkload to enqueue against,
+// so the workload is invisible in the control plane until one is created from the runner itself.
+var _ = Describe("enqueueWorkloadsForWorkloadRunner with no external workload", func() {
+	const ns, runnerName = "team-a", "wlr-1"
+
+	runnerInPhase := func(phase dromosv1alpha1.WorkloadRunnerPhase) *dromosv1alpha1.WorkloadRunner {
+		return &dromosv1alpha1.WorkloadRunner{
+			ObjectMeta: metav1.ObjectMeta{Name: runnerName, Namespace: ns, UID: testWlrUID},
+			Status:     dromosv1alpha1.WorkloadRunnerStatus{Phase: phase},
+		}
+	}
+
+	enqueueFor := func(runner *dromosv1alpha1.WorkloadRunner,
+		objects ...client.Object,
+	) workqueue.TypedRateLimitingInterface[utils.ExternalWorkloadTask] {
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+		c := fakeclient.NewClientBuilder().WithScheme(scheme).WithObjects(objects...).Build()
+
+		q := workqueue.NewTypedRateLimitingQueue[utils.ExternalWorkloadTask](
+			workqueue.DefaultTypedControllerRateLimiter[utils.ExternalWorkloadTask]())
+		enqueueWorkloadsForWorkloadRunner(context.Background(), c, &ExternalWorkloadHandler{tasksQueue: q}, runner)
+		return q
+	}
+
+	DescribeTable("enqueues a runner task only once the runner has failed",
+		func(phase dromosv1alpha1.WorkloadRunnerPhase, wantTask bool) {
+			q := enqueueFor(runnerInPhase(phase))
+
+			if !wantTask {
+				Expect(q.Len()).To(BeZero())
+				return
+			}
+			Expect(q.Len()).To(Equal(1))
+			task, _ := q.Get()
+			Expect(task.GetOperation()).To(Equal(string(utils.CreateFromRunnerOperation)))
+			Expect(task.WorkloadRunnerName).To(Equal(runnerName))
+			Expect(task.Key.Namespace).To(Equal(ns))
+			q.Done(task)
+		},
+		Entry("failed", dromosv1alpha1.WorkloadRunnerPhaseFailed, true),
+		Entry("degraded", dromosv1alpha1.WorkloadRunnerPhaseDegraded, true),
+		Entry("unknown", dromosv1alpha1.WorkloadRunnerPhaseUnknown, true),
+		Entry("creating", dromosv1alpha1.WorkloadRunnerPhaseCreating, false),
+		Entry("pending", dromosv1alpha1.WorkloadRunnerPhasePending, false),
+		Entry("running", dromosv1alpha1.WorkloadRunnerPhaseRunning, false),
+		Entry("completed", dromosv1alpha1.WorkloadRunnerPhaseCompleted, false),
+	)
+
+	It("does not enqueue a runner task when the runner already has an external workload", func() {
+		q := enqueueFor(runnerInPhase(dromosv1alpha1.WorkloadRunnerPhaseFailed),
+			ewForRunner("ew-training", runnerName, "training", "Training"))
+
+		Expect(q.Len()).To(Equal(1))
+		task, _ := q.Get()
+		Expect(task.GetOperation()).To(Equal(string(utils.UpdateOperation)),
+			"an existing external workload must still take the child-keyed update path")
+		Expect(task.Key.Name).To(Equal("training"))
+		q.Done(task)
 	})
 })

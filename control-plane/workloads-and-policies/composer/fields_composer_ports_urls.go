@@ -14,9 +14,9 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 const (

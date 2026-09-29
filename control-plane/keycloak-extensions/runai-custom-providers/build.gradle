@@ -29,19 +29,23 @@ configurations {
 
 dependencies {
     // Keycloak SPI deps are provided at runtime by the server
-    compileOnly "org.keycloak:keycloak-core:26.6.+"
-    compileOnly "org.keycloak:keycloak-server-spi:26.6.+"
-    compileOnly "org.keycloak:keycloak-services:26.6.+"
-    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.+'
-    compileOnly 'jakarta.ws.rs:jakarta.ws.rs-api:4.0.+'
-    compileOnly 'org.slf4j:slf4j-api:2.0.+'
+    compileOnly "org.keycloak:keycloak-core:26.7.4"
+    compileOnly "org.keycloak:keycloak-server-spi:26.7.4"
+    compileOnly "org.keycloak:keycloak-services:26.7.4"
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.22.3'
+    compileOnly 'jakarta.ws.rs:jakarta.ws.rs-api:4.0.0'
+    compileOnly 'org.slf4j:slf4j-api:2.0.20'
 
-    testImplementation 'org.glassfish.jersey.core:jersey-server:4.0.+'
-    testImplementation 'org.slf4j:slf4j-simple:2.0.+'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.+'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.+'
-    testImplementation 'org.mockito:mockito-core:5.2.+'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.+'
+    testImplementation 'org.glassfish.jersey.core:jersey-server:4.0.2'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.20'
+    // The BOM keeps the launcher aligned with the engine; without an explicit
+    // launcher Gradle injects its own, which fails against newer JUnit platforms.
+    testImplementation platform('org.junit:junit-bom:5.14.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.mockito:mockito-core:5.24.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.24.0'
     testImplementation 'org.assertj:assertj-core:3.27.7'
 }
 

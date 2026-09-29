@@ -11,8 +11,8 @@ import (
 	"fmt"
 
 	clusterService "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	workloadsService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsService "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	goVersion "github.com/hashicorp/go-version"

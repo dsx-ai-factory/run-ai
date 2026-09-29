@@ -15,8 +15,8 @@ import (
 	"time"
 
 	clusterclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	workloadclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	workloadclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"golang.org/x/oauth2"
 	"k8s.io/client-go/tools/clientcmd"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -25,21 +25,26 @@ import (
 )
 
 const (
-	kubeQPS      = 50
-	kubeBurst    = 200
 	loginTimeout = 30 * time.Second
 	loginPath    = "/api/v1/token"
 )
 
 type Clients struct {
 	Identity       string
-	Kube           k8sclient.Client
+	Kube           k8sclient.WithWatch
 	ClusterService *clusterclient.APIClient
 	OrgUnits       *orgunitclient.APIClient
 	Workloads      *workloadclient.APIClient
 }
 
 func New(ctx context.Context, env core.Env) (*Clients, error) {
+	return NewWithLimits(ctx, env, DefaultLimits)
+}
+
+func NewWithLimits(ctx context.Context, env core.Env, limits Limits) (*Clients, error) {
+	if limits.KubeRequestsPerSecond < 1 || limits.ControlPlaneRequestsPerSecond < 1 {
+		return nil, fmt.Errorf("request limits must be at least 1 per second, got kube %d and control plane %d", limits.KubeRequestsPerSecond, limits.ControlPlaneRequestsPerSecond)
+	}
 	base, err := controlPlaneURL(env.ControlPlaneURL)
 	if err != nil {
 		return nil, err
@@ -57,10 +62,10 @@ func New(ctx context.Context, env core.Env) (*Clients, error) {
 	if err != nil {
 		return nil, fmt.Errorf("resolving the flowmark identity: %w", err)
 	}
-	httpClient := oauth2.NewClient(ctx, source)
+	httpClient := paced(oauth2.NewClient(ctx, source), limits.ControlPlaneRequestsPerSecond)
 	baseURL := base.String()
 
-	kube, err := newKubeClient(env.KubeconfigPath)
+	kube, err := kubeWithLimit(env.KubeconfigPath, limits.KubeRequestsPerSecond)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +127,11 @@ func credentials(ctx context.Context, env core.Env, base *url.URL) (oauth2.Token
 	return newTokenSource(ctx, loginClient, base.JoinPath(loginPath).String(), env.Username, env.Password), nil
 }
 
-func newKubeClient(path string) (k8sclient.Client, error) {
+func Kube(path string) (k8sclient.WithWatch, error) {
+	return kubeWithLimit(path, DefaultLimits.KubeRequestsPerSecond)
+}
+
+func kubeWithLimit(path string, requestsPerSecond int) (k8sclient.WithWatch, error) {
 	if path == "" {
 		return nil, errors.New("kubeconfig path is empty (set --kubeconfig)")
 	}
@@ -131,10 +140,10 @@ func newKubeClient(path string) (k8sclient.Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("loading kubeconfig %q: %w", path, err)
 	}
-	config.QPS = kubeQPS
-	config.Burst = kubeBurst
+	config.QPS = float32(requestsPerSecond)
+	config.Burst = burstOf(requestsPerSecond)
 
-	kube, err := k8sclient.New(config, k8sclient.Options{})
+	kube, err := k8sclient.NewWithWatch(config, k8sclient.Options{})
 	if err != nil {
 		return nil, fmt.Errorf("creating kube client: %w", err)
 	}

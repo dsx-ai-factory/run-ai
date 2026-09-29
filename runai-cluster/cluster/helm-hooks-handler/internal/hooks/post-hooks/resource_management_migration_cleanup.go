@@ -330,7 +330,7 @@ func (p *PostUpgradeHook) finalizeResourceManagementMigration(ctx context.Contex
 		// the legacy org units: the agent serves the validate-project webhook that
 		// guards the delete, and the project-controller clears the departments' /
 		// projects' finalizers so the deletes actually complete.
-		for _, name := range []string{hooks.AgentOperandName, hooks.ProjectControllerOperandName} {
+		for _, name := range []string{hooks.AgentOperandName, hooks.ProjectControllerDeploymentName} {
 			if err := waitForDeploymentReady(ctx, resources.LocalClusterClient, name, p.params.OperandDownIntervalMillis, logger); err != nil {
 				return fmt.Errorf("failed waiting for %s before cleanup: %w", name, err)
 			}

@@ -76,6 +76,7 @@ rules:
 - apiGroups:
   - kai.resources
   resources:
+  - krmconfigs
   - managednodesconfigs
   verbs:
   - create
@@ -84,6 +85,14 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - kai.resources
+  resources:
+  - krmconfigs/status
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - kai.scheduler
@@ -103,6 +112,13 @@ rules:
   - configs/status
   verbs:
   - get
+- apiGroups:
+  - gpu-fractioning.kai.scheduler
+  resources:
+  - gpufractioningconfigs
+  verbs:
+  - get
+  - list
 - apiGroups:
   - monitoring.coreos.com
   resources:

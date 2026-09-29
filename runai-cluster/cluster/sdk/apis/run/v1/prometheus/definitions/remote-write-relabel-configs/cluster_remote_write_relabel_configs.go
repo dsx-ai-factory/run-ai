@@ -27,6 +27,7 @@ var genericMetrics = []string{
 	"reporter_push_gateway_.*",
 	"kube_node_status_condition",
 	"runai_pod_group_phase_with_info",
+	"runai_pod_group_evicted_pods_total",
 	"runai_queue_info",
 	"runai_queue_quota_cpu_cores",
 	"runai_queue_quota_memory_bytes",
@@ -406,6 +407,7 @@ var runaiNamespaceExportedMetrics = []string{
 	"container_network_transmit_bytes_total",
 	"container_network_receive_bytes_total",
 	"kube_pod_container_status_restarts_total",
+	"kube_pod_container_status_ready",
 }
 
 var allNamespaceExportedMetrics = slices.Concat(

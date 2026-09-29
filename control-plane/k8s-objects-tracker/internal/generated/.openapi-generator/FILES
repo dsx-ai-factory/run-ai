@@ -6,6 +6,8 @@ pkg/api/api_cluster_objects_status.go
 pkg/api/api_cluster_objects_status_service.go
 pkg/api/api_config_maps.go
 pkg/api/api_config_maps_service.go
+pkg/api/api_device_classes.go
+pkg/api/api_device_classes_service.go
 pkg/api/api_health.go
 pkg/api/api_health_service.go
 pkg/api/api_pvcs.go
@@ -34,6 +36,8 @@ pkg/api/model_config_map_list_info.go
 pkg/api/model_config_maps.go
 pkg/api/model_config_maps_list_response.go
 pkg/api/model_create_cluster_wide_pvc_v1_request.go
+pkg/api/model_device_class.go
+pkg/api/model_device_classes.go
 pkg/api/model_error.go
 pkg/api/model_issue.go
 pkg/api/model_origin.go

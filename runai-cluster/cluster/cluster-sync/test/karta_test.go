@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"

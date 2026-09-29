@@ -86,7 +86,7 @@ runai inference submit <workload-name> -p <project-name> -i ghcr.io/knative/hell
       --node-type string                        Enforce node type affinity by setting a node-type label.
       --pod-running-timeout duration            Timeout for pod to reach running state (e.g. 5s, 2m, 3h).
       --port stringArray                        Expose ports from the workload container. Format: service-type=NodePort,container=80,external=8080.
-      --preemptibility preemptibility           Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
+      --preemptibility preemptibility           Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, semi-preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
       --preferred-pod-topology-key string       If possible, schedule all pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --priority string                         Sets the workload’s scheduling priority. Valid values: very-low, low, medium-low, medium, medium-high, high, very-high. 
                                                 Overrides the default priority for the workload type. Changing priority does not update preemptibility automatically.

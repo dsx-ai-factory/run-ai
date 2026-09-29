@@ -15,7 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/options"
 	clierrors "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/errors"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"k8s.io/utils/ptr"
 )
 

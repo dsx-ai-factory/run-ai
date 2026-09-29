@@ -18,7 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	workloadclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	projects "github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/projects/seed_cluster"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/sampler_actions"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/scale"

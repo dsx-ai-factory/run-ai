@@ -40,8 +40,9 @@ Qualify `control plane` when necessary to distinguish the NVIDIA Run:ai control 
 | `inference workload` | Workload type | A workload used to serve a model for inference. | inference job |
 | `native workload` | Product concept | A workload created using a workload type natively supported by NVIDIA Run:ai. | — |
 | `non-preemptible` | Scheduling property | Describes a workload protected from scheduling preemption after it starts. | non-preemptive |
-| `preemptibility` | Scheduling property | The property that determines whether a workload is preemptible or non-preemptible. | — |
+| `preemptibility` | Scheduling property | The property that determines whether a workload is preemptible, semi-preemptible, or non-preemptible. | — |
 | `preemptible` | Scheduling property | Describes a workload that can be interrupted by the Scheduler. | preemptive |
+| `semi-preemptible` | Scheduling property | Describes a workload whose minimum required replicas are protected from interruption, while any additional replicas behave as preemptible replicas. | — |
 | `standard training workload` | Workload type | A non-distributed training workload. | standard training job |
 | `supported workload type` | Product concept | A Kubernetes or ML workload type integrated with NVIDIA Run:ai. | native workload when the distinction matters |
 | `training workload` | Workload type | A workload used to train a model. | training job |
@@ -121,11 +122,14 @@ Do not describe cross-project or cross-department resource reclaim as priority-b
 | `GPU fractions` | Feature or plural concept | NVIDIA Run:ai functionality for allocating portions of GPUs to workloads. | fractional GPUs |
 | `GPU memory limit` | Resource property | The maximum GPU memory available to a workload using dynamic GPU fractions. | GPU memory request |
 | `GPU memory request` | Resource property | The amount of GPU memory requested for a workload. | GPU memory limit |
-| `GPU time-slicing` | Resource-optimization concept | Sharing GPU compute time among workloads. | GPU fractions when compute time-sharing is intended |
+| `GPU compute mode` | Resource-optimization concept | How workloads sharing a GPU divide the GPU compute. Either time-slicing or SM-sharing. | GPU memory fraction |
+| `GPU memory fraction` | Resource-optimization concept | A portion of the GPU memory of a physical GPU allocated to a workload. | fractional GPU |
+| `SM-sharing` | Resource-optimization concept | A GPU compute mode in which workloads run concurrently on separate streaming multiprocessors. | MPS |
+| `time-slicing` | Resource-optimization concept | A GPU compute mode in which workloads take sequential turns on the GPU compute engines. | GPU fractions when compute sharing is intended |
 | `multi-GPU fractions` | Resource-optimization concept | Fractional allocations across multiple GPU devices. | multi GPU fractions |
 | `single-GPU fraction` | Resource-optimization concept | A fractional allocation from one GPU device. | single GPU fraction |
 
-Do not use `GPU fractions`, `dynamic GPU fractions`, and `GPU time-slicing` interchangeably.
+Do not use `GPU memory fractions`, `dynamic GPU memory fractions`, and `GPU compute modes` interchangeably. Memory fractions and compute modes are separate settings on a workload.
 
 ## Policies and Scheduling Rules
 

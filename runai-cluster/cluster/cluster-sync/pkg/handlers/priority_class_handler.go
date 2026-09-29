@@ -17,7 +17,7 @@ import (
 
 	"sync"
 
-	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	swagger "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	runaiBackendClient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	global_consts "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
