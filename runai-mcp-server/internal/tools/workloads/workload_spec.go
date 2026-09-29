@@ -116,7 +116,7 @@ func getWorkloadSpecRun(ctx context.Context, client *runaiclient.Client, in getW
 
 	// Step 2 — fetch the submitted spec from the type-specific endpoint. Soft fail:
 	// spec is dropped on failure, runtime fields above are kept, and the caller is warned.
-	result := fetchKindSpec(ctx, client, in.WorkloadID, wl.Type)
+	result := fetchKindSpec(ctx, client, in.WorkloadID, wl.Type, in.IncludeFullSpec)
 	if result.Retrieved {
 		removeWorkloadSpecSecrets(result.Spec)
 		if in.IncludeFullSpec {
@@ -137,7 +137,7 @@ type kindSpecResult struct {
 }
 
 // fetchKindSpec dispatches to the type-specific endpoint; soft-fails on errors.
-func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, workloadType string) kindSpecResult {
+func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, workloadType string, includeFullSpec bool) kindSpecResult {
 	var (
 		call                string
 		spec                workloads.MappedNullable
@@ -199,11 +199,26 @@ func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, 
 		evt.Msg("get_workload_spec: kind-specific spec lookup failed, omitting spec")
 		return kindSpecResult{Applicable: true}
 	}
-	if rawSpec, ok := specFromSuccessfulResponse(httpResp, workloadType); ok {
-		return kindSpecResult{Spec: rawSpec, Applicable: true, Retrieved: true}
+	// Full mode reads the untouched response so fields newer than the generated
+	// client are preserved without first converting the typed spec.
+	if includeFullSpec {
+		if rawSpec, ok := specFromSuccessfulResponse(httpResp, workloadType); ok {
+			return kindSpecResult{Spec: rawSpec, Applicable: true, Retrieved: true}
+		}
 	}
-	rawSpec := mergeDistributedWorkloadSpec(toRawObject(spec), distributedWorkload)
-	return kindSpecResult{Spec: rawSpec, Applicable: true, Retrieved: len(rawSpec) > 0}
+
+	// The generated client already decoded every field needed by the compact
+	// summary. Only re-read the response as a fallback when that spec is empty.
+	typedSpec := mergeDistributedWorkloadSpec(toRawObject(spec), distributedWorkload)
+	if len(typedSpec) > 0 {
+		return kindSpecResult{Spec: typedSpec, Applicable: true, Retrieved: true}
+	}
+	if !includeFullSpec {
+		if rawSpec, ok := specFromSuccessfulResponse(httpResp, workloadType); ok {
+			return kindSpecResult{Spec: rawSpec, Applicable: true, Retrieved: true}
+		}
+	}
+	return kindSpecResult{Applicable: true}
 }
 
 var workloadSpecSummaryFields = map[string]struct{}{
@@ -305,8 +320,8 @@ func removeWorkloadSpecSecrets(value any) {
 	}
 }
 
-// specFromSuccessfulResponse reads the untouched response JSON so full mode
-// preserves spec fields added after the generated client was built.
+// specFromSuccessfulResponse reads the untouched response JSON for full mode
+// and as a fallback when the generated client returns an empty typed spec.
 func specFromSuccessfulResponse(httpResp *http.Response, workloadType string) (map[string]any, bool) {
 	if httpResp == nil || httpResp.Body == nil || httpResp.StatusCode < http.StatusOK || httpResp.StatusCode >= http.StatusMultipleChoices {
 		return nil, false

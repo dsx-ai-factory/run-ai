@@ -177,11 +177,11 @@ func TestGetWorkloadSpecRun_RecoversSpecFromSuccessfulGeneratedClientDecodeFailu
 
 	var buf strings.Builder
 	ctx := zerolog.New(&buf).WithContext(context.Background())
-	out, err := getWorkloadSpecRun(ctx, client, getWorkloadSpecInput{WorkloadID: validUUID, IncludeFullSpec: true})
+	out, err := getWorkloadSpecRun(ctx, client, getWorkloadSpecInput{WorkloadID: validUUID})
 	require.NoError(t, err)
 	require.NotNil(t, out.Spec, "a decode error in response metadata must not hide a valid spec")
 	assert.Equal(t, "ubuntu", out.Spec["image"])
-	assert.Equal(t, "sleep infinity", out.Spec["command"])
+	assert.NotContains(t, out.Spec, "command", "raw recovery still uses the compact summary by default")
 	compute, ok := out.Spec["compute"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, json.Number("1"), compute["gpuDevicesRequest"])
@@ -224,8 +224,10 @@ func TestGetWorkloadSpecRun_DistributedDispatch(t *testing.T) {
 		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
 			"name": "d1", "requestedName": "d1", "workloadId": validUUID, "projectId": "11", "clusterId": "c-1",
 			"createdBy": "u", "createdAt": "2026-05-17T15:00:00Z", "desiredPhase": "Running",
-			"distributedFramework": "PyTorch",
-			"spec":                 map[string]any{"image": "pytorch/pytorch:2.6.0"},
+			"distributedFramework":   "PyTorch",
+			"spec":                   map[string]any{"image": "pytorch/pytorch:2.6.0"},
+			"masterSpecSameAsWorker": false,
+			"masterSpec":             map[string]any{"image": "pytorch/master:2.6.0"},
 		})
 	})
 
@@ -234,6 +236,10 @@ func TestGetWorkloadSpecRun_DistributedDispatch(t *testing.T) {
 	assert.Equal(t, "Distributed", out.Type)
 	require.NotNil(t, out.Spec)
 	assert.Equal(t, "pytorch/pytorch:2.6.0", out.Spec["image"])
+	assert.Equal(t, false, out.Spec["masterSpecSameAsWorker"])
+	masterSpec, ok := out.Spec["masterSpec"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "pytorch/master:2.6.0", masterSpec["image"])
 }
 
 func TestGetWorkloadSpecRun_InferenceDispatch(t *testing.T) {
