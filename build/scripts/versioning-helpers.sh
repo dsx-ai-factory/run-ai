@@ -6,9 +6,9 @@
 # Shell helpers sourced by build/makefile/versioning.mk recipes and by
 # check-breaking-changes.sh. Required env: TAG_FORMAT. Optional: MAX_PATCH
 # (defaults to 100), and for unattended use (CI):
-#   PATCH_ONLY=1  never prompt, and tag only a patch. A breaking change stops with
-#                 exit 3 instead of being tagged, so a person decides what it is.
-#   DRY_RUN=1     compute and print the tag, create nothing.
+#   AUTO_TAG=1  don't prompt: tag what apidiff decided -- patch for a compatible
+#               change, minor for a breaking one.
+#   DRY_RUN=1   compute and print the tag, create nothing.
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -23,12 +23,11 @@ versioning_max_patch() {
 }
 
 # apidiff only catches signature-level breaks, not behavior changes — confirm with a human before tagging.
-# PATCH_ONLY=1 is the unattended mode: the patch-only rule below stands in for the human.
 versioning_confirm() {
     local prompt="$1" reply
-    if [ "${PATCH_ONLY:-}" = "1" ]; then
-        return 0
-    fi
+    case "${AUTO_TAG:-}" in
+        1|true) return 0 ;;
+    esac
     read -r -p "${prompt} [y/N] " reply
     case "$reply" in
         y|Y) return 0 ;;
@@ -198,11 +197,6 @@ versioning_publish_prod_bump() {
         minor) message="minor — breaking changes" ;;
     esac
     new_tag="${TAG_FORMAT}/v${target_version}"
-    if [ "${PATCH_ONLY:-}" = "1" ] && [ "$bump_kind" != "patch" ]; then
-        printf "%bBreaking API change in %s: it would be %s. PATCH_ONLY is set, so nothing is tagged — a person decides.%b\n" \
-            "$RED" "$TAG_FORMAT" "$new_tag" "$NC" >&2
-        return 3
-    fi
     versioning_create_tag "$new_tag" "Prod release ${new_tag} (${message})"
 }
 

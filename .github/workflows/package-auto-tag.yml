@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Tags the shared packages and service clients, with the same make targets developers
-# use -- they work out the next version themselves. PATCH_ONLY: an API-compatible change
-# is tagged as a patch; a breaking one fails the job untagged, for a person to decide.
+# use -- they work out the next version themselves. AUTO_TAG: no prompt; apidiff decides
+# -- patch for an API-compatible change, minor for a breaking one. Renovate takes patches
+# only, so a minor is published but consumers move to it deliberately.
 #
 # When: a person's change, or a Renovate security fix, is released on push. Routine
 # Renovate updates merge as usual but are released once a week, so a package does not
@@ -113,7 +114,7 @@ jobs:
         env:
           MODULE: ${{ matrix.module }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
-          PATCH_ONLY: "1"
+          AUTO_TAG: "1"
           GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
         run: |
           case "$MODULE" in
