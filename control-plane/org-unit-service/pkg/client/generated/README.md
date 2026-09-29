@@ -119,6 +119,7 @@ Class | Method | HTTP request | Description
 *OrgUnitAPI* | [**OrgsNodePoolSummary**](docs/OrgUnitAPI.md#orgsnodepoolsummary) | **Get** /internal/org-unit/node-pools/{nodepoolId}/summary | Get org units summary per nodepool
 *OrgUnitAPI* | [**UpdateOrgUnitSettings**](docs/OrgUnitAPI.md#updateorgunitsettings) | **Post** /internal/org-unit/settings | 
 *ProjectsAPI* | [**BatchPatchProjectNodePoolResources**](docs/ProjectsAPI.md#batchpatchprojectnodepoolresources) | **Post** /api/v1/org-unit/projects/node-pool-resources/batch-patch | Patch multiple projects node pool resources in batch.
+*ProjectsAPI* | [**CountInternalProjects**](docs/ProjectsAPI.md#countinternalprojects) | **Get** /internal/org-unit/projects/count | Count internal projects
 *ProjectsAPI* | [**CountProjectNodePoolResources**](docs/ProjectsAPI.md#countprojectnodepoolresources) | **Get** /api/v1/org-unit/projects/node-pool-resources/count | Count projects node pool resources
 *ProjectsAPI* | [**CountProjects**](docs/ProjectsAPI.md#countprojects) | **Get** /api/v1/org-unit/projects/count | Count projects
 *ProjectsAPI* | [**CreateProject**](docs/ProjectsAPI.md#createproject) | **Post** /api/v1/org-unit/projects | Create project
