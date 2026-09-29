@@ -855,7 +855,7 @@ var _ = Describe("ApiClustersService", Ordered, func() {
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=` + fullUrl + ` \
---set cluster.bootstrapToken=Any_Secret \
+--set controlPlane.bootstrapToken=Any_Secret \
 --set cluster.uid=` + clusters[0].Uuid + ` \
 --set cluster.url=https://test-url.runai --version="2.16.3" --create-namespace`
 				Expect(ok).To(BeTrue())
@@ -876,7 +876,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=` + appConfig.Host + ` \
---set cluster.bootstrapToken=Any_Secret \
+--set controlPlane.bootstrapToken=Any_Secret \
 --set cluster.uid=` + clusters[0].Uuid + ` \
 --set cluster.url=` + appConfig.Host + ` --version="2.17.2" --create-namespace`
 				installationInfo, ok := resp.Body.(api.ClusterInstallationInfoResponse)
@@ -897,7 +897,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=` + fullUrl + ` \
---set cluster.bootstrapToken=Any_Secret \
+--set controlPlane.bootstrapToken=Any_Secret \
 --set cluster.uid=` + clusters[0].Uuid + ` \
 --set cluster.url=` + fullUrl + ` --version=">0.0.0-0" --create-namespace`
 				installationInfo, ok := resp.Body.(api.ClusterInstallationInfoResponse)
@@ -941,7 +941,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=tenant.domain \
---set cluster.bootstrapToken=Tenant_Secret \
+--set controlPlane.bootstrapToken=Tenant_Secret \
 --set cluster.uid=` + clusters[0].Uuid + ` \
 --set cluster.url=https://test-url.runai --version="2.16.3" --create-namespace`
 				Expect(ok).To(BeTrue())
