@@ -126,7 +126,7 @@ services:
       /bin/sh -c "
         /entrypoint.sh rustfs &
         echo 'Waiting for rustfs to be ready...';
-        until curl -fsS http://127.0.0.1:9000/health >/dev/null 2>&1; do sleep 1; done;
+        curl -fsS --retry 180 --retry-delay 1 --retry-connrefused http://127.0.0.1:9000/health >/dev/null;
         curl -sS -X PUT --aws-sigv4 'aws:amz:us-east-1:s3' --user 'rustfsadmin:rustfsadmin' http://127.0.0.1:9000/metrics-service;
         wait
       "
