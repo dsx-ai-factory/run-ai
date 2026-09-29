@@ -11,6 +11,7 @@ package oauth2templates
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
 	"reflect"
 	"slices"
@@ -29,7 +30,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const PluginName = "oauth2-templates"
+// The framework sorts plugins by name. Provision templates before networking
+// creates standalone proxy Deployments.
+const PluginName = "auth-proxy-templates"
 
 type Plugin struct {
 	configMapName string
@@ -152,16 +155,9 @@ func proxyInventory(ctx context.Context, karta *kartav1alpha1.Karta, resource *u
 }
 
 func unchangedLegacyProxies(desired, existing map[proxyIdentity]proxySpec) bool {
-	if len(desired) != len(existing) {
-		return false
-	}
-	for id, proxy := range desired {
-		live, ok := existing[id]
-		if !ok || live.templates || proxy.image != live.image {
-			return false
-		}
-	}
-	return true
+	return maps.EqualFunc(desired, existing, func(proxy, live proxySpec) bool {
+		return proxy.image == live.image && !live.templates
+	})
 }
 
 func completePodSpec(instance kartaresource.ExtractedInstance) (*corev1.PodSpec, error) {
@@ -203,17 +199,12 @@ func mountTemplates(pod *corev1.PodSpec, configMapName string) error {
 			Items:                []corev1.KeyToPath{{Key: oauth2proxy.TemplateKey, Path: oauth2proxy.TemplateKey}},
 		}},
 	}
-	hasVolume := false
-	for _, existing := range pod.Volumes {
-		if existing.Name != volume.Name {
-			continue
-		}
-		if !reflect.DeepEqual(existing, volume) {
-			return fmt.Errorf("volume %q conflicts with OAuth2 templates", volume.Name)
-		}
-		hasVolume = true
+	if slices.ContainsFunc(pod.Volumes, func(existing corev1.Volume) bool {
+		return existing.Name == volume.Name && !reflect.DeepEqual(existing, volume)
+	}) {
+		return fmt.Errorf("volume %q conflicts with OAuth2 templates", volume.Name)
 	}
-	if !hasVolume {
+	if !slices.ContainsFunc(pod.Volumes, func(existing corev1.Volume) bool { return existing.Name == volume.Name }) {
 		pod.Volumes = append(pod.Volumes, volume)
 	}
 
@@ -224,17 +215,12 @@ func mountTemplates(pod *corev1.PodSpec, configMapName string) error {
 			if !isRunaiProxy(*container) {
 				continue
 			}
-			hasMount := false
-			for _, existing := range container.VolumeMounts {
-				if existing.Name != mount.Name && existing.MountPath != mount.MountPath {
-					continue
-				}
-				if !reflect.DeepEqual(existing, mount) {
-					return fmt.Errorf("container %q has a conflicting OAuth2 templates mount", container.Name)
-				}
-				hasMount = true
+			if slices.ContainsFunc(container.VolumeMounts, func(existing corev1.VolumeMount) bool {
+				return (existing.Name == mount.Name || existing.MountPath == mount.MountPath) && existing != mount
+			}) {
+				return fmt.Errorf("container %q has a conflicting OAuth2 templates mount", container.Name)
 			}
-			if !hasMount {
+			if !slices.Contains(container.VolumeMounts, mount) {
 				container.VolumeMounts = append(container.VolumeMounts, mount)
 			}
 		}

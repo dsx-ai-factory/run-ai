@@ -18,7 +18,6 @@ import (
 
 	anyworkloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/mnnvlconv"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/oauth2templates"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/ownership"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/restart"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/networking"
@@ -60,7 +59,6 @@ func run() error {
 			mnnvl.WithWorkloadLabelStampDisabled(),
 		)),
 		app.WithManagerSetup(
-			oauth2templates.NewSetup(),
 			networkingIntegration.NewSetup(),
 			ownership.NewSetup(),
 		),
