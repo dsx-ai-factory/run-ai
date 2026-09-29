@@ -6,7 +6,7 @@
 set -x
 
 if [ -f .env ]; then
-  export "$(cat .env | xargs)"
+  export $(cat .env | xargs)
 fi
 
 DOCKER_REPO="${DOCKER_REPO:?set DOCKER_REPO to your container registry, e.g. myreg.example.com/myuser}"
