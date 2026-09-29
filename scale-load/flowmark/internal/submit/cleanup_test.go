@@ -17,9 +17,12 @@ import (
 
 	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
 )
@@ -123,5 +126,31 @@ func TestCleanupOfAMissingProjectIsANoOp(t *testing.T) {
 	}
 	if orgUnits.deletes.Load() != 0 {
 		t.Fatal("no delete may be issued when the project does not exist")
+	}
+}
+
+func TestCleanupStopsBeforeTheNamespaceWhenTheClusterHasNoProjectKind(t *testing.T) {
+	namespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "runai-flowmark-burst-1", Labels: map[string]string{projectNamespaceLabel: "flowmark-burst-1"}}}
+	orgUnits := &fakeOrgUnits{projects: []orgunitclient.Project{managedTestProject("flowmark-burst-1", orgunitclient.PROJECTPHASE_READY, namespace.Name)}}
+	clients := testClients(t, orgUnits, namespace)
+	clients.Kube = fake.NewClientBuilder().WithObjects(namespace).WithInterceptorFuncs(interceptor.Funcs{
+		Get: func(ctx context.Context, c k8sclient.WithWatch, key k8sclient.ObjectKey, obj k8sclient.Object, opts ...k8sclient.GetOption) error {
+			if obj.GetObjectKind().GroupVersionKind() == clusterProjectKind {
+				return &meta.NoKindMatchError{GroupKind: schema.GroupKind{Group: clusterProjectKind.Group, Kind: clusterProjectKind.Kind}}
+			}
+			return c.Get(ctx, key, obj, opts...)
+		},
+	}).Build()
+
+	err := CleanupProject(context.Background(), clients, "c1", "flowmark-burst-1", time.Second)
+	if err == nil || !strings.Contains(err.Error(), "kubeconfig") {
+		t.Fatalf("a cluster without the Project kind must stop cleanup with a pointer to the kubeconfig, got %v", err)
+	}
+	if orgUnits.deletes.Load() != 1 {
+		t.Fatalf("the control plane project is ours and must still be deleted, got %d deletes", orgUnits.deletes.Load())
+	}
+	var left corev1.Namespace
+	if err := clients.Kube.Get(context.Background(), k8sclient.ObjectKey{Name: namespace.Name}, &left); err != nil {
+		t.Fatal("the namespace must be left alone when the cluster cannot be verified")
 	}
 }

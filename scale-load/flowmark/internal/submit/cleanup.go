@@ -63,10 +63,16 @@ func waitClusterProjectGone(ctx context.Context, kube k8sclient.Client, name str
 	var last error
 	err := wait.PollUntilContextTimeout(ctx, pollInterval, timeout, true, func(ctx context.Context) (bool, error) {
 		last = kube.Get(ctx, k8sclient.ObjectKey{Name: name}, clusterProject(name))
-		return apierrors.IsNotFound(last) || meta.IsNoMatchError(last), nil
+		if meta.IsNoMatchError(last) {
+			return false, fmt.Errorf("cluster has no %s kind; is --kubeconfig pointing at the cluster of project %q? its namespace was left alone: %w", clusterProjectKind.Kind, name, last)
+		}
+		return apierrors.IsNotFound(last), nil
 	})
 	if err == nil {
 		return nil
+	}
+	if meta.IsNoMatchError(err) {
+		return err
 	}
 	if last != nil {
 		return fmt.Errorf("cluster project %q still present after %s (last: %v): %w", name, timeout, last, err)
@@ -104,7 +110,7 @@ func removeOrphanNamespace(ctx context.Context, kube k8sclient.Client, name stri
 	switch {
 	case err == nil:
 		return fmt.Errorf("project %q is gone from the control plane but still present on the cluster; not touching it", name)
-	case !apierrors.IsNotFound(err) && !meta.IsNoMatchError(err):
+	case !apierrors.IsNotFound(err):
 		return fmt.Errorf("checking project %q on the cluster before removing its namespace: %w", name, err)
 	}
 	for i := range namespaces.Items {
