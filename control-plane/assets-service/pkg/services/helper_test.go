@@ -88,13 +88,6 @@ var _ = Describe("services helper tests", func() {
 	Context("ValidateClusterIdBelongsToTenant", func() {
 		var randoms *testutils.RandomValues
 
-		// The function itself is now trivial: caller resolves clusterInfo
-		// first (helper.go:82–90) and only invokes this when the fetch
-		// succeeded — so all we cover directly is the tenant-id compare.
-		// "cluster does not exist" and nil/empty clusterId behaviors moved
-		// to the caller and are exercised through ValidateAssetCreateRequestMeta
-		// (see the scope=cluster cross-tenant case below).
-
 		BeforeEach(func() {
 			randoms = testutils.NewRandomValues()
 		})

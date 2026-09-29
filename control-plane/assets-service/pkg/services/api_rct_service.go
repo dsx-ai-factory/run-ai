@@ -39,11 +39,17 @@ import (
 //go:embed schemas/rct_object_spec.schema.json
 var rctObjectSpecSchemaRaw []byte
 
-// rctObjectSpecKey is the fully-qualified schema name (matches the K8s
-// OpenAPI naming convention) of the ResourceClaimSpec type inside the
-// embedded document. The compiler resolves refs like
-// "#/components/schemas/io.k8s.api.resource.v1.DeviceClaim" natively.
-const rctObjectSpecKey = "io.k8s.api.resource.v1.ResourceClaimSpec"
+const (
+	rctObjectTypeName = "resource.v1.ResourceClaimSpec"
+
+	// rctObjectSpecKey is the fully-qualified schema name (matches the K8s
+	// OpenAPI naming convention) of the ResourceClaimSpec type inside the
+	// embedded document. The compiler resolves refs like
+	// "#/components/schemas/io.k8s.api.resource.v1.DeviceClaim" natively.
+	rctObjectSpecKey = "io.k8s.api." + rctObjectTypeName
+
+	resourceURL = "mem://rct_object_spec.schema.json"
+)
 
 // rctObjectSpecSchema is compiled once from the embedded schema at init and
 // reused by every CreateRct/UpdateRctById call. Nil until initRctObjectSpecValidator
@@ -258,7 +264,7 @@ func requireRctKind(assetMeta *dbmodel.AssetMeta, id string) *api.Error {
 func validateRctObjectSpec(objectSpec map[string]any) *api.Error {
 	return validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 		objectSpec, rctObjectSpecSchema,
-		"spec.objectSpec", "resource.k8s.io/v1 ResourceClaimSpec",
+		"spec.objectSpec", rctObjectTypeName,
 	)
 }
 
@@ -276,7 +282,6 @@ func initRctObjectSpecValidator() {
 	}
 
 	compiler := jsschema.NewCompiler()
-	const resourceURL = "mem://rct_object_spec.schema.json"
 	if err := compiler.AddResource(resourceURL, doc); err != nil {
 		logging.Errorf("rct: failed to add object-spec schema resource: %v", err)
 		return
