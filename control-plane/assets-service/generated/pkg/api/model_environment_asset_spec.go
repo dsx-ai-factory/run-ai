@@ -58,7 +58,7 @@ type EnvironmentAssetSpec struct {
 	SupplementalGroups *string `json:"supplementalGroups,omitempty" gorm:"" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+	// Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at [/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//AllowPrivilegeEscalation *bool `json:"allowPrivilegeEscalation,omitempty"`
 	AllowPrivilegeEscalation *bool `json:"allowPrivilegeEscalation,omitempty" gorm:""`
