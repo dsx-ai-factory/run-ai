@@ -206,6 +206,8 @@ kai-resource-management:
       resourceReservation:
         namespace: runai-reservation
         serviceAccount: runai-reservation
+      nvFractions:
+        set: true
     operator:
       resources:
         limits:

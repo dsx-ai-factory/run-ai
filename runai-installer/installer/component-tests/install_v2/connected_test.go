@@ -191,7 +191,7 @@ func TestConnectedInstall_CompatFallbackWarns(t *testing.T) {
 		versions[m["name"].(string)] = m["version"].(string)
 	}
 	assert.Equal(t, "76.2.0", versions["prometheus"], "fallback reports the latest matrix versions")
-	assert.Equal(t, "v26.7.0", versions["gpu-operator"])
+	assert.Equal(t, "v26.7.1", versions["gpu-operator"])
 
 	// The warning does not fail the install: prereqs still install with the
 	// fallback versions and the run succeeds.

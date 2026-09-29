@@ -7,17 +7,16 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/measure"
+	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/report"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/runner"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/burst"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/selfcheck"
@@ -34,9 +33,13 @@ func main() {
 
 func run() error {
 	scenariosDir := flag.String("scenarios", "./scenarios", "directory with scenario yaml files")
-	outputDir := flag.String("output", "./out", "directory for results.json")
+	outputDir := flag.String("output", "./out", "directory that receives results-<timestamp>.json and manifest.json")
 	kubeconfig := flag.String("kubeconfig", "", "path to kubeconfig of the cluster under test")
 	cpURL := flag.String("cp-url", "", "control plane URL (credentials via FLOWMARK_CP_* env vars)")
+	provider := flag.String("provider", "local", "who provided the environment, e.g. ci or kind")
+	clusterType := flag.String("cluster-type", "local", "cluster class recorded with the results so runs are compared like with like")
+	cpVersion := flag.String("cp-version", "", "control plane version to record, if known")
+	clusterVersion := flag.String("cluster-version", "", "cluster version to record, if known")
 	flag.Parse()
 
 	env := core.Env{
@@ -49,25 +52,38 @@ func run() error {
 	registry := buildRegistry(selfcheck.Suite{}, burst.Suite{})
 	ctx := context.Background()
 
-	results := core.Results{Schema: core.SchemaVersion, Metadata: core.Metadata{StartedAt: time.Now().UTC()}}
+	info := report.RunInfo{
+		StartedAt:           time.Now(),
+		Provider:            *provider,
+		ClusterType:         *clusterType,
+		ControlPlaneVersion: *cpVersion,
+		ClusterVersion:      *clusterVersion,
+	}
 	if env.KubeconfigPath != "" {
 		offset, err := clockOffset(ctx, env.KubeconfigPath)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "flowmark:", err)
-			results.Metadata.ClockOffsetError = err.Error()
+			info.ClockOffsetError = err.Error()
 		} else {
-			results.Metadata.ClockOffsetMs = &offset
+			info.ClockOffsetMs = &offset
 		}
 	}
 
 	sections, runErr := runner.Run(ctx, env, *scenariosDir, registry)
-	results.Metadata.FinishedAt = time.Now().UTC()
-	results.Scenarios = sections
-	if len(sections) > 0 {
-		if err := writeResults(*outputDir, results); err != nil {
-			return errors.Join(runErr, err)
-		}
+	info.FinishedAt = time.Now()
+	if len(sections) == 0 {
+		return runErr
 	}
+
+	store, err := report.NewLocal(*outputDir)
+	if err != nil {
+		return errors.Join(runErr, fmt.Errorf("report: %w", err))
+	}
+	receipt, err := report.Publish(ctx, store, report.Build(sections, info))
+	if err != nil {
+		return errors.Join(runErr, fmt.Errorf("report: %w", err))
+	}
+	fmt.Fprintf(os.Stderr, "flowmark: wrote %s to %s, %d runs in %s\n", receipt.File, store, receipt.Runs, report.ManifestName)
 	return runErr
 }
 
@@ -89,19 +105,4 @@ func buildRegistry(suites ...core.Scenario) map[string]core.Scenario {
 		registry[s.Name()] = s
 	}
 	return registry
-}
-
-func writeResults(dir string, results core.Results) error {
-	if err := os.MkdirAll(dir, 0o750); err != nil {
-		return fmt.Errorf("creating output dir %q: %w", dir, err)
-	}
-	data, err := json.MarshalIndent(results, "", "  ")
-	if err != nil {
-		return err
-	}
-	path := filepath.Join(dir, "results.json")
-	if err := os.WriteFile(path, data, 0o600); err != nil {
-		return fmt.Errorf("writing %q: %w", path, err)
-	}
-	return nil
 }

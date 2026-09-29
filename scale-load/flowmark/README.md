@@ -18,18 +18,21 @@ The binary lands in `bin/flowmark`.
 ./bin/flowmark --scenarios ./scenarios --output ./out
 ```
 
-Runs every `*.yaml` scenario in the scenarios directory and writes
-`out/results.json`. Exit code 0 means every scenario passed;
-1 means any error: a failed scenario (the results file is still written),
-invalid scenarios or scenario files, or a failure writing the results.
+Runs every `*.yaml` scenario in the scenarios directory, then writes the run
+into `--output`: one `results-<timestamp>.json` per run plus `manifest.json`,
+the ordered list of all runs in that directory. After writing, FlowMark reads
+both files back and compares them; a difference or a missing manifest entry
+is an error, so a run whose numbers did not land fails like any other failed
+run. Exit code 0 means every scenario passed and the results were written and
+verified; 1 means any error: a failed scenario (the results are still
+written), invalid scenarios or scenario files, or a failed write or
+verification, in which case the message names the failed step, e.g.
+`report: write results results-20260928T010000Z.json: ...`.
 
-The file has three top-level keys: `schema` (currently `v1`), `metadata`
-(`started_at`, `finished_at`, and `clock_offset_ms` when a kubeconfig was
-given), and `scenarios`, one section per scenario file. `clock_offset_ms`
-is how far the cluster clock is ahead of the machine running FlowMark,
-measured once at startup with a probe ConfigMap in the `default`
-namespace. It is reported for context only and never enters a latency. If
-the probe fails, the run continues and `clock_offset_error` holds the reason.
+Uploading to S3 is not the binary's job. As in the KAI-Scheduler scale tests,
+the nightly workflow publishes the output directory with the AWS CLI after
+the run and maintains the bucket's `manifest.json` the same way; that workflow
+arrives with the nightly task. The binary stays fully offline.
 
 `./bin/flowmark --help` lists all flags.
 
@@ -40,10 +43,38 @@ a pre-issued `FLOWMARK_CP_TOKEN`. Credentials are never accepted as
 flags and never appear in output. The selfcheck scenario needs none of
 these.
 
+### The results file
+
+```
+schema: "v1"
+regression_detected: false     # always false until the regression task lands
+metadata:
+  date, finished_at            # UTC; date is the run start and names the file
+  provider, cluster_type       # --provider / --cluster-type, default "local"; CI passes the real ones
+  control_plane_version, cluster_version   # --cp-version / --cluster-version, omitted when unknown
+  clock_offset_ms              # cluster clock minus ours, measured once at startup when a kubeconfig is given
+sections:                      # one per scenario file: category, metrics, failed, error
+```
+
+These are the fields the dashboard draws from: `category` picks the Scale or
+Load tab, each section's `p90_ms` and `slo_p90_ms` give the line and its SLO,
+`metadata.date` is the x axis, `metadata.control_plane_version` labels every
+dot and marks version changes, and `regression_detected` colours a run red.
+`clock_offset_ms` is context only and never enters a latency; if the probe
+fails the run continues and `clock_offset_error` holds the reason. The file
+name carries the start time to the second, so two runs on the same day never
+overwrite each other. The manifest is `{"runs": [...]}`, appended in run
+order, and re-publishing the same run is a no-op. One writer per destination
+is assumed, locally and in the bucket: two nightly writers updating the
+manifest at the same moment could lose an entry.
+
 ## Scenarios
 
 A scenario is a yaml file: a `suite` key naming a registered suite, plus
-knobs the suite understands:
+knobs the suite understands. `workload-burst` rejects any knob it does not
+know, so a misspelled key fails the scenario before anything is created
+instead of silently falling back to a default; `selfcheck` accepts anything
+because echoing its knobs is its job:
 
 ```yaml
 suite: selfcheck

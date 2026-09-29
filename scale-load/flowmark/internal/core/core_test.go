@@ -160,3 +160,16 @@ func TestRunIDIsShortUniqueHex(t *testing.T) {
 		t.Fatalf("two run ids must differ, both were %q", first)
 	}
 }
+
+func TestConfigUnknown(t *testing.T) {
+	cfg := Config{Knobs: map[string]any{"workloads": []any{1}, "workloadTipe": "Training", "slos": nil}}
+
+	got := cfg.Unknown("workloads", "workloadType", "slo")
+
+	if !slices.Equal(got, []string{"slos", "workloadTipe"}) {
+		t.Fatalf("unknown knobs must be reported sorted, got %v", got)
+	}
+	if got := (Config{}).Unknown("workloads"); len(got) != 0 {
+		t.Fatalf("no knobs means nothing unknown, got %v", got)
+	}
+}

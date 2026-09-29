@@ -54,6 +54,7 @@ func TestParseSettings(t *testing.T) {
 		{name: "empty image", knobs: map[string]any{"image": ""}, wantErr: "image must not be empty"},
 		{name: "training with pods", knobs: map[string]any{"workloadType": "Training", "podsPerWorkload": 2}, wantErr: "podsPerWorkload must be 1 for Training"},
 		{name: "unsupported type", knobs: map[string]any{"workloadType": "StatefulSet"}, wantErr: "is not supported, use Deployment or Training"},
+		{name: "misspelled knob", knobs: map[string]any{"workloadTipe": "Training"}, wantErr: `unknown knob "workloadTipe"; known knobs: workloads, workloadType`},
 		{name: "empty rounds", knobs: map[string]any{"workloads": []any{}}, wantErr: "at least one round"},
 		{name: "zero round", knobs: map[string]any{"workloads": []any{100, 0}}, wantErr: "at least 1"},
 		{name: "repeated size", knobs: map[string]any{"workloads": []any{100, 100}}, wantErr: "must not repeat a round size, got 100 twice"},
