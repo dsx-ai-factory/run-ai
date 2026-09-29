@@ -109,15 +109,51 @@ features, or performance trade-offs the administrator should know before
 enabling. Common examples: dependency on another feature being enabled first,
 memory overhead, incompatibility with certain workload types.
 
+### Using CLI
+
+Include one line linking to the specific command page under
+`docs/reference/cli/runai/`, if a CLI command exists for this feature. Pages
+are named `runai_<noun>_<verb>.md` (e.g. `runai_department_list.md`) — find
+the actual file for the resource rather than guessing the filename, and link
+to that file, not to the bare directory. Only include if confirmed in the
+code.
+
+```markdown
+## Using CLI
+
+To view the available actions on [feature name], see the [feature name] [CLI v2 reference](../../reference/cli/runai/runai_<noun>.md).
+```
+
 ### Using API
 
-Use Fern's `api:` link syntax, not a hardcoded domain — it resolves to the
-correct endpoint page at build time regardless of URL pattern or version:
+Use Fern's `api:` link syntax, not a hardcoded domain. It resolves to the
+correct endpoint page at build time regardless of URL pattern or version.
+Point at the specific `METHOD path` that matches the action described (for
+example, the `POST` endpoint if the text is about creating a resource, the
+`GET` list endpoint if it is about viewing available actions) — never link to
+just the API root or a bare tag name:
 
 ```markdown
 ## Using API
 
 To view the available actions, go to the [Feature Name](api:[api-name]:[METHOD path]) API reference.
+```
+
+### Using MCP
+
+Include one line naming the relevant MCP tool from
+`docs/agents/tools-reference.md`, if the feature has a real, confirmed tool
+there — check the domain tables (Identity, Credentials, Workloads, Cluster
+and Infrastructure, Resources and Organization) rather than guessing a tool
+name. MCP tools are not individually addressable pages, so link to the
+domain section anchor (e.g. `../../agents/tools-reference.md#workloads`), not
+a per-tool anchor, and name the tool itself in backticks. Only include if
+confirmed in `tools-reference.md`.
+
+```markdown
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes the [`tool_name`](../../agents/tools-reference.md#domain-section) tool to [do X] via natural language. See [AI Agents](../../agents/overview.md) for setup.
 ```
 
 ## Nav Registration

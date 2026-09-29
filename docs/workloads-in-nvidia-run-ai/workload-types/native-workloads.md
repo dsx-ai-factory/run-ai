@@ -37,13 +37,13 @@ As models mature and the need for more robust data processing and model training
 
 See [Standard training](../using-training/train-models.md) and [Distributed training](../using-training/distributed-training-models.md) to learn more about how to submit a training workload via the NVIDIA Run:ai UI. For quick starts, see [Run your first standard training](../using-training/quick-starts/standard-training-quickstart.md) and [Run your first distributed training](../using-training/quick-starts/distributed-training-quickstart.md).
 
-<Info>
+<Note>
 
 **Note**
 
 Multi-GPU training and distributed training are two distinct concepts. Multi-GPU training uses multiple GPUs within a single node, whereas distributed training spans multiple nodes and typically requires coordination between them.
 
-</Info>
+</Note>
 
 ## Inference: Deploying and Serving Models
 

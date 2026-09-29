@@ -13,6 +13,8 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+VERSIONING_SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
 versioning_max_patch() {
     echo "${MAX_PATCH:-100}"
 }
@@ -43,7 +45,7 @@ versioning_fetch_tags() {
 }
 
 versioning_latest_prod_tag() {
-    git tag -l "${TAG_FORMAT}/v*" | sort -V | grep -v -- '-dev' | tail -1
+    git tag -l "${TAG_FORMAT}/v*" | sed '/-dev/d' | sort -V | tail -1
 }
 
 versioning_latest_dev_tag() {
@@ -186,4 +188,30 @@ versioning_publish_prod_bump() {
     esac
     new_tag="${TAG_FORMAT}/v${target_version}"
     versioning_create_tag "$new_tag" "Prod release ${new_tag} (${message})"
+}
+
+versioning_publish_dev_bump() {
+    local bump_kind="$1" latest_prod_tag="$2"
+    local latest_dev_tag target_version new_tag
+    latest_dev_tag=$(versioning_latest_dev_tag)
+    echo "Latest dev tag: ${latest_dev_tag}"
+    target_version=$(versioning_next_dev_target_version "$bump_kind" "$latest_prod_tag" "$latest_dev_tag")
+    new_tag=$(versioning_next_dev_tag "$target_version")
+    versioning_create_tag "$new_tag" "Dev release ${new_tag}"
+}
+
+versioning_bump() {
+    local channel="$1" pkg_dir="$2"
+    local latest_prod_tag result bump_kind
+    versioning_refresh_tags
+    latest_prod_tag=$(versioning_latest_prod_tag)
+    echo "Latest prod tag: ${latest_prod_tag}"
+    result=0
+    "${VERSIONING_SCRIPTS_DIR}/check-breaking-changes.sh" "$TAG_FORMAT" "$pkg_dir" "$latest_prod_tag" || result=$?
+    bump_kind=$(versioning_bump_kind_from_result "$result")
+    case "$channel" in
+        prod) versioning_publish_prod_bump "$bump_kind" "$latest_prod_tag" ;;
+        dev) versioning_publish_dev_bump "$bump_kind" "$latest_prod_tag" ;;
+        *) echo "Error: unknown channel '${channel}' (expected prod or dev)" >&2; return 2 ;;
+    esac
 }

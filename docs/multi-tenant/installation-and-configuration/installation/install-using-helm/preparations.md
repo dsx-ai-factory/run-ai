@@ -19,7 +19,7 @@ Your [deployment model](../../system-requirements/deployment-model.md) is always
 
 ## General Setup
 
-This section covers what you set up once, before installing anything: your installer machine and the registry credentials needed to pull NVIDIA Run:ai images. None of it depends on whether you're installing the control plane or a tenant cluster.
+This section covers what you set up once, before installing anything: your installer machine and the registry credentials needed to pull NVIDIA Run:ai images. None of it depends on whether you are installing the control plane or a tenant cluster.
 
 ### Installer Machine
 
@@ -115,7 +115,7 @@ For NVIDIA Run:ai on OpenShift to run with PSA `restricted` policy:
 
 ### Cluster TLS Certificates
 
-These certificates secure the tenant cluster's domain, workspaces, training, distributed inference, and standard inference FQDNs you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns). Before creating the secrets below, see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificates you need and why. The workspaces, training, and distributed inference wildcard certificate is only needed for the default host-based routing - see [Host-Based Routing (Ingress Resource)](#host-based-routing-ingress-resource) below for the matching Ingress setup. If you're using path-based routing instead, skip that certificate.
+These certificates secure the tenant cluster's domain, workspaces, training, distributed inference, and standard inference FQDNs you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns). Before creating the secrets below, see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) to confirm which certificates you need and why. The workspaces, training, and distributed inference wildcard certificate is only needed for the default host-based routing - see [Host-Based Routing (Ingress Resource)](#host-based-routing-ingress-resource) below for the matching Ingress setup. If you are using path-based routing instead, skip that certificate.
 
 #### Cluster Domain Certificates (Single-Domain)
 
@@ -181,7 +181,7 @@ The inference wildcard certificate is only required for standard inference (Knat
 **Note**
 
 * The following steps are required for Kubernetes only. For OpenShift, no additional configuration is required.
-* NVIDIA Run:ai also supports path-based routing. If you prefer to use it instead of the default host-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during the Helm installation. See [Cluster Configuration](../../../../installation-and-configuration/configuration/cluster-config.md).
+* NVIDIA Run:ai also supports path-based routing. If you prefer to use it instead of the default host-based routing, disable host-based routing by setting `clusterConfig.global.subdomainSupport: false` during the Helm installation. See [Advanced Cluster Configurations](../../../../installation-and-configuration/configuration/cluster-config.md).
 * If you choose path-based routing, skip the steps below.
 
 </Note>

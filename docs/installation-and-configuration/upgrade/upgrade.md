@@ -61,7 +61,7 @@ helm search repo -l runai/control-plane
 Support-Entitled artifacts require authentication to NGC. Before upgrading, make sure that:
 
 * You have an NGC Personal Key.
-* An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](preparations.md#software-artifacts).
+* An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
 Add the NVIDIA Run:ai Helm repository using your NGC Personal Key:
 
@@ -77,7 +77,7 @@ helm search repo -l runai/control-plane
 
 **Note**
 
-If you are upgrading from a JFrog-based installation, prepare the NGC-based `runai-reg-creds` secret as described in [Software Artifacts](preparations.md#software-artifacts).
+If you are upgrading from a JFrog-based installation, prepare the NGC-based `runai-reg-creds` secret as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
 </Note>
 
@@ -92,7 +92,7 @@ The artifact preparation process is the same for Open Source and Support-Entitle
 Before upgrading:
 
 * Set `runaiVersion` in `airgap-pack.yaml` to the NVIDIA Run:ai version you are upgrading to.
-* Complete the `airgap pack` and `airgap load` procedures described in [Software Artifacts](preparations.md#software-artifacts).
+* Complete the `airgap pack` and `airgap load` procedures described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
 Make sure the required artifacts are available in the air-gapped environment before upgrading the control plane and cluster.
 
@@ -102,7 +102,7 @@ Make sure the required artifacts are available in the air-gapped environment bef
 
 ### Before You Upgrade
 
-Before upgrading the NVIDIA Run:ai control plane, review the [System Requirements](../../system-requirements/README.md) and complete the applicable steps in [Preparations](../installation/install-using-helm/preparations.md).
+Before upgrading the NVIDIA Run:ai control plane, review the [System Requirements](../system-requirements/README.md) and complete the applicable steps in [Preparations](../installation/install-using-helm/preparations.md).
 
 ### Upgrade
 
@@ -250,7 +250,7 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 
 ### Before You Upgrade
 
-Before upgrading the NVIDIA Run:ai cluster, review the [System Requirements](../../system-requirements/README.md) and complete the applicable steps in [Preparations](../installation/install-using-helm/preparations.md) and [Prerequisites and Features](../installation/install-using-helm/prerequisites-and-features.md).
+Before upgrading the NVIDIA Run:ai cluster, review the [System Requirements](../system-requirements/README.md) and complete the applicable steps in [Preparations](../installation/install-using-helm/preparations.md) and [Prerequisites and Features](../installation/install-using-helm/prerequisites-and-features.md).
 
 <Note>
 

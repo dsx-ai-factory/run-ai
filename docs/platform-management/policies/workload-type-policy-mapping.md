@@ -2,9 +2,9 @@
 
 NVIDIA Run:ai provides policy mappings for many supported workload types. For those types, you can create workload policies directly. See [Supported workload types policies](supported-workload-type-policies.md).
 
-This document describes how to register mapping resources for a workload type that is not yet mapped, or for a new workload type you are adding to the platform using the [Workload Types API](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types).
+This document describes how to register mapping resources for a workload type that is not yet mapped, or for a new workload type you are adding to the platform using the [Workload Types API](api:main-api:POST/api/v1/workload-types).
 
-<Info>
+<Note>
 
 **Note**
 
@@ -13,17 +13,17 @@ This document describes how to register mapping resources for a workload type th
 * To register mapping resources, follow the instructions in this document.
 * To check which workload types are mapped, see [Manage mappings](#managing-mappings).
 
-</Info>
+</Note>
 
 ## How It Works
 
-<Info>
+<Note>
 
 **Note**
 
 For workload types that use a standard Kubernetes pod template, NVIDIA Run:ai provides system-provided formatters and field groups (`podSpec`, `podSpecContainer`, `podSpecAndContainer`, `metadata`) that cover standard Kubernetes fields out of the box. In this case you only need to create the spec mapping and can skip the formatter and field group steps.
 
-</Info>
+</Note>
 
 Three building blocks work together to enable policies for a new workload type. The dependency order is: formatters are referenced by field groups, which are referenced by spec mappings.
 
@@ -35,7 +35,7 @@ Three building blocks work together to enable policies for a new workload type. 
 
 ## Before You Start
 
-* Your new workload type must be registered using the [Workload Types API](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types). See [Extending workload support with Karta](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md).
+* Your new workload type must be registered using the [Workload Types API](api:main-api:POST/api/v1/workload-types). See [Extending workload support with Karta](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md).
 * Identify the **group**, **version**, and **kind** (GVK) of your workload type as defined in its CRD.
 * You have the `policies:create` permission at the **tenant** scope. Department or project administrators with policy creation permissions scoped to a department, cluster, or project cannot create mappings.
 
@@ -115,13 +115,13 @@ A successful response returns the created formatter with its `id` and `scope: te
 
 To retrieve available system-provided formatters for reference: `GET /api/v1/policies/formatters`
 
-<Info>
+<Note>
 
 **Note**
 
 System-provided formatters cannot be modified. You can only update formatters that you have created.
 
-</Info>
+</Note>
 
 ## Creating Field Groups
 
@@ -189,13 +189,13 @@ A successful response returns the created field group with its `id` and `scope: 
 
 To retrieve available system-provided field groups for reference: `GET /api/v1/policies/field-groups`
 
-<Info>
+<Note>
 
 **Note**
 
 Unlike formatters, you can modify system-provided field groups by adding fields or item selectors to them. You cannot modify system-provided formatters; you can only create new formatters at the tenant scope.
 
-</Info>
+</Note>
 
 ## Creating the Spec Mapping
 
@@ -276,13 +276,13 @@ Send a `POST` request to `/api/v1/policies/mappings`.
 
 A successful response returns the created mapping with its `id` and `scope: tenant`.
 
-<Info>
+<Note>
 
 **Note**
 
 As a best practice, include an `allContainers` spec selector in any workload mapping. This ensures container-level fields (such as image, resource limits, and environment variables) are exposed for policy rules across all app and init containers.
 
-</Info>
+</Note>
 
 ## Managing Formatters
 

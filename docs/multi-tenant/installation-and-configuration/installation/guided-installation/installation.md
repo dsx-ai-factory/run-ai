@@ -53,7 +53,7 @@ At a minimum, configure:
    - `controlPlane.tls` - The wildcard certificate and private key for the control plane domain, as `certPath` and `keyPath`. See [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates).
    - `controlPlane.multiTenant` - Set to `true` to install the control plane in multi-tenant mode.
    - `controlPlane.version` - The control plane version to install. Omit it to install the latest supported version.
-   - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer - including the control plane administrator credentials and the external metrics store connection. See [Control Plane Configuration](../../../../installation-and-configuration/configuration/control-plane-config.md) for the full set of keys.
+   - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer - including the control plane administrator credentials and the external metrics store connection. See [Advanced Control Plane Configurations](../../../../installation-and-configuration/configuration/control-plane-config.md) for the full set of keys.
    - `controlPlane.customHelmValues.supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, set to `true`.
    - The external metrics store connection - required for every multi-tenant control plane. The example below configures Grafana Labs; for Mimir, see the [Mimir Metrics Store](templates.md#mimir-metrics-store) template. See [Metrics Store Requirements](../../system-requirements/metrics-store-requirements/README.md) for both.
 
@@ -177,7 +177,7 @@ externalConnection:
     --dry-run
   ```
 
-- **Run the installer** - Once you're ready, run it against the control plane cluster:
+- **Run the installer** - Once you are ready, run it against the control plane cluster:
 
   ```bash
   ./runai-installer install \

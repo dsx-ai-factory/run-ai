@@ -55,13 +55,13 @@ NVIDIA Run:ai provides control-plane API which supports and aggregates analytics
 
 NVIDIA provides extended metrics as shown [here](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/feature-overview.html#profiling-metrics).
 
-<Info>
+<Note>
 
 **Note**
 
 GPU profiling metrics are disabled by default. If unavailable, your administrator must enable it under **General settings** → Analytics → GPU profiling metrics. Before enabling, the administrator must configure GPU profiling through the DCGM Exporter and NVIDIA Run:ai Prometheus integration. For configuration steps, see [GPU profiling metrics](gpu-profiling-metrics.md).
 
-</Info>
+</Note>
 
 | Metric name in API | Applicable API endpoint | Metric name in UI | Applicable UI table |
 | --- | --- | --- | --- |
@@ -84,7 +84,7 @@ GPU profiling metrics are disabled by default. If unavailable, your administrato
 
 ### NVIDIA NIM
 
-NVIDIA NIM metrics provide workload-level observability, including key runtime and performance data such as request throughput, latency, and token usage for LLMs. See [NIM observability metrics via API](https://run-ai-docs.nvidia.com/api/2.26/api-guides/nim-observability-metrics-via-api) for more details.
+NVIDIA NIM metrics provide workload-level observability, including key runtime and performance data such as request throughput, latency, and token usage for LLMs. See [NIM observability metrics via API](../../rest-api/api-guides/nim-observability-metrics-via-api.md) for more details.
 
 | Metric name in API | Applicable API endpoint | Metric name in UI | Applicable UI table |
 | --- | --- | --- | --- |

@@ -156,7 +156,7 @@ controlPlane:
 | `multiTenant` | bool | No | Set to `true` to install the control plane in multi-tenant mode. |
 | `domain` | string | Yes | Wildcard fully qualified domain name (FQDN) where the NVIDIA Run:ai UI and API are available for every tenant (for example, `*.runai.hostorg.com`). |
 | `tls` | [`tls`](#default-tls-configuration) | No | Control plane TLS settings. Overrides the top-level `tls` configuration. Must be a wildcard certificate matching `domain`. |
-| `customHelmValues` | map | No | Custom Helm values merged into the control plane chart. Use this field to configure settings that are not exposed directly by the installer, including the control plane administrator credentials and the external metrics store connection - see [Control Plane Configuration](../../../../installation-and-configuration/configuration/control-plane-config.md) for the full set of keys. |
+| `customHelmValues` | map | No | Custom Helm values merged into the control plane chart. Use this field to configure settings that are not exposed directly by the installer, including the control plane administrator credentials and the external metrics store connection - see [Advanced Control Plane Configurations](../../../../installation-and-configuration/configuration/control-plane-config.md) for the full set of keys. |
 
 ---
 
@@ -199,7 +199,7 @@ cluster:
 | `tls` | [`tls`](#default-tls-configuration) | No | Cluster TLS settings. Overrides the top-level `tls` configuration. |
 | `inference.wildcardDomain` | string | No | Wildcard FQDN for inference endpoints (for example, `*.runai-inference.tenant-a-corp.com`). Required when Knative is installed. |
 | `inference.wildcardTls` | [`tls`](#default-tls-configuration) | No | TLS settings for the wildcard inference domain. |
-| `customHelmValues` | map | No | Custom Helm values merged into the cluster chart. Use this field to configure settings that are not exposed directly by the installer - see [Cluster Configuration](../../../../installation-and-configuration/configuration/cluster-config.md) for the full set of keys. |
+| `customHelmValues` | map | No | Custom Helm values merged into the cluster chart. Use this field to configure settings that are not exposed directly by the installer - see [Advanced Cluster Configurations](../../../../installation-and-configuration/configuration/cluster-config.md) for the full set of keys. |
 
 ---
 

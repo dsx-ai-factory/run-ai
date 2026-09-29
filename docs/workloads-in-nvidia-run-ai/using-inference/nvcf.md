@@ -8,13 +8,13 @@ This guide provides the required steps for integrating NVIDIA Cloud Functions wi
 
 By default, inference workloads in NVIDIA Run:ai are assigned a priority of `very-high`, which is non-preemptible. This behavior ensures that inference workloads, which often serve real-time or latency-sensitive traffic, are guaranteed the resources they need and will not be disrupted by other workloads. For more details, see [Workload priority control](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
-<Info>
+<Note>
 
 **Note**
 
 Changing the priority is not supported for NVCF workloads.
 
-</Info>
+</Note>
 
 ## Setup
 
@@ -32,14 +32,14 @@ Once the cluster is registered to NVCF and appears as ready, create a project in
 2. When setting the **Namespace**, choose **"Enter existing namespace from the cluster"** and enter **`nvcf-backend`**.
 3. Assign the necessary resource quotas to the project.
 
-<Info>
+<Note>
 
 **Note**
 
 * This is the designated NVIDIA Run:ai project for all NVCF functions; other projects will not be used.
 * NVCF is assigned to a specific project and adheres to the project's resource quota. Ensure that your project has sufficient quota allocated to accommodate.
 
-</Info>
+</Note>
 
 ## Deploying a Function
 
@@ -48,13 +48,13 @@ In NVCF, function creation defines the code and resources while deployment regis
 1. Create the function as detailed in [Function Creation](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/function-creation.html#function-creation).
 2. Deploy the function as detailed in [Function Deployment](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/function-deployment.html).
 
-<Info>
+<Note>
 
 **Note**
 
 Using a custom Helm chart when creating a [Cloud Function](https://docs.nvidia.com/cloud-functions/user-guide/latest/cloud-function/function-creation.html) is not supported.
 
-</Info>
+</Note>
 
 ## Managing and Monitoring
 

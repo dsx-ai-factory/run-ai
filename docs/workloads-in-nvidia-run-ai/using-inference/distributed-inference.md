@@ -60,14 +60,14 @@ Distributed inference workloads are based on a [Leader Worker Set (LWS)](https:/
 
 ### Setting Up an Environment
 
-<Info>
+<Note>
 
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
 * To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -125,13 +125,13 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 ### Setting Up Compute Resources
 
-<Info>
+<Note>
 
 **Note**
 
 GPU memory limit is disabled by default. If unavailable, your administrator must enable it under **General Settings** → Resources → GPU resource optimization.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -174,13 +174,13 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 ### Setting Up Data & Storage
 
-<Info>
+<Note>
 
 **Note**
 
 S3 data sources are not supported for inference workloads.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -192,13 +192,13 @@ S3 data sources are not supported for inference workloads.
 
 **Configure data sources for a one-time configuration**
 
-<Info>
+<Note>
 
 **Note**
 
 [PVCs](../workload-assets/data-volumes.md), [Secrets](../workload-assets/credentials.md), and [ConfigMaps](../workload-assets/environments.md) cannot be added as a one-time configuration.
 
-</Info>
+</Note>
 
 1. Click the **➕** icon and choose the data source from the dropdown menu. You can add multiple data sources.
 2. Once selected, set the **data origin** according to the required fields and enter the **container path** to set the **data target location**.
@@ -271,7 +271,7 @@ Access to the inference serving API depends on how the serving endpoint access w
 
 Follow the below steps to obtain a token:
 
-1. Use the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API with:
+1. Use the [Tokens](api:main-api:POST/api/v2/token) API with:
    * `grantType: password` for specific users or groups
    * `grantType: client_credentials` for service accounts and user access keys
 2.  Use the obtained token to make API calls to the inference serving endpoint. For example:
@@ -296,4 +296,8 @@ To view the available actions, see the inference workload [CLI v2 reference](../
 
 ## Using API
 
-To view the available actions for creating an inference workload, see the [Distributed Inferences](https://run-ai-docs.nvidia.com/api/2.26/workloads/distributed-inferences) API reference.
+To view the available actions for creating an inference workload, see the [Distributed Inferences](api:main-api:POST/api/v1/workloads/distributed-inferences) API reference.
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes the [`submit_workload`](../../agents/tools-reference.md#workloads) tool to submit a new workload via natural language. See [AI Agents](../../agents/overview.md) for setup.

@@ -5,7 +5,7 @@
 
 This page describes how to onboard a new tenant end to end: create the tenant, provision and register its Kubernetes cluster, install the cluster using the `runai-installer` CLI, and share access details with the tenant.
 
-Onboarding a tenant requires an authenticated Bearer token - see [API Access Setup](api-access-setup.md) if you haven't generated one yet.
+Onboarding a tenant requires an authenticated Bearer token - see [API Access Setup](api-access-setup.md) if you have not generated one yet.
 
 ## Create a Tenant
 
@@ -234,7 +234,7 @@ At a minimum, configure:
    - `cluster.workloadRouting` - `host` (the default) or `path`. This determines which certificate you need for `cluster.tls` below.
    - `cluster.tls` - A certificate and private key for the cluster domain, as `certPath` and `keyPath`. Which certificate you need depends on `workloadRouting` and the workload types you plan to support - see [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates).
    - `cluster.version` - The cluster version to install. Omit it to install the latest supported version.
-   - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Cluster Configuration](../../../../installation-and-configuration/configuration/cluster-config.md) for the full set of keys.
+   - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../../installation-and-configuration/configuration/cluster-config.md) for the full set of keys.
 
    ```yaml
    cluster:
@@ -354,7 +354,7 @@ externalConnection:
     --dry-run
   ```
 
-- **Run the installer** - Once you're ready, run it against the tenant's cluster:
+- **Run the installer** - Once you are ready, run it against the tenant's cluster:
 
   ```bash
   ./runai-installer install \

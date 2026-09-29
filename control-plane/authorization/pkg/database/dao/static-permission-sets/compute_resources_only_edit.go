@@ -22,6 +22,13 @@ var ComputeResourcesOnlyEdit = models.PermissionSet{
 			Delete:       true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+			Create:       true,
+			Read:         true,
+			Update:       true,
+			Delete:       true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_CLUSTERS_MINIMAL,
 			Read:         true,
 		},

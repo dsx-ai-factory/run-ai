@@ -52,7 +52,6 @@ type CatalogUpdater interface {
 
 type AuthorizationUpdater interface {
 	UpdateEnableScopedAuthorization(ctx context.Context, tenantID int, value interface{}) error
-	UpdateTenantIsCspManaged(ctx context.Context, tenantID int, value interface{}) error
 }
 
 type ClusterUpdater interface {
@@ -594,27 +593,6 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 				if deps.WorkloadsUpdater != nil {
 					if err := deps.WorkloadsUpdater.UpdateSetting(ctx, tenantID, SettingKeyGpuOverProvisioning, value); err != nil {
 						return nil, fmt.Errorf("failed to update GpuOverProvisioning in workloads service: %w", err)
-					}
-				}
-				return nil, nil
-			},
-		},
-		{
-			Key:          SettingKeyTenantIsCspManaged,
-			Source:       SourceTenant,
-			Category:     CategoryTenant,
-			Description:  "Mark the tenant as managed by CSP",
-			Stage:        StageAlpha,
-			Label:        "CSP managed",
-			Type:         TypeBoolean,
-			Privilege:    PrivilegeAdmin,
-			DefaultValue: false,
-			Validate:     ValidateBoolean,
-			Migrated:     true,
-			OnSet: func(ctx context.Context, tenantID int, value interface{}) (*OnSetResult, error) {
-				if deps.AuthorizationUpdater != nil {
-					if err := deps.AuthorizationUpdater.UpdateTenantIsCspManaged(ctx, tenantID, value); err != nil {
-						return nil, fmt.Errorf("failed to update TenantIsCspManaged in authorization service: %w", err)
 					}
 				}
 				return nil, nil

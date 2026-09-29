@@ -10,13 +10,13 @@ NUMA-aware scheduling is especially important on high-density GPU servers such a
 
 The following must be in place before enabling NUMA-aware scheduling on a node pool. These are configured outside of NVIDIA Run:ai.
 
-<Info>
+<Note>
 
 **Note**
 
 Before setting up the prerequisites below, verify whether they are already configured in your cluster.
 
-</Info>
+</Note>
 
 ### Node Feature Discovery (NFD) Topology Updater
 
@@ -43,7 +43,7 @@ The Topology Manager only coordinates hints from the CPU manager and memory mana
 
 ## Enabling NUMA-Aware Scheduling
 
-NUMA-aware scheduling is configured per node pool and is disabled by default. To enable it, toggle the **NUMA-aware scheduling** option when creating or editing a node pool. See [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/node-pools) for details.
+NUMA-aware scheduling is configured per node pool and is disabled by default. To enable it, toggle the **NUMA-aware scheduling** option when creating or editing a node pool. See [Node pools](api:main-api:GET/api/v1/node-pools) for details.
 
 ## How It Works
 
@@ -75,4 +75,4 @@ NUMA topology data and NUMA-related node health are visible in the [Nodes](nodes
 
 ## Using API
 
-To view the available actions, go to the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API reference.
+To view the available actions, go to the [Node pools](api:main-api:GET/api/v1/node-pools) API reference.

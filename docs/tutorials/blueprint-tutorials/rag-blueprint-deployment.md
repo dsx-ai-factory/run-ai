@@ -19,13 +19,13 @@ Before you start, make sure the following requirements are met:
 * You have:
   * An NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key.
 
-<Info>
+<Note>
 
 **Note**
 
 Workloads using GPU fractions are likely to achieve better performance when scheduled using a spread placement strategy. It is recommended that your administrator configures the node pool's scheduling placement strategy to spread mode before deploying this application.
 
-</Info>
+</Note>
 
 ## Step 1: Logging In
 
@@ -47,13 +47,13 @@ To use the API, you will need to obtain a token as shown in [Creating a user acc
 
 ## Step 2: Creating a User Access Key
 
-<Info>
+<Note>
 
 **Note**
 
 This step is only required if you intend to follow the API steps in this tutorial.
 
-</Info>
+</Note>
 
 Access keys are used for API integrations with NVIDIA Run:ai. An access key contains a client ID and a client secret. With the client credentials, you can obtain a token and use it within subsequent API calls.
 
@@ -65,7 +65,7 @@ In the NVIDIA Run:ai user interface:
 4. Copy the **Client ID** and **Client secret** and store securely
 5. Click **DONE**
 
-To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API. For example:
+To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
 curl -X POST \ 
@@ -149,12 +149,12 @@ The RAG Blueprint deploys a set of NVIDIA NIM microservices including an LLM, em
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [AI applications](https://run-ai-docs.nvidia.com/api/2.26/ai-applications/ai-applications) API:
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [AI applications](api:main-api:POST/api/v1/ai-applications) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](rag-blueprint-deployment.md#step-2-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 * `ngc-secret` - The Kubernetes name of the Docker registry credential created in [Step 3](rag-blueprint-deployment.md#step-3-creating-the-docker-registry-credential).
 * `ngc-api` - The Kubernetes name of the Generic secret credential created in [Step 4](rag-blueprint-deployment.md#step-4-creating-the-generic-secret-credential).
 
@@ -205,13 +205,13 @@ Instead of allocating full GPUs, you can use NVIDIA Run:ai GPU fractions to shar
 
 ### How the Configuration Works
 
-<Info>
+<Note>
 
 **Note**
 
 The GPU memory values in this configuration are provided as a reference. They have not been optimized for performance and may need to be adjusted for your specific environment.
 
-</Info>
+</Note>
 
 * `gpu-memory` - Specifies the amount of GPU memory (in MiB) to allocate to the component. NVIDIA Run:ai uses this annotation to calculate the fractional GPU slice required, rather than reserving an entire GPU device.
 * `gpu-memory-num-devices` - The number of GPU devices the component can access. Set to `1` for all components in this configuration.
@@ -326,12 +326,12 @@ The following table summarizes the GPU memory requested per component:
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [AI applications](https://run-ai-docs.nvidia.com/api/2.26/ai-applications/ai-applications) API:
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see [AI applications](api:main-api:POST/api/v1/ai-applications) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](rag-blueprint-deployment.md#step-2-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 * `ngc-secret` - The Kubernetes name of the Docker registry credential created in [Step 3](rag-blueprint-deployment.md#step-3-creating-the-docker-registry-credential).
 * `ngc-api` - The Kubernetes name of the Generic secret credential created in [Step 4](rag-blueprint-deployment.md#step-4-creating-the-generic-secret-credential).
 
@@ -455,7 +455,7 @@ Go to Workload manager → AI applications. The **Connection(s)** column display
 
 <Tab title="API">
 
-To get the endpoints for your AI application, use the [Get AI application](https://run-ai-docs.nvidia.com/api/2.26/ai-applications/ai-applications#get-api-v1-ai-applications-aiapplicationid) API, which returns the list of network endpoints exposed by the application and its associated workloads. You can also retrieve endpoints for a specific workload directly using the [Get workload endpoints](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads) API.
+To get the endpoints for your AI application, use the [Get AI application](api:main-api:GET/api/v1/ai-applications/{aiApplicationId}) API, which returns the list of network endpoints exposed by the application and its associated workloads. You can also retrieve endpoints for a specific workload directly using the [Get workload endpoints](api:main-api:GET/api/v1/workloads) API.
 
 </Tab>
 

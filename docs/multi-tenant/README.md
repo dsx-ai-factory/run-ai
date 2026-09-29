@@ -15,7 +15,7 @@ NVIDIA Run:ai provides a consistent way to run development, training, and infere
 NVIDIA Run:ai multi-tenant is available as open source. The NVIDIA Run:ai Support-Entitled Release is available for organizations that require [NVIDIA enterprise support and an SLA](../getting-started/product-support-policy.md).
 </Note>
 
-## Getting started
+## Getting Started
 
 <Cards>
   <Card
@@ -29,7 +29,7 @@ NVIDIA Run:ai multi-tenant is available as open source. The NVIDIA Run:ai Suppor
   <Card
     title="Local Development"
     icon="square-terminal"
-    href="https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md"
+    href="../../local-dev.md"
   >
     Build NVIDIA Run:ai and run the full stack locally for development.
   </Card>
@@ -41,7 +41,7 @@ NVIDIA Run:ai multi-tenant is available as open source. The NVIDIA Run:ai Suppor
   <Card
     title="Configure authentication and authorization"
     icon="sitemap"
-    href="infrastructure-setup/authentication-and-authorization/roles.md"
+    href="installation-and-configuration/configuration/authentication/roles.md"
   >
     Manage roles and access rules for administrators and tenants.
   </Card>
@@ -49,7 +49,7 @@ NVIDIA Run:ai multi-tenant is available as open source. The NVIDIA Run:ai Suppor
   <Card
     title="Operate at scale"
     icon="gears"
-    href="infrastructure-setup/procedures/scaling.md"
+    href="installation-and-configuration/operations/scaling.md"
   >
     Tune NVIDIA Run:ai system services for scale and high availability as your number of tenants grows.
   </Card>
@@ -85,7 +85,7 @@ NVIDIA Run:ai multi-tenant is available as open source. The NVIDIA Run:ai Suppor
   <Card
     title="Product Version Life Cycle"
     icon="calendar"
-    href="../getting-started/product-support-policy.md"
+    href="../getting-started/product-support-policy.md#supported-versions"
   >
     Plan upgrades based on support timelines.
   </Card>

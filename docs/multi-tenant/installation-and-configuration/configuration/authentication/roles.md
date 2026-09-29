@@ -127,9 +127,9 @@ Administrators can control whether it is available for use by enabling or disabl
 
 ## Troubleshooting Common Issues
 
-<Accordion title="Can't delete role">
+<Accordion title="Cannot delete role">
 
-**Can't delete role**
+**Cannot delete role**
 
 **Description:** The role cannot be deleted.
 

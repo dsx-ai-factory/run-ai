@@ -48,13 +48,13 @@ Feature availability may vary across NVIDIA Run:ai versions and cluster deployme
 | [Workload assets](../workload-assets/overview.md) | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 | [Workload Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
-<Info>
+<Note>
 
 **Workload awareness**
 
 Specific workload-aware visibility, so that different pods are identified and treated as a single workload (for example GPU utilization, workload view, dashboards).
 
-</Info>
+</Note>
 
 ## Externally Submitted Kubernetes Workloads
 

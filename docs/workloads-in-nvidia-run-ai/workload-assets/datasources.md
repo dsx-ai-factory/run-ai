@@ -10,13 +10,13 @@ The data sources table can be found under **Workload manager** in the NVIDIA Run
 
 The data sources table provides a list of all the data sources defined in the platform and allows you to manage them.
 
-<Info>
+<Note>
 
 **Note**
 
 **Data & storage** - with **Data sources** and **Data volumes -** is visible only if your administrator has enabled [Data volumes](data-volumes.md)**.**
 
-</Info>
+</Note>
 
 <figure><img src="../../assets/data-sources-new.png" alt=""/><figcaption></figcaption></figure>
 
@@ -149,13 +149,13 @@ After the data source is created, check its status to monitor its proper creatio
 
 The [S3 bucket](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-s3-bucket.html) data source enables the mapping of a remote S3 bucket into the workload's file system. Similar to a PVC, this mapping remains accessible across different workload executions, extending beyond the lifecycle of individual pods. However, unlike PVCs, data stored in an S3 bucket resides remotely, which may lead to decreased performance during the execution of heavy machine learning workloads. As part of the NVIDIA Run:ai connection to the S3 bucket, you can create [credentials](credentials.md) in order to access and map private buckets.
 
-<Info>
+<Note>
 
 **Note**
 
 S3 data sources are not supported for custom inference workloads.
 
-</Info>
+</Note>
 
 1. Select the **cluster** under which to create this data source
 2. Select a [**scope**](overview.md#asset-scope)
@@ -259,13 +259,13 @@ After the data source is created, check its status to monitor its proper creatio
 
 </Accordion>
 
-<Info>
+<Note>
 
 **Note**
 
 It is also possible to add data sources directly when creating a specific [workspace](../using-workspaces/running-workspace.md), [training](../using-training/train-models.md) or [inference](../using-inference/nvidia-run-ai-inference-overview.md) workload.
 
-</Info>
+</Note>
 
 ## Copying a Data Source
 
@@ -291,13 +291,13 @@ To delete a data source:
 2. Click **DELETE**
 3. Confirm you want to delete the data source
 
-<Info>
+<Note>
 
 **Note**
 
 It is not possible to delete a data source being used by an existing workload or template.
 
-</Info>
+</Note>
 
 ## Creating PVCs in Advance
 
@@ -312,13 +312,13 @@ The actions taken by the admin are based on the scope (cluster, department or pr
 
 The PVC is now displayed for that scope in the list of existing PVCs.
 
-<Info>
+<Note>
 
 **Note**
 
 This step is also relevant for creating the data source of type PVC via API
 
-</Info>
+</Note>
 
 ### **Department Scope**
 
@@ -360,6 +360,10 @@ The ConfigMap is now displayed for that scope in the list of existing ConfigMaps
 
 The ConfigMap is now displayed for that scope in the list of existing ConfigMaps.
 
+## Using CLI
+
+To view the available actions on data sources, see the data source [CLI v2 reference](../../reference/cli/runai/runai_datasource.md).
+
 ## Using API
 
-To view the available actions, go to the [Data sources](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/datasources) API reference.
+To view the available actions, go to the [Data sources](api:main-api:GET/api/v1/asset/datasource) API reference.

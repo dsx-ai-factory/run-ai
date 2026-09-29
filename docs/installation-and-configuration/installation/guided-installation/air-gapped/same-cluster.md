@@ -177,7 +177,7 @@ externalConnection:
     --dry-run
   ```
 
-- **Run the installer** - Once you're ready:
+- **Run the installer** - Once you are ready:
 
   ```bash
   ./runai-installer install \

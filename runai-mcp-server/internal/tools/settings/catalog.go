@@ -64,8 +64,7 @@ func rw(names ...string) []settingKey {
 
 var categoryDefs = []categoryDef{
 	{catWorkloads, rw("enablePolicies", "workloadSubmissionV2Enabled", "enableTemplatesV2", "enableHybridSubmission", "gpuOverProvisioning", "applicationSubmission")},
-	// tenantIsCspManaged is a provisioning-owned tenant attribute, not an operator feature flag: listable, not updatable.
-	{catAuthorization, []settingKey{{"enableScopedAuthorization", true}, {"tenantIsCspManaged", false}}},
+	{catAuthorization, []settingKey{{"enableScopedAuthorization", true}}},
 	{catCluster, rw("enableAdvancedGpuMetrics")},
 	{catOrgUnit, rw("limitQuotaOverSubscription")},
 	{catCatalog, rw("enableNgcIntegration")},
