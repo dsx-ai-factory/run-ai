@@ -39,11 +39,23 @@ func convertBinderConfig(runaiConfig *runaiv1.RunaiConfig) *kaibinder.Binder {
 	}
 }
 
+// KAI's chart normally supplies this name. We render the KAIConfig ourselves, so leaving it
+// unset drops the binder onto a built-in default whose repository does not exist, and every
+// fractional workload then fails to bind on the reservation pod's image pull.
+const resourceReservationImageName = "resourcereservation"
+
 func convertBinderResourceReservationImage(binderConfig *binder.Binder) *kaicommon.Image {
-	if binderConfig.ResourceReservation == nil {
-		return nil
+	var image *kaicommon.Image
+	if binderConfig.ResourceReservation != nil {
+		image = convertImage(binderConfig.ResourceReservation.Image)
 	}
-	return convertImage(binderConfig.ResourceReservation.Image)
+	if image == nil {
+		image = &kaicommon.Image{}
+	}
+	if image.Name == nil {
+		image.Name = ptr.To(resourceReservationImageName)
+	}
+	return image
 }
 
 func convertBinderK8sClientConfig(binderConfig *binder.Binder) *kaicommon.K8sClientConfig {
