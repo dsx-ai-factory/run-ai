@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 **Type** | Pointer to **string** |  | [optional] 
 **DesiredPhase** | Pointer to **NullableString** | The desired phase of the application. | [optional] 
 **Phase** | Pointer to **string** | The actual status of the release in the cluster. | [optional] 
-**ClusterId** | Pointer to **string** | The id of the cluster. | [optional]
+**ClusterId** | Pointer to **string** | The id of the cluster. | [optional] 
 **ProjectId** | Pointer to **string** | The id of the project. | [optional] 
 **ProjectName** | Pointer to **string** | The name of the project | [optional] 
 **DepartmentId** | Pointer to **string** | The id of the department. | [optional] 
@@ -700,3 +700,5 @@ HasSpec returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

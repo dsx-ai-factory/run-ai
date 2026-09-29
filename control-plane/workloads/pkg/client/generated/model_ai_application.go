@@ -33,7 +33,7 @@ type AIApplication struct {
 	// The actual status of the release in the cluster.
 	Phase *string `json:"phase,omitempty"`
 	// The id of the cluster.
-	ClusterId *string `json:"clusterId,omitempty" validate:"regexp=.*"`
+	ClusterId *string `json:"clusterId,omitempty"`
 	// The id of the project.
 	ProjectId *string `json:"projectId,omitempty" validate:"regexp=.*"`
 	// The name of the project
