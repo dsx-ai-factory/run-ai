@@ -497,6 +497,9 @@ navigation:
       - page: Validating GPU Cluster Communication with NCCL Tests
         slug: nccl-tests
         path: ../../docs/tutorials/training-tutorials/nccl-tests.md
+      - page: Deploying a Slurm Cluster with Slinky
+        slug: deploying-slurm
+        path: ../../docs/tutorials/training-tutorials/deploying-slurm.md
     - section: Inference Tutorials
       contents:
       - page: NVIDIA NIM Distributed Inference Deployment
