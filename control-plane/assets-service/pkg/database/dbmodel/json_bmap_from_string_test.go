@@ -56,16 +56,21 @@ var _ = Describe("JsonBMapFromString.Value()", func() {
 })
 
 var _ = Describe("JsonBMapFromString.Scan()", func() {
-	It("populates the map from a JSON []byte payload", func() {
+	// Scan uses gojsonq.LoadJsonBytes which decodes JSON numbers as
+	// json.Number (i.e. Decoder.UseNumber()), not float64. That contract
+	// matters downstream — dbmodel.FromJsonBMap round-trips these values
+	// into typed swagger structs, and json.Number preserves precision for
+	// int64 / uint64 fields that float64 would silently round.
+	It("populates the map from a JSON []byte payload (numbers as json.Number)", func() {
 		var m JsonBMapFromString
 		Expect(m.Scan([]byte(`{"a":1,"b":"x"}`))).To(BeNil())
-		Expect(m).To(Equal(JsonBMapFromString{"a": float64(1), "b": "x"}))
+		Expect(m).To(Equal(JsonBMapFromString{"a": json.Number("1"), "b": "x"}))
 	})
 
-	It("populates the map from a JSON string payload", func() {
+	It("populates the map from a JSON string payload (numbers as json.Number)", func() {
 		var m JsonBMapFromString
 		Expect(m.Scan(`{"a":1,"b":"x"}`)).To(BeNil())
-		Expect(m).To(Equal(JsonBMapFromString{"a": float64(1), "b": "x"}))
+		Expect(m).To(Equal(JsonBMapFromString{"a": json.Number("1"), "b": "x"}))
 	})
 
 	It("returns an explanatory error for an unsupported scan type", func() {
