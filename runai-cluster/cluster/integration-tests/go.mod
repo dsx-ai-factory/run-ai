@@ -19,7 +19,7 @@ require (
 	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v1.5.2
 	knative.dev/serving v0.48.1
-	kubevirt.io/api v1.8.4
+	kubevirt.io/api v1.9.0
 	sigs.k8s.io/controller-runtime v0.23.3
 )
 
