@@ -3,12 +3,15 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# Tags every shared package that has changed since its latest prod tag, through the
-# same `make package-bump-version` a developer runs. Driven by
+# Tags every shared package and service client that has changed since its latest prod
+# tag, through the same make targets a developer runs: `package-bump-version` in a
+# runai-common-packages / runai-application-packages directory, `client-bump-version`
+# in the service that owns a control-plane/<service>/pkg/client module. Driven by
 # .github/workflows/package-auto-tag.yml; runnable by hand from an up-to-date main.
 #
 # Env:
-#   PACKAGES    comma-separated package directories to consider instead of all of them
+#   PACKAGES    comma-separated module directories to consider instead of all of them
+#               (a package directory, or control-plane/<service>/pkg/client)
 #   PATCH_ONLY  passed through: never prompt, never tag a breaking change (see
 #               versioning-helpers.sh). The workflow always sets it.
 #   DRY_RUN     passed through: report the tags, create none.
@@ -24,13 +27,31 @@ cd "$REPO_ROOT"
 
 SUMMARY=${GITHUB_STEP_SUMMARY:-/dev/stdout}
 
-# One level deep only: a pathspec `*` crosses slashes, and the nested modules below a
+# Exact depths only: a pathspec `*` crosses slashes, and the nested modules below a
 # package (queryapi/integration-tests, runaidb/integration-tests) are its test
 # harnesses, not packages anyone imports.
-all_packages() {
+all_modules() {
     git ls-files 'runai-common-packages/*/go.mod' 'runai-application-packages/*/go.mod' \
-        | grep -E '^runai-(common|application)-packages/[^/]+/go\.mod$' \
+        'control-plane/*/pkg/client/go.mod' \
+        | grep -E '^(runai-(common|application)-packages/[^/]+|control-plane/[^/]+/pkg/client)/go\.mod$' \
         | xargs -r -n1 dirname | sort
+}
+
+# A client is tagged from the service that owns it: its Makefile sets the client's
+# TAG_FORMAT, and client-bump-version refuses to run anywhere else.
+bump() {
+    local module="$1"
+    case "$module" in
+        control-plane/*/pkg/client) make -C "${module%/pkg/client}" client-bump-version ;;
+        *) make -C "$module" package-bump-version ;;
+    esac
+}
+
+makefile_of() {
+    case "$1" in
+        control-plane/*/pkg/client) echo "${1%/pkg/client}/Makefile" ;;
+        *) echo "$1/Makefile" ;;
+    esac
 }
 
 latest_prod_tag() {
@@ -53,7 +74,7 @@ git fetch --tags --force origin >/dev/null 2>&1
 if [ -n "${PACKAGES:-}" ]; then
     IFS=',' read -ra candidates <<<"$PACKAGES"
 else
-    mapfile -t candidates < <(all_packages)
+    mapfile -t candidates < <(all_modules)
 fi
 
 tagged=() refused=() moved=() failed=() untagged=() unchanged=()
@@ -61,12 +82,12 @@ for raw in "${candidates[@]}"; do
     pkg=$(echo "$raw" | xargs)
     pkg=${pkg%/}
     [ -n "$pkg" ] || continue
-    if [ ! -f "$pkg/go.mod" ] || [ ! -f "$pkg/Makefile" ]; then
-        failed+=("$pkg (not a package directory)")
+    if [ ! -f "$pkg/go.mod" ] || [ ! -f "$(makefile_of "$pkg")" ]; then
+        failed+=("$pkg (not a package or client module)")
         continue
     fi
     if [ -z "$(latest_prod_tag "$pkg")" ]; then
-        # The first version of a package is a decision, not a patch.
+        # The first version of a module is a decision, not a patch.
         untagged+=("$pkg")
         continue
     fi
@@ -76,7 +97,7 @@ for raw in "${candidates[@]}"; do
     fi
 
     echo "::group::${pkg}"
-    output=$(make -C "$pkg" package-bump-version 2>&1)
+    output=$(bump "$pkg" 2>&1)
     status=$?
     echo "$output"
     echo "::endgroup::"
