@@ -71,7 +71,7 @@ Prepare the artifacts according to the release type you are upgrading to.
 Open Source artifacts are publicly available from NGC and do not require authentication.
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm search repo -l runai/control-plane
 ```
@@ -83,12 +83,8 @@ Support-Entitled artifacts require authentication to NGC. Before upgrading, make
 * You have an NGC Personal Key.
 * An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](installation/install-using-helm/preparations.md#software-artifacts).
 
-Add the NVIDIA Run:ai Helm repository using your NGC Personal Key:
-
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update \
-  --username='$oauthtoken' \
-  --password=<NGC_API_KEY>
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm search repo -l runai/control-plane
 ```
@@ -128,6 +124,17 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 * Replace `<VERSION>` with the NVIDIA Run:ai version you are upgrading to.
 * Set `supportEntitled=true` to configure the installation as Support-Entitled.
 * Set `global.imagePullSecrets[0].name=runai-reg-creds` to use the NGC image pull secret prepared in [Software Artifacts](#prepare-software-artifacts).
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](installation/install-using-helm/preparations.md#registry-credentials) for how to generate the SAK. By default, telemetry is not associated with your organization.
+  - `--set telemetryService.telemetryAuth.token=<SAK_TOKEN>` - Passes the SAK directly. Visible in shell history and process listings.
+  - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
+
+<Note>
+
+**Note**
+
+These flags configure functionality introduced in v3.0. If you are upgrading from v2.26 or earlier, add them explicitly as shown. `--reset-then-reuse-values` preserves values from your current release, so you do not need to pass them again in later upgrades once you are on v3.0 or above.
+
+</Note>
 
 ```bash
 helm get values runai-backend -n runai-backend > runai_control_plane_values.yaml
@@ -136,65 +143,9 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
   -f runai_control_plane_values.yaml \
   --reset-then-reuse-values \
   --set supportEntitled=true \
-  --set global.imagePullSecrets[0].name=runai-reg-creds
-```
-
-### Enable Telemetry Service (Support-Entitled)
-
-NVIDIA Run:ai includes telemetry for Support-Entitled deployments, reporting initial metrics including platform usage and adoption signals, GPU utilization and allocation, and cluster health signals to support proactive troubleshooting and continued product improvement. By default, telemetry is not associated with your organization. You can opt in to identified telemetry by providing an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) during installation, which associates the telemetry with your NCA ID.
-
-<Accordion title="Pass the SAK Value Directly">
-
-**Pass the SAK Value Directly**
-
-Pass the SAK as a plaintext Helm value. The chart creates and manages the Kubernetes Secret for you.
-
-```bash
-helm upgrade runai-backend -n runai-backend runai/control-plane \
-  --version "<VERSION>" \
-  -f runai_control_plane_values.yaml \
-  --reset-then-reuse-values \
-  --set supportEntitled=true \
+  --set global.imagePullSecrets[0].name=runai-reg-creds \
   --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
 ```
-
-<Warning>
-
-**Warning**
-
-The SAK value is passed as a `--set` flag, which may be visible in shell history and process listings.
-
-</Warning>
-
-</Accordion>
-
-<Accordion title="Reference a Pre-Created Secret">
-
-**Reference a Pre-Created Secret**
-
-1. Create the Secret containing the SAK before upgrading:
-
-```bash
-kubectl create secret generic runai-telemetry-sak \
-  --namespace runai-backend \
-  --from-literal=TELEMETRY_TOKEN=<SAK_TOKEN>
-```
-
-2. Reference the Secret in the upgrade command. The chart does not create or manage it.
-
-3. Set both the Secret name and key explicitly:
-
-```bash
-helm upgrade runai-backend -n runai-backend runai/control-plane \
-  --version "<VERSION>" \
-  -f runai_control_plane_values.yaml \
-  --reset-then-reuse-values \
-  --set supportEntitled=true \
-  --set telemetryService.telemetryAuth.existingSecret=runai-telemetry-sak \
-  --set telemetryService.telemetryAuth.secretKey=TELEMETRY_TOKEN
-```
-
-</Accordion>
 
 ## Migrate from NGINX to HAProxy Kubernetes Ingress Controller
 

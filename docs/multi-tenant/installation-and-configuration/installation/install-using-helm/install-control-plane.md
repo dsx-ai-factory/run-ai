@@ -119,7 +119,7 @@ authorization:
 **Open Source**
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm upgrade -i runai-backend -n runai-backend runai/control-plane \ 
     -f /path/to/your/values.yaml 
@@ -133,7 +133,6 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 
 In addition to the values in your `values.yaml` file, update the Helm commands as follows:
 
-* Authenticate `helm repo add` using your [NGC Personal Key](preparations.md#registry-credentials).
 * Add `--set supportEntitled=true` to the `helm upgrade` command.
 * Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Registry Credentials](preparations.md#registry-credentials).
 * Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the SAK. By default, telemetry is not associated with your organization.
@@ -141,9 +140,7 @@ In addition to the values in your `values.yaml` file, update the Helm commands a
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update \
-  --username='$oauthtoken' \
-  --password=<NGC_API_KEY>
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm upgrade -i runai-backend -n runai-backend runai/control-plane \ 
     -f /path/to/your/values.yaml \
