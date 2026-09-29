@@ -9326,7 +9326,7 @@ components:
     ClusterInstallationInfoResponse:
       example:
         installationStr: helm upgrade -i runai-cluster runai/runai-cluster -n runai
-          --set cluster.uid=... --set cluster.bootstrapToken=<installer-bootstrap-jwt>
+          --set cluster.uid=... --set controlPlane.bootstrapToken=<installer-bootstrap-jwt>
         repositoryName: runai
         chartRepoURL: https://charts.example.com
         bootstrapToken: <installer-bootstrap-jwt>
@@ -9340,7 +9340,7 @@ components:
         bootstrapToken:
           description: |
             Short-lived JWT (2h TTL) for the installer service account.
-            Pass to the Helm hook via --set cluster.bootstrapToken=<token>.
+            Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>.
           type: string
         clientSecret:
           deprecated: true
