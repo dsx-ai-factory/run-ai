@@ -52,6 +52,8 @@ func validateExposureExtensions(runner *dromosv1alpha1.WorkloadRunner, object cl
 	case *networkingv1.Ingress:
 		errs = append(errs, validateIngressClass(exposure, constraints.ingressClass))
 	case *openshiftv1.Route:
+		// Routes have no Ingress class or Gateway parent/filter fields.
+		// Annotation checks run below; backend ownership is checked separately.
 	case *gatewayv1.HTTPRoute:
 		errs = append(errs, validateHTTPRouteFilters(exposure), validateGatewayParents(exposure, constraints))
 	default:

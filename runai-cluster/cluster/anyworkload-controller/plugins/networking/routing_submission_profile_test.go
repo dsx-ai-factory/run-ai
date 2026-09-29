@@ -108,12 +108,18 @@ func TestNativeSubmissionProfilesStillValidatePodOwnership(t *testing.T) {
 				reader := newOwnershipFakeClient(t, service, owned, foreign, slice)
 				for name, err := range map[string]error{
 					"referenced Service": validateReferencedServiceOwnership(context.Background(), reader, runner, client.ObjectKeyFromObject(service)),
-					"exposure backends": validateExposureServiceOwnership(context.Background(), reader, runner,
-						ingressWithServices(service.Name), routeWithServices(service.Name), httpRouteWithServices(service.Name, "", "")),
+					"Ingress": validateExposureServiceOwnership(context.Background(), reader, runner,
+						ingressWithServices(service.Name)),
+					"Route": validateExposureServiceOwnership(context.Background(), reader, runner,
+						routeWithServices(service.Name)),
+					"HTTPRoute": validateExposureServiceOwnership(context.Background(), reader, runner,
+						httpRouteWithServices(service.Name, "", "")),
 				} {
-					if !errors.Is(err, errOwnershipViolation) || !strings.Contains(err.Error(), foreign.Name) {
-						t.Errorf("%s: expected foreign Pod ownership violation, got %v", name, err)
-					}
+					t.Run(name, func(t *testing.T) {
+						if !errors.Is(err, errOwnershipViolation) || !strings.Contains(err.Error(), foreign.Name) {
+							t.Fatalf("expected foreign Pod ownership violation, got %v", err)
+						}
+					})
 				}
 			})
 		}

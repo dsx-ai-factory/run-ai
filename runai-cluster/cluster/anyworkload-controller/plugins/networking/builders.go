@@ -294,8 +294,9 @@ func (p *Plugin) buildHTTPRoute(
 }
 
 // The caller supplies networking intent, not Kubernetes lifecycle state.
-// The input metadata has already been deep-copied by each builder. Annotations
-// are checked before apply; ownership is set by setOwnerAndApply.
+// The input metadata has already been deep-copied by each builder. Annotation
+// checks run before apply for restricted submission profiles; ownership is set
+// by setOwnerAndApply.
 func networkingObjectMeta(metadata metav1.ObjectMeta, runner *dromosv1alpha1.WorkloadRunner) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
 		Name:        getResourceName(metadata.Name, runner),

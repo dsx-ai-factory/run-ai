@@ -115,12 +115,23 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 
 func TestBuildEnvVarsRejectsIncompleteGatewayConfiguration(t *testing.T) {
 	for _, tt := range []struct {
-		name      string
-		gateway   string
-		namespace string
+		name        string
+		gateway     string
+		namespace   string
+		wantMessage string
 	}{
-		{name: "missing name", namespace: "gateway-system"},
-		{name: "missing namespace", gateway: "workload-gateway"},
+		{
+			name: "missing name", namespace: "gateway-system",
+			wantMessage: `gatewayAPI is enabled but name="" or namespace="gateway-system" is empty`,
+		},
+		{
+			name: "missing namespace", gateway: "workload-gateway",
+			wantMessage: `gatewayAPI is enabled but name="workload-gateway" or namespace="" is empty`,
+		},
+		{
+			name:        "missing both",
+			wantMessage: `gatewayAPI is enabled but name="" or namespace="" is empty`,
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			runaiConfig := &runaiv1.RunaiConfig{}
@@ -130,8 +141,12 @@ func TestBuildEnvVarsRejectsIncompleteGatewayConfiguration(t *testing.T) {
 			runaiConfig.Spec.Global.GatewayAPI.Namespace = tt.namespace
 			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-			if _, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal); err == nil {
+			_, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+			if err == nil {
 				t.Fatal("buildEnvVars() accepted an incomplete enabled Gateway configuration")
+			}
+			if err.Error() != tt.wantMessage {
+				t.Fatalf("buildEnvVars() error = %q, want %q", err.Error(), tt.wantMessage)
 			}
 		})
 	}
