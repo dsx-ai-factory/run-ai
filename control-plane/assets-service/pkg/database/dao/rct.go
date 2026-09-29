@@ -5,9 +5,7 @@
 
 // Package dao (file rct.go): DAO for the resource claim template asset kind.
 // The RCT asset is stored across assets_metadata (shared) and assets_spec
-// (shared, generic k8s-object spec table). This file wires those two rows
-// together with typed swagger models. Mirrors the compute.go / nfs.go
-// per-kind DAO shape; the underlying spec-table primitives live in assets.go.
+// This file wires those two rows together with typed swagger models.
 
 package dao
 
@@ -26,9 +24,7 @@ import (
 )
 
 // CreateRct atomically creates a resource claim template asset (assets_metadata
-// row + assets_spec row) and returns the typed asset with populated identity
-// fields. Mirrors CreateNFSAsset; the shared row-writing body lives in
-// createAssetInTransaction (assets.go).
+// row + assets_spec row) and returns the typed asset with populated identity fields.
 func CreateRct(ctx context.Context, request api.RctCreationRequest, nameValidationQuery *database.ParametrizedQuery) (*api.Rct, *api.Error) {
 	tx := runaidb.DB().WithContext(ctx).Begin()
 	committedTx := false
@@ -53,8 +49,7 @@ func CreateRct(ctx context.Context, request api.RctCreationRequest, nameValidati
 // ListRcts returns a paginated list of resource claim template assets. The
 // offset/limit contract matches the swagger: fetch limit+1 rows so we can set
 // RctListResponse.Next when the next page exists (i.e. when the returned page
-// is full). Mirrors ListNFSAssets structurally, plus pagination + spec
-// unmarshaling from the shared assets_spec table.
+// is full).
 func ListRcts(ctx context.Context, offset, limit int32) (*api.RctListResponse, *api.Error) {
 	combinedList := make([]dbmodel.AssetSpecCombinedRec, 0)
 	query := dbmodel.AssetMetaRec{
@@ -109,7 +104,7 @@ func ListRcts(ctx context.Context, offset, limit int32) (*api.RctListResponse, *
 
 // GetRctById fetches a single resource claim template joined from
 // assets_metadata + assets_spec, unmarshals the JSON spec into the typed
-// RctSpec, and returns the typed asset. Mirrors GetNFSAssetById.
+// RctSpec, and returns the typed asset.
 func GetRctById(ctx context.Context, id string) (*api.Rct, *api.Error) {
 	var combinedRec dbmodel.AssetSpecCombinedRec
 	query := dbmodel.AssetMetaRec{
