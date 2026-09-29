@@ -1,17 +1,10 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# Publishes the shared Go packages and the service clients. A change to
-# runai-common-packages, runai-application-packages or a control-plane/<service>/pkg/client
-# only reaches its consumers once the module is tagged, and
-# until now that was manual -- so fixes, Renovate's included, sat unpublished while every
-# consumer kept pinning the old tag (nats-server v2.11.1 via cache/v2.4.3, long after
-# cache itself moved to v2.15.0).
-#
-# Each run tags, from the tip of main, every module with commits since its latest prod
-# tag, through the same make targets developers use (package-bump-version for packages,
-# client-bump-version for clients). PATCH_ONLY: only
-# API-compatible changes are tagged; a breaking change stops for a person instead.
+# Tags the shared packages and service clients a push to main changed, with the same
+# make targets developers use -- they work out the next version themselves. PATCH_ONLY:
+# an API-compatible change is tagged as a patch; a breaking one fails the job untagged,
+# for a person to decide.
 name: Package auto-tag
 
 on:
@@ -23,10 +16,9 @@ on:
       - "control-plane/*/pkg/client/**"
   workflow_dispatch:
     inputs:
-      packages:
-        description: "Module directories, comma separated (e.g. runai-common-packages/cache, control-plane/audit-service/pkg/client). Empty: every package and client with commits since its latest tag."
-        required: false
-        default: ""
+      modules:
+        description: "Module directories, comma separated (e.g. runai-common-packages/cache, control-plane/audit-service/pkg/client)"
+        required: true
       dry_run:
         description: "Report the tags without creating them"
         type: boolean
@@ -35,44 +27,81 @@ on:
 permissions:
   contents: read
 
-# One run at a time. GitHub keeps a single queued run per group and drops older ones,
-# which loses nothing here: each run works out what is pending from the repository,
-# not from the push that started it.
-concurrency:
-  group: package-auto-tag
-  cancel-in-progress: false
-
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.modules.outputs.modules }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: modules
+        env:
+          INPUT: ${{ inputs.modules }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -n "$INPUT" ]; then
+            files=$(echo "$INPUT" | tr ',' '\n' | sed 's#[[:space:]]##g; s#/*$#/x#')
+          else
+            files=$(git diff --name-only "$BEFORE" "$GITHUB_SHA")
+          fi
+          # A package is its top-level directory; a client is its service's pkg/client.
+          modules=$(echo "$files" \
+            | grep -oE '^(runai-(common|application)-packages/[^/]+|control-plane/[^/]+/pkg/client)/' \
+            | sed 's#/$##' | sort -u \
+            | while read -r m; do [ -f "$m/go.mod" ] && echo "$m"; done)
+          echo "modules=$(echo "$modules" | jq -R . | jq -sc 'map(select(. != ""))')" >> "$GITHUB_OUTPUT"
+          echo "$modules"
+
   tag:
+    needs: scope
+    if: needs.scope.outputs.modules != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.scope.outputs.modules) }}
+    # One run per module at a time. A newer queued run replaces an older one, which
+    # loses nothing: the bump tags the tip of main, which includes both changes.
+    concurrency:
+      group: package-auto-tag-${{ matrix.module }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
-      # A named `main` branch at origin/main: versioning.mk refuses to tag a prod release
-      # from anything else.
-      - name: Checkout main
-        uses: actions/checkout@v6
+      # A named `main` at origin/main: versioning.mk refuses to tag from anything else.
+      - uses: actions/checkout@v6
         with:
           ref: main
           fetch-depth: 0
           fetch-tags: true
           token: ${{ secrets.GIT_HUB_OSS }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: stable
 
-      # apidiff loads the previous tag's module graph, which includes this repository's
-      # own modules; they are internal, so Go has to fetch them with credentials.
       - name: Let Go fetch the repository's own modules
         env:
           TOKEN: ${{ secrets.GIT_HUB_OSS }}
         run: git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
 
-      - name: Tag changed packages and clients
+      - name: Bump ${{ matrix.module }}
         env:
-          PACKAGES: ${{ inputs.packages }}
-          # Pushes always tag for real; a manual run defaults to a dry run.
+          MODULE: ${{ matrix.module }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
           PATCH_ONLY: "1"
           GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
-        run: bash build/scripts/package-auto-tag.sh
+        run: |
+          case "$MODULE" in
+            control-plane/*/pkg/client) bump() { make -C "${MODULE%/pkg/client}" client-bump-version; } ;;
+            *) bump() { make -C "$MODULE" package-bump-version; } ;;
+          esac
+          # versioning.mk refuses when main moved during the run, and the push that moved
+          # it may not touch this module -- so catch up with main and bump again.
+          for attempt in 1 2 3; do
+            if bump 2>&1 | tee bump.log; [ "${PIPESTATUS[0]}" -eq 0 ]; then exit 0; fi
+            grep -q "not up to date with origin/main" bump.log || exit 1
+            git fetch -q origin main && git reset -q --hard origin/main
+          done
+          exit 1
