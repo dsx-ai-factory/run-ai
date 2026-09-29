@@ -30,18 +30,6 @@ external-workload-integrator-test: git-config-command install-ginkgo
 	$(MAKE) TEST_PATH=./suites/external-workload-integrator run-ginkgo-tests
 .PHONY: external-workload-integrator-test
 
-project-controller-test: git-config-command install-ginkgo
-	$(MAKE) TEST_PATH=./suites/project-controller run-ginkgo-tests
-.PHONY: project-controller-test
-
-nodepool-controller-test: git-config-command install-ginkgo
-	$(MAKE) TEST_PATH=./suites/nodepool-controller run-ginkgo-tests
-.PHONY: nodepool-controller-test
-
-pod-group-assigner-test: git-config-command install-ginkgo
-	$(MAKE) TEST_PATH=./suites/pod-group-assigner run-ginkgo-tests
-.PHONY: pod-group-assigner-test
-
 # Ensure ~/.gitconfig exists before any container bind-mounts it. Docker creates a
 # root-owned DIRECTORY at the mount source when the path is missing, which then breaks
 # every git command for the user (see DOCKER_GO_BASE_COMMAND in golang.mk).

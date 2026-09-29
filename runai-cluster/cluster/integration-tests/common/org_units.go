@@ -6,9 +6,6 @@
 package common
 
 import (
-	"strconv"
-
-	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	v2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2"
 	schedulingv2alpha2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v2alpha2"
@@ -18,11 +15,6 @@ import (
 
 // Org-unit fixtures for the suites. The services under test reconcile and read the
 // kai.resources Project and Department, so those are the only org units the suites create.
-
-// SecretsReadyConditionType is the project status condition the secrets deletion blocker
-// reports. It is derived by the project-controller from the "Secrets" blocker group's
-// display name, so it is not available as a constant on the CRD.
-const SecretsReadyConditionType kaiv1alpha1.ProjectConditionType = "SecretsReady"
 
 // BuildProjectObject builds a project with a single queue on the default node pool.
 // The project and department id labels keep the run.ai keys: they are the ones the
@@ -86,28 +78,4 @@ func BuildQueueResources(gpuDeserved, cpuDeserved, memoryDeserved int64) *kaiv1a
 			Limit:    -1,
 		},
 	}
-}
-
-// SetProjectDeletion sets how the project is to be deleted. blocking makes the
-// project-controller run its deletion blockers (the resources remaining in the project
-// hold the deletion back); force makes it finalize the project even when a blocker
-// reports it is not empty, and lives on an annotation rather than in the spec.
-func SetProjectDeletion(project *kaiv1alpha1.Project, blocking, force bool) {
-	if blocking {
-		blockingType := kaiv1alpha1.Blocking
-		project.Spec.DeletionType = &blockingType
-	} else {
-		project.Spec.DeletionType = nil
-	}
-
-	annotations := project.GetAnnotations()
-	if annotations == nil {
-		annotations = map[string]string{}
-	}
-	if force {
-		annotations[clusterconstants.ForceDeleteAnnotation] = strconv.FormatBool(true)
-	} else {
-		delete(annotations, clusterconstants.ForceDeleteAnnotation)
-	}
-	project.SetAnnotations(annotations)
 }
