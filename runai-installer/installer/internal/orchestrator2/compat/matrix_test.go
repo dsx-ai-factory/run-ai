@@ -13,7 +13,7 @@ import (
 func TestThreeZeroMatrix(t *testing.T) {
 	expected := Locks{
 		Prometheus:          "76.2.0",
-		GPUOperator:         "v26.7.0",
+		GPUOperator:         "v26.7.1",
 		GPUOperatorFake:     "0.0.62",
 		NetworkOperator:     "v26.7.0",
 		Knative:             "1.23.0",
@@ -49,7 +49,7 @@ func TestLatestMatrix(t *testing.T) {
 	if !fellBack {
 		t.Fatal("Resolve(0.0.0-branch) did not fall back")
 	}
-	if locks[GPUOperator] != "v26.7.0" {
-		t.Fatalf("Resolve(0.0.0-branch)[GPUOperator] = %q, want %q", locks[GPUOperator], "v26.7.0")
+	if locks[GPUOperator] != "v26.7.1" {
+		t.Fatalf("Resolve(0.0.0-branch)[GPUOperator] = %q, want %q", locks[GPUOperator], "v26.7.1")
 	}
 }
