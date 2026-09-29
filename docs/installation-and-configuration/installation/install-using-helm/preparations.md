@@ -43,7 +43,7 @@ Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-sid
 
 ### Registry Credentials
 
-NVIDIA Run:ai Support-Entitled Release installations require an NGC Personal Key to authenticate to the NVIDIA Run:ai container registry (`nvcr.io`) and Helm registry (`helm.ngc.nvidia.com/nvidia/runai`), for connected installs. Generate a Personal Key from the [NGC Personal Keys](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#ngc-api-keys) page.
+NVIDIA Run:ai Support-Entitled Release installations require an NGC Personal Key to authenticate to the NVIDIA Run:ai container registry (`nvcr.io`), for connected installs. Generate a Personal Key from the [NGC Personal Keys](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#ngc-api-keys) page.
 
 Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password. Use this key to create the `runai-reg-creds` secret described in [Software Artifacts](#software-artifacts) below.
 
