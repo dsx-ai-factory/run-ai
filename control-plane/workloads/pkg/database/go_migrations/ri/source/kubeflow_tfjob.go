@@ -6,6 +6,8 @@
 package source
 
 import (
+	"strings"
+
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
@@ -66,7 +68,7 @@ func buildKubeflowTFJobChildComponents() []kartav1alpha1.ComponentDefinition {
 			PodSelector: &kartav1alpha1.PodSelector{
 				ComponentTypeSelector: &kartav1alpha1.ComponentTypeSelector{
 					KeyPath: ".metadata.labels[\"training.kubeflow.org/replica-type\"]",
-					Value:   ptr.To(replicaType),
+					Value:   ptr.To(strings.ToLower(replicaType)),
 				},
 			},
 		})
