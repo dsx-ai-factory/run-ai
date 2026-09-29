@@ -4880,7 +4880,7 @@ export interface DistributedInferenceServingPort {
      */
     'authorizedGroups'?: Array<string> | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof DistributedInferenceServingPort
      */
@@ -4917,7 +4917,7 @@ export interface DistributedInferenceServingPortAccess {
      */
     'authorizedGroups'?: Array<string> | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof DistributedInferenceServingPortAccess
      */
@@ -5613,7 +5613,7 @@ export interface EnvironmentAssetSpec {
      */
     'supplementalGroups'?: string | null;
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof EnvironmentAssetSpec
      */
@@ -9052,7 +9052,7 @@ export interface NodeSelectorTerm {
  */
 export interface NonOverridableSpecFields {
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof NonOverridableSpecFields
      */
@@ -9167,7 +9167,7 @@ export interface NonOverridableSpecFields {
  */
 export interface NonOverridableSpecFieldsAllOf {
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof NonOverridableSpecFieldsAllOf
      */
@@ -13302,7 +13302,7 @@ export interface SupersetSpecAllOf {
  */
 export interface SupersetSpecAllOfSecurity {
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof SupersetSpecAllOfSecurity
      */
@@ -14027,7 +14027,7 @@ export interface TrainingV2 {
     'distributed'?: DistributedData | null;
 }
 /**
- * Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers).
+ * Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).
  * @export
  * @enum {string}
  */
