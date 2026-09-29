@@ -206,9 +206,6 @@ kai-resource-management:
       resourceReservation:
         namespace: runai-reservation
         serviceAccount: runai-reservation
-      # Installs KAI's gpu-fractioning subchart, which is what writes the
-      # gpu-fractioning.nvidia.com/Ready node condition every node and cluster fractions
-      # status reads. The mode itself comes from the KAIConfig go-operator owns.
       nvFractions:
         set: true
     operator:
