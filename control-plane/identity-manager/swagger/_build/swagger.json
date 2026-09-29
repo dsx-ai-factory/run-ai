@@ -1993,7 +1993,7 @@
       "x-internal": true,
       "post": {
         "summary": "Mint a short-lived bootstrap JWT for the installer service account.",
-        "description": "Returns a 2-hour Keycloak access token for the cluster's dedicated\nper-cluster installer service account, scoped to the given cluster.\nCalled by cluster-service when generating the cluster install command.\nThe token is passed to the Helm hook as\n--set cluster.bootstrapToken=<token> and used directly as a Bearer token\nto call GET /clusters/{uuid}/control-plane-config — the installer client\nsecret never leaves the server.\n\nThe per-cluster installer client is resolved (and, if needed,\nself-healed by creating it) internally, so callers only need to say\nwhich cluster the token is for.\n",
+        "description": "Returns a 2-hour Keycloak access token for the cluster's dedicated\nper-cluster installer service account, scoped to the given cluster.\nCalled by cluster-service when generating the cluster install command.\nThe token is passed to the Helm hook as\n--set controlPlane.bootstrapToken=<token> and used directly as a Bearer token\nto call GET /clusters/{uuid}/control-plane-config — the installer client\nsecret never leaves the server.\n\nThe per-cluster installer client is resolved (and, if needed,\nself-healed by creating it) internally, so callers only need to say\nwhich cluster the token is for.\n",
         "x-service": "identity-manager",
         "x-test-coverage": "not-applicable",
         "operationId": "mint_installer_bootstrap_token",
