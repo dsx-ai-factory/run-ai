@@ -1,10 +1,13 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# Tags the shared packages and service clients a push to main changed, with the same
-# make targets developers use -- they work out the next version themselves. PATCH_ONLY:
-# an API-compatible change is tagged as a patch; a breaking one fails the job untagged,
-# for a person to decide.
+# Tags the shared packages and service clients, with the same make targets developers
+# use -- they work out the next version themselves. PATCH_ONLY: an API-compatible change
+# is tagged as a patch; a breaking one fails the job untagged, for a person to decide.
+#
+# When: a person's change, or a Renovate security fix, is released on push. Routine
+# Renovate updates merge as usual but are released once a week, so a package does not
+# cut a release -- and fan out to every consumer -- for each dependency bump.
 name: Package auto-tag
 
 on:
@@ -14,6 +17,8 @@ on:
       - "runai-common-packages/**"
       - "runai-application-packages/**"
       - "control-plane/*/pkg/client/**"
+  schedule:
+    - cron: "0 5 * * 0"   # Sunday 05:00 UTC: the week's Renovate updates
   workflow_dispatch:
     inputs:
       modules:
@@ -36,22 +41,40 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - id: modules
         env:
           INPUT: ${{ inputs.modules }}
           BEFORE: ${{ github.event.before }}
         run: |
-          if [ -n "$INPUT" ]; then
-            files=$(echo "$INPUT" | tr ',' '\n' | sed 's#[[:space:]]##g; s#/*$#/x#')
-          else
-            files=$(git diff --name-only "$BEFORE" "$GITHUB_SHA")
-          fi
           # A package is its top-level directory; a client is its service's pkg/client.
-          modules=$(echo "$files" \
-            | grep -oE '^(runai-(common|application)-packages/[^/]+|control-plane/[^/]+/pkg/client)/' \
-            | sed 's#/$##' | sort -u \
-            | while read -r m; do [ -f "$m/go.mod" ] && echo "$m"; done)
+          to_modules() {
+            grep -oE '^(runai-(common|application)-packages/[^/]+|control-plane/[^/]+/pkg/client)/' \
+              | sed 's#/$##' | sort -u \
+              | while read -r m; do [ -f "$m/go.mod" ] && echo "$m"; done || true
+          }
+          case "$GITHUB_EVENT_NAME" in
+            workflow_dispatch)
+              modules=$(echo "$INPUT" | tr ',' '\n' | sed 's#[[:space:]]##g; s#/*$#/x#' | to_modules) ;;
+            push)
+              # Only a person's change or a security fix; routine Renovate merges wait
+              # for the weekly run.
+              modules=$(git log --format='%H%x09%an%x09%s' "$BEFORE..$GITHUB_SHA" \
+                | while IFS=$'\t' read -r sha author subject; do
+                    if [ "$author" != "devops-runai" ] || [[ "$subject" == *"[SECURITY]"* ]]; then
+                      git diff-tree --no-commit-id --name-only -r "$sha"
+                    fi
+                  done | to_modules) ;;
+            schedule)
+              # Everything changed since its last release. A module never tagged is
+              # skipped: its first version is a decision.
+              modules=$(git ls-files '*/go.mod' | to_modules \
+                | while read -r m; do
+                    tag=$(git tag -l "$m/v*" | grep -v -- '-dev' | sort -V | tail -1 || true)
+                    if [ -n "$tag" ] && [ -n "$(git log -1 --format=%H "$tag..HEAD" -- "$m")" ]; then echo "$m"; fi
+                  done) ;;
+          esac
           echo "modules=$(echo "$modules" | jq -R . | jq -sc 'map(select(. != ""))')" >> "$GITHUB_OUTPUT"
           echo "$modules"
 
