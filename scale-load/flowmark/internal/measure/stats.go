@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-// Summary is the statistical view of one batch of timings. Only arrived items
-// feed the latency fields; pending and failed items are counted, never timed.
 type Summary struct {
 	SampleSize   int
 	PendingCount int
@@ -27,11 +25,6 @@ type Summary struct {
 	Throughput   float64
 }
 
-// Stats summarises timings. Percentiles use the nearest-rank method over the
-// arrived durations only, so a pending item can never pull p50 towards zero.
-// Throughput is arrived items divided by the makespan, the span from the
-// earliest creation to the latest arrival. SuccessRate is arrived over all
-// items. An empty or all-pending batch yields zero samples and no latencies.
 func Stats(timings []Timing) Summary {
 	var summary Summary
 	var durations []time.Duration
@@ -74,11 +67,15 @@ func Stats(timings []Timing) Summary {
 	}
 	summary.Mean = sum / time.Duration(len(durations))
 
-	summary.Makespan = last.Sub(first)
-	if summary.Makespan > 0 {
+	summary.Makespan = max(last.Sub(first), 0)
+	if summary.HasThroughput() {
 		summary.Throughput = float64(summary.SampleSize) / summary.Makespan.Seconds()
 	}
 	return summary
+}
+
+func (s Summary) HasThroughput() bool {
+	return s.SampleSize >= 2 && s.Makespan > 0
 }
 
 func percentile(sorted []time.Duration, p float64) time.Duration {
@@ -89,9 +86,6 @@ func percentile(sorted []time.Duration, p float64) time.Duration {
 	return sorted[rank-1]
 }
 
-// Metrics renders the summary for a results section. Latency keys are present
-// only when at least one item arrived, so a fully pending run reports counts
-// and nothing that could be read as a fast zero.
 func (s Summary) Metrics() map[string]any {
 	metrics := map[string]any{
 		"sample_size":   s.SampleSize,
@@ -107,6 +101,9 @@ func (s Summary) Metrics() map[string]any {
 	metrics["p99_ms"] = s.P99.Milliseconds()
 	metrics["mean_ms"] = s.Mean.Milliseconds()
 	metrics["max_ms"] = s.Max.Milliseconds()
+	if !s.HasThroughput() {
+		return metrics
+	}
 	metrics["makespan_ms"] = s.Makespan.Milliseconds()
 	metrics["throughput_per_sec"] = s.Throughput
 	return metrics

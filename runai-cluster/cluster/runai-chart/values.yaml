@@ -197,6 +197,11 @@ kai-resource-management:
   defaultNodePool:
     enabled: false
   kai-scheduler:
+    gpu-fractioning:
+      metricsAgent:
+        metricNames:
+          gpuSmUtilizationPercent: runai_pod_gpu_utilization
+          gpuMemoryUsedBytes: runai_pod_gpu_memory_used_bytes
     global:
       # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
       # chart-level autoscaling switch off so it does not imply enablement.

@@ -35851,6 +35851,20 @@ components:
       schema:
         type: string
         example: '1'
+    ProjectsFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name!=some-name
+      explode: false
     OrgUnitSettingsKey:
       name: key
       in: path
@@ -35957,20 +35971,6 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryType'
-    ProjectsFilterBy:
-      name: filterBy
-      in: query
-      required: false
-      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.
-      schema:
-        type: array
-        maxItems: 10
-        items:
-          type: string
-          pattern: ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
-        example:
-          - name!=some-name
-      explode: false
     ProjectsSortBy:
       name: sortBy
       in: query
