@@ -53463,29 +53463,6 @@ components:
         specified.
       type: boolean
       nullable: true
-    AssetKind1:
-      description: The kind of the asset.
-      type: string
-      minLength: 1
-      enum:
-        - compute
-        - environment
-        - accessKey
-        - dockerRegistry
-        - password
-        - genericSecret
-        - registry
-        - s3
-        - git
-        - nfs
-        - pvc
-        - hostPath
-        - workload-template
-        - model
-        - config-map
-        - secret-volume
-        - data-volume
-        - ngcApiKey
     AssetsMapping:
       type: object
       properties:
@@ -53495,7 +53472,7 @@ components:
           minLength: 1
           example: my-asset-name
         kind:
-          $ref: '#/components/schemas/AssetKind1'
+          $ref: '#/components/schemas/AssetKind'
         id:
           $ref: '#/components/schemas/AssetId'
     SupersetWorkload:

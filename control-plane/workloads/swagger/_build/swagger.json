@@ -16347,7 +16347,8 @@
           "config-map",
           "secret-volume",
           "data-volume",
-          "ngcApiKey"
+          "ngcApiKey",
+          "resource-claim-template"
         ]
       },
       "AssetsMapping": {
