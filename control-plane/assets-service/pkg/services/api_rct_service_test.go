@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
@@ -258,80 +257,8 @@ var _ = Describe("Rct API tests", func() {
 		return recorder
 	}
 
-	Context("ObjectSpec validation", func() {
-		It("accepts a minimal valid ResourceClaimSpec", func() {
-			resp := postRctWithObjectSpec(validRctObjectSpec())
-			Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
-		})
-
-		It("rejects an empty objectSpec (short-circuit before schema)", func() {
-			// Can't build this via the Go struct path — omitempty on
-			// `ObjectSpec map[string]interface{}` strips empty maps at marshal
-			// time, so the request arrives with a zero-valued Spec and the
-			// generated AssertRctCreationRequestRequired wrapper rejects it as
-			// "spec required" before validateRctObjectSpec runs. Construct
-			// the JSON explicitly so ObjectSpec is present-but-empty.
-			body := fmt.Sprintf(
-				`{"meta":{"name":%q,"scope":"cluster","clusterId":%q},"spec":{"objectSpec":{}}}`,
-				testutils.RandString(5), randoms.ClusterId,
-			)
-			httpReq, err := http.NewRequest("POST", urlRct, strings.NewReader(body))
-			Expect(err).To(BeNil())
-			httpReq.Header = *headerForAdmin(randoms)
-			recorder := httptest.NewRecorder()
-			router.ServeHTTP(recorder, httpReq)
-			Expect(recorder.Code).To(Equal(http.StatusBadRequest), recorder.Body.String())
-			Expect(recorder.Body.String()).To(ContainSubstring("spec.objectSpec is required"))
-		})
-
-		It("rejects a top-level typo like 'devics' via typed-decode layer", func() {
-			// K8s OpenAPI schemas are permissive (no additionalProperties: false),
-			// so layer 1 (santhosh-tekuri) accepts unknown fields. Layer 2
-			// (json.DisallowUnknownFields against resourcev1.ResourceClaimSpec)
-			// is what catches this — the regression that motivated adding the
-			// second layer in the first place.
-			resp := postRctWithObjectSpec(map[string]any{
-				"devics":  map[string]any{},
-				"devices": map[string]any{"requests": []any{}},
-			})
-			Expect(resp.Code).To(Equal(http.StatusBadRequest))
-			// The response body is JSON-encoded, so the inner double-quotes
-			// around the field name arrive as `\"...\"`. Backticks let us
-			// match that verbatim without Go-string escaping the backslashes.
-			Expect(resp.Body.String()).To(ContainSubstring(`unknown field \"devics\"`))
-		})
-
-		It("rejects an unknown nested field inside devices.requests[] via typed-decode layer", func() {
-			resp := postRctWithObjectSpec(map[string]any{
-				"devices": map[string]any{
-					"requests": []any{
-						map[string]any{
-							"name":                "gpu",
-							"exactly":             map[string]any{"deviceClassName": "gpu.nvidia.com", "count": 1},
-							"unexpectedNestedKey": "oops",
-						},
-					},
-				},
-			})
-			Expect(resp.Code).To(Equal(http.StatusBadRequest))
-			// See note above on why the backticks + escaped quotes.
-			Expect(resp.Body.String()).To(ContainSubstring(`unknown field \"unexpectedNestedKey\"`))
-		})
-
-		It("rejects a shape mismatch (devices.requests as string) via schema layer", func() {
-			// Layer 1 fires before layer 2 for structural type violations
-			// because typed decode would fail with a Go json unmarshal error
-			// that's harder to read; the schema error names the offending
-			// path directly.
-			resp := postRctWithObjectSpec(map[string]any{
-				"devices": map[string]any{
-					"requests": "not-an-array",
-				},
-			})
-			Expect(resp.Code).To(Equal(http.StatusBadRequest))
-			Expect(resp.Body.String()).To(ContainSubstring("resource.k8s.io/v1 ResourceClaimSpec"))
-		})
-	})
+	// ObjectSpec validation is unit-tested directly in
+	// k8s_object_validation_test.go against the same rctObjectSpecSchema.
 
 	// postRctToClusterVersion re-installs the cluster mock at the given
 	// cluster version and issues a valid RCT creation POST. Everything else
@@ -375,31 +302,6 @@ var _ = Describe("Rct API tests", func() {
 			WithCluster(randoms.ClusterId, buildClusterWithKubeVersion(clusterVer, kubeVer)))
 		checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
 		return postRctWithObjectSpec(validRctObjectSpec())
-	}
-
-	// postRctWithObjectMeta issues a cluster-scoped RCT creation POST with
-	// the given ObjectMeta and a valid ObjectSpec. Used by the ObjectMeta
-	// validation tests.
-	postRctWithObjectMeta := func(meta *api.K8sObjectMeta) *httptest.ResponseRecorder {
-		req := api.RctCreationRequest{
-			Meta: api.AssetCreationRequest{
-				Name:      testutils.RandString(5),
-				Scope:     api.SCOPE_CLUSTER,
-				ClusterId: convutils.Ref(randoms.ClusterId),
-			},
-			Spec: api.RctSpec{
-				ObjectMeta: meta,
-				ObjectSpec: validRctObjectSpec(),
-			},
-		}
-		payload, err := json.Marshal(req)
-		Expect(err).To(BeNil())
-		httpReq, err := http.NewRequest("POST", urlRct, bytes.NewReader(payload))
-		Expect(err).To(BeNil())
-		httpReq.Header = *headerForAdmin(randoms)
-		recorder := httptest.NewRecorder()
-		router.ServeHTTP(recorder, httpReq)
-		return recorder
 	}
 
 	Context("cluster capability check (MinVersionResourceClaimTemplates = 3.1.0)", func() {
@@ -486,61 +388,17 @@ var _ = Describe("Rct API tests", func() {
 		})
 	})
 
-	Context("ObjectMeta validation (K8s label/annotation syntax)", func() {
-		It("accepts a valid label + annotation payload", func() {
-			meta := &api.K8sObjectMeta{
-				Labels:      &map[string]string{"app": "my-app", "example.com/tier": "gpu"},
-				Annotations: &map[string]string{"example.com/owner": "team-a"},
-			}
-			resp := postRctWithObjectMeta(meta)
-			Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
-		})
-
-		It("accepts an empty label value (K8s spec allows it)", func() {
-			meta := &api.K8sObjectMeta{Labels: &map[string]string{"app": ""}}
-			Expect(postRctWithObjectMeta(meta).Code).To(Equal(http.StatusAccepted))
-		})
-
-		It("rejects an invalid label key character", func() {
-			meta := &api.K8sObjectMeta{Labels: &map[string]string{"my@label": "v"}}
-			resp := postRctWithObjectMeta(meta)
-			Expect(resp.Code).To(Equal(http.StatusBadRequest))
-			Expect(resp.Body.String()).To(ContainSubstring("spec.objectMeta.labels"))
-			Expect(resp.Body.String()).To(ContainSubstring("valid Kubernetes qualified name"))
-		})
-
-		It("rejects a label key name longer than 63 characters", func() {
-			meta := &api.K8sObjectMeta{Labels: &map[string]string{strings.Repeat("a", 64): "v"}}
-			resp := postRctWithObjectMeta(meta)
-			Expect(resp.Code).To(Equal(http.StatusBadRequest))
-			Expect(resp.Body.String()).To(ContainSubstring("spec.objectMeta.labels"))
-		})
-
-		It("rejects a label key prefix longer than 253 characters", func() {
-			meta := &api.K8sObjectMeta{Labels: &map[string]string{strings.Repeat("a", 254) + "/name": "v"}}
-			resp := postRctWithObjectMeta(meta)
-			Expect(resp.Code).To(Equal(http.StatusBadRequest))
-			Expect(resp.Body.String()).To(ContainSubstring("prefix component"))
-		})
-
-		It("rejects an invalid label value character", func() {
-			meta := &api.K8sObjectMeta{Labels: &map[string]string{"app": "bad@value"}}
-			resp := postRctWithObjectMeta(meta)
-			Expect(resp.Code).To(Equal(http.StatusBadRequest))
-			Expect(resp.Body.String()).To(ContainSubstring("valid Kubernetes label value"))
-		})
-
-		It("rejects an invalid annotation key character", func() {
-			meta := &api.K8sObjectMeta{Annotations: &map[string]string{"my@ann": "v"}}
-			resp := postRctWithObjectMeta(meta)
-			Expect(resp.Code).To(Equal(http.StatusBadRequest))
-			Expect(resp.Body.String()).To(ContainSubstring("spec.objectMeta.annotations"))
-		})
-
-		It("enforces the same label rules on the update path", func() {
-			// Create a valid RCT first, then PUT with a bad label.
+	Context("ObjectMeta / ObjectSpec validation wiring", func() {
+		// The validators themselves are unit-tested in
+		// k8s_object_validation_test.go. This single integration test
+		// proves that both CreateRct and UpdateRctById actually call them.
+		It("create + update reject a bad label via validateK8sObjectMeta", func() {
+			// CreateRct with a valid meta must succeed (proves the create
+			// path runs validateK8sObjectMeta and it accepts good input).
 			created, _, _ := createRctAsset(buildRandomClusterRctAsset(randoms), router, headerForAdmin(randoms))
 
+			// UpdateRctById with a bad label must fail (proves the update
+			// path runs validateK8sObjectMeta and it rejects bad input).
 			badUpdate := api.RctUpdateRequest{
 				Meta: api.AssetUpdateRequest{Name: testutils.RandString(5)},
 				Spec: api.RctSpec{

@@ -14959,128 +14959,29 @@ components:
       type: object
     RctListResponse:
       example:
-        next: 0
         entries:
         - meta:
-            name: my-asset
+            id: a418ed33-9399-48c0-a890-122cadd13bfd
+            name: my-rct
+            kind: resource-claim-template
             scope: project
             projectId: 4500001
-            id: a418ed33-9399-48c0-a890-122cadd13bfd
-            kind: s3
             createdBy: test@run.ai
-            createdAt: 2023-02-23T14:25:36.707685Z
+            createdAt: 2026-01-01T00:00:00Z
             updatedBy: test@run.ai
-            updatedAt: 2023-02-23T14:25:36.707685Z
-            workloadSupportedTypes:
-              workspace: false
-              training: false
-              distributed: true
-              distFramework: TF
+            updatedAt: 2026-01-01T00:00:00Z
           spec:
             objectMeta:
-              annotations:
-                example.com/owner: team-a
-                example.com/version: "1.0"
               labels:
                 app: my-app
             objectSpec:
-              key: ""
-        - meta:
-            name: my-asset
-            scope: project
-            projectId: 4500001
-            id: a418ed33-9399-48c0-a890-122cadd13bfd
-            kind: s3
-            createdBy: test@run.ai
-            createdAt: 2023-02-23T14:25:36.707685Z
-            updatedBy: test@run.ai
-            updatedAt: 2023-02-23T14:25:36.707685Z
-            workloadSupportedTypes:
-              workspace: false
-              training: false
-              distributed: true
-              distFramework: TF
-          spec:
-            objectMeta:
-              annotations:
-                example.com/owner: team-a
-                example.com/version: "1.0"
-              labels:
-                app: my-app
-            objectSpec:
-              key: ""
-        - meta:
-            name: my-asset
-            scope: project
-            projectId: 4500001
-            id: a418ed33-9399-48c0-a890-122cadd13bfd
-            kind: s3
-            createdBy: test@run.ai
-            createdAt: 2023-02-23T14:25:36.707685Z
-            updatedBy: test@run.ai
-            updatedAt: 2023-02-23T14:25:36.707685Z
-            workloadSupportedTypes:
-              workspace: false
-              training: false
-              distributed: true
-              distFramework: TF
-          spec:
-            objectMeta:
-              annotations:
-                example.com/owner: team-a
-                example.com/version: "1.0"
-              labels:
-                app: my-app
-            objectSpec:
-              key: ""
-        - meta:
-            name: my-asset
-            scope: project
-            projectId: 4500001
-            id: a418ed33-9399-48c0-a890-122cadd13bfd
-            kind: s3
-            createdBy: test@run.ai
-            createdAt: 2023-02-23T14:25:36.707685Z
-            updatedBy: test@run.ai
-            updatedAt: 2023-02-23T14:25:36.707685Z
-            workloadSupportedTypes:
-              workspace: false
-              training: false
-              distributed: true
-              distFramework: TF
-          spec:
-            objectMeta:
-              annotations:
-                example.com/owner: team-a
-                example.com/version: "1.0"
-              labels:
-                app: my-app
-            objectSpec:
-              key: ""
-        - meta:
-            name: my-asset
-            scope: project
-            projectId: 4500001
-            id: a418ed33-9399-48c0-a890-122cadd13bfd
-            kind: s3
-            createdBy: test@run.ai
-            createdAt: 2023-02-23T14:25:36.707685Z
-            updatedBy: test@run.ai
-            updatedAt: 2023-02-23T14:25:36.707685Z
-            workloadSupportedTypes:
-              workspace: false
-              training: false
-              distributed: true
-              distFramework: TF
-          spec:
-            objectMeta:
-              annotations:
-                example.com/owner: team-a
-                example.com/version: "1.0"
-              labels:
-                app: my-app
-            objectSpec:
-              key: ""
+              devices:
+                requests:
+                - name: gpu
+                  exactly:
+                    deviceClassName: gpu.nvidia.com
+                    count: 1
+                    allocationMode: ExactCount
       properties:
         next:
           description: |

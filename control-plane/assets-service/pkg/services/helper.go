@@ -49,7 +49,7 @@ func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreation
 
 	if ClusterAndBelow.Has(kind) {
 		if meta.Scope == api.SCOPE_TENANT || meta.Scope == api.SCOPE_SYSTEM {
-			return api.NewValidationError(fmt.Sprintf("scope %s is not supported for kind %s", meta.Scope, kind))
+			return api.NewError(http.StatusForbidden, fmt.Sprintf("scope %s is not supported for kind %s", meta.Scope, kind), nil)
 		}
 	}
 

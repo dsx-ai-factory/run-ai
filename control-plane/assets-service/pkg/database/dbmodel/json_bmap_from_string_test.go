@@ -178,4 +178,3 @@ var _ = Describe("FromJsonBMap()", func() {
 		Expect(err.Error()).To(ContainSubstring("unmarshal json"))
 	})
 })
-

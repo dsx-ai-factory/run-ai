@@ -36,10 +36,5 @@ kubectl get --raw '/openapi/v3/apis/resource.k8s.io/v1' \
   > control-plane/assets-service/pkg/services/schemas/rct_object_spec.schema.json
 ```
 
-Do NOT slice down to only `ResourceClaimSpec` — its `$ref`s
-(`DeviceClaim`, `DeviceRequest`, `DeviceSelector`, ...) need to resolve
-locally, so the whole `components.schemas` dictionary must stay together
-inside the full OpenAPI document.
-
 Commit the file with a note in the commit message identifying the K8s server
 version it came from (`kubectl version -o json | jq .serverVersion`).

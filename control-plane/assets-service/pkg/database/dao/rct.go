@@ -142,15 +142,13 @@ func GetRctById(ctx context.Context, id string) (*api.Rct, *api.Error) {
 }
 
 // UpdateRct updates the assets_metadata row and overwrites the JSON spec in
-// assets_spec for a resource claim template, atomically. On success it clears
-// any cached policy compliance for the asset and notifies watchers (agent
-// sync) via NotifyAssetModified. Mirrors UpdateNFSAsset.
+// assets_spec for a resource claim template, atomically.
 func UpdateRct(ctx context.Context, id string, request api.RctUpdateRequest, nameValidationQuery *database.ParametrizedQuery) (*api.Rct, *api.Error) {
 	tx := runaidb.DB().WithContext(ctx).Begin()
 	committedTx := false
 	defer orm.FinalizeTransaction(tx, &committedTx)
 
-	result, assetMeta, err := updateRctInTransaction(ctx, tx, id, request, nameValidationQuery)
+	result, _, err := updateRctInTransaction(ctx, tx, id, request, nameValidationQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -159,8 +157,6 @@ func UpdateRct(ctx context.Context, id string, request api.RctUpdateRequest, nam
 		return nil, database.Error(database.COMMIT_UPDATES, api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE).WithDetails(err)
 	}
 	committedTx = true
-
-	NotifyAssetModified(ctx, id, assetMeta.Kind, ScopeInfoOfDbMeta(assetMeta))
 
 	return result, nil
 }
@@ -223,8 +219,6 @@ func DeleteRct(ctx context.Context, assetMeta *dbmodel.AssetMeta, deletionType D
 		return database.Error(database.COMMIT_DELETIONS, api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE).WithDetails(err)
 	}
 	committedTx = true
-
-	NotifyAssetDeleted(ctx, assetMeta.Id, assetMeta.Kind, ScopeInfoOfDbMeta(assetMeta))
 
 	return nil
 }

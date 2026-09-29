@@ -6,15 +6,12 @@
 package services
 
 import (
-	"bytes"
 	"context"
 	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
-	"strings"
 
 	jsschema "github.com/santhosh-tekuri/jsonschema/v6"
 	resourcev1 "k8s.io/api/resource/v1"
@@ -71,16 +68,6 @@ func (s *RctApiService) CreateRct(ctx context.Context, request api.RctCreationRe
 	assetKind := api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE
 	audit.AuditFromCtx(ctx).WithEntityType(string(assetKind)).WithEntityName(request.Meta.Name).WithClusterId(safeStrPtr(request.Meta.ClusterId))
 
-	// SYSTEM-scope RBAC pre-check: RCT is x-no-authorization + ClusterAndBelow,
-	// so without this the validator returns 400 before RBAC can return the
-	// correct 403. Non-SYSTEM requests fall through to the standard order
-	// (validate → RBAC) used by every other asset handler.
-	if request.Meta.Scope == api.SCOPE_SYSTEM {
-		if rbacErr := auth.ValidateAccessByActionAndAssetKind(ctx, ScopeInfoOfCreateRequest(&request.Meta), string(assetKind), backend.ACTION_CREATE, convutils.Deref(request.Meta.Private, false)); rbacErr != nil {
-			return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
-		}
-	}
-
 	validationError := ValidateAssetCreateRequestMeta(ctx, &request.Meta, assetKind)
 	if validationError != nil {
 		return NewErrorResponse(validationError), nil
@@ -128,7 +115,7 @@ func (s *RctApiService) CreateRct(ctx context.Context, request api.RctCreationRe
 func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32) (api.ImplResponse, error) {
 	assetKind := api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE
 
-	// this API does not work with the "classic" queryParams so just initial it to empty
+	// WAIT_FOR_OFER this API does not work with the "classic" queryParams so just initial it to empty
 	// when we work with the "standard" filter this needs to be refactored
 	queryParams, queryError := query_types.NewQueryParams("", "", "", false, 0, "", "", nil)
 	if queryError != nil {
@@ -263,142 +250,16 @@ func requireRctKind(assetMeta *dbmodel.AssetMeta, id string) *api.Error {
 		fmt.Sprintf("resource claim template with id %s not found", id), nil)
 }
 
-// Kubernetes label/annotation key + label value syntax. Reproduced here rather
-// than importing k8s.io/apimachinery/pkg/util/validation (not vendored in this
-// service) — the two regexes are stable and well-documented:
-//
-//   Qualified-name key: [prefix/]name where
-//     prefix (optional) is a DNS subdomain (≤253 chars)
-//     name     (required) is [A-Za-z0-9] with `.` `_` `-` inside (≤63 chars)
-//   Label value: empty OR same character class as name (≤63 chars)
-//
-// See https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set
-var (
-	dnsLabelSubsetRegex = regexp.MustCompile(`^[A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?$`)
-	dnsSubdomainRegex   = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
-)
-
-// validateK8sObjectMeta enforces Kubernetes-compatible key syntax on labels
-// and annotations, and value syntax on labels. The K8sObjectMeta payload is
-// sync'd to the cluster as-is, so rejecting invalid entries at asset-create /
-// asset-update time surfaces the error to the user before the sync agent
-// tries to POST the malformed ResourceClaimTemplate to the K8s API server.
-// OpenAPI 3.0 can't express key patterns on map types (that's a 3.1
-// propertyNames feature), so this is where key validation lives.
-func validateK8sObjectMeta(meta *api.K8sObjectMeta) *api.Error {
-	if meta == nil {
-		return nil
-	}
-	if meta.Labels != nil {
-		for key, value := range *meta.Labels {
-			if err := validateQualifiedName(key, "spec.objectMeta.labels"); err != nil {
-				return err
-			}
-			if err := validateLabelValue(key, value); err != nil {
-				return err
-			}
-		}
-	}
-	if meta.Annotations != nil {
-		// Annotation values have no syntactic constraint (arbitrary strings
-		// up to the maxLength enforced by the generated model constraints);
-		// only the key is validated here.
-		for key := range *meta.Annotations {
-			if err := validateQualifiedName(key, "spec.objectMeta.annotations"); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func validateQualifiedName(key, path string) *api.Error {
-	if len(key) == 0 {
-		return api.NewValidationError(fmt.Sprintf("%s: key must not be empty", path))
-	}
-	var prefix, name string
-	if p, n, found := strings.Cut(key, "/"); found {
-		prefix, name = p, n
-	} else {
-		name = key
-	}
-	if len(name) == 0 || len(name) > 63 || !dnsLabelSubsetRegex.MatchString(name) {
-		return api.NewValidationError(fmt.Sprintf(
-			"%s: key %q name component is not a valid Kubernetes qualified name (must be [A-Za-z0-9] with `.`, `_`, `-` allowed inside, ≤63 chars)",
-			path, key))
-	}
-	if prefix != "" {
-		if len(prefix) > 253 || !dnsSubdomainRegex.MatchString(prefix) {
-			return api.NewValidationError(fmt.Sprintf(
-				"%s: key %q prefix component is not a valid DNS subdomain (≤253 chars, lowercase alphanumeric + `-`, dot-separated)",
-				path, key))
-		}
-	}
-	return nil
-}
-
-func validateLabelValue(key, value string) *api.Error {
-	if value == "" {
-		return nil // empty label value is valid per K8s spec
-	}
-	if len(value) > 63 || !dnsLabelSubsetRegex.MatchString(value) {
-		return api.NewValidationError(fmt.Sprintf(
-			"spec.objectMeta.labels[%q]: value %q is not a valid Kubernetes label value (must be [A-Za-z0-9] with `.`, `_`, `-` allowed inside, ≤63 chars)",
-			key, value))
-	}
-	return nil
-}
-
-// validateRctObjectSpec checks that the free-form objectSpec conforms to the
-// Kubernetes OpenAPI schema for resource.k8s.io/v1 ResourceClaimSpec (i.e.
-// starts with `devices`; the outer ResourceClaimTemplateSpec wrapping is not
-// part of our on-the-wire shape). The schema is checked in as a static asset
-// (see schemas/README.md) and loaded once at process start.
-//
-// Two-layer validation:
-//  1. OpenAPI schema (rctObjectSpecValidator) — types, enums, required
-//     fields, and constraints declared in the schema (min/max, length, ...).
-//  2. Typed struct decode with DisallowUnknownFields — rejects misspelled
-//     fields. Necessary because K8s publishes permissive schemas: without
-//     `additionalProperties: false` (which they never set), JSON Schema
-//     allows any extra key, so `{"devics": {}}` would pass layer 1.
-//
-// Does NOT catch cluster-side concerns (DeviceClass existence, CEL selector
-// evaluation) — those are checked at apply time by the K8s API server and
-// surfaced back through the asset's cluster-status.
+// validateRctObjectSpec is a thin adapter over the generic
+// validateK8sObjectSpec, specialised to the K8s ResourceClaimSpec type.
+// Kept here (rather than inlined at each callsite) so future RCT-only
+// validation can slot in alongside the generic call without changing the
+// callers, and so the RCT-specific schema label lives with the RCT service.
 func validateRctObjectSpec(objectSpec map[string]any) *api.Error {
-	if len(objectSpec) == 0 {
-		return api.NewError(http.StatusBadRequest, "spec.objectSpec is required", nil)
-	}
-	if rctObjectSpecSchema == nil {
-		return api.NewError(http.StatusServiceUnavailable,
-			"spec.objectSpec: schema-based validator is not initialized; check server logs", nil)
-	}
-
-	// Layer 1: JSON Schema (santhosh-tekuri).
-	if err := rctObjectSpecSchema.Validate(objectSpec); err != nil {
-		return api.NewError(http.StatusBadRequest,
-			fmt.Sprintf("spec.objectSpec does not conform to resource.k8s.io/v1 ResourceClaimSpec: %v", err), nil)
-	}
-
-	// Layer 2: typed struct decode with strict unknown-field checking. K8s
-	// publishes permissive schemas (no additionalProperties: false), so
-	// unknown/misspelled fields would slip through layer 1. Go's closed
-	// struct types via json.DisallowUnknownFields catch them.
-	raw, err := json.Marshal(objectSpec)
-	if err != nil {
-		return api.NewError(http.StatusBadRequest,
-			fmt.Sprintf("spec.objectSpec: marshal failed: %v", err), nil)
-	}
-	var typed resourcev1.ResourceClaimSpec
-	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&typed); err != nil {
-		return api.NewError(http.StatusBadRequest,
-			fmt.Sprintf("spec.objectSpec: %v", err), nil)
-	}
-
-	return nil
+	return validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
+		objectSpec, rctObjectSpecSchema,
+		"spec.objectSpec", "resource.k8s.io/v1 ResourceClaimSpec",
+	)
 }
 
 func initRctObjectSpecValidator() {

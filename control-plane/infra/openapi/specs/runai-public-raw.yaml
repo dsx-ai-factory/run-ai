@@ -35454,6 +35454,30 @@ components:
           maxItems: 500
           items:
             $ref: '#/components/schemas/Rct'
+      example:
+        entries:
+          - meta:
+              id: a418ed33-9399-48c0-a890-122cadd13bfd
+              name: my-rct
+              kind: resource-claim-template
+              scope: project
+              projectId: 4500001
+              createdBy: test@run.ai
+              createdAt: '2026-01-01T00:00:00Z'
+              updatedBy: test@run.ai
+              updatedAt: '2026-01-01T00:00:00Z'
+            spec:
+              objectMeta:
+                labels:
+                  app: my-app
+              objectSpec:
+                devices:
+                  requests:
+                    - name: gpu
+                      exactly:
+                        deviceClassName: gpu.nvidia.com
+                        count: 1
+                        allocationMode: ExactCount
     RctCreationRequest:
       type: object
       required:

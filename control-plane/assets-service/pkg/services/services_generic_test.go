@@ -265,9 +265,9 @@ func NewAssetKindTable(router chi.Router) []ginkgo.TableEntry {
 			testUsageInfo:      true,
 			testComplianceInfo: true,
 			testStatusInfo:     true,
-			allowedScopes:     &clusterDownScopes,
-			minClusterVersion: "2.20.0",
-			supportsCleanup:   true,
+			allowedScopes:      &clusterDownScopes,
+			minClusterVersion:  "2.20.0",
+			supportsCleanup:    true,
 		}),
 
 		ginkgo.Entry(string(api.ASSETKIND_SECRET_VOLUME), AssetTest{
