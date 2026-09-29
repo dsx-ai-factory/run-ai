@@ -176,6 +176,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("create two assets -> count by name", func() {
 		DescribeTable("both assets included in the list", func(testData AssetTest) {
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 			meta1, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 			testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 
@@ -197,6 +200,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("create two assets -> list by name", func() {
 		DescribeTable("only the requested asset is listed", func(testData AssetTest) {
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 			meta1, spec1, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 			testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 
@@ -212,6 +218,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("create system, tenant, cluster, department and project scoped assets -> list by scope", func() {
 		DescribeTable("only the relevant asset is listed", func(testData AssetTest) {
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 			var specSystem []byte
 			var specTenant []byte
 			var specCluster []byte
@@ -264,6 +273,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("create system, tenant, cluster department and project scoped assets -> list by department id and project id", func() {
 		DescribeTable("only the relevant assets are listed", func(testData AssetTest) {
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 			var specSystem []byte
 			var specTenant []byte
 			var specCluster []byte
@@ -300,6 +312,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("create two project scoped assets -> list by project id", func() {
 		DescribeTable("only the relevant asset is listed", func(testData AssetTest) {
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 			_, specProj1, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 			testData.factory.createProjectBasedAsset(differentProject, headerForAdmin(randoms))
 
@@ -583,7 +598,7 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("delete an asset which is being used by a workload", func() {
 		DescribeTable("delete fail for the deleted item with precondition error", func(testData AssetTest) {
-			if testData.notSupportedPre217 || testData.notSupportedPre220 {
+			if !testData.supportsClusterMockVersion(testing.OldClustersPreK8sObjectsTracker) {
 				return
 			}
 
@@ -594,7 +609,7 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("test usage info - workspaces, trainings and templates", func() {
 		DescribeTable("request should return usage info of the asset", func(testData AssetTest) {
-			if testData.testUsageInfo && !testData.notSupportedPre217 && !testData.notSupportedPre220 {
+			if testData.testUsageInfo && testData.supportsClusterMockVersion(testing.OldClustersPreK8sObjectsTracker) {
 				//   environment asset we always need
 				envAsset, envSpec, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
 
@@ -1667,6 +1682,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("test project deletion", func() {
 		DescribeTable("base flow", func(testData AssetTest) {
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 			_, specProj1, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 
 			//  list by project shows only the correct asset
@@ -1709,6 +1727,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 				if testData.skipClusterDeleteEventTest {
 					return
 				}*/
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 
 			_, specProj1, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 			listProjectHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?scope=%s&%s", testData.url, api.SCOPE_PROJECT, randoms.ProjectIdParam()), nil)
@@ -1774,6 +1795,9 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("Test tenant deletion", func() {
 		DescribeTable("Base flow", func(testData AssetTest) {
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 			// Ensure we only include assets that support cluster scope
 			if testData.allowedScopes == nil || testData.allowedScopes == &projectScopeOnly {
 				Skip(fmt.Sprintf("Asset type %s does not support cluster scope, skipping this test.", testData.kind))

@@ -34642,6 +34642,7 @@ components:
         - secret-volume
         - data-volume
         - ngcApiKey
+        - resource-claim-template
     UpdateCount:
       description: the value of an update counter of a data in the system.
       type: integer
@@ -34711,7 +34712,8 @@ components:
         - $ref: '#/components/schemas/AssetReadOnlyFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         id: a418ed33-9399-48c0-a890-122cadd13bfd
         kind: s3
         createdBy: test@run.ai
@@ -35052,7 +35054,8 @@ components:
         - $ref: '#/components/schemas/AssetCreationFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         workloadSupportedTypes:
           workspace: false
           training: false
@@ -35313,6 +35316,88 @@ components:
             - $ref: '#/components/schemas/ComputeAssetSpec'
           nullable: true
           type: object
+    K8sObjectMeta:
+      description: Metadata of the Kubernetes resource that is created by this k8sObject
+      type: object
+      nullable: true
+      properties:
+        annotations:
+          type: object
+          nullable: true
+          description: Free-form annotations attached to the resource.
+          additionalProperties:
+            type: string
+            maxLength: 10000
+          maxProperties: 1000
+          example:
+            example.com/owner: team-a
+            example.com/version: '1.0'
+        labels:
+          type: object
+          nullable: true
+          description: Free-form labels attached to the resource.
+          additionalProperties:
+            type: string
+            maxLength: 63
+          maxProperties: 1000
+          example:
+            app: my-app
+    RctSpec:
+      type: object
+      properties:
+        objectMeta:
+          $ref: '#/components/schemas/K8sObjectMeta'
+        objectSpec:
+          description: The raw Kubernetes spec of the ResourceClaimTemplate.
+          type: object
+          additionalProperties: true
+    Rct:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetMeta'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+    RctListResponse:
+      type: object
+      required:
+        - entries
+      properties:
+        next:
+          type: integer
+          format: int32
+          description: >
+            Offset for the next page of results. Present only when there are
+            more entries beyond the current page (i.e., the number of returned
+            entries equals the limit).
+        entries:
+          type: array
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/Rct'
+    RctCreationRequest:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetCreationRequest'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+    RctUpdateRequest:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetUpdateRequest'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
     AccessKeyCreationSpec:
       properties:
         existingSecretName:
@@ -53278,6 +53363,29 @@ components:
         specified.
       type: boolean
       nullable: true
+    AssetKind1:
+      description: The kind of the asset.
+      type: string
+      minLength: 1
+      enum:
+        - compute
+        - environment
+        - accessKey
+        - dockerRegistry
+        - password
+        - genericSecret
+        - registry
+        - s3
+        - git
+        - nfs
+        - pvc
+        - hostPath
+        - workload-template
+        - model
+        - config-map
+        - secret-volume
+        - data-volume
+        - ngcApiKey
     AssetsMapping:
       type: object
       properties:
@@ -53287,7 +53395,7 @@ components:
           minLength: 1
           example: my-asset-name
         kind:
-          $ref: '#/components/schemas/AssetKind'
+          $ref: '#/components/schemas/AssetKind1'
         id:
           $ref: '#/components/schemas/AssetId'
     SupersetWorkload:

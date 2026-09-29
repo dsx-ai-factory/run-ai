@@ -81,6 +81,20 @@ func LoadResponsePatchingPtrs(assets interface{}) map[string]ResponsePatchingPtr
 			ComplianceInfo: &realEntry.Compliance,
 		}
 
+	case *api.RctListResponse:
+		for idx, entry := range realEntry.Entries {
+			idToPatchingPtrsMap[entry.Meta.Id] = ResponsePatchingPtrs{
+				Meta: &realEntry.Entries[idx].Meta,
+				Spec: &realEntry.Entries[idx].Spec,
+			}
+		}
+
+	case *api.Rct:
+		idToPatchingPtrsMap[realEntry.Meta.Id] = ResponsePatchingPtrs{
+			Meta: &realEntry.Meta,
+			Spec: &realEntry.Spec,
+		}
+
 	case *api.HostPathListResponse:
 		for idx, entry := range realEntry.Entries {
 			idToPatchingPtrsMap[entry.Meta.Id] = ResponsePatchingPtrs{

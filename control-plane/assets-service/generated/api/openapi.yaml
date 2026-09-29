@@ -1055,6 +1055,352 @@ paths:
         resource-type: compute-resources
         action: update
       x-audit: true
+  /api/v1/k8s-objects/resource-claim-templates:
+    get:
+      description: Use to retrieve a list of resource claim templates.
+      operationId: list_rcts
+      parameters:
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RctListResponse'
+          description: Request completed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List resource claim templates.
+      tags:
+      - Resource Claim Templates
+      x-no-authorization: true
+      x-service: assets-service
+      x-test-coverage:
+      - control-plane/assets-service/pkg/services/api_rct_service_test.go
+    post:
+      description: Use to create a resource claim template and synchronize it to the
+        cluster.
+      operationId: create_rct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RctCreationRequest'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rct'
+          description: Request accepted successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create resource claim template.
+      tags:
+      - Resource Claim Templates
+      x-no-authorization: true
+      x-service: assets-service
+      x-test-coverage:
+      - control-plane/assets-service/pkg/services/api_rct_service_test.go
+      x-audit: true
+  /api/v1/k8s-objects/resource-claim-templates/{AssetId}:
+    delete:
+      description: "Use to delete a resource claim template, by id."
+      operationId: delete_rct_by_id
+      parameters:
+      - description: Unique identifier of the asset.
+        explode: false
+        in: path
+        name: AssetId
+        required: true
+        schema:
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "202":
+          content:
+            application/json:
+              example:
+                code: 202
+                message: Request has been accepted.
+              schema:
+                $ref: '#/components/schemas/HttpResponse'
+          description: Accepted.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete a resource claim template.
+      tags:
+      - Resource Claim Templates
+      x-service: assets-service
+      x-test-coverage:
+      - control-plane/assets-service/pkg/services/api_rct_service_test.go
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: delete
+      x-audit: true
+    get:
+      description: Use to retrieve the details of a resource claim template by id.
+      operationId: get_rct_by_id
+      parameters:
+      - description: Unique identifier of the asset.
+        explode: false
+        in: path
+        name: AssetId
+        required: true
+        schema:
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rct'
+          description: Request completed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Retrieve a resource claim template.
+      tags:
+      - Resource Claim Templates
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: read
+      x-service: assets-service
+      x-test-coverage:
+      - control-plane/assets-service/pkg/services/api_rct_service_test.go
+    put:
+      description: Use to update the details of a resource claim template by id.
+      operationId: update_rct_by_id
+      parameters:
+      - description: Unique identifier of the asset.
+        explode: false
+        in: path
+        name: AssetId
+        required: true
+        schema:
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RctUpdateRequest'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rct'
+          description: Request accepted successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        default:
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update a resource claim template.
+      tags:
+      - Resource Claim Templates
+      x-service: assets-service
+      x-test-coverage:
+      - control-plane/assets-service/pkg/services/api_rct_service_test.go
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: update
+      x-audit: true
   /api/v1/asset/credentials:
     get:
       description: Use to retrieve a list of all existing credentials.
@@ -12153,6 +12499,30 @@ components:
         minLength: 1
         type: string
       style: simple
+    Offset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 100
+        format: int32
+        type: integer
+      style: form
+    Limit:
+      description: The maximum number of entries to return.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        format: int32
+        maximum: 500
+        minimum: 1
+        type: integer
+      style: form
     IncludeStatus:
       description: Whether the query should include asset status information as part
         of the response.
@@ -12350,30 +12720,6 @@ components:
         type: boolean
       style: form
       x-internal: true
-    Offset:
-      description: The offset of the first item returned in the collection.
-      explode: true
-      in: query
-      name: offset
-      required: false
-      schema:
-        example: 100
-        format: int32
-        type: integer
-      style: form
-    Limit:
-      description: The maximum number of entries to return.
-      explode: true
-      in: query
-      name: limit
-      required: false
-      schema:
-        default: 50
-        format: int32
-        maximum: 500
-        minimum: 1
-        type: integer
-      style: form
     ClusterUuid:
       description: The Universally Unique Identifier (UUID) of the cluster.
       explode: false
@@ -12738,6 +13084,7 @@ components:
       - secret-volume
       - data-volume
       - ngcApiKey
+      - resource-claim-template
       minLength: 1
       type: string
     UpdateCount:
@@ -12813,7 +13160,8 @@ components:
       - $ref: '#/components/schemas/AssetReadOnlyFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         id: a418ed33-9399-48c0-a890-122cadd13bfd
         kind: s3
         createdBy: test@run.ai
@@ -13308,7 +13656,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -13434,7 +13783,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -13543,7 +13893,8 @@ components:
               status: status
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -13679,7 +14030,8 @@ components:
       - $ref: '#/components/schemas/AssetCreationFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         workloadSupportedTypes:
           workspace: false
           training: false
@@ -13690,7 +14042,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -13784,7 +14137,8 @@ components:
       example:
         entries:
         - name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -13797,7 +14151,8 @@ components:
             distributed: true
             distFramework: TF
         - name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -14088,7 +14443,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -14220,7 +14576,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -14335,7 +14692,8 @@ components:
               status: status
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -14459,7 +14817,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -14494,6 +14853,281 @@ components:
       required:
       - meta
       - spec
+    K8sObjectMeta:
+      description: Metadata of the Kubernetes resource that is created by this k8sObject
+      example:
+        annotations:
+          example.com/owner: team-a
+          example.com/version: "1.0"
+        labels:
+          app: my-app
+      nullable: true
+      properties:
+        annotations:
+          additionalProperties:
+            maxLength: 10000
+            type: string
+          description: Free-form annotations attached to the resource.
+          example:
+            example.com/owner: team-a
+            example.com/version: "1.0"
+          maxProperties: 1000
+          nullable: true
+          type: object
+        labels:
+          additionalProperties:
+            maxLength: 63
+            type: string
+          description: Free-form labels attached to the resource.
+          example:
+            app: my-app
+          maxProperties: 1000
+          nullable: true
+          type: object
+      type: object
+    RctSpec:
+      example:
+        objectMeta:
+          annotations:
+            example.com/owner: team-a
+            example.com/version: "1.0"
+          labels:
+            app: my-app
+        objectSpec:
+          key: ""
+      properties:
+        objectMeta:
+          $ref: '#/components/schemas/K8sObjectMeta'
+        objectSpec:
+          additionalProperties: true
+          description: The raw Kubernetes spec of the ResourceClaimTemplate.
+          type: object
+      type: object
+    Rct:
+      example:
+        meta:
+          name: my-asset
+          scope: project
+          projectId: 4500001
+          id: a418ed33-9399-48c0-a890-122cadd13bfd
+          kind: s3
+          createdBy: test@run.ai
+          createdAt: 2023-02-23T14:25:36.707685Z
+          updatedBy: test@run.ai
+          updatedAt: 2023-02-23T14:25:36.707685Z
+          workloadSupportedTypes:
+            workspace: false
+            training: false
+            distributed: true
+            distFramework: TF
+        spec:
+          objectMeta:
+            annotations:
+              example.com/owner: team-a
+              example.com/version: "1.0"
+            labels:
+              app: my-app
+          objectSpec:
+            key: ""
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetMeta'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+      required:
+      - meta
+      - spec
+      type: object
+    RctListResponse:
+      example:
+        next: 0
+        entries:
+        - meta:
+            name: my-asset
+            scope: project
+            projectId: 4500001
+            id: a418ed33-9399-48c0-a890-122cadd13bfd
+            kind: s3
+            createdBy: test@run.ai
+            createdAt: 2023-02-23T14:25:36.707685Z
+            updatedBy: test@run.ai
+            updatedAt: 2023-02-23T14:25:36.707685Z
+            workloadSupportedTypes:
+              workspace: false
+              training: false
+              distributed: true
+              distFramework: TF
+          spec:
+            objectMeta:
+              annotations:
+                example.com/owner: team-a
+                example.com/version: "1.0"
+              labels:
+                app: my-app
+            objectSpec:
+              key: ""
+        - meta:
+            name: my-asset
+            scope: project
+            projectId: 4500001
+            id: a418ed33-9399-48c0-a890-122cadd13bfd
+            kind: s3
+            createdBy: test@run.ai
+            createdAt: 2023-02-23T14:25:36.707685Z
+            updatedBy: test@run.ai
+            updatedAt: 2023-02-23T14:25:36.707685Z
+            workloadSupportedTypes:
+              workspace: false
+              training: false
+              distributed: true
+              distFramework: TF
+          spec:
+            objectMeta:
+              annotations:
+                example.com/owner: team-a
+                example.com/version: "1.0"
+              labels:
+                app: my-app
+            objectSpec:
+              key: ""
+        - meta:
+            name: my-asset
+            scope: project
+            projectId: 4500001
+            id: a418ed33-9399-48c0-a890-122cadd13bfd
+            kind: s3
+            createdBy: test@run.ai
+            createdAt: 2023-02-23T14:25:36.707685Z
+            updatedBy: test@run.ai
+            updatedAt: 2023-02-23T14:25:36.707685Z
+            workloadSupportedTypes:
+              workspace: false
+              training: false
+              distributed: true
+              distFramework: TF
+          spec:
+            objectMeta:
+              annotations:
+                example.com/owner: team-a
+                example.com/version: "1.0"
+              labels:
+                app: my-app
+            objectSpec:
+              key: ""
+        - meta:
+            name: my-asset
+            scope: project
+            projectId: 4500001
+            id: a418ed33-9399-48c0-a890-122cadd13bfd
+            kind: s3
+            createdBy: test@run.ai
+            createdAt: 2023-02-23T14:25:36.707685Z
+            updatedBy: test@run.ai
+            updatedAt: 2023-02-23T14:25:36.707685Z
+            workloadSupportedTypes:
+              workspace: false
+              training: false
+              distributed: true
+              distFramework: TF
+          spec:
+            objectMeta:
+              annotations:
+                example.com/owner: team-a
+                example.com/version: "1.0"
+              labels:
+                app: my-app
+            objectSpec:
+              key: ""
+        - meta:
+            name: my-asset
+            scope: project
+            projectId: 4500001
+            id: a418ed33-9399-48c0-a890-122cadd13bfd
+            kind: s3
+            createdBy: test@run.ai
+            createdAt: 2023-02-23T14:25:36.707685Z
+            updatedBy: test@run.ai
+            updatedAt: 2023-02-23T14:25:36.707685Z
+            workloadSupportedTypes:
+              workspace: false
+              training: false
+              distributed: true
+              distFramework: TF
+          spec:
+            objectMeta:
+              annotations:
+                example.com/owner: team-a
+                example.com/version: "1.0"
+              labels:
+                app: my-app
+            objectSpec:
+              key: ""
+      properties:
+        next:
+          description: |
+            Offset for the next page of results. Present only when there are more entries beyond the current page (i.e., the number of returned entries equals the limit).
+          format: int32
+          type: integer
+        entries:
+          items:
+            $ref: '#/components/schemas/Rct'
+          maxItems: 500
+          type: array
+      required:
+      - entries
+      type: object
+    RctCreationRequest:
+      example:
+        meta:
+          name: my-asset
+          scope: project
+          projectId: 4500001
+          workloadSupportedTypes:
+            workspace: false
+            training: false
+            inference: false
+            distributed: true
+            distFramework: TF
+        spec:
+          objectMeta:
+            annotations:
+              example.com/owner: team-a
+              example.com/version: "1.0"
+            labels:
+              app: my-app
+          objectSpec:
+            key: ""
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetCreationRequest'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+      required:
+      - meta
+      - spec
+      type: object
+    RctUpdateRequest:
+      example:
+        meta:
+          name: my-asset
+        spec:
+          objectMeta:
+            annotations:
+              example.com/owner: team-a
+              example.com/version: "1.0"
+            labels:
+              app: my-app
+          objectSpec:
+            key: ""
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetUpdateRequest'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+      required:
+      - meta
+      - spec
+      type: object
     AccessKeyCreationSpec:
       example:
         accessKeyId: accessKeyId
@@ -14828,7 +15462,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -14941,7 +15576,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -15037,7 +15673,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -15388,7 +16025,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -15512,7 +16150,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -15617,7 +16256,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -15731,7 +16371,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -15775,7 +16416,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -15899,7 +16541,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -16004,7 +16647,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -16118,7 +16762,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -16148,7 +16793,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -16273,7 +16919,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -16379,7 +17026,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -16494,7 +17142,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -16525,7 +17174,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -16652,7 +17302,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -16760,7 +17411,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -16877,7 +17529,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -16910,7 +17563,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -17032,7 +17686,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -17135,7 +17790,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -17247,7 +17903,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -17311,7 +17968,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -17341,7 +17999,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -17360,7 +18019,8 @@ components:
             url: https://hub.docker.com/
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -17388,7 +18048,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -18236,7 +18897,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -18448,7 +19110,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -18641,7 +19304,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -18843,7 +19507,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -19707,7 +20372,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -19839,7 +20505,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -19950,7 +20617,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -20178,7 +20846,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -20302,7 +20971,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -20407,7 +21077,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -20521,7 +21192,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -20566,7 +21238,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -20675,7 +21348,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -20767,7 +21441,8 @@ components:
               status: status
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -20868,7 +21543,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -20909,7 +21585,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -21018,7 +21695,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -21110,7 +21788,8 @@ components:
               status: status
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -21220,7 +21899,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -21350,7 +22030,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -21499,7 +22180,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -21627,7 +22309,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -21989,7 +22672,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -22092,7 +22776,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -22204,7 +22889,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -25348,7 +26034,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -26161,7 +26848,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -26963,7 +27651,8 @@ components:
               category: null
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -28173,7 +28862,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -57026,7 +57716,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -57148,7 +57839,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -57251,7 +57943,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -57363,7 +58056,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -57397,7 +58091,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -57518,7 +58213,8 @@ components:
         entries:
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -57620,7 +58316,8 @@ components:
             status: Creating
         - meta:
             name: my-asset
-            scope: tenant
+            scope: project
+            projectId: 4500001
             id: a418ed33-9399-48c0-a890-122cadd13bfd
             kind: s3
             createdBy: test@run.ai
@@ -57731,7 +58428,8 @@ components:
       example:
         meta:
           name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           workloadSupportedTypes:
             workspace: false
             training: false
@@ -61464,7 +62162,8 @@ components:
       example:
         assetsMeta:
         - name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai
@@ -61477,7 +62176,8 @@ components:
             distributed: true
             distFramework: TF
         - name: my-asset
-          scope: tenant
+          scope: project
+          projectId: 4500001
           id: a418ed33-9399-48c0-a890-122cadd13bfd
           kind: s3
           createdBy: test@run.ai

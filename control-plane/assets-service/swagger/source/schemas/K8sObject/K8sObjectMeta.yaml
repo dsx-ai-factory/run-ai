@@ -1,0 +1,25 @@
+description: Metadata of the Kubernetes resource that is created by this k8sObject
+type: object
+nullable: true
+properties:
+  annotations:
+    type: object
+    nullable: true
+    description: Free-form annotations attached to the resource.
+    additionalProperties:
+      type: string
+      maxLength: 10000
+    maxProperties: 1000
+    example:
+      example.com/owner: team-a
+      example.com/version: "1.0"
+  labels:
+    type: object
+    nullable: true
+    description: Free-form labels attached to the resource.
+    additionalProperties:
+      type: string
+      maxLength: 63
+    maxProperties: 1000
+    example:
+      app: my-app

@@ -35,9 +35,9 @@ The feature designed here serves two purposes:
 
 1. The `k8s-objects-tracker` keeps track of all the `ResourceClaimTemplates` in the Run:ai related namespaces (both managed and unmanaged).
 
-2. The `k8s-objects-tracker` keeps track of `DeviceClasses` in the cluster.
+2. The `k8s-objects-tracker` keeps track of `DeviceClasses` in the cluster. 🟢
 
-3. New RBAC resource type for controlling templates access exists.
+3. New RBAC resource type for controlling templates access exists. 🟢
 
    1. Two new permission sets are introduced, following the same model as other asset types:
       1. **Edit Access** — create/update/delete templates.
@@ -49,13 +49,15 @@ The feature designed here serves two purposes:
 
    
 
-   1. Support only 1.34+ clusters (in which the feature is enabled by default).
+   1. Support only >= 3.1.0 clusters (in which the agent/cluster-sync syncs the `ResourceClaimTemplates`). 🟢
 
-   2. Spec identical to k8s spec.
+   2. Support only >= 1.34+ clusters (in which the feature is enabled by default). 🟢
 
-   3. Creation rejected if the spec contains a `DeviceClass` that does not exist in the cluster.  
+   3. Spec compatible with  k8s `ResourceClaimTeamplte` spec. 🟢
 
-   4. Listing **compute assets** returns the DRA `ResourceClaimTemplate`s as well (they surface in the compute asset list alongside compute assets). No need to include the spec itself (TBD)
+   4. Creation rejected if the spec contains a `DeviceClass` that does not exist in the cluster.  
+
+   5. Listing **compute assets** returns the DRA `ResourceClaimTemplate`s as well (they surface in the compute asset list alongside compute assets). No need to include the spec itself (TBD)
 
       
 

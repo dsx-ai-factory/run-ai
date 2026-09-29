@@ -22,6 +22,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/testing"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	. "github.com/onsi/ginkgo/v2"
@@ -87,40 +88,27 @@ var _ = Describe("services helper tests", func() {
 	Context("ValidateClusterIdBelongsToTenant", func() {
 		var randoms *testutils.RandomValues
 
+		// The function itself is now trivial: caller resolves clusterInfo
+		// first (helper.go:82–90) and only invokes this when the fetch
+		// succeeded — so all we cover directly is the tenant-id compare.
+		// "cluster does not exist" and nil/empty clusterId behaviors moved
+		// to the caller and are exercised through ValidateAssetCreateRequestMeta
+		// (see the scope=cluster cross-tenant case below).
+
 		BeforeEach(func() {
 			randoms = testutils.NewRandomValues()
-			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
-				WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, "2.22.0", false)))
-			checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
-		})
-
-		It("returns nil when clusterId is nil", func() {
-			Expect(ValidateClusterIdBelongsToTenant(mockTenantCtx(randoms), nil)).To(BeNil())
-		})
-
-		It("returns nil when clusterId is an empty string", func() {
-			Expect(ValidateClusterIdBelongsToTenant(mockTenantCtx(randoms), convutils.Ref(""))).To(BeNil())
 		})
 
 		It("returns nil when cluster belongs to the caller tenant", func() {
-			Expect(ValidateClusterIdBelongsToTenant(mockTenantCtx(randoms), convutils.Ref(randoms.ClusterId))).To(BeNil())
-		})
-
-		It("returns 403 when cluster does not exist", func() {
-			unknownClusterId := "00000000-0000-0000-0000-000000000000"
-			err := ValidateClusterIdBelongsToTenant(mockTenantCtx(randoms), &unknownClusterId)
-			Expect(err).NotTo(BeNil())
-			Expect(int(err.Code)).To(Equal(http.StatusForbidden))
-			Expect(err.Message).To(ContainSubstring("not permitted to perform this operation"))
+			clusterInfo := openapi.NewClustersMinimalData(randoms.ClusterId, "c", int32(randoms.TenantId))
+			Expect(ValidateClusterIdBelongsToTenant(mockTenantCtx(randoms), clusterInfo)).To(BeNil())
 		})
 
 		It("returns 403 when cluster belongs to a different tenant", func() {
 			otherTenant := randoms.CloneWithDifferentTenant()
-			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
-				WithCluster(otherTenant.ClusterId, testing.BuildDisplayedCluster(otherTenant, "2.22.0", false)))
-			checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
+			clusterInfo := openapi.NewClustersMinimalData(otherTenant.ClusterId, "c", int32(otherTenant.TenantId))
 
-			err := ValidateClusterIdBelongsToTenant(mockTenantCtx(randoms), convutils.Ref(otherTenant.ClusterId))
+			err := ValidateClusterIdBelongsToTenant(mockTenantCtx(randoms), clusterInfo)
 			Expect(err).NotTo(BeNil())
 			Expect(int(err.Code)).To(Equal(http.StatusForbidden))
 			Expect(err.Message).To(ContainSubstring("not permitted to perform this operation"))

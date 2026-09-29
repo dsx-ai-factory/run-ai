@@ -1,0 +1,15 @@
+type: object
+required:
+  - entries
+properties:
+  next:
+    type: integer
+    format: int32
+    description: >
+      Offset for the next page of results. Present only when there are more entries
+      beyond the current page (i.e., the number of returned entries equals the limit).
+  entries:
+    type: array
+    maxItems: 500
+    items:
+      $ref: "./Rct.yaml"
