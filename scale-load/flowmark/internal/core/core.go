@@ -10,6 +10,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -60,6 +61,21 @@ func (c Config) Int(key string, fallback int) (int, error) {
 		return 0, fmt.Errorf("knob %q must be a whole number, got %T", key, raw)
 	}
 	return value, nil
+}
+
+func (c Config) Unknown(known ...string) []string {
+	allowed := make(map[string]bool, len(known))
+	for _, key := range known {
+		allowed[key] = true
+	}
+	var unknown []string
+	for key := range c.Knobs {
+		if !allowed[key] {
+			unknown = append(unknown, key)
+		}
+	}
+	sort.Strings(unknown)
+	return unknown
 }
 
 func (c Config) Ints(key string, fallback []int) ([]int, error) {
@@ -126,19 +142,4 @@ type Section struct {
 	Metrics  map[string]any `json:"metrics"`
 	Failed   bool           `json:"failed"`
 	Error    string         `json:"error,omitempty"`
-}
-
-const SchemaVersion = "v1"
-
-type Metadata struct {
-	StartedAt        time.Time `json:"started_at"`
-	FinishedAt       time.Time `json:"finished_at"`
-	ClockOffsetMs    *int64    `json:"clock_offset_ms,omitempty"`
-	ClockOffsetError string    `json:"clock_offset_error,omitempty"`
-}
-
-type Results struct {
-	Schema    string             `json:"schema"`
-	Metadata  Metadata           `json:"metadata"`
-	Scenarios map[string]Section `json:"scenarios"`
 }
