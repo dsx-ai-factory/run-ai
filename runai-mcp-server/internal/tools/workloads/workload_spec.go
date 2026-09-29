@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/rs/zerolog"
 
@@ -29,6 +28,8 @@ const (
 	workloadSpecFieldDistributedFramework = "distributedFramework"
 	workloadSpecFieldPreemptibility       = "preemptibility"
 )
+
+var workloadSpecSensitiveKeys = []string{"awsSessionToken"}
 
 type getWorkloadSpecInput struct {
 	WorkloadID      string `json:"workloadId"                jsonschema:"Workload ID (UUID)"`
@@ -118,7 +119,7 @@ func getWorkloadSpecRun(ctx context.Context, client *runaiclient.Client, in getW
 	// spec is dropped on failure, runtime fields above are kept, and the caller is warned.
 	result := fetchKindSpec(ctx, client, in.WorkloadID, wl.Type, in.IncludeFullSpec)
 	if result.Retrieved {
-		removeWorkloadSpecSecrets(result.Spec)
+		result.Spec = common.RemoveKeys(result.Spec, workloadSpecSensitiveKeys).(map[string]any)
 		if in.IncludeFullSpec {
 			out.Spec = result.Spec
 		} else {
@@ -295,29 +296,6 @@ func summarizeWorkloadSpec(spec map[string]any) map[string]any {
 		return nil
 	}
 	return summary
-}
-
-// removeWorkloadSpecSecrets strips credentials that may be embedded in storage
-// configuration while retaining the non-secret fields needed to understand it.
-func removeWorkloadSpecSecrets(value any) {
-	switch value := value.(type) {
-	case map[string]any:
-		for key, nested := range value {
-			if strings.EqualFold(key, "awsSessionToken") {
-				delete(value, key)
-				continue
-			}
-			removeWorkloadSpecSecrets(nested)
-		}
-	case []any:
-		for _, nested := range value {
-			removeWorkloadSpecSecrets(nested)
-		}
-	case []map[string]any:
-		for _, nested := range value {
-			removeWorkloadSpecSecrets(nested)
-		}
-	}
 }
 
 // specFromSuccessfulResponse reads the untouched response JSON for full mode

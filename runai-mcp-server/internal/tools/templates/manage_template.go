@@ -214,7 +214,7 @@ func updateTemplate(
 		return target.output, err
 	}
 	diff := common.DiffMaps(currentRequest, in.Request)
-	details := templateWithoutSecrets(diff).(map[string]any)
+	details := common.RemoveKeys(diff, templateSensitiveKeys).(map[string]any)
 	if !templateClientCanElicit(ctx) {
 		details = compactTemplateUpdateConfirmation(target.template.Meta, diff)
 	}
@@ -278,7 +278,7 @@ func deleteTemplate(
 	if target.template.Meta.ScopeType == workloads.SCOPETYPE_SYSTEM {
 		warning = "deleting a system template hides the preset for the current tenant"
 	}
-	details := common.WithConfirmWarning(templateWithoutSecrets(target.raw).(map[string]any), warning)
+	details := common.WithConfirmWarning(common.RemoveKeys(target.raw, templateSensitiveKeys).(map[string]any), warning)
 	if !templateClientCanElicit(ctx) {
 		details = compactTemplateDeleteConfirmation(target.template.Meta, warning)
 	}

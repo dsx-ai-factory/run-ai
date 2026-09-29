@@ -78,7 +78,7 @@ func getTemplateRun(ctx context.Context, client *runaiclient.Client, in getTempl
 			return getTemplateOutput{}, fmt.Errorf("prepare template %q for update: %w", in.TemplateID, err)
 		}
 	} else {
-		out.Template = templateWithoutSecrets(raw).(map[string]any)
+		out.Template = common.RemoveKeys(raw, templateSensitiveKeys).(map[string]any)
 	}
 	return out, nil
 }
@@ -102,6 +102,8 @@ var knownTemplateResponseFields = map[string]struct{}{
 	"runnable":               {},
 	"spec":                   {},
 }
+
+var templateSensitiveKeys = []string{"awsSessionToken"}
 
 var knownTemplateMetaFields = map[string]struct{}{
 	"clusterId":               {},
@@ -164,7 +166,7 @@ func templateUpdateSnapshot(workloadType string, raw map[string]any) (map[string
 	}
 	// A nullable credential field carries no secret and must not block the
 	// snapshot, but it should still be omitted from the caller-visible request.
-	request = templateWithoutSecrets(request).(map[string]any)
+	request = common.RemoveKeys(request, templateSensitiveKeys).(map[string]any)
 	adapter, ok := templateAdapters[workloadType]
 	if !ok {
 		return nil, "", unsupportedTemplateTypeError("workloadType")
@@ -216,7 +218,7 @@ func templateContainsSecret(value any) bool {
 	switch value := value.(type) {
 	case map[string]any:
 		for key, nested := range value {
-			if (strings.EqualFold(key, "awsSessionToken") && nested != nil) || templateContainsSecret(nested) {
+			if (templateSensitiveKey(key) && nested != nil) || templateContainsSecret(nested) {
 				return true
 			}
 		}
@@ -230,26 +232,13 @@ func templateContainsSecret(value any) bool {
 	return false
 }
 
-func templateWithoutSecrets(value any) any {
-	switch value := value.(type) {
-	case map[string]any:
-		clean := make(map[string]any, len(value))
-		for key, nested := range value {
-			if strings.EqualFold(key, "awsSessionToken") {
-				continue
-			}
-			clean[key] = templateWithoutSecrets(nested)
+func templateSensitiveKey(key string) bool {
+	for _, sensitiveKey := range templateSensitiveKeys {
+		if strings.EqualFold(key, sensitiveKey) {
+			return true
 		}
-		return clean
-	case []any:
-		clean := make([]any, len(value))
-		for i, nested := range value {
-			clean[i] = templateWithoutSecrets(nested)
-		}
-		return clean
-	default:
-		return value
 	}
+	return false
 }
 
 func validateTemplateFingerprint(value string) error {
