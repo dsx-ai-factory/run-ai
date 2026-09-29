@@ -3378,6 +3378,38 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/org-unit/projects/count:
+    x-internal: true
+    get:
+      summary: Count internal projects
+      operationId: count_internal_projects
+      x-internal: true
+      x-no-authorization: true
+      x-service: org-unit-service
+      x-test-coverage:
+        - control-plane/org-unit-service/pkg/test/project_api_test.go
+      description: |
+        Internal endpoint to count projects by the given query parameters
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectsFilterBy'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /internal/org-unit/names:
     x-internal: true
     get:
@@ -16253,7 +16285,7 @@ paths:
                   newPassword:
                     type: string
                 example:
-                  tempPassword: Abcd!234
+                  tempPassword: <temporary-password>
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -16527,17 +16559,27 @@ paths:
     x-internal: true
     post:
       summary: Mint a short-lived bootstrap JWT for the installer service account.
-      description: |
+      description: >
         Returns a 2-hour Keycloak access token for the cluster's dedicated
+
         per-cluster installer service account, scoped to the given cluster.
+
         Called by cluster-service when generating the cluster install command.
+
         The token is passed to the Helm hook as
-        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer token
+
+        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer
+        token
+
         to call GET /clusters/{uuid}/control-plane-config — the installer client
+
         secret never leaves the server.
 
+
         The per-cluster installer client is resolved (and, if needed,
+
         self-healed by creating it) internally, so callers only need to say
+
         which cluster the token is for.
       x-service: identity-manager
       x-test-coverage: not-applicable
@@ -30108,7 +30150,8 @@ components:
       example:
         installationStr: >-
           helm upgrade -i runai-cluster runai/runai-cluster -n runai --set
-          cluster.uid=... --set controlPlane.bootstrapToken=<installer-bootstrap-jwt>
+          cluster.uid=... --set
+          controlPlane.bootstrapToken=<installer-bootstrap-jwt>
         repositoryName: runai
         chartRepoURL: 'https://charts.example.com'
         bootstrapToken: <installer-bootstrap-jwt>
@@ -49854,8 +49897,8 @@ components:
           minLength: 8
           maxLength: 255
       example:
-        currentPassword: Abcd!234
-        newPassword: Zxcv!567
+        currentPassword: <current-password>
+        newPassword: <new-password>
     InternalUserCreationRequest:
       type: object
       required:
@@ -61056,6 +61099,26 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryTypeInternal'
+    ProjectsFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are == Equals, != Not equals, <= Less than or equal, >=
+        Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
+        and =$ Ends with. Dates are in ISO 8601 timestamp format and available
+        for operators ==, !=, <= and >=.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: >-
+            ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name!=some-name
+      explode: false
     OrgUnitType:
       in: query
       required: true
@@ -61221,26 +61284,6 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryType'
-    ProjectsFilterBy:
-      name: filterBy
-      in: query
-      required: false
-      description: >-
-        Filter results by a parameter. Use the format field-name operator value.
-        Operators are == Equals, != Not equals, <= Less than or equal, >=
-        Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
-        and =$ Ends with. Dates are in ISO 8601 timestamp format and available
-        for operators ==, !=, <= and >=.
-      schema:
-        type: array
-        maxItems: 10
-        items:
-          type: string
-          pattern: >-
-            ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
-        example:
-          - name!=some-name
-      explode: false
     ProjectsSortBy:
       name: sortBy
       in: query
