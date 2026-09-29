@@ -118,9 +118,10 @@ func (bns *BackendNodeService) fetchNodesPaged(ctx context.Context, clusterUuid 
 	}
 
 	var nodes []openapi.Node
-	hasMore := false
 
-	for {
+	// Bounded like FetchAllNodes, as a safety net against a server that
+	// ignores offset and keeps returning full pages forever.
+	for page := 0; page < maxNodePages; page++ {
 		limit := pageSize
 		if opts.MaxItems > 0 {
 			if remaining := opts.MaxItems - int32(len(nodes)); remaining < limit {
@@ -138,12 +139,13 @@ func (bns *BackendNodeService) fetchNodesPaged(ctx context.Context, clusterUuid 
 			requestLimit = maxNodePageSize
 		}
 
-		page, err := bns.nodeClient.GetNodeList(ctx, clusterUuid, offset, requestLimit)
+		result, err := bns.nodeClient.GetNodeList(ctx, clusterUuid, offset, requestLimit)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		items := page.GetNodes()
+		items := result.GetNodes()
+		var hasMore bool
 		if cappedAtMax {
 			hasMore = int32(len(items)) >= limit
 		} else {
@@ -156,21 +158,21 @@ func (bns *BackendNodeService) fetchNodesPaged(ctx context.Context, clusterUuid 
 		nodes = append(nodes, items...)
 		offset += int32(len(items))
 
+		if !hasMore {
+			return nodes, nil, nil
+		}
+
 		reachedMax := opts.MaxItems > 0 && int32(len(nodes)) >= opts.MaxItems
-		if opts.NoPagination || reachedMax || !hasMore {
-			break
+		if opts.NoPagination || reachedMax {
+			nextToken, err := structs.OffsetToNextToken(offset)
+			if err != nil {
+				return nil, nil, err
+			}
+			return nodes, nextToken, nil
 		}
 	}
 
-	if !hasMore {
-		return nodes, nil, nil
-	}
-
-	nextToken, err := structs.OffsetToNextToken(offset)
-	if err != nil {
-		return nil, nil, err
-	}
-	return nodes, nextToken, nil
+	return nil, nil, fmt.Errorf("stopped after reading %d pages: the server keeps returning full pages", maxNodePages)
 }
 
 func resolveStartOffset(opts *apilist.PageOptions) (int32, error) {

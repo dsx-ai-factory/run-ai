@@ -248,6 +248,15 @@ var _ = Describe("Node Service Test", func() {
 			_, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: 2, NoPagination: true})
 			Expect(err).To(HaveOccurred())
 		})
+
+		It("gives up instead of looping forever when the server ignores offset", func() {
+			fullPage := []openapi.Node{makeNode("a"), makeNode("b"), makeNode("c")}
+			mocknc.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, gomock.Any(), int32(3)).
+				Return(&openapi.Nodes{Nodes: fullPage}, nil).Times(maxNodePages)
+
+			_, err := nbs.List(context.Background(), ClusterUuid, apilist.PageOptions{PageSize: 2})
+			Expect(err).To(MatchError(ContainSubstring("keeps returning full pages")))
+		})
 	})
 
 	Context("FetchAllNodes", func() {
