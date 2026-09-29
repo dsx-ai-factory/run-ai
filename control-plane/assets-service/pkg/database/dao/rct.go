@@ -58,8 +58,6 @@ func ListRcts(ctx context.Context, offset, limit int32) (*api.RctListResponse, *
 		},
 	}
 
-	clonePresetAssetsToTenant(ctx, auth.TenantIdOf(ctx))
-
 	result, err := GetAssetMeta(ctx, runaidb.DB().WithContext(ctx), query, nil, assetsSpecJoin())
 	if err != nil {
 		return nil, err
