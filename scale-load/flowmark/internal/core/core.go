@@ -14,12 +14,13 @@ import (
 	"time"
 )
 
-type Scenario interface {
+type Suite interface {
 	Name() string
-	Run(ctx context.Context, env Env, cfg Config) (Section, error)
+	Category() Category
+	Run(ctx context.Context, target Target, scenario Scenario) (Section, error)
 }
 
-type Env struct {
+type Target struct {
 	KubeconfigPath  string
 	ControlPlaneURL string
 	Username        string
@@ -27,13 +28,13 @@ type Env struct {
 	Token           string
 }
 
-type Config struct {
+type Scenario struct {
 	Suite string
 	Knobs map[string]any
 }
 
-func (c Config) Duration(key string, fallback time.Duration) (time.Duration, error) {
-	raw, ok := c.Knobs[key]
+func (s Scenario) Duration(key string, fallback time.Duration) (time.Duration, error) {
+	raw, ok := s.Knobs[key]
 	if !ok || raw == nil {
 		return fallback, nil
 	}
@@ -51,8 +52,8 @@ func (c Config) Duration(key string, fallback time.Duration) (time.Duration, err
 	return parsed, nil
 }
 
-func (c Config) Int(key string, fallback int) (int, error) {
-	raw, ok := c.Knobs[key]
+func (s Scenario) Int(key string, fallback int) (int, error) {
+	raw, ok := s.Knobs[key]
 	if !ok || raw == nil {
 		return fallback, nil
 	}
@@ -63,14 +64,14 @@ func (c Config) Int(key string, fallback int) (int, error) {
 	return value, nil
 }
 
-func (c Config) Unknown(known ...string) []string {
-	allowed := make(map[string]bool, len(known))
+func (s Scenario) UnknownKnobs(known ...string) []string {
+	isKnown := make(map[string]bool, len(known))
 	for _, key := range known {
-		allowed[key] = true
+		isKnown[key] = true
 	}
 	var unknown []string
-	for key := range c.Knobs {
-		if !allowed[key] {
+	for key := range s.Knobs {
+		if !isKnown[key] {
 			unknown = append(unknown, key)
 		}
 	}
@@ -78,8 +79,8 @@ func (c Config) Unknown(known ...string) []string {
 	return unknown
 }
 
-func (c Config) Ints(key string, fallback []int) ([]int, error) {
-	raw, ok := c.Knobs[key]
+func (s Scenario) Ints(key string, fallback []int) ([]int, error) {
+	raw, ok := s.Knobs[key]
 	if !ok || raw == nil {
 		return fallback, nil
 	}
@@ -98,8 +99,8 @@ func (c Config) Ints(key string, fallback []int) ([]int, error) {
 	return values, nil
 }
 
-func (c Config) Map(key string) (map[string]any, error) {
-	raw, ok := c.Knobs[key]
+func (s Scenario) Map(key string) (map[string]any, error) {
+	raw, ok := s.Knobs[key]
 	if !ok || raw == nil {
 		return nil, nil
 	}
@@ -110,8 +111,8 @@ func (c Config) Map(key string) (map[string]any, error) {
 	return value, nil
 }
 
-func (c Config) String(key string, fallback string) (string, error) {
-	raw, ok := c.Knobs[key]
+func (s Scenario) String(key string, fallback string) (string, error) {
+	raw, ok := s.Knobs[key]
 	if !ok || raw == nil {
 		return fallback, nil
 	}
@@ -122,7 +123,7 @@ func (c Config) String(key string, fallback string) (string, error) {
 	return value, nil
 }
 
-func RunID() (string, error) {
+func NewRunID() (string, error) {
 	var raw [4]byte
 	if _, err := rand.Read(raw[:]); err != nil {
 		return "", fmt.Errorf("generate run id: %w", err)
