@@ -15,6 +15,7 @@ import (
 	"net/http/httptest"
 	"slices"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -65,7 +66,7 @@ func TestParseSettings(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := parseSettings(core.Config{Knobs: tc.knobs})
+			got, err := parseSettings(core.Scenario{Knobs: tc.knobs})
 			if tc.wantErr != "" {
 				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
 					t.Fatalf("expected error containing %q, got %v", tc.wantErr, err)
@@ -207,8 +208,13 @@ func TestDeploymentRoundWithoutIntegratorReportsPendingAndStillCleansUp(t *testi
 }
 
 type fakeControlPlane struct {
-	kube    k8sclient.WithWatch
-	deletes atomic.Int32
+	kube               k8sclient.WithWatch
+	deletes            atomic.Int32
+	failAfterStore     atomic.Int32
+	keepListingDeleted atomic.Bool
+
+	mu        sync.Mutex
+	trainings map[string]string
 }
 
 func (cp *fakeControlPlane) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -223,18 +229,105 @@ func (cp *fakeControlPlane) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		runner.SetNamespace(testNamespace)
 		runner.SetName(request.Name)
 		_ = cp.kube.Create(r.Context(), runner)
+		cp.mu.Lock()
+		if cp.trainings == nil {
+			cp.trainings = map[string]string{}
+		}
+		cp.trainings["wl-"+request.Name] = request.Name
+		cp.mu.Unlock()
+		if cp.failAfterStore.Add(-1) >= 0 {
+			w.WriteHeader(http.StatusBadGateway)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = fmt.Fprintf(w, `{"workloadId":"wl-%s","name":"%s"}`, request.Name, request.Name)
+	case r.Method == http.MethodGet && r.URL.Path == "/api/v1/workloads":
+		cp.mu.Lock()
+		response := workloadclient.GetWorkloads200Response{Workloads: []workloadclient.Workload{}}
+		for id, name := range cp.trainings {
+			response.Workloads = append(response.Workloads, workloadclient.Workload{
+				Id: id, Name: name, Type: trainingType, ProjectId: "p1", ClusterId: "c1", Namespace: testNamespace,
+				Source: workloadclient.SOURCE_CONTROL_PLANE, Phase: workloadclient.PHASE_RUNNING,
+				Conditions: []workloadclient.Condition{}, Category: "training",
+			})
+		}
+		cp.mu.Unlock()
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(response)
 	case r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/api/v1/workloads/trainings/wl-"):
+		id := strings.TrimPrefix(r.URL.Path, "/api/v1/workloads/trainings/")
 		runner := &unstructured.Unstructured{}
 		runner.SetGroupVersionKind(measure.WorkloadRunnerKind)
 		runner.SetNamespace(testNamespace)
-		runner.SetName(strings.TrimPrefix(r.URL.Path, "/api/v1/workloads/trainings/wl-"))
+		runner.SetName(strings.TrimPrefix(id, "wl-"))
 		_ = cp.kube.Delete(r.Context(), runner)
+		if !cp.keepListingDeleted.Load() {
+			cp.mu.Lock()
+			delete(cp.trainings, id)
+			cp.mu.Unlock()
+		}
 		cp.deletes.Add(1)
 		w.WriteHeader(http.StatusNoContent)
 	default:
 		w.WriteHeader(http.StatusNotFound)
+	}
+}
+
+func TestTrainingTeardownSendsOneDeletePerWorkloadEvenWhileTheControlPlaneStillListsThem(t *testing.T) {
+	ctx := context.Background()
+	kube := fakeKube()
+	controlPlane := &fakeControlPlane{kube: kube}
+	controlPlane.keepListingDeleted.Store(true)
+	server := httptest.NewServer(controlPlane)
+	t.Cleanup(server.Close)
+	clients := &client.Clients{Kube: kube, Workloads: workloadclient.NewAPIClient(&workloadclient.Configuration{
+		Servers: workloadclient.ServerConfigurations{{URL: server.URL}},
+	})}
+	flow := &trainingFlow{clients: clients, project: submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, concurrency: 4, created: map[string]string{}}
+
+	result := runRound(ctx, flow, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
+
+	if result.err != nil {
+		t.Fatalf("the round must quiesce once the runners are gone: %v", result.err)
+	}
+	if _, err := flow.teardown(ctx, testNamespace, nil); err != nil {
+		t.Fatalf("a later teardown pass must not fail: %v", err)
+	}
+	if got := controlPlane.deletes.Load(); got != 5 {
+		t.Fatalf("each training must be deleted exactly once although the control plane keeps listing it, got %d deletes", got)
+	}
+}
+
+func TestTrainingTeardownDeletesWorkloadsWhoseCreateFailedAfterTheServerStoredThem(t *testing.T) {
+	ctx := context.Background()
+	kube := fakeKube()
+	controlPlane := &fakeControlPlane{kube: kube}
+	controlPlane.failAfterStore.Store(1)
+	server := httptest.NewServer(controlPlane)
+	t.Cleanup(server.Close)
+	clients := &client.Clients{Kube: kube, Workloads: workloadclient.NewAPIClient(&workloadclient.Configuration{
+		Servers: workloadclient.ServerConfigurations{{URL: server.URL}},
+	})}
+	flow := &trainingFlow{clients: clients, project: submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, concurrency: 4, created: map[string]string{}}
+
+	result := runRound(ctx, flow, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
+
+	if result.err != nil {
+		t.Fatalf("the round must still quiesce: %v", result.err)
+	}
+	summary := measure.Stats(result.timings)
+	if summary.SampleSize != 4 || summary.FailedCount != 1 {
+		t.Fatalf("one create failed client-side, four arrived: %+v", summary)
+	}
+	if result.unmatched != 0 {
+		t.Fatalf("the stored workload's arrival is not a correlation problem, got %d unmatched", result.unmatched)
+	}
+	if got := controlPlane.deletes.Load(); got != 5 {
+		t.Fatalf("all 5 stored trainings must be deleted, including the one whose create failed, got %d", got)
+	}
+	runners, err := countAllInNamespace(ctx, kube, measure.WorkloadRunnerKind, testNamespace)
+	if err != nil || runners != 0 {
+		t.Fatalf("no WorkloadRunner may remain, got %d (%v)", runners, err)
 	}
 }
 
@@ -247,9 +340,9 @@ func TestTrainingRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
 	clients := &client.Clients{Kube: kube, Workloads: workloadclient.NewAPIClient(&workloadclient.Configuration{
 		Servers: workloadclient.ServerConfigurations{{URL: server.URL}},
 	})}
-	path := &trainingFlow{clients: clients, project: submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, concurrency: 4, created: map[string]string{}}
+	flow := &trainingFlow{clients: clients, project: submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, concurrency: 4, created: map[string]string{}}
 
-	result := runRound(ctx, path, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
+	result := runRound(ctx, flow, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
 
 	if result.err != nil {
 		t.Fatalf("round must succeed: %v", result.err)
@@ -266,8 +359,10 @@ func TestTrainingRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
 	if got := controlPlane.deletes.Load(); got != 5 {
 		t.Fatalf("every training must be deleted through the control plane once, got %d deletes", got)
 	}
-	if len(path.created) != 0 {
-		t.Fatalf("no training may remain tracked after quiesce: %v", path.created)
+	for id := range flow.created {
+		if !flow.deleteRequested[id] {
+			t.Fatalf("training %s was never deleted", id)
+		}
 	}
 	runners, err := countAllInNamespace(ctx, kube, measure.WorkloadRunnerKind, testNamespace)
 	if err != nil || runners != 0 {
@@ -399,7 +494,7 @@ func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 	if section.Metrics["slo_p90_ms"] != 5000 || !maps.Equal(section.Metrics["slo"].(map[string]int), knobs.slo) {
 		t.Fatalf("SLO must be copied from the yaml: %v / %v", section.Metrics["slo_p90_ms"], section.Metrics["slo"])
 	}
-	documented := []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec", "arrival_makespan_ms", "submit_makespan_ms", "quiesce_ms", "sample_size", "pending_count", "failed_count", "unmatched_arrivals", "success_rate"}
+	documented := []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec", "makespan_ms", "submit_makespan_ms", "quiesce_ms", "sample_size", "pending_count", "failed_count", "unmatched_arrivals", "success_rate"}
 	for _, size := range knobs.rounds {
 		for _, key := range documented {
 			if _, present := section.Metrics[fmt.Sprintf("%s@%d", key, size)]; !present {
@@ -451,5 +546,53 @@ func TestBuildSectionStoppedRunAndFailedCreates(t *testing.T) {
 	}
 	if section.Metrics["failed_count@1"] != 1 || section.Metrics["sample_size@2"] != 2 {
 		t.Fatalf("counts wrong: %v", section.Metrics)
+	}
+}
+
+func TestDescribeRound(t *testing.T) {
+	cases := []struct {
+		name   string
+		r      round
+		want   []string
+		absent []string
+	}{
+		{
+			name: "every workload arrived",
+			r:    round{size: 2, timings: []measure.Timing{timing("a", measure.Arrived, time.Second, nil), timing("b", measure.Arrived, 2*time.Second, nil)}},
+			want: []string{"2/2 arrived", "p90 2s", "workloads/s"},
+		},
+		{
+			name:   "nothing arrived shows no latency",
+			r:      round{size: 2, timings: []measure.Timing{timing("a", measure.Pending, 0, nil), timing("b", measure.Failed, 0, errors.New("quota"))}},
+			want:   []string{"0/2 arrived", "1 pending", "1 failed"},
+			absent: []string{"p90", "workloads/s"},
+		},
+		{
+			name:   "one arrival is not a rate",
+			r:      round{size: 1, timings: []measure.Timing{timing("a", measure.Arrived, 8*time.Millisecond, nil)}},
+			want:   []string{"1/1 arrived", "p90 8ms"},
+			absent: []string{"workloads/s"},
+		},
+		{
+			name:   "round error is appended",
+			r:      round{size: 3, unmatched: 1, err: errors.New("watch: connection refused")},
+			want:   []string{"0/3 arrived", "1 unmatched arrivals", ": watch: connection refused"},
+			absent: []string{"p90"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := describeRound(tc.r)
+			for _, want := range tc.want {
+				if !strings.Contains(got, want) {
+					t.Errorf("describeRound() = %q, want it to contain %q", got, want)
+				}
+			}
+			for _, absent := range tc.absent {
+				if strings.Contains(got, absent) {
+					t.Errorf("describeRound() = %q, must not contain %q", got, absent)
+				}
+			}
+		})
 	}
 }
