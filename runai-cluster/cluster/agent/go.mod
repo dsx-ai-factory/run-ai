@@ -35,7 +35,7 @@ require (
 	github.com/go-logr/zerologr v1.2.3
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/kai-scheduler/KAI-scheduler v0.18.0
+	github.com/kai-scheduler/KAI-scheduler v0.18.1
 	github.com/kai-scheduler/kai-resource-management-api v0.1.3
 	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/onsi/gomega v1.42.1
