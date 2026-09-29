@@ -34,16 +34,6 @@ func CleanupProject(ctx context.Context, clients *client.Clients, clusterID, nam
 		return err
 	}
 
-	reported, ok := project.Status.GetNamespaceOk()
-	if !ok || reported == nil || *reported == "" {
-		return fmt.Errorf("project %q reports no namespace; refusing to guess one", name)
-	}
-	namespace := *reported
-
-	if err := clusterKnowsProject(ctx, clients.Kube, name, clusterID); err != nil {
-		return err
-	}
-
 	response, err := clients.OrgUnits.ProjectsAPI.DeleteProject(ctx, project.Id).Execute()
 	if err != nil {
 		return fmt.Errorf("deleting project %q: %w", name, err)
@@ -55,7 +45,11 @@ func CleanupProject(ctx context.Context, clients *client.Clients, clusterID, nam
 	if err := waitClusterProjectGone(ctx, clients.Kube, name, timeout); err != nil {
 		return err
 	}
-	return deleteProjectNamespace(ctx, clients.Kube, namespace, name)
+	reported, ok := project.Status.GetNamespaceOk()
+	if !ok || reported == nil || *reported == "" {
+		return removeOrphanNamespace(ctx, clients.Kube, name)
+	}
+	return deleteProjectNamespace(ctx, clients.Kube, *reported, name)
 }
 
 func clusterProject(name string) *unstructured.Unstructured {
@@ -65,22 +59,11 @@ func clusterProject(name string) *unstructured.Unstructured {
 	return cr
 }
 
-func clusterKnowsProject(ctx context.Context, kube k8sclient.Client, name, clusterID string) error {
-	err := kube.Get(ctx, k8sclient.ObjectKey{Name: name}, clusterProject(name))
-	switch {
-	case err == nil:
-		return nil
-	case apierrors.IsNotFound(err) || meta.IsNoMatchError(err):
-		return fmt.Errorf("cluster does not know project %q; is --kubeconfig pointing at cluster %s? (%w)", name, clusterID, err)
-	}
-	return fmt.Errorf("checking project %q on the cluster: %w", name, err)
-}
-
 func waitClusterProjectGone(ctx context.Context, kube k8sclient.Client, name string, timeout time.Duration) error {
 	var last error
 	err := wait.PollUntilContextTimeout(ctx, pollInterval, timeout, true, func(ctx context.Context) (bool, error) {
 		last = kube.Get(ctx, k8sclient.ObjectKey{Name: name}, clusterProject(name))
-		return apierrors.IsNotFound(last), nil
+		return apierrors.IsNotFound(last) || meta.IsNoMatchError(last), nil
 	})
 	if err == nil {
 		return nil
@@ -121,7 +104,7 @@ func removeOrphanNamespace(ctx context.Context, kube k8sclient.Client, name stri
 	switch {
 	case err == nil:
 		return fmt.Errorf("project %q is gone from the control plane but still present on the cluster; not touching it", name)
-	case !apierrors.IsNotFound(err):
+	case !apierrors.IsNotFound(err) && !meta.IsNoMatchError(err):
 		return fmt.Errorf("checking project %q on the cluster before removing its namespace: %w", name, err)
 	}
 	for i := range namespaces.Items {
