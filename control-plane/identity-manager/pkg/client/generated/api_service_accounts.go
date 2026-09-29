@@ -120,7 +120,7 @@ type ServiceAccountsAPI interface {
 	per-cluster installer service account, scoped to the given cluster.
 	Called by cluster-service when generating the cluster install command.
 	The token is passed to the Helm hook as
-	--set cluster.bootstrapToken=<token> and used directly as a Bearer token
+	--set controlPlane.bootstrapToken=<token> and used directly as a Bearer token
 	to call GET /clusters/{uuid}/control-plane-config — the installer client
 	secret never leaves the server.
 
@@ -1209,7 +1209,7 @@ Returns a 2-hour Keycloak access token for the cluster's dedicated
 per-cluster installer service account, scoped to the given cluster.
 Called by cluster-service when generating the cluster install command.
 The token is passed to the Helm hook as
---set cluster.bootstrapToken=<token> and used directly as a Bearer token
+--set controlPlane.bootstrapToken=<token> and used directly as a Bearer token
 to call GET /clusters/{uuid}/control-plane-config — the installer client
 secret never leaves the server.
 

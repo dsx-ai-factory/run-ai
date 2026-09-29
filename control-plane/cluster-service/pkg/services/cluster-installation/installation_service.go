@@ -28,7 +28,7 @@ var installationTemplate, _ = template.New("InstallationStr").Parse(`helm repo a
 helm repo update
 helm upgrade -i runai-cluster {{.RepositoryName }}/runai-cluster -n runai \
 --set controlPlane.url={{.Host}} \
---set cluster.bootstrapToken={{.BootstrapToken}} \
+--set controlPlane.bootstrapToken={{.BootstrapToken}} \
 --set cluster.uid={{.Uuid}} \
 --set cluster.url={{.RemoteClusterUrl}} --version="{{.Version}}" --create-namespace{{.IngressClassFlag}}{{.FipsModeFlag}}`)
 

@@ -26,7 +26,7 @@ type ClusterInstallationInfoResponse struct {
 	InstallationStr string `json:"installationStr"`
 	RepositoryName  string `json:"repositoryName"`
 	ChartRepoURL    string `json:"chartRepoURL"`
-	// Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set cluster.bootstrapToken=<token>.
+	// Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>.
 	BootstrapToken string `json:"bootstrapToken"`
 	// Deprecated. Omitted on CP >= 3.0. Use bootstrapToken instead.
 	// Deprecated
