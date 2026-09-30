@@ -36,7 +36,7 @@ Workload priority is defined by selecting a priority from a predefined list in t
 
 ## Default Priority and Preemptibility per Workload
 
-NVIDIA Run:ai defines the following default mappings of workload types to priorities and preemptibility. Each workload type comes with a default category that determines it default priority and preemptibility value. To retrieve the default priority and preemptibility per workload type, refer to the [List workload types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#get-api-v1-workload-types) API.
+NVIDIA Run:ai defines the following default mappings of workload types to priorities and preemptibility. Each workload type comes with a default category that determines it default priority and preemptibility value. To retrieve the default priority and preemptibility per workload type, refer to the [List workload types](api:main-api:GET/api/v1/workload-types) API.
 
 <Note>
 
@@ -149,7 +149,7 @@ For [supported workload types](../../../workloads-in-nvidia-run-ai/workload-type
 
 ## Updating the Default Mapping
 
-Administrators can change the default priority and preemptibility assigned to a workload type by updating the mapping using the [NVIDIA Run:ai API](https://run-ai-docs.nvidia.com/api/2.26/). To update the priority mapping:
+Administrators can change the default priority and preemptibility assigned to a workload type by updating the mapping using the [NVIDIA Run:ai API](api:main-api). To update the priority mapping:
 
 1. Retrieve the list of workload types and their IDs using `GET /api/v1/workload-types`.
 2. Identify the `workloadTypeId` of the workload type you want to modify.
@@ -159,4 +159,4 @@ Administrators can change the default priority and preemptibility assigned to a 
 
 ## Using API
 
-Go to the [Workload priorities](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#get-api-v1-workload-priorities) API reference to view the available actions.
+Go to the [Workload priorities](api:main-api:GET/api/v1/workload-priorities) API reference to view the available actions.
