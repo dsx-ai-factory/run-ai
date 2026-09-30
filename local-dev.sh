@@ -1351,7 +1351,7 @@ build_cli_exposer() {
         -v "${gocache_vol}:/tmp/.cache:z" \
         -e GOPATH=/go \
         -e GOCACHE=/tmp/.cache \
-        library/golang:1.26.8 \
+        "library/golang:$(awk '$1=="go"{print $2;exit}' "${cli_dir}/go.mod")" \
         go build \
           -ldflags "-X github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/version.version=${cli_version} -extldflags -static -s -w" \
           -o bin/dist/linux/amd64/runai \
@@ -1823,6 +1823,10 @@ prefetch_go_modules() {
 
   [[ ${#mod_dirs[@]} -eq 0 ]] && return 0
 
+  # The newest Go any of them asks for; the image's Go will not fetch a newer one.
+  local go_version
+  go_version=$(for rel in "${mod_dirs[@]}"; do awk '$1=="go"{print $2;exit}' "${REPO_ROOT}/${rel}/go.mod"; done | sort -V | tail -1)
+
   # A cold cache is several GB and takes a long time; print one line per module so the
   # step does not look hung.
   local cmds="" i=0
@@ -1859,7 +1863,7 @@ prefetch_go_modules() {
     -e GOPRIVATE="github.com/run-ai/*" \
     -e CGO_ENABLED=0 \
     -e GO111MODULE=on \
-    library/golang:1.26.8 \
+    "library/golang:${go_version}" \
     bash -c "${cmds}" 2>/dev/null \
     | while IFS= read -r line; do log "  ${line}"; done || \
     warn "Module pre-warm incomplete — remaining modules will download during build"
