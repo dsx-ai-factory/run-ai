@@ -39,8 +39,8 @@ Consider an organization with a department budgeted for **two nodes of 8×H100 G
 
 Consider a team serving a small language model across a single node of **8×H100 80 GB GPUs**. A model such as Qwen3-8B occupies approximately 16.4 GB of GPU memory in BF16 precision, leaving most of each GPU unused when the model is given a whole device.
 
-* Requesting 38 GB of GPU memory per model instance fits two instances on each GPU, for a total of 16 concurrent model servers on the node instead of 8.
-* The remaining memory on each GPU accommodates the CUDA context and driver overhead, so the allocation holds under production load.
+* Requesting 36 GB of GPU memory per model instance fits two instances on each GPU, for a total of 16 concurrent model servers on the node instead of 8.
+* The remaining memory on each GPU accommodates the driver reserve and the CUDA context, so the allocation holds under production load.
 * Quota can be expressed in the memory each model actually needs, rather than rounded up to whole devices.
 
 For more details on mapping your organization and resources, refer to [Adapting AI initiatives to your organization](../../aiinitiatives/adapting-ai-initiatives.md).
@@ -89,7 +89,7 @@ Sharing a single GPU between multiple workloads remains unchanged. It now serves
 
 **Note**
 
-NVIDIA Run:ai installs and operates normally without these prerequisites in place, and non-fractional workloads are unaffected. Fractional workloads, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
+NVIDIA Run:ai installs and operates normally without these prerequisites in place, and workloads not using GPU fractions are unaffected. Workloads using GPU fractions, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
 
 </Note>
 
@@ -100,6 +100,7 @@ GPU memory fractions require the following on every GPU node in the cluster. GPU
 | CUDA | 13.4 or later |
 | CUDA driver | r615 or later |
 | NVIDIA GPU Operator | 26.7.1 or later |
+| NVIDIA GPU Operator NRI plugin | Disabled. Install the NVIDIA GPU Operator with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false`). GPU memory fractions do not function while the NRI plugin is enabled. |
 
 ## Setting GPU Memory Fractions
 
@@ -130,22 +131,24 @@ Make sure the [default scheduler](../scheduling/default-scheduler.md) is set to 
 
 ### Annotation Prefixes
 
-Annotations without a prefix (`gpu-fraction`, `gpu-memory`, `gpu-fraction-num-devices`, `gpu-fraction-container-name`) are Run:ai's own convention, consumed by the Scheduler rather than passed to CUDA. GPU memory portions are a Scheduler convention, because CUDA expresses memory only as an absolute size; the Scheduler resolves the portion against the GPU it selected and passes an absolute size to the node. The `nvidia.com/` prefix indicates that the annotation reaches the node instead, and is applied directly to CUDA.
+* Annotations without a prefix (`gpu-fraction`, `gpu-memory`, `gpu-fraction-num-devices`, `gpu-fraction-container-name`) are Run:ai's own convention for the memory Request, consumed by the Scheduler rather than passed to CUDA. GPU memory portions are a Scheduler convention, because CUDA expresses memory only as an absolute size; the Scheduler resolves the portion against the GPU it selected and passes an absolute size to the node.
+* `nvidia.com/container.<container-name>.gpu-memory.request` is the official NVIDIA-native alternative for an absolute-size Request only - it reaches the node and is applied directly to CUDA.
+* There is no `nvidia.com/` equivalent for a portion Request; use `gpu-fraction` for that.
 
 ### Annotation Reference
 
-A GPU memory fraction is always allocated to a single container. NVIDIA Run:ai currently supports one fractional container per pod, so every annotation below ultimately applies to that one container. The annotations differ only in how the container is identified:
+GPU memory fractions can be assigned to only one container in the pod. An annotation identifies that container in one of two ways:
 
-* Annotations that embed `container.<container-name>` in the key name the container directly.
-* Annotations without that element apply to the container named by `gpu-fraction-container-name`, or to the first container in the pod when that annotation is omitted.
+* Embedded in the key, as `container.<container-name>` - used only by `nvidia.com/container.<container-name>.gpu-memory.request`.
+* Named separately, by `gpu-fraction-container-name`, defaulting to the first container in the pod if omitted.
 
-| Annotation | Input format | Purpose |
-|---|---|---|
-| `gpu-fraction` | A portion of GPU memory as a double-precision floating-point number. For example, `0.25`, `0.75`. | Requests a portion of GPU memory. |
-| `gpu-memory` | Memory size in MiB. For example, `2500`, `4096`. | Requests an absolute amount of GPU memory. |
-| `gpu-fraction-num-devices` | The number of GPU devices to allocate using the specified `gpu-fraction` or `gpu-memory` value. Defaults to 1 if omitted. | Requests multiple GPU devices for the fractional container. |
-| `gpu-fraction-container-name` | The name of a container in the pod. Defaults to the first container (index 0) if omitted. | Selects which container receives the GPU allocation when the request is made with `gpu-fraction` or `gpu-memory`. |
-| `nvidia.com/container.<container-name>.gpu-memory.request` | Memory size in Kubernetes resource quantity format. For example, `40G`. | Requests an absolute amount of GPU memory. This is the official NVIDIA alternative to `gpu-memory`. |
+| Annotation | Input format | Purpose | Used with |
+|---|---|---|---|
+| `gpu-fraction` | A portion of GPU memory as a double-precision floating-point number. For example, `0.25`, `0.75`. | Requests a portion of GPU memory. | Optionally `gpu-fraction-num-devices` and `gpu-fraction-container-name`. No container-scoped form. |
+| `gpu-memory` | Memory size in MiB. For example, `2500`, `4096`. | Requests an absolute amount of GPU memory. | Optionally `gpu-fraction-num-devices` and `gpu-fraction-container-name`. Alternative: `nvidia.com/container.<container-name>.gpu-memory.request`. |
+| `gpu-fraction-num-devices` | The number of GPU devices to allocate using the specified `gpu-fraction` or `gpu-memory` value. Defaults to 1 if omitted. | Requests multiple GPU devices for the fractional container. | Any Request form - `gpu-fraction`, `gpu-memory`, or `nvidia.com/container.<container-name>.gpu-memory.request`. The number of GPU devices is a pod-level property, so this annotation has no container-scoped form. |
+| `gpu-fraction-container-name` | The name of a container in the pod. Defaults to the first container (index 0) if omitted. | Selects which container receives the GPU allocation when the request is made with `gpu-fraction` or `gpu-memory`. | Not used with `nvidia.com/container.<container-name>.gpu-memory.request` - that form names the container in its key. If both are present, the names must match or the request is rejected. |
+| `nvidia.com/container.<container-name>.gpu-memory.request` | Memory size in Kubernetes resource quantity format. For example, `40G`. | Requests an absolute amount of GPU memory. This is the official NVIDIA alternative to `gpu-memory`. | Optionally `gpu-fraction-num-devices`. |
 
 <Note>
 
@@ -156,84 +159,84 @@ A GPU memory fraction is always allocated to a single container. NVIDIA Run:ai c
 
 </Note>
 
-<Note>
-
-**Note**
-
-* There is no `container.<container-name>` form of `gpu-fraction-num-devices`. Use `gpu-fraction-num-devices`.
-* There is no `container.<container-name>` form of a GPU memory portion request. Use `gpu-fraction`.
-* If `gpu-fraction-container-name` is used together with an annotation that names a container in its key, the container names must be identical or the request is rejected.
-
-</Note>
-
-Dynamic GPU memory fractions add a memory limit to the request. Refer to [dynamic GPU memory fractions](dynamic-memory-fractions.md) for those annotations.
-
 ### Examples
 
-The following example requests an absolute amount of GPU memory on 4 GPU devices:
+* Requests an absolute amount of GPU memory on 4 GPU devices:
 
-```yaml
-metadata:
-  annotations:
-    gpu-memory: "4000"   # MiB
-    # or: nvidia.com/container.app.gpu-memory.request: "40G"
-    # optional; 1 if omitted - number of fractional GPU devices
-    gpu-fraction-num-devices: "4"
-spec:
-  containers:
-    - name: app
-```
+  ```yaml
+  metadata:
+    annotations:
+      gpu-memory: "4000"   # MiB
+      # optional; 1 if omitted - number of fractional GPU devices
+      gpu-fraction-num-devices: "4"
+  spec:
+    containers:
+      - name: app
+  ```
 
-The following example requests a portion of GPU memory on 2 GPU devices:
+* Requests the same absolute amount of GPU memory using the official NVIDIA-native annotation instead of `gpu-memory`. The container name moves into the key, and device count still uses the unprefixed `gpu-fraction-num-devices`:
 
-```yaml
-metadata:
-  annotations:
-    gpu-fraction: "0.5"
-    # optional; 1 if omitted - number of fractional GPU devices
-    gpu-fraction-num-devices: "2"
-spec:
-  containers:
-    - name: app
-```
+  ```yaml
+  metadata:
+    annotations:
+      nvidia.com/container.app.gpu-memory.request: "40G"
+      # optional; 1 if omitted - number of fractional GPU devices
+      gpu-fraction-num-devices: "4"
+  spec:
+    containers:
+      - name: app
+  ```
 
-The following complete example creates a pod that requests 2 GPU devices, each requesting 50% of memory:
+* Requests a portion of GPU memory on 2 GPU devices:
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    user: test
-    gpu-fraction: "0.5"
-    gpu-fraction-num-devices: "2"
-    # Specify which container should receive the GPU memory fraction allocation
-    # By default, the first container (index 0) receives the GPU allocation
-    gpu-fraction-container-name: "app"
-  labels:
-    runai/queue: test
-  name: multi-fractional-pod-job
-  namespace: test
-spec:
-  containers:
-  - image: gcr.io/run-ai-demo/quickstart-cuda
-    imagePullPolicy: Always
-    name: app
-    resources:
-      limits:
-        cpu: 200m
-        memory: 200Mi
-      requests:
-        cpu: 100m
-        memory: 100Mi
-    securityContext:
-      capabilities:
-        drop: ["ALL"]
-  schedulerName: runai-scheduler
-  serviceAccount: default
-  serviceAccountName: default
-  terminationGracePeriodSeconds: 5
-```
+  ```yaml
+  metadata:
+    annotations:
+      gpu-fraction: "0.5"
+      # optional; 1 if omitted - number of fractional GPU devices
+      gpu-fraction-num-devices: "2"
+  spec:
+    containers:
+      - name: app
+  ```
+
+* Complete example: creates a pod that requests 2 GPU devices, each requesting 50% of memory:
+
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      user: test
+      gpu-fraction: "0.5"
+      gpu-fraction-num-devices: "2"
+      # Specify which container should receive the GPU memory fraction allocation
+      # By default, the first container (index 0) receives the GPU allocation
+      gpu-fraction-container-name: "app"
+    labels:
+      runai/queue: test
+    name: multi-fractional-pod-job
+    namespace: test
+  spec:
+    containers:
+    - image: <image>
+      imagePullPolicy: Always
+      name: app
+      resources:
+        limits:
+          cpu: 200m
+          memory: 200Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+      securityContext:
+        capabilities:
+          drop: ["ALL"]
+    schedulerName: runai-scheduler
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 5
+  ```
 
 ## Enforcing GPU Memory Fractions with a Policy
 
@@ -252,11 +255,12 @@ Policy enforcement does not reach [externally submitted workloads](../../../work
 * Selecting a GPU portion using percentages as units does not guarantee the exact memory size. This means 50% of an A-100-40GB is 20 GB while 50% of an A-100-80GB is 40 GB. To have better control over the exact allocated memory, specify the exact memory size, for example 40 GB.
 * GPU memory fractions control the memory split. Each workload's share of GPU compute is controlled separately by its compute mode - refer to [GPU compute modes](compute-modes.md).
 * An application sees its own requested GPU memory size through NVML and `nvidia-smi`, not the memory of the whole device. Tools that report total GPU memory inside the container report the fraction.
+* Part of the memory of every GPU is reserved for the NVIDIA driver and for internal use, such as error correction. The reserved amount is estimated at 3% to 5% of the total GPU memory and varies by GPU type. Account for this reserve when requesting an absolute memory size, because requests that exceed the remaining memory can cause an OOMKill signal to be sent to the pod. Requests expressed as a portion of the GPU are not affected.
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/runai.md) and run according to your workload.
 
 ## Using API
 
-To view the available actions, go to the [API reference](https://run-ai-docs.nvidia.com/api/2.26/) and run according to your workload.
+To view the available actions, go to the [API reference](../../../rest-api/about-the-rest-api.md) and run according to your workload.

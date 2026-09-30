@@ -97,7 +97,7 @@ func TestStatsEmptyAndAllPending(t *testing.T) {
 				t.Fatalf("no samples must mean no latencies: %+v", got)
 			}
 			metrics := got.Metrics()
-			for _, key := range []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_s"} {
+			for _, key := range []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec"} {
 				if _, present := metrics[key]; present {
 					t.Fatalf("%s must be omitted when nothing arrived", key)
 				}
@@ -120,6 +120,21 @@ func TestStatsThroughputAndMakespan(t *testing.T) {
 	}
 	if got.Throughput != 4.0/5.0 {
 		t.Fatalf("throughput must be 4 items / 5s, got %v", got.Throughput)
+	}
+	instant := Stats([]Timing{{Name: "a", Outcome: Arrived, Created: base, Arrived: base.Add(-time.Second)}})
+	if instant.Makespan != 0 || instant.Throughput != 0 {
+		t.Fatalf("an arrival stamped before its create must give a zero window, never a negative one: %+v", instant)
+	}
+	single := Stats(arrivals(base, seconds(2)...))
+	if single.Throughput != 0 {
+		t.Fatalf("one arrival is not a rate, got throughput %v", single.Throughput)
+	}
+	for _, summary := range []Summary{instant, single} {
+		for _, key := range []string{"makespan_ms", "throughput_per_sec"} {
+			if _, ok := summary.Metrics()[key]; ok {
+				t.Fatalf("%s must be absent without at least two arrivals over a real window", key)
+			}
+		}
 	}
 	if got.Max != 2*time.Second || got.Mean != 2*time.Second {
 		t.Fatalf("max/mean wrong: %+v", got)

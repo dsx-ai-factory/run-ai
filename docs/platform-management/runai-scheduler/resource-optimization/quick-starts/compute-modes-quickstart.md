@@ -10,16 +10,16 @@ Before you start, make sure:
 
 * You have created a [project](../../../aiinitiatives/organization/projects.md) or have one created for you.
 * The project has an assigned quota of at least 1 GPU.
-* A GPU is available that is not currently running other fractional workloads.
+* A GPU is available that is not currently running other workloads using GPU fractions.
 
-<Info>
+<Note>
 
 **Note**
 
 * The compute mode is exclusive per GPU. The first workload placed on a GPU fixes the compute mode of that GPU, and every workload that joins afterwards must request the same mode. Starting this walkthrough on a GPU that is already running time-slicing workloads prevents the SM-sharing workspaces from being placed on it.
 * Flexible workload submission is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload submission.
 
-</Info>
+</Note>
 
 ## Step 1: Logging In
 
@@ -43,7 +43,7 @@ runai login --help
 
 <Tab title="API">
 
-To use the API, you will need to obtain a token as shown in [API authentication](https://run-ai-docs.nvidia.com/api/2.26/getting-started/how-to-authenticate-to-the-api).
+To use the API, you will need to obtain a token as shown in [API authentication](../../../../rest-api/how-to-authenticate-to-the-api.md).
 
 </Tab>
 
@@ -83,7 +83,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../../reference/cli/runai/):
+Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../../reference/cli/runai/runai_workspace_submit.md):
 
 ```sh
 runai project set "project-name"
@@ -99,7 +99,7 @@ runai workspace submit "workload-name-1" --image jupyter/scipy-notebook \
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](https://run-ai-docs.nvidia.com/api/2.26/workloads/workspaces) API:
+Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](api:main-api:POST/api/v1/workloads/workspaces) API:
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
@@ -137,8 +137,8 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](compute-modes-quickstart.md#step-1-logging-in)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 
 </Tab>
 
@@ -148,13 +148,13 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 
 Repeat Step 2 with a different workload name, using the same compute resource and the same `sm-sharing` compute mode. Both workspaces request 20 GB of GPU memory, so both can be placed on the same GPU.
 
-<Info>
+<Note>
 
 **Note**
 
 A workload requesting `time-slicing`, or a workload submitted without a compute mode annotation, is not placed on this GPU while the SM-sharing workspaces are running on it.
 
-</Info>
+</Note>
 
 ## Step 4: Verifying the Compute Mode
 

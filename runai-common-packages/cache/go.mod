@@ -5,9 +5,9 @@ go 1.27.1
 require (
 	github.com/aws/smithy-go v1.28.2
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/lithammer/shortuuid/v4 v4.3.0
 	github.com/maypok86/otter/v2 v2.3.0
@@ -26,14 +26,14 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
 	github.com/go-playground/validator/v10 v10.30.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/go-tpm v0.9.8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 // indirect
-	github.com/klauspost/compress v1.20.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
+	github.com/klauspost/compress v1.20.1 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/minio/highwayhash v1.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -45,7 +45,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.24.1 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.70.1 // indirect
+	github.com/prometheus/common v0.71.0 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
@@ -65,12 +65,12 @@ require (
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/time v0.16.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260921155816-b14227669459 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )

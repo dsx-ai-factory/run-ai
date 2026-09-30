@@ -36,6 +36,139 @@ describe("cluster.util", () => {
     expect(result.tooltipText).toContain("dependency2");
   });
 
+  it("renders the fractioning reason rather than naming the gpu-stack dependency", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            reason: "NVIDIA GPU Operator version 26.6.0 is below minimum supported version v26.7.1",
+            components: {
+              nvidia: { available: true },
+              "gpu-fractioning": {
+                available: false,
+                reason: "NVIDIA GPU Operator version 26.6.0 is below minimum supported version v26.7.1",
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain(
+      "NVIDIA GPU Operator version 26.6.0 is below minimum supported version v26.7.1",
+    );
+    expect(result.tooltipText).toContain("As a result, GPU fractions are not supported.");
+    expect(result.tooltipText).not.toContain("gpu-stack");
+  });
+
+  it("keeps both sections, and one guide link, when fractioning and another dependency fail together", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            reason: "NVIDIA GPU Operator version 26.6.0 is below minimum supported version v26.7.1",
+            components: {
+              nvidia: { available: true },
+              "gpu-fractioning": {
+                available: false,
+                reason: "NVIDIA GPU Operator version 26.6.0 is below minimum supported version v26.7.1",
+              },
+            },
+          },
+          "kube-prometheus-stack": { available: false, reason: "Prometheus is not installed" },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain("kube-prometheus-stack");
+    expect(result.tooltipText).toContain("As a result, some features may be impacted.");
+    expect(result.tooltipText).toContain("As a result, GPU fractions are not supported.");
+    expect(result.tooltipText).not.toContain("gpu-stack");
+    expect(result.tooltipText.match(/As a result,/g)).toHaveLength(2);
+  });
+
+  it("keeps gpu-stack named when a nested component under an available one has failed", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            components: {
+              nvidia: {
+                available: true,
+                components: {
+                  "nvidia-metrics": { available: false, reason: "Metrics are missing in the DCGM-exporter." },
+                },
+              },
+              "gpu-fractioning": { available: false, reason: "fractions are not supported on this driver" },
+            },
+          },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain("gpu-stack");
+    expect(result.tooltipText).toContain("As a result, GPU fractions are not supported.");
+  });
+
+  it("keeps gpu-stack named when fractioning is not its only failing component", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            reason: "dcgm-exporter service not found in the cluster",
+            components: {
+              nvidia: { available: false, reason: "dcgm-exporter service not found in the cluster" },
+              "gpu-fractioning": { available: false, reason: "fractions are not supported on this driver" },
+            },
+          },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain("gpu-stack");
+    expect(result.tooltipText).toContain("fractions are not supported on this driver");
+    expect(result.tooltipText).toContain("As a result, GPU fractions are not supported.");
+  });
+
+  it("names the dependency when gpu-stack fails for a reason other than fractioning", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            reason: "dcgm-exporter service not found in the cluster",
+            components: {
+              nvidia: { available: false, reason: "dcgm-exporter service not found in the cluster" },
+              "gpu-fractioning": { available: true },
+            },
+          },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain("gpu-stack");
+    expect(result.tooltipText).not.toContain("GPU fractions are not supported.");
+  });
+
   it('should handle "Connected" status and set color to "success"', () => {
     const status = {
       state: ClusterState.Connected,

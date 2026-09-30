@@ -101,6 +101,13 @@ var ComputeResourcesAdmin = models.Role{
 			Delete:       true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+			Create:       true,
+			Read:         true,
+			Update:       true,
+			Delete:       true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_TEMPLATES,
 			Read:         true,
 		},

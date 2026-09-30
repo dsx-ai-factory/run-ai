@@ -36,7 +36,7 @@ Before restoring the NVIDIA Run:ai cluster, it is essential to validate that it 
 
 ### Re-install the Cluster
 
-1. Follow the NVIDIA Run:ai cluster [installation](../../installation/install-using-helm/helm-install.md) instructions and ensure all [prerequisites](../../installation/install-using-helm/prerequisites-and-features.md) are met.
+1. Follow the NVIDIA Run:ai cluster installation instructions for [Connected](../../installation/guided-installation/connected/multi-cluster.md#install-each-nvidia-runai-cluster) or [Air-Gapped](../../installation/guided-installation/air-gapped/multi-cluster.md#install-each-nvidia-runai-cluster) environments and ensure all [prerequisites](../../installation/guided-installation/prerequisites-and-features.md) are met.
 2.  If you have a backup of the cluster configurations, reload it once the installation is complete:
 
     ```bash
@@ -58,7 +58,7 @@ For more information, see [Advanced cluster configurations](../../configuration/
 
 ### Database Storage <a href="#database-storage" id="database-storage"></a>
 
-By default, NVIDIA Run:ai utilizes an internal PostgreSQL database to manage control plane data. This database resides on a Kubernetes Persistent Volume (PV). To safeguard against data loss, it's essential to implement a reliable backup strategy.
+By default, NVIDIA Run:ai utilizes an internal PostgreSQL database to manage control plane data. This database resides on a Kubernetes Persistent Volume (PV). To safeguard against data loss, it is essential to implement a reliable backup strategy.
 
 #### Backup Methods
 
@@ -88,7 +88,7 @@ NVIDIA Run:ai stores metrics history using [Thanos](https://github.com/thanos-io
 
 ### Deployment Configurations <a href="#backing-up-control-plane-configuration" id="backing-up-control-plane-configuration"></a>
 
-The NVIDIA Run:ai control plane installation can be [customized](../../configuration/control-plane-config.md) using `--set` flags during Helm deployment. These configuration overrides are preserved during upgrades but are **not retained** if Kubernetes is uninstalled or damaged. To ensure recovery, it's recommended to back up the full set of applied Helm customizations.
+The NVIDIA Run:ai control plane installation can be [customized](../../configuration/control-plane-config.md) using `--set` flags during Helm deployment. These configuration overrides are preserved during upgrades but are **not retained** if Kubernetes is uninstalled or damaged. To ensure recovery, it is recommended to back up the full set of applied Helm customizations.
 
 1.  To back up the control plane Helm values:
 
@@ -109,7 +109,7 @@ Follow the steps below to restore the control plane including previously backed-
 2. Restore Persistent Volumes - Recover the PVs and ensure these volumes are correctly reattached or restored from your backup solution:
    * PostgreSQL database - Stores control plane metadata
    * Thanos - Stores workload metrics and historical data
-3. Reinstall the control plane - Install the NVIDIA Run:ai [control plane](../../installation/install-using-helm/install-control-plane.md) on the newly created cluster. During installation:
+3. Reinstall the control plane - Install the NVIDIA Run:ai control plane for [Connected](../../installation/guided-installation/connected/multi-cluster.md#install-the-control-plane) or [Air-Gapped](../../installation/guided-installation/air-gapped/multi-cluster.md#install-the-control-plane) environments on the newly created cluster. During installation:
    * Use the saved Helm configuration overrides to preserve custom settings
    * Connect the control plane to the recovered PostgreSQL volume
    * Reconnect Thanos to the restored metrics volume

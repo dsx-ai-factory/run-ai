@@ -77,13 +77,13 @@ If any of the selected reports fail to delete, an error message identifies the f
 
 ## Downloading a Report
 
-<Info>
+<Note>
 
 **Note**
 
 To download, the report must be in status “Ready”. Download acts on a single report at a time — if more than one report is selected, the **DOWNLOAD CSV** button is disabled.
 
-</Info>
+</Note>
 
 1. Select the report you want to download
 2. Click **DOWNLOAD CSV**
@@ -155,4 +155,4 @@ Reports must be saved in a storage solution compatible with S3. To activate this
 
 ## Using API
 
-To view the available actions, go to the [Reports](https://run-ai-docs.nvidia.com/api/2.26/organizations/reports) API reference.
+To view the available actions, go to the [Reports](api:main-api:GET/api/v1/org-unit/reports) API reference.

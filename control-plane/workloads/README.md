@@ -205,4 +205,4 @@ bundles the spec into `swagger/_build/` and generates the **server stubs** in
 [`internal/generated`](internal/generated) (openapi-generator `v7.12.0`,
 consumed by the router). The generated directory **must not be edited by hand** —
 changes are overwritten on the next generation run. The public Go client for this
-service is generated separately into `runai-clients/workloads-client`.
+service is a separate module under [`pkg/client`](pkg/client).

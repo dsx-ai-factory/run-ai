@@ -197,10 +197,7 @@ func (a *AnyworkloadController) SetDefaultsWhereNeeded(globalRegistry string) {
 	if a.RunaiOauth2ProxyImage == nil {
 		a.RunaiOauth2ProxyImage = &common.Image{}
 	}
-	a.RunaiOauth2ProxyImage.SetDefaultsWhereNeeded(&common.Image{
-		Registry: ptr.To(globalRegistry),
-		Name:     ptr.To(common.WorkloadRunaiOauth2ProxyImageName),
-	})
+	a.RunaiOauth2ProxyImage.SetDefaultsWhereNeeded(common.ThirdPartyImage("OAUTH2_PROXY"))
 
 	if a.RunaiOauth2ProxyRedisFQDN == nil {
 		a.RunaiOauth2ProxyRedisFQDN = ptr.To("cluster-redis.runai.svc.cluster.local:6379")

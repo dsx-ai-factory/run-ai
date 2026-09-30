@@ -6,12 +6,14 @@
 package testing
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
 	"time"
 
+	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
@@ -29,8 +31,8 @@ import (
 
 	clustersOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/mocks"
-	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
-	workloadsMocks "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/mocks"
+	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	workloadsMocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/mocks"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/utils/ptr"
@@ -2951,6 +2953,40 @@ var _ = Describe("Project API tests", Ordered, func() {
 			count := countResponse.Body.(api.CountResponse).Count
 			Expect(count).To(Equal(countBefore + 6))
 		})
+
+		It("internal count ignores the caller's permitted scopes", func() {
+			createdIds := []string{}
+			for i := 0; i < 2; i++ {
+				name := createProjectName()
+				createResponse, err := projectApiService.CreateProject(ctx, getProjectCreateRequest(name, name, departmentId, clusterId))
+				Expect(err).To(BeNil())
+				Expect(createResponse.Code).To(Equal(http.StatusCreated))
+				created := createResponse.Body.(api.Project)
+				createdIds = append(createdIds, created.Id)
+				projectIds = append(projectIds, created.Id)
+			}
+
+			unscoped, err := projectApiService.CountProjects(ctx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(unscoped.Code).To(Equal(http.StatusOK))
+			total := unscoped.Body.(api.CountResponse).Count
+			Expect(total).To(BeNumerically(">=", 2))
+
+			limitedCtx := context.WithValue(ctx, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{
+				Projects: []string{createdIds[0]},
+			})
+
+			scoped, err := projectApiService.CountProjects(limitedCtx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(scoped.Code).To(Equal(http.StatusOK))
+			Expect(scoped.Body.(api.CountResponse).Count).To(Equal(int64(1)))
+
+			internal, err := projectApiService.CountInternalProjects(limitedCtx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(internal.Code).To(Equal(http.StatusOK))
+			Expect(internal.Body.(api.CountResponse).Count).To(Equal(total))
+		})
+
 	})
 
 	Context("memory units", func() {

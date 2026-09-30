@@ -23,10 +23,6 @@ func (a *AuthorizationAdapter) UpdateEnableScopedAuthorization(ctx context.Conte
 	return a.updateBooleanSetting(ctx, tenantID, authorization_openapi.AUTHORIZATIONSETTINGSKEYENUM_ENABLE_SCOPED_AUTHORIZATION, value)
 }
 
-func (a *AuthorizationAdapter) UpdateTenantIsCspManaged(ctx context.Context, tenantID int, value interface{}) error {
-	return a.updateBooleanSetting(ctx, tenantID, authorization_openapi.AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED, value)
-}
-
 func (a *AuthorizationAdapter) updateBooleanSetting(ctx context.Context, tenantID int, key authorization_openapi.AuthorizationSettingsKeyEnum, value interface{}) error {
 	boolVal, ok := value.(bool)
 	if !ok {

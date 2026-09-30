@@ -100,7 +100,7 @@
     "gcr.io/knative-samples/helloworld-go"
   ],
   "urls": [
-    "https://nael-env-001.runailabs.com/team-b/my-training-demo-123"
+    "https://nael-env-001.example.com/team-b/my-training-demo-123"
   ],
   "environments": [
     {
@@ -109,7 +109,7 @@
           "name": "url",
           "toolType": "custom",
           "connectionType": "ExternalUrl",
-          "url": "https://nael-env-001.runailabs.com/team-b/my-training-demo-123",
+          "url": "https://nael-env-001.example.com/team-b/my-training-demo-123",
           "authorizedGroups": [
             "ml-team",
             "data-scientists",
@@ -129,6 +129,7 @@
     "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai training submit my-training-demo-123 --project team-b --image gcr.io/knative-samples/helloworld-go --image-pull-policy IfNotPresent --working-dir /app -g 1 --runs 5 --parallelism 2 --backoff-limit 3 --restart-policy OnFailure --environment-variable BATCH_SIZE=32 --environment-variable EPOCHS=100 --environment-variable LEARNING_RATE=0.001 --label experiment=demo --label framework=custom --annotation owner=data-science-team --existing-pvc claimname=my-simple-pvc,path=/data --external-url container=8080,authgroups=ml-team:data-scientists:platform-ops --auto-deletion-time-after-completion 1h --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_PTRACE --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- sh -c 'echo \"Training simulation\"; sleep 30'"
   },
   "preemptible": true,
+  "preemptibility": "semi-preemptible",
   "fullySaasWorkload": true,
   "environmentVariables": {
     "BATCH_SIZE": "32",

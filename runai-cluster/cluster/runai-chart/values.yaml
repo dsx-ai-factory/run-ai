@@ -1,9 +1,7 @@
 global:
+  # Quote it: a bare `on` is a YAML bool, which KAI rejects. Being global it
+  # reaches KRM and the bundled kai-scheduler on its own.
   fipsMode: "off"
-  # The bundled kai-scheduler reads this boolean rather than fipsMode, and Helm
-  # derives neither from the other, so set both together or KRM fails the render.
-  # Being global it reaches the scheduler through KRM, without naming either.
-  fips: false
   customCA:
     enabled: false
     secret:
@@ -39,6 +37,10 @@ thirdPartyImages:
     registry: registry.k8s.io
     repository: git-sync/git-sync
     tag: v4.7.0
+  oauth2-proxy:
+    registry: quay.io
+    repository: oauth2-proxy/oauth2-proxy
+    tag: v7.15.4
   valkey:
     registry: docker.io
     repository: valkey/valkey
@@ -199,6 +201,11 @@ kai-resource-management:
   defaultNodePool:
     enabled: false
   kai-scheduler:
+    gpu-fractioning:
+      metricsAgent:
+        metricNames:
+          gpuSmUtilizationPercent: runai_pod_gpu_utilization
+          gpuMemoryUsedBytes: runai_pod_gpu_memory_used_bytes
     global:
       # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
       # chart-level autoscaling switch off so it does not imply enablement.
@@ -208,6 +215,8 @@ kai-resource-management:
       resourceReservation:
         namespace: runai-reservation
         serviceAccount: runai-reservation
+      nvFractions:
+        set: true
     operator:
       resources:
         limits:
@@ -222,8 +231,12 @@ kai-resource-management:
       enabled: false
     defaultPriorityClasses:
       enabled: false
+    # go-operator owns the KAIConfig singleton too, so neither of KAI's own
+    # managers may create it. Both off is KAI's "external" mode.
     kaiConfigDeployer:
       enabled: false
+    kaiConfig:
+      render: false
     nodescaleadjuster:
       scalingPodNamespace: runai-scale-adjust
 karta:

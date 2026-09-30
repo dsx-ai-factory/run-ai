@@ -224,6 +224,10 @@ describe("policy-rule-card.vue — enforcement combination validation", () => {
       global: {
         plugins: [Quasar],
         stubs: {
+          NotificationAlertBar: {
+            props: { title: String, showH1Content: Boolean, orientation: String },
+            template: "<div><slot /></div>",
+          },
           QForm: {
             template: "<form><slot /></form>",
             methods: { validate: () => Promise.resolve(true) },
@@ -356,7 +360,11 @@ describe("policy-rule-card.vue — enforcement combination validation", () => {
     expect(save.rule.allowOverride).toBe(true);
   });
 
-  it("warns when the draft matches a locked higher-scope rule", async () => {
+  it.each([
+    { scope: "cluster", clusterId: "cluster-id" },
+    { scope: "department", departmentId: "department-id" },
+    { scope: "project", projectId: "project-id" },
+  ])("names only the blocking $scope in the warning", async (sourceOfRule) => {
     const info: IFieldInfo = {
       ...fieldInfo("", []),
       itemSelectors: [],
@@ -372,11 +380,15 @@ describe("policy-rule-card.vue — enforcement combination validation", () => {
             specSelector: "test-selector",
             allowOverride: false,
             enforcements: [],
-            sourceOfRule: { scope: "cluster", clusterId: "cluster-id" },
+            sourceOfRule,
           },
         ],
         tenantName: "runai",
-        orgUnits: [{ id: "cluster-id", type: "cluster", name: "cluster-a" }],
+        orgUnits: [
+          { id: "cluster-id", type: "cluster", name: "cluster-a" },
+          { id: "department-id", type: "department", name: "department-a", parentId: "cluster-id" },
+          { id: "project-id", type: "project", name: "project-a", parentId: "department-id" },
+        ],
       },
     );
 
@@ -387,8 +399,10 @@ describe("policy-rule-card.vue — enforcement combination validation", () => {
       showH1Content: true,
       orientation: "vertical",
     });
-    expect((wrapper.vm as unknown as { lockedRuleWarning: string }).lockedRuleWarning).toBe(
-      "There is a policy rule for this target in place in organization runai / cluster cluster-a that prevents lower scopes from overriding it. The rule you're creating will be saved but remain inactive until the cluster rule is removed or changed to allow override.",
+    const scope = sourceOfRule.scope;
+    expect(warning.text()).toBe(
+      `There is a policy rule for the same target in place in ${scope} ${scope}-a that prevents lower scopes from overriding it. The rule you're creating will be saved but remain inactive until the ${scope} rule is removed or changed to allow override.`,
     );
+    expect(warning.findAll("strong").map((node) => node.text())).toEqual([`${scope} ${scope}-a`]);
   });
 });

@@ -137,6 +137,11 @@ paths:
   /api/v1/storage-classes/sync:
     $ref: './resources/v1/StorageClassSync.yaml'
 
+  /api/v1/device-classes:
+    $ref: './resources/DeviceClass.yaml'
+  /api/v1/device-classes/sync:
+    $ref: './resources/DeviceClassSync.yaml'
+
   /api/v1/storage-class-configuration:
     $ref: './resources/StorageClassConfiguration.yaml'
   /api/v1/storage-class-configuration/{id}:

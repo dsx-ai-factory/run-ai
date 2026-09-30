@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	wlclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wlclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaimcp"

@@ -24,7 +24,7 @@ import (
 	extapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/mocks"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	pubsub "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub"
 	pubsubmocks "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/mocks"

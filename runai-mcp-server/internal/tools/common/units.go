@@ -6,7 +6,7 @@
 package common
 
 import (
-	orgunit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 )
 
 // Unit conversion divisors used to normalize CPU/memory values from upstream

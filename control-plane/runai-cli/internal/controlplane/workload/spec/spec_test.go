@@ -24,7 +24,7 @@ import (
 	nodes "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec/spectype"
 	clierrors "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/errors"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	"github.com/spf13/cobra"
 	"k8s.io/utils/ptr"

@@ -19,7 +19,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/batch"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/list"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
 	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cluster/apis"

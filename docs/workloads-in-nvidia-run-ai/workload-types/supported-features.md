@@ -32,6 +32,7 @@ Feature availability may vary across NVIDIA Run:ai versions and cluster deployme
 | [Gang scheduling](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#gang-scheduling) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | [Network topology-aware scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md) | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ |
 | [GB200 NVL72 and Multi-Node NVLink domains (MNNVL)](../../platform-management/aiinitiatives/resources/using-gb200.md) | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ |
+| [Dynamic Resource Allocation (DRA) / ResourceClaims](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#dynamic-resource-allocation-dra) | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 | [Scheduling rules](../../platform-management/policies/scheduling-rules.md) | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 
 ## Operational and Platform Features
@@ -47,13 +48,13 @@ Feature availability may vary across NVIDIA Run:ai versions and cluster deployme
 | [Workload assets](../workload-assets/overview.md) | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 | [Workload Policies](../../platform-management/policies/native-workload-policies.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
-<Info>
+<Note>
 
 **Workload awareness**
 
 Specific workload-aware visibility, so that different pods are identified and treated as a single workload (for example GPU utilization, workload view, dashboards).
 
-</Info>
+</Note>
 
 ## Externally Submitted Kubernetes Workloads
 

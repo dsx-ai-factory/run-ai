@@ -2,7 +2,7 @@ exposedUrls:
   - container: 443
     toolName: tool-url-mcust
     toolType: custom
-    url: https://ofer-test-f.runailabs.com/secret
+    url: https://ofer-test-f.example.com/secret
     name: name-url-cust
   - container: 80
     toolName: tool-url-mauto

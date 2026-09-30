@@ -14,7 +14,7 @@ require (
 	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/ThreeDotsLabs/watermill v1.5.3 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5 // indirect
-	github.com/andybalholm/brotli v1.2.4 // indirect
+	github.com/andybalholm/brotli v1.2.6 // indirect
 	github.com/aws/smithy-go v1.28.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -28,18 +28,18 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0 // indirect
 	github.com/ebitengine/purego v0.10.2 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
-	github.com/go-faster/errors v0.7.1 // indirect
+	github.com/go-faster/errors v0.8.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
 	github.com/go-playground/validator/v10 v10.30.5 // indirect
 	github.com/go-sql-driver/mysql v1.10.1 // indirect
@@ -48,8 +48,8 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.20.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20260906184651-6331bc6350fe // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 // indirect
+	github.com/google/pprof v0.0.0-20260926063103-aaccee046517 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
@@ -57,7 +57,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.20.0 // indirect
+	github.com/klauspost/compress v1.20.1 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lib/pq v1.12.3 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
@@ -86,12 +86,12 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/paulmach/orb v0.13.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
-	github.com/pierrec/lz4/v4 v4.1.30 // indirect
+	github.com/pierrec/lz4/v4 v4.1.31 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20260916203055-22a1a467d9f0 // indirect
 	github.com/prometheus/client_golang v1.24.1 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.70.1 // indirect
+	github.com/prometheus/common v0.71.0 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/redis/go-redis/v9 v9.22.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
@@ -108,8 +108,8 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/testcontainers/testcontainers-go v0.43.0 // indirect
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.43.0 // indirect
+	github.com/testcontainers/testcontainers-go v0.44.0 // indirect
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
@@ -118,7 +118,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.70.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 // indirect
 	go.opentelemetry.io/otel v1.46.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.46.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.46.0 // indirect
@@ -137,8 +137,8 @@ require (
 	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/tools v0.50.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260918162117-cecb64721679 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260918162117-cecb64721679 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect
@@ -150,31 +150,31 @@ require (
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
+	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.0
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/google/uuid v1.6.0
 	github.com/onsi/ginkgo/v2 v2.33.0
-	github.com/onsi/gomega v1.43.1
+	github.com/onsi/gomega v1.44.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
@@ -186,8 +186,8 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client 
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../control-plane/cluster-service/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../runai-clients/org-unit-service-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../runai-clients/workloads-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../../control-plane/workloads/pkg/client
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities => ../../runai-cluster/common/cluster-capabilities

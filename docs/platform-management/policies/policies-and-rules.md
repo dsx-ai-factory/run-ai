@@ -34,13 +34,13 @@ NVIDIA Run:ai policies can target any workload type in the platform -- both NVID
 * NVIDIA Run:ai native workloads are fully integrated into the platform. Policies for these workloads are configured using the policy YAML editor.
 * Supported workload types include any other workload type registered in the platform (such as PyTorchJob, RayJob, and others). Policies for these types can be configured interactively using the Rule builder or written as YAML.
 
-<Info>
+<Note>
 
 **Note**
 
 To apply policies to a new [workload type](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md) your organization has registered, you must first map it to the policy engine using the mapping APIs. See [Workload types policy mapping](workload-type-policy-mapping.md).
 
-</Info>
+</Note>
 
 ### Policy Structure
 
@@ -57,7 +57,7 @@ The structure of a policy depends on the workload type it targets.
 
 ## Scope of Effectiveness
 
-<Info>
+<Note>
 
 **Note**
 
@@ -67,7 +67,7 @@ Scope availability depends on the policy type:
 * Policies for supported workload types support tenant, cluster, department, and project scope. System scope is not available for these policies.
 * Submitting a policy at the tenant scope is supported via API only for both native workload and supported workload type policies.
 
-</Info>
+</Note>
 
 Numerous teams working on various projects require the use of different tools, requirements, and safeguards. One policy may not suit all teams and their requirements. Hence, administrators can select the scope to cover the effectiveness of the policy. When a scope is selected, all of its subordinate units are also affected. As a result, all workloads submitted within the selected scope are controlled by the policy.
 
@@ -101,13 +101,13 @@ Kyverno runs as a dynamic admission controller in a Kubernetes cluster. Kyverno 
 
 ### System Policies
 
-<Info>
+<Note>
 
 **Note**
 
 System policies apply to NVIDIA Run:ai native workloads only. They do not apply to policies for supported workload types.
 
-</Info>
+</Note>
 
 By default, every account in NVIDIA Run:ai is governed by system policies that establish foundational security controls across all workloads, scopes, and interfaces (UI, CLI, API). These policies ensure consistent workload behavior and prevent unauthorized escalation. They can also be viewed as part of the effective policy for every scope**.**
 

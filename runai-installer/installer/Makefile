@@ -5,7 +5,9 @@
 
 SERVICE_NAME=runai-installer
 BIN_REL_PATH?=bin
-OUTPUT_PATH?=$(BIN_REL_PATH)/$(OS)/$(ARCH)/$(SERVICE_NAME)
+# Windows needs the .exe suffix for the shell to treat the file as a program.
+BIN_EXT=$(if $(filter windows,$(OS)),.exe,)
+OUTPUT_PATH?=$(BIN_REL_PATH)/$(OS)/$(ARCH)/$(SERVICE_NAME)$(BIN_EXT)
 export GOPRIVATE=github.com/run-ai/*
 
 # Build tags. The released binary is built with none of them, so it exposes
@@ -21,7 +23,11 @@ GO_VERSION_BASE?=$(shell awk '$$1=="go"{print $$2;exit}' go.mod)
 GOLANGCI_LINT_VERSION=v2.9.0
 DOCKERHUB_PROXY?=
 
+# Ensure ~/.gitconfig exists before any container bind-mounts it. Docker creates a
+# root-owned DIRECTORY at the mount source when the path is missing, which then breaks
+# every git command for the user (see DOCKER_GO_BASE_COMMAND in golang.mk).
 git-config-command:
+	@touch $(HOME)/.gitconfig
 ifdef GITHUB_TOKEN
 	@echo Creating gitconfig with github token
 	git config --file $(HOME)/.gitconfig url.https://$(GITHUB_TOKEN)@github.com/.insteadOf https://github.com/
@@ -71,6 +77,8 @@ build: git-config-command
 	OS=linux ARCH=arm64 make build-for-platform
 	OS=darwin ARCH=amd64 make build-for-platform
 	OS=darwin ARCH=arm64 make build-for-platform
+	OS=windows ARCH=amd64 make build-for-platform
+	OS=windows ARCH=arm64 make build-for-platform
 .PHONY: build
 
 # Same binaries plus the legacy commands, written to $(INTERNAL_BIN_REL_PATH)

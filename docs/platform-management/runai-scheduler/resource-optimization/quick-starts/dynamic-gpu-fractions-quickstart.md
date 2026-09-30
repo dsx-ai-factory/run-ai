@@ -12,14 +12,14 @@ Before you start, make sure:
 * The project has an assigned quota of at least 0.5 GPU.
 * [Dynamic GPU memory fractions](../dynamic-memory-fractions.md) is enabled.
 
-<Info>
+<Note>
 
 **Note**
 
 * Flexible workload submission is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload submission.
 * Dynamic GPU memory fractions is disabled by default. To set a memory Limit through the UI, the CLI, or the APIs, it must be enabled by your administrator under **General settings** → **Resources** → **GPU resource optimization**.
 
-</Info>
+</Note>
 
 ## Step 1: Logging In
 
@@ -43,7 +43,7 @@ runai login --help
 
 <Tab title="API">
 
-To use the API, you will need to obtain a token as shown in [API authentication](https://run-ai-docs.nvidia.com/api/2.26/getting-started/how-to-authenticate-to-the-api).
+To use the API, you will need to obtain a token as shown in [API authentication](../../../../rest-api/how-to-authenticate-to-the-api.md).
 
 </Tab>
 
@@ -67,7 +67,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 8. Under **Environment**, click the **load** icon. A side pane appears, displaying a list of available environments. To add a new environment:
    * Click the **+** icon to create a new environment
    * Enter quick-start as the **name** for the environment. The name must be unique.
-   * Enter the **Image URL** - `gcr.io/run-ai-lab/pytorch-example-jupyter`
+   * Enter the **Image URL** - `quay.io/jupyter/pytorch-notebook`
    * Tools - Set the connection for your tool:
      * Click **+TOOL**
      * Select **Jupyter** tool from the list
@@ -111,7 +111,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
     * Click **+NEW ENVIRONMENT**
     * Enter quick-start as the **name** for the environment. The name must be unique.
-    * Enter the **Image URL** - `gcr.io/run-ai-lab/pytorch-example-jupyter`
+    * Enter the **Image URL** - `quay.io/jupyter/pytorch-notebook`
     * Tools - Set the connection for your tool
       * Click **+TOOL**
       * Select **Jupyter** tool from the list
@@ -145,12 +145,12 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../../reference/cli/runai/):
+Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../../reference/cli/runai/runai_workspace_submit.md):
 
 ```sh
 runai project set "project-name"
 runai workspace submit "workload-name" \
---image gcr.io/run-ai-lab/pytorch-example-jupyter \
+--image quay.io/jupyter/pytorch-notebook \
 --gpu-memory-request 4G --gpu-memory-limit 12G --large-shm \
 --external-url container=8888 --name-prefix jupyter  \
 --command -- start-notebook.sh \
@@ -161,7 +161,7 @@ runai workspace submit "workload-name" \
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](https://run-ai-docs.nvidia.com/api/2.26/workloads/workspaces) API:
+Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](api:main-api:POST/api/v1/workloads/workspaces) API:
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \ 
@@ -174,7 +174,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
     "spec": {
         "command" : "start-notebook.sh",
         "args" : "--NotebookApp.token=''",
-        "image": "gcr.io/run-ai-lab/pytorch-example-jupyter",
+        "image": "quay.io/jupyter/pytorch-notebook",
         "compute": {
             "gpuDevicesRequest": 1,
             "gpuMemoryRequest": "4G",
@@ -195,18 +195,18 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](dynamic-gpu-fractions-quickstart.md#step-1-logging-in)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 * `toolType` will show the Jupyter icon when connecting to the Jupyter tool via the user interface.
 * `toolName` will show when connecting to the Jupyter tool via the user interface.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 
@@ -252,12 +252,12 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../../reference/cli/runai/):
+Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../../reference/cli/runai/runai_workspace_submit.md):
 
 ```sh
 runai project set "project-name"
 runai workspace submit "workload-name" \
---image gcr.io/run-ai-lab/pytorch-example-jupyter --gpu-memory-request 4G \
+--image quay.io/jupyter/pytorch-notebook --gpu-memory-request 4G \
 --gpu-memory-limit 12G --large-shm --external-url container=8888 \
 --name-prefix jupyter --command -- start-notebook.sh \
 --NotebookApp.token=
@@ -267,7 +267,7 @@ runai workspace submit "workload-name" \
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](https://run-ai-docs.nvidia.com/api/2.26/workloads/workspaces) API:
+Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](api:main-api:POST/api/v1/workloads/workspaces) API:
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \ 
@@ -280,7 +280,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
     "spec": {
         "command" : "start-notebook.sh",
         "args" : "--NotebookApp.token=''",
-        "image": "gcr.io/run-ai-lab/pytorch-example-jupyter",
+        "image": "quay.io/jupyter/pytorch-notebook",
         "compute": {
             "gpuDevicesRequest": 1,
             "gpuMemoryRequest": "4G",
@@ -301,18 +301,18 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](dynamic-gpu-fractions-quickstart.md#step-1-logging-in)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 * `toolType` will show the Jupyter icon when connecting to the Jupyter tool via the user interface.
 * `toolName` will show when connecting to the Jupyter tool via the user interface.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 

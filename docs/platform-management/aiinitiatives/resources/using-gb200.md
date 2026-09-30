@@ -4,13 +4,13 @@ Multi-Node NVLink (MNNVL) systems, including NVIDIA GB200, NVIDIA GB200 NVL72 an
 
 Kubernetes does not natively recognize NVIDIA’s MNNVL architecture, which makes managing and scheduling workloads across these high-performance domains more complex. The NVIDIA Run:ai platform simplifies this by abstracting the complexity of MNNVL configuration. Without this abstraction, optimal performance on a GB200 NVL72 system would require deep knowledge of NVLink domains, their hardware dependencies, and manual configuration for each distributed workload. NVIDIA Run:ai automates these steps, ensuring high performance with minimal effort. While GB200 NVL72 supports all [workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), distributed workloads - training and inference - benefit most from its accelerated GPU networking capabilities.
 
-<Info>
+<Note>
 
 **Note**
 
 Distributed workloads include both distributed training and distributed inference.
 
-</Info>
+</Note>
 
 To learn more about GB200, MNNVL and related NVIDIA technologies, refer to the following:
 
@@ -46,9 +46,9 @@ The NVIDIA Run:ai platform enables administrators, researchers, and MLOps engine
 ## Prerequisites
 
 * **Kubernetes version** - Requires Kubernetes 1.32 or later.
-* **NVIDIA GPU Operator** - Install NVIDIA GPU Operator version 25.3 or above. See the [NVIDIA GPU Operator](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#nvidia-gpu-operator) section for installation instructions. This version must include the associated **Dynamic Resource Allocation (DRA) driver**, which provides support for GB200 accelerated networking resources and the ComputeDomain feature. For detailed steps on installing the DRA driver and configuring ComputeDomain, refer to [NVIDIA Dynamic Resource Allocation (DRA) Driver](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#nvidia-dynamic-resource-allocation-dra-driver).
-* **NVIDIA Network Operator** - Install the NVIDIA Network Operator. See the [NVIDIA Network Operator](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#nvidia-network-operator) section for installation instructions.
-* **Enable GPU network acceleration** - After installation, update the cluster configuration to enable GPU network acceleration by setting the `anyworkload-controller.GPUNetworkAccelerationEnabled=true` flag. Enabling this flag triggers an update of the NVIDIA Run:ai `anyworkload-controller` deployment and automatically restarts the controller to apply the change. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../../installation-and-configuration/configuration/cluster-config.md).
+* **NVIDIA GPU Operator** - Install NVIDIA GPU Operator version 25.3 or above. See the [NVIDIA GPU Operator](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nvidia-gpu-operator) section for installation instructions. This version must include the associated **Dynamic Resource Allocation (DRA) driver**, which provides support for GB200 accelerated networking resources and the ComputeDomain feature. For detailed steps on installing the DRA driver and configuring ComputeDomain, refer to [NVIDIA Dynamic Resource Allocation (DRA) Driver](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nvidia-dynamic-resource-allocation-dra-driver).
+* **NVIDIA Network Operator** - Install the NVIDIA Network Operator. See the [NVIDIA Network Operator](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nvidia-network-operator) section for installation instructions.
+* **Enable GPU network acceleration** - After installation, update the cluster configuration to enable GPU network acceleration by setting the appropriate flag for the relevant controller. Enabling either flag triggers an update of the corresponding NVIDIA Run:ai controller deployment and automatically restarts the controller to apply the change. Configure the flag, `GPUNetworkAccelerationEnabled=true`, for the controller that applies to your workloads. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../../installation-and-configuration/configuration/cluster-config.md).
 
 ## Configuring and Managing GB200 NVL72 Domains
 
@@ -109,13 +109,13 @@ These additional steps are crucial for the creation of underlying HW resources (
 
 You can influence how the Scheduler places distributed workloads into GB200 MNNVL node pools using the **Topology** field available in the [distributed training](../../../workloads-in-nvidia-run-ai/using-training/distributed-training-models.md) and [distributed inference](../../../workloads-in-nvidia-run-ai/using-inference/distributed-inference.md) workload submission forms.
 
-<Info>
+<Note>
 
 **Note**
 
 The following options are based on [inter-pod affinity rules](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/), which define how pods are grouped based on topology.
 
-</Info>
+</Note>
 
 * **Confine a workload to a single GB200 MNNVL domain** - To ensure the workload is scheduled within a single GB200 MNNVL domain (e.g., a GB200 NVL72 rack), apply a label with a Required policy using the MNNVL label key (`nvidia.com/gpu.clique`). This instructs the Scheduler to strictly place all pods within the same MNNVL domain. If the workload exceeds 18 pods (or 72 GPUs), the Scheduler will not be able to find a matching domain and will fail to schedule the workload.
 * **Try to schedule a workload using a Preferred topology** - To guide the Scheduler to prioritize a specific topology without enforcing it, apply a label with a policy of Preferred. You can apply any label with a Preferred policy. These labels are treated with higher scheduling weight than the default Preferred pod affinity automatically applied by NVIDIA Run:ai for MNNVL.
@@ -138,7 +138,7 @@ You can customize how the NVIDIA Run:ai platform applies the MNNVL feature to ea
 
 ## Known Limitations and Compatibility
 
-* If the DRA driver is not installed correctly in the cluster, particularly if the required CRDs are missing, and the MNNVL feature is enabled in the NVIDIA Run:ai platform, the `anyworkload-controller` will enter a crash loop. This will continue until the DRA driver is properly installed with all necessary CRDs or the MNNVL feature is disabled in the NVIDIA Run:ai platform.
+* If the DRA driver is not installed correctly in the cluster, particularly if the required CRDs are missing, and the MNNVL feature is enabled in the NVIDIA Run:ai platform, the workload controller will enter a crash loop. This will continue until the DRA driver is properly installed with all necessary CRDs or the MNNVL feature is disabled in the NVIDIA Run:ai platform.
 * To run workloads on a GB200 node pool (i.e., a node pool MNNVL-enabled), the workload must explicitly request that node pool. To prevent unintentional use of MNNVL node pools, administrators must ensure these node pools are not included in any project's default list of node pools.
 * Only one distributed workload per node can use GB200 accelerated networking resources. If GPUs remain unused on that node, other workload types may still utilize them.
 * Workloads created in versions earlier than 2.21 do not include GB200 MNNVL node pools and are therefore not expected to experience compatibility issues.

@@ -2,13 +2,13 @@
 
 This guide explains how to create distributed training templates for reuse during workload submission. To manage templates, see [Workload Templates](../README.md).
 
-<Info>
+<Note>
 
 **Note**
 
 Flexible workload templates is enabled by default and applies only to flexible workload submission (enabled by default). If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload templates.
 
-</Info>
+</Note>
 
 ## Before You Start
 If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../../settings/user-settings/user-credentials.md) (created under User settings).
@@ -22,13 +22,13 @@ You can override the defaults by configuring priority and preemptibility. For mo
 
 When loading an existing asset, environment or compute resource, into a template, you can choose whether to link the asset or use it without linking. Linked assets remain connected to the template. Any updates made to the original environment or compute resource are automatically reflected in the template. While linked, the asset fields in the template cannot be modified.
 
-<Info>
+<Note>
 
 **Note**
 
 Linking data source assets is currently not supported.
 
-</Info>
+</Note>
 
 ## Adding a New Template
 
@@ -36,21 +36,21 @@ Linking data source assets is currently not supported.
 2. Click **+NEW TEMPLATE** and select **Training** from the dropdown menu**.**
 3. Within the new training template form, select the **scope**.
 4. Set the training workload architecture as **distributed** workload, which consists of multiple processes working together. These processes can run on different nodes. This workload uses environments that support distributed training workloads only.
-5. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#distributed-training) for details on enabling.
+5. Set the framework for the distributed workload. In case one of the frameworks is not enabled, see [Distributed training prerequisites](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
 6. Set the distributed workload configuration that defines how distributed training workloads are divided across multiple machines or processes. Choose **Workers & master** or **Workers only** based on your training requirements and infrastructure. In distributed training workloads, both **Workers** and **Master** include the same configuration sections. By default, the Master uses the Worker configuration for shared fields. This default behavior can be overridden if different settings are required for the Master.
 7. Enter a unique **name** for the training template. If the name already exists in the project, you will be requested to submit a different name.
 8. Click **CONTINUE**
 
 ### Setting Up an Environment
 
-<Info>
+<Note>
 
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
 * To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -102,14 +102,14 @@ Manually configure the settings below as needed.
 
 ### Setting Up Compute Resources
 
-<Info>
+<Note>
 
 **Note**
 
 * GPU memory limit is disabled by default. If unavailable, your administrator must enable it under **General settings** → Resources → GPU resource optimization.
 * Toleration(s) and topology can still be modified even when the compute resource asset is linked.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -146,14 +146,14 @@ Manually configure the settings below as needed.
 
 ### Setting Up Data & Storage
 
-<Info>
+<Note>
 
 **Note**
 
 * Data volumes is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Data volumes.
 * If Data volumes is not enabled, **Data & storage** appears as **Data sources** only, and no data volumes will be available.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -165,13 +165,13 @@ Manually configure the settings below as needed.
 
 **Configure data sources for a one-time configuration**
 
-<Info>
+<Note>
 
 **Note**
 
 [PVCs](../../workload-assets/data-volumes.md), [Secrets](../../workload-assets/credentials.md), [ConfigMaps](../../workload-assets/environments.md) and [Data volumes](../../workload-assets/data-volumes.md) cannot be added as a one-time configuration.
 
-</Info>
+</Note>
 
 1. Click the **➕** icon and choose the data source from the dropdown menu. You can add multiple data sources.
 2. Once selected, set the **data origin** according to the required fields and enter the **container path** to set the **data target location**.
@@ -202,30 +202,31 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 
 ### Setting Up General Settings
 
-<Info>
+<Note>
 
 **Note**
 
 The following general settings are optional.
 
-</Info>
+</Note>
 
 1. Set **annotations(s).** Kubernetes annotations are key-value pairs attached to the workload. They are used for storing additional descriptive metadata to enable documentation, monitoring and automation.
 2. Set **labels(s).** Kubernetes labels are key-value pairs attached to the workload. They are used for categorizing to enable querying.
 
 ### Configuring Workload Setup
 
-<Info>
+<Note>
 
 **Note**
 
 The fields in the **Workload setup** section are optional and apply to the entire workload (both Workers and Master).
 
-</Info>
+</Note>
 
-1. Set whether the workload may be interrupted by selecting **Preemptible** or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
+1. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+   * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 2. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 3. Set the **grace period** for workload preemption. This is a buffer that allows a preempted workload to reach a safe checkpoint before it is forcibly preempted. Enter a timeframe between 0 sec and 5 min.
 4. Set the **backoff limit** before workload failure. The backoff limit is the maximum number of retry attempts for failed workloads. After reaching the limit, the workload status will change to "Failed." Enter a value between 0 and 100.
@@ -240,4 +241,4 @@ The fields in the **Workload setup** section are optional and apply to the entir
 
 ## Using API
 
-Go to the [Workload templates](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-templates) API reference to view the available actions.
+Go to the [Workload templates](api:main-api:GET/api/v1/workload-templates) API reference to view the available actions.

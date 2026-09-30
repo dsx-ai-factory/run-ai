@@ -13,18 +13,18 @@ To learn more about the inference workload type in NVIDIA Run:ai and determine t
 ## Before You Start
 
 * Make sure you have created a [project](../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
-* Make sure [Knative](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) is properly installed by your administrator.
+* Make sure [Knative](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) is properly installed by your administrator.
 * To access gated Hugging Face models, make sure to obtain an access token from [Hugging Face Account Settings](https://huggingface.co/) → Access Token. In NVIDIA Run:ai, store the token as a [shared secret](../workload-assets/credentials.md#generic-secret) (created by an administrator) or a [user credential](../../settings/user-settings/user-credentials.md) (created under User settings). The credential must be a Generic secret that contains an `HF_TOKEN`.
 * If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../settings/user-settings/user-credentials.md) (created under User settings).
 
-<Info>
+<Note>
 
 **Note**
 
 * Selecting the **inference server** is enabled by default. If you do not see it in the menu, contact your administrator to enable it under **General settings** → Workloads → Hugging Face models.
 * **Docker registry URL for inference workloads** - For Knative-based inference workloads, Docker Hub credentials must be configured using `https://index.docker.io/v1/` as the registry URL. Credentials configured with `docker.io` result in `401 Unauthorized` errors for Knative-based inference workloads due to differences in how image digests are resolved during image pull. See [Credentials](../workload-assets/credentials.md#docker-registry) for more details.
 
-</Info>
+</Note>
 
 ## Workload Priority and Preemption
 By default, inference workloads in NVIDIA Run:ai are assigned a **Very high** priority and are **non-preemptible**. These defaults ensures that inference workloads, which often serve real-time or latency-sensitive traffic, are guaranteed the resources they need. The default very-high priority ensures the fastest possible scheduling, and the default non-preemptible value guarantees that the workload will not be disrupted by other workloads once it starts running.
@@ -53,14 +53,14 @@ Within the form, you have two options:
 
 ### Setting Up an Environment
 
-<Info>
+<Note>
 
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
 * To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -78,7 +78,7 @@ Within the form, you have two options:
    * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
    * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 4. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 
 </Tab>
@@ -124,7 +124,7 @@ Manually configure the settings below as needed. The changes will apply to this 
      * For **Specific group(s)**, enter **group names** as they appear in your identity provider. You must be a member of one of the groups listed to have access.
      * For **Specific user(s) and service account(s)**, enter a valid user email or name. If you remove yourself, you will lose access.
 4. Set whether inference serving endpoints can be accessed externally or only by internal cluster traffic:
-   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference) section for more details.
+   * **External (Public access)** - Available only if your administrator has configured **Knative** to support external access. See the [Inference requirements](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) section for more details.
    * **Internal only** - Endpoint is accessible only within cluster traffic.
 5. Set the connection for your **tool(s)**. If you are loading from existing setup, the tools are configured as part of the environment.
    * Select the connection type:
@@ -154,14 +154,14 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 ### Setting Up Compute Resources
 
-<Info>
+<Note>
 
 **Note**
 
 * This form is available in both the initial and advanced setup forms. If you configure it during the initial setup, the values will be populated into the advanced setup. Any changes made during the advanced setup will override the initial configuration and be applied to the workload.
 * GPU memory limit is disabled by default. If unavailable, your administrator must enable it under **General settings** → Resources → GPU resource optimization.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -216,7 +216,7 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 ### Setting Up Data & Storage
 
-<Info>
+<Note>
 
 **Note**
 
@@ -224,7 +224,7 @@ Manually configure the settings below as needed. The changes will apply to this 
 * **Advanced setup** - If Data volumes is not enabled, **Data & storage** appears as **Data sources** only, and no data volumes will be available.
 * S3 data sources are not supported for inference workloads.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -251,13 +251,13 @@ Select the data source that will serve as the **model store**. If the model is a
 
 **Configure data sources for a one-time configuration**
 
-<Info>
+<Note>
 
 **Note**
 
 [PVCs](../workload-assets/data-volumes.md), [Secrets](../workload-assets/credentials.md), [ConfigMaps](../workload-assets/environments.md) and [Data volumes](../workload-assets/data-volumes.md) cannot be added as a one-time configuration.
 
-</Info>
+</Note>
 
 1. Click the **➕** icon and choose the data source from the dropdown menu. You can add multiple data sources.
 2. Once selected, set the **data origin** according to the required fields and enter the **container path** to set the **data target location**.
@@ -291,18 +291,19 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 
 ### Setting Up General Settings
 
-<Info>
+<Note>
 
 **Note**
 
 * The following general settings are optional.
 * General settings are available via the Advanced setup form.
 
-</Info>
+</Note>
 
-1. Set whether the workload may be interrupted by selecting **Preemptible** or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
+1. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+   * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 2. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 3. Set the **workload initialization timeout.** This is the maximum amount of time the system will wait for the workload to start and become ready. If the workload does not start within this time, it will automatically fail. Enter a value between 5 seconds and 720 minutes. If you do not set a value, the default is taken from [Knative’s max-revision-timeout-seconds](https://knative.dev/docs/serving/configuration/config-defaults/#max-revision-timeout-seconds).
 4. Set the **request timeout.** This defines the maximum time allowed to process an end-user request. If the system does not receive a response within this time, the request will be ignored. Enter a value between 5 seconds and 10 minutes. If you do not set a value, the default is taken from [Knative’s revision-timeout-seconds](https://knative.dev/docs/serving/configuration/config-defaults/#revision-timeout-seconds).
@@ -388,7 +389,7 @@ Access to the inference serving API depends on how the serving endpoint access w
 
 Follow the below steps to obtain a token:
 
-1. Use the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API with:
+1. Use the [Tokens](api:main-api:POST/api/v2/token) API with:
    * `grantType: password` for specific users or groups
    * `grantType: client_credentials` for service accounts and user access keys
 2.  Use the obtained token to make API calls to the inference serving endpoint. For example:
@@ -413,5 +414,9 @@ To view the available actions, see the inference workload [CLI v2 reference](../
 
 ## Using API
 
-* To view the available actions for creating an inference workload, see the [Inferences](https://run-ai-docs.nvidia.com/api/2.26/workloads/inferences) API reference.
-* To view the available actions for rolling an inference update, see the [Update inference spec](https://run-ai-docs.nvidia.com/api/2.26/workloads/inferences#patch-api-v1-workloads-inferences-workloadid) API reference.
+* To view the available actions for creating an inference workload, see the [Inferences](api:main-api:POST/api/v1/workloads/inferences) API reference.
+* To view the available actions for rolling an inference update, see the [Update inference spec](api:main-api:PATCH/api/v1/workloads/inferences/{workloadId}) API reference.
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes the [`submit_workload`](../../agents/tools-reference.md#workloads) tool to submit a new workload via natural language. See [AI Agents](../../agents/overview.md) for setup.

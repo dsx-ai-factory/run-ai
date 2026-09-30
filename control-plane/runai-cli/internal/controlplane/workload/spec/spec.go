@@ -26,8 +26,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec/spectype"
 	clierrors "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/errors"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/flags/update"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	policyconstants "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/constants"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

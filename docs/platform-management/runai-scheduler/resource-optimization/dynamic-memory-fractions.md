@@ -63,7 +63,7 @@ A GPU application sees its own share of GPU memory through the NVIDIA Management
 
 A GPU memory fraction submitted without a Limit has a Limit equal to its Request. The GPU application therefore sees a GPU memory space the size of the Request, and that size does not change while the workload runs.
 
-For a workload submitted with a Request and a Limit, the free memory reported to the GPU application always covers the rest of its Request, and grows beyond that when the GPU has memory to spare - never above the Limit. In other words, the Request is always available to the workload, and the memory between the Request and the Limit is available only while no one else needs it.
+For a workload submitted with a Request and a Limit, the free memory reported to the GPU application always covers the rest of its Request, and grows beyond that when the GPU has memory to spare - never above the Limit. In other words, the Request is always available to the workload, and the memory between the Request and the Limit is available only while no one else needs it. Refer to [Known limitations with CUDA 13.4 and driver r615](#known-limitations-with-cuda-134-and-driver-r615) for cases where this guarantee does not hold.
 
 For example, take a workload with a 4 GB Request and a 12 GB Limit that is currently using 1 GB of GPU memory:
 
@@ -89,7 +89,7 @@ A memory reclaim is targeted at a single process and affects only the container 
 
 **Note**
 
-NVIDIA Run:ai installs and operates normally without these prerequisites in place, and non-fractional workloads are unaffected. Fractional workloads, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
+NVIDIA Run:ai installs and operates normally without these prerequisites in place, and workloads not using GPU fractions are unaffected. Workloads using GPU fractions, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
 
 </Note>
 
@@ -100,6 +100,7 @@ Dynamic GPU memory fractions require the following on every GPU node in the clus
 | CUDA | 13.4 or later |
 | CUDA driver | r615 or later |
 | NVIDIA GPU Operator | 26.7.1 or later |
+| NVIDIA GPU Operator NRI plugin | Disabled. Install the NVIDIA GPU Operator with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false`). GPU memory fractions do not function while the NRI plugin is enabled. |
 
 ## Setting Dynamic GPU Memory Fractions
 
@@ -142,40 +143,38 @@ Make sure the [default scheduler](../scheduling/default-scheduler.md) is set to 
 
 **Warning**
 
-If you are upgrading from a release that used the `RUNAI_GPU_MEMORY_LIMIT` environment variable, that variable is no longer honored; the memory Limit is now set with an annotation. A workload that still sets `RUNAI_GPU_MEMORY_LIMIT` starts and runs normally, but with no memory ceiling, and no error or event is raised. Refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for the annotation replacement and a before/after example.
+If you are upgrading from a release that used the `RUNAI_GPU_MEMORY_LIMIT` environment variable, that variable is no longer honored; the memory Limit is now set with an annotation. A workload that still sets `RUNAI_GPU_MEMORY_LIMIT` starts and runs normally, but with no memory ceiling, and no error or event is raised. Refer to [Migrate GPU Fractions](../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for the annotation replacement and a before/after example.
 
 </Warning>
 
 ### Annotation Prefixes
 
-Two prefixes are used, and the prefix indicates which component consumes the annotation:
-
-* `nvidia.com/` - The annotation reaches the node and is applied to CUDA.
-* `kai.scheduler/` - The annotation is consumed by the Scheduler only and is never passed to the node. GPU memory portions are a Scheduler convention, because CUDA expresses memory only as an absolute size. The Scheduler resolves the portion against the GPU it selected and passes an absolute size to the node.
+* Annotations without a prefix (`gpu-fraction`, `gpu-memory`, `gpu-fraction-num-devices`, `gpu-fraction-container-name`) set the Request, and are Run:ai's own convention, consumed by the Scheduler rather than passed to CUDA.
+* `nvidia.com/container.<container-name>.gpu-memory.request` is the official NVIDIA-native alternative for an absolute-size Request.
+* `nvidia.com/container.<container-name>.gpu-memory.limit` sets the Limit for an absolute-size Request - the annotation reaches the node and is applied directly to CUDA.
+* `kai.scheduler/container.<container-name>.gpu-memory.portion.limit` sets the Limit for a portion Request - the annotation is consumed by the Scheduler only and is never passed to the node. GPU memory portions are a Scheduler convention, because CUDA expresses memory only as an absolute size; the Scheduler resolves the portion against the GPU it selected and passes an absolute size to the node.
 
 ### Annotation Reference
 
-A dynamic GPU memory fraction is always allocated to a single container. NVIDIA Run:ai currently supports one fractional container per pod, so every annotation below ultimately applies to that one container. The Request sets the guaranteed memory, and the Limit sets the ceiling the workload can grow into. The annotations differ only in how the container is identified:
+A dynamic GPU memory fraction can be assigned to only one container in the pod. The Request sets the guaranteed memory, and the Limit sets the ceiling the workload can grow into. An annotation identifies its container in one of two ways:
 
-* Annotations that embed `container.<container-name>` in the key name the container directly.
-* Annotations without that element apply to the container named by `gpu-fraction-container-name`, or to the first container in the pod when that annotation is omitted.
+* Embedded in the key, as `container.<container-name>` - used by every `nvidia.com/` and `kai.scheduler/` annotation.
+* Named separately, by `gpu-fraction-container-name`, defaulting to the first container in the pod if omitted.
 
-| Annotation | Input format | Purpose |
-|---|---|---|
-| `gpu-fraction` | A portion of GPU memory as a double-precision floating-point number. For example, `0.25`, `0.75`. | Requests a portion of GPU memory. |
-| `gpu-memory` | Memory size in MiB. For example, `2500`, `4096`. | Requests an absolute amount of GPU memory. |
-| `gpu-fraction-num-devices` | The number of GPU devices to allocate using the specified `gpu-fraction` or `gpu-memory` value. Defaults to 1 if omitted. | Requests multiple GPU devices for the fractional container. |
-| `gpu-fraction-container-name` | The name of a container in the pod. Defaults to the first container (index 0) if omitted. | Selects which container receives the GPU allocation when the request is made with `gpu-fraction` or `gpu-memory`. |
-| `nvidia.com/container.<container-name>.gpu-memory.request` | Memory size in Kubernetes resource quantity format. For example, `40G`. | Requests an absolute amount of GPU memory. This is the official NVIDIA alternative to `gpu-memory`. |
-| `nvidia.com/container.<container-name>.gpu-memory.limit` | Memory size in Kubernetes resource quantity format. For example, `80G`. | Sets the memory Limit for a request made as an absolute memory size. |
-| `kai.scheduler/container.<container-name>.gpu-memory.portion.limit` | A portion of GPU memory as a double-precision floating-point number. For example, `0.8`. | Sets the memory Limit for a request made as a GPU memory portion. |
+| Annotation | Input format | Purpose | Used with |
+|---|---|---|---|
+| `gpu-fraction` | A portion of GPU memory as a double-precision floating-point number. For example, `0.25`, `0.75`. | Requests a portion of GPU memory. | Optionally `gpu-fraction-num-devices` and `gpu-fraction-container-name`. No container-scoped form. Limit: `kai.scheduler/container.<container-name>.gpu-memory.portion.limit`. |
+| `gpu-memory` | Memory size in MiB. For example, `2500`, `4096`. | Requests an absolute amount of GPU memory. | Optionally `gpu-fraction-num-devices` and `gpu-fraction-container-name`. Alternative Request form: `nvidia.com/container.<container-name>.gpu-memory.request`. Limit: `nvidia.com/container.<container-name>.gpu-memory.limit`. |
+| `gpu-fraction-num-devices` | The number of GPU devices to allocate using the specified `gpu-fraction` or `gpu-memory` value. Defaults to 1 if omitted. | Requests multiple GPU devices for the fractional container. | Any Request form - `gpu-fraction`, `gpu-memory`, or `nvidia.com/container.<container-name>.gpu-memory.request`. The number of GPU devices is a pod-level property, so this annotation has no container-scoped form. |
+| `gpu-fraction-container-name` | The name of a container in the pod. Defaults to the first container (index 0) if omitted. | Selects which container receives the GPU allocation when the request is made with `gpu-fraction` or `gpu-memory`. | Not used with an annotation that names the container in its key. If both are present, the names must match or the request is rejected. |
+| `nvidia.com/container.<container-name>.gpu-memory.request` | Memory size in Kubernetes resource quantity format. For example, `40G`. | Requests an absolute amount of GPU memory. This is the official NVIDIA alternative to `gpu-memory`. | Optionally `gpu-fraction-num-devices`. Limit: `nvidia.com/container.<container-name>.gpu-memory.limit`. |
+| `nvidia.com/container.<container-name>.gpu-memory.limit` | Memory size in Kubernetes resource quantity format. For example, `80G`. | Sets the memory Limit for a request made as an absolute memory size. | Pairs with an absolute-size Request - `gpu-memory` or `nvidia.com/container.<container-name>.gpu-memory.request`. Pairing with a portion Request causes the Limit to be interpreted as the wrong kind of value. |
+| `kai.scheduler/container.<container-name>.gpu-memory.portion.limit` | A portion of GPU memory as a double-precision floating-point number. For example, `0.8`. | Sets the memory Limit for a request made as a GPU memory portion. | Pairs with the portion Request - `gpu-fraction`. Pairing with an absolute-size Request causes the Limit to be interpreted as the wrong kind of value. |
 
 <Note>
 
 **Note**
 
-* Pair an absolute memory Request with `nvidia.com/container.<container-name>.gpu-memory.limit`, and a memory portion Request with `kai.scheduler/container.<container-name>.gpu-memory.portion.limit`. Pairing a Request with the Limit of the other form causes the Limit to be interpreted as the wrong kind of value.
-* Substitute `<container-name>` with the name of the container receiving the fraction. This is the same container named by `gpu-fraction-container-name`, or the first container in the pod if that annotation is omitted. If both are used, the names must be identical or the request is rejected.
 * The Limit does not affect the Scheduler. The Scheduler places the workload according to its Request. The Limit governs only how far the workload can then grow at runtime.
 * To set how a workload shares GPU compute, refer to the annotations described in [GPU compute modes](compute-modes.md).
 
@@ -183,34 +182,47 @@ A dynamic GPU memory fraction is always allocated to a single container. NVIDIA 
 
 ### Examples
 
-The following example requests an absolute amount of GPU memory with a Limit, on 4 GPU devices:
+* Requests an absolute amount of GPU memory with a Limit, on 4 GPU devices:
 
-```yaml
-metadata:
-  annotations:
-    gpu-memory: "4000"   # MiB
-    # or: nvidia.com/container.app.gpu-memory.request: "40G"
-    nvidia.com/container.app.gpu-memory.limit: "80G"
-    # optional; 1 if omitted - number of fractional GPU devices
-    gpu-fraction-num-devices: "4"
-spec:
-  containers:
-    - name: app          # the <container-name> used in the limit annotation
-```
+  ```yaml
+  metadata:
+    annotations:
+      gpu-memory: "4000"   # MiB
+      nvidia.com/container.app.gpu-memory.limit: "80G"
+      # optional; 1 if omitted - number of fractional GPU devices
+      gpu-fraction-num-devices: "4"
+  spec:
+    containers:
+      - name: app          # the <container-name> used in the limit annotation
+  ```
 
-The following example requests a portion of GPU memory with a Limit, on 2 GPU devices:
+* Requests the same Request and Limit using the official NVIDIA-native annotation for the Request instead of `gpu-memory`. The container name moves into the key, and device count still uses the unprefixed `gpu-fraction-num-devices`:
 
-```yaml
-metadata:
-  annotations:
-    gpu-fraction: "0.5"
-    kai.scheduler/container.app.gpu-memory.portion.limit: "0.8"
-    # optional; 1 if omitted - number of fractional GPU devices
-    gpu-fraction-num-devices: "2"
-spec:
-  containers:
-    - name: app          # the <container-name> used in the limit annotation
-```
+  ```yaml
+  metadata:
+    annotations:
+      nvidia.com/container.app.gpu-memory.request: "40G"
+      nvidia.com/container.app.gpu-memory.limit: "80G"
+      # optional; 1 if omitted - number of fractional GPU devices
+      gpu-fraction-num-devices: "4"
+  spec:
+    containers:
+      - name: app
+  ```
+
+* Requests a portion of GPU memory with a Limit, on 2 GPU devices:
+
+  ```yaml
+  metadata:
+    annotations:
+      gpu-fraction: "0.5"
+      kai.scheduler/container.app.gpu-memory.portion.limit: "0.8"
+      # optional; 1 if omitted - number of fractional GPU devices
+      gpu-fraction-num-devices: "2"
+  spec:
+    containers:
+      - name: app          # the <container-name> used in the limit annotation
+  ```
 
 ## Enforcing Dynamic GPU Memory Fractions with a Policy
 
@@ -232,10 +244,17 @@ Policy enforcement does not reach [externally submitted workloads](../../../work
 * Memory loaned above the Request is not guaranteed. A workload operating above its Request can have that memory reclaimed at any time.
 * To keep a workload running through a memory reclaim, build the container so that the process accessing the GPU is not the root process of the container. A workload whose root process accesses the GPU directly is terminated when its loaned memory is reclaimed.
 
+### Known Limitations with CUDA 13.4 and Driver r615
+
+The following limitations apply to dynamic GPU memory fractions when running on CUDA 13.4 with driver r615. Both issues will be resolved in a future release of CUDA.
+
+* **Memory is reclaimed from one workload at a time.** When several workloads on a GPU are using memory above their Request, and another workload on that GPU allocates up to its own Request, only one of the bursting workloads receives an OOMKill signal. If that single reclaim does not free enough memory, the allocating workload does not receive the full memory of its Request.
+* **A workload allocating within its Request can be terminated.** In some scenarios, a workload allocating memory up to its Request receives a SIGKILL, instead of memory being reclaimed from the workloads operating above their own Request. Administrators can address this using the misc cgroup fallback. Refer to [MPS memory partitioning](https://docs.nvidia.com/deploy/mps/latest/mpsv3-memory-partitioning.html) for the affected scenarios and the configuration.
+
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/runai.md) and run according to your workload.
 
 ## Using API
 
-To view the available actions, go to the [API reference](https://run-ai-docs.nvidia.com/api/2.26/) and run according to your workload.
+To view the available actions, go to the [API reference](../../../rest-api/about-the-rest-api.md) and run according to your workload.

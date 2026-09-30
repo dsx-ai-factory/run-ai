@@ -22,8 +22,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/scopes_sync"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/settings"
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
+	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 	tenants_api "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client"
-	org_unit_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
@@ -68,9 +68,6 @@ func init() {
 
 	if err := setting.Register[*settings.EnableScopedAuthorization](); err != nil {
 		logging.Errorf("Failed to register EnableScopedAuthorization setting: %v", err)
-	}
-	if err := setting.Register[*settings.TenantIsCspManaged](); err != nil {
-		logging.Errorf("Failed to register TenantIsCspManaged setting: %v", err)
 	}
 
 	logging.Infof("Initializing cluster capabilities checker")
@@ -117,9 +114,6 @@ func runSettingsMigration() {
 	var errs []error
 	if err := setting.Migrate[*settings.EnableScopedAuthorization](); err != nil {
 		errs = append(errs, fmt.Errorf("EnableScopedAuthorization: %s", err.Error()))
-	}
-	if err := setting.Migrate[*settings.TenantIsCspManaged](); err != nil {
-		errs = append(errs, fmt.Errorf("TenantIsCspManaged: %s", err.Error()))
 	}
 	if len(errs) > 0 {
 		logging.Fatalf("failed to migrate settings: %v", errors.Join(errs...))

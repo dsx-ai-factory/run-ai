@@ -126,6 +126,22 @@ func (nodeHandler *NodeHandler) SetNumaNodeHandler(numaNodeHandler *NumaNodeHand
 	nodeHandler.numaNodeHandler = numaNodeHandler
 }
 
+// UpdateGpuFractioningSupport stores the cluster's fractioning verdict and resyncs every node
+// when it flips. The per-node conditions are derived from it, but the Node objects do not change
+// when it does, so the update-diff path sees nothing and would leave the reported conditions
+// stale until the next periodic full sync.
+func (nodeHandler *NodeHandler) UpdateGpuFractioningSupport(clusterInfoCm *corev1.ConfigMap, isInInitialList bool) {
+	if !nodeHandler.nodeParser.UpdateGpuFractioningSupport(clusterInfoCm) {
+		return
+	}
+	// The startup full sync runs after the informer seeds this, so it already reports the verdict.
+	if isInInitialList {
+		return
+	}
+	zap.S().Info("Cluster GPU fractioning support changed, resyncing all nodes")
+	nodeHandler.syncAllNodes()
+}
+
 func (nodeHandler *NodeHandler) syncAllNodes() bool {
 	// Allow at most 1 waiting goroutine; additional callers are dropped
 	if !nodeHandler.syncWaiting.CompareAndSwap(false, true) {

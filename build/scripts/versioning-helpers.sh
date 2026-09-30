@@ -5,13 +5,18 @@
 
 # Shell helpers sourced by build/makefile/versioning.mk recipes and by
 # check-breaking-changes.sh. Required env: TAG_FORMAT. Optional: MAX_PATCH
-# (defaults to 100).
+# (defaults to 100), and for unattended use (CI):
+#   AUTO_TAG=1  don't prompt: tag what apidiff decided -- patch for a compatible
+#               change, minor for a breaking one.
+#   DRY_RUN=1   compute and print the tag, create nothing.
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+
+VERSIONING_SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 versioning_max_patch() {
     echo "${MAX_PATCH:-100}"
@@ -20,6 +25,9 @@ versioning_max_patch() {
 # apidiff only catches signature-level breaks, not behavior changes — confirm with a human before tagging.
 versioning_confirm() {
     local prompt="$1" reply
+    case "${AUTO_TAG:-}" in
+        1|true) return 0 ;;
+    esac
     read -r -p "${prompt} [y/N] " reply
     case "$reply" in
         y|Y) return 0 ;;
@@ -43,7 +51,7 @@ versioning_fetch_tags() {
 }
 
 versioning_latest_prod_tag() {
-    git tag -l "${TAG_FORMAT}/v*" | sort -V | grep -v -- '-dev' | tail -1
+    git tag -l "${TAG_FORMAT}/v*" | sed '/-dev/d' | sort -V | tail -1
 }
 
 versioning_latest_dev_tag() {
@@ -122,6 +130,10 @@ versioning_next_dev_tag() {
 # git tag + git push + echo. Used by both the prod and dev bump paths.
 versioning_create_tag() {
     local new_tag="$1" tag_message="$2"
+    if [ "${DRY_RUN:-}" = "1" ]; then
+        printf "%b[dry-run] Would publish tag: %s%b\n" "$BLUE" "$new_tag" "$NC"
+        return 0
+    fi
     if ! versioning_confirm "Create tag ${new_tag}?"; then
         echo "Aborted — no tag created."
         return 0
@@ -186,4 +198,30 @@ versioning_publish_prod_bump() {
     esac
     new_tag="${TAG_FORMAT}/v${target_version}"
     versioning_create_tag "$new_tag" "Prod release ${new_tag} (${message})"
+}
+
+versioning_publish_dev_bump() {
+    local bump_kind="$1" latest_prod_tag="$2"
+    local latest_dev_tag target_version new_tag
+    latest_dev_tag=$(versioning_latest_dev_tag)
+    echo "Latest dev tag: ${latest_dev_tag}"
+    target_version=$(versioning_next_dev_target_version "$bump_kind" "$latest_prod_tag" "$latest_dev_tag")
+    new_tag=$(versioning_next_dev_tag "$target_version")
+    versioning_create_tag "$new_tag" "Dev release ${new_tag}"
+}
+
+versioning_bump() {
+    local channel="$1" pkg_dir="$2"
+    local latest_prod_tag result bump_kind
+    versioning_refresh_tags
+    latest_prod_tag=$(versioning_latest_prod_tag)
+    echo "Latest prod tag: ${latest_prod_tag}"
+    result=0
+    "${VERSIONING_SCRIPTS_DIR}/check-breaking-changes.sh" "$TAG_FORMAT" "$pkg_dir" "$latest_prod_tag" || result=$?
+    bump_kind=$(versioning_bump_kind_from_result "$result")
+    case "$channel" in
+        prod) versioning_publish_prod_bump "$bump_kind" "$latest_prod_tag" ;;
+        dev) versioning_publish_dev_bump "$bump_kind" "$latest_prod_tag" ;;
+        *) echo "Error: unknown channel '${channel}' (expected prod or dev)" >&2; return 2 ;;
+    esac
 }

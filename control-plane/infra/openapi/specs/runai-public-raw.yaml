@@ -3378,6 +3378,38 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/org-unit/projects/count:
+    x-internal: true
+    get:
+      summary: Count internal projects
+      operationId: count_internal_projects
+      x-internal: true
+      x-no-authorization: true
+      x-service: org-unit-service
+      x-test-coverage:
+        - control-plane/org-unit-service/pkg/test/project_api_test.go
+      description: |
+        Internal endpoint to count projects by the given query parameters
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectsFilterBy'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /internal/org-unit/names:
     x-internal: true
     get:
@@ -15165,9 +15197,6 @@ paths:
               enableScopedAuthorization:
                 value:
                   enabled: false
-              tenantIsCspManaged:
-                value:
-                  enabled: false
       responses:
         '200':
           description: Setting successfully updated
@@ -16256,7 +16285,7 @@ paths:
                   newPassword:
                     type: string
                 example:
-                  tempPassword: Abcd!234
+                  tempPassword: <temporary-password>
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -16530,17 +16559,27 @@ paths:
     x-internal: true
     post:
       summary: Mint a short-lived bootstrap JWT for the installer service account.
-      description: |
+      description: >
         Returns a 2-hour Keycloak access token for the cluster's dedicated
+
         per-cluster installer service account, scoped to the given cluster.
+
         Called by cluster-service when generating the cluster install command.
+
         The token is passed to the Helm hook as
-        --set cluster.bootstrapToken=<token> and used directly as a Bearer token
+
+        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer
+        token
+
         to call GET /clusters/{uuid}/control-plane-config — the installer client
+
         secret never leaves the server.
 
+
         The per-cluster installer client is resolved (and, if needed,
+
         self-healed by creating it) internally, so callers only need to say
+
         which cluster the token is for.
       x-service: identity-manager
       x-test-coverage: not-applicable
@@ -18504,6 +18543,7 @@ paths:
         - $ref: '#/components/parameters/TelemetryGroupBy1'
         - $ref: '#/components/parameters/TelemetryType2'
         - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
       responses:
         '200':
           description: Executed successfully.
@@ -18560,6 +18600,7 @@ paths:
         - $ref: '#/components/parameters/TelemetryGroupBy1'
         - $ref: '#/components/parameters/TelemetryType2'
         - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
       responses:
         '200':
           description: Executed successfully.
@@ -30100,7 +30141,7 @@ components:
           type: string
           description: |
             Short-lived JWT (2h TTL) for the installer service account.
-            Pass to the Helm hook via --set cluster.bootstrapToken=<token>.
+            Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>.
         clientSecret:
           type: string
           deprecated: true
@@ -30109,7 +30150,8 @@ components:
       example:
         installationStr: >-
           helm upgrade -i runai-cluster runai/runai-cluster -n runai --set
-          cluster.uid=... --set cluster.bootstrapToken=<installer-bootstrap-jwt>
+          cluster.uid=... --set
+          controlPlane.bootstrapToken=<installer-bootstrap-jwt>
         repositoryName: runai
         chartRepoURL: 'https://charts.example.com'
         bootstrapToken: <installer-bootstrap-jwt>
@@ -47469,16 +47511,18 @@ components:
       items:
         $ref: '#/components/schemas/V1StorageClass'
       x-schema-name: StorageClasses
+    ReportingClusterId:
+      type: string
+      format: uuid
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
     StorageClass:
       type: object
       required:
         - storage_class_name
       properties:
         cluster_id:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storage_class_name:
           type: string
           description: Storage class name
@@ -47844,10 +47888,7 @@ components:
         - spec
       properties:
         clusterId:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string
           description: Storage class name
@@ -47867,6 +47908,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StorageClassV2'
+    DeviceClass:
+      type: object
+      required:
+        - deviceClassName
+      properties:
+        clusterId:
+          $ref: '#/components/schemas/ReportingClusterId'
+        deviceClassName:
+          type: string
+          description: >
+            DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules
+            (lowercase alphanumeric, `-`, and `.`, starting and ending with an
+            alphanumeric character), up to 253 characters.
+          minLength: 1
+          maxLength: 253
+          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+          example: gpu.nvidia.com
+    DeviceClasses:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/DeviceClass'
     ScopeClusterId:
       description: The ID of the cluster.
       type: string
@@ -48074,6 +48142,7 @@ components:
         - nfs-assets
         - s3-assets
         - compute-resources
+        - resource-claim-templates
         - templates
         - credentials
         - events-history
@@ -48082,6 +48151,7 @@ components:
         - datavolumes
         - secret-volume-assets
         - storage-class-configuration
+        - device-classes
         - access-keys
         - workload-properties
         - network-topologies
@@ -49145,26 +49215,15 @@ components:
           nullable: true
       example:
         enabled: false
-    TenantIsCspManagedSetting:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          nullable: true
-      example:
-        enabled: false
     AuthorizationSettingsGetResponse:
       type: object
       properties:
         enableScopedAuthorization:
           $ref: '#/components/schemas/EnableScopedAuthorizationSetting'
-        tenantIsCspManaged:
-          $ref: '#/components/schemas/TenantIsCspManagedSetting'
     AuthorizationSettingsKeyEnum:
       type: string
       enum:
         - enableScopedAuthorization
-        - tenantIsCspManaged
     UpdateAuthorizationSettingByKeyRequest:
       type: object
       properties:
@@ -49838,8 +49897,8 @@ components:
           minLength: 8
           maxLength: 255
       example:
-        currentPassword: Abcd!234
-        newPassword: Zxcv!567
+        currentPassword: <current-password>
+        newPassword: <new-password>
     InternalUserCreationRequest:
       type: object
       required:
@@ -61040,6 +61099,26 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryTypeInternal'
+    ProjectsFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are == Equals, != Not equals, <= Less than or equal, >=
+        Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
+        and =$ Ends with. Dates are in ISO 8601 timestamp format and available
+        for operators ==, !=, <= and >=.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: >-
+            ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name!=some-name
+      explode: false
     OrgUnitType:
       in: query
       required: true
@@ -61205,26 +61284,6 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryType'
-    ProjectsFilterBy:
-      name: filterBy
-      in: query
-      required: false
-      description: >-
-        Filter results by a parameter. Use the format field-name operator value.
-        Operators are == Equals, != Not equals, <= Less than or equal, >=
-        Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
-        and =$ Ends with. Dates are in ISO 8601 timestamp format and available
-        for operators ==, !=, <= and >=.
-      schema:
-        type: array
-        maxItems: 10
-        items:
-          type: string
-          pattern: >-
-            ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
-        example:
-          - name!=some-name
-      explode: false
     ProjectsSortBy:
       name: sortBy
       in: query
@@ -62830,6 +62889,25 @@ components:
         example:
           - Running
           - Failed
+    TelemetryFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are == Equals, != Not equals, <= Less than or equal, >=
+        Greater than or equal. Dates are in ISO 8601 timestamp format.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          maxLength: 1000
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+        example:
+          - 'createdAt>=2026-09-01T00:00:00Z'
+          - 'createdAt<=2026-09-02T00:00:00Z'
+      explode: false
     PodsSort:
       name: sortBy
       in: query

@@ -70,22 +70,5 @@ func CollectImageLocks(paths []string) (ImageCollection, error) {
 	sort.Slice(collection.Locks, func(i, j int) bool {
 		return collection.Locks[i].Name < collection.Locks[j].Name
 	})
-	seen := map[string]lock.Image{}
-	for index := range collection.Locks {
-		images := collection.Locks[index].Images[:0]
-		for _, image := range collection.Locks[index].Images {
-			key := image.Name + "\x00" + image.Source
-			previous, exists := seen[key]
-			if exists {
-				if previous != image {
-					return ImageCollection{}, fmt.Errorf("conflicting lock entries for image %s", image.Name)
-				}
-				continue
-			}
-			seen[key] = image
-			images = append(images, image)
-		}
-		collection.Locks[index].Images = images
-	}
 	return collection, nil
 }

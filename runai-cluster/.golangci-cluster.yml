@@ -271,7 +271,7 @@ issues:
   max-issues-per-linter: 0
 
   # Print only new issues
-  new-from-rev: origin/master
+  new-from-rev: origin/main
 
   exclude-generated: lax
 

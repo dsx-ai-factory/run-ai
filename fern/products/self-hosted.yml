@@ -111,9 +111,9 @@ navigation:
       contents:
       - page: Node Roles
         path: ../../docs/installation-and-configuration/configuration/node-roles.md
-      - page: Control Plane Configuration
+      - page: Advanced Control Plane Configuration
         path: ../../docs/installation-and-configuration/configuration/control-plane-config.md
-      - page: Cluster Configuration
+      - page: Advanced Cluster Configuration
         path: ../../docs/installation-and-configuration/configuration/cluster-config.md
       - page: Cluster Authentication
         path: ../../docs/installation-and-configuration/configuration/cluster-authentication.md
@@ -149,7 +149,7 @@ navigation:
       contents:
       - page: Clusters
         path: ../../docs/installation-and-configuration/operations/clusters.md
-      - page: Scaling
+      - page: NVIDIA Run:ai at Scale
         path: ../../docs/installation-and-configuration/operations/scaling.md
       - page: High Availability
         path: ../../docs/installation-and-configuration/operations/high-availability.md
@@ -246,7 +246,8 @@ navigation:
           - page: Segment-Based Topology Placement
             path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md
         - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
-          path: ../../docs/platform-management/aiinitiatives/resources/enabling-spectrum-x-networking-for-nvidia-run-ai-workloads.md
+          slug: spectrum-x-networking
+          path: ../../docs/platform-management/aiinitiatives/resources/spectrum-x-networking.md
         - page: Configuring NUMA-Aware Scheduling
           slug: numa-aware-scheduling
           path: ../../docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md
@@ -268,6 +269,9 @@ navigation:
         - page: Workload Priority and Preemption
           slug: workload-priority-control
           path: ../../docs/platform-management/runai-scheduler/scheduling/workload-priority-control.md
+        - page: Background Workloads
+          slug: background-workloads
+          path: ../../docs/platform-management/runai-scheduler/scheduling/background-workloads.md
         - section: Quick Starts
           contents:
           - page: Over Quota, Fairness and Preemption
@@ -454,6 +458,7 @@ navigation:
       slug: using-inference
       contents:
       - page: NVIDIA Run:ai Inference Overview
+        slug: inference-overview
         path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md
       - page: Deploy Inference Workloads with NVIDIA NIM
         slug: nim-inference
@@ -483,6 +488,7 @@ navigation:
     - page: Introduction to AI Applications
       path: ../../docs/ai-applications/introduction-to-ai-applications.md
     - page: AI Applications
+      slug: submit-ai-applications
       path: ../../docs/ai-applications/ai-applications.md
   - section: Tutorials
     contents:
@@ -494,6 +500,9 @@ navigation:
       - page: Validating GPU Cluster Communication with NCCL Tests
         slug: nccl-tests
         path: ../../docs/tutorials/training-tutorials/nccl-tests.md
+      - page: Deploying a Slurm Cluster with Slinky
+        slug: deploying-slurm
+        path: ../../docs/tutorials/training-tutorials/deploying-slurm.md
     - section: Inference Tutorials
       contents:
       - page: NVIDIA NIM Distributed Inference Deployment
@@ -532,9 +541,10 @@ navigation:
       path: ../../docs/agents/agent-skills.md
   - section: Development
     contents:
-    - link: Local Development
-      href: https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md
-      target: _blank
+    - page: Local Development
+      path: ../../local-dev.md
+    - page: Contributing
+      path: ../../CONTRIBUTING.md
     - page: Service Reference
       path: ../../docs/developer/services.md
     - page: CRD Reference
@@ -631,12 +641,10 @@ navigation:
         - accessKeys
         - accessRules
         - permissions
-        - applications
         - serviceAccounts
         - roles
         - tokens
         - users
-        - userApplications
         - idps
         - me
         - settings
@@ -646,12 +654,12 @@ navigation:
         - auditLogs
       - section: Datavolumes
         contents:
-        - datavolumesApi
+        - datavolumes
       - section: Workloads
         contents:
         - events
         - pods
-        - workloadsApi
+        - workloads
         - workloadsV2
         - nvidiaNim
         - workspaces
@@ -693,7 +701,7 @@ navigation:
         - subscriptions
       - section: AI Applications
         contents:
-        - aiApplicationsApi
+        - ai-applications
     - section: API Guides
       contents:
       - page: Interacting with Workloads Using the Cluster API

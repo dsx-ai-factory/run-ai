@@ -1,15 +1,15 @@
 # User Access Keys (formerly applications)
 
-Access keys are used for API integrations with NVIDIA Run:ai. An access key contains a client ID and a client secret. With the client credentials, you can obtain a token as detailed in [API authentication](https://run-ai-docs.nvidia.com/api/2.26/getting-started/how-to-authenticate-to-the-api) and use it within subsequent API calls.
+Access keys are used for API integrations with NVIDIA Run:ai. An access key contains a client ID and a client secret. With the client credentials, you can obtain a token as detailed in [API authentication](../../rest-api/how-to-authenticate-to-the-api.md) and use it within subsequent API calls.
 
-<Info>
+<Note>
 
 **Note**
 
 * All clusters in the tenant must be version 2.20 and onward.
 * The token obtained through access keys assumes the [roles and permissions](../../platform-management/authentication/roles.md) of the user.
 
-</Info>
+</Note>
 
 ## Creating Access Key
 
@@ -24,13 +24,13 @@ To create an access key:
 
 You can create up to 20 access keys.
 
-<Info>
+<Note>
 
 **Note**
 
 The client secret is visible only at the time of creation. It cannot be recovered but can be regenerated.
 
-</Info>
+</Note>
 
 ## Regenerating a Client Secret
 
@@ -58,4 +58,4 @@ Regenerating a client secret revokes the previous one.
 
 ## Using API
 
-Go to the [Access Keys](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/access-keys) API reference to view the available actions.
+Go to the [Access Keys](api:main-api:GET/api/v1/access-keys) API reference to view the available actions.

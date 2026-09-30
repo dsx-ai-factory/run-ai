@@ -18,17 +18,11 @@ import (
 // that records which method was called with what value, optionally returning an error.
 type stubAuthorizationUpdater struct {
 	scopedAuthorizationCalls []interface{}
-	cspManagedCalls          []interface{}
 	err                      error
 }
 
 func (s *stubAuthorizationUpdater) UpdateEnableScopedAuthorization(_ context.Context, _ int, value interface{}) error {
 	s.scopedAuthorizationCalls = append(s.scopedAuthorizationCalls, value)
-	return s.err
-}
-
-func (s *stubAuthorizationUpdater) UpdateTenantIsCspManaged(_ context.Context, _ int, value interface{}) error {
-	s.cspManagedCalls = append(s.cspManagedCalls, value)
 	return s.err
 }
 
@@ -93,7 +87,6 @@ func TestBuildSettingDefinitions_AllKeysPresent(t *testing.T) {
 		SettingKeyEnableDataVolumes,
 		SettingKeyEnableNgcIntegration,
 		SettingKeyGpuOverProvisioning,
-		SettingKeyTenantIsCspManaged,
 		SettingKeyEnableScopedAuthorization,
 		SettingKeyNewNavigation,
 		SettingKeyEnableCustomRoles,
@@ -122,8 +115,8 @@ func TestBuildSettingDefinitions_SettingCounts(t *testing.T) {
 		}
 	}
 
-	assert.Equal(t, 31, len(settings), "total number of settings")
-	assert.Equal(t, 21, migrated, "number of migrated settings")
+	assert.Equal(t, 30, len(settings), "total number of settings")
+	assert.Equal(t, 20, migrated, "number of migrated settings")
 	assert.Equal(t, 10, nonMigrated, "number of non-migrated settings")
 }
 
@@ -147,7 +140,6 @@ func TestBuildSettingDefinitions_MigratedSettingsAreCorrect(t *testing.T) {
 		SettingKeyEnableTemplatesV2,
 		SettingKeyGpuOverProvisioning,
 		SettingKeyEnableAdvancedGPUMetrics,
-		SettingKeyTenantIsCspManaged,
 		SettingKeyEnableScopedAuthorization,
 		SettingKeyLimitQuotaOverSubscription,
 		SettingKeyProjectManualOverQuota,
@@ -285,7 +277,6 @@ func TestEnableScopedAuthorization_OnSet_CallsUpdater(t *testing.T) {
 	_, err := value.OnSet(context.Background(), 42, true)
 	assert.NoError(t, err)
 	assert.Equal(t, []interface{}{true}, updater.scopedAuthorizationCalls)
-	assert.Empty(t, updater.cspManagedCalls)
 }
 
 func TestEnableScopedAuthorization_OnSet_PropagatesError(t *testing.T) {
@@ -296,39 +287,6 @@ func TestEnableScopedAuthorization_OnSet_PropagatesError(t *testing.T) {
 	_, err := value.OnSet(context.Background(), 42, false)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "EnableScopedAuthorization")
-	assert.Contains(t, err.Error(), "authorization service down")
-}
-
-// ==================== TenantIsCspManaged OnSet ====================
-
-func TestTenantIsCspManaged_OnSet_NoUpdater_Succeeds(t *testing.T) {
-	defs := BuildSettingDefinitions(&OnSetDeps{})
-	value := defs[SettingKeyTenantIsCspManaged]
-
-	result, err := value.OnSet(context.Background(), 42, true)
-	assert.NoError(t, err)
-	assert.Nil(t, result)
-}
-
-func TestTenantIsCspManaged_OnSet_CallsUpdater(t *testing.T) {
-	updater := &stubAuthorizationUpdater{}
-	defs := BuildSettingDefinitions(&OnSetDeps{AuthorizationUpdater: updater})
-	value := defs[SettingKeyTenantIsCspManaged]
-
-	_, err := value.OnSet(context.Background(), 42, true)
-	assert.NoError(t, err)
-	assert.Equal(t, []interface{}{true}, updater.cspManagedCalls)
-	assert.Empty(t, updater.scopedAuthorizationCalls)
-}
-
-func TestTenantIsCspManaged_OnSet_PropagatesError(t *testing.T) {
-	updater := &stubAuthorizationUpdater{err: errors.New("authorization service down")}
-	defs := BuildSettingDefinitions(&OnSetDeps{AuthorizationUpdater: updater})
-	value := defs[SettingKeyTenantIsCspManaged]
-
-	_, err := value.OnSet(context.Background(), 42, false)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "TenantIsCspManaged")
 	assert.Contains(t, err.Error(), "authorization service down")
 }
 

@@ -4,9 +4,9 @@ go 1.26.8
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0-20250618145324-1d01c564dfbc
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0-20250618145324-1d01c564dfbc
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
@@ -79,11 +79,11 @@ require (
 	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.10.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
-	golang.org/x/tools v0.45.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/tools v0.49.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260427160629-7cedc36a6bc4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4 // indirect
 	google.golang.org/grpc v1.82.1 // indirect
@@ -94,4 +94,4 @@ require (
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../../control-plane/cluster-service/pkg/client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client => ../../../runai-clients/workloads-client
+replace github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client => ../../../control-plane/workloads/pkg/client

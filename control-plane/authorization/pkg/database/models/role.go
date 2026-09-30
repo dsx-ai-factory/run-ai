@@ -6,14 +6,8 @@
 package models
 
 import (
-	"strings"
-
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
-
-	"gorm.io/gorm"
 )
-
-const DGXCManagedPostfix = "-DGXC"
 
 type RoleScope string
 
@@ -37,17 +31,10 @@ type Role struct {
 	Enabled                 bool             `gorm:""`
 	EffectiveEnabled        *bool            `gorm:"-"`
 	ClusterRolePredefinedId *int64           `gorm:""`
-	RoleType                RoleType         `gorm:"default:ALL"`
-	ShowForDGXC             bool             `gorm:"-"`
 	Deprecated              bool             `gorm:"default:false"`
 	TenantId                *string          `gorm:""`
 	NoPermissionSet         *bool            `gorm:"default:true"`
 	PermissionSets          *[]PermissionSet `gorm:"many2many:role_to_permission_set;"`
-}
-
-func (r *Role) AfterFind(tx *gorm.DB) (err error) {
-	r.Name, _ = strings.CutSuffix(r.Name, DGXCManagedPostfix)
-	return
 }
 
 func (r Role) SortAndFilterFieldsToColumn() queryapi.APIFieldsMapping {
@@ -60,12 +47,3 @@ func (r Role) SortAndFilterFieldsToColumn() queryapi.APIFieldsMapping {
 		"enabled":   queryapi.NewFieldMapping("enabled"),
 	}
 }
-
-type RoleType string
-
-// List of ResourceType
-const (
-	DGXC    RoleType = "DGXC"
-	NonDGXC RoleType = "NON_DGXC"
-	ALL     RoleType = "ALL"
-)

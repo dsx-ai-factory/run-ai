@@ -65,7 +65,7 @@ To add a new compute resource:
 7. Set the resource types needed within a single node. The NVIDIA Run:ai Scheduler tries to match a single node that complies with the compute resource for each of the workload’s pods.
    *   **GPU devices** - The number of devices (physical GPUs) per pod. For example, if you requested 3 devices per pod and the running workload using this compute resource consists of 3 pods, there are 9 physical GPU devices used in total.
 
-       <Info><p><strong>Note</strong></p><ul><li>When setting it to zero, the workload using this computer resource neither requests nor uses GPU resources while running.</li><li>You can set any number of GPU devices and specify the memory requirement to any portion size (1..100), or memory size value using GB or MB units per device.</li></ul></Info>
+       <Note><p><strong>Note</strong></p><ul><li>When setting it to zero, the workload using this computer resource neither requests nor uses GPU resources while running.</li><li>You can set any number of GPU devices and specify the memory requirement to any portion size (1..100), or memory size value using GB or MB units per device.</li></ul></Note>
    * Enable **GPU fractioning** to allocate a portion of the GPU memory to each device
      * Select the memory request format
        * **% (of device)** - Fraction of a GPU device’s memory
@@ -74,7 +74,7 @@ To add a new compute resource:
      * Set the memory **Request** - The minimum amount of GPU memory that is provisioned per device. This means that any pod of a running workload that uses this compute resource, receives this amount of GPU memory for each device(s) the pod utilizes.
      *   Optional: Set the memory **Limit** - The maximum amount of GPU memory that is provisioned per device. This means that any pod of a running workload that uses this compute resource, receives **at most** this amount of GPU memory for each device(s) the pod utilizes. The limit value must be equal to or higher than the request.
 
-         <Info><p><strong>Note</strong></p><ul><li>GPU memory limit is disabled by default. If you cannot see <strong>Limit</strong> in the compute resource form, then it must be enabled by your Administrator, under <strong>General settings</strong> → Resources → GPU resource optimization.</li><li>When a <strong>Limit</strong> is set and is bigger than the <strong>Request</strong>, the Scheduler allows each pod to reach the maximum amount of GPU memory in an opportunistic manner (only upon availability).</li><li>If the GPU memory <strong>Limit</strong> is bigger that the <strong>Request</strong>, the pod is prone to be killed by the NVIDIA Run:ai toolkit (out of memory signal). The greater the difference between the GPU memory used and the request, the higher the risk of being killed.</li><li>If GPU resource optimization is turned off, the minimum and maximum are in fact equal.</li></ul></Info>
+         <Note><p><strong>Note</strong></p><ul><li>GPU memory limit is disabled by default. If you cannot see <strong>Limit</strong> in the compute resource form, then it must be enabled by your Administrator, under <strong>General settings</strong> → Resources → GPU resource optimization.</li><li>When a <strong>Limit</strong> is set and is bigger than the <strong>Request</strong>, the Scheduler allows each pod to reach the maximum amount of GPU memory in an opportunistic manner (only upon availability).</li><li>If the GPU memory <strong>Limit</strong> is bigger that the <strong>Request</strong>, the pod is prone to be killed by the NVIDIA Run:ai toolkit (out of memory signal). The greater the difference between the GPU memory used and the request, the higher the risk of being killed.</li><li>If GPU resource optimization is turned off, the minimum and maximum are in fact equal.</li></ul></Note>
    * **CPU resources**
      * Select the units for the CPU compute (Cores / Millicores)
        * Set the CPU compute **Request** - The minimum amount of CPU compute that is provisioned per pod. This means that any pod of a running workload that uses this compute resource, receives this amount of CPU compute for each pod.
@@ -83,7 +83,7 @@ To add a new compute resource:
        * Set the CPU memory **Request** - The minimum amount of CPU memory that is provisioned per pod. This means that any pod of a running workload that uses this compute resource, receives this amount of CPU memory for each pod.
        *   Optional: Set the CPU memory **Limit** - The maximum amount of CPU memory that is provisioned per pod. This means that any pod of a running workload that uses this compute resource, receives **at most** this amount of CPU memory. The limit value must be equal to or higher than the request. By default, the limit is set to “Auto”, which means that the pod may consume up to the node's maximum available CPU memory resources.
 
-           <Info><p><strong>Note</strong></p><p>If the CPU Memory <strong>Limit</strong> is bigger that the <strong>Request</strong>, the pod is prone to be killed by the operating system (out of memory signal). The greater the difference between the CPU memory used and the request, the higher the risk of being killed.</p></Info>
+           <Note><p><strong>Note</strong></p><p>If the CPU Memory <strong>Limit</strong> is bigger that the <strong>Request</strong>, the pod is prone to be killed by the operating system (out of memory signal). The greater the difference between the CPU memory used and the request, the higher the risk of being killed.</p></Note>
 8. Optional: More settings
    * **Increase shared memory size**\
      When enabled, the shared memory size available to the pod is increased from the default 64MB to the node's total available memory or the CPU memory limit, if set above.
@@ -91,13 +91,13 @@ To add a new compute resource:
      Click **+EXTENDED RESOURCES** to add resource/quantity pairs. For more information on how to set extended resources, see the [Extended resources](https://kubernetes.io/docs/tasks/configure-pod-container/extended-resource/) and [Quantity](https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/) guides
 9. Click **CREATE COMPUTE RESOURCE**
 
-<Info>
+<Note>
 
 **Note**
 
 It is also possible to add compute resources directly when creating a specific [workspace](../using-workspaces/running-workspace.md), [training](../using-training/train-models.md) or [inference](../using-inference/nvidia-run-ai-inference-overview.md) workload.
 
-</Info>
+</Note>
 
 ## Editing a Compute Resource
 
@@ -107,13 +107,13 @@ To edit a compute resource:
 2. Click **Edit**
 3. Update the compute resource and click **SAVE COMPUTE RESOURCE**
 
-<Info>
+<Note>
 
 **Note**
 
 The already bound workload that is using this asset will not be affected.
 
-</Info>
+</Note>
 
 ## Copying a Compute Resource
 
@@ -130,14 +130,18 @@ To copy an existing compute resource:
 2. Click **DELETE**
 3. On the dialog, click **DELETE** to confirm
 
-<Info>
+<Note>
 
 **Note**
 
 The already bound workload that is using this asset will not be affected.
 
-</Info>
+</Note>
+
+## Using CLI
+
+To view the available actions on compute resources, see the compute resource [CLI v2 reference](../../reference/cli/runai/runai_compute.md).
 
 ## Using API
 
-Go to the [Compute resources](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/compute) API reference to view the available actions
+Go to the [Compute resources](api:main-api:GET/api/v1/asset/compute) API reference to view the available actions

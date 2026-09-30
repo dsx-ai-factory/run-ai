@@ -18,8 +18,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/config"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/batch"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/google/uuid"

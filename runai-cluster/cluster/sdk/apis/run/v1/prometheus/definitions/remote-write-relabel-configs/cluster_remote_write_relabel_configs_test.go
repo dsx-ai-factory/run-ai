@@ -37,3 +37,16 @@ func TestVLLMRemoteWriteAllowlist(t *testing.T) {
 		}
 	}
 }
+
+func TestPreemptedPodsRemoteWriteAllowlist(t *testing.T) {
+	const pattern = "runai_total_preemption_attempts"
+	if !slices.Contains(genericMetrics, pattern) {
+		t.Fatalf("genericMetrics does not contain %q", pattern)
+	}
+
+	configs := &ClusterRemoteWriteRelabelConfigs{}
+	re := regexp.MustCompile("^(?:" + configs.getRelabelConfigRegex() + ")$")
+	if !re.MatchString("runai_total_preemption_attempts;runai") {
+		t.Errorf("generated relabel regex does not match %q", "runai_total_preemption_attempts;runai")
+	}
+}

@@ -1,0 +1,145 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Tags the shared packages and service clients, with the same make targets developers
+# use -- they work out the next version themselves. AUTO_TAG: no prompt; apidiff decides
+# -- patch for an API-compatible change, minor for a breaking one. Renovate takes patches
+# only, so a minor is published but consumers move to it deliberately.
+#
+# When: a person's change, or a Renovate security fix, is released on push. Routine
+# Renovate updates merge as usual but are released once a week, so a package does not
+# cut a release -- and fan out to every consumer -- for each dependency bump.
+name: Package auto-tag
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "runai-common-packages/**"
+      - "runai-application-packages/**"
+      - "control-plane/*/pkg/client/**"
+  schedule:
+    - cron: "0 5 * * 0"   # Sunday 05:00 UTC: the week's Renovate updates
+  workflow_dispatch:
+    inputs:
+      modules:
+        description: "Module directories, comma separated (e.g. runai-common-packages/cache, control-plane/audit-service/pkg/client). Empty: what the weekly run would release"
+        required: false
+      dry_run:
+        description: "Report the tags without creating them"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.modules.outputs.modules }}
+    steps:
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+
+      - id: modules
+        env:
+          INPUT: ${{ inputs.modules }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          # A package is its top-level directory; a client is its service's pkg/client.
+          to_modules() {
+            grep -oE '^(runai-(common|application)-packages/[^/]+|control-plane/[^/]+/pkg/client)/' \
+              | sed 's#/$##' | sort -u \
+              | while read -r m; do [ -f "$m/go.mod" ] && echo "$m"; done || true
+          }
+          # Everything changed since its last release. A module never tagged is
+          # skipped: its first version is a decision.
+          weekly() {
+            git ls-files '*/go.mod' | to_modules \
+              | while read -r m; do
+                  tag=$(git tag -l "$m/v*" | grep -v -- '-dev' | sort -V | tail -1 || true)
+                  if [ -n "$tag" ] && [ -n "$(git log -1 --format=%H "$tag..HEAD" -- "$m")" ]; then echo "$m"; fi
+                done
+          }
+          case "$GITHUB_EVENT_NAME" in
+            workflow_dispatch)
+              if [ -z "${INPUT//[[:space:],]/}" ]; then
+                modules=$(weekly)
+              else
+                modules=$(echo "$INPUT" | tr ',' '\n' | sed 's#[[:space:]]##g; s#/*$#/x#' | to_modules)
+              fi ;;
+            push)
+              # The pushed commits, or just the tip when there is no usable before (a
+              # new branch or a force push).
+              range="$BEFORE..$GITHUB_SHA"
+              git cat-file -e "$BEFORE^{commit}" 2>/dev/null || range="$GITHUB_SHA^!"
+              # Only a person's change or a security fix; routine Renovate merges wait
+              # for the weekly run. Each commit counts with everything it brought to
+              # main, a merge included.
+              modules=$(git log --first-parent --format='%H%x09%an%x09%s' "$range" \
+                | while IFS=$'\t' read -r sha author subject; do
+                    if [ "$author" != "devops-runai" ] || [[ "$subject" == *"[SECURITY]"* ]]; then
+                      git diff --name-only "$sha^1" "$sha"
+                    fi
+                  done | to_modules) ;;
+            schedule)
+              modules=$(weekly) ;;
+          esac
+          echo "modules=$(echo "$modules" | jq -R . | jq -sc 'map(select(. != ""))')" >> "$GITHUB_OUTPUT"
+          echo "$modules"
+
+  tag:
+    needs: scope
+    if: needs.scope.outputs.modules != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.scope.outputs.modules) }}
+    # One run per module at a time. A newer queued run replaces an older one, which
+    # loses nothing: the bump tags the tip of main, which includes both changes.
+    concurrency:
+      group: package-auto-tag-${{ matrix.module }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      # A named `main` at origin/main: versioning.mk refuses to tag from anything else.
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          ref: main
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.GIT_HUB_OSS }}
+
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: stable
+
+      - name: Bump ${{ matrix.module }}
+        env:
+          MODULE: ${{ matrix.module }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
+          AUTO_TAG: "1"
+          GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
+          TOKEN: ${{ secrets.GIT_HUB_OSS }}
+        run: |
+          # Go fetches the repository's own modules with this; set for this step's
+          # processes only, not written to the runner's git config.
+          export GIT_CONFIG_COUNT=1 \
+            GIT_CONFIG_KEY_0="url.https://x-access-token:${TOKEN}@github.com/.insteadOf" \
+            GIT_CONFIG_VALUE_0="https://github.com/"
+          case "$MODULE" in
+            control-plane/*/pkg/client) bump() { make -C "${MODULE%/pkg/client}" client-bump-version; } ;;
+            *) bump() { make -C "$MODULE" package-bump-version; } ;;
+          esac
+          # versioning.mk refuses when main moved during the run, and the push that moved
+          # it may not touch this module -- so catch up with main and bump again.
+          for _ in 1 2 3; do
+            if bump 2>&1 | tee bump.log; [ "${PIPESTATUS[0]}" -eq 0 ]; then exit 0; fi
+            grep -q "not up to date with origin/main" bump.log || exit 1
+            git fetch -q origin main && git reset -q --hard origin/main
+          done
+          exit 1

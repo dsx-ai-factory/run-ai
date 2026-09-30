@@ -12,10 +12,10 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/testing_crud"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	. "github.com/onsi/ginkgo/v2"

@@ -79,13 +79,13 @@ Use the zoom and pan controls, or the minimap, to navigate the diagram.
 
 ## Creating an AI Application
 
-<Info>
+<Note>
 
 **Note**
 
 AI application submission is enabled by default. If you do not see it in the menu, contact your administrator to enable it under **General settings** → Workloads → AI application submission.
 
-</Info>
+</Note>
 
 1. To create an AI application, go to Workload manager → AI applications.
 2. Click **+ NEW AI APPLICATION**
@@ -135,4 +135,4 @@ If no endpoints appear, the workloads may not yet be in a running state, or the 
 
 ## Using API
 
-Go to the [AI Applications](https://run-ai-docs.nvidia.com/api/2.26/ai-applications/ai-applications) API reference to view the available actions.
+Go to the [AI Applications](api:main-api:GET/api/v1/ai-applications) API reference to view the available actions.

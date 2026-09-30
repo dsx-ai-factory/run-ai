@@ -1073,12 +1073,6 @@ export interface AuthorizationSettingsGetResponse {
      * @memberof AuthorizationSettingsGetResponse
      */
     'enableScopedAuthorization'?: EnableScopedAuthorizationSetting;
-    /**
-     * 
-     * @type {TenantIsCspManagedSetting}
-     * @memberof AuthorizationSettingsGetResponse
-     */
-    'tenantIsCspManaged'?: TenantIsCspManagedSetting;
 }
 /**
  * 
@@ -1087,8 +1081,7 @@ export interface AuthorizationSettingsGetResponse {
  */
 
 export const AuthorizationSettingsKeyEnum = {
-    EnableScopedAuthorization: 'enableScopedAuthorization',
-    TenantIsCspManaged: 'tenantIsCspManaged'
+    EnableScopedAuthorization: 'enableScopedAuthorization'
 } as const;
 
 export type AuthorizationSettingsKeyEnum = typeof AuthorizationSettingsKeyEnum[keyof typeof AuthorizationSettingsKeyEnum];
@@ -1813,6 +1806,7 @@ export const ResourceType = {
     NfsAssets: 'nfs-assets',
     S3Assets: 's3-assets',
     ComputeResources: 'compute-resources',
+    ResourceClaimTemplates: 'resource-claim-templates',
     Templates: 'templates',
     Credentials: 'credentials',
     EventsHistory: 'events-history',
@@ -1821,6 +1815,7 @@ export const ResourceType = {
     Datavolumes: 'datavolumes',
     SecretVolumeAssets: 'secret-volume-assets',
     StorageClassConfiguration: 'storage-class-configuration',
+    DeviceClasses: 'device-classes',
     AccessKeys: 'access-keys',
     WorkloadProperties: 'workload-properties',
     NetworkTopologies: 'network-topologies',
@@ -2460,19 +2455,6 @@ export interface SubmissionError {
      * @memberof SubmissionError
      */
     'complianceIssues'?: Array<ComplianceIssuesComplianceIssuesInner>;
-}
-/**
- * 
- * @export
- * @interface TenantIsCspManagedSetting
- */
-export interface TenantIsCspManagedSetting {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TenantIsCspManagedSetting
-     */
-    'enabled'?: boolean | null;
 }
 /**
  * 

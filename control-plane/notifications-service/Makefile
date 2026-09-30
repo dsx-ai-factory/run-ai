@@ -14,6 +14,8 @@ MAIN_DIR=${REPO_DIR}/cmd/main.go
 MOCKERY=$(BIN_DIR)/mockery
 MOCKERY_VERSION=v2.53.7
 DOCKER_COMPOSE_FILE=./integration_tests/docker-compose.yaml
+# The compose file builds the slack mock on the Go this module's go.mod asks for.
+export GO_ALPINE_VERSION
 
 OPENAPI_GENERATOR_VERSION_SERVER=v7.12.0
 OPENAPI_GENERATOR_VERSION_CLIENT_GO=v7.12.0
@@ -52,10 +54,10 @@ validate_mockery:
 		echo "existing mockery binary is not of required version ${MOCKERY_VERSION}. Reinstalling it"; \
 		rm -f ${MOCKERY}; \
 	fi
-	GOBIN=${BIN_DIR} GOTOOLCHAIN=go1.26.8 go install github.com/vektra/mockery/v2/...@${MOCKERY_VERSION}
+	GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v2/...@${MOCKERY_VERSION}
 
 mockery: validate_mockery
-	GOTOOLCHAIN=go1.26.8 ${MOCKERY}
+	${MOCKERY}
 
 test: build test-go integration-tests ## Run unit and integration tests
 .PHONY: test
@@ -178,7 +180,7 @@ openapi-lint: openapi-lint-generic ## Lint the swagger bundle.
 .PHONY: openapi-lint
 
 generate_mocks: validate_mockery
-	GOTOOLCHAIN=go1.26.8 ${MOCKERY}
+	${MOCKERY}
 
 local-deploy: export OS=linux
 local-deploy: export ARCH=amd64

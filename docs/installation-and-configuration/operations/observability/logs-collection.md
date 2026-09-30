@@ -20,7 +20,7 @@ To collect NVIDIA Run:ai logs, follow these steps:
     runai diagnostics collect-logs
     ```
 
-This command gathers diagnostic logs from your Kubernetes cluster to facilitate troubleshooting or support requests with NVIDIA Run:ai Support. The following optional flags are available:
+This command gathers diagnostic logs from your Kubernetes cluster to facilitate troubleshooting. The following optional flags are available:
 
 | Flag                  | Description                                                                                                                                                                         |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

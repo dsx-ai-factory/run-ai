@@ -8,7 +8,7 @@ dependencies:
   - name: kai-resource-management
     condition: kai-resource-management.enabled
     repository: oci://ghcr.io/kai-scheduler/kai-resource-management
-    version: v0.0.3
+    version: v0.18.1
   - name: karta
     condition: karta.enabled
     repository: oci://ghcr.io/dsx-ai-factory/workload-map

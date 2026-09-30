@@ -4,13 +4,13 @@ A workload policy is an end-to-end solution for AI managers and administrators t
 
 This guide explains the policy YAML fields and the possible rules and defaults that can be set for each field.
 
-<Info>
+<Note>
 
 **Note**
 
 This reference applies to NVIDIA Run:ai native workloads. To define policies for other supported workload types, see [Supported workload types policies](supported-workload-type-policies.md).
 
-</Info>
+</Note>
 
 ## Policy YAML Fields - Reference Table
 
@@ -48,7 +48,7 @@ Click the link to view the value type of each field.
 | sshAuthMountPath | Specifies the directory where SSH keys are mounted | <a href="policy-yaml-reference.md#value-types">string</a> | Distributed training (MPI only) |
 | mpiLauncherCreationPolicy | <p>Define s whether the MPI Launcher is created in parallel with the workers, or if its creation is postponed until all workers are in Ready state. This prevents failures when the launcher attempts to connect to workers that are not yet ready.</p><p>Enum: <code>AtStartup</code>, <code>WaitForWorkersReady</code></p> | <a href="policy-yaml-reference.md#value-types">string</a> | Distributed training (MPI only) |
 | ports | Specifies a set of ports exposed from the container running the created workload. More information in <a href="policy-yaml-reference.md#ports-fields">Ports fields</a> below. | <a href="policy-yaml-reference.md#value-types">itemized</a> | <ul><li>Workspace</li><li>Standard training</li><li>Distributed training</li><li>Inference</li></ul> |
-| preemptibility | Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible and non-preemptible. |  | <ul><li>Workspace</li><li>Standard training</li><li>Distributed training</li><li>Inference</li><li>Distributed inference (API only)</li><li>NVIDIA NIM services (API only)</li></ul> |
+| preemptibility | Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible, and non-preemptible. |  | <ul><li>Workspace</li><li>Standard training</li><li>Distributed training</li><li>Inference</li><li>Distributed inference (API only)</li><li>NVIDIA NIM services (API only)</li></ul> |
 | probes | Specifies the ReadinessProbe to use to determine if the container is ready to accept traffic. More information in <a href="policy-yaml-reference.md#probes-fields">Probes fields</a> below | - | <ul><li>Workspace</li><li>Standard training</li><li>Distributed training</li><li>Inference</li><li>Distributed inference (API only)</li><li>NVIDIA NIM services (API only)</li></ul> |
 | tolerations | Toleration rules which apply to the pods running the workload. Toleration rules guide (but do not require) the system to which node each pod can be scheduled to or evicted from, based on matching between those rules and the set of taints defined for each Kubernetes node. | <a href="policy-yaml-reference.md#value-types">itemized</a> | <ul><li>Workspace</li><li>Standard training</li><li>Distributed training</li><li>Inference</li><li>Distributed inference (API only)</li><li>NVIDIA NIM services (API only)</li></ul> |
 | priorityClass | <p>Specifies the priority class of the workload. The default values are:</p><ul><li>Workspace - <code>High</code></li><li>Training / distributed training - <code>Low</code></li><li>Inference - <code>Very high</code></li></ul><p>You can change it to any of the following valid values to adjust the workload's scheduling behavior: <code>very-low</code>, <code>low</code>, <code>medium- low</code>, <code>medium</code>, <code>medium-high</code>, <code>high</code>, <code>very-high</code>.</p> | <a href="policy-yaml-reference.md#value-types">string</a> | <ul><li>Workspace</li><li>Standard training</li><li>Distributed training</li><li>Inference</li><li>Distributed inference (API only)</li><li>NVIDIA NIM services (API only)</li></ul> |
@@ -336,7 +336,7 @@ defaults:
 | authorizedUsers | Specifies the list of users that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive. | <a href="policy-yaml-reference.md#value-types">array</a> | <ul><li>Inference</li><li>Distributed inference (API only)</li></ul> |
 | authorizedGroups | Specifies the list of groups that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive. | <a href="policy-yaml-reference.md#value-types">array</a> | <ul><li>Inference</li><li>Distributed inference (API only)</li></ul> |
 | clusterLocalAccessOnly | Configures the serving port URL to be available only on the cluster-local network, and not externally. Defaults to false. | <a href="policy-yaml-reference.md#value-types">boolean</a> | Inference |
-| exposeExternally | Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the <a href="../../installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md#standard-inference">inference requirements</a> section. | <a href="policy-yaml-reference.md#value-types">boolean</a> | <ul><li>Distributed inference (API only)</li><li>NVIDIA NIM services (API only)</li></ul> |
+| exposeExternally | Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the <a href="../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference">inference requirements</a> section. | <a href="policy-yaml-reference.md#value-types">boolean</a> | <ul><li>Distributed inference (API only)</li><li>NVIDIA NIM services (API only)</li></ul> |
 | exposedUrl | The custom URL to use for the serving port. If empty (default), an autogenerated URL will be used. | <a href="policy-yaml-reference.md#value-types">string</a> | <ul><li>Distributed inference (API only)</li><li>NVIDIA NIM services (API only)</li></ul> |
 | serviceType | The type of Kubernetes service to create for the inference deployment. Options include 'ClusterIP' (default), 'NodePort', 'LoadBalancer', and 'ExternalName'. Default: "ClusterIP" | <a href="policy-yaml-reference.md#value-types">string</a> | NVIDIA NIM services (API only) |
 | grpcPort | The GRPC port that the container running the inference service exposes. | <a href="policy-yaml-reference.md#value-types">integer</a> | NVIDIA NIM services (API only) |
@@ -450,13 +450,13 @@ The effective policy for the above mentioned workload has the following extended
 | added/cpu | Submission request | 3 | The default of the quantity attribute from the attributes section |
 | added/memory | Submission request | 5M | Submission request |
 
-<Info>
+<Note>
 
 **Note**
 
 The default/memory is not populated to the workload, this is because it has been excluded from the workload using “exclude: true”.
 
-</Info>
+</Note>
 
 A workload submission request cannot exclude the default/cpu resource, as this key is included in the locked rules under the instances section.
 
@@ -641,7 +641,7 @@ The effective workload that runs has the following set of values:
 | security.runAsNonRoot | true   | Policy defaults    |
 | security.runAsUid     | 501    | Submission request |
 
-<Info>
+<Note>
 
 **Note**
 
@@ -661,7 +661,7 @@ security:
 
 If this policy is applied, the submission request above fails, as it attempts to change the value of secuirty.runAsUid from 500 (the policy default) to 501 (the value provided in the submission request), which is forbidden due to canEdit rule set to false for this field.
 
-</Info>
+</Note>
 
 ### Imposed Assets
 

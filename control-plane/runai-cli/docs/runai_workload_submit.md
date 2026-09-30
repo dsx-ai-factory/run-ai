@@ -43,7 +43,7 @@ runai workload submit --file workload.yaml --project my-project --mnnvl Required
   -h, --help                            help for submit
       --mnnvl mnnvl                     Enable MNNVL (Multi-Node NVLink) mode. Valid values: Required|None
       --name-prefix string              Use the provided name as a prefix (generates random suffix). Mutually exclusive with [NAME] argument
-      --preemptibility preemptibility   Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
+      --preemptibility preemptibility   Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, semi-preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
       --priority string                 Sets the workload’s scheduling priority. Valid values: very-low, low, medium-low, medium, medium-high, high, very-high. 
                                         Overrides the default priority for the workload type. Changing priority does not update preemptibility automatically.
   -p, --project string                  Specify the project for the command to use. Defaults to the project set in the context, if any. Use 'runai project set <project>' to set the default.
