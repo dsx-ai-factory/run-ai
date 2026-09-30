@@ -1089,7 +1089,7 @@ paths:
                   newPassword:
                     type: string
                 example:
-                  tempPassword: Abcd!234
+                  tempPassword: <temporary-password>
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -4148,14 +4148,14 @@ components:
           type: string
           description: |
             Short-lived JWT (2h TTL) for the installer service account.
-            Pass to the Helm hook via --set cluster.bootstrapToken=<token>.
+            Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>.
         clientSecret:
           type: string
           deprecated: true
           nullable: true
           description: Deprecated. Omitted on CP >= 3.0. Use bootstrapToken instead.
       example:
-        installationStr: helm upgrade -i runai-cluster runai/runai-cluster -n runai --set cluster.uid=... --set cluster.bootstrapToken=<installer-bootstrap-jwt>
+        installationStr: helm upgrade -i runai-cluster runai/runai-cluster -n runai --set cluster.uid=... --set controlPlane.bootstrapToken=<installer-bootstrap-jwt>
         repositoryName: runai
         chartRepoURL: https://charts.example.com
         bootstrapToken: <installer-bootstrap-jwt>
@@ -4771,8 +4771,8 @@ components:
           minLength: 8
           maxLength: 255
       example:
-        currentPassword: Abcd!234
-        newPassword: Zxcv!567
+        currentPassword: <current-password>
+        newPassword: <new-password>
     Groups:
       type: array
       items:
@@ -5432,6 +5432,7 @@ components:
         - nfs-assets
         - s3-assets
         - compute-resources
+        - resource-claim-templates
         - templates
         - credentials
         - events-history

@@ -15,7 +15,7 @@ NVIDIA Run:ai provides a consistent way to run development, training, and infere
 NVIDIA Run:ai is available as open source. The NVIDIA Run:ai Support-Entitled Release is available for organizations that require [NVIDIA enterprise support and an SLA](getting-started/product-support-policy.md).
 </Note>
 
-## Getting started
+## Getting Started
 
 <Cards>
   <Card
@@ -37,7 +37,7 @@ NVIDIA Run:ai is available as open source. The NVIDIA Run:ai Support-Entitled Re
   <Card
     title="Local Development"
     icon="square-terminal"
-    href="https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md"
+    href="../local-dev.md"
   >
     Build NVIDIA Run:ai and run the full stack locally for development.
   </Card>
@@ -121,7 +121,7 @@ NVIDIA Run:ai is available as open source. The NVIDIA Run:ai Support-Entitled Re
   <Card
     title="Upgrade"
     icon="arrow-up"
-    href="installation-and-configuration/upgrade/helm.md"
+    href="installation-and-configuration/upgrade/upgrade.md"
   >
     Upgrade an existing NVIDIA Run:ai deployment to a new version.
   </Card>
@@ -129,7 +129,7 @@ NVIDIA Run:ai is available as open source. The NVIDIA Run:ai Support-Entitled Re
   <Card
     title="Product Version Life Cycle"
     icon="calendar"
-    href="getting-started/product-support-policy.md"
+    href="getting-started/product-support-policy.md#supported-versions"
   >
     Plan upgrades based on support timelines.
   </Card>

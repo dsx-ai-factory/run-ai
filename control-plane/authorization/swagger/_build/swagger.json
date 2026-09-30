@@ -2689,6 +2689,7 @@
           "nfs-assets",
           "s3-assets",
           "compute-resources",
+          "resource-claim-templates",
           "templates",
           "credentials",
           "events-history",

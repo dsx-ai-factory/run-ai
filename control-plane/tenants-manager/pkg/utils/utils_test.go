@@ -40,7 +40,7 @@ func TestCheckHttpResponse_WithError(t *testing.T) {
 
 func TestValidatePassword_ValidPasswords(t *testing.T) {
 	validPasswords := []string{
-		"Abcd!234",
+		"Valid!Pw1",
 		"Admin!234",
 		"P@ssw0rd",
 		"MyP@ss123",
@@ -65,13 +65,13 @@ func TestValidatePassword_TooShort(t *testing.T) {
 }
 
 func TestValidatePassword_MissingLowercase(t *testing.T) {
-	err := utils.ValidatePassword("ABCD!234")
+	err := utils.ValidatePassword("UPPER!123")
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), utils.InvalidPasswordMessage)
 }
 
 func TestValidatePassword_MissingUppercase(t *testing.T) {
-	err := utils.ValidatePassword("abcd!234")
+	err := utils.ValidatePassword("lower!123")
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), utils.InvalidPasswordMessage)
 }

@@ -39,11 +39,21 @@ func convertBinderConfig(runaiConfig *runaiv1.RunaiConfig) *kaibinder.Binder {
 	}
 }
 
+// Not a typo: the hyphenated spelling is KAI's own default and no such repository exists.
+const resourceReservationImageName = "resourcereservation"
+
 func convertBinderResourceReservationImage(binderConfig *binder.Binder) *kaicommon.Image {
-	if binderConfig.ResourceReservation == nil {
-		return nil
+	var image *kaicommon.Image
+	if binderConfig.ResourceReservation != nil {
+		image = convertImage(binderConfig.ResourceReservation.Image)
 	}
-	return convertImage(binderConfig.ResourceReservation.Image)
+	if image == nil {
+		image = &kaicommon.Image{}
+	}
+	if image.Name == nil {
+		image.Name = ptr.To(resourceReservationImageName)
+	}
+	return image
 }
 
 func convertBinderK8sClientConfig(binderConfig *binder.Binder) *kaicommon.K8sClientConfig {

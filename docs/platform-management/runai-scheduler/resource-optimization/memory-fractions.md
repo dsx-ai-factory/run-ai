@@ -89,7 +89,7 @@ Sharing a single GPU between multiple workloads remains unchanged. It now serves
 
 **Note**
 
-NVIDIA Run:ai installs and operates normally without these prerequisites in place, and workloads not using GPU fractions are unaffected. Workloads using GPU fractions, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
+NVIDIA Run:ai installs and operates normally without these prerequisites in place, and workloads not using GPU fractions are unaffected. Workloads using GPU fractions, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
 
 </Note>
 
@@ -259,8 +259,8 @@ Policy enforcement does not reach [externally submitted workloads](../../../work
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/runai.md) and run according to your workload.
 
 ## Using API
 
-To view the available actions, go to the [API reference](https://run-ai-docs.nvidia.com/api/2.26/) and run according to your workload.
+To view the available actions, go to the [API reference](../../../rest-api/about-the-rest-api.md) and run according to your workload.

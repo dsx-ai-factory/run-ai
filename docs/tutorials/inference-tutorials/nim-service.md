@@ -2,13 +2,13 @@
 
 This tutorial demonstrates how to deploy the Llama 3.2 1B Instruct model as a NIM Service workload on the NVIDIA Run:ai platform. NIM Service workloads use the [NVIDIA NIM Operator](https://docs.nvidia.com/nim-operator/latest/) under the hood. You can use this workflow as a reference and adapt it for other models, model sources, container images, and hardware configurations.
 
-<Info>
+<Note>
 
 **Note**
 
 For the NIM example, verify that the selected NIM is supported on your target hardware according to the [NIM support matrix](https://docs.nvidia.com/nim/large-language-models/latest/supported-models.html).
 
-</Info>
+</Note>
 
 In this tutorial, you will learn how to:
 
@@ -59,13 +59,13 @@ runai login --help
 
 ## Step 2: Creating a User Access Key
 
-<Info>
+<Note>
 
 **Note**
 
 This step is only required if you intend to follow the API steps in this tutorial.
 
-</Info>
+</Note>
 
 Access keys are used for API integrations with NVIDIA Run:ai. An access key contains a client ID and a client secret. With the client credentials, you can obtain a token and use it within subsequent API calls.
 
@@ -77,7 +77,7 @@ In the NVIDIA Run:ai user interface:
 4. Copy the **Client ID** and **Client secret** and store securely
 5. Click **DONE**
 
-To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API. For example:
+To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
 curl -X POST \ 
@@ -97,13 +97,13 @@ curl -X POST \
 
 This [credential](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md) stores your NGC API key for authenticating with the NGC catalog.
 
-<Info>
+<Note>
 
 **Note**
 
 [User credentials](../../settings/user-settings/user-credentials.md) cannot be used with NIM Service workloads. If you do not have permission to create credentials, contact your administrator.
 
-</Info>
+</Note>
 
 1. Go to Workload manager → Credentials.
 2. Click **+NEW CREDENTIAL** and select **NGC API key**.
@@ -118,13 +118,13 @@ Once created, note the **Kubernetes name** from the [Credentials](../../workload
 
 This [credential](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md) authenticates image pulls from `nvcr.io` so the workload can fetch the NIM container image.
 
-<Info>
+<Note>
 
 **Note**
 
 [User credentials](../../settings/user-settings/user-credentials.md) cannot be used with NIM Service workloads. If you do not have permission to create credentials, contact your administrator.
 
-</Info>
+</Note>
 
 1. Go to Workload manager → Credentials.
 2. Click **+NEW CREDENTIAL** and select **Docker registry**.
@@ -142,17 +142,17 @@ Once created, note the **Kubernetes name** from the [Credentials](../../workload
 
 This tutorial uses a [model-free NIM](https://docs.nvidia.com/nim/large-language-models/latest/about-nim-llm/overview.html#model-free-and-model-specific-containers) container, which serves a model you configure at deploy time via the `NIM_MODEL_NAME` environment variable rather than a model bundled into the image. In this tutorial, that model is Llama 3.2 1B Instruct. NIM Services can also use model-specific NIMs from NGC. The workload provisions a PVC inline at submission time and mounts it at `/opt/nim/.cache` to cache downloaded model weights and engine artifacts so subsequent restarts skip the download.
 
-<Info>
+<Note>
 
 **Note**
 
 The first time the workload is submitted, the PVC is provisioned and the model is downloaded, so startup takes longer. Subsequent restarts reuse the cached weights and start much faster.
 
-</Info>
+</Note>
 
 ### How the Configuration Works
 
-<Info>
+<Note>
 
 **Note**
 
@@ -166,7 +166,7 @@ The first time the workload is submitted, the PVC is provisioned and the model i
 
 A Hugging Face token (`HF_TOKEN`) is required only for gated Hugging Face models. Public Hugging Face models and the other sources can be pulled without one.
 
-</Info>
+</Note>
 
 * **Container image** - The model-free NIM container image (`llm-nim`), which can serve any supported model. The specific model is selected at runtime via the `NIM_MODEL_NAME` environment variable.
 * **Image pull secret** - References the Docker registry Kubernetes secret created in [Step 4](nim-service.md#step-4-creating-the-docker-registry-credential), used to pull the NIM image from `nvcr.io`.
@@ -238,11 +238,11 @@ spec:
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the following parameters. For more details, see the [NVIDIA NIM](https://run-ai-docs.nvidia.com/api/2.26/workloads/nvidia-nim) API:
+Copy the following command to your terminal. Make sure to update the following parameters. For more details, see the [NVIDIA NIM](api:main-api:POST/api/v2/workloads/nim-services) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](nim-service.md#step-2-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
 * `<image-pull-secret-name>` - The Kubernetes name of the Docker registry credential created in [Step 4](nim-service.md#step-4-creating-the-docker-registry-credential).
 * `<ngc-auth-secret-name>` - The Kubernetes name of the NGC API key credential created in [Step 3](nim-service.md#step-3-creating-the-ngc-api-key-credential).
 * `<HF_TOKEN>` - Your Hugging Face access token.
@@ -331,15 +331,15 @@ Once the workload reaches **Running** and shows an available **Connection**, you
 
 ## Step 7: Accessing the Inference Workload
 
-You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads#get-api-v1-workloads) API. The endpoint URL will be available in the response body under `endpoints`.
+You can programmatically consume an inference workload via API by making direct calls to the serving endpoint, typically from other workloads or external integrations. Once an inference workload is deployed, the serving endpoint URL appears in the **Connections** column of the [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) table. To retrieve the service endpoint programmatically, use the [Get Workloads](api:main-api:GET/api/v1/workloads) API. The endpoint URL will be available in the response body under `endpoints`.
 
-<Info>
+<Note>
 
 **Note**
 
 For clusters below version 2.25, the endpoint URL will be available in the response body under `urls`.
 
-</Info>
+</Note>
 
 ```bash
 #replace <serving-endpoint-url> and <model-name> (e.g. "meta-llama/Llama-3.2-1B-Instruct")

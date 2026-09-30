@@ -89,7 +89,7 @@ A memory reclaim is targeted at a single process and affects only the container 
 
 **Note**
 
-NVIDIA Run:ai installs and operates normally without these prerequisites in place, and workloads not using GPU fractions are unaffected. Workloads using GPU fractions, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
+NVIDIA Run:ai installs and operates normally without these prerequisites in place, and workloads not using GPU fractions are unaffected. Workloads using GPU fractions, however, are not scheduled onto a node until that node meets every prerequisite. If you are upgrading from a release that used the proprietary GPU sharing implementation, refer to [Migrate GPU Fractions](../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for per-node verification steps.
 
 </Note>
 
@@ -142,7 +142,7 @@ Make sure the [default scheduler](../scheduling/default-scheduler.md) is set to 
 
 **Warning**
 
-If you are upgrading from a release that used the `RUNAI_GPU_MEMORY_LIMIT` environment variable, that variable is no longer honored; the memory Limit is now set with an annotation. A workload that still sets `RUNAI_GPU_MEMORY_LIMIT` starts and runs normally, but with no memory ceiling, and no error or event is raised. Refer to [Migrate GPU Fractions](../../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for the annotation replacement and a before/after example.
+If you are upgrading from a release that used the `RUNAI_GPU_MEMORY_LIMIT` environment variable, that variable is no longer honored; the memory Limit is now set with an annotation. A workload that still sets `RUNAI_GPU_MEMORY_LIMIT` starts and runs normally, but with no memory ceiling, and no error or event is raised. Refer to [Migrate GPU Fractions](../../../installation-and-configuration/upgrade/migrate-gpu-fractions.md) for the annotation replacement and a before/after example.
 
 </Warning>
 
@@ -252,8 +252,8 @@ The following limitations apply to dynamic GPU memory fractions when running on 
 
 ## Using CLI
 
-To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/) and run according to your workload.
+To view the available actions, go to the [CLI v2 reference](../../../reference/cli/runai/runai.md) and run according to your workload.
 
 ## Using API
 
-To view the available actions, go to the [API reference](https://run-ai-docs.nvidia.com/api/2.26/) and run according to your workload.
+To view the available actions, go to the [API reference](../../../rest-api/about-the-rest-api.md) and run according to your workload.

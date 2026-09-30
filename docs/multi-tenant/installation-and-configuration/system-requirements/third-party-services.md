@@ -3,7 +3,7 @@
 
 # Third-Party Services
 
-Third-party services are a set of supporting services deployed as part of the NVIDIA Run:ai installation, including Keycloak for authentication and identity management, PostgreSQL as the centralized database, Traefik as the API gateway, NATS for asynchronous communication, and others. This page lists those services and how to replace select services with externally managed instances, including any preparation required before installation. For configuration of the NVIDIA Run:ai-managed instances themselves (built-in tuning, password rotation, and so on), see [Control Plane Configuration](../../../installation-and-configuration/configuration/control-plane-config.md).
+Third-party services are a set of supporting services deployed as part of the NVIDIA Run:ai installation, including Keycloak for authentication and identity management, PostgreSQL as the centralized database, Traefik as the API gateway, NATS for asynchronous communication, and others. This page lists those services and how to replace select services with externally managed instances, including any preparation required before installation. For configuration of the NVIDIA Run:ai-managed instances themselves (built-in tuning, password rotation, and so on), see [Advanced Control Plane Configurations](../../../installation-and-configuration/configuration/control-plane-config.md).
 
 ## Externally Managed Instances
 
@@ -29,11 +29,11 @@ Images are pulled directly from these registries during installation. No registr
 
 ### Keycloak
 
-Keycloak provides authentication and identity management for the NVIDIA Run:ai control plane. It is deployed as part of the control plane Helm chart using [Keycloakx](https://artifacthub.io/packages/helm/codecentric/keycloakx) (`keycloakx`), and is not supported as an external service. For Helm configuration fields and changing the admin password, see [Control Plane Configuration](../../../installation-and-configuration/configuration/control-plane-config.md#keycloak).
+Keycloak provides authentication and identity management for the NVIDIA Run:ai control plane. It is deployed as part of the control plane Helm chart using [Keycloakx](https://artifacthub.io/packages/helm/codecentric/keycloakx) (`keycloakx`), and is not supported as an external service. For Helm configuration fields and changing the admin password, see [Advanced Control Plane Configurations](../../../installation-and-configuration/configuration/control-plane-config.md#keycloak).
 
 ### PostgreSQL
 
-PostgreSQL is the centralized database for the NVIDIA Run:ai control plane, including tenant records. It is deployed as part of the control plane Helm chart using [Bitnami PostgreSQL](https://artifacthub.io/packages/helm/bitnami/postgresql) (`postgresql`). Only PostgreSQL version 16 is supported. For built-in PostgreSQL tuning and changing passwords, see [Control Plane Configuration](../../../installation-and-configuration/configuration/control-plane-config.md#postgresql).
+PostgreSQL is the centralized database for the NVIDIA Run:ai control plane, including tenant records. It is deployed as part of the control plane Helm chart using [Bitnami PostgreSQL](https://artifacthub.io/packages/helm/bitnami/postgresql) (`postgresql`). Only PostgreSQL version 16 is supported. For built-in PostgreSQL tuning and changing passwords, see [Advanced Control Plane Configurations](../../../installation-and-configuration/configuration/control-plane-config.md#postgresql).
 
 #### Using an External PostgreSQL Instance
 
@@ -93,7 +93,7 @@ Then configure the chart to use the provisioned database.
 
 ### Traefik
 
-Traefik serves as the API gateway for the NVIDIA Run:ai control plane, handling token verification and micro-service routing. It is deployed as part of the control plane Helm chart and is not supported as an external service. For additional configuration, see [Control Plane Configuration](../../../installation-and-configuration/configuration/control-plane-config.md).
+Traefik serves as the API gateway for the NVIDIA Run:ai control plane, handling token verification and micro-service routing. It is deployed as part of the control plane Helm chart and is not supported as an external service. For additional configuration, see [Advanced Control Plane Configurations](../../../installation-and-configuration/configuration/control-plane-config.md).
 
 ### NATS
 
@@ -120,7 +120,7 @@ Thanos is not deployed as part of a multi-tenant installation. Instead, an exter
 
 ## NVIDIA Run:ai Cluster Services
 
-NVIDIA Run:ai cluster services support the workloads running on a tenant cluster, rather than the platform itself. Each is deployed automatically as part of the cluster Helm chart and does not support an external instance. Their upstream images can be overridden via Helm or the `RunaiConfig` custom resource. For the full list of configurable fields and instructions, see [Cluster Configuration](../../../installation-and-configuration/configuration/cluster-config.md#third-party-service-images).
+NVIDIA Run:ai cluster services support the workloads running on a tenant cluster, rather than the platform itself. Each is deployed automatically as part of the cluster Helm chart and does not support an external instance. Their upstream images can be overridden via Helm or the `RunaiConfig` custom resource. For the full list of configurable fields and instructions, see [Advanced Cluster Configurations](../../../installation-and-configuration/configuration/cluster-config.md#third-party-service-images).
 
 | Component | Supports External Instance | Description |
 | --------- | -------------------------- | ----------- |

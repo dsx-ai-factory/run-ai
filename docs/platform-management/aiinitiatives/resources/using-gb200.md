@@ -4,13 +4,13 @@ Multi-Node NVLink (MNNVL) systems, including NVIDIA GB200, NVIDIA GB200 NVL72 an
 
 Kubernetes does not natively recognize NVIDIA’s MNNVL architecture, which makes managing and scheduling workloads across these high-performance domains more complex. The NVIDIA Run:ai platform simplifies this by abstracting the complexity of MNNVL configuration. Without this abstraction, optimal performance on a GB200 NVL72 system would require deep knowledge of NVLink domains, their hardware dependencies, and manual configuration for each distributed workload. NVIDIA Run:ai automates these steps, ensuring high performance with minimal effort. While GB200 NVL72 supports all [workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), distributed workloads - training and inference - benefit most from its accelerated GPU networking capabilities.
 
-<Info>
+<Note>
 
 **Note**
 
 Distributed workloads include both distributed training and distributed inference.
 
-</Info>
+</Note>
 
 To learn more about GB200, MNNVL and related NVIDIA technologies, refer to the following:
 
@@ -109,13 +109,13 @@ These additional steps are crucial for the creation of underlying HW resources (
 
 You can influence how the Scheduler places distributed workloads into GB200 MNNVL node pools using the **Topology** field available in the [distributed training](../../../workloads-in-nvidia-run-ai/using-training/distributed-training-models.md) and [distributed inference](../../../workloads-in-nvidia-run-ai/using-inference/distributed-inference.md) workload submission forms.
 
-<Info>
+<Note>
 
 **Note**
 
 The following options are based on [inter-pod affinity rules](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/), which define how pods are grouped based on topology.
 
-</Info>
+</Note>
 
 * **Confine a workload to a single GB200 MNNVL domain** - To ensure the workload is scheduled within a single GB200 MNNVL domain (e.g., a GB200 NVL72 rack), apply a label with a Required policy using the MNNVL label key (`nvidia.com/gpu.clique`). This instructs the Scheduler to strictly place all pods within the same MNNVL domain. If the workload exceeds 18 pods (or 72 GPUs), the Scheduler will not be able to find a matching domain and will fail to schedule the workload.
 * **Try to schedule a workload using a Preferred topology** - To guide the Scheduler to prioritize a specific topology without enforcing it, apply a label with a policy of Preferred. You can apply any label with a Preferred policy. These labels are treated with higher scheduling weight than the default Preferred pod affinity automatically applied by NVIDIA Run:ai for MNNVL.

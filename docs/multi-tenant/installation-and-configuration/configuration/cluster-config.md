@@ -145,7 +145,7 @@ NVIDIA Run:ai cluster includes many different services. To simplify resource man
 
 **Note**
 
-For resource recommendations, see [Vertical scaling](../../infrastructure-setup/procedures/scaling.md#vertical-scaling). To automatically adjust resources based on actual usage, see [Vertical Pod Autoscaling (VPA)](../operations/vpa.md). Note that static resource configuration remains the primary mechanism. VPA works alongside it by generating recommendations or dynamically applying adjustments depending on the configured update mode.
+For resource recommendations, see [Vertical scaling](../operations/scaling.md#vertical-scaling). To automatically adjust resources based on actual usage, see [Vertical Pod Autoscaling (VPA)](../operations/vpa.md). Note that static resource configuration remains the primary mechanism. VPA works alongside it by generating recommendations or dynamically applying adjustments depending on the configured update mode.
 
 </Note>
 

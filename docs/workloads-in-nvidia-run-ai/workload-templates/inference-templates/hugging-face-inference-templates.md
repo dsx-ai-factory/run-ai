@@ -2,7 +2,7 @@
 
 This guide explains how to create vLLM inference templates for reuse during workload submission. To manage templates, see [Workload Templates](../README.md).
 
-<Info>
+<Note>
 
 **Note**
 
@@ -10,7 +10,7 @@ This guide explains how to create vLLM inference templates for reuse during work
 * Selecting the **inference server** is enabled by default. If you cannot see it in the menu, contact your administrator to enable it under **General settings** → Workloads → Hugging face models.
 * **Docker registry URL for inference workloads** - For Knative-based inference workloads, Docker Hub credentials must be configured using `https://index.docker.io/v1/` as the registry URL. Credentials configured with `docker.io` result in `401 Unauthorized` errors for Knative-based inference workloads due to differences in how image digests are resolved during image pull. See [Credentials](../../workload-assets/credentials.md#docker-registry) for more details.
 
-</Info>
+</Note>
 
 ## Before You Start
 * To access gated Hugging Face models, make sure to obtain an access token from [Hugging Face Account Settings](https://huggingface.co/) → Access Token. In NVIDIA Run:ai, store the token as a [shared secret](../../workload-assets/credentials.md#generic-secret) (created by an administrator). The credential must be a Generic secret that contains an `HF_TOKEN`.
@@ -25,13 +25,13 @@ You can override the defaults by configuring priority and preemptibility. For mo
 
 When loading an existing asset, environment or compute resource, into a template, you can choose whether to link the asset or use it without linking. Linked assets remain connected to the template. Any updates made to the original environment or compute resource are automatically reflected in the template. While linked, the asset fields in the template cannot be modified.
 
-<Info>
+<Note>
 
 **Note**
 
 Linking data source assets is currently not supported.
 
-</Info>
+</Note>
 
 ## Adding a New Template
 
@@ -44,14 +44,14 @@ Linking data source assets is currently not supported.
 
 ### Setting Up an Environment
 
-<Info>
+<Note>
 
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
 * To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -140,7 +140,7 @@ Manually configure the settings below as needed.
 
 ### Setting Up Compute Resources
 
-<Info>
+<Note>
 
 **Note**
 
@@ -148,7 +148,7 @@ Manually configure the settings below as needed.
 * GPU memory limit is disabled by default. If unavailable, your administrator must enable it under **General settings** → Resources → GPU resource optimization.
 * Replica autoscaling and toleration(s) can still be modified even when the compute resource asset is linked.
 
-</Info>
+</Note>
 
 **Load from existing setup**
 
@@ -186,7 +186,7 @@ Manually configure the settings below as needed.
 
 ### Setting Up Data & Storage
 
-<Info>
+<Note>
 
 **Note**
 
@@ -194,7 +194,7 @@ Manually configure the settings below as needed.
 * **Advanced setup** - If Data volumes is not enabled, **Data & storage** appears as **Data sources** only, and no data volumes will be available.
 * S3 data sources are not supported for inference workloads.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -221,13 +221,13 @@ Select the data source that will serve as the **model store**. If the model is a
 
 **Configure data sources for a one-time configuration**
 
-<Info>
+<Note>
 
 **Note**
 
 [PVCs](../../workload-assets/data-volumes.md), [Secrets](../../workload-assets/credentials.md), [ConfigMaps](../../workload-assets/environments.md) and [Data volumes](../../workload-assets/data-volumes.md) cannot be added as a one-time configuration.
 
-</Info>
+</Note>
 
 1. Click the **➕** icon and choose the data source from the dropdown menu. You can add multiple data sources.
 2. Once selected, set the **data origin** according to the required fields and enter the **container path** to set the **data target location**.
@@ -261,14 +261,14 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 
 ### Setting Up General Settings
 
-<Info>
+<Note>
 
 **Note**
 
 * The following general settings are optional.
 * General settings are available via the Advanced setup form.
 
-</Info>
+</Note>
 
 1. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
@@ -288,4 +288,4 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 
 ## Using API
 
-Go to the [Workload templates](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-templates) API reference to view the available actions.
+Go to the [Workload templates](api:main-api:GET/api/v1/workload-templates) API reference to view the available actions.

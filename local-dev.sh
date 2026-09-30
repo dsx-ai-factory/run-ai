@@ -21,6 +21,7 @@
 #   --domain FQDN          Domain to use (default: runai.local)
 #   --admin-email EMAIL    Admin account email (default: test@run.ai)
 #   --admin-password PASS  Admin password — must meet complexity requirements
+#                          (default: auto-generated, shown in the final summary)
 #   --parallel N           Parallel build jobs (default: 4)
 #   --skip-build           Skip building Docker images
 #   --skip-build-cp        Skip building control-plane images only
@@ -82,7 +83,9 @@ MIN_LINUX_DISK_GB=100
 
 DOMAIN="${RUNAI_DOMAIN:-runai.local}"
 ADMIN_EMAIL="${RUNAI_ADMIN_EMAIL:-test@run.ai}"
-ADMIN_PASSWORD="${RUNAI_ADMIN_PASSWORD:-Abcd!234}"
+# Empty means the chart's secret-generator hook picks a random password; it is read
+# back from runai-backend-gen-tenants-manager after deploy.
+ADMIN_PASSWORD="${RUNAI_ADMIN_PASSWORD:-}"
 CP_NAMESPACE="runai-backend"
 RC_NAMESPACE="runai"
 CP_TENANT_NAME="runai"
@@ -1350,7 +1353,7 @@ build_cli_exposer() {
         -e GOCACHE=/tmp/.cache \
         library/golang:1.26.8 \
         go build \
-          -ldflags "-X github.com/run-ai/runai-oss-test/control-plane/runai-cli/pkg/version.version=${cli_version} -extldflags -static -s -w" \
+          -ldflags "-X github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/version.version=${cli_version} -extldflags -static -s -w" \
           -o bin/dist/linux/amd64/runai \
           . \
         >>"${log_file}" 2>&1; then
@@ -1390,7 +1393,7 @@ build_keycloak_extensions() {
   fi
 
   local log_file="${LOG_DIR}/${svc_name}.log"
-  log "  Building ${svc_name} (Gradle + Docker)..."
+  log "  Building ${svc_name} (Gradle + Go + Docker)..."
 
   # Retried with a longer backoff than retry_build's flat 10s. Maven Central
   # rate-limits per source IP, so on a shared/NAT egress downloads can fail with
@@ -1399,7 +1402,7 @@ build_keycloak_extensions() {
   # used to trigger it; a cold cache can still hit it.
   local _kc_attempt _kc_delay=20
   for _kc_attempt in 1 2 3; do
-    if (cd "${svc_dir}" && make build DOCKERHUB_PROXY= >"${log_file}" 2>&1); then
+    if (cd "${svc_dir}" && make build-gradle DOCKERHUB_PROXY= >"${log_file}" 2>&1); then
       break
     fi
     if (( _kc_attempt == 3 )); then
@@ -1416,8 +1419,28 @@ build_keycloak_extensions() {
     _kc_delay=$(( _kc_delay * 2 ))
   done
 
+  # Step 2: compile the Go init binary (amd64 only — this is local dev, not a
+  # release build) that replaces the old copy-extensions.sh/write-keycloak-
+  # conf.sh scripts inside the scratch runtime image. Same pattern as
+  # build_go_service's step 1.
+  local _kc_go_attempt
+  for _kc_go_attempt in 1 2 3; do
+    if (cd "${svc_dir}" && make build-go-amd \
+          OS=linux ARCH=amd64 \
+          DOCKERHUB_PROXY= \
+          GITHUB_TOKEN= \
+          >>"${log_file}" 2>&1); then
+      break
+    fi
+    if (( _kc_go_attempt == 3 )); then
+      die "build-go-amd failed for ${svc_name}. See ${log_file}"
+    fi
+    warn "  ${svc_name} build-go-amd attempt ${_kc_go_attempt} failed (transient?) — retrying in 10s..."
+    sleep 10
+  done
+
   local image_ref="${LOCAL_IMAGE_REPO}/${svc_name}:${CP_IMAGE_TAG}"
-  if ! container_build "${image_ref}" "${svc_dir}" >>"${log_file}" 2>&1; then
+  if ! container_build "${image_ref}" --build-arg TARGETARCH=amd64 "${svc_dir}" >>"${log_file}" 2>&1; then
     die "docker build failed for ${svc_name}. See ${log_file}"
   fi
   if ! container_load "${image_ref}" "${log_file}"; then
@@ -1789,17 +1812,24 @@ prefetch_go_modules() {
   mkdir -p "${gopath_vol}" "${gocache_vol}"
 
   # Build a script that runs go mod download in each service directory.
-  local cmds=""
+  local -a mod_dirs=()
   for base_dir in "${REPO_ROOT}/control-plane" "${REPO_ROOT}/runai-cluster/cluster"; do
     while IFS= read -r -d '' go_mod; do
       local rel
       rel="$(dirname "${go_mod}")"
-      rel="${rel#${REPO_ROOT}/}"
-      cmds+="(cd /repo/${rel} && go mod download all 2>/dev/null) || true; "
+      mod_dirs+=("${rel#${REPO_ROOT}/}")
     done < <(find "${base_dir}" -maxdepth 2 -name "go.mod" -print0 2>/dev/null)
   done
 
-  [[ -z "${cmds}" ]] && return 0
+  [[ ${#mod_dirs[@]} -eq 0 ]] && return 0
+
+  # A cold cache is several GB and takes a long time; print one line per module so the
+  # step does not look hung.
+  local cmds="" i=0
+  for rel in "${mod_dirs[@]}"; do
+    i=$((i + 1))
+    cmds+="echo '[${i}/${#mod_dirs[@]}] ${rel}'; (cd /repo/${rel} && go mod download all 2>/dev/null) || true; "
+  done
 
   local af_args=()
   [[ "${CONTAINER_TOOL}" == "podman" && -f "${HOME}/.docker/config.json" ]] && \
@@ -1830,7 +1860,8 @@ prefetch_go_modules() {
     -e CGO_ENABLED=0 \
     -e GO111MODULE=on \
     library/golang:1.26.8 \
-    bash -c "${cmds}" >/dev/null 2>&1 || \
+    bash -c "${cmds}" 2>/dev/null \
+    | while IFS= read -r line; do log "  ${line}"; done || \
     warn "Module pre-warm incomplete — remaining modules will download during build"
 
   log "Go module cache warm"
@@ -2182,16 +2213,26 @@ deploy_control_plane() {
   if kubectl get secret runai-backend-gen-keycloakx -n "${CP_NAMESPACE}" &>/dev/null; then
     cp_no_hooks="--no-hooks"
     log "Existing secrets detected — skipping helm hooks (passwords preserved)"
-    # Patch the tenants-manager secret so ADMIN_PASSWORD matches our configured value.
-    # When hooks are skipped the secret keeps its old auto-generated value; tenants-manager
+    # Patch the tenants-manager secret so ADMIN_PASSWORD matches an explicitly requested
+    # value. When hooks are skipped the secret keeps its old value; tenants-manager
     # creates the admin user with whatever is in this secret, so we must keep them in sync.
-    local encoded_pw
-    encoded_pw="$(printf '%s' "${ADMIN_PASSWORD}" | base64)"
-    kubectl patch secret runai-backend-gen-tenants-manager \
-      -n "${CP_NAMESPACE}" \
-      --type=merge \
-      -p "{\"data\":{\"ADMIN_PASSWORD\":\"${encoded_pw}\"}}" \
-      2>/dev/null || true
+    if [[ -n "${ADMIN_PASSWORD}" ]]; then
+      local encoded_pw
+      encoded_pw="$(printf '%s' "${ADMIN_PASSWORD}" | base64)"
+      kubectl patch secret runai-backend-gen-tenants-manager \
+        -n "${CP_NAMESPACE}" \
+        --type=merge \
+        -p "{\"data\":{\"ADMIN_PASSWORD\":\"${encoded_pw}\"}}" \
+        2>/dev/null || true
+    fi
+  fi
+
+  local password_args=()
+  if [[ -n "${ADMIN_PASSWORD}" ]]; then
+    password_args=(
+      --set-string "global.management.password=${ADMIN_PASSWORD}"
+      --set-string "tenantsManager.config.adminPassword=${ADMIN_PASSWORD}"
+    )
   fi
 
   # Skip helm dep build when all tarballs are already present locally.
@@ -2250,9 +2291,8 @@ PYEOF
     --set global.ingress.tlsSecretName=runai-backend-tls \
     --set global.customCA.enabled=true \
     --set "global.management.user=${ADMIN_EMAIL}" \
-    --set "global.management.password=${ADMIN_PASSWORD}" \
     --set "tenantsManager.config.adminUsername=${ADMIN_EMAIL}" \
-    --set "tenantsManager.config.adminPassword=${ADMIN_PASSWORD}" \
+    ${password_args[@]+"${password_args[@]}"} \
     --set global.config.kubernetesDistribution=kubernetes \
     --set nats.jetstream.maxMemory=4G \
     --set nats.resources.requests.cpu=250m \
@@ -2275,7 +2315,17 @@ PYEOF
   fi
 
   log "Control-plane deployed successfully"
+  resolve_admin_password || die "Could not read ADMIN_PASSWORD from secret runai-backend-gen-tenants-manager in ${CP_NAMESPACE}"
   wait_for_cp_health
+}
+
+# Fills ADMIN_PASSWORD from the tenants-manager secret when it wasn't passed explicitly.
+resolve_admin_password() {
+  [[ -n "${ADMIN_PASSWORD}" ]] && return 0
+  ADMIN_PASSWORD="$(kubectl get secret runai-backend-gen-tenants-manager \
+    -n "${CP_NAMESPACE}" -o jsonpath='{.data.ADMIN_PASSWORD}' 2>/dev/null \
+    | base64 --decode 2>/dev/null || true)"
+  [[ -n "${ADMIN_PASSWORD}" ]]
 }
 
 # Fetches an admin access token from Keycloak. Prints the token on stdout and
@@ -2634,7 +2684,7 @@ print_access_info() {
   echo ""
   echo "  URL:      https://${DOMAIN}"
   echo "  Admin:    ${ADMIN_EMAIL}"
-  echo "  Password: ${ADMIN_PASSWORD}"
+  echo "  Password: ${ADMIN_PASSWORD:-<unavailable — control plane not deployed>}"
   echo "  Trust the self-signed CA (macOS):"
   echo "    sudo security add-trusted-cert -d -r trustRoot \\"
   echo "      -k /Library/Keychains/System.keychain ${CERT_DIR}/ca.crt"
@@ -2642,6 +2692,14 @@ print_access_info() {
   echo "  Trust the self-signed CA (Linux):"
   echo "    sudo cp ${CERT_DIR}/ca.crt /usr/local/share/ca-certificates/runai-local.crt"
   echo "    sudo update-ca-certificates"
+  echo ""
+  local cli_bin="${REPO_ROOT}/control-plane/runai-cli/bin/dist/${OS}/${ARCH}/runai"
+  echo "  runai CLI (the UI download is linux/amd64 only, so build one for this machine):"
+  echo "    make -C ${REPO_ROOT}/control-plane/runai-cli cli-${OS}-${ARCH}"
+  echo "    ${cli_bin} config set --cp-url https://${DOMAIN}"
+  echo "    ${cli_bin} login user -u ${ADMIN_EMAIL}"
+  echo "    Requires the trusted CA above (the CLI has no skip-TLS option)."
+  echo "    Usage: ${REPO_ROOT}/control-plane/runai-cli/docs/runai.md"
   echo ""
   echo "  Teardown:  ./local-dev.sh --teardown"
   echo "  Logs:      ${LOG_DIR}/"
@@ -2730,12 +2788,16 @@ main() {
 
     if [[ $SKIP_DEPLOY_RC -eq 0 ]]; then
       # CP must be healthy before we can register the cluster and get credentials.
-      [[ $SKIP_DEPLOY_CP -eq 1 ]] && wait_for_cp_health
+      if [[ $SKIP_DEPLOY_CP -eq 1 ]]; then
+        resolve_admin_password || die "Could not read ADMIN_PASSWORD from secret runai-backend-gen-tenants-manager in ${CP_NAMESPACE} — is the control plane deployed?"
+        wait_for_cp_health
+      fi
       provision_cluster_credentials
       deploy_runai_cluster
     fi
   fi
 
+  resolve_admin_password || true
   print_access_info
 
   local _elapsed=$(( $(date +%s) - _start_ts ))

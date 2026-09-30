@@ -14,8 +14,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/watch"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 const testNamespace = "runai-flowmark"
@@ -178,7 +180,7 @@ func TestCancelledContextEndsWaitWithError(t *testing.T) {
 	if waited := time.Since(start); waited > 5*time.Second {
 		t.Fatalf("WaitAll must return promptly after cancellation, waited %s", waited)
 	}
-	if got.Outcome != Pending || !errors.Is(got.Err, errWatchClosed) || !errors.Is(got.Err, context.Canceled) {
+	if got.Outcome != Pending || !errors.Is(got.Err, ErrWatchClosed) || !errors.Is(got.Err, context.Canceled) {
 		t.Fatalf("cancellation must surface on pending items, got %+v", got)
 	}
 }
@@ -293,5 +295,148 @@ func TestUnmatchedCountsArrivalsNobodyMarked(t *testing.T) {
 	}
 	if got := byName(w.WaitAll(time.Second))["uid-marked"]; got.Outcome != Arrived {
 		t.Fatalf("the marked item must still arrive: %+v", got)
+	}
+}
+
+func TestServerClosedWatchIsReopenedAndLaterArrivalsStillCount(t *testing.T) {
+	reconnectDelay = 10 * time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+
+	first := watch.NewFake()
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(ctx context.Context, c k8sclient.WithWatch, list k8sclient.ObjectList, opts ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			if opened == 1 {
+				return first, nil
+			}
+			return c.Watch(ctx, list, opts...)
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	w.MarkCreated("w1", time.Now())
+	first.Stop()
+
+	deadline := time.Now().Add(2 * time.Second)
+	for w.Reconnects() == 0 && time.Now().Before(deadline) {
+		time.Sleep(time.Millisecond)
+	}
+	if w.Reconnects() != 1 {
+		t.Fatalf("the watch must be reopened once after the server closed it, got %d", w.Reconnects())
+	}
+	if err := kube.Create(context.Background(), runner("w1")); err != nil {
+		t.Fatal(err)
+	}
+	got := byName(w.WaitAll(2 * time.Second))["w1"]
+	if got.Outcome != Arrived {
+		t.Fatalf("an arrival after the reconnect must count, got %+v", got)
+	}
+}
+
+func TestWatchThatCannotBeReopenedEndsWaitWithClosedError(t *testing.T) {
+	reconnectDelay = time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+
+	first := watch.NewFake()
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(context.Context, k8sclient.WithWatch, k8sclient.ObjectList, ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			if opened == 1 {
+				return first, nil
+			}
+			return nil, errors.New("apiserver unreachable")
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+	w.MarkCreated("w1", time.Now())
+	first.Stop()
+
+	got := byName(w.WaitAll(5 * time.Second))["w1"]
+	if got.Outcome != Pending || !errors.Is(got.Err, ErrWatchClosed) {
+		t.Fatalf("a watch that cannot be reopened must surface on pending items, got %+v", got)
+	}
+	if opened != 1+maxReconnects {
+		t.Fatalf("expected %d reopen attempts, got %d", maxReconnects, opened-1)
+	}
+}
+
+func TestUnmatchedIgnoresArrivalsOfFailedCreates(t *testing.T) {
+	kube, w := startWatch(t)
+	w.MarkFailed("w1", errors.New("504 from the gateway, but the object was stored"))
+	if err := kube.Create(context.Background(), runner("w1")); err != nil {
+		t.Fatal(err)
+	}
+	waitForArrival(t, w, "w1")
+
+	if got := w.Unmatched(); got != 0 {
+		t.Fatalf("an arrival for a failed create is not a correlation problem, got %d unmatched", got)
+	}
+}
+
+func TestAWatchTheServerKeepsEndingIsGivenUpWithTheClosedError(t *testing.T) {
+	reconnectDelay = time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(context.Context, k8sclient.WithWatch, k8sclient.ObjectList, ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			ended := watch.NewFake()
+			ended.Stop()
+			return ended, nil
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+	w.MarkCreated("w1", time.Now())
+
+	got := byName(w.WaitAll(5 * time.Second))["w1"]
+	if got.Outcome != Pending || !errors.Is(got.Err, ErrWatchClosed) {
+		t.Fatalf("a watch that keeps closing must end as a closed watch, not a slow cluster: %+v", got)
+	}
+	if opened != 1+maxReconnectCycles || w.Reconnects() != maxReconnectCycles {
+		t.Fatalf("expected %d reopen cycles, got opened=%d reconnects=%d", maxReconnectCycles, opened, w.Reconnects())
+	}
+}
+
+func TestAWatchTheServerKeepsFailingWithAnErrorEventIsGivenUp(t *testing.T) {
+	reconnectDelay = time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(context.Context, k8sclient.WithWatch, k8sclient.ObjectList, ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			failing := watch.NewFake()
+			go failing.Error(&metav1.Status{Code: 504, Message: "Too large resource version"})
+			return failing, nil
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+	w.MarkCreated("w1", time.Now())
+
+	got := byName(w.WaitAll(5 * time.Second))["w1"]
+	if got.Outcome != Pending || !errors.Is(got.Err, ErrWatchClosed) {
+		t.Fatalf("a watch that keeps failing must end as a closed watch: %+v", got)
+	}
+	if opened != 1+maxReconnectCycles {
+		t.Fatalf("expected %d reopen cycles, got %d opens", maxReconnectCycles, opened-1)
 	}
 }

@@ -24,6 +24,10 @@ func (n *MockIdmClient) GetInstallerServiceAccountForTenantId(_ context.Context,
 	return nil, nil
 }
 
+func (n *MockIdmClient) MintInstallerBootstrapToken(_ context.Context, _ string, _ string) (string, error) {
+	return "", nil
+}
+
 func (n *MockIdmClient) GetInternalClientByFilter(_ context.Context, _ string) ([]openapi.Client, error) {
 	return nil, nil
 }

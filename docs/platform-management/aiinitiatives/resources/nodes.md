@@ -8,14 +8,14 @@ The Nodes table can be found under **Resources** in the NVIDIA Run:ai platform.
 
 The Nodes table displays a list of predefined nodes available to users in the NVIDIA Run:ai platform.
 
-<Info>
+<Note>
 
 **Note**
 
 * It is not possible to create additional nodes, or edit, or delete existing nodes.
 * Only users with relevant permissions can view the table.
 
-</Info>
+</Note>
 
 <figure><img src="../../../assets/nodes-new.png" alt=""/><figcaption></figcaption></figure>
 
@@ -24,7 +24,7 @@ The Nodes table consists of the following columns:
 | Column                    | Description                                                                                                                                                                                                                                            |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Node                      | The Kubernetes name of the node                                                                                                                                                                                                                        |
-| Status                    | <p>The state of the node: Ready, Not ready, Missing Prerequisites:</p><ul><li>Ready - The node is eligible for scheduling.</li><li>Not ready - The main reason appears in parenthesis on the right side of the state field; hovering the state lists the reasons why the node is Not ready.</li><li>Missing Prerequisites - The node is in a node pool with [NUMA-aware scheduling](numa-aware-scheduling.md) enabled, and its NodeResourceTopology data is missing or invalid, or its Topology Manager policy is set to `none`; hovering the state shows the specific reason.</li></ul> |
+| Status                    | <p>The state of the node: Ready, Not ready, Missing Prerequisites:</p><ul><li>Ready - The node is eligible for scheduling.</li><li>Not ready - The main reason appears in parenthesis on the right side of the state field; hovering the state lists the reasons why the node is Not ready.</li><li>Missing Prerequisites - Hovering the state shows the specific reason or reasons:<ul><li>NUMA-aware scheduling - The node is in a node pool with [NUMA-aware scheduling](numa-aware-scheduling.md) enabled, and its NodeResourceTopology data is missing or invalid, or its Topology Manager policy is set to `none`.</li><li>GPU fractions - On a GPU node, one or more prerequisites for GPU fractions are not met, for example an unsupported CUDA driver version; each unmet prerequisite is listed separately. This is only evaluated when the cluster itself supports GPU fractions; see [Clusters](../../../installation-and-configuration/operations/clusters.md#cluster-status) for cluster-level status. See [Prerequisites and Features](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#nvidia-gpu-operator) for the required versions.</li></ul></li></ul> |
 | Node pool                 | The name of the associated node pool. By default, every node in the NVIDIA Run:ai platform is associated with the default node pool, if no other node pool is associated.                                                                              |
 | Cluster                   | The cluster that the node is associated with                                                                                                                                                                                                           |
 | NVLink domain UID         | Indicates if the MNNVL domain ID is part of the MNNVL label value. In case the MNNVL label is not the default MNNVL label key (`nvidia.com/gpu.clique`), this field will show the whole label value.                                                   |
@@ -60,13 +60,13 @@ Click one of the values in the GPU devices column, to view the list of GPU devic
 
 Click the value in the NUMA nodes column to view the resource breakdown per NUMA node on this node.
 
-<Info>
+<Note>
 
 **Note**
 
 The list is empty when the node's NUMA topology data is missing or invalid. See [NUMA-aware scheduling](numa-aware-scheduling.md) for the prerequisites for NUMA-aware scheduling.
 
-</Info>
+</Note>
 
 | Column                | Description                                                                    |
 | ---------------------- | -------------------------------------------------------------------------------- |
@@ -82,13 +82,13 @@ The list is empty when the node's NUMA topology data is missing or invalid. See 
 
 Click one of the values in the Pod(s) column, to view the list of pods and their parameters.
 
-<Info>
+<Note>
 
 **Note**
 
 This column is only viewable if your role in the NVIDIA Run:ai platform gives you read access to workloads, even if you are allowed to view workloads, you can only view the workloads within your allowed scope. This means, there might be more pods running on this node then appear in the list you are viewing.
 
-</Info>
+</Note>
 
 | Column                | Description                                                                                                                                                                                                                |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -120,13 +120,13 @@ Click a row in the Nodes table, then click the Show details button at the upper 
 * **Resource utilization** - Displays general GPU, CPU and network metrics
 * **GPU profiling** - Shows additional NVIDIA-specific metrics
 
-<Info>
+<Note>
 
 **Note**
 
 GPU profiling metrics are disabled by default. If unavailable, your administrator must enable it under **General settings** → Analytics → GPU profiling metrics. Before enabling, the administrator must configure GPU profiling through the DCGM Exporter and NVIDIA Run:ai Prometheus integration. For configuration steps, see [GPU profiling metrics](../../monitor-performance/gpu-profiling-metrics.md).
 
-</Info>
+</Note>
 
 #### Resource Utilization
 
@@ -159,4 +159,8 @@ Select **GPU profiling** from the dropdown to view extended GPU device-level met
 
 ## Using API
 
-To view the available actions, go to the [Nodes](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodes) API reference.
+To view the available actions, go to the [Nodes](api:main-api:GET/api/v1/nodes) API reference.
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes the [`get_node_pods`](../../../agents/tools-reference.md#cluster-and-infrastructure) tool to see which pods are running on a specific node, and which workloads they belong to, via natural language. See [AI Agents](../../../agents/overview.md) for setup.

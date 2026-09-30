@@ -98,13 +98,13 @@ After mapping and building your hierarchal structured organization as shown abov
 
 ![](../../assets/scope-example.png)
 
-<Info>
+<Note>
 
 **Note**
 
 When a scope is selected, the very same unit, including all of its subordinates (both existing and any future subordinates, if added), are selected as well.
 
-</Info>
+</Note>
 
 ## Next Steps
 

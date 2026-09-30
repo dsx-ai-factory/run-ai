@@ -197,6 +197,7 @@ assetsService:
   exposedRules:
     - PathPrefix(`/api/v1/asset`)
     - PathPrefix(`/api/v2/asset`)
+    - PathPrefix(`/api/v1/k8s-objects`)
     - PathPrefix(`/api/v1/workload`)
     - PathPrefix(`/api/v1/workspace`)
     - PathPrefix(`/api/v2/workspace`)
@@ -2241,6 +2242,7 @@ k8sObjectsTracker:
     - PathPrefix(`/api/v1/storage-class`)
     - PathPrefix(`/api/v2/storage-class`)
     - PathPrefix(`/api/v1/device-classes`)
+    - PathPrefix(`/api/v1/resource-claim-templates`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/storage-classes.*`) # legacy
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/(namespace:[^/]+)/pvcs`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/(namespace:[^/]+)/secrets`)

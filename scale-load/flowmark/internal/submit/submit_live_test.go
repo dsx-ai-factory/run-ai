@@ -32,7 +32,7 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	clients, err := client.New(ctx, core.Env{
+	clients, err := client.New(ctx, core.Target{
 		KubeconfigPath:  os.Getenv("KUBECONFIG"),
 		ControlPlaneURL: os.Getenv("FLOWMARK_CP_URL"),
 		Username:        os.Getenv("FLOWMARK_CP_USER"),
@@ -48,8 +48,8 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 		t.Fatalf("ClusterID: %v", err)
 	}
 
-	cfg := core.Config{Knobs: map[string]any{"project_ready_timeout": "3m"}}
-	timeout, err := cfg.Duration("project_ready_timeout", 2*time.Minute)
+	scenario := core.Scenario{Knobs: map[string]any{"project_ready_timeout": "3m"}}
+	timeout, err := scenario.Duration("project_ready_timeout", 2*time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}

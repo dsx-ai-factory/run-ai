@@ -74,7 +74,7 @@ Reclaim is an inter-project and inter-department resource balancing action that 
 
 This mode of operation means that a lower priority workload submitted in one project (e.g. training) can reclaim resources from a project that runs a higher priority workload (e.g. preemptive workspace) if fairness re-balancing is required.
 
-<Info>
+<Note>
 
 **Note**
 
@@ -84,19 +84,19 @@ When the Over quota weight setting is disabled, the weight of each project or de
 
 _A scheduling queue is defined per project/node pool or department/node pool._
 
-</Info>
+</Note>
 
 ### Priority Preemption Within a Project
 
 [Higher priority workloads](concepts-and-principles.md#priority-and-preemption) may preempt lower priority preemptible workloads or the preemptible pods of lower priority semi-preemptible workloads within the same project/node pool queue. For example, in a project that runs a training workload that uses the project within quota (for a certain node pool), a newly submitted workspace within the same project/node pool may stop (preempt) the training workload if there are not enough over quota resources for the project within that node pool to run both workloads (that is, the workspace using in-quota resources and the training workload using over quota resources).
 
-<Info>
+<Note>
 
 **Note**
 
 Workload priority applies only within the same project and does not influence workloads across different projects, where fairness determines precedence.
 
-</Info>
+</Note>
 
 ## Quota, Over Quota, and Fairshare
 
@@ -121,13 +121,13 @@ This method represents a short-term fairshare scoring approach. It enables depar
 
 Administrators can control the frequency of such changes by configuring a guaranteed min-runtime per node pool. This setting ensures that once a preemptible workload, or the preemptible pods of a semi-preemptible workload, start running, they effectively behave as non-preemptible for the duration of the guaranteed min-runtime.
 
-<Info>
+<Note>
 
 **Note**
 
 Setting a guaranteed min-runtime on a node pool that also serves high-priority or interactive/real-time workloads may introduce significant delays for those workloads when they need to run. As a result, such workloads may effectively lose their interactive or real-time characteristics and break their SLA.
 
-</Info>
+</Note>
 
 Below you can find a numerical example of how point-in-time fairshare scoring actually works.
 

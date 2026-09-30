@@ -13,14 +13,14 @@ To collect NVIDIA Run:ai logs, follow these steps:
 
 ### Step-by-step Instructions
 
-1. Open a terminal on any machine where the NVIDIA Run:ai CLI is installed and configured with access to the Kubernetes cluster. The user running this command typically requires system administrator [permissions](../../../infrastructure-setup/authentication-and-authorization/roles.md), including access to pods and namespaces.
+1. Open a terminal on any machine where the NVIDIA Run:ai CLI is installed and configured with access to the Kubernetes cluster. The user running this command typically requires system administrator [permissions](../../configuration/authentication/roles.md), including access to pods and namespaces.
 2.  Collect the Logs. Execute the following command to collect the logs. See the [CLI commands reference](../../../../reference/cli/runai/runai_diagnostics.md) for more details:
 
     ```bash
     runai diagnostics collect-logs
     ```
 
-This command gathers diagnostic logs from your Kubernetes cluster to facilitate troubleshooting or support requests with NVIDIA Run:ai Support. The following optional flags are available:
+This command gathers diagnostic logs from your Kubernetes cluster to facilitate troubleshooting. The following optional flags are available:
 
 | Flag                  | Description                                                                                                                                                                         |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -47,7 +47,7 @@ Increase log verbosity to capture more detailed information, providing deeper in
 Before you begin, ensure you have the following:
 
 * Access to the Kubernetes cluster where NVIDIA Run:ai is installed
-  * Including [necessary permissions](../../../infrastructure-setup/authentication-and-authorization/roles.md) to view and modify configurations.
+  * Including [necessary permissions](../../configuration/authentication/roles.md) to view and modify configurations.
 * kubectl installed and configured:
   * The Kubernetes command-line tool, `kubectl`, must be installed and configured to interact with the cluster.
   * Sufficient privileges to edit configurations and view logs.
