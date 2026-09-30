@@ -4,13 +4,13 @@ A workload policy is an end-to-end solution for AI managers and administrators t
 
 This guide explains the policy YAML fields and the possible rules and defaults that can be set for each field.
 
-<Info>
+<Note>
 
 **Note**
 
 This reference applies to NVIDIA Run:ai native workloads. To define policies for other supported workload types, see [Supported workload types policies](supported-workload-type-policies.md).
 
-</Info>
+</Note>
 
 ## Policy YAML Fields - Reference Table
 
@@ -450,13 +450,13 @@ The effective policy for the above mentioned workload has the following extended
 | added/cpu | Submission request | 3 | The default of the quantity attribute from the attributes section |
 | added/memory | Submission request | 5M | Submission request |
 
-<Info>
+<Note>
 
 **Note**
 
 The default/memory is not populated to the workload, this is because it has been excluded from the workload using “exclude: true”.
 
-</Info>
+</Note>
 
 A workload submission request cannot exclude the default/cpu resource, as this key is included in the locked rules under the instances section.
 
@@ -641,7 +641,7 @@ The effective workload that runs has the following set of values:
 | security.runAsNonRoot | true   | Policy defaults    |
 | security.runAsUid     | 501    | Submission request |
 
-<Info>
+<Note>
 
 **Note**
 
@@ -661,7 +661,7 @@ security:
 
 If this policy is applied, the submission request above fails, as it attempts to change the value of secuirty.runAsUid from 500 (the policy default) to 501 (the value provided in the submission request), which is forbidden due to canEdit rule set to false for this field.
 
-</Info>
+</Note>
 
 ### Imposed Assets
 
