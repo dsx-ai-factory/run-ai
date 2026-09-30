@@ -21,10 +21,19 @@ func NewITenantsManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ITenantsManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ITenantsManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -84,16 +93,32 @@ type ITenantsManager_GetAllLogos_Call struct {
 }
 
 // GetAllLogos is a helper method to define mock.On call
-//   - ctx
-//   - offset
-//   - limit
-func (_e *ITenantsManager_Expecter) GetAllLogos(ctx interface{}, offset interface{}, limit interface{}) *ITenantsManager_GetAllLogos_Call {
+//   - ctx context.Context
+//   - offset int32
+//   - limit int32
+func (_e *ITenantsManager_Expecter) GetAllLogos(ctx any, offset any, limit any) *ITenantsManager_GetAllLogos_Call {
 	return &ITenantsManager_GetAllLogos_Call{Call: _e.mock.On("GetAllLogos", ctx, offset, limit)}
 }
 
 func (_c *ITenantsManager_GetAllLogos_Call) Run(run func(ctx context.Context, offset int32, limit int32)) *ITenantsManager_GetAllLogos_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 int32
+		if args[2] != nil {
+			arg2 = args[2].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -150,15 +175,26 @@ type ITenantsManager_GetTenantByIdInternal_Call struct {
 }
 
 // GetTenantByIdInternal is a helper method to define mock.On call
-//   - ctx
-//   - id
-func (_e *ITenantsManager_Expecter) GetTenantByIdInternal(ctx interface{}, id interface{}) *ITenantsManager_GetTenantByIdInternal_Call {
+//   - ctx context.Context
+//   - id int32
+func (_e *ITenantsManager_Expecter) GetTenantByIdInternal(ctx any, id any) *ITenantsManager_GetTenantByIdInternal_Call {
 	return &ITenantsManager_GetTenantByIdInternal_Call{Call: _e.mock.On("GetTenantByIdInternal", ctx, id)}
 }
 
 func (_c *ITenantsManager_GetTenantByIdInternal_Call) Run(run func(ctx context.Context, id int32)) *ITenantsManager_GetTenantByIdInternal_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -215,14 +251,20 @@ type ITenantsManager_ListAllTenantsInternal_Call struct {
 }
 
 // ListAllTenantsInternal is a helper method to define mock.On call
-//   - ctx
-func (_e *ITenantsManager_Expecter) ListAllTenantsInternal(ctx interface{}) *ITenantsManager_ListAllTenantsInternal_Call {
+//   - ctx context.Context
+func (_e *ITenantsManager_Expecter) ListAllTenantsInternal(ctx any) *ITenantsManager_ListAllTenantsInternal_Call {
 	return &ITenantsManager_ListAllTenantsInternal_Call{Call: _e.mock.On("ListAllTenantsInternal", ctx)}
 }
 
 func (_c *ITenantsManager_ListAllTenantsInternal_Call) Run(run func(ctx context.Context)) *ITenantsManager_ListAllTenantsInternal_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

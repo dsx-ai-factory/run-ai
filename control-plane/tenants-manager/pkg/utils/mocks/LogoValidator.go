@@ -18,10 +18,19 @@ func NewLogoValidator(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *LogoValidator {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &LogoValidator{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,14 +84,20 @@ type LogoValidator_DecodeLogo_Call struct {
 }
 
 // DecodeLogo is a helper method to define mock.On call
-//   - encodedLogo
-func (_e *LogoValidator_Expecter) DecodeLogo(encodedLogo interface{}) *LogoValidator_DecodeLogo_Call {
+//   - encodedLogo string
+func (_e *LogoValidator_Expecter) DecodeLogo(encodedLogo any) *LogoValidator_DecodeLogo_Call {
 	return &LogoValidator_DecodeLogo_Call{Call: _e.mock.On("DecodeLogo", encodedLogo)}
 }
 
 func (_c *LogoValidator_DecodeLogo_Call) Run(run func(encodedLogo string)) *LogoValidator_DecodeLogo_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -122,14 +137,20 @@ type LogoValidator_ValidateLogoSize_Call struct {
 }
 
 // ValidateLogoSize is a helper method to define mock.On call
-//   - logo
-func (_e *LogoValidator_Expecter) ValidateLogoSize(logo interface{}) *LogoValidator_ValidateLogoSize_Call {
+//   - logo *[]byte
+func (_e *LogoValidator_Expecter) ValidateLogoSize(logo any) *LogoValidator_ValidateLogoSize_Call {
 	return &LogoValidator_ValidateLogoSize_Call{Call: _e.mock.On("ValidateLogoSize", logo)}
 }
 
 func (_c *LogoValidator_ValidateLogoSize_Call) Run(run func(logo *[]byte)) *LogoValidator_ValidateLogoSize_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*[]byte))
+		var arg0 *[]byte
+		if args[0] != nil {
+			arg0 = args[0].(*[]byte)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -169,14 +190,20 @@ type LogoValidator_ValidateMimeType_Call struct {
 }
 
 // ValidateMimeType is a helper method to define mock.On call
-//   - logo
-func (_e *LogoValidator_Expecter) ValidateMimeType(logo interface{}) *LogoValidator_ValidateMimeType_Call {
+//   - logo *[]byte
+func (_e *LogoValidator_Expecter) ValidateMimeType(logo any) *LogoValidator_ValidateMimeType_Call {
 	return &LogoValidator_ValidateMimeType_Call{Call: _e.mock.On("ValidateMimeType", logo)}
 }
 
 func (_c *LogoValidator_ValidateMimeType_Call) Run(run func(logo *[]byte)) *LogoValidator_ValidateMimeType_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*[]byte))
+		var arg0 *[]byte
+		if args[0] != nil {
+			arg0 = args[0].(*[]byte)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
