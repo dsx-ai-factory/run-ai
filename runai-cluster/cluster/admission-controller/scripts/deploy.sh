@@ -13,6 +13,8 @@ if [ -f .env ]; then
   export $(cat .env | xargs)
 fi
 
+DOCKER_REPO="${DOCKER_REPO:?set DOCKER_REPO to your container registry, e.g. myreg.example.com/myuser}"
+
 while getopts d flag
 do
     case "${flag}" in
@@ -20,8 +22,8 @@ do
     esac
 done
 
-make docker DEBUG=$DEBUG IMAGE_PREFIX=gcr.io/run-ai-lab IMAGE_NAME=admission-controller IMAGE_VERSION=$TAG &&
-docker push gcr.io/run-ai-lab/admission-controller:$TAG &&
+make docker DEBUG=$DEBUG IMAGE_PREFIX=$DOCKER_REPO IMAGE_NAME=admission-controller IMAGE_VERSION=$TAG &&
+docker push $DOCKER_REPO/admission-controller:$TAG &&
 kubectl rollout restart deployment/runai-admission-controller -n runai
 
 #patch deployment
