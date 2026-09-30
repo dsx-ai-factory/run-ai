@@ -217,9 +217,8 @@ It is highly recommended to upgrade the Kubernetes version together with the NVI
 2. Select the cluster you want to upgrade
 3. Click **INSTALLATION INSTRUCTIONS**
 4. Optional: Select the NVIDIA Run:ai cluster version (latest, by default)
-5. Select **Manual Helm** as the installation type
-6. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
-7. Click **CONTINUE**
+5. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
+6. Click **CONTINUE**
 
 ### Run the Upgrade Command
 
@@ -493,9 +492,8 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 2. Select the cluster you want to upgrade
 3. Click **INSTALLATION INSTRUCTIONS**
 4. Optional: Select the NVIDIA Run:ai cluster version (latest, by default)
-5. Select **Manual Helm** as the installation type
-6. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
-7. Click **CONTINUE**
+5. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
+6. Click **CONTINUE**
 
 #### Installation Instructions
 
