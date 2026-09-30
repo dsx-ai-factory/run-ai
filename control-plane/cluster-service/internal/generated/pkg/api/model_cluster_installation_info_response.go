@@ -36,7 +36,7 @@ type ClusterInstallationInfoResponse struct {
 	ChartRepoURL string `json:"chartRepoURL" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set cluster.bootstrapToken=<token>.
+	// Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//BootstrapToken string `json:"bootstrapToken"`
 	BootstrapToken string `json:"bootstrapToken" gorm:"not null;"`

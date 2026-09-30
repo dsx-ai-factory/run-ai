@@ -137,10 +137,10 @@ func TestRejectedLoginNamesTheStep(t *testing.T) {
 
 func TestLoginDoesNotFollowRedirects(t *testing.T) {
 	leaked := 0
-	target := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { leaked++ }))
-	t.Cleanup(target.Close)
+	leakSink := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { leaked++ }))
+	t.Cleanup(leakSink.Close)
 	redirecting := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, target.URL+loginPath, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, leakSink.URL+loginPath, http.StatusTemporaryRedirect)
 	}))
 	t.Cleanup(redirecting.Close)
 
@@ -148,8 +148,8 @@ func TestLoginDoesNotFollowRedirects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parsing test server URL: %v", err)
 	}
-	env := core.Env{ControlPlaneURL: redirecting.URL, Username: "user@test", Password: "secret"}
-	source, err := credentials(context.Background(), env, base)
+	target := core.Target{ControlPlaneURL: redirecting.URL, Username: "user@test", Password: "secret"}
+	source, err := credentials(context.Background(), target, base)
 	if err != nil {
 		t.Fatalf("credentials: %v", err)
 	}
@@ -228,5 +228,97 @@ func TestControlPlaneURL(t *testing.T) {
 				t.Fatalf("login endpoint %q, want %q", login, tc.want+loginPath)
 			}
 		})
+	}
+}
+
+func TestControlPlaneURLNeverEchoesThePassword(t *testing.T) {
+	for _, in := range []string{
+		"https://user:hunter2@cp.example.com",
+		"http://user:hunter2@cp.example.com",
+		"https://user:hunter2@cp.example.com/%zz",
+	} {
+		t.Run(in, func(t *testing.T) {
+			_, err := controlPlaneURL(in)
+			if err == nil {
+				t.Fatal("expected an error")
+			}
+			if strings.Contains(err.Error(), "hunter2") {
+				t.Fatalf("error text leaks the password: %v", err)
+			}
+		})
+	}
+}
+
+func TestStaticTokenMustOutliveTheMinimumRunLength(t *testing.T) {
+	base, _ := url.Parse("https://cp.example.com")
+	cases := []struct {
+		name    string
+		exp     time.Time
+		wantErr string
+	}{
+		{name: "expired", exp: time.Now().Add(-time.Minute), wantErr: "expired"},
+		{name: "too short", exp: time.Now().Add(2 * time.Minute), wantErr: "a run needs at least"},
+		{name: "long enough", exp: time.Now().Add(time.Hour)},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			token := mintJWT(t, jwt.MapClaims{"sub": "flowmark", "exp": tc.exp.Unix()})
+			source, err := credentials(context.Background(), core.Target{Token: token}, base)
+			if tc.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+					t.Fatalf("expected error containing %q, got %v", tc.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			got, _ := source.Token()
+			if got.Expiry.Unix() != tc.exp.Unix() {
+				t.Fatalf("expiry must be read from the token, got %s want %s", got.Expiry, tc.exp)
+			}
+		})
+	}
+}
+
+func TestStaticTokenWithoutExpiryIsRejected(t *testing.T) {
+	base, _ := url.Parse("https://cp.example.com")
+	token := mintJWT(t, jwt.MapClaims{"sub": "flowmark"})
+	if _, err := credentials(context.Background(), core.Target{Token: token}, base); err == nil || !strings.Contains(err.Error(), "no expiry") {
+		t.Fatalf("a token without exp must be rejected, got %v", err)
+	}
+}
+
+func TestRefreshAfterTheRunContextWasCancelledStillLogsIn(t *testing.T) {
+	expired := mintJWT(t, jwt.MapClaims{"sub": "flowmark", "exp": time.Now().Add(-time.Minute).Unix()})
+	fresh := mintJWT(t, jwt.MapClaims{"sub": "flowmark", "exp": time.Now().Add(time.Hour).Unix()})
+	server := &fakeIDM{tokens: []string{expired, fresh}}
+	ts := httptest.NewServer(server)
+	t.Cleanup(ts.Close)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	source := newTokenSource(ctx, ts.Client(), ts.URL+loginPath, "user", "secret")
+	if _, err := source.Token(); err != nil {
+		t.Fatalf("first login: %v", err)
+	}
+	cancel()
+	token, err := source.Token()
+	if err != nil {
+		t.Fatalf("a refresh after Ctrl-C must still work so cleanup can talk to the control plane: %v", err)
+	}
+	if token.AccessToken != fresh {
+		t.Fatal("the refreshed token must be the new one")
+	}
+}
+
+func TestFirstLoginHonoursTheRunContext(t *testing.T) {
+	server := &fakeIDM{tokens: []string{mintJWT(t, jwt.MapClaims{"sub": "flowmark", "exp": time.Now().Add(time.Hour).Unix()})}}
+	ts := httptest.NewServer(server)
+	t.Cleanup(ts.Close)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if _, err := newTokenSource(ctx, ts.Client(), ts.URL+loginPath, "user", "secret").Token(); err == nil {
+		t.Fatal("a first login under a cancelled context must fail, not hang or succeed")
 	}
 }
