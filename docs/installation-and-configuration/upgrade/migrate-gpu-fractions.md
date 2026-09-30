@@ -16,6 +16,7 @@ The upgrade affects every cluster running fractional GPU workloads. The submissi
 | CUDA | 13.4 or later | Delivers the CUDA-native GPU sharing implementation |
 | CUDA driver | r615 or later | Must be installed on all GPU nodes |
 | GPU Operator | 26.7.1 or later | Deploys the CUDA sharing components cluster-wide. Does not default to CUDA driver r615 - set the driver version explicitly |
+| NRI plugin | Disabled (`cdi.nriPluginEnabled` set to `false`) | Set when installing or configuring the GPU Operator. GPU memory fractions do not function while the NRI plugin is enabled |
 
 ## Migrate Dynamic Fractions YAML
 
@@ -124,7 +125,12 @@ Upgrade to r615 or later (or r620 when available). This is the core dependency f
 
 **Step 4 - Upgrade the GPU Operator**
 
-Upgrade to 26.7.1 or later. This deploys the CUDA sharing components and updates related node-level components across the cluster. GPU Operator 26.7.1 does not default to CUDA driver r615 - set the driver version to r615 or later explicitly in the GPU Operator configuration (`driver.version`) rather than relying on the default. Skip this step if you are following Option B.
+Upgrade to 26.7.1 or later. This deploys the CUDA sharing components and updates related node-level components across the cluster. In the GPU Operator configuration:
+
+1. Set the driver version to r615 or later (`driver.version`). GPU Operator 26.7.1 does not default to CUDA driver r615, so do not rely on the default.
+2. Set `cdi.nriPluginEnabled` to `false` (`--set cdi.nriPluginEnabled=false`, or `cdi.nriPluginEnabled: false` in the `ClusterPolicy` spec on OpenShift). GPU memory fractions do not function while the NRI plugin is enabled.
+
+Skip this step if you are following Option B.
 
 **Step 5 - Upgrade NVIDIA Run:ai**
 
@@ -151,7 +157,7 @@ Supported workload types were deleted, not suspended, in Step 1, so there is no 
 ## Verify GPU Fractions
 
 * Confirm all GPU nodes report CUDA driver r615 or later. A single node on an older driver accepts workloads not using GPU fractions but rejects workloads using GPU fractions, producing scheduling failures that are easy to misdiagnose. Verify this explicitly rather than assuming it from the GPU Operator version, since GPU Operator 26.7.1 does not default to r615.
-* Confirm the GPU Operator is at 26.7.1 or later and its pods are `Running` across the cluster (`kubectl get pods -n gpu-operator`).
+* Confirm the GPU Operator is at 26.7.1 or later, that `cdi.nriPluginEnabled` is set to `false`, and that its pods are `Running` across the cluster (`kubectl get pods -n gpu-operator`).
 * Confirm the platform reports v3.0.
 * Submit a small test workload requesting a fraction and confirm it reaches `Running` rather than remaining `Pending`.
 * For a migrated dynamic fraction workload, confirm the limit annotation is present on the pod and that the container is held to its ceiling - a missed limit annotation runs normally but without a burst ceiling, so verify explicitly rather than inferring from a successful start.
@@ -164,6 +170,7 @@ Supported workload types were deleted, not suspended, in Step 1, so there is no 
 | Workloads using GPU fractions stay `Pending` after the upgrade; workloads not using GPU fractions schedule normally | A prerequisite is not yet satisfied, most often the CUDA driver on one or more nodes, or a GPU Operator still below 26.7.1 | Check the driver on every GPU node and the GPU Operator version - fractions enable automatically once both are correct |
 | Only some workloads using GPU fractions are `Pending`; others run | Mixed driver versions across the node pool | Audit the driver version node by node rather than cluster-wide, and upgrade any node below r615 |
 | GPU Operator is at 26.7.1 or later, but GPU nodes still report a driver older than r615 | GPU Operator 26.7.1 does not default to CUDA driver r615 | Set the driver version to r615 or later explicitly in the GPU Operator configuration (`driver.version`) - do not rely on the GPU Operator default |
+| Workloads using GPU fractions do not function even though the GPU Operator and driver versions are correct | The NRI plugin is enabled in the GPU Operator (`cdi.nriPluginEnabled=true`) | Set `cdi.nriPluginEnabled` to `false` in the GPU Operator configuration and confirm the GPU Operator pods restart |
 | A dynamic fraction workload runs but is not held to its limit | `RUNAI_GPU_MEMORY_LIMIT` is still in the manifest and was not replaced by the annotation; v3.0 ignores the variable | Migrate the manifest as described above. This failure is silent - audit manifests rather than waiting for a symptom |
 | The limit annotation is present but has no effect | The container name in the annotation key does not match a container in the pod, or does not match `gpu-fraction-container-name` | Confirm the `<container>` element of the annotation key matches the container name exactly, including case |
 | The limit is interpreted as the wrong kind of value | An absolute limit was paired with a portion request, or the reverse | Pair `gpu-memory` with the `nvidia.com/…gpu-memory.limit` key, and `gpu-fraction` with the `kai.scheduler/…portion.limit` key |

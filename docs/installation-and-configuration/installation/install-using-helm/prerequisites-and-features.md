@@ -38,7 +38,13 @@ For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/usi
 
 **Note**
 
-To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), GPU Operator 26.7.1 or later is required, alongside CUDA driver r615 or later. GPU Operator 26.7.1 does not default to CUDA driver r615, so set the driver version explicitly rather than relying on the default - with `--set driver.version=<version>` on Kubernetes, or by setting `driver.version` in the `ClusterPolicy` spec on OpenShift, where the GPU Operator is installed from OperatorHub. See [GPU Memory Fractions](../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
+To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), the following are required:
+
+* GPU Operator 26.7.1 or later is required.
+* CUDA driver r615 or later is required. GPU Operator 26.7.1 does not default to it, so set the driver version explicitly rather than relying on the default - with `--set driver.version=<version>` on Kubernetes, or by setting `driver.version` in the `ClusterPolicy` spec on OpenShift, where the GPU Operator is installed from OperatorHub.
+* The NRI plugin must be disabled. Install the GPU Operator with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false` on Kubernetes, or `cdi.nriPluginEnabled: false` in the `ClusterPolicy` spec on OpenShift). GPU memory fractions do not function while the NRI plugin is enabled.
+
+See [GPU Memory Fractions](../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
 
 </Note>
 

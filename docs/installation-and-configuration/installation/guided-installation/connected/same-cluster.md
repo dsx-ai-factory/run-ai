@@ -105,7 +105,7 @@ For a same-cluster installation on Kubernetes, configure:
    - `prerequisites.gpuOperator` - Required for every installation. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites) for more details.
      - `mode` - Set to `install`.
      - `version` - Omit to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported range if you want to set it explicitly. GPU fractions (memory fractions, dynamic memory fractions, or compute modes) require 26.7.1 or later, installed automatically when omitted.
-     - `customHelmValues` - Merges Helm values into the GPU Operator's own Helm chart. Set `driver.version` to r615 or later if you plan to use GPU fractions, since GPU Operator 26.7.1 does not default to this driver version. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites).
+     - `customHelmValues` - Merges Helm values into the GPU Operator's own Helm chart. Set `driver.version` to r615 or later if you plan to use GPU fractions, since GPU Operator 26.7.1 does not default to this driver version. Set `cdi.nriPluginEnabled` to `false`, since GPU memory fractions do not function while the NRI plugin is enabled. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites).
    - `prerequisites.prometheus` - Required for every installation. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites) for more details.
      - `mode` - Set to `install`.
      - `version` - Omit to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported range.

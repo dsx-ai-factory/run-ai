@@ -1,4 +1,4 @@
-# Upgrade
+# Upgrade NVIDIA Run:ai
 
 This page walks through the NVIDIA Run:ai upgrade procedure: preparing software artifacts, upgrading the control plane, upgrading the cluster, and verifying the result.
 
@@ -10,37 +10,13 @@ Upgrades are performed using Manual Helm, regardless of which path you used to i
 
 </Note>
 
-## Before Upgrade
+## Before You Begin
 
-NVIDIA Run:ai supports a maximum gap of four versions per upgrade; attempting to skip more than four versions in a single upgrade may fail. If your target version is more than four versions ahead of your current version, perform multiple upgrades. Each upgrade can span a maximum of four versions, and each upgrade must complete successfully before you begin the next.
+Complete the following before starting the upgrade:
 
-<Note>
-
-**Note**
-
-For Support-Entitled Releases, upgrades are officially supported and tested only for versions within the current Supported Versions.
-
-</Note>
-
-To ensure a smooth and supported upgrade process:
-
-* **Align control plane and cluster versions** - For best results, upgrade the control plane and cluster components to the same NVIDIA Run:ai version during the same maintenance window. Keeping versions aligned helps avoid unexpected behavior caused by version mismatches and ensures full compatibility across platform components.
-* **Upgrade order** - When performing an upgrade:
-  * Upgrade the control plane Helm chart first
-  * Upgrade the cluster Helm chart only after the control plane upgrade completes successfully
-
-## Kubernetes Compatibility
-
-Before upgrading NVIDIA Run:ai, verify that your Kubernetes distribution version is compatible with the target NVIDIA Run:ai version. If your current Kubernetes distribution release falls outside the supported range, upgrade your distribution first.
-
-| NVIDIA Run:ai version | Supported Kubernetes versions |
-| ---------------------- | ------------------------------ |
-| 3.0 (latest)            | 1.35 to 1.37                   |
-| 2.26                    | 1.34 to 1.36                   |
-| 2.25                    | 1.33 to 1.35                   |
-| 2.24                    | 1.33 to 1.35                   |
-
-For information on supported versions of managed Kubernetes, consult the release notes provided by your Kubernetes service provider. For an up-to-date end-of-life statement see [Kubernetes Release History](https://kubernetes.io/releases/).
+* [Plan the Upgrade](plan-the-upgrade.md)
+* [Back Up Before Upgrading](backup-before-upgrading.md)
+* [Migrate GPU Fractions](migrate-gpu-fractions.md), if your tenant clusters use GPU fractions
 
 ## Helm
 
@@ -81,7 +57,7 @@ helm search repo -l runai/control-plane
 Support-Entitled artifacts require authentication to NGC. Before upgrading, make sure that:
 
 * You have an NGC Personal Key.
-* An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](installation/install-using-helm/preparations.md#software-artifacts).
+* An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
 ```bash
 helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
@@ -93,7 +69,7 @@ helm search repo -l runai/control-plane
 
 **Note**
 
-If you are upgrading from a JFrog-based installation, prepare the NGC-based `runai-reg-creds` secret as described in [Software Artifacts](installation/install-using-helm/preparations.md#software-artifacts).
+If you are upgrading from a JFrog-based installation, prepare the NGC-based `runai-reg-creds` secret as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
 </Note>
 
@@ -101,7 +77,7 @@ If you are upgrading from a JFrog-based installation, prepare the NGC-based `run
 
 ### Before You Upgrade
 
-Before upgrading the NVIDIA Run:ai control plane, review the [System Requirements](system-requirements/README.md) and complete the applicable steps in [Preparations](installation/install-using-helm/preparations.md).
+Before upgrading the NVIDIA Run:ai control plane, review the [System Requirements](../system-requirements/README.md) and complete the applicable steps in [Preparations](../installation/install-using-helm/preparations.md).
 
 ### Upgrade
 
@@ -124,7 +100,7 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 * Replace `<VERSION>` with the NVIDIA Run:ai version you are upgrading to.
 * Set `supportEntitled=true` to configure the installation as Support-Entitled.
 * Set `global.imagePullSecrets[0].name=runai-reg-creds` to use the NGC image pull secret prepared in [Software Artifacts](#prepare-software-artifacts).
-* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](installation/install-using-helm/preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](../installation/install-using-helm/preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
   - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
