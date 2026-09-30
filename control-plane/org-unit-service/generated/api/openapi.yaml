@@ -8349,7 +8349,6 @@ components:
           limit: 0
           deserved: 1000
         rank: High
-        priority: Normal
         gpu:
           overQuotaWeight: 2
           limit: 0
@@ -8371,13 +8370,6 @@ components:
             \ org-units. For example, all workloads in rank \"High\" will be scheduled\
             \ before all workloads in rank \"Medium\"."
           example: High
-          nullable: true
-          type: string
-        priority:
-          deprecated: true
-          description: Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          example: Normal
           nullable: true
           type: string
       required:
@@ -8440,7 +8432,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8458,7 +8449,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8540,7 +8530,6 @@ components:
           limit: 0
           deserved: 1000
         rank: High
-        priority: Normal
         gpu:
           overQuotaWeight: 2
           limit: 0
@@ -8562,13 +8551,6 @@ components:
             \ org-units. For example, all workloads in rank \"High\" will be scheduled\
             \ before all workloads in rank \"Medium\"."
           example: High
-          nullable: true
-          type: string
-        priority:
-          deprecated: true
-          description: Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          example: Normal
           nullable: true
           type: string
     DepartmentCreationRequest:
@@ -8615,7 +8597,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8633,7 +8614,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8786,7 +8766,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8804,7 +8783,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8958,7 +8936,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8976,7 +8953,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9420,7 +9396,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9438,7 +9413,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9634,7 +9608,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9652,7 +9625,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9762,7 +9734,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9780,7 +9751,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -12501,7 +12471,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12519,7 +12488,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12606,7 +12574,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12624,7 +12591,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12731,7 +12697,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12749,7 +12714,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12896,7 +12860,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12914,7 +12877,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0

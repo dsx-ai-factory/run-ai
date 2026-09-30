@@ -6539,13 +6539,6 @@ export interface Resources {
      * @memberof Resources
      */
     'rank'?: string | null;
-    /**
-     * Deprecated. Use rank instead. The scheduling priority for workloads in this node pool.
-     * @type {string}
-     * @memberof Resources
-     * @deprecated
-     */
-    'priority'?: string | null;
 }
 /**
  * 
@@ -6746,13 +6739,6 @@ export interface ResourcesNullable {
      * @memberof ResourcesNullable
      */
     'rank'?: string | null;
-    /**
-     * Deprecated. Use rank instead. The scheduling priority for workloads in this node pool.
-     * @type {string}
-     * @memberof ResourcesNullable
-     * @deprecated
-     */
-    'priority'?: string | null;
 }
 /**
  * 
