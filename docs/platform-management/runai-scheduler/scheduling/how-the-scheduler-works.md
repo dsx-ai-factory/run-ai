@@ -14,7 +14,7 @@ Over-quota resources are also assigned according to department and project ranks
 
 ### Pod Creation and Grouping
 
-When a workload is submitted, the submitting workload controller creates a single pod or multiple pods (for distributed training workloads or deployment based inference). When the Scheduler gets a submit request with the first pod, it creates a [pod group](concepts-and-principles.md#workloads-and-pod-groups) and a [sub group](concepts-and-principles.md#sub-groups), and allocates all the relevant building blocks of that workload. The next pods of the same workload are attached to the same pod group, either to the same sub-group or to another sub-group within the top pod-group.
+When a workload is submitted, the submitting workload controller creates a single pod or multiple pods (for distributed training workloads or deployment based inference). When the Scheduler gets a submit request with the first pod, it creates a [pod group](concepts-and-principles.md#workloads-and-pod-groups) and a [sub group](concepts-and-principles.md#multi-level-sub-groups), and allocates all the relevant building blocks of that workload. The next pods of the same workload are attached to the same pod group, either to the same sub-group or to another sub-group within the top pod-group.
 
 ### Queue Management
 
