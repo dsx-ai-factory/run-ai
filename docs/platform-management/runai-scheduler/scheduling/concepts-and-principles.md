@@ -230,7 +230,11 @@ In both scenarios, the platform schedules the workloads, accounts for the reques
 **Note**
 
 * A translation layer in the Scheduler translates legacy extended-resource requests (for example, `nvidia.com/gpu: 2`) into DRA `ResourceClaim` requests automatically, so NVIDIA Run:ai native workloads and [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) can use DRA without submitting a claim directly.
-* Extended resources and DRA workloads can share the same cluster only when extended-resource translation is enabled.
+* Workloads that request extended resources and workloads that submit DRA claims can run in the same cluster when extended-resource translation is enabled. Translation requires all of the following:
+  * The NVIDIA DRA driver, installed through the NVIDIA GPU Operator.
+  * A `DeviceClass` that sets `spec.extendedResourceName` to the extended resource name in use, for example `nvidia.com/gpu`. The GPU Operator creates the `gpu.nvidia.com` `DeviceClass` but does not set this field, so the legacy name requires a separate `DeviceClass` created by the administrator.
+  * Kubernetes support for the DRA extended resource feature, which is generally available from Kubernetes 1.37.
+  * NVIDIA Run:ai v3.0 or later, which provides the Scheduler side of the translation.
 * For configuration details, refer to [Installing the NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/26.7/dra-intro-install.html) and [Setting up DRA in a Kubernetes cluster](https://kubernetes.io/docs/tasks/configure-pod-container/assign-resources/set-up-dra-cluster/).
 
 </Note>
