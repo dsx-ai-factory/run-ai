@@ -140,5 +140,7 @@ services:
     build:
       context: ./slack
       dockerfile: Dockerfile
+      args:
+        GO_ALPINE_VERSION: ${GO_ALPINE_VERSION:?set by make}
     ports:
       - "8081:8081"
