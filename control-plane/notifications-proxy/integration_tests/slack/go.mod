@@ -1,3 +1,3 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/integration_tests/slack
 
-go 1.26.8
+go 1.27.1
