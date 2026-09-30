@@ -27,12 +27,12 @@ The installer can install supported prerequisites and features for you. By defau
 
 The domains and certificates you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) map to specific `config.yaml` fields. You supply the control plane values when you write your `config.yaml` in [Control Plane Installation](installation.md), and each tenant cluster's values when you [install that cluster](create-a-tenant-and-cluster.md#install-the-cluster).
 
-| Domain | Config Fields | Required When | DNS Record | Certificate |
-| --- | --- | --- | --- | --- |
-| Control plane domain (wildcard, for example `*.runai.hostorg.com`) | `controlPlane.domain`, `controlPlane.tls` | Always | `*.runai.hostorg.com` | A wildcard certificate matching the control plane domain |
-| Tenant cluster domain (for example, `runai.tenant-a-corp.com`) | `cluster.domain`, `cluster.tls` | Always | `runai.tenant-a-corp.com` | Covered by `cluster.tls`, see the next row |
-| Workspaces, training, and distributed inference (for example, `*.runai.tenant-a-corp.com`) | None. Do not set a separate domain field. The wildcard is `*.` plus the tenant cluster domain. | Host-based routing (the default). Not needed with path-based routing. | `*.runai.tenant-a-corp.com` | The same `cluster.tls` certificate, which must list both `runai.tenant-a-corp.com` and `*.runai.tenant-a-corp.com` as Subject Alternative Names |
-| Standard inference (Knative), for example `*.runai-inference.tenant-a-corp.com` | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Standard inference exposed externally only | `*.runai-inference.tenant-a-corp.com` | The wildcard, in `cluster.inference.wildcardTls` |
+| Domain | Config Fields | Required When | Certificate |
+| --- | --- | --- | --- |
+| Control plane domain (wildcard, for example `*.runai.hostorg.com`) | `controlPlane.domain`, `controlPlane.tls` | Always | A wildcard certificate matching the control plane domain |
+| Tenant cluster domain (for example, `runai.tenant-a-corp.com`) | `cluster.domain`, `cluster.tls` | Always | Covered by `cluster.tls`, see the next row |
+| Workspaces, training, and distributed inference (for example, `*.runai.tenant-a-corp.com`) | None. Do not set a separate domain field. The wildcard is `*.` plus the tenant cluster domain. | Host-based routing (the default). Not needed with path-based routing. | The same `cluster.tls` certificate, which must list both `runai.tenant-a-corp.com` and `*.runai.tenant-a-corp.com` as Subject Alternative Names |
+| Standard inference (Knative), for example `*.runai-inference.tenant-a-corp.com` | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Standard inference exposed externally only | The wildcard, in `cluster.inference.wildcardTls` |
 
 ## Registry Credentials
 
