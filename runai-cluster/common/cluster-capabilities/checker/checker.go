@@ -335,8 +335,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionOfSegmentTopology:                         "2.27.0",
 	MinVersionNoNativeSubmission:                        "3.0.0",
 	MinVersionGpuMemoryLimitAnnotations:                 "3.0.0",
-	// TODO: confirm the first release shipping template provisioning before merging this follow-up.
-	MinVersionOAuth2ProxyTemplates: "3.0.0",
+	MinVersionOAuth2ProxyTemplates:                      "3.0.18",
 }
 
 // ClustersCacheConfig is a struct that holds the configuration for the clusters cache.

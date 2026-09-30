@@ -74,6 +74,9 @@ var _ = DescribeTable("OAuth2 templates follow the cluster capability in init an
 			}
 		}
 	},
-	Entry("older cluster keeps embedded templates", "2.99.99", false),
-	Entry("capable cluster mounts the provided templates", "3.0.0", true),
+	Entry("older cluster omits the template mount", "2.99.99", false),
+	Entry("initial 3.0 release omits the template mount", "3.0.0", false),
+	Entry("last release without provisioning omits the template mount", "3.0.17", false),
+	Entry("first release with provisioning mounts the templates", "3.0.18", true),
+	Entry("later releases mount the templates", "3.0.19", true),
 )
