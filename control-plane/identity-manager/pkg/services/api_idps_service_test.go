@@ -39,7 +39,7 @@ import (
 const (
 	URL      = "https://example.com/"
 	XML_FILE = "aGVsbG8gd29ybGQ="
-	XML_URL  = "https://test.run.ai/auth/realms/workAI/protocol/saml/descriptor"
+	XML_URL  = "https://example.com/auth/realms/workAI/protocol/saml/descriptor"
 	realm    = "test-realm"
 	idpAlias = "idpAlias"
 )
@@ -660,14 +660,14 @@ func TestGetIdp_saml(t *testing.T) {
 
 	mappers := generateMapperConfigArray()
 	iamMock.MockIdpService.On("GetIdpMappers", mock.Anything, mock.Anything, mock.Anything).Return(mappers, nil)
-	iamMock.MockIdpService.On("GetSPSamlMetadataUrl", mock.Anything, mock.Anything, mock.Anything).Return("https://app.run.ai/auth/realms/test/broker/saml-a1b2c3/endpoint/descriptor")
+	iamMock.MockIdpService.On("GetSPSamlMetadataUrl", mock.Anything, mock.Anything, mock.Anything).Return("https://app.example.com/auth/realms/test/broker/saml-a1b2c3/endpoint/descriptor")
 	saml := generateIdentitySamlProviderRepresentation()
 	saml.Alias = ptr.To("saml-a1b2c3")
 
 	idp := testSubject.iamIdpToApi(ctx, saml, "test")
 	assert.NotNil(t, idp.SamlData)
 	assert.NotNil(t, idp.Mappers)
-	assert.Equal(t, "https://app.run.ai/auth/realms/test/broker/saml-a1b2c3/endpoint/descriptor", idp.SamlData.ServiceProviderMetadataUrl)
+	assert.Equal(t, "https://app.example.com/auth/realms/test/broker/saml-a1b2c3/endpoint/descriptor", idp.SamlData.ServiceProviderMetadataUrl)
 	assert.Equal(t, fmt.Sprintf("https://app.example.com/auth/realms/%s/broker/saml-a1b2c3/endpoint", "test"), idp.RedirectUri)
 	assert.Nil(t, idp.OidcData)
 	assert.Nil(t, idp.OcpData)
