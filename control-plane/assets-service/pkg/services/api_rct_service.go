@@ -21,8 +21,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/projects"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/query_types"
+	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/services/asset_cluster_status"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/services/response_patching"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/services/scope"
+	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/services/status_info"
 	audit "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client"
 	backend "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
@@ -118,7 +120,7 @@ func (s *RctApiService) CreateRct(ctx context.Context, request api.RctCreationRe
 }
 
 // ListRcts - List resource claim templates.
-func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32) (api.ImplResponse, error) {
+func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32, statusInfo bool) (api.ImplResponse, error) {
 	assetKind := api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE
 
 	// WAIT_FOR_OFER this API does not work with the "classic" queryParams so just initial it to empty
@@ -128,7 +130,7 @@ func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32)
 		return NewErrorResponse(queryError), nil
 	}
 
-	_, authError := query_types.ApplyRbacRules(ctx, queryParams)
+	permittedScopes, authError := query_types.ApplyRbacRules(ctx, queryParams)
 	if authError != nil {
 		return NewErrorResponse(authError), nil
 	}
@@ -136,7 +138,10 @@ func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32)
 	// WAIT_FOR_OFER currently the code does not support filtering by scope, so the
 	// list will filter the result by the entire scope the user is allowed to see.
 	// once we support filtering, we need to filter by scope as well.
-	result, actionError := dao.ListRcts(ctx, offset, limit)
+	// When statusInfo is requested we also surface soft-deleted rows so the UI
+	// can render DELETING / DELETION_FAILED for RCTs mid-tombstone (mirrors
+	// the credentials / PVC behavior).
+	result, actionError := dao.ListRcts(ctx, offset, limit, dao.RctOptions{IncludeDeleted: statusInfo})
 	if actionError != nil {
 		return NewErrorResponse(actionError), nil
 	}
@@ -148,18 +153,36 @@ func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32)
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("list %s: Failed to patch project names: %v", assetKind, patchErr)
 	}
 
+	if statusInfo {
+		assetClusterStatus := asset_cluster_status.NewAssetClusterStatus(patchingPointers, permittedScopes)
+
+		if statusErr := status_info.PatchStatusInfo(ctx, assetClusterStatus, patchingPointers, assetKind); statusErr != nil {
+			return NewErrorResponse(statusErr), nil
+		}
+	}
+
 	return api.Response(http.StatusOK, result), nil
 }
 
 // GetRctById - Retrieve a resource claim template.
-func (s *RctApiService) GetRctById(ctx context.Context, id string) (api.ImplResponse, error) {
-	asset, actionError := dao.GetRctById(ctx, id)
+func (s *RctApiService) GetRctById(ctx context.Context, id string, statusInfo bool) (api.ImplResponse, error) {
+	asset, actionError := dao.GetRctById(ctx, id, dao.RctOptions{IncludeDeleted: statusInfo})
 	if actionError != nil {
 		return NewErrorResponse(actionError), nil
 	}
 
-	if _, _, authError := query_types.ApplyRbacRulesGetById(ctx, asset.Meta); authError != nil {
+	permittedScopes, _, authError := query_types.ApplyRbacRulesGetById(ctx, asset.Meta)
+	if authError != nil {
 		return NewErrorResponse(authError), nil
+	}
+
+	if statusInfo {
+		patchingPointers := response_patching.LoadResponsePatchingPtrs(asset)
+		assetClusterStatus := asset_cluster_status.NewAssetClusterStatus(patchingPointers, permittedScopes)
+
+		if statusErr := status_info.PatchStatusInfo(ctx, assetClusterStatus, patchingPointers, api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE); statusErr != nil {
+			return NewErrorResponse(statusErr), nil
+		}
 	}
 
 	return api.Response(http.StatusOK, asset), nil

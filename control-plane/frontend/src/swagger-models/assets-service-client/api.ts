@@ -10616,6 +10616,12 @@ export interface Rct {
      * @memberof Rct
      */
     'spec': RctSpec;
+    /**
+     * 
+     * @type {AssetClusterStatusInfo}
+     * @memberof Rct
+     */
+    'status'?: AssetClusterStatusInfo | null;
 }
 /**
  * 
@@ -23825,10 +23831,11 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
          * Use to retrieve the details of a resource claim template by id.
          * @summary Retrieve a resource claim template.
          * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getRctById: async (assetId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getRctById: async (assetId: string, statusInfo?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'assetId' is not null or undefined
             assertParamExists('getRctById', 'assetId', assetId)
             const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}`
@@ -23848,6 +23855,10 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            if (statusInfo !== undefined) {
+                localVarQueryParameter['statusInfo'] = statusInfo;
+            }
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -23864,10 +23875,11 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listRcts: async (offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listRcts: async (offset?: number, limit?: number, statusInfo?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/k8s-objects/resource-claim-templates`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -23890,6 +23902,10 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
+            }
+
+            if (statusInfo !== undefined) {
+                localVarQueryParameter['statusInfo'] = statusInfo;
             }
 
 
@@ -23981,11 +23997,12 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
          * Use to retrieve the details of a resource claim template by id.
          * @summary Retrieve a resource claim template.
          * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getRctById(assetId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Rct>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getRctById(assetId, options);
+        async getRctById(assetId: string, statusInfo?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Rct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRctById(assetId, statusInfo, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -23993,11 +24010,12 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listRcts(offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RctListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listRcts(offset, limit, options);
+        async listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RctListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRcts(offset, limit, statusInfo, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -24046,22 +24064,24 @@ export const ResourceClaimTemplatesApiFactory = function (configuration?: Config
          * Use to retrieve the details of a resource claim template by id.
          * @summary Retrieve a resource claim template.
          * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getRctById(assetId: string, options?: any): AxiosPromise<Rct> {
-            return localVarFp.getRctById(assetId, options).then((request) => request(axios, basePath));
+        getRctById(assetId: string, statusInfo?: boolean, options?: any): AxiosPromise<Rct> {
+            return localVarFp.getRctById(assetId, statusInfo, options).then((request) => request(axios, basePath));
         },
         /**
          * Use to retrieve a list of resource claim templates.
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listRcts(offset?: number, limit?: number, options?: any): AxiosPromise<RctListResponse> {
-            return localVarFp.listRcts(offset, limit, options).then((request) => request(axios, basePath));
+        listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: any): AxiosPromise<RctListResponse> {
+            return localVarFp.listRcts(offset, limit, statusInfo, options).then((request) => request(axios, basePath));
         },
         /**
          * Use to update the details of a resource claim template by id.
@@ -24112,12 +24132,13 @@ export class ResourceClaimTemplatesApi extends BaseAPI {
      * Use to retrieve the details of a resource claim template by id.
      * @summary Retrieve a resource claim template.
      * @param {string} assetId Unique identifier of the asset.
+     * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ResourceClaimTemplatesApi
      */
-    public getRctById(assetId: string, options?: AxiosRequestConfig) {
-        return ResourceClaimTemplatesApiFp(this.configuration).getRctById(assetId, options).then((request) => request(this.axios, this.basePath));
+    public getRctById(assetId: string, statusInfo?: boolean, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).getRctById(assetId, statusInfo, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -24125,12 +24146,13 @@ export class ResourceClaimTemplatesApi extends BaseAPI {
      * @summary List resource claim templates.
      * @param {number} [offset] The offset of the first item returned in the collection.
      * @param {number} [limit] The maximum number of entries to return.
+     * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ResourceClaimTemplatesApi
      */
-    public listRcts(offset?: number, limit?: number, options?: AxiosRequestConfig) {
-        return ResourceClaimTemplatesApiFp(this.configuration).listRcts(offset, limit, options).then((request) => request(this.axios, this.basePath));
+    public listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).listRcts(offset, limit, statusInfo, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -522,9 +522,9 @@ type RegistryAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type ResourceClaimTemplatesAPIServicer interface {
-	ListRcts(context.Context, int32, int32) (ImplResponse, error)
+	ListRcts(context.Context, int32, int32, bool) (ImplResponse, error)
 	CreateRct(context.Context, RctCreationRequest) (ImplResponse, error)
-	GetRctById(context.Context, string) (ImplResponse, error)
+	GetRctById(context.Context, string, bool) (ImplResponse, error)
 	UpdateRctById(context.Context, string, RctUpdateRequest) (ImplResponse, error)
 	DeleteRctById(context.Context, string) (ImplResponse, error)
 }

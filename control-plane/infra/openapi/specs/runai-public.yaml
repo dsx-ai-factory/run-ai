@@ -18143,6 +18143,55 @@ components:
     RctSpec:
       allOf:
         - $ref: '#/components/schemas/K8sObjectSpec'
+    AssetSyncStatusEnum:
+      type: string
+      enum:
+        - Creating
+        - Deleting
+        - Failed
+        - Deletion failed
+        - Issues found
+        - No issues found
+        - No status
+        - Updating
+    ScopeId:
+      type: string
+      description: The id of the cluster, department or project, depending on the scope type.
+    AssetClusterStatusIssueEnum:
+      type: string
+      enum:
+        - ReplicationError
+        - LostPhase
+        - NotCreated
+    AssetClusterStatusIssue:
+      type: object
+      required:
+        - scopeId
+        - scopeType
+        - issue
+      properties:
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        issue:
+          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
+    AssetClusterStatusIssues:
+      type: array
+      items:
+        $ref: '#/components/schemas/AssetClusterStatusIssue'
+    AssetClusterStatusInfo:
+      properties:
+        status:
+          $ref: '#/components/schemas/AssetSyncStatusEnum'
+        issues:
+          $ref: '#/components/schemas/AssetClusterStatusIssues'
+        message:
+          type: string
+        url:
+          type: string
+      nullable: true
+      type: object
     AssetMetaForSync:
       allOf:
         - $ref: '#/components/schemas/AssetCreationFields'
@@ -18312,55 +18361,6 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/NgcApiKeySpec'
-    AssetSyncStatusEnum:
-      type: string
-      enum:
-        - Creating
-        - Deleting
-        - Failed
-        - Deletion failed
-        - Issues found
-        - No issues found
-        - No status
-        - Updating
-    ScopeId:
-      type: string
-      description: The id of the cluster, department or project, depending on the scope type.
-    AssetClusterStatusIssueEnum:
-      type: string
-      enum:
-        - ReplicationError
-        - LostPhase
-        - NotCreated
-    AssetClusterStatusIssue:
-      type: object
-      required:
-        - scopeId
-        - scopeType
-        - issue
-      properties:
-        scopeId:
-          $ref: '#/components/schemas/ScopeId'
-        scopeType:
-          $ref: '#/components/schemas/ScopeType'
-        issue:
-          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
-    AssetClusterStatusIssues:
-      type: array
-      items:
-        $ref: '#/components/schemas/AssetClusterStatusIssue'
-    AssetClusterStatusInfo:
-      properties:
-        status:
-          $ref: '#/components/schemas/AssetSyncStatusEnum'
-        issues:
-          $ref: '#/components/schemas/AssetClusterStatusIssues'
-        message:
-          type: string
-        url:
-          type: string
-      nullable: true
-      type: object
     ClusterResourceInfo:
       properties:
         name:

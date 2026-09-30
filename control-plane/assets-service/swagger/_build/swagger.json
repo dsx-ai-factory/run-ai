@@ -621,7 +621,8 @@
         "x-no-authorization": true,
         "x-service": "assets-service",
         "x-test-coverage": [
-          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go",
+          "control-plane/assets-service/pkg/services/api_agent_sync_test.go"
         ],
         "tags": [
           "Resource Claim Templates"
@@ -632,6 +633,9 @@
           },
           {
             "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeStatus"
           }
         ],
         "responses": {
@@ -723,10 +727,16 @@
         },
         "x-service": "assets-service",
         "x-test-coverage": [
-          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go",
+          "control-plane/assets-service/pkg/services/api_agent_sync_test.go"
         ],
         "tags": [
           "Resource Claim Templates"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IncludeStatus"
+          }
         ],
         "responses": {
           "200": {
@@ -8527,6 +8537,84 @@
           }
         ]
       },
+      "AssetSyncStatusEnum": {
+        "type": "string",
+        "enum": [
+          "Creating",
+          "Deleting",
+          "Failed",
+          "Deletion failed",
+          "Issues found",
+          "No issues found",
+          "No status",
+          "Updating"
+        ]
+      },
+      "ScopeId": {
+        "type": "string",
+        "description": "The id of the cluster, department or project, depending on the scope type."
+      },
+      "ScopeType": {
+        "type": "string",
+        "enum": [
+          "system",
+          "tenant",
+          "cluster",
+          "department",
+          "project"
+        ]
+      },
+      "AssetClusterStatusIssueEnum": {
+        "type": "string",
+        "enum": [
+          "ReplicationError",
+          "LostPhase",
+          "NotCreated"
+        ]
+      },
+      "AssetClusterStatusIssue": {
+        "type": "object",
+        "required": [
+          "scopeId",
+          "scopeType",
+          "issue"
+        ],
+        "properties": {
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "issue": {
+            "$ref": "#/components/schemas/AssetClusterStatusIssueEnum"
+          }
+        }
+      },
+      "AssetClusterStatusIssues": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AssetClusterStatusIssue"
+        }
+      },
+      "AssetClusterStatusInfo": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/AssetSyncStatusEnum"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/AssetClusterStatusIssues"
+          },
+          "message": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
       "Rct": {
         "type": "object",
         "required": [
@@ -8539,6 +8627,9 @@
           },
           "spec": {
             "$ref": "#/components/schemas/RctSpec"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AssetClusterStatusInfo"
           }
         }
       },
@@ -9012,84 +9103,6 @@
             ]
           }
         }
-      },
-      "AssetSyncStatusEnum": {
-        "type": "string",
-        "enum": [
-          "Creating",
-          "Deleting",
-          "Failed",
-          "Deletion failed",
-          "Issues found",
-          "No issues found",
-          "No status",
-          "Updating"
-        ]
-      },
-      "ScopeId": {
-        "type": "string",
-        "description": "The id of the cluster, department or project, depending on the scope type."
-      },
-      "ScopeType": {
-        "type": "string",
-        "enum": [
-          "system",
-          "tenant",
-          "cluster",
-          "department",
-          "project"
-        ]
-      },
-      "AssetClusterStatusIssueEnum": {
-        "type": "string",
-        "enum": [
-          "ReplicationError",
-          "LostPhase",
-          "NotCreated"
-        ]
-      },
-      "AssetClusterStatusIssue": {
-        "type": "object",
-        "required": [
-          "scopeId",
-          "scopeType",
-          "issue"
-        ],
-        "properties": {
-          "scopeId": {
-            "$ref": "#/components/schemas/ScopeId"
-          },
-          "scopeType": {
-            "$ref": "#/components/schemas/ScopeType"
-          },
-          "issue": {
-            "$ref": "#/components/schemas/AssetClusterStatusIssueEnum"
-          }
-        }
-      },
-      "AssetClusterStatusIssues": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/AssetClusterStatusIssue"
-        }
-      },
-      "AssetClusterStatusInfo": {
-        "properties": {
-          "status": {
-            "$ref": "#/components/schemas/AssetSyncStatusEnum"
-          },
-          "issues": {
-            "$ref": "#/components/schemas/AssetClusterStatusIssues"
-          },
-          "message": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          }
-        },
-        "nullable": true,
-        "type": "object"
       },
       "ClusterResourceInfo": {
         "properties": {
@@ -17457,6 +17470,15 @@
           "maximum": 500
         }
       },
+      "IncludeStatus": {
+        "name": "statusInfo",
+        "in": "query",
+        "required": false,
+        "description": "Whether the query should include asset status information as part of the response.",
+        "schema": {
+          "type": "boolean"
+        }
+      },
       "ClusterIdRequired": {
         "name": "clusterId",
         "in": "query",
@@ -17477,15 +17499,6 @@
           "type": "integer",
           "format": "int64",
           "example": 123
-        }
-      },
-      "IncludeStatus": {
-        "name": "statusInfo",
-        "in": "query",
-        "required": false,
-        "description": "Whether the query should include asset status information as part of the response.",
-        "schema": {
-          "type": "boolean"
         }
       },
       "PrivateOnly": {

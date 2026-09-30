@@ -391,11 +391,13 @@ paths:
       x-service: assets-service
       x-test-coverage:
         - control-plane/assets-service/pkg/services/api_rct_service_test.go
+        - control-plane/assets-service/pkg/services/api_agent_sync_test.go
       tags:
         - Resource Claim Templates
       parameters:
         - $ref: '#/components/parameters/Offset'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/IncludeStatus'
       responses:
         '200':
           description: Request completed successfully.
@@ -455,8 +457,11 @@ paths:
       x-service: assets-service
       x-test-coverage:
         - control-plane/assets-service/pkg/services/api_rct_service_test.go
+        - control-plane/assets-service/pkg/services/api_agent_sync_test.go
       tags:
         - Resource Claim Templates
+      parameters:
+        - $ref: '#/components/parameters/IncludeStatus'
       responses:
         '200':
           description: Request completed successfully.
@@ -5530,6 +5535,63 @@ components:
     RctSpec:
       allOf:
         - $ref: '#/components/schemas/K8sObjectSpec'
+    AssetSyncStatusEnum:
+      type: string
+      enum:
+        - Creating
+        - Deleting
+        - Failed
+        - Deletion failed
+        - Issues found
+        - No issues found
+        - No status
+        - Updating
+    ScopeId:
+      type: string
+      description: The id of the cluster, department or project, depending on the scope type.
+    ScopeType:
+      type: string
+      enum:
+        - system
+        - tenant
+        - cluster
+        - department
+        - project
+    AssetClusterStatusIssueEnum:
+      type: string
+      enum:
+        - ReplicationError
+        - LostPhase
+        - NotCreated
+    AssetClusterStatusIssue:
+      type: object
+      required:
+        - scopeId
+        - scopeType
+        - issue
+      properties:
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        issue:
+          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
+    AssetClusterStatusIssues:
+      type: array
+      items:
+        $ref: '#/components/schemas/AssetClusterStatusIssue'
+    AssetClusterStatusInfo:
+      properties:
+        status:
+          $ref: '#/components/schemas/AssetSyncStatusEnum'
+        issues:
+          $ref: '#/components/schemas/AssetClusterStatusIssues'
+        message:
+          type: string
+        url:
+          type: string
+      nullable: true
+      type: object
     Rct:
       type: object
       required:
@@ -5540,6 +5602,8 @@ components:
           $ref: '#/components/schemas/AssetMeta'
         spec:
           $ref: '#/components/schemas/RctSpec'
+        status:
+          $ref: '#/components/schemas/AssetClusterStatusInfo'
     RctListResponse:
       type: object
       required:
@@ -5842,63 +5906,6 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/NgcApiKeySpec'
-    AssetSyncStatusEnum:
-      type: string
-      enum:
-        - Creating
-        - Deleting
-        - Failed
-        - Deletion failed
-        - Issues found
-        - No issues found
-        - No status
-        - Updating
-    ScopeId:
-      type: string
-      description: The id of the cluster, department or project, depending on the scope type.
-    ScopeType:
-      type: string
-      enum:
-        - system
-        - tenant
-        - cluster
-        - department
-        - project
-    AssetClusterStatusIssueEnum:
-      type: string
-      enum:
-        - ReplicationError
-        - LostPhase
-        - NotCreated
-    AssetClusterStatusIssue:
-      type: object
-      required:
-        - scopeId
-        - scopeType
-        - issue
-      properties:
-        scopeId:
-          $ref: '#/components/schemas/ScopeId'
-        scopeType:
-          $ref: '#/components/schemas/ScopeType'
-        issue:
-          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
-    AssetClusterStatusIssues:
-      type: array
-      items:
-        $ref: '#/components/schemas/AssetClusterStatusIssue'
-    AssetClusterStatusInfo:
-      properties:
-        status:
-          $ref: '#/components/schemas/AssetSyncStatusEnum'
-        issues:
-          $ref: '#/components/schemas/AssetClusterStatusIssues'
-        message:
-          type: string
-        url:
-          type: string
-      nullable: true
-      type: object
     ClusterResourceInfo:
       properties:
         name:
@@ -11787,6 +11794,13 @@ components:
         default: 50
         minimum: 1
         maximum: 500
+    IncludeStatus:
+      name: statusInfo
+      in: query
+      required: false
+      description: Whether the query should include asset status information as part of the response.
+      schema:
+        type: boolean
     ClusterIdRequired:
       name: clusterId
       in: query
@@ -11805,13 +11819,6 @@ components:
         type: integer
         format: int64
         example: 123
-    IncludeStatus:
-      name: statusInfo
-      in: query
-      required: false
-      description: Whether the query should include asset status information as part of the response.
-      schema:
-        type: boolean
     PrivateOnly:
       name: privateOnly
       in: query
