@@ -107,12 +107,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # A named `main` at origin/main: versioning.mk refuses to tag from anything else.
+      # Runs as devops-runai, the one identity the tag rulesets let through. Not
+      # GITHUB_TOKEN: a bypass for it would cover every workflow in the repository.
+      # (GIT_HUB_OSS is a run-ai org token with no access to this repository.)
       - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
         with:
           ref: main
           fetch-depth: 0
           fetch-tags: true
-          token: ${{ secrets.GIT_HUB_OSS }}
+          token: ${{ secrets.DEVOPS_RUNAI_TOKEN }}
 
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
@@ -124,7 +127,7 @@ jobs:
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
           AUTO_TAG: "1"
           GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
-          TOKEN: ${{ secrets.GIT_HUB_OSS }}
+          TOKEN: ${{ secrets.DEVOPS_RUNAI_TOKEN }}
         run: |
           # Go fetches the repository's own modules with this; set for this step's
           # processes only, not written to the runner's git config.
