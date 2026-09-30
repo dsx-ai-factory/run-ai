@@ -35400,7 +35400,12 @@ components:
           maxProperties: 1000
           example:
             app: my-app
-    RctSpec:
+    K8sObjectSpec:
+      description: |
+        Common shape for k8s-object asset specs: the raw Kubernetes object
+        metadata (labels/annotations) and the raw Kubernetes object spec.
+        Shared between the k8s-object CRUD APIs (e.g. RctSpec) and the
+        cluster-facing k8s-objects sync API (K8sObjectsUpdate).
       type: object
       required:
         - objectSpec
@@ -35408,9 +35413,12 @@ components:
         objectMeta:
           $ref: '#/components/schemas/K8sObjectMeta'
         objectSpec:
-          description: The raw Kubernetes spec of the ResourceClaimTemplate.
+          description: The raw Kubernetes spec of the object.
           type: object
           additionalProperties: true
+    RctSpec:
+      allOf:
+        - $ref: '#/components/schemas/K8sObjectSpec'
     Rct:
       type: object
       required:
@@ -35482,6 +35490,113 @@ components:
           $ref: '#/components/schemas/AssetUpdateRequest'
         spec:
           $ref: '#/components/schemas/RctSpec'
+    ClusterSyncReportUpdate:
+      description: success/failure report of a single update attempt of the cluster
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: >-
+            a unique id of the entity being updated (asset, workload, policy,
+            etc).
+        updateCount:
+          $ref: '#/components/schemas/UpdateCount'
+        updateAttemptTime:
+          description: the time in which the cluster attempted the update.
+          type: string
+          format: date-time
+          example: '2024-06-06T12:09:18.211Z'
+        message:
+          description: >-
+            optional failure message for the case that the update has failed.
+            should be sent null if the update was successful.
+          type: string
+          example: mandatory image was not provided.
+          nullable: true
+    ClusterSyncReport:
+      description: allow cluster to report about success/failures of sync updates
+      properties:
+        updates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClusterSyncReportUpdate'
+    RequestInfo:
+      required:
+        - afterUpdate
+      description: value that the agent sent to the afterUpdate query parameter.
+      properties:
+        afterUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    ResponseInfo:
+      description: >-
+        The lowest and highest update counts included in this bulk of updates.
+        for example, it is possible that agent requester for afterUpdate=10 and
+        received a bulk of four updates - 12, 13, 16, 18. in this case
+        lowestUpdate=12, highestUpdate=18.
+      properties:
+        lowestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+        highestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    SystemInfo:
+      description: >-
+        the highest update count that was assigned to the data being
+        synchronized. for example, it is possible that the agent sent
+        afterUpdate=12 and received a bulk containing only four updates (13, 15,
+        18, 19) but in the system there is already update 21 which was not
+        included in this bulk and can be received in the following bulk.
+      properties:
+        highestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    AssetMetaForSync:
+      allOf:
+        - $ref: '#/components/schemas/AssetCreationFields'
+        - $ref: '#/components/schemas/AssetUpdatableFields'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              $ref: '#/components/schemas/AssetId'
+        - type: object
+          required:
+            - kind
+          properties:
+            kind:
+              $ref: '#/components/schemas/AssetKind'
+        - type: object
+          properties:
+            prevName:
+              $ref: '#/components/schemas/AssetName'
+    K8sObjectsUpdate:
+      type: object
+      required:
+        - meta
+        - updateCount
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetMetaForSync'
+        updateCount:
+          $ref: '#/components/schemas/UpdateCount'
+        isDeleted:
+          description: the asset has been deleted
+          type: boolean
+          nullable: true
+        spec:
+          $ref: '#/components/schemas/K8sObjectSpec'
+    K8sObjectsUpdatesResp:
+      type: object
+      properties:
+        requestInfo:
+          $ref: '#/components/schemas/RequestInfo'
+        responseInfo:
+          $ref: '#/components/schemas/ResponseInfo'
+        systemInfo:
+          $ref: '#/components/schemas/SystemInfo'
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/K8sObjectsUpdate'
     AccessKeyCreationSpec:
       properties:
         existingSecretName:
@@ -35747,84 +35862,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CredentialsListResponseEntry'
-    ClusterSyncReportUpdate:
-      description: success/failure report of a single update attempt of the cluster
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: >-
-            a unique id of the entity being updated (asset, workload, policy,
-            etc).
-        updateCount:
-          $ref: '#/components/schemas/UpdateCount'
-        updateAttemptTime:
-          description: the time in which the cluster attempted the update.
-          type: string
-          format: date-time
-          example: '2024-06-06T12:09:18.211Z'
-        message:
-          description: >-
-            optional failure message for the case that the update has failed.
-            should be sent null if the update was successful.
-          type: string
-          example: mandatory image was not provided.
-          nullable: true
-    ClusterSyncReport:
-      description: allow cluster to report about success/failures of sync updates
-      properties:
-        updates:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClusterSyncReportUpdate'
-    RequestInfo:
-      required:
-        - afterUpdate
-      description: value that the agent sent to the afterUpdate query parameter.
-      properties:
-        afterUpdate:
-          $ref: '#/components/schemas/UpdateCount'
-    ResponseInfo:
-      description: >-
-        The lowest and highest update counts included in this bulk of updates.
-        for example, it is possible that agent requester for afterUpdate=10 and
-        received a bulk of four updates - 12, 13, 16, 18. in this case
-        lowestUpdate=12, highestUpdate=18.
-      properties:
-        lowestUpdate:
-          $ref: '#/components/schemas/UpdateCount'
-        highestUpdate:
-          $ref: '#/components/schemas/UpdateCount'
-    SystemInfo:
-      description: >-
-        the highest update count that was assigned to the data being
-        synchronized. for example, it is possible that the agent sent
-        afterUpdate=12 and received a bulk containing only four updates (13, 15,
-        18, 19) but in the system there is already update 21 which was not
-        included in this bulk and can be received in the following bulk.
-      properties:
-        highestUpdate:
-          $ref: '#/components/schemas/UpdateCount'
-    AssetMetaForSync:
-      allOf:
-        - $ref: '#/components/schemas/AssetCreationFields'
-        - $ref: '#/components/schemas/AssetUpdatableFields'
-        - type: object
-          required:
-            - id
-          properties:
-            id:
-              $ref: '#/components/schemas/AssetId'
-        - type: object
-          required:
-            - kind
-          properties:
-            kind:
-              $ref: '#/components/schemas/AssetKind'
-        - type: object
-          properties:
-            prevName:
-              $ref: '#/components/schemas/AssetName'
     CredentialsUpdate:
       type: object
       required:
@@ -61874,6 +61911,17 @@ components:
         type: string
         format: uuid
         minLength: 1
+    SyncAfter:
+      name: after
+      description: >-
+        search for updates with update counter greater than the value passed for
+        this parameter
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int64
+        example: 123
     IncludeStatus:
       name: statusInfo
       in: query
@@ -61919,17 +61967,6 @@ components:
           - password
           - genericSecret
           - ngcApiKey
-    SyncAfter:
-      name: after
-      description: >-
-        search for updates with update counter greater than the value passed for
-        this parameter
-      in: query
-      required: false
-      schema:
-        type: integer
-        format: int64
-        example: 123
     SearchName:
       name: searchName
       in: query

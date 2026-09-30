@@ -250,6 +250,7 @@ type SecretAPIRouter interface {
 type SynchronizationAPIRouter interface {
 	// Deprecated
 	ListAssetsById(http.ResponseWriter, *http.Request)
+	K8sObjectsSyncUpdates(http.ResponseWriter, *http.Request)
 	CredentialsSyncUpdates(http.ResponseWriter, *http.Request)
 	DatasourceSyncUpdates(http.ResponseWriter, *http.Request)
 	SyncValidate(http.ResponseWriter, *http.Request)
@@ -559,6 +560,7 @@ type SecretAPIServicer interface {
 type SynchronizationAPIServicer interface {
 	// Deprecated
 	ListAssetsById(context.Context, string) (ImplResponse, error)
+	K8sObjectsSyncUpdates(context.Context, string, int64, ClusterSyncReport) (ImplResponse, error)
 	CredentialsSyncUpdates(context.Context, string, int64, ClusterSyncReport) (ImplResponse, error)
 	DatasourceSyncUpdates(context.Context, string, int64, ClusterSyncReport) (ImplResponse, error)
 	SyncValidate(context.Context, ValidateSyncRequest) (ImplResponse, error)
