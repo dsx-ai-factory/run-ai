@@ -141,6 +141,38 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/org-unit/projects/count:
+    x-internal: true
+    get:
+      summary: Count internal projects
+      operationId: count_internal_projects
+      x-internal: true
+      x-no-authorization: true
+      x-service: org-unit-service
+      x-test-coverage:
+        - control-plane/org-unit-service/pkg/test/project_api_test.go
+      description: |
+        Internal endpoint to count projects by the given query parameters
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectsFilterBy'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /internal/org-unit/names:
     x-internal: true
     get:
@@ -2855,6 +2887,28 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryTypeInternal'
+    ProjectsFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name!=some-name
+      explode: false
+    Search:
+      name: search
+      in: query
+      required: false
+      description: Filter results by a free text search.
+      schema:
+        type: string
+        example: test project
     OrgUnitType:
       in: query
       required: true
@@ -2976,14 +3030,6 @@ components:
         default: 50
         minimum: 1
         maximum: 500
-    Search:
-      name: search
-      in: query
-      required: false
-      description: Filter results by a free text search.
-      schema:
-        type: string
-        example: test project
     ReportId:
       name: reportId
       in: path
@@ -3099,20 +3145,6 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryType'
-    ProjectsFilterBy:
-      name: filterBy
-      in: query
-      required: false
-      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.
-      schema:
-        type: array
-        maxItems: 10
-        items:
-          type: string
-          pattern: ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
-        example:
-          - name!=some-name
-      explode: false
     ProjectsSortBy:
       name: sortBy
       in: query
@@ -3517,6 +3549,15 @@ components:
                     name:
                       type: string
                       example: department-A
+    CountResponse:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          format: int64
+          example: 1
     ScopeType:
       type: string
       enum:
@@ -3796,15 +3837,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Report'
-    CountResponse:
-      type: object
-      required:
-        - count
-      properties:
-        count:
-          type: integer
-          format: int64
-          example: 1
     BatchDeleteReportsRequest:
       type: object
       description: Batch of report IDs to delete.

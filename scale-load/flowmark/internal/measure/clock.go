@@ -21,12 +21,6 @@ import (
 
 const clockRounds = 5
 
-// ClockOffset measures how far the cluster clock is from ours: positive means
-// the cluster is ahead. Each round creates a tiny ConfigMap in namespace,
-// compares the server's creationTimestamp with the midpoint of our send, and
-// deletes the probe; the median of five rounds is returned. The server stores
-// creationTimestamp in whole seconds, so the result is honest only to about a
-// second and is reported as metadata, never mixed into any latency.
 func ClockOffset(ctx context.Context, kube k8sclient.Client, namespace string) (time.Duration, error) {
 	return clockOffset(ctx, kube, namespace, time.Now)
 }

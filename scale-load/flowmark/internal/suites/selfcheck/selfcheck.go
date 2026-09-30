@@ -18,7 +18,11 @@ func (Suite) Name() string {
 	return "selfcheck"
 }
 
-func (Suite) Run(_ context.Context, _ core.Env, cfg core.Config) (core.Section, error) {
+func (Suite) Category() core.Category {
+	return core.CategoryScale
+}
+
+func (Suite) Run(_ context.Context, _ core.Target, scenario core.Scenario) (core.Section, error) {
 	start := time.Now()
 	time.Sleep(100 * time.Millisecond)
 
@@ -26,7 +30,7 @@ func (Suite) Run(_ context.Context, _ core.Env, cfg core.Config) (core.Section, 
 		Category: core.CategoryScale,
 		Metrics: map[string]any{
 			"selfcheck_duration_seconds": time.Since(start).Seconds(),
-			"knobs_received":             cfg.Knobs,
+			"knobs_received":             scenario.Knobs,
 		},
 	}, nil
 }
