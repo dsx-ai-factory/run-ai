@@ -27,6 +27,21 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
+            name: IMG_THIRD_PARTY_OAUTH2_PROXY_REGISTRY
+            value: quay.io
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_OAUTH2_PROXY_REPOSITORY
+            value: oauth2-proxy/oauth2-proxy
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_OAUTH2_PROXY_TAG
+            value: v7.15.4
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
             name: IMG_THIRD_PARTY_VALKEY_REGISTRY
             value: docker.io
       - contains:
@@ -54,3 +69,28 @@ tests:
           content:
             name: IMG_THIRD_PARTY_WAIT_UBI_MINIMAL_TAG
             value: "9.8"
+
+  - it: should pass overridden oauth2-proxy images to the operator
+    set:
+      thirdPartyImages.oauth2-proxy.registry: registry.example.com
+      thirdPartyImages.oauth2-proxy.repository: mirror/oauth2-proxy
+      thirdPartyImages.oauth2-proxy.tag: custom-tag
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_OAUTH2_PROXY_REGISTRY
+            value: registry.example.com
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_OAUTH2_PROXY_REPOSITORY
+            value: mirror/oauth2-proxy
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_OAUTH2_PROXY_TAG
+            value: custom-tag
