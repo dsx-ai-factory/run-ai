@@ -51,8 +51,10 @@ jobs:
           BEFORE: ${{ github.event.before }}
         run: |
           # A package is its top-level directory; a client is its service's pkg/client.
+          # Generated mocks don't change what a module ships, so they release nothing.
           to_modules() {
-            grep -oE '^(runai-(common|application)-packages/[^/]+|control-plane/[^/]+/pkg/client)/' \
+            grep -v '/mocks/' \
+              | grep -oE '^(runai-(common|application)-packages/[^/]+|control-plane/[^/]+/pkg/client)/' \
               | sed 's#/$##' | sort -u \
               | while read -r m; do [ -f "$m/go.mod" ] && echo "$m"; done || true
           }
@@ -62,7 +64,7 @@ jobs:
             git ls-files '*/go.mod' | to_modules \
               | while read -r m; do
                   tag=$(git tag -l "$m/v*" | grep -v -- '-dev' | sort -V | tail -1 || true)
-                  if [ -n "$tag" ] && [ -n "$(git log -1 --format=%H "$tag..HEAD" -- "$m")" ]; then echo "$m"; fi
+                  if [ -n "$tag" ] && [ -n "$(git log -1 --format=%H "$tag..HEAD" -- "$m" ":(exclude,glob)$m/**/mocks/**")" ]; then echo "$m"; fi
                 done
           }
           case "$GITHUB_EVENT_NAME" in
