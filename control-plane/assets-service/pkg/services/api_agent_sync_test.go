@@ -37,6 +37,7 @@ import (
 const (
 	urlGetCredentialsUpdates = "/api/v1/asset/credentials/updates"
 	urlGetDatasourceUpdates  = "/api/v1/asset/datasource/updates"
+	urlGetK8sObjectsUpdates  = "/api/v1/k8s-objects/updates"
 
 	salesforceUrl          = "https://www.nvidia.com/en-eu/support/enterprise/#contact-us"
 	issuesFoundCredentials = "Issues were found while propagating the credential to the credentials' scope"
@@ -790,6 +791,145 @@ var _ = Describe("AgentSync", func() {
 			})
 		})
 
+		Context("sync handles k8s-object (RCT) assets", func() {
+			It("handles all kinds of synced k8s-object assets", func() {
+				// to be synced
+				rctReq := buildRandomClusterRctAsset(randoms)
+				rctReq.Meta.Name = "rct1"
+				rct, _, _ := createRctAsset(rctReq, router, headerForAdmin(randoms))
+
+				// not to be synced (belongs to a different family)
+				createPVCAsset(testing.BuildRandomProjectPVCAsset(randoms), router, headerForAdmin(randoms))
+
+				//
+				//  right after creation, everything should be in creating state
+				//  TODO(dra-rct-sync): assert status projection once the RCT list
+				//  endpoint returns per-cluster status like credentials/PVC do.
+				//
+
+				//
+				//  check that correct updates are reported to the agent
+				//
+				after := int64(0)
+
+				expectedUpdates := api.K8sObjectsUpdatesResp{
+					RequestInfo: api.RequestInfo{
+						AfterUpdate: after,
+					},
+					ResponseInfo: api.ResponseInfo{
+						LowestUpdate:  1,
+						HighestUpdate: 1,
+					},
+					SystemInfo: api.SystemInfo{
+						HighestUpdate: 2, // we also have the extra pvc
+					},
+					Assets: []api.K8sObjectsUpdate{
+						{
+							Meta: srcToTarget[api.AssetMeta, api.AssetMetaForSync](rct.Meta),
+							Spec: api.K8sObjectSpec{
+								ObjectSpec: rctReq.Spec.ObjectSpec,
+							},
+							IsDeleted:   pointer.Bool(false),
+							UpdateCount: 1,
+						},
+					},
+				}
+
+				updates, listErr := listK8sObjectsUpdatesForTest(randoms, router, after, nil)
+				Expect(listErr).To(BeNil())
+
+				testutils.Expect(updates).ToEqual(expectedUpdates)
+
+				after = max(after, updates.ResponseInfo.HighestUpdate)
+
+				//
+				//  agent reports failure of the creation in the cluster
+				//
+				report := api.ClusterSyncReport{
+					Updates: []api.ClusterSyncReportUpdate{
+						{
+							Id:          expectedUpdates.Assets[0].Meta.Id,
+							UpdateCount: expectedUpdates.Assets[0].UpdateCount,
+							Message:     convutils.Ref("k8s object couldn't be applied"),
+						},
+					},
+				}
+
+				updates, listErr = listK8sObjectsUpdatesForTest(randoms, router, after, &report)
+				Expect(listErr).To(BeNil())
+				Expect(len(updates.Assets)).To(Equal(0))
+
+				//
+				//  TODO(dra-rct-sync): once the RCT list endpoint surfaces
+				//  per-cluster status, assert the FAILED / rctSyncFailedMessage
+				//  branch of DetermineStatus that k8sObjectsAssetsToSyncSet drives.
+				//
+
+				//
+				//   delete the RCT
+				//
+				deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlRct, rct.Meta.Id), nil)
+				Expect(err).To(BeNil())
+				deleteHttpReq.Header = *headerForAdmin(randoms)
+
+				deleteHttpResp := httptest.NewRecorder()
+				router.ServeHTTP(deleteHttpResp, deleteHttpReq)
+				Expect(deleteHttpResp.Code).To(Equal(http.StatusAccepted))
+
+				//
+				//   the agent pulled the deletion tombstone (isDeleted=true, empty spec)
+				//
+				report = api.ClusterSyncReport{
+					Updates: []api.ClusterSyncReportUpdate{},
+				}
+
+				expectedUpdates = api.K8sObjectsUpdatesResp{
+					RequestInfo: api.RequestInfo{
+						AfterUpdate: after,
+					},
+					ResponseInfo: api.ResponseInfo{
+						LowestUpdate:  3,
+						HighestUpdate: 3,
+					},
+					SystemInfo: api.SystemInfo{
+						HighestUpdate: 3,
+					},
+					Assets: []api.K8sObjectsUpdate{
+						{
+							Meta:        srcToTarget[api.AssetMeta, api.AssetMetaForSync](rct.Meta),
+							IsDeleted:   pointer.Bool(true),
+							UpdateCount: 3,
+						},
+					},
+				}
+
+				updates, listErr = listK8sObjectsUpdatesForTest(randoms, router, after, &report)
+				Expect(listErr).To(BeNil())
+				Expect(len(updates.Assets)).To(Equal(1))
+
+				after = max(after, updates.ResponseInfo.HighestUpdate)
+
+				testutils.Expect(updates).ToEqual(expectedUpdates)
+
+				//
+				//  the agent reported success in deleting the RCT — post-sync
+				//  cleanup drops the assets_metadata and assets_spec rows.
+				//
+				report = api.ClusterSyncReport{
+					Updates: []api.ClusterSyncReportUpdate{
+						{
+							Id:          rct.Meta.Id,
+							UpdateCount: 3,
+						},
+					},
+				}
+
+				updates, listErr = listK8sObjectsUpdatesForTest(randoms, router, after, &report)
+				Expect(listErr).To(BeNil())
+				Expect(len(updates.Assets)).To(Equal(0))
+			})
+		})
+
 		Context("sync skips autoDelete workload-volume pvc assets", func() {
 			It("does not sync pvc assets marked autoDelete=true", func() {
 				// persistent pvc (autoDelete=false) - owned by the asset sync agent, must be synced
@@ -1366,6 +1506,35 @@ func listCredentialsUpdatesForTest(randoms *testutils.RandomValues, router chi.R
 	}
 
 	var updatesResp api.CredentialsUpdatesResp
+	jsonErr := json.Unmarshal(resp.Body.Bytes(), &updatesResp)
+	Expect(jsonErr).To(BeNil())
+
+	return &updatesResp, nil
+}
+
+func listK8sObjectsUpdatesForTest(randoms *testutils.RandomValues, router chi.Router, after int64, report *api.ClusterSyncReport) (*api.K8sObjectsUpdatesResp, *api.Error) {
+	url := fmt.Sprintf("%s?clusterId=%s&after=%d", urlGetK8sObjectsUpdates, randoms.ClusterId, after)
+
+	if report == nil {
+		report = &api.ClusterSyncReport{}
+	}
+
+	syncHttpReq, err := http.NewRequest("POST", url, makePayload(report))
+	Expect(err).To(BeNil())
+	syncHttpReq.Header = *headerForAdmin(randoms)
+
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, syncHttpReq)
+
+	if resp.Code != http.StatusOK {
+		var updatesError api.Error
+		jsonErr := json.Unmarshal(resp.Body.Bytes(), &updatesError)
+		Expect(jsonErr).To(BeNil())
+
+		return nil, &updatesError
+	}
+
+	var updatesResp api.K8sObjectsUpdatesResp
 	jsonErr := json.Unmarshal(resp.Body.Bytes(), &updatesResp)
 	Expect(jsonErr).To(BeNil())
 

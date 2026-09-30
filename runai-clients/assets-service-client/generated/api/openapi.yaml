@@ -1490,7 +1490,7 @@ paths:
       - Synchronization
       x-service: assets-service
       x-test-coverage:
-      - control-plane/assets-service/pkg/services/api_rct_service_test.go"
+      - control-plane/assets-service/pkg/services/api_agent_sync_test.go"
       x-authorize:
         resource-type: resource-claim-templates
         action: sync

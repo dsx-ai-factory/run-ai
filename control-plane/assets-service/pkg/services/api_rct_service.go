@@ -234,7 +234,10 @@ func (s *RctApiService) DeleteRctById(ctx context.Context, id string) (api.ImplR
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
 	}
 
-	if actionError := dao.DeleteRct(ctx, assetMeta, dao.HardDelete); actionError != nil {
+	// RCT is a DRA-era asset, so the cluster is always new enough to consume
+	// the tombstone via the k8s-objects sync endpoint. Soft-delete
+	// unconditionally so post-sync cleanup drops the row after the agent acks.
+	if actionError := dao.DeleteRct(ctx, assetMeta, dao.SoftDelete); actionError != nil {
 		return NewErrorResponse(actionError), nil
 	}
 
