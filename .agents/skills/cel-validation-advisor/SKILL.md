@@ -16,13 +16,15 @@ This file is the portable Markdown prompt: copy or attach the whole file, includ
 | Agent | Setup from the repository root | Verify / invoke |
 |---|---|---|
 | Codex | Open the checkout containing `.agents/skills/cel-validation-advisor/SKILL.md`; Codex discovers this shared directory natively, including from subdirectories of the repository. No `.codex/skills/` copy is needed. | Start Codex in that checkout and ask it to use `cel-validation-advisor`; in CLI/IDE, run `/skills` to confirm discovery or invoke `$cel-validation-advisor` with the validation task. |
-| Claude Code | The committed `.claude/skills/cel-validation-advisor` symlink points to `../../.agents/skills/cel-validation-advisor`. If distributing just this file, copy it to `.claude/skills/cel-validation-advisor/SKILL.md`. | Start `claude`; invoke `/cel-validation-advisor` with the validation task. |
+| Claude Code | The committed `.claude/skills/cel-validation-advisor` symlink points to `../../.agents/skills/cel-validation-advisor`. For checkouts without symlink support, use the fallback below. If distributing just this file, copy it to `.claude/skills/cel-validation-advisor/SKILL.md`. | Start `claude`; invoke `/cel-validation-advisor` with the validation task. |
 | Gemini CLI | Keep this file at `.agents/skills/cel-validation-advisor/SKILL.md`; current Gemini CLI discovers that workspace alias. For versions without that alias, copy it to `.gemini/skills/cel-validation-advisor/SKILL.md`. | Start `gemini`, run `/skills reload` then `/skills list`, and ask it to use `cel-validation-advisor`. |
 | Cursor | Open the checkout containing `.agents/skills/cel-validation-advisor/SKILL.md`. For versions without shared-directory discovery, copy it to `.cursor/skills/cel-validation-advisor/SKILL.md`. | Open Customize → Skills, confirm discovery, and ask Agent to use `cel-validation-advisor`. |
 | GitHub Copilot in VS Code | Open the checkout containing `.agents/skills/cel-validation-advisor/SKILL.md`; current VS Code supports this shared project-skill directory. | In Chat, run `/skills` to confirm discovery, then invoke `/cel-validation-advisor` with the validation task. |
 | Other agents or clients without shared skill discovery | Attach this Markdown file as context, or paste its contents with the request below. | Ask the agent to read the file before proposing validation changes. |
 
 Keep one maintained copy; use the fallback copy only if discovery fails. If the client lacks skill support entirely, attaching the prompt still works, without automatic activation.
+
+**Claude fallback without symlink support:** with `core.symlinks=false`, Git checks out `.claude/skills/cel-validation-advisor` as a plain file containing `../../.agents/skills/cel-validation-advisor`. If that entry is a plain file containing this exact link target, replace only that placeholder locally with a directory of the same name, then copy `.agents/skills/cel-validation-advisor/SKILL.md` into it as `SKILL.md`. Restart Claude Code and verify `/cel-validation-advisor` is available. Keep this local workaround out of commits and refresh the copy whenever the shared skill changes.
 
 ```text
 Use cel-validation-advisor to implement the following validation: <requirement>.
