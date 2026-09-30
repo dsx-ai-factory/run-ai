@@ -30,7 +30,7 @@ Some features require additional networking configuration. For example, external
 
 **Configuration Templates**
 
-The steps below build the minimum configuration for a multi-cluster installation on standard Kubernetes, from an air-gapped bundle - one file for the control plane, one for each NVIDIA Run:ai cluster. Depending on your Kubernetes distribution, workload routing, networking setup, and the prerequisites and workload features you need, you may require additional configuration.
+The steps below build the minimum configuration for a multi-cluster installation on Kubernetes or OpenShift, from an air-gapped bundle - one file for the control plane, one for each NVIDIA Run:ai cluster. Depending on your Kubernetes distribution, workload routing, networking setup, and the prerequisites and workload features you need, you may require additional configuration.
 
 * Once you understand the minimum configuration, see [Configuration Templates](templates.md) - if your use case matches one, use it as your starting point instead of building the configuration from scratch.
 * See [Prerequisites and Features](../prerequisites-and-features.md) to understand the components required, depending on the workload types you plan to enable.
@@ -40,7 +40,11 @@ The steps below build the minimum configuration for a multi-cluster installation
 
 Create a `cp-config.yaml` file for the control plane cluster. Use the domains, TLS certificates, and networking values you prepared in [Networking Setup](../../../system-requirements/networking-setup.md) when completing the configuration below.
 
-At a minimum, configure:
+Expand the section for your platform:
+
+<Accordion title="Kubernetes">
+
+For a control plane installation on Kubernetes, configure:
 
 1. Define the installation:
 
@@ -138,6 +142,90 @@ externalConnection:
     className: <YOUR_INGRESS_CLASS>
 ```
 
+</Accordion>
+
+<Accordion title="OpenShift">
+
+For a control plane installation on OpenShift, configure:
+
+1. Define the installation:
+
+   - `install.mode` - Set to `runai_control_plane_only` to install the control plane only.
+   - `install.connectivity` - Set to `air_gapped`, for an installation with no outbound internet access.
+   - `install.kubernetesDistribution` - Set to `openshift`.
+
+   ```yaml
+   install:
+     mode: runai_control_plane_only
+     connectivity: air_gapped
+     kubernetesDistribution: openshift
+   ```
+
+2. Configure the registry:
+
+   - `registry.host` - The hostname of your own internal mirror registry (populated by loading the air-gapped bundle), not NGC.
+   - `registry.username` - The username to authenticate to that registry.
+   - `registry.passwordPath` - The path to a file containing the password for that user. See [Registry Credentials](preparations.md#registry-credentials).
+
+   ```yaml
+   registry:
+     host: <REGISTRY_HOST>
+     username: <REGISTRY_USERNAME>
+     passwordPath: /path/to/registry-password
+   ```
+
+3. Configure the air-gapped bundle:
+
+   - `airgap` - The same `workingDir` and `valuesDir` you used with `airgap load`, plus `skipPrepare: true` - the bundle is already loaded, so `install` skips straight to the chart install. See [Air-Gapped Bundle](preparations.md#air-gapped-bundle) and [`airgap`](../configuration-reference.md#air-gapped-installation-configuration) in the Configuration Reference.
+
+   ```yaml
+   airgap:
+     workingDir: /data/runai-airgap
+     valuesDir: /data/runai-airgap
+     skipPrepare: true
+   ```
+
+4. Define the control plane:
+
+   - `controlPlane.domain` - The FQDN for the NVIDIA Run:ai UI and API. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
+   - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
+   - `controlPlane.customHelmValues.supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
+
+   ```yaml
+   controlPlane:
+     enabled: true
+     domain: <DOMAIN>
+     customHelmValues:
+       supportEntitled: true # Support-Entitled Release only
+   ```
+
+The following example combines these settings to install the NVIDIA Run:ai control plane on OpenShift from an already-loaded air-gapped bundle:
+
+```yaml
+install:
+  mode: runai_control_plane_only
+  connectivity: air_gapped
+  kubernetesDistribution: openshift
+
+registry:
+  host: <REGISTRY_HOST>
+  username: <REGISTRY_USERNAME>
+  passwordPath: /path/to/registry-password
+
+airgap:
+  workingDir: /data/runai-airgap
+  valuesDir: /data/runai-airgap
+  skipPrepare: true
+
+controlPlane:
+  enabled: true
+  domain: <DOMAIN>
+  customHelmValues:
+    supportEntitled: true # Support-Entitled Release only
+```
+
+</Accordion>
+
 - **Validate first** - Before applying any changes, check your configuration against the control plane cluster:
 
   ```bash
@@ -180,7 +268,11 @@ kubectl get secret runai-backend-gen-tenants-manager -n runai-backend -o jsonpat
 
 Create a `cluster-config.yaml` file for each NVIDIA Run:ai cluster. The control plane must already be installed and reachable at its FQDN. Use the domains, TLS certificates, and networking values you prepared in [Networking Setup](../../../system-requirements/networking-setup.md) when completing the configuration below.
 
-At a minimum, configure:
+Expand the section for your platform:
+
+<Accordion title="Kubernetes">
+
+For a cluster installation on Kubernetes, configure:
 
 1. Define the installation:
 
@@ -243,7 +335,16 @@ At a minimum, configure:
      customHelmValues: {}
    ```
 
-5. Configure external access to the cluster:
+5. Skip the prerequisites:
+
+   - `prerequisites.skip` - Set to `true`. The air-gapped bundle contains only the NVIDIA Run:ai charts, so the installer cannot install prerequisites such as the GPU Operator and Prometheus. Make sure the prerequisites your workloads need are already installed on the cluster. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites).
+
+   ```yaml
+   prerequisites:
+     skip: true
+   ```
+
+6. Configure external access to the cluster:
 
    - `externalConnection` - Configures how traffic reaches the NVIDIA Run:ai cluster endpoint from outside the cluster, through a Kubernetes Ingress Controller or Gateway API implementation already running on your cluster. This is separate from `cluster.workloadRouting`, which controls how the workloads you submit are exposed. See [Networking Setup](../../../system-requirements/networking-setup.md).
 
@@ -285,11 +386,120 @@ cluster:
     keyPath: /path/to/cluster-a-key.pem
   customHelmValues: {}
 
+prerequisites:
+  skip: true
+
 externalConnection:
   type: ingress
   ingress:
     className: <YOUR_INGRESS_CLASS>
 ```
+
+</Accordion>
+
+<Accordion title="OpenShift">
+
+For a cluster installation on OpenShift, configure:
+
+1. Define the installation:
+
+   - `install.mode` - Set to `runai_cluster_only` to install the cluster component only.
+   - `install.connectivity` - Set to `air_gapped`, for an installation with no outbound internet access.
+   - `install.kubernetesDistribution` - Set to `openshift`.
+
+   ```yaml
+   install:
+     mode: runai_cluster_only
+     connectivity: air_gapped
+     kubernetesDistribution: openshift
+   ```
+
+2. Configure the registry:
+
+   - `registry.host` - The hostname of your own internal mirror registry (populated by loading the air-gapped bundle), not NGC.
+   - `registry.username` - The username to authenticate to that registry.
+   - `registry.passwordPath` - The path to a file containing the password for that user. See [Registry Credentials](preparations.md#registry-credentials).
+
+   ```yaml
+   registry:
+     host: <REGISTRY_HOST>
+     username: <REGISTRY_USERNAME>
+     passwordPath: /path/to/registry-password
+   ```
+
+3. Configure the air-gapped bundle:
+
+   - `airgap` - The same `workingDir` and `valuesDir` you used with `airgap load`, plus `skipPrepare: true` - the bundle is already loaded, so `install` skips straight to the chart install. See [Air-Gapped Bundle](preparations.md#air-gapped-bundle) and [`airgap`](../configuration-reference.md#air-gapped-installation-configuration) in the Configuration Reference.
+
+   ```yaml
+   airgap:
+     workingDir: /data/runai-airgap-cluster-a
+     valuesDir: /data/runai-airgap-cluster-a
+     skipPrepare: true
+   ```
+
+4. Define the cluster:
+
+   - `cluster.name` - The name of the NVIDIA Run:ai cluster as it appears in the control plane.
+   - `cluster.domain` - The FQDN for this cluster. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates). Required when the cluster component is installed on a different OpenShift cluster than the control plane. The installer also uses this domain to reach the control plane when registering the cluster.
+   - `cluster.controlPlaneUrl` - The control plane's FQDN, reachable over HTTPS from this cluster.
+   - `cluster.controlPlaneCredentials` - Identifies this cluster to the control plane. Use the control plane administrator username and password generated during control plane installation - the installer uses these to register the cluster and fetch its bootstrap token automatically, in the same run. See [Retrieve Control Plane Credentials](#retrieve-control-plane-credentials).
+   - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
+
+   ```yaml
+   cluster:
+     enabled: true
+     name: <CLUSTER_NAME>
+     domain: <CLUSTER_DOMAIN>
+     controlPlaneUrl: https://<DOMAIN>
+     controlPlaneCredentials:
+       username: <ADMIN_EMAIL>
+       passwordPath: /path/to/cp-password
+     customHelmValues: {}
+   ```
+
+5. Skip the prerequisites:
+
+   - `prerequisites.skip` - Set to `true`. The air-gapped bundle contains only the NVIDIA Run:ai charts, so the installer cannot install prerequisites such as the GPU Operator and Prometheus. Make sure the prerequisites your workloads need are already installed on the cluster. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites).
+
+   ```yaml
+   prerequisites:
+     skip: true
+   ```
+
+The following example combines these settings to install the NVIDIA Run:ai cluster component on OpenShift from an already-loaded air-gapped bundle, and has the installer register it with the control plane using the control plane administrator username and password:
+
+```yaml
+install:
+  mode: runai_cluster_only
+  connectivity: air_gapped
+  kubernetesDistribution: openshift
+
+registry:
+  host: <REGISTRY_HOST>
+  username: <REGISTRY_USERNAME>
+  passwordPath: /path/to/registry-password
+
+airgap:
+  workingDir: /data/runai-airgap-cluster-a
+  valuesDir: /data/runai-airgap-cluster-a
+  skipPrepare: true
+
+cluster:
+  enabled: true
+  name: <CLUSTER_NAME>
+  domain: <CLUSTER_DOMAIN>
+  controlPlaneUrl: https://<DOMAIN>
+  controlPlaneCredentials:
+    username: <ADMIN_EMAIL>
+    passwordPath: /path/to/cp-password
+  customHelmValues: {}
+
+prerequisites:
+  skip: true
+```
+
+</Accordion>
 
 - **Validate first** - Before applying any changes, check your configuration against the target cluster:
 

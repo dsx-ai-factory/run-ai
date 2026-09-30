@@ -47,12 +47,12 @@ NVIDIA Run:ai Support-Entitled Release installations require an NGC Personal Key
 
 Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password. Use this key to create the `runai-reg-creds` secret described in [Software Artifacts](#software-artifacts) below.
 
-For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) (SAK). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. Pass the resulting key as `telemetryService.telemetryAuth.token` during installation, or reference a secret you create yourself beforehand via `telemetryService.telemetryAuth.existingSecret`/`secretKey`:
+For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. Pass the resulting key as `telemetryService.telemetryAuth.token` during installation, or reference a secret you create yourself beforehand via `telemetryService.telemetryAuth.existingSecret`/`secretKey`. Create the `runai-backend` namespace first, as described in [Control Plane Namespace](#control-plane-namespace), then create the secret:
 
 ```bash
 kubectl create secret generic <SECRET_NAME> \
   --namespace runai-backend \
-  --from-literal=<KEY_NAME>=<SAK_TOKEN>
+  --from-literal=<KEY_NAME>=<SERVICE_API_KEY>
 ```
 
 ## Control Plane Setup

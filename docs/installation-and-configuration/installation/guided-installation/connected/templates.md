@@ -407,7 +407,6 @@ cluster:
   enabled: true
   version: ""
   name: <CLUSTER_NAME>
-  domain: <DOMAIN>
   inference:
     wildcardDomain: "*.<INFERENCE_WILDCARD_DOMAIN>"
   customHelmValues: {}

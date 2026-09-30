@@ -20,7 +20,7 @@ Complete [Preparations](preparations.md) before continuing, including the system
 
 **Configuration Templates**
 
-The steps below build the minimum configuration for a multi-cluster installation on standard Kubernetes - one file for the control plane, one for each NVIDIA Run:ai cluster. Depending on your Kubernetes distribution, workload routing, networking setup, and the prerequisites and workload features you need, you may require additional configuration.
+The steps below build the minimum configuration for a multi-cluster installation on Kubernetes or OpenShift - one file for the control plane, one for each NVIDIA Run:ai cluster. Depending on your Kubernetes distribution, workload routing, networking setup, and the prerequisites and workload features you need, you may require additional configuration.
 
 * Once you understand the minimum configuration, see [Configuration Templates](templates.md) - if your use case matches one, use it as your starting point instead of building the configuration from scratch.
 * See [Prerequisites and Features](../prerequisites-and-features.md) to understand the components required, depending on the workload types you plan to enable.
@@ -30,7 +30,11 @@ The steps below build the minimum configuration for a multi-cluster installation
 
 Create a `cp-config.yaml` file for the control plane cluster. Use the domains, TLS certificates, and networking values you prepared in [Networking Setup](../../../system-requirements/networking-setup.md) when completing the configuration below.
 
-At a minimum, configure:
+Expand the section for your platform:
+
+<Accordion title="Kubernetes">
+
+For a control plane installation on Kubernetes, configure:
 
 1. Define the installation:
 
@@ -61,8 +65,8 @@ At a minimum, configure:
    - `controlPlane.version` - The control plane version to install. Omit it to install the latest supported version.
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
      - `supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
-     - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the SAK. Provide it one of two ways:
-       - `token: <SAK_TOKEN>` - Sets the SAK directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
+     - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
+       - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
        - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
 
    ```yaml
@@ -77,7 +81,7 @@ At a minimum, configure:
        supportEntitled: true # Support-Entitled Release only
        telemetryService: # Optional, Support-Entitled Release only
          telemetryAuth:
-           token: <SAK_TOKEN>
+           token: <SERVICE_API_KEY>
    ```
 
 4. Configure external access to the control plane:
@@ -117,6 +121,80 @@ externalConnection:
   ingress:
     className: <YOUR_INGRESS_CLASS>
 ```
+
+</Accordion>
+
+<Accordion title="OpenShift">
+
+For a control plane installation on OpenShift, configure:
+
+1. Define the installation:
+
+   - `install.mode` - Set to `runai_control_plane_only` to install the control plane only.
+   - `install.connectivity` - Set to `connected`, for an installation with outbound internet access.
+   - `install.kubernetesDistribution` - Set to `openshift`.
+
+   ```yaml
+   install:
+     mode: runai_control_plane_only
+     connectivity: connected
+     kubernetesDistribution: openshift
+   ```
+
+2. Configure the registry:
+
+   - `registry.type` - Set to `ngc`.
+   - `registry.tokenPath` - For NVIDIA Run:ai Support-Entitled Release installations, provide the path to your NGC Personal Key. Open Source installations do not require registry credentials. See [Registry Credentials](preparations.md#registry-credentials).
+
+   ```yaml
+   registry:
+     type: ngc
+     tokenPath: /path/to/ngc-token # Support-Entitled Release only
+   ```
+
+3. Define the control plane:
+
+   - `controlPlane.domain` - The FQDN for the NVIDIA Run:ai UI and API. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
+   - `controlPlane.version` - The control plane version to install. Omit it to install the latest supported version.
+   - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
+     - `supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
+     - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
+       - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
+       - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
+
+   ```yaml
+   controlPlane:
+     enabled: true
+     domain: <DOMAIN>
+     version: "" # Omit to install the latest supported version
+     customHelmValues:
+       supportEntitled: true # Support-Entitled Release only
+       telemetryService: # Optional, Support-Entitled Release only
+         telemetryAuth:
+           token: <SERVICE_API_KEY>
+   ```
+
+The following example combines these settings to install the NVIDIA Run:ai control plane on OpenShift:
+
+```yaml
+install:
+  mode: runai_control_plane_only
+  connectivity: connected
+  kubernetesDistribution: openshift
+
+registry:
+  type: ngc
+  tokenPath: /path/to/ngc-token # Support-Entitled Release only
+
+controlPlane:
+  enabled: true
+  domain: <DOMAIN>
+  version: ""
+  customHelmValues:
+    supportEntitled: true # Support-Entitled Release only
+```
+
+</Accordion>
 
 - **Validate first** - Before applying any changes, check your configuration against the control plane cluster:
 
@@ -160,7 +238,11 @@ kubectl get secret runai-backend-gen-tenants-manager -n runai-backend -o jsonpat
 
 Create a `cluster-config.yaml` file for each NVIDIA Run:ai cluster. The control plane must already be installed and reachable at its FQDN. Use the domains, TLS certificates, and networking values you prepared in [Networking Setup](../../../system-requirements/networking-setup.md) when completing the configuration below.
 
-At a minimum, configure:
+Expand the section for your platform:
+
+<Accordion title="Kubernetes">
+
+For a cluster installation on Kubernetes, configure:
 
 1. Define the installation:
 
@@ -219,7 +301,7 @@ At a minimum, configure:
      - `version` - Omit to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported range if you want to set it explicitly. GPU fractions (memory fractions, dynamic memory fractions, or compute modes) require 26.7.1 or later, installed automatically when omitted.
      - `customHelmValues` - Merges Helm values into the GPU Operator's own Helm chart. Set `driver.version` to r615 or later if you plan to use GPU fractions, since GPU Operator 26.7.1 does not default to this driver version. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites).
    - `prerequisites.prometheus` - Required for every installation. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites) for more details.
-     - `mode` - Set to `install`. On OpenShift, `install` is rejected - set to `skip` instead and use the cluster's built-in monitoring stack.
+     - `mode` - Set to `install`.
      - `version` - Omit to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported range.
      - `customHelmValues` - Merges Helm values into Prometheus's own Helm chart.
 
@@ -299,6 +381,129 @@ externalConnection:
   ingress:
     className: <YOUR_INGRESS_CLASS>
 ```
+
+</Accordion>
+
+<Accordion title="OpenShift">
+
+For a cluster installation on OpenShift, configure:
+
+1. Define the installation:
+
+   - `install.mode` - Set to `runai_cluster_only` to install the cluster component only.
+   - `install.connectivity` - Set to `connected`, for an installation with outbound internet access.
+   - `install.kubernetesDistribution` - Set to `openshift`.
+
+   ```yaml
+   install:
+     mode: runai_cluster_only
+     connectivity: connected
+     kubernetesDistribution: openshift
+   ```
+
+2. Configure the registry:
+
+   - `registry.type` - Set to `ngc`.
+   - `registry.tokenPath` - For NVIDIA Run:ai Support-Entitled Release installations, provide the path to your NGC Personal Key. Open Source installations do not require registry credentials. See [Registry Credentials](preparations.md#registry-credentials).
+
+   ```yaml
+   registry:
+     type: ngc
+     tokenPath: /path/to/ngc-token # Support-Entitled Release only
+   ```
+
+3. Define the cluster:
+
+   - `cluster.name` - The name of the NVIDIA Run:ai cluster as it appears in the control plane.
+   - `cluster.domain` - The FQDN for this cluster. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates). Required when the cluster component is installed on a different OpenShift cluster than the control plane. The installer also uses this domain to reach the control plane when registering the cluster.
+   - `cluster.controlPlaneUrl` - The control plane's FQDN, reachable over HTTPS from this cluster.
+   - `cluster.controlPlaneCredentials` - Identifies this cluster to the control plane. Use the control plane administrator username and password generated during control plane installation - the installer uses these to register the cluster and fetch its bootstrap token automatically, in the same run. See [Retrieve Control Plane Credentials](#retrieve-control-plane-credentials).
+   - `cluster.version` - The cluster version to install. Omit it to install the latest supported version.
+   - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
+
+   ```yaml
+   cluster:
+     enabled: true
+     name: <CLUSTER_NAME>
+     domain: <CLUSTER_DOMAIN>
+     controlPlaneUrl: https://<DOMAIN>
+     controlPlaneCredentials:
+       username: <ADMIN_EMAIL>
+       passwordPath: /path/to/cp-password
+     version: "" # Omit to install the latest supported version
+     customHelmValues: {}
+   ```
+
+4. Enable the prerequisites:
+
+   - `prerequisites.gpuOperator` - Required for every installation. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites) for more details.
+     - `mode` - Set to `install`. The installer installs the GPU Operator through OperatorHub (OLM).
+     - `version` - Omit to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported range if you want to set it explicitly. GPU fractions (memory fractions, dynamic memory fractions, or compute modes) require 26.7.1 or later, installed automatically when omitted.
+     - `openshift.customResource` - Merges values into the GPU Operator's `ClusterPolicy`. `customHelmValues` is not supported on OpenShift. Set `driver.version` to r615 or later if you plan to use GPU fractions, since GPU Operator 26.7.1 does not default to this driver version. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) and [Per-Component OpenShift Fields](../configuration-reference.md#per-component-openshift-fields).
+   - `prerequisites.prometheus` - See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites) for more details.
+     - `mode` - Set to `skip`, to use the cluster's built-in monitoring stack. `install` is rejected on OpenShift.
+
+   ```yaml
+   prerequisites:
+     gpuOperator:
+       mode: install
+       version: ""
+       openshift:
+         customResource:
+           driver:
+             version: <DRIVER_VERSION>
+     prometheus:
+       mode: skip
+   ```
+
+   <Note>
+
+   **Features**
+
+   The minimum configuration does not include features such as Knative, Kubeflow, MPI Operator, LWS, NIM Operator, Dynamo, or Grove. These are skipped by default.
+
+   If your workloads require any of these features, add the corresponding `features` configuration. See [Prerequisites and Features](../prerequisites-and-features.md#features).
+
+   Some features need OpenShift-specific configuration. For example, Knative, required for standard inference, installs through the OpenShift Serverless operator and requires `cluster.inference.wildcardDomain`, but no wildcard TLS certificate. Features that install through OperatorHub, such as Knative and LWS, are customized through `openshift.customResource` rather than `customHelmValues`. See [Per-Component OpenShift Fields](../configuration-reference.md#per-component-openshift-fields).
+
+   </Note>
+
+The following example combines these settings to install the NVIDIA Run:ai cluster component on a separate OpenShift cluster, and has the installer register it with the control plane using the control plane administrator username and password:
+
+```yaml
+install:
+  mode: runai_cluster_only
+  connectivity: connected
+  kubernetesDistribution: openshift
+
+registry:
+  type: ngc
+  tokenPath: /path/to/ngc-token # Support-Entitled Release only
+
+cluster:
+  enabled: true
+  name: <CLUSTER_NAME>
+  domain: <CLUSTER_DOMAIN>
+  controlPlaneUrl: https://<DOMAIN>
+  controlPlaneCredentials:
+    username: <ADMIN_EMAIL>
+    passwordPath: /path/to/cp-password
+  version: ""
+  customHelmValues: {}
+
+prerequisites:
+  gpuOperator:
+    mode: install
+    version: ""
+    openshift:
+      customResource:
+        driver:
+          version: <DRIVER_VERSION>
+  prometheus:
+    mode: skip
+```
+
+</Accordion>
 
 - **Validate first** - Before applying any changes, check your configuration against the target cluster:
 

@@ -41,7 +41,7 @@ For [Multi-Node NVLink](../../../../platform-management/aiinitiatives/resources/
 
 **Note**
 
-To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), GPU Operator 26.7.1 or later is required, alongside CUDA driver r615 or later. GPU Operator 26.7.1 does not default to CUDA driver r615, so set the driver version explicitly with `--set driver.version=<version>` rather than relying on the default. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
+To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), GPU Operator 26.7.1 or later is required, alongside CUDA driver r615 or later. GPU Operator 26.7.1 does not default to CUDA driver r615, so set the driver version explicitly rather than relying on the default - with `--set driver.version=<version>` on Kubernetes, or by setting `driver.version` in the `ClusterPolicy` spec on OpenShift, where the GPU Operator is installed from OperatorHub. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
 
 </Note>
 
@@ -99,12 +99,10 @@ The Network Operator works alongside the NVIDIA GPU Operator to provide:
 * Kubernetes device plugins to expose high-speed network hardware to workloads.
 * Secondary network components to support network-intensive applications.
 
-On Kubernetes, the Network Operator must be installed and configured as follows:
+The Network Operator must be installed and configured as follows:
 
 1. Install the network operator as detailed in [Network Operator Deployment on Vanilla Kubernetes Cluster](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-on-vanilla-kubernetes-cluster).
 2. Configure SR-IOV InfiniBand support as detailed in [Network Operator Deployment with an SR-IOV InfiniBand Network](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-with-an-sr-iov-infiniband-network).
-
-On OpenShift, install the Network Operator, the SR-IOV Network Operator, and the Node Feature Discovery (NFD) Operator through the Red Hat OperatorHub catalog in the OpenShift Container Platform web console, rather than via Helm.
 
 ### NVIDIA Dynamic Resource Allocation (DRA) Driver
 

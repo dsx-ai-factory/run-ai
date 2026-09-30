@@ -68,14 +68,14 @@ In the NVIDIA Run:ai user interface:
 To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
-curl -X POST \ 
+curl -X POST \
   # Replace <COMPANY_URL> below with:
   # For self-hosted use the NVIDIA Run:ai user interface URL.
-  'https://<COMPANY_URL>/api/v2/token' \ 
-  --header 'Accept: */*' \ 
-  --header 'Content-Type: application/x-www-form-urlencoded' \ 
-  --data-urlencode 'grant_type=client_credentials' \ 
-  --data-urlencode 'client_id=<CLIENT ID>' \ 
+  'https://<COMPANY_URL>/api/v2/token' \
+  --header 'Accept: */*' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'grant_type=client_credentials' \
+  --data-urlencode 'client_id=<CLIENT ID>' \
   --data-urlencode 'client_secret=<CLIENT SECRET>'
 ```
 
@@ -157,7 +157,7 @@ Copy the following command to your terminal. Make sure to update the following p
 * `ngc-api` - The Kubernetes name of the Generic secret credential created in [Step 4](rag-blueprint-deployment.md#step-4-creating-the-generic-secret-credential).
 
 ```bash
-curl -L 'https://<COMPANY-URL>/api/v1/ai-applications' \ 
+curl -L 'https://<COMPANY-URL>/api/v1/ai-applications' \
 -H 'Content-Type: application/json' \
 -H 'Authorization: Bearer <TOKEN>' \
 -d '{  

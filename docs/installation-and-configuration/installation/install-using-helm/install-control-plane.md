@@ -11,7 +11,7 @@ By completing this process, the NVIDIA Run:ai control plane will be running in y
 
 ## Before You Start
 
-Before installing the NVIDIA Run:ai control plane, complete the entire [System Requirements](../../system-requirements/README.md) section and [Preparations](preparations.md).
+Before installing the NVIDIA Run:ai control plane, complete [Preparations](preparations.md).
 
 ## Permissions
 
@@ -65,8 +65,8 @@ In addition to the values above, update the Helm commands as follows:
 
 * Add `--set supportEntitled=true` to the `helm upgrade` command.
 * Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
-* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the SAK. By default, telemetry is not associated with your organization.
-  - `--set telemetryService.telemetryAuth.token=<SAK_TOKEN>` - Passes the SAK directly. Visible in shell history and process listings.
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
+  - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
 ```bash
@@ -79,7 +79,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
   --set supportEntitled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
-  --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
+  --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
 
 For example:
@@ -94,7 +94,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminPassword="myPassw0rd\!" \
   --set supportEntitled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
-  --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
+  --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
 
 <Note>
@@ -221,8 +221,8 @@ In addition to the values above, update the Helm commands as follows:
 
 * Add `--set supportEntitled=true` to the `helm upgrade` command.
 * Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
-* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the SAK. By default, telemetry is not associated with your organization.
-  - `--set telemetryService.telemetryAuth.token=<SAK_TOKEN>` - Passes the SAK directly. Visible in shell history and process listings.
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
+  - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
 ```bash
@@ -235,7 +235,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
   --set supportEntitled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
-  --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
+  --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
 
 For example:
@@ -250,7 +250,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminPassword="myPassw0rd\!" \
   --set supportEntitled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
-  --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
+  --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
 
 <Note>
@@ -372,4 +372,4 @@ After installing the NVIDIA Run:ai control plane, it may take a few minutes for 
 
 ## Next Steps
 
-With the control plane installed, continue to [Install the Cluster](helm-install.md). Before installing the cluster, review [Prerequisites and Features](prerequisites-and-features.md) for any additional setup the NVIDIA Run:ai cluster requires.
+With the control plane installed, continue to [Install the Cluster](helm-install.md). Before installing the cluster, make sure you have completed the required setup in [Prerequisites and Features](prerequisites-and-features.md).
