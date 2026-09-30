@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package initializer
+package keycloakinit
 
 import (
 	"fmt"
@@ -13,18 +13,19 @@ import (
 	"path/filepath"
 )
 
-// CopyExtensions merges each source directory tree into its destination,
-// the way `cp -r src/. dst/` does.
+// CopyExtensions recursively copies each source directory tree onto its
+// destination, merging into any existing content the way `cp -r src/. dst/`
+// does.
 func CopyExtensions(pairs map[string]string) error {
 	for src, dst := range pairs {
-		if err := copyTree(src, dst); err != nil {
+		if err := copyDirRecursive(src, dst); err != nil {
 			return fmt.Errorf("copy %s to %s: %w", src, dst, err)
 		}
 	}
 	return nil
 }
 
-func copyTree(src, dst string) error {
+func copyDirRecursive(src, dst string) error {
 	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("walk %s: %w", path, err)

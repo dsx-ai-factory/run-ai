@@ -21,7 +21,7 @@ inside the runtime image (see "Runtime base image" below).
 | `build-go` | `build-go-amd` + `build-go-arm` — compiles `cmd/main.go` for amd64 + arm64 into `bin/keycloak-extensions-$ARCH` |
 | `test` | `test-gradle` then `test-go` |
 | `test-gradle` | `gradle test -p runai-custom-providers` in the container, then parses HTML reports via `scripts/parse_html_report.py` |
-| `test-go` | Plain `go test ./...` for the `internal/initializer` package (table-driven unit tests, no Ginkgo — this is a one-shot init binary, not a controller/webhook) |
+| `test-go` | Plain `go test ./...` for the `internal/keycloakinit` package (table-driven unit tests, no Ginkgo — this is a one-shot init binary, not a controller/webhook) |
 | `lint` | `lint-go` — golangci-lint against the Go code (the Gradle side has no lint target) |
 | `validate` | No-op |
 
@@ -39,7 +39,7 @@ inside the runtime image (see "Runtime base image" below).
   calls). Copies in the provider JAR, OTel agent JAR, `runai-theme/`, and the
   compiled `keycloak-extensions-$TARGETARCH` binary as `ENTRYPOINT`. Runs as
   `65532:65532`.
-- The Go binary (`cmd/main.go` → `internal/initializer`) replaces the old
+- The Go binary (`cmd/main.go` → `internal/keycloakinit`) replaces the old
   `scripts/copy-extensions.sh` + `scripts/write-keycloak-conf.sh` shell
   scripts, which can't run in a `scratch` image (no shell). It performs the
   same two steps in one run-to-completion process: copy

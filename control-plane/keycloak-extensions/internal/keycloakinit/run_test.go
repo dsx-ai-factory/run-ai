@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package initializer
+package keycloakinit
 
 import (
 	"path/filepath"
 	"testing"
 )
 
-func TestRun(t *testing.T) {
+func TestInitializer_Run(t *testing.T) {
 	root := t.TempDir()
 
 	paths := Paths{
@@ -30,7 +30,8 @@ func TestRun(t *testing.T) {
 	mustWriteFile(t, filepath.Join(paths.SecretsDir, "KC_HTTP_PORT"), "8080")
 	mustWriteFile(t, filepath.Join(paths.SecretsDir, "KEYCLOAK_ADMIN"), "admin")
 
-	if err := Run(paths); err != nil {
+	init := &Initializer{Paths: paths}
+	if err := init.Run(); err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
 
