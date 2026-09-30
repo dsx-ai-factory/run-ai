@@ -7,7 +7,6 @@
 package common
 
 import (
-	"fmt"
 	"os"
 
 	"k8s.io/utils/pointer"
@@ -23,23 +22,10 @@ const (
 	DefaultVersionEnvVarName  = "IMG_DEFAULT_VERSION"
 
 	ThirdPartyImageEnvVarPrefix = "IMG_THIRD_PARTY_"
-
-	DefaultEnv         = "prod"
-	DefaultRepositeory = "runai.jfrog.io/op-containers-"
 )
 
 // ImageSpec is a struct describing a container image
 type Image struct {
-	// DEPRECATED: Use Registry instead
-	// Repository is the repository prefix for the image
-	// +kubebuilder:validation:Optional
-	Repository *string `json:"repository,omitempty"`
-
-	// DEPRECATED: Use Registry instead
-	// Env is the repository suffix for the image
-	// +kubebuilder:validation:Optional
-	Env *string `json:"env,omitempty"`
-
 	// Registry is the registry of the image
 	// +kubebuilder:validation:Optional
 	Registry *string `json:"registry,omitempty"`
@@ -76,21 +62,10 @@ func (i *Image) SetDefaultsWhereNeeded(defaultImageValues *Image) {
 		4. Default registry
 	*/
 	if i.Registry == nil {
-		if i.Repository != nil || i.Env != nil {
-			// Backward compatibility
-			if i.Repository == nil {
-				i.Repository = ptr.To[string](DefaultRepositeory)
-			}
-			if i.Env == nil {
-				i.Env = ptr.To[string](DefaultEnv)
-			}
-			i.Registry = ptr.To[string](fmt.Sprintf("%s%s", *i.Repository, *i.Env))
+		if defaultImageValues.Registry != nil {
+			i.Registry = defaultImageValues.Registry
 		} else {
-			if defaultImageValues.Registry != nil {
-				i.Registry = defaultImageValues.Registry
-			} else {
-				i.Registry = ptr.To[string](os.Getenv(DefaultRegistryEnvVarName))
-			}
+			i.Registry = ptr.To[string](os.Getenv(DefaultRegistryEnvVarName))
 		}
 	}
 
@@ -179,7 +154,7 @@ func (r *Route) SetDefaultsWhereNeeded() {
 
 // GatewayRef specifies a reference to a Gateway resource for per-operand override.
 // When provided, both Name and Namespace must be non-empty.
-// +kubebuilder:validation:XValidation:rule="!has(self.name) && !has(self.__namespace__) || (has(self.name) && self.name != '' && has(self.__namespace__) && self.__namespace__ != '')",message="both name and namespace are required when gatewayAPI override is specified"
+// +kubebuilder:validation:XValidation:rule="!has(self.name) && !has(self.__namespace__) || (has(self.name) && self.name != ” && has(self.__namespace__) && self.__namespace__ != ”)",message="both name and namespace are required when gatewayAPI override is specified"
 type GatewayRef struct {
 	// Name is the name of the Gateway resource.
 	// +kubebuilder:validation:MinLength=1
