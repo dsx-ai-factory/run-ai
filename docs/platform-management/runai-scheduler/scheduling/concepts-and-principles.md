@@ -32,7 +32,7 @@ A queue is created for each [project/node pool pair](../../aiinitiatives/adaptin
 
 ### Quota
 
-Each project and department includes a set of deserved resource quotas, per node pool and resource type. For example, project “LLM-Train/Node Pool NV-H100” quota parameters specify the number of GPUs, CPUs(cores), and the amount of CPU memory that this project deserves to get when using this node pool. [Non-preemptible workloads and the non-preemptible pods of semi-preemptible workloads](concepts-and-principles.md#priority-and-preemption) can only be scheduled if their requested resources are within the deserved resource quotas of their respective project/node pool and department/node pool.
+Each project and department includes a set of deserved resource quotas, per node pool and resource type. For example, project “LLM-Train/Node Pool NV-H100” quota parameters specify the number of GPUs, CPUs(cores), and the amount of CPU memory that this project deserves to get when using this node pool. Non-preemptible workloads and the non-preemptible pods of semi-preemptible workloads (see [Priority and Preemption](concepts-and-principles.md#priority-and-preemption)) can only be scheduled if their requested resources are within the deserved resource quotas of their respective project/node pool and department/node pool.
 
 #### Deserved Quota and Workload Scheduling
 
@@ -150,7 +150,7 @@ Workload priority is always respected within a project. This means higher priori
 
 ### Gang Scheduling
 
-Gang scheduling describes a scheduling principle in which a workload composed of multiple pods is either scheduled as a gang (at least the min-members number of pods are scheduled and running) or fully pending (none of the pods are running). Gang scheduling applies to a single pod group.
+Gang scheduling describes a scheduling principle in which a workload composed of multiple pods is either scheduled as a gang (at least the min-members number of pods are scheduled together) or fully pending (none of the pods are scheduled). Pods above the min-members count are not part of the gang. They are scheduled when resources are available and can remain pending without affecting the gang. Gang scheduling applies to a single pod group.
 
 #### Multi-Level Gang Scheduling
 

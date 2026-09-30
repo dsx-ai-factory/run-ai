@@ -245,7 +245,7 @@ Policy enforcement does not reach [externally submitted workloads](../../../work
 
 ### Known Limitations with CUDA 13.4 and Driver r615
 
-The following limitations apply to dynamic GPU memory fractions when running on CUDA 13.4 with driver r615. Both issues will be resolved with CUDA 13.5 and driver r620, when they are released.
+The following limitations apply to dynamic GPU memory fractions when running on CUDA 13.4 with driver r615. Both issues will be resolved in a future release of CUDA.
 
 * **Memory is reclaimed from one workload at a time.** When several workloads on a GPU are using memory above their Request, and another workload on that GPU allocates up to its own Request, only one of the bursting workloads receives an OOMKill signal. If that single reclaim does not free enough memory, the allocating workload does not receive the full memory of its Request.
 * **A workload allocating within its Request can be terminated.** In some scenarios, a workload allocating memory up to its Request receives a SIGKILL, instead of memory being reclaimed from the workloads operating above their own Request. Administrators can address this using the misc cgroup fallback. Refer to [MPS memory partitioning](https://docs.nvidia.com/deploy/mps/latest/mpsv3-memory-partitioning.html) for the affected scenarios and the configuration.

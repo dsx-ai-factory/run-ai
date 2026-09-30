@@ -28,7 +28,7 @@ If the sum of all project quotas exceeds the quota of their parent department, t
 
 The next step in the scheduling process is resource binding. During this step, the Scheduler selects nodes for the pods, assigns each pod to a node (the bind operation), and binds additional pod resources such as storage, ingress, and other required components.
 
-If the pod group has a [gang scheduling](concepts-and-principles.md#gang-scheduling) or [multi-level gang scheduling rule](concepts-and-principles.md#multi-level-gang-scheduling) applied, the Scheduler either allocates and binds all pods together or places all of them in a pending state. If the latter occurs, the Scheduler retries scheduling the entire pod group together in the next scheduling cycle.
+If the pod group has a [gang scheduling](concepts-and-principles.md#gang-scheduling) or [multi-level gang scheduling rule](concepts-and-principles.md#multi-level-gang-scheduling) applied, the Scheduler either allocates and binds at least the min-members number of pods together or places all of them in a pending state. If the latter occurs, the Scheduler retries scheduling the gang together in the next scheduling cycle. Pods above the min-members count are not part of the gang and are scheduled when resources are available.
 
 During this process, the Scheduler updates the status of the pods and their associated pod group and sub-groups. Users can track the workload submission and scheduling process using either the CLI or the NVIDIA Run:ai UI. For more details on submitting and managing workloads, see [Workloads](../../../workloads-in-nvidia-run-ai/workloads.md).
 
@@ -38,7 +38,7 @@ If the Scheduler cannot find sufficient resources to schedule a workload (includ
 
 1. **Consolidation (bin packing)** - The Scheduler first tries to consolidate workloads into smaller number of nodes to make room for the currently scheduled workload.
 2. **Resource rebalancing across queues** - If consolidation does not succeed, the Scheduler attempts to [reclaim resources](concepts-and-principles.md#reclaim-of-resources-between-projects-and-departments) from other queues (projects) that are either over their deserved quota or over their calculated fairshare.
-3. **Preemption within the same queue** - If resources are still unavailable, the Scheduler tries to  preempt [lower priority preemptible workloads or the preemptible pods of lower priority semi-preemptible workloads](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project) within the same queue (project).
+3. **Preemption within the same queue** - If resources are still unavailable, the Scheduler tries to  preempt lower priority preemptible workloads or the preemptible pods of lower priority semi-preemptible workloads (see [Preemption of Lower Priority Workloads Within a Project](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project)) within the same queue (project).
 
 ### When a Queue Receives Additional Resources
 
@@ -47,7 +47,7 @@ A [scheduling queue](concepts-and-principles.md#scheduling-queue) deserves more 
 1. The queue has workloads that request resources.
 2. The queue has not reached its deserved quota, or, it is already over its deserved quota but below its fairshare (= deserved quota + over quota share of the free resources).
 
-In this situation, the Scheduler attempts to rebalance resources across queues to provide the entitled queue with its deserved resources. If rebalancing does not resolve the resource shortage, the Scheduler tries to preempt [lower priority preemptible workloads or the preemptible pods of lower priority semi-preemptible workloads](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project) within the same queue (project).
+In this situation, the Scheduler attempts to rebalance resources across queues to provide the entitled queue with its deserved resources. If rebalancing does not resolve the resource shortage, the Scheduler tries to preempt lower priority preemptible workloads or the preemptible pods of lower priority semi-preemptible workloads (see [Preemption of Lower Priority Workloads Within a Project](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project)) within the same queue (project).
 
 ### Scheduling Above Fairshare
 
