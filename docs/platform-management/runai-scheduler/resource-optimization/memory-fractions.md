@@ -39,8 +39,8 @@ Consider an organization with a department budgeted for **two nodes of 8×H100 G
 
 Consider a team serving a small language model across a single node of **8×H100 80 GB GPUs**. A model such as Qwen3-8B occupies approximately 16.4 GB of GPU memory in BF16 precision, leaving most of each GPU unused when the model is given a whole device.
 
-* Requesting 38 GB of GPU memory per model instance fits two instances on each GPU, for a total of 16 concurrent model servers on the node instead of 8.
-* The remaining memory on each GPU accommodates the CUDA context and driver overhead, so the allocation holds under production load.
+* Requesting 36 GB of GPU memory per model instance fits two instances on each GPU, for a total of 16 concurrent model servers on the node instead of 8.
+* The remaining memory on each GPU accommodates the driver reserve and the CUDA context, so the allocation holds under production load.
 * Quota can be expressed in the memory each model actually needs, rather than rounded up to whole devices.
 
 For more details on mapping your organization and resources, refer to [Adapting AI initiatives to your organization](../../aiinitiatives/adapting-ai-initiatives.md).
@@ -254,6 +254,8 @@ Policy enforcement does not reach [externally submitted workloads](../../../work
 * Selecting a GPU portion using percentages as units does not guarantee the exact memory size. This means 50% of an A-100-40GB is 20 GB while 50% of an A-100-80GB is 40 GB. To have better control over the exact allocated memory, specify the exact memory size, for example 40 GB.
 * GPU memory fractions control the memory split. Each workload's share of GPU compute is controlled separately by its compute mode - refer to [GPU compute modes](compute-modes.md).
 * An application sees its own requested GPU memory size through NVML and `nvidia-smi`, not the memory of the whole device. Tools that report total GPU memory inside the container report the fraction.
+* The NVIDIA GPU Operator must be installed with `nriPluginEnabled` set to `false`. GPU memory fractions do not function while the NRI plugin is enabled.
+* Part of the memory of every GPU is reserved for the NVIDIA driver and for internal use, such as error correction. The reserved amount is estimated at 3% to 5% of the total GPU memory and varies by GPU type. Account for this reserve when requesting an absolute memory size, because requests that exceed the remaining memory can cause an OOMKill signal to be sent to the pod. Requests expressed as a portion of the GPU are not affected.
 
 ## Using CLI
 
