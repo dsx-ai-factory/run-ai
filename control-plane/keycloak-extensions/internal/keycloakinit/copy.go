@@ -18,14 +18,16 @@ import (
 // does.
 func CopyExtensions(pairs map[string]string) error {
 	for src, dst := range pairs {
-		if err := copyDirRecursive(src, dst); err != nil {
+		if err := copyDirTree(src, dst); err != nil {
 			return fmt.Errorf("copy %s to %s: %w", src, dst, err)
 		}
 	}
 	return nil
 }
 
-func copyDirRecursive(src, dst string) error {
+// copyDirTree walks src (via filepath.WalkDir, not self-recursion) and
+// copies every file it finds to the matching path under dst.
+func copyDirTree(src, dst string) error {
 	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("walk %s: %w", path, err)
