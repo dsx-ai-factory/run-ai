@@ -9,7 +9,7 @@ Department:                         default
 Submitted By:                       test@example.com
 Priority:                           low (40)
 Category:                           Train
-Preemptible:                        true
+Preemptibility:                     Semi-preemptible
 Requested Node Pool:                default
 Image:                              gcr.io/knative-samples/helloworld-go
 Image Pull Policy:                  IfNotPresent

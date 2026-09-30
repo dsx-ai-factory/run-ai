@@ -31,7 +31,7 @@ export GITHUB_TOKEN=ghp_...   # needed for private Go modules
 
 **All flags:** `--domain`, `--admin-email`, `--admin-password`, `--parallel N`, `--skip-build`, `--skip-build-cp`, `--skip-build-rc`, `--skip-frontend`, `--skip-cluster`, `--skip-deploy`, `--skip-deploy-cp`, `--skip-deploy-rc`, `--skip-prometheus`, `--skip-fake-gpu`, `--gpu-operator`, `--gpu-driver`, `--gpu-operator-version`, `--force-rebuild`, `--teardown`, `--purge`
 
-After first run: `sudo sh -c 'echo "127.0.0.1 runai.local" >> /etc/hosts'` → https://runai.local (admin@run.ai / Admin@1234!)
+After first run: `sudo sh -c 'echo "127.0.0.1 runai.local" >> /etc/hosts'` → https://runai.local (login `test@run.ai`; password is auto-generated and printed in the final summary unless `--admin-password` is passed)
 
 ## Service structure
 Each service has `artifact-metadata.json` (`artifact_type`: container | go | cli | helm) and standard Makefile targets: `build`, `test`, `lint`, `validate`.
@@ -73,7 +73,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [control-plane/metrics-service](control-plane/metrics-service)
 - [control-plane/notifications-proxy](control-plane/notifications-proxy)
 - [control-plane/org-unit-service](control-plane/org-unit-service)
-- [control-plane/org-units-migrator](control-plane/org-units-migrator)
 - [control-plane/policy-service](control-plane/policy-service)
 - [control-plane/secret-generator](control-plane/secret-generator)
 - [control-plane/temp-backend-settings](control-plane/temp-backend-settings)
@@ -113,10 +112,7 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [runai-cluster/cluster/init-ca](runai-cluster/cluster/init-ca)
 - [runai-cluster/cluster/karta-migrate](runai-cluster/cluster/karta-migrate)
 - [runai-cluster/cluster/metrics-exporter](runai-cluster/cluster/metrics-exporter)
-- [runai-cluster/cluster/nodepool-controller](runai-cluster/cluster/nodepool-controller)
 - [runai-cluster/cluster/oauth2-proxy](runai-cluster/cluster/oauth2-proxy)
-- [runai-cluster/cluster/pod-group-assigner](runai-cluster/cluster/pod-group-assigner)
-- [runai-cluster/cluster/project-controller](runai-cluster/cluster/project-controller)
 - [runai-cluster/cluster/runai-crd-upgrader](runai-cluster/cluster/runai-crd-upgrader)
 - [runai-cluster/cluster/runtime-rules](runai-cluster/cluster/runtime-rules)
 - [runai-cluster/cluster/shared-objects-controller](runai-cluster/cluster/shared-objects-controller)

@@ -29,19 +29,16 @@ type AuthorizationSettingsKeyEnum string
 // List of AuthorizationSettingsKeyEnum
 const (
 	AUTHORIZATIONSETTINGSKEYENUM_ENABLE_SCOPED_AUTHORIZATION AuthorizationSettingsKeyEnum = "enableScopedAuthorization"
-	AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED       AuthorizationSettingsKeyEnum = "tenantIsCspManaged"
 )
 
 // AllowedAuthorizationSettingsKeyEnumEnumValues is all the allowed values of AuthorizationSettingsKeyEnum enum
 var AllowedAuthorizationSettingsKeyEnumEnumValues = []AuthorizationSettingsKeyEnum{
 	"enableScopedAuthorization",
-	"tenantIsCspManaged",
 }
 
 // validAuthorizationSettingsKeyEnumEnumValue provides a map of AuthorizationSettingsKeyEnums for fast verification of use input
 var validAuthorizationSettingsKeyEnumEnumValues = map[AuthorizationSettingsKeyEnum]struct{}{
 	"enableScopedAuthorization": {},
-	"tenantIsCspManaged":        {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

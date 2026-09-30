@@ -58,7 +58,7 @@ For more information, see [Advanced cluster configurations](../../configuration/
 
 ### Database Storage <a href="#database-storage" id="database-storage"></a>
 
-By default, NVIDIA Run:ai utilizes an internal PostgreSQL database to manage control plane data. This database resides on a Kubernetes Persistent Volume (PV). To safeguard against data loss, it's essential to implement a reliable backup strategy.
+By default, NVIDIA Run:ai utilizes an internal PostgreSQL database to manage control plane data. This database resides on a Kubernetes Persistent Volume (PV). To safeguard against data loss, it is essential to implement a reliable backup strategy.
 
 #### Backup Methods
 
@@ -88,7 +88,7 @@ NVIDIA Run:ai stores metrics history using [Thanos](https://github.com/thanos-io
 
 ### Deployment Configurations <a href="#backing-up-control-plane-configuration" id="backing-up-control-plane-configuration"></a>
 
-The NVIDIA Run:ai control plane installation can be [customized](../../configuration/control-plane-config.md) using `--set` flags during Helm deployment. These configuration overrides are preserved during upgrades but are **not retained** if Kubernetes is uninstalled or damaged. To ensure recovery, it's recommended to back up the full set of applied Helm customizations.
+The NVIDIA Run:ai control plane installation can be [customized](../../configuration/control-plane-config.md) using `--set` flags during Helm deployment. These configuration overrides are preserved during upgrades but are **not retained** if Kubernetes is uninstalled or damaged. To ensure recovery, it is recommended to back up the full set of applied Helm customizations.
 
 1.  To back up the control plane Helm values:
 

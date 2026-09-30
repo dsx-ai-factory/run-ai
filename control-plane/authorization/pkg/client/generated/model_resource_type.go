@@ -51,6 +51,7 @@ const (
 	RESOURCETYPE_NFS_ASSETS                   ResourceType = "nfs-assets"
 	RESOURCETYPE_S3_ASSETS                    ResourceType = "s3-assets"
 	RESOURCETYPE_COMPUTE_RESOURCES            ResourceType = "compute-resources"
+	RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES     ResourceType = "resource-claim-templates"
 	RESOURCETYPE_TEMPLATES                    ResourceType = "templates"
 	RESOURCETYPE_CREDENTIALS                  ResourceType = "credentials"
 	RESOURCETYPE_EVENTS_HISTORY               ResourceType = "events-history"
@@ -100,6 +101,7 @@ var AllowedResourceTypeEnumValues = []ResourceType{
 	"nfs-assets",
 	"s3-assets",
 	"compute-resources",
+	"resource-claim-templates",
 	"templates",
 	"credentials",
 	"events-history",

@@ -26,7 +26,7 @@ Example response shape:
 }
 ```
 
-Use `next` as the pointer for retrieving the next page of results. If `next` is not returned (or is empty), you've reached the end of the collection.
+Use `next` as the pointer for retrieving the next page of results. If `next` is not returned (or is empty), you have reached the end of the collection.
 
 ### Example: Paginate Through Results
 

@@ -37,12 +37,6 @@ func (s *SettingsManager) GetSettingByKey(key api.AuthorizationSettingsKeyEnum, 
 			return nil, err
 		}
 		return setting, nil
-	case api.AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED:
-		setting, err := setting_pkg.Get[*TenantIsCspManaged](tenantID)
-		if err != nil {
-			return nil, err
-		}
-		return setting, nil
 	default:
 		return nil, fmt.Errorf("%s: %s", ErrUnknownSettingKey, key)
 	}
@@ -56,9 +50,6 @@ func (s *SettingsManager) UpdateSettingByKey(ctx context.Context, key api.Author
 	case api.AUTHORIZATIONSETTINGSKEYENUM_ENABLE_SCOPED_AUTHORIZATION:
 		settingValue := EnableScopedAuthorization{Enabled: *updateRequest.Enabled}
 		return setting_pkg.Update[*EnableScopedAuthorization](tenantID, settingValue).UpdatedByUser().Execute()
-	case api.AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED:
-		settingValue := TenantIsCspManaged{Enabled: *updateRequest.Enabled}
-		return setting_pkg.Update[*TenantIsCspManaged](tenantID, settingValue).UpdatedByUser().Execute()
 	default:
 		return fmt.Errorf("%s: %s", ErrUnknownSettingKey, key)
 	}
@@ -71,8 +62,6 @@ func (s *SettingsManager) TransformSettingsToResponse(settingsList []manager.Set
 		switch v := setting.(type) {
 		case *EnableScopedAuthorization:
 			response.EnableScopedAuthorization = api.EnableScopedAuthorizationSetting{Enabled: &v.Enabled}
-		case *TenantIsCspManaged:
-			response.TenantIsCspManaged = api.TenantIsCspManagedSetting{Enabled: &v.Enabled}
 		}
 	}
 

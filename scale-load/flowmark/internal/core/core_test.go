@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func TestConfigInt(t *testing.T) {
+func TestScenarioInt(t *testing.T) {
 	cases := []struct {
 		name    string
 		knobs   map[string]any
@@ -28,7 +28,7 @@ func TestConfigInt(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := Config{Knobs: tc.knobs}.Int("workloads", 2)
+			got, err := Scenario{Knobs: tc.knobs}.Int("workloads", 2)
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got %d", got)
@@ -42,7 +42,7 @@ func TestConfigInt(t *testing.T) {
 	}
 }
 
-func TestConfigString(t *testing.T) {
+func TestScenarioString(t *testing.T) {
 	cases := []struct {
 		name    string
 		knobs   map[string]any
@@ -57,7 +57,7 @@ func TestConfigString(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := Config{Knobs: tc.knobs}.String("workloadType", "Training")
+			got, err := Scenario{Knobs: tc.knobs}.String("workloadType", "Training")
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got %q", got)
@@ -71,7 +71,7 @@ func TestConfigString(t *testing.T) {
 	}
 }
 
-func TestConfigDuration(t *testing.T) {
+func TestScenarioDuration(t *testing.T) {
 	cases := []struct {
 		name    string
 		knobs   map[string]any
@@ -89,7 +89,7 @@ func TestConfigDuration(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := Config{Knobs: tc.knobs}.Duration("timeout", 2*time.Minute)
+			got, err := Scenario{Knobs: tc.knobs}.Duration("timeout", 2*time.Minute)
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got %s", got)
@@ -103,7 +103,7 @@ func TestConfigDuration(t *testing.T) {
 	}
 }
 
-func TestConfigInts(t *testing.T) {
+func TestScenarioInts(t *testing.T) {
 	cases := []struct {
 		name    string
 		knobs   map[string]any
@@ -117,7 +117,7 @@ func TestConfigInts(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := (Config{Knobs: tc.knobs}).Ints("workloads", []int{1, 2})
+			got, err := (Scenario{Knobs: tc.knobs}).Ints("workloads", []int{1, 2})
 			if tc.wantErr != "" {
 				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
 					t.Fatalf("expected error containing %q, got %v", tc.wantErr, err)
@@ -131,25 +131,25 @@ func TestConfigInts(t *testing.T) {
 	}
 }
 
-func TestConfigMap(t *testing.T) {
-	got, err := (Config{Knobs: map[string]any{"slo": map[string]any{"create_to_ew_p90_ms": 5000}}}).Map("slo")
+func TestScenarioMap(t *testing.T) {
+	got, err := (Scenario{Knobs: map[string]any{"slo": map[string]any{"create_to_ew_p90_ms": 5000}}}).Map("slo")
 	if err != nil || got["create_to_ew_p90_ms"] != 5000 {
 		t.Fatalf("got %v (%v)", got, err)
 	}
-	if got, err := (Config{}).Map("slo"); err != nil || got != nil {
+	if got, err := (Scenario{}).Map("slo"); err != nil || got != nil {
 		t.Fatalf("absent map must be nil without error, got %v (%v)", got, err)
 	}
-	if _, err := (Config{Knobs: map[string]any{"slo": "fast"}}).Map("slo"); err == nil || !strings.Contains(err.Error(), "must be a mapping") {
+	if _, err := (Scenario{Knobs: map[string]any{"slo": "fast"}}).Map("slo"); err == nil || !strings.Contains(err.Error(), "must be a mapping") {
 		t.Fatalf("expected mapping error, got %v", err)
 	}
 }
 
-func TestRunIDIsShortUniqueHex(t *testing.T) {
-	first, err := RunID()
+func TestNewRunIDIsShortUniqueHex(t *testing.T) {
+	first, err := NewRunID()
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := RunID()
+	second, err := NewRunID()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,5 +158,18 @@ func TestRunIDIsShortUniqueHex(t *testing.T) {
 	}
 	if first == second {
 		t.Fatalf("two run ids must differ, both were %q", first)
+	}
+}
+
+func TestScenarioUnknownKnobs(t *testing.T) {
+	scenario := Scenario{Knobs: map[string]any{"workloads": []any{1}, "workloadTipe": "Training", "slos": nil}}
+
+	got := scenario.UnknownKnobs("workloads", "workloadType", "slo")
+
+	if !slices.Equal(got, []string{"slos", "workloadTipe"}) {
+		t.Fatalf("unknown knobs must be reported sorted, got %v", got)
+	}
+	if got := (Scenario{}).UnknownKnobs("workloads"); len(got) != 0 {
+		t.Fatalf("no knobs means nothing unknown, got %v", got)
 	}
 }

@@ -5,8 +5,8 @@
 
 # check-breaking-changes.sh
 # Compares the current package against its latest prod tag using apidiff.
-# Exit 0: no breaking changes — 'make package-bump-version' selects a patch bump
-# Exit 1: breaking changes found — 'make package-bump-version' selects a minor bump
+# Exit 0: no breaking changes — the bump targets select a patch bump
+# Exit 1: breaking changes found — the bump targets select a minor bump
 #
 # Usage: check-breaking-changes.sh <TAG_FORMAT> <PKG_DIR> [LATEST_TAG]
 #   TAG_FORMAT  e.g. runai-common-packages/runaihttp
@@ -83,6 +83,7 @@ rel_path() {
 
 # ── main ─────────────────────────────────────────────────────────────────────
 
+cd "$PKG_DIR" || die "Package directory not found: ${PKG_DIR}"
 ensure_apidiff
 
 REPO_ROOT=$(git -C "$PKG_DIR" rev-parse --show-toplevel)
@@ -135,7 +136,8 @@ OLD_MODULE_PATH=$(cd "$OLD_PKG_DIR" && GOWORK=off go list -m -f '{{.Path}}') \
 NEW_MODULE_PATH=$(cd "$PKG_DIR" && GOWORK=off go list -m -f '{{.Path}}') \
     || die "Failed to read the current module path from ${PKG_REL}."
 
-(cd "$OLD_PKG_DIR" && GOWORK=off GOCACHE="$API_GOCACHE" apidiff -m -w "$OLD_API" "$OLD_MODULE_PATH" 2>"$APIDIFF_STDERR") \
+rm -f "${OLD_PKG_DIR}/go.sum"
+(cd "$OLD_PKG_DIR" && GOWORK=off GOFLAGS=-mod=mod GONOSUMDB="${GONOSUMDB:+${GONOSUMDB},}github.com/dsx-ai-factory/run-ai" GOCACHE="$API_GOCACHE" apidiff -m -w "$OLD_API" "$OLD_MODULE_PATH" 2>"$APIDIFF_STDERR") \
     || die "Failed to export the API from ${LATEST_TAG}: $(cat "$APIDIFF_STDERR")"
 (cd "$PKG_DIR" && GOWORK=off GOCACHE="$API_GOCACHE" apidiff -m -w "$NEW_API" "$NEW_MODULE_PATH" 2>"$APIDIFF_STDERR") \
     || die "Failed to export the current API: $(cat "$APIDIFF_STDERR")"

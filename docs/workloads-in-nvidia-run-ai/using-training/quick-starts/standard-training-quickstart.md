@@ -11,13 +11,13 @@ Before you start, make sure:
 * You have created a [project](../../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
 * The project has an assigned quota of at least 1 GPU.
 
-<Info>
+<Note>
 
 **Note**
 
 Flexible workload submission is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload submission.
 
-</Info>
+</Note>
 
 ## Step 1: Logging In
 
@@ -41,7 +41,7 @@ runai login --help
 
 <Tab title="API">
 
-To use the API, you will need to obtain a token as shown in [API authentication](https://run-ai-docs.nvidia.com/api/2.26/getting-started/how-to-authenticate-to-the-api).
+To use the API, you will need to obtain a token as shown in [API authentication](../../../rest-api/how-to-authenticate-to-the-api.md).
 
 </Tab>
 
@@ -63,7 +63,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 8.  Click **CONTINUE**
 
     In the next step:
-9. Under **Environment**, enter the **Image URL** - `runai.jfrog.io/demo/quickstart`
+9. Under **Environment**, enter the **Image URL** - `nvcr.io/nvidia/pytorch:25.06-py3`
 10. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘one-gpu’** compute resource for your workload.
     * If ‘one-gpu’ is not displayed, follow the below steps to create a one-time compute resource configuration:
       * Set **GPU devices** per pod - 1
@@ -89,7 +89,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
     * Click **+NEW ENVIRONMENT**
     * Enter quick-start as the **name** for the environment. The name must be unique.
-    * Enter `runai.jfrog.io/demo/quickstart` as the **Image URL**
+    * Enter `nvcr.io/nvidia/pytorch:25.06-py3` as the **Image URL**
     * Click **CREATE ENVIRONMENT**
 
     The newly created environment will be selected automatically
@@ -110,18 +110,18 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../reference/cli/runai/):
+Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
 runai project set "project-name"
-runai training submit "workload-name" -i runai.jfrog.io/demo/quickstart -g 1
+runai training submit "workload-name" -i nvcr.io/nvidia/pytorch:25.06-py3 -g 1
 ```
 
 </Tab>
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the below parameters according. For more details, see [Trainings](https://run-ai-docs.nvidia.com/api/2.26/workloads/trainings) API:
+Copy the following command to your terminal. Make sure to update the below parameters according. For more details, see [Trainings](api:main-api:POST/api/v1/workloads/trainings) API:
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/training' \
@@ -132,7 +132,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/training' \
     "projectId": "<PROJECT-ID>", 
     "clusterId": "<CLUSTER-UUID>", 
     "spec": {
-        "image": "runai.jfrog.io/demo/quickstart", 
+        "image": "nvcr.io/nvidia/pytorch:25.06-py3",
         "compute": { 
             "gpuDevicesRequest": 1
         } 
@@ -142,16 +142,16 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/training' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](standard-training-quickstart.md#step-1-logging-in)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 

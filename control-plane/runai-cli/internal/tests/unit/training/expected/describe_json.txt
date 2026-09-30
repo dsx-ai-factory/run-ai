@@ -11,6 +11,7 @@
     "submittedBy": "test@example.com",
     "priority": "low (40)",
     "category": "Train",
+    "preemptibility": "semi-preemptible",
     "environmentVariables": {
       "BATCH_SIZE": "32",
       "EPOCHS": "100",

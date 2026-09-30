@@ -59,6 +59,8 @@
 
 * `COMPUTE_RESOURCES` (value: `"compute-resources"`)
 
+* `RESOURCE_CLAIM_TEMPLATES` (value: `"resource-claim-templates"`)
+
 * `TEMPLATES` (value: `"templates"`)
 
 * `CREDENTIALS` (value: `"credentials"`)

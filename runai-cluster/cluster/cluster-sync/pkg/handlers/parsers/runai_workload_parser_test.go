@@ -1306,6 +1306,28 @@ var _ = Describe("Parsers", func() {
 
 					Expect(parser.distributedFrameworkForExternalWorkload(externalWorkload, "Distributed")).To(Equal("PyTorch"))
 				})
+
+				// The runner owns the ExternalWorkload, so its owner reference no longer names the child.
+				It("resolves the framework from the spec kind when the owner is a WorkloadRunner", func() {
+					externalWorkload := &v1alpha1.ExternalWorkload{
+						ObjectMeta: metav1.ObjectMeta{
+							OwnerReferences: []metav1.OwnerReference{
+								{
+									APIVersion: "run.ai/v1alpha1",
+									Kind:       "WorkloadRunner",
+									Name:       "wlr-1",
+								},
+							},
+						},
+						Spec: v1alpha1.ExternalWorkloadSpec{
+							Type:                 "Distributed",
+							OriginalWorkloadKind: "PyTorchJob",
+						},
+					}
+					parser := &WorkloadParser{}
+
+					Expect(parser.distributedFrameworkForExternalWorkload(externalWorkload, "Distributed")).To(Equal("PyTorch"))
+				})
 			})
 
 			Context("Logical workload name", func() {

@@ -7,14 +7,14 @@ Workload assets enable organizations to:
 * Create and reuse preconfigured setup for code, data, storage and resources to be used by AI practitioners to simplify the process of submitting workloads
 * Share the preconfigured setup with a wide audience of AI practitioners with similar needs
 
-<Info>
+<Note>
 
 **Note**
 
 * The creation of assets is possible only via API and the NVIDIA Run:ai UI.
 * The submission of workloads using assets, is possible only via the NVIDIA Run:ai UI.
 
-</Info>
+</Note>
 
 ## Workload Asset Types
 
@@ -33,13 +33,13 @@ There are four workload asset types used by the workload:
 
 When a workload asset is created, a [scope](../../platform-management/aiinitiatives/adapting-ai-initiatives.md#scopes-in-an-organization) is required. The scope defines who in the organization can view and/or use the asset.
 
-<Info>
+<Note>
 
 **Note**
 
 When an asset is created via API, the scope can be the entire account. This is currently an experimental feature.
 
-</Info>
+</Note>
 
 ## Who Can Create an Asset?
 

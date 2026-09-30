@@ -1,6 +1,6 @@
 # Quick Start Templates
 
-This section provides ready-to-use templates for defining new workload types. Each template represents a common Kubernetes pattern and can serve as a foundation when registering a new workload type through the [Workload Types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types) API.
+This section provides ready-to-use templates for defining new workload types. Each template represents a common Kubernetes pattern and can serve as a foundation when registering a new workload type through the [Workload Types](api:main-api:POST/api/v1/workload-types) API.
 
 Use these templates to accelerate development - simply start from the closest match and adapt it to your CRD’s structure.
 

@@ -15,7 +15,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	nodepoolresources "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/nodepool-controller/resources"
 	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	nodepool_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/nodepool-controller"
@@ -32,7 +31,7 @@ func convertNodePoolController(ctx context.Context, k8sReader client.Reader,
 		return nil, nil
 	}
 
-	shardArgs, err := nodepoolresources.MarshalShardArgs(
+	shardArgs, err := marshalShardArgs(
 		runaiConfig.Spec.RunAIScheduler, runaiConfig.Spec.Global.NodeAffinity)
 	if err != nil {
 		return nil, fmt.Errorf("marshal scheduling shard args: %w", err)

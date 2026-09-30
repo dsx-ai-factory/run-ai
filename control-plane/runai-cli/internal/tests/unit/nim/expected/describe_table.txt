@@ -10,7 +10,7 @@ Department:                         default
 Submitted By:                       test@example.com
 Priority:                           very-high (150)
 Category:                           Deploy
-Preemptible:                        false
+Preemptibility:                     Non-preemptible
 Image:                              nvcr.io/nim/meta/llama3-8b-instruct
 Labels:                             [app:nim-service,
                                      env:production]

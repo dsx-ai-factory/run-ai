@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -16,6 +17,8 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -41,6 +44,8 @@ const (
 	sloP90Key            = "p90_ms"
 )
 
+var knownKnobs = []string{"workloads", "workloadType", "podsPerWorkload", "image", "submitConcurrency", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "timeout", "setupTimeout", "settle", "cluster", "slo"}
+
 type Suite struct{}
 
 type settings struct {
@@ -65,7 +70,7 @@ type item struct {
 	pods      int32
 }
 
-type flow interface {
+type workloadFlow interface {
 	name() string
 	watch(ctx context.Context, namespace string) (*measure.Watcher, error)
 	create(ctx context.Context, workload item) (string, error)
@@ -77,36 +82,49 @@ type round struct {
 	size           int
 	timings        []measure.Timing
 	unmatched      int
+	reconnects     int
 	submitMakespan time.Duration
 	quiesce        time.Duration
 	err            error
 }
 
+const suiteName = "scale-burst"
+
 func (Suite) Name() string {
-	return "workload-burst"
+	return suiteName
 }
 
-func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section core.Section, err error) {
-	knobs, err := parseSettings(cfg)
+func (Suite) Category() core.Category {
+	return core.CategoryScale
+}
+
+func (Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario) (section core.Section, err error) {
+	knobs, err := parseSettings(scenario)
 	if err != nil {
 		return core.Section{}, err
 	}
 
-	clients, err := client.NewWithLimits(ctx, env, knobs.limits)
+	setupCtx, cancelSetup := context.WithTimeout(ctx, knobs.setupTimeout)
+	defer cancelSetup()
+	clients, err := client.NewWithLimits(ctx, target, knobs.limits)
 	if err != nil {
 		return core.Section{}, err
 	}
-	clusterID, err := submit.ClusterID(ctx, clients, knobs.cluster)
+	if !clients.TokenExpiry.IsZero() {
+		log.Printf("%s: control plane token expires in %s; longer runs will fail with 401", suiteName, time.Until(clients.TokenExpiry).Round(time.Minute))
+	}
+	clusterID, err := submit.ClusterID(setupCtx, clients, knobs.cluster)
 	if err != nil {
 		return core.Section{}, err
 	}
-	id, err := core.RunID()
+	id, err := core.NewRunID()
 	if err != nil {
 		return core.Section{}, err
 	}
 
 	projectName := "flowmark-burst-" + id
 	defer func() {
+		log.Printf("%s: cleaning up project %q", suiteName, projectName)
 		cleanupErr := cleanup(clients, clusterID, projectName, knobs.setupTimeout)
 		if cleanupErr == nil {
 			return
@@ -118,71 +136,110 @@ func (Suite) Run(ctx context.Context, env core.Env, cfg core.Config) (section co
 		section.Failed = true
 		section.Error = joinMessages(section.Error, "cleanup: "+cleanupErr.Error())
 	}()
-	project, err := submit.Project(ctx, clients, clusterID, projectName, knobs.setupTimeout)
+	project, err := submit.Project(setupCtx, clients, clusterID, projectName, knobs.setupTimeout)
 	if err != nil {
 		return core.Section{}, err
 	}
+	log.Printf("%s: project %q ready, namespace %s", suiteName, project.Name, project.Namespace)
 
-	path := newFlow(knobs.workloadType, clients, project, knobs.concurrency)
+	flow := newFlow(knobs.workloadType, clients, project, knobs.concurrency)
 	var rounds []round
 	for index, size := range knobs.rounds {
-		result := runRound(ctx, path, clients.Kube, project.Namespace, id, index+1, size, knobs)
+		roundNumber := index + 1
+		log.Printf("%s: round %d/%d started: %d %s workloads", suiteName, roundNumber, len(knobs.rounds), size, knobs.workloadType)
+		roundStart := time.Now()
+		result := runRound(ctx, flow, clients.Kube, project.Namespace, id, roundNumber, size, knobs)
+		log.Printf("%s: round %d/%d finished in %s: %s", suiteName, roundNumber, len(knobs.rounds), time.Since(roundStart).Round(time.Second), describeRound(result))
 		rounds = append(rounds, result)
 		if result.err != nil || ctx.Err() != nil {
 			break
 		}
 		if index < len(knobs.rounds)-1 {
+			log.Printf("%s: settling %s before round %d", suiteName, knobs.settle, roundNumber+1)
 			settle(ctx, knobs.settle)
+			if ctx.Err() != nil {
+				break
+			}
 		}
 	}
-	return buildSection(path.name(), rounds, knobs), nil
+	return buildSection(flow.name(), rounds, knobs), nil
 }
 
-func newFlow(workloadType string, clients *client.Clients, project submit.ProjectRef, concurrency int) flow {
+func describeRound(r round) string {
+	summary := measure.Stats(r.timings)
+	text := fmt.Sprintf("%d/%d arrived", summary.SampleSize, r.size)
+	if summary.SampleSize > 0 {
+		text += fmt.Sprintf(", p90 %s", summary.P90.Round(time.Millisecond))
+	}
+	if summary.HasThroughput() {
+		text += fmt.Sprintf(", %.1f workloads/s", summary.Throughput)
+	}
+	if summary.PendingCount > 0 {
+		text += fmt.Sprintf(", %d pending", summary.PendingCount)
+	}
+	if summary.FailedCount > 0 {
+		text += fmt.Sprintf(", %d failed", summary.FailedCount)
+	}
+	if r.unmatched > 0 {
+		text += fmt.Sprintf(", %d unmatched arrivals", r.unmatched)
+	}
+	if r.reconnects > 0 {
+		text += fmt.Sprintf(", watch reopened %d times", r.reconnects)
+	}
+	if r.err != nil {
+		text += ": " + r.err.Error()
+	}
+	return text
+}
+
+func newFlow(workloadType string, clients *client.Clients, project submit.ProjectRef, concurrency int) workloadFlow {
 	if workloadType == trainingType {
-		return &trainingFlow{clients: clients, project: project, concurrency: concurrency, created: map[string]string{}}
+		return &trainingFlow{clients: clients, project: project, concurrency: concurrency, created: map[string]string{}, deleteRequested: map[string]bool{}}
 	}
 	return &deploymentFlow{kube: clients.Kube, concurrency: concurrency}
 }
 
-func parseSettings(cfg core.Config) (settings, error) {
+func parseSettings(scenario core.Scenario) (settings, error) {
+	if unknown := scenario.UnknownKnobs(knownKnobs...); len(unknown) > 0 {
+		return settings{}, fmt.Errorf("unknown knob %q; known knobs: %s", unknown[0], strings.Join(knownKnobs, ", "))
+	}
 	var knobs settings
 	var err error
-	if knobs.rounds, err = cfg.Ints("workloads", []int{100, 250, 500}); err != nil {
+	if knobs.rounds, err = scenario.Ints("workloads", []int{100, 250, 500}); err != nil {
 		return settings{}, err
 	}
-	if knobs.workloadType, err = cfg.String("workloadType", deploymentType); err != nil {
+	if knobs.workloadType, err = scenario.String("workloadType", deploymentType); err != nil {
 		return settings{}, err
 	}
-	pods, err := cfg.Int("podsPerWorkload", 1)
+	pods, err := scenario.Int("podsPerWorkload", 1)
 	if err != nil {
 		return settings{}, err
 	}
-	if knobs.image, err = cfg.String("image", defaultImage); err != nil {
+	if knobs.image, err = scenario.String("image", defaultImage); err != nil {
 		return settings{}, err
 	}
-	if knobs.concurrency, err = cfg.Int("submitConcurrency", defaultConcurrency); err != nil {
+	if knobs.concurrency, err = scenario.Int("submitConcurrency", defaultConcurrency); err != nil {
 		return settings{}, err
 	}
-	if knobs.limits.KubeRequestsPerSecond, err = cfg.Int("kubeRequestsPerSecond", client.DefaultLimits.KubeRequestsPerSecond); err != nil {
+	if knobs.limits.KubeRequestsPerSecond, err = scenario.Int("kubeRequestsPerSecond", client.DefaultLimits.KubeRequestsPerSecond); err != nil {
 		return settings{}, err
 	}
-	if knobs.limits.ControlPlaneRequestsPerSecond, err = cfg.Int("controlPlaneRequestsPerSecond", client.DefaultLimits.ControlPlaneRequestsPerSecond); err != nil {
+	if knobs.limits.ControlPlaneRequestsPerSecond, err = scenario.Int("controlPlaneRequestsPerSecond", client.DefaultLimits.ControlPlaneRequestsPerSecond); err != nil {
 		return settings{}, err
 	}
-	if knobs.timeout, err = cfg.Duration("timeout", 15*time.Minute); err != nil {
+	if knobs.timeout, err = scenario.Duration("timeout", 15*time.Minute); err != nil {
 		return settings{}, err
 	}
-	if knobs.setupTimeout, err = cfg.Duration("setupTimeout", 5*time.Minute); err != nil {
+	if knobs.setupTimeout, err = scenario.Duration("setupTimeout", 5*time.Minute); err != nil {
 		return settings{}, err
 	}
-	if knobs.settle, err = cfg.Duration("settle", 90*time.Second); err != nil {
+	if knobs.settle, err = scenario.Duration("settle", 90*time.Second); err != nil {
 		return settings{}, err
 	}
-	if knobs.cluster, err = cfg.String("cluster", ""); err != nil {
+	if knobs.cluster, err = scenario.String("cluster", ""); err != nil {
 		return settings{}, err
 	}
-	slo, err := cfg.Map("slo")
+	slo, err := scenario.Map("slo")
 	if err != nil {
 		return settings{}, err
 	}
@@ -245,9 +302,9 @@ func wholeNumbers(knob string, raw map[string]any) (map[string]int, error) {
 	return values, nil
 }
 
-func runRound(ctx context.Context, path flow, kube k8sclient.Client, namespace, id string, index, size int, knobs settings) round {
+func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, namespace, id string, index, size int, knobs settings) round {
 	result := round{index: index, size: size}
-	watcher, err := path.watch(ctx, namespace)
+	watcher, err := flow.watch(ctx, namespace)
 	if err != nil {
 		result.err = err
 		return result
@@ -257,11 +314,17 @@ func runRound(ctx context.Context, path flow, kube k8sclient.Client, namespace, 
 	labels := map[string]string{runLabel: id, roundLabel: strconv.Itoa(index), roundSizeLabel: strconv.Itoa(size)}
 	var names sync.Map
 	submitStart := time.Now()
-	burst(ctx, path, watcher, &names, namespace, id, index, size, labels, knobs)
+	burst(ctx, flow, watcher, &names, namespace, id, index, size, labels, knobs)
 	result.submitMakespan = time.Since(submitStart)
 
 	timings := watcher.WaitAll(knobs.timeout)
 	result.unmatched = watcher.Unmatched()
+	result.reconnects = watcher.Reconnects()
+	if ctx.Err() != nil {
+		result.timings = timings
+		result.err = fmt.Errorf("interrupted before teardown: %w", ctx.Err())
+		return result
+	}
 	for i := range timings {
 		if name, ok := names.Load(timings[i].Name); ok {
 			timings[i].Name = name.(string)
@@ -271,12 +334,12 @@ func runRound(ctx context.Context, path flow, kube k8sclient.Client, namespace, 
 	result.timings = timings
 
 	quiesceStart := time.Now()
-	result.err = quiesce(ctx, path, kube, namespace, labels, knobs.setupTimeout)
+	result.err = quiesce(ctx, flow, kube, namespace, labels, knobs.setupTimeout)
 	result.quiesce = time.Since(quiesceStart)
 	return result
 }
 
-func burst(ctx context.Context, path flow, watcher *measure.Watcher, names *sync.Map, namespace, id string, index, size int, labels map[string]string, knobs settings) {
+func burst(ctx context.Context, flow workloadFlow, watcher *measure.Watcher, names *sync.Map, namespace, id string, index, size int, labels map[string]string, knobs settings) {
 	jobs := make(chan int)
 	var wg sync.WaitGroup
 	for range knobs.concurrency {
@@ -285,7 +348,9 @@ func burst(ctx context.Context, path flow, watcher *measure.Watcher, names *sync
 			defer wg.Done()
 			for i := range jobs {
 				name := fmt.Sprintf("flowmark-burst-%s-r%d-%d", id, index, i+1)
-				key, err := path.create(ctx, item{name: name, namespace: namespace, labels: labels, image: knobs.image, pods: knobs.pods})
+				createCtx, cancel := context.WithTimeout(ctx, knobs.setupTimeout)
+				key, err := flow.create(createCtx, item{name: name, namespace: namespace, labels: labels, image: knobs.image, pods: knobs.pods})
+				cancel()
 				acceptedAt := time.Now()
 				if err != nil {
 					watcher.MarkFailed(name, err)
@@ -297,16 +362,19 @@ func burst(ctx context.Context, path flow, watcher *measure.Watcher, names *sync
 		}()
 	}
 	for i := range size {
+		if ctx.Err() != nil {
+			break
+		}
 		jobs <- i
 	}
 	close(jobs)
 	wg.Wait()
 }
 
-func quiesce(ctx context.Context, path flow, kube k8sclient.Client, namespace string, labels map[string]string, timeout time.Duration) error {
+func quiesce(ctx context.Context, flow workloadFlow, kube k8sclient.Client, namespace string, labels map[string]string, timeout time.Duration) error {
 	var last string
 	err := wait.PollUntilContextTimeout(ctx, quiescePoll, timeout, true, func(ctx context.Context) (bool, error) {
-		leftover, err := path.teardown(ctx, namespace, labels)
+		leftover, err := flow.teardown(ctx, namespace, labels)
 		if err != nil {
 			last = err.Error()
 			return false, nil
@@ -362,6 +430,7 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 		metrics["failed_count"+at] = summary.FailedCount
 		metrics["success_rate"+at] = summary.SuccessRate
 		metrics["unmatched_arrivals"+at] = r.unmatched
+		metrics["watch_reconnects"+at] = r.reconnects
 		metrics["submit_makespan_ms"+at] = r.submitMakespan.Milliseconds()
 		metrics["quiesce_ms"+at] = r.quiesce.Milliseconds()
 		if summary.SampleSize > 0 {
@@ -370,7 +439,9 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 			metrics["p99_ms"+at] = summary.P99.Milliseconds()
 			metrics["mean_ms"+at] = summary.Mean.Milliseconds()
 			metrics["max_ms"+at] = summary.Max.Milliseconds()
-			metrics["arrival_makespan_ms"+at] = summary.Makespan.Milliseconds()
+		}
+		if summary.HasThroughput() {
+			metrics["makespan_ms"+at] = summary.Makespan.Milliseconds()
 			metrics["throughput_per_sec"+at] = summary.Throughput
 		}
 		problems = append(problems, roundProblems(r, summary)...)
@@ -391,13 +462,18 @@ func roundProblems(r round, summary measure.Summary) []string {
 	var problems []string
 	if summary.PendingCount > 0 {
 		message := fmt.Sprintf("round %d (%d workloads): %d never reached the cluster within the timeout", r.index, r.size, summary.PendingCount)
-		if err := lastError(r.timings, measure.Pending); err != nil {
+		if err := lastError(r.timings, measure.Pending); errors.Is(err, measure.ErrWatchClosed) {
+			message = fmt.Sprintf("round %d (%d workloads): the watch ended before %d arrived (%v)", r.index, r.size, summary.PendingCount, err)
+		} else if err != nil {
 			message += " (" + err.Error() + ")"
 		}
-		if r.unmatched > 0 {
+		if r.unmatched > 0 && summary.FailedCount == 0 {
 			message += fmt.Sprintf(" (%d objects arrived that matched no submitted workload; is the correlation field missing?)", r.unmatched)
 		}
 		problems = append(problems, message)
+	}
+	if r.reconnects > 0 {
+		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the watch was reopened %d times; latencies of workloads in flight during the gaps include the reconnect delay", r.index, r.size, r.reconnects))
 	}
 	if summary.FailedCount > 0 {
 		message := fmt.Sprintf("round %d (%d workloads): %d creates failed", r.index, r.size, summary.FailedCount)
@@ -433,4 +509,41 @@ func joinMessages(first, second string) string {
 		return second
 	}
 	return first + "; " + second
+}
+
+func deleteAll(ctx context.Context, concurrency int, targets []k8sclient.Object, remove func(context.Context, k8sclient.Object) error) error {
+	jobs := make(chan k8sclient.Object)
+	errs := make(chan error, len(targets))
+	var wg sync.WaitGroup
+	for range concurrency {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for obj := range jobs {
+				if err := remove(ctx, obj); err != nil {
+					errs <- fmt.Errorf("deleting %s: %w", obj.GetName(), err)
+				}
+			}
+		}()
+	}
+	for _, obj := range targets {
+		jobs <- obj
+	}
+	close(jobs)
+	wg.Wait()
+	close(errs)
+	var failures []error
+	for err := range errs {
+		failures = append(failures, err)
+	}
+	return errors.Join(failures...)
+}
+
+func countAllInNamespace(ctx context.Context, kube k8sclient.Client, kind schema.GroupVersionKind, namespace string) (int, error) {
+	list := &unstructured.UnstructuredList{}
+	list.SetGroupVersionKind(schema.GroupVersionKind{Group: kind.Group, Version: kind.Version, Kind: kind.Kind + "List"})
+	if err := kube.List(ctx, list, k8sclient.InNamespace(namespace)); err != nil {
+		return 0, fmt.Errorf("listing %s objects: %w", kind.Kind, err)
+	}
+	return len(list.Items), nil
 }

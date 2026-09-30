@@ -165,14 +165,12 @@ Override knobs of note:
 Git tag bump and validation for versioned Go modules. `TAG_FORMAT` is the tag
 prefix (`$(TAG_FORMAT)/vX.Y.Z` prod, `-dev.N` dev).
 
-- `client-bump-version(-dev)` — legacy patch-only bump for generated clients.
+- `client-bump-version(-dev)` — run from the service that owns the client.
 - `package-bump-version(-dev)` — `runai-common-packages/*` and
-  `runai-application-packages/*` only; auto patch/minor via `apidiff`,
-  confirms before tagging.
+  `runai-application-packages/*`.
+- Both share one flow: auto patch/minor via `apidiff`, confirms before tagging.
 - `check-breaking-changes` — preview the `apidiff` verdict, no tagging.
 - `validate` / `validate-imports` — go.mod replace / `-dev` client checks.
-
-No `?=` knobs; everything derives from `SERVICE_NAME` and git tag state.
 
 ### `mirrord.mk`
 
