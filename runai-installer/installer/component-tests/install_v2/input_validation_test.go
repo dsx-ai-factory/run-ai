@@ -180,11 +180,10 @@ func TestInputValidation_Failures(t *testing.T) {
 		{
 			name: "missing chart repository for a non-prod NGC registry",
 			setup: func(t *testing.T, _ *installconfig.Config, opts *installconfig.RunOptions) {
-				t.Setenv(step.NGCNonProdChartRepoEnv, "")
 				opts.Env = spec.EnvStaging
 				opts.Registry = &spec.Registry{Type: spec.RegistryTypeNGC, Token: "ngc-key"}
 			},
-			wantSub: step.NGCNonProdChartRepoEnv,
+			wantSub: "chart repository is required for a non-prod NGC install",
 		},
 		{
 			name: "missing registry CA chain file",

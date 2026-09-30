@@ -124,7 +124,7 @@ func TestNGCInstall_ChartRepositoryOverride(t *testing.T) {
 	assert.Equal(t, "runai-cluster", cl[0].ChartName)
 }
 
-func TestNGCInstall_NonProdChartRepoFromEnv(t *testing.T) {
+func TestNGCInstall_NonProdChartRepository(t *testing.T) {
 	helm := harness.NewFakeHelmWithReleases()
 	k8s := &harness.FakeK8sExecutor{}
 	_, provider := harness.NewFakeRunAIClientProvider(helm)
@@ -133,7 +133,7 @@ func TestNGCInstall_NonProdChartRepoFromEnv(t *testing.T) {
 	eventsPath := filepath.Join(t.TempDir(), "events.ndjson")
 	cfg, opts := ngcConfig(t, eventsPath, "ngc-key")
 	opts.Env = spec.EnvStaging
-	t.Setenv(step.NGCNonProdChartRepoEnv, "https://helm.ngc.nvidia.com/myorg/myteam/")
+	opts.Registry.ChartRepository = "https://helm.ngc.nvidia.com/myorg/myteam/"
 	term, _, _ := newTestTerminal()
 
 	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
