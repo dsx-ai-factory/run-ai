@@ -36,9 +36,6 @@ func MissingChartRepoError(chart string) error {
 	return fmt.Errorf("no chart repository configured for the %s chart: set the %s environment variable", chart, ChartRepoBaseEnv)
 }
 
-// NGCNonProdChartRepoEnv names the environment variable holding the NGC chart
-// repository for the non-prod environments (staging, lab and test). Only the
-// prod repository is public, so the non-prod one is not compiled in.
 const NGCNonProdChartRepoEnv = "RUNAI_NGC_NONPROD_CHART_REPO"
 
 const ngcChartRepoProd = "https://helm.ngc.nvidia.com/nvidia/runai"
