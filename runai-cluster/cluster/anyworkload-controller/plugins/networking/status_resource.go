@@ -67,6 +67,10 @@ func (p *Plugin) Status(ctx context.Context, runner *dromosv1alpha1.WorkloadRunn
 	if err := setNetworkingAdditionalInfo(status, nil); err != nil {
 		return err
 	}
+	if p.routingDisabled {
+		status.SetPhase(dromosv1alpha1.PluginPhaseDisabled)
+		return nil
+	}
 
 	shape, cfg, classifyErr := classifyInput(runner)
 	if classifyErr != nil {

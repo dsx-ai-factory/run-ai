@@ -8,6 +8,7 @@ package networking
 import (
 	"context"
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
@@ -44,6 +45,8 @@ type Plugin struct {
 	reader           client.Reader
 	ownershipReader  client.Reader
 	enforceOwnership bool
+	configMapName    string
+	routingDisabled  bool
 }
 
 // Integration owns the networking plugin's anyworkload-controller-specific
@@ -77,6 +80,7 @@ func newPlugin(reader, ownershipReader client.Reader) *Plugin {
 		reader:           reader,
 		ownershipReader:  ownershipReader,
 		enforceOwnership: true,
+		configMapName:    os.Getenv(workloadconfig.EnvVarOauth2ProxyTemplatesConfigMap),
 	}
 }
 
@@ -87,7 +91,7 @@ func (i *Integration) Build(_ context.Context, deps framework.PluginDeps) (frame
 	if err != nil {
 		return nil, fmt.Errorf("load networking config: %w", err)
 	}
-	if !cfg.Enabled {
+	if !cfg.Enabled && os.Getenv(workloadconfig.EnvVarOauth2ProxyTemplatesConfigMap) == "" {
 		i.disabled = true
 		return nil, framework.ErrPluginDisabled
 	}
@@ -95,6 +99,7 @@ func (i *Integration) Build(_ context.Context, deps framework.PluginDeps) (frame
 		return nil, fmt.Errorf("networking plugin requires a non-nil Client in PluginDeps")
 	}
 	i.plugin = newPlugin(deps.Client, nil)
+	i.plugin.routingDisabled = !cfg.Enabled
 	return i.plugin, nil
 }
 
@@ -110,6 +115,9 @@ func (i *Integration) Setup(
 	}
 	if i.plugin == nil {
 		return fmt.Errorf("networking integration must be built before setup")
+	}
+	if i.plugin.routingDisabled {
+		return nil
 	}
 	if apiReader == nil {
 		return fmt.Errorf("networking integration requires a non-nil APIReader")
@@ -129,6 +137,12 @@ func (p *Plugin) Name() string {
 }
 
 func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
+	if p.configMapName != "" {
+		bldr = bldr.Watches(&corev1.ConfigMap{}, handler.EnqueueRequestsFromMapFunc(p.mapConfigMapToRunners))
+	}
+	if p.routingDisabled {
+		return bldr, nil
+	}
 	ownedEnqueue := handler.EnqueueRequestsFromMapFunc(p.mapToWorkloadRunner)
 	serviceEnqueue := handler.EnqueueRequestsFromMapFunc(p.mapServiceDependency)
 	podEnqueue := handler.EnqueueRequestsFromMapFunc(p.mapPodDependency)

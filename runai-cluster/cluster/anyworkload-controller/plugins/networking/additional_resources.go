@@ -37,6 +37,14 @@ func (p *Plugin) HandleAdditionalResources(
 	k8sClient client.Client,
 	state *reconcile.State,
 ) error {
+	if p.configMapName != "" {
+		if err := p.ensureOAuth2Templates(ctx, runner, k8sClient); err != nil {
+			return err
+		}
+	}
+	if p.routingDisabled {
+		return nil
+	}
 	shape, cfg, err := classifyInput(runner)
 	if err != nil {
 		_ = state.AddPluginIssue(ctx, p, runner, err, false, "", issue.Network)
