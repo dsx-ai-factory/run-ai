@@ -7,17 +7,24 @@ package services
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
+	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 )
 
 // K8sObjectsSyncUpdates is the cluster-agent-facing endpoint that streams
-// k8s-object asset updates to the cluster. Handler is not yet implemented;
-// it will mirror CredentialsSyncUpdates / DatasourceSyncUpdates once the
-// k8s-objects sync list and the RCT branch of prepareAssetSyncUpdatesResp
-// are in place.
+// k8s-object asset updates (resource claim templates today) to the cluster.
+// It mirrors CredentialsSyncUpdates / DatasourceSyncUpdates: the shared
+// handleAgentSyncUpdates orchestrator loads the deltas past `after`, and
+// prepareAssetSyncUpdatesResp fans them into UnifiedAssetSyncResponse via
+// the RCT branch. K8s-object specs are not encrypted, so needToDecrypt is
+// false.
 func (s *SyncApiService) K8sObjectsSyncUpdates(ctx context.Context, clusterId string, after int64, clusterSyncReport api.ClusterSyncReport) (api.ImplResponse, error) {
-	return api.Response(http.StatusNotImplemented, nil), errors.New("K8sObjectsSyncUpdates not implemented")
+	unifiedResult, err := s.handleAgentSyncUpdates(ctx, clusterId, after, &clusterSyncReport, dbmodel.K8sObjectsAssetsToSync, false /*no need to decrypt*/)
+	if err != nil {
+		return api.Response(int(err.Code), err), nil
+	}
+
+	return api.Response(http.StatusOK, unifiedResult.ToK8sObjects()), nil
 }

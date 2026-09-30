@@ -168,6 +168,7 @@ var TablesOfSyncedAssets = []string{
 	TableNameAssetsGenericSecret,
 	TableNameAssetsDockerRegistry,
 	TableNameAssetsNgcApiKey,
+	TableNameAssetsSpec,
 }
 
 var TableOfCredentials = []string{
