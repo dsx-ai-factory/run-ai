@@ -72,8 +72,8 @@ type Mocks struct {
 	tenantSettingsClient        *bc_mocks.TenantSettingsClient
 	idmClient                   *idm_client.IIdm
 	orgUnitClient               *org_unit_client.IOrgUnitClient
-	tmInternalApi               *tm_client_mock.InternalApi
-	tmTenantsApi                *tm_client_mock.TenantsApi
+	tmInternalApi               *tm_client_mock.InternalAPI
+	tmTenantsApi                *tm_client_mock.TenantsAPI
 	clusterDeleter              *cdmock.ClusterDeleter
 	pubsub                      *pubsubmocks.PubSuber
 	orgClient                   *org_unit_service_client_mock.IOrgUnitClient
@@ -137,8 +137,8 @@ func prepareMocksExt(mockClusterDeleter bool) {
 		tenantSettingsClient:        &bc_mocks.TenantSettingsClient{},
 		idmClient:                   &idm_client.IIdm{},
 		orgUnitClient:               &org_unit_client.IOrgUnitClient{},
-		tmInternalApi:               &tm_client_mock.InternalApi{},
-		tmTenantsApi:                &tm_client_mock.TenantsApi{},
+		tmInternalApi:               &tm_client_mock.InternalAPI{},
+		tmTenantsApi:                &tm_client_mock.TenantsAPI{},
 		clusterDeleter:              cdmock.NewClusterDeleter(ginkgo.GinkgoT()),
 		pubsub:                      &pubsubmocks.PubSuber{},
 		orgClient:                   &org_unit_service_client_mock.IOrgUnitClient{},

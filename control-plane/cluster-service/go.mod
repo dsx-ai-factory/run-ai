@@ -11,7 +11,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.17
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.2
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.5
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
