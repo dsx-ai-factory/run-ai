@@ -130,12 +130,18 @@ jobs:
           AUTO_TAG: "1"
           GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
           TOKEN: ${{ secrets.DEVOPS_RUNAI_TOKEN }}
+          RUN_AI_TOKEN: ${{ secrets.GIT_HUB_OSS }}
         run: |
-          # Go fetches the repository's own modules with this; set for this step's
-          # processes only, not written to the runner's git config.
-          export GIT_CONFIG_COUNT=1 \
+          # Go fetches the repository's own modules with TOKEN. The apidiff check
+          # compares against the module's previous release, and releases from before
+          # the move here import private github.com/run-ai modules, which only the
+          # run-ai org token can read; git uses the longest matching prefix. Set for
+          # this step's processes only, not written to the runner's git config.
+          export GIT_CONFIG_COUNT=2 \
             GIT_CONFIG_KEY_0="url.https://x-access-token:${TOKEN}@github.com/.insteadOf" \
-            GIT_CONFIG_VALUE_0="https://github.com/"
+            GIT_CONFIG_VALUE_0="https://github.com/" \
+            GIT_CONFIG_KEY_1="url.https://x-access-token:${RUN_AI_TOKEN}@github.com/run-ai/.insteadOf" \
+            GIT_CONFIG_VALUE_1="https://github.com/run-ai/"
           case "$MODULE" in
             control-plane/*/pkg/client) bump() { make -C "${MODULE%/pkg/client}" client-bump-version; } ;;
             *) bump() { make -C "$MODULE" package-bump-version; } ;;
