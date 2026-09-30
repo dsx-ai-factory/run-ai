@@ -31766,14 +31766,6 @@ components:
             will be scheduled before all workloads in rank "Medium".
           default: MediumLow
           example: High
-        priority:
-          deprecated: true
-          description: >-
-            Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          type: string
-          nullable: true
-          example: Normal
     DepartmentForList:
       allOf:
         - $ref: '#/components/schemas/DataDepartmentFields'
@@ -31873,14 +31865,6 @@ components:
             will be scheduled before all workloads in rank "Medium".
           default: MediumLow
           example: High
-        priority:
-          deprecated: true
-          description: >-
-            Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          type: string
-          nullable: true
-          example: Normal
     DepartmentCreationRequest:
       allOf:
         - $ref: '#/components/schemas/DataDepartmentFields'

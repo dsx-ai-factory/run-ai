@@ -246,40 +246,6 @@ var _ = Describe("Org unit sync tests", Ordered, func() {
 			validateSyncProject(syncProject, department1Id, true, false, nodeType1Id)
 		})
 
-		It("backwards compatibility test: basic project with priority-only resources", func() {
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, department1Id, clusterId)
-			request.SchedulingRules = ptr.To(api.SchedulingRules{
-				InteractiveJobTimeLimitSeconds: ptr.To(int32(20)),
-			})
-			// use only Priority in the request, no Rank, to test backwards compatibility
-			request.Resources[0].Rank = nil
-			request.Resources[0].Priority = ptr.To("Highest")
-
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			Expect(err).To(BeNil())
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			project := createResponse.Body.(api.Project)
-
-			projectId := project.Id
-			projectIds = append(projectIds, projectId)
-			updatedAt := project.UpdatedAt
-
-			updateProjStatus(ctx, projectApiService, projectId, clusterId, ptr.To(updatedAt))
-
-			getResponse, err := projectApiService.GetSyncProjects(ctx, clusterId, time.Time{}, 0, 0, false)
-			Expect(err).To(BeNil())
-			Expect(getResponse.Code).To(Equal(http.StatusOK))
-			syncProjects := getResponse.Body.(api.GetSyncProjects200Response).Projects
-			Expect(len(syncProjects)).To(Equal(1))
-			syncProject := syncProjects[0]
-			validateSyncProject(syncProject, department1Id, false, false, nodeType1Id)
-			resources := syncProject.Resources[0]
-			rankValue := services.MapRankToNumber(ptr.To("Highest"))
-			Expect(resources.Rank).To(Equal(rankValue))
-			Expect(resources.Priority).To(Equal(rankValue))
-		})
-
 		It("permissions", func() {
 			toMockAccessrulesDepId = ptr.To(department1Id)
 			name := createProjectName()
