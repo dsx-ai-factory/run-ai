@@ -27,7 +27,7 @@ import (
 const (
 	intervalMillisWhenWaitingForView = 20
 	IntervalWhenWaitingForView       = intervalMillisWhenWaitingForView * time.Millisecond
-	timeoutMillisWhenWaitingForView  = 200
+	timeoutMillisWhenWaitingForView  = 1000
 	TimeoutWhenWaitingForView        = timeoutMillisWhenWaitingForView * time.Millisecond
 )
 

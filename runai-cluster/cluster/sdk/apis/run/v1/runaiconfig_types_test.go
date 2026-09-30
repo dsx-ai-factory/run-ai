@@ -83,9 +83,14 @@ var _ = Describe("RunaiConfig", func() {
 		})
 
 		It("should use chart-provided images for anyworkload-controller", func() {
+			GinkgoT().Setenv("IMG_DEFAULT_REGISTRY", "internal.example.com")
+			GinkgoT().Setenv("IMG_DEFAULT_VERSION", "runai-version")
 			GinkgoT().Setenv("IMG_THIRD_PARTY_GIT_SYNC_REGISTRY", "registry.k8s.io")
 			GinkgoT().Setenv("IMG_THIRD_PARTY_GIT_SYNC_REPOSITORY", "git-sync/git-sync")
 			GinkgoT().Setenv("IMG_THIRD_PARTY_GIT_SYNC_TAG", "v4.7.0")
+			GinkgoT().Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_REGISTRY", "quay.io")
+			GinkgoT().Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_REPOSITORY", "oauth2-proxy/oauth2-proxy")
+			GinkgoT().Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_TAG", "v7.15.4")
 			GinkgoT().Setenv("IMG_THIRD_PARTY_WAIT_UBI_MINIMAL_REGISTRY", "registry.access.redhat.com")
 			GinkgoT().Setenv("IMG_THIRD_PARTY_WAIT_UBI_MINIMAL_REPOSITORY", "ubi9/ubi-minimal")
 			GinkgoT().Setenv("IMG_THIRD_PARTY_WAIT_UBI_MINIMAL_TAG", "9.8")
@@ -97,10 +102,38 @@ var _ = Describe("RunaiConfig", func() {
 			Expect(*gitSync.Name).To(Equal("git-sync/git-sync"))
 			Expect(*gitSync.Tag).To(Equal("v4.7.0"))
 
+			oauth2Proxy := resource.Spec.AnyworkloadController.RunaiOauth2ProxyImage
+			Expect(*oauth2Proxy.Registry).To(Equal("quay.io"))
+			Expect(*oauth2Proxy.Name).To(Equal("oauth2-proxy/oauth2-proxy"))
+			Expect(*oauth2Proxy.Tag).To(Equal("v7.15.4"))
+
 			usernameLoader := resource.Spec.AnyworkloadController.RunaiOauth2ProxyUsernameLoaderImage
 			Expect(*usernameLoader.Registry).To(Equal("registry.access.redhat.com"))
 			Expect(*usernameLoader.Name).To(Equal("ubi9/ubi-minimal"))
 			Expect(*usernameLoader.Tag).To(Equal("9.8"))
+		})
+
+		It("should preserve explicit oauth2-proxy image overrides", func() {
+			GinkgoT().Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_REGISTRY", "quay.io")
+			GinkgoT().Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_REPOSITORY", "oauth2-proxy/oauth2-proxy")
+			GinkgoT().Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_TAG", "v7.15.4")
+			resource := &RunaiConfig{
+				Spec: RunaiConfigSpec{
+					AnyworkloadController: &anyworkload_controller.AnyworkloadController{
+						RunaiOauth2ProxyImage: &common.Image{
+							Registry: ptr.To("registry.example.com"),
+							Name:     ptr.To("custom/oauth2-proxy"),
+							Tag:      ptr.To("custom-tag"),
+						},
+					},
+				},
+			}
+			resource.SetDefaultsWhereNeeded()
+
+			image := resource.Spec.AnyworkloadController.RunaiOauth2ProxyImage
+			Expect(*image.Registry).To(Equal("registry.example.com"))
+			Expect(*image.Name).To(Equal("custom/oauth2-proxy"))
+			Expect(*image.Tag).To(Equal("custom-tag"))
 		})
 
 		It("should preserve explicit username-loader image overrides", func() {

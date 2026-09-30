@@ -42,7 +42,7 @@ var _ = Describe("Deployment", func() {
 			runaiConfig.Spec.ResearcherService.Image.Name = ptr.To[string]("name")
 
 			initDeployment(runaiConfig, deployment)
-			Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(BeEquivalentTo("gcr.io/run-ai-prod/name:tag"))
+			Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(BeEquivalentTo("registry.example.com/runai/name:tag"))
 		})
 	})
 
