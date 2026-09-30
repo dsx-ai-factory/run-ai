@@ -23,8 +23,8 @@ on:
   workflow_dispatch:
     inputs:
       modules:
-        description: "Module directories, comma separated (e.g. runai-common-packages/cache, control-plane/audit-service/pkg/client)"
-        required: true
+        description: "Module directories, comma separated (e.g. runai-common-packages/cache, control-plane/audit-service/pkg/client). Empty: what the weekly run would release"
+        required: false
       dry_run:
         description: "Report the tags without creating them"
         type: boolean
@@ -39,10 +39,11 @@ jobs:
     outputs:
       modules: ${{ steps.modules.outputs.modules }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
         with:
           fetch-depth: 0
           fetch-tags: true
+          persist-credentials: false
 
       - id: modules
         env:
@@ -55,26 +56,38 @@ jobs:
               | sed 's#/$##' | sort -u \
               | while read -r m; do [ -f "$m/go.mod" ] && echo "$m"; done || true
           }
+          # Everything changed since its last release. A module never tagged is
+          # skipped: its first version is a decision.
+          weekly() {
+            git ls-files '*/go.mod' | to_modules \
+              | while read -r m; do
+                  tag=$(git tag -l "$m/v*" | grep -v -- '-dev' | sort -V | tail -1 || true)
+                  if [ -n "$tag" ] && [ -n "$(git log -1 --format=%H "$tag..HEAD" -- "$m")" ]; then echo "$m"; fi
+                done
+          }
           case "$GITHUB_EVENT_NAME" in
             workflow_dispatch)
-              modules=$(echo "$INPUT" | tr ',' '\n' | sed 's#[[:space:]]##g; s#/*$#/x#' | to_modules) ;;
+              if [ -z "${INPUT//[[:space:],]/}" ]; then
+                modules=$(weekly)
+              else
+                modules=$(echo "$INPUT" | tr ',' '\n' | sed 's#[[:space:]]##g; s#/*$#/x#' | to_modules)
+              fi ;;
             push)
+              # The pushed commits, or just the tip when there is no usable before (a
+              # new branch or a force push).
+              range="$BEFORE..$GITHUB_SHA"
+              git cat-file -e "$BEFORE^{commit}" 2>/dev/null || range="$GITHUB_SHA^!"
               # Only a person's change or a security fix; routine Renovate merges wait
-              # for the weekly run.
-              modules=$(git log --format='%H%x09%an%x09%s' "$BEFORE..$GITHUB_SHA" \
+              # for the weekly run. Each commit counts with everything it brought to
+              # main, a merge included.
+              modules=$(git log --first-parent --format='%H%x09%an%x09%s' "$range" \
                 | while IFS=$'\t' read -r sha author subject; do
                     if [ "$author" != "devops-runai" ] || [[ "$subject" == *"[SECURITY]"* ]]; then
-                      git diff-tree --no-commit-id --name-only -r "$sha"
+                      git diff --name-only "$sha^1" "$sha"
                     fi
                   done | to_modules) ;;
             schedule)
-              # Everything changed since its last release. A module never tagged is
-              # skipped: its first version is a decision.
-              modules=$(git ls-files '*/go.mod' | to_modules \
-                | while read -r m; do
-                    tag=$(git tag -l "$m/v*" | grep -v -- '-dev' | sort -V | tail -1 || true)
-                    if [ -n "$tag" ] && [ -n "$(git log -1 --format=%H "$tag..HEAD" -- "$m")" ]; then echo "$m"; fi
-                  done) ;;
+              modules=$(weekly) ;;
           esac
           echo "modules=$(echo "$modules" | jq -R . | jq -sc 'map(select(. != ""))')" >> "$GITHUB_OUTPUT"
           echo "$modules"
@@ -94,21 +107,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # A named `main` at origin/main: versioning.mk refuses to tag from anything else.
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
         with:
           ref: main
           fetch-depth: 0
           fetch-tags: true
           token: ${{ secrets.GIT_HUB_OSS }}
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: stable
-
-      - name: Let Go fetch the repository's own modules
-        env:
-          TOKEN: ${{ secrets.GIT_HUB_OSS }}
-        run: git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
 
       - name: Bump ${{ matrix.module }}
         env:
@@ -116,14 +124,20 @@ jobs:
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
           AUTO_TAG: "1"
           GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
+          TOKEN: ${{ secrets.GIT_HUB_OSS }}
         run: |
+          # Go fetches the repository's own modules with this; set for this step's
+          # processes only, not written to the runner's git config.
+          export GIT_CONFIG_COUNT=1 \
+            GIT_CONFIG_KEY_0="url.https://x-access-token:${TOKEN}@github.com/.insteadOf" \
+            GIT_CONFIG_VALUE_0="https://github.com/"
           case "$MODULE" in
             control-plane/*/pkg/client) bump() { make -C "${MODULE%/pkg/client}" client-bump-version; } ;;
             *) bump() { make -C "$MODULE" package-bump-version; } ;;
           esac
           # versioning.mk refuses when main moved during the run, and the push that moved
           # it may not touch this module -- so catch up with main and bump again.
-          for attempt in 1 2 3; do
+          for _ in 1 2 3; do
             if bump 2>&1 | tee bump.log; [ "${PIPESTATUS[0]}" -eq 0 ]; then exit 0; fi
             grep -q "not up to date with origin/main" bump.log || exit 1
             git fetch -q origin main && git reset -q --hard origin/main
