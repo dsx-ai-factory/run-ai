@@ -26,6 +26,16 @@ const (
 
 // ImageSpec is a struct describing a container image
 type Image struct {
+	// DEPRECATED: Use Registry instead
+	// Repository is the repository prefix for the image
+	// +kubebuilder:validation:Optional
+	Repository *string `json:"repository,omitempty"`
+
+	// DEPRECATED: Use Registry instead
+	// Env is the repository suffix for the image
+	// +kubebuilder:validation:Optional
+	Env *string `json:"env,omitempty"`
+
 	// Registry is the registry of the image
 	// +kubebuilder:validation:Optional
 	Registry *string `json:"registry,omitempty"`
@@ -54,13 +64,6 @@ func ThirdPartyImage(name string) *Image {
 
 // SetDefaultsWhereNeeded sets default fields for unset fields
 func (i *Image) SetDefaultsWhereNeeded(defaultImageValues *Image) {
-	/*
-		Image registry precedence (from highest to lowest):
-		1. Specified registry
-		2. Specified repository/env
-		3. Global registry
-		4. Default registry
-	*/
 	if i.Registry == nil {
 		if defaultImageValues.Registry != nil {
 			i.Registry = defaultImageValues.Registry
