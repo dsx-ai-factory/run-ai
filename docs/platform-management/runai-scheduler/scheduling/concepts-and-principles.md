@@ -36,7 +36,7 @@ Each project and department includes a set of deserved resource quotas, per node
 
 #### Deserved Quota and Workload Scheduling
 
-Deserved quota means that a project is entitled to use up to a maximum number of resources defined by its quota (for example, 10 GPUs). The Scheduler does not allow a project to exceed this limit within a given node pool for non-preemptible workloads and the non-preemptible pods of semi-preemptible workloads. A workload's pods that are scheduled within its deserved quota are assured to keep running, particularly in the case of non-preemptible workloads and the non-preemptible pods of semi-preemptible workloads.
+Deserved quota means that a project is entitled to use up to a maximum number of resources defined by its quota (for example, 10 GPUs). The Scheduler does not allow a project to exceed this limit within a given node pool for non-preemptible workloads and the non-preemptible pods of semi-preemptible workloads. A non-preemptible workload's pods, and the non-preemptible pods of a semi-preemptible workload, that are scheduled within the deserved quota are assured to keep running.
 
 Preemptible workloads and the preemptible pods of semi-preemptible workloads, on the other hand, may be preempted by higher priority workloads using the same project / node pool resource quota.
 
