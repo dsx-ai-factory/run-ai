@@ -63,7 +63,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 8.  Click **CONTINUE**
 
     In the next step:
-9. Under **Environment**, enter the **Image URL** - `kubeflowkatib/pytorch-mnist-gpu`
+9. Under **Environment**, enter the **Image URL** - `kubeflow/pytorch-dist-mnist:latest`
 10. Under **Runtime settings**, click **+COMMAND & ARGUMENTS**, then set the **Arguments** to `--epochs 100`.
 11. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘one-gpu’** compute resource for your workload.
     * If ‘one-gpu’ is not displayed, follow the below steps to create a one-time compute resource configuration:
@@ -90,7 +90,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
     * Click **+NEW ENVIRONMENT**
     * Enter quick-start as the **name** for the environment. The name must be unique.
-    * Enter `kubeflowkatib/pytorch-mnist-gpu` as the **Image URL**
+    * Enter `kubeflow/pytorch-dist-mnist:latest` as the **Image URL**
     * Set the runtime settings for the environment. Click **+COMMAND & ARGUMENTS** and enter the arguments - `--epochs 100`
     * Click **CREATE ENVIRONMENT**
 
@@ -116,7 +116,7 @@ Copy the following command to your terminal. Make sure to update the below with 
 
 ```sh
 runai project set "project-name"
-runai training submit "workload-name" -i kubeflowkatib/pytorch-mnist-gpu -g 1 -- --epochs 100
+runai training submit "workload-name" -i kubeflow/pytorch-dist-mnist:latest -g 1 -- --epochs 100
 ```
 
 </Tab>
@@ -134,7 +134,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/training' \
     "projectId": "<PROJECT-ID>", 
     "clusterId": "<CLUSTER-UUID>", 
     "spec": {
-        "image": "kubeflowkatib/pytorch-mnist-gpu",
+        "image": "kubeflow/pytorch-dist-mnist:latest",
         "args": "--epochs 100",
         "compute": { 
             "gpuDevicesRequest": 1

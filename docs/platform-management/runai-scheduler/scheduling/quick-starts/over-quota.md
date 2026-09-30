@@ -61,7 +61,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 8.  Click **CONTINUE**
 
     In the next step:
-9. Under **Environment**, enter the **Image URL** - `kubeflowkatib/pytorch-mnist-gpu`
+9. Under **Environment**, enter the **Image URL** - `kubeflow/pytorch-dist-mnist:latest`
 10. Under **Runtime settings**, click **+COMMAND & ARGUMENTS**, then set the **Arguments** to `--epochs 100`.
 11. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘one-gpu’** compute resource for your workload.
     * If ‘one-gpu’ is not displayed, follow the below steps to create a one-time compute resource configuration:
@@ -87,7 +87,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
     * Click **+NEW ENVIRONMENT**
     * Enter quick-start as the **name** for the environment. The name must be unique.
-    * Enter the **Image URL** - `kubeflowkatib/pytorch-mnist-gpu`
+    * Enter the **Image URL** - `kubeflow/pytorch-dist-mnist:latest`
     * Set the runtime settings for the environment. Click **+COMMAND & ARGUMENTS** and enter the arguments - `--epochs 100`
     * Click **CREATE ENVIRONMENT**
 
@@ -112,7 +112,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
-runai training submit a1 -i kubeflowkatib/pytorch-mnist-gpu -g 1 -p team-a -- --epochs 100
+runai training submit a1 -i kubeflow/pytorch-dist-mnist:latest -g 1 -p team-a -- --epochs 100
 ```
 
 </Tab>
@@ -130,7 +130,7 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
   "projectId": "<PROJECT-ID>", 
   "clusterId": "<CLUSTER-UUID>",
   "spec": {
-    "image":"kubeflowkatib/pytorch-mnist-gpu",
+    "image":"kubeflow/pytorch-dist-mnist:latest",
     "args": "--epochs 100",
     "compute": {
       "gpuDevicesRequest": 1
@@ -170,7 +170,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 7. Enter **a2** as the workload **name**
 8. Click **CONTINUE**\
    In the next step:
-9. Under **Environment**, enter the **Image URL** - `kubeflowkatib/pytorch-mnist-gpu`
+9. Under **Environment**, enter the **Image URL** - `kubeflow/pytorch-dist-mnist:latest`
 10. Under **Runtime settings**, click **+COMMAND & ARGUMENTS**, then set the **Arguments** to `--epochs 100`.
 11. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘two-gpus’** compute resource for your workload.
     * If ‘two-gpus’ is not displayed, follow the below steps to create a one-time compute resource configuration:
@@ -213,7 +213,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
-runai training submit a2 -i kubeflowkatib/pytorch-mnist-gpu -g 2 -p team-a -- --epochs 100
+runai training submit a2 -i kubeflow/pytorch-dist-mnist:latest -g 2 -p team-a -- --epochs 100
 ```
 
 </Tab>
@@ -231,7 +231,7 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
   "projectId": "<PROJECT-ID>", 
   "clusterId": "<CLUSTER-UUID>",
   "spec": {
-    "image":"kubeflowkatib/pytorch-mnist-gpu",
+    "image":"kubeflow/pytorch-dist-mnist:latest",
     "args": "--epochs 100",
     "compute": {
       "gpuDevicesRequest": 2
@@ -272,7 +272,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 8.  Click **CONTINUE**
 
     In the next step:
-9. Under **Environment**, enter the **Image URL** - `kubeflowkatib/pytorch-mnist-gpu`
+9. Under **Environment**, enter the **Image URL** - `kubeflow/pytorch-dist-mnist:latest`
 10. Under **Runtime settings**, click **+COMMAND & ARGUMENTS**, then set the **Arguments** to `--epochs 100`.
 11. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘one-gpu’** compute resource for your workload.
     * If ‘one-gpu’ is not displayed, follow the below steps to create a one-time compute resource configuration:
@@ -298,7 +298,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
     * Click **+NEW ENVIRONMENT**
     * Enter quick-start as the **name** for the environment. The name must be unique.
-    * Enter the **Image URL** - `kubeflowkatib/pytorch-mnist-gpu`
+    * Enter the **Image URL** - `kubeflow/pytorch-dist-mnist:latest`
     * Set the runtime settings for the environment. Click **+COMMAND & ARGUMENTS** and enter the arguments - `--epochs 100`
     * Click **CREATE ENVIRONMENT**
 
@@ -323,7 +323,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
-runai training submit b1 -i kubeflowkatib/pytorch-mnist-gpu -g 1 -p team-b -- --epochs 100
+runai training submit b1 -i kubeflow/pytorch-dist-mnist:latest -g 1 -p team-b -- --epochs 100
 ```
 
 </Tab>
@@ -341,7 +341,7 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
   "projectId": "<PROJECT-ID>", 
   "clusterId": "<CLUSTER-UUID>",
   "spec": {
-    "image":"kubeflowkatib/pytorch-mnist-gpu",
+    "image":"kubeflow/pytorch-dist-mnist:latest",
     "args": "--epochs 100",
     "compute": {
       "gpuDevicesRequest": 1
@@ -424,7 +424,7 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads' \
 8.  Click **CONTINUE**
 
     In the next step:
-9. Under **Environment**, enter the **Image URL** - `kubeflowkatib/pytorch-mnist-gpu`
+9. Under **Environment**, enter the **Image URL** - `kubeflow/pytorch-dist-mnist:latest`
 10. Under **Runtime settings**, click **+COMMAND & ARGUMENTS**, then set the **Arguments** to `--epochs 100`.
 11. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘one-gpu’** compute resource for your workload.
     * If ‘one-gpu’ is not displayed, follow the below steps to create a one-time compute resource configuration:
@@ -457,7 +457,7 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads' \
 Copy the following command to your terminal. For more details, see [CLI reference](../../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
-runai training submit b2 -i kubeflowkatib/pytorch-mnist-gpu -g 1 -p team-b -- --epochs 100
+runai training submit b2 -i kubeflow/pytorch-dist-mnist:latest -g 1 -p team-b -- --epochs 100
 ```
 
 </Tab>
@@ -475,7 +475,7 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
   "projectId": "<PROJECT-ID>", 
   "clusterId": "<CLUSTER-UUID>",
   "spec": {
-    "image":"kubeflowkatib/pytorch-mnist-gpu",
+    "image":"kubeflow/pytorch-dist-mnist:latest",
     "args": "--epochs 100",
     "compute": {
       "gpuDevicesRequest": 1
