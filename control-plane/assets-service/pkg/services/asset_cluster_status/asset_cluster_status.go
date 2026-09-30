@@ -56,8 +56,8 @@ type AssetClusterStatus struct {
 
 type AssetIdStatusMap map[string]*api.AssetClusterStatusInfo
 
-// When k8s-objects-tracker learns about a new asset kind (e.g.
-// resource-claim-template, and any future k8s-object asset), FOUR maps in this
+// WAIT_FOR_OFER when k8s-objects-tracker learns about a new asset kind (e.g.
+// resource-claim-template, and any further k8s-object asset), FOUR maps in this
 // file must be updated together, or the status projection will silently fall
 // through to nil / to the wrong message:
 //
@@ -86,9 +86,9 @@ var assetKindToClusterResourceType = map[api.AssetKind]openapi.ClusterResourceTy
 	api.ASSETKIND_SECRET_VOLUME:   openapi.CLUSTERRESOURCETYPE_SECRET,
 	api.ASSETKIND_ENVIRONMENT:     openapi.CLUSTERRESOURCETYPE_SECRET,
 	api.ASSETKIND_NGC_API_KEY:     openapi.CLUSTERRESOURCETYPE_SECRET,
-	// resource-claim-template: intentionally absent until the tracker learns
-	// about resource.k8s.io/v1 resources. See the doc block above for the full
-	// checklist of maps that must be updated together.
+	// WAIT_FOR_OFER resource-claim-template intentionally absent until the
+	// tracker learns about resource.k8s.io/v1 resources. See the doc block
+	// above for the full checklist of maps that must be updated together.
 }
 
 // HasClusterResourceMapping reports whether the given asset kind has a
@@ -664,11 +664,12 @@ func getAccountScopeMessage(assetKind api.AssetKind) string {
 	}
 }
 
-// The K8SResource branches in the three getAsset*Message helpers below
-// hardcode "data source ..." copy — that's correct for PVC/ConfigMap but
-// wrong for future k8s-object kinds (resource-claim-template, etc.). When
-// adding a new k8s-object kind to assetKindToClusterResourceType, extend
-// each K8SResource branch to key by assetKind (or add a new target type).
+// WAIT_FOR_OFER the K8SResource branches in the three getAsset*Message
+// helpers below hardcode "data source ..." copy — that's correct for
+// PVC/ConfigMap but wrong for k8s-object kinds (resource-claim-template,
+// etc.). When adding a new k8s-object kind to assetKindToClusterResourceType,
+// extend each K8SResource branch to key by assetKind (or add a new target
+// type).
 func getAssetNotCreatedMessage(statusInfo *api.AssetClusterStatusInfo, assetKind api.AssetKind) {
 	statusInfo.Url = runaiSupportUrl
 	switch assetKindToTargetAssetType[assetKind] {
