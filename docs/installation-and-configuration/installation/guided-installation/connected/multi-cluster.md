@@ -196,6 +196,8 @@ controlPlane:
 
 </Accordion>
 
+### Run the Installer
+
 - **Validate first** - Before applying any changes, check your configuration against the control plane cluster:
 
   ```bash
@@ -504,6 +506,8 @@ prerequisites:
 ```
 
 </Accordion>
+
+### Run the Installer
 
 - **Validate first** - Before applying any changes, check your configuration against the target cluster:
 
