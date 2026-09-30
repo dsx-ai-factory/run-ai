@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	RegistryTestValue = "gcr.io/run-ai-prod"
+	RegistryTestValue = "registry.example.com/runai"
 )
 
 func TestOperand(t *testing.T) {
