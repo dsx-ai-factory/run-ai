@@ -60,8 +60,8 @@ type Mocks struct {
 	clusterOAuthClientGetter    *pmocks.ClusterOAuthClientGetter
 	clusterAccessControlCreator *pmocks.ClusterAccessControlCreator
 	tenantSettingsClient        *bcmocks.TenantSettingsClient
-	tmInternalApi               *tmmocks.InternalApi
-	tmTenantsApi                *tmmocks.TenantsApi
+	tmInternalApi               *tmmocks.InternalAPI
+	tmTenantsApi                *tmmocks.TenantsAPI
 }
 
 type Input struct {
@@ -393,8 +393,8 @@ func initNaiveMocks() *Mocks {
 		clusterOAuthClientGetter:    &pmocks.ClusterOAuthClientGetter{},
 		clusterAccessControlCreator: &pmocks.ClusterAccessControlCreator{},
 		tenantSettingsClient:        &bcmocks.TenantSettingsClient{},
-		tmInternalApi:               tmmocks.NewInternalApi(GinkgoT()),
-		tmTenantsApi:                tmmocks.NewTenantsApi(GinkgoT()),
+		tmInternalApi:               tmmocks.NewInternalAPI(GinkgoT()),
+		tmTenantsApi:                tmmocks.NewTenantsAPI(GinkgoT()),
 	}
 
 	mocks.clusterOAuthClientGetter.On("GetClient", mock.Anything, mock.Anything, mock.Anything).

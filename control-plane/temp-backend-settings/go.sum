@@ -55,8 +55,8 @@ github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.3 h1:
 github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.3/go.mod h1:eAkCN2AmiVPgy3lqnkQOONQBW7GPUI7Nir0P12sCSfM=
 github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11 h1:lsACFL1BtfA7kE/L69+4EfIXD07MFwRcvcVlR9v3VzQ=
 github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11/go.mod h1:iXkyB6X4UBcmjGdfdEKif6Ldzep5j0RyvgXMde3Ls9Q=
-github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4 h1:rKrmKnhHFMOcSikVHwNNebSGuY/aFuu1O6lznt/YGio=
-github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4/go.mod h1:bnTPVoSqRBxJMuFz1etcfocpGn07brEEygb539/vOzA=
+github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.5 h1:Gzp9GhPhIxJaqr6W1CdW8DyC4tv2l/3qChfcl+TA+/0=
+github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.5/go.mod h1:GoQbjLk+IveYEO4td/AwOrtIOAz6+/2lLRdr7IetS2U=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 h1:AyRQ8atgtE5K5sviTNpMAiHKiTa2YqHiprLr4kBcPpo=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1/go.mod h1:G/lLs3Oks3sA31Pv9QSKdjzeFC8b9CWE6ePmOHqLKvo=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4 h1:BKviUk3CaBx/RGpriS+2yqMaX+coTML1+usXa/+8E+g=
