@@ -208,11 +208,6 @@ airgap:
   valuesDir: /data/runai-airgap
   skipPrepare: true
 
-openshift:
-  olmCatalog:
-    source: <OPERATORHUB_CATALOG_SOURCE>
-    sourceNamespace: openshift-marketplace
-
 controlPlane:
   enabled: true
   domain: <DOMAIN>
@@ -221,7 +216,6 @@ controlPlane:
 cluster:
   enabled: true
   name: <CLUSTER_NAME>
-  domain: <DOMAIN>
   customHelmValues: {}
 
 prerequisites:

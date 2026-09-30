@@ -38,7 +38,7 @@ For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/usi
 
 **Note**
 
-To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), GPU Operator 26.7.1 or later is required, alongside CUDA driver r615 or later. GPU Operator 26.7.1 does not default to CUDA driver r615, so set the driver version explicitly with `--set driver.version=<version>` rather than relying on the default. See [GPU Memory Fractions](../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
+To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), GPU Operator 26.7.1 or later is required, alongside CUDA driver r615 or later. GPU Operator 26.7.1 does not default to CUDA driver r615, so set the driver version explicitly rather than relying on the default - with `--set driver.version=<version>` on Kubernetes, or by setting `driver.version` in the `ClusterPolicy` spec on OpenShift, where the GPU Operator is installed from OperatorHub. See [GPU Memory Fractions](../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
 
 </Note>
 
@@ -155,18 +155,16 @@ The Network Operator works alongside the NVIDIA GPU Operator to provide:
 * Kubernetes device plugins to expose high-speed network hardware to workloads.
 * Secondary network components to support network-intensive applications.
 
-On Kubernetes, the Network Operator must be installed and configured as follows:
+The Network Operator must be installed and configured as follows:
 
 1. Install the network operator as detailed in [Network Operator Deployment on Vanilla Kubernetes Cluster](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-on-vanilla-kubernetes-cluster).
 2. Configure SR-IOV InfiniBand support as detailed in [Network Operator Deployment with an SR-IOV InfiniBand Network](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-with-an-sr-iov-infiniband-network).
 
 For air-gapped installation, follow the instructions in [Network Operator Deployment in an Air-gapped Environment](https://docs.nvidia.com/networking/display/kubernetes2540/advanced/proxy-airgapped.html#network-operator-deployment-in-an-air-gapped-environment).
 
-On OpenShift, install the Network Operator, the SR-IOV Network Operator, and the Node Feature Discovery (NFD) Operator through the Red Hat OperatorHub catalog in the OpenShift Container Platform web console, rather than via Helm.
-
 ### NVIDIA Dynamic Resource Allocation (DRA) Driver
 
-When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html) is required to enable Dynamic Resource Allocation at the Kubernetes level. To install, follow the instructions in [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver). The DRA driver is installed with the GPU Operator, for both connected and air-gapped installations.
+When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html) is required to enable Dynamic Resource Allocation at the Kubernetes level. To install, follow the instructions in [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver). The DRA driver is installed with the GPU Operator. For air-gapped installations, follow the air-gapped instructions in the [NVIDIA GPU Operator](#nvidia-gpu-operator) section.
 
 After the DRA driver is installed, update the cluster configuration using the `anyworkload-controller.GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai `anyworkload-controller` deployment and restarts the controller. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../configuration/cluster-config.md).
 

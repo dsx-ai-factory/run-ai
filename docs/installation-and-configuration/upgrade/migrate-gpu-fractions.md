@@ -107,7 +107,7 @@ The CUDA driver, GPU Operator, and NVIDIA Run:ai upgrades can happen in either o
 
 ## Step-by-Step
 
-**Step 1 - Suspend or delete workloads using GPU fractions**
+**Step 1 - Suspend or delete running workloads using GPU fractions**
 
 * For [native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md), suspend the workload through the NVIDIA Run:ai UI, CLI, or API.
 * For [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) submitted as a Kubernetes manifest, delete the workload but retain its manifest.

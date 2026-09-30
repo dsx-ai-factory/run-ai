@@ -124,15 +124,15 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 * Replace `<VERSION>` with the NVIDIA Run:ai version you are upgrading to.
 * Set `supportEntitled=true` to configure the installation as Support-Entitled.
 * Set `global.imagePullSecrets[0].name=runai-reg-creds` to use the NGC image pull secret prepared in [Software Artifacts](#prepare-software-artifacts).
-* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](installation/install-using-helm/preparations.md#registry-credentials) for how to generate the SAK. By default, telemetry is not associated with your organization.
-  - `--set telemetryService.telemetryAuth.token=<SAK_TOKEN>` - Passes the SAK directly. Visible in shell history and process listings.
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](installation/install-using-helm/preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
+  - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
 <Note>
 
 **Note**
 
-These flags configure functionality introduced in v3.0. If you are upgrading from v2.26 or earlier, add them explicitly as shown. `--reset-then-reuse-values` preserves values from your current release, so you do not need to pass them again in later upgrades once you are on v3.0 or above.
+These flags configure functionality introduced in v3.0. If you are upgrading from v2.26 or earlier, add them explicitly as shown. `--reset-then-reuse-values` preserves the values from your current release (for example, your domain and tenant administrator settings), so you do not need to pass those again. Once you are on v3.0 or above, it also preserves these flags, so you do not need to pass them again in later upgrades.
 
 </Note>
 
@@ -144,7 +144,7 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
   --reset-then-reuse-values \
   --set supportEntitled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
-  --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
+  --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
 
 ## Migrate from NGINX to HAProxy Kubernetes Ingress Controller
