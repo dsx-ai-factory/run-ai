@@ -36,12 +36,12 @@ func MissingChartRepoError(chart string) error {
 	return fmt.Errorf("no chart repository configured for the %s chart: set the %s environment variable", chart, ChartRepoBaseEnv)
 }
 
-const ngcChartHost = "helm.ngc.nvidia.com"
+// NGCNonProdChartRepoEnv names the environment variable holding the NGC chart
+// repository for the non-prod environments (staging, lab and test). Only the
+// prod repository is public, so the non-prod one is not compiled in.
+const NGCNonProdChartRepoEnv = "RUNAI_NGC_NONPROD_CHART_REPO"
 
-const (
-	ngcChartOrgTeamProd    = "nvidia/runai"
-	ngcChartOrgTeamNonProd = "nvstaging/runai"
-)
+const ngcChartRepoProd = "https://helm.ngc.nvidia.com/nvidia/runai"
 
 const (
 	CPReleaseName      = "runai-backend"
@@ -68,16 +68,19 @@ type AuthenticatedHelmInstaller interface {
 	InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string, auth ChartAuth) error
 }
 
-func ngcChartOrgTeam(env config.RunaiEnvType) string {
-	if env == config.EnvProd {
-		return ngcChartOrgTeamProd
-	}
-	return ngcChartOrgTeamNonProd
+// NGCNonProdChartRepo returns the configured non-prod NGC chart repository
+// without a trailing slash, or "" when none is set.
+func NGCNonProdChartRepo() string {
+	return strings.TrimSuffix(strings.TrimSpace(os.Getenv(NGCNonProdChartRepoEnv)), "/")
 }
 
-// NGCChartRepo returns the NGC ChartMuseum root.
+// NGCChartRepo returns the NGC ChartMuseum root for env: the public repository
+// for prod, otherwise NGCNonProdChartRepo.
 func NGCChartRepo(env config.RunaiEnvType) string {
-	return fmt.Sprintf("https://%s/%s", ngcChartHost, ngcChartOrgTeam(env))
+	if env == config.EnvProd {
+		return ngcChartRepoProd
+	}
+	return NGCNonProdChartRepo()
 }
 
 // CPChartRepo returns the control plane chart repository for env under the

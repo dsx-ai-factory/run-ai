@@ -13,20 +13,36 @@ import (
 func init() { checks = append(checks, chartRepoCheck) }
 
 // chartRepoCheck ensures a connected install can locate the Run:ai charts.
-// NGC registries have a built-in chart repository; every other registry type
-// needs either registry.chartRepository in the config or the chart repository
-// base from the environment. Air-gapped installs pull charts from the bundle
-// and are exempt.
+// NGC registries have a built-in chart repository for prod only; non-prod NGC
+// installs and every other registry type need either registry.chartRepository
+// in the config or the matching environment variable. Air-gapped installs pull
+// charts from the bundle and are exempt.
 func chartRepoCheck(s *spec.Spec) []Finding {
-	if s.IsAirGapped() || s.Registry == nil || s.Registry.Type == spec.RegistryTypeNGC {
+	if s.IsAirGapped() || s.Registry == nil || s.Registry.ChartRepository != "" {
 		return nil
 	}
-	if s.Registry.ChartRepository != "" || step.ChartRepoBase() != "" {
+	if s.Registry.Type == spec.RegistryTypeNGC {
+		return ngcChartRepoCheck(s)
+	}
+	if step.ChartRepoBase() != "" {
 		return nil
 	}
 	return []Finding{{
 		Check:   "chart-repository",
 		Field:   "registry.chartRepository",
 		Message: "chart repository is required for a non-NGC registry: set registry.chartRepository or the " + step.ChartRepoBaseEnv + " environment variable",
+	}}
+}
+
+// ngcChartRepoCheck mirrors the plan, which treats every env other than prod
+// (including an unset one) as non-prod.
+func ngcChartRepoCheck(s *spec.Spec) []Finding {
+	if s.Env == spec.EnvProd || step.NGCNonProdChartRepo() != "" {
+		return nil
+	}
+	return []Finding{{
+		Check:   "chart-repository",
+		Field:   "registry.chartRepository",
+		Message: "chart repository is required for a non-prod NGC install: set registry.chartRepository or the " + step.NGCNonProdChartRepoEnv + " environment variable",
 	}}
 }
