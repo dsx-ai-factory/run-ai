@@ -100,6 +100,7 @@ Dynamic GPU memory fractions require the following on every GPU node in the clus
 | CUDA | 13.4 or later |
 | CUDA driver | r615 or later |
 | NVIDIA GPU Operator | 26.7.1 or later |
+| NVIDIA GPU Operator NRI plugin | Disabled. Install the NVIDIA GPU Operator with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false`). GPU memory fractions do not function while the NRI plugin is enabled. |
 
 ## Setting Dynamic GPU Memory Fractions
 

@@ -100,6 +100,7 @@ GPU memory fractions require the following on every GPU node in the cluster. GPU
 | CUDA | 13.4 or later |
 | CUDA driver | r615 or later |
 | NVIDIA GPU Operator | 26.7.1 or later |
+| NVIDIA GPU Operator NRI plugin | Disabled. Install the NVIDIA GPU Operator with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false`). GPU memory fractions do not function while the NRI plugin is enabled. |
 
 ## Setting GPU Memory Fractions
 
@@ -254,7 +255,6 @@ Policy enforcement does not reach [externally submitted workloads](../../../work
 * Selecting a GPU portion using percentages as units does not guarantee the exact memory size. This means 50% of an A-100-40GB is 20 GB while 50% of an A-100-80GB is 40 GB. To have better control over the exact allocated memory, specify the exact memory size, for example 40 GB.
 * GPU memory fractions control the memory split. Each workload's share of GPU compute is controlled separately by its compute mode - refer to [GPU compute modes](compute-modes.md).
 * An application sees its own requested GPU memory size through NVML and `nvidia-smi`, not the memory of the whole device. Tools that report total GPU memory inside the container report the fraction.
-* The NVIDIA GPU Operator must be installed with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false`). GPU memory fractions do not function while the NRI plugin is enabled.
 * Part of the memory of every GPU is reserved for the NVIDIA driver and for internal use, such as error correction. The reserved amount is estimated at 3% to 5% of the total GPU memory and varies by GPU type. Account for this reserve when requesting an absolute memory size, because requests that exceed the remaining memory can cause an OOMKill signal to be sent to the pod. Requests expressed as a portion of the GPU are not affected.
 
 ## Using CLI
