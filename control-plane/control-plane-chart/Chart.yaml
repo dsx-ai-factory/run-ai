@@ -23,8 +23,8 @@ dependencies:
     condition: thanos.enabled
   - name: runai-telemetry
     alias: telemetryService
-    repository: https://runai.jfrog.io/artifactory/api/helm/diagnostics
-    version: 1.1.6
+    repository: https://helm.ngc.nvidia.com/nvidia/runai
+    version: 1.1.24
     condition: telemetryService.enabled,supportEntitled
   - name: nats
     repository: https://charts.bitnami.com/bitnami
