@@ -30,11 +30,6 @@ services:
       dockerfile: Dockerfile
       args:
         TARGETARCH: amd64
-    # scratch has no shell, so no command/healthcheck override here — it runs
-    # its own ENTRYPOINT and exits; see service_completed_successfully below.
-    # user: "0:0" stays: fresh named volumes land root-owned in plain Docker
-    # (no fsGroup equivalent here), so the non-root image UID can't write
-    # into /providers, /themes, /agent without it.
     user: "0:0"
     volumes:
       - keycloak-providers:/providers

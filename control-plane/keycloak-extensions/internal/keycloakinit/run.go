@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package initializer
+package keycloakinit
 
 import "fmt"
 
-// Paths is the set of filesystem locations Run operates on.
+// Paths is the set of filesystem locations an Initializer operates on.
 type Paths struct {
 	ExtensionsProvidersDir string
 	ExtensionsThemesDir    string
@@ -36,9 +36,22 @@ func DefaultPaths() Paths {
 	}
 }
 
+// Initializer stages the keycloak-extensions payload into Keycloak's shared
+// volumes and writes keycloak.conf from the mounted secrets.
+type Initializer struct {
+	Paths Paths
+}
+
+// New returns an Initializer configured with DefaultPaths.
+func New() *Initializer {
+	return &Initializer{Paths: DefaultPaths()}
+}
+
 // Run stages the provider/theme/agent payloads into the shared volumes
 // Keycloak reads from, then generates keycloak.conf from the secret files.
-func Run(p Paths) error {
+func (i *Initializer) Run() error {
+	p := i.Paths
+
 	if err := CopyExtensions(map[string]string{
 		p.ExtensionsProvidersDir: p.ProvidersDir,
 		p.ExtensionsThemesDir:    p.ThemesDir,

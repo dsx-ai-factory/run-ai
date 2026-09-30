@@ -34,7 +34,7 @@ The service is responsible for:
 - **Sidecar delivery** — at runtime the container copies providers, theme, and
   agent into shared volumes (`/providers`, `/themes`, `/agent`), then writes
   Keycloak config, via a small statically-linked Go binary (`cmd/main.go` →
-  `internal/initializer`) that runs as the image's `ENTRYPOINT` and exits.
+  `internal/keycloakinit`) that runs as the image's `ENTRYPOINT` and exits.
 
 ## Repository layout
 
@@ -50,7 +50,7 @@ The service is responsible for:
 │   ├── login/
 │   └── email/
 ├── cmd/main.go                 # Go init binary entry point (ENTRYPOINT)
-├── internal/initializer/       # Copy + keycloak-config generation logic + unit tests
+├── internal/keycloakinit/       # Copy + keycloak-config generation logic + unit tests
 ├── go.mod
 ├── bin/                        # Build output (jars + Go binaries) — populated by `make build`
 ├── Dockerfile                  # Multi-stage, `scratch` runtime image
@@ -72,7 +72,7 @@ both — Gradle inside a `gradle:8.12.0-jdk21` Docker container
 | `make build-go` | Compiles `cmd/main.go` for amd64 + arm64 into `bin/keycloak-extensions-$ARCH` |
 | `make test` | `test-gradle` then `test-go` |
 | `make test-gradle` | Runs `gradle test -p runai-custom-providers` in the container, then parses the HTML test reports via `scripts/parse_html_report.py` |
-| `make test-go` | Runs the `internal/initializer` unit tests |
+| `make test-go` | Runs the `internal/keycloakinit` unit tests |
 | `make lint` | `lint-go` — golangci-lint against the Go code (the Gradle side has no lint target) |
 | `make validate` | No-op |
 
@@ -133,7 +133,7 @@ Image ref: `runai-local/keycloak-extensions:0.0.0`.
 |--------|-------------|
 | `make test` | `test-gradle` then `test-go` |
 | `make test-gradle` | Runs the JUnit 5 suite for `runai-custom-providers` in the Gradle container and parses the HTML reports |
-| `make test-go` | Runs the table-driven unit tests in `internal/initializer` (copy logic, `keycloak.conf` key transform/generation, and one end-to-end test covering both steps together via `Run()`) |
+| `make test-go` | Runs the table-driven unit tests in `internal/keycloakinit` (copy logic, `keycloak.conf` key transform/generation, and one end-to-end test covering both steps together via `Run()`) |
 
 Within the Gradle project you can also run `gradle test -p runai-custom-providers`
 directly (Java 21 + Gradle 8 required). The Go tests run with plain `go test`
