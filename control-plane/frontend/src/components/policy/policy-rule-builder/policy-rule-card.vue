@@ -86,7 +86,7 @@
     <q-linear-progress v-if="loadingFieldInfo" animation-speed="100" indeterminate class="q-my-sm" />
 
     <notification-alert-bar
-      v-if="lockedRuleWarning"
+      v-if="lockedRule"
       aid="locked-rule-warning"
       class="q-mt-md"
       :variant="ENotificationBarVariant.Warning"
@@ -94,7 +94,11 @@
       show-h1-content
       orientation="vertical"
     >
-      {{ lockedRuleWarning }}
+      There is a policy rule for the same target in place in
+      <strong class="warning-scope">{{ lockedRuleSourceName }}</strong>
+      that prevents lower scopes from overriding it. The rule you're creating will be saved but remain inactive until the
+      {{ lockedRuleSourceScope }}
+      rule is removed or changed to allow override.
     </notification-alert-bar>
 
     <template v-if="showEnforcements && fieldInfo">
@@ -157,11 +161,7 @@ import { isNotEmpty } from "@/common/form.validators";
 import { errorMessages } from "@/common/error-message.constant";
 import { ErrorAlert } from "@/utils/error-alert.util";
 import { QForm, useQuasar } from "quasar";
-import {
-  ScopeType,
-  type EffectiveRulesEffectiveRulesInner,
-  type SourceOfRule,
-} from "@/swagger-models/policy-service-client";
+import type { EffectiveRulesEffectiveRulesInner } from "@/swagger-models/policy-service-client";
 import type { OrgUnit } from "@/swagger-models/org-unit-service-client";
 
 export interface Props {
@@ -212,13 +212,12 @@ const footerMessage = computed<string>(
 const lockedRule = computed<EffectiveRulesEffectiveRulesInner | undefined>(() =>
   gvkPolicyUtil.lockedParentRuleForDraft(draft.value, props.lockedRules),
 );
-const lockedRuleWarning = computed<string>(() => {
-  if (!lockedRule.value) return "";
-  const source = lockedRule.value.sourceOfRule;
-  const sourceScope = gvkPolicyUtil.ruleSourceLabel(source).toLowerCase();
-  const sourcePath = ruleSourcePath(source);
-  return `There is a policy rule for this target in place in ${sourcePath} that prevents lower scopes from overriding it. The rule you're creating will be saved but remain inactive until the ${sourceScope} rule is removed or changed to allow override.`;
-});
+const lockedRuleSourceName = computed(() =>
+  gvkPolicyUtil.ruleSourceDisplayName(lockedRule.value?.sourceOfRule, props.orgUnits, props.tenantName),
+);
+const lockedRuleSourceScope = computed(() =>
+  gvkPolicyUtil.ruleSourceLabel(lockedRule.value?.sourceOfRule).toLowerCase(),
+);
 const allowOverrideOptions: ISelectOption[] = [
   {
     label: "Not allowed",
@@ -233,30 +232,6 @@ const allowOverrideOptions: ISelectOption[] = [
     toolTip: "Any descendant scope can define a policy that overrides this rule",
   },
 ];
-
-function ruleSourcePath(source: SourceOfRule | null | undefined): string {
-  const parts = props.tenantName ? [`organization ${props.tenantName}`] : [];
-  const sourceId =
-    source?.scope === ScopeType.Cluster
-      ? source.clusterId
-      : source?.scope === ScopeType.Department
-        ? source.departmentId
-        : source?.scope === ScopeType.Project
-          ? source.projectId?.toString()
-          : undefined;
-  let unit = sourceId ? props.orgUnits.find((candidate) => candidate.id === sourceId) : undefined;
-  const lineage: OrgUnit[] = [];
-  while (unit) {
-    if (unit.type !== ScopeType.Tenant) lineage.unshift(unit);
-    unit = unit.parentId ? props.orgUnits.find((candidate) => candidate.id === unit?.parentId) : undefined;
-  }
-  if (lineage.length) {
-    parts.push(...lineage.map((item) => `${item.type} ${item.name}`));
-  } else if (sourceId && source?.scope) {
-    parts.push(`${source.scope} ${sourceId}`);
-  }
-  return parts.join(" / ") || gvkPolicyUtil.ruleSourceLabel(source).toLowerCase();
-}
 
 onMounted(async () => {
   if (draft.value.field && draft.value.specSelector) {
@@ -503,6 +478,9 @@ defineExpose({ commit, isDirty, attemptLeave });
 }
 .rule-step-divider {
   background-color: var(--border-subtle);
+}
+.warning-scope {
+  font-weight: 500;
 }
 .field-label {
   margin-bottom: -8px;
