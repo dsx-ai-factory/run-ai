@@ -16,7 +16,6 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	featuregate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/feature-gate"
@@ -138,7 +137,7 @@ func BuildOAuth2ProxyContainer(cfg OAuth2ProxyConfig) (*corev1.Container, error)
 		"--cookie-samesite=lax",
 		"--skip-jwt-bearer-tokens=true",
 		fmt.Sprintf("--extra-jwt-issuers=%s=runai", oidcIssuerUrl),
-		"--custom-templates-dir="+oauth2proxy.TemplatesPath,
+		"--custom-templates-dir=/usr/share/oauth2-proxy",
 		"--pass-authorization-header=false",
 		fmt.Sprintf("--cookie-name=%s", cfg.CookiePrefix),
 	)
@@ -186,14 +185,6 @@ func BuildOAuth2ProxyContainer(cfg OAuth2ProxyConfig) (*corev1.Container, error)
 			Name:      constants.ExternalUrlAuthVolumeName,
 			MountPath: constants.ExternalUrlAuthVolumePath,
 		},
-	}
-
-	if os.Getenv(workloadconfig.EnvVarOauth2ProxyTemplatesConfigMap) != "" {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      oauth2proxy.VolumeName,
-			MountPath: oauth2proxy.TemplatesPath,
-			ReadOnly:  true,
-		})
 	}
 
 	// Custom CA support
