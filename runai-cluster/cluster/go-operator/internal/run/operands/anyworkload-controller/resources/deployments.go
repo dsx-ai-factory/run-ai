@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	outils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	anyworkload_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
@@ -234,12 +235,19 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 		},
 	}
 
-	if internal != nil && len(internal.Global.NMC.AllowedServiceAccounts) > 0 {
-		envVars = append(envVars, v1.EnvVar{
-			Name:  "RESTART_ALLOWED_SERVICE_ACCOUNTS",
-			Value: strings.Join(internal.Global.NMC.AllowedServiceAccounts, ","),
-		})
+	// The agent and runtime-rules also update runners while restart ownership is active.
+	var allowedServiceAccounts []string
+	agentServiceAccount := outils.GetNMCServiceAccountNameOrDefault(d.runaiConfig, operands.RunaiAgentName)
+	for _, name := range []string{d.operandName, agentServiceAccount, constants.RuntimeRulesOperandName} {
+		allowedServiceAccounts = append(allowedServiceAccounts, fmt.Sprintf("system:serviceaccount:%s:%s", d.runaiConfig.GetNamespace(), name))
 	}
+	if internal != nil {
+		allowedServiceAccounts = append(allowedServiceAccounts, internal.Global.NMC.AllowedServiceAccounts...)
+	}
+	envVars = append(envVars, v1.EnvVar{
+		Name:  "RESTART_ALLOWED_SERVICE_ACCOUNTS",
+		Value: strings.Join(allowedServiceAccounts, ","),
+	})
 
 	if internal != nil && internal.Global.ControlPlane.Config.GetResearcherService().OauthProxy.GetOidcIssuerUrl() != "" {
 		envVars = append(envVars, v1.EnvVar{

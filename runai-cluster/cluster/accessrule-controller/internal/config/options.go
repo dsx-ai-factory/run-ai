@@ -43,6 +43,6 @@ func (opts *Options) parseCommandLineArgs(flagSet *flag.FlagSet, options []strin
 			"Enabling this will ensure there is only one active controller manager.")
 	flagSet.BoolVar(&opts.LegacyProjectPermissions, "legacy-project-permissions", true, "Should handle legacy project permissions")
 	flagSet.IntVar(&opts.LegacyProjectPermissionsIntervalSeconds, "legacy-project-permissions-interval-seconds", 30, "Interval in seconds to check for legacy project permissions")
-	flagSet.Var(&opts.AllowedServiceAccounts, "allowed-service-accounts", "Comma-separated list of service account name patterns that should be allowed to perform access rule operations")
+	flagSet.Var(&opts.AllowedServiceAccounts, "allowed-service-accounts", "Comma-separated list of exact usernames allowed to perform access rule operations (Kubernetes service accounts: system:serviceaccount:<namespace>:<name>)")
 	return flagSet.Parse(options)
 }

@@ -130,6 +130,12 @@ func handleEnvVars(runaiConfig *runaiv1.RunaiConfig) []v1.EnvVar {
 	config := runaiConfig.Spec.ApplicationController
 	envVars := []v1.EnvVar{
 		{
+			Name: "ALLOWED_SERVICE_ACCOUNTS",
+			Value: fmt.Sprintf("system:serviceaccount:%s:%s,system:serviceaccount:%s:%s",
+				runaiConfig.GetNamespace(), operands.RunaiApplicationControllerName,
+				runaiConfig.GetNamespace(), outils.GetNMCServiceAccountNameOrDefault(runaiConfig, operands.RunaiAgentName)),
+		},
+		{
 			Name:  "K8S_CLIENT_CONFIG_QPS",
 			Value: strconv.Itoa(*config.K8sClientConfig.QPS),
 		},
