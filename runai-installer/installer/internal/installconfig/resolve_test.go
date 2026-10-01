@@ -87,10 +87,12 @@ func TestResolveRegistry_FlagCarriesConfigHostAndCA(t *testing.T) {
 	assert.Equal(t, "/etc/runai/registry-ca.crt", reg.CAChainPath, "CA chain carries over from config when a token flag is used")
 }
 
-func TestResolveRegistry_NoSource(t *testing.T) {
-	_, err := ResolveRegistry(&Config{}, "", "")
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "no registry credentials")
+func TestResolveRegistry_NoSourceDefaultsToAnonymousNGC(t *testing.T) {
+	for _, cfg := range []*Config{nil, {}} {
+		reg, err := ResolveRegistry(cfg, "", "")
+		require.NoError(t, err)
+		assert.Equal(t, &spec.Registry{Type: spec.RegistryTypeNGC}, reg)
+	}
 }
 
 func TestResolveRegistry_UnknownConfigType(t *testing.T) {
