@@ -39,10 +39,10 @@ github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 h1:Ov1I7x8Z
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1/go.mod h1:hDzQ3k8G0AiU88ODxROMfPpkNkvrBskZ1kJvgnSY+ao=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5 h1:VW9VpIKde5c9ATV9XE2pz6vhIjL+82S2MwYIYtzAq+o=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5/go.mod h1:9hjg4OEtK3FRgwQrSVVg+FoZS655NKhdAD0OPZrkB9o=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.14 h1:LqB8Oy1LS7wPocShFNxYosrEPFtWincoM645NhLlwT0=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.14/go.mod h1:Q15qWp/ra8iVeRugHg4RdQAxHH5dmNEC5tXypKh/Hmo=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26 h1:hRBDSzatoGF4vDaVRcAhJ4hNkrknBVExajUgd0xed+s=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26/go.mod h1:kIsDxusbprdR9zaphXs8DN/F57U1WnxX8h7Dc+TBpeM=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.16 h1:EMkkIAK2v0DYGwpLS4pVY2s5PLJbpcSeXOVIFvge6Ec=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.16/go.mod h1:AgQyJFZv/W7PlkpPyUOqWMZeRVGTaox/5bVeX1FDF94=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 h1:jKUugCu2kI3tldTkjPn+JosT/U7S+14rtYnvl+YbmHA=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27/go.mod h1:4VcmwWwis7snxQoiQ9h3VNMdSmrNg32Hb/b/Hd2FESs=
 github.com/felixge/httpsnoop v1.1.0 h1:3YtUj32ZZkqZtt3sZZsClsymw/QDuVfpNhoA31zeORc=
 github.com/felixge/httpsnoop v1.1.0/go.mod h1:Zqxgdd+1Rkcz8euOqdr7lqgCRJztwr5hp9vDSi5UZCE=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
