@@ -6,20 +6,15 @@
 # -- patch for an API-compatible change, minor for a breaking one. Renovate takes patches
 # only, so a minor is published but consumers move to it deliberately.
 #
-# When: a person's change, or a Renovate security fix, is released on push. Routine
-# Renovate updates merge as usual but are released once a week, so a package does not
-# cut a release -- and fan out to every consumer -- for each dependency bump.
+# When: once a week, every module changed since its last release. Nothing is tagged on
+# push, so a package does not cut a release -- and fan out to every consumer -- for each
+# change; whoever needs a release sooner tags it (make package-bump-version /
+# client-bump-version, or a manual run of this workflow).
 name: Package auto-tag
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "runai-common-packages/**"
-      - "runai-application-packages/**"
-      - "control-plane/*/pkg/client/**"
   schedule:
-    - cron: "0 5 * * 0"   # Sunday 05:00 UTC: the week's Renovate updates
+    - cron: "0 5 * * 0"   # Sunday 05:00 UTC
   workflow_dispatch:
     inputs:
       modules:
@@ -48,7 +43,6 @@ jobs:
       - id: modules
         env:
           INPUT: ${{ inputs.modules }}
-          BEFORE: ${{ github.event.before }}
         run: |
           # A package is its top-level directory; a client is its service's pkg/client.
           # Generated mocks don't change what a module ships, so they release nothing.
@@ -74,20 +68,6 @@ jobs:
               else
                 modules=$(echo "$INPUT" | tr ',' '\n' | sed 's#[[:space:]]##g; s#/*$#/x#' | to_modules)
               fi ;;
-            push)
-              # The pushed commits, or just the tip when there is no usable before (a
-              # new branch or a force push).
-              range="$BEFORE..$GITHUB_SHA"
-              git cat-file -e "$BEFORE^{commit}" 2>/dev/null || range="$GITHUB_SHA^!"
-              # Only a person's change or a security fix; routine Renovate merges wait
-              # for the weekly run. Each commit counts with everything it brought to
-              # main, a merge included.
-              modules=$(git log --first-parent --format='%H%x09%an%x09%s' "$range" \
-                | while IFS=$'\t' read -r sha author subject; do
-                    if [ "$author" != "devops-runai" ] || [[ "$subject" == *"[SECURITY]"* ]]; then
-                      git diff --name-only "$sha^1" "$sha"
-                    fi
-                  done | to_modules) ;;
             schedule)
               modules=$(weekly) ;;
           esac
