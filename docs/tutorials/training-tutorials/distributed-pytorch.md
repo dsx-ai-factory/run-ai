@@ -133,17 +133,15 @@ In the NVIDIA Run:ai user interface:
 To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
-curl -X POST \ 
+curl -X POST \
   # Replace <COMPANY_URL> below with:
   # For self-hosted use the NVIDIA Run:ai user interface URL.
-  'https://<COMPANY_URL>/api/v1/token' \ 
-  --header 'Accept: */*' \ 
-  --header 'Content-Type: application/json' \ 
-  --data-raw '{ 
-  "grantType":"client_credentials", 
-  "clientId":"<CLIENT ID>", 
-  "clientSecret" : "<CLIENT SECRET>" 
-}'
+  'https://<COMPANY_URL>/api/v2/token' \
+  --header 'Accept: */*' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'grant_type=client_credentials' \
+  --data-urlencode 'client_id=<CLIENT ID>' \
+  --data-urlencode 'client_secret=<CLIENT SECRET>'
 ```
 
 ## Step 4: Creating a User Credential
@@ -359,8 +357,8 @@ Copy the following example request and update the parameters as needed. For more
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/distributed' \
--H 'Content-Type: application/json' \ 
--H 'Authorization: Bearer <TOKEN>' \   
+-H 'Content-Type: application/json' \
+-H 'Authorization: Bearer <TOKEN>' \
 -d '{  
     "name": "<workload-name>",  
     "projectId": "<PROJECT-ID>",

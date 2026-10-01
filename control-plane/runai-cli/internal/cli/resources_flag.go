@@ -49,9 +49,9 @@ func (rf *NullableResourcesFlag) String() string {
 			}
 		}
 
-		// Add priority if available
-		if value.HasPriority() {
-			parts = append(parts, fmt.Sprintf("priority=%s", value.GetPriority()))
+		// Add rank if available
+		if value.HasRank() {
+			parts = append(parts, fmt.Sprintf("rank=%s", value.GetRank()))
 		}
 
 		// Add GPU properties if available
@@ -98,9 +98,16 @@ func (rf *NullableResourcesFlag) Set(value string) error {
 	nodepool.SetName(*nodepoolName)
 	newResource.SetNodePool(*nodepool)
 
-	// Set Priority if provided
+	// Set Rank if provided
+	rank := am.Get(parsers.Rank)
 	if priority := am.Get(parsers.Priority); priority != nil {
-		newResource.SetPriority(*priority)
+		if rank != nil {
+			return fmt.Errorf("%s set either rank or priority, not both", errorMessagePrefix(*nodepoolName))
+		}
+		rank = priority
+	}
+	if rank != nil {
+		newResource.SetRank(*rank)
 	}
 
 	// Set GPU properties if provided

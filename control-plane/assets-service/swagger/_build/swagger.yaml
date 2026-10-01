@@ -3669,7 +3669,7 @@ paths:
       operationId: create_inference
       x-service: assets-service
       x-test-coverage:
-        - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+        - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-no-authorization: true
       x-internal: true
       tags:
@@ -3703,7 +3703,7 @@ paths:
       x-internal: true
       x-service: assets-service
       x-test-coverage:
-        - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+        - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       tags:
         - Inferences
       parameters:

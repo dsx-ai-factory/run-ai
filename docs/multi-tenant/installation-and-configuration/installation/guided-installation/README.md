@@ -77,7 +77,7 @@ The NVIDIA Run:ai control plane and cluster each ship as a single Helm chart, an
 
 Each chart also bundles the third-party services it depends on (PostgreSQL, Keycloak, and others), installed as part of the same chart. These images are sourced from their official upstream registries (Docker Hub, Quay, registry.k8s.io) - see [Third-Party Services](../../system-requirements/third-party-services.md) for which services each chart brings in.
 
-NVIDIA Run:ai's images and each third-party service's images are pulled directly from these upstream registries during installation, over the outbound access you prepare beforehand - see [External Access to Critical Services](../../system-requirements/external-access-to-critical-services.md) for the outbound connectivity the install needs.
+NVIDIA Run:ai's images are pulled directly from NGC, and each third-party service's images directly from its own upstream registry, during installation, over the outbound access you prepare beforehand - see [External Access to Critical Services](../../system-requirements/external-access-to-critical-services.md) for the outbound connectivity the install needs.
 
 ## Next Steps
 
@@ -85,6 +85,7 @@ Continue with:
 
 * **[Preparations](preparations.md)** - System requirements, external metrics store, registry credentials, and downloading the installer.
 * **[Control Plane Installation](installation.md)** - Install the control plane.
+* **[API Access Setup](api-access-setup.md)** - Configure programmatic API access using service account credentials.
 * **[Create a Tenant and Cluster](create-a-tenant-and-cluster.md)** - Create a tenant, provision and register its cluster, and install that cluster.
 * **[Configuration Templates](templates.md)** - Complete, ready-to-use configurations for specific use cases.
 

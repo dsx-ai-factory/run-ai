@@ -136,7 +136,7 @@ func PatchOrgUnitDataResources(newResources []models.Resources, orgUnitData *mod
 	for i, resource := range resources {
 		newResource := resourcesMap[resource.NodePoolId]
 		if newResource != nil {
-			rank, err := ParseRank(newResource.Rank, nil)
+			rank, err := ParseRank(newResource.Rank)
 			if err != nil {
 				return err
 			}
@@ -188,7 +188,7 @@ func PatchOrgUnitDataResourcesPartial(
 
 		// Rank: update only when explicitly touched
 		if patchRequest.Rank != nil && newResource.Rank != nil {
-			rank, err := ParseRank(newResource.Rank, nil)
+			rank, err := ParseRank(newResource.Rank)
 			if err != nil {
 				return err
 			}
@@ -307,7 +307,7 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 		return nil, errors.New("over quota feature is off. OverQuotaWeight should be deserved or empty")
 	}
 
-	rank, err := ParseRank(nodePoolResources.Rank, nodePoolResources.Priority)
+	rank, err := ParseRank(nodePoolResources.Rank)
 	if err != nil {
 		return nil, err
 	}
