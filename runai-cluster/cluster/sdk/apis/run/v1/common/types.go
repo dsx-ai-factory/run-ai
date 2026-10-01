@@ -7,7 +7,6 @@
 package common
 
 import (
-	"fmt"
 	"os"
 
 	"k8s.io/utils/pointer"
@@ -23,9 +22,6 @@ const (
 	DefaultVersionEnvVarName  = "IMG_DEFAULT_VERSION"
 
 	ThirdPartyImageEnvVarPrefix = "IMG_THIRD_PARTY_"
-
-	DefaultEnv         = "prod"
-	DefaultRepositeory = "runai.jfrog.io/op-containers-"
 )
 
 // ImageSpec is a struct describing a container image
@@ -68,29 +64,11 @@ func ThirdPartyImage(name string) *Image {
 
 // SetDefaultsWhereNeeded sets default fields for unset fields
 func (i *Image) SetDefaultsWhereNeeded(defaultImageValues *Image) {
-	/*
-		Image registry precedence (from highest to lowest):
-		1. Specified registry
-		2. Specified repository/env
-		3. Global registry
-		4. Default registry
-	*/
 	if i.Registry == nil {
-		if i.Repository != nil || i.Env != nil {
-			// Backward compatibility
-			if i.Repository == nil {
-				i.Repository = ptr.To[string](DefaultRepositeory)
-			}
-			if i.Env == nil {
-				i.Env = ptr.To[string](DefaultEnv)
-			}
-			i.Registry = ptr.To[string](fmt.Sprintf("%s%s", *i.Repository, *i.Env))
+		if defaultImageValues.Registry != nil {
+			i.Registry = defaultImageValues.Registry
 		} else {
-			if defaultImageValues.Registry != nil {
-				i.Registry = defaultImageValues.Registry
-			} else {
-				i.Registry = ptr.To[string](os.Getenv(DefaultRegistryEnvVarName))
-			}
+			i.Registry = ptr.To[string](os.Getenv(DefaultRegistryEnvVarName))
 		}
 	}
 
