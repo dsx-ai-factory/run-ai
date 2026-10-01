@@ -6,7 +6,7 @@ get:
   x-internal: true
   x-service: assets-service
   x-test-coverage:
-    - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+    - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
   tags:
     - Inferences
   parameters:

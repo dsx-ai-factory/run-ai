@@ -9877,7 +9877,7 @@ paths:
       - Inferences
       x-service: assets-service
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-no-authorization: true
   /api/v1/inference/{workloadId}:
     delete:
@@ -10009,7 +10009,7 @@ paths:
       x-no-authorization: true
       x-service: assets-service
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
   /api/v2/inference:
     post:
       description: Creates an inference from a given set of assets. The set must include
