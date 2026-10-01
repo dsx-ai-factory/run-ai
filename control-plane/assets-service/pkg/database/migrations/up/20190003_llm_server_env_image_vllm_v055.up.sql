@@ -9,7 +9,11 @@ DO $$
 
         llm_server_image text := 'runai.jfrog.io/core-llm/runai-vllm:v0.5.5-0.5.0';
         chatbot_ui_image text := 'runai.jfrog.io/core-llm/llm-app';
-        gpt2_image       text := 'runai.jfrog.io/core-llm/quickstart-inference:gpt2-cpu';
+        gpt2_image       text := 'ghcr.io/huggingface/text-generation-inference:3.3.6-intel-cpu';
+        gpt2_command     text := 'text-generation-launcher';
+        gpt2_args        text := '--model-id gpt2 --port 3000';
+        gpt2_environment_variables jsonb := '[]';
+        gpt2_connections jsonb := '[{"name": "ServingPort", "internalToolInfo": {"toolType": "custom", "containerPort": 3000, "connectionType": "ServingPort", "servingPortInfo": {"protocol": "http"}}}]';
     BEGIN
         BEGIN
             UPDATE assets_environment
@@ -21,7 +25,11 @@ DO $$
             WHERE asset_id = chatbot_ui_env_id;
 
             UPDATE assets_environment
-            SET image = gpt2_image
+            SET image = gpt2_image,
+                command = gpt2_command,
+                args = gpt2_args,
+                environment_variables = gpt2_environment_variables,
+                connections = gpt2_connections
             WHERE asset_id = gpt2_env_id;
         END;
     END

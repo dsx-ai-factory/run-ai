@@ -74,6 +74,50 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			dbTesting.CleanTables()
 		})
 
+		It("replaces the legacy GPT-2 image without changing customized environments", func() {
+			legacyEnvironmentID := "7d098107-131b-456f-a38c-9f4cc983b587"
+			customEnvironmentID := "fd09b64d-ef9b-4bb0-a3af-16534020c0b7"
+			legacyImage := "runai.jfrog.io/core-llm/" + "quickstart-inference:gpt2-cpu"
+			replacementImage := "ghcr.io/huggingface/text-generation-inference:3.3.6-intel-cpu"
+			customImage := "example.com/custom/gpt2:latest"
+
+			db := runaidb.DB().Actual().WithContext(context.Background())
+			result := db.Exec(`
+				INSERT INTO assets_metadata (id, kind, scope, tenant_id, name, created_by, created_at, updated_by, updated_at) VALUES
+					(?, 'environment', 'tenant', ?, 'gpt2', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'gpt2', 'Run:ai', now(), 'Run:ai', now());`,
+				legacyEnvironmentID, tenantAId,
+				customEnvironmentID, tenantBId,
+			)
+			Expect(result.Error).To(BeNil())
+
+			result = db.Exec(`
+				INSERT INTO assets_environment (asset_id, image) VALUES
+					(?, ?),
+					(?, ?);`,
+				legacyEnvironmentID, legacyImage,
+				customEnvironmentID, customImage,
+			)
+			Expect(result.Error).To(BeNil())
+
+			migrateTo(20250005, "up 20250006")
+
+			var actualLegacyImage string
+			result = db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", legacyEnvironmentID).Scan(&actualLegacyImage)
+			Expect(result.Error).To(BeNil())
+			Expect(actualLegacyImage).To(Equal(replacementImage))
+
+			var actualLegacyCommand string
+			result = db.Raw("SELECT command FROM assets_environment WHERE asset_id = ?", legacyEnvironmentID).Scan(&actualLegacyCommand)
+			Expect(result.Error).To(BeNil())
+			Expect(actualLegacyCommand).To(Equal("text-generation-launcher"))
+
+			var actualCustomImage string
+			result = db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", customEnvironmentID).Scan(&actualCustomImage)
+			Expect(result.Error).To(BeNil())
+			Expect(actualCustomImage).To(Equal(customImage))
+		})
+
 		It("replaces the Jupyter TensorBoard image and preserves customizations", func() {
 			legacyEnvironmentID := "10a96a7b-e5cc-4dcc-ac38-ef206a06d4b4"
 			customCommandEnvironmentID := "89247adf-c729-4550-81aa-fd3e17533046"
