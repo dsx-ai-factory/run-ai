@@ -286,7 +286,14 @@ func TestRestartAllowedServiceAccounts(t *testing.T) {
 		want                string
 	}{
 		{name: "built-in controllers", want: "system:serviceaccount:custom-runai:anyworkload-controller,system:serviceaccount:custom-runai:runai-agent,system:serviceaccount:custom-runai:runtime-rules"},
-		{name: "built-in controllers and configured identity", extra: []string{"system:serviceaccount:management:restart"}, want: "system:serviceaccount:custom-runai:anyworkload-controller,system:serviceaccount:custom-runai:runai-agent,system:serviceaccount:custom-runai:runtime-rules,system:serviceaccount:management:restart"},
+		{
+			name:  "built-in controllers and configured identity",
+			extra: []string{"system:serviceaccount:management:restart"},
+			want: "system:serviceaccount:custom-runai:anyworkload-controller," +
+				"system:serviceaccount:custom-runai:runai-agent," +
+				"system:serviceaccount:custom-runai:runtime-rules," +
+				"system:serviceaccount:management:restart",
+		},
 		{name: "NMC agent", agentServiceAccount: "nmc-agent", want: "system:serviceaccount:custom-runai:anyworkload-controller,system:serviceaccount:custom-runai:nmc-agent,system:serviceaccount:custom-runai:runtime-rules"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
