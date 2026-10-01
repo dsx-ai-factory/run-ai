@@ -27,8 +27,7 @@ The service is responsible for:
   group) a role over a scope (tenant, cluster, department, project). Includes
   agent-sync and cluster-scoped/subject-scoped/me-scoped read variants.
 - **Roles** — managing tenant roles and the built-in static roles (including
-  legacy static roles), enabling/disabling roles, and both v1 and current role
-  APIs.
+  legacy static roles), and enabling/disabling roles.
 - **Permission sets & permissions** — resolving the permissions granted by a
   role, and managing permission sets.
 - **Authorization decisions** — evaluating whether a request is authorized for a

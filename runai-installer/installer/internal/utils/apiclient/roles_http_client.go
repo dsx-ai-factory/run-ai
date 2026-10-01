@@ -30,6 +30,13 @@ type Role struct {
 	UpdatedAt   string `json:"updatedAt,omitempty"`
 }
 
+// The roles API is paginated; request the maximum page size so a single call covers every role in the tenant.
+const rolesPageLimit = 500
+
+type rolesResponse struct {
+	Roles []Role `json:"roles"`
+}
+
 type RolesHTTPClient struct {
 	httpClient  *http.Client
 	tokenApi    idmclient.TokensAPI
@@ -145,7 +152,7 @@ func (c *RolesHTTPClient) GetRoles(ctx context.Context) ([]Role, int, error) {
 		return nil, 0, fmt.Errorf("failed to get valid token: %w", err)
 	}
 
-	rolesURL := fmt.Sprintf("%s/api/v1/authorization/roles", c.serverURL)
+	rolesURL := fmt.Sprintf("%s/api/v2/authorization/roles?limit=%d", c.serverURL, rolesPageLimit)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rolesURL, nil)
 	if err != nil {
@@ -202,12 +209,12 @@ func (c *RolesHTTPClient) GetRoles(ctx context.Context) ([]Role, int, error) {
 		logging.Errorf("[RolesHTTPClient] GetRoles failed with status %d: %s", statusCode, string(body))
 		return nil, statusCode, fmt.Errorf("GetRoles failed with status %d: %s", statusCode, string(body))
 	}
-	var roles []Role
-	if err := json.Unmarshal(body, &roles); err != nil {
+	var response rolesResponse
+	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, statusCode, fmt.Errorf("failed to parse roles response: %w", err)
 	}
-	logging.Infof("[RolesHTTPClient] Successfully fetched %d roles", len(roles))
-	return roles, statusCode, nil
+	logging.Infof("[RolesHTTPClient] Successfully fetched %d roles", len(response.Roles))
+	return response.Roles, statusCode, nil
 }
 
 func (c *RolesHTTPClient) GetRoleIDByName(ctx context.Context, roleName string) (int32, error) {
