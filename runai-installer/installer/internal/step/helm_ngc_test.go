@@ -18,7 +18,7 @@ func TestNGCChartRepo(t *testing.T) {
 		env  config.RunaiEnvType
 		want string
 	}{
-		{name: "prod", env: config.EnvProd, want: "https://helm.ngc.nvidia.com/nvidia/runai"},
+		{name: "prod", env: config.EnvProd, want: "https://helm.ngc.nvidia.com/nvidia/runai-oss"},
 		{name: "staging", env: config.EnvStaging, want: ""},
 		{name: "lab", env: config.EnvLab, want: ""},
 		{name: "test", env: config.EnvTest, want: ""},
