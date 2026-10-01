@@ -19,7 +19,6 @@ import (
 	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 )
 
-//go:generate mockery --name IAuthorizationExternalClient
 type IAuthorizationExternalClient interface {
 	authorization_api.AccessRulesAPI
 	authorization_api.RolesAPI
@@ -30,7 +29,6 @@ type IAuthorizationExternalClient interface {
 	AccessRulesSync(ctx context.Context, clusterId string, accessRuleForSync []authorization_api.AccessRuleForSync) (*http.Response, error)
 }
 
-//go:generate mockery --name IAuthorizationClient
 type IAuthorizationClient interface {
 	IAuthorizationExternalClient
 	authorization_api.InternalAPI
