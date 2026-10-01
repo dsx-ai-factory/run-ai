@@ -122,6 +122,20 @@ NVIDIA Run:ai can be deployed in either a connected or air-gapped environment, r
 
 NVIDIA Run:ai runs on both Kubernetes and OpenShift, and the installation model is the same for both. Where they differ is in how certain infrastructure pieces work: OpenShift routes traffic through its built-in router rather than an ingress controller, installs operators such as the GPU Operator through OLM rather than Helm, and manages TLS at the router level rather than through Kubernetes secrets. These differences are handled within each installation guide, and the overall flow remains the same.
 
+#### Gov-Ready
+
+Gov-ready is an NVIDIA standard that makes sure NVIDIA software complies with the federal and governmental security and compliance requirements that regulated customers must meet. NVIDIA Run:ai, including its dependencies, supports Gov-ready deployments. For the standards and regulations it covers, refer to [Government-Ready AI Software](https://www.nvidia.com/en-eu/use-cases/government-ready-ai-software/).
+
+Gov-ready software helps you to:
+
+* Reduce the effort of securing an open-source technology stack against continuous security vulnerabilities.
+* Adopt AI with software that is vetted against demanding regulatory frameworks.
+* Run commercially supported, production-ready software in regulated environments.
+
+All NVIDIA Run:ai images, including the open-source images, are Gov-ready. The vulnerability remediation SLA and support for Gov-ready issues apply to [NVIDIA Run:ai Support-Entitled Release](../getting-started/product-support-policy.md) customers. Open-source users can use the Gov-ready images, but they do not receive the SLA.
+
+For the images and Helm values, refer to [Gov-Ready Third-Party Services](system-requirements/gov-ready-third-party-services.md). For the ordered steps, refer to [Gov-Ready Installation](installation/gov-ready-installation.md).
+
 ### Installation Paths
 
 NVIDIA Run:ai supports three installation paths. Choose based on your tooling, environment, and the balance you want between installation convenience and fine-grained control over configuration values.
@@ -167,3 +181,4 @@ If you are deploying NVIDIA Run:ai through NVIDIA Base Command Manager (BCM), do
 * Install using the path that fits your environment:
   * [Guided Installation](installation/guided-installation/README.md) - Recommended for most installations.
   * [Manual Helm](installation/install-using-helm/preparations.md) - For organizations managing releases through their own tooling.
+* For a Gov-ready environment, follow [Gov-Ready Installation](installation/gov-ready-installation.md) alongside the path you choose.

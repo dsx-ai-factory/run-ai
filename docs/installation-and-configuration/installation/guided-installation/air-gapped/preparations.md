@@ -14,6 +14,14 @@ Complete the [System Requirements](../../../system-requirements/README.md) secti
 * [Third-Party Services](../../../system-requirements/third-party-services.md) - The third-party services deployed as part of the installation.
 * [External Access to Critical Services](../../../system-requirements/external-access-to-critical-services.md) - The inbound and outbound connectivity required to reach those services and NVIDIA registries.
 
+<Note>
+
+**Gov-ready**
+
+For a Gov-ready installation, also review [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md), which replace the standard third-party services images.
+
+</Note>
+
 Your [deployment model](../../../system-requirements/deployment-model.md) determines how the installation steps are applied. In a same-cluster deployment, the control plane and NVIDIA Run:ai cluster are installed on the same Kubernetes cluster. In a multi-cluster deployment, control plane setup is completed once, and cluster setup is repeated for each NVIDIA Run:ai cluster.
 
 ## Prerequisites and Features
@@ -21,6 +29,14 @@ Your [deployment model](../../../system-requirements/deployment-model.md) determ
 GPU Operator and Prometheus are required for every installation. Network Operator, and features such as Knative and Kubeflow, apply only if your environment or planned workload types need them. Your planned workload types may also affect the networking configuration required for the installation, including wildcard domains and TLS certificates. See [Prerequisites and Features](../prerequisites-and-features.md) for what each one does and when you need it.
 
 The installer does not install prerequisites or features at all in air-gapped environments - you must install them yourself beforehand, directly on each target Kubernetes cluster, using each vendor's own air-gapped installation instructions.
+
+<Note>
+
+**Gov-ready**
+
+For a Gov-ready installation, install the Gov-ready versions of the GPU Operator and Network Operator yourself. Refer to the Gov-ready documentation of the [NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/install-gpu-operator-gov-ready.html) and the [NVIDIA Network Operator](https://docs.nvidia.com/networking/display/kubernetes2670/install-network-operator-gov-ready.html) for the preparation and the Helm values they require.
+
+</Note>
 
 ## Domains and TLS Certificates
 
@@ -85,7 +101,9 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
    - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
+     - Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add an entry for each hardened third-party image: `keycloak`, `postgres` (the PostgreSQL wait image), `traefik`, `nats`, and `thanos` for the control plane, and `valkey` and `git-sync` for the cluster. Each `source` is the full reference of the hardened image in your Docker Hub organization, including the tag. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#providing-credentials) for the entries.
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
+     - Docker Hub credentials <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add an entry for `docker.io` with your Docker ID or organization name and an access token, so that the pack can pull the hardened images. You do not create a Kubernetes secret. See [Providing Credentials](../../../system-requirements/gov-ready-third-party-services.md#providing-credentials).
 
    ```bash
    cat > airgap-pack.yaml <<'EOF'
@@ -97,11 +115,13 @@ On that connected machine, download the `runai-installer` binary and use its `ai
    imageOverrides:
      - name: keycloak
        source: <your-registry>/keycloak:<tag>
+     # Gov-ready: add an entry for each hardened image (keycloak, postgres, traefik, nats, thanos, valkey, git-sync)
 
    registryAuth:
      - registry: <your-registry-host>
        username: <username>
        passwordPath: /path/to/registry-password
+     # Gov-ready: add an entry for docker.io with your Docker Hub credentials
    EOF
 
    ./runai-installer airgap pack \
