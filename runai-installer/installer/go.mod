@@ -18,9 +18,9 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.17
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.19
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
 	github.com/dsx-ai-factory/run-ai/runai-installer/clients v0.0.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
@@ -77,7 +77,7 @@ require (
 	github.com/docker/docker-credential-helpers v0.9.9 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/evanphx/json-patch v5.9.11+incompatible // indirect
