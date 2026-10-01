@@ -207,6 +207,22 @@ var _ = Describe("Workloads types API tests", Ordered, func() {
 				Expect(priorities[0].Source).To(Equal(RunaiSource))
 				Expect(priorities[0].AggregatedPhase).To(Equal(StatusReady))
 			})
+
+			DescribeTable("rejects sortBy outside the allowed fields",
+				func(sortBy string) {
+					response, err := workloadPropertiesService.GetWorkloadPriorities(ctx, "", sortBy, []string{})
+					Expect(err).To(BeNil())
+					Expect(response.Code).To(Equal(http.StatusBadRequest))
+
+					response, err = workloadPropertiesService.GetWorkloadClusterPriorities(ctx, uuid.NewString(), "", sortBy, []string{})
+					Expect(err).To(BeNil())
+					Expect(response.Code).To(Equal(http.StatusBadRequest))
+				},
+				Entry("unknown field", "unknown"),
+				Entry("raw column name", "tenant_id"),
+				Entry("sql injection", "name; DROP TABLE priorities--"),
+				Entry("order clause injection", "(SELECT 1)"),
+			)
 		})
 
 		Context("Get priorities with status", func() {
