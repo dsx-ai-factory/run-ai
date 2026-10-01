@@ -101,7 +101,7 @@ jobs:
           ref: main
           fetch-depth: 0
           fetch-tags: true
-          token: ${{ secrets.DEVOPS_RUNAI_TOKEN }}
+          token: ${{ secrets.DEVOPS_RUNAI_AUTOTAG_TOKEN }}
 
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
@@ -114,7 +114,7 @@ jobs:
           AUTO_TAG: "1"
           FORCE_MINOR: ${{ github.event_name == 'workflow_dispatch' && inputs.force_minor && '1' || '' }}
           GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
-          TOKEN: ${{ secrets.DEVOPS_RUNAI_TOKEN }}
+          TOKEN: ${{ secrets.DEVOPS_RUNAI_AUTOTAG_TOKEN }}
         run: |
           # Go fetches the repository's own modules with this; set for this step's
           # processes only, not written to the runner's git config.
