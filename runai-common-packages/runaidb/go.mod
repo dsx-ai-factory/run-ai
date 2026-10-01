@@ -7,7 +7,7 @@ require (
 	github.com/aws/smithy-go v1.28.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27
 	github.com/golang-migrate/migrate/v4 v4.20.1
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/stretchr/testify v1.12.1
