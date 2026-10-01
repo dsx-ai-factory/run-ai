@@ -46,7 +46,7 @@ const (
 	EnvVarOauth2ProxyOidcIssuerUrl = "OAUTH2_PROXY_OIDC_ISSUER_URL"
 
 	EnvVarOauth2ProxyUsernameLoaderImage = "RUNAI_OAUTH2_PROXY_USERNAME_LOADER_IMAGE"
-	EnvVarOauth2ProxyTemplatesConfigMap  = oauth2proxy.TemplatesConfigMapEnvVar
+	EnvVarOauth2ProxyTemplatesEnabled    = oauth2proxy.TemplatesEnabledEnvVar
 	EnvVarOauth2ProxyResources           = constants.OAuth2ProxyResourcesEnvVar
 	EnvVarUsernameLoaderResources        = constants.UsernameLoaderResourcesEnvVar
 	EnvVarGitSyncResources               = constants.GitSyncResourcesEnvVar
@@ -94,6 +94,10 @@ func GatewayNamespace() string {
 
 func SubdomainSupportEnabled() bool {
 	return strings.ToLower(os.Getenv(EnvVarSubdomainSupport)) == "true"
+}
+
+func OAuth2ProxyTemplatesEnabled() bool {
+	return strings.ToLower(os.Getenv(EnvVarOauth2ProxyTemplatesEnabled)) == "true"
 }
 
 // ParseWorkloadInjectedContainerResources parses an injected-container resource

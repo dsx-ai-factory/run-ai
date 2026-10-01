@@ -44,6 +44,9 @@ func TestIntegrationSetupConfiguresOnlyNetworking(t *testing.T) {
 	if integration.plugin.ownershipReader != liveReader {
 		t.Fatal("setup did not inject the live ownership reader")
 	}
+	if integration.plugin.templatesReader != liveReader {
+		t.Fatal("setup did not inject the live templates reader")
+	}
 	wantFields := []string{
 		workloadRunnerNetworkingDependencyIndex,
 		endpointSlicePodUIDIndex,

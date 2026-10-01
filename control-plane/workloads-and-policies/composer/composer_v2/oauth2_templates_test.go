@@ -12,6 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/init_containers"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	. "github.com/onsi/ginkgo/v2"
@@ -69,6 +70,7 @@ var _ = DescribeTable("OAuth2 templates follow the cluster capability in init an
 				Expect(pod.Volumes[index].ConfigMap).To(Equal(&corev1.ConfigMapVolumeSource{
 					LocalObjectReference: corev1.LocalObjectReference{Name: oauth2proxy.ConfigMapName},
 					Items:                []corev1.KeyToPath{{Key: oauth2proxy.TemplateKey, Path: oauth2proxy.TemplateKey}},
+					Optional:             convutils.Ref(true),
 				}))
 				Expect(pod.Volumes).To(HaveLen(2), "one shared template volume regardless of proxy count")
 			}

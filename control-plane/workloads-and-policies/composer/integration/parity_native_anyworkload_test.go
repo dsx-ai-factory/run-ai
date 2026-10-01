@@ -101,7 +101,7 @@ var _ = Describe("native vs anyworkload composer parity for oauth2-proxy", func(
 		}
 		GinkgoT().Setenv(builders.ExternalUrlAuthContainerImageEnv, oauth2ParityImage)
 		GinkgoT().Setenv(config.EnvVarOauth2ProxyUsernameLoaderImage, oauth2ParityUsernameLoaderImage)
-		GinkgoT().Setenv(oauth2proxy.TemplatesConfigMapEnvVar, oauth2proxy.ConfigMapName)
+		GinkgoT().Setenv(oauth2proxy.TemplatesEnabledEnvVar, "true")
 		// The cluster only stamps the oauth2-proxy sidecar RestartPolicy when the
 		// sidecar-containers feature gate is on; the anyworkload constructor sets
 		// it unconditionally at the K8s 1.29 floor. Enable the gate so both agree.

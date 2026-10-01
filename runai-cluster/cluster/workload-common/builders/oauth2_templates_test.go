@@ -15,9 +15,19 @@ import (
 )
 
 func TestOAuth2ProxyTemplateVolume(t *testing.T) {
-	for _, configMapName := range []string{"", oauth2proxy.ConfigMapName} {
-		t.Run("configMap="+configMapName, func(t *testing.T) {
-			t.Setenv(workloadconfig.EnvVarOauth2ProxyTemplatesConfigMap, configMapName)
+	for _, tc := range []struct {
+		name    string
+		value   string
+		enabled bool
+	}{
+		{name: "unset"},
+		{name: "disabled", value: "false"},
+		{name: "enabled", value: "true", enabled: true},
+		{name: "case insensitive", value: "TRUE", enabled: true},
+		{name: "config map name is not enablement", value: "other-templates"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Setenv(workloadconfig.EnvVarOauth2ProxyTemplatesEnabled, tc.value)
 			t.Setenv(workloadconfig.EnvVarOauth2ProxyResources, "")
 			container, err := BuildOAuth2ProxyContainer(OAuth2ProxyConfig{
 				ContainerName: "proxy", UpstreamURL: "http://workload:8888",
@@ -39,8 +49,8 @@ func TestOAuth2ProxyTemplateVolume(t *testing.T) {
 					templateVolume = &volumes[i]
 				}
 			}
-			if configMapName == "" {
-				require.Nil(t, templateMount, "legacy image still supplies its embedded page")
+			if !tc.enabled {
+				require.Nil(t, templateMount)
 				require.Nil(t, templateVolume)
 				return
 			}
@@ -49,9 +59,10 @@ func TestOAuth2ProxyTemplateVolume(t *testing.T) {
 			require.True(t, templateMount.ReadOnly)
 			require.NotNil(t, templateVolume)
 			require.NotNil(t, templateVolume.ConfigMap)
-			require.Equal(t, configMapName, templateVolume.ConfigMap.Name)
+			require.Equal(t, oauth2proxy.ConfigMapName, templateVolume.ConfigMap.Name)
 			require.Equal(t, []corev1.KeyToPath{{Key: "error.html", Path: "error.html"}}, templateVolume.ConfigMap.Items)
-			require.Nil(t, templateVolume.ConfigMap.Optional, "wait for the preserved page rather than silently use the upstream page")
+			require.NotNil(t, templateVolume.ConfigMap.Optional)
+			require.True(t, *templateVolume.ConfigMap.Optional, "missing templates must not block the workload")
 		})
 	}
 }

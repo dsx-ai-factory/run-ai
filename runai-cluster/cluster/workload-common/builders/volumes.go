@@ -8,7 +8,6 @@ package builders
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
@@ -910,13 +909,14 @@ func ComposeAuthVolume() corev1.Volume {
 // Includes the auth volume and the configured templates and custom CA volumes.
 func ComposeAuthProxyVolumes() []corev1.Volume {
 	volumes := []corev1.Volume{ComposeAuthVolume()}
-	if name := os.Getenv(config.EnvVarOauth2ProxyTemplatesConfigMap); name != "" {
+	if config.OAuth2ProxyTemplatesEnabled() {
 		volumes = append(volumes, corev1.Volume{
 			Name: oauth2proxy.VolumeName,
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{Name: name},
+					LocalObjectReference: corev1.LocalObjectReference{Name: oauth2proxy.ConfigMapName},
 					Items:                []corev1.KeyToPath{{Key: oauth2proxy.TemplateKey, Path: oauth2proxy.TemplateKey}},
+					Optional:             utils.Ref(true),
 				},
 			},
 		})

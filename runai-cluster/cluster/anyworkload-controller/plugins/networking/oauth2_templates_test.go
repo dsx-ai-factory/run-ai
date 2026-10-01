@@ -18,7 +18,7 @@ import (
 )
 
 func TestStandaloneProxyPreservesErrorPageWithoutUsernameLoader(t *testing.T) {
-	t.Setenv(workloadconfig.EnvVarOauth2ProxyTemplatesConfigMap, oauth2proxy.ConfigMapName)
+	t.Setenv(workloadconfig.EnvVarOauth2ProxyTemplatesEnabled, "true")
 	t.Setenv(workloadconfig.EnvVarOauth2ProxyResources, "")
 	runner := &dromosv1alpha1.WorkloadRunner{ObjectMeta: metav1.ObjectMeta{
 		Name: "workload", Namespace: "runai-project",
@@ -43,11 +43,13 @@ func TestStandaloneProxyPreservesErrorPageWithoutUsernameLoader(t *testing.T) {
 			g.Expect(pod.Containers[0].VolumeMounts).To(ContainElement(corev1.VolumeMount{
 				Name: oauth2proxy.VolumeName, MountPath: oauth2proxy.TemplatesPath, ReadOnly: true,
 			}))
+			optional := true
 			g.Expect(pod.Volumes).To(ContainElement(corev1.Volume{
 				Name: oauth2proxy.VolumeName,
 				VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{
 					LocalObjectReference: corev1.LocalObjectReference{Name: oauth2proxy.ConfigMapName},
 					Items:                []corev1.KeyToPath{{Key: oauth2proxy.TemplateKey, Path: oauth2proxy.TemplateKey}},
+					Optional:             &optional,
 				}},
 			}))
 		})

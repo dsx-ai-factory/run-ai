@@ -109,9 +109,9 @@ func TestBuildEnvVarsIncludesOAuth2ProxyTemplates(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
-	value, found := envValue(envVars, oauth2proxy.TemplatesConfigMapEnvVar)
-	if !found || value != oauth2proxy.ConfigMapName {
-		t.Fatalf("template ConfigMap env = %q (present=%v), want %q", value, found, oauth2proxy.ConfigMapName)
+	value, found := envValue(envVars, oauth2proxy.TemplatesEnabledEnvVar)
+	if !found || value != "true" {
+		t.Fatalf("template enabled env = %q (present=%v), want true", value, found)
 	}
 }
 
