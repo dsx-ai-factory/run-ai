@@ -12,13 +12,13 @@ NVIDIA Run:ai defines workload priority and preemptibility to determine how work
 
 Refer to the [NVIDIA Run:ai Scheduler: Concepts and Principles](concepts-and-principles.md#priority-and-preemption) doc for more information.
 
-<Info>
+<Note>
 
 **Note**
 
 This applies only within a single project. It does not impact the scheduling queues or workloads of other projects.
 
-</Info>
+</Note>
 
 ## Priority Dictionary
 
@@ -38,14 +38,14 @@ Workload priority is defined by selecting a priority from a predefined list in t
 
 NVIDIA Run:ai defines the following default mappings of workload types to priorities and preemptibility. Each workload type comes with a default category that determines it default priority and preemptibility value. To retrieve the default priority and preemptibility per workload type, refer to the [List workload types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#get-api-v1-workload-types) API.
 
-<Info>
+<Note>
 
 **Note**
 
 * For more information on workload support, see [Introduction to workloads](../../../workloads-in-nvidia-run-ai/introduction-to-workloads.md).
 * Changing the priority is not supported for NVCF workloads.
 
-</Info>
+</Note>
 
 | Category | Default Priority | Default Preemptibility |
 | -------- | ---------------- | ---------------------- |
@@ -104,14 +104,14 @@ NVIDIA Run:ai defines the following default mappings of workload types to priori
 
 ## Setting Priority and Preemptibility During Workload Submission
 
-<Info>
+<Note>
 
 **Note**
 
 * If preemptibility is not explicitly configured, the system uses the default preemptibility behavior associated with the selected workload priority.
 * Changing a workload’s priority and preemptibility may impact its ability to be scheduled. For example, switching a workload from a low priority, preemptible value (which allows over-quota usage) to high priority, non-preemptible value (which requires in-quota resources) may reduce its chances of being scheduled in cases where the required quota is unavailable.
 
-</Info>
+</Note>
 
 ### NVIDIA Run:ai Native Workloads
 
@@ -123,13 +123,13 @@ For native NVIDIA Run:ai workloads, priority and preemptibility can be set durin
 
 ### Supported Workload Types
 
-<Info>
+<Note>
 
 **Note**
 
 If priority or preemptibility is set through the UI, API, or CLI, those values override any values defined in the YAML manifest.
 
-</Info>
+</Note>
 
 For [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) submitted with a YAML manifest, priority and preemptibility can be set as follows:
 

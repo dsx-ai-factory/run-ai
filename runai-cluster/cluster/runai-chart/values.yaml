@@ -37,6 +37,10 @@ thirdPartyImages:
     registry: registry.k8s.io
     repository: git-sync/git-sync
     tag: v4.7.0
+  oauth2-proxy:
+    registry: quay.io
+    repository: oauth2-proxy/oauth2-proxy
+    tag: v7.15.4
   valkey:
     registry: docker.io
     repository: valkey/valkey
@@ -197,6 +201,11 @@ kai-resource-management:
   defaultNodePool:
     enabled: false
   kai-scheduler:
+    gpu-fractioning:
+      metricsAgent:
+        metricNames:
+          gpuSmUtilizationPercent: runai_pod_gpu_utilization
+          gpuMemoryUsedBytes: runai_pod_gpu_memory_used_bytes
     global:
       # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
       # chart-level autoscaling switch off so it does not imply enablement.
