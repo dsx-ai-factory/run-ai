@@ -9,7 +9,6 @@ Name | Type | Description | Notes
 **Cpu** | Pointer to [**NullableResourcesCpu**](ResourcesCpu.md) |  | [optional] 
 **Memory** | Pointer to [**NullableResourcesMemory**](ResourcesMemory.md) |  | [optional] 
 **Rank** | Pointer to **NullableString** | The scheduling rank of this org-unit within the node pool. Determines the scheduling order of workloads between org-units. Workloads in higher-ranked org-units are scheduled before workloads in lower-ranked org-units. For example, all workloads in rank \&quot;High\&quot; will be scheduled before all workloads in rank \&quot;Medium\&quot;. | [optional] [default to "MediumLow"]
-**Priority** | Pointer to **NullableString** | Deprecated. Use rank instead. The scheduling priority for workloads in this node pool. | [optional] 
 
 ## Methods
 
@@ -195,41 +194,6 @@ HasRank returns a boolean if a field has been set.
 `func (o *ResourcesNullable) UnsetRank()`
 
 UnsetRank ensures that no value is present for Rank, not even an explicit nil
-### GetPriority
-
-`func (o *ResourcesNullable) GetPriority() string`
-
-GetPriority returns the Priority field if non-nil, zero value otherwise.
-
-### GetPriorityOk
-
-`func (o *ResourcesNullable) GetPriorityOk() (*string, bool)`
-
-GetPriorityOk returns a tuple with the Priority field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetPriority
-
-`func (o *ResourcesNullable) SetPriority(v string)`
-
-SetPriority sets Priority field to given value.
-
-### HasPriority
-
-`func (o *ResourcesNullable) HasPriority() bool`
-
-HasPriority returns a boolean if a field has been set.
-
-### SetPriorityNil
-
-`func (o *ResourcesNullable) SetPriorityNil(b bool)`
-
- SetPriorityNil sets the value for Priority to be an explicit nil
-
-### UnsetPriority
-`func (o *ResourcesNullable) UnsetPriority()`
-
-UnsetPriority ensures that no value is present for Priority, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

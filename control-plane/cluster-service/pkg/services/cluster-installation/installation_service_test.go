@@ -91,7 +91,7 @@ var _ = Describe("ClusterVersionList", func() {
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="test-version" --create-namespace`
 
@@ -118,7 +118,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version=">0.0.0-0" --create-namespace`
 			helmActions := mocks.NewHelmActions(GinkgoT())
@@ -148,7 +148,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.24.0" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=haproxy`
@@ -177,7 +177,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.24.0" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=haproxy`
@@ -204,7 +204,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.24.0" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=haproxy`
@@ -235,7 +235,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.24.0" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=haproxy`
@@ -266,7 +266,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.25.1" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=haproxy`
@@ -297,7 +297,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.23.0" --create-namespace`
 
@@ -327,7 +327,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.15.0" --create-namespace`
 
@@ -358,7 +358,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.24.0" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=haproxy \
@@ -386,7 +386,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.24.0" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=haproxy \
@@ -414,7 +414,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.23.0" --create-namespace \
 --set global.fipsMode=only`
@@ -447,7 +447,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.24.0" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=nginx`
@@ -481,7 +481,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.23.0" --create-namespace \
 --set clusterConfig.global.ingress.ingressClass=haproxy`
@@ -514,7 +514,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.24.0" --create-namespace`
 
@@ -547,7 +547,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \
---set cluster.bootstrapToken=test-secret \
+--set controlPlane.bootstrapToken=test-secret \
 --set cluster.uid=test-uuid \
 --set cluster.url=test-cluster-url --version="2.25.0" --create-namespace`
 

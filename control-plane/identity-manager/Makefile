@@ -51,12 +51,16 @@ build-integration-tests: build-keycloak build-integration-tests-generic
 	# build dockers
 	docker compose -f ./integration-tests/docker-compose.yaml build
 
+# --no-attach keycloak-extensions: it's a run-to-completion init job (exits 0
+# once it's staged the Keycloak payload), not a long-lived service. Without
+# this, `up`'s default "abort the stack when any attached container exits"
+# behavior tears everything down the moment it finishes.
 docker-compose-integration-tests-up: build-integration-tests
-	docker compose --profile "*" -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --exit-code-from identity-manager-tests || ${FAILURE_MESSAGE_HANDLER}
+	docker compose --profile "*" -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --no-attach keycloak-extensions --exit-code-from identity-manager-tests || ${FAILURE_MESSAGE_HANDLER}
 .PHONY: docker-compose-integration-tests-up
 
 docker-compose-integration-tests-debug: build-integration-tests
-	docker compose --profile "*" -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --abort-on-container-failure
+	docker compose --profile "*" -f ./integration-tests/docker-compose.yaml up -V --remove-orphans --force-recreate --no-attach keycloak-extensions --abort-on-container-failure
 .PHONY: docker-compose-integration-tests-debug
 
 coverage:

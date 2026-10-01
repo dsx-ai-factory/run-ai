@@ -38,6 +38,9 @@ navigation:
         path: ../../docs/getting-started/whats-new/deprecation-notifications.md
     - page: Support, Lifecycle, and Deprecation Policy
       path: ../../docs/getting-started/product-support-policy.md
+    - page: Quick Start Guide
+      path: ../../docs/getting-started/quick-start-guide.md
+      hidden: true
   - section: Installation and Configuration
     contents:
     - page: Overview
@@ -269,6 +272,9 @@ navigation:
         - page: Workload Priority and Preemption
           slug: workload-priority-control
           path: ../../docs/platform-management/runai-scheduler/scheduling/workload-priority-control.md
+        - page: Background Workloads
+          slug: background-workloads
+          path: ../../docs/platform-management/runai-scheduler/scheduling/background-workloads.md
         - section: Quick Starts
           contents:
           - page: Over Quota, Fairness and Preemption
@@ -497,6 +503,9 @@ navigation:
       - page: Validating GPU Cluster Communication with NCCL Tests
         slug: nccl-tests
         path: ../../docs/tutorials/training-tutorials/nccl-tests.md
+      - page: Deploying a Slurm Cluster with Slinky
+        slug: deploying-slurm
+        path: ../../docs/tutorials/training-tutorials/deploying-slurm.md
     - section: Inference Tutorials
       contents:
       - page: NVIDIA NIM Distributed Inference Deployment

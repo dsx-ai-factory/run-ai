@@ -23,7 +23,7 @@ services:
       - SERVICE_NAME=metrics-service-integration-tests
       - METRICS_SERVER_HOST=metrics-service:8080
       - SECRETS_MOUNT_PATH=/etc/secrets
-      - S3_ENDPOINT=minio:9000
+      - S3_ENDPOINT=rustfs:9000
       # The metrics-service container migrates the shared DB; the test process
       # must not run migrations (it has no migration files mounted).
       - DB_MIGRATION_AUTO=false
@@ -38,7 +38,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      minio:
+      rustfs:
         condition: service_healthy
     volumes:
       - ${CONFIG_FILE:-./config.yaml}:/config.yaml
@@ -50,8 +50,8 @@ services:
       - DB_NAME=runai
       - DB_SCHEMA=metrics
       - SECRETS_MOUNT_PATH=/etc/secrets
-      - S3_ENDPOINT=minio:9000
-      - S3_ACCESS_KEY_ID=minioadmin
+      - S3_ENDPOINT=rustfs:9000
+      - S3_ACCESS_KEY_ID=rustfsadmin
       - LOG_LEVEL=debug
       - CONFIG_KEY_DELIMITER=;
       - PUBSUB_TYPE=redis
@@ -109,36 +109,33 @@ services:
       - 9090:9090
       - ${AGENT_PORT:-8090}:${AGENT_PORT:-8090}  # For promtool agent
 
-  minio:
+  rustfs:
     profiles:
       - run-setup
-    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
-    container_name: minio
+    image: rustfs/rustfs:1.0.0
+    container_name: rustfs
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-      # The image runs as UID 1001 with HOME=/, which it cannot write to, so mc
-      # needs a writable location for its config.
-      HOME: /tmp
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
     ports:
-      - "9000:9000"    # Exposing MinIO API port
-      - "9001:9001"    # Exposing MinIO Console port
-    healthcheck:
-      test: [ "CMD", "mc", "ready", "local" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
+      - "9000:9000"    # Exposing S3 API port
+      - "9001:9001"    # Exposing console port
+    # rustfs has no startup bucket creation and ships no S3 client, so the
+    # bucket is created over the API with curl's built-in SigV4 signing.
     entrypoint: >
       /bin/sh -c "
-        minio server /bitnami/minio/data --console-address ":9001" & 
-        sleep 5;
-        echo 'Waiting for MinIO to be ready...';
-        mc alias set temp http://localhost:9000 minioadmin minioadmin &&
-        if ! mc ls temp/metrics-service; then mc mb temp/metrics-service; fi &&
-        mc alias rm temp;
+        /entrypoint.sh rustfs &
+        echo 'Waiting for rustfs to be ready...';
+        curl -fsS --retry 180 --retry-delay 1 --retry-connrefused http://127.0.0.1:9000/health >/dev/null;
+        curl -sS -X PUT --aws-sigv4 'aws:amz:us-east-1:s3' --user 'rustfsadmin:rustfsadmin' http://127.0.0.1:9000/metrics-service;
         wait
       "
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS --aws-sigv4 'aws:amz:us-east-1:s3' --user 'rustfsadmin:rustfsadmin' 'http://127.0.0.1:9000/metrics-service?max-keys=0' >/dev/null"]
+      interval: 2s
+      timeout: 10s
+      retries: 15
+      start_period: 2s
     restart: always
     
   redis:

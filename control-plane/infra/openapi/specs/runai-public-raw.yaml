@@ -24,15 +24,15 @@ info:
     access rules.
 
     To assign access rules to the service account, see [Create access
-    rules](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/accessrules#create-or-delete-rules).
+    rules](/run-ai/self-hosted/documentation/platform-management/authentication/access-rules).
 
     Make sure you assign the correct rules to your service account. Use the
-    [Roles](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/roles)
+    [Roles](/run-ai/self-hosted/documentation/platform-management/authentication/roles)
     to assign the correct access rules.
 
 
     To get your access token, follow the instructions in [Request a
-    token](https://run-ai-docs.nvidia.com/self-hosted/latest/reference/api/rest-auth/#request-an-api-token).
+    token](/run-ai/self-hosted/reference/rest-api/getting-started/how-to-authenticate-to-the-api#request-an-api-token).
   title: 'NVIDIA Run:ai'
   x-logo:
     url: ./runai-logo-api.png
@@ -74,7 +74,7 @@ tags:
       quotas in the Department. 
 
       For further information see, [Working with
-      Departments](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/departments).
+      Departments](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/departments).
   - name: Reports
     x-parent: Organizations
   - name: NodePools
@@ -88,7 +88,7 @@ tags:
       administrator-defined label (for example, key & value). 
 
       For more information, see [Node
-      Pools](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/resources/node-pools/#introduction).
+      Pools](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/resources/node-pools).
   - name: Nodes
     x-parent: Organizations
     description: >
@@ -97,7 +97,7 @@ tags:
 
       Each Node is managed by the NVIDIA Run:ai control plane. For more
       information, see
-      [Nodes](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/resources/nodes).
+      [Nodes](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/resources/nodes).
   - name: Projects
     x-parent: Organizations
     description: >
@@ -110,7 +110,7 @@ tags:
       shares resources or has a specific resources budget (quota). 
 
       See
-      [Projects](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects) 
+      [Projects](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) 
 
       for more information.
   - name: Logo
@@ -148,7 +148,7 @@ tags:
       administrators for organization-wide access.
 
       For more information, see [Access
-      control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).
+      control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).
   - name: Access rules
     x-parent: Authentication and Authorization
     description: >
@@ -163,7 +163,7 @@ tags:
       and entities.
 
       For more information, see [Access
-      control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).
+      control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).
   - name: Service Accounts
     x-parent: Authentication and Authorization
     description: >
@@ -209,7 +209,7 @@ tags:
       scope) assigned to the current user.
 
       For more information see [Access
-      control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).
+      control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).
   - name: Events
     x-parent: Workloads
     description: >-
@@ -230,7 +230,7 @@ tags:
       Each submission combines the user's Kubernetes manifest with NVIDIA Run:ai
       scheduling metadata, enabling consistent orchestration, monitoring, and
       governance. See [Extending workload
-      support](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/workload-types/extending-workload-support)
+      support](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/extending-workload-support)
       for more details.
   - name: NVIDIA NIM
     x-parent: Workloads
@@ -270,7 +270,7 @@ tags:
       can have multiple workspaces under a specific project. 
 
       For more information, see
-      [Workspaces](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/using-workspaces/running-workspace).
+      [Workspaces](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-workspaces/running-workspace).
   - name: Trainings
     x-parent: Workloads
     description: >
@@ -312,7 +312,7 @@ tags:
       additional launcher process that manages and 
 
       coordinates the other worker pods. For more information, see [Distributed
-      training](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/using-training/distributed-training/distributed-training-models).
+      training](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/distributed-training-models).
   - name: Workloads batch
     x-parent: Workloads
   - name: Workload properties
@@ -332,13 +332,13 @@ tags:
       Train, Deploy. Each workload type is assigned a default category to ensure
       consistent classification across the platform for monitoring purposes. See
       [Monitor workloads by
-      category](https://run-ai-docs.nvidia.com/saas/platform-management/monitor-performance/workload-categories).
+      category](/run-ai/self-hosted/documentation/platform-management/monitor-performance/workload-categories).
 
       - Priority - Determines the scheduling order of workloads within a project
       and whether a workload can be preempted. Higher-priority workloads are
       scheduled first and may become non-preemptible, preventing interruption by
       lower-priority workloads. See [Workload priority
-      control](https://run-ai-docs.nvidia.com/saas/platform-management/runai-scheduler/scheduling/workload-priority-control).
+      control](/run-ai/self-hosted/documentation/platform-management/runai-scheduler/scheduling/workload-priority-control).
   - name: Workload templates
     x-parent: Workloads
     description: >
@@ -392,7 +392,7 @@ tags:
       The audit log provides audit trail information for user activity, changes
       to business objects and other important information. For more information,
       see [Audit
-      log](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/procedures/event-history).
+      log](/run-ai/self-hosted/documentation/installation-and-configuration/operate/observability/event-history).
   - name: Compute
     x-parent: Workload assets
     description: >
@@ -407,13 +407,13 @@ tags:
 
 
       For more information, see [Compute
-      resource](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/assets/compute-resources).
+      resource](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/assets/compute-resources).
   - name: Credentials
     x-parent: Workload assets
     description: >-
       Credentials are used to unlock protected resources such as applications,
       containers, and other assets. For more information, see
-      [Credentials](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/assets/credentials).
+      [Credentials](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/assets/credentials).
   - name: Datasources
     x-parent: Workload assets
     description: Data source assets.
@@ -436,7 +436,7 @@ tags:
       workload.
 
       For more information, see
-      [Environments](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/assets/environments).
+      [Environments](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/assets/environments).
   - name: Git
     x-parent: Workload assets
     description: >-
@@ -493,7 +493,7 @@ tags:
       resources or entities. 
 
       For more information, see
-      [Policies](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/policies/#introduction).
+      [Policies](/run-ai/self-hosted/documentation/platform-management/policies/policies-and-rules).
   - name: Notification State
     x-parent: Notifications
     description: Use to manage notification state.
@@ -3370,6 +3370,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TelemetryResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/org-unit/projects/count:
+    x-internal: true
+    get:
+      summary: Count internal projects
+      operationId: count_internal_projects
+      x-internal: true
+      x-no-authorization: true
+      x-service: org-unit-service
+      x-test-coverage:
+        - control-plane/org-unit-service/pkg/test/project_api_test.go
+      description: |
+        Internal endpoint to count projects by the given query parameters
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectsFilterBy'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -9089,7 +9121,7 @@ paths:
       x-service: assets-service
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-no-authorization: true
       x-internal: true
       tags:
@@ -9126,7 +9158,7 @@ paths:
       x-service: assets-service
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       tags:
         - Inferences
       parameters:
@@ -16253,7 +16285,7 @@ paths:
                   newPassword:
                     type: string
                 example:
-                  tempPassword: Abcd!234
+                  tempPassword: <temporary-password>
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -16527,17 +16559,27 @@ paths:
     x-internal: true
     post:
       summary: Mint a short-lived bootstrap JWT for the installer service account.
-      description: |
+      description: >
         Returns a 2-hour Keycloak access token for the cluster's dedicated
+
         per-cluster installer service account, scoped to the given cluster.
+
         Called by cluster-service when generating the cluster install command.
+
         The token is passed to the Helm hook as
-        --set cluster.bootstrapToken=<token> and used directly as a Bearer token
+
+        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer
+        token
+
         to call GET /clusters/{uuid}/control-plane-config — the installer client
+
         secret never leaves the server.
 
+
         The per-cluster installer client is resolved (and, if needed,
+
         self-healed by creating it) internally, so callers only need to say
+
         which cluster the token is for.
       x-service: identity-manager
       x-test-coverage: not-applicable
@@ -20040,7 +20082,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20077,7 +20119,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20186,7 +20228,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20223,7 +20265,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -30099,7 +30141,7 @@ components:
           type: string
           description: |
             Short-lived JWT (2h TTL) for the installer service account.
-            Pass to the Helm hook via --set cluster.bootstrapToken=<token>.
+            Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>.
         clientSecret:
           type: string
           deprecated: true
@@ -30108,7 +30150,8 @@ components:
       example:
         installationStr: >-
           helm upgrade -i runai-cluster runai/runai-cluster -n runai --set
-          cluster.uid=... --set cluster.bootstrapToken=<installer-bootstrap-jwt>
+          cluster.uid=... --set
+          controlPlane.bootstrapToken=<installer-bootstrap-jwt>
         repositoryName: runai
         chartRepoURL: 'https://charts.example.com'
         bootstrapToken: <installer-bootstrap-jwt>
@@ -31622,7 +31665,7 @@ components:
             rank in a node pool, resources are distributed proportionally based
             on their weights. Valid values: 1–20. Requires over-quota weight to
             be enabled. When enabled, the default is 2. See [GPU over
-            quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota)
+            quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects)
             for more details.
           nullable: true
           example: 2
@@ -31651,7 +31694,7 @@ components:
             rank in a node pool, resources are distributed proportionally based
             on their weights. Valid values: 1–20. Requires over-quota weight to
             be enabled. When enabled, the default is 2. See [GPU over
-            quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota)
+            quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects)
             for more details.
           nullable: true
           example: 2
@@ -31723,14 +31766,6 @@ components:
             will be scheduled before all workloads in rank "Medium".
           default: MediumLow
           example: High
-        priority:
-          deprecated: true
-          description: >-
-            Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          type: string
-          nullable: true
-          example: Normal
     DepartmentForList:
       allOf:
         - $ref: '#/components/schemas/DataDepartmentFields'
@@ -31830,14 +31865,6 @@ components:
             will be scheduled before all workloads in rank "Medium".
           default: MediumLow
           example: High
-        priority:
-          deprecated: true
-          description: >-
-            Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          type: string
-          nullable: true
-          example: Normal
     DepartmentCreationRequest:
       allOf:
         - $ref: '#/components/schemas/DataDepartmentFields'
@@ -36160,8 +36187,8 @@ components:
       description: >-
         Allow the container running the workload and all launched processes to
         gain additional privileges after the workload starts. For more
-        information consult the User Identity in Container guide at
-        https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+        information consult the [User Identity in Container
+        guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
       type: boolean
       example: false
       nullable: true
@@ -36387,7 +36414,7 @@ components:
         are automatically taken from the identity provider (IdP) token
         (available only in SSO-enabled installations). For more information, see
         [User
-        Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers).
+        Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).
       type: string
       enum:
         - fromTheImage
@@ -40809,7 +40836,7 @@ components:
             accessible outside the cluster. If set to true, the endpoint will be
             exposed externally. To enable external access, your administrator
             must configure the cluster as described in the [inference
-            requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference).
+            requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate).
             section.
           type: boolean
           nullable: true
@@ -44902,7 +44929,7 @@ components:
         outside the cluster. If set to true, the endpoint will be exposed
         externally. To enable external access, your administrator must configure
         the cluster as described in the [inference
-        requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference).
+        requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate).
         section.
       type: boolean
       nullable: true
@@ -49854,8 +49881,8 @@ components:
           minLength: 8
           maxLength: 255
       example:
-        currentPassword: Abcd!234
-        newPassword: Zxcv!567
+        currentPassword: <current-password>
+        newPassword: <new-password>
     InternalUserCreationRequest:
       type: object
       required:
@@ -61056,6 +61083,26 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryTypeInternal'
+    ProjectsFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are == Equals, != Not equals, <= Less than or equal, >=
+        Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
+        and =$ Ends with. Dates are in ISO 8601 timestamp format and available
+        for operators ==, !=, <= and >=.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: >-
+            ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name!=some-name
+      explode: false
     OrgUnitType:
       in: query
       required: true
@@ -61221,26 +61268,6 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryType'
-    ProjectsFilterBy:
-      name: filterBy
-      in: query
-      required: false
-      description: >-
-        Filter results by a parameter. Use the format field-name operator value.
-        Operators are == Equals, != Not equals, <= Less than or equal, >=
-        Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
-        and =$ Ends with. Dates are in ISO 8601 timestamp format and available
-        for operators ==, !=, <= and >=.
-      schema:
-        type: array
-        maxItems: 10
-        items:
-          type: string
-          pattern: >-
-            ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
-        example:
-          - name!=some-name
-      explode: false
     ProjectsSortBy:
       name: sortBy
       in: query

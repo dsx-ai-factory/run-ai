@@ -112,7 +112,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [runai-cluster/cluster/init-ca](runai-cluster/cluster/init-ca)
 - [runai-cluster/cluster/karta-migrate](runai-cluster/cluster/karta-migrate)
 - [runai-cluster/cluster/metrics-exporter](runai-cluster/cluster/metrics-exporter)
-- [runai-cluster/cluster/oauth2-proxy](runai-cluster/cluster/oauth2-proxy)
 - [runai-cluster/cluster/runai-crd-upgrader](runai-cluster/cluster/runai-crd-upgrader)
 - [runai-cluster/cluster/runtime-rules](runai-cluster/cluster/runtime-rules)
 - [runai-cluster/cluster/shared-objects-controller](runai-cluster/cluster/shared-objects-controller)

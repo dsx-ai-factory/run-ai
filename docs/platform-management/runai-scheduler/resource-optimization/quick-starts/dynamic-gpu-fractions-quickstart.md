@@ -67,7 +67,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 8. Under **Environment**, click the **load** icon. A side pane appears, displaying a list of available environments. To add a new environment:
    * Click the **+** icon to create a new environment
    * Enter quick-start as the **name** for the environment. The name must be unique.
-   * Enter the **Image URL** - `gcr.io/run-ai-lab/pytorch-example-jupyter`
+   * Enter the **Image URL** - `quay.io/jupyter/pytorch-notebook`
    * Tools - Set the connection for your tool:
      * Click **+TOOL**
      * Select **Jupyter** tool from the list
@@ -111,7 +111,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
     * Click **+NEW ENVIRONMENT**
     * Enter quick-start as the **name** for the environment. The name must be unique.
-    * Enter the **Image URL** - `gcr.io/run-ai-lab/pytorch-example-jupyter`
+    * Enter the **Image URL** - `quay.io/jupyter/pytorch-notebook`
     * Tools - Set the connection for your tool
       * Click **+TOOL**
       * Select **Jupyter** tool from the list
@@ -150,7 +150,7 @@ Copy the following command to your terminal. Make sure to update the below with 
 ```sh
 runai project set "project-name"
 runai workspace submit "workload-name" \
---image gcr.io/run-ai-lab/pytorch-example-jupyter \
+--image quay.io/jupyter/pytorch-notebook \
 --gpu-memory-request 4G --gpu-memory-limit 12G --large-shm \
 --external-url container=8888 --name-prefix jupyter  \
 --command -- start-notebook.sh \
@@ -164,9 +164,9 @@ runai workspace submit "workload-name" \
 Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](api:main-api:POST/api/v1/workloads/workspaces) API:
 
 ```bash
-curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \ 
+curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 -H 'Content-Type: application/json' \
--H 'Authorization: Bearer <TOKEN>' \ 
+-H 'Authorization: Bearer <TOKEN>' \
 -d '{ 
     "name": "workload-name", 
     "projectId": "<PROJECT-ID>", 
@@ -174,7 +174,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
     "spec": {
         "command" : "start-notebook.sh",
         "args" : "--NotebookApp.token=''",
-        "image": "gcr.io/run-ai-lab/pytorch-example-jupyter",
+        "image": "quay.io/jupyter/pytorch-notebook",
         "compute": {
             "gpuDevicesRequest": 1,
             "gpuMemoryRequest": "4G",
@@ -257,7 +257,7 @@ Copy the following command to your terminal. Make sure to update the below with 
 ```sh
 runai project set "project-name"
 runai workspace submit "workload-name" \
---image gcr.io/run-ai-lab/pytorch-example-jupyter --gpu-memory-request 4G \
+--image quay.io/jupyter/pytorch-notebook --gpu-memory-request 4G \
 --gpu-memory-limit 12G --large-shm --external-url container=8888 \
 --name-prefix jupyter --command -- start-notebook.sh \
 --NotebookApp.token=
@@ -270,9 +270,9 @@ runai workspace submit "workload-name" \
 Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](api:main-api:POST/api/v1/workloads/workspaces) API:
 
 ```bash
-curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \ 
+curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 -H 'Content-Type: application/json' \
--H 'Authorization: Bearer <TOKEN>' \ 
+-H 'Authorization: Bearer <TOKEN>' \
 -d '{ 
     "name": "workload-name", 
     "projectId": "<PROJECT-ID>", 
@@ -280,7 +280,7 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
     "spec": {
         "command" : "start-notebook.sh",
         "args" : "--NotebookApp.token=''",
-        "image": "gcr.io/run-ai-lab/pytorch-example-jupyter",
+        "image": "quay.io/jupyter/pytorch-notebook",
         "compute": {
             "gpuDevicesRequest": 1,
             "gpuMemoryRequest": "4G",

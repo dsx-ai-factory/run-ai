@@ -5118,7 +5118,7 @@ export const ServiceAccountsApiAxiosParamCreator = function (configuration?: Con
             };
         },
         /**
-         * Returns a 2-hour Keycloak access token for the cluster\'s dedicated per-cluster installer service account, scoped to the given cluster. Called by cluster-service when generating the cluster install command. The token is passed to the Helm hook as --set cluster.bootstrapToken=<token> and used directly as a Bearer token to call GET /clusters/{uuid}/control-plane-config — the installer client secret never leaves the server.  The per-cluster installer client is resolved (and, if needed, self-healed by creating it) internally, so callers only need to say which cluster the token is for. 
+         * Returns a 2-hour Keycloak access token for the cluster\'s dedicated per-cluster installer service account, scoped to the given cluster. Called by cluster-service when generating the cluster install command. The token is passed to the Helm hook as --set controlPlane.bootstrapToken=<token> and used directly as a Bearer token to call GET /clusters/{uuid}/control-plane-config — the installer client secret never leaves the server.  The per-cluster installer client is resolved (and, if needed, self-healed by creating it) internally, so callers only need to say which cluster the token is for. 
          * @summary Mint a short-lived bootstrap JWT for the installer service account.
          * @param {string} clusterId The id of the cluster
          * @param {string} [tenantId] If exists will return the relevant resource for the tenant ID
@@ -5319,7 +5319,7 @@ export const ServiceAccountsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns a 2-hour Keycloak access token for the cluster\'s dedicated per-cluster installer service account, scoped to the given cluster. Called by cluster-service when generating the cluster install command. The token is passed to the Helm hook as --set cluster.bootstrapToken=<token> and used directly as a Bearer token to call GET /clusters/{uuid}/control-plane-config — the installer client secret never leaves the server.  The per-cluster installer client is resolved (and, if needed, self-healed by creating it) internally, so callers only need to say which cluster the token is for. 
+         * Returns a 2-hour Keycloak access token for the cluster\'s dedicated per-cluster installer service account, scoped to the given cluster. Called by cluster-service when generating the cluster install command. The token is passed to the Helm hook as --set controlPlane.bootstrapToken=<token> and used directly as a Bearer token to call GET /clusters/{uuid}/control-plane-config — the installer client secret never leaves the server.  The per-cluster installer client is resolved (and, if needed, self-healed by creating it) internally, so callers only need to say which cluster the token is for. 
          * @summary Mint a short-lived bootstrap JWT for the installer service account.
          * @param {string} clusterId The id of the cluster
          * @param {string} [tenantId] If exists will return the relevant resource for the tenant ID
@@ -5423,7 +5423,7 @@ export const ServiceAccountsApiFactory = function (configuration?: Configuration
             return localVarFp.getServiceAccounts(options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns a 2-hour Keycloak access token for the cluster\'s dedicated per-cluster installer service account, scoped to the given cluster. Called by cluster-service when generating the cluster install command. The token is passed to the Helm hook as --set cluster.bootstrapToken=<token> and used directly as a Bearer token to call GET /clusters/{uuid}/control-plane-config — the installer client secret never leaves the server.  The per-cluster installer client is resolved (and, if needed, self-healed by creating it) internally, so callers only need to say which cluster the token is for. 
+         * Returns a 2-hour Keycloak access token for the cluster\'s dedicated per-cluster installer service account, scoped to the given cluster. Called by cluster-service when generating the cluster install command. The token is passed to the Helm hook as --set controlPlane.bootstrapToken=<token> and used directly as a Bearer token to call GET /clusters/{uuid}/control-plane-config — the installer client secret never leaves the server.  The per-cluster installer client is resolved (and, if needed, self-healed by creating it) internally, so callers only need to say which cluster the token is for. 
          * @summary Mint a short-lived bootstrap JWT for the installer service account.
          * @param {string} clusterId The id of the cluster
          * @param {string} [tenantId] If exists will return the relevant resource for the tenant ID
@@ -5536,7 +5536,7 @@ export class ServiceAccountsApi extends BaseAPI {
     }
 
     /**
-     * Returns a 2-hour Keycloak access token for the cluster\'s dedicated per-cluster installer service account, scoped to the given cluster. Called by cluster-service when generating the cluster install command. The token is passed to the Helm hook as --set cluster.bootstrapToken=<token> and used directly as a Bearer token to call GET /clusters/{uuid}/control-plane-config — the installer client secret never leaves the server.  The per-cluster installer client is resolved (and, if needed, self-healed by creating it) internally, so callers only need to say which cluster the token is for. 
+     * Returns a 2-hour Keycloak access token for the cluster\'s dedicated per-cluster installer service account, scoped to the given cluster. Called by cluster-service when generating the cluster install command. The token is passed to the Helm hook as --set controlPlane.bootstrapToken=<token> and used directly as a Bearer token to call GET /clusters/{uuid}/control-plane-config — the installer client secret never leaves the server.  The per-cluster installer client is resolved (and, if needed, self-healed by creating it) internally, so callers only need to say which cluster the token is for. 
      * @summary Mint a short-lived bootstrap JWT for the installer service account.
      * @param {string} clusterId The id of the cluster
      * @param {string} [tenantId] If exists will return the relevant resource for the tenant ID

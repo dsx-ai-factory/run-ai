@@ -5,7 +5,9 @@
 
 SERVICE_NAME=runai-installer
 BIN_REL_PATH?=bin
-OUTPUT_PATH?=$(BIN_REL_PATH)/$(OS)/$(ARCH)/$(SERVICE_NAME)
+# Windows needs the .exe suffix for the shell to treat the file as a program.
+BIN_EXT=$(if $(filter windows,$(OS)),.exe,)
+OUTPUT_PATH?=$(BIN_REL_PATH)/$(OS)/$(ARCH)/$(SERVICE_NAME)$(BIN_EXT)
 export GOPRIVATE=github.com/run-ai/*
 
 # Build tags. The released binary is built with none of them, so it exposes
@@ -75,6 +77,8 @@ build: git-config-command
 	OS=linux ARCH=arm64 make build-for-platform
 	OS=darwin ARCH=amd64 make build-for-platform
 	OS=darwin ARCH=arm64 make build-for-platform
+	OS=windows ARCH=amd64 make build-for-platform
+	OS=windows ARCH=arm64 make build-for-platform
 .PHONY: build
 
 # Same binaries plus the legacy commands, written to $(INTERNAL_BIN_REL_PATH)

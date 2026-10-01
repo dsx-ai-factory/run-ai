@@ -117,7 +117,7 @@ help: ## Display this help.
 .PHONY: help
 
 docker-build-generic: git-config-command
-	docker buildx build ${DOCKER_BUILD_ADDITIONAL_ARGS} --build-arg SERVICE_NAME=${SERVICE_NAME} -f ${DOCKERFILE_PATH} -t ${DOCKER_IMAGE_NAME} --platform=linux/amd64 --attest type=sbom --attest type=provenance,mode=max --load .
+	docker buildx build ${DOCKER_BUILD_ADDITIONAL_ARGS} --build-arg SERVICE_NAME=${SERVICE_NAME} --build-arg GO_VERSION=${GO_VERSION} -f ${DOCKERFILE_PATH} -t ${DOCKER_IMAGE_NAME} --platform=linux/amd64 --attest type=sbom --attest type=provenance,mode=max --load .
 .PHONY: docker-build
 
 docker-push-generic:

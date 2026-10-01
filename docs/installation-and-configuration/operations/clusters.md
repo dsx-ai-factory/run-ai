@@ -33,7 +33,7 @@ The clusters table consists of the following columns:
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Waiting to connect    | The cluster has never been connected.                                                                                                                                                                |
 | Disconnected          | There is no communication from the cluster to the Control plane. This may be due to a network issue. [See troubleshooting scenarios.](clusters.md#troubleshooting-scenarios)                         |
-| Missing prerequisites | Some prerequisites are missing from the cluster. As a result, some features may be impacted. [See troubleshooting scenarios.](clusters.md#troubleshooting-scenarios)                                 |
+| Missing prerequisites | Some prerequisites are missing from the cluster. As a result, some features may be impacted. If the cluster's NVIDIA GPU Operator version does not meet the minimum required for GPU fractions, this is shown as a separate reason stating that GPU fractions are not supported. See [Prerequisites and Features](../installation/guided-installation/prerequisites-and-features.md) for the required versions, and [troubleshooting scenarios](clusters.md#troubleshooting-scenarios) below. |
 | Service issues        | At least one of the services is not working properly. You can view the list of nonfunctioning services for more information. [See troubleshooting scenarios.](clusters.md#troubleshooting-scenarios) |
 | Connected             | The NVIDIA Run:ai cluster is connected, and all NVIDIA Run:ai services are running.                                                                                                                  |
 
@@ -66,19 +66,14 @@ Follow the setup and installation instructions below to get the installation ins
 1. In the NVIDIA Run:ai UI, go to **Resources -> Clusters** and click **NEW CLUSTER**.
 2. Enter a unique **name** for your cluster.
 3. Optional: Choose the NVIDIA Run:ai cluster version (latest, by default).
-4. Select the installation type:
-   * **Guided (recommended)** - The `runai-installer` CLI reads a single configuration file, validates it against your cluster, and installs every required component.
-   * **Manual Helm** - You run the Helm charts yourself.
-5. Set the cluster location:
+4. Set the cluster location:
    * **Same as control plane** - Install the NVIDIA Run:ai cluster on the same Kubernetes cluster as the NVIDIA Run:ai control plane.
    * **Remote control plane** - Install the NVIDIA Run:ai cluster on a different Kubernetes cluster than the NVIDIA Run:ai control plane. Enter the Cluster URL. For more information, see [Fully Qualified Domain Name](../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
-6. Click **CONTINUE**
+5. Click **CONTINUE**
 
 ### Installation Instructions
 
-1. Follow the installation instructions and run the commands provided on your Kubernetes cluster:
-   * **Guided** - see [Install Each NVIDIA Run:ai Cluster](../installation/guided-installation/connected/multi-cluster.md#install-each-nvidia-runai-cluster).
-   * **Manual Helm** - see [Install the Cluster](../installation/install-using-helm/helm-install.md).
+1. Follow the installation instructions and run the commands provided on your Kubernetes cluster. For more information, see [Install the Cluster](../installation/install-using-helm/helm-install.md).
 2. Click **DONE**
 
 The cluster is displayed in the table with the status **Waiting to connect**. Once installation is complete, the cluster status changes to **Connected**.
@@ -392,6 +387,8 @@ If the node has no workloads worth preserving on its remaining healthy GPUs, a f
 **Cluster is missing prerequisites**
 
 **Description:** When a cluster's status displays Missing prerequisites, it indicates that at least one of the Mandatory Prerequisites has not been fulfilled. In such cases, NVIDIA Run:ai services may not function properly.
+
+One specific case is GPU fractions readiness: if the cluster's NVIDIA GPU Operator version does not meet the minimum required version, or the cluster otherwise does not meet the prerequisites for GPU fractions, the status message names the reason and states that GPU fractions are not supported. This does not block the rest of the cluster from functioning; only GPU fractions are affected. To resolve this, update the installation to meet the GPU fractions prerequisites, for example by upgrading the NVIDIA GPU Operator to the required version. See [Prerequisites and Features](../installation/guided-installation/prerequisites-and-features.md#nvidia-gpu-operator) for the required versions.
 
 **Mitigation:**
 

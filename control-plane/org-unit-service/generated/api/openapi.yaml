@@ -329,6 +329,90 @@ paths:
       x-test-coverage:
       - control-plane/org-unit-service/pkg/test/project_telemetry_test.go
     x-internal: true
+  /internal/org-unit/projects/count:
+    get:
+      description: |
+        Internal endpoint to count projects by the given query parameters
+      operationId: count_internal_projects
+      parameters:
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name!=some-name
+          items:
+            pattern: ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+          description: ok
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Count internal projects
+      tags:
+      - Projects
+      x-no-authorization: true
+      x-service: org-unit-service
+      x-test-coverage:
+      - control-plane/org-unit-service/pkg/test/project_api_test.go
+    x-internal: true
   /internal/org-unit/names:
     get:
       description: Get the names of requested org units.
@@ -6633,6 +6717,35 @@ components:
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryTypeInternal'
       style: form
+    ProjectsFilterBy:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
+        \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
+        \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
+        \ operators ==, !=, <= and >=."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - name!=some-name
+        items:
+          pattern: ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        maxItems: 10
+        type: array
+      style: form
+    Search:
+      description: Filter results by a free text search.
+      explode: true
+      in: query
+      name: search
+      required: false
+      schema:
+        example: test project
+        type: string
+      style: form
     OrgUnitType:
       description: The org unit type.
       explode: true
@@ -6783,16 +6896,6 @@ components:
         minimum: 1
         type: integer
       style: form
-    Search:
-      description: Filter results by a free text search.
-      explode: true
-      in: query
-      name: search
-      required: false
-      schema:
-        example: test project
-        type: string
-      style: form
     ReportId:
       description: The report id
       example: 575c19e8-c7c3-45b0-8290-2f47397a8383
@@ -6935,25 +7038,6 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryType'
-      style: form
-    ProjectsFilterBy:
-      description: "Filter results by a parameter. Use the format field-name operator\
-        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
-        \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
-        \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
-        \ operators ==, !=, <= and >=."
-      explode: false
-      in: query
-      name: filterBy
-      required: false
-      schema:
-        example:
-        - name!=some-name
-        items:
-          pattern: ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
-          type: string
-        maxItems: 10
-        type: array
       style: form
     ProjectsSortBy:
       description: Sort results by a parameters.
@@ -7561,6 +7645,17 @@ components:
       - type
       - values
       type: object
+    CountResponse:
+      example:
+        count: 1
+      properties:
+        count:
+          example: 1
+          format: int64
+          type: integer
+      required:
+      - count
+      type: object
     ScopeType:
       enum:
       - system
@@ -7892,17 +7987,6 @@ components:
       items:
         $ref: '#/components/schemas/Report'
       type: array
-    CountResponse:
-      example:
-        count: 1
-      properties:
-        count:
-          example: 1
-          format: int64
-          type: integer
-      required:
-      - count
-      type: object
     BatchDeleteReportsRequest:
       description: Batch of report IDs to delete.
       example:
@@ -8300,7 +8384,7 @@ components:
           type: number
         overQuotaWeight:
           description: |
-            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details.
+            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.
           example: 2
           format: double
           nullable: true
@@ -8322,7 +8406,7 @@ components:
           type: number
         overQuotaWeight:
           description: |
-            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details.
+            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.
           example: 2
           format: double
           nullable: true
@@ -8349,7 +8433,6 @@ components:
           limit: 0
           deserved: 1000
         rank: High
-        priority: Normal
         gpu:
           overQuotaWeight: 2
           limit: 0
@@ -8371,13 +8454,6 @@ components:
             \ org-units. For example, all workloads in rank \"High\" will be scheduled\
             \ before all workloads in rank \"Medium\"."
           example: High
-          nullable: true
-          type: string
-        priority:
-          deprecated: true
-          description: Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          example: Normal
           nullable: true
           type: string
       required:
@@ -8440,7 +8516,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8458,7 +8533,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8540,7 +8614,6 @@ components:
           limit: 0
           deserved: 1000
         rank: High
-        priority: Normal
         gpu:
           overQuotaWeight: 2
           limit: 0
@@ -8562,13 +8635,6 @@ components:
             \ org-units. For example, all workloads in rank \"High\" will be scheduled\
             \ before all workloads in rank \"Medium\"."
           example: High
-          nullable: true
-          type: string
-        priority:
-          deprecated: true
-          description: Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          example: Normal
           nullable: true
           type: string
     DepartmentCreationRequest:
@@ -8615,7 +8681,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8633,7 +8698,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8786,7 +8850,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8804,7 +8867,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8958,7 +9020,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8976,7 +9037,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9420,7 +9480,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9438,7 +9497,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9634,7 +9692,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9652,7 +9709,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9762,7 +9818,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9780,7 +9835,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -12501,7 +12555,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12519,7 +12572,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12606,7 +12658,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12624,7 +12675,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12731,7 +12781,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12749,7 +12798,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12896,7 +12944,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12914,7 +12961,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0

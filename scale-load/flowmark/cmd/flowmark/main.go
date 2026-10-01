@@ -10,7 +10,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
@@ -25,24 +28,36 @@ import (
 const clockProbeNamespace = "default"
 
 func main() {
+	log.SetFlags(log.Ltime | log.Lmsgprefix)
+	log.SetPrefix("flowmark: ")
 	if err := run(); err != nil {
-		fmt.Fprintln(os.Stderr, "flowmark:", err)
+		log.Print(err)
 		os.Exit(1)
 	}
 }
 
 func run() error {
 	scenariosDir := flag.String("scenarios", "./scenarios", "directory with scenario yaml files")
-	outputDir := flag.String("output", "./out", "directory that receives results-<timestamp>.json and manifest.json")
-	kubeconfig := flag.String("kubeconfig", "", "path to kubeconfig of the cluster under test")
-	cpURL := flag.String("cp-url", "", "control plane URL (credentials via FLOWMARK_CP_* env vars)")
+	only := flag.String("only", "", "comma-separated scenario names to run, e.g. training-burst (default: every scenario in --scenarios)")
+	workloads := flag.String("workloads", "", "override the workloads knob for this run, e.g. 100 or 100,250")
+	outputDir := flag.String("output", "./reports", "directory that receives results-<timestamp>.json and manifest.json")
+	kubeconfig := flag.String("kubeconfig", os.Getenv("KUBECONFIG"), "path to kubeconfig of the cluster under test (default $KUBECONFIG)")
+	cpURL := flag.String("cp-url", os.Getenv("FLOWMARK_CP_URL"), "control plane URL (default $FLOWMARK_CP_URL; credentials via FLOWMARK_CP_USER and FLOWMARK_CP_PASSWORD, or FLOWMARK_CP_TOKEN)")
 	provider := flag.String("provider", "local", "who provided the environment, e.g. ci or kind")
 	clusterType := flag.String("cluster-type", "local", "cluster class recorded with the results so runs are compared like with like")
 	cpVersion := flag.String("cp-version", "", "control plane version to record, if known")
 	clusterVersion := flag.String("cluster-version", "", "cluster version to record, if known")
 	flag.Parse()
+	if flag.NArg() > 0 {
+		return fmt.Errorf("unexpected argument %q; scenarios are selected with --only", flag.Arg(0))
+	}
+	log.Printf("started, scenarios from %s, results to %s", *scenariosDir, *outputDir)
+	options, err := runOptions(*only, *workloads)
+	if err != nil {
+		return err
+	}
 
-	env := core.Env{
+	target := core.Target{
 		KubeconfigPath:  *kubeconfig,
 		ControlPlaneURL: *cpURL,
 		Username:        os.Getenv("FLOWMARK_CP_USER"),
@@ -50,7 +65,11 @@ func run() error {
 		Token:           os.Getenv("FLOWMARK_CP_TOKEN"),
 	}
 	registry := buildRegistry(selfcheck.Suite{}, burst.Suite{})
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	context.AfterFunc(ctx, func() {
+		log.Print("interrupted: finishing cleanup and writing the rounds that completed; a second Ctrl-C or SIGTERM quits at once without cleanup")
+		stop()
+	})
 
 	info := report.RunInfo{
 		StartedAt:           time.Now(),
@@ -59,21 +78,23 @@ func run() error {
 		ControlPlaneVersion: *cpVersion,
 		ClusterVersion:      *clusterVersion,
 	}
-	if env.KubeconfigPath != "" {
-		offset, err := clockOffset(ctx, env.KubeconfigPath)
+	if target.KubeconfigPath != "" {
+		offset, err := clockOffset(ctx, target.KubeconfigPath)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "flowmark:", err)
+			log.Print(err)
 			info.ClockOffsetError = err.Error()
 		} else {
+			log.Printf("cluster clock offset %+dms", offset)
 			info.ClockOffsetMs = &offset
 		}
 	}
 
-	sections, runErr := runner.Run(ctx, env, *scenariosDir, registry)
+	sections, runErr := runner.Run(ctx, target, *scenariosDir, registry, options)
 	info.FinishedAt = time.Now()
 	if len(sections) == 0 {
 		return runErr
 	}
+	log.Printf("%d scenarios finished in %s, %d failed", len(sections), info.FinishedAt.Sub(info.StartedAt).Round(time.Second), failedCount(sections))
 
 	store, err := report.NewLocal(*outputDir)
 	if err != nil {
@@ -83,8 +104,18 @@ func run() error {
 	if err != nil {
 		return errors.Join(runErr, fmt.Errorf("report: %w", err))
 	}
-	fmt.Fprintf(os.Stderr, "flowmark: wrote %s to %s, %d runs in %s\n", receipt.File, store, receipt.Runs, report.ManifestName)
+	log.Printf("wrote %s to %s, %d runs in %s", receipt.File, store, receipt.Runs, report.ManifestName)
 	return runErr
+}
+
+func failedCount(sections map[string]core.Section) int {
+	failed := 0
+	for _, section := range sections {
+		if section.Failed {
+			failed++
+		}
+	}
+	return failed
 }
 
 func clockOffset(ctx context.Context, kubeconfig string) (int64, error) {
@@ -99,8 +130,8 @@ func clockOffset(ctx context.Context, kubeconfig string) (int64, error) {
 	return offset.Milliseconds(), nil
 }
 
-func buildRegistry(suites ...core.Scenario) map[string]core.Scenario {
-	registry := make(map[string]core.Scenario, len(suites))
+func buildRegistry(suites ...core.Suite) map[string]core.Suite {
+	registry := make(map[string]core.Suite, len(suites))
 	for _, s := range suites {
 		registry[s.Name()] = s
 	}

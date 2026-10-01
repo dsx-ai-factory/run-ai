@@ -70,7 +70,8 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Admission.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.Scheduler.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.Binder.Service.Image).To(BeNil())
-		Expect(kaiConfig.Spec.Binder.ResourceReservation.Image).To(BeNil())
+		Expect(kaiConfig.Spec.Binder.ResourceReservation.Image).To(Equal(
+			&kaicommon.Image{Name: ptr.To("resourcereservation")}))
 		Expect(kaiConfig.Spec.PodGrouper.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.PodGroupController.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.QueueController.Service.Image).To(BeNil())
@@ -195,23 +196,6 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(image.Name).To(Equal(ptr.To("runai-scheduler")))
 		Expect(image.Tag).To(Equal(ptr.To("2.26.99")))
 		Expect(image.PullPolicy).To(Equal(ptr.To(v1.PullAlways)))
-	})
-
-	It("preserves deprecated repository and environment image semantics", func() {
-		runaiConfig := defaultRunaiConfig()
-		runaiConfig.Spec.RunAIScheduler.Image = &runaicommon.Image{
-			Repository: ptr.To("registry.example.com/runai-"),
-			Env:        ptr.To("prod"),
-			Name:       ptr.To("scheduler-custom"),
-			Tag:        ptr.To("kai-compatible"),
-		}
-
-		image := buildKAIConfig(runaiConfig).Spec.Scheduler.Service.Image
-		Expect(image).NotTo(BeNil())
-		Expect(image.Repository).To(Equal(ptr.To("registry.example.com/runai-prod")))
-		Expect(image.Name).To(Equal(ptr.To("scheduler-custom")))
-		Expect(image.Tag).To(Equal(ptr.To("kai-compatible")))
-		Expect(image.PullPolicy).To(BeNil())
 	})
 
 	It("does not use the standalone RunAI admission controller as KAI admission configuration", func() {

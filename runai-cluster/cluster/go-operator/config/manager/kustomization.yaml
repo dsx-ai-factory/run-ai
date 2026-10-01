@@ -12,5 +12,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: gcr.io/run-ai-lab/go-operator
+  newName: nvcr.io/nvidia/runai/go-operator
   newTag: 0.0.1
