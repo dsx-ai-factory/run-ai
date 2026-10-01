@@ -217,6 +217,10 @@ var _ = Describe("Workloads types API tests", Ordered, func() {
 					response, err = workloadPropertiesService.GetWorkloadClusterPriorities(ctx, uuid.NewString(), "", sortBy, []string{})
 					Expect(err).To(BeNil())
 					Expect(response.Code).To(Equal(http.StatusBadRequest))
+
+					response, err = workloadPropertiesService.GetAvailablePrioritiesAndCategories(ctx, uuid.NewString(), "", sortBy, []string{})
+					Expect(err).To(BeNil())
+					Expect(response.Code).To(Equal(http.StatusBadRequest))
 				},
 				Entry("unknown field", "unknown"),
 				Entry("raw column name", "tenant_id"),
