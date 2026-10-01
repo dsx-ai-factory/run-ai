@@ -62,6 +62,44 @@ func TestInvalidVolumeJson(t *testing.T) {
 	assert.Equal(t, len(pod.Spec.Containers[0].VolumeMounts), 0)
 }
 
+func TestPatchVolumeSources(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		source    v1.VolumeSource
+		wantError bool
+	}{
+		{name: "pvc", source: v1.VolumeSource{PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{ClaimName: "data"}}},
+		{name: "configmap", source: v1.VolumeSource{ConfigMap: &v1.ConfigMapVolumeSource{LocalObjectReference: v1.LocalObjectReference{Name: "cm"}}}},
+		{name: "hostpath", source: v1.VolumeSource{HostPath: &v1.HostPathVolumeSource{Path: "/"}}, wantError: true},
+		{name: "csi", source: v1.VolumeSource{CSI: &v1.CSIVolumeSource{Driver: "some.csi.driver"}}, wantError: true},
+		{name: "allowed and hostpath together", source: v1.VolumeSource{
+			EmptyDir: &v1.EmptyDirVolumeSource{},
+			HostPath: &v1.HostPathVolumeSource{Path: "/"},
+		}, wantError: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			volumesJson, err := json.Marshal([]v1.Volume{{Name: "volume-0", VolumeSource: tc.source}})
+			assert.Nil(t, err)
+			annotations := map[string]string{
+				volumesPatchAnnotationKey:      string(volumesJson),
+				volumeMountsPatchAnnotationKey: getVolumeMountJson(t),
+			}
+			pod := createTestPod(annotations)
+			mutator := createMutator(testNamespaceName, false)
+			err = mutator.patchVolumesAndMounts(pod, nil)
+
+			if tc.wantError {
+				assert.NotNil(t, err)
+				assert.Equal(t, len(pod.Spec.Volumes), 0)
+				assert.Equal(t, len(pod.Spec.Containers[0].VolumeMounts), 0)
+				return
+			}
+			assert.Nil(t, err)
+			assert.Equal(t, len(pod.Spec.Volumes), 1)
+		})
+	}
+}
+
 func createTestPod(annotations map[string]string) *v1.Pod {
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{

@@ -7,7 +7,9 @@ package pod_mutators
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"reflect"
 
 	"k8s.io/api/admission/v1beta1"
 	v1 "k8s.io/api/core/v1"
@@ -40,6 +42,11 @@ func (pm *PodMutator) patchVolumesAndMounts(pod *v1.Pod, _ *v1beta1.AdmissionReq
 		return err
 	}
 
+	if err = validatePatchVolumes(volumes); err != nil {
+		log.Printf("Rejected volume patch annotation: %v\n", err)
+		return err
+	}
+
 	volumeMounts, err := parseVolumeMountsAnnotation(mountsAnnotationValue)
 	if err != nil {
 		log.Printf("Failed to parse volume mount patch annotation: %v\n", err)
@@ -67,6 +74,24 @@ func parseVolumesAnnotation(annotationValue string) ([]v1.Volume, error) {
 		return nil, err
 	}
 	return volumes, nil
+}
+
+// Annotation volumes must not expose the node (e.g. hostPath), so only these sources are allowed.
+func validatePatchVolumes(volumes []v1.Volume) error {
+	for _, volume := range volumes {
+		source := volume.VolumeSource
+		source.NFS = nil
+		source.PersistentVolumeClaim = nil
+		source.ConfigMap = nil
+		source.Secret = nil
+		source.EmptyDir = nil
+		if !reflect.DeepEqual(source, v1.VolumeSource{}) {
+			return fmt.Errorf("volume %q in %s annotation has an unsupported source: "+
+				"only nfs, persistentVolumeClaim, configMap, secret and emptyDir are allowed",
+				volume.Name, volumesPatchAnnotationKey)
+		}
+	}
+	return nil
 }
 
 func parseVolumeMountsAnnotation(annotationValue string) ([]v1.VolumeMount, error) {
