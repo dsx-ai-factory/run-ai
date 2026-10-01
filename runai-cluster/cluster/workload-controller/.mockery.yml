@@ -1,0 +1,65 @@
+dir: internal/autogenerate/mocks
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs:
+    interfaces:
+      JobStackCreator: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/builders/common:
+    interfaces:
+      ComputeBuilder: {}
+      ExternalBuilder: {}
+      PreviewBuilder: {}
+      ResourceBuilder: {}
+      ResourceYaml: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/builders/factory:
+    interfaces:
+      CommonResourceBuilderFactory: {}
+      JobBuilderFactory: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/controller:
+    interfaces:
+      ResourcesManager: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/finalizers:
+    interfaces:
+      RemoveFinalizer: {}
+      RemoveFinalizerFactory: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/jobs:
+    interfaces:
+      JobAdapter: {}
+      JobAdapterFactory: {}
+      JobStatus: {}
+      ReplicaTypeSpec: {}
+      Spec: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/shared/enforcer:
+    interfaces:
+      SubresourceApplier: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/shared/enforcer/factory:
+    interfaces:
+      JobMergeCreator: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/status/aggregator:
+    interfaces:
+      WorkloadStatusCalculater: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/status/update:
+    interfaces:
+      StatusUpdater: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/utils:
+    interfaces:
+      UuidGenerator: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/utils/policy:
+    interfaces:
+      WorkloadPolicy: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/utils/workloads/convertors:
+    interfaces:
+      Convertor: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types:
+    interfaces:
+      Field: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils/pod:
+    config:
+      dir: internal/autogenerate/mocks/external
+      pkgname: external
+    interfaces:
+      IRunaiPhaseCalculator: {}
+      IRunaiPodPhaseExtended: {}
