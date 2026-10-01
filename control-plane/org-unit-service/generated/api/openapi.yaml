@@ -8384,7 +8384,7 @@ components:
           type: number
         overQuotaWeight:
           description: |
-            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details.
+            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.
           example: 2
           format: double
           nullable: true
@@ -8406,7 +8406,7 @@ components:
           type: number
         overQuotaWeight:
           description: |
-            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details.
+            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.
           example: 2
           format: double
           nullable: true
@@ -8433,7 +8433,6 @@ components:
           limit: 0
           deserved: 1000
         rank: High
-        priority: Normal
         gpu:
           overQuotaWeight: 2
           limit: 0
@@ -8455,13 +8454,6 @@ components:
             \ org-units. For example, all workloads in rank \"High\" will be scheduled\
             \ before all workloads in rank \"Medium\"."
           example: High
-          nullable: true
-          type: string
-        priority:
-          deprecated: true
-          description: Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          example: Normal
           nullable: true
           type: string
       required:
@@ -8524,7 +8516,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8542,7 +8533,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8624,7 +8614,6 @@ components:
           limit: 0
           deserved: 1000
         rank: High
-        priority: Normal
         gpu:
           overQuotaWeight: 2
           limit: 0
@@ -8646,13 +8635,6 @@ components:
             \ org-units. For example, all workloads in rank \"High\" will be scheduled\
             \ before all workloads in rank \"Medium\"."
           example: High
-          nullable: true
-          type: string
-        priority:
-          deprecated: true
-          description: Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          example: Normal
           nullable: true
           type: string
     DepartmentCreationRequest:
@@ -8699,7 +8681,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8717,7 +8698,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8870,7 +8850,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -8888,7 +8867,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9042,7 +9020,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9060,7 +9037,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9504,7 +9480,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9522,7 +9497,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9718,7 +9692,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9736,7 +9709,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9846,7 +9818,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -9864,7 +9835,6 @@ components:
             limit: 0
             deserved: 1000
           rank: High
-          priority: Normal
           gpu:
             overQuotaWeight: 2
             limit: 0
@@ -12585,7 +12555,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12603,7 +12572,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12690,7 +12658,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12708,7 +12675,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12815,7 +12781,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12833,7 +12798,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12980,7 +12944,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0
@@ -12998,7 +12961,6 @@ components:
               limit: 0
               deserved: 1000
             rank: High
-            priority: Normal
             gpu:
               overQuotaWeight: 2
               limit: 0

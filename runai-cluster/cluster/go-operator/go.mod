@@ -24,7 +24,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jarcoal/httpmock v1.3.1
-	github.com/kai-scheduler/KAI-scheduler v0.18.1
+	github.com/kai-scheduler/KAI-scheduler v0.18.2
 	github.com/kubeflow/training-operator v1.9.3
 	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/onsi/gomega v1.40.0

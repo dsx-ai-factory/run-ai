@@ -11,7 +11,7 @@ By completing this process, the NVIDIA Run:ai control plane will be running in y
 
 ## Before You Start
 
-Before installing the NVIDIA Run:ai control plane, complete the entire [System Requirements](../../system-requirements/README.md) section and [Preparations](preparations.md).
+Before installing the NVIDIA Run:ai control plane, complete [Preparations](preparations.md).
 
 ## Permissions
 
@@ -110,16 +110,48 @@ authorization:
 
 </Tabs>
 
-2. Run the following commands to install the NVIDIA Run:ai control plane using your configured `values.yaml` file:
+2. Run the following commands to install the NVIDIA Run:ai control plane using your configured `values.yaml` file. Use the commands for the release type you are installing.
+
+<Tabs>
+
+<Tab title="Open Source">
+
+**Open Source**
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update \
-  --username='$oauthtoken' \
-  --password=<NGC_API_KEY>
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
-helm upgrade -i runai-backend -n runai-backend runai/control-plane \ 
+helm upgrade -i runai-backend -n runai-backend runai/control-plane \
     -f /path/to/your/values.yaml 
 ```
+
+</Tab>
+
+<Tab title="Support-Entitled">
+
+**Support-Entitled**
+
+In addition to the values in your `values.yaml` file, update the Helm commands as follows:
+
+* Add `--set supportEntitled=true` to the `helm upgrade` command.
+* Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Registry Credentials](preparations.md#registry-credentials).
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
+  - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
+  - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
+
+```bash
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
+helm repo update
+helm upgrade -i runai-backend -n runai-backend runai/control-plane \
+    -f /path/to/your/values.yaml \
+    --set supportEntitled=true \
+    --set global.imagePullSecrets[0].name=runai-reg-creds \
+    --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
+```
+
+</Tab>
+
+</Tabs>
 
 <Note>
 
@@ -132,4 +164,4 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 
 ## Next Steps
 
-Set up [API Access](../guided-installation/api-access-setup.md) to authenticate your API requests, then onboard your first tenant. See [Create a Tenant and Cluster](create-a-tenant-and-cluster.md).
+Set up [API Access](../guided-installation/api-access-setup.md) to authenticate your API requests, then onboard your first tenant. See [Create a Tenant and Cluster](create-a-tenant-and-cluster.md). Before installing a tenant's cluster, make sure you have completed the required setup in [Prerequisites and Features](prerequisites-and-features.md) on that tenant's own Kubernetes cluster.

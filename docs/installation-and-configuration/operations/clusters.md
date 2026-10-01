@@ -66,19 +66,14 @@ Follow the setup and installation instructions below to get the installation ins
 1. In the NVIDIA Run:ai UI, go to **Resources -> Clusters** and click **NEW CLUSTER**.
 2. Enter a unique **name** for your cluster.
 3. Optional: Choose the NVIDIA Run:ai cluster version (latest, by default).
-4. Select the installation type:
-   * **Guided (recommended)** - The `runai-installer` CLI reads a single configuration file, validates it against your cluster, and installs every required component.
-   * **Manual Helm** - You run the Helm charts yourself.
-5. Set the cluster location:
+4. Set the cluster location:
    * **Same as control plane** - Install the NVIDIA Run:ai cluster on the same Kubernetes cluster as the NVIDIA Run:ai control plane.
    * **Remote control plane** - Install the NVIDIA Run:ai cluster on a different Kubernetes cluster than the NVIDIA Run:ai control plane. Enter the Cluster URL. For more information, see [Fully Qualified Domain Name](../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
-6. Click **CONTINUE**
+5. Click **CONTINUE**
 
 ### Installation Instructions
 
-1. Follow the installation instructions and run the commands provided on your Kubernetes cluster:
-   * **Guided** - see [Install Each NVIDIA Run:ai Cluster](../installation/guided-installation/connected/multi-cluster.md#install-each-nvidia-runai-cluster).
-   * **Manual Helm** - see [Install the Cluster](../installation/install-using-helm/helm-install.md).
+1. Follow the installation instructions and run the commands provided on your Kubernetes cluster. For more information, see [Install the Cluster](../installation/install-using-helm/helm-install.md).
 2. Click **DONE**
 
 The cluster is displayed in the table with the status **Waiting to connect**. Once installation is complete, the cluster status changes to **Connected**.

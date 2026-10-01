@@ -44,7 +44,7 @@ require (
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.18.1 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	golang.org/x/mod v0.41.0 // indirect
 )

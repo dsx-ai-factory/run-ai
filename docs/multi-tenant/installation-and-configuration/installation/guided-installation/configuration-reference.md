@@ -28,8 +28,13 @@ Fields marked **Required** must be specified. All other fields are optional.
 
 **Networking and Nodes**
 
-- [External Connection](#external-connection) - How external traffic reaches the control plane or a tenant cluster: Kubernetes Ingress or Gateway API.
+- [External Connection](#external-connection) - How external traffic reaches the control plane or a tenant cluster: Kubernetes Ingress or Gateway API. Omitted entirely on OpenShift, where Routes are configured automatically.
 - [System Nodes](#system-nodes) - Dedicating specific nodes to control plane or cluster system components, with a preferred or required scheduling mode and automatic node labeling.
+
+**OpenShift**
+
+- [OpenShift Configuration](#openshift-configuration) - Installer-wide OpenShift settings for tenant clusters, such as a mirrored OperatorHub catalog source.
+- [Per-Component OpenShift Fields](#per-component-openshift-fields) - OpenShift-specific fields available under individual prerequisites and features.
 
 ---
 
@@ -287,7 +292,8 @@ gpuOperator:
 | `mode` | string | No | Installation behavior. Supported values: `install` (install the component if it is not already installed) and `skip` (do not install or require the component). If omitted, defaults to `install` for prerequisites and `skip` for features. |
 | `type` | string | No | `gpuOperator` only. GPU Operator variant: `real` (default) for physical GPUs, or `fake` for testing without GPU hardware. |
 | `version` | string | No | Component version. Omit to install the latest version. |
-| `customHelmValues` | map | No | Custom Helm values merged into the component's Helm chart. Not supported for `kubeflow` or `mpiOperator`, which install from pinned manifests rather than a Helm chart - setting it there is rejected. |
+| `customHelmValues` | map | No | Custom Helm values merged into the component's Helm chart. Not supported for `kubeflow` or `mpiOperator`, which install from pinned manifests rather than a Helm chart - setting it there is rejected. On OpenShift, components that install via OperatorHub (OLM) instead of Helm are configured with `openshift` instead (see below). |
+| `openshift` | object | No | OpenShift-specific settings - see [Per-Component OpenShift Fields](#per-component-openshift-fields), below. Used only when `install.kubernetesDistribution` is `openshift`, and only for components that install via OLM on OpenShift. |
 
 ---
 
@@ -295,7 +301,7 @@ gpuOperator:
 
 ### External Connection
 
-Configures how the control plane's or a tenant cluster's chart exposes its services - as Kubernetes `Ingress` objects or Gateway API `Gateway`/`HTTPRoute` objects. This assumes the matching controller is already running on the target cluster (an Ingress Controller such as HAProxy, or a Gateway API implementation such as KGateway) - see [Ingress Controller](../../system-requirements/networking-setup.md#ingress-controller) for setup.
+Configures how the control plane's or a tenant cluster's chart exposes its services - as Kubernetes `Ingress` objects or Gateway API `Gateway`/`HTTPRoute` objects. This assumes the matching controller is already running on the target cluster (an Ingress Controller such as HAProxy, or a Gateway API implementation such as KGateway) - see [Ingress Controller](../../system-requirements/networking-setup.md#ingress-controller) for setup. Omit this section entirely on OpenShift, where OpenShift Routes are configured automatically.
 
 ```yaml
 externalConnection:
@@ -306,7 +312,7 @@ externalConnection:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `type` | string | Yes | External traffic routing method. Supported values: `ingress` (Kubernetes Ingress) and `gatewayApi` (Gateway API). |
+| `type` | string | Conditional | External traffic routing method. Supported values: `ingress` (Kubernetes Ingress) and `gatewayApi` (Gateway API). Required unless the section is omitted on OpenShift. |
 | `ingress.className` | string | Conditional | Name of the `IngressClass` resource to use. Required when `type` is `ingress`. Mutually exclusive with `gatewayApi`. |
 | `gatewayApi.name` | string | Conditional | Name of the Gateway resource. Required when `type` is `gatewayApi`. |
 | `gatewayApi.namespace` | string | Conditional | Namespace of the Gateway resource. Required when `type` is `gatewayApi`. Mutually exclusive with `ingress`. |
@@ -338,3 +344,35 @@ systemNodes:
 | `manageLabels` | bool | No | Whether the installer automatically applies the system node label to the specified nodes. When `true`, exactly one of `nodes` or `selector` must be set - both or neither is rejected. |
 | `nodes` | list | No | List of node names to designate as system nodes. Mutually exclusive with `selector` when `manageLabels` is `true`. |
 | `selector` | map | No | Label selector used to identify system nodes instead of specifying individual node names. Mutually exclusive with `nodes` when `manageLabels` is `true`. |
+
+---
+
+## OpenShift
+
+Applies to tenant clusters only, when `install.kubernetesDistribution: openshift`. The NVIDIA Run:ai control plane runs on Kubernetes. Skip this section for every other supported distribution.
+
+### OpenShift Configuration
+
+Configures OpenShift-specific installer settings for a tenant cluster.
+
+```yaml
+openshift:
+  olmCatalog:
+    source: my-mirrored-catalog
+    sourceNamespace: openshift-marketplace
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `olmCatalog.source` | string | No | Name of the OperatorHub `CatalogSource` used for all OLM-based operator installations. Any OpenShift install can point at a custom catalog, such as a mirrored or vetted internal one. Omit to use the default public catalogs. |
+| `olmCatalog.sourceNamespace` | string | No | Namespace containing the `CatalogSource`. |
+
+### Per-Component OpenShift Fields
+
+Set under any prerequisite's or feature's own `openshift` block (for example, `gpuOperator.openshift`) when that component installs via OperatorHub (OLM) instead of Helm. This is separate from the [OpenShift Configuration](#openshift-configuration) section, above, which determines the catalog source these operators are pulled from in the first place - these fields configure how each operator behaves once it is installed from that catalog.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `installPlanApproval` | string | No | OLM upgrade strategy: `manual` (default; pins the operator to the installed version and requires manual approval to upgrade) or `automatic` (lets OLM upgrade the operator automatically when a new version is available in the channel). |
+| `customResource` | map | No | Values merged into the operator's primary OpenShift custom resource spec. For example, `ClusterPolicy` for the GPU Operator, `NicClusterPolicy` for the Network Operator. Mirrors the approach an OpenShift admin uses to customize an OLM-installed operator by editing its CR rather than Helm values. |
+| `subscriptionConfig.env` | map | No | Environment variables set on the operator pod via the OLM Subscription's `spec.config`. For settings that have no custom resource field, such as the NIM Operator's `ENABLE_WEBHOOKS`. |
