@@ -15,6 +15,8 @@ import (
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	corev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -44,6 +46,22 @@ func (ot *OAuth2Templates) Object(ctx context.Context) (client.Object, error) {
 	key := client.ObjectKey{Name: oauth2proxy.ConfigMapName, Namespace: ot.runaiConfig.Namespace}
 	if err := ot.k8sReader.Get(ctx, key, configMap); err != nil && !kerrors.IsNotFound(err) {
 		return nil, fmt.Errorf("get OAuth2 templates configmap %s: %w", key, err)
+	}
+
+	ownerKind := runv1.GroupVersion.WithKind(runv1.RunaiConfigKind).GroupKind()
+	if owner := metav1.GetControllerOf(configMap); owner != nil &&
+		(schema.FromAPIVersionAndKind(owner.APIVersion, owner.Kind).GroupKind() != ownerKind ||
+			owner.Name != ot.runaiConfig.Name || owner.UID != ot.runaiConfig.UID) {
+		return nil, fmt.Errorf("configmap %s is controlled by %s %s, refusing to overwrite", key, owner.Kind, owner.Name)
+	}
+	// Remote resources use owner annotations instead of owner references.
+	for annotation, expected := range map[string]string{
+		runv1.NamespacedNameAnnotation: client.ObjectKeyFromObject(ot.runaiConfig).String(),
+		runv1.TypeAnnotation:           ownerKind.String(),
+	} {
+		if actual, exists := configMap.Annotations[annotation]; exists && actual != expected {
+			return nil, fmt.Errorf("configmap %s has conflicting %s ownership annotation", key, annotation)
+		}
 	}
 
 	configMap.Name = key.Name
