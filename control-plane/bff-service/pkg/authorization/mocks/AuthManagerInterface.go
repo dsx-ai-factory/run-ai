@@ -20,10 +20,19 @@ func NewAuthManagerInterface(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *AuthManagerInterface {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &AuthManagerInterface{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type AuthManagerInterface_GetTenantID_Call struct {
 }
 
 // GetTenantID is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *AuthManagerInterface_Expecter) GetTenantID(ctx interface{}, tenantId interface{}) *AuthManagerInterface_GetTenantID_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *AuthManagerInterface_Expecter) GetTenantID(ctx any, tenantId any) *AuthManagerInterface_GetTenantID_Call {
 	return &AuthManagerInterface_GetTenantID_Call{Call: _e.mock.On("GetTenantID", ctx, tenantId)}
 }
 
 func (_c *AuthManagerInterface_GetTenantID_Call) Run(run func(ctx context.Context, tenantId string)) *AuthManagerInterface_GetTenantID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -121,14 +141,20 @@ type AuthManagerInterface_HandleSystemPermissions_Call struct {
 }
 
 // HandleSystemPermissions is a helper method to define mock.On call
-//   - ctx
-func (_e *AuthManagerInterface_Expecter) HandleSystemPermissions(ctx interface{}) *AuthManagerInterface_HandleSystemPermissions_Call {
+//   - ctx context.Context
+func (_e *AuthManagerInterface_Expecter) HandleSystemPermissions(ctx any) *AuthManagerInterface_HandleSystemPermissions_Call {
 	return &AuthManagerInterface_HandleSystemPermissions_Call{Call: _e.mock.On("HandleSystemPermissions", ctx)}
 }
 
 func (_c *AuthManagerInterface_HandleSystemPermissions_Call) Run(run func(ctx context.Context)) *AuthManagerInterface_HandleSystemPermissions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -166,16 +192,32 @@ type AuthManagerInterface_ValidatePrivilegeEscalation_Call struct {
 }
 
 // ValidatePrivilegeEscalation is a helper method to define mock.On call
-//   - ctx
-//   - authzClient
-//   - subjectId
-func (_e *AuthManagerInterface_Expecter) ValidatePrivilegeEscalation(ctx interface{}, authzClient interface{}, subjectId interface{}) *AuthManagerInterface_ValidatePrivilegeEscalation_Call {
+//   - ctx context.Context
+//   - authzClient authorization_client.IAuthorizationClient
+//   - subjectId string
+func (_e *AuthManagerInterface_Expecter) ValidatePrivilegeEscalation(ctx any, authzClient any, subjectId any) *AuthManagerInterface_ValidatePrivilegeEscalation_Call {
 	return &AuthManagerInterface_ValidatePrivilegeEscalation_Call{Call: _e.mock.On("ValidatePrivilegeEscalation", ctx, authzClient, subjectId)}
 }
 
 func (_c *AuthManagerInterface_ValidatePrivilegeEscalation_Call) Run(run func(ctx context.Context, authzClient authorization_client.IAuthorizationClient, subjectId string)) *AuthManagerInterface_ValidatePrivilegeEscalation_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(authorization_client.IAuthorizationClient), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 authorization_client.IAuthorizationClient
+		if args[1] != nil {
+			arg1 = args[1].(authorization_client.IAuthorizationClient)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

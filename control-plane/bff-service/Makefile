@@ -21,7 +21,7 @@ OPENAPI_CLIENT_NAME_GO=client
 SHARED_PACKAGES_PATH_ABS=control-plane/bff-service/pkg
 
 ##@ Basic Commands 
-mockery: generate-mocks ## Regenerate mocks (delegates to the shared target).
+mockery: generate-mocks-local ## Regenerate mocks without Docker (delegates to the shared target; Renovate runs it).
 .PHONY: mockery
 
 test: build-go  test-go docker-compose-integration-tests-up ## Run unit-tests + integration tests
