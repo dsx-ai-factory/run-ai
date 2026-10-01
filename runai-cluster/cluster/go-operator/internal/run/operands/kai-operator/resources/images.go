@@ -6,8 +6,6 @@
 package resources
 
 import (
-	"fmt"
-
 	kaicommon "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
@@ -21,16 +19,8 @@ func convertImage(image *runaicommon.Image) *kaicommon.Image {
 	if image == nil {
 		return nil
 	}
-
-	repository := image.Registry
-	if repository == nil && (image.Repository != nil || image.Env != nil) {
-		legacyRepository := ptr.Deref(image.Repository, runaicommon.DefaultRepositeory)
-		legacyEnv := ptr.Deref(image.Env, runaicommon.DefaultEnv)
-		repository = ptr.To(fmt.Sprintf("%s%s", legacyRepository, legacyEnv))
-	}
-
 	converted := &kaicommon.Image{
-		Repository: repository,
+		Repository: image.Registry,
 		Name:       image.Name,
 		Tag:        image.Tag,
 	}

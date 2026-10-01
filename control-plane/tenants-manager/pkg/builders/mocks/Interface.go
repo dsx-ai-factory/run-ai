@@ -20,10 +20,19 @@ func NewInterface(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Interface {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Interface{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,16 +73,32 @@ type Interface_Construct_Call struct {
 }
 
 // Construct is a helper method to define mock.On call
-//   - ctx
-//   - tenant
-//   - builderResponse
-func (_e *Interface_Expecter) Construct(ctx interface{}, tenant interface{}, builderResponse interface{}) *Interface_Construct_Call {
+//   - ctx context.Context
+//   - tenant *builders.TenantInfo
+//   - builderResponse map[string]interface{}
+func (_e *Interface_Expecter) Construct(ctx any, tenant any, builderResponse any) *Interface_Construct_Call {
 	return &Interface_Construct_Call{Call: _e.mock.On("Construct", ctx, tenant, builderResponse)}
 }
 
 func (_c *Interface_Construct_Call) Run(run func(ctx context.Context, tenant *builders.TenantInfo, builderResponse map[string]interface{})) *Interface_Construct_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*builders.TenantInfo), args[2].(map[string]interface{}))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *builders.TenantInfo
+		if args[1] != nil {
+			arg1 = args[1].(*builders.TenantInfo)
+		}
+		var arg2 map[string]interface{}
+		if args[2] != nil {
+			arg2 = args[2].(map[string]interface{})
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -111,15 +136,26 @@ type Interface_Destruct_Call struct {
 }
 
 // Destruct is a helper method to define mock.On call
-//   - ctx
-//   - tenant
-func (_e *Interface_Expecter) Destruct(ctx interface{}, tenant interface{}) *Interface_Destruct_Call {
+//   - ctx context.Context
+//   - tenant *builders.TenantInfo
+func (_e *Interface_Expecter) Destruct(ctx any, tenant any) *Interface_Destruct_Call {
 	return &Interface_Destruct_Call{Call: _e.mock.On("Destruct", ctx, tenant)}
 }
 
 func (_c *Interface_Destruct_Call) Run(run func(ctx context.Context, tenant *builders.TenantInfo)) *Interface_Destruct_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*builders.TenantInfo))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *builders.TenantInfo
+		if args[1] != nil {
+			arg1 = args[1].(*builders.TenantInfo)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

@@ -21,10 +21,19 @@ func NewProvisioningRun(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ProvisioningRun {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ProvisioningRun{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -67,17 +76,38 @@ type ProvisioningRun_Complete_Call struct {
 }
 
 // Complete is a helper method to define mock.On call
-//   - ctx
-//   - runId
-//   - status
-//   - diagnostics
-func (_e *ProvisioningRun_Expecter) Complete(ctx interface{}, runId interface{}, status interface{}, diagnostics interface{}) *ProvisioningRun_Complete_Call {
+//   - ctx context.Context
+//   - runId uint
+//   - status models.ProvisioningRunStatus
+//   - diagnostics string
+func (_e *ProvisioningRun_Expecter) Complete(ctx any, runId any, status any, diagnostics any) *ProvisioningRun_Complete_Call {
 	return &ProvisioningRun_Complete_Call{Call: _e.mock.On("Complete", ctx, runId, status, diagnostics)}
 }
 
 func (_c *ProvisioningRun_Complete_Call) Run(run func(ctx context.Context, runId uint, status models.ProvisioningRunStatus, diagnostics string)) *ProvisioningRun_Complete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint), args[2].(models.ProvisioningRunStatus), args[3].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		var arg2 models.ProvisioningRunStatus
+		if args[2] != nil {
+			arg2 = args[2].(models.ProvisioningRunStatus)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -128,15 +158,26 @@ type ProvisioningRun_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *ProvisioningRun_Expecter) Create(ctx interface{}, tenantId interface{}) *ProvisioningRun_Create_Call {
+//   - ctx context.Context
+//   - tenantId uint
+func (_e *ProvisioningRun_Expecter) Create(ctx any, tenantId any) *ProvisioningRun_Create_Call {
 	return &ProvisioningRun_Create_Call{Call: _e.mock.On("Create", ctx, tenantId)}
 }
 
 func (_c *ProvisioningRun_Create_Call) Run(run func(ctx context.Context, tenantId uint)) *ProvisioningRun_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -187,15 +228,26 @@ type ProvisioningRun_GetLatestForTenant_Call struct {
 }
 
 // GetLatestForTenant is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *ProvisioningRun_Expecter) GetLatestForTenant(ctx interface{}, tenantId interface{}) *ProvisioningRun_GetLatestForTenant_Call {
+//   - ctx context.Context
+//   - tenantId uint
+func (_e *ProvisioningRun_Expecter) GetLatestForTenant(ctx any, tenantId any) *ProvisioningRun_GetLatestForTenant_Call {
 	return &ProvisioningRun_GetLatestForTenant_Call{Call: _e.mock.On("GetLatestForTenant", ctx, tenantId)}
 }
 
 func (_c *ProvisioningRun_GetLatestForTenant_Call) Run(run func(ctx context.Context, tenantId uint)) *ProvisioningRun_GetLatestForTenant_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
