@@ -21,10 +21,19 @@ func NewSettingsManagerInterface(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SettingsManagerInterface {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SettingsManagerInterface{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -76,18 +85,44 @@ type SettingsManagerInterface_GetAllSettings_Call struct {
 }
 
 // GetAllSettings is a helper method to define mock.On call
-//   - ctx
-//   - tenantID
-//   - tenantData
-//   - clusterVersions
-//   - excludeMigrated
-func (_e *SettingsManagerInterface_Expecter) GetAllSettings(ctx interface{}, tenantID interface{}, tenantData interface{}, clusterVersions interface{}, excludeMigrated interface{}) *SettingsManagerInterface_GetAllSettings_Call {
+//   - ctx context.Context
+//   - tenantID int
+//   - tenantData settings.TenantStaticData
+//   - clusterVersions []string
+//   - excludeMigrated bool
+func (_e *SettingsManagerInterface_Expecter) GetAllSettings(ctx any, tenantID any, tenantData any, clusterVersions any, excludeMigrated any) *SettingsManagerInterface_GetAllSettings_Call {
 	return &SettingsManagerInterface_GetAllSettings_Call{Call: _e.mock.On("GetAllSettings", ctx, tenantID, tenantData, clusterVersions, excludeMigrated)}
 }
 
 func (_c *SettingsManagerInterface_GetAllSettings_Call) Run(run func(ctx context.Context, tenantID int, tenantData settings.TenantStaticData, clusterVersions []string, excludeMigrated bool)) *SettingsManagerInterface_GetAllSettings_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int), args[2].(settings.TenantStaticData), args[3].([]string), args[4].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 settings.TenantStaticData
+		if args[2] != nil {
+			arg2 = args[2].(settings.TenantStaticData)
+		}
+		var arg3 []string
+		if args[3] != nil {
+			arg3 = args[3].([]string)
+		}
+		var arg4 bool
+		if args[4] != nil {
+			arg4 = args[4].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
@@ -125,18 +160,44 @@ type SettingsManagerInterface_SetSetting_Call struct {
 }
 
 // SetSetting is a helper method to define mock.On call
-//   - ctx
-//   - tenantID
-//   - key
-//   - value
-//   - clusterVersions
-func (_e *SettingsManagerInterface_Expecter) SetSetting(ctx interface{}, tenantID interface{}, key interface{}, value interface{}, clusterVersions interface{}) *SettingsManagerInterface_SetSetting_Call {
+//   - ctx context.Context
+//   - tenantID int
+//   - key string
+//   - value interface{}
+//   - clusterVersions []string
+func (_e *SettingsManagerInterface_Expecter) SetSetting(ctx any, tenantID any, key any, value any, clusterVersions any) *SettingsManagerInterface_SetSetting_Call {
 	return &SettingsManagerInterface_SetSetting_Call{Call: _e.mock.On("SetSetting", ctx, tenantID, key, value, clusterVersions)}
 }
 
 func (_c *SettingsManagerInterface_SetSetting_Call) Run(run func(ctx context.Context, tenantID int, key string, value interface{}, clusterVersions []string)) *SettingsManagerInterface_SetSetting_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int), args[2].(string), args[3].(interface{}), args[4].([]string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 interface{}
+		if args[3] != nil {
+			arg3 = args[3].(interface{})
+		}
+		var arg4 []string
+		if args[4] != nil {
+			arg4 = args[4].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
