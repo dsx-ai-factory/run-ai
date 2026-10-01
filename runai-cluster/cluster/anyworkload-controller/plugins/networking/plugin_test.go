@@ -8,6 +8,7 @@ package networking
 import (
 	"context"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -21,27 +22,33 @@ import (
 )
 
 var _ = Describe("Plugin", func() {
-	Describe("endpoint annotation watch predicate", func() {
-		var predicate = endpointAnnotationChangedPredicate()
+	Describe("networking annotations watch predicate", func() {
+		var predicate = networkingAnnotationsChangedPredicate()
 
-		It("accepts updates when the endpoints annotation value changes", func() {
+		DescribeTable("accepts updates when a networking annotation value changes", func(annotation string) {
 			Expect(predicate.Update(event.UpdateEvent{
-				ObjectOld: workloadRunnerWithAnnotations(map[string]string{endpoints.Annotation: "old"}),
-				ObjectNew: workloadRunnerWithAnnotations(map[string]string{endpoints.Annotation: "new"}),
+				ObjectOld: workloadRunnerWithAnnotations(map[string]string{annotation: "old"}),
+				ObjectNew: workloadRunnerWithAnnotations(map[string]string{annotation: "new"}),
 			})).To(BeTrue())
-		})
+		},
+			Entry("endpoints", endpoints.Annotation),
+			Entry("submission profile", constants.NetworkingSubmissionProfileAnnotation),
+		)
 
-		It("accepts updates when the endpoints annotation is added or removed", func() {
+		DescribeTable("accepts updates when a networking annotation is added or removed", func(annotation string) {
 			Expect(predicate.Update(event.UpdateEvent{
 				ObjectOld: workloadRunnerWithAnnotations(nil),
-				ObjectNew: workloadRunnerWithAnnotations(map[string]string{endpoints.Annotation: "new"}),
+				ObjectNew: workloadRunnerWithAnnotations(map[string]string{annotation: "new"}),
 			})).To(BeTrue())
 
 			Expect(predicate.Update(event.UpdateEvent{
-				ObjectOld: workloadRunnerWithAnnotations(map[string]string{endpoints.Annotation: "old"}),
+				ObjectOld: workloadRunnerWithAnnotations(map[string]string{annotation: "old"}),
 				ObjectNew: workloadRunnerWithAnnotations(nil),
 			})).To(BeTrue())
-		})
+		},
+			Entry("endpoints", endpoints.Annotation),
+			Entry("submission profile", constants.NetworkingSubmissionProfileAnnotation),
+		)
 
 		It("ignores unrelated annotation updates", func() {
 			Expect(predicate.Update(event.UpdateEvent{

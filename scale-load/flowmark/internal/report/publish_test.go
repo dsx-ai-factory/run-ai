@@ -6,6 +6,7 @@
 package report
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"os"
@@ -89,6 +90,25 @@ func TestPublishAppendsToExistingManifestAndIsIdempotent(t *testing.T) {
 	manifest, err := parseManifest(store.objects[ManifestName])
 	if err != nil || len(manifest.Runs) != 2 {
 		t.Fatalf("two distinct runs must give two manifest entries even after a re-run, got %v (%v)", manifest.Runs, err)
+	}
+}
+
+func TestPublishRefusesToOverwriteADifferentRunWithTheSameName(t *testing.T) {
+	store := newFakeStore()
+	first := document(0)
+	if _, err := Publish(context.Background(), store, first); err != nil {
+		t.Fatal(err)
+	}
+	second := first
+	second.Metadata.Provider = "another-runner-in-the-same-second"
+
+	_, err := Publish(context.Background(), store, second)
+	if err == nil || !strings.Contains(err.Error(), "refusing to overwrite") {
+		t.Fatalf("expected a refusal, got %v", err)
+	}
+	kept, _ := first.Encode()
+	if !bytes.Equal(store.objects[first.FileName()], kept) {
+		t.Fatal("the first run's results must be untouched")
 	}
 }
 

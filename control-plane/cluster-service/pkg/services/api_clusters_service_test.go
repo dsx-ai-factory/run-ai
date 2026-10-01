@@ -72,8 +72,8 @@ type Mocks struct {
 	tenantSettingsClient        *bc_mocks.TenantSettingsClient
 	idmClient                   *idm_client.IIdm
 	orgUnitClient               *org_unit_client.IOrgUnitClient
-	tmInternalApi               *tm_client_mock.InternalApi
-	tmTenantsApi                *tm_client_mock.TenantsApi
+	tmInternalApi               *tm_client_mock.InternalAPI
+	tmTenantsApi                *tm_client_mock.TenantsAPI
 	clusterDeleter              *cdmock.ClusterDeleter
 	pubsub                      *pubsubmocks.PubSuber
 	orgClient                   *org_unit_service_client_mock.IOrgUnitClient
@@ -137,8 +137,8 @@ func prepareMocksExt(mockClusterDeleter bool) {
 		tenantSettingsClient:        &bc_mocks.TenantSettingsClient{},
 		idmClient:                   &idm_client.IIdm{},
 		orgUnitClient:               &org_unit_client.IOrgUnitClient{},
-		tmInternalApi:               &tm_client_mock.InternalApi{},
-		tmTenantsApi:                &tm_client_mock.TenantsApi{},
+		tmInternalApi:               &tm_client_mock.InternalAPI{},
+		tmTenantsApi:                &tm_client_mock.TenantsAPI{},
 		clusterDeleter:              cdmock.NewClusterDeleter(ginkgo.GinkgoT()),
 		pubsub:                      &pubsubmocks.PubSuber{},
 		orgClient:                   &org_unit_service_client_mock.IOrgUnitClient{},
@@ -855,7 +855,7 @@ var _ = Describe("ApiClustersService", Ordered, func() {
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=` + fullUrl + ` \
---set cluster.bootstrapToken=Any_Secret \
+--set controlPlane.bootstrapToken=Any_Secret \
 --set cluster.uid=` + clusters[0].Uuid + ` \
 --set cluster.url=https://test-url.runai --version="2.16.3" --create-namespace`
 				Expect(ok).To(BeTrue())
@@ -876,7 +876,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=` + appConfig.Host + ` \
---set cluster.bootstrapToken=Any_Secret \
+--set controlPlane.bootstrapToken=Any_Secret \
 --set cluster.uid=` + clusters[0].Uuid + ` \
 --set cluster.url=` + appConfig.Host + ` --version="2.17.2" --create-namespace`
 				installationInfo, ok := resp.Body.(api.ClusterInstallationInfoResponse)
@@ -897,7 +897,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=` + fullUrl + ` \
---set cluster.bootstrapToken=Any_Secret \
+--set controlPlane.bootstrapToken=Any_Secret \
 --set cluster.uid=` + clusters[0].Uuid + ` \
 --set cluster.url=` + fullUrl + ` --version=">0.0.0-0" --create-namespace`
 				installationInfo, ok := resp.Body.(api.ClusterInstallationInfoResponse)
@@ -941,7 +941,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=tenant.domain \
---set cluster.bootstrapToken=Tenant_Secret \
+--set controlPlane.bootstrapToken=Tenant_Secret \
 --set cluster.uid=` + clusters[0].Uuid + ` \
 --set cluster.url=https://test-url.runai --version="2.16.3" --create-namespace`
 				Expect(ok).To(BeTrue())

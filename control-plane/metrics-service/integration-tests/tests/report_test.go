@@ -455,7 +455,7 @@ func waitForReportStatus(ctx context.Context, reportId string, expectedStatus op
 
 func initializeS3Client() (*minio.Client, error) {
 	endpoint := getEnvOrDefault("S3_ENDPOINT", "localhost:9000")
-	s3_client.Init(&s3_client.S3Config{Endpoint: endpoint, AccessKey: "minioadmin", AccessKeyId: "minioadmin"})
+	s3_client.Init(&s3_client.S3Config{Endpoint: endpoint, AccessKey: "rustfsadmin", AccessKeyId: "rustfsadmin"})
 	client, err := s3_client.Client()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize S3 client: %v", err)

@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.27.1
+ARG GO_VERSION
+FROM golang:${GO_VERSION}
 
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.27.2
 

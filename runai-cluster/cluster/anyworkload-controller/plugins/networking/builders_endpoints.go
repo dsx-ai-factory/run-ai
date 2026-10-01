@@ -54,7 +54,9 @@ func (p *Plugin) buildEndpointWorkloadService(
 		APIVersion: constants.CoreV1,
 		Kind:       constants.KindService,
 	}
-	svc.Namespace = runner.Namespace
+	svc.ObjectMeta = networkingObjectMeta(svc.ObjectMeta, runner)
+	svc.Name = serviceCreate.Name // Unlike the legacy shape, endpoint names have no fallback.
+	svc.Status = corev1.ServiceStatus{}
 	if isMetricsService(svc) {
 		if svc.Labels == nil {
 			svc.Labels = map[string]string{}

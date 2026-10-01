@@ -51,7 +51,7 @@ For connected environments, prepare the artifacts according to the release type 
 Open Source artifacts are publicly available from NGC and do not require authentication.
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm search repo -l runai/control-plane
 ```
@@ -63,12 +63,8 @@ Support-Entitled artifacts require authentication to NGC. Before upgrading, make
 * You have an NGC Personal Key.
 * An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
-Add the NVIDIA Run:ai Helm repository using your NGC Personal Key:
-
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update \
-  --username='$oauthtoken' \
-  --password=<NGC_API_KEY>
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm search repo -l runai/control-plane
 ```
@@ -129,6 +125,17 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 * Replace `<VERSION>` with the NVIDIA Run:ai version you are upgrading to.
 * Set `supportEntitled=true` to configure the installation as Support-Entitled.
 * Set `global.imagePullSecrets[0].name=runai-reg-creds` to use the NGC image pull secret prepared in [Software Artifacts](#prepare-software-artifacts).
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](../installation/install-using-helm/preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
+  - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
+  - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
+
+<Note>
+
+**Note**
+
+These flags configure functionality introduced in v3.0. If you are upgrading from v2.26 or earlier, add them explicitly as shown. `--reset-then-reuse-values` preserves the values from your current release (for example, your domain and tenant administrator settings), so you do not need to pass those again. Once you are on v3.0 or above, it also preserves these flags, so you do not need to pass them again in later upgrades.
+
+</Note>
 
 ```bash
 helm get values runai-backend -n runai-backend > runai_control_plane_values.yaml
@@ -137,7 +144,8 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
   -f runai_control_plane_values.yaml \
   --reset-then-reuse-values \
   --set supportEntitled=true \
-  --set global.imagePullSecrets[0].name=runai-reg-creds
+  --set global.imagePullSecrets[0].name=runai-reg-creds \
+  --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
 
 </Accordion>
@@ -172,76 +180,19 @@ helm upgrade runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend
 
 Add `--set supportEntitled=true` to the `helm upgrade` command:
 
+<Note>
+
+**Note**
+
+This flag configures functionality introduced in v3.0. If you are upgrading from v2.26 or earlier, add it explicitly as shown. `--reset-then-reuse-values` preserves the values from your current release (for example, your domain and tenant administrator settings), so you do not need to pass those again. Once you are on v3.0 or above, it also preserves this flag, so you do not need to pass it again in later upgrades.
+
+</Note>
+
 ```bash
 helm upgrade runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
   -f <VALUES_DIR>/control-plane-airgap-values.yaml \
   --reset-then-reuse-values \
   --set supportEntitled=true
-```
-
-</Accordion>
-
-### Enable Telemetry Service (Support-Entitled)
-
-NVIDIA Run:ai includes telemetry for Support-Entitled deployments, reporting initial metrics including platform usage and adoption signals, GPU utilization and allocation, and cluster health signals to support proactive troubleshooting and continued product improvement. By default, telemetry is not associated with your organization. You can opt in to identified telemetry by providing an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key) during installation, which associates the telemetry with your NCA ID.
-
-<Note>
-
-**Note**
-
-This section applies to Connected installations only. Air-gapped environments have no outbound connectivity to NVIDIA, so telemetry is not applicable.
-
-</Note>
-
-<Accordion title="Pass the SAK Value Directly">
-
-**Pass the SAK Value Directly**
-
-Pass the SAK as a plaintext Helm value. The chart creates and manages the Kubernetes Secret for you.
-
-```bash
-helm upgrade runai-backend -n runai-backend runai/control-plane \
-  --version "<VERSION>" \
-  -f runai_control_plane_values.yaml \
-  --reset-then-reuse-values \
-  --set supportEntitled=true \
-  --set telemetryService.telemetryAuth.token=<SAK_TOKEN>
-```
-
-<Warning>
-
-**Warning**
-
-The SAK value is passed as a `--set` flag, which may be visible in shell history and process listings.
-
-</Warning>
-
-</Accordion>
-
-<Accordion title="Reference a Pre-Created Secret">
-
-**Reference a Pre-Created Secret**
-
-1. Create the Secret containing the SAK before upgrading:
-
-```bash
-kubectl create secret generic runai-telemetry-sak \
-  --namespace runai-backend \
-  --from-literal=TELEMETRY_TOKEN=<SAK_TOKEN>
-```
-
-2. Reference the Secret in the upgrade command. The chart does not create or manage it.
-
-3. Set both the Secret name and key explicitly:
-
-```bash
-helm upgrade runai-backend -n runai-backend runai/control-plane \
-  --version "<VERSION>" \
-  -f runai_control_plane_values.yaml \
-  --reset-then-reuse-values \
-  --set supportEntitled=true \
-  --set telemetryService.telemetryAuth.existingSecret=runai-telemetry-sak \
-  --set telemetryService.telemetryAuth.secretKey=TELEMETRY_TOKEN
 ```
 
 </Accordion>
@@ -266,9 +217,8 @@ It is highly recommended to upgrade the Kubernetes version together with the NVI
 2. Select the cluster you want to upgrade
 3. Click **INSTALLATION INSTRUCTIONS**
 4. Optional: Select the NVIDIA Run:ai cluster version (latest, by default)
-5. Select **Manual Helm** as the installation type
-6. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
-7. Click **CONTINUE**
+5. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
+6. Click **CONTINUE**
 
 ### Run the Upgrade Command
 
@@ -294,11 +244,11 @@ The `bootstrapToken` in the generated Helm command is a short-lived token that e
     * Keep the remaining `--set` values exactly as generated by the UI.
 
     ```bash
-    helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+    helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
     helm repo update
     helm upgrade -i runai-cluster runai/runai-cluster -n runai \
       --set controlPlane.url=... \
-      --set cluster.bootstrapToken=... \
+      --set controlPlane.bootstrapToken=... \
       --set cluster.uid=... \
       --set cluster.url=... --version="<VERSION>" --create-namespace \
       --set clusterConfig.global.ingress.ingressClass=haproxy
@@ -318,7 +268,6 @@ The `bootstrapToken` in the generated Helm command is a short-lived token that e
     * Do not add the Helm repository - skip `helm repo add` and `helm repo update`.
     * Replace `runai/runai-cluster` with `./charts/runai-cluster-<VERSION>.tgz`, the chart written by `airgap load`.
     * Add `-f <VALUES_DIR>/cluster-airgap-values.yaml`. Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml`.
-    * Add `--set clusterConfig.prometheus.spec.baseImage=<DOCKER_REGISTRY_ADDRESS>/<FULL_IMAGE_PATH>`.
     * Add `--set global.customCA.enabled=true` as described in the [Cluster Local CA](../installation/install-using-helm/preparations.md#cluster-local-ca) section.
     * The recommended ingress controller is HAProxy. If you are using a different ingress controller, update the ingress class to match the ingress controller configured during the [control plane installation](../installation/install-using-helm/install-control-plane.md#kubernetes).
     * Keep the remaining `--set` values exactly as generated by the UI.
@@ -326,10 +275,9 @@ The `bootstrapToken` in the generated Helm command is a short-lived token that e
     ```bash
     helm upgrade -i runai-cluster ./charts/runai-cluster-<VERSION>.tgz \
       --set controlPlane.url=... \
-      --set cluster.bootstrapToken=... \
+      --set controlPlane.bootstrapToken=... \
       --set cluster.uid=... \
       --set cluster.url=... --create-namespace \
-      --set clusterConfig.prometheus.spec.baseImage=registry.mycompany.local/prometheus/prometheus \
       --set global.customCA.enabled=true \
       --set clusterConfig.global.ingress.ingressClass=haproxy \
       -f <VALUES_DIR>/cluster-airgap-values.yaml
@@ -544,9 +492,8 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 2. Select the cluster you want to upgrade
 3. Click **INSTALLATION INSTRUCTIONS**
 4. Optional: Select the NVIDIA Run:ai cluster version (latest, by default)
-5. Select **Manual Helm** as the installation type
-6. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
-7. Click **CONTINUE**
+5. Under **Settings**, review the cluster location (**Same as control plane** or **Remote control plane**) and Cluster URL
+6. Click **CONTINUE**
 
 #### Installation Instructions
 

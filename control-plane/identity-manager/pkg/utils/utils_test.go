@@ -106,15 +106,15 @@ func TestTemplateBaseUrl(t *testing.T) {
 	}{
 		{
 			desc:         "test prefix",
-			hostTemplate: "http://{{.}}.run.ai",
+			hostTemplate: "http://{{.}}.example.com",
 			name:         "test",
-			expectedRes:  "http://test.run.ai",
+			expectedRes:  "http://test.example.com",
 		},
 		{
 			desc:         "test full url",
-			hostTemplate: "abc.run.ai",
+			hostTemplate: "abc.example.com",
 			name:         "test",
-			expectedRes:  "abc.run.ai",
+			expectedRes:  "abc.example.com",
 		},
 		{
 			desc:         "test empty",
@@ -124,9 +124,9 @@ func TestTemplateBaseUrl(t *testing.T) {
 		},
 		{
 			desc:         "test uppercase name",
-			hostTemplate: "http://{{.}}.run.ai",
+			hostTemplate: "http://{{.}}.example.com",
 			name:         "TEST",
-			expectedRes:  "http://test.run.ai",
+			expectedRes:  "http://test.example.com",
 		},
 	}
 	for _, tc := range testCases {
@@ -208,17 +208,17 @@ func TestGetTenantNameFromHost(t *testing.T) {
 		},
 		{
 			desc:        "test default url",
-			host:        "test.run.ai",
+			host:        "test.example.com",
 			expectedRes: "test",
 		},
 		{
 			desc:        "test test url",
-			host:        "abcd.test.run.ai",
+			host:        "abcd.test.example.com",
 			expectedRes: "abcd",
 		},
 		{
 			desc:        "test stagin url",
-			host:        "abcd.staging.run.ai",
+			host:        "abcd.staging.example.com",
 			expectedRes: "abcd",
 		},
 	}
@@ -259,7 +259,7 @@ func TestDecodeBase64ToReader_InvalidBase64(t *testing.T) {
 }
 
 func TestReadUrlContent_HappyFlow(t *testing.T) {
-	url := "https://test.run.ai/auth/realms/workAI/protocol/saml/descriptor"
+	url := "https://example.com/auth/realms/workAI/protocol/saml/descriptor"
 	res, err := utils.ReadUrlContent(context.Background(), url)
 	assert.NotNil(t, res)
 	assert.Nil(t, err)

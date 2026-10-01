@@ -952,7 +952,7 @@ export interface NimServiceServingPort {
      */
     'metricsPort'?: number | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof NimServiceServingPort
      */

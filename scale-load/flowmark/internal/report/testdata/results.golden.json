@@ -11,7 +11,7 @@
     "clock_offset_ms": -296
   },
   "sections": {
-    "external-workload": {
+    "deployment-burst": {
       "category": "scale",
       "metrics": {
         "flow": "deployment_to_external_workload",

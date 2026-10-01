@@ -27,18 +27,26 @@ The installer can install supported prerequisites and features for you. By defau
 
 The domains and certificates you prepared in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../system-requirements/networking-setup.md#tls-certificates) map to specific `config.yaml` fields. You supply the control plane values when you write your `config.yaml` in [Control Plane Installation](installation.md), and each tenant cluster's values when you [install that cluster](create-a-tenant-and-cluster.md#install-the-cluster).
 
-| Domain / Certificate | Config Field(s) | Required When | Notes |
+| Domain | Config Fields | Required When | Certificate |
 | --- | --- | --- | --- |
-| Control Plane Domain and Certificate (wildcard) | `controlPlane.domain`, `controlPlane.tls` | Always | Secures the NVIDIA Run:ai UI and API for every tenant. Must be a wildcard matching the control plane domain (for example, `*.runai.hostorg.com`). |
-| Tenant Cluster Domain and Certificate | `cluster.domain`, `cluster.tls` | Always | Secures communication between the control plane and that tenant's cluster. |
-| Tenant Cluster Workspaces, Training, and Distributed Inference Wildcard Certificate | `cluster.tls` (same field as above) | Required unless using path-based routing | Must be a wildcard matching the tenant cluster's domain (for example, `*.runai.tenant-a-corp.com`). Shares `cluster.tls` with the row above - not a separate field. |
-| Tenant Cluster Standard Inference Wildcard Domain and Certificate | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Only for standard inference (Knative) exposed externally via a wildcard FQDN | Not required for distributed inference (LWS, Dynamo, KServe, and other serving frameworks) or cluster-local standard inference. |
+| Control plane domain (wildcard, for example `*.runai.hostorg.com`) | `controlPlane.domain`, `controlPlane.tls` | Always | A wildcard certificate matching the control plane domain |
+| Tenant cluster domain (for example, `runai.tenant-a-corp.com`) | `cluster.domain`, `cluster.tls` | Always | Covered by `cluster.tls`, see the next row |
+| Workspaces, training, and distributed inference (for example, `*.runai.tenant-a-corp.com`) | None. Do not set a separate domain field. The wildcard is `*.` plus the tenant cluster domain. | Host-based routing (the default). Not needed with path-based routing. | The same `cluster.tls` certificate, which must list both `runai.tenant-a-corp.com` and `*.runai.tenant-a-corp.com` as Subject Alternative Names |
+| Standard inference (Knative), for example `*.runai-inference.tenant-a-corp.com` | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Standard inference exposed externally only | The wildcard, in `cluster.inference.wildcardTls` |
 
 ## Registry Credentials
 
-Open Source installations set `registry.type: ngc` in the configuration, with no credentials needed. NVIDIA Run:ai Support-Entitled Release installations set the same field, plus an NGC Personal Key to authenticate to the NVIDIA Run:ai container registry (`nvcr.io`) and Helm registry (`helm.ngc.nvidia.com/nvidia/runai`) for pulling NVIDIA Run:ai container images and charts. Generate a Personal Key from the [NGC Personal Keys](https://org.ngc.nvidia.com/setup/personal-keys) page.
+Open Source installations set `registry.type: ngc` in the configuration, with no credentials needed. NVIDIA Run:ai Support-Entitled Release installations set the same field, plus an NGC Personal Key to authenticate to the NVIDIA Run:ai container registry (`nvcr.io`) for pulling NVIDIA Run:ai container images. Generate a Personal Key from the [NGC Personal Keys](https://org.ngc.nvidia.com/setup/personal-keys) page.
 
 Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password.
+
+For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. Provide the resulting key in `telemetryService.telemetryAuth` during installation, either directly as `token`, or by referencing a secret you create yourself beforehand:
+
+```bash
+kubectl create secret generic <SECRET_NAME> \
+  --namespace runai-backend \
+  --from-literal=<KEY_NAME>=<SERVICE_API_KEY>
+```
 
 ## Download the Installer
 
@@ -73,5 +81,6 @@ chmod +x runai-installer-darwin-arm64
 ## Next Steps
 
 * [Control Plane Installation](installation.md) - The minimum configuration to install the control plane.
+* [API Access Setup](api-access-setup.md) - Configure programmatic API access using service account credentials.
 * [Configuration Templates](templates.md) - Complete, ready-to-use configurations for specific use cases - use one instead of the minimum configuration if it matches yours.
 * [Configuration Reference](configuration-reference.md) - All supported configuration fields, for building a configuration from scratch.

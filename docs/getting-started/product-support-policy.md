@@ -72,7 +72,3 @@ A deprecated capability remains available for at least two subsequent releases f
 ### Breaking Changes
 
 A breaking change is a change to a public API endpoint or parameter that requires customer action to preserve existing behavior after upgrade - that is, the removal or incompatible change of a public API endpoint or a request or response parameter. Breaking changes are introduced only at a major or minor (Ma.Mi) release, never in a patch (Pa) release, and are always called out in that release's [Deprecation Notifications](whats-new/deprecation-notifications.md).
-
-## Contact Support
-
-Support is available through the [NVIDIA Enterprise Support portal](https://enterprise-support.nvidia.com) for organizations with an active NVIDIA Run:ai Support-entitled Release agreement. Open a ticket there for issues covered under your support agreement.

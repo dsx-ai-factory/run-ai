@@ -14,14 +14,21 @@ import (
 	"sync"
 	"time"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// Outcome is the honest fate of one measured item: it arrived, it is still
-// pending when the caller stopped waiting, or its creation failed.
+const (
+	maxReconnects      = 5
+	maxReconnectCycles = 10
+)
+
+var reconnectDelay = time.Second
+
 type Outcome string
 
 const (
@@ -30,19 +37,12 @@ const (
 	Failed  Outcome = "failed"
 )
 
-// WorkloadRunnerKind is the object Run:ai creates on the cluster for every
-// workload submitted through the control plane.
 var WorkloadRunnerKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
 
-// ExternalWorkloadKind is the object Run:ai creates for every plain Kubernetes
-// workload it integrates.
 var ExternalWorkloadKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "ExternalWorkload"}
 
-var errWatchClosed = errors.New("watch closed by the server")
+var ErrWatchClosed = errors.New("watch closed")
 
-// Timing is the measurement of one item. Duration is only meaningful when
-// Outcome is Arrived; pending and failed items carry no duration so they can
-// never be mistaken for a fast arrival.
 type Timing struct {
 	Name     string
 	Outcome  Outcome
@@ -52,64 +52,94 @@ type Timing struct {
 	Err      error
 }
 
-// Watcher stamps the arrival of Kubernetes objects on the local monotonic
-// clock. It never reads server timestamps, so a duration is always the gap
-// between two readings of the same clock.
 type Watcher struct {
-	cancel context.CancelFunc
-	nameOf func(*unstructured.Unstructured) string
+	cancel    context.CancelFunc
+	nameOf    func(*unstructured.Unstructured) string
+	kube      k8sclient.WithWatch
+	kind      schema.GroupVersionKind
+	namespace string
 
-	mu       sync.Mutex
-	created  map[string]time.Time
-	arrived  map[string]time.Time
-	failed   map[string]error
-	lastMark time.Time
-	closed   error
-	changed  chan struct{}
-	done     chan struct{}
+	resourceVersion string
+
+	mu         sync.Mutex
+	created    map[string]time.Time
+	arrived    map[string]time.Time
+	failed     map[string]error
+	lastMark   time.Time
+	closed     error
+	reconnects int
+	changed    chan struct{}
+	done       chan struct{}
 }
 
-// Watch opens a watch on kind in namespace before the caller creates anything,
-// so no arrival can be missed. nameOf maps an event object to the item name the
-// caller will pass to MarkCreated. Arrival is the first event seen for a name;
-// later events for the same name never move the stamp.
 func Watch(ctx context.Context, kube k8sclient.WithWatch, kind schema.GroupVersionKind, namespace string, nameOf func(*unstructured.Unstructured) string) (*Watcher, error) {
-	list := &unstructured.UnstructuredList{}
-	list.SetGroupVersionKind(schema.GroupVersionKind{Group: kind.Group, Version: kind.Version, Kind: kind.Kind + "List"})
-
 	ctx, cancel := context.WithCancel(ctx)
-	events, err := kube.Watch(ctx, list, k8sclient.InNamespace(namespace))
+	w := &Watcher{
+		cancel:    cancel,
+		nameOf:    nameOf,
+		kube:      kube,
+		kind:      kind,
+		namespace: namespace,
+		created:   map[string]time.Time{},
+		arrived:   map[string]time.Time{},
+		failed:    map[string]error{},
+		changed:   make(chan struct{}, 1),
+		done:      make(chan struct{}),
+	}
+	events, err := w.open(ctx)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("watching %s in namespace %q: %w", kind.Kind, namespace, err)
-	}
-
-	w := &Watcher{
-		cancel:  cancel,
-		nameOf:  nameOf,
-		created: map[string]time.Time{},
-		arrived: map[string]time.Time{},
-		failed:  map[string]error{},
-		changed: make(chan struct{}, 1),
-		done:    make(chan struct{}),
 	}
 	go w.consume(ctx, events)
 	return w, nil
 }
 
-// WatchWorkloads watches the WorkloadRunner objects Run:ai creates for
-// workloads submitted through the control plane. The item name is the
-// workload name.
+func (w *Watcher) open(ctx context.Context) (watch.Interface, error) {
+	list := &unstructured.UnstructuredList{}
+	list.SetGroupVersionKind(schema.GroupVersionKind{Group: w.kind.Group, Version: w.kind.Version, Kind: w.kind.Kind + "List"})
+	options := &k8sclient.ListOptions{
+		Namespace: w.namespace,
+		Raw:       &metav1.ListOptions{AllowWatchBookmarks: true, ResourceVersion: w.resourceVersion},
+	}
+	return w.kube.Watch(ctx, list, options)
+}
+
+func (w *Watcher) reopen(ctx context.Context) (watch.Interface, error) {
+	var last error
+	for attempt := 1; attempt <= maxReconnects; attempt++ {
+		timer := time.NewTimer(reconnectDelay)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, fmt.Errorf("%w: %w", ErrWatchClosed, ctx.Err())
+		case <-timer.C:
+		}
+		events, err := w.open(ctx)
+		if err == nil {
+			w.mu.Lock()
+			w.reconnects++
+			w.mu.Unlock()
+			return events, nil
+		}
+		last = err
+		if apierrors.IsGone(err) || apierrors.IsResourceExpired(err) {
+			w.resourceVersion = ""
+		}
+	}
+	return nil, fmt.Errorf("%w: reopening the %s watch failed %d times (last: %v)", ErrWatchClosed, w.kind.Kind, maxReconnects, last)
+}
+
+func (w *Watcher) Reconnects() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.reconnects
+}
+
 func WatchWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
 	return Watch(ctx, kube, WorkloadRunnerKind, namespace, (*unstructured.Unstructured).GetName)
 }
 
-// WatchExternalWorkloads watches the ExternalWorkload objects Run:ai creates
-// for plain Kubernetes workloads. The item key is the UID of the source object
-// as recorded in spec.originalWorkloadUID, so callers mark each item with the
-// UID the API server returned on create. The owner reference UID and, last,
-// the ew-<kind>-<name> naming rule are fallbacks for objects missing that
-// field; they never override it.
 func WatchExternalWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
 	return Watch(ctx, kube, ExternalWorkloadKind, namespace, externalWorkloadSource)
 }
@@ -135,11 +165,6 @@ func externalWorkloadSourceName(obj *unstructured.Unstructured) string {
 	return rest
 }
 
-// MarkCreated records when the caller finished creating name, taken from the
-// same local clock the arrival is stamped with. It may be called before or
-// after the arrival event; the duration is the same either way. An arrival
-// stamped before t0, possible when the cluster reacts while the create call is
-// still returning, is reported as zero, never negative.
 func (w *Watcher) MarkCreated(name string, t0 time.Time) {
 	w.mu.Lock()
 	w.created[name] = t0
@@ -148,8 +173,6 @@ func (w *Watcher) MarkCreated(name string, t0 time.Time) {
 	w.signal()
 }
 
-// MarkFailed records that creating name failed. The item is reported as
-// Failed and is never part of a latency distribution.
 func (w *Watcher) MarkFailed(name string, err error) {
 	w.mu.Lock()
 	w.failed[name] = err
@@ -157,12 +180,6 @@ func (w *Watcher) MarkFailed(name string, err error) {
 	w.signal()
 }
 
-// WaitAll blocks until every marked item has arrived or failed, or until
-// timeout has passed since the last MarkCreated. Items still unresolved are
-// reported as Pending, never as zero-duration arrivals. If the server closed
-// the watch or the context was cancelled, WaitAll returns at once and pending
-// items carry that error so a broken watch cannot pass as a slow cluster.
-// Results are sorted by name.
 func (w *Watcher) WaitAll(timeout time.Duration) []Timing {
 	for {
 		w.mu.Lock()
@@ -185,23 +202,20 @@ func (w *Watcher) WaitAll(timeout time.Duration) []Timing {
 	}
 }
 
-// Unmatched reports how many arrivals belong to no marked item. When items are
-// keyed by UID this means the objects lacked the field the watcher keys on, so a
-// run that ends all pending can tell a missing correlation field from a slow
-// cluster. Arrivals for items marked later stop counting as unmatched.
 func (w *Watcher) Unmatched() int {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	unmatched := 0
 	for key := range w.arrived {
-		if _, marked := w.created[key]; !marked {
+		_, marked := w.created[key]
+		_, failed := w.failed[key]
+		if !marked && !failed {
 			unmatched++
 		}
 	}
 	return unmatched
 }
 
-// Stop closes the watch and waits for the event loop to exit.
 func (w *Watcher) Stop() {
 	w.cancel()
 	<-w.done
@@ -209,25 +223,52 @@ func (w *Watcher) Stop() {
 
 func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 	defer close(w.done)
-	defer events.Stop()
 	for {
 		select {
 		case <-ctx.Done():
-			w.close(fmt.Errorf("%w: %w", errWatchClosed, ctx.Err()))
+			events.Stop()
+			w.close(fmt.Errorf("%w: %w", ErrWatchClosed, ctx.Err()))
 			return
 		case event, open := <-events.ResultChan():
 			if !open {
-				w.close(errWatchClosed)
-				return
+				events.Stop()
+				if w.Reconnects() >= maxReconnectCycles {
+					w.close(fmt.Errorf("%w: the server ended the %s watch %d times", ErrWatchClosed, w.kind.Kind, maxReconnectCycles))
+					return
+				}
+				reopened, err := w.reopen(ctx)
+				if err != nil {
+					w.close(err)
+					return
+				}
+				events = reopened
+				continue
 			}
 			switch event.Type {
 			case watch.Added, watch.Modified:
 				if obj, ok := event.Object.(*unstructured.Unstructured); ok {
+					w.resourceVersion = obj.GetResourceVersion()
 					w.recordArrival(w.nameOf(obj), time.Now())
 				}
+			case watch.Bookmark:
+				if obj, ok := event.Object.(*unstructured.Unstructured); ok {
+					w.resourceVersion = obj.GetResourceVersion()
+				}
 			case watch.Error:
-				w.close(fmt.Errorf("%w: %v", errWatchClosed, event.Object))
-				return
+				events.Stop()
+				if status := apierrors.FromObject(event.Object); apierrors.IsGone(status) || apierrors.IsResourceExpired(status) {
+					w.resourceVersion = ""
+				}
+				if w.Reconnects() >= maxReconnectCycles {
+					w.close(fmt.Errorf("%w: the server ended the %s watch %d times", ErrWatchClosed, w.kind.Kind, maxReconnectCycles))
+					return
+				}
+				reopened, err := w.reopen(ctx)
+				if err != nil {
+					w.close(fmt.Errorf("%w after a watch error (%v)", err, event.Object))
+					return
+				}
+				events = reopened
 			}
 		}
 	}

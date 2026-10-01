@@ -77,8 +77,8 @@ func buildDisplayedCluster(clusterId string, version string) openapi.DisplayedCl
 }
 
 func validateRank(requestedRank *string, actualRank *string, fieldName string) {
-	p1, _ := services.ParseRank(requestedRank, nil)
-	p2, _ := services.ParseRank(actualRank, nil)
+	p1, _ := services.ParseRank(requestedRank)
+	p2, _ := services.ParseRank(actualRank)
 	ExpectWithOffset(3, p1).To(Equal(p2), fmt.Sprintf("mismatch in %s", fieldName))
 }
 
@@ -90,7 +90,6 @@ func validateResourcesAndNullable(requestedResources api.ResourcesNullable, actu
 	Expect(requestedResources.NodePool).To(Equal(actualResources.NodePool))
 	Expect(requestedResources.Memory).To(Equal(actualResources.Memory))
 	validateRank(requestedResources.Rank, actualResources.Rank, "rank")
-	validateRank(requestedResources.Rank, actualResources.Priority, "priority")
 }
 
 func validateResources(resources1 api.Resources, resources2 api.Resources) {
@@ -99,7 +98,6 @@ func validateResources(resources1 api.Resources, resources2 api.Resources) {
 	Expect(resources1.NodePool).To(Equal(resources2.NodePool))
 	Expect(resources1.Memory).To(Equal(resources2.Memory))
 	validateRank(resources1.Rank, resources2.Rank, "rank")
-	validateRank(resources1.Rank, resources2.Priority, "priority")
 }
 
 func findResourceByNodePoolId(resourcesSlice []api.Resources, nodePoolId string) *api.Resources {

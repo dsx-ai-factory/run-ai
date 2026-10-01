@@ -1351,7 +1351,7 @@ build_cli_exposer() {
         -v "${gocache_vol}:/tmp/.cache:z" \
         -e GOPATH=/go \
         -e GOCACHE=/tmp/.cache \
-        library/golang:1.26.8 \
+        "library/golang:$(awk '$1=="go"{print $2;exit}' "${cli_dir}/go.mod")" \
         go build \
           -ldflags "-X github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/version.version=${cli_version} -extldflags -static -s -w" \
           -o bin/dist/linux/amd64/runai \
@@ -1393,7 +1393,7 @@ build_keycloak_extensions() {
   fi
 
   local log_file="${LOG_DIR}/${svc_name}.log"
-  log "  Building ${svc_name} (Gradle + Docker)..."
+  log "  Building ${svc_name} (Gradle + Go + Docker)..."
 
   # Retried with a longer backoff than retry_build's flat 10s. Maven Central
   # rate-limits per source IP, so on a shared/NAT egress downloads can fail with
@@ -1402,7 +1402,7 @@ build_keycloak_extensions() {
   # used to trigger it; a cold cache can still hit it.
   local _kc_attempt _kc_delay=20
   for _kc_attempt in 1 2 3; do
-    if (cd "${svc_dir}" && make build DOCKERHUB_PROXY= >"${log_file}" 2>&1); then
+    if (cd "${svc_dir}" && make build-gradle DOCKERHUB_PROXY= >"${log_file}" 2>&1); then
       break
     fi
     if (( _kc_attempt == 3 )); then
@@ -1419,8 +1419,28 @@ build_keycloak_extensions() {
     _kc_delay=$(( _kc_delay * 2 ))
   done
 
+  # Step 2: compile the Go init binary (amd64 only — this is local dev, not a
+  # release build) that replaces the old copy-extensions.sh/write-keycloak-
+  # conf.sh scripts inside the scratch runtime image. Same pattern as
+  # build_go_service's step 1.
+  local _kc_go_attempt
+  for _kc_go_attempt in 1 2 3; do
+    if (cd "${svc_dir}" && make build-go-amd \
+          OS=linux ARCH=amd64 \
+          DOCKERHUB_PROXY= \
+          GITHUB_TOKEN= \
+          >>"${log_file}" 2>&1); then
+      break
+    fi
+    if (( _kc_go_attempt == 3 )); then
+      die "build-go-amd failed for ${svc_name}. See ${log_file}"
+    fi
+    warn "  ${svc_name} build-go-amd attempt ${_kc_go_attempt} failed (transient?) — retrying in 10s..."
+    sleep 10
+  done
+
   local image_ref="${LOCAL_IMAGE_REPO}/${svc_name}:${CP_IMAGE_TAG}"
-  if ! container_build "${image_ref}" "${svc_dir}" >>"${log_file}" 2>&1; then
+  if ! container_build "${image_ref}" --build-arg TARGETARCH=amd64 "${svc_dir}" >>"${log_file}" 2>&1; then
     die "docker build failed for ${svc_name}. See ${log_file}"
   fi
   if ! container_load "${image_ref}" "${log_file}"; then
@@ -1803,6 +1823,10 @@ prefetch_go_modules() {
 
   [[ ${#mod_dirs[@]} -eq 0 ]] && return 0
 
+  # The newest Go any of them asks for; the image's Go will not fetch a newer one.
+  local go_version
+  go_version=$(for rel in "${mod_dirs[@]}"; do awk '$1=="go"{print $2;exit}' "${REPO_ROOT}/${rel}/go.mod"; done | sort -V | tail -1)
+
   # A cold cache is several GB and takes a long time; print one line per module so the
   # step does not look hung.
   local cmds="" i=0
@@ -1839,7 +1863,7 @@ prefetch_go_modules() {
     -e GOPRIVATE="github.com/run-ai/*" \
     -e CGO_ENABLED=0 \
     -e GO111MODULE=on \
-    library/golang:1.26.8 \
+    "library/golang:${go_version}" \
     bash -c "${cmds}" 2>/dev/null \
     | while IFS= read -r line; do log "  ${line}"; done || \
     warn "Module pre-warm incomplete — remaining modules will download during build"

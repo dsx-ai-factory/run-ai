@@ -37,14 +37,26 @@ func TestPacedTransportSpacesRequests(t *testing.T) {
 	}
 }
 
+type mustNotBeCalled struct{ t *testing.T }
+
+func (m mustNotBeCalled) RoundTrip(*http.Request) (*http.Response, error) {
+	m.t.Fatal("the request must be rejected by the limiter before reaching the network")
+	return nil, nil
+}
+
 func TestPacedTransportStopsOnCancelledContext(t *testing.T) {
-	transport := &pacedTransport{limiter: rate.NewLimiter(1, 1), next: http.DefaultTransport}
+	transport := &pacedTransport{limiter: rate.NewLimiter(1, 1), next: mustNotBeCalled{t}}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	request, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://127.0.0.1:1/", nil)
 	_ = transport.limiter.Wait(context.Background())
 
-	if _, err := transport.RoundTrip(request); err == nil {
+	start := time.Now()
+	_, err := transport.RoundTrip(request)
+	if err == nil {
 		t.Fatal("a cancelled request must not wait in the limiter")
+	}
+	if elapsed := time.Since(start); elapsed > 100*time.Millisecond {
+		t.Fatalf("a cancelled request must return at once, waited %s for a token", elapsed)
 	}
 }

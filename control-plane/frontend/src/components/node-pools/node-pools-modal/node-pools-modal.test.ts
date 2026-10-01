@@ -39,12 +39,10 @@ const modalOptions: INodePoolModalOptions = {
     {
       nodePool: { id: "100001", name: "node-pool-2" },
       gpu: { deserved: 150, limit: -1, overQuotaWeight: 2 },
-      priority: "Normal",
     },
     {
       nodePool: { id: "100000", name: "default" },
       gpu: { deserved: 150, limit: -1, overQuotaWeight: 2 },
-      priority: "Normal",
     },
   ],
   entityType: EQuotaEntity.department,
