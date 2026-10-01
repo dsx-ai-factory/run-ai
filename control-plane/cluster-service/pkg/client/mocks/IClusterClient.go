@@ -21,10 +21,19 @@ func NewIClusterClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *IClusterClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &IClusterClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -76,15 +85,26 @@ type IClusterClient_CreateCluster_Call struct {
 }
 
 // CreateCluster is a helper method to define mock.On call
-//   - ctx
-//   - clusterCreateRequest
-func (_e *IClusterClient_Expecter) CreateCluster(ctx interface{}, clusterCreateRequest interface{}) *IClusterClient_CreateCluster_Call {
+//   - ctx context.Context
+//   - clusterCreateRequest *openapi.ClusterCreationRequest
+func (_e *IClusterClient_Expecter) CreateCluster(ctx any, clusterCreateRequest any) *IClusterClient_CreateCluster_Call {
 	return &IClusterClient_CreateCluster_Call{Call: _e.mock.On("CreateCluster", ctx, clusterCreateRequest)}
 }
 
 func (_c *IClusterClient_CreateCluster_Call) Run(run func(ctx context.Context, clusterCreateRequest *openapi.ClusterCreationRequest)) *IClusterClient_CreateCluster_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*openapi.ClusterCreationRequest))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *openapi.ClusterCreationRequest
+		if args[1] != nil {
+			arg1 = args[1].(*openapi.ClusterCreationRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -135,15 +155,26 @@ type IClusterClient_GetClusterByUuid_Call struct {
 }
 
 // GetClusterByUuid is a helper method to define mock.On call
-//   - ctx
-//   - id
-func (_e *IClusterClient_Expecter) GetClusterByUuid(ctx interface{}, id interface{}) *IClusterClient_GetClusterByUuid_Call {
+//   - ctx context.Context
+//   - id string
+func (_e *IClusterClient_Expecter) GetClusterByUuid(ctx any, id any) *IClusterClient_GetClusterByUuid_Call {
 	return &IClusterClient_GetClusterByUuid_Call{Call: _e.mock.On("GetClusterByUuid", ctx, id)}
 }
 
 func (_c *IClusterClient_GetClusterByUuid_Call) Run(run func(ctx context.Context, id string)) *IClusterClient_GetClusterByUuid_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -192,15 +223,26 @@ type IClusterClient_GetClusterControlPlaneConfig_Call struct {
 }
 
 // GetClusterControlPlaneConfig is a helper method to define mock.On call
-//   - ctx
-//   - clusterUUID
-func (_e *IClusterClient_Expecter) GetClusterControlPlaneConfig(ctx interface{}, clusterUUID interface{}) *IClusterClient_GetClusterControlPlaneConfig_Call {
+//   - ctx context.Context
+//   - clusterUUID string
+func (_e *IClusterClient_Expecter) GetClusterControlPlaneConfig(ctx any, clusterUUID any) *IClusterClient_GetClusterControlPlaneConfig_Call {
 	return &IClusterClient_GetClusterControlPlaneConfig_Call{Call: _e.mock.On("GetClusterControlPlaneConfig", ctx, clusterUUID)}
 }
 
 func (_c *IClusterClient_GetClusterControlPlaneConfig_Call) Run(run func(ctx context.Context, clusterUUID string)) *IClusterClient_GetClusterControlPlaneConfig_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -249,15 +291,26 @@ type IClusterClient_GetClusterInternalConfig_Call struct {
 }
 
 // GetClusterInternalConfig is a helper method to define mock.On call
-//   - ctx
-//   - clusterUUID
-func (_e *IClusterClient_Expecter) GetClusterInternalConfig(ctx interface{}, clusterUUID interface{}) *IClusterClient_GetClusterInternalConfig_Call {
+//   - ctx context.Context
+//   - clusterUUID string
+func (_e *IClusterClient_Expecter) GetClusterInternalConfig(ctx any, clusterUUID any) *IClusterClient_GetClusterInternalConfig_Call {
 	return &IClusterClient_GetClusterInternalConfig_Call{Call: _e.mock.On("GetClusterInternalConfig", ctx, clusterUUID)}
 }
 
 func (_c *IClusterClient_GetClusterInternalConfig_Call) Run(run func(ctx context.Context, clusterUUID string)) *IClusterClient_GetClusterInternalConfig_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -306,15 +359,26 @@ type IClusterClient_GetClusterMinimalDataById_Call struct {
 }
 
 // GetClusterMinimalDataById is a helper method to define mock.On call
-//   - ctx
-//   - clusterId
-func (_e *IClusterClient_Expecter) GetClusterMinimalDataById(ctx interface{}, clusterId interface{}) *IClusterClient_GetClusterMinimalDataById_Call {
+//   - ctx context.Context
+//   - clusterId string
+func (_e *IClusterClient_Expecter) GetClusterMinimalDataById(ctx any, clusterId any) *IClusterClient_GetClusterMinimalDataById_Call {
 	return &IClusterClient_GetClusterMinimalDataById_Call{Call: _e.mock.On("GetClusterMinimalDataById", ctx, clusterId)}
 }
 
 func (_c *IClusterClient_GetClusterMinimalDataById_Call) Run(run func(ctx context.Context, clusterId string)) *IClusterClient_GetClusterMinimalDataById_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -363,14 +427,20 @@ type IClusterClient_GetClusters_Call struct {
 }
 
 // GetClusters is a helper method to define mock.On call
-//   - ctx
-func (_e *IClusterClient_Expecter) GetClusters(ctx interface{}) *IClusterClient_GetClusters_Call {
+//   - ctx context.Context
+func (_e *IClusterClient_Expecter) GetClusters(ctx any) *IClusterClient_GetClusters_Call {
 	return &IClusterClient_GetClusters_Call{Call: _e.mock.On("GetClusters", ctx)}
 }
 
 func (_c *IClusterClient_GetClusters_Call) Run(run func(ctx context.Context)) *IClusterClient_GetClusters_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -421,15 +491,26 @@ type IClusterClient_GetClustersCount_Call struct {
 }
 
 // GetClustersCount is a helper method to define mock.On call
-//   - ctx
-//   - groupBy
-func (_e *IClusterClient_Expecter) GetClustersCount(ctx interface{}, groupBy interface{}) *IClusterClient_GetClustersCount_Call {
+//   - ctx context.Context
+//   - groupBy string
+func (_e *IClusterClient_Expecter) GetClustersCount(ctx any, groupBy any) *IClusterClient_GetClustersCount_Call {
 	return &IClusterClient_GetClustersCount_Call{Call: _e.mock.On("GetClustersCount", ctx, groupBy)}
 }
 
 func (_c *IClusterClient_GetClustersCount_Call) Run(run func(ctx context.Context, groupBy string)) *IClusterClient_GetClustersCount_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -478,14 +559,20 @@ type IClusterClient_GetClustersMinimalData_Call struct {
 }
 
 // GetClustersMinimalData is a helper method to define mock.On call
-//   - ctx
-func (_e *IClusterClient_Expecter) GetClustersMinimalData(ctx interface{}) *IClusterClient_GetClustersMinimalData_Call {
+//   - ctx context.Context
+func (_e *IClusterClient_Expecter) GetClustersMinimalData(ctx any) *IClusterClient_GetClustersMinimalData_Call {
 	return &IClusterClient_GetClustersMinimalData_Call{Call: _e.mock.On("GetClustersMinimalData", ctx)}
 }
 
 func (_c *IClusterClient_GetClustersMinimalData_Call) Run(run func(ctx context.Context)) *IClusterClient_GetClustersMinimalData_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -534,15 +621,26 @@ type IClusterClient_GetInternalCluster_Call struct {
 }
 
 // GetInternalCluster is a helper method to define mock.On call
-//   - ctx
-//   - clusterId
-func (_e *IClusterClient_Expecter) GetInternalCluster(ctx interface{}, clusterId interface{}) *IClusterClient_GetInternalCluster_Call {
+//   - ctx context.Context
+//   - clusterId string
+func (_e *IClusterClient_Expecter) GetInternalCluster(ctx any, clusterId any) *IClusterClient_GetInternalCluster_Call {
 	return &IClusterClient_GetInternalCluster_Call{Call: _e.mock.On("GetInternalCluster", ctx, clusterId)}
 }
 
 func (_c *IClusterClient_GetInternalCluster_Call) Run(run func(ctx context.Context, clusterId string)) *IClusterClient_GetInternalCluster_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -591,15 +689,26 @@ type IClusterClient_GetInternalClusters_Call struct {
 }
 
 // GetInternalClusters is a helper method to define mock.On call
-//   - ctx
-//   - includeDeleted
-func (_e *IClusterClient_Expecter) GetInternalClusters(ctx interface{}, includeDeleted interface{}) *IClusterClient_GetInternalClusters_Call {
+//   - ctx context.Context
+//   - includeDeleted bool
+func (_e *IClusterClient_Expecter) GetInternalClusters(ctx any, includeDeleted any) *IClusterClient_GetInternalClusters_Call {
 	return &IClusterClient_GetInternalClusters_Call{Call: _e.mock.On("GetInternalClusters", ctx, includeDeleted)}
 }
 
 func (_c *IClusterClient_GetInternalClusters_Call) Run(run func(ctx context.Context, includeDeleted bool)) *IClusterClient_GetInternalClusters_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 bool
+		if args[1] != nil {
+			arg1 = args[1].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -648,15 +757,26 @@ type IClusterClient_GetNetworkTopologies_Call struct {
 }
 
 // GetNetworkTopologies is a helper method to define mock.On call
-//   - ctx
-//   - filterBy
-func (_e *IClusterClient_Expecter) GetNetworkTopologies(ctx interface{}, filterBy interface{}) *IClusterClient_GetNetworkTopologies_Call {
+//   - ctx context.Context
+//   - filterBy []string
+func (_e *IClusterClient_Expecter) GetNetworkTopologies(ctx any, filterBy any) *IClusterClient_GetNetworkTopologies_Call {
 	return &IClusterClient_GetNetworkTopologies_Call{Call: _e.mock.On("GetNetworkTopologies", ctx, filterBy)}
 }
 
 func (_c *IClusterClient_GetNetworkTopologies_Call) Run(run func(ctx context.Context, filterBy []string)) *IClusterClient_GetNetworkTopologies_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].([]string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []string
+		if args[1] != nil {
+			arg1 = args[1].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -713,16 +833,32 @@ type IClusterClient_GetNodeInternal_Call struct {
 }
 
 // GetNodeInternal is a helper method to define mock.On call
-//   - ctx
-//   - clusterUuid
-//   - nodeName
-func (_e *IClusterClient_Expecter) GetNodeInternal(ctx interface{}, clusterUuid interface{}, nodeName interface{}) *IClusterClient_GetNodeInternal_Call {
+//   - ctx context.Context
+//   - clusterUuid string
+//   - nodeName string
+func (_e *IClusterClient_Expecter) GetNodeInternal(ctx any, clusterUuid any, nodeName any) *IClusterClient_GetNodeInternal_Call {
 	return &IClusterClient_GetNodeInternal_Call{Call: _e.mock.On("GetNodeInternal", ctx, clusterUuid, nodeName)}
 }
 
 func (_c *IClusterClient_GetNodeInternal_Call) Run(run func(ctx context.Context, clusterUuid string, nodeName string)) *IClusterClient_GetNodeInternal_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -771,16 +907,32 @@ type IClusterClient_GetNodeNetworkTopologyLabelValues_Call struct {
 }
 
 // GetNodeNetworkTopologyLabelValues is a helper method to define mock.On call
-//   - ctx
-//   - clusterUuid
-//   - nodeName
-func (_e *IClusterClient_Expecter) GetNodeNetworkTopologyLabelValues(ctx interface{}, clusterUuid interface{}, nodeName interface{}) *IClusterClient_GetNodeNetworkTopologyLabelValues_Call {
+//   - ctx context.Context
+//   - clusterUuid string
+//   - nodeName string
+func (_e *IClusterClient_Expecter) GetNodeNetworkTopologyLabelValues(ctx any, clusterUuid any, nodeName any) *IClusterClient_GetNodeNetworkTopologyLabelValues_Call {
 	return &IClusterClient_GetNodeNetworkTopologyLabelValues_Call{Call: _e.mock.On("GetNodeNetworkTopologyLabelValues", ctx, clusterUuid, nodeName)}
 }
 
 func (_c *IClusterClient_GetNodeNetworkTopologyLabelValues_Call) Run(run func(ctx context.Context, clusterUuid string, nodeName string)) *IClusterClient_GetNodeNetworkTopologyLabelValues_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -829,15 +981,26 @@ type IClusterClient_GetNodePoolsByCluster_Call struct {
 }
 
 // GetNodePoolsByCluster is a helper method to define mock.On call
-//   - ctx
-//   - clusterUUID
-func (_e *IClusterClient_Expecter) GetNodePoolsByCluster(ctx interface{}, clusterUUID interface{}) *IClusterClient_GetNodePoolsByCluster_Call {
+//   - ctx context.Context
+//   - clusterUUID string
+func (_e *IClusterClient_Expecter) GetNodePoolsByCluster(ctx any, clusterUUID any) *IClusterClient_GetNodePoolsByCluster_Call {
 	return &IClusterClient_GetNodePoolsByCluster_Call{Call: _e.mock.On("GetNodePoolsByCluster", ctx, clusterUUID)}
 }
 
 func (_c *IClusterClient_GetNodePoolsByCluster_Call) Run(run func(ctx context.Context, clusterUUID string)) *IClusterClient_GetNodePoolsByCluster_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -886,15 +1049,26 @@ type IClusterClient_GetNodePoolsInternalByCluster_Call struct {
 }
 
 // GetNodePoolsInternalByCluster is a helper method to define mock.On call
-//   - ctx
-//   - clusterId
-func (_e *IClusterClient_Expecter) GetNodePoolsInternalByCluster(ctx interface{}, clusterId interface{}) *IClusterClient_GetNodePoolsInternalByCluster_Call {
+//   - ctx context.Context
+//   - clusterId string
+func (_e *IClusterClient_Expecter) GetNodePoolsInternalByCluster(ctx any, clusterId any) *IClusterClient_GetNodePoolsInternalByCluster_Call {
 	return &IClusterClient_GetNodePoolsInternalByCluster_Call{Call: _e.mock.On("GetNodePoolsInternalByCluster", ctx, clusterId)}
 }
 
 func (_c *IClusterClient_GetNodePoolsInternalByCluster_Call) Run(run func(ctx context.Context, clusterId string)) *IClusterClient_GetNodePoolsInternalByCluster_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -943,15 +1117,26 @@ type IClusterClient_GetNodePoolsMinimalByCluster_Call struct {
 }
 
 // GetNodePoolsMinimalByCluster is a helper method to define mock.On call
-//   - ctx
-//   - clusterUUID
-func (_e *IClusterClient_Expecter) GetNodePoolsMinimalByCluster(ctx interface{}, clusterUUID interface{}) *IClusterClient_GetNodePoolsMinimalByCluster_Call {
+//   - ctx context.Context
+//   - clusterUUID string
+func (_e *IClusterClient_Expecter) GetNodePoolsMinimalByCluster(ctx any, clusterUUID any) *IClusterClient_GetNodePoolsMinimalByCluster_Call {
 	return &IClusterClient_GetNodePoolsMinimalByCluster_Call{Call: _e.mock.On("GetNodePoolsMinimalByCluster", ctx, clusterUUID)}
 }
 
 func (_c *IClusterClient_GetNodePoolsMinimalByCluster_Call) Run(run func(ctx context.Context, clusterUUID string)) *IClusterClient_GetNodePoolsMinimalByCluster_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1000,15 +1185,26 @@ type IClusterClient_GetNodePoolsMinimalForTenants_Call struct {
 }
 
 // GetNodePoolsMinimalForTenants is a helper method to define mock.On call
-//   - ctx
-//   - tenantIds
-func (_e *IClusterClient_Expecter) GetNodePoolsMinimalForTenants(ctx interface{}, tenantIds interface{}) *IClusterClient_GetNodePoolsMinimalForTenants_Call {
+//   - ctx context.Context
+//   - tenantIds []string
+func (_e *IClusterClient_Expecter) GetNodePoolsMinimalForTenants(ctx any, tenantIds any) *IClusterClient_GetNodePoolsMinimalForTenants_Call {
 	return &IClusterClient_GetNodePoolsMinimalForTenants_Call{Call: _e.mock.On("GetNodePoolsMinimalForTenants", ctx, tenantIds)}
 }
 
 func (_c *IClusterClient_GetNodePoolsMinimalForTenants_Call) Run(run func(ctx context.Context, tenantIds []string)) *IClusterClient_GetNodePoolsMinimalForTenants_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].([]string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []string
+		if args[1] != nil {
+			arg1 = args[1].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1057,15 +1253,26 @@ type IClusterClient_GetNodepoolMinimal_Call struct {
 }
 
 // GetNodepoolMinimal is a helper method to define mock.On call
-//   - ctx
-//   - nodepoolId
-func (_e *IClusterClient_Expecter) GetNodepoolMinimal(ctx interface{}, nodepoolId interface{}) *IClusterClient_GetNodepoolMinimal_Call {
+//   - ctx context.Context
+//   - nodepoolId string
+func (_e *IClusterClient_Expecter) GetNodepoolMinimal(ctx any, nodepoolId any) *IClusterClient_GetNodepoolMinimal_Call {
 	return &IClusterClient_GetNodepoolMinimal_Call{Call: _e.mock.On("GetNodepoolMinimal", ctx, nodepoolId)}
 }
 
 func (_c *IClusterClient_GetNodepoolMinimal_Call) Run(run func(ctx context.Context, nodepoolId string)) *IClusterClient_GetNodepoolMinimal_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1103,16 +1310,32 @@ type IClusterClient_PutClusterConfigStatus_Call struct {
 }
 
 // PutClusterConfigStatus is a helper method to define mock.On call
-//   - ctx
-//   - clusterUUID
-//   - putClusterConfigStatusRequest
-func (_e *IClusterClient_Expecter) PutClusterConfigStatus(ctx interface{}, clusterUUID interface{}, putClusterConfigStatusRequest interface{}) *IClusterClient_PutClusterConfigStatus_Call {
+//   - ctx context.Context
+//   - clusterUUID string
+//   - putClusterConfigStatusRequest *openapi.PutClusterConfigStatusRequest
+func (_e *IClusterClient_Expecter) PutClusterConfigStatus(ctx any, clusterUUID any, putClusterConfigStatusRequest any) *IClusterClient_PutClusterConfigStatus_Call {
 	return &IClusterClient_PutClusterConfigStatus_Call{Call: _e.mock.On("PutClusterConfigStatus", ctx, clusterUUID, putClusterConfigStatusRequest)}
 }
 
 func (_c *IClusterClient_PutClusterConfigStatus_Call) Run(run func(ctx context.Context, clusterUUID string, putClusterConfigStatusRequest *openapi.PutClusterConfigStatusRequest)) *IClusterClient_PutClusterConfigStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*openapi.PutClusterConfigStatusRequest))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *openapi.PutClusterConfigStatusRequest
+		if args[2] != nil {
+			arg2 = args[2].(*openapi.PutClusterConfigStatusRequest)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
