@@ -19,10 +19,19 @@ func NewStateMigrationClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *StateMigrationClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &StateMigrationClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -63,15 +72,26 @@ type StateMigrationClient_Migrate_Call struct {
 }
 
 // Migrate is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *StateMigrationClient_Expecter) Migrate(ctx interface{}, tenantId interface{}) *StateMigrationClient_Migrate_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *StateMigrationClient_Expecter) Migrate(ctx any, tenantId any) *StateMigrationClient_Migrate_Call {
 	return &StateMigrationClient_Migrate_Call{Call: _e.mock.On("Migrate", ctx, tenantId)}
 }
 
 func (_c *StateMigrationClient_Migrate_Call) Run(run func(ctx context.Context, tenantId string)) *StateMigrationClient_Migrate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

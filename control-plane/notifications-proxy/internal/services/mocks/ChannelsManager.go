@@ -20,10 +20,19 @@ func NewChannelsManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ChannelsManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ChannelsManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,16 +73,32 @@ type ChannelsManager_CreateChannel_Call struct {
 }
 
 // CreateChannel is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - config
-func (_e *ChannelsManager_Expecter) CreateChannel(ctx interface{}, tenantId interface{}, config interface{}) *ChannelsManager_CreateChannel_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - config channel.NotificationChannel
+func (_e *ChannelsManager_Expecter) CreateChannel(ctx any, tenantId any, config any) *ChannelsManager_CreateChannel_Call {
 	return &ChannelsManager_CreateChannel_Call{Call: _e.mock.On("CreateChannel", ctx, tenantId, config)}
 }
 
 func (_c *ChannelsManager_CreateChannel_Call) Run(run func(ctx context.Context, tenantId string, config channel.NotificationChannel)) *ChannelsManager_CreateChannel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(channel.NotificationChannel))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 channel.NotificationChannel
+		if args[2] != nil {
+			arg2 = args[2].(channel.NotificationChannel)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -111,16 +136,32 @@ type ChannelsManager_DeleteChannel_Call struct {
 }
 
 // DeleteChannel is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - sinkId
-func (_e *ChannelsManager_Expecter) DeleteChannel(ctx interface{}, tenantId interface{}, sinkId interface{}) *ChannelsManager_DeleteChannel_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - sinkId string
+func (_e *ChannelsManager_Expecter) DeleteChannel(ctx any, tenantId any, sinkId any) *ChannelsManager_DeleteChannel_Call {
 	return &ChannelsManager_DeleteChannel_Call{Call: _e.mock.On("DeleteChannel", ctx, tenantId, sinkId)}
 }
 
 func (_c *ChannelsManager_DeleteChannel_Call) Run(run func(ctx context.Context, tenantId string, sinkId string)) *ChannelsManager_DeleteChannel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -169,16 +210,32 @@ type ChannelsManager_GetChannel_Call struct {
 }
 
 // GetChannel is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channelId
-func (_e *ChannelsManager_Expecter) GetChannel(ctx interface{}, tenantId interface{}, channelId interface{}) *ChannelsManager_GetChannel_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channelId string
+func (_e *ChannelsManager_Expecter) GetChannel(ctx any, tenantId any, channelId any) *ChannelsManager_GetChannel_Call {
 	return &ChannelsManager_GetChannel_Call{Call: _e.mock.On("GetChannel", ctx, tenantId, channelId)}
 }
 
 func (_c *ChannelsManager_GetChannel_Call) Run(run func(ctx context.Context, tenantId string, channelId string)) *ChannelsManager_GetChannel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -227,15 +284,26 @@ type ChannelsManager_GetNotificationsChannels_Call struct {
 }
 
 // GetNotificationsChannels is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *ChannelsManager_Expecter) GetNotificationsChannels(ctx interface{}, tenantId interface{}) *ChannelsManager_GetNotificationsChannels_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *ChannelsManager_Expecter) GetNotificationsChannels(ctx any, tenantId any) *ChannelsManager_GetNotificationsChannels_Call {
 	return &ChannelsManager_GetNotificationsChannels_Call{Call: _e.mock.On("GetNotificationsChannels", ctx, tenantId)}
 }
 
 func (_c *ChannelsManager_GetNotificationsChannels_Call) Run(run func(ctx context.Context, tenantId string)) *ChannelsManager_GetNotificationsChannels_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -273,17 +341,38 @@ type ChannelsManager_PatchChannel_Call struct {
 }
 
 // PatchChannel is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channelId
-//   - config
-func (_e *ChannelsManager_Expecter) PatchChannel(ctx interface{}, tenantId interface{}, channelId interface{}, config interface{}) *ChannelsManager_PatchChannel_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channelId string
+//   - config channel.NotificationChannel
+func (_e *ChannelsManager_Expecter) PatchChannel(ctx any, tenantId any, channelId any, config any) *ChannelsManager_PatchChannel_Call {
 	return &ChannelsManager_PatchChannel_Call{Call: _e.mock.On("PatchChannel", ctx, tenantId, channelId, config)}
 }
 
 func (_c *ChannelsManager_PatchChannel_Call) Run(run func(ctx context.Context, tenantId string, channelId string, config channel.NotificationChannel)) *ChannelsManager_PatchChannel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(channel.NotificationChannel))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 channel.NotificationChannel
+		if args[3] != nil {
+			arg3 = args[3].(channel.NotificationChannel)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -321,17 +410,38 @@ type ChannelsManager_UpdateChannel_Call struct {
 }
 
 // UpdateChannel is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channelId
-//   - config
-func (_e *ChannelsManager_Expecter) UpdateChannel(ctx interface{}, tenantId interface{}, channelId interface{}, config interface{}) *ChannelsManager_UpdateChannel_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channelId string
+//   - config channel.NotificationChannel
+func (_e *ChannelsManager_Expecter) UpdateChannel(ctx any, tenantId any, channelId any, config any) *ChannelsManager_UpdateChannel_Call {
 	return &ChannelsManager_UpdateChannel_Call{Call: _e.mock.On("UpdateChannel", ctx, tenantId, channelId, config)}
 }
 
 func (_c *ChannelsManager_UpdateChannel_Call) Run(run func(ctx context.Context, tenantId string, channelId string, config channel.NotificationChannel)) *ChannelsManager_UpdateChannel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(channel.NotificationChannel))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 channel.NotificationChannel
+		if args[3] != nil {
+			arg3 = args[3].(channel.NotificationChannel)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -378,16 +488,32 @@ type ChannelsManager_ValidateChannel_Call struct {
 }
 
 // ValidateChannel is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - config
-func (_e *ChannelsManager_Expecter) ValidateChannel(ctx interface{}, tenantId interface{}, config interface{}) *ChannelsManager_ValidateChannel_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - config channel.NotificationChannel
+func (_e *ChannelsManager_Expecter) ValidateChannel(ctx any, tenantId any, config any) *ChannelsManager_ValidateChannel_Call {
 	return &ChannelsManager_ValidateChannel_Call{Call: _e.mock.On("ValidateChannel", ctx, tenantId, config)}
 }
 
 func (_c *ChannelsManager_ValidateChannel_Call) Run(run func(ctx context.Context, tenantId string, config channel.NotificationChannel)) *ChannelsManager_ValidateChannel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(channel.NotificationChannel))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 channel.NotificationChannel
+		if args[2] != nil {
+			arg2 = args[2].(channel.NotificationChannel)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

@@ -19,10 +19,19 @@ func NewTenantDeleteClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *TenantDeleteClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &TenantDeleteClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -63,15 +72,26 @@ type TenantDeleteClienter_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *TenantDeleteClienter_Expecter) Delete(ctx interface{}, tenantId interface{}) *TenantDeleteClienter_Delete_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *TenantDeleteClienter_Expecter) Delete(ctx any, tenantId any) *TenantDeleteClienter_Delete_Call {
 	return &TenantDeleteClienter_Delete_Call{Call: _e.mock.On("Delete", ctx, tenantId)}
 }
 
 func (_c *TenantDeleteClienter_Delete_Call) Run(run func(ctx context.Context, tenantId string)) *TenantDeleteClienter_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

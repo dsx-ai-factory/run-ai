@@ -18,10 +18,19 @@ func NewSlackClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SlackClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SlackClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -73,14 +82,20 @@ type SlackClienter_CreateApp_Call struct {
 }
 
 // CreateApp is a helper method to define mock.On call
-//   - accessToken
-func (_e *SlackClienter_Expecter) CreateApp(accessToken interface{}) *SlackClienter_CreateApp_Call {
+//   - accessToken string
+func (_e *SlackClienter_Expecter) CreateApp(accessToken any) *SlackClienter_CreateApp_Call {
 	return &SlackClienter_CreateApp_Call{Call: _e.mock.On("CreateApp", accessToken)}
 }
 
 func (_c *SlackClienter_CreateApp_Call) Run(run func(accessToken string)) *SlackClienter_CreateApp_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -129,16 +144,32 @@ type SlackClienter_ExchangeCode_Call struct {
 }
 
 // ExchangeCode is a helper method to define mock.On call
-//   - code
-//   - clientId
-//   - clientSecret
-func (_e *SlackClienter_Expecter) ExchangeCode(code interface{}, clientId interface{}, clientSecret interface{}) *SlackClienter_ExchangeCode_Call {
+//   - code string
+//   - clientId string
+//   - clientSecret string
+func (_e *SlackClienter_Expecter) ExchangeCode(code any, clientId any, clientSecret any) *SlackClienter_ExchangeCode_Call {
 	return &SlackClienter_ExchangeCode_Call{Call: _e.mock.On("ExchangeCode", code, clientId, clientSecret)}
 }
 
 func (_c *SlackClienter_ExchangeCode_Call) Run(run func(code string, clientId string, clientSecret string)) *SlackClienter_ExchangeCode_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -176,15 +207,26 @@ type SlackClienter_GetAuthUrl_Call struct {
 }
 
 // GetAuthUrl is a helper method to define mock.On call
-//   - state
-//   - clientId
-func (_e *SlackClienter_Expecter) GetAuthUrl(state interface{}, clientId interface{}) *SlackClienter_GetAuthUrl_Call {
+//   - state string
+//   - clientId string
+func (_e *SlackClienter_Expecter) GetAuthUrl(state any, clientId any) *SlackClienter_GetAuthUrl_Call {
 	return &SlackClienter_GetAuthUrl_Call{Call: _e.mock.On("GetAuthUrl", state, clientId)}
 }
 
 func (_c *SlackClienter_GetAuthUrl_Call) Run(run func(state string, clientId string)) *SlackClienter_GetAuthUrl_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
