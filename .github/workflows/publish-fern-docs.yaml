@@ -12,7 +12,7 @@
 # As with previews, DOCS_FERN_TOKEN lives in the private
 # run-ai/saas-configuration; this workflow only dispatches.
 #
-# NOTE: docs/ and fern/ currently exist only on master. Publishing an older ref
+# NOTE: docs/ and fern/ currently exist only on main. Publishing an older ref
 # will fail fast on the saas side with an explanatory message rather than
 # publishing an empty site.
 
@@ -23,10 +23,10 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "dsx-ai-factory/run-ai ref to publish (branch or tag). Docs currently exist only on master."
+        description: "dsx-ai-factory/run-ai ref to publish (branch or tag). Docs currently exist only on main."
         required: true
         type: string
-        default: master
+        default: main
 
 permissions:
   contents: read
@@ -39,7 +39,7 @@ jobs:
   dispatch:
     name: Dispatch publish to saas-configuration
     # Never fire from a fork of this repo.
-    if: github.repository == 'dsx-ai-factory/run-ai' || github.repository == 'run-ai/run-ai' || github.repository == 'run-ai/runai-oss-test'
+    if: github.repository == 'dsx-ai-factory/run-ai'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

@@ -12,20 +12,22 @@ import (
 
 /*
 example:
-nodepool=nodepool-name,gpu-deserved=10,gpu-limit=2,priority=Low
+nodepool=nodepool-name,gpu-deserved=10,gpu-limit=2,rank=Low
 */
 
 const (
 	Nodepool    = "nodepool"
 	GpuDeserved = "gpu-deserved"
 	GpuLimit    = "gpu-limit"
-	Priority    = "priority"
+	Rank        = "rank"
+	// Priority is the original name of Rank, kept as an alias so existing scripts keep working.
+	Priority = "priority"
 
 	ParserNameNew = "NewNodepoolParser"
 )
 
 var (
-	NewProjectNodepoolMap = []string{Nodepool, GpuDeserved, GpuLimit, Priority}
+	NewProjectNodepoolMap = []string{Nodepool, GpuDeserved, GpuLimit, Rank, Priority}
 )
 
 func NewNodepoolParser(resources string) *parser.AttributeMapper {

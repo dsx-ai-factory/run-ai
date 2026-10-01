@@ -336,15 +336,11 @@ var _ = Describe("Org unit tests", Ordered, func() {
 					if r.NodePool.Name == defaultNodePoolName {
 						Expect(r.Rank).ToNot(BeNil())
 						Expect(*r.Rank).To(Equal("MediumLow"))
-						Expect(r.Priority).ToNot(BeNil())
-						Expect(*r.Priority).To(Equal("MediumLow"))
 					}
 					if d.Id == depA.Id {
 						if r.NodePool.Name == nodePoolName2 {
 							Expect(r.Rank).ToNot(BeNil())
 							Expect(*r.Rank).To(Equal("VeryLow"))
-							Expect(r.Priority).ToNot(BeNil())
-							Expect(*r.Priority).To(Equal("VeryLow"))
 						}
 						// also validate quota and weights unchanged - compare with depABefore
 						if r.NodePool.Name == defaultNodePoolName {
@@ -375,10 +371,6 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			Expect(*depADefaultRes.Rank).To(Equal("MediumLow"))
 			Expect(depANp2Res.Rank).ToNot(BeNil())
 			Expect(*depANp2Res.Rank).To(Equal("VeryLow"))
-			Expect(depADefaultRes.Priority).ToNot(BeNil())
-			Expect(*depADefaultRes.Priority).To(Equal("MediumLow"))
-			Expect(depANp2Res.Priority).ToNot(BeNil())
-			Expect(*depANp2Res.Priority).To(Equal("VeryLow"))
 		})
 
 		It("DepartmentsResetResources WEIGHTS_TO_DEFAULT sets correct weights on target nodepool", func() {
@@ -612,8 +604,6 @@ var _ = Describe("Org unit tests", Ordered, func() {
 					if r.NodePool.Id == nodePoolId2 {
 						Expect(r.Rank).ToNot(BeNil())
 						Expect(*r.Rank).To(Equal("MediumLow"))
-						Expect(r.Priority).ToNot(BeNil())
-						Expect(*r.Priority).To(Equal("MediumLow"))
 					}
 				}
 			}

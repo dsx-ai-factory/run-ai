@@ -1,6 +1,6 @@
 # Migrate Legacy Workloads
 
-The controllers and CRDs behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller and CRD. Native workloads submitted before upgrading through a legacy workload type continue running after the upgrade, but lose some capabilities until resubmitted.
+The controllers and CRDs behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller and CRD. Running native workloads that were submitted through a legacy workload type before upgrading continue running after the upgrade, but lose some capabilities until resubmitted.
 
 Resolving an affected workload is not required immediately after upgrading; each workload can be resubmitted independently at any time. To restore full functionality, resubmit an affected workload either [manually](#submit-workload-via-ui-api-cli) through the NVIDIA Run:ai UI, API, or CLI, or, to reuse each workload's existing configuration instead of re-entering it by hand, [using the migration script](#submit-workload-via-migration-script) against the control plane API.
 

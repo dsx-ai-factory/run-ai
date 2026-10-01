@@ -180,7 +180,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(1)),
 						OverQuotaWeight: ptr.To(float64(1)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -192,7 +192,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(2)),
 						OverQuotaWeight: ptr.To(float64(2)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -204,7 +204,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(3)),
 						OverQuotaWeight: ptr.To(float64(3)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 			}
 			request := getProjectResourcesCreateRequest(name1, defaultDepartment1.Id, cluster1Id, resources)
@@ -228,7 +228,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(10)),
 						OverQuotaWeight: ptr.To(float64(10)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -240,7 +240,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(20)),
 						OverQuotaWeight: ptr.To(float64(20)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -252,7 +252,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(30)),
 						OverQuotaWeight: ptr.To(float64(30)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 			}
 			request = getProjectResourcesCreateRequest(name2, defaultDepartment1.Id, cluster1Id, resources)
@@ -276,7 +276,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(11)),
 						OverQuotaWeight: ptr.To(float64(11)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -288,7 +288,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(21)),
 						OverQuotaWeight: ptr.To(float64(21)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -300,7 +300,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(31)),
 						OverQuotaWeight: ptr.To(float64(31)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 			}
 			request = getProjectResourcesCreateRequest(name3, defaultDepartment2.Id, cluster2Id, resources)
@@ -335,7 +335,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(210)),
 						OverQuotaWeight: ptr.To(float64(210)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -347,7 +347,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(310)),
 						OverQuotaWeight: ptr.To(float64(310)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 			}
 			request = getProjectResourcesCreateRequest(name4, defaultDepartment2.Id, cluster2Id, resources)
@@ -759,7 +759,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(1)),
 						OverQuotaWeight: ptr.To(float64(1)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -771,7 +771,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(2)),
 						OverQuotaWeight: ptr.To(float64(2)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -783,7 +783,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(3)),
 						OverQuotaWeight: ptr.To(float64(3)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 			}
 			request := getDepartmentResourcesCreateRequest(name1, cluster1Id, resources)
@@ -807,7 +807,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(10)),
 						OverQuotaWeight: ptr.To(float64(10)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -819,7 +819,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(20)),
 						OverQuotaWeight: ptr.To(float64(20)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -831,7 +831,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Limit:           ptr.To(float64(30)),
 						OverQuotaWeight: ptr.To(float64(30)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 			}
 			request = getDepartmentResourcesCreateRequest(name2, cluster1Id, resources)

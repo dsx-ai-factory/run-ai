@@ -53,7 +53,7 @@ curl -L 'https://console.<DOMAIN>/api/v1/service-accounts' \
 {
   "id": "0eeaf222-e503-4f35-9d9c-c419816272e3",
   "name": "service-account-123",
-  "clientSecret": "asdasidjn9d",
+  "clientSecret": "<CLIENT SECRET>",
   "clientId": "service-account-123"
 }
 ```
@@ -108,6 +108,6 @@ curl -L 'https://console.<DOMAIN>/api/v1/users' \
 {
   "id": "0eeaf222-e503-4f35-9d9c-c419816272e3",
   "username": "admin@hostorg.com",
-  "tempPassword": "asdasidjn9d"
+  "tempPassword": "<TEMP PASSWORD>"
 }
 ```

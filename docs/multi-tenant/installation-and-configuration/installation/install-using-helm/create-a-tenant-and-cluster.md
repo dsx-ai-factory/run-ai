@@ -25,9 +25,9 @@ To register a new tenant in the system, send a `POST` request to the `/api/v1/te
 **Example request:**
 
 ```bash
-curl -L 'https://console.<DOMAIN>/api/v1/tenants' \ 
+curl -L 'https://console.<DOMAIN>/api/v1/tenants' \
 -H 'Content-Type: application/json' \
--H 'Authorization: Bearer <TOKEN>' \ 
+-H 'Authorization: Bearer <TOKEN>' \
 {
   "name": "mytenant",
   "email": "administrator@mytenant.com"
@@ -142,9 +142,9 @@ This registration step does **not** install anything on the tenant's cluster yet
 **Example request:**
 
 ```bash
-curl -L 'https://console.<DOMAIN>/api/v1/clusters' \ 
+curl -L 'https://console.<DOMAIN>/api/v1/clusters' \
 -H 'Content-Type: application/json' \
--H 'Authorization: Bearer <TOKEN>' \ 
+-H 'Authorization: Bearer <TOKEN>' \
 {
   "name": "string",
   "domain": "string",
@@ -186,7 +186,7 @@ You will run the returned `installationStr` on the tenant's cluster to complete 
 {
   "installationStr": "helm upgrade -i runai-cluster -n runai runai/runai-cluster --set cluster.uid=<CLUSTER_UUID> --set controlPlane.url=<CONTROL_PLANE_DOMAIN> --set controlPlane.bootstrapToken=<BOOTSTRAP_TOKEN>",
   "repositoryName": "runai",
-  "chartRepoURL": "https://helm.ngc.nvidia.com/nvidia/runai",
+  "chartRepoURL": "https://helm.ngc.nvidia.com/nvidia/runai-oss",
   "bootstrapToken": "ABC333DDD"
 }
 ```

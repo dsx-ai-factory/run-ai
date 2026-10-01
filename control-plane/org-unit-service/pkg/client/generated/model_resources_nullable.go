@@ -28,9 +28,6 @@ type ResourcesNullable struct {
 	Memory   NullableResourcesMemory   `json:"memory,omitempty"`
 	// The scheduling rank of this org-unit within the node pool. Determines the scheduling order of workloads between org-units. Workloads in higher-ranked org-units are scheduled before workloads in lower-ranked org-units. For example, all workloads in rank \"High\" will be scheduled before all workloads in rank \"Medium\".
 	Rank NullableString `json:"rank,omitempty"`
-	// Deprecated. Use rank instead. The scheduling priority for workloads in this node pool.
-	// Deprecated
-	Priority NullableString `json:"priority,omitempty"`
 }
 
 // NewResourcesNullable instantiates a new ResourcesNullable object
@@ -258,52 +255,6 @@ func (o *ResourcesNullable) UnsetRank() {
 	o.Rank.Unset()
 }
 
-// GetPriority returns the Priority field value if set, zero value otherwise (both if not set or set to explicit null).
-// Deprecated
-func (o *ResourcesNullable) GetPriority() string {
-	if o == nil || IsNil(o.Priority.Get()) {
-		var ret string
-		return ret
-	}
-	return *o.Priority.Get()
-}
-
-// GetPriorityOk returns a tuple with the Priority field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-// Deprecated
-func (o *ResourcesNullable) GetPriorityOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Priority.Get(), o.Priority.IsSet()
-}
-
-// HasPriority returns a boolean if a field has been set.
-func (o *ResourcesNullable) HasPriority() bool {
-	if o != nil && o.Priority.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetPriority gets a reference to the given NullableString and assigns it to the Priority field.
-// Deprecated
-func (o *ResourcesNullable) SetPriority(v string) {
-	o.Priority.Set(&v)
-}
-
-// SetPriorityNil sets the value for Priority to be an explicit nil
-func (o *ResourcesNullable) SetPriorityNil() {
-	o.Priority.Set(nil)
-}
-
-// UnsetPriority ensures that no value is present for Priority, not even an explicit nil
-func (o *ResourcesNullable) UnsetPriority() {
-	o.Priority.Unset()
-}
-
 func (o ResourcesNullable) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -328,9 +279,6 @@ func (o ResourcesNullable) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Rank.IsSet() {
 		toSerialize["rank"] = o.Rank.Get()
-	}
-	if o.Priority.IsSet() {
-		toSerialize["priority"] = o.Priority.Get()
 	}
 	return toSerialize, nil
 }
