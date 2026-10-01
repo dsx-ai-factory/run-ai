@@ -34,7 +34,7 @@ type EnvironmentAssetSpec struct {
 	RunAsUid NullableInt64 `json:"runAsUid,omitempty"`
 	// Comma separated list of groups that the user running the container belongs to, in addition to the group indicated by runAsGid. Use only when the source uid/gid of the environment asset is not `fromTheImage`, and `overrideUidGidInWorkspace` is enabled. Using an empty string implies reverting the supplementary groups of the image.
 	SupplementalGroups NullableString `json:"supplementalGroups,omitempty" validate:"regexp=.*"`
-	// Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+	// Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
 	AllowPrivilegeEscalation NullableBool `json:"allowPrivilegeEscalation,omitempty"`
 	// Add POSIX capabilities to running containers. Defaults to the default set of capabilities granted by the container runtime.
 	Capabilities []Capability `json:"capabilities,omitempty"`

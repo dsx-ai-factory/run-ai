@@ -124,6 +124,30 @@ func TestNGCInstall_ChartRepositoryOverride(t *testing.T) {
 	assert.Equal(t, "runai-cluster", cl[0].ChartName)
 }
 
+func TestNGCInstall_NonProdChartRepository(t *testing.T) {
+	helm := harness.NewFakeHelmWithReleases()
+	k8s := &harness.FakeK8sExecutor{}
+	_, provider := harness.NewFakeRunAIClientProvider(helm)
+	deps := orchestrator2.Deps{K8sExecutor: k8s, HelmInstaller: helm, RunAIClientProvider: provider, ClusterProbe: okProbe()}
+
+	eventsPath := filepath.Join(t.TempDir(), "events.ndjson")
+	cfg, opts := ngcConfig(t, eventsPath, "ngc-key")
+	opts.Env = spec.EnvStaging
+	opts.Registry.ChartRepository = "https://helm.ngc.nvidia.com/myorg/myteam/"
+	term, _, _ := newTestTerminal()
+
+	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
+
+	cp := helm.CallsByRelease("runai-backend")
+	require.Len(t, cp, 1)
+	assert.Equal(t, "https://helm.ngc.nvidia.com/myorg/myteam", cp[0].RepoUrl)
+	assert.Equal(t, "$oauthtoken", cp[0].Auth.Username)
+
+	cl := helm.CallsByRelease("runai-cluster")
+	require.Len(t, cl, 1)
+	assert.Equal(t, "https://helm.ngc.nvidia.com/myorg/myteam", cl[0].RepoUrl)
+}
+
 func TestDockerConfigInstall_ChartsAnonymous(t *testing.T) {
 	helm := harness.NewFakeHelmWithReleases()
 	k8s := &harness.FakeK8sExecutor{}
