@@ -64,7 +64,7 @@ Support-Entitled artifacts require authentication to NGC. Before upgrading, make
 * An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
 helm repo update
 helm search repo -l runai/control-plane
 ```

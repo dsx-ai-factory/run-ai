@@ -87,6 +87,8 @@ For a control plane installation on Kubernetes, configure:
    - `controlPlane.tls` - The certificate and private key for the control plane FQDN, as `certPath` and `keyPath`. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
    - `controlPlane.customHelmValues.supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
+   - Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add the values that are not images to `controlPlane.customHelmValues`: the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values.
+   - `controlPlane.customHelmValues.global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`.
 
    ```yaml
    controlPlane:
@@ -97,6 +99,9 @@ For a control plane installation on Kubernetes, configure:
        keyPath: /path/to/cp-key.pem
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
+       # Gov-ready: add the external PostgreSQL, Keycloak, and NATS values, see Gov-Ready Third-Party Services
+       global:
+         fipsMode: only # Gov-ready
    ```
 
 5. Configure external access to the control plane:
@@ -135,6 +140,9 @@ controlPlane:
     keyPath: /path/to/cp-key.pem
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
+    # Gov-ready: add the external PostgreSQL, Keycloak, and NATS values, see Gov-Ready Third-Party Services
+    global:
+      fipsMode: only # Gov-ready
 
 externalConnection:
   type: ingress
@@ -190,6 +198,8 @@ For a control plane installation on OpenShift, configure:
    - `controlPlane.domain` - The FQDN for the NVIDIA Run:ai UI and API. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
    - `controlPlane.customHelmValues.supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
+   - Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add the values that are not images to `controlPlane.customHelmValues`: the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values.
+   - `controlPlane.customHelmValues.global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`.
 
    ```yaml
    controlPlane:
@@ -197,6 +207,9 @@ For a control plane installation on OpenShift, configure:
      domain: <DOMAIN>
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
+       # Gov-ready: add the external PostgreSQL, Keycloak, and NATS values, see Gov-Ready Third-Party Services
+       global:
+         fipsMode: only # Gov-ready
    ```
 
 The following example combines these settings to install the NVIDIA Run:ai control plane on OpenShift from an already-loaded air-gapped bundle:
@@ -222,6 +235,9 @@ controlPlane:
   domain: <DOMAIN>
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
+    # Gov-ready: add the external PostgreSQL, Keycloak, and NATS values, see Gov-Ready Third-Party Services
+    global:
+      fipsMode: only # Gov-ready
 ```
 
 </Accordion>
@@ -320,6 +336,7 @@ For a cluster installation on Kubernetes, configure:
    - `cluster.workloadRouting` - `host` (the default) or `path`. This determines which certificate you need for `cluster.tls` below.
    - `cluster.tls` - A certificate and private key for the cluster domain, as `certPath` and `keyPath`. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates) for which certificate you need.
    - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
+   - `cluster.customHelmValues.global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`.
 
    ```yaml
    cluster:
@@ -334,7 +351,9 @@ For a cluster installation on Kubernetes, configure:
      tls:
        certPath: /path/to/cluster-a-cert.pem
        keyPath: /path/to/cluster-a-key.pem
-     customHelmValues: {}
+     customHelmValues:
+       global:
+         fipsMode: only # Gov-ready
    ```
 
 5. Skip the prerequisites:
@@ -386,7 +405,9 @@ cluster:
   tls:
     certPath: /path/to/cluster-a-cert.pem
     keyPath: /path/to/cluster-a-key.pem
-  customHelmValues: {}
+  customHelmValues:
+    global:
+      fipsMode: only # Gov-ready
 
 prerequisites:
   skip: true
@@ -447,6 +468,7 @@ For a cluster installation on OpenShift, configure:
    - `cluster.controlPlaneUrl` - The control plane's FQDN, reachable over HTTPS from this cluster.
    - `cluster.controlPlaneCredentials` - Identifies this cluster to the control plane. Use the control plane administrator username and password generated during control plane installation - the installer uses these to register the cluster and fetch its bootstrap token automatically, in the same run. See [Retrieve Control Plane Credentials](#retrieve-control-plane-credentials).
    - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
+   - `cluster.customHelmValues.global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`.
 
    ```yaml
    cluster:
@@ -457,7 +479,9 @@ For a cluster installation on OpenShift, configure:
      controlPlaneCredentials:
        username: <ADMIN_EMAIL>
        passwordPath: /path/to/cp-password
-     customHelmValues: {}
+     customHelmValues:
+       global:
+         fipsMode: only # Gov-ready
    ```
 
 5. Skip the prerequisites:
@@ -495,7 +519,9 @@ cluster:
   controlPlaneCredentials:
     username: <ADMIN_EMAIL>
     passwordPath: /path/to/cp-password
-  customHelmValues: {}
+  customHelmValues:
+    global:
+      fipsMode: only # Gov-ready
 
 prerequisites:
   skip: true

@@ -12,6 +12,7 @@ The templates below are for same-cluster installations. For a multi-cluster inst
 | [Full Installation](#full-installation) | You want both training and inference capabilities and all supported prerequisites/features included. |
 | [Gateway API Installation](#gateway-api-installation) | Your environment uses Kubernetes Gateway API instead of an Ingress controller. |
 | [OpenShift Installation](#openshift-installation) | You are installing NVIDIA Run:ai on OpenShift. |
+| [Gov-Ready Installation](#gov-ready-installation) | You are installing a Gov-ready environment on Kubernetes. |
 
 ## Before You Use a Template
 
@@ -225,3 +226,88 @@ prerequisites:
     mode: skip
 ```
 
+## Gov-Ready Installation
+
+Use this template for a Gov-ready same-cluster installation on Kubernetes. It includes FIPS mode, an external PostgreSQL instance, and the Keycloak and NATS settings that the hardened images require. The image values for the third-party services are not part of the template, because you add the hardened images to the pack configuration and `airgap load` generates the image values. For what each value does, refer to [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md). For the overall flow, refer to [Gov-Ready Installation](../../gov-ready-installation.md).
+
+To use the template in a multi-cluster deployment, split it as described in [Use a Template for Multi-Cluster](#use-a-template-for-multi-cluster): the `controlPlane` values go in the control plane config and the `cluster` values go in the cluster config.
+
+```yaml
+install:
+  mode: full_installation
+  connectivity: air_gapped
+
+registry:
+  host: <REGISTRY_HOST>
+  username: <REGISTRY_USERNAME>
+  passwordPath: /path/to/registry-password
+
+airgap:
+  workingDir: /data/runai-airgap
+  valuesDir: /data/runai-airgap
+  skipPrepare: true
+
+controlPlane:
+  enabled: true
+  domain: <DOMAIN>
+  tls:
+    certPath: /path/to/cp-cert.pem
+    keyPath: /path/to/cp-key.pem
+  customHelmValues:
+    global:
+      fipsMode: only
+      postgresql:
+        auth:
+          host: <POSTGRESQL_HOST>
+          port: <POSTGRESQL_PORT>
+          database: <DATABASE_NAME>
+          username: <ROLE_NAME>
+          password: <ROLE_PASSWORD> # Or use existingSecret
+          postgresPassword: <ANY_VALUE> # Required, not used with an external instance
+          dbSslMode: <SSL_MODE>
+    postgresql:
+      enabled: false
+    grafana:
+      dbUser: grafana
+      dbPassword: <GRAFANA_PASSWORD>
+    keycloakx:
+      securityContext:
+        runAsUser: 65532
+      command:
+        - /bin/sh
+        - -c
+        - |
+          KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)" \
+          KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)" \
+          exec /opt/keycloak/bin/kc.sh start \
+            --features=token-exchange,admin-fine-grained-authz:v1,fips
+    nats:
+      command:
+        - /nats-server
+
+cluster:
+  enabled: true
+  name: <CLUSTER_NAME>
+  tls:
+    certPath: /path/to/cluster-cert.pem
+    keyPath: /path/to/cluster-key.pem
+  customHelmValues:
+    global:
+      fipsMode: only
+
+prerequisites:
+  gpuOperator:
+    mode: skip
+    customHelmValues: {}
+  prometheus:
+    mode: skip
+    customHelmValues: {}
+  networkOperator:
+    mode: skip
+    customHelmValues: {}
+
+externalConnection:
+  type: ingress
+  ingress:
+    className: <YOUR_INGRESS_CLASS>
+```

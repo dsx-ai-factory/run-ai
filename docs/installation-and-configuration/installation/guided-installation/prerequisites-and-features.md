@@ -85,6 +85,7 @@ See [GPU Memory Fractions](../../../platform-management/runai-scheduler/resource
 
 </Note>
 
+* For Gov-ready installations, follow the instructions in [Install the Gov-Ready GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/install-gpu-operator-gov-ready.html).
 * For air-gapped installation, follow the instructions in [Install NVIDIA GPU Operator in Air-Gapped Environments](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/install-gpu-operator-air-gapped.html).
 * The installer uses the default namespace for your platform - `gpu-operator` on Kubernetes, `nvidia-gpu-operator` on OpenShift. Otherwise, you must specify the target namespace using the flag `clusterConfig.global.nvidiaDcgmExporter.namespace` as described in [Advanced cluster configurations](../../configuration/cluster-config.md).
 * NVIDIA drivers may already be installed on the nodes. In such cases, use the NVIDIA GPU Operator flags `--set driver.enabled=false`. [DGX OS](https://docs.nvidia.com/dgx/dgx-os-6-user-guide/release_notes.html) is one such example as it comes bundled with NVIDIA Drivers.
@@ -193,20 +194,22 @@ For troubleshooting information, see the [NVIDIA GPU Operator Troubleshooting Gu
 
 When deploying on clusters with RDMA or Multi-Node NVLink-capable nodes (for example B200, GB200), the NVIDIA Network Operator is required to enable high-performance networking features such as GPUDirect RDMA in Kubernetes.
 
-For air-gapped installation, follow the instructions in [Network Operator Deployment in an Air-gapped Environment](https://docs.nvidia.com/networking/display/kubernetes2540/advanced/proxy-airgapped.html#network-operator-deployment-in-an-air-gapped-environment).
-
 The Network Operator works alongside the NVIDIA GPU Operator to provide:
 
 * NVIDIA networking drivers for advanced network capabilities.
 * Kubernetes device plugins to expose high-speed network hardware to workloads.
 * Secondary network components to support network-intensive applications.
 
-Setting `prerequisites.networkOperator.mode: install` installs the Network Operator:
+With `prerequisites.networkOperator.mode: install`, the installer does the following:
 
 - **Kubernetes** - Installs the Network Operator Helm chart.
 - **OpenShift** - Installs the Network Operator via OperatorHub (OLM), along with the SR-IOV Network Operator and the Node Feature Discovery (NFD) Operator, if not already present.
 
-To configure SR-IOV InfiniBand support on Kubernetes, set the required values via `customHelmValues` - see [Network Operator Deployment with an SR-IOV InfiniBand Network](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-with-an-sr-iov-infiniband-network) for which values to set. This does not apply to OpenShift - configure SR-IOV support via the SR-IOV Network Operator directly.
+When installing the Network Operator:
+
+* For Gov-ready installations, follow the instructions in [Install the Gov-Ready Network Operator](https://docs.nvidia.com/networking/display/kubernetes2670/install-network-operator-gov-ready.html).
+* For air-gapped installation, follow the instructions in [Network Operator Deployment in an Air-gapped Environment](https://docs.nvidia.com/networking/display/kubernetes2540/advanced/proxy-airgapped.html#network-operator-deployment-in-an-air-gapped-environment).
+* To configure SR-IOV InfiniBand support on Kubernetes, set the required values via `customHelmValues` - see [Network Operator Deployment with an SR-IOV InfiniBand Network](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-with-an-sr-iov-infiniband-network) for which values to set. This does not apply to OpenShift - configure SR-IOV support via the SR-IOV Network Operator directly.
 
 ### NVIDIA Dynamic Resource Allocation (DRA) Driver
 
