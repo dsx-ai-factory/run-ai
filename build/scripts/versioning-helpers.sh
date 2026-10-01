@@ -140,7 +140,11 @@ versioning_create_tag() {
         return 0
     fi
     git tag "$new_tag" -m "$tag_message"
-    git push origin "$new_tag" >/dev/null 2>&1
+    if ! git push origin "$new_tag" >/dev/null 2>&1; then
+        git tag -d "$new_tag" >/dev/null
+        printf "%bFailed to push tag %s (not published).%b\n" "$RED" "$new_tag" "$NC" >&2
+        return 1
+    fi
     printf "%bPublished tag: %s%b\n" "$GREEN" "$new_tag" "$NC"
 }
 
