@@ -180,63 +180,6 @@ func (_m *RolesAPI) GetRoleExecute(r openapi.ApiGetRoleRequest) (*openapi.Role, 
 	return r0, r1, r2
 }
 
-// GetRoleV1 provides a mock function with given fields: ctx, roleIdPath
-func (_m *RolesAPI) GetRoleV1(ctx context.Context, roleIdPath int32) openapi.ApiGetRoleV1Request {
-	ret := _m.Called(ctx, roleIdPath)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRoleV1")
-	}
-
-	var r0 openapi.ApiGetRoleV1Request
-	if rf, ok := ret.Get(0).(func(context.Context, int32) openapi.ApiGetRoleV1Request); ok {
-		r0 = rf(ctx, roleIdPath)
-	} else {
-		r0 = ret.Get(0).(openapi.ApiGetRoleV1Request)
-	}
-
-	return r0
-}
-
-// GetRoleV1Execute provides a mock function with given fields: r
-func (_m *RolesAPI) GetRoleV1Execute(r openapi.ApiGetRoleV1Request) (*openapi.RoleV1, *http.Response, error) {
-	ret := _m.Called(r)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRoleV1Execute")
-	}
-
-	var r0 *openapi.RoleV1
-	var r1 *http.Response
-	var r2 error
-	if rf, ok := ret.Get(0).(func(openapi.ApiGetRoleV1Request) (*openapi.RoleV1, *http.Response, error)); ok {
-		return rf(r)
-	}
-	if rf, ok := ret.Get(0).(func(openapi.ApiGetRoleV1Request) *openapi.RoleV1); ok {
-		r0 = rf(r)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*openapi.RoleV1)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(openapi.ApiGetRoleV1Request) *http.Response); ok {
-		r1 = rf(r)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*http.Response)
-		}
-	}
-
-	if rf, ok := ret.Get(2).(func(openapi.ApiGetRoleV1Request) error); ok {
-		r2 = rf(r)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
-}
-
 // GetRoles provides a mock function with given fields: ctx
 func (_m *RolesAPI) GetRoles(ctx context.Context) openapi.ApiGetRolesRequest {
 	ret := _m.Called(ctx)
@@ -286,63 +229,6 @@ func (_m *RolesAPI) GetRolesExecute(r openapi.ApiGetRolesRequest) (*openapi.GetR
 	}
 
 	if rf, ok := ret.Get(2).(func(openapi.ApiGetRolesRequest) error); ok {
-		r2 = rf(r)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
-}
-
-// GetRolesV1 provides a mock function with given fields: ctx
-func (_m *RolesAPI) GetRolesV1(ctx context.Context) openapi.ApiGetRolesV1Request {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRolesV1")
-	}
-
-	var r0 openapi.ApiGetRolesV1Request
-	if rf, ok := ret.Get(0).(func(context.Context) openapi.ApiGetRolesV1Request); ok {
-		r0 = rf(ctx)
-	} else {
-		r0 = ret.Get(0).(openapi.ApiGetRolesV1Request)
-	}
-
-	return r0
-}
-
-// GetRolesV1Execute provides a mock function with given fields: r
-func (_m *RolesAPI) GetRolesV1Execute(r openapi.ApiGetRolesV1Request) ([]openapi.RoleV1, *http.Response, error) {
-	ret := _m.Called(r)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRolesV1Execute")
-	}
-
-	var r0 []openapi.RoleV1
-	var r1 *http.Response
-	var r2 error
-	if rf, ok := ret.Get(0).(func(openapi.ApiGetRolesV1Request) ([]openapi.RoleV1, *http.Response, error)); ok {
-		return rf(r)
-	}
-	if rf, ok := ret.Get(0).(func(openapi.ApiGetRolesV1Request) []openapi.RoleV1); ok {
-		r0 = rf(r)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]openapi.RoleV1)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(openapi.ApiGetRolesV1Request) *http.Response); ok {
-		r1 = rf(r)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*http.Response)
-		}
-	}
-
-	if rf, ok := ret.Get(2).(func(openapi.ApiGetRolesV1Request) error); ok {
 		r2 = rf(r)
 	} else {
 		r2 = ret.Error(2)

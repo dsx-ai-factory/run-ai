@@ -4,9 +4,10 @@
  */
 
 //@ts-nocheck
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { rolesService } from "@/services/control-plane/rbac/roles.service/roles.service";
+import { authorizationApi } from "@/services/infra/client-apis/authorization-api/authorization-api";
 import {
   permissionMockNarrow,
   permissionsMockWide,
@@ -18,6 +19,38 @@ describe("rolesService", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     setActivePinia(createPinia());
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe("list", () => {
+    it("returns the roles of a single page", async () => {
+      const getRoles = vi
+        .spyOn(authorizationApi.rolesApi, "getRoles")
+        .mockResolvedValueOnce({ data: { roles: [rolesMock[0], rolesMock[1]] } });
+
+      const roles = await rolesService.list();
+
+      expect(roles).toEqual([rolesMock[0], rolesMock[1]]);
+      expect(getRoles).toHaveBeenCalledTimes(1);
+      expect(getRoles).toHaveBeenCalledWith(500, 0);
+    });
+
+    it("follows next until all pages are fetched", async () => {
+      const getRoles = vi
+        .spyOn(authorizationApi.rolesApi, "getRoles")
+        .mockResolvedValueOnce({ data: { roles: [rolesMock[0]], next: 500 } })
+        .mockResolvedValueOnce({ data: { roles: [rolesMock[1]] } });
+
+      const roles = await rolesService.list();
+
+      expect(roles).toEqual([rolesMock[0], rolesMock[1]]);
+      expect(getRoles).toHaveBeenCalledTimes(2);
+      expect(getRoles).toHaveBeenNthCalledWith(1, 500, 0);
+      expect(getRoles).toHaveBeenNthCalledWith(2, 500, 500);
+    });
   });
 
   it("isPermittedRole with wide set of permissions", async () => {

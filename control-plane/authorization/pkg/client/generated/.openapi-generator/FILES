@@ -86,7 +86,6 @@ docs/RoleCreationFieldsInternal.md
 docs/RoleEnabledDisabledFields.md
 docs/RolePermission.md
 docs/RolePermissionSet.md
-docs/RoleV1.md
 docs/RolesAPI.md
 docs/RolesSortFilterFields.md
 docs/ScopeType.md
@@ -168,7 +167,6 @@ model_role_creation_fields_internal.go
 model_role_enabled_disabled_fields.go
 model_role_permission.go
 model_role_permission_set.go
-model_role_v1.go
 model_roles_sort_filter_fields.go
 model_scope_type.go
 model_subject_type.go
