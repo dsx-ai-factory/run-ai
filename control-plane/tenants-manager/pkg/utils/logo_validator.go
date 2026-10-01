@@ -12,7 +12,6 @@ import (
 	"strings"
 )
 
-//go:generate mockery
 type LogoValidator interface {
 	DecodeLogo(encodedLogo string) (*[]byte, *Error)
 	ValidateMimeType(logo *[]byte) *Error
