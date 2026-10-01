@@ -18,10 +18,19 @@ func NewMockSummaryVecRegisterer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockSummaryVecRegisterer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockSummaryVecRegisterer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,14 +73,20 @@ type MockSummaryVecRegisterer_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - name
-func (_e *MockSummaryVecRegisterer_Expecter) Get(name interface{}) *MockSummaryVecRegisterer_Get_Call {
+//   - name string
+func (_e *MockSummaryVecRegisterer_Expecter) Get(name any) *MockSummaryVecRegisterer_Get_Call {
 	return &MockSummaryVecRegisterer_Get_Call{Call: _e.mock.On("Get", name)}
 }
 
 func (_c *MockSummaryVecRegisterer_Get_Call) Run(run func(name string)) *MockSummaryVecRegisterer_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -111,17 +126,38 @@ type MockSummaryVecRegisterer_Register_Call struct {
 }
 
 // Register is a helper method to define mock.On call
-//   - name
-//   - description
-//   - labels
-//   - objectives
-func (_e *MockSummaryVecRegisterer_Expecter) Register(name interface{}, description interface{}, labels interface{}, objectives interface{}) *MockSummaryVecRegisterer_Register_Call {
+//   - name string
+//   - description string
+//   - labels []string
+//   - objectives map[float64]float64
+func (_e *MockSummaryVecRegisterer_Expecter) Register(name any, description any, labels any, objectives any) *MockSummaryVecRegisterer_Register_Call {
 	return &MockSummaryVecRegisterer_Register_Call{Call: _e.mock.On("Register", name, description, labels, objectives)}
 }
 
 func (_c *MockSummaryVecRegisterer_Register_Call) Run(run func(name string, description string, labels []string, objectives map[float64]float64)) *MockSummaryVecRegisterer_Register_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].([]string), args[3].(map[float64]float64))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		var arg3 map[float64]float64
+		if args[3] != nil {
+			arg3 = args[3].(map[float64]float64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
