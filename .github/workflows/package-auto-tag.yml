@@ -18,12 +18,16 @@ on:
   workflow_dispatch:
     inputs:
       modules:
-        description: "Module directories, comma separated (e.g. runai-common-packages/cache, control-plane/audit-service/pkg/client). Empty: what the weekly run would release"
+        description: "Module directories, comma separated (e.g. runai-common-packages/cache, control-plane/audit-service/pkg/client). Empty: every module changed since its last release, as the weekly run does"
         required: false
       dry_run:
-        description: "Report the tags without creating them"
+        description: "Dry run: report the tags without creating them"
         type: boolean
         default: true
+      force_minor:
+        description: "Force a minor release, even where apidiff finds no breaking change"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -108,6 +112,7 @@ jobs:
           MODULE: ${{ matrix.module }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
           AUTO_TAG: "1"
+          FORCE_MINOR: ${{ github.event_name == 'workflow_dispatch' && inputs.force_minor && '1' || '' }}
           GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
           TOKEN: ${{ secrets.DEVOPS_RUNAI_TOKEN }}
         run: |

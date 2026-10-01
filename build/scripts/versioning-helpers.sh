@@ -9,6 +9,7 @@
 #   AUTO_TAG=1  don't prompt: tag what apidiff decided -- patch for a compatible
 #               change, minor for a breaking one.
 #   DRY_RUN=1   compute and print the tag, create nothing.
+#   FORCE_MINOR=1  release a minor even when apidiff finds the change compatible.
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -196,6 +197,7 @@ versioning_publish_prod_bump() {
         patch) message="patch" ;;
         minor) message="minor — breaking changes" ;;
     esac
+    case "${FORCE_MINOR:-}" in 1|true) message="minor — forced" ;; esac
     new_tag="${TAG_FORMAT}/v${target_version}"
     versioning_create_tag "$new_tag" "Prod release ${new_tag} (${message})"
 }
@@ -219,6 +221,11 @@ versioning_bump() {
     result=0
     "${VERSIONING_SCRIPTS_DIR}/check-breaking-changes.sh" "$TAG_FORMAT" "$pkg_dir" "$latest_prod_tag" || result=$?
     bump_kind=$(versioning_bump_kind_from_result "$result")
+    case "${FORCE_MINOR:-}" in
+        1|true)
+            [ "$bump_kind" = minor ] || printf "%bFORCE_MINOR set: minor.%b\n" "$YELLOW" "$NC" >&2
+            bump_kind=minor ;;
+    esac
     case "$channel" in
         prod) versioning_publish_prod_bump "$bump_kind" "$latest_prod_tag" ;;
         dev) versioning_publish_dev_bump "$bump_kind" "$latest_prod_tag" ;;
