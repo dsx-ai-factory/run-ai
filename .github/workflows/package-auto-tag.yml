@@ -112,6 +112,9 @@ jobs:
           MODULE: ${{ matrix.module }}
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
           AUTO_TAG: "1"
+          # Release tags are annotated, so git needs a tagger.
+          GIT_COMMITTER_NAME: devops-runai
+          GIT_COMMITTER_EMAIL: devops@run.ai
           FORCE_MINOR: ${{ github.event_name == 'workflow_dispatch' && inputs.force_minor && '1' || '' }}
           GOPRIVATE: github.com/run-ai/*,github.com/dsx-ai-factory/*
           TOKEN: ${{ secrets.DEVOPS_RUNAI_AUTOTAG_TOKEN }}
