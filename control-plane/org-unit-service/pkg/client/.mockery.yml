@@ -1,0 +1,24 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client:
+    interfaces:
+      IOrgUnitClient: {}
+      IOrgUnitExternalClient: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      DepartmentsAPI: {}
+      DepartmentsV1API: {}
+      HealthAPI: {}
+      NodeTypesAPI: {}
+      NotificationsAPI: {}
+      OrgUnitAPI: {}
+      ProjectsAPI: {}
+      ProjectsV1API: {}
+      ReportsAPI: {}
