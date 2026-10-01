@@ -1,0 +1,22 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client:
+    interfaces:
+      IK8SObjectTrackerClient: {}
+      IK8SObjectTrackerExternalClient: {}
+  github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      ClusterObjectsStatusAPI: {}
+      ConfigMapsAPI: {}
+      HealthAPI: {}
+      PVCsAPI: {}
+      SecretsAPI: {}
+      StorageClassConfigurationAPI: {}
+      StorageClassesAPI: {}
