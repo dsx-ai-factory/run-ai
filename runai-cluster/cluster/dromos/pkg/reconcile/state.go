@@ -7,7 +7,6 @@ package reconcile
 
 import (
 	"context"
-	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile/issue"
 	"knative.dev/pkg/logging"
@@ -17,23 +16,10 @@ import (
 type State struct {
 	pluginIssueMap   map[string][]issue.Issue
 	controllerIssues []issue.Issue
-	requeueAfter     time.Duration
 }
 
 func New() *State {
 	return &State{pluginIssueMap: make(map[string][]issue.Issue)}
-}
-
-// RequestRequeueAfter retries recoverable plugin work without preventing the
-// workload, remaining plugins, and status from being reconciled first.
-func (s *State) RequestRequeueAfter(delay time.Duration) {
-	if delay > 0 && (s.requeueAfter == 0 || delay < s.requeueAfter) {
-		s.requeueAfter = delay
-	}
-}
-
-func (s *State) RequeueAfter() time.Duration {
-	return s.requeueAfter
 }
 
 func (s *State) AddControllerIssue(object client.Object, err error, isCritical bool, description string, group issue.Group) {

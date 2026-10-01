@@ -43,10 +43,7 @@ const (
 type Plugin struct {
 	reader           client.Reader
 	ownershipReader  client.Reader
-	templatesReader  client.Reader
 	enforceOwnership bool
-	templatesEnabled bool
-	routingDisabled  bool
 }
 
 // Integration owns the networking plugin's anyworkload-controller-specific
@@ -79,9 +76,7 @@ func newPlugin(reader, ownershipReader client.Reader) *Plugin {
 	return &Plugin{
 		reader:           reader,
 		ownershipReader:  ownershipReader,
-		templatesReader:  ownershipReader,
 		enforceOwnership: true,
-		templatesEnabled: workloadconfig.OAuth2ProxyTemplatesEnabled(),
 	}
 }
 
@@ -92,7 +87,7 @@ func (i *Integration) Build(_ context.Context, deps framework.PluginDeps) (frame
 	if err != nil {
 		return nil, fmt.Errorf("load networking config: %w", err)
 	}
-	if !cfg.Enabled && !workloadconfig.OAuth2ProxyTemplatesEnabled() {
+	if !cfg.Enabled {
 		i.disabled = true
 		return nil, framework.ErrPluginDisabled
 	}
@@ -100,11 +95,10 @@ func (i *Integration) Build(_ context.Context, deps framework.PluginDeps) (frame
 		return nil, fmt.Errorf("networking plugin requires a non-nil Client in PluginDeps")
 	}
 	i.plugin = newPlugin(deps.Client, nil)
-	i.plugin.routingDisabled = !cfg.Enabled
 	return i.plugin, nil
 }
 
-// Setup injects the live reader into networking and registers its cache
+// Setup injects the live reader only into networking and registers its cache
 // indexes. It must be called from app.WithManagerSetup before mgr.Start.
 func (i *Integration) Setup(
 	ctx context.Context,
@@ -119,10 +113,6 @@ func (i *Integration) Setup(
 	}
 	if apiReader == nil {
 		return fmt.Errorf("networking integration requires a non-nil APIReader")
-	}
-	i.plugin.templatesReader = apiReader
-	if i.plugin.routingDisabled {
-		return nil
 	}
 	if fieldIndexer == nil {
 		return fmt.Errorf("networking integration requires a non-nil FieldIndexer")
@@ -139,12 +129,6 @@ func (p *Plugin) Name() string {
 }
 
 func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
-	if p.templatesEnabled {
-		bldr = bldr.Watches(&corev1.ConfigMap{}, handler.EnqueueRequestsFromMapFunc(p.mapConfigMapToRunners), builder.OnlyMetadata)
-	}
-	if p.routingDisabled {
-		return bldr, nil
-	}
 	ownedEnqueue := handler.EnqueueRequestsFromMapFunc(p.mapToWorkloadRunner)
 	serviceEnqueue := handler.EnqueueRequestsFromMapFunc(p.mapServiceDependency)
 	podEnqueue := handler.EnqueueRequestsFromMapFunc(p.mapPodDependency)

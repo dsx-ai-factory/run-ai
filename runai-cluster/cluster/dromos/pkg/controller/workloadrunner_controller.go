@@ -123,11 +123,7 @@ func (c *WorkloadRunnerController) Reconcile(ctx context.Context, req ctrl.Reque
 		return statusResult.Result()
 	}
 
-	if specResult.ShortCircuitReconcileFlow() {
-		return specResult.Result()
-	}
-
-	return ctrl.Result{RequeueAfter: state.RequeueAfter()}, nil
+	return specResult.Result()
 }
 
 // mapKartaToWorkloadRunnerEvent maps a Karta to a WorkloadRunner event.
