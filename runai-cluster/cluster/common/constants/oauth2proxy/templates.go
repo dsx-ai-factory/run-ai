@@ -3,21 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Package oauth2proxy defines the files supplied to the upstream OAuth2 Proxy image.
+// Package oauth2proxy defines the shared OAuth2 Proxy template identifiers.
 package oauth2proxy
 
-import _ "embed"
-
 const (
-	ConfigMapName            = "runai-oauth2-proxy-templates"
-	VolumeName               = "runai-oauth2-proxy-templates"
-	TemplateKey              = "error.html"
-	TemplatesPath            = "/usr/share/oauth2-proxy"
-	TemplatesConfigMapEnvVar = "RUNAI_OAUTH2_PROXY_TEMPLATES_CONFIG_MAP"
+	ConfigMapName          = "runai-oauth2-proxy-templates"
+	VolumeName             = "runai-oauth2-proxy-templates"
+	TemplateKey            = "error.html"
+	TemplatesPath          = "/usr/share/oauth2-proxy"
+	TemplatesEnabledEnvVar = "RUNAI_OAUTH2_PROXY_TEMPLATES_ENABLED"
 )
-
-// ErrorPageHTML is the existing Run:ai error page, distributed as a ConfigMap
-// instead of being copied into a custom container image.
-//
-//go:embed error.html
-var ErrorPageHTML string

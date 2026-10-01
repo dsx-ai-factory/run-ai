@@ -8,7 +8,6 @@ package networking
 import (
 	"context"
 	"fmt"
-	"os"
 	"reflect"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
@@ -44,8 +43,9 @@ const (
 type Plugin struct {
 	reader           client.Reader
 	ownershipReader  client.Reader
+	templatesReader  client.Reader
 	enforceOwnership bool
-	configMapName    string
+	templatesEnabled bool
 	routingDisabled  bool
 }
 
@@ -79,8 +79,9 @@ func newPlugin(reader, ownershipReader client.Reader) *Plugin {
 	return &Plugin{
 		reader:           reader,
 		ownershipReader:  ownershipReader,
+		templatesReader:  ownershipReader,
 		enforceOwnership: true,
-		configMapName:    os.Getenv(workloadconfig.EnvVarOauth2ProxyTemplatesConfigMap),
+		templatesEnabled: workloadconfig.OAuth2ProxyTemplatesEnabled(),
 	}
 }
 
@@ -91,7 +92,7 @@ func (i *Integration) Build(_ context.Context, deps framework.PluginDeps) (frame
 	if err != nil {
 		return nil, fmt.Errorf("load networking config: %w", err)
 	}
-	if !cfg.Enabled && os.Getenv(workloadconfig.EnvVarOauth2ProxyTemplatesConfigMap) == "" {
+	if !cfg.Enabled && !workloadconfig.OAuth2ProxyTemplatesEnabled() {
 		i.disabled = true
 		return nil, framework.ErrPluginDisabled
 	}
@@ -103,7 +104,7 @@ func (i *Integration) Build(_ context.Context, deps framework.PluginDeps) (frame
 	return i.plugin, nil
 }
 
-// Setup injects the live reader only into networking and registers its cache
+// Setup injects the live reader into networking and registers its cache
 // indexes. It must be called from app.WithManagerSetup before mgr.Start.
 func (i *Integration) Setup(
 	ctx context.Context,
@@ -116,11 +117,12 @@ func (i *Integration) Setup(
 	if i.plugin == nil {
 		return fmt.Errorf("networking integration must be built before setup")
 	}
-	if i.plugin.routingDisabled {
-		return nil
-	}
 	if apiReader == nil {
 		return fmt.Errorf("networking integration requires a non-nil APIReader")
+	}
+	i.plugin.templatesReader = apiReader
+	if i.plugin.routingDisabled {
+		return nil
 	}
 	if fieldIndexer == nil {
 		return fmt.Errorf("networking integration requires a non-nil FieldIndexer")
@@ -137,8 +139,8 @@ func (p *Plugin) Name() string {
 }
 
 func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
-	if p.configMapName != "" {
-		bldr = bldr.Watches(&corev1.ConfigMap{}, handler.EnqueueRequestsFromMapFunc(p.mapConfigMapToRunners))
+	if p.templatesEnabled {
+		bldr = bldr.Watches(&corev1.ConfigMap{}, handler.EnqueueRequestsFromMapFunc(p.mapConfigMapToRunners), builder.OnlyMetadata)
 	}
 	if p.routingDisabled {
 		return bldr, nil

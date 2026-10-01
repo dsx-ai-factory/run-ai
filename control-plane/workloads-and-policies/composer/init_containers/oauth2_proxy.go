@@ -256,6 +256,7 @@ func BuildOAuth2ProxyVolumes(info *composer.ExposedUrlInfo) []corev1.Volume {
 			VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{
 				LocalObjectReference: corev1.LocalObjectReference{Name: oauth2proxy.ConfigMapName},
 				Items:                []corev1.KeyToPath{{Key: oauth2proxy.TemplateKey, Path: oauth2proxy.TemplateKey}},
+				Optional:             convutils.Ref(true),
 			}},
 		})
 	}

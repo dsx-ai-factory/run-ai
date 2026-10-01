@@ -7,6 +7,7 @@ package networking
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
@@ -19,15 +20,32 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+//go:embed templates/error.html
+var oauth2ErrorPageHTML string
+
+// Read contents directly so the metadata-only watch never starts a second cache
+// retaining every ConfigMap's data.
+type oauth2TemplatesClient struct {
+	client.Client
+	reader client.Reader
+}
+
+func (c oauth2TemplatesClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+	return c.reader.Get(ctx, key, obj, opts...)
+}
+
 func (p *Plugin) ensureOAuth2Templates(ctx context.Context, runner *dromosv1alpha1.WorkloadRunner, k8sClient client.Client) error {
-	templates := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: p.configMapName, Namespace: runner.Namespace}}
-	_, err := controllerutil.CreateOrUpdate(ctx, k8sClient, templates, func() error {
+	if p.templatesReader == nil {
+		return fmt.Errorf("OAuth2 proxy templates require a non-nil APIReader")
+	}
+	templates := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: oauth2proxy.ConfigMapName, Namespace: runner.Namespace}}
+	_, err := controllerutil.CreateOrUpdate(ctx, oauth2TemplatesClient{Client: k8sClient, reader: p.templatesReader}, templates, func() error {
 		// Keep the shared file until namespace deletion, independently of any
 		// individual workload, and never take over another controller's object.
 		if owner := metav1.GetControllerOf(templates); owner != nil {
 			return fmt.Errorf("OAuth2 proxy templates are owned by %s %s", owner.Kind, owner.Name)
 		}
-		templates.Data = map[string]string{oauth2proxy.TemplateKey: oauth2proxy.ErrorPageHTML}
+		templates.Data = map[string]string{oauth2proxy.TemplateKey: oauth2ErrorPageHTML}
 		templates.BinaryData = nil
 		return nil
 	})
@@ -39,7 +57,7 @@ func (p *Plugin) ensureOAuth2Templates(ctx context.Context, runner *dromosv1alph
 
 // Reconcile after edits or deletion so restarted pods can still mount the page.
 func (p *Plugin) mapConfigMapToRunners(ctx context.Context, obj client.Object) []ctrl.Request {
-	if obj.GetName() != p.configMapName {
+	if obj.GetName() != oauth2proxy.ConfigMapName {
 		return nil
 	}
 	runners := &dromosv1alpha1.WorkloadRunnerList{}

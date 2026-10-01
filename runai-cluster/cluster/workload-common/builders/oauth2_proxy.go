@@ -188,7 +188,7 @@ func BuildOAuth2ProxyContainer(cfg OAuth2ProxyConfig) (*corev1.Container, error)
 		},
 	}
 
-	if os.Getenv(workloadconfig.EnvVarOauth2ProxyTemplatesConfigMap) != "" {
+	if workloadconfig.OAuth2ProxyTemplatesEnabled() {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      oauth2proxy.VolumeName,
 			MountPath: oauth2proxy.TemplatesPath,

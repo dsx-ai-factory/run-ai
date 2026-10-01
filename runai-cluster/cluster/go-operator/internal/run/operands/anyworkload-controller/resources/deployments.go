@@ -259,8 +259,8 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 		})
 	}
 	envVars = append(envVars, v1.EnvVar{
-		Name:  oauth2proxy.TemplatesConfigMapEnvVar,
-		Value: oauth2proxy.ConfigMapName,
+		Name:  oauth2proxy.TemplatesEnabledEnvVar,
+		Value: "true",
 	})
 
 	if config.RunaiOauth2ProxyRedisFQDN != nil {
