@@ -137,7 +137,7 @@ NEW_MODULE_PATH=$(cd "$PKG_DIR" && GOWORK=off go list -m -f '{{.Path}}') \
     || die "Failed to read the current module path from ${PKG_REL}."
 
 rm -f "${OLD_PKG_DIR}/go.sum"
-(cd "$OLD_PKG_DIR" && GOWORK=off GOFLAGS=-mod=mod GONOSUMDB="${GONOSUMDB:+${GONOSUMDB},}github.com/dsx-ai-factory/run-ai" GOCACHE="$API_GOCACHE" apidiff -m -w "$OLD_API" "$OLD_MODULE_PATH" 2>"$APIDIFF_STDERR") \
+(cd "$OLD_PKG_DIR" && GOWORK=off GOFLAGS=-mod=mod GOCACHE="$API_GOCACHE" apidiff -m -w "$OLD_API" "$OLD_MODULE_PATH" 2>"$APIDIFF_STDERR") \
     || die "Failed to export the API from ${LATEST_TAG}: $(cat "$APIDIFF_STDERR")"
 (cd "$PKG_DIR" && GOWORK=off GOCACHE="$API_GOCACHE" apidiff -m -w "$NEW_API" "$NEW_MODULE_PATH" 2>"$APIDIFF_STDERR") \
     || die "Failed to export the current API: $(cat "$APIDIFF_STDERR")"
