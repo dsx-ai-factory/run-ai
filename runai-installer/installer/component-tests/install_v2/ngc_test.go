@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const ngcChartsRepo = "https://helm.ngc.nvidia.com/nvidia/runai"
+const ngcChartsRepo = "https://helm.ngc.nvidia.com/nvidia/runai-oss"
 
 func ngcConfig(t *testing.T, path, token string) (*installconfig.Config, installconfig.RunOptions) {
 	t.Helper()
@@ -97,6 +97,31 @@ func TestNGCInstall_TokenFree(t *testing.T) {
 	evs := readEvents(t, eventsPath)
 	assert.True(t, hasPipelineEvent(evs, "pipeline_succeeded", "runai"))
 	assert.False(t, hasPipelineEvent(evs, "pipeline_failed", ""))
+}
+
+func TestInstall_NoRegistryUsesPublicOSSCharts(t *testing.T) {
+	helm := harness.NewFakeHelmWithReleases()
+	k8s := &harness.FakeK8sExecutor{}
+	_, provider := harness.NewFakeRunAIClientProvider(helm)
+	deps := orchestrator2.Deps{K8sExecutor: k8s, HelmInstaller: helm, RunAIClientProvider: provider, ClusterProbe: okProbe()}
+
+	eventsPath := filepath.Join(t.TempDir(), "events.ndjson")
+	cfg, opts := connectedConfig(t, eventsPath, false)
+	cfg.Registry = nil
+	registry, err := installconfig.ResolveRegistry(cfg, "", "")
+	require.NoError(t, err)
+	opts.Registry = registry
+	term, _, _ := newTestTerminal()
+
+	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
+
+	for _, release := range []string{"runai-backend", "runai-cluster"} {
+		calls := helm.CallsByRelease(release)
+		require.Len(t, calls, 1)
+		assert.Equal(t, ngcChartsRepo, calls[0].RepoUrl)
+		assert.True(t, calls[0].Auth.IsZero(), "the public OSS charts pull anonymously")
+	}
+	assert.False(t, appliedNames(k8s)["runai-reg-creds"], "the public OSS images need no pull secret")
 }
 
 func TestNGCInstall_ChartRepositoryOverride(t *testing.T) {
