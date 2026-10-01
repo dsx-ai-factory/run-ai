@@ -74,6 +74,72 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			dbTesting.CleanTables()
 		})
 
+		It("replaces the Jupyter TensorBoard image and preserves customizations", func() {
+			legacyEnvironmentID := "10a96a7b-e5cc-4dcc-ac38-ef206a06d4b4"
+			customCommandEnvironmentID := "89247adf-c729-4550-81aa-fd3e17533046"
+			customImageEnvironmentID := "57eb91a4-b44c-499d-92b7-95230a1b542e"
+			legacyImage := "gcr.io/run-ai-demo/" + "jupyter-tensorboard"
+			replacementImage := "nvcr.io/nvidia/pytorch:26.09-py3"
+			replacementArgs := `-c "tensorboard --logdir \"${LOG_DIR:-./}\" --bind_all & exec jupyter lab --ip=0.0.0.0 --allow-root --ServerApp.token="`
+			customImage := "example.com/custom/jupyter-tensorboard:latest"
+
+			db := runaidb.DB().Actual().WithContext(context.Background())
+			result := db.Exec(`
+				INSERT INTO assets_metadata (id, kind, scope, tenant_id, name, created_by, created_at, updated_by, updated_at) VALUES
+					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now());`,
+				legacyEnvironmentID, tenantAId,
+				customCommandEnvironmentID, tenantBId,
+				customImageEnvironmentID, tenantCId,
+			)
+			Expect(result.Error).To(BeNil())
+
+			result = db.Exec(`
+				INSERT INTO assets_environment (asset_id, image, command, args) VALUES
+					(?, ?, NULL, NULL),
+					(?, ?, 'custom-command', 'custom-args'),
+					(?, ?, NULL, NULL);`,
+				legacyEnvironmentID, legacyImage,
+				customCommandEnvironmentID, legacyImage,
+				customImageEnvironmentID, customImage,
+			)
+			Expect(result.Error).To(BeNil())
+
+			migrateTo(20250006, "up 20250007")
+
+			type environmentSpec struct {
+				Image   string
+				Command *string
+				Args    *string
+			}
+
+			var actualLegacy environmentSpec
+			result = db.Raw("SELECT image, command, args FROM assets_environment WHERE asset_id = ?", legacyEnvironmentID).Scan(&actualLegacy)
+			Expect(result.Error).To(BeNil())
+			Expect(actualLegacy.Image).To(Equal(replacementImage))
+			Expect(actualLegacy.Command).NotTo(BeNil())
+			Expect(*actualLegacy.Command).To(Equal("bash"))
+			Expect(actualLegacy.Args).NotTo(BeNil())
+			Expect(*actualLegacy.Args).To(Equal(replacementArgs))
+
+			var actualCustomCommand environmentSpec
+			result = db.Raw("SELECT image, command, args FROM assets_environment WHERE asset_id = ?", customCommandEnvironmentID).Scan(&actualCustomCommand)
+			Expect(result.Error).To(BeNil())
+			Expect(actualCustomCommand.Image).To(Equal(replacementImage))
+			Expect(actualCustomCommand.Command).NotTo(BeNil())
+			Expect(*actualCustomCommand.Command).To(Equal("custom-command"))
+			Expect(actualCustomCommand.Args).NotTo(BeNil())
+			Expect(*actualCustomCommand.Args).To(Equal("custom-args"))
+
+			var actualCustomImage environmentSpec
+			result = db.Raw("SELECT image, command, args FROM assets_environment WHERE asset_id = ?", customImageEnvironmentID).Scan(&actualCustomImage)
+			Expect(result.Error).To(BeNil())
+			Expect(actualCustomImage.Image).To(Equal(customImage))
+			Expect(actualCustomImage.Command).To(BeNil())
+			Expect(actualCustomImage.Args).To(BeNil())
+		})
+
 		It("environment assets migration", func() {
 			// inject the preset environments and verify they are exists
 			injectPresetEnvironments()
