@@ -89,6 +89,8 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 			runaiConfig.SetDefaultsWhereNeeded()
 			runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor = tt.kubernetesFlavor
 			runaiConfig.Spec.Global.GatewayAPI.Enabled = &tt.gatewayAPIEnabled
+			runaiConfig.Spec.Global.GatewayAPI.Name = "workload-gateway"
+			runaiConfig.Spec.Global.GatewayAPI.Namespace = "gateway-system"
 			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
 			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
@@ -98,6 +100,16 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 
 			assertEnvValue(t, envVars, "IS_OPENSHIFT", tt.expectedOpenShift)
 			assertEnvValue(t, envVars, "GATEWAY_API_ENABLED", tt.expectedGatewayAPI)
+			if tt.gatewayAPIEnabled {
+				assertEnvValue(t, envVars, "GATEWAY_NAME", "workload-gateway")
+				assertEnvValue(t, envVars, "GATEWAY_NAMESPACE", "gateway-system")
+			} else {
+				for _, name := range []string{"GATEWAY_NAME", "GATEWAY_NAMESPACE"} {
+					if _, found := envValue(envVars, name); found {
+						t.Fatalf("env var %s unexpectedly configured while Gateway API is disabled", name)
+					}
+				}
+			}
 		})
 	}
 }
@@ -112,6 +124,61 @@ func TestBuildEnvVarsIncludesOAuth2ProxyTemplates(t *testing.T) {
 	value, found := envValue(envVars, oauth2proxy.TemplatesEnabledEnvVar)
 	if !found || value != "true" {
 		t.Fatalf("template enabled env = %q (present=%v), want true", value, found)
+	}
+}
+
+func TestBuildEnvVarsRejectsIncompleteGatewayConfiguration(t *testing.T) {
+	for _, tt := range []struct {
+		name        string
+		gateway     string
+		namespace   string
+		wantMessage string
+	}{
+		{
+			name: "missing name", namespace: "gateway-system",
+			wantMessage: `gatewayAPI is enabled but name="" or namespace="gateway-system" is empty`,
+		},
+		{
+			name: "missing namespace", gateway: "workload-gateway",
+			wantMessage: `gatewayAPI is enabled but name="workload-gateway" or namespace="" is empty`,
+		},
+		{
+			name:        "missing both",
+			wantMessage: `gatewayAPI is enabled but name="" or namespace="" is empty`,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			runaiConfig := &runaiv1.RunaiConfig{}
+			runaiConfig.SetDefaultsWhereNeeded()
+			*runaiConfig.Spec.Global.GatewayAPI.Enabled = true
+			runaiConfig.Spec.Global.GatewayAPI.Name = tt.gateway
+			runaiConfig.Spec.Global.GatewayAPI.Namespace = tt.namespace
+			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+
+			_, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+			if err == nil {
+				t.Fatal("buildEnvVars() accepted an incomplete enabled Gateway configuration")
+			}
+			if err.Error() != tt.wantMessage {
+				t.Fatalf("buildEnvVars() error = %q, want %q", err.Error(), tt.wantMessage)
+			}
+		})
+	}
+}
+
+func TestBuildEnvVarsDoesNotInjectIngressAnnotationDefaults(t *testing.T) {
+	runaiConfig := &runaiv1.RunaiConfig{}
+	runaiConfig.SetDefaultsWhereNeeded()
+	runaiConfig.Spec.Global.Ingress.Annotations = map[string]string{"example.com/default": "value"}
+	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	if err != nil {
+		t.Fatalf("buildEnvVars() error = %v", err)
+	}
+	assertEnvValue(t, envVars, "INGRESS_CLASS", runaiConfig.Spec.Global.Ingress.Class)
+	if _, found := envValue(envVars, "INGRESS_ANNOTATIONS"); found {
+		t.Fatal("INGRESS_ANNOTATIONS must not be enabled by routing validation")
 	}
 }
 
