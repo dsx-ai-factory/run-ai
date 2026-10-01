@@ -7550,13 +7550,15 @@ func (_c *GoCloak_GetClientManagementPermissions_Call) RunAndReturn(run func(ctx
 
 // GetClientOfflineSessions provides a mock function for the type GoCloak
 func (_mock *GoCloak) GetClientOfflineSessions(ctx context.Context, token string, realm string, idOfClient string, params ...gocloak.GetClientUserSessionsParams) ([]*gocloak.UserSessionRepresentation, error) {
-	var tmpRet mock.Arguments
-	if len(params) > 0 {
-		tmpRet = _mock.Called(ctx, token, realm, idOfClient, params)
-	} else {
-		tmpRet = _mock.Called(ctx, token, realm, idOfClient)
+	// gocloak.GetClientUserSessionsParams
+	_va := make([]any, len(params))
+	for _i := range params {
+		_va[_i] = params[_i]
 	}
-	ret := tmpRet
+	var _ca []any
+	_ca = append(_ca, ctx, token, realm, idOfClient)
+	_ca = append(_ca, _va...)
+	ret := _mock.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetClientOfflineSessions")
@@ -7617,9 +7619,11 @@ func (_c *GoCloak_GetClientOfflineSessions_Call) Run(run func(ctx context.Contex
 			arg3 = args[3].(string)
 		}
 		var arg4 []gocloak.GetClientUserSessionsParams
-		var variadicArgs []gocloak.GetClientUserSessionsParams
-		if len(args) > 4 {
-			variadicArgs = args[4].([]gocloak.GetClientUserSessionsParams)
+		variadicArgs := make([]gocloak.GetClientUserSessionsParams, len(args)-4)
+		for i, a := range args[4:] {
+			if a != nil {
+				variadicArgs[i] = a.(gocloak.GetClientUserSessionsParams)
+			}
 		}
 		arg4 = variadicArgs
 		run(
@@ -9373,13 +9377,15 @@ func (_c *GoCloak_GetClientServiceAccount_Call) RunAndReturn(run func(ctx contex
 
 // GetClientUserSessions provides a mock function for the type GoCloak
 func (_mock *GoCloak) GetClientUserSessions(ctx context.Context, token string, realm string, idOfClient string, params ...gocloak.GetClientUserSessionsParams) ([]*gocloak.UserSessionRepresentation, error) {
-	var tmpRet mock.Arguments
-	if len(params) > 0 {
-		tmpRet = _mock.Called(ctx, token, realm, idOfClient, params)
-	} else {
-		tmpRet = _mock.Called(ctx, token, realm, idOfClient)
+	// gocloak.GetClientUserSessionsParams
+	_va := make([]any, len(params))
+	for _i := range params {
+		_va[_i] = params[_i]
 	}
-	ret := tmpRet
+	var _ca []any
+	_ca = append(_ca, ctx, token, realm, idOfClient)
+	_ca = append(_ca, _va...)
+	ret := _mock.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetClientUserSessions")
@@ -9440,9 +9446,11 @@ func (_c *GoCloak_GetClientUserSessions_Call) Run(run func(ctx context.Context, 
 			arg3 = args[3].(string)
 		}
 		var arg4 []gocloak.GetClientUserSessionsParams
-		var variadicArgs []gocloak.GetClientUserSessionsParams
-		if len(args) > 4 {
-			variadicArgs = args[4].([]gocloak.GetClientUserSessionsParams)
+		variadicArgs := make([]gocloak.GetClientUserSessionsParams, len(args)-4)
+		for i, a := range args[4:] {
+			if a != nil {
+				variadicArgs[i] = a.(gocloak.GetClientUserSessionsParams)
+			}
 		}
 		arg4 = variadicArgs
 		run(
@@ -16859,13 +16867,15 @@ func (_c *GoCloak_LoginAdmin_Call) RunAndReturn(run func(ctx context.Context, us
 
 // LoginClient provides a mock function for the type GoCloak
 func (_mock *GoCloak) LoginClient(ctx context.Context, clientID string, clientSecret string, realm string, scopes ...string) (*gocloak.JWT, error) {
-	var tmpRet mock.Arguments
-	if len(scopes) > 0 {
-		tmpRet = _mock.Called(ctx, clientID, clientSecret, realm, scopes)
-	} else {
-		tmpRet = _mock.Called(ctx, clientID, clientSecret, realm)
+	// string
+	_va := make([]any, len(scopes))
+	for _i := range scopes {
+		_va[_i] = scopes[_i]
 	}
-	ret := tmpRet
+	var _ca []any
+	_ca = append(_ca, ctx, clientID, clientSecret, realm)
+	_ca = append(_ca, _va...)
+	ret := _mock.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LoginClient")
@@ -16926,9 +16936,11 @@ func (_c *GoCloak_LoginClient_Call) Run(run func(ctx context.Context, clientID s
 			arg3 = args[3].(string)
 		}
 		var arg4 []string
-		var variadicArgs []string
-		if len(args) > 4 {
-			variadicArgs = args[4].([]string)
+		variadicArgs := make([]string, len(args)-4)
+		for i, a := range args[4:] {
+			if a != nil {
+				variadicArgs[i] = a.(string)
+			}
 		}
 		arg4 = variadicArgs
 		run(
@@ -18422,13 +18434,15 @@ func (_c *GoCloak_RevokeUserConsents_Call) RunAndReturn(run func(ctx context.Con
 
 // SendVerifyEmail provides a mock function for the type GoCloak
 func (_mock *GoCloak) SendVerifyEmail(ctx context.Context, token string, userID string, realm string, params ...gocloak.SendVerificationMailParams) error {
-	var tmpRet mock.Arguments
-	if len(params) > 0 {
-		tmpRet = _mock.Called(ctx, token, userID, realm, params)
-	} else {
-		tmpRet = _mock.Called(ctx, token, userID, realm)
+	// gocloak.SendVerificationMailParams
+	_va := make([]any, len(params))
+	for _i := range params {
+		_va[_i] = params[_i]
 	}
-	ret := tmpRet
+	var _ca []any
+	_ca = append(_ca, ctx, token, userID, realm)
+	_ca = append(_ca, _va...)
+	ret := _mock.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SendVerifyEmail")
@@ -18478,9 +18492,11 @@ func (_c *GoCloak_SendVerifyEmail_Call) Run(run func(ctx context.Context, token 
 			arg3 = args[3].(string)
 		}
 		var arg4 []gocloak.SendVerificationMailParams
-		var variadicArgs []gocloak.SendVerificationMailParams
-		if len(args) > 4 {
-			variadicArgs = args[4].([]gocloak.SendVerificationMailParams)
+		variadicArgs := make([]gocloak.SendVerificationMailParams, len(args)-4)
+		for i, a := range args[4:] {
+			if a != nil {
+				variadicArgs[i] = a.(gocloak.SendVerificationMailParams)
+			}
 		}
 		arg4 = variadicArgs
 		run(
