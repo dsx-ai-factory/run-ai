@@ -20,10 +20,19 @@ func NewMetricStoresDao(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MetricStoresDao {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MetricStoresDao{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type MetricStoresDao_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - ctx
-//   - metricStore
-func (_e *MetricStoresDao_Expecter) Create(ctx interface{}, metricStore interface{}) *MetricStoresDao_Create_Call {
+//   - ctx context.Context
+//   - metricStore models.MetricStore
+func (_e *MetricStoresDao_Expecter) Create(ctx any, metricStore any) *MetricStoresDao_Create_Call {
 	return &MetricStoresDao_Create_Call{Call: _e.mock.On("Create", ctx, metricStore)}
 }
 
 func (_c *MetricStoresDao_Create_Call) Run(run func(ctx context.Context, metricStore models.MetricStore)) *MetricStoresDao_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(models.MetricStore))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 models.MetricStore
+		if args[1] != nil {
+			arg1 = args[1].(models.MetricStore)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -121,15 +141,26 @@ type MetricStoresDao_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *MetricStoresDao_Expecter) Delete(ctx interface{}, tenantId interface{}) *MetricStoresDao_Delete_Call {
+//   - ctx context.Context
+//   - tenantId int32
+func (_e *MetricStoresDao_Expecter) Delete(ctx any, tenantId any) *MetricStoresDao_Delete_Call {
 	return &MetricStoresDao_Delete_Call{Call: _e.mock.On("Delete", ctx, tenantId)}
 }
 
 func (_c *MetricStoresDao_Delete_Call) Run(run func(ctx context.Context, tenantId int32)) *MetricStoresDao_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -178,15 +209,26 @@ type MetricStoresDao_GetByTenantId_Call struct {
 }
 
 // GetByTenantId is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *MetricStoresDao_Expecter) GetByTenantId(ctx interface{}, tenantId interface{}) *MetricStoresDao_GetByTenantId_Call {
+//   - ctx context.Context
+//   - tenantId int32
+func (_e *MetricStoresDao_Expecter) GetByTenantId(ctx any, tenantId any) *MetricStoresDao_GetByTenantId_Call {
 	return &MetricStoresDao_GetByTenantId_Call{Call: _e.mock.On("GetByTenantId", ctx, tenantId)}
 }
 
 func (_c *MetricStoresDao_GetByTenantId_Call) Run(run func(ctx context.Context, tenantId int32)) *MetricStoresDao_GetByTenantId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

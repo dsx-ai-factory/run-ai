@@ -21,10 +21,19 @@ func NewQueryVersionPicker(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *QueryVersionPicker {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &QueryVersionPicker{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -65,16 +74,32 @@ type QueryVersionPicker_Pick_Call struct {
 }
 
 // Pick is a helper method to define mock.On call
-//   - ctx
-//   - cvMap
-//   - r
-func (_e *QueryVersionPicker_Expecter) Pick(ctx interface{}, cvMap interface{}, r interface{}) *QueryVersionPicker_Pick_Call {
+//   - ctx context.Context
+//   - cvMap map[string]*clusters.ClusterVersionHistory
+//   - r *services.MetricInformationRange
+func (_e *QueryVersionPicker_Expecter) Pick(ctx any, cvMap any, r any) *QueryVersionPicker_Pick_Call {
 	return &QueryVersionPicker_Pick_Call{Call: _e.mock.On("Pick", ctx, cvMap, r)}
 }
 
 func (_c *QueryVersionPicker_Pick_Call) Run(run func(ctx context.Context, cvMap map[string]*clusters.ClusterVersionHistory, r *services.MetricInformationRange)) *QueryVersionPicker_Pick_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(map[string]*clusters.ClusterVersionHistory), args[2].(*services.MetricInformationRange))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 map[string]*clusters.ClusterVersionHistory
+		if args[1] != nil {
+			arg1 = args[1].(map[string]*clusters.ClusterVersionHistory)
+		}
+		var arg2 *services.MetricInformationRange
+		if args[2] != nil {
+			arg2 = args[2].(*services.MetricInformationRange)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

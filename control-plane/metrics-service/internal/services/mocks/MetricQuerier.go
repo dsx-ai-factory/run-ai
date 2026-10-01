@@ -21,10 +21,19 @@ func NewMetricQuerier(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MetricQuerier {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MetricQuerier{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -76,17 +85,38 @@ type MetricQuerier_Query_Call struct {
 }
 
 // Query is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - query
-//   - timeRange
-func (_e *MetricQuerier_Expecter) Query(ctx interface{}, tenantId interface{}, query interface{}, timeRange interface{}) *MetricQuerier_Query_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - query string
+//   - timeRange *services.MetricInformationRange
+func (_e *MetricQuerier_Expecter) Query(ctx any, tenantId any, query any, timeRange any) *MetricQuerier_Query_Call {
 	return &MetricQuerier_Query_Call{Call: _e.mock.On("Query", ctx, tenantId, query, timeRange)}
 }
 
 func (_c *MetricQuerier_Query_Call) Run(run func(ctx context.Context, tenantId int32, query string, timeRange *services.MetricInformationRange)) *MetricQuerier_Query_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(string), args[3].(*services.MetricInformationRange))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 *services.MetricInformationRange
+		if args[3] != nil {
+			arg3 = args[3].(*services.MetricInformationRange)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
