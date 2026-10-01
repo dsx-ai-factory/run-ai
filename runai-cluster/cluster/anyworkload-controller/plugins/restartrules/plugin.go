@@ -36,7 +36,7 @@ type Plugin struct {
 }
 
 // NewPlugin builds the restartrules plugin with an explicit allowed-service-account
-// pattern list. Useful for tests that want to wire it directly.
+// identity list. Useful for tests that want to wire it directly.
 func NewPlugin(allowedServiceAccounts []string) *Plugin {
 	return &Plugin{allowedServiceAccounts: allowedServiceAccounts}
 }

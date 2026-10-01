@@ -110,6 +110,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 
 		It("Requester is runai-agent - allow", func() {
 			req.UserInfo.UID = runaiAgentUID
+			req.UserInfo.Username = "system:serviceaccount:runai:runai-agent"
 
 			for _, operation := range operations {
 				req.Operation = operation
@@ -191,13 +192,13 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test AccessRuleValidator with allowedServiceAccounts", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			accessRuleValidator = NewAccessRuleValidator(k8sClient, []string{"test-service", "kube-system"})
+			accessRuleValidator = NewAccessRuleValidator(k8sClient, []string{"system:serviceaccount:test-namespace:test-service-account", "system:serviceaccount:kube-system:coredns"})
 		})
 
-		It("Requester username contains allowed pattern - allow without checking service account UIDs", func() {
+		It("Requester username matches an allowed identity - allow without checking service account UIDs", func() {
 			// Set a random UID that doesn't match any service account
 			req.UserInfo.UID = uuid.New().String()
-			req.UserInfo.Username = "serviceaccount:test-namespace:test-service-account"
+			req.UserInfo.Username = "system:serviceaccount:test-namespace:test-service-account"
 
 			for _, operation := range operations {
 				req.Operation = operation
@@ -210,9 +211,9 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Requester username contains second allowed pattern - allow", func() {
+		It("Requester username matches the second allowed identity - allow", func() {
 			req.UserInfo.UID = uuid.New().String()
-			req.UserInfo.Username = "serviceaccount:kube-system:coredns"
+			req.UserInfo.Username = "system:serviceaccount:kube-system:coredns"
 
 			for _, operation := range operations {
 				req.Operation = operation
@@ -225,10 +226,10 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Requester username doesn't contain any allowed pattern - fall back to UID check", func() {
+		It("Requester username does not match any allowed identity - fall back to UID check", func() {
 			// Set the UID to runai-agent so it should be allowed by UID check
 			req.UserInfo.UID = runaiAgentUID
-			req.UserInfo.Username = "serviceaccount:default:some-other-service"
+			req.UserInfo.Username = "system:serviceaccount:default:some-other-service"
 
 			for _, operation := range operations {
 				req.Operation = operation
@@ -241,9 +242,9 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Requester username doesn't contain allowed pattern and UID is not allowed - deny", func() {
+		It("Requester username does not match an allowed identity and UID is not allowed - deny", func() {
 			req.UserInfo.UID = uuid.New().String()
-			req.UserInfo.Username = "serviceaccount:default:unauthorized-service"
+			req.UserInfo.Username = "system:serviceaccount:default:unauthorized-service"
 
 			for _, operation := range operations {
 				req.Operation = operation
@@ -266,7 +267,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 
 		It("Should fall back to UID check when allowedServiceAccounts is empty", func() {
 			req.UserInfo.UID = runaiAgentUID
-			req.UserInfo.Username = "serviceaccount:test:test-service"
+			req.UserInfo.Username = "system:serviceaccount:test:test-service"
 
 			for _, operation := range operations {
 				req.Operation = operation
@@ -279,7 +280,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Service account is from  system:serviceaccount - allow", func() {
+		It("Unlisted service account - deny", func() {
 			req.UserInfo.UID = uuid.New().String()
 			req.UserInfo.Username = "system:serviceaccount:kube-system:coredns"
 
@@ -287,23 +288,23 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 				req.Operation = operation
 				res := accessRuleValidator.Handle(context.Background(), req)
 
-				Expect(res.Result.Message).To(BeEmpty())
-				Expect(res.Allowed).To(BeTrue())
-				Expect(res.Result.Reason).To(BeEmpty())
-				Expect(res.Result.Code).To(Equal(int32(http.StatusOK)))
+				Expect(res.Result.Message).To(ContainSubstring("operation not allowed"))
+				Expect(res.Allowed).To(BeFalse())
+				Expect(res.Result.Reason).To(Not(BeEmpty()))
+				Expect(res.Result.Code).To(Equal(int32(http.StatusForbidden)))
 			}
 		})
 	})
 
-	Context("Test AccessRuleValidator with single allowedServiceAccount pattern", func() {
+	Context("Test AccessRuleValidator with single allowedServiceAccount identity", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			accessRuleValidator = NewAccessRuleValidator(k8sClient, []string{"admin"})
+			accessRuleValidator = NewAccessRuleValidator(k8sClient, []string{"system:serviceaccount:kube-system:admin-controller"})
 		})
 
-		It("Username contains the single allowed pattern - allow", func() {
+		It("Username matches the single allowed identity - allow", func() {
 			req.UserInfo.UID = uuid.New().String()
-			req.UserInfo.Username = "serviceaccount:kube-system:admin-controller"
+			req.UserInfo.Username = "system:serviceaccount:kube-system:admin-controller"
 
 			for _, operation := range operations {
 				req.Operation = operation
@@ -316,9 +317,9 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Username doesn't contain the pattern - deny if UID also not allowed", func() {
+		It("Username does not match the identity - deny if UID also not allowed", func() {
 			req.UserInfo.UID = uuid.New().String()
-			req.UserInfo.Username = "serviceaccount:default:user-service"
+			req.UserInfo.Username = "system:serviceaccount:default:user-service"
 
 			for _, operation := range operations {
 				req.Operation = operation
