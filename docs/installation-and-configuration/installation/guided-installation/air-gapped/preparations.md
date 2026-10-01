@@ -26,13 +26,13 @@ The installer does not install prerequisites or features at all in air-gapped en
 
 Each domain and certificate you prepared in [FQDN and DNS](../../../system-requirements/networking-setup.md#fqdn-and-dns) and [TLS Certificates](../../../system-requirements/networking-setup.md#tls-certificates) maps to a specific `config.yaml` field under `controlPlane` or `cluster`. Which ones you need depends on your deployment model (same-cluster or multi-cluster), your workload routing, and the workload types you plan to support - use this section as a reference for where each one goes. You supply the actual values when you write your `config.yaml` in [Same-Cluster Installation](same-cluster.md) or [Multi-Cluster Installation](multi-cluster.md).
 
-| Domain / Certificate | Config Field(s) | Required When | Notes |
+| Domain | Config Fields | Required When | Certificate |
 | --- | --- | --- | --- |
-| Control Plane Domain and Certificate | `controlPlane.domain`, `controlPlane.tls` | Always | Secures the NVIDIA Run:ai UI and API. |
-| Cluster Domain and Certificate | `cluster.domain`, `cluster.tls` | `cluster.domain`: multi-cluster only (same-cluster reuses `controlPlane.domain`). `cluster.tls`: always. | Secures communication between the control plane and the cluster. |
-| Workspaces, Training, and Distributed Inference Wildcard Certificate | `cluster.tls` (same field as above) | Required unless using path-based routing | Must be a wildcard matching the cluster domain (for example, `*.runai-a.mycorp.local`). Shares `cluster.tls` with the row above - not a separate field. |
-| Standard Inference Wildcard Domain and Certificate | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Only for standard inference (Knative) exposed externally via a wildcard FQDN | Not required for distributed inference (LWS, Dynamo, KServe, and other serving frameworks) or cluster-local standard inference. |
-| Local Certificate Authority (CA) | `tls.caChainPath` (or `controlPlane.tls.caChainPath` / `cluster.tls.caChainPath` per component) | If your certificates are signed by a private or local CA | Set once at the top level, or override per component if different components use different CAs. |
+| Control plane domain (for example, `runai.mycorp.local`) | `controlPlane.domain`, `controlPlane.tls` | Always | The exact domain |
+| Cluster domain (for example, `runai-a.mycorp.local`) | `cluster.domain`, `cluster.tls` | `cluster.domain`: multi-cluster only. In same-cluster, omit it and the cluster reuses the control plane domain. `cluster.tls`: always. | Covered by `cluster.tls`, see the next row |
+| Workspaces, training, and distributed inference (for example, `*.runai-a.mycorp.local`) | None. Do not set a separate domain field. The wildcard is `*.` plus your cluster domain. | Host-based routing (the default). Not needed with path-based routing. | The same `cluster.tls` certificate, which must list both `runai-a.mycorp.local` and `*.runai-a.mycorp.local` as Subject Alternative Names |
+| Standard inference (Knative), for example `*.runai-inference.mycorp.local` | `cluster.inference.wildcardDomain`, `cluster.inference.wildcardTls` | Standard inference exposed externally only | The wildcard, in `cluster.inference.wildcardTls` |
+| Local Certificate Authority (CA) | `tls.caChainPath` (or `controlPlane.tls.caChainPath` / `cluster.tls.caChainPath` per component) | If your certificates are signed by a private or local CA | Set once at the top level, or override per component if different components use different CAs |
 
 ## Registry Credentials
 

@@ -37,6 +37,20 @@ For [Multi-Node NVLink](../../../../platform-management/aiinitiatives/resources/
 
 </Note>
 
+<Note>
+
+**Note**
+
+To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), the following are required:
+
+* GPU Operator 26.7.1 or later is required.
+* CUDA driver r615 or later is required. GPU Operator 26.7.1 does not default to it, so set the driver version explicitly rather than relying on the default - with `--set driver.version=<version>` on Kubernetes, or by setting `driver.version` in the `ClusterPolicy` spec on OpenShift, where the GPU Operator is installed from OperatorHub.
+* The NRI plugin must be disabled. Install the GPU Operator with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false` on Kubernetes, or `cdi.nriPluginEnabled: false` in the `ClusterPolicy` spec on OpenShift). GPU memory fractions do not function while the NRI plugin is enabled.
+
+See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
+
+</Note>
+
 * For installation instructions, see [Installing the NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html).
 * Use the default `gpu-operator` namespace. Otherwise, you must specify the target namespace using the flag `clusterConfig.global.nvidiaDcgmExporter.namespace` as described in [Advanced Cluster Configurations](../../../../installation-and-configuration/configuration/cluster-config.md).
 * NVIDIA drivers may already be installed on the nodes. In such cases, use the NVIDIA GPU Operator flags `--set driver.enabled=false`. [DGX OS](https://docs.nvidia.com/dgx/dgx-os-6-user-guide/release_notes.html) is one such example as it comes bundled with NVIDIA Drivers.

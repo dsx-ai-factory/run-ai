@@ -45,7 +45,7 @@ If the NVIDIA Run:ai cluster is already deployed and connected to the control pl
 
 </Note>
 
-A cluster is your organization's compute infrastructure, where AI workloads are executed. The wizard asks you to choose an installation type - [Guided](../../installation-and-configuration/installation/guided-installation/README.md) (recommended) or [Manual Helm](../../installation-and-configuration/installation/install-using-helm/preparations.md) - then generates the corresponding `config.yaml`/`runai-installer` command or Helm command that you run on your Kubernetes cluster to install the required components and prepare the cluster for workload scheduling.
+A cluster is your organization's compute infrastructure, where AI workloads are executed. The wizard generates the [Helm](../../installation-and-configuration/installation/install-using-helm/preparations.md) command that you run on your Kubernetes cluster to install the required components and prepare the cluster for workload scheduling.
 
 The wizard displays **Waiting for cluster to connect** while the cluster is being installed and connected to the control plane. Once the installation completes successfully and the cluster establishes communication with the control plane, the wizard updates to **Cluster connected**. After completing the wizard flow, the cluster is added to the [Clusters](../../installation-and-configuration/operations/clusters.md) table.
 

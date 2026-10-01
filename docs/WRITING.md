@@ -85,12 +85,11 @@ Never use plain text for callouts or warnings. Every note, tip, warning, or
 important callout must use a Fern component — not bold text, blockquotes, or
 any other markdown construct.
 
-- `<Note>` — notes and supplemental information; open body with **Note**
+- `<Note>` — notes, supplemental information, and short informational
+  callouts; open body with **Note**; typically a single sentence, but a
+  brief bulleted list is acceptable for grouped short facts
 - `<Warning>` — caveats, prerequisites, breaking changes; use **Important**,
   **Prerequisite**, **Warning**, or **Breaking change from version X.Y:**
-- `<Callout intent="info">` — short informational notes; typically a
-  single sentence, but a brief bulleted list is acceptable for grouped
-  short facts
 - `<Accordion title="...">` — optional detail most readers can skip
 - `<Tabs>` / `<Tab title="...">` — steps that differ by interface; standard
   titles are `UI`, `CLI v2`, `API`

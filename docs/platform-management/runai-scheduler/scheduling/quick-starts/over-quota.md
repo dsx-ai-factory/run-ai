@@ -124,7 +124,7 @@ Copy the following command to your terminal. Make sure to update the following p
 ```bash
 curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer <TOKEN>' \ 
+--header 'Authorization: Bearer <TOKEN>' \
 --data '{
   "name": "a1",
   "projectId": "<PROJECT-ID>", 
@@ -225,7 +225,7 @@ Copy the following command to your terminal. Make sure to update the following p
 ```bash
 curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer <TOKEN>' \ 
+--header 'Authorization: Bearer <TOKEN>' \
 --data '{
   "name": "a2",
   "projectId": "<PROJECT-ID>", 
@@ -469,7 +469,7 @@ Copy the following command to your terminal. Make sure to update the following p
 ```bash
 curl --location 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer <TOKEN>' \ 
+--header 'Authorization: Bearer <TOKEN>' \
 --data '{
   "name": "b2",
   "projectId": "<PROJECT-ID>", 

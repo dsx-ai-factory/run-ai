@@ -27,7 +27,7 @@ var genericMetrics = []string{
 	"reporter_push_gateway_.*",
 	"kube_node_status_condition",
 	"runai_pod_group_phase_with_info",
-	"runai_pod_group_evicted_pods_total",
+	"runai_total_preemption_attempts",
 	"runai_queue_info",
 	"runai_queue_quota_cpu_cores",
 	"runai_queue_quota_memory_bytes",

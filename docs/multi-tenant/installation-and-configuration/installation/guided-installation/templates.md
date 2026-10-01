@@ -15,13 +15,8 @@ Use these templates to start with a complete `config.yaml` instead of building o
 
 Complete [Preparations](preparations.md) before using a template. This includes completing the applicable [System Requirements](../../system-requirements/README.md) and having the required wildcard domain, TLS certificate, networking values, registry credentials, and other installation inputs ready.
 
-<Note>
-
-**Note**
-
-See the [Configuration Reference](configuration-reference.md) for what every field accepts.
-
-</Note>
+* See [Control Plane Installation](installation.md#create-a-configuration-file) to understand the minimum configuration needed before adapting a template.
+* See [Configuration Reference](configuration-reference.md) for the full set of supported fields and descriptions.
 
 ## Full Installation
 

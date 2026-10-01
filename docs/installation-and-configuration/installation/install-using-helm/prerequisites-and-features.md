@@ -34,6 +34,20 @@ For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/usi
 
 </Note>
 
+<Note>
+
+**Note**
+
+To use GPU fractions (memory fractions, dynamic memory fractions, or compute modes), the following are required:
+
+* GPU Operator 26.7.1 or later is required.
+* CUDA driver r615 or later is required. GPU Operator 26.7.1 does not default to it, so set the driver version explicitly rather than relying on the default - with `--set driver.version=<version>` on Kubernetes, or by setting `driver.version` in the `ClusterPolicy` spec on OpenShift, where the GPU Operator is installed from OperatorHub.
+* The NRI plugin must be disabled. Install the GPU Operator with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false` on Kubernetes, or `cdi.nriPluginEnabled: false` in the `ClusterPolicy` spec on OpenShift). GPU memory fractions do not function while the NRI plugin is enabled.
+
+See [GPU Memory Fractions](../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) for the full requirement set.
+
+</Note>
+
 * For installation instructions, see [Installing the NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html).
 * For air-gapped installation, follow the instructions in [Install NVIDIA GPU Operator in Air-Gapped Environments](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/install-gpu-operator-air-gapped.html).
 * Use the default `gpu-operator` namespace. Otherwise, you must specify the target namespace using the flag `clusterConfig.global.nvidiaDcgmExporter.namespace` as described in [Advanced cluster configurations](../../configuration/cluster-config.md).
@@ -156,7 +170,7 @@ For air-gapped installation, follow the instructions in [Network Operator Deploy
 
 ### NVIDIA Dynamic Resource Allocation (DRA) Driver
 
-When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html) is required to enable Dynamic Resource Allocation at the Kubernetes level. To install, follow the instructions in [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver). The DRA driver is installed with the GPU Operator, for both connected and air-gapped installations.
+When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html) is required to enable Dynamic Resource Allocation at the Kubernetes level. To install, follow the instructions in [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver). The DRA driver is installed with the GPU Operator. For air-gapped installations, follow the air-gapped instructions in the [NVIDIA GPU Operator](#nvidia-gpu-operator) section.
 
 After the DRA driver is installed, update the cluster configuration using the `anyworkload-controller.GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai `anyworkload-controller` deployment and restarts the controller. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../configuration/cluster-config.md).
 
