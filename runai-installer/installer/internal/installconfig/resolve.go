@@ -25,7 +25,9 @@ const (
 
 // ResolveRegistry picks exactly one registry source and resolves its
 // credentials into a spec.Registry. Precedence: the --registry-token-path /
-// --ngc-token-path CLI flags override the config file's registry section.
+// --ngc-token-path CLI flags override the config file's registry section. With
+// neither, it falls back to anonymous NGC, which serves the public Run:ai OSS
+// charts and images.
 func ResolveRegistry(cfg *Config, registryTokenPath, ngcTokenPath string) (*spec.Registry, error) {
 	if registryTokenPath != "" && ngcTokenPath != "" {
 		return nil, errors.New("--registry-token-path and --ngc-token-path are mutually exclusive")
@@ -52,7 +54,7 @@ func ResolveRegistry(cfg *Config, registryTokenPath, ngcTokenPath string) (*spec
 	}
 
 	if cfg == nil || cfg.Registry == nil {
-		return nil, errors.New("no registry credentials: set --registry-token-path, --ngc-token-path, or registry in the config")
+		return &spec.Registry{Type: spec.RegistryTypeNGC}, nil
 	}
 	return resolveRegistryFromConfig(cfg.Registry)
 }

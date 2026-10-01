@@ -36,7 +36,7 @@ func MissingChartRepoError(chart string) error {
 	return fmt.Errorf("no chart repository configured for the %s chart: set the %s environment variable", chart, ChartRepoBaseEnv)
 }
 
-const ngcChartRepoProd = "https://helm.ngc.nvidia.com/nvidia/runai"
+const ngcChartRepoProd = "https://helm.ngc.nvidia.com/nvidia/runai-oss"
 
 const (
 	CPReleaseName      = "runai-backend"
