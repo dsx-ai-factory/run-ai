@@ -17,7 +17,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name CacheManagerInterface --output ./mocks --filename cache_manager.go
 type CacheManagerInterface[T any] interface {
 	Get(ctx context.Context, cacheKey string) (*T, error)
 	Set(ctx context.Context, cacheKey string, value T) error

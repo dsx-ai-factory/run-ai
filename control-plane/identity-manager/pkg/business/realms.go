@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 )
 
-//go:generate mockery --name RealmDal
 type RealmDal interface {
 	CreateRealm(ctx context.Context, realm *models.Realm) (*models.Realm, error)
 	DeleteRealm(ctx context.Context, realmName string) (*uuid.UUID, error)

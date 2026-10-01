@@ -9,5 +9,36 @@ packages:
       IIdm: {}
       IIdmExternalClient: {}
   github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
     interfaces:
-      TokensAPI: {}
+      AccessKeysAPI: {}
+      ClientsAPI:
+        config:
+          filename: ClientsApi.go
+      ConfigAPI:
+        config:
+          filename: ConfigApi.go
+      HealthAPI:
+        config:
+          filename: HealthApi.go
+      IdpsAPI:
+        config:
+          filename: IdpsApi.go
+      LoginsAPI:
+        config:
+          filename: LoginsApi.go
+      LogoutAPI: {}
+      OpenIDConnectAPI: {}
+      RealmAPI:
+        config:
+          filename: RealmApi.go
+      ServiceAccountsAPI: {}
+      SettingsAPI: {}
+      TokensAPI:
+        config:
+          filename: TokensApi.go
+      UsersAPI:
+        config:
+          filename: UsersApi.go
