@@ -851,8 +851,11 @@ func (s *WorkloadPropertiesService) GetAvailablePrioritiesAndCategories(ctx cont
 	var combinedResp api.GetAvailablePrioritiesAndCategories200Response
 
 	prioritiesResp, err := s.GetWorkloadClusterPriorities(ctx, clusterId, sortOrder, sortBy, filterBy)
-	if err != nil || prioritiesResp.Code != http.StatusOK {
+	if err != nil {
 		return api.Response(http.StatusServiceUnavailable, api.NewError(http.StatusServiceUnavailable, "failed to list available priorities", err)), err
+	}
+	if prioritiesResp.Code != http.StatusOK {
+		return prioritiesResp, nil
 	}
 
 	prioritiesRespBody := prioritiesResp.Body.(api.GetWorkloadClusterPriorities200Response)
