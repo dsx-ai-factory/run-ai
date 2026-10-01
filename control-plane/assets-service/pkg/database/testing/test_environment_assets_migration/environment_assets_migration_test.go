@@ -184,6 +184,56 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			Expect(actualCustomImage.Args).To(BeNil())
 		})
 
+		It("replaces the legacy vLLM 0.6.4 image without changing custom images", func() {
+			legacyVLLMEnvironmentID := "c6a8d1c6-79a0-4d32-a35d-f66db4894871"
+			customVLLMEnvironmentID := "79bb39a1-b5b4-45b5-8558-24fa5fc0bd74"
+			legacyVLLMImage := "runai.jfrog.io/core-llm/" + "runai-vllm:v0.6.4-0.10.0"
+			customVLLMImage := "example.com/custom/vllm:latest"
+			replacementVLLMImage := "docker.io/vllm/vllm-openai:v0.6.4"
+			replacementVLLMArgs := `-c "if [ -n \"$RUNAI_MODEL_NAME\" ]; then exec python3 -m vllm.entrypoints.openai.api_server --model \"$RUNAI_MODEL\" --served-model-name \"$RUNAI_MODEL_NAME\" --host 0.0.0.0 --port 8000; else exec python3 -m vllm.entrypoints.openai.api_server --model \"$RUNAI_MODEL\" --host 0.0.0.0 --port 8000; fi"`
+
+			db := runaidb.DB().Actual().WithContext(context.Background())
+			result := db.Exec(`
+				INSERT INTO assets_metadata (id, kind, scope, tenant_id, name, created_by, created_at, updated_by, updated_at) VALUES
+					(?, 'environment', 'tenant', ?, 'llm-server', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'llm-server', 'Run:ai', now(), 'Run:ai', now());`,
+				legacyVLLMEnvironmentID, tenantAId,
+				customVLLMEnvironmentID, tenantBId,
+			)
+			Expect(result.Error).To(BeNil())
+
+			result = db.Exec(`
+				INSERT INTO assets_environment (asset_id, image, command, args) VALUES
+					(?, ?, NULL, NULL),
+					(?, ?, NULL, NULL);`,
+				legacyVLLMEnvironmentID, legacyVLLMImage,
+				customVLLMEnvironmentID, customVLLMImage,
+			)
+			Expect(result.Error).To(BeNil())
+
+			migrateTo(20250007, "up 20250008")
+
+			type environmentSpec struct {
+				Image   string
+				Command *string
+				Args    *string
+			}
+
+			var actualVLLM environmentSpec
+			result = db.Raw("SELECT image, command, args FROM assets_environment WHERE asset_id = ?", legacyVLLMEnvironmentID).Scan(&actualVLLM)
+			Expect(result.Error).To(BeNil())
+			Expect(actualVLLM.Image).To(Equal(replacementVLLMImage))
+			Expect(actualVLLM.Command).NotTo(BeNil())
+			Expect(*actualVLLM.Command).To(Equal("bash"))
+			Expect(actualVLLM.Args).NotTo(BeNil())
+			Expect(*actualVLLM.Args).To(Equal(replacementVLLMArgs))
+
+			var actualCustomVLLMImage string
+			result = db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", customVLLMEnvironmentID).Scan(&actualCustomVLLMImage)
+			Expect(result.Error).To(BeNil())
+			Expect(actualCustomVLLMImage).To(Equal(customVLLMImage))
+		})
+
 		It("environment assets migration", func() {
 			// inject the preset environments and verify they are exists
 			injectPresetEnvironments()
