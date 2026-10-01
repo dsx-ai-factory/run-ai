@@ -4,14 +4,6 @@ metadata:
   name: runai-anyworkload-controller-project
 rules:
   - apiGroups:
-      - ""
-    resources:
-      - configmaps
-    verbs:
-      - create
-      - update
-      - patch
-  - apiGroups:
       - run.ai
     resources:
       - workloadrunners
@@ -92,14 +84,6 @@ rules:
       - ""
     resources:
       - namespaces
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
     verbs:
       - get
       - list

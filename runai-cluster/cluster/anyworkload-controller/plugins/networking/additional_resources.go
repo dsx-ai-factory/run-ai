@@ -9,7 +9,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
@@ -38,15 +37,6 @@ func (p *Plugin) HandleAdditionalResources(
 	k8sClient client.Client,
 	state *reconcile.State,
 ) error {
-	if p.templatesEnabled {
-		if err := p.ensureOAuth2Templates(ctx, runner, k8sClient); err != nil {
-			_ = state.AddPluginIssue(ctx, p, runner, err, false, "OAuth2 proxy templates", issue.Network)
-			state.RequestRequeueAfter(30 * time.Second)
-		}
-	}
-	if p.routingDisabled {
-		return nil
-	}
 	shape, cfg, err := classifyInput(runner)
 	if err != nil {
 		_ = state.AddPluginIssue(ctx, p, runner, err, false, "", issue.Network)

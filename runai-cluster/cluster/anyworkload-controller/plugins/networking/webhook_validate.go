@@ -22,9 +22,6 @@ func (p *Plugin) WebhookValidate(
 	existingRunner *dromosv1alpha1.WorkloadRunner,
 	desiredRunner *dromosv1alpha1.WorkloadRunner,
 ) (admission.Warnings, field.ErrorList) {
-	if p.routingDisabled {
-		return nil, nil
-	}
 	shape, cfg, err := classifyInput(desiredRunner)
 	if err != nil {
 		return nil, field.ErrorList{field.Forbidden(

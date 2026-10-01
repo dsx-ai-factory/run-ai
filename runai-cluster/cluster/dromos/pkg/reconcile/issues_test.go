@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
@@ -24,22 +23,6 @@ func TestIssues(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Issues Suite")
 }
-
-var _ = Describe("Deferred plugin retries", func() {
-	DescribeTable("preserves the earliest positive retry requested by plugins",
-		func(delays []time.Duration, expected time.Duration) {
-			state := reconcile.New()
-			for _, delay := range delays {
-				state.RequestRequeueAfter(delay)
-			}
-			Expect(state.RequeueAfter()).To(Equal(expected))
-		},
-		Entry("no retry requested", nil, time.Duration(0)),
-		Entry("shorter retry takes priority", []time.Duration{time.Minute, 30 * time.Second}, 30*time.Second),
-		Entry("later requests cannot postpone recovery", []time.Duration{30 * time.Second, time.Minute}, 30*time.Second),
-		Entry("nonpositive requests cannot cancel recovery", []time.Duration{time.Minute, 0, -time.Second}, time.Minute),
-	)
-})
 
 var _ = Describe("SetControllerIssues", func() {
 	var (
