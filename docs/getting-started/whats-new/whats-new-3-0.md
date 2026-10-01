@@ -105,6 +105,8 @@ Upgrading to v3.0 requires administrators to perform additional steps beyond the
 NVIDIA Run:ai v3.0 updates supported versions across Kubernetes distributions, NVIDIA operators, and framework operators. Refer to [Support Matrix](../../installation-and-configuration/support-matrix.md) for the complete list of supported versions.
 
 * **NVIDIA GPU Operator 26.7.1** - The maximum supported version is now 26.7.1. With GPU Operator 26.7, the DRA driver is installed by the GPU Operator instead of separately.
+* **NVIDIA NIM Operator 3.1.x** - Version 3.1.x is now supported.
+* **NVIDIA Dynamo Operator 1.4.x** - Version 1.4.x is now supported.
 * **Prometheus / Kube-Prometheus Stack 3.13.1 / 88.6.5** - The minimum supported versions are now 3.13.1 and 88.6.5.
 * **Knative Serving 1.23** - The maximum supported version is now 1.23.
 * **Kubeflow Training Operator 1.9.4** - Version 1.9.4 is now supported.
