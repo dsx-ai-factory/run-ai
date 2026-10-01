@@ -3,10 +3,10 @@ module github.com/dsx-ai-factory/run-ai/control-plane/metric-stores-migrator
 go 1.27.1
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.19
+	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.21
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
 	github.com/pkg/errors v0.9.1
@@ -15,7 +15,7 @@ require (
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
