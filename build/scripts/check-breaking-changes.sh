@@ -28,6 +28,16 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # every exported mock symbol, which would otherwise dominate the report.
 IGNORED_CHANGES_REGEX='^- (\./([^ ]*/)?mocks\.|package [^ ]*/mocks:)'
 
+# Service clients (control-plane/<service>/pkg/client): the module root is the
+# hand-written facade in api.go. apidiff marks a new method on that interface
+# incompatible because it breaks implementers, but callers are unaffected and
+# mocks are regenerated. The contract this check versions is the generated API
+# source (./generated and other subpackages). Facade additions are a patch.
+# Removals and signature changes on the facade stay breaking.
+# Root-package lines have no "./" prefix; subpackages are "./generated...."
+# or "package <module>/<sub>: ...".
+CLIENT_FACADE_ADDITION_REGEX='^- [^./].*: added$'
+
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 die() { echo -e "${RED}Error: $*${NC}" >&2; exit 2; }
@@ -36,6 +46,10 @@ die() { echo -e "${RED}Error: $*${NC}" >&2; exit 2; }
 # a valid empty result rather than a failure.
 filter_ignored() {
     grep -v -E "$IGNORED_CHANGES_REGEX" || true
+}
+
+is_service_client() {
+    [[ "$TAG_FORMAT" == control-plane/*/pkg/client ]]
 }
 
 # Extract one section of an apidiff report. Report.Text writes the incompatible
@@ -147,6 +161,20 @@ result=$(apidiff -m "$OLD_API" "$NEW_API" 2>"$APIDIFF_STDERR") \
 
 BREAKING_CHANGES=$(printf '%s\n' "$result" | report_section Incompatible | filter_ignored)
 COMPAT_CHANGES=$(printf '%s\n' "$result" | report_section Compatible | filter_ignored)
+
+# New methods on the hand-written client facade are not a change to the
+# generated API source. Keep them visible as compatible; do not minor-bump.
+if is_service_client && [ -n "$BREAKING_CHANGES" ]; then
+    facade_additions=$(printf '%s\n' "$BREAKING_CHANGES" | grep -E "$CLIENT_FACADE_ADDITION_REGEX" || true)
+    if [ -n "$facade_additions" ]; then
+        BREAKING_CHANGES=$(printf '%s\n' "$BREAKING_CHANGES" | grep -v -E "$CLIENT_FACADE_ADDITION_REGEX" || true)
+        if [ -n "$COMPAT_CHANGES" ]; then
+            COMPAT_CHANGES=$(printf '%s\n%s\n' "$COMPAT_CHANGES" "$facade_additions")
+        else
+            COMPAT_CHANGES=$facade_additions
+        fi
+    fi
+fi
 
 BREAKING=false
 [ -n "$BREAKING_CHANGES" ] && BREAKING=true
