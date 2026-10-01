@@ -1,4 +1,20 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # GitHub issue-chooser configuration.
 # Reference: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+#
+# The chooser is limited to bug reports, feature requests, documentation
+# requests, and the security contact link. Blank issues stay off so every issue
+# arrives with the fields triage needs, and usage questions go to Discussions
+# rather than an issue template.
 
 blank_issues_enabled: false
+
+contact_links:
+  - name: Ask a question
+    url: https://github.com/dsx-ai-factory/run-ai/discussions
+    about: Ask usage questions and start design conversations in Discussions.
+  - name: Report a security vulnerability
+    url: https://www.nvidia.com/en-us/security/report-vulnerability/
+    about: Never open a public issue for a security vulnerability. Report it privately to NVIDIA PSIRT — see SECURITY.md.
