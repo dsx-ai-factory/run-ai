@@ -28,11 +28,7 @@ MOCKERY_VERSION=v3.8.0
 # Must be new enough to decode the Go release's export data: v2.9.0 fails
 # every package on Go 1.27 with "export data version 4 ... (typecheck)".
 GOLANGCI_LINT_VERSION=v2.13.2
-# Both orgs' modules are private: fetch them directly, not through the public
-# proxy, and skip the public checksum database. Exported so host-side tools (the
-# versioning scripts) see it too, not only the containers that get it via -e.
-GOPRIVATE=github.com/run-ai/*,github.com/dsx-ai-factory/*
-export GOPRIVATE
+GOPRIVATE=github.com/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.
 GINKGO_TIMEOUT?=15m
