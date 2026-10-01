@@ -13,11 +13,20 @@ import (
 )
 
 func TestNGCChartRepo(t *testing.T) {
-	assert.Equal(t, "https://helm.ngc.nvidia.com/nvidia/runai",
-		NGCChartRepo(config.EnvProd))
-
-	assert.Equal(t, "https://helm.ngc.nvidia.com/nvstaging/runai",
-		NGCChartRepo(config.EnvStaging))
+	for _, tc := range []struct {
+		name string
+		env  config.RunaiEnvType
+		want string
+	}{
+		{name: "prod", env: config.EnvProd, want: "https://helm.ngc.nvidia.com/nvidia/runai"},
+		{name: "staging", env: config.EnvStaging, want: ""},
+		{name: "lab", env: config.EnvLab, want: ""},
+		{name: "test", env: config.EnvTest, want: ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, NGCChartRepo(tc.env))
+		})
+	}
 }
 
 func TestChartAuth_IsZero(t *testing.T) {

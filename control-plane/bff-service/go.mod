@@ -7,7 +7,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.3
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.2
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
@@ -109,7 +109,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.46.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.46.0 // indirect
 	go.opentelemetry.io/otel/trace v1.46.0 // indirect
-	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect

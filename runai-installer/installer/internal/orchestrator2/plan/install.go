@@ -512,8 +512,8 @@ func caChainPath(tls *spec.TLS) string {
 
 // cpChartSource picks the control plane chart repository: an explicit
 // registry.chartRepository override wins; otherwise NGC installs use the NGC
-// repository and everything else uses the chart repository base from the
-// environment (see step.ChartRepoBaseEnv).
+// repository (see step.NGCChartRepo) and everything else uses the chart
+// repository base from the environment (see step.ChartRepoBaseEnv).
 func cpChartSource(s *spec.Spec) (repo string, isOCI bool) {
 	if override := chartRepositoryOverride(s.Registry); override != "" {
 		return override, false

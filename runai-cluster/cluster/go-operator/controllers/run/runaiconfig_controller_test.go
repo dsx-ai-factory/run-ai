@@ -152,6 +152,9 @@ func TestImages(t *testing.T) {
 	t.Setenv("IMG_THIRD_PARTY_GIT_SYNC_REGISTRY", "registry.k8s.io")
 	t.Setenv("IMG_THIRD_PARTY_GIT_SYNC_REPOSITORY", "git-sync/git-sync")
 	t.Setenv("IMG_THIRD_PARTY_GIT_SYNC_TAG", "v4.7.0")
+	t.Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_REGISTRY", "quay.io")
+	t.Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_REPOSITORY", "oauth2-proxy/oauth2-proxy")
+	t.Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_TAG", "v7.15.4")
 	t.Setenv("IMG_THIRD_PARTY_VALKEY_REGISTRY", "docker.io")
 	t.Setenv("IMG_THIRD_PARTY_VALKEY_REPOSITORY", "valkey/valkey")
 	t.Setenv("IMG_THIRD_PARTY_VALKEY_TAG", "9.0.4")
@@ -197,7 +200,7 @@ func TestImages(t *testing.T) {
 
 func checkNoNewThirdPartyImageInOperator(opImageMap map[string]*common.Image) bool {
 	imageMap := map[string]bool{}
-	for _, name := range []string{"GIT_SYNC", "VALKEY", "WAIT_UBI_MINIMAL"} {
+	for _, name := range []string{"GIT_SYNC", "OAUTH2_PROXY", "VALKEY", "WAIT_UBI_MINIMAL"} {
 		image := common.ThirdPartyImage(name)
 		imageMap[*image.Name+":"+*image.Tag] = true
 	}

@@ -63,7 +63,7 @@ A GPU application sees its own share of GPU memory through the NVIDIA Management
 
 A GPU memory fraction submitted without a Limit has a Limit equal to its Request. The GPU application therefore sees a GPU memory space the size of the Request, and that size does not change while the workload runs.
 
-For a workload submitted with a Request and a Limit, the free memory reported to the GPU application always covers the rest of its Request, and grows beyond that when the GPU has memory to spare - never above the Limit. In other words, the Request is always available to the workload, and the memory between the Request and the Limit is available only while no one else needs it.
+For a workload submitted with a Request and a Limit, the free memory reported to the GPU application always covers the rest of its Request, and grows beyond that when the GPU has memory to spare - never above the Limit. In other words, the Request is always available to the workload, and the memory between the Request and the Limit is available only while no one else needs it. Refer to [Known limitations with CUDA 13.4 and driver r615](#known-limitations-with-cuda-134-and-driver-r615) for cases where this guarantee does not hold.
 
 For example, take a workload with a 4 GB Request and a 12 GB Limit that is currently using 1 GB of GPU memory:
 
@@ -100,6 +100,7 @@ Dynamic GPU memory fractions require the following on every GPU node in the clus
 | CUDA | 13.4 or later |
 | CUDA driver | r615 or later |
 | NVIDIA GPU Operator | 26.7.1 or later |
+| NVIDIA GPU Operator NRI plugin | Disabled. Install the NVIDIA GPU Operator with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false`). GPU memory fractions do not function while the NRI plugin is enabled. |
 
 ## Setting Dynamic GPU Memory Fractions
 
@@ -242,6 +243,13 @@ Policy enforcement does not reach [externally submitted workloads](../../../work
 * The Limit is enforced at runtime only and is never read by the Scheduler. Raising a Limit does not change where a workload is placed.
 * Memory loaned above the Request is not guaranteed. A workload operating above its Request can have that memory reclaimed at any time.
 * To keep a workload running through a memory reclaim, build the container so that the process accessing the GPU is not the root process of the container. A workload whose root process accesses the GPU directly is terminated when its loaned memory is reclaimed.
+
+### Known Limitations with CUDA 13.4 and Driver r615
+
+The following limitations apply to dynamic GPU memory fractions when running on CUDA 13.4 with driver r615. Both issues will be resolved in a future release of CUDA.
+
+* **Memory is reclaimed from one workload at a time.** When several workloads on a GPU are using memory above their Request, and another workload on that GPU allocates up to its own Request, only one of the bursting workloads receives an OOMKill signal. If that single reclaim does not free enough memory, the allocating workload does not receive the full memory of its Request.
+* **A workload allocating within its Request can be terminated.** In some scenarios, a workload allocating memory up to its Request receives a SIGKILL, instead of memory being reclaimed from the workloads operating above their own Request. Administrators can address this using the misc cgroup fallback. Refer to [MPS memory partitioning](https://docs.nvidia.com/deploy/mps/latest/mpsv3-memory-partitioning.html) for the affected scenarios and the configuration.
 
 ## Using CLI
 

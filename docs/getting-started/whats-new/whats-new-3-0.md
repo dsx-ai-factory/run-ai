@@ -4,13 +4,13 @@ The NVIDIA Run:ai v3.0 what's new provides a detailed summary of the latest feat
 
 For a full list of changes, see the GitHub changelog (TBD).
 
-<Info>
+<Note>
 
 **Note**
 
 For a complete list of deprecated features, APIs, and capabilities, see [Deprecation Notifications](deprecation-notifications.md).
 
-</Info>
+</Note>
 
 ## Feature Life Cycle
 

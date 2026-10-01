@@ -5,7 +5,10 @@
 
 # Shell helpers sourced by build/makefile/versioning.mk recipes and by
 # check-breaking-changes.sh. Required env: TAG_FORMAT. Optional: MAX_PATCH
-# (defaults to 100).
+# (defaults to 100), and for unattended use (CI):
+#   AUTO_TAG=1  don't prompt: tag what apidiff decided -- patch for a compatible
+#               change, minor for a breaking one.
+#   DRY_RUN=1   compute and print the tag, create nothing.
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -22,6 +25,9 @@ versioning_max_patch() {
 # apidiff only catches signature-level breaks, not behavior changes — confirm with a human before tagging.
 versioning_confirm() {
     local prompt="$1" reply
+    case "${AUTO_TAG:-}" in
+        1|true) return 0 ;;
+    esac
     read -r -p "${prompt} [y/N] " reply
     case "$reply" in
         y|Y) return 0 ;;
@@ -124,6 +130,10 @@ versioning_next_dev_tag() {
 # git tag + git push + echo. Used by both the prod and dev bump paths.
 versioning_create_tag() {
     local new_tag="$1" tag_message="$2"
+    if [ "${DRY_RUN:-}" = "1" ]; then
+        printf "%b[dry-run] Would publish tag: %s%b\n" "$BLUE" "$new_tag" "$NC"
+        return 0
+    fi
     if ! versioning_confirm "Create tag ${new_tag}?"; then
         echo "Aborted — no tag created."
         return 0

@@ -7,7 +7,6 @@ package common
 
 import (
 	"context"
-	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -78,52 +77,5 @@ var _ = Describe("common", func() {
 		Expect(*image.Name).To(Equal("git-sync"))
 		Expect(*image.Tag).To(Equal("v4.4.0"))
 		Expect(image.PullPolicy).To(Equal(v1.PullIfNotPresent))
-	})
-
-	It("Image with deprecated repository set", func(ctx context.Context) {
-		image := &Image{
-			Repository: ptr.To("repo"),
-		}
-		image.SetDefaultsWhereNeeded(&Image{
-			Name: ptr.To("name"),
-		})
-
-		Expect(*image.Registry).To(Equal(fmt.Sprintf("%s%s", "repo", DefaultEnv)))
-	})
-
-	It("Image with deprecated env set", func(ctx context.Context) {
-		image := &Image{
-			Env: ptr.To("env"),
-		}
-		image.SetDefaultsWhereNeeded(&Image{
-			Name: ptr.To("name"),
-		})
-
-		Expect(*image.Registry).To(Equal(fmt.Sprintf("%s%s", DefaultRepositeory, "env")))
-	})
-
-	It("Image with deprecated env and repository set", func(ctx context.Context) {
-		image := &Image{
-			Env:        ptr.To("env"),
-			Repository: ptr.To("repo"),
-		}
-		image.SetDefaultsWhereNeeded(&Image{
-			Name: ptr.To("name"),
-		})
-
-		Expect(*image.Registry).To(Equal(fmt.Sprintf("%s%s", "repo", "env")))
-	})
-
-	It("Image with deprecated env and repository set and global registry", func(ctx context.Context) {
-		image := &Image{
-			Env:        ptr.To("env"),
-			Repository: ptr.To("repo"),
-		}
-		image.SetDefaultsWhereNeeded(&Image{
-			Registry: ptr.To("global"),
-			Name:     ptr.To("name"),
-		})
-
-		Expect(*image.Registry).To(Equal(fmt.Sprintf("%s%s", "repo", "env")))
 	})
 })
