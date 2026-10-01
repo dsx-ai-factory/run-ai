@@ -71,6 +71,7 @@ dependents=""
 while :; do
   added=false
   while IFS= read -r gomod; do
+    gomod="${repo_root}/${gomod#./}"
     dir="$(dirname "${gomod}")"
     grep -qxF "${dir}" <<<"${direct}"$'\n'"${dependents}" && continue
     while IFS= read -r target; do
@@ -80,7 +81,8 @@ while :; do
         break
       fi
     done < <(local_replace_targets "${gomod}")
-  done < <(find "${repo_root}" -name go.mod -not -path '*/.*' -not -path '*/vendor/*')
+  # Relative paths, so a hidden directory above the checkout doesn't exclude everything.
+  done < <(cd "${repo_root}" && find . -name go.mod -not -path '*/.*' -not -path '*/vendor/*')
   [[ "${added}" == true ]] || break
 done
 
