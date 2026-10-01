@@ -27,7 +27,6 @@ const (
 	TenantSettingAdvancedGpuMetrics = "tenant.enable_advanced_gpu_metrics"
 )
 
-//go:generate mockery --name TenantSettingsClient --output ../../../mocks/pkg/clients/backend
 type TenantSettingsClient interface {
 	GetAdvancedGpuMetricsSetting(ctx context.Context) (bool, error)
 

@@ -12,11 +12,9 @@ import (
 	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 )
 
-//go:generate mockery --name IWorkloadsExternalClient
 type IWorkloadsExternalClient interface {
 }
 
-//go:generate mockery --name IWorkloadsClient
 type IWorkloadsClient interface {
 	IWorkloadsExternalClient
 	GetAncestors(ctx context.Context, resourceId string) (*openapi.Ancestors, error)

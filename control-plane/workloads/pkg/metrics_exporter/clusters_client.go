@@ -11,7 +11,6 @@ import (
 	api "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 )
 
-//go:generate mockery --name ClustersClienter
 type ClustersClienter interface {
 	GetClusterIds(ctx context.Context, tenantId int32) ([]string, error)
 }
