@@ -36,3 +36,13 @@ packages:
   github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client:
     interfaces:
       ITenantsManager:
+  github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated:
+    config:
+      dir: pkg/client/mocks
+      include-auto-generated: true
+    interfaces:
+      HealthAPI:
+      InternalAPI:
+      LogoAPI:
+      TenantAPI:
+      TenantsAPI:

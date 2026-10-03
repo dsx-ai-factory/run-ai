@@ -31,7 +31,7 @@ NVIDIA Run:ai uses the following third-party components which are managed as Kub
 *   **Thanos** - To enable Thanos autoscaling, use the following NVIDIA Run:ai control plane helm flags:
 
     ```bash
-    --set thanos.query.autoscaling.enabled=true \  
+    --set thanos.query.autoscaling.enabled=true \
     --set thanos.query.autoscaling.maxReplicas=2 \
     --set thanos.query.autoscaling.minReplicas=2 
     ```

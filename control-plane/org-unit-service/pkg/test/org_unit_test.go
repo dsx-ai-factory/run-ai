@@ -392,7 +392,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			}
 			creationReq.Resources[0].Rank = ptr.To("High") // set non-default priority
 			creationReq.Resources = append(creationReq.Resources, CreateNodePoolApiResourcesNoQuota(nodePoolId2, nodePoolName2))
-			creationReq.Resources[1].Priority = ptr.To("VeryLow") // set non-default priority for np2 - using backwards priority
+			creationReq.Resources[1].Rank = ptr.To("VeryLow") // set non-default rank for np2
 			depBothRes, err := departmentApiService.CreateDepartment(ctx, creationReq)
 			Expect(err).To(BeNil())
 			Expect(depBothRes.Code).To(Equal(http.StatusCreated), fmt.Sprint("failed creating department: ", depBothRes.Body))
@@ -1353,8 +1353,6 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				}
 				Expect(defR.Rank).ToNot(BeNil())
 				Expect(*defR.Rank).To(Equal("VeryLow"))
-				Expect(defR.Priority).ToNot(BeNil())
-				Expect(*defR.Priority).To(Equal("VeryLow"))
 			})
 
 			It("project create+update succeed when quota and ranks are enabled", func() {
@@ -1397,8 +1395,6 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				}
 				Expect(defR.Rank).ToNot(BeNil())
 				Expect(*defR.Rank).To(Equal("VeryLow"))
-				Expect(defR.Priority).ToNot(BeNil())
-				Expect(*defR.Priority).To(Equal("VeryLow"))
 			})
 		})
 

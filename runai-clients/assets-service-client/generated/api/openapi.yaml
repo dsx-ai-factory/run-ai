@@ -10223,7 +10223,7 @@ paths:
       - Inferences
       x-service: assets-service
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-no-authorization: true
   /api/v1/inference/{workloadId}:
     delete:
@@ -10355,7 +10355,7 @@ paths:
       x-no-authorization: true
       x-service: assets-service
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
   /api/v2/inference:
     post:
       description: Creates an inference from a given set of assets. The set must include
@@ -18250,9 +18250,9 @@ components:
           type: string
       type: object
     AllowPrivilegeEscalation:
-      description: Allow the container running the workload and all launched processes
-        to gain additional privileges after the workload starts. For more information
-        consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+      description: "Allow the container running the workload and all launched processes\
+        \ to gain additional privileges after the workload starts. For more information\
+        \ consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
       example: false
       nullable: true
       type: boolean
@@ -18471,7 +18471,7 @@ components:
         \ `custom` - user and group ids can be specified in the environment asset\
         \ and/or the workload creation request. c. `idpToken` - user and group IDs\
         \ are automatically taken from the identity provider (IdP) token (available\
-        \ only in SSO-enabled installations). For more information, see [User Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers)."
+        \ only in SSO-enabled installations). For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)."
       enum:
       - fromTheImage
       - fromIdpToken
@@ -59120,7 +59120,7 @@ components:
           description: "Indicates whether the inference serving endpoint should be\
             \ accessible outside the cluster. If set to true, the endpoint will be\
             \ exposed externally. To enable external access, your administrator must\
-            \ configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference).\
+            \ configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate).\
             \ section."
           nullable: true
           type: boolean
@@ -65226,9 +65226,9 @@ components:
       nullable: true
       properties:
         allowPrivilegeEscalation:
-          description: Allow the container running the workload and all launched processes
-            to gain additional privileges after the workload starts. For more information
-            consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+          description: "Allow the container running the workload and all launched\
+            \ processes to gain additional privileges after the workload starts. For\
+            \ more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
           example: false
           nullable: true
           type: boolean

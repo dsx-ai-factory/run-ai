@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi
 go 1.27.1
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.14
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.16
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 )
@@ -20,7 +20,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
@@ -70,7 +70,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.46.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.46.0 // indirect
 	go.opentelemetry.io/otel/trace v1.46.0 // indirect
-	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/net v0.59.0 // indirect

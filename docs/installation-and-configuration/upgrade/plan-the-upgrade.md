@@ -42,9 +42,10 @@ The following v3.0 changes can affect your upgrade. Review each one and determin
 
 GPU fractions remain supported in v3.0, now powered by NVIDIA CUDA instead of the previous proprietary engine. This affects every cluster running fractional GPU workloads:
 
-* Workloads using GPU fractions must be suspended (native workload types) or deleted (supported workload types) before the NVIDIA Run:ai upgrade begins.
+* Running workloads using GPU fractions must be suspended (native workload types) or deleted (supported workload types) before the NVIDIA Run:ai upgrade begins.
 * CUDA 13.4 or later, CUDA driver r615 or later, and GPU Operator 26.7.1 or later are required for fractions to work on v3.0.
 * GPU Operator 26.7.1 does not default to CUDA driver r615. Set the driver version explicitly - see [Migrate GPU Fractions](migrate-gpu-fractions.md).
+* The GPU Operator must be installed with `cdi.nriPluginEnabled` set to `false` (`--set cdi.nriPluginEnabled=false`). GPU memory fractions do not function while the NRI plugin is enabled.
 * For [supported workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), Kubernetes manifests using dynamic fractions (a fraction request with a memory limit) require migration to a new annotation. [Native workload types](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) keep the same UI, API, and CLI fields - NVIDIA Run:ai converts them to the new annotation format automatically.
 * You can choose whether to upgrade the CUDA driver and GPU Operator before or after upgrading NVIDIA Run:ai - the choice affects only how long fractions stay unavailable.
 
@@ -54,7 +55,7 @@ See [Migrate GPU Fractions](migrate-gpu-fractions.md) for the full procedure.
 
 The controllers and CRDs behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller and CRD.
 
-Native workloads submitted before upgrading through a legacy workload type continue running after the upgrade, but some capabilities are unavailable until the workload is resubmitted. Identify workloads on legacy types now so you can plan for resubmission after upgrading.
+Running native workloads that were submitted through a legacy workload type before upgrading continue running after the upgrade, but some capabilities are unavailable until the workload is resubmitted. Identify running workloads on legacy types now so you can plan for resubmission after upgrading.
 
 See [Migrate Legacy Workloads](migrate-legacy-workloads.md) for the affected capabilities and the resubmission procedure.
 
@@ -79,7 +80,7 @@ A fresh GPU Operator installation installs the [NVIDIA DRA driver](https://docs.
 ## Upgrade Workflow
 
 1. [Back up your deployment](backup-before-upgrading.md), including cluster and control plane configuration and any third-party services such as PostgreSQL and metrics storage.
-2. If you use GPU fractions, suspend or delete workloads using GPU fractions and migrate any dynamic fractions YAML as described in [Migrate GPU Fractions](migrate-gpu-fractions.md).
+2. If you use GPU fractions, suspend or delete running workloads using GPU fractions and migrate any dynamic fractions YAML as described in [Migrate GPU Fractions](migrate-gpu-fractions.md).
 3. [Upgrade NVIDIA Run:ai](upgrade.md): prepare the software artifacts, then upgrade the control plane followed by the cluster.
-4. [Migrate legacy workloads](migrate-legacy-workloads.md) if they apply to your environment, including resubmitting workloads on legacy types and resubmitting any GPU fraction workloads suspended or deleted in step 2.
+4. [Migrate legacy workloads](migrate-legacy-workloads.md) if they apply to your environment, including resubmitting running workloads on legacy types and resubmitting any GPU fraction workloads suspended or deleted in step 2.
 5. Verify affected functionality - confirm the cluster is **Connected**, GPU fractions are enforcing their limits, and resubmitted workloads behave as expected.

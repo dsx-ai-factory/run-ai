@@ -115,12 +115,10 @@ func MapUpdateRequestToModel(
 
 func mapUpdateResourcesRequestToModel(ctx context.Context, requestedResources []api.ResourcesNullable, project *models.Project, nodePoolsMetadata map[string]cluster_openapi.NodepoolMinimal) error {
 	originalResourcesNodePoolToId := make(map[string]uuid.UUID)
-	originalResourcesNodePoolIdToRank := make(map[string]string)
 	for _, originalResources := range project.OrgUnitData.Resources {
 		originalResourcesNodePoolToId[originalResources.NodePoolId] = originalResources.ID
-		originalResourcesNodePoolIdToRank[originalResources.NodePoolId] = ptr.Deref(originalResources.Rank, models.DefaultResourceRank)
 	}
-	newResources, err := services.ApiResourcesToModel(ctx, requestedResources, false, nodePoolsMetadata, true, originalResourcesNodePoolToId, originalResourcesNodePoolIdToRank)
+	newResources, err := services.ApiResourcesToModel(ctx, requestedResources, false, nodePoolsMetadata, true, originalResourcesNodePoolToId)
 	if err != nil {
 		return err
 	}
@@ -135,12 +133,10 @@ func mapUpdateResourcesRequestToModel(ctx context.Context, requestedResources []
 
 func mapPatchResourcesRequestToModel(ctx context.Context, requestedResources []api.ResourcesNullable, project *models.Project, nodePoolsMetadata map[string]cluster_openapi.NodepoolMinimal) error {
 	originalResourcesNodePoolToId := make(map[string]uuid.UUID)
-	originalResourcesNodePoolIdToRank := make(map[string]string)
 	for _, originalResources := range project.OrgUnitData.Resources {
 		originalResourcesNodePoolToId[originalResources.NodePoolId] = originalResources.ID
-		originalResourcesNodePoolIdToRank[originalResources.NodePoolId] = ptr.Deref(originalResources.Rank, models.DefaultResourceRank)
 	}
-	newResources, err := services.ApiResourcesToModel(ctx, requestedResources, false, nodePoolsMetadata, false, originalResourcesNodePoolToId, originalResourcesNodePoolIdToRank)
+	newResources, err := services.ApiResourcesToModel(ctx, requestedResources, false, nodePoolsMetadata, false, originalResourcesNodePoolToId)
 	if err != nil {
 		return err
 	}

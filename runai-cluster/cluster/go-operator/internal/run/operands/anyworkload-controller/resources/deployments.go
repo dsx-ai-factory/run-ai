@@ -298,6 +298,17 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 		}
 	}
 
+	if gatewayAPIEnabled {
+		gateway := d.runaiConfig.Spec.Global.GatewayAPI
+		if gateway.Name == "" || gateway.Namespace == "" {
+			return nil, fmt.Errorf("gatewayAPI is enabled but name=%q or namespace=%q is empty", gateway.Name, gateway.Namespace)
+		}
+		envVars = append(envVars,
+			v1.EnvVar{Name: "GATEWAY_NAME", Value: gateway.Name},
+			v1.EnvVar{Name: "GATEWAY_NAMESPACE", Value: gateway.Namespace},
+		)
+	}
+
 	if config != nil {
 		envVars = append(envVars, v1.EnvVar{
 			Name:  "OPENSHIFT_ROUTE_TERMINATION_POLICY",

@@ -36,12 +36,7 @@ func MissingChartRepoError(chart string) error {
 	return fmt.Errorf("no chart repository configured for the %s chart: set the %s environment variable", chart, ChartRepoBaseEnv)
 }
 
-const ngcChartHost = "helm.ngc.nvidia.com"
-
-const (
-	ngcChartOrgTeamProd    = "nvidia/runai"
-	ngcChartOrgTeamNonProd = "nvstaging/runai"
-)
+const ngcChartRepoProd = "https://helm.ngc.nvidia.com/nvidia/runai-oss"
 
 const (
 	CPReleaseName      = "runai-backend"
@@ -68,16 +63,13 @@ type AuthenticatedHelmInstaller interface {
 	InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string, auth ChartAuth) error
 }
 
-func ngcChartOrgTeam(env config.RunaiEnvType) string {
-	if env == config.EnvProd {
-		return ngcChartOrgTeamProd
-	}
-	return ngcChartOrgTeamNonProd
-}
-
-// NGCChartRepo returns the NGC ChartMuseum root.
+// NGCChartRepo returns the NGC ChartMuseum root for env. Only prod has a
+// built-in repository; other envs return "" and need registry.chartRepository.
 func NGCChartRepo(env config.RunaiEnvType) string {
-	return fmt.Sprintf("https://%s/%s", ngcChartHost, ngcChartOrgTeam(env))
+	if env == config.EnvProd {
+		return ngcChartRepoProd
+	}
+	return ""
 }
 
 // CPChartRepo returns the control plane chart repository for env under the
