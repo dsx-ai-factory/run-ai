@@ -46,6 +46,15 @@ func (pv *ProjectValidator) initValidator() []validator.ValidatingFunction {
 }
 
 func (pv *ProjectValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+	// Orphan deletion completes through a garbage-collector UPDATE, after the
+	// agent's DELETE has already been authorized.
+	allowedCleanup, err := pv.allowOrphanFinalizerRemoval(ctx, req)
+	if err != nil {
+		return admission.Errored(http.StatusInternalServerError, err)
+	}
+	if allowedCleanup {
+		return admission.Allowed("")
+	}
 	serviceAccountValidatorResponse, err := pv.serviceAccountValidator.Validate(ctx, req)
 	if err != nil {
 		log.Error().Msgf("ProjectValidator: failed validating request, err: %v", err)
