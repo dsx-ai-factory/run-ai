@@ -29,6 +29,17 @@ const (
 
 var spaceSplitter = regexp.MustCompile(`\s+`)
 
+type WorkloadInfo struct {
+	Name      string
+	Namespace string
+	Initials  string
+}
+
+func (w *WorkloadInfo) composeWorkloadCredentialName(credential string) string {
+	vf := ValueFromUserCredentials
+	return vf.patchName(credential, w.Initials, w.Name)
+}
+
 // BuildImagePullSecrets receives secretFromWorkloads, in format: secret-1 secret-2 secret-3...
 // and it adds to a podspec a list of secrets composed of this input list + the (optional) secrets
 // of the serviceAccount of the namespace. if no imagePullSecrets are specified in the workload field,

@@ -35,13 +35,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// encryptedData holds a byte array with encrypted "private-value-1"
-var encryptedData = []byte{
-	168, 221, 244, 73, 135, 225, 25, 104, 145, 32, 118, 20, 196, 29, 72, 165,
-	224, 40, 97, 180, 83, 157, 205, 140, 158, 186, 60, 73, 173, 193, 146, 219,
-	201, 199, 65, 36, 241, 251, 52, 131, 38, 155, 0,
-}
-
 func GetMergedWorkload(workload *v2alpha1.DistributedWorkload, client client.Client) (*v2alpha1.DistributedWorkload, error) {
 	projectName := strings.TrimPrefix(workload.ObjectMeta.Namespace, "runai-")
 	ctx := workloadproject.SetProjectInContext(context.TODO(), projectName)
@@ -140,32 +133,12 @@ func GetDistributedBuilder(inputYaml []byte, t *testing.T, _ error, _ string,
 			TrainingJobTimeLimitSecs:                     120,
 		},
 	}
-	fakeCredential := corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "my-user-credential",
-			Namespace: "runai",
-		},
-		Data: map[string][]byte{
-			"my-user-key": encryptedData,
-		},
-	}
-
-	fakeCredential2 := corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "ips-2",
-			Namespace: "runai",
-		},
-		Data: map[string][]byte{
-			"my-user-key": encryptedData,
-		},
-	}
 	ctx := workloadproject.SetProjectInContext(context.TODO(), projectName)
 
 	// in order to apply the fake objects above plus the objects given in initObjs,
 	// we need to concatenate them to one list to be passed to NewFakeClient
 	var allObjs []runtime.Object
-	allObjs = append(allObjs, &fakePvc, &fakePvc2, &fakePvc3, &fakePvcBlock, &fakeProject, &fakeDataVolumePvc,
-		&fakeCredential, &fakeCredential2)
+	allObjs = append(allObjs, &fakePvc, &fakePvc2, &fakePvc3, &fakePvcBlock, &fakeProject, &fakeDataVolumePvc)
 
 	allObjs = append(allObjs,
 		kaiNodePoolFixture(v1alpha1.DefaultNodePoolName, "test-key", "test-value", ""),
