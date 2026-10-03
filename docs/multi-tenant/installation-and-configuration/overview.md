@@ -60,7 +60,7 @@ Day 2 covers the ongoing operational tasks that keep the control plane and every
 
 ### Upgrades
 
-Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. Upgrade the control plane first, then each tenant's cluster. To upgrade NVIDIA Run:ai, see [Upgrade](upgrade.md).
+Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. Upgrade the control plane first, then each tenant's cluster. To upgrade NVIDIA Run:ai, see [Upgrade](upgrade/plan-the-upgrade.md).
 
 ## Understanding Installation
 

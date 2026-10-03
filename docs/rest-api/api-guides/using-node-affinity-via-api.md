@@ -38,7 +38,7 @@ When submitting a workload, include the `nodeAffinityRequired` field in the API 
 **Example:**
 
 ```bash
-curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \ 
+curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 -H 'Authorization: Bearer <API-TOKEN>' \
 -H 'Content-Type: application/json' \
 -d '{

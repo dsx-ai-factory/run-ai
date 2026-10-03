@@ -152,9 +152,9 @@ runai workspace submit "workload-name" --image jupyter/scipy-notebook \
 Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Workspaces](api:main-api:POST/api/v1/workloads/workspaces) API:
 
 ```bash
-curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \ 
+curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 -H 'Content-Type: application/json' \
--H 'Authorization: Bearer <TOKEN>' \ 
+-H 'Authorization: Bearer <TOKEN>' \
 -d '{ 
     "name": "workload-name", 
     "projectId": "<PROJECT-ID>",  

@@ -343,8 +343,12 @@ func (s *WorkloadPropertiesService) GetWorkloadPriorities(ctx context.Context, s
 	if filterErr != nil {
 		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
 	}
+	sortColumn, sortErr := queryapi.NewParser(models.Priority{}.FilterFieldsToColumn()).GetMapping(sortBy)
+	if sortErr != nil {
+		return ErrorToApiError(sortErr, http.StatusBadRequest), nil
+	}
 
-	priorities, err := dao.GetPriorities(ctx, tenantId, sortOrder, sortBy, filters)
+	priorities, err := dao.GetPriorities(ctx, tenantId, sortOrder, sortColumn, filters)
 	if err != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "Failed to get priorities", err)), nil
 	}
@@ -457,8 +461,12 @@ func (s *WorkloadPropertiesService) GetWorkloadClusterPriorities(ctx context.Con
 	if filterErr != nil {
 		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
 	}
+	sortColumn, sortErr := queryapi.NewParser(models.PriorityClusterView{}.FilterFieldsToColumn()).GetMapping(sortBy)
+	if sortErr != nil {
+		return ErrorToApiError(sortErr, http.StatusBadRequest), nil
+	}
 
-	priorities, err := dao.GetClusterPriorities(ctx, tenantId, clusterId, sortOrder, sortBy, filters)
+	priorities, err := dao.GetClusterPriorities(ctx, tenantId, clusterId, sortOrder, sortColumn, filters)
 	if err != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "Failed to get priorities", err)), nil
 	}
@@ -843,8 +851,11 @@ func (s *WorkloadPropertiesService) GetAvailablePrioritiesAndCategories(ctx cont
 	var combinedResp api.GetAvailablePrioritiesAndCategories200Response
 
 	prioritiesResp, err := s.GetWorkloadClusterPriorities(ctx, clusterId, sortOrder, sortBy, filterBy)
-	if err != nil || prioritiesResp.Code != http.StatusOK {
+	if err != nil {
 		return api.Response(http.StatusServiceUnavailable, api.NewError(http.StatusServiceUnavailable, "failed to list available priorities", err)), err
+	}
+	if prioritiesResp.Code != http.StatusOK {
+		return prioritiesResp, nil
 	}
 
 	prioritiesRespBody := prioritiesResp.Body.(api.GetWorkloadClusterPriorities200Response)

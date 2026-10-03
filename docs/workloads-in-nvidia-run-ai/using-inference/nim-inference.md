@@ -440,8 +440,8 @@ Access to the inference serving API depends on how the serving endpoint access w
 Follow the below steps to obtain a token:
 
 1. Use the [Tokens](api:main-api:POST/api/v2/token) API with:
-   * `grantType: password` for specific users or groups
-   * `grantType: client_credentials` for service accounts and user access keys
+   * `grant_type: password` for specific users or groups
+   * `grant_type: client_credentials` for service accounts and user access keys
 2.  Use the obtained token to make API calls to the inference serving endpoint. For example:
 
     ```bash
