@@ -20,7 +20,6 @@ import (
 
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -110,8 +109,6 @@ func LoadPolicy(t *testing.T, testName string) *v2alpha1.DistributedPolicy {
 	return &policyObj
 }
 
-const ADSEncryptionKey = "905c18f0839affcddca117dcac633f79"
-
 type TestEnvVars struct {
 	SubdomainSupportEnvVarValue   string
 	IngressAnnotationsEnvVarValue string
@@ -121,7 +118,6 @@ type TestEnvVars struct {
 	CustomCAGitEnvVarValue        string
 	CustomCAS3EnvVarValue         string
 	RedisFQDN                     string
-	ADSEncryptionKey              string
 }
 
 type TestConfig struct {
@@ -221,10 +217,6 @@ func Run(t *testing.T, curTest *TestConfig, expectedErr error,
 		if curTest.TestEnvVars.RedisFQDN != "" {
 			os.Setenv("RUNAI_OAUTH2_PROXY_REDIS_FQDN", curTest.TestEnvVars.RedisFQDN)
 			defer os.Unsetenv("RUNAI_OAUTH2_PROXY_REDIS_FQDN")
-		}
-		if curTest.TestEnvVars.ADSEncryptionKey != "" {
-			os.Setenv(constants.RunaiAdsEncryptionKeyEnvVar, curTest.TestEnvVars.ADSEncryptionKey)
-			defer os.Unsetenv(constants.RunaiAdsEncryptionKeyEnvVar)
 		}
 	}
 
@@ -367,10 +359,6 @@ func TestJobBuilder(ctx context.Context, t *testing.T, curTest *TestConfig, comp
 			os.Setenv("RUNAI_OAUTH2_PROXY_REDIS_FQDN", curTest.TestEnvVars.RedisFQDN)
 			defer os.Unsetenv("RUNAI_OAUTH2_PROXY_REDIS_FQDN")
 		}
-		if curTest.TestEnvVars.ADSEncryptionKey != "" {
-			os.Setenv(constants.RunaiAdsEncryptionKeyEnvVar, curTest.TestEnvVars.ADSEncryptionKey)
-			defer os.Unsetenv(constants.RunaiAdsEncryptionKeyEnvVar)
-		}
 	}
 
 	var actualYaml bytes.Buffer
@@ -389,9 +377,6 @@ func TestJobBuilder(ctx context.Context, t *testing.T, curTest *TestConfig, comp
 		externalUrls, err := commonBuilder.BuildExternalUrls(ctx, &jobWorkload, &ExternalBuilderOptions{})
 		assert.NoError(t, err, "failed to build external urls", curTest.TestName)
 		commonResources = append(commonResources, externalUrls...)
-		credentials, err := commonBuilder.BuildCredentials(ctx, &jobWorkload, ResourceBuilderOptions{})
-		assert.NoError(t, err, "failed to build credentials", curTest.TestName)
-		commonResources = append(commonResources, credentials...)
 	}
 
 	computeResources, err := computeBuilder.Build(ctx, &jobWorkload, &ComputeBuilderOptions{})
