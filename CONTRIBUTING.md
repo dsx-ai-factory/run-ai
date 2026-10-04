@@ -9,6 +9,7 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 ## Ways to Contribute
 
 - **You want to report a bug, feature idea, or documentation issue** - File a [GitHub issue](https://github.com/dsx-ai-factory/run-ai/issues/new/choose) using the appropriate template. Maintainers will triage and label it.
+- **You want to ask a usage question** - Start a [Discussion](https://github.com/dsx-ai-factory/run-ai/discussions). Questions are not filed as issues, so the issue tracker stays a list of defects and requests.
 - **You want to propose a new feature and implement it** - File a feature-request issue describing your intended feature, and discuss the design there. Once the plan looks good, implement it following the Contribution Workflow below.
 - **You want to implement a feature or bug fix for an outstanding issue** - Pick up an issue labelled `good first issue` or `help wanted`, comment to claim it, then follow the Contribution Workflow below.
 
@@ -329,7 +330,8 @@ Reports made in bad faith, for example to retaliate against, harass, or silence 
 
 ## Getting Help
 
-- [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) - Bugs, feature requests, documentation issues, usage questions
+- [GitHub Discussions](https://github.com/dsx-ai-factory/run-ai/discussions) - Usage questions and design conversations
+- [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) - Bugs, feature requests, documentation issues
 - [Security](SECURITY.md) - Private vulnerability reports
 - [Support](SUPPORT.md) - Which versions are supported
 

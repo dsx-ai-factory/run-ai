@@ -1,5 +1,8 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 name: Bug report
-description: Report a reproducible bug in Run:ai.
+description: Report a reproducible bug in Run:ai, including a failing or flaky test.
 title: "[bug] "
 labels: ["bug"]
 body:
@@ -12,12 +15,13 @@ body:
         - Confirm the bug reproduces on a [currently supported version](../blob/HEAD/SUPPORT.md).
         - Search [existing issues](../../issues?q=is%3Aissue) — your bug may already be tracked.
         - **Security vulnerabilities:** stop here and follow [`SECURITY.md`](../blob/HEAD/SECURITY.md) instead.
+        - **Usage questions:** ask in [Discussions](../../discussions) instead.
 
   - type: input
     id: runai-version
     attributes:
-      label: Run:ai version
-      description: The Run:ai release the bug reproduces on (for example `v2.26.1`).
+      label: Run:ai version or commit
+      description: The Run:ai release the bug reproduces on, or the commit SHA for a failure seen in CI.
       placeholder: "v2.26.1"
     validations:
       required: true

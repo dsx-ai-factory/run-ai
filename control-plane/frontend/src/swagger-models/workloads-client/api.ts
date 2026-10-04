@@ -1113,7 +1113,8 @@ export const AssetKind = {
     ConfigMap: 'config-map',
     SecretVolume: 'secret-volume',
     DataVolume: 'data-volume',
-    NgcApiKey: 'ngcApiKey'
+    NgcApiKey: 'ngcApiKey',
+    ResourceClaimTemplate: 'resource-claim-template'
 } as const;
 
 export type AssetKind = typeof AssetKind[keyof typeof AssetKind];

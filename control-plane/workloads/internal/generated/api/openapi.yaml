@@ -32617,6 +32617,7 @@ components:
       - secret-volume
       - data-volume
       - ngcApiKey
+      - resource-claim-template
       minLength: 1
       type: string
     AssetsMapping:

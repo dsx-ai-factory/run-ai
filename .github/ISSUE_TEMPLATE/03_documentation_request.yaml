@@ -1,5 +1,8 @@
-name: Documentation issue
-description: Report a problem with or suggest an improvement to the documentation.
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Documentation request or correction
+description: Request new documentation, or report a problem with existing documentation.
 title: "[docs] "
 labels: ["documentation"]
 body:
