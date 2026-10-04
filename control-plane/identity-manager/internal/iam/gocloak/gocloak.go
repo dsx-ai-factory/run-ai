@@ -16,7 +16,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-//go:generate mockery --name GoCloak --output ./mocks --filename gocloak.go
 type GoCloak interface {
 	// GetRequest returns a request for calling endpoints.
 	GetRequest(ctx context.Context) *resty.Request

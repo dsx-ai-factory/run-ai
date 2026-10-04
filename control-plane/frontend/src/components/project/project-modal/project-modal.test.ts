@@ -28,7 +28,7 @@ describe("project-modal component", () => {
         uuid: "1c16fffa-fd84-4bff-a148-798e305b8d60",
         tenantId: 1001,
         name: "barak-1720974608",
-        domain: "https://barak.runailabs.com",
+        domain: "https://project.example.com",
         version: "0.0.0-10000136.master-cabf8e4",
       },
     ],

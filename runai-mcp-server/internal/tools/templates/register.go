@@ -12,5 +12,6 @@ import (
 
 func Register(r *runaimcp.Registry, client *runaiclient.Client) {
 	registerListTemplates(r, client)
+	registerGetTemplate(r, client)
 	registerManageTemplate(r, client)
 }

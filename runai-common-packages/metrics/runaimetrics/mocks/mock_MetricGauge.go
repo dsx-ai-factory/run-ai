@@ -17,10 +17,19 @@ func NewMockMetricGauge(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMetricGauge {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMetricGauge{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -50,14 +59,20 @@ type MockMetricGauge_Add_Call struct {
 }
 
 // Add is a helper method to define mock.On call
-//   - value
-func (_e *MockMetricGauge_Expecter) Add(value interface{}) *MockMetricGauge_Add_Call {
+//   - value float64
+func (_e *MockMetricGauge_Expecter) Add(value any) *MockMetricGauge_Add_Call {
 	return &MockMetricGauge_Add_Call{Call: _e.mock.On("Add", value)}
 }
 
 func (_c *MockMetricGauge_Add_Call) Run(run func(value float64)) *MockMetricGauge_Add_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(float64))
+		var arg0 float64
+		if args[0] != nil {
+			arg0 = args[0].(float64)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -150,14 +165,20 @@ type MockMetricGauge_Set_Call struct {
 }
 
 // Set is a helper method to define mock.On call
-//   - value
-func (_e *MockMetricGauge_Expecter) Set(value interface{}) *MockMetricGauge_Set_Call {
+//   - value float64
+func (_e *MockMetricGauge_Expecter) Set(value any) *MockMetricGauge_Set_Call {
 	return &MockMetricGauge_Set_Call{Call: _e.mock.On("Set", value)}
 }
 
 func (_c *MockMetricGauge_Set_Call) Run(run func(value float64)) *MockMetricGauge_Set_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(float64))
+		var arg0 float64
+		if args[0] != nil {
+			arg0 = args[0].(float64)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -184,14 +205,20 @@ type MockMetricGauge_Sub_Call struct {
 }
 
 // Sub is a helper method to define mock.On call
-//   - value
-func (_e *MockMetricGauge_Expecter) Sub(value interface{}) *MockMetricGauge_Sub_Call {
+//   - value float64
+func (_e *MockMetricGauge_Expecter) Sub(value any) *MockMetricGauge_Sub_Call {
 	return &MockMetricGauge_Sub_Call{Call: _e.mock.On("Sub", value)}
 }
 
 func (_c *MockMetricGauge_Sub_Call) Run(run func(value float64)) *MockMetricGauge_Sub_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(float64))
+		var arg0 float64
+		if args[0] != nil {
+			arg0 = args[0].(float64)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

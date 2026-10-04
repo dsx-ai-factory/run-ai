@@ -124,7 +124,6 @@ export const dateUtil = {
   formatTimeRemaining,
 };
 
-// TODO: need to move it to date.model.
 // now I can do that becuase date.model have date.util import and we
 // need to import this type to date.util (from the date.model) - will
 // have circular dependencies
@@ -206,7 +205,6 @@ function adjustDateBy(timeUnit: TimeUnit, date: Date | number, amount: number): 
   }
 }
 
-// TODO: Convert this to date-fns
 function timeAgo(timestamp: number | string | Date): string {
   const date = new Date(timestamp);
   let seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);

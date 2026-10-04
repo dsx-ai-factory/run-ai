@@ -20,10 +20,19 @@ func NewIIdmExternalClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *IIdmExternalClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &IIdmExternalClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,16 +84,32 @@ type IIdmExternalClient_ClientCredentialsLogin_Call struct {
 }
 
 // ClientCredentialsLogin is a helper method to define mock.On call
-//   - ctx
-//   - clientId
-//   - clientSecret
-func (_e *IIdmExternalClient_Expecter) ClientCredentialsLogin(ctx interface{}, clientId interface{}, clientSecret interface{}) *IIdmExternalClient_ClientCredentialsLogin_Call {
+//   - ctx context.Context
+//   - clientId string
+//   - clientSecret string
+func (_e *IIdmExternalClient_Expecter) ClientCredentialsLogin(ctx any, clientId any, clientSecret any) *IIdmExternalClient_ClientCredentialsLogin_Call {
 	return &IIdmExternalClient_ClientCredentialsLogin_Call{Call: _e.mock.On("ClientCredentialsLogin", ctx, clientId, clientSecret)}
 }
 
 func (_c *IIdmExternalClient_ClientCredentialsLogin_Call) Run(run func(ctx context.Context, clientId string, clientSecret string)) *IIdmExternalClient_ClientCredentialsLogin_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -133,16 +158,32 @@ type IIdmExternalClient_ClientCredentialsLoginV2_Call struct {
 }
 
 // ClientCredentialsLoginV2 is a helper method to define mock.On call
-//   - ctx
-//   - clientId
-//   - clientSecret
-func (_e *IIdmExternalClient_Expecter) ClientCredentialsLoginV2(ctx interface{}, clientId interface{}, clientSecret interface{}) *IIdmExternalClient_ClientCredentialsLoginV2_Call {
+//   - ctx context.Context
+//   - clientId string
+//   - clientSecret string
+func (_e *IIdmExternalClient_Expecter) ClientCredentialsLoginV2(ctx any, clientId any, clientSecret any) *IIdmExternalClient_ClientCredentialsLoginV2_Call {
 	return &IIdmExternalClient_ClientCredentialsLoginV2_Call{Call: _e.mock.On("ClientCredentialsLoginV2", ctx, clientId, clientSecret)}
 }
 
 func (_c *IIdmExternalClient_ClientCredentialsLoginV2_Call) Run(run func(ctx context.Context, clientId string, clientSecret string)) *IIdmExternalClient_ClientCredentialsLoginV2_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -191,16 +232,32 @@ type IIdmExternalClient_RefreshToken_Call struct {
 }
 
 // RefreshToken is a helper method to define mock.On call
-//   - ctx
-//   - refreshToken
-//   - clientId
-func (_e *IIdmExternalClient_Expecter) RefreshToken(ctx interface{}, refreshToken interface{}, clientId interface{}) *IIdmExternalClient_RefreshToken_Call {
+//   - ctx context.Context
+//   - refreshToken string
+//   - clientId string
+func (_e *IIdmExternalClient_Expecter) RefreshToken(ctx any, refreshToken any, clientId any) *IIdmExternalClient_RefreshToken_Call {
 	return &IIdmExternalClient_RefreshToken_Call{Call: _e.mock.On("RefreshToken", ctx, refreshToken, clientId)}
 }
 
 func (_c *IIdmExternalClient_RefreshToken_Call) Run(run func(ctx context.Context, refreshToken string, clientId string)) *IIdmExternalClient_RefreshToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -249,18 +306,44 @@ type IIdmExternalClient_TokenExchange_Call struct {
 }
 
 // TokenExchange is a helper method to define mock.On call
-//   - ctx
-//   - exchangeCode
-//   - clientId
-//   - redirectUri
-//   - codeVerifier
-func (_e *IIdmExternalClient_Expecter) TokenExchange(ctx interface{}, exchangeCode interface{}, clientId interface{}, redirectUri interface{}, codeVerifier interface{}) *IIdmExternalClient_TokenExchange_Call {
+//   - ctx context.Context
+//   - exchangeCode string
+//   - clientId string
+//   - redirectUri string
+//   - codeVerifier string
+func (_e *IIdmExternalClient_Expecter) TokenExchange(ctx any, exchangeCode any, clientId any, redirectUri any, codeVerifier any) *IIdmExternalClient_TokenExchange_Call {
 	return &IIdmExternalClient_TokenExchange_Call{Call: _e.mock.On("TokenExchange", ctx, exchangeCode, clientId, redirectUri, codeVerifier)}
 }
 
 func (_c *IIdmExternalClient_TokenExchange_Call) Run(run func(ctx context.Context, exchangeCode string, clientId string, redirectUri string, codeVerifier string)) *IIdmExternalClient_TokenExchange_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 string
+		if args[4] != nil {
+			arg4 = args[4].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
@@ -309,17 +392,38 @@ type IIdmExternalClient_UserLogin_Call struct {
 }
 
 // UserLogin is a helper method to define mock.On call
-//   - ctx
-//   - username
-//   - password
-//   - clientId
-func (_e *IIdmExternalClient_Expecter) UserLogin(ctx interface{}, username interface{}, password interface{}, clientId interface{}) *IIdmExternalClient_UserLogin_Call {
+//   - ctx context.Context
+//   - username string
+//   - password string
+//   - clientId string
+func (_e *IIdmExternalClient_Expecter) UserLogin(ctx any, username any, password any, clientId any) *IIdmExternalClient_UserLogin_Call {
 	return &IIdmExternalClient_UserLogin_Call{Call: _e.mock.On("UserLogin", ctx, username, password, clientId)}
 }
 
 func (_c *IIdmExternalClient_UserLogin_Call) Run(run func(ctx context.Context, username string, password string, clientId string)) *IIdmExternalClient_UserLogin_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }

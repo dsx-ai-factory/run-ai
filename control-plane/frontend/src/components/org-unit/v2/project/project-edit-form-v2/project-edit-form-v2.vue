@@ -843,7 +843,6 @@ watch(
       updatedProject.description = localProject.value.description;
       updatedProject.requestedNamespace = localProject.value.requestedNamespace;
     }
-    // Barak:todo - remove the nodeTypes merge when backend is fixed
     localProject.value = { ...updatedProject, nodeTypes: localProject.value.nodeTypes };
 
     // Reset scope-name baselines so isScopeNameDirty reflects only unsaved changes

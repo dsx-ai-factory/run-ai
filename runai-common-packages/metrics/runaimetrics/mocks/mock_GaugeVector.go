@@ -18,10 +18,19 @@ func NewMockGaugeVector(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockGaugeVector {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockGaugeVector{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -97,14 +106,20 @@ type MockGaugeVector_WithLabels_Call struct {
 }
 
 // WithLabels is a helper method to define mock.On call
-//   - labels
-func (_e *MockGaugeVector_Expecter) WithLabels(labels interface{}) *MockGaugeVector_WithLabels_Call {
+//   - labels map[string]string
+func (_e *MockGaugeVector_Expecter) WithLabels(labels any) *MockGaugeVector_WithLabels_Call {
 	return &MockGaugeVector_WithLabels_Call{Call: _e.mock.On("WithLabels", labels)}
 }
 
 func (_c *MockGaugeVector_WithLabels_Call) Run(run func(labels map[string]string)) *MockGaugeVector_WithLabels_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(map[string]string))
+		var arg0 map[string]string
+		if args[0] != nil {
+			arg0 = args[0].(map[string]string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

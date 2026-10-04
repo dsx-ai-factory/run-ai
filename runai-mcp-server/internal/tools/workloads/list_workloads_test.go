@@ -7,6 +7,7 @@ package workloads
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -301,7 +302,7 @@ func TestListWorkloadsRunFiltersMapsAndPaginates(t *testing.T) {
 		Name: "trainer", ProjectID: "4500002", ClusterID: validUUID, Phase: "Pending", Type: "Training",
 		NodePoolName: "gpu-a", CreatedAfter: "2026-07-05T10:00:00Z", PhaseUpdatedAfter: "2026-07-06T10:00:00Z",
 		DeletedOnly: true, DeletedAfter: "2026-07-07T10:00:00Z",
-		Limit: 2, Offset: 4,
+		IncludeDetails: true, Limit: 2, Offset: 4,
 	})
 	require.NoError(t, err)
 	require.Len(t, out.Workloads, 1)
@@ -422,11 +423,37 @@ func TestListWorkloadsRunGPUIdleFilterAndMapping(t *testing.T) {
 		})
 	})
 
-	out, err := listWorkloadsRun(context.Background(), client, listWorkloadsInput{GPUIdleOnly: true})
+	out, err := listWorkloadsRun(context.Background(), client, listWorkloadsInput{GPUIdleOnly: true, IncludeDetails: true})
 	require.NoError(t, err)
 	require.Len(t, out.Workloads, 1)
 	require.NotNil(t, out.Workloads[0].IdleAllocatedGpus)
 	assert.Equal(t, float32(1.5), *out.Workloads[0].IdleAllocatedGpus)
+}
+
+func TestListWorkloadsRunOmitsDetailsByDefault(t *testing.T) {
+	client, mux := runaiclienttest.NewServer(t)
+	mux.HandleFunc("/api/v1/workloads", func(w http.ResponseWriter, _ *http.Request) {
+		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+			"workloads": []map[string]any{{
+				"id": validUUID, "name": "trainer", "type": "Training", "phase": "Running",
+				"projectId": "4500002", "projectName": "research", "clusterId": validUUID,
+				"createdAt": "2026-07-05T10:00:00Z", "phaseUpdatedAt": "2026-07-06T10:00:00Z",
+				"priority": 50, "requestedNodePools": []string{"gpu-a"},
+			}},
+		})
+	})
+
+	out, err := listWorkloadsRun(context.Background(), client, listWorkloadsInput{})
+	require.NoError(t, err)
+	require.Len(t, out.Workloads, 1)
+	encoded, marshalErr := json.Marshal(out.Workloads[0])
+	require.NoError(t, marshalErr)
+	assert.NotContains(t, string(encoded), "createdAt")
+	assert.NotContains(t, string(encoded), "requestedNodePools")
+	assert.NotContains(t, string(encoded), "priority")
+	assert.Contains(t, string(encoded), "phaseUpdatedAt")
+	assert.Contains(t, string(encoded), "allocatedGpu")
+	assert.Contains(t, string(encoded), "requestedGpu")
 }
 
 func TestListWorkloadsRunAllocatedGPUUsesServerFilterAndMapsGPUCounts(t *testing.T) {

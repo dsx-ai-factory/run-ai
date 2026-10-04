@@ -32617,6 +32617,7 @@ components:
       - secret-volume
       - data-volume
       - ngcApiKey
+      - resource-claim-template
       minLength: 1
       type: string
     AssetsMapping:
@@ -126726,6 +126727,7 @@ components:
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         source: source
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
         type: type
         spec:
           auth:
@@ -126797,6 +126799,11 @@ components:
           type: string
         phase:
           description: The actual status of the release in the cluster.
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
           type: string
         projectId:
           description: The id of the project.
@@ -130767,6 +130774,7 @@ components:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           source: source
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           type: type
           spec:
             auth:
@@ -130846,6 +130854,7 @@ components:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           source: source
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           type: type
           spec:
             auth:

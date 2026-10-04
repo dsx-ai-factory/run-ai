@@ -17556,6 +17556,7 @@ components:
         - secret-volume
         - data-volume
         - ngcApiKey
+        - resource-claim-template
     UpdateCount:
       description: the value of an update counter of a data in the system.
       type: integer
@@ -17621,7 +17622,8 @@ components:
         - $ref: '#/components/schemas/AssetReadOnlyFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         id: a418ed33-9399-48c0-a890-122cadd13bfd
         kind: s3
         createdBy: test@run.ai
@@ -17883,7 +17885,8 @@ components:
         - $ref: '#/components/schemas/AssetCreationFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         workloadSupportedTypes:
           workspace: false
           training: false
@@ -33351,6 +33354,8 @@ components:
         phase:
           type: string
           description: The actual status of the release in the cluster.
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
         projectId:
           $ref: '#/components/schemas/ProjectId'
         projectName:
