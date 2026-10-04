@@ -20,7 +20,7 @@ var dummyNetworkingService = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// NetworkingService - Service configuration for routing traffic to the workload. Use 'spec' or 'ref' (not both).
+// NetworkingService - Service configuration for routing traffic to the workload. Provide exactly one of spec or ref.
 type NetworkingService struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////

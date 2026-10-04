@@ -59,6 +59,22 @@
       "enabled": false
     },
     {
+      "description": "kai-resource-management subchart: patch updates. OCI charts resolve through the docker datasource, which the rule above disables.",
+      "matchManagers": [
+        "helmv3"
+      ],
+      "matchFileNames": [
+        "runai-cluster/cluster/runai-chart/Chart.yaml"
+      ],
+      "matchDepNames": [
+        "kai-resource-management"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "enabled": true
+    },
+    {
       "matchManagers": [
         "dockerfile"
       ],

@@ -17,13 +17,9 @@ The templates below are for same-cluster installations. For a multi-cluster inst
 
 Complete [Preparations](preparations.md) before using a template. This includes completing the applicable [System Requirements](../../../system-requirements/README.md) and having the required domains, TLS certificates, networking values, registry credentials, and other installation inputs ready.
 
-<Note>
-
-**Note**
-
-See the [Configuration Reference](../configuration-reference.md) for what every field accepts.
-
-</Note>
+* See [Same-Cluster Installation](same-cluster.md#create-a-configuration-file) or [Multi-Cluster Installation](multi-cluster.md), whichever matches your deployment model, to understand the minimum configuration needed before adapting a template.
+* See [Prerequisites and Features](../prerequisites-and-features.md) to understand the components required, depending on the workload types you plan to enable, and how to install them yourself in air-gapped environments.
+* See [Configuration Reference](../configuration-reference.md) for the full set of supported fields and descriptions.
 
 ## Full Installation
 
@@ -212,25 +208,14 @@ airgap:
   valuesDir: /data/runai-airgap
   skipPrepare: true
 
-openshift:
-  olmCatalog:
-    source: <OPERATORHUB_CATALOG_SOURCE>
-    sourceNamespace: openshift-marketplace
-
 controlPlane:
   enabled: true
   domain: <DOMAIN>
-  tls:
-    certPath: /path/to/cp-cert.pem
-    keyPath: /path/to/cp-key.pem
   customHelmValues: {}
 
 cluster:
   enabled: true
   name: <CLUSTER_NAME>
-  tls:
-    certPath: /path/to/cluster-cert.pem
-    keyPath: /path/to/cluster-key.pem
   customHelmValues: {}
 
 prerequisites:

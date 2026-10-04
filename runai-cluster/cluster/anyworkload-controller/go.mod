@@ -103,7 +103,7 @@ require (
 	github.com/itchyny/gojq v0.12.19 // indirect
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.18.1 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
 	github.com/kubeflow/training-operator v1.9.3 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect

@@ -437,7 +437,7 @@ export const allOrgUnitNodePoolsModalColumnsMap: Record<string, ITableColumn> = 
   nodePoolProjectPriority: {
     name: "project-priority",
     label: "Project priority",
-    field: (row: INodePoolsResourcesRow) => row.priority,
+    field: (row: INodePoolsResourcesRow) => row.rank,
     sortable: true,
     align: "left",
     format: (priority: string) => orgUnitUtil.mapStringToPriorityLabel(priority),
@@ -445,7 +445,7 @@ export const allOrgUnitNodePoolsModalColumnsMap: Record<string, ITableColumn> = 
   nodePoolDepartmentPriority: {
     name: "nodepool-department-priority",
     label: "Department priority",
-    field: (row: INodePoolsResourcesRow) => row.priority,
+    field: (row: INodePoolsResourcesRow) => row.rank,
     sortable: true,
     align: "left",
     format: (priority: string) => orgUnitUtil.mapStringToPriorityLabel(priority),

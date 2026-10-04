@@ -17,7 +17,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/go-openapi/swag/pools v0.27.1 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.18.1 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
