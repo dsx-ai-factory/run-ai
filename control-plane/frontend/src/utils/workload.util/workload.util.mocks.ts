@@ -791,7 +791,7 @@ export const nimWorkloadWithNimImage: Workload = {
   },
   requestedNodePools: ["default"],
   images: ["nvcr.io/nim/mistralai/mistral-7b-instruct:latest"],
-  urls: ["https://mdev218.runailabs.com/p100/nim-workload"],
+  urls: ["https://cluster.example.com/p100/nim-workload"],
   environments: [],
   preemptible: true,
   priority: null,
@@ -838,7 +838,7 @@ export const nimWorkloadWithNimWorkloadFlag: Workload = {
   },
   requestedNodePools: ["default"],
   images: ["some-other-image:latest"],
-  urls: ["https://mdev218.runailabs.com/p100/nim-workload-flag"],
+  urls: ["https://cluster.example.com/p100/nim-workload-flag"],
   environments: [],
   preemptible: true,
   priority: null,
@@ -887,7 +887,7 @@ export const nonNimInferenceWorkload: Workload = {
   },
   requestedNodePools: ["default"],
   images: ["some-regular-image:latest"],
-  urls: ["https://mdev218.runailabs.com/p100/regular-inference"],
+  urls: ["https://cluster.example.com/p100/regular-inference"],
   environments: [],
   preemptible: true,
   priority: null,
@@ -934,7 +934,7 @@ export const nonInferenceWorkload: Workload = {
   },
   requestedNodePools: ["default"],
   images: ["nvcr.io/nim/some-model:latest"],
-  urls: ["https://mdev218.runailabs.com/p100/training-workload"],
+  urls: ["https://cluster.example.com/p100/training-workload"],
   environments: [],
   preemptible: true,
   priority: null,
@@ -1011,7 +1011,7 @@ export const connectionsMocks: Record<string, Workload> = {
     },
     requestedNodePools: ["default"],
     images: ["tensorflow/tensorflow:latest"],
-    urls: ["https://mdev2.runailabs.com/p100/w100"],
+    urls: ["https://cluster-2.example.com/p100/w100"],
     environments: [
       {
         connections: [
@@ -1019,7 +1019,7 @@ export const connectionsMocks: Record<string, Workload> = {
             name: "TensorBoard",
             toolType: "tensorboard",
             connectionType: "ExternalUrl",
-            url: "https://mdev2.runailabs.com/p100/w100",
+            url: "https://cluster-2.example.com/p100/w100",
             containerPort: 6006,
           },
         ],
@@ -1104,7 +1104,7 @@ export const connectionsMocks: Record<string, Workload> = {
     },
     requestedNodePools: ["default"],
     currentNodePools: ["default"],
-    urls: ["https://mdev218.runailabs.com/p100/i100", "http://i100.runai-p100.svc.cluster.local"],
+    urls: ["https://cluster.example.com/p100/i100", "http://i100.runai-p100.svc.cluster.local"],
     environments: [
       {
         connections: [
@@ -1112,7 +1112,7 @@ export const connectionsMocks: Record<string, Workload> = {
             name: "ChatbotUI",
             toolType: "chatbot-ui",
             connectionType: "ExternalUrl",
-            url: "https://mdev218.runailabs.com/p100/i100",
+            url: "https://cluster.example.com/p100/i100",
           },
         ],
         name: "chatbot-ui",

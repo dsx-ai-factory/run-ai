@@ -1,0 +1,9 @@
+type: object
+required:
+  - meta
+  - spec
+properties:
+  meta:
+    $ref: "../Asset/AssetMeta.yaml"
+  spec:
+    $ref: "./RctSpec.yaml"

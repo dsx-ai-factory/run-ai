@@ -67,6 +67,12 @@ export interface AIApplication {
      */
     'phase'?: string;
     /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof AIApplication
+     */
+    'clusterId'?: string;
+    /**
      * The id of the project.
      * @type {string}
      * @memberof AIApplication
@@ -1113,7 +1119,8 @@ export const AssetKind = {
     ConfigMap: 'config-map',
     SecretVolume: 'secret-volume',
     DataVolume: 'data-volume',
-    NgcApiKey: 'ngcApiKey'
+    NgcApiKey: 'ngcApiKey',
+    ResourceClaimTemplate: 'resource-claim-template'
 } as const;
 
 export type AssetKind = typeof AssetKind[keyof typeof AssetKind];

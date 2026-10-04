@@ -10,8 +10,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"sync/atomic"
 	"testing"
 
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -20,9 +22,17 @@ import (
 )
 
 const (
-	testTemplateID = "6fced230-c208-4b73-98a8-964fc1a32787"
-	testClusterID  = "f49990e7-52ba-4519-a760-e241ef6b01b1"
+	testTemplateID          = "6fced230-c208-4b73-98a8-964fc1a32787"
+	testClusterID           = "f49990e7-52ba-4519-a760-e241ef6b01b1"
+	testTemplateFingerprint = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
 )
+
+func templateFingerprintForTest(t *testing.T, workloadType string, response map[string]any) string {
+	t.Helper()
+	_, fingerprint, err := templateUpdateSnapshot(workloadType, response)
+	require.NoError(t, err)
+	return fingerprint
+}
 
 func templateResponse(workloadType, name string) map[string]any {
 	return templateResponseWithScope(workloadType, name, "tenant")
@@ -106,9 +116,12 @@ func TestManageTemplateCreateHandlesAPIContractEdges(t *testing.T) {
 
 func TestManageTemplateUpdateConfirmationAndPut(t *testing.T) {
 	client, mux := runaiclienttest.NewServer(t)
+	response := templateResponse(templateTypeTraining, "base")
+	response["spec"] = map[string]any{"image": "private.registry/sensitive-image:latest"}
+	response["assets"] = map[string]any{"compute": testClusterID}
 	mux.HandleFunc("/api/v1/workload-templates/"+testTemplateID, func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
-		runaiclienttest.WriteJSON(w, http.StatusOK, templateResponse(templateTypeTraining, "base"))
+		runaiclienttest.WriteJSON(w, http.StatusOK, response)
 	})
 	putCalls := 0
 	mux.HandleFunc("/api/v1/workload-templates/trainings/"+testTemplateID, func(w http.ResponseWriter, r *http.Request) {
@@ -121,12 +134,18 @@ func TestManageTemplateUpdateConfirmationAndPut(t *testing.T) {
 	})
 	input := manageTemplateInput{
 		Action: "update", WorkloadType: templateTypeTraining, TemplateID: testTemplateID,
-		Request: map[string]any{"meta": map[string]any{"name": "base-v2"}},
+		Request:             map[string]any{"meta": map[string]any{"name": "base-v2"}},
+		ExpectedFingerprint: templateFingerprintForTest(t, templateTypeTraining, response),
 	}
 
 	out, err := manageTemplateRun(context.Background(), client, input)
 	assert.ErrorIs(t, err, runaimcp.ErrConfirmationRequired)
-	assert.ErrorContains(t, err, "base-v2")
+	assert.ErrorContains(t, err, `update of template "base" (`+testTemplateID+`)`)
+	assert.ErrorContains(t, err, "scope:tenant (1001)")
+	assert.ErrorContains(t, err, "changedFields:[assets meta spec]")
+	assert.NotContains(t, err.Error(), "base-v2")
+	assert.NotContains(t, err.Error(), "sensitive-image")
+	assert.NotContains(t, err.Error(), testClusterID)
 	assert.Equal(t, "base", out.Name)
 	assert.Zero(t, putCalls)
 
@@ -136,6 +155,129 @@ func TestManageTemplateUpdateConfirmationAndPut(t *testing.T) {
 	assert.Equal(t, 1, putCalls)
 	assert.True(t, out.Applied)
 	assert.Equal(t, "base-v2", out.Name)
+}
+
+type templateTestElicitor struct {
+	params   *mcp.ElicitParams
+	action   string
+	onElicit func()
+}
+
+func (f *templateTestElicitor) Elicit(_ context.Context, params *mcp.ElicitParams) (*mcp.ElicitResult, error) {
+	f.params = params
+	if f.onElicit != nil {
+		f.onElicit()
+	}
+	action := f.action
+	if action == "" {
+		action = "decline"
+	}
+	return &mcp.ElicitResult{Action: action}, nil
+}
+
+func (f *templateTestElicitor) InitializeParams() *mcp.InitializeParams {
+	return &mcp.InitializeParams{
+		Capabilities: &mcp.ClientCapabilities{Elicitation: &mcp.ElicitationCapabilities{}},
+	}
+}
+
+func (f *templateTestElicitor) ID() string { return "template-test" }
+
+func TestManageTemplateInteractiveConfirmationDoesNotExposeSessionToken(t *testing.T) {
+	for _, action := range []string{"update", "delete"} {
+		t.Run(action, func(t *testing.T) {
+			client, mux := runaiclienttest.NewServer(t)
+			response := templateResponse(templateTypeTraining, "base")
+			response["spec"] = map[string]any{"image": "old-image"}
+			input := manageTemplateInput{
+				Action: action, WorkloadType: templateTypeTraining, TemplateID: testTemplateID,
+			}
+			secretStorage := map[string]any{"s3": []any{map[string]any{
+				"name": "models", "bucket": "model-bucket", "path": "/models",
+				"awsSessionToken": "must-never-be-returned",
+			}}}
+			if action == "update" {
+				input.Request = map[string]any{
+					"meta": map[string]any{"name": "base"},
+					"spec": map[string]any{"image": "new-image", "storage": secretStorage},
+				}
+				input.ExpectedFingerprint = templateFingerprintForTest(t, templateTypeTraining, response)
+				require.NoError(t, input.Validate())
+			} else {
+				response["spec"] = map[string]any{"storage": secretStorage}
+			}
+			mux.HandleFunc("/api/v1/workload-templates/"+testTemplateID, func(w http.ResponseWriter, _ *http.Request) {
+				runaiclienttest.WriteJSON(w, http.StatusOK, response)
+			})
+
+			elicitor := &templateTestElicitor{}
+			ctx := runaimcp.WithSession(context.Background(), elicitor)
+			_, err := manageTemplateRun(ctx, client, input)
+			assert.ErrorIs(t, err, runaimcp.ErrDeclined)
+			require.NotNil(t, elicitor.params)
+			assert.NotContains(t, elicitor.params.Message, "awsSessionToken")
+			assert.NotContains(t, elicitor.params.Message, "must-never-be-returned")
+			assert.Contains(t, elicitor.params.Message, "model-buck", "non-secret details remain visible")
+		})
+	}
+}
+
+func TestManageTemplateRejectsChangeMadeDuringInteractiveConfirmation(t *testing.T) {
+	client, mux := runaiclienttest.NewServer(t)
+	before := templateResponse(templateTypeTraining, "base")
+	before["spec"] = map[string]any{"image": "worker:1"}
+	after := templateResponse(templateTypeTraining, "changed-by-another-user")
+	after["spec"] = map[string]any{"image": "worker:2"}
+	var changed atomic.Bool
+	mux.HandleFunc("/api/v1/workload-templates/"+testTemplateID, func(w http.ResponseWriter, _ *http.Request) {
+		if changed.Load() {
+			runaiclienttest.WriteJSON(w, http.StatusOK, after)
+			return
+		}
+		runaiclienttest.WriteJSON(w, http.StatusOK, before)
+	})
+	var putCalled atomic.Bool
+	mux.HandleFunc("/api/v1/workload-templates/trainings/"+testTemplateID, func(w http.ResponseWriter, _ *http.Request) {
+		putCalled.Store(true)
+		runaiclienttest.WriteJSON(w, http.StatusOK, before)
+	})
+
+	elicitor := &templateTestElicitor{action: "accept", onElicit: func() { changed.Store(true) }}
+	ctx := runaimcp.WithSession(context.Background(), elicitor)
+	_, err := manageTemplateRun(ctx, client, manageTemplateInput{
+		Action: "update", WorkloadType: templateTypeTraining, TemplateID: testTemplateID,
+		Request:             map[string]any{"meta": map[string]any{"name": "my-change"}},
+		ExpectedFingerprint: templateFingerprintForTest(t, templateTypeTraining, before),
+	})
+	assert.ErrorIs(t, err, runaimcp.ErrConflict)
+	assert.ErrorContains(t, err, "changed since get_template")
+	assert.False(t, putCalled.Load())
+}
+
+func TestManageTemplateRefusesUnknownCurrentFields(t *testing.T) {
+	client, mux := runaiclienttest.NewServer(t)
+	known := templateResponse(templateTypeTraining, "base")
+	known["spec"] = map[string]any{"image": "worker:1"}
+	current := templateResponse(templateTypeTraining, "base")
+	current["spec"] = map[string]any{"image": "worker:1", "futureMutableField": true}
+	mux.HandleFunc("/api/v1/workload-templates/"+testTemplateID, func(w http.ResponseWriter, _ *http.Request) {
+		runaiclienttest.WriteJSON(w, http.StatusOK, current)
+	})
+	putCalled := false
+	mux.HandleFunc("/api/v1/workload-templates/trainings/"+testTemplateID, func(w http.ResponseWriter, _ *http.Request) {
+		putCalled = true
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	_, err := manageTemplateRun(context.Background(), client, manageTemplateInput{
+		Action: "update", WorkloadType: templateTypeTraining, TemplateID: testTemplateID,
+		Request:             map[string]any{"meta": map[string]any{"name": "base-v2"}},
+		ExpectedFingerprint: templateFingerprintForTest(t, templateTypeTraining, known),
+		Confirm:             true,
+	})
+	assert.ErrorIs(t, err, runaimcp.ErrConflict)
+	assert.ErrorContains(t, err, "cannot safely preserve")
+	assert.False(t, putCalled)
 }
 
 func TestManageTemplateSystemUpdateFailsBeforeConfirmation(t *testing.T) {
@@ -192,8 +334,10 @@ func TestManageTemplateDeleteConfirmationWarnings(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			client, mux := runaiclienttest.NewServer(t)
 			mux.HandleFunc("/api/v1/workload-templates/"+testTemplateID, func(w http.ResponseWriter, _ *http.Request) {
-				runaiclienttest.WriteJSON(w, http.StatusOK,
-					templateResponseWithScope(templateTypeWorkspace, "base", tt.scope))
+				response := templateResponseWithScope(templateTypeWorkspace, "base", tt.scope)
+				response["spec"] = map[string]any{"image": "private.registry/delete-secret:latest"}
+				response["assets"] = map[string]any{"compute": testClusterID}
+				runaiclienttest.WriteJSON(w, http.StatusOK, response)
 			})
 			deleteCalled := false
 			mux.HandleFunc("/api/v1/workload-templates/workspaces/"+testTemplateID, func(w http.ResponseWriter, _ *http.Request) {
@@ -209,6 +353,10 @@ func TestManageTemplateDeleteConfirmationWarnings(t *testing.T) {
 			if tt.notContain != "" {
 				assert.NotContains(t, err.Error(), tt.notContain)
 			}
+			assert.Contains(t, err.Error(), "scope:"+tt.scope)
+			assert.NotContains(t, err.Error(), "delete-secret")
+			assert.NotContains(t, err.Error(), testClusterID)
+			assert.NotContains(t, err.Error(), "createdBy")
 			assert.False(t, deleteCalled)
 		})
 	}
@@ -248,12 +396,14 @@ func TestManageTemplateInputValidation(t *testing.T) {
 		wantErr string
 	}{
 		{name: "valid create", input: manageTemplateInput{Action: "create", WorkloadType: templateTypeTraining, Request: validCreate}},
-		{name: "valid update", input: manageTemplateInput{Action: "update", WorkloadType: templateTypeTraining, TemplateID: testTemplateID, Request: validUpdate}},
+		{name: "valid update", input: manageTemplateInput{Action: "update", WorkloadType: templateTypeTraining, TemplateID: testTemplateID, Request: validUpdate, ExpectedFingerprint: testTemplateFingerprint}},
 		{name: "valid delete", input: manageTemplateInput{Action: "delete", WorkloadType: templateTypeTraining, TemplateID: testTemplateID}},
 		{name: "unsupported action", input: manageTemplateInput{Action: "patch", WorkloadType: templateTypeTraining}, wantErr: "action must be one of"},
 		{name: "unsupported workload type", input: manageTemplateInput{Action: "create", WorkloadType: "Job"}, wantErr: "workloadType must be one of"},
 		{name: "create rejects id", input: manageTemplateInput{Action: "create", WorkloadType: templateTypeTraining, TemplateID: testTemplateID, Request: validCreate}, wantErr: "must not be set for create"},
 		{name: "update requires id", input: manageTemplateInput{Action: "update", WorkloadType: templateTypeTraining, Request: validUpdate}, wantErr: "templateId is required"},
+		{name: "update requires fingerprint", input: manageTemplateInput{Action: "update", WorkloadType: templateTypeTraining, TemplateID: testTemplateID, Request: validUpdate}, wantErr: "expectedFingerprint is required"},
+		{name: "update rejects invalid fingerprint", input: manageTemplateInput{Action: "update", WorkloadType: templateTypeTraining, TemplateID: testTemplateID, Request: validUpdate, ExpectedFingerprint: "invalid"}, wantErr: "value returned by get_template"},
 		{name: "delete rejects request", input: manageTemplateInput{Action: "delete", WorkloadType: templateTypeTraining, TemplateID: testTemplateID, Request: validUpdate}, wantErr: "must not be set for delete"},
 		{name: "system create unsupported", input: manageTemplateInput{Action: "create", WorkloadType: templateTypeTraining, Request: map[string]any{
 			"meta": map[string]any{"name": "base", "scopeType": "system"},

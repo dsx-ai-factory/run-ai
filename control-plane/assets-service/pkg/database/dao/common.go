@@ -62,6 +62,7 @@ func DeleteAssetsByScope(ctx context.Context, scopeType api.ScopeType, scopeId s
 		api.ASSETKIND_GENERIC_SECRET,
 		api.ASSETKIND_DOCKER_REGISTRY,
 		api.ASSETKIND_NGC_API_KEY,
+		api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
 	}
 
 	for _, layer := range [][]api.AssetKind{layerThree, layerTwo, layerOne} {

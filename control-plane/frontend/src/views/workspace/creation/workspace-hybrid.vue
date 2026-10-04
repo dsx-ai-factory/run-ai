@@ -415,7 +415,6 @@ const WorkspaceHybrid = defineComponent({
       );
     },
     supportMultiFractionGpu(): boolean {
-      // TODO: returning false for now because the backend does not support it
       return this.clusterStore.isClusterVersionSufficient(
         this.workspaceModel.clusterId || "",
         MIN_CLUSTER_VERSION_FOR_MULTI_FRACTION_GPU,
@@ -648,6 +647,5 @@ const WorkspaceHybrid = defineComponent({
   },
 });
 
-//Dima todo - Type assertion to prevent TS7056 while maintaining type safety -- will be refactored later --hide the annoying warning
 export default WorkspaceHybrid as typeof WorkspaceHybrid & DefineComponent;
 </script>

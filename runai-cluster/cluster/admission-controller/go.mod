@@ -5,8 +5,8 @@ go 1.27.1
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261001113945-91fe5adea43a
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261001113945-91fe5adea43a
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261004125232-8df8b2a11ae1
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261004125232-8df8b2a11ae1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
@@ -30,7 +30,7 @@ replace (
 )
 
 require (
-	github.com/awslabs/operatorpkg v0.0.0-20260917215433-d57ef9a9ef51 // indirect
+	github.com/awslabs/operatorpkg v0.0.0-20261002163259-5e8ed3699dea // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

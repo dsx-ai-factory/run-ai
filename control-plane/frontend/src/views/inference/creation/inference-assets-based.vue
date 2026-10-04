@@ -198,7 +198,6 @@ import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes
 import { dataSourceUtil } from "@/utils/data-source.util/data-source.util";
 import {
   MIN_CLUSTER_VERSION_FOR_AUTO_SCALE_DISABLED,
-  // MIN_CLUSTER_VERSION_FOR_CONFIG_MAP_ENV_VAR, // TODO: Uncomment after checking it's working
   MIN_CLUSTER_VERSION_FOR_INFERENCE_VOLUME,
   MIN_CLUSTER_VERSION_FOR_TOLERATIONS,
 } from "@/common/version.constant";
@@ -276,7 +275,6 @@ export default defineComponent({
         await this.loadFromExistingInference(this.fromCopyId);
       }
 
-      // TODO: Moshe - to remove this once we have the policy feature enabled but to keep the fallback policy
       await this.setDataSourcePolicy();
 
       const selectedCluster: ClustersMinimalData | undefined = this.clusterStore.clusterList.find(
@@ -421,7 +419,6 @@ export default defineComponent({
     },
     supportConfigMapAsEnvVar(): boolean {
       return false;
-      // TODO: Validate it does work in inference
       // return this.clusterStore.isClusterVersionSufficient(this.clusterUid, MIN_CLUSTER_VERSION_FOR_CONFIG_MAP_ENV_VAR);
     },
     supportTolerations(): boolean {

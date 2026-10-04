@@ -19,7 +19,6 @@ export const assetService = {
 
 const endpoint: string = API.asset;
 async function isExist(kind: string, assetName: string, options: IAssetNameValidationOptions): Promise<boolean> {
-  //TODO: is says this is deprecated, verifying with Ofer
   // assetsServiceApi.workloadApi.assetNameConflictValidation(kind, assetName, options.scopeType, options.scopeId);
   try {
     await controlPlaneService.get(`${endpoint}/name-availability`, {

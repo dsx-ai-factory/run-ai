@@ -19,11 +19,9 @@ import (
 )
 
 const (
-	// AirgapBaseURLEnv names the environment variable holding the base URL the
-	// legacy air-gap tarballs are downloaded from. The credentials come from the
-	// registry pull secret, which must carry an auth entry for that host.
-	AirgapBaseURLEnv = "E2E_AIRGAP_BASE_URL"
-
+	AirgapBaseURLEnv      = "E2E_AIRGAP_BASE_URL"
+	HarborDomainEnv       = "E2E_HARBOR_DOMAIN"
+	DefaultHarborDomain   = "example.com"
 	harborProject         = "runai"
 	airgapDownloadTimeout = 30 * time.Minute
 )
@@ -42,11 +40,18 @@ func HarborPass() string {
 	return os.Getenv("E2E_HARBOR_PASSWORD")
 }
 
+func HarborDomain() string {
+	if domain := strings.TrimSpace(os.Getenv(HarborDomainEnv)); domain != "" {
+		return domain
+	}
+	return DefaultHarborDomain
+}
+
 func HarborRegistryURL(clusterName, kubernetesDistribution string) string {
 	if kubernetesDistribution == "openshift" {
-		return fmt.Sprintf("%s-harbor.apps.%s.runailabs.com/%s", clusterName, clusterName, harborProject)
+		return fmt.Sprintf("%s-harbor.apps.%s.%s/%s", clusterName, clusterName, HarborDomain(), harborProject)
 	}
-	return fmt.Sprintf("%s-harbor.runailabs.com/%s", clusterName, harborProject)
+	return fmt.Sprintf("%s-harbor.%s/%s", clusterName, HarborDomain(), harborProject)
 }
 
 // extractRegistryAuth returns the basic-auth value the pull secret holds for

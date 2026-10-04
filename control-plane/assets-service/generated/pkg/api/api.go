@@ -211,6 +211,17 @@ type RegistryAPIRouter interface {
 	GetRepositoryTags(http.ResponseWriter, *http.Request)
 }
 
+// ResourceClaimTemplatesAPIRouter defines the required methods for binding the api requests to a responses for the ResourceClaimTemplatesAPI
+// The ResourceClaimTemplatesAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a ResourceClaimTemplatesAPIServicer to perform the required actions, then write the service results to the http response.
+type ResourceClaimTemplatesAPIRouter interface {
+	ListRcts(http.ResponseWriter, *http.Request)
+	CreateRct(http.ResponseWriter, *http.Request)
+	GetRctById(http.ResponseWriter, *http.Request)
+	UpdateRctById(http.ResponseWriter, *http.Request)
+	DeleteRctById(http.ResponseWriter, *http.Request)
+}
+
 // S3APIRouter defines the required methods for binding the api requests to a responses for the S3API
 // The S3APIRouter implementation should parse necessary information from the http request,
 // pass the data to a S3APIServicer to perform the required actions, then write the service results to the http response.
@@ -503,6 +514,18 @@ type RegistryAPIServicer interface {
 	DeleteRegistry(context.Context, string) (ImplResponse, error)
 	GetRepositories(context.Context, string, string) (ImplResponse, error)
 	GetRepositoryTags(context.Context, string, string, string) (ImplResponse, error)
+}
+
+// ResourceClaimTemplatesAPIServicer defines the api actions for the ResourceClaimTemplatesAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type ResourceClaimTemplatesAPIServicer interface {
+	ListRcts(context.Context, int32, int32) (ImplResponse, error)
+	CreateRct(context.Context, RctCreationRequest) (ImplResponse, error)
+	GetRctById(context.Context, string) (ImplResponse, error)
+	UpdateRctById(context.Context, string, RctUpdateRequest) (ImplResponse, error)
+	DeleteRctById(context.Context, string) (ImplResponse, error)
 }
 
 // S3APIServicer defines the api actions for the S3API service

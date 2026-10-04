@@ -4,7 +4,6 @@
 -->
 
 <template>
-  <!-- TODO: Need to implement the policy here -->
   <policy-non-compliance-card-wrapper
     :compliance-data="undefined"
     :field="data.meta.kind"

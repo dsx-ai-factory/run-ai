@@ -80,9 +80,12 @@ var resourceTypeOfKind = map[assets.AssetKind]authClient.ResourceType{
 	assets.ASSETKIND_CONFIG_MAP:        authClient.RESOURCETYPE_CM_VOLUME_ASSETS,
 	assets.ASSETKIND_SECRET_VOLUME:     authClient.RESOURCETYPE_SECRET_VOLUME_ASSETS,
 	assets.ASSETKIND_NGC_API_KEY:       authClient.RESOURCETYPE_CREDENTIALS,
-	WorkspaceAsAssetKind:               authClient.RESOURCETYPE_WORKSPACES,
-	TrainingAsAssetKind:                authClient.RESOURCETYPE_TRAININGS,
-	InferenceAsAssetKind:               authClient.RESOURCETYPE_INFERENCES,
+
+	assets.ASSETKIND_RESOURCE_CLAIM_TEMPLATE: authClient.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+
+	WorkspaceAsAssetKind: authClient.RESOURCETYPE_WORKSPACES,
+	TrainingAsAssetKind:  authClient.RESOURCETYPE_TRAININGS,
+	InferenceAsAssetKind: authClient.RESOURCETYPE_INFERENCES,
 }
 
 var TestingAllowCreateSystemScopedAssets = false

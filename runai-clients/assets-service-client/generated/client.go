@@ -88,6 +88,8 @@ type APIClient struct {
 
 	RegistryAPI RegistryAPI
 
+	ResourceClaimTemplatesAPI ResourceClaimTemplatesAPI
+
 	S3API S3API
 
 	SecretAPI SecretAPI
@@ -135,6 +137,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.NFSAPI = (*NFSAPIService)(&c.common)
 	c.PVCAPI = (*PVCAPIService)(&c.common)
 	c.RegistryAPI = (*RegistryAPIService)(&c.common)
+	c.ResourceClaimTemplatesAPI = (*ResourceClaimTemplatesAPIService)(&c.common)
 	c.S3API = (*S3APIService)(&c.common)
 	c.SecretAPI = (*SecretAPIService)(&c.common)
 	c.SynchronizationAPI = (*SynchronizationAPIService)(&c.common)

@@ -634,6 +634,7 @@ func applicationViewToApi(application models.ApplicationView, verbosity api.AiAp
 		UpdatedAt:      application.UpdatedAt,
 		UpdatedBy:      application.UpdatedBy,
 		DesiredPhase:   application.DesiredPhase,
+		ClusterId:      application.ClusterId,
 		ActionStatus:   actionStatus,
 		ActionMessage:  application.Message,
 	}
