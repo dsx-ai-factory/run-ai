@@ -18,7 +18,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.19
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.20
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
@@ -77,8 +77,8 @@ require (
 	github.com/docker/cli v29.8.2+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.9 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/evanphx/json-patch v5.9.11+incompatible // indirect
@@ -116,7 +116,7 @@ require (
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20261001064331-60bf690a9302 // indirect
+	github.com/google/pprof v0.0.0-20261003200830-ebaad5f31b4d // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gookit/color v1.6.1 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
@@ -177,9 +177,10 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 // indirect
-	go.opentelemetry.io/otel v1.46.0 // indirect
-	go.opentelemetry.io/otel/metric v1.46.0 // indirect
-	go.opentelemetry.io/otel/trace v1.46.0 // indirect
+	go.opentelemetry.io/otel v1.47.0 // indirect
+	go.opentelemetry.io/otel/log v1.47.0 // indirect
+	go.opentelemetry.io/otel/metric v1.47.0 // indirect
+	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect

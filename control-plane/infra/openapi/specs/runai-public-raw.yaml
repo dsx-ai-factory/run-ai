@@ -57239,7 +57239,6 @@ components:
     ServicePort:
       type: object
       description: Service port specification.
-      nullable: true
       properties:
         name:
           description: The Service port name.
@@ -57285,7 +57284,7 @@ components:
           description: The Kubernetes Service name.
           type: string
           minLength: 1
-          maxLength: 253
+          maxLength: 63
           example: workload-service
         type:
           description: Kubernetes service type that determines how the service is exposed.
@@ -57320,14 +57319,16 @@ components:
         - ports
     ServiceRef:
       type: object
-      description: Reference an existing Service.
+      description: >-
+        Reference an existing Service. Requires authorization on the service and
+        externalAccess on the endpoint.
       nullable: true
       properties:
         name:
           description: The name of the existing Kubernetes Service.
           type: string
           minLength: 1
-          maxLength: 253
+          maxLength: 63
           example: existing-service
         port:
           description: The port on the existing Service to route traffic to.
@@ -57352,6 +57353,11 @@ components:
           $ref: '#/components/schemas/AuthorizedGroups'
     Workloadv2Authorization:
       type: object
+      description: >-
+        Access control for this networking endpoint. Requires externalAccess.
+
+        Only the access list selected by authorizationType may be nonempty;
+        authenticatedUsers requires both lists to be empty.
       example:
         forceJsonResponse: false
         authorizationType: authenticatedUsers
@@ -57368,9 +57374,8 @@ components:
     NetworkingService:
       type: object
       description: >-
-        Service configuration for routing traffic to the workload. Use 'spec' or
-        'ref' (not both).
-      nullable: true
+        Service configuration for routing traffic to the workload. Provide
+        exactly one of spec or ref.
       properties:
         spec:
           description: >-
@@ -57383,14 +57388,18 @@ components:
             `spec`.
           $ref: '#/components/schemas/ServiceRef'
         authorization:
-          description: Access control configuration for traffic through this endpoint.
+          description: >-
+            Access control configuration for traffic through this endpoint.
+            Required when using ref. Requires externalAccess on the endpoint.
           $ref: '#/components/schemas/Workloadv2Authorization'
     NetworkingEndpoint:
       type: object
       description: >-
-        A single networking endpoint. An endpoint may create or reference one
-        Service and may expose it externally.
-      nullable: true
+        A single networking endpoint. Provide a Service, externalAccess
+        containing an Ingress, Route, or HTTPRoute, or both.
+
+        An endpoint may create or reference at most one Service. Authorization
+        requires externalAccess.
       properties:
         externalAccess:
           description: >-
@@ -57412,7 +57421,7 @@ components:
         Networking endpoint configurations for the workload (external access,
         services with auth).
 
-        Supported for cluster version 2.25 and above.
+        Requires cluster version 3.0.0 or later.
       nullable: true
       maxItems: 1000
       items:
@@ -57611,7 +57620,6 @@ components:
           type: string
           nullable: true
         networking:
-          x-internal: true
           $ref: '#/components/schemas/NetworkingConfiguration'
         userCredentials:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials'

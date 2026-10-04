@@ -260,7 +260,10 @@ const (
 	// supports resource class templates
 	MinVersionResourceClaimTemplates
 
-	// NOTE -> Make sure to add the min version to the map below
+	// MinVersionNetworkingOwnershipEnforcement - the min cluster version enforcing networking Service and Pod ownership.
+	MinVersionNetworkingOwnershipEnforcement
+
+  // NOTE -> Make sure to add the min version to the map below
 )
 
 var clusterVersionToCapabilityMap = map[int]string{
@@ -339,6 +342,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionNoNativeSubmission:                        "3.0.0",
 	MinVersionGpuMemoryLimitAnnotations:                 "3.0.0",
 	MinVersionResourceClaimTemplates:                    "3.1.0",
+	MinVersionNetworkingOwnershipEnforcement:            "3.0.0",
 }
 
 // ClustersCacheConfig is a struct that holds the configuration for the clusters cache.
