@@ -23,8 +23,8 @@ github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15 h1:yrLkxH
 github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15/go.mod h1:nA6KW3kR5u4ZnLnedbNog0zXGJABFUPAsgRCJAbvEdE=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5 h1:VW9VpIKde5c9ATV9XE2pz6vhIjL+82S2MwYIYtzAq+o=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5/go.mod h1:9hjg4OEtK3FRgwQrSVVg+FoZS655NKhdAD0OPZrkB9o=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6 h1:ZIFCaaOrtuiBxSrG47DBMN/SqCrbw8LwcCboRZejwAs=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6/go.mod h1:p92ZFxba+dpnLsTz0MpacEkRVhCfr/nTwpvfV7q6FAg=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7 h1:Qpd2NF7cp41AcCYysqpSfcGTtWLYRYjHWaR1Mi/o64I=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7/go.mod h1:1YcJ4cr+6B8C1C3Xmio1oOkgxuSqBJWgyAPgbLE+1s0=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.10.1 h1:b0/UzAf9yR5rhf3RPm9gf3ehBPpf0oZKIjtpKrx59Ho=

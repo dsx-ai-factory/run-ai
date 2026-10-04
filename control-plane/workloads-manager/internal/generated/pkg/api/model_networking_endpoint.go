@@ -20,7 +20,7 @@ var dummyNetworkingEndpoint = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// NetworkingEndpoint - A single networking endpoint. An endpoint may create or reference one Service and may expose it externally.
+// NetworkingEndpoint - A single networking endpoint. Provide a Service, externalAccess containing an Ingress, Route, or HTTPRoute, or both. An endpoint may create or reference at most one Service. Authorization requires externalAccess.
 type NetworkingEndpoint struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
