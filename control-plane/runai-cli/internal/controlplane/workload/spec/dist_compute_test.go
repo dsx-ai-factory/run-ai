@@ -90,6 +90,35 @@ var _ = Describe("Distributed master GPU requests", func() {
 			`{"gpuDevicesRequest":1}`, `{"gpuPortionRequest":0.5,"gpuPortionLimit":0.75}`, false),
 	)
 
+	DescribeTable("ignores a null master GPU device request",
+		func(masterArgs []string, masterCompute string) {
+			args := append([]string{"--gpu-devices-request", "1"}, masterArgs...)
+			Expect(command.ParseFlags(args)).To(Succeed())
+			gs.flags.Compute.MasterGpuDeviceRequest.Set(nil)
+
+			distributedSpec, err := gs.GenerateDistributedSpec(context.Background(), "cluster-id", nil)
+			Expect(err).NotTo(HaveOccurred())
+			worker := distributedSpec.GetSpec()
+			payload, err := json.Marshal(worker.GetCompute())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(payload).To(MatchJSON(`{"gpuDevicesRequest":1}`))
+
+			if masterCompute == "" {
+				Expect(distributedSpec.GetMasterSpecSameAsWorker()).To(BeTrue())
+				Expect(distributedSpec.HasMasterSpec()).To(BeFalse())
+			} else {
+				Expect(distributedSpec.GetMasterSpecSameAsWorker()).To(BeFalse())
+				Expect(distributedSpec.HasMasterSpec()).To(BeTrue())
+				master := distributedSpec.GetMasterSpec()
+				payload, err = json.Marshal(master.GetCompute())
+				Expect(err).NotTo(HaveOccurred())
+				Expect(payload).To(MatchJSON(masterCompute))
+			}
+		},
+		Entry("without another master override", []string{}, ""),
+		Entry("with a master CPU override", []string{"--master-cpu-core-request", "1"}, `{"gpuDevicesRequest":1,"cpuCoreRequest":1}`),
+	)
+
 	DescribeTable("preserves the CPU-only MPI master with a separate command",
 		func(masterArgs []string) {
 			gs = NewDistributedSpec(api.MPI)

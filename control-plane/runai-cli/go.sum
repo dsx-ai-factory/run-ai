@@ -41,6 +41,8 @@ github.com/deckarep/golang-set/v2 v2.6.0 h1:XfcQbWM1LlMB8BsJ8N9vW5ehnnPVIw0je80N
 github.com/deckarep/golang-set/v2 v2.6.0/go.mod h1:VAky9rY/yGXJOLEDv3OMci+7wtDpOF4IN+y82NBOac4=
 github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11 h1:lsACFL1BtfA7kE/L69+4EfIXD07MFwRcvcVlR9v3VzQ=
 github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11/go.mod h1:iXkyB6X4UBcmjGdfdEKif6Ldzep5j0RyvgXMde3Ls9Q=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5 h1:VsVvUhPY9OCcgO32NnAhjz+oyGOgZ/CWa08CZqrfnBc=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5/go.mod h1:jqO0+q1TnbjpcyoyDQ4bSrsixa8Ld522tIWdYc7bJiU=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 h1:Fy946r1JrfkYN5KBZhu+GBLhxuA7EY1Lt10sgDIzDxs=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8/go.mod h1:xAYNpT7DXg6+KXXeNERsHq6fYR605zz2lE+GCE8BKZY=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 h1:ngMQ/W6rCI/3Fl695DqGHByE5abCf3R1JNKd9Wtnv7s=
