@@ -4,8 +4,8 @@ go 1.27.1
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.16
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.17
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/stretchr/testify v1.12.1
 )
@@ -32,7 +32,7 @@ require (
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28 // indirect
 	github.com/ebitengine/purego v0.11.1 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
