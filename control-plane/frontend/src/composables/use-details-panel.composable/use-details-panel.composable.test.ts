@@ -22,7 +22,7 @@ const generalSection = makeSection("general", "General information", [
   { label: "Type", value: "Workspace" },
   { label: "Category", value: "Build" },
   { label: "Project", value: "p-1", link: { text: "p-1", href: "/projects/p-1" } },
-  { label: "Cluster", value: "dima-cluster" },
+  { label: "Cluster", value: "test-cluster" },
 ]);
 
 const computeSection = makeSection("compute", "Compute", [

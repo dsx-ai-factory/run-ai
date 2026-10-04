@@ -194,7 +194,6 @@ export const mockProject: Project = {
         overQuotaWeight: 5,
         units: "Mib" as Units,
       },
-      priority: "MediumLow",
     },
   ],
 };
