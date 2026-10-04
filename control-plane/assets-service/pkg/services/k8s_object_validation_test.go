@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	resourcev1 "k8s.io/api/resource/v1"
+	apivalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/util/validation"
 )
 
@@ -96,7 +97,7 @@ var _ = Describe("validateK8sObjectMeta", func() {
 	It("accepts annotations whose combined size is just under the K8s limit", func() {
 		// One annotation of (limit - key_len) bytes exactly hits the ceiling.
 		key := "example.com/big"
-		value := strings.Repeat("x", validation.TotalAnnotationSizeLimitB-len(key))
+		value := strings.Repeat("x", apivalidation.TotalAnnotationSizeLimitB-len(key))
 		err := validateK8sObjectMeta(&api.K8sObjectMeta{
 			Annotations: &map[string]string{key: value},
 		})

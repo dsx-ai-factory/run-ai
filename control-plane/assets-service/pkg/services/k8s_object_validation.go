@@ -23,6 +23,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
 	jsschema "github.com/santhosh-tekuri/jsonschema/v6"
+	apivalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/util/validation"
 )
 
@@ -90,10 +91,10 @@ func validateK8sObjectMeta(meta *api.K8sObjectMeta) *api.Error {
 			}
 			total += len(key) + len(value)
 		}
-		if total > validation.TotalAnnotationSizeLimitB {
+		if total > apivalidation.TotalAnnotationSizeLimitB {
 			return api.NewValidationError(fmt.Sprintf(
 				"%s: total size %d bytes exceeds Kubernetes limit of %d bytes",
-				PathObjectMetaAnnotations, total, validation.TotalAnnotationSizeLimitB))
+				PathObjectMetaAnnotations, total, apivalidation.TotalAnnotationSizeLimitB))
 		}
 	}
 	return nil
