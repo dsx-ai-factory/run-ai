@@ -514,6 +514,7 @@ var _ = Describe("AI applications API tests", Ordered, func() {
 			Expect(application.Id).To(Equal(application2.Id))
 			Expect(application.Source).To(Equal(application2.Source))
 			Expect(application.Type).To(Equal(application2.Type))
+			Expect(application.ClusterId).To(Equal(clusterId.String()))
 			Expect(application.ProjectName).To(Equal(application2.ProjectName))
 			Expect(application.ProjectId).To(Equal(application2.ProjectId))
 			Expect(application.DepartmentId).To(Equal(application2.DepartmentId))

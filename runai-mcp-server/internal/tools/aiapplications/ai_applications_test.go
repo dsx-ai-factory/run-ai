@@ -105,7 +105,7 @@ func TestListAIApplications(t *testing.T) {
 			"applications": []map[string]any{{
 				"id": testApplicationID, "name": "nemo-app", "phase": "Running",
 				"actionStatus": "deployed", "actionMessage": "application is ready",
-				"projectId": testProjectID, "projectName": "team-a", "createdAt": "2026-08-20T09:00:00Z",
+				"clusterId": testClusterID, "projectId": testProjectID, "projectName": "team-a", "createdAt": "2026-08-20T09:00:00Z",
 			}},
 		})
 	})
@@ -117,6 +117,7 @@ func TestListAIApplications(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, out.Applications, 1)
 	assert.Equal(t, testApplicationID, out.Applications[0].ID)
+	assert.Equal(t, testClusterID, out.Applications[0].ClusterID)
 	assert.Equal(t, "Running", out.Applications[0].Phase)
 	assert.Equal(t, "deployed", out.Applications[0].ActionStatus)
 	assert.Equal(t, "application is ready", out.Applications[0].ActionMessage)
@@ -166,6 +167,8 @@ func TestSubmitAIApplicationCreatesAfterConfirmation(t *testing.T) {
 	in.Spec.Auth = &aiApplicationAuth{AssetID: testApplicationID, UserCredential: true}
 	out, err := submitAIApplicationRun(context.Background(), client, in)
 	require.NoError(t, err)
+	assert.True(t, out.SubmissionAccepted)
+	assert.True(t, out.ResponseDetailsAvailable)
 	assert.Equal(t, testApplicationID, out.ID)
 	assert.Equal(t, "Pending", out.Phase)
 	assert.Equal(t, "creating", out.ActionStatus)
@@ -187,17 +190,47 @@ func TestSubmitAIApplicationRequiresConfirmationBeforeCreate(t *testing.T) {
 	assert.False(t, createCalled)
 }
 
-func TestSubmitAIApplicationAcceptsNoContentSuccess(t *testing.T) {
-	client, mux := runaiclienttest.NewServer(t)
-	mux.HandleFunc("/api/v1/ai-applications", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	})
+func TestSubmitAIApplicationAcceptedResponseVariants(t *testing.T) {
+	tests := []struct {
+		name        string
+		status      int
+		body        string
+		wantWarning string
+	}{
+		{name: "no content", status: http.StatusNoContent},
+		{name: "malformed response", status: http.StatusOK, body: `{"id":`, wantWarning: "response details are unavailable"},
+		{name: "empty response", status: http.StatusOK, body: `{}`, wantWarning: "did not include application details"},
+	}
 
-	in := validSubmitInput()
-	in.Confirm = true
-	out, err := submitAIApplicationRun(context.Background(), client, in)
-	require.NoError(t, err)
-	assert.Empty(t, out.ID)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mux := runaiclienttest.NewServer(t)
+			requests := 0
+			mux.HandleFunc("/api/v1/ai-applications", func(w http.ResponseWriter, _ *http.Request) {
+				requests++
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(tt.status)
+				if tt.body != "" {
+					_, _ = w.Write([]byte(tt.body))
+				}
+			})
+
+			in := validSubmitInput()
+			in.Confirm = true
+			out, err := submitAIApplicationRun(context.Background(), client, in)
+			require.NoError(t, err)
+			assert.True(t, out.SubmissionAccepted)
+			assert.False(t, out.ResponseDetailsAvailable)
+			assert.Empty(t, out.ID)
+			if tt.wantWarning == "" {
+				assert.Empty(t, out.Warnings)
+			} else {
+				require.Len(t, out.Warnings, 1)
+				assert.Contains(t, out.Warnings[0], tt.wantWarning)
+			}
+			assert.Equal(t, 1, requests, "must not make a follow-up API call")
+		})
+	}
 }
 
 func TestSubmitAIApplicationTreatsServerErrorAsUnknownOutcome(t *testing.T) {

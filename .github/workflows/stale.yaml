@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# 90 days without activity marks an issue or pull request stale; 30 more days
+# of silence closes it. The `lifecycle/frozen` label exempts an item.
+name: Stale issues
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "21 4 * * *"
+
+# A manual run must not overlap the nightly one: two passes over the same item
+# would post its stale comment twice.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  stale:
+    name: Mark and close inactive issues and pull requests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      issues: write
+      pull-requests: write
+      # actions/stale persists its scan cursor between runs through the cache.
+      actions: write
+
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11
+        with:
+          days-before-stale: 90
+          stale-issue-label: 'lifecycle/stale'
+          stale-issue-message: 'This issue is stale because it has been open 90 days with no activity. This issue will be closed in 30 days unless new comments are made or the stale label is removed. To skip these checks, apply the "lifecycle/frozen" label.'
+          close-issue-message: 'This issue was automatically closed due to inactivity.'
+          days-before-issue-close: 30
+          exempt-issue-labels: 'lifecycle/frozen'
+          stale-pr-label: 'lifecycle/stale'
+          stale-pr-message: 'This pull request is stale because it has been open 90 days with no activity. It will be closed in 30 days unless new comments are made or the stale label is removed. To skip these checks, apply the "lifecycle/frozen" label.'
+          close-pr-message: 'This pull request was automatically closed due to inactivity.'
+          days-before-pr-close: 30
+          exempt-pr-labels: 'lifecycle/frozen'
+          remove-stale-when-updated: true
+          operations-per-run: 1000

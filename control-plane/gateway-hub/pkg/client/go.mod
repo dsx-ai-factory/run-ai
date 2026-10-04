@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/control-plane/gateway-hub/pkg/client
 go 1.27.1
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28
 )
 
 require (

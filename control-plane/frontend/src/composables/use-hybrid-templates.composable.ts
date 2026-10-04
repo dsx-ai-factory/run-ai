@@ -597,7 +597,6 @@ export function useHybridTemplates(
         complyToWorkloadType: EWorkloadTypeSupportedInAssetsService.Inference,
         isInference: true,
       },
-      // TODO: Moshe: check these filters
       [EHybridFormTypes.DistributedInferenceLeader]: {
         complyToWorkloadType: EWorkloadTypeSupportedInAssetsService.Inference,
         isInference: true,

@@ -62,6 +62,7 @@ type aiApplicationListItem struct {
 	Phase          string `json:"phase,omitempty"          jsonschema:"Current Kubernetes or Helm release phase."`
 	ActionStatus   string `json:"actionStatus,omitempty"   jsonschema:"Current AI application action status, such as creating, deployed, or failed."`
 	ActionMessage  string `json:"actionMessage,omitempty"  jsonschema:"Message associated with the current AI application action status."`
+	ClusterID      string `json:"clusterId"                jsonschema:"Cluster UUID where the AI application is scheduled."`
 	ProjectID      string `json:"projectId,omitempty"      jsonschema:"Owning project ID."`
 	ProjectName    string `json:"projectName,omitempty"    jsonschema:"Owning project name."`
 	DepartmentID   string `json:"departmentId,omitempty"   jsonschema:"Owning department ID."`
@@ -146,7 +147,7 @@ func aiApplicationFilters(in listAIApplicationsInput) []string {
 func mapAIApplication(application workloads.AIApplication) aiApplicationListItem {
 	return aiApplicationListItem{
 		ID: application.GetId(), Name: application.GetName(), Source: application.GetSource(), Type: application.GetType(),
-		DesiredPhase: application.GetDesiredPhase(), Phase: application.GetPhase(), ProjectID: application.GetProjectId(),
+		DesiredPhase: application.GetDesiredPhase(), Phase: application.GetPhase(), ClusterID: application.GetClusterId(), ProjectID: application.GetProjectId(),
 		ActionStatus: application.GetActionStatus(), ActionMessage: application.GetActionMessage(),
 		ProjectName: application.GetProjectName(), DepartmentID: application.GetDepartmentId(), DepartmentName: application.GetDepartmentName(),
 		CreatedAt: common.TimestampString(application.CreatedAt), CreatedBy: application.GetCreatedBy(),

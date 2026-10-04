@@ -15,7 +15,10 @@ native KAI `SchedulingShard` per Run:ai node pool.
 
 Use `./update-krm-version.sh v0.1.0` to pin a KRM release. The script reads
 that release's chart metadata, takes the `kai-scheduler` version it bundles, and
-re-pins our KAI Go module to match, so the two cannot drift apart.
+re-pins our KAI Go module to match, so the two cannot drift apart. Modules that
+reach KAI only through a local `replace` are tidied as well. It needs `go`,
+`helm` and mikefarah's `yq` v4, and it edits nothing until both the KRM chart
+and the KAI Go module resolve.
 
 There is deliberately no way to bump KAI on its own: doing so would move our Go
 types ahead of the scheduler KRM actually deploys, with nothing to catch it. To

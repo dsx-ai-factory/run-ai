@@ -81,6 +81,7 @@ type FieldsComposerOptions struct {
 	GpuMemoryLimitAnnotationsSupported   bool
 	LauncherCreationPolicySupported      bool
 	NodeAffinitySupported                bool
+	OAuth2ProxyTemplatesSupported        bool
 	PreemptibilitySupported              bool
 	UserCredentialsSupported             bool
 	VolumeDefaultModeSupported           bool
@@ -100,6 +101,7 @@ func OptionsForPolicy() FieldsComposerOptions {
 		GpuMemoryLimitAnnotationsSupported:   true,
 		LauncherCreationPolicySupported:      true,
 		NodeAffinitySupported:                true,
+		OAuth2ProxyTemplatesSupported:        true,
 		PreemptibilitySupported:              true,
 		UserCredentialsSupported:             true,
 		VolumeDefaultModeSupported:           true,

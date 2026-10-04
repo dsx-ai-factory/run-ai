@@ -8,7 +8,6 @@ properties:
     type: string
     nullable: true
   networking:
-    x-internal: true
     $ref: "./Networking/NetworkingConfiguration.yaml"
   userCredentials:
     $ref: "./WorkloadV2UpdateConfigurationUserCredentials.yaml"
