@@ -58,31 +58,23 @@ Once the bundle is loaded, the `registry` section in your configuration file aut
 
 ## Download the Installer
 
-<Warning>
-
-**TODO**
-
-`<release-url>` is a placeholder - the real download URL for the `runai-installer` binary is not yet finalized. Replace it once the release location is confirmed.
-
-</Warning>
-
-Download the `runai-installer` binary for your operating system and CPU architecture, on each machine you run the installer from:
+Download the `runai-installer` binary for your operating system and CPU architecture, on each machine you run the installer from. Replace `<VERSION>` with the NVIDIA Run:ai version you are installing, for example `3.0.17`:
 
 ```bash
 # Linux, AMD64 (x86_64)
-curl -LO <release-url>/runai-installer-linux-amd64
+curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-linux-amd64
 chmod +x runai-installer-linux-amd64
 
 # Linux, ARM64
-curl -LO <release-url>/runai-installer-linux-arm64
+curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-linux-arm64
 chmod +x runai-installer-linux-arm64
 
 # macOS, AMD64 (Intel)
-curl -LO <release-url>/runai-installer-darwin-amd64
+curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-darwin-amd64
 chmod +x runai-installer-darwin-amd64
 
 # macOS, ARM64 (Apple Silicon)
-curl -LO <release-url>/runai-installer-darwin-arm64
+curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-darwin-arm64
 chmod +x runai-installer-darwin-arm64
 ```
 
@@ -101,9 +93,9 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
    - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
-     - Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add an entry for each hardened third-party image: `keycloak`, `postgres` (the PostgreSQL wait image), `traefik`, `nats`, and `thanos` for the control plane, and `valkey` and `git-sync` for the cluster. Each `source` is the full reference of the hardened image in your Docker Hub organization, including the tag. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#providing-credentials) for the entries.
+     - Third-party services - Add an entry for each hardened third-party image: `keycloak`, `postgres` (the PostgreSQL wait image), `traefik`, `nats`, and `thanos` for the control plane, and `valkey` and `git-sync` for the cluster. Each `source` is the full reference of the hardened image in your Docker Hub organization, including the tag. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#providing-credentials) for the entries. <Badge intent="info" minimal outlined>Gov-ready</Badge>
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
-     - Docker Hub credentials <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add an entry for `docker.io` with your Docker ID or organization name and an access token, so that the pack can pull the hardened images. You do not create a Kubernetes secret. See [Providing Credentials](../../../system-requirements/gov-ready-third-party-services.md#providing-credentials).
+     - Docker Hub credentials - Add an entry for `docker.io` with your Docker ID or organization name and an access token, so that the pack can pull the hardened images. You do not create a Kubernetes secret. See [Providing Credentials](../../../system-requirements/gov-ready-third-party-services.md#providing-credentials). <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```bash
    cat > airgap-pack.yaml <<'EOF'

@@ -65,11 +65,12 @@ For a control plane installation on Kubernetes, configure:
    - `controlPlane.version` - The control plane version to install. Omit it to install the latest supported version.
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
      - `supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
+     - `telemetryService.enabled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true` to enable telemetry.
      - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
        - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
        - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
-     - Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add the hardened image values for the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values.
-     - `global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`.
+     - Third-party services - Add the hardened image values for the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
    controlPlane:
@@ -81,8 +82,9 @@ For a control plane installation on Kubernetes, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
-       telemetryService: # Optional, Support-Entitled Release only
-         telemetryAuth:
+       telemetryService: # Support-Entitled Release only
+         enabled: true
+         telemetryAuth: # Optional
            token: <SERVICE_API_KEY>
        # Gov-ready: add the hardened control plane image values, see Gov-Ready Third-Party Services
        global:
@@ -166,11 +168,12 @@ For a control plane installation on OpenShift, configure:
    - `controlPlane.version` - The control plane version to install. Omit it to install the latest supported version.
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
      - `supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
+     - `telemetryService.enabled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true` to enable telemetry.
      - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
        - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
        - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
-     - Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add the hardened image values for the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values.
-     - `global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`.
+     - Third-party services - Add the hardened image values for the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
    controlPlane:
@@ -179,8 +182,9 @@ For a control plane installation on OpenShift, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
-       telemetryService: # Optional, Support-Entitled Release only
-         telemetryAuth:
+       telemetryService: # Support-Entitled Release only
+         enabled: true
+         telemetryAuth: # Optional
            token: <SERVICE_API_KEY>
        # Gov-ready: add the hardened control plane image values, see Gov-Ready Third-Party Services
        global:
@@ -294,8 +298,8 @@ For a cluster installation on Kubernetes, configure:
    - `cluster.tls` - A certificate and private key for the cluster domain, as `certPath` and `keyPath`. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates) for which certificate you need.
    - `cluster.version` - The cluster version to install. Omit it to install the latest supported version.
    - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
-     - Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add the hardened image values for the cluster third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#cluster-services) for the values.
-     - `global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`.
+     - Third-party services - Add the hardened image values for the cluster third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#cluster-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
    cluster:
@@ -323,7 +327,7 @@ For a cluster installation on Kubernetes, configure:
      - `mode` - Set to `install`.
      - `version` - Omit to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported range if you want to set it explicitly. GPU fractions (memory fractions, dynamic memory fractions, or compute modes) require 26.7.1 or later, installed automatically when omitted.
      - `customHelmValues` - Merges Helm values into the GPU Operator's own Helm chart. Set `driver.version` to r615 or later if you plan to use GPU fractions, since GPU Operator 26.7.1 does not default to this driver version. Set `cdi.nriPluginEnabled` to `false`, since GPU memory fractions do not function while the NRI plugin is enabled. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites).
-     - GPU Operator values <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add the Helm values required for a Gov-ready GPU Operator to `customHelmValues`. See [Install the Gov-Ready GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/install-gpu-operator-gov-ready.html) for the values.
+     - GPU Operator values - Add the Helm values required for a Gov-ready GPU Operator to `customHelmValues`. See [Install the Gov-Ready GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/install-gpu-operator-gov-ready.html) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
    - `prerequisites.prometheus` - Required for every installation. See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites) for more details.
      - `mode` - Set to `install`.
      - `version` - Omit to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported range.
@@ -447,8 +451,8 @@ For a cluster installation on OpenShift, configure:
    - `cluster.controlPlaneCredentials` - Identifies this cluster to the control plane. Use the control plane administrator username and password generated during control plane installation - the installer uses these to register the cluster and fetch its bootstrap token automatically, in the same run. See [Retrieve Control Plane Credentials](#retrieve-control-plane-credentials).
    - `cluster.version` - The cluster version to install. Omit it to install the latest supported version.
    - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
-     - Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add the hardened image values for the cluster third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#cluster-services) for the values.
-     - `global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`.
+     - Third-party services - Add the hardened image values for the cluster third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#cluster-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
    cluster:
@@ -472,7 +476,7 @@ For a cluster installation on OpenShift, configure:
      - `mode` - Set to `install`. The installer installs the GPU Operator through OperatorHub (OLM).
      - `version` - Omit to install the latest version, or see [Support Matrix](../../../support-matrix.md) for the supported range if you want to set it explicitly. GPU fractions (memory fractions, dynamic memory fractions, or compute modes) require 26.7.1 or later, installed automatically when omitted.
      - `openshift.customResource` - Merges values into the GPU Operator's `ClusterPolicy`. `customHelmValues` is not supported on OpenShift. Set `driver.version` to r615 or later if you plan to use GPU fractions, since GPU Operator 26.7.1 does not default to this driver version. See [GPU Memory Fractions](../../../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites) and [Per-Component OpenShift Fields](../configuration-reference.md#per-component-openshift-fields).
-     - GPU Operator values <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add the values required for a Gov-ready GPU Operator to `openshift.customResource`. See [Install the Gov-Ready GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/install-gpu-operator-gov-ready.html) for the values.
+     - GPU Operator values - Add the values required for a Gov-ready GPU Operator to `openshift.customResource`. See [Install the Gov-Ready GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/install-gpu-operator-gov-ready.html) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
    - `prerequisites.prometheus` - See [Prerequisites and Features](../prerequisites-and-features.md#prerequisites) for more details.
      - `mode` - Set to `skip`, to use the cluster's built-in monitoring stack. `install` is rejected on OpenShift.
 

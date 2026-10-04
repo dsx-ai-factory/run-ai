@@ -46,8 +46,8 @@ Use the Helm command for the release type you are installing and update the valu
   * **Lowercase Characters**: At least 1 lowercase letter (a-z).
   * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
   * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values.
-* `global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add `--set global.fipsMode=only` to the `helm upgrade` command. Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography.
+* Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+* Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
 
@@ -66,13 +66,14 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 In addition to the values above, update the Helm commands as follows:
 
 * Add `--set supportEntitled=true` to the `helm upgrade` command.
+* Add `--set telemetryService.enabled=true` to the `helm upgrade` command to enable telemetry.
 * Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 * Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
   - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set global.domain=<DOMAIN> \
@@ -80,6 +81,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
   --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
   --set supportEntitled=true \
+  --set telemetryService.enabled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
   --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
@@ -87,7 +89,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 For example:
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set global.domain=runai.mycorp.local \
@@ -95,6 +97,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminUsername=email@local.com \
   --set tenantsManager.config.adminPassword="myPassw0rd\!" \
   --set supportEntitled=true \
+  --set telemetryService.enabled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
   --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
@@ -136,8 +139,8 @@ Use the Helm command for the release type you are installing and update the valu
   * **Lowercase Characters**: At least 1 lowercase letter (a-z).
   * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
   * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Save the values that are not images, which are the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values.
-* `global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add `--set global.fipsMode=only` to the `helm upgrade` command. Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography.
+* Save the values that are not images, which are the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+* Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
 
@@ -153,7 +156,7 @@ helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
 
 **Support-Entitled**
 
-In addition to the values above, add `--set supportEntitled=true` to the `helm upgrade` command:
+In addition to the values above, add `--set supportEntitled=true` and `--set telemetryService.enabled=true` to the `helm upgrade` command:
 
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
@@ -163,6 +166,7 @@ helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
     --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
     --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
     --set supportEntitled=true \
+    --set telemetryService.enabled=true \
     -n runai-backend -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
@@ -176,6 +180,7 @@ helm upgrade -i runai-backend ./charts/control-plane-3.0.2.tgz \
     --set tenantsManager.config.adminUsername=email@local.com \
     --set tenantsManager.config.adminPassword="myPassw0rd\!" \
     --set supportEntitled=true \
+    --set telemetryService.enabled=true \
     -n runai-backend -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
@@ -206,8 +211,8 @@ Use the Helm command for the release type you are installing and update the valu
   * **Lowercase Characters**: At least 1 lowercase letter (a-z).
   * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
   * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values.
-* `global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add `--set global.fipsMode=only` to the `helm upgrade` command. Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography.
+* Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+* Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
 
@@ -226,13 +231,14 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 In addition to the values above, update the Helm commands as follows:
 
 * Add `--set supportEntitled=true` to the `helm upgrade` command.
+* Add `--set telemetryService.enabled=true` to the `helm upgrade` command to enable telemetry.
 * Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 * Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
   - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set global.domain=runai.apps.<OPENSHIFT-CLUSTER-DOMAIN> \
@@ -240,6 +246,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
   --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
   --set supportEntitled=true \
+  --set telemetryService.enabled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
   --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
@@ -247,7 +254,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
 For example:
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set global.domain=runai.apps.mycorp.local \
@@ -255,6 +262,7 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
   --set tenantsManager.config.adminUsername=email@local.com \
   --set tenantsManager.config.adminPassword="myPassw0rd\!" \
   --set supportEntitled=true \
+  --set telemetryService.enabled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
   --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
@@ -295,8 +303,8 @@ Use the Helm command for the release type you are installing and update the valu
   * **Lowercase Characters**: At least 1 lowercase letter (a-z).
   * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
   * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Third-party services <Badge intent="info" minimal outlined>Gov-ready</Badge> - Save the values that are not images, which are the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values.
-* `global.fipsMode` <Badge intent="info" minimal outlined>Gov-ready</Badge> - Add `--set global.fipsMode=only` to the `helm upgrade` command. Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography.
+* Save the values that are not images, which are the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+* Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
 
@@ -312,7 +320,7 @@ helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-back
 
 **Support-Entitled**
 
-In addition to the values above, add `--set supportEntitled=true` to the `helm upgrade` command:
+In addition to the values above, add `--set supportEntitled=true` and `--set telemetryService.enabled=true` to the `helm upgrade` command:
 
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
@@ -322,6 +330,7 @@ helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-back
     --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
     --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
     --set supportEntitled=true \
+    --set telemetryService.enabled=true \
     -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
@@ -335,6 +344,7 @@ helm upgrade -i runai-backend ./charts/control-plane-3.0.2.tgz -n runai-backend 
     --set tenantsManager.config.adminUsername=email@local.com \
     --set tenantsManager.config.adminPassword="myPassw0rd\!" \
     --set supportEntitled=true \
+    --set telemetryService.enabled=true \
     -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
