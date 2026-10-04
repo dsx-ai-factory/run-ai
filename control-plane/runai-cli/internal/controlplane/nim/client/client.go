@@ -14,7 +14,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec"
 	clierrors "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/errors"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 
 type BackendNimClient struct {
@@ -22,7 +22,7 @@ type BackendNimClient struct {
 }
 
 func NewNimClient(urlStr, token string) (*BackendNimClient, error) {
-	conf, err := config.CreateNimClientConfig(urlStr, token)
+	conf, err := config.CreateWorkloadManagerServiceConfig(urlStr, token)
 	if err != nil {
 		return nil, err
 	}

@@ -12,6 +12,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/actions"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	pkgvalidation "github.com/dsx-ai-factory/run-ai/runai-installer/installer/pkg/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -55,7 +57,7 @@ func actionForStep(t *testing.T, f *orchestrator2.Flow, stepName string) orchest
 func fullInstallSpec() *spec.Spec {
 	return &spec.Spec{
 		Command:  spec.CommandInstall,
-		Registry: &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"},
+		Registry: &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"},
 		ControlPlane: &spec.ControlPlane{
 			Domain:  "test.runai.local",
 			Version: "2.26.0",
@@ -141,6 +143,82 @@ func TestResolve_Install_ExternalControlPlane(t *testing.T) {
 	assert.Equal(t, "bootstrap-token", clusterAction.BootstrapToken)
 }
 
+func TestResolve_Install_ExternalControlPlaneCredentials(t *testing.T) {
+	s := &spec.Spec{
+		Command:      spec.CommandInstall,
+		InstallMode:  spec.InstallModeClusterOnly,
+		Connectivity: spec.ConnectivityConnected,
+		Registry:     &spec.Registry{Type: spec.RegistryTypeNGC},
+		Cluster: &spec.Cluster{
+			Name:                    "cluster-a",
+			Domain:                  "cluster.example.com",
+			Version:                 "2.26.0",
+			TLS:                     &spec.TLS{CAChainPath: "/ca.pem"},
+			ControlPlaneURL:         "https://cp.example.com",
+			ControlPlaneCredentials: &spec.ControlPlaneCredentials{Username: "admin@example.com", Password: "pw"},
+		},
+	}
+	deps := orchestrator2.Deps{RunAIClientWithCredentials: func(string, string, step.ControlPlaneCredentials) (step.RunAIAPIClient, error) { return nil, nil }}
+
+	pre, inst, err := Resolve(s, deps)
+	require.NoError(t, err)
+
+	require.Len(t, pre.Pipelines, 1)
+	require.Len(t, pre.Pipelines[0].Flows, 1)
+	assert.Contains(t, stepNames(pre.Pipelines[0].Flows[0]), "preflight-control-plane-access")
+	access := actionForStep(t, pre.Pipelines[0].Flows[0], "preflight-control-plane-access").(actions.CheckControlPlaneAccess)
+	assert.Equal(t, "cluster-a", access.ClusterName)
+	assert.Equal(t, "https://cp.example.com", access.ControlPlane.URL)
+	assert.Equal(t, "/ca.pem", access.ControlPlane.CACertPath)
+	require.NotNil(t, access.ControlPlane.Credentials)
+	assert.Equal(t, "admin@example.com", access.ControlPlane.Credentials.Username)
+
+	runai := inst.Pipelines[1]
+	require.Len(t, runai.Flows, 1)
+	clusterFlow := runai.Flows[0]
+	assert.Contains(t, stepNames(clusterFlow), "register-cluster", "the installer registers the cluster itself")
+
+	register := actionForStep(t, clusterFlow, "register-cluster").(actions.EnsureCluster)
+	assert.Equal(t, "cluster-a", register.ClusterName)
+	assert.Equal(t, "https://cp.example.com", register.ControlPlane.URL)
+	assert.Equal(t, "cluster.example.com", register.ControlPlane.Domain)
+	assert.Equal(t, "/ca.pem", register.ControlPlane.CACertPath)
+	require.NotNil(t, register.ControlPlane.Credentials)
+	assert.Equal(t, "pw", register.ControlPlane.Credentials.Password)
+
+	clusterAction := actionForStep(t, clusterFlow, "install-cluster-chart").(actions.InstallClusterChart)
+	assert.Equal(t, "https://cp.example.com", clusterAction.ControlPlaneURL)
+	assert.Equal(t, "cluster.example.com", clusterAction.Domain)
+	assert.Empty(t, clusterAction.ClusterUID)
+	assert.Empty(t, clusterAction.BootstrapToken)
+	assert.False(t, clusterAction.UsesSuppliedCredentials())
+	require.NotNil(t, clusterAction.Credentials)
+	assert.Equal(t, "admin@example.com", clusterAction.Credentials.Username)
+}
+
+func TestResolve_Install_ExternalControlPlane_NoAccessCheckWithSuppliedIdentity(t *testing.T) {
+	s := &spec.Spec{
+		Command:      spec.CommandInstall,
+		InstallMode:  spec.InstallModeClusterOnly,
+		Connectivity: spec.ConnectivityConnected,
+		Registry:     &spec.Registry{Type: spec.RegistryTypeNGC},
+		Cluster: &spec.Cluster{
+			Name:            "cluster-a",
+			Domain:          "cluster.example.com",
+			ControlPlaneURL: "https://cp.example.com",
+			UID:             "cluster-uid",
+			BootstrapToken:  "bootstrap-token",
+		},
+	}
+	deps := orchestrator2.Deps{RunAIClientWithCredentials: func(string, string, step.ControlPlaneCredentials) (step.RunAIAPIClient, error) { return nil, nil }}
+
+	pre, _, err := Resolve(s, deps)
+	require.NoError(t, err)
+	for _, f := range pre.Pipelines[0].Flows {
+		assert.NotContains(t, stepNames(f), "preflight-control-plane-access")
+	}
+}
+
 func TestResolve_Install_ControlPlaneOnly_NoOptionalSecrets(t *testing.T) {
 	s := &spec.Spec{
 		Command:      spec.CommandInstall,
@@ -158,6 +236,37 @@ func TestResolve_Install_ControlPlaneOnly_NoOptionalSecrets(t *testing.T) {
 	}, stepNames(runai.Flows[0]))
 }
 
+func TestBuildFeatureFlows_LWS(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		distribution string
+		steps        []string
+		namespace    string
+	}{
+		{name: "helm off openshift", steps: []string{"install-lws"}, namespace: "lws-system"},
+		{
+			name:         "operatorhub on openshift",
+			distribution: pkgvalidation.KubernetesDistributionOpenShift,
+			steps:        []string{"install-cert-manager-operator", "install-lws-operator", "create-leader-worker-set-operator"},
+			namespace:    "openshift-lws-operator",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s := fullInstallSpec()
+			s.KubernetesDistribution = tc.distribution
+			s.Features = &spec.Features{LWS: &spec.Dependency{Mode: spec.DependencyModeInstall}}
+
+			flows, _ := buildFeatureFlows(s, orchestrator2.Deps{})
+			require.Len(t, flows, 1)
+			assert.Equal(t, "lws", flows[0].Name)
+			assert.Equal(t, tc.steps, stepNames(flows[0]))
+			assert.Contains(t, clusterExtraValues(s, s.Cluster), "clusterConfig.lws.namespace="+tc.namespace)
+		})
+	}
+
+	assert.NotContains(t, clusterExtraValues(fullInstallSpec(), fullInstallSpec().Cluster), "clusterConfig.lws.namespace=lws-system")
+}
+
 func TestControlPlaneValues_CustomCA(t *testing.T) {
 	s := &spec.Spec{ControlPlane: &spec.ControlPlane{Domain: "runai.example.com"}}
 
@@ -168,7 +277,7 @@ func TestControlPlaneValues_CustomCA(t *testing.T) {
 }
 
 func TestUsesManagedRegistrySecret(t *testing.T) {
-	registry := &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"}
+	registry := &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"}
 
 	assert.True(t, usesManagedRegistrySecret(&spec.Spec{Registry: registry}))
 	assert.True(t, usesManagedRegistrySecret(&spec.Spec{
@@ -211,7 +320,7 @@ func TestResolve_Install_Airgap(t *testing.T) {
 		"push-airgap-images",
 	}, stepNames(runai.Flows[0]))
 
-	// Air-gapped control plane skips the JFrog registry secret.
+	// Air-gapped control plane skips the managed registry secret.
 	assert.Equal(t, []string{
 		"create-control-plane-namespace",
 		"install-control-plane-tls",

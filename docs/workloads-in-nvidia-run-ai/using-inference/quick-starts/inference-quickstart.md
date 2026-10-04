@@ -4,13 +4,13 @@ This quick start provides a step-by-step walkthrough for running and querying a 
 
 An inference workload provides the setup and configuration needed to deploy your trained model for real-time or batch predictions. It includes specifications for the container image, data sets, network settings, and resource requests required to serve your models.
 
-<Info>
+<Note>
 
 **Note**
 
 Before running this example, verify that the CUDA version supported by [Triton](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/introduction/compatibility.html) is compatible with your target [GPU hardware](https://developer.nvidia.com/cuda/gpus).
 
-</Info>
+</Note>
 
 ## Prerequisites
 
@@ -18,15 +18,15 @@ Before you start, make sure:
 
 * You have created a [project](../../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
 * The project has an assigned quota of at least 1 GPU.
-* [Knative](../../../installation-and-configuration/installation/install-using-helm/system-requirements.md#inference) is properly installed by your administrator.
+* [Knative](../../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#standard-inference) is properly installed by your administrator.
 
-<Info>
+<Note>
 
 **Note**
 
 Flexible workload submission is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload submission.
 
-</Info>
+</Note>
 
 ## Step 1: Logging In
 
@@ -50,7 +50,7 @@ runai login --help
 
 <Tab title="API">
 
-To use the API, you will need to obtain a token as shown in [API authentication](https://run-ai-docs.nvidia.com/api/2.26/getting-started/how-to-authenticate-to-the-api).
+To use the API, you will need to obtain a token as shown in [API authentication](../../../rest-api/how-to-authenticate-to-the-api.md).
 
 </Tab>
 
@@ -58,13 +58,13 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
 ## Step 2: Submitting an Inference Workload
 
-<Info>
+<Note>
 
 **Note**
 
 The container images used in this example are publicly available and do not require authentication to pull.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -152,7 +152,7 @@ This would start a triton inference server with a maximum of 2 instances, each i
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../reference/cli/runai/):
+Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. For more details, see [CLI reference](../../../reference/cli/runai/runai_inference_submit.md):
 
 ```sh
 runai project set <project_name>
@@ -170,7 +170,7 @@ runai inference submit <WORKLOAD-NAME> \
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Inferences](https://run-ai-docs.nvidia.com/api/2.26/workloads/inferences) API:
+Copy the following command to your terminal. Make sure to update the below parameters. For more details, see [Inferences](api:main-api:POST/api/v1/workloads/inferences) API:
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/inferences' \
@@ -208,16 +208,16 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/inferences' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](inference-quickstart.md#step-1-logging-in)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 
@@ -225,13 +225,13 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
 ## Step 3: Querying the Inference Server
 
-<Info>
+<Note>
 
 **Note**
 
 The container images used in this example are publicly available and do not require authentication to pull.
 
-</Info>
+</Note>
 
 In this step, you'll test the deployed model by sending a request to the inference server. To do this, you'll launch a general-purpose workload, typically a **Training** or **Workspace** workload, to run the Triton demo client. You'll first retrieve the workload address, which serves as the model’s inference serving endpoint. Then, use the client to send a sample request and verify that the model is responding correctly.
 
@@ -306,7 +306,7 @@ In this step, you'll test the deployed model by sending a request to the inferen
 
 <Tab title="CLI v2">
 
-Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. To retrieve the inference endpoint, use the [runai inference describe](../../../reference/cli/runai/runai_inference_describe.md) command. For more details, see [CLI reference](../../../reference/cli/runai/):
+Copy the following command to your terminal. Make sure to update the below with the name of your project and workload. To retrieve the inference endpoint, use the [runai inference describe](../../../reference/cli/runai/runai_inference_describe.md) command. For more details, see [CLI reference](../../../reference/cli/runai/runai_training_submit.md):
 
 ```sh
 runai project set <project_name>
@@ -319,7 +319,7 @@ runai training submit <WORKLOAD-NAME> \
 
 <Tab title="API">
 
-Copy the following command to your terminal. Make sure to update the below parameters according. For more details, see [Trainings](https://run-ai-docs.nvidia.com/api/2.26/workloads/trainings) API:
+Copy the following command to your terminal. Make sure to update the below parameters according. For more details, see [Trainings](api:main-api:POST/api/v1/workloads/trainings) API:
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
@@ -343,17 +343,17 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
 * `<TOKEN>` - The API access token obtained in [Step 1](inference-quickstart.md#step-1-logging-in)
-* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters#get-api-v1-clusters) API.
-* `<INFERENCE-ENDPOINT>` - You can get the inference endpoint from the urls parameter via the [Get Workloads](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads#get-api-v1-workloads) API.
+* `<PROJECT-ID>` - The ID of the Project the workload is running on. You can get the Project ID via the [Get Projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the Cluster. You can get the Cluster UUID via the [Get Clusters](api:main-api:GET/api/v1/clusters) API.
+* `<INFERENCE-ENDPOINT>` - You can get the inference endpoint from the urls parameter via the [Get Workloads](api:main-api:GET/api/v1/workloads) API.
 
-<Info>
+<Note>
 
 **Note**
 
 The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
-</Info>
+</Note>
 
 </Tab>
 

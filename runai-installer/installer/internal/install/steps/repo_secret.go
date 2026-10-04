@@ -92,7 +92,7 @@ func (i *InstallRepoAccessSecret) Execute(ctx context.Context, runaiData *model.
 		return error
 	}
 
-	ngcCredentials := runaiData.GetInputValue(configinputs.InstallInputJfrogCreds)
+	ngcCredentials := runaiData.GetInputValue(configinputs.InstallInputRegistryPullSecret)
 
 	// If in dev mode and NGC credentials are empty, use kubectl command
 	if ngcCredentials == "" && runaiData.Config.DevMode {

@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	authorizationclient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/mocks"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

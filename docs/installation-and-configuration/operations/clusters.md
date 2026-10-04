@@ -33,7 +33,7 @@ The clusters table consists of the following columns:
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Waiting to connect    | The cluster has never been connected.                                                                                                                                                                |
 | Disconnected          | There is no communication from the cluster to the Control plane. This may be due to a network issue. [See troubleshooting scenarios.](clusters.md#troubleshooting-scenarios)                         |
-| Missing prerequisites | Some prerequisites are missing from the cluster. As a result, some features may be impacted. [See troubleshooting scenarios.](clusters.md#troubleshooting-scenarios)                                 |
+| Missing prerequisites | Some prerequisites are missing from the cluster. As a result, some features may be impacted. If the cluster's NVIDIA GPU Operator version does not meet the minimum required for GPU fractions, this is shown as a separate reason stating that GPU fractions are not supported. See [Prerequisites and Features](../installation/guided-installation/prerequisites-and-features.md) for the required versions, and [troubleshooting scenarios](clusters.md#troubleshooting-scenarios) below. |
 | Service issues        | At least one of the services is not working properly. You can view the list of nonfunctioning services for more information. [See troubleshooting scenarios.](clusters.md#troubleshooting-scenarios) |
 | Connected             | The NVIDIA Run:ai cluster is connected, and all NVIDIA Run:ai services are running.                                                                                                                  |
 
@@ -63,15 +63,17 @@ Follow the setup and installation instructions below to get the installation ins
 
 ### **Setup**
 
-1. In the NVIDIA Run:ai UI, go to Resources -> Clusters
-2. Enter a unique **name** for your cluster
-3. Optional: Choose the NVIDIA Run:ai cluster version (latest, by default)
-4. Enter the Cluster URL. For more information, see [Fully Qualified Domain Name](../../getting-started/installation/install-using-helm/system-requirements.md#fully-qualified-domain-name-fqdn) requirement.
+1. In the NVIDIA Run:ai UI, go to **Resources -> Clusters** and click **NEW CLUSTER**.
+2. Enter a unique **name** for your cluster.
+3. Optional: Choose the NVIDIA Run:ai cluster version (latest, by default).
+4. Set the cluster location:
+   * **Same as control plane** - Install the NVIDIA Run:ai cluster on the same Kubernetes cluster as the NVIDIA Run:ai control plane.
+   * **Remote control plane** - Install the NVIDIA Run:ai cluster on a different Kubernetes cluster than the NVIDIA Run:ai control plane. Enter the Cluster URL. For more information, see [Fully Qualified Domain Name](../system-requirements/networking-setup.md#fqdn-and-dns) requirement.
 5. Click **CONTINUE**
 
 ### Installation Instructions
 
-1. Follow the installation instructions and run the commands provided on your Kubernetes cluster. To add a new cluster, see the [installation guide](../../getting-started/installation/install-using-helm/helm-install.md).
+1. Follow the installation instructions and run the commands provided on your Kubernetes cluster. For more information, see [Install the Cluster](../installation/install-using-helm/helm-install.md).
 2. Click **DONE**
 
 The cluster is displayed in the table with the status **Waiting to connect**. Once installation is complete, the cluster status changes to **Connected**.
@@ -107,7 +109,17 @@ After creating the network topology, the administrator must associate it with th
 
 ## Using the API
 
-Go to the [Clusters](https://run-ai-docs.nvidia.com/api/2.26/organizations/clusters) API reference to view the available actions
+Go to the [Clusters](api:main-api:GET/api/v1/clusters) API reference to view the available actions
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes [Cluster and Infrastructure](../../agents/tools-reference.md#cluster-and-infrastructure) tools to inspect clusters via natural language:
+
+* `get_cluster_physical_inventory` - see a cluster's GPU nodes, GPU models, and total, allocatable, allocated, and free GPUs, CPU cores, and memory
+* `get_cluster_infrastructure_health` - see nodes that are NotReady or Unknown, with their conditions, taints, and GPU counts
+* `get_cluster_metrics` - track a cluster's GPU and CPU capacity and utilization over time
+
+See [AI Agents](../../agents/overview.md) for setup.
 
 ## Troubleshooting
 
@@ -217,7 +229,7 @@ Before starting, make sure you have access to the Kubernetes cluster where NVIDI
 
 **Description:** A single faulty GPU node can cause the entire cluster to show a **Disconnected** status in the NVIDIA Run:ai platform, even when all other nodes are healthy. This typically occurs when the node is stuck in GPU validation and the NVIDIA Run:ai system DaemonSets cannot complete initialization on it. This happens because the NVIDIA Run:ai platform evaluates cluster health based on all system DaemonSet pods being available. A single stuck pod causes the DaemonSet to report as unavailable, which cascades to the cluster-level health status.
 
-Cordoning the node is not sufficient. A common first response is to cordon the faulty node using `kubectl cordon`. However, cordoning only prevents new pods from being scheduled on the node. It does not evict pods that already tolerate the `node.kubernetes.io/unschedulable` taint. The `runai-container-toolkit` DaemonSet tolerates this taint by default. As a result, its pod remains running (or stuck) on the cordoned node, and the cluster continues to report as Disconnected.
+Cordoning the node is not sufficient. A common first response is to cordon the faulty node using `kubectl cordon`. However, cordoning only prevents new pods from being scheduled on the node. It does not evict pods that already tolerate the `node.kubernetes.io/unschedulable` taint. The NVIDIA Run:ai system DaemonSets tolerate this taint by default. As a result, their pods remain running (or stuck) on the cordoned node, and the cluster continues to report as Disconnected.
 
 **Mitigation:** These steps require `cluster-admin` permissions to taint nodes. To isolate the faulty node and allow the cluster to recover:
 
@@ -226,25 +238,30 @@ Cordoning the node is not sufficient. A common first response is to cordon the f
     ```bash
     kubectl taint node <node-name> runai/gpu-fault=true:NoSchedule
     ```
-2. Delete the stuck DaemonSet pod on the faulty node. The taint from step 1 prevents the DaemonSet controller from recreating it, which reduces the expected pod count and allows the DaemonSet to report as fully available:
+2. Identify the stuck DaemonSet pod on the faulty node:
 
     ```bash
-    kubectl -n runai delete pod -l app=runai-container-toolkit --field-selector spec.nodeName=<node-name>
+    kubectl -n runai get pods --field-selector spec.nodeName=<node-name>
     ```
-3. Verify the cluster status returns to **Connected** in the NVIDIA Run:ai platform UI.
-4. Once the hardware issue on the node is resolved, remove the taint:
+3. Delete the stuck pod. The taint from step 1 prevents the DaemonSet controller from recreating it, which reduces the expected pod count and allows the DaemonSet to report as fully available:
+
+    ```bash
+    kubectl -n runai delete pod <pod-name>
+    ```
+4. Verify the cluster status returns to **Connected** in the NVIDIA Run:ai platform UI.
+5. After the hardware issue on the node is resolved, remove the taint:
 
     ```bash
     kubectl taint node <node-name> runai/gpu-fault=true:NoSchedule-
     ```
 
-<Info>
+<Note>
 
 **Note**
 
 If the node has no workloads worth preserving on its remaining healthy GPUs, a full drain and reboot (`kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data`) is an alternative approach. This resolves the underlying hardware fault directly and the taint workaround is not needed.
 
-</Info>
+</Note>
 
 </Accordion>
 
@@ -370,6 +387,8 @@ If the node has no workloads worth preserving on its remaining healthy GPUs, a f
 **Cluster is missing prerequisites**
 
 **Description:** When a cluster's status displays Missing prerequisites, it indicates that at least one of the Mandatory Prerequisites has not been fulfilled. In such cases, NVIDIA Run:ai services may not function properly.
+
+One specific case is GPU fractions readiness: if the cluster's NVIDIA GPU Operator version does not meet the minimum required version, or the cluster otherwise does not meet the prerequisites for GPU fractions, the status message names the reason and states that GPU fractions are not supported. This does not block the rest of the cluster from functioning; only GPU fractions are affected. To resolve this, update the installation to meet the GPU fractions prerequisites, for example by upgrading the NVIDIA GPU Operator to the required version. See [Prerequisites and Features](../installation/guided-installation/prerequisites-and-features.md#nvidia-gpu-operator) for the required versions.
 
 **Mitigation:**
 

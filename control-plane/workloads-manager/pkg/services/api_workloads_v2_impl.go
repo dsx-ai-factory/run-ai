@@ -47,11 +47,11 @@ import (
 
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	authApi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/org_unit"
 	workloadsClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/settings"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 const (
@@ -253,6 +253,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		project,
 		workloadId,
 		trustedConvertedFromNative,
+		nodePoolsKarta(ctx, workloadType, manifestResourceInfo.Version),
 	)
 	if editErr != nil {
 		return nil, SingleError(NewManifestError(fmt.Sprintf("failed to edit manifest: %v", editErr)))
@@ -760,6 +761,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		project,
 		workloadId,
 		qRecord.TranslatedFromV1,
+		nodePoolsKarta(ctx, workloadType, manifestResourceInfo.Version),
 	)
 	if editErr != nil {
 		return nil, api.NewError(http.StatusBadRequest, fmt.Sprintf("failed to edit manifest: %v", editErr), nil)

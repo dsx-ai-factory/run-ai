@@ -70,7 +70,8 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Admission.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.Scheduler.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.Binder.Service.Image).To(BeNil())
-		Expect(kaiConfig.Spec.Binder.ResourceReservation.Image).To(BeNil())
+		Expect(kaiConfig.Spec.Binder.ResourceReservation.Image).To(Equal(
+			&kaicommon.Image{Name: ptr.To("resourcereservation")}))
 		Expect(kaiConfig.Spec.PodGrouper.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.PodGroupController.Service.Image).To(BeNil())
 		Expect(kaiConfig.Spec.QueueController.Service.Image).To(BeNil())
@@ -197,23 +198,6 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(image.PullPolicy).To(Equal(ptr.To(v1.PullAlways)))
 	})
 
-	It("preserves deprecated repository and environment image semantics", func() {
-		runaiConfig := defaultRunaiConfig()
-		runaiConfig.Spec.RunAIScheduler.Image = &runaicommon.Image{
-			Repository: ptr.To("registry.example.com/runai-"),
-			Env:        ptr.To("prod"),
-			Name:       ptr.To("scheduler-custom"),
-			Tag:        ptr.To("kai-compatible"),
-		}
-
-		image := buildKAIConfig(runaiConfig).Spec.Scheduler.Service.Image
-		Expect(image).NotTo(BeNil())
-		Expect(image.Repository).To(Equal(ptr.To("registry.example.com/runai-prod")))
-		Expect(image.Name).To(Equal(ptr.To("scheduler-custom")))
-		Expect(image.Tag).To(Equal(ptr.To("kai-compatible")))
-		Expect(image.PullPolicy).To(BeNil())
-	})
-
 	It("does not use the standalone RunAI admission controller as KAI admission configuration", func() {
 		runaiConfig := defaultRunaiConfig()
 		Expect(runaiConfig.Spec.AdmissionController.Image).NotTo(BeNil())
@@ -259,6 +243,11 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Global.QueueLabelKey).To(Equal(ptr.To(clustercommonconstants.RunaiQueueLabel)))
 	})
 
+	It("always selects the CUDA-native fractions mode", func() {
+		kaiConfig := buildKAIConfig(defaultRunaiConfig())
+		Expect(kaiConfig.Spec.Global.GpuSharingMode).To(Equal(ptr.To(kaicommon.GpuSharingModeNvFractions)))
+	})
+
 	It("sets the RunAI scheduler vocabulary on global, matching the engine adapter", func() {
 		runaiConfig := defaultRunaiConfig()
 		// The chart delivers the control-plane pull secret through this list.
@@ -272,6 +261,22 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(kaiConfig.Spec.Global.ImagePullSecrets).To(ContainElement(controlPlaneImagePullSecretName))
 	})
 
+	// The chart puts KAI on -fips images for both "on" and "only", so this flag is
+	// the only thing separating the two: without it "only" silently degrades to the
+	// image default on every operator-managed KAI pod.
+	DescribeTable("carries FIPS run-time strictness onto the CR",
+		func(fipsMode string, expected bool) {
+			runaiConfig := defaultRunaiConfig()
+			runaiConfig.Spec.Internal.Global.FipsMode = fipsMode
+
+			Expect(buildKAIConfig(runaiConfig).Spec.Global.FIPSOnly).To(Equal(ptr.To(expected)))
+		},
+		Entry("only", "only", true),
+		Entry("on", "on", false),
+		Entry("off", "off", false),
+		Entry("unset", "", false),
+	)
+
 	It("sets reservation identity and admission/webhook fields like the engine adapter", func() {
 		kaiConfig := buildKAIConfig(defaultRunaiConfig())
 
@@ -281,6 +286,7 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		Expect(rr.RuntimeClassName).To(Equal(ptr.To("")))
 
 		adm := kaiConfig.Spec.Admission
+		Expect(adm.ServiceName).To(Equal(ptr.To("engine-admission")))
 		Expect(adm.GPUSharing).To(Equal(ptr.To(true)))
 		Expect(adm.QueueLabelSelector).To(Equal(ptr.To(true)))
 		Expect(adm.ValidatingWebhookConfigurationName).To(Equal(ptr.To("validating-engine-admission")))

@@ -10,13 +10,13 @@ NUMA-aware scheduling is especially important on high-density GPU servers such a
 
 The following must be in place before enabling NUMA-aware scheduling on a node pool. These are configured outside of NVIDIA Run:ai.
 
-<Info>
+<Note>
 
 **Note**
 
 Before setting up the prerequisites below, verify whether they are already configured in your cluster.
 
-</Info>
+</Note>
 
 ### Node Feature Discovery (NFD) Topology Updater
 
@@ -43,15 +43,7 @@ The Topology Manager only coordinates hints from the CPU manager and memory mana
 
 ## Enabling NUMA-Aware Scheduling
 
-NUMA-aware scheduling is configured per node pool and is disabled by default. To enable it, toggle the **NUMA-aware scheduling** option when creating or editing a node pool. See [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/node-pools) for details.
-
-<Info>
-
-**Note**
-
-The NUMA-aware scheduling toggle is only available for clusters running version 2.26 or later.
-
-</Info>
+NUMA-aware scheduling is configured per node pool and is disabled by default. To enable it, toggle the **NUMA-aware scheduling** option when creating or editing a node pool. See [Node pools](api:main-api:GET/api/v1/node-pools) for details.
 
 ## How It Works
 
@@ -67,6 +59,14 @@ If no node satisfies the workload's resource request within the policy constrain
 
 Enabling or disabling NUMA-aware scheduling does not affect workloads already running in the pool unless they are rescheduled.
 
+## NUMA Visibility
+
+NUMA topology data and NUMA-related node health are visible in the [Nodes](nodes.md) and [Node pools](node-pools.md) tables.
+
+* **Topology Manager policy** - The Kubelet Topology Manager policy read from each node's NodeResourceTopology data (`none`, `best-effort`, `restricted`, or `single-numa-node`). See the Topology Manager policy column in [Nodes](nodes.md).
+* **Per-NUMA-node resource breakdown** - For each NUMA node on a physical node, the total and allocated GPUs, CPU cores, and CPU memory. See [NUMA Nodes for a Node](nodes.md#numa-nodes-for-a-node).
+* **Missing Prerequisites status** - A node or node pool with NUMA-aware scheduling enabled shows a Missing Prerequisites status when a node's NodeResourceTopology data is missing or invalid, or its Topology Manager policy is set to `none`. Hovering the node's status shows the specific reason. See the Status column in [Nodes](nodes.md) and [Node pools](node-pools.md).
+
 ## Best Practices
 
 * Configure all nodes in the same node pool to the same Kubelet Topology Manager policy. Mixed policies within a pool can produce inconsistent scheduling results.
@@ -75,4 +75,4 @@ Enabling or disabling NUMA-aware scheduling does not affect workloads already ru
 
 ## Using API
 
-To view the available actions, go to the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API reference.
+To view the available actions, go to the [Node pools](api:main-api:GET/api/v1/node-pools) API reference.

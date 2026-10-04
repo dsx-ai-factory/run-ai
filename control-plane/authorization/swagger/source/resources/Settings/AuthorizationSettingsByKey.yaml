@@ -21,9 +21,6 @@ put:
           enableScopedAuthorization:
             value:
               enabled: false
-          tenantIsCspManaged:
-            value:
-              enabled: false
   responses:
     "200":
       description: Setting successfully updated

@@ -24,6 +24,7 @@ type passwordGrantSource struct {
 	tokenURL string
 	username string
 	password string
+	loggedIn bool
 }
 
 type tokenRequest struct {
@@ -48,20 +49,25 @@ func newTokenSource(ctx context.Context, httpClient *http.Client, tokenURL, user
 }
 
 func (s *passwordGrantSource) Token() (*oauth2.Token, error) {
-	token, err := s.login()
+	ctx := s.ctx
+	if s.loggedIn {
+		ctx = context.WithoutCancel(s.ctx)
+	}
+	token, err := s.login(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("control-plane login as %q: %w", s.username, err)
 	}
+	s.loggedIn = true
 	return token, nil
 }
 
-func (s *passwordGrantSource) login() (*oauth2.Token, error) {
-	body, err := json.Marshal(tokenRequest{Username: s.username, Password: s.password, GrantType: "password"})
+func (s *passwordGrantSource) login(ctx context.Context) (*oauth2.Token, error) {
+	body, err := json.Marshal(tokenRequest{Username: s.username, Password: s.password, GrantType: "password"}) //nolint:gosec
 	if err != nil {
 		return nil, err
 	}
 
-	request, err := http.NewRequestWithContext(s.ctx, http.MethodPost, s.tokenURL, bytes.NewReader(body))
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, s.tokenURL, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}

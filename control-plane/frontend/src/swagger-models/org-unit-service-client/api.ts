@@ -3435,7 +3435,7 @@ export interface NonNullResource {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof NonNullResource
      */
@@ -6447,7 +6447,7 @@ export interface Resource {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof Resource
      */
@@ -6539,13 +6539,6 @@ export interface Resources {
      * @memberof Resources
      */
     'rank'?: string | null;
-    /**
-     * Deprecated. Use rank instead. The scheduling priority for workloads in this node pool.
-     * @type {string}
-     * @memberof Resources
-     * @deprecated
-     */
-    'priority'?: string | null;
 }
 /**
  * 
@@ -6566,7 +6559,7 @@ export interface ResourcesCpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesCpu
      */
@@ -6641,7 +6634,7 @@ export interface ResourcesGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesGpu
      */
@@ -6666,7 +6659,7 @@ export interface ResourcesMemory {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesMemory
      */
@@ -6746,13 +6739,6 @@ export interface ResourcesNullable {
      * @memberof ResourcesNullable
      */
     'rank'?: string | null;
-    /**
-     * Deprecated. Use rank instead. The scheduling priority for workloads in this node pool.
-     * @type {string}
-     * @memberof ResourcesNullable
-     * @deprecated
-     */
-    'priority'?: string | null;
 }
 /**
  * 
@@ -6773,7 +6759,7 @@ export interface ResourcesNullableGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesNullableGpu
      */
@@ -6823,7 +6809,7 @@ export interface ResourcesPerNodePoolGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesPerNodePoolGpu
      */
@@ -6873,7 +6859,7 @@ export interface ResourcesPerNodePoolNullableGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesPerNodePoolNullableGpu
      */
@@ -6958,7 +6944,7 @@ export interface ResourcesSyncGpu {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesSyncGpu
      */
@@ -6983,7 +6969,7 @@ export interface ResourcesSyncMemory {
      */
     'limit'?: number | null;
     /**
-     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details. 
+     * The weight assigned to determine the org-unit\'s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details. 
      * @type {number}
      * @memberof ResourcesSyncMemory
      */
@@ -10788,6 +10774,50 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * Internal endpoint to count projects by the given query parameters 
+         * @summary Count internal projects
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        countInternalProjects: async (filterBy?: Array<string>, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/internal/org-unit/projects/count`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (filterBy) {
+                localVarQueryParameter['filterBy'] = filterBy.join(COLLECTION_FORMATS.csv);
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Count projects node pool resources
          * @summary Count projects node pool resources
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
@@ -11894,6 +11924,18 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Internal endpoint to count projects by the given query parameters 
+         * @summary Count internal projects
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async countInternalProjects(filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CountResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countInternalProjects(filterBy, search, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Count projects node pool resources
          * @summary Count projects node pool resources
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
@@ -12193,6 +12235,17 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.batchPatchProjectNodePoolResources(batchPatchNodePoolResourcesRequest, options).then((request) => request(axios, basePath));
         },
         /**
+         * Internal endpoint to count projects by the given query parameters 
+         * @summary Count internal projects
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+         * @param {string} [search] Filter results by a free text search.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        countInternalProjects(filterBy?: Array<string>, search?: string, options?: any): AxiosPromise<CountResponse> {
+            return localVarFp.countInternalProjects(filterBy, search, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Count projects node pool resources
          * @summary Count projects node pool resources
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
@@ -12470,6 +12523,19 @@ export class ProjectsApi extends BaseAPI {
      */
     public batchPatchProjectNodePoolResources(batchPatchNodePoolResourcesRequest: BatchPatchNodePoolResourcesRequest, options?: AxiosRequestConfig) {
         return ProjectsApiFp(this.configuration).batchPatchProjectNodePoolResources(batchPatchNodePoolResourcesRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Internal endpoint to count projects by the given query parameters 
+     * @summary Count internal projects
+     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
+     * @param {string} [search] Filter results by a free text search.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProjectsApi
+     */
+    public countInternalProjects(filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig) {
+        return ProjectsApiFp(this.configuration).countInternalProjects(filterBy, search, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -103,6 +103,11 @@ func (s *UpgradeClusterChart) Execute(ctx context.Context, runaiData *model.RunA
 
 	version := s.upgradeCfg.ClusterVersion
 	repo := step.ClusterChartRepo(s.upgradeCfg.EffectiveClusterEnv())
+	if repo == "" {
+		err := step.MissingChartRepoError(step.ClusterChartName)
+		s.SetStatus(model.Failed, err)
+		return err
+	}
 	logging.Infof("[Upgrade] Upgrading cluster chart to version %s from %s", version, repo)
 	err := s.helmInstaller.InstallOrUpgradeRelease(ctx,
 		repo, version, step.ClusterReleaseName, step.ClusterChartName, step.ClusterNamespace, false, values)

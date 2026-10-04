@@ -6,8 +6,8 @@
 package nim
 
 import (
-	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 
 const (

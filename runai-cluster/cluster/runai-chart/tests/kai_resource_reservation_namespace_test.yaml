@@ -1,7 +1,7 @@
 suite: Test RunAI KAI resource reservation namespace
 
 templates:
-  - charts/kai-scheduler/templates/services/resourcereservation-namespace.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/services/resourcereservation-namespace.yaml
 
 tests:
   - it: should render the namespace referenced by the RunAI-owned KAI Config

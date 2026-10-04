@@ -34,5 +34,5 @@ Skills do not replace the MCP server. They use the capabilities exposed by the M
 
 | Skill | Type | Description | Example Prompt |
 |---|---|---|---|
-| [`runai-diagnose-failed-workload`](https://github.com/dsx-ai-factory/run-ai/tree/master/skills/runai-diagnose-failed-workload) | Read | Diagnose a failed, crashed, or CrashLoopBackOff workload — classifies the root cause, cites evidence, and recommends a fix. | "Why did my workload fail?" |
-| [`runai-audit-assigned-quota`](https://github.com/dsx-ai-factory/run-ai/tree/master/skills/runai-audit-assigned-quota) | Read | Audit GPU quota fairness across a cluster — identifies starved and over-borrowing projects per node pool and quantifies reclaimable GPUs. | "Who is using over-quota in node-pool-a?" |
+| [`runai-diagnose-failed-workload`](https://github.com/dsx-ai-factory/run-ai/tree/master/skills/runai-diagnose-failed-workload) | Read | Diagnose a failed, crashed, or CrashLoopBackOff workload, classifying the root cause, cites evidence, and recommends a fix. | "Why did my workload fail?" |
+| [`runai-audit-assigned-quota`](https://github.com/dsx-ai-factory/run-ai/tree/master/skills/runai-audit-assigned-quota) | Read | Audit GPU quota fairness across a cluster, identifying starved and over-borrowing projects per node pool and quantifies reclaimable GPUs. | "Who is using over-quota in node-pool-a?" |

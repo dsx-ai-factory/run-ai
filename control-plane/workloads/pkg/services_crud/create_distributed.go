@@ -13,10 +13,10 @@ import (
 	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
-	workloadApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 func CreateDistributed(ctx context.Context, tenantSettingsClient clients.TenantSettingsClient, request api.DistributedCreationRequest) (api.ImplResponse, error) {

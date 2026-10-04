@@ -5,10 +5,14 @@
 
 set -x
 
-DOCKER_REPO="gcr.io/run-ai-lab/"
+if [ -f .env ]; then
+  export $(cat .env | xargs)
+fi
+
+DOCKER_REPO="${DOCKER_REPO:?set DOCKER_REPO to your container registry, e.g. myreg.example.com/myuser}"
 IMAGE_NAME="status-updater"
 TAG=${TAG:-$USER} # You can also put it in the git ignored .env
-IMAGE_FULL_NAME="${DOCKER_REPO}${IMAGE_NAME}:${TAG}"
+IMAGE_FULL_NAME="${DOCKER_REPO}/${IMAGE_NAME}:${TAG}"
 RELEASE_VER=`git rev-parse --short HEAD`
 
 DEBUG=
@@ -19,10 +23,6 @@ do
         *) DEBUG=0;;
     esac
 done
-
-if [ -f .env ]; then
-  export "$(cat .env | xargs)"
-fi
 
 make image DEBUG=$DEBUG &&
 docker tag runai/status-updater:"$RELEASE_VER" "$IMAGE_FULL_NAME" &&

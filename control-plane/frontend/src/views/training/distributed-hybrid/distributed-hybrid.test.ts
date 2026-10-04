@@ -20,7 +20,7 @@ import { dataSourceService } from "@/services/control-plane/data-source.service/
 import type { ConfigMapListInfo, SecretListInfo, StorageClassV2 } from "@/swagger-models/k8s-objects-tracker-client";
 import type { IUISuperWorkloadCreationRequest } from "@/models/workload.model";
 import { setActivePinia } from "pinia";
-import type { UnifiedWorkload, WorkloadTypeConfig } from "@/swagger-models/workloads-client";
+import { UidGidSource, type UnifiedWorkload, type WorkloadTypeConfig } from "@/swagger-models/workloads-client";
 import type { CredentialsListResponseEntry, DistributedFramework } from "@/swagger-models/assets-service-client";
 import { workloadHybridUtil } from "@/utils/workload-hybrid.util/workload-hybrid.util";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
@@ -212,7 +212,6 @@ describe("distributed-hybrid.vue", () => {
             limit: -1,
             overQuotaWeight: 12,
           },
-          priority: "MediumLow",
         },
       ],
     };
@@ -303,6 +302,47 @@ describe("distributed-hybrid.vue", () => {
   });
 
   describe("methods", () => {
+    it.each([
+      { flow: "new", source: UidGidSource.FromIdpToken },
+      { flow: "copy", source: UidGidSource.FromIdpToken },
+      { flow: "new", source: UidGidSource.Custom },
+      { flow: "copy", source: UidGidSource.Custom },
+    ])("onSubmit - should serialize each replica's $source identity in a $flow workload", async ({ flow, source }) => {
+      await flushPromises();
+      trainingStore.setDistFlatFromContext({
+        fromCopyId: flow === "copy" ? "source-distributed-id" : null,
+        templateId: null,
+      });
+      const originalIdentity = { runAsUid: 1001, runAsGid: 1002, supplementalGroups: "1003" };
+      const workerIdentity = { runAsUid: 10001, runAsGid: 10002, supplementalGroups: "10003" };
+      const masterIdentity = { runAsUid: 20001, runAsGid: 20002, supplementalGroups: "20003" };
+      const security = { uidGidSource: source, ...originalIdentity };
+      wrapper.vm.workerContext.hybridWorkloadModel.value.spec.security = { ...security };
+      wrapper.vm.workerContext.hybridWorkloadModel.value.masterSpec = {};
+      wrapper.vm.workerContext.hybridWorkloadModel.value.masterSpecSameAsWorker = false;
+      wrapper.vm.masterContext.hybridWorkloadModel.value.spec.security = { ...security };
+      wrapper.vm.distPolicy = {
+        worker: { defaults: { security: workerIdentity } },
+        master: { defaults: { security: masterIdentity } },
+      };
+      vi.mocked(trainingService.createDistributedFlat).mockResolvedValue({ workloadId: "created-id" } as never);
+
+      await wrapper.vm.onSubmit();
+
+      expect(trainingService.createDistributedFlat).toHaveBeenCalledOnce();
+      const request = JSON.parse(JSON.stringify(vi.mocked(trainingService.createDistributedFlat).mock.calls[0][0]));
+      expect(request.spec?.security).toEqual({
+        uidGidSource: source,
+        ...(source === UidGidSource.FromIdpToken ? {} : originalIdentity),
+      });
+      expect(request.masterSpec?.security).toEqual({
+        uidGidSource: source,
+        ...(source === UidGidSource.FromIdpToken ? {} : originalIdentity),
+      });
+      expect(wrapper.vm.workerContext.hybridWorkloadModel.value.spec.security).toEqual(security);
+      expect(wrapper.vm.masterContext.hybridWorkloadModel.value.spec.security).toEqual(security);
+    });
+
     it("onSubmit - should omit copied preemptibility when cluster does not support it", async () => {
       const clusterStore = useClusterStore(pinia);
       vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(false);

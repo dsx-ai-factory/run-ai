@@ -121,6 +121,16 @@ var ClusterAppPS = models.PermissionSet{
 			Sync:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
+			Read:         true,
+			Sync:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+			Read:         true,
+			Sync:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_CM_VOLUME_ASSETS,
 			Read:         true,
 			Delete:       true,

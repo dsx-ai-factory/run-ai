@@ -16,26 +16,24 @@ import (
 	authclient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	authgenerated "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	clustersvcswagger "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	orgUnit "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+	orgunitgenerated "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	workloadswagger "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	asssets "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client"
 	assetsgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	datavolumesclient "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client"
 	datavolumesgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
 	k8sobjectstracker "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client"
 	k8strackergenerated "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
-	orgUnit "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
-	orgunitgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	policies "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client"
 	policiesgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadswagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/metrics"
-	cpclient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/clients/control-plane/generated"
 	"go.uber.org/zap"
 )
 
 type BackendClient struct {
 	Client                 *assetsgenerated.APIClient
-	ControlPlaneClient     *cpclient.APIClient
 	AccessRulesClient      authclient.IAuthorizationExternalClient
 	DatavolumesClient      datavolumesclient.IDatavolumesClient
 	ClusterServiceClient   *clustersvcswagger.APIClient
@@ -71,12 +69,8 @@ func NewBackendClient(basePath string, httpClient *http.Client) *BackendClient {
 		Servers:    assetsgenerated.ServerConfigurations{{URL: basePath}},
 		HTTPClient: httpClient,
 	}
-	controlPlaneConfig := cpclient.NewConfiguration()
-	controlPlaneConfig.Servers = cpclient.ServerConfigurations{{URL: basePath}}
-	controlPlaneConfig.HTTPClient = httpClient
 	runaiBackendClient := &BackendClient{
-		Client:             assetsgenerated.NewAPIClient(assetsConfig),
-		ControlPlaneClient: cpclient.NewAPIClient(controlPlaneConfig),
+		Client: assetsgenerated.NewAPIClient(assetsConfig),
 		AccessRulesClient: authclient.NewAccessRulesClientWithConfig(&authgenerated.Configuration{
 			Servers:    authgenerated.ServerConfigurations{{URL: basePath}},
 			HTTPClient: httpClient,
@@ -245,11 +239,10 @@ func (backendClient *BackendClient) sendLiveness() {
 	var livenessErr error
 	livenessErr = nil
 	requestTimeTag := time.Now().UnixMilli()
-	livenessRequest := cpclient.NewUpdateClusterLiveness1Request()
-	livenessRequest.SetTimeTag(requestTimeTag)
-	res, err := backendClient.ControlPlaneClient.ClustersApi.UpdateClusterLiveness1(
+	livenessRequest := clustersvcswagger.NewClusterLivenessSyncRequest(requestTimeTag)
+	res, err := backendClient.ClusterServiceClient.ClustersAPI.UpdateClusterLiveness(
 		backendClient.Context(), config.Config().ClusterUuid,
-	).UpdateClusterLiveness1Request(*livenessRequest).Execute()
+	).ClusterLivenessSyncRequest(*livenessRequest).Execute()
 	if res != nil {
 		_ = res.Body.Close()
 	}

@@ -1,6 +1,10 @@
 type: object
 description: Authentication configuration required to access a private Helm repository or chart URL. This is used when the chart source requires credentials.
 properties:
+  userCredential:
+    type: boolean
+    nullable: true
+    description: Indicates whether the asset is a user credential owned by the caller. When omitted or false, the asset is treated as a shared credential.
   assetId:
     type: string
     description: The ID of the asset to use for authentication.

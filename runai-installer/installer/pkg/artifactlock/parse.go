@@ -7,6 +7,7 @@ package artifactlock
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -20,25 +21,28 @@ func ParseFile(path string) (*ArtifactLock, error) {
 		return nil, fmt.Errorf("open artifact lock %q: %w", path, err)
 	}
 	defer f.Close()
+	return Parse(f, path)
+}
 
-	dec := yaml.NewDecoder(f)
+func Parse(r io.Reader, name string) (*ArtifactLock, error) {
+	dec := yaml.NewDecoder(r)
 	dec.KnownFields(true)
 
 	var lock ArtifactLock
 	if err := dec.Decode(&lock); err != nil {
-		return nil, fmt.Errorf("parse artifact lock %q: %w", path, err)
+		return nil, fmt.Errorf("parse artifact lock %q: %w", name, err)
 	}
 	if lock.APIVersion != APIVersion || lock.Kind != Kind {
-		return nil, fmt.Errorf("artifact lock %q is not a %s %s", path, APIVersion, Kind)
+		return nil, fmt.Errorf("artifact lock %q is not a %s %s", name, APIVersion, Kind)
 	}
 	if lock.Metadata.Version == "" {
-		return nil, fmt.Errorf("artifact lock %q has no metadata.version", path)
+		return nil, fmt.Errorf("artifact lock %q has no metadata.version", name)
 	}
 	if err := lock.ValidateImages(); err != nil {
-		return nil, fmt.Errorf("artifact lock %q: %w", path, err)
+		return nil, fmt.Errorf("artifact lock %q: %w", name, err)
 	}
 	if err := lock.ValidateCLIs(); err != nil {
-		return nil, fmt.Errorf("artifact lock %q: %w", path, err)
+		return nil, fmt.Errorf("artifact lock %q: %w", name, err)
 	}
 	return &lock, nil
 }

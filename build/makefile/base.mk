@@ -99,7 +99,11 @@ endif
 ### Targets
 
 ##@ Basic Commands
+# Ensure ~/.gitconfig exists before any container bind-mounts it. Docker creates a
+# root-owned DIRECTORY at the mount source when the path is missing, which then breaks
+# every git command for the user (see DOCKER_GO_BASE_COMMAND in golang.mk).
 git-config-command:
+	@touch ${HOME}/.gitconfig
 ifdef GITHUB_TOKEN
 	echo Creating gitconfig with github token
 	git config --file ${HOME}/.gitconfig url.https://${GITHUB_TOKEN}@github.com/.insteadOf https://github.com/
@@ -113,7 +117,7 @@ help: ## Display this help.
 .PHONY: help
 
 docker-build-generic: git-config-command
-	docker buildx build ${DOCKER_BUILD_ADDITIONAL_ARGS} --build-arg SERVICE_NAME=${SERVICE_NAME} -f ${DOCKERFILE_PATH} -t ${DOCKER_IMAGE_NAME} --platform=linux/amd64 --attest type=sbom --attest type=provenance,mode=max --load .
+	docker buildx build ${DOCKER_BUILD_ADDITIONAL_ARGS} --build-arg SERVICE_NAME=${SERVICE_NAME} --build-arg GO_VERSION=${GO_VERSION} -f ${DOCKERFILE_PATH} -t ${DOCKER_IMAGE_NAME} --platform=linux/amd64 --attest type=sbom --attest type=provenance,mode=max --load .
 .PHONY: docker-build
 
 docker-push-generic:

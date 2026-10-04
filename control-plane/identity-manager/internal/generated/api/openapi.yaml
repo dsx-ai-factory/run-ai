@@ -2733,7 +2733,7 @@ paths:
         per-cluster installer service account, scoped to the given cluster.
         Called by cluster-service when generating the cluster install command.
         The token is passed to the Helm hook as
-        --set cluster.bootstrapToken=<token> and used directly as a Bearer token
+        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer token
         to call GET /clusters/{uuid}/control-plane-config — the installer client
         secret never leaves the server.
 
@@ -6287,8 +6287,8 @@ components:
       type: object
     UserChangePasswordRequest:
       example:
-        currentPassword: Abcd!234
-        newPassword: Zxcv!567
+        currentPassword: <current-password>
+        newPassword: <new-password>
       properties:
         currentPassword:
           maxLength: 255
@@ -7379,7 +7379,7 @@ components:
       type: object
     change_user_password_200_response:
       example:
-        tempPassword: Abcd!234
+        tempPassword: <temporary-password>
       properties:
         currentPassword:
           type: string

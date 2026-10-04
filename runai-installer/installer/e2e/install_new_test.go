@@ -74,7 +74,7 @@ var _ = Describe("Installer New Flow E2E", Label(newFlowLabel), func() {
 
 // connectedFullInstallConfig builds a connected full-installation spec (control
 // plane + cluster) wired to the shared TestEnv: domain, cluster name, generated
-// self-signed certs and the JFrog token from RUNAI_SECRETS_DIR. Mandatory
+// self-signed certs and the registry pull secret from RUNAI_SECRETS_DIR. Mandatory
 // prerequisites are requested so the run exercises the new prereq flow; the GPU
 // operator is fake to avoid real drivers.
 func connectedFullInstallConfig() installconfig.Config {
@@ -127,10 +127,10 @@ func connectedFullInstallConfig() installconfig.Config {
 		}
 	}
 
-	if testEnv.JfrogToken != "" {
+	if testEnv.PullSecret != "" {
 		cfg.Registry = &installconfig.Registry{
-			Type:      "jfrog",
-			TokenPath: filepath.Join(testEnv.TempDir, "runai_jfrog_token"),
+			Type:      "dockerconfig",
+			TokenPath: filepath.Join(testEnv.TempDir, "runai_pull_secret"),
 		}
 	}
 
@@ -171,7 +171,9 @@ func installablePrereqReleases(cfg installconfig.Config) []prereqRelease {
 		add(p.NetworkOperator, "nvidia-network-operator", "network-operator")
 	}
 	if f := cfg.Features; f != nil {
-		add(f.LWS, "lws-system", "lws")
+		if testEnv.KubernetesDistribution != pkgvalidation.KubernetesDistributionOpenShift {
+			add(f.LWS, lwsNamespace(), "lws")
+		}
 		add(f.NIMOperator, "nim-operator", "nim-operator")
 		add(f.Grove, "grove-system", "grove")
 	}
@@ -196,6 +198,37 @@ func ensurePrereqsInstalled(cfg installconfig.Config) {
 			r.release, r.namespace,
 		))
 	}
+	if f := cfg.Features; f != nil && f.LWS != nil && f.LWS.Mode == "install" {
+		ensureLWSInstalled()
+	}
+}
+
+// lwsNamespace is where the installer runs the LWS controller: the Red Hat
+// Leader Worker Set operator's namespace on OpenShift, the upstream Helm
+// chart's namespace elsewhere.
+func lwsNamespace() string {
+	if testEnv.KubernetesDistribution == pkgvalidation.KubernetesDistributionOpenShift {
+		return "openshift-lws-operator"
+	}
+	return "lws-system"
+}
+
+// ensureLWSInstalled verifies the LWS controller is available in the namespace
+// the distribution installs it to, that the installer pointed RunaiConfig at
+// that namespace, and that the Run:ai operator consequently reports LWS as an
+// available dependency. The operator republishes runai-public on its own
+// reconcile cadence, so the last check polls.
+func ensureLWSInstalled() {
+	namespace := lwsNamespace()
+	Eventually(func() error { return utils.LWSControllerAvailable(namespace) }, 5*time.Minute, 10*time.Second).Should(Succeed(),
+		fmt.Sprintf("LWS controller must be available in namespace %q after install", namespace),
+	)
+	Expect(utils.RunaiConfigLWSNamespace()).To(Equal(namespace),
+		"runaiconfig spec.lws.namespace must point at the installed LWS controller",
+	)
+	Eventually(utils.RunaiPublicLWSAvailable, 5*time.Minute, 10*time.Second).Should(Succeed(),
+		"runai-public must report LWS as available",
+	)
 }
 
 // writeInstallNewConfig marshals the config to YAML, prints it, and writes it to

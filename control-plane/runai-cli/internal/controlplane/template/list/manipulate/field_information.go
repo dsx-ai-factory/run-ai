@@ -8,7 +8,7 @@ package manipulate
 import (
 	"fmt"
 
-	wcgenerated "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wcgenerated "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 const (

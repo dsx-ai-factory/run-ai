@@ -6,7 +6,7 @@ NVIDIA Run:ai supports service mesh implementations. When a service mesh is depl
 
 By default, NVIDIA Run:ai prevents Istio from injecting sidecar containers into system jobs in the control plane. For other service mesh solutions, users must manually add annotations during installation.
 
-To disable sidecar injection in the NVIDIA Run:ai control plane, modify the Helm values file by adding the required pod labels to the following components. See [Advanced control plane configurations](control-plane-config.md) for more details.
+To disable sidecar injection in the NVIDIA Run:ai control plane, modify the Helm values file by adding the required pod labels to the following components. See [Advanced control plane configurations](../control-plane-config.md) for more details.
 
 Example for [Open Service Mesh](https://release-v0-11.docs.openservicemesh.io/docs/guides/app_onboarding/sidecar_injection/#explicitly-disabling-automatic-sidecar-injection-on-pods):
 
@@ -44,15 +44,4 @@ Example for [Istio Service Mesh](https://istio.io/latest/docs/setup/additional-s
 ```bash
 helm upgrade -i ... 
 --set-json global.additionalJobLabels='{"sidecar.istio.io/inject":false}'
-```
-
-### Workloads
-
-To prevent sidecar injection in workloads created at runtime (such as training workloads), update the `runaiconfig` resource. See [Advanced cluster configurations](cluster-config.md) for more details:
-
-```yaml
-spec:
-  workload-controller:
-    additionalPodLabels:
-      sidecar.istio.io/inject: false
 ```

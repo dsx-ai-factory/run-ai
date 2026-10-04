@@ -1,8 +1,6 @@
 # External Dependencies
 
-NVIDIA Run:ai's cluster components build on external open-source projects, pulled in as versioned Helm chart dependencies or Go modules rather than built from Run:ai source. NVIDIA Run:ai packages, configures, and manages these dependencies as part of the platform, so no separate installation or maintenance is required to use them. The diagram below shows how these dependencies connect to Run:ai's own cluster components in the workload scheduling pipeline.
-
-![How open source enables the NVIDIA Run:ai platform](../assets/oss-composition.svg)
+NVIDIA Run:ai's cluster components build on external open-source projects, pulled in as versioned Helm chart dependencies or Go modules rather than built from Run:ai source. NVIDIA Run:ai packages, configures, and manages these dependencies as part of the platform, so no separate installation or maintenance is required to use them.
 
 Helm chart dependencies are declared in [`runai-chart/Chart.yaml`](https://github.com/dsx-ai-factory/run-ai/blob/main/runai-cluster/cluster/runai-chart/Chart.yaml) and documented in the [Chart dependencies](https://github.com/dsx-ai-factory/run-ai/blob/main/runai-cluster/cluster/runai-chart/README.md#chart-dependencies) section of the runai-chart README.
 
@@ -22,24 +20,24 @@ KAI (Kubernetes AI) Scheduler is an open-source, CNCF-donated AI-aware schedulin
 
 NVIDIA Run:ai integrates KAI with specific configuration overrides - the `go-operator` owns `kai-config` and the `kai-nodepool-controller` creates one KAI SchedulingShard per node pool. KAI's default queue, shard, and config-deployer components are disabled.
 
-## kai-gpu-fractioning
+## gpu-fractioning
 
-**Source:** [`kai-scheduler/kai-gpu-fractioning`](https://github.com/kai-scheduler/kai-gpu-fractioning)
+**Source:** [`kai-scheduler/gpu-fractioning`](https://github.com/kai-scheduler/gpu-fractioning)
 **Dependency of:** KAI Scheduler - a sub-chart dependency, so it does not need its own entry in `runai-chart/Chart.yaml`
 
-kai-gpu-fractioning is a Kubernetes operator that enables multiple pods to safely share a single GPU with enforced memory boundaries. It runs alongside KAI Scheduler: KAI Scheduler decides which fraction of which GPU a workload gets, and kai-gpu-fractioning enforces that memory boundary on the node and exports per-pod metrics for the resulting fractional GPUs.
+gpu-fractioning is a Kubernetes operator that enables multiple pods to safely share a single GPU with enforced memory boundaries. It runs alongside KAI Scheduler: KAI Scheduler decides which fraction of which GPU a workload gets, and gpu-fractioning enforces that memory boundary on the node and exports per-pod metrics for the resulting fractional GPUs.
 
 ## kai-resource-management-api
 
 **Source:** [`kai-scheduler/kai-resource-management-api`](https://github.com/kai-scheduler/kai-resource-management-api)
 **Dependency of:** Run:ai's own cluster services (declared in each service's `go.mod`) - a Go module dependency, not a Helm chart dependency and not a separately running service
 
-The API-only counterpart to KRM: the CRD type definitions (`kai.resources`: Project, Department, NodePool, ManagedNodesConfig, KRMConfig). Any Run:ai service that reads or writes these CRDs imports this module for the typed Go structs, independent of which controller owns reconciling them - today that's a mix of Run:ai's own controllers and, once KRM is adopted, KRM's. Migrating legacy CRDs onto `kai.resources` runs automatically this release and self-gates once complete; it isn't a customer-facing toggle.
+The API-only counterpart to KRM: the CRD type definitions (`kai.resources`: Project, Department, NodePool, ManagedNodesConfig, KRMConfig). Any Run:ai service that reads or writes these CRDs imports this module for the typed Go structs, independent of which controller owns reconciling them - today that's a mix of Run:ai's own controllers and, once KRM is adopted, KRM's. Migrating legacy CRDs onto `kai.resources` runs automatically this release and self-gates once complete; it is not a customer-facing toggle.
 
-## Karta
+## workload-map
 
-**Source:** [`run-ai/karta`](https://github.com/run-ai/karta)
-**Dependency of:** `runai-chart` - a direct Helm chart dependency (`oci://ghcr.io/run-ai/karta`, declared in `Chart.yaml`)
+**Source:** [`dsx-ai-factory/workload-map`](https://github.com/dsx-ai-factory/workload-map)
+**Dependency of:** `runai-chart` - a direct Helm chart dependency (`oci://ghcr.io/dsx-ai-factory/workload-map/karta`, declared in `Chart.yaml`)
 
 Karta is a CRD-based resource abstraction layer with its own operator. It replaced the legacy `ResourceInterface` (RI) CRD as the way Run:ai represents and reconciles workload resource attachments in the cluster. The `karta-migrate` Helm hook handles the one-time migration from RI to Karta CRs on upgrade.
 

@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Hash-pinned install of ruff, used by the ruff job in .github/workflows/pr-checks.yaml.
+#
+# ruff has no transitive dependencies, so the version pin already settles
+# which version is installed. The hashes are here for artifact integrity:
+# --only-binary :all: selects a wheel but never verifies its digest, so
+# without --require-hashes a compromised index or CDN could serve a different
+# artifact under this filename.
+#
+# Every wheel hash published for this version is listed, so the install stays
+# valid as the job's floating `python-version: '3.x'` moves between
+# interpreter versions and platform wheel variants.
+#
+# Regenerate after a version bump: collect every bdist_wheel sha256 for the
+# new version from https://pypi.org/pypi/ruff/<version>/json
+
+ruff==0.15.15 \
+    --hash=sha256:2728b93d7b23a603ea2c0ac6eb73d760bd38ec9de35f35fb41e18f7a3fee7622 \
+    --hash=sha256:29428ea79694afbe756d45fd59b36f22b6b020dc0443cf7de0173046236964b9 \
+    --hash=sha256:3c8ceca6792f38196b8f589bc92eccd03eef286602da92e5dc05cc42ef6441b7 \
+    --hash=sha256:3cdb1679e06a1f6b47bc384714ae96f6e2fb65ca441eb78c43d2ca554176ce1f \
+    --hash=sha256:48decfa11d740de4889de623be1463308346312f2409a56e24aa280c86162dc4 \
+    --hash=sha256:587a6278ed42059191c1a466e490bd7930fb50bd2e255398bc29616c895a61cb \
+    --hash=sha256:7614ee79c69788cf6cedd568069ade9cecc22a1ad20494efe8d0c9ebb4b622d4 \
+    --hash=sha256:77d955a431430c66f72dd94e379ad38a16daea3d25094872ac4edf9e797be530 \
+    --hash=sha256:7aa77465b8ecaf1a27bea098d696f7fed5e1eccbd10b321b682d6de586ae5627 \
+    --hash=sha256:8df0323902e15e24bc4bf246da830573d3cf3352bd0b9a164eab335d111ff4a4 \
+    --hash=sha256:a5015088452ca0081387063649ec67f06d3d1d6b8b936a1f836b5e9657ecd48c \
+    --hash=sha256:ac5a646d1f6a7dadd5d50842dae2c1f9862ac887ef5d1b1375e02def791fde6e \
+    --hash=sha256:be582fcc0db438902c7792b08d6ddf6c9b9e21addaa10092c2c741cfb09e5a45 \
+    --hash=sha256:cf93e5388f412e1b108b1f8b34a6e036b70fe8aff89393befad96fe48670311b \
+    --hash=sha256:db5bd4d802415cca656dc1616070b725952d6ae95eb5d4831e49fbd94a38f75f \
+    --hash=sha256:df0c1c084f5f4be9812f61518a45c440d3c30d69ce4bf6c5270e66d38338f02a \
+    --hash=sha256:f5294aab6356c81600fcdea3a62bb1b924dfd5e91767c12318d3f68f86af57cd

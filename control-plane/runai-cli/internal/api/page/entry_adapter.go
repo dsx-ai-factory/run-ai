@@ -8,8 +8,8 @@ package page
 import (
 	"time"
 
-	ousc "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	wsc "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	ousc "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	wsc "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 type WorkloadEntryAdapter struct {

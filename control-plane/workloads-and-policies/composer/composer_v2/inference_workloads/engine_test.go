@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"k8s.io/apimachinery/pkg/util/validation"

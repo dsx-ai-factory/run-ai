@@ -33,7 +33,6 @@ const (
 	SettingKeyAdminMessage                  = "tenant.admin_message"
 	SettingKeyGpuOverProvisioning           = "tenant.gpu_over_provisioning"
 	SettingKeyWorkloadSubmissionV2Enabled   = "tenant.workload_submission_v2_enabled"
-	SettingKeyTenantIsCspManaged            = "tenant.is_csp_managed"
 	SettingKeyEnableNewCliInstaller         = "tenant.is_new_cli_installer_enabled"
 	SettingKeyDeletedWorkloadsView          = "tenant.deleted_workloads_view"
 	SettingKeyNewNavigation                 = "tenant.new_navigation"

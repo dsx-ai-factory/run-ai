@@ -19,6 +19,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/specrun"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -162,11 +163,27 @@ func TestInputValidation_Failures(t *testing.T) {
 			wantSub: "not accessible",
 		},
 		{
-			name: "invalid JFrog token format",
+			name: "invalid docker config token format",
 			setup: func(t *testing.T, _ *installconfig.Config, opts *installconfig.RunOptions) {
-				opts.Registry = &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "not valid base64!!"}
+				opts.Registry = &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "not valid base64!!"}
 			},
 			wantSub: "base64-encoded docker config",
+		},
+		{
+			name: "missing chart repository for a docker config registry",
+			setup: func(t *testing.T, _ *installconfig.Config, opts *installconfig.RunOptions) {
+				t.Setenv(step.ChartRepoBaseEnv, "")
+				opts.Registry = &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "dG9r"}
+			},
+			wantSub: "chart repository is required",
+		},
+		{
+			name: "missing chart repository for a non-prod NGC registry",
+			setup: func(t *testing.T, _ *installconfig.Config, opts *installconfig.RunOptions) {
+				opts.Env = spec.EnvStaging
+				opts.Registry = &spec.Registry{Type: spec.RegistryTypeNGC, Token: "ngc-key"}
+			},
+			wantSub: "chart repository is required for a non-prod NGC install",
 		},
 		{
 			name: "missing registry CA chain file",
@@ -621,7 +638,7 @@ func TestInputValidation_RegistryHost(t *testing.T) {
 		cfg.Install.Connectivity = "air_gapped"
 		cfg.Airgap = &installconfig.Airgap{BundlePath: harness.CreateTestTarball(t), WorkingDir: t.TempDir()}
 		opts := validationOpts(t)
-		opts.Registry = &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "tok"}
+		opts.Registry = &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "tok"}
 		assertValidationFails(t, cfg, opts, "registry.host")
 	})
 
@@ -662,7 +679,7 @@ func TestInputValidation_RegistryHost(t *testing.T) {
 		cfg.Install.Connectivity = "air_gapped"
 		cfg.Airgap = &installconfig.Airgap{BundlePath: harness.CreateTestTarball(t), WorkingDir: t.TempDir()}
 		opts := validationOpts(t)
-		opts.Registry = &spec.Registry{Type: spec.RegistryTypeJFrog, Token: "dG9r", Host: "registry.local:5000"}
+		opts.Registry = &spec.Registry{Type: spec.RegistryTypeDockerConfig, Token: "dG9r", Host: "registry.local:5000"}
 		assertValidationFails(t, cfg, opts, "not a token")
 	})
 

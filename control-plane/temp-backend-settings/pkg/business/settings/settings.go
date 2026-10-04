@@ -52,7 +52,6 @@ type CatalogUpdater interface {
 
 type AuthorizationUpdater interface {
 	UpdateEnableScopedAuthorization(ctx context.Context, tenantID int, value interface{}) error
-	UpdateTenantIsCspManaged(ctx context.Context, tenantID int, value interface{}) error
 }
 
 type ClusterUpdater interface {
@@ -96,8 +95,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryProject,
 			Description: "Enable over quota weight to set what proportion of unused resources a project can get on top of its quota. " +
-				"For more information, see the <a href='https://run-ai-docs.nvidia.com/saas/platform-management/" +
-				"runai-scheduler/scheduling/concepts-and-principles#over-quota-weight' target='_blank'>Over quota weight guide</a>",
+				"For more information, see the <a data-doc-key='overQuotaWeight' target='_blank'>Over quota weight guide</a>",
 			Label:        "Over quota weight",
 			Type:         TypeBoolean,
 			Privilege:    PrivilegeAdmin,
@@ -119,8 +117,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Category: CategoryTenant,
 			Description: "Enable to prevent projects' total quota from exceeding the department's quota or being less than " +
 				"the total usage by non-preemptible workloads. For more information, see the " +
-				"<a href='https://run-ai-docs.nvidia.com/saas/platform-management/runai-scheduler/scheduling/" +
-				"concepts-and-principles#over-subscription' target='_blank'>Run:ai scheduler guide</a>",
+				"<a data-doc-key='overSubscription' target='_blank'>Run:ai scheduler guide</a>",
 			Label:        "Limit projects from exceeding department quota",
 			Type:         TypeBoolean,
 			Privilege:    PrivilegeAdmin,
@@ -156,9 +153,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryProject,
 			Description: "Enable resource quota based on CPU resources.\nFor more information, see the " +
-				"<a href='https://run-ai-docs.nvidia.com/saas/platform-management/aiinitiatives/organization/" +
-				"departments' target='_blank'>Departments guide</a> and the <a href='https://run-ai-docs.nvidia.com/" +
-				"saas/platform-management/aiinitiatives/organization/projects' target='_blank'>Projects guide</a>",
+				"<a data-doc-key='departments' target='_blank'>Departments guide</a> and the <a data-doc-key='projects' target='_blank'>Projects guide</a>",
 			Label:        "CPU quota",
 			Type:         TypeBoolean,
 			Privilege:    PrivilegeAdmin,
@@ -216,8 +211,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryTenant,
 			Description: "Enable to impose restrictions and default values on workloads' fields. " +
-				"For more information, see the <a href='https://run-ai-docs.nvidia.com/saas/" +
-				"platform-management/policies/policies-and-rules' target='_blank'>Policies guide</a>",
+				"For more information, see the <a data-doc-key='policies' target='_blank'>Policies guide</a>",
 			Label:                       "Policies",
 			Type:                        TypeBoolean,
 			Privilege:                   PrivilegeAdmin,
@@ -261,8 +255,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryTenant,
 			Description: "Enable for better data consistency with the UI, auto-upgrade, and interactive mode. " +
-				"For more information, see the <a href='https://run-ai-docs.nvidia.com/saas/reference/" +
-				"cli/runai' target='_blank'>CLI guide</a>",
+				"For more information, see the <a data-doc-key='cliReference' target='_blank'>CLI guide</a>",
 			Label:                       "Improved command<br>line interface",
 			Type:                        TypeBoolean,
 			Privilege:                   PrivilegeAdmin,
@@ -376,8 +369,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Description: "Enable to view metrics in the Node and Workload metrics tab. " +
 				"To configure the <a href='https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/" +
 				"feature-overview.html#metrics' target='_blank'>NVIDIA exporter</a> and NVIDIA Run:ai cluster, see " +
-				"<a href='https://run-ai-docs.nvidia.com/self-hosted/platform-management/monitor-performance/" +
-				"gpu-profiling-metrics' target='_blank'>GPU profiling metrics</a>.",
+				"<a data-doc-key='gpuProfiling' target='_blank'>GPU profiling metrics</a>.",
 			Label:                       "GPU profiling metrics",
 			Type:                        TypeBoolean,
 			Privilege:                   PrivilegeAdmin,
@@ -443,8 +435,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryTenant,
 			Description: "Enable instant deployment of Hugging Face models via the Models view or the workload " +
-				"submission form. For more information, see the <a href='https://run-ai-docs.nvidia.com/self-hosted/" +
-				"workloads-in-nvidia-run-ai/using-inference/hugging-face-inference' target='_blank'>" +
+				"submission form. For more information, see the <a data-doc-key='huggingFaceInference' target='_blank'>" +
 				"Deploy Inference Workloads from Hugging Face</a>",
 			Label:                       "Hugging face models",
 			Type:                        TypeBoolean,
@@ -467,8 +458,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryTenant,
 			Description: "Enable instant deployment of NIM models via the workload submission form. " +
-				"For more information, see the <a href='https://run-ai-docs.nvidia.com/self-hosted/" +
-				"workloads-in-nvidia-run-ai/using-inference/nim-inference' target='_blank'>" +
+				"For more information, see the <a data-doc-key='nimInference' target='_blank'>" +
 				"Deploy Inference Workloads with NVIDIA NIM</a>",
 			Label:                       "NIM models",
 			Type:                        TypeBoolean,
@@ -494,8 +484,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Description: "Enable to submit workloads via the new flexible form. Allow selecting an existing setup " +
 				"or starting from scratch, reviewing existing setups and understanding policy definitions. " +
 				"The form also includes advanced features tailored for inference workloads. For more information, see " +
-				"<a href='https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/" +
-				"whats-new-2-21#flexible-workload-submission' target='_blank'>Flexible submission.</a>",
+				"<a data-doc-key='flexibleSubmission' target='_blank'>Flexible submission.</a>",
 			Label:                       "Flexible workload submission",
 			Type:                        TypeBoolean,
 			Privilege:                   PrivilegeAdmin,
@@ -526,8 +515,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryTenant,
 			Description: "Enable to create workload templates via the new flexible form. " +
-				"For more information, see the <a href='https://run-ai-docs.nvidia.com/self-hosted/" +
-				"workloads-in-nvidia-run-ai/workload-templates' target='_blank'>Workload Templates guide</a>",
+				"For more information, see the <a data-doc-key='workloadTemplates' target='_blank'>Workload Templates guide</a>",
 			Label:                       "Flexible workload templates",
 			Type:                        TypeBoolean,
 			Privilege:                   PrivilegeAdmin,
@@ -549,8 +537,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryTenant,
 			Description: "Enable to allow creation of data volumes to share underlying data across scopes. " +
-				"For more information, see the <a href='https://run-ai-docs.nvidia.com/saas/" +
-				"workloads-in-nvidia-run-ai/assets/data-volumes' target='_blank'>Data volumes guide</a>",
+				"For more information, see the <a data-doc-key='dataVolumes' target='_blank'>Data volumes guide</a>",
 			Label:                       "Data volumes",
 			Type:                        TypeBoolean,
 			Privilege:                   PrivilegeAdmin,
@@ -593,8 +580,7 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 			Source:   SourceTenant,
 			Category: CategoryTenant,
 			Description: "Enable to set a GPU memory limit for workloads. To enable this on each Run:ai cluster, see the " +
-				"<a href='https://run-ai-docs.nvidia.com/saas/platform-management/runai-scheduler/" +
-				"resource-optimization/dynamic-fractions' target='_blank'>Dynamic GPU fractions guide</a>",
+				"<a data-doc-key='dynamicFractions' target='_blank'>Dynamic GPU fractions guide</a>",
 			Stage:                       StageBeta,
 			Label:                       "GPU resource optimization",
 			Type:                        TypeBoolean,
@@ -607,27 +593,6 @@ func BuildSettingDefinitions(deps *OnSetDeps) map[string]SettingDefinition {
 				if deps.WorkloadsUpdater != nil {
 					if err := deps.WorkloadsUpdater.UpdateSetting(ctx, tenantID, SettingKeyGpuOverProvisioning, value); err != nil {
 						return nil, fmt.Errorf("failed to update GpuOverProvisioning in workloads service: %w", err)
-					}
-				}
-				return nil, nil
-			},
-		},
-		{
-			Key:          SettingKeyTenantIsCspManaged,
-			Source:       SourceTenant,
-			Category:     CategoryTenant,
-			Description:  "Mark the tenant as managed by CSP",
-			Stage:        StageAlpha,
-			Label:        "CSP managed",
-			Type:         TypeBoolean,
-			Privilege:    PrivilegeAdmin,
-			DefaultValue: false,
-			Validate:     ValidateBoolean,
-			Migrated:     true,
-			OnSet: func(ctx context.Context, tenantID int, value interface{}) (*OnSetResult, error) {
-				if deps.AuthorizationUpdater != nil {
-					if err := deps.AuthorizationUpdater.UpdateTenantIsCspManaged(ctx, tenantID, value); err != nil {
-						return nil, fmt.Errorf("failed to update TenantIsCspManaged in authorization service: %w", err)
 					}
 				}
 				return nil, nil

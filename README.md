@@ -7,7 +7,7 @@
 [![Latest release](https://img.shields.io/github/v/release/dsx-ai-factory/run-ai)](https://github.com/dsx-ai-factory/run-ai/releases)
 [![Contributors](https://img.shields.io/github/contributors/dsx-ai-factory/run-ai)](https://github.com/dsx-ai-factory/run-ai/graphs/contributors)
 
-[Docs](https://docs.nvidia.com/run-ai/) | [Roadmap](#roadmap) | [Installation](#installation) | [API Reference](https://docs.nvidia.com/run-ai/) | [Contributing](CONTRIBUTING.md) | [License](#license)
+[Docs](https://docs.nvidia.com/run-ai/) | [Roadmap](#roadmap) | [Installation](#installation) | [API Reference](https://docs.nvidia.com/run-ai/self-hosted/reference/home) | [Contributing](CONTRIBUTING.md) | [License](#license)
 
 **NVIDIA Run:ai is an open-source AI workload and GPU orchestration platform** for managing shared AI infrastructure on Kubernetes.
 
@@ -21,7 +21,7 @@ This monorepo contains the NVIDIA Run:ai control plane and cluster services, ins
   <img src="docs/assets/system-overview.png" alt="NVIDIA Run:ai system overview" width="900" />
 </p>
 
-**[Architecture Overview →](docs/developer/architecture.md)**
+**[Architecture Overview →](https://docs.nvidia.com/run-ai/self-hosted/documentation/getting-started/architecture)**
 
 NVIDIA Run:ai is made up of two components, both installed on a Kubernetes cluster:
 
@@ -90,7 +90,7 @@ The [`local-dev.sh`](local-dev.sh) script builds the NVIDIA Run:ai control plane
 ./local-dev.sh --teardown                       # tear the environment down
 ```
 
-See [Local Development Guide](local-dev.md) for prerequisites (Docker/Podman, `kind`, `kubectl`, `helm`, Go, Node) and all available flags.
+See [Local Development Guide](local-dev.md) for prerequisites (Docker/Podman, `make`, `git`, `curl`, `python3`, `openssl`, and minimum CPU/RAM/disk; `kind`, `kubectl`, and `helm` are installed automatically) and all available flags. Go, Node, and Java are not needed on the host: all builds run inside containers.
 
 ### Building Individual Services
 
@@ -98,18 +98,18 @@ Each service directory has a Makefile with standard targets (`make build`, `make
 
 ## Installation
 
-NVIDIA Run:ai can be deployed on Kubernetes or OpenShift in connected or air-gapped environments. To understand the full setup lifecycle, see the [Installation and Configuration Overview](https://nvidia-preview-01a02a68-bbb9-71d8-b4ab-3579d895216b.docs.buildwithfern.com/run-ai/self-hosted/documentation/installation-and-configuration/overview).
+NVIDIA Run:ai can be deployed on Kubernetes or OpenShift in connected or air-gapped environments. To understand the full setup lifecycle, see the [Installation and Configuration Overview](https://docs.nvidia.com/run-ai/self-hosted/documentation/installation-and-configuration/overview).
 
 **Before you start:**
 
-- **[Support Matrix](https://nvidia-preview-01a02a68-bbb9-71d8-b4ab-3579d895216b.docs.buildwithfern.com/run-ai/self-hosted/documentation/installation-and-configuration/support-matrix)** - Kubernetes/OpenShift versions, operating systems, GPU and network operators, and third-party services NVIDIA Run:ai supports.
-- **[System Requirements](https://nvidia-preview-01a02a68-bbb9-71d8-b4ab-3579d895216b.docs.buildwithfern.com/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements)** - Infrastructure, networking, and access you need to prepare before installing.
+- **[Support Matrix](https://docs.nvidia.com/run-ai/self-hosted/documentation/installation-and-configuration/support-matrix)** - Kubernetes/OpenShift versions, operating systems, GPU and network operators, and third-party services NVIDIA Run:ai supports.
+- **[System Requirements](https://docs.nvidia.com/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements)** - Infrastructure, networking, and access you need to prepare before installing.
 
 Choose an installation method based on how you want to manage the deployment:
 
-- **[Guided installation](https://nvidia-preview-01a02a68-bbb9-71d8-b4ab-3579d895216b.docs.buildwithfern.com/run-ai/self-hosted/documentation/installation-and-configuration/installation/guided-installation-recommended) (recommended)** - Uses the `runai-installer` CLI with a configuration YAML file. The installer performs preflight checks, installs required dependencies, and deploys the NVIDIA Run:ai control plane and cluster.
+- **[Guided installation](https://docs.nvidia.com/run-ai/self-hosted/documentation/installation-and-configuration/install/guided-installation) (recommended)** - Uses the `runai-installer` CLI with a configuration YAML file. The installer performs preflight checks, installs required dependencies, and deploys the NVIDIA Run:ai control plane and cluster.
 
-- **[Manual installation](https://nvidia-preview-01a05288-a018-735b-ad78-e678676b8b99.docs.buildwithfern.com/run-ai/self-hosted/documentation/installation-and-configuration/installation/manual-helm/control-plane-system-requirements)** - Deploys the NVIDIA Run:ai Helm charts directly. Use this path if you manage deployments through your own tooling, such as Argo CD, or require granular control over Helm values.
+- **[Manual installation](https://docs.nvidia.com/run-ai/self-hosted/documentation/installation-and-configuration/install/manual-helm/preparations)** - Deploys the NVIDIA Run:ai Helm charts directly. Use this path if you manage deployments through your own tooling, such as Argo CD, or require granular control over Helm values.
 
 To build and run NVIDIA Run:ai locally for development, see [Usage](#usage).
 

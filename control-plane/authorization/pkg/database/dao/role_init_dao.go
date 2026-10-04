@@ -80,9 +80,6 @@ func (r *RoleDaoInitializer) DbUpsertLegacyRole(ctx context.Context, roleRequest
 			existingRole.Description = roleRequest.Description
 			existingRole.UpdatedAt = roleRequest.UpdatedAt
 			existingRole.Deprecated = roleRequest.Deprecated
-			if roleRequest.RoleType != "" {
-				existingRole.RoleType = roleRequest.RoleType
-			}
 			if err := upsertPermissionSetAndPermissions(ctx, tx, roleRequest, existingRole); err != nil {
 				return err
 			}

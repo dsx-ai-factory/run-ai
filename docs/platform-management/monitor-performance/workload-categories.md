@@ -6,16 +6,16 @@ Categories appear in the Overview dashboard, allowing administrators to filter, 
 
 ## Default Category Mapping
 
-NVIDIA Run:ai defines the following default mappings of workload types to categories. To retrieve the default category per workload type, refer to the [List workload types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#get-api-v1-workload-types) API.
+NVIDIA Run:ai defines the following default mappings of workload types to categories. To retrieve the default category per workload type, refer to the [List workload types](api:main-api:GET/api/v1/workload-types) API.
 
-<Info>
+<Note>
 
 **Note**
 
 * For more information on workload support, see [Introduction to workloads](../../workloads-in-nvidia-run-ai/introduction-to-workloads.md).
 * To see the default priority assigned to each of the workload types listed below, refer to [Workload priority control](../runai-scheduler/scheduling/workload-priority-control.md).
 
-</Info>
+</Note>
 
 ### NVIDIA Run:ai Native Workloads
 
@@ -68,7 +68,7 @@ NVIDIA Run:ai defines the following default mappings of workload types to catego
 
 ## Update the Default Category Mapping
 
-Administrators can change the default category assigned to a workload type by updating the category mapping using the [NVIDIA Run:ai API](https://run-ai-docs.nvidia.com/api/2.26/). To update the category mapping:
+Administrators can change the default category assigned to a workload type by updating the category mapping using the [NVIDIA Run:ai API](../../rest-api/about-the-rest-api.md). To update the category mapping:
 
 1. Retrieve the list of workload types and their IDs using `GET /api/v1/workload-types`.
 2. Identify the `workloadTypeId` of the workload type you want to modify.
@@ -78,4 +78,4 @@ Administrators can change the default category assigned to a workload type by up
 
 ## Using API
 
-Go to the [Workload properties](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#get-api-v1-workload-categories) API reference to view the available actions.
+Go to the [Workload properties](api:main-api:GET/api/v1/workload-categories) API reference to view the available actions.

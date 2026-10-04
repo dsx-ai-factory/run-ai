@@ -23,6 +23,10 @@ var DataStorageRead = models.PermissionSet{
 			Read:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_DEVICE_CLASSES,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_GIT_ASSETS,
 			Read:         true,
 		},

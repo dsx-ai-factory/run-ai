@@ -37,9 +37,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 
 	authApi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	k8sTrackerApi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
 	policyApi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 const (

@@ -198,8 +198,8 @@ func (p *Plugin) buildWorkloadService(
 		APIVersion: constants.CoreV1,
 		Kind:       constants.KindService,
 	}
-	svc.Namespace = runner.Namespace
-	svc.Name = getResourceName(svc.Name, runner)
+	svc.ObjectMeta = networkingObjectMeta(svc.ObjectMeta, runner)
+	svc.Status = corev1.ServiceStatus{}
 	return svc
 }
 
@@ -214,8 +214,8 @@ func (p *Plugin) buildIngress(
 		APIVersion: constants.NetworkingV1,
 		Kind:       constants.KindIngress,
 	}
-	ingress.Namespace = runner.Namespace
-	ingress.Name = getResourceName(ingress.Name, runner)
+	ingress.ObjectMeta = networkingObjectMeta(ingress.ObjectMeta, runner)
+	ingress.Status = networkingv1.IngressStatus{}
 
 	if backendServiceName != "" {
 		for i := range ingress.Spec.Rules {
@@ -247,8 +247,8 @@ func (p *Plugin) buildRoute(
 		APIVersion: constants.RouteV1,
 		Kind:       constants.KindRoute,
 	}
-	route.Namespace = runner.Namespace
-	route.Name = getResourceName(route.Name, runner)
+	route.ObjectMeta = networkingObjectMeta(route.ObjectMeta, runner)
+	route.Status = openshiftv1.RouteStatus{}
 
 	if backendServiceName != "" {
 		route.Spec.To = openshiftv1.RouteTargetReference{
@@ -273,8 +273,8 @@ func (p *Plugin) buildHTTPRoute(
 		APIVersion: constants.GatewayV1,
 		Kind:       constants.KindHTTPRoute,
 	}
-	httpRoute.Namespace = runner.Namespace
-	httpRoute.Name = getResourceName(httpRoute.Name, runner)
+	httpRoute.ObjectMeta = networkingObjectMeta(httpRoute.ObjectMeta, runner)
+	httpRoute.Status = gatewayv1.HTTPRouteStatus{}
 
 	if backendServiceName != "" {
 		port := gatewayv1.PortNumber(backendServicePort)
@@ -291,4 +291,17 @@ func (p *Plugin) buildHTTPRoute(
 	}
 
 	return httpRoute
+}
+
+// The caller supplies networking intent, not Kubernetes lifecycle state.
+// The input metadata has already been deep-copied by each builder. Annotation
+// checks run before apply for restricted submission profiles; ownership is set
+// by setOwnerAndApply.
+func networkingObjectMeta(metadata metav1.ObjectMeta, runner *dromosv1alpha1.WorkloadRunner) metav1.ObjectMeta {
+	return metav1.ObjectMeta{
+		Name:        getResourceName(metadata.Name, runner),
+		Namespace:   runner.Namespace,
+		Labels:      metadata.Labels,
+		Annotations: metadata.Annotations,
+	}
 }

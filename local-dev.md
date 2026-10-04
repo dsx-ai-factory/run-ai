@@ -1,6 +1,6 @@
 # local-dev.sh — Local Development Guide
 
-local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine — control plane, cluster services, and UI — so you can develop and test against the real product instead of individual services in isolation. It builds ~50 Go services from source, creates a self-contained [Kind](https://kind.sigs.k8s.io/) cluster, loads images directly into it via `kind load docker-image`, and deploys the full stack behind a self-signed TLS certificate. Everything runs locally — no external registry, no cloud cluster.
+local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine — control plane, cluster services, UI and Command-line interface (CLI). As such, you can develop and test against the real product instead of individual services in isolation. The script builds ~50 Go services from source, creates a self-contained [Kind](https://kind.sigs.k8s.io/) cluster, loads images directly into it via `kind load docker-image`, and deploys the full stack behind a self-signed TLS certificate. Everything runs locally — no external registry, no cloud cluster.
 
 ---
 
@@ -9,11 +9,15 @@ local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine
 | Requirement | Notes |
 |---|---|
 | **OS / Architecture** | `macOS` or `Linux`, `amd64` or `arm64` — the only four supported combinations. Any other platform, such as Windows, stops the script with a clear error before setup begins. |
-| **Docker Desktop** | Must be running. On Linux, enable the containerd image store. macOS uses Podman instead (see below). |
+| **Container Runtime** | Use docker or podman. On Linux, enable the containerd image store. See more info on Podman settings for MacOS below. |
+| **Linux host: ≥ 4 CPUs, ≥ 16 GB RAM, ≥ 100 GB free disk** | Linux only. Kind nodes, ~50 services, and parallel builds all share the host directly, with no VM to size. Disk is measured where the container runtime stores data (usually `/var/lib/docker`). One full build leaves about 44 GB of caches: roughly 11 GB of Docker build cache, and 33 GB of Go module and build caches in `~/.cache`. It also needs about 8 GB of images, which are stored both in the registry and in the Kind nodes. The script warns at startup if the host is below any of these; it does not stop. On a tight host, use `--parallel 2` and `--skip-frontend`. |
 | **Podman VM ≥ 12 GB RAM** | macOS only. The full stack (NATS×3, PostgreSQL, Keycloak, ~50 services) requires at least 12 GB. With 8 GB the API server starves under QEMU overhead and the cluster never stabilises. Resize with `podman machine stop && podman machine set --memory 12288 && podman machine start`. |
 | **`GITHUB_TOKEN`** | Only needed while the repo is private — Go builds pull modules from `github.com/run-ai/*`. Not required with `--skip-build` or once the repo is public. Set it before running: `export GITHUB_TOKEN=ghp_...` |
 | **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.31.0`, node image `v1.32.5`); `kubectl` and `helm` always install the latest release. |
 | **`openssl`** | For TLS cert generation. Ships with macOS and most Linux distros; not auto-installed if missing. |
+| **`make`, `git`, `curl`, `python3`** | Used directly by the script and the service Makefiles. Not auto-installed; the script stops at startup if any is missing. |
+
+Go, Node, and Java are **not** needed on the host. Every Go, frontend, and Gradle build runs inside a container (`golang`, `node`, `gradle` images).
 
 ---
 
@@ -48,6 +52,9 @@ The script runs these phases in order. Each phase is independently skippable.
 - Confirms the container daemon is actually running, and on macOS with Podman, auto-switches the VM to rootful mode if needed (Kind requires it).
 - Validates `GITHUB_TOKEN` — warns, but does not fail, if it is unset and a build is about to run.
 - Auto-installs `kind`, `kubectl`, and `helm` if they are not already on `$PATH`.
+- Stops if `make`, `git`, `curl`, `python3`, or `openssl` is missing.
+- On Linux, warns if the host has fewer than 4 CPUs, less than 16 GB RAM, or less than 100 GB free for container storage.
+- With `--gpu-operator`, checks the NVIDIA host setup, and configures Docker's `nvidia` runtime if needed. See [Real GPUs](#real-gpus---gpu-operator).
 
 ### TLS Certificate + `/etc/hosts`
 
@@ -61,7 +68,7 @@ The script runs these phases in order. Each phase is independently skippable.
 
 - Creates a 5-node Kind cluster (1 control-plane + 4 workers) named `runai-local`, pinned to Kubernetes `v1.32.5`.
 - The control-plane node maps host ports 80/443 for ingress, and is labeled `ingress-ready=true`.
-- containerd is pre-configured to mirror `localhost:5001` to the local registry container, so all 5 nodes can pull from it once it exists — set up here even though the registry itself is not created until the next phase.
+- containerd on each node is pointed at `/etc/containerd/certs.d` for registry settings. In the next phase, each node gets a `hosts.toml` there that sends `localhost:5001` pulls to the local registry container.
 
 ### Local Registry
 
@@ -81,7 +88,7 @@ Installs `kube-prometheus-stack` into the `monitoring` namespace — a minimal i
 
 - Installs `oci://ghcr.io/run-ai/fake-gpu-operator` into `gpu-operator`, configured for 8 × `Tesla-A10` in the default node pool, so GPU workloads can be scheduled without real hardware. Wired to the Prometheus instance installed in the previous phase.
 - Labels every worker node with `run.ai/simulated-gpu-node-pool=default` — required for the chart's node-pool topology to recognize which nodes should simulate GPUs.
-- Skip with `--skip-fake-gpu`.
+- Skip with `--skip-fake-gpu`. Replaced by the real NVIDIA GPU Operator when `--gpu-operator` is set — see [Real GPUs](#real-gpus---gpu-operator).
 
 ### Build — control-plane (25 Go Services + Frontend)
 For each Go service, the script compiles an `amd64` binary inside a golang Docker container (workspace-mounted, uses the Go module cache at `~/.cache/go-build-docker-*`), builds a `linux/amd64` image, and **pushes it to the local registry**. Up to `--parallel N` services build concurrently.
@@ -113,28 +120,28 @@ The runai-cluster chart configures these scheduling subcharts:
 
 | Subchart | Setting | Notes |
 |---|---|---|
-| `kai-scheduler` | `enabled=true` | CNCF-donated AI-aware GPU scheduler — applies fair-share, preemption, bin-packing, and multi-node placement rules. The engine underlying the Run:ai Scheduler. |
+| `kai-resource-management` | `enabled=true` | KAI Resource Management — supplies the nodepool-controller, project-controller and pod-group-assigner, and bundles `kai-scheduler` as its own dependency. |
 | `karta` | `enabled=true` | CRD-based resource abstraction layer with a standard schema for describing any Kubernetes workload type, so controllers can extract pod specs and status without per-type logic. |
 
-#### kai-scheduler CRDs
+#### KRM and kai-scheduler CRDs
 
-The script applies these directly from the Go module cache (`podgroups`, `queues`, `schedulingshards`, `configs`, `topologies`), since the `crd-upgrader` job does not manage them. The module version is pinned in `runai-cluster/cluster/go-operator/go.mod` — if it is not in the cache, you will see `kai-scheduler Go module not found; CRDs may be missing`; run `go mod download` in `go-operator` and re-deploy.
+The script applies nothing by hand. Both charts ship their CRDs in their own `crds/` directory, which Helm applies for subcharts, and each carries a crd-upgrader hook for the upgrade path. If a placeholder subchart was installed (see below), the CRDs are missing along with everything else.
 
 #### Scale-Adjust Namespace
 
-Enabling `kai-scheduler` triggers creation of the `runai-scale-adjust` namespace. If a previous failed install left it without Helm ownership labels, the script deletes it first so Helm can recreate it cleanly.
+Enabling `kai-resource-management` triggers creation of the `runai-scale-adjust` namespace. If a previous failed install left it without Helm ownership labels, the script deletes it first so Helm can recreate it cleanly.
 
 #### Chart Reconciliation
 
 Before installing, the script reconciles `charts/` against `Chart.yaml`, since Helm needs a subchart present for every declared dependency and `charts/*.tgz` is gitignored (a fresh clone has none):
 
 1. **Prune** — deletes any tarball that no longer matches a declared dependency. Helm loads *every* tarball in `charts/`, so a leftover from a previous version bump would make the resolved subchart ambiguous, and a tarball for a removed dependency would render with no condition to gate it.
-2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/run-ai/karta`) and need no credentials.
+2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/workload-map/karta`) and need no credentials.
 3. **Fall back** — if the fetch fails (offline, registry down), generates a minimal placeholder so the install can still proceed, and warns that the subchart will be empty.
 
 Names and versions are read from `Chart.yaml`, so bumping a dependency cannot leave the script stale.
 
-> **If you see the placeholder warning,** `kai-scheduler` and `karta` will be enabled but deploy nothing — Helm matches dependencies by name only, so a placeholder satisfies the check and the subchart installs empty. Re-run once you have network access, or fetch manually with `helm dependency build runai-cluster/cluster/runai-chart`. See [Known Issues](#known-issues).
+> **If you see the placeholder warning,** `kai-resource-management` and `karta` will be enabled but deploy nothing — Helm matches dependencies by name only, so a placeholder satisfies the check and the subchart installs empty. Re-run once you have network access, or fetch manually with `helm dependency build runai-cluster/cluster/runai-chart`. See [Known Issues](#known-issues).
 
 ---
 
@@ -148,7 +155,7 @@ Names and versions are read from `Chart.yaml`, so bumping a dependency cannot le
 |---|---|
 | `--domain FQDN` | Domain for ingress and TLS (default: `runai.local`) |
 | `--admin-email EMAIL` | Initial admin account email (default: `test@run.ai`) |
-| `--admin-password PASS` | Initial admin password (default: `Abcd!234`) — min 8 chars, 1 digit, 1 upper, 1 lower, 1 special |
+| `--admin-password PASS` | Initial admin password (default: randomly generated by the chart and printed in the final summary) — min 8 chars, 1 digit, 1 upper, 1 lower, 1 special |
 | `--parallel N` | Concurrent build jobs (default: `4`). Set higher on machines with many cores |
 | `--skip-build` | Skip all image builds — reuse whatever is already in the Kind cluster |
 | `--skip-build-cp` | Skip control-plane builds only |
@@ -160,8 +167,12 @@ Names and versions are read from `Chart.yaml`, so bumping a dependency cannot le
 | `--skip-deploy-rc` | Skip deploying the runai-cluster chart |
 | `--skip-prometheus` | Skip the prometheus-operator install |
 | `--skip-fake-gpu` | Skip the fake-gpu-operator install. Without it, GPU workloads cannot be scheduled |
+| `--gpu-operator` | Use real NVIDIA GPUs (only NVIDIA is supported): install the NVIDIA GPU Operator instead of fake-gpu-operator. Linux + Docker only; see [Real GPUs](#real-gpus---gpu-operator) |
+| `--gpu-driver` | With the GPU Operator, let it install the NVIDIA driver (`driver.enabled=true`) instead of using the host driver. Implies `--gpu-operator` |
+| `--gpu-operator-version VER` | GPU Operator chart version (default: `v26.7.1`). Implies `--gpu-operator` |
 | `--force-rebuild` | Ignore the build cache — rebuild and re-push every image |
-| `--teardown` | Delete the Kind cluster and local registry, then exit |
+| `--teardown` | Remove the Kind cluster, local registry and its volume, `kind` network, built images, and the `/etc/hosts` entry, then exit. See [Teardown](#teardown) |
+| `--purge` | With `--teardown`: also clear the build cache, Go/Gradle caches, and the generated files in `.local-dev/` (certs, logs). Implies `--teardown` |
 | `--help` | Print usage |
 
 ### Environment Variables
@@ -173,6 +184,58 @@ Names and versions are read from `Chart.yaml`, so bumping a dependency cannot le
 | `RUNAI_ADMIN_PASSWORD` | Same as `--admin-password` |
 | `PARALLEL_JOBS` | Same as `--parallel` |
 | `KIND_CLUSTER` | Kind cluster name (default: `runai-local`) |
+| `GPU_OPERATOR_VERSION` | NVIDIA GPU Operator chart version used with `--gpu-operator` (default: `v26.7.1`) |
+
+---
+
+## Real GPUs (`--gpu-operator`)
+
+By default the cluster uses fake-gpu-operator, so no GPU hardware is needed. On a Linux host with GPUs, `--gpu-operator` installs the real [NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/) instead.
+
+> **Only NVIDIA GPUs are supported.** AMD, Intel, and other accelerators are not. The script checks the host PCI bus for an NVIDIA device (vendor `0x10de`) and stops if it finds none.
+
+| Flag | Effect |
+|---|---|
+| `--gpu-operator` | Install the NVIDIA GPU Operator using the **host's** NVIDIA driver (`driver.enabled=false`). |
+| `--gpu-driver` | Let the GPU Operator install the driver itself (`driver.enabled=true`). Implies `--gpu-operator`. See [Operator-managed driver](#operator-managed-driver---gpu-driver). |
+| `--gpu-operator-version VER` | GPU Operator chart version (default: `v26.7.1`; also settable via `GPU_OPERATOR_VERSION`). Implies `--gpu-operator`. |
+
+Kind nodes are containers, so GPUs must first be passed from the host into a node container, and then from the node into pods. That needs a one-time host setup.
+
+### Host driver (default)
+
+**Host requirements:** Linux, Docker (Podman is not supported), an NVIDIA GPU with a working NVIDIA driver (`nvidia-smi` runs), and the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). The script checks these before it starts and stops if any is missing.
+
+Docker must also use the `nvidia` runtime by default and accept GPU requests through volume mounts. If it does not, the script configures it for you, prompting for `sudo`, and **restarts Docker**, which stops any running containers. It lists them first. It runs:
+
+```bash
+sudo nvidia-ctk runtime configure --runtime=docker --set-as-default
+sudo nvidia-ctk config --set accept-nvidia-visible-devices-as-volume-mounts=true --in-place
+sudo systemctl restart docker
+```
+
+If you prefer, run these yourself before the script. It then skips this step.
+
+**What the script does differently:**
+
+- **Cluster creation:** the first worker (`runai-local-worker`) mounts `/dev/null` at `/var/run/nvidia-container-devices/all`, which makes the nvidia runtime inject all host GPUs into that node. Only one node gets GPUs, because every node would otherwise advertise the same physical devices.
+- **Node prep:** inside the GPU node, the script symlinks `/sbin/ldconfig.real` and unmounts `/proc/driver/nvidia`, which the operator's container toolkit needs inside a Kind node.
+- **Other nodes:** labeled `nvidia.com/gpu.deploy.operands=false`, because NFD sees the host PCI bus from every node.
+- **Install:** installs `nvidia/gpu-operator` with `driver.enabled=false`. The operator's own DCGM exporter `ServiceMonitor` stays off, because the runai-cluster chart creates one; enabling both would scrape GPU metrics twice. The script then waits until the node advertises `nvidia.com/gpu`.
+- **Registry fix on the GPU node:** the operator's toolkit adds `/etc/containerd/conf.d/99-nvidia.toml`, which uses containerd config version 3. Once any loaded file is version 3, containerd ignores the node's older-format `io.containerd.grpc.v1.cri` section, including the local-registry setting. Without a fix, the GPU node fails every `localhost:5001` pull with `connection refused`. After the operator is ready, the script adds `zz-runai-registry.toml`, which loads after the nvidia file and restores the registry setting. It then restarts containerd on that node and checks the setting is in effect.
+
+The GPU mount can only be added when the cluster is created. To switch an existing fake-GPU cluster to real GPUs, recreate it:
+
+```bash
+./local-dev.sh --teardown
+./local-dev.sh --gpu-operator
+```
+
+### Operator-managed driver (`--gpu-driver`)
+
+With `--gpu-driver`, the host must have an NVIDIA GPU but **no** NVIDIA driver loaded; the script stops if `/sys/module/nvidia` exists. The NVIDIA Container Toolkit and the Docker runtime setup above are not needed, and the `/dev/null` mount is not added, because there is no host driver for the runtime to inject. Instead, the driver container runs inside the privileged GPU node, builds the kernel module against the host kernel, and creates the `/dev/nvidia*` devices itself. The script waits up to 30 minutes for the GPUs to appear.
+
+> **Experimental on Kind.** The GPU Operator picks the driver image from the node OS, which in Kind is the `kindest/node` image (Debian), not your host distribution. The driver build also needs kernel headers matching the host kernel. If the `nvidia-driver-daemonset` pod fails, check its logs (`kubectl logs -n gpu-operator -l app=nvidia-driver-daemonset`). Use the host-driver mode instead.
 
 ---
 
@@ -365,20 +428,20 @@ Images are pushed to the local `kind-registry` container and referenced as `loca
 
 ## Known Issues
 
-### No kai-scheduler / karta Pods After Deploy
+### No KRM / kai-scheduler / karta Pods After Deploy
 
 The script fetches these subcharts automatically, but if the fetch failed it falls back to an empty placeholder and the scheduler silently deploys nothing. Look for this in the output:
 
 ```
-[warn]   Could not fetch kai-scheduler@<version> — installing an EMPTY placeholder.
+[warn]   Could not fetch kai-resource-management@<version> — installing an EMPTY placeholder.
 ```
 
 The version comes from `Chart.yaml`, so it moves as that pin moves. Confirm by size: a real chart is tens of KB, a placeholder a few hundred bytes:
 
 ```bash
 ls -l runai-cluster/cluster/runai-chart/charts/*.tgz
-# kai-scheduler-v<version>.tgz   ~84 KB   real
-# karta-<version>.tgz            ~13 KB   real
+# kai-resource-management-v<version>.tgz  ~140 KB   real  (bundles kai-scheduler)
+# karta-<version>.tgz                      ~13 KB   real
 ```
 
 Fix by fetching manually, then redeploying just the chart:
@@ -472,4 +535,28 @@ git pull --ff-only
 ./local-dev.sh --teardown
 ```
 
-Deletes the Kind cluster and the `kind-registry` container. Files in `.local-dev/` are left in place; remove manually if needed.
+Removes everything the run created that only local-dev.sh uses:
+
+- the Kind cluster and its node containers;
+- the `kind-registry` container **and its volume**, which holds every pushed image (~1 GB);
+- the `kind` network, and the `kindest/node` image, unless other Kind clusters still exist;
+- all `runai-local/*` and `localhost:5001/runai-local/*` images, plus `registry:2`;
+- the `127.0.0.1 <domain>` line in `/etc/hosts`, which prompts for `sudo`;
+- the build-hash cache in `.local-dev/hashes`.
+
+Caches that make the next run faster are **kept**, and the script prints each one with its size:
+
+- Docker's build cache, which is shared with your other projects;
+- `~/.cache/go-build-docker-*`;
+- `control-plane/keycloak-extensions/.gradle`;
+- `.local-dev/certs/`, `.local-dev/logs/`, and `.local-dev/bin/`.
+
+`.local-dev/values-cp.yaml` and `.local-dev/values-rc.yaml` are tracked in git and are never removed, even with `--purge`.
+
+To remove those too:
+
+```bash
+./local-dev.sh --teardown --purge
+```
+
+`--purge` runs `docker builder prune -af`, which clears Docker's **entire** build cache, not just this project's. Base images pulled for builds (`golang`, `node`, `gradle`, and so on) are never removed; delete them with `docker rmi` if needed.

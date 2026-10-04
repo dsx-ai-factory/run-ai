@@ -6,9 +6,11 @@
 package parsers_test
 
 import (
+	"context"
+	"fmt"
 	"strconv"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/test/fakecachedclient"
@@ -1284,6 +1286,244 @@ var _ = Describe("Parsers", Ordered, func() {
 				{LabelKey: "topology.kubernetes.io/zone", LabelValue: "us-east-1"},
 				{LabelKey: "topology.kubernetes.io/rack", LabelValue: ""},
 			}))
+		})
+
+		Context("GPU fractioning readiness", func() {
+			gpuFractioningCondition := func(status corev1.ConditionStatus, reason, message string) corev1.NodeCondition {
+				return corev1.NodeCondition{
+					Type:    parsers.GpuFractioningReadyConditionType,
+					Status:  status,
+					Reason:  reason,
+					Message: message,
+				}
+			}
+
+			var previousGpuFractioningReadiness bool
+
+			BeforeEach(func() {
+				previousGpuFractioningReadiness = config.Config().EnableNodeGpuFractioningReadiness
+				config.Config().EnableNodeGpuFractioningReadiness = true
+			})
+
+			AfterEach(func() {
+				config.Config().EnableNodeGpuFractioningReadiness = previousGpuFractioningReadiness
+			})
+
+			clusterInfoConfigMap := func(gpuFractioningAvailable bool) *corev1.ConfigMap {
+				return &corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{Name: "runai-public", Namespace: "runai"},
+					Data: map[string]string{
+						"runai-public": fmt.Sprintf(`dependencies:
+  required:
+    gpu-stack:
+      available: %t
+      components:
+        gpu-fractioning:
+          available: %t
+`, gpuFractioningAvailable, gpuFractioningAvailable),
+					},
+				}
+			}
+
+			withClusterVersion := func(configMap *corev1.ConfigMap) *corev1.ConfigMap {
+				configMap.Data["runai-public"] = "cluster-version: 2.23.0\n" + configMap.Data["runai-public"]
+				return configMap
+			}
+
+			unparsableClusterInfo := func() *corev1.ConfigMap {
+				return &corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{Name: "runai-public", Namespace: "runai"},
+					Data:       map[string]string{"runai-public": "dependencies: ["},
+				}
+			}
+
+			DescribeTable("reports a change only when the stored verdict flips",
+				func(before, after *corev1.ConfigMap, expectedChanged bool) {
+					nodeParser = parsers.NewNodeParser(fakeCachedClient)
+					nodeParser.UpdateGpuFractioningSupport(before)
+
+					Expect(nodeParser.UpdateGpuFractioningSupport(after)).To(Equal(expectedChanged))
+				},
+				Entry("supported to unsupported", clusterInfoConfigMap(true), clusterInfoConfigMap(false), true),
+				Entry("unsupported to supported", clusterInfoConfigMap(false), clusterInfoConfigMap(true), true),
+				Entry("unrelated fields changing", clusterInfoConfigMap(false), withClusterVersion(clusterInfoConfigMap(false)), false),
+				Entry("created as unsupported", nil, clusterInfoConfigMap(false), true),
+				Entry("created as supported", nil, clusterInfoConfigMap(true), false),
+				Entry("deleted while unsupported", clusterInfoConfigMap(false), nil, true),
+				Entry("deleted while supported", clusterInfoConfigMap(true), nil, false),
+				Entry("becoming unparsable while unsupported", clusterInfoConfigMap(false), unparsableClusterInfo(), true),
+			)
+
+			It("keeps parsing off the stored verdict rather than re-reading the cluster info", func() {
+				unsupported := clusterInfoConfigMap(false)
+				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
+					WithObjects(nvidiaComponentsPod, unsupported)
+				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+				nodeParser = parsers.NewNodeParser(fakeCachedClient)
+				nodeParser.UpdateGpuFractioningSupport(unsupported)
+
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition, gpuFractioningCondition(
+					corev1.ConditionFalse, "MpsdNotReady", "mps daemon is not running")}
+				Expect(nodeParser.ParseNodeToServerScheme(node).Conditions).
+					To(Equal([]clustersvcswagger.NodeStatusConditionDetails{}))
+
+				// The ConfigMap now says supported, but nothing has told the parser yet.
+				Expect(fakeCachedClient.Update(context.Background(), clusterInfoConfigMap(true))).To(Succeed())
+				Expect(nodeParser.ParseNodeToServerScheme(node).Conditions).
+					To(Equal([]clustersvcswagger.NodeStatusConditionDetails{}))
+
+				nodeParser.UpdateGpuFractioningSupport(clusterInfoConfigMap(true))
+				Expect(nodeParser.ParseNodeToServerScheme(node).Conditions).To(HaveLen(1))
+			})
+
+			It("reports nothing on the node when the cluster does not support fractions", func() {
+				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
+					WithObjects(nvidiaComponentsPod, clusterInfoConfigMap(false))
+				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+				nodeParser = parsers.NewNodeParser(fakeCachedClient)
+				nodeParser.UpdateGpuFractioningSupport(clusterInfoConfigMap(false))
+
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition, gpuFractioningCondition(
+					corev1.ConditionFalse, "GPUDriverVersionUnsupported",
+					"NVIDIA driver major version 595 is below minimum supported major version 615")}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(Equal([]clustersvcswagger.NodeStatusConditionDetails{}))
+			})
+
+			It("still reports the node when the cluster does support fractions", func() {
+				fakeClientBuilder = fakerunaiclient.NewClientBuilder().WithScheme(scheme).
+					WithObjects(nvidiaComponentsPod, clusterInfoConfigMap(true))
+				fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+				nodeParser = parsers.NewNodeParser(fakeCachedClient)
+				nodeParser.UpdateGpuFractioningSupport(clusterInfoConfigMap(true))
+
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition, gpuFractioningCondition(
+					corev1.ConditionFalse, "MpsdNotReady", "mps daemon is not running")}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.MissingPrerequisitesPhase))
+				Expect(parsedNodeInfo.Conditions).To(Equal([]clustersvcswagger.NodeStatusConditionDetails{{
+					Type:    parsers.MissingGpuFractioningPrerequisite,
+					Reason:  "MpsdNotReady",
+					Message: utils.Ref("mps daemon is not running"),
+				}}))
+			})
+
+			DescribeTable("maps the operator's condition onto the node status",
+				func(conditions []corev1.NodeCondition, expectedPhase string,
+					expectedConditions []clustersvcswagger.NodeStatusConditionDetails) {
+					// These cases are about the conditions, not the cluster gate.
+					nodeParser.UpdateGpuFractioningSupport(clusterInfoConfigMap(true))
+					node.Status.Conditions = append([]corev1.NodeCondition{readyCondition}, conditions...)
+
+					parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+					Expect(parsedNodeInfo.Status).To(Equal(expectedPhase))
+					Expect(parsedNodeInfo.Conditions).To(Equal(expectedConditions))
+				},
+				Entry("healthy node reports nothing",
+					[]corev1.NodeCondition{gpuFractioningCondition(
+						corev1.ConditionTrue, "AllDaemonsReady", "all gpu-fractioning daemons are running")},
+					parsers.ReadyPhase, []clustersvcswagger.NodeStatusConditionDetails{}),
+				Entry("absent condition reports the node as unmanaged",
+					[]corev1.NodeCondition{},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: parsers.GpuFractioningNotManaged,
+						Message: utils.Ref("GPU fractions are not supported on this node - " +
+							"it is not covered by the GPU fractioning operator."),
+					}}),
+				Entry("unknown status is treated as unsupported",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionUnknown, "", "")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: parsers.GpuFractioningNotManaged,
+						Message: utils.Ref("GPU fractions are not supported on this node - " +
+							"it is not covered by the GPU fractioning operator."),
+					}}),
+				Entry("unsupported driver",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
+						"GPUDriverVersionUnsupported",
+						"NVIDIA driver major version 570 is below minimum supported major version 615")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:   parsers.MissingGpuFractioningPrerequisite,
+						Reason: "GPUDriverVersionUnsupported",
+						Message: utils.Ref(
+							"NVIDIA driver major version 570 is below minimum supported major version 615"),
+					}}),
+				Entry("an empty reason falls back to the condition type",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse, "", "")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  parsers.MissingGpuFractioningPrerequisite,
+						Message: utils.Ref(""),
+					}}),
+				Entry("crashlooping daemon passes the kubelet reason through",
+					[]corev1.NodeCondition{gpuFractioningCondition(corev1.ConditionFalse,
+						"CrashLoopBackOff", "mpsd pod is not ready: CrashLoopBackOff")},
+					parsers.MissingPrerequisitesPhase, []clustersvcswagger.NodeStatusConditionDetails{{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  "CrashLoopBackOff",
+						Message: utils.Ref("mpsd pod is not ready: CrashLoopBackOff"),
+					}}),
+			)
+
+			It("reports nothing on a node without GPUs", func() {
+				delete(node.Labels, "feature.node.kubernetes.io/pci-10de.present")
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			It("reports nothing when the feature is disabled", func() {
+				config.Config().EnableNodeGpuFractioningReadiness = false
+				node.Status.Conditions = []corev1.NodeCondition{
+					readyCondition,
+					gpuFractioningCondition(corev1.ConditionFalse, "GPUDriverVersionMissing", "driver label is missing"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			It("leaves the operator's condition untouched when the feature is disabled", func() {
+				config.Config().EnableNodeGpuFractioningReadiness = false
+				node.Status.Conditions = []corev1.NodeCondition{
+					readyCondition,
+					gpuFractioningCondition(corev1.ConditionTrue, "AllDaemonsReady", "all gpu-fractioning daemons are running"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Conditions).To(ContainElement(
+					clustersvcswagger.NodeStatusConditionDetails{
+						Type:    parsers.GpuFractioningReadyConditionType,
+						Reason:  "AllDaemonsReady",
+						Message: utils.Ref("all gpu-fractioning daemons are running"),
+					}))
+			})
+
+			It("lets NotReady outrank a missing fractioning prerequisite", func() {
+				nodeParser.UpdateGpuFractioningSupport(clusterInfoConfigMap(true))
+				node.Status.Conditions = []corev1.NodeCondition{
+					notReadyCondition,
+					gpuFractioningCondition(corev1.ConditionFalse, "GPUDriverVersionMissing", "driver label is missing"),
+				}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.NotReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(ContainElement(
+					clustersvcswagger.NodeStatusConditionDetails{
+						Type:    parsers.MissingGpuFractioningPrerequisite,
+						Reason:  "GPUDriverVersionMissing",
+						Message: utils.Ref("driver label is missing"),
+					}))
+			})
 		})
 	})
 })

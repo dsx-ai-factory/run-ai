@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strconv"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	constants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters"
@@ -114,6 +114,10 @@ func workloadNameForSync(workload *v1alpha1.ExternalWorkload) string {
 func (p *WorkloadParser) distributedFrameworkForExternalWorkload(workload *v1alpha1.ExternalWorkload, workloadType string) string {
 	if workload == nil || workloadType != DistributedDisplayType {
 		return ""
+	}
+
+	if framework := distributedFrameworkFromKind(workload.Spec.OriginalWorkloadKind); framework != "" {
+		return framework
 	}
 
 	if framework := distributedFrameworkFromKind(workload.Spec.Type); framework != "" {

@@ -90,7 +90,16 @@ func DefaultRuleGroups(ruleGroupsConfig *RuleGroupsConfig) []monitoringv1.RuleGr
 		{
 			// fixing the gpu label in runai_pod_gpu_info - gpu label value is actually the UUID so we are taking the UUID from the dcgm metric
 			Record: "runai_pod_gpu_info_fixed",
-			Expr:   intstr.FromString(`(label_replace(runai_pod_gpu_info{gpu!=""}, "UUID", "$1", "gpu", "(.*)")) * on (UUID) group_left(gpu) (count(runai_dcgm_gpu_utilization) by (UUID, gpu))`),
+			// KAI fraction pods get NVIDIA_VISIBLE_DEVICES at container-create via NRI, never in
+			// the pod spec, so the exporter emits no gpu label for them and the first branch is
+			// empty. metricsd carries the pod-to-GPU mapping on its own series; take it from there
+			// for exactly those pods, so one is never counted from both sources.
+			//
+			// group, not count: downstream rules multiply by this value, so it has to be 1 however
+			// many series metricsd emits for the pod.
+			Expr: intstr.FromString(
+				`(label_replace(runai_pod_gpu_info{gpu!=""}, "UUID", "$1", "gpu", "(.*)")) * on (UUID) group_left(gpu) (count(runai_dcgm_gpu_utilization) by (UUID, gpu))` +
+					` or (group by (pod_uuid, gpu, UUID) (label_replace(runai_pod_gpu_utilization, "UUID", "$1", "gpu_uuid", "(.*)")) unless on (pod_uuid) runai_pod_gpu_info{gpu!=""})`),
 		},
 		{
 			Record: "runai_pod_info_unique", // same

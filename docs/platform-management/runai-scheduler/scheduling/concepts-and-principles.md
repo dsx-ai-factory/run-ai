@@ -2,7 +2,7 @@
 
 When a user [submits a workload](../../../workloads-in-nvidia-run-ai/workloads.md), it is directed to the designated Kubernetes cluster and managed by the NVIDIA Run:ai Scheduler. The Scheduler’s primary role is to optimize placement, allocating workloads to the most suitable nodes based on specific resource requirements, workload characteristics, and organizational policies. This ensures high utilization while strictly adhering to NVIDIA Run:ai’s fairness and quota management logic.
 
-The Scheduler is platform-agnostic, supporting native Kubernetes workloads, NVIDIA Run:ai workloads, and various third-party frameworks. For a detailed breakdown of compatible types, see [Introduction to workloads](../../../workloads-in-nvidia-run-ai/introduction-to-workloads.md#types-of-workloads-in-runai).
+The Scheduler is platform-agnostic, supporting native Kubernetes workloads, NVIDIA Run:ai workloads, and various third-party frameworks. For a detailed breakdown of compatible types, see [Introduction to workloads](../../../workloads-in-nvidia-run-ai/introduction-to-workloads.md#workloads-in-nvidia-runai).
 
 To better understand the logic driving these allocation decisions, get to know the key concepts, resource management and scheduling principles of the Scheduler.
 
@@ -20,7 +20,7 @@ The NVIDIA Run:ai Scheduler is a workload scheduler. This means the Scheduler al
 
 Some workloads use a workload structure composed of multiple functions (functionality disaggregation). In this structure, each function can have one or more replicas, and each replica is made up of one or more pods, usually structured as leader and worker sets (distributed replicas). One example of such a workload structure is the NVIDIA Dynamo inference framework, which uses Grove as a Kubernetes API (CRD) and controller for the underlying pods. A single Dynamo workload is composed of three functions: an incoming router (gateway), a prefill, and a decoder. Each of these functions may have multiple replicas, where the prefill and decoder replicas are structured as leader-worker sets.
 
-This workload structure requires framing sets of leader-worker replicas as gang-scheduled sub-groups, which may be further grouped into sets of scale replicas, forming a second level of sub-groups. Therefore, the NVIDIA Run:ai workload group structure, handled by the Scheduler, is a hierarchy consisting of a top-level pod group with subordinate sub-groups. In this hierarchical group structure, a sub-group always points to a higher-level sub-group and ultimately to the top-level pod group. By default, each pod group has at least one sub-group under which all workers or replicas are federated.
+This workload structure requires framing sets of leader-worker replicas as gang-scheduled sub-groups, which may be further grouped into sets of scale replicas, forming a second level of sub-groups. Therefore, the NVIDIA Run:ai workload group structure, handled by the Scheduler, is a hierarchy consisting of a top-level pod group with subordinate sub-groups. In this hierarchical group structure, a sub-group always points to a higher-level sub-group and ultimately to the top-level pod group. By default, each pod group has at least one sub-group under which all workers or replicas are federated. The lowest level of sub-groups always federates individual pods.
 
 ## Scheduling Queue
 
@@ -32,13 +32,15 @@ A queue is created for each [project/node pool pair](../../aiinitiatives/adaptin
 
 ### Quota
 
-Each project and department includes a set of deserved resource quotas, per node pool and resource type. For example, project “LLM-Train/Node Pool NV-H100” quota parameters specify the number of GPUs, CPUs(cores), and the amount of CPU memory that this project deserves to get when using this node pool. [Non-preemptible workloads](concepts-and-principles.md#priority-and-preemption) can only be scheduled if their requested resources are within the deserved resource quotas of their respective project/node pool and department/node pool.
+Each project and department includes a set of deserved resource quotas, per node pool and resource type. For example, project “LLM-Train/Node Pool NV-H100” quota parameters specify the number of GPUs, CPUs(cores), and the amount of CPU memory that this project deserves to get when using this node pool. Non-preemptible workloads and the non-preemptible pods of semi-preemptible workloads (see [Priority and Preemption](concepts-and-principles.md#priority-and-preemption)) can only be scheduled if their requested resources are within the deserved resource quotas of their respective project/node pool and department/node pool.
 
 #### Deserved Quota and Workload Scheduling
 
-Deserved quota means that a project is entitled to use up to a maximum number of resources defined by its quota (for example, 10 GPUs). The Scheduler does not allow a project to exceed this limit within a given node pool for non-preemptible workloads. A workload scheduled within its deserved quota is assured to run once scheduled, particularly in the case of non-preemptible workloads.
+Deserved quota means that a project is entitled to use up to a maximum number of resources defined by its quota (for example, 10 GPUs). The Scheduler does not allow a project to exceed this limit within a given node pool for non-preemptible workloads and the non-preemptible pods of semi-preemptible workloads. A non-preemptible workload's pods, and the non-preemptible pods of a semi-preemptible workload, that are scheduled within the deserved quota are assured to keep running.
 
-Preemptible workloads, on the other hand, may be preempted by higher priority workloads using the same project / node pool resource quota.
+Preemptible workloads and the preemptible pods of semi-preemptible workloads, on the other hand, may be preempted by higher priority workloads using the same project / node pool resource quota.
+
+[Background workloads](background-workloads.md) are excluded from quota and fairshare calculations entirely. They occupy resources but are invisible to the Scheduler when it plans, and are evicted when their resources are needed by other workloads.
 
 #### When Deserved Quota Cannot Be Fully Satisfied
 
@@ -46,7 +48,7 @@ The Scheduler may not always be able to provide the full deserved quota for seve
 
 ### Over Quota
 
-Projects and departments can have a share in the unused resources of any node pool, beyond their quota of deserved resources. These resources are referred to as over quota resources. The administrator configures the [over quota parameters](../../aiinitiatives/organization/projects.md) per node pool for each project and department. Over quota resources can only be used by preemptible workloads.
+Projects and departments can have a share in the unused resources of any node pool, beyond their quota of deserved resources. These resources are referred to as over quota resources. The administrator configures the [over quota parameters](../../aiinitiatives/organization/projects.md) per node pool for each project and department. Over quota resources can only be used by preemptible workloads and the preemptible pods of semi-preemptible workloads.
 
 ### Over Quota Weight
 
@@ -60,13 +62,13 @@ A department’s max GPU device allocation effectively limits the total number o
 
 ### Project and Department Rank
 
-<Info>
+<Note>
 
 **Note**
 
 NVIDIA Run:ai terminology for project priority and department priority has changed to project rank and department rank, across the UI and API.
 
-</Info>
+</Note>
 
 Administrators can assign each project/node pool pair a rank. The rank determines the project’s relative precedence for resources compared to its siblings within the same department and node pool pair. Projects with a higher rank are allocated resources first, both within their quota and over quota, and may also reclaim (preempt) resources from lower-ranked projects within the same department/node pool pair.
 
@@ -109,7 +111,7 @@ The Scheduler then takes the minimum of:
 
 and uses this value as the effective fairshare for the project or department.
 
-The Scheduler aims to provide each project or department with the resources they deserve per node pool using two main parameters: deserved quota and deserved fairshare (that is, quota plus over-quota resources). If one project’s node pool queue is below its fairshare while another project’s node pool queue exceeds its fairshare, the Scheduler shifts resources between queues to rebalance fairness. This process may result in the preemption of some over-quota, preemptible workloads.
+The Scheduler aims to provide each project or department with the resources they deserve per node pool using two main parameters: deserved quota and deserved fairshare (that is, quota plus over-quota resources). If one project’s node pool queue is below its fairshare while another project’s node pool queue exceeds its fairshare, the Scheduler shifts resources between queues to rebalance fairness. This process may result in the preemption of some over-quota, preemptible workloads or the preemptible pods of semi-preemptible workloads.
 
 ### Time-Based Fairshare
 
@@ -125,18 +127,22 @@ This time-based fairshare calculation ensures that each project and department r
 
 NVIDIA Run:ai supports scheduling workloads using different priority and preemption policies:
 
-* Workload's priority and preemption are two distinct parameters set in a workload. Workload's priority sets the scheduling precedence within a project, while workload's preemption sets whether the workload is preemptible or non-preemptible.
+* Workload's priority and preemption are two distinct parameters set in a workload. Workload's priority sets the scheduling precedence within a project, while workload's preemption sets whether the workload is preemptible, non-preemptible, or semi-preemptible.
 * High priority workloads (pods) can preempt [lower priority workloads](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project) (pods) within the same scheduling queue (project), according to their preemption policy (i.e. if preemptible).
 * If no explicit preemption policy parameter is set, the NVIDIA Run:ai Scheduler implicitly assumes any PriorityClass >= 100 is non-preemptible and any PriorityClass < 100 is preemptible.
 * Cross project and cross department workload preemptions are referred to as [resource reclaim](concepts-and-principles.md#reclaim-of-resources-between-projects-and-departments) and are based on [fairness](concepts-and-principles.md#fairness-fair-resource-distribution) between queues rather than the priority of the workloads.
 
 To make it easier for users to submit workloads, NVIDIA Run:ai preconfigured several Kubernetes PriorityClass objects. The NVIDIA Run:ai preset PriorityClass objects have their ‘preemptionPolicy’ always set to ‘PreemptLowerPriority’, regardless of their actual NVIDIA Run:ai preemption policy within the NVIDIA Run:ai platform.
 
-A non-preemptible workload is only scheduled if in-quota and cannot be preempted after being scheduled, not even by a higher priority workload. To see the default priority and preemption policy of a workload and for details on how to change the priority and preemption, see [Workload priority and preemption](workload-priority-control.md).
+A non-preemptible workload is only scheduled if in-quota and cannot be preempted after being scheduled, not even by a higher priority workload. A preemptible workload can go over-quota. It can either reserve resources within the quota, where those resources may be taken back by higher priority workloads within that project, or it can use temporary over-quota resources that may be taken back by other projects.
+
+A semi-preemptible workload uses a mix of non-preemptible and preemptible pods, that is, workers or replicas. Pods within the min-members count, that is, the minimum scheduling gang, are non-preemptible, while pods above the min-members count are preemptible. Semi-preemptible workloads provide a minimum guaranteed service level for an inference or distributed training workload, while also using excess resources when demand exists and extra resources are available.
+
+To see the *default* priority and preemption policy of a workload and for details on how to change the priority and preemption, see [Workload priority and preemption](workload-priority-control.md).
 
 ### Preemption of Lower Priority Workloads Within a Project
 
-Workload priority is always respected within a project. This means higher priority workloads are scheduled before lower priority workloads. It also means that higher priority workloads may preempt lower priority workloads within the same project if the lower priority workloads are preemptible.
+Workload priority is always respected within a project. This means higher priority workloads are scheduled before lower priority workloads. It also means that higher priority workloads may preempt lower priority workloads within the same project if the lower priority workloads are preemptible, or are the preemptible pods of a semi-preemptible workload.
 
 ### Reclaim of Resources Between Projects and Departments
 
@@ -144,21 +150,7 @@ Workload priority is always respected within a project. This means higher priori
 
 ### Gang Scheduling
 
-Gang scheduling describes a scheduling principle in which a workload composed of multiple pods is either fully scheduled (all pods are scheduled and running) or fully pending (none of the pods are running). Gang scheduling applies to a single pod group.
-
-#### Stale Gang Eviction
-
-A pod group becomes stale when it has running pods but no longer meets its gang condition, for example, when one or more pods fail or stop running while the rest continue. The Scheduler detects the stale state and starts a grace period before evicting the remaining pods, giving the workload's controller time to recover the missing pods and restore the gang condition.
-
-During the grace period, the running pods are not evicted. If enough pods return to a running state within the window, the pod group recovers and is no longer considered stale. If the grace period expires and the gang condition is still not met, the Scheduler evicts all running pods in the pod group, and it becomes eligible for rescheduling.
-
-The grace period has a cluster-wide default and can be overridden per workload:
-
-* **Cluster-wide default** - Configured with the `defaultStalenessGracePeriod` [cluster configuration](../../../installation-and-configuration/post-installation-configuration/cluster-config.md) parameter. Default: 60 seconds.
-* **Per-workload override** - Set the `kai.scheduler/staleness-grace-period` annotation on the workload. The value is a duration string, a number followed by a unit (`s`, `m`, or `h`), for example `30s`, `5m`, or `1h`:
-  * An invalid value is ignored, and the cluster-wide default applies.
-  * A negative value disables stale gang eviction for that pod group entirely.
-  * If the annotation is not set, the cluster-wide default applies.
+Gang scheduling describes a scheduling principle in which a workload composed of multiple pods is either scheduled as a gang (at least the min-members number of pods are scheduled together) or fully pending (none of the pods are scheduled). Pods above the min-members count are not part of the gang. They are scheduled when resources are available and can remain pending without affecting the gang. Gang scheduling applies to a single pod group.
 
 #### Multi-Level Gang Scheduling
 
@@ -169,6 +161,20 @@ The top level of the hierarchy is always a pod group, regardless of whether the 
 A sub-group has parameters similar to those of a pod group. For example, it includes a min-members parameter, which indicates the minimum number of pods that must be scheduled for the sub-group to be considered ganged.
 
 For a hierarchical workload to transition to the Running state, all sub-groups must be successfully ganged, including the top-level pod group.
+
+#### Stale Gang Eviction
+
+A pod group becomes stale when it has running pods (or sub-groups) but no longer meets its gang condition for that level, for example, when one or more pods fail or stop running while the rest continue, or when one or more sub-groups no longer meet their gang condition. The Scheduler detects the stale state and starts a grace period before evicting the remaining pods, giving the workload's controller time to recover the missing pods and restore the gang condition.
+
+During the grace period, the running pods are not evicted. If enough pods return to a running state within the window, the pod group recovers and is no longer considered stale. If the grace period expires and the gang condition is still not met, the Scheduler evicts all running pods in the pod group, and it becomes eligible for rescheduling.
+
+The grace period has a cluster-wide default and can be overridden per workload:
+
+* **Cluster-wide default** - Configured with the `defaultStalenessGracePeriod` [advanced cluster configuration](../../../installation-and-configuration/configuration/cluster-config.md) parameter. Default: 60 seconds.
+* **Per-workload override** - Set the `kai.scheduler/staleness-grace-period` annotation on the workload. The value is a duration string, a number followed by a unit (`s`, `m`, or `h`), for example `30s`, `5m`, or `1h`:
+  * An invalid value is ignored, and the cluster-wide default applies.
+  * A negative value disables stale gang eviction for that pod group entirely.
+  * If the annotation is not set, the cluster-wide default applies.
 
 ### Placement Strategy - Bin-Pack and Spread
 
@@ -194,22 +200,15 @@ The primary function of the NVIDIA Run:ai Scheduler is to match workloads with a
 * **Kubernetes Extended Resources** - Non-native Kubernetes resources such as GPUs, FPGAs, or networking adapters. Historically requested as static "extended resources" (for example, `nvidia.com/gpu: 2`). Starting with Kubernetes v1.34, workloads can leverage [Dynamic Resource Allocation (DRA)](concepts-and-principles.md#dynamic-resource-allocation-dra).
 * **Kubernetes Storage Resources** - Persistent Volumes (PVs) and Persistent Volume Claims (PVCs), managed by the Kubernetes CSI subsystem.
 
-<Info>
-
-**Note**
-
-With Kubernetes v1.34, DRA is GA. You can also use earlier Kubernetes version v1.33 where DRA was Beta.
-
-</Info>
-
 ### Dynamic Resource Allocation (DRA)
 
-Dynamic Resource Allocation (DRA) is a Kubernetes-native mechanism that provides a more flexible alternative to static extended resources. Instead of requesting a fixed number of devices, workloads can express complex hardware requirements - such as GPU type, minimum GPU memory, GPU sharing, or priority lists - using `ResourceClaim` and `ResourceClaimTemplate` objects. `ResourceClaims` and `ResourceClaimTemplates` define the proprietary parameters of the requested hardware, such as GPUs or communication channels.
+Dynamic Resource Allocation (DRA) is a Kubernetes-native mechanism that provides a more flexible alternative to static extended resources. Instead of requesting a fixed number of devices, workloads can express complex hardware requirements - such as GPU type, minimum GPU memory, GPU sharing, or priority lists - using `ResourceClaim` and `ResourceClaimTemplate` objects. `ResourceClaims` and `ResourceClaimTemplates` define the proprietary parameters of the requested hardware, such as GPUs or communication channels. DRA is GA in Kubernetes v1.34 and was Beta in v1.33, which is also supported.
 
 NVIDIA Run:ai has introduced DRA support progressively. Each supported resource type in DRA requires the respective vendor to advertise their proprietary driver:
 
 * **v2.20** - DRA support for `ComputeDomain` `ResourceClaims`
 * **v2.25** - DRA support for NVIDIA GPUs
+* **v3.0** - Translation of extended-resource requests into DRA claims
 
 The NVIDIA Run:ai platform supports scheduling and presentation of workloads using DRA claims in two scenarios:
 
@@ -218,14 +217,18 @@ The NVIDIA Run:ai platform supports scheduling and presentation of workloads usi
 
 In both scenarios, the platform schedules the workloads, accounts for the requested resources in quota management, and surfaces workload status and other parameters via the UI, API, and CLI.
 
-<Info>
+#### Extended-Resource Translation
 
-**Note**
+A translation layer in the Scheduler translates legacy extended-resource requests (for example, `nvidia.com/gpu: 2`) into DRA `ResourceClaim` requests automatically, so [NVIDIA Run:ai native workloads](../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) and [supported workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) can use DRA without submitting a claim directly.
 
-* When submitting NVIDIA Run:ai native workloads, the platform continues using extended resources. Both extended resources and DRA are supported during the transition period.
-* Using DRA and extended resources on the same underlying nodes can cause resource inconsistencies and allocation collisions. It is recommended to separate nodes by splitting them into different node pools - one for extended resources and one for DRA. This allows you to adopt DRA incrementally while maintaining the legacy 'extended resources’ workloads and nodes unaffected.
+Workloads that request extended resources and workloads that submit DRA claims can run in the same cluster when extended-resource translation is enabled. Translation requires all of the following:
 
-</Info>
+* The NVIDIA DRA driver, installed through the NVIDIA GPU Operator.
+* A `DeviceClass` that sets `spec.extendedResourceName` to the extended resource name in use, for example `nvidia.com/gpu`. The GPU Operator creates the `gpu.nvidia.com` `DeviceClass` but does not set this field, so the legacy name requires a separate `DeviceClass` created by the administrator.
+* Kubernetes support for the DRA extended resource feature, which is generally available from Kubernetes 1.37.
+* NVIDIA Run:ai v3.0 or later, which provides the Scheduler side of the translation.
+
+For configuration details, refer to [Installing the NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/26.7/dra-intro-install.html) and [Setting up DRA in a Kubernetes cluster](https://kubernetes.io/docs/tasks/configure-pod-container/assign-resources/set-up-dra-cluster/).
 
 ## Next Steps
 

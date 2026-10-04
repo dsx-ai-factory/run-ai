@@ -18,4 +18,9 @@ const (
 	RunaiProjectControllerName          = "runai-project-controller"
 	RunaiExternalWorkloadIntegratorName = "external-workload-integrator"
 	RunaiWorkloadExporterName           = "workload-exporter"
+
+	// KRMProjectControllerName is KRM's project-controller, which replaced the
+	// Run:ai-built one named by RunaiProjectControllerName. That name is still the
+	// right one for the resources the now-disabled Run:ai operand owns and deletes.
+	KRMProjectControllerName = "project-controller"
 )

@@ -15,11 +15,12 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/specrun"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const ngcChartsRepo = "https://helm.ngc.nvidia.com/nvidia/runai"
+const ngcChartsRepo = "https://helm.ngc.nvidia.com/nvidia/runai-oss"
 
 func ngcConfig(t *testing.T, path, token string) (*installconfig.Config, installconfig.RunOptions) {
 	t.Helper()
@@ -98,6 +99,31 @@ func TestNGCInstall_TokenFree(t *testing.T) {
 	assert.False(t, hasPipelineEvent(evs, "pipeline_failed", ""))
 }
 
+func TestInstall_NoRegistryUsesPublicOSSCharts(t *testing.T) {
+	helm := harness.NewFakeHelmWithReleases()
+	k8s := &harness.FakeK8sExecutor{}
+	_, provider := harness.NewFakeRunAIClientProvider(helm)
+	deps := orchestrator2.Deps{K8sExecutor: k8s, HelmInstaller: helm, RunAIClientProvider: provider, ClusterProbe: okProbe()}
+
+	eventsPath := filepath.Join(t.TempDir(), "events.ndjson")
+	cfg, opts := connectedConfig(t, eventsPath, false)
+	cfg.Registry = nil
+	registry, err := installconfig.ResolveRegistry(cfg, "", "")
+	require.NoError(t, err)
+	opts.Registry = registry
+	term, _, _ := newTestTerminal()
+
+	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
+
+	for _, release := range []string{"runai-backend", "runai-cluster"} {
+		calls := helm.CallsByRelease(release)
+		require.Len(t, calls, 1)
+		assert.Equal(t, ngcChartsRepo, calls[0].RepoUrl)
+		assert.True(t, calls[0].Auth.IsZero(), "the public OSS charts pull anonymously")
+	}
+	assert.False(t, appliedNames(k8s)["runai-reg-creds"], "the public OSS images need no pull secret")
+}
+
 func TestNGCInstall_ChartRepositoryOverride(t *testing.T) {
 	helm := harness.NewFakeHelmWithReleases()
 	k8s := &harness.FakeK8sExecutor{}
@@ -123,7 +149,31 @@ func TestNGCInstall_ChartRepositoryOverride(t *testing.T) {
 	assert.Equal(t, "runai-cluster", cl[0].ChartName)
 }
 
-func TestJFrogInstall_ChartsAnonymous(t *testing.T) {
+func TestNGCInstall_NonProdChartRepository(t *testing.T) {
+	helm := harness.NewFakeHelmWithReleases()
+	k8s := &harness.FakeK8sExecutor{}
+	_, provider := harness.NewFakeRunAIClientProvider(helm)
+	deps := orchestrator2.Deps{K8sExecutor: k8s, HelmInstaller: helm, RunAIClientProvider: provider, ClusterProbe: okProbe()}
+
+	eventsPath := filepath.Join(t.TempDir(), "events.ndjson")
+	cfg, opts := ngcConfig(t, eventsPath, "ngc-key")
+	opts.Env = spec.EnvStaging
+	opts.Registry.ChartRepository = "https://helm.ngc.nvidia.com/myorg/myteam/"
+	term, _, _ := newTestTerminal()
+
+	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
+
+	cp := helm.CallsByRelease("runai-backend")
+	require.Len(t, cp, 1)
+	assert.Equal(t, "https://helm.ngc.nvidia.com/myorg/myteam", cp[0].RepoUrl)
+	assert.Equal(t, "$oauthtoken", cp[0].Auth.Username)
+
+	cl := helm.CallsByRelease("runai-cluster")
+	require.Len(t, cl, 1)
+	assert.Equal(t, "https://helm.ngc.nvidia.com/myorg/myteam", cl[0].RepoUrl)
+}
+
+func TestDockerConfigInstall_ChartsAnonymous(t *testing.T) {
 	helm := harness.NewFakeHelmWithReleases()
 	k8s := &harness.FakeK8sExecutor{}
 	_, provider := harness.NewFakeRunAIClientProvider(helm)
@@ -138,8 +188,8 @@ func TestJFrogInstall_ChartsAnonymous(t *testing.T) {
 	cp := helm.CallsByRelease("runai-backend")
 	require.Len(t, cp, 1)
 	assert.Contains(t, cp[0].RepoUrl, "cp-charts-prod")
-	assert.False(t, cp[0].IsOci, "JFrog charts are classic Helm repos, not OCI")
-	assert.True(t, cp[0].Auth.IsZero(), "JFrog Helm repos are anonymous")
+	assert.False(t, cp[0].IsOci, "chart repo base charts are classic Helm repos, not OCI")
+	assert.True(t, cp[0].Auth.IsZero(), "chart repo base Helm repos are anonymous")
 
 	cl := helm.CallsByRelease("runai-cluster")
 	require.Len(t, cl, 1)
@@ -147,5 +197,31 @@ func TestJFrogInstall_ChartsAnonymous(t *testing.T) {
 	assert.False(t, cl[0].IsOci)
 	assert.True(t, cl[0].Auth.IsZero())
 
-	assert.True(t, appliedNames(k8s)["runai-reg-creds"], "JFrog install applies the pull secret from its token")
+	assert.True(t, appliedNames(k8s)["runai-reg-creds"], "docker config install applies the pull secret from its token")
+}
+
+func TestDockerConfigInstall_ChartRepositoryOverride(t *testing.T) {
+	helm := harness.NewFakeHelmWithReleases()
+	k8s := &harness.FakeK8sExecutor{}
+	_, provider := harness.NewFakeRunAIClientProvider(helm)
+	deps := orchestrator2.Deps{K8sExecutor: k8s, HelmInstaller: helm, RunAIClientProvider: provider, ClusterProbe: okProbe()}
+
+	eventsPath := filepath.Join(t.TempDir(), "events.ndjson")
+	cfg, opts := connectedConfig(t, eventsPath, false)
+	// A configured chart repository wins over the environment base, so a
+	// private mirror can serve both charts without any environment setup.
+	t.Setenv(step.ChartRepoBaseEnv, "")
+	opts.Registry.ChartRepository = "https://charts.example.com/mirror/"
+	term, _, _ := newTestTerminal()
+
+	require.NoError(t, specrun.Execute(context.Background(), cfg.ToSpec(opts), deps, term, execOpts()))
+
+	cp := helm.CallsByRelease("runai-backend")
+	require.Len(t, cp, 1)
+	assert.Equal(t, "https://charts.example.com/mirror", cp[0].RepoUrl)
+	assert.True(t, cp[0].Auth.IsZero())
+
+	cl := helm.CallsByRelease("runai-cluster")
+	require.Len(t, cl, 1)
+	assert.Equal(t, "https://charts.example.com/mirror", cl[0].RepoUrl)
 }

@@ -30,7 +30,6 @@ var tenantSettingKeys = map[string]string{
 	"AdminMessage":                  "tenant.admin_message",
 	"GpuOverProvisioning":           "tenant.gpu_over_provisioning",
 	"WorkloadSubmissionV2Enabled":   "tenant.workload_submission_v2_enabled",
-	"TenantIsCspManaged":            "tenant.is_csp_managed",
 	"EnableNewCliInstaller":         "tenant.is_new_cli_installer_enabled",
 	"DeletedWorkloadsView":          "tenant.deleted_workloads_view",
 	"NewNavigation":                 "tenant.new_navigation",

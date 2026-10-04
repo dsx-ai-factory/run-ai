@@ -2,7 +2,7 @@
 
 This tutorial demonstrates how to run NCCL `all_reduce_perf_mpi` benchmarks inside PyTorch containers launched as NVIDIA Run:ai training workloads. A single workflow covers single-node, single-rack, and multi-rack validation, so you can verify GPU-to-GPU communication on the cluster before running training, inference, or other production workloads.
 
-<Info>
+<Note>
 
 **Note**
 
@@ -10,7 +10,7 @@ This tutorial demonstrates how to run NCCL `all_reduce_perf_mpi` benchmarks insi
 * The example is configured for GB200 systems. For other hardware, verify compatibility with your target [GPU hardware](https://developer.nvidia.com/cuda/gpus).
 * While the walkthrough uses the NVIDIA PyTorch container, you can adapt this workflow to other container images and hardware configurations.
 
-</Info>
+</Note>
 
 In this tutorial, you will learn how to:
 
@@ -52,13 +52,13 @@ Before you start, make sure the following requirements are met:
   * For multi-node tests, an image that supports MPI launch between pods (SSH keys or site PMIx setup).
   * Optional: `kubectl` access for inspecting Kubernetes cluster node labels (including rack-level information, if configured).
 
-<Info>
+<Note>
 
 **Note**
 
 The example image is publicly pullable from NGC without authentication. If you use a container that requires authentication, your administrator must configure a Docker registry [credential](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md#docker-registry) so the cluster can pull the image.
 
-</Info>
+</Note>
 
 ## Step 1: Logging In
 
@@ -90,13 +90,13 @@ runai login --help
 
 ## Step 2: Creating a User Access Key
 
-<Info>
+<Note>
 
 **Note**
 
 This step is only required if you intend to follow the API steps in this tutorial.
 
-</Info>
+</Note>
 
 Access keys are used for API integrations with NVIDIA Run:ai. An access key contains a client ID and a client secret. With the client credentials, you can obtain a token and use it within subsequent API calls.
 
@@ -108,20 +108,18 @@ In the NVIDIA Run:ai user interface:
 4. Copy the **Client ID** and **Client secret** and store securely
 5. Click **DONE**
 
-To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/tokens) API. For example:
+To request an API access token, use the client credentials to get a token to access NVIDIA Run:ai using the [Tokens](api:main-api:POST/api/v2/token) API. For example:
 
 ```bash
-curl -X POST \ 
+curl -X POST \
   # Replace <COMPANY_URL> below with:
   # For self-hosted use the NVIDIA Run:ai user interface URL.
-  'https://<COMPANY_URL>/api/v1/token' \ 
-  --header 'Accept: */*' \ 
-  --header 'Content-Type: application/json' \ 
-  --data-raw '{ 
-  "grantType":"client_credentials", 
-  "clientId":"<CLIENT ID>", 
-  "clientSecret" : "<CLIENT SECRET>" 
-}'
+  'https://<COMPANY_URL>/api/v2/token' \
+  --header 'Accept: */*' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'grant_type=client_credentials' \
+  --data-urlencode 'client_id=<CLIENT ID>' \
+  --data-urlencode 'client_secret=<CLIENT SECRET>'
 ```
 
 ## Step 3: Identifying Available Nodes and Racks
@@ -173,12 +171,12 @@ Submit a training workload that requests four GPUs on one node and idles the con
 
 <Tab title="API">
 
-Copy the following example request and update the parameters as needed. For more details, see the [Trainings](https://run-ai-docs.nvidia.com/api/2.25/workloads/trainings) API:
+Copy the following example request and update the parameters as needed. For more details, see the [Trainings](api:main-api:POST/api/v1/workloads/trainings) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](nccl-tests.md#step-2-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the `nccl-benchmarking` project. Retrieve it via the [Get projects](https://run-ai-docs.nvidia.com/api/2.25/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the cluster. Retrieve it via the [Get clusters](https://run-ai-docs.nvidia.com/api/2.25/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the `nccl-benchmarking` project. Retrieve it via the [Get projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the cluster. Retrieve it via the [Get clusters](api:main-api:GET/api/v1/clusters) API.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/trainings' \
@@ -299,7 +297,7 @@ Submit a multi-worker training workload. Two workers each request four GPUs, for
 3. Within the new training form, select the **cluster** and the `nccl-benchmarking` **project**.
 4. Set the training workload **architecture** to **Distributed**. A distributed workload runs multiple processes that can span across different nodes.
 5. Select **Start from scratch**.
-6. Set the framework for the distributed workload to **MPI**. If MPI isn't available, see [Distributed training prerequisites](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#distributed-training) for details on enabling.
+6. Set the framework for the distributed workload to **MPI**. If MPI isn't available, see [Distributed training prerequisites](../../installation-and-configuration/installation/guided-installation/prerequisites-and-features.md#distributed-training) for details on enabling.
 7. Enter `nccl-multi-node` as the **name** for the workload, then click **CONTINUE**.
 8. Under **Environment**, set the **Image URL** to `nvcr.io/nvidia/pytorch:26.01-py3`.
 9. Under **Runtime settings**, click **+COMMAND & ARGUMENTS**, then set the **Command** to `bash` and the **Arguments** to `-c 'apt-get update -qq && apt-get install -y --no-install-recommends openssh-server && mkdir -p /var/run/sshd && /usr/sbin/sshd -p 2222 -o StrictModes=no && sleep 1d'`. This installs and starts an SSH server on port `2222` so the MPI launcher can reach the workers, then idles the container.
@@ -312,12 +310,12 @@ Submit a multi-worker training workload. Two workers each request four GPUs, for
 
 <Tab title="API">
 
-Copy the following example request and update the parameters as needed. For more details, see the [Distributed](https://run-ai-docs.nvidia.com/api/2.25/workloads/distributed) API:
+Copy the following example request and update the parameters as needed. For more details, see the [Distributed](api:main-api:POST/api/v1/workloads/distributed) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](nccl-tests.md#step-2-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the `nccl-benchmarking` project. Retrieve it via the [Get projects](https://run-ai-docs.nvidia.com/api/2.25/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the cluster. Retrieve it via the [Get clusters](https://run-ai-docs.nvidia.com/api/2.25/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the `nccl-benchmarking` project. Retrieve it via the [Get projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the cluster. Retrieve it via the [Get clusters](api:main-api:GET/api/v1/clusters) API.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/distributed' \
@@ -487,12 +485,12 @@ Submit a workload that scales the multi-worker pattern to three workers across t
 
 <Tab title="API">
 
-Copy the following example request and update the parameters as needed. For more details, see the [Distributed](https://run-ai-docs.nvidia.com/api/2.25/workloads/distributed) API:
+Copy the following example request and update the parameters as needed. For more details, see the [Distributed](api:main-api:POST/api/v1/workloads/distributed) API:
 
 * `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface.
 * `<TOKEN>` - The API access token obtained in [Step 2](nccl-tests.md#step-2-creating-a-user-access-key).
-* `<PROJECT-ID>` - The ID of the `nccl-benchmarking` project. Retrieve it via the [Get projects](https://run-ai-docs.nvidia.com/api/2.25/organizations/projects#get-api-v1-org-unit-projects) API.
-* `<CLUSTER-UUID>` - The unique identifier of the cluster. Retrieve it via the [Get clusters](https://run-ai-docs.nvidia.com/api/2.25/organizations/clusters#get-api-v1-clusters) API.
+* `<PROJECT-ID>` - The ID of the `nccl-benchmarking` project. Retrieve it via the [Get projects](api:main-api:GET/api/v1/org-unit/projects) API.
+* `<CLUSTER-UUID>` - The unique identifier of the cluster. Retrieve it via the [Get clusters](api:main-api:GET/api/v1/clusters) API.
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/distributed' \

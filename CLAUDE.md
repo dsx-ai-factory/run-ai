@@ -26,11 +26,12 @@ export GITHUB_TOKEN=ghp_...   # needed for private Go modules
 ./local-dev.sh --skip-build-cp --skip-cluster     # rebuild RC only, reuse cluster
 ./local-dev.sh --force-rebuild                    # ignore build cache
 ./local-dev.sh --teardown && ./local-dev.sh       # nuke and restart
+./local-dev.sh --gpu-operator                     # real NVIDIA GPUs instead of fake-gpu-operator (Linux)
 ```
 
-**All flags:** `--domain`, `--admin-email`, `--admin-password`, `--parallel N`, `--skip-build`, `--skip-build-cp`, `--skip-build-rc`, `--skip-frontend`, `--skip-cluster`, `--skip-deploy`, `--skip-deploy-cp`, `--skip-deploy-rc`, `--skip-prometheus`, `--skip-fake-gpu`, `--force-rebuild`, `--teardown`
+**All flags:** `--domain`, `--admin-email`, `--admin-password`, `--parallel N`, `--skip-build`, `--skip-build-cp`, `--skip-build-rc`, `--skip-frontend`, `--skip-cluster`, `--skip-deploy`, `--skip-deploy-cp`, `--skip-deploy-rc`, `--skip-prometheus`, `--skip-fake-gpu`, `--gpu-operator`, `--gpu-driver`, `--gpu-operator-version`, `--force-rebuild`, `--teardown`, `--purge`
 
-After first run: `sudo sh -c 'echo "127.0.0.1 runai.local" >> /etc/hosts'` → https://runai.local (admin@run.ai / Admin@1234!)
+After first run: `sudo sh -c 'echo "127.0.0.1 runai.local" >> /etc/hosts'` → https://runai.local (login `test@run.ai`; password is auto-generated and printed in the final summary unless `--admin-password` is passed)
 
 ## Service structure
 Each service has `artifact-metadata.json` (`artifact_type`: container | go | cli | helm) and standard Makefile targets: `build`, `test`, `lint`, `validate`.
@@ -72,7 +73,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [control-plane/metrics-service](control-plane/metrics-service)
 - [control-plane/notifications-proxy](control-plane/notifications-proxy)
 - [control-plane/org-unit-service](control-plane/org-unit-service)
-- [control-plane/org-units-migrator](control-plane/org-units-migrator)
 - [control-plane/policy-service](control-plane/policy-service)
 - [control-plane/secret-generator](control-plane/secret-generator)
 - [control-plane/temp-backend-settings](control-plane/temp-backend-settings)
@@ -86,8 +86,10 @@ service, run `/write-service-docs <path>` to document it and add it below.
 **control-plane** (go — libraries & client packages)
 - [control-plane/authorization/pkg/client](control-plane/authorization/pkg/client)
 - [control-plane/cluster-service/pkg/client](control-plane/cluster-service/pkg/client)
+- [control-plane/org-unit-service/pkg/client](control-plane/org-unit-service/pkg/client)
 - [control-plane/runai-cli](control-plane/runai-cli)
 - [control-plane/workloads-and-policies](control-plane/workloads-and-policies)
+- [control-plane/workloads/pkg/client](control-plane/workloads/pkg/client)
 
 **control-plane** (tooling)
 - [control-plane/fielder](control-plane/fielder) — Python workload field-spec code generator
@@ -110,10 +112,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [runai-cluster/cluster/init-ca](runai-cluster/cluster/init-ca)
 - [runai-cluster/cluster/karta-migrate](runai-cluster/cluster/karta-migrate)
 - [runai-cluster/cluster/metrics-exporter](runai-cluster/cluster/metrics-exporter)
-- [runai-cluster/cluster/nodepool-controller](runai-cluster/cluster/nodepool-controller)
-- [runai-cluster/cluster/oauth2-proxy](runai-cluster/cluster/oauth2-proxy)
-- [runai-cluster/cluster/pod-group-assigner](runai-cluster/cluster/pod-group-assigner)
-- [runai-cluster/cluster/project-controller](runai-cluster/cluster/project-controller)
 - [runai-cluster/cluster/runai-crd-upgrader](runai-cluster/cluster/runai-crd-upgrader)
 - [runai-cluster/cluster/runtime-rules](runai-cluster/cluster/runtime-rules)
 - [runai-cluster/cluster/shared-objects-controller](runai-cluster/cluster/shared-objects-controller)
@@ -148,9 +146,7 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [runai-clients/cluster-api-client](runai-clients/cluster-api-client)
 - [runai-clients/datavolumes-service-client](runai-clients/datavolumes-service-client)
 - [runai-clients/k8s-objects-tracker-client](runai-clients/k8s-objects-tracker-client)
-- [runai-clients/org-unit-service-client](runai-clients/org-unit-service-client)
 - [runai-clients/policy-service-client](runai-clients/policy-service-client)
-- [runai-clients/workloads-client](runai-clients/workloads-client)
 - [runai-clients/workloads-manager-client](runai-clients/workloads-manager-client)
 
 **runai-common-packages** (go)
@@ -183,3 +179,4 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - `/list-services` — show all services grouped by type
 - `/write-service-docs` — generate README + CLAUDE.md for a service
 - `/validate-service-docs` — check a service's README against its Makefile
+- `/cel-validation-advisor` — assess CEL options before adding a Kubernetes webhook or changing admission validation

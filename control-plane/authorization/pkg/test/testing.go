@@ -20,7 +20,6 @@ type TestingT interface {
 var (
 	TestTenant           uint = 1
 	ManagementTestTenant uint = 2
-	DGXCTestTenant       uint = 3
 	CustomRolesEnabled        = true
 	ClusterVersion            = "2.21.0"
 )

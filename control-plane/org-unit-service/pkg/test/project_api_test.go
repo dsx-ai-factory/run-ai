@@ -6,12 +6,14 @@
 package testing
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
 	"time"
 
+	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
@@ -29,8 +31,8 @@ import (
 
 	clustersOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/mocks"
-	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
-	workloadsMocks "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/mocks"
+	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	workloadsMocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/mocks"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/utils/ptr"
@@ -313,7 +315,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(getProject.CreatedAt.UnixMilli()).To(Equal(created.CreatedAt.UnixMilli()))
 			Expect(getProject.UpdatedAt.UnixMilli()).To(Equal(created.UpdatedAt.UnixMilli()))
 			Expect(resources.Rank).To(Equal(ptr.To("VeryHigh")))
-			Expect(resources.Priority).To(Equal(ptr.To("VeryHigh")))
 			// Expect(getProject.DefaultNodePools).To(Not(BeNil()))
 		})
 
@@ -427,55 +428,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(*syncedProj.Resources[0].Memory.OverQuotaWeight).To(Equal(services.MinOverQuotaWeight))
 		})
 
-		It("backwards compatibility test: create/get one project using priority in request", func() {
-			clusterServiceClient = mocks.IClusterClient{}
-			clusterServiceClient.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
-				TenantId: int32(TestTenantId),
-				Uuid:     clusterId,
-				Version:  *clustersOpenapi.NewNullableString(ptr.To(services.ResourcePriorityMinVersion)),
-			}, nil)
-			clusterServiceClient.On("GetNodePoolsMinimalByCluster", mock.Anything, mock.Anything).Return(&clustersOpenapi.GetNodepoolsMinimal200Response{
-				Nodepools: []clustersOpenapi.NodepoolMinimal{
-					{
-						Name:                   defaultNodePoolName,
-						Id:                     fmt.Sprint(defaultNodePoolId),
-						Phase:                  ptr.To(clustersOpenapi.NODEPOOLPHASE_READY),
-						SchedulingCapabilities: NpSchedCapabilitiesDefault(false, false),
-					},
-				},
-			}, nil)
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, departmentId, clusterId)
-			request.Resources = []api.ResourcesNullable{{
-				Gpu: api.ResourcesNullableGpu{
-					Deserved: 0,
-				},
-				Priority: ptr.To("VeryHigh"),
-			}}
-			request.EnforceRunaiScheduler = ptr.To(false)
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Project)
-			projectIds = append(projectIds, created.Id)
-			Expect(len(created.Resources)).To(Equal(1))
-			resources := created.Resources[0]
-			Expect(resources.Rank).To(Equal(ptr.To("VeryHigh")))
-			Expect(resources.Priority).To(Equal(ptr.To("VeryHigh")))
-
-			getResponse, err := projectApiService.GetProject(ctx, created.Id)
-			if err != nil {
-				Fail("Failed getting project")
-			}
-			getProject := getResponse.Body.(api.Project)
-			resources = getProject.Resources[0]
-			Expect(resources.Rank).To(Equal(ptr.To("VeryHigh")))
-			Expect(resources.Priority).To(Equal(ptr.To("VeryHigh")))
-		})
-
 		It("test create project with version below 2.20 with not Normal rank", func() {
 			clusterServiceClient = mocks.IClusterClient{}
 			clusterServiceClient.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
@@ -500,15 +452,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 				Rank: ptr.To("VeryHigh"),
 			}}
 			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-			Expect(createResponse.Code).To(Equal(http.StatusBadRequest))
-
-			request.Resources = []api.ResourcesNullable{{
-				Priority: ptr.To("VeryHigh"),
-			}}
-			createResponse, err = projectApiService.CreateProject(ctx, request)
 			if err != nil {
 				Fail("Failed creating project")
 			}
@@ -2020,104 +1963,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 			getProject := getResponse.Body.(api.Project)
 			Expect(string(getProject.Status.Phase)).To(Equal("Ready"))
 		})
-
-		It("backwards compatibility test: update project resources using priority in request", func() {
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, departmentId, clusterId)
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Project)
-			projectIds = append(projectIds, created.Id)
-
-			updateResources := getUpdateResources()
-			updateResources[0].Rank = nil
-			updateResources[0].Priority = ptr.To("Low")
-
-			updateResponse, err := projectApiService.UpdateProjectResources(ctx, created.Id, updateResources)
-			if err != nil {
-				Fail("Failed updating project")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedResources := updateResponse.Body.([]api.Resources)
-			updatedRes := findResourceByNodePoolId(updatedResources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
-
-			getResponse, err := projectApiService.GetProject(ctx, created.Id)
-			if err != nil {
-				Fail("Failed getting project")
-			}
-			Expect(getResponse.Code).To(Equal(http.StatusOK))
-			getProject := getResponse.Body.(api.Project)
-			getRes := findResourceByNodePoolId(getProject.Resources, "1")
-			Expect(getRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), getRes.Rank, "rank")
-			validateRank(ptr.To("Low"), getRes.Priority, "priority")
-		})
-
-		It("backwards compatibility test: update project resources with both rank and priority - rank wins when differs from db", func() {
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, departmentId, clusterId)
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Project)
-			projectIds = append(projectIds, created.Id)
-
-			updateResources := getUpdateResources()
-			updateResources[0].Rank = ptr.To("Low")
-			updateResources[0].Priority = ptr.To(services.DefaultResourceRank)
-
-			updateResponse, err := projectApiService.UpdateProjectResources(ctx, created.Id, updateResources)
-			if err != nil {
-				Fail("Failed updating project")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedResources := updateResponse.Body.([]api.Resources)
-			updatedRes := findResourceByNodePoolId(updatedResources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
-		})
-
-		It("backwards compatibility test: update project with both rank and priority - priority wins when differs from db", func() {
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, departmentId, clusterId)
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Project)
-			projectIds = append(projectIds, created.Id)
-
-			updateRequest := getProjectUpdateRequest(created)
-			updateRequest.Resources[0].Rank = ptr.To(services.DefaultResourceRank)
-			updateRequest.Resources[0].Priority = ptr.To("Low")
-
-			updateResponse, err := projectApiService.UpdateProject(ctx, created.Id, updateRequest)
-			if err != nil {
-				Fail("Failed updating project")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedProject := updateResponse.Body.(api.Project)
-			updatedRes := findResourceByNodePoolId(updatedProject.Resources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
-		})
 	})
 
 	Context("test patch project resources", func() {
@@ -2951,6 +2796,40 @@ var _ = Describe("Project API tests", Ordered, func() {
 			count := countResponse.Body.(api.CountResponse).Count
 			Expect(count).To(Equal(countBefore + 6))
 		})
+
+		It("internal count ignores the caller's permitted scopes", func() {
+			createdIds := []string{}
+			for i := 0; i < 2; i++ {
+				name := createProjectName()
+				createResponse, err := projectApiService.CreateProject(ctx, getProjectCreateRequest(name, name, departmentId, clusterId))
+				Expect(err).To(BeNil())
+				Expect(createResponse.Code).To(Equal(http.StatusCreated))
+				created := createResponse.Body.(api.Project)
+				createdIds = append(createdIds, created.Id)
+				projectIds = append(projectIds, created.Id)
+			}
+
+			unscoped, err := projectApiService.CountProjects(ctx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(unscoped.Code).To(Equal(http.StatusOK))
+			total := unscoped.Body.(api.CountResponse).Count
+			Expect(total).To(BeNumerically(">=", 2))
+
+			limitedCtx := context.WithValue(ctx, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{
+				Projects: []string{createdIds[0]},
+			})
+
+			scoped, err := projectApiService.CountProjects(limitedCtx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(scoped.Code).To(Equal(http.StatusOK))
+			Expect(scoped.Body.(api.CountResponse).Count).To(Equal(int64(1)))
+
+			internal, err := projectApiService.CountInternalProjects(limitedCtx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(internal.Code).To(Equal(http.StatusOK))
+			Expect(internal.Body.(api.CountResponse).Count).To(Equal(total))
+		})
+
 	})
 
 	Context("memory units", func() {

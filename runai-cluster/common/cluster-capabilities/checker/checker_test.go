@@ -18,7 +18,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	workloadsService "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 var defaultCheckerClusterConfig = &ClustersCacheConfig{ExpirationSec: 600, CleanupSec: 10}

@@ -2,15 +2,15 @@
 
 NVIDIA Run:ai supports a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. These workloads are managed by [Karta](extending-workload-support/#karta-overview), which ensures they receive the same advanced scheduling, orchestration, and monitoring capabilities as NVIDIA Run:ai native workloads. For more details on feature support, see [Supported features](supported-features.md).
 
-All supported workload types are pre-registered using the [Workload Types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types) API. You can retrieve the full list of these workloads and their current configuration defaults.
+All supported workload types are pre-registered using the [Workload Types](api:main-api:POST/api/v1/workload-types) API. You can retrieve the full list of these workloads and their current configuration defaults.
 
-<Info>
+<Note>
 
 **Note**
 
 To define and register workload types beyond those provided by NVIDIA Run:ai, see [Extending workload support with Karta](extending-workload-support/).
 
-</Info>
+</Note>
 
 ## List of Supported Workload Types
 
@@ -24,7 +24,7 @@ The following workload types are already registered in the platform and ready to
 * **Slinky** - [NodeSet](https://github.com/SlinkyProject/slurm-operator#nodesets)
 * **Additional frameworks** - [SeldonDeployment](http://machinelearning.seldon.io), [AMLJob](https://learn.microsoft.com/en-us/cli/azure/ml/job?view=azure-cli-latest\&utm_source=chatgpt.com), [Workflow](http://argoproj.io), [DevWorkspace](http://workspace.devfile.io), [Service](http://serving.knative.dev), [VirtualMachineInstance](http://kubevirt.io/), InferenceService ([KServe](https://kserve.github.io/website/))
 
-<Info>
+<Note>
 
 **Scope of Slinky NodeSet Support**
 
@@ -32,7 +32,7 @@ NVIDIA Run:ai recognizes a [Slinky](https://github.com/SlinkyProject/slurm-opera
 
 This support is scoped to the `NodeSet` workload as it runs on Kubernetes. It is not an integration with the Slurm control plane: NVIDIA Run:ai does not submit, schedule, or manage Slurm jobs, partitions, accounts, or the Slurm controller (`slurmctld`).
 
-</Info>
+</Note>
 
 ## Submitting Supported Workload Types
 
@@ -42,13 +42,13 @@ Supported workload types are submitted as standard Kubernetes YAML manifests**.*
 
 Each workload type is assigned a default category, which determines its default priority and preemptibility. These defaults influence how workloads are scheduled and prioritized within a project, as well as how they are grouped for monitoring and reporting.
 
-<Info>
+<Note>
 
 **Note**
 
-To retrieve the default category, priority and preemptibility per workload type, refer to the [List workload types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#get-api-v1-workload-types) API.
+To retrieve the default category, priority and preemptibility per workload type, refer to the [List workload types](api:main-api:GET/api/v1/workload-types) API.
 
-</Info>
+</Note>
 
 | Category | Default Priority | Default Preemptibility |
 | -------- | ---------------- | ---------------------- |
@@ -95,7 +95,7 @@ To retrieve the default category, priority and preemptibility per workload type,
 
 ## Updating Default Category and Priority Mapping
 
-Administrators can change the default priority and category assigned to a workload type by updating the mapping using the [NVIDIA Run:ai API](https://run-ai-docs.nvidia.com/api/2.26/):
+Administrators can change the default priority and category assigned to a workload type by updating the mapping using the [NVIDIA Run:ai API](../../rest-api/about-the-rest-api.md):
 
 * To update the priority mapping, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md#updating-the-default-mapping)
 * To update the category mapping, see [Monitor workloads by category](../../platform-management/monitor-performance/workload-categories.md#update-the-default-category-mapping)

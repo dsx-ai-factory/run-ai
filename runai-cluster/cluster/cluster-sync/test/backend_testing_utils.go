@@ -29,7 +29,7 @@ func CreateBasicRunaiBackend() *ghttp.Server {
 
 func addHandlerToMockAndValidateLivenessRequest(server *ghttp.Server, _ string) <-chan *http.Request {
 	requests := make(chan *http.Request, 1)
-	livenessPath := fmt.Sprintf("/v1/k8s/clusters/%s/liveness", ClusterIdForTests)
+	livenessPath := fmt.Sprintf("/api/v1/clusters/%s/liveness", ClusterIdForTests)
 	server.RouteToHandler("POST", livenessPath, func(writer http.ResponseWriter, request *http.Request) {
 		zap.S().Infof("Got Liveness Request in mock")
 		ghttp.VerifyContentType("application/json")(writer, request)

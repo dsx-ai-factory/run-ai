@@ -24,21 +24,21 @@ import (
 
 func newInstallCmd() *cobra.Command {
 	var (
-		configPath       string
-		dryRun           bool
-		preflightOnly    bool
-		skipPreflight    bool
-		yes              bool
-		output           string
-		eventsFile       string
-		statusFile       string
-		onFailure        string
-		kubeconfig       string
-		env              string
-		jfrogTokenPath   string
-		ngcTokenPath     string
-		devMode          bool
-		executionTimeout time.Duration
+		configPath        string
+		dryRun            bool
+		preflightOnly     bool
+		skipPreflight     bool
+		yes               bool
+		output            string
+		eventsFile        string
+		statusFile        string
+		onFailure         string
+		kubeconfig        string
+		env               string
+		registryTokenPath string
+		ngcTokenPath      string
+		devMode           bool
+		executionTimeout  time.Duration
 	)
 
 	cmd := &cobra.Command{
@@ -60,7 +60,7 @@ func newInstallCmd() *cobra.Command {
 				return err
 			}
 
-			registry, err := installconfig.ResolveRegistry(cfg, jfrogTokenPath, ngcTokenPath)
+			registry, err := installconfig.ResolveRegistry(cfg, registryTokenPath, ngcTokenPath)
 			if err != nil {
 				return err
 			}
@@ -144,7 +144,7 @@ func newInstallCmd() *cobra.Command {
 	f.StringVar(&onFailure, "on-failure", "", "failure policy: abort (default) or skip. Applies to step failures when not interactive, and to input/preflight failures in any mode (when set, it overrides the interactive prompt)")
 	f.StringVar(&kubeconfig, "kubeconfig", "", "path to kubeconfig (overrides default discovery)")
 	f.StringVar(&env, "env", "prod", "Run:ai environment selecting chart repos: prod, staging, lab, or test")
-	f.StringVar(&jfrogTokenPath, "jfrog-token-path", "", "path to a file containing the JFrog token")
+	f.StringVar(&registryTokenPath, "registry-token-path", "", "path to a file containing a base64-encoded docker config (.dockerconfigjson) used as the image pull secret")
 	f.StringVar(&ngcTokenPath, "ngc-token-path", "", "path to a file containing the NGC token")
 	f.BoolVar(&devMode, "dev-mode", false, "relax input validation for development/testing (e.g. allow a Run:ai version not in the compatibility matrix)")
 	f.DurationVar(&executionTimeout, "execution-timeout", 50*time.Minute, "total timeout for the run")

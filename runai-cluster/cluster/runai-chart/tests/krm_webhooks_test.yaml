@@ -1,0 +1,43 @@
+suite: Test KRM webhook ownership
+
+tests:
+  # RunAI keeps its own project/department/nodepool validation, so KRM's must stay off.
+  - it: should not render KRM validating webhooks
+    templates:
+      - charts/kai-resource-management/templates/project-controller/webhook.yaml
+      - charts/kai-resource-management/templates/nodepool-controller/webhook.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # KRM's PodGroup mutating webhook replaces runai-pod-group-mutation. It has no
+  # toggle upstream and must always render; the Pod mutating webhook must not,
+  # because runai's admission-controller does that. The template also emits the
+  # serving-cert Secret, so the webhook is the second document.
+  - it: should render the serving cert and only the PodGroup mutating webhook
+    template: charts/kai-resource-management/templates/pod-group-assigner/webhook.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: Secret
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: pod-group-assigner-tls-secret
+        documentIndex: 0
+      - isKind:
+          of: MutatingWebhookConfiguration
+        documentIndex: 1
+      - equal:
+          path: metadata.name
+          value: kai-pod-group-mutation
+        documentIndex: 1
+      - equal:
+          path: webhooks[0].rules[0].resources[0]
+          value: podgroups
+        documentIndex: 1
+      - equal:
+          path: webhooks[0].namespaceSelector.matchExpressions[0].key
+          value: runai/queue
+        documentIndex: 1

@@ -15,7 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli/clients"
 	mnnvltypes "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/utils/mnnvl"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -821,7 +821,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 				"inference distributed submit %s -p p301 -i %s "+
 					"--replicas 3 --workers 4 "+
 					"--restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated "+
-					"--node-pools default --preemptibility preemptible --priority high "+
+					"--node-pools default --preemptibility semi-preemptible --priority high "+
 					"--serving-port 8080 --dry-run",
 				DistInfFullName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
@@ -835,6 +835,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 			Expect(distInf.Spec.StartupPolicy.IsSet()).To(BeTrue())
 			Expect(distInf.Spec.NodePools).To(ContainElement("default"))
 			Expect(distInf.Spec.Preemptibility.IsSet()).To(BeTrue())
+			Expect(distInf.Spec.GetPreemptibility()).To(Equal(openapi.PREEMPTIBILITY_SEMI_PREEMPTIBLE))
 			Expect(distInf.Spec.PriorityClass.IsSet()).To(BeTrue())
 		})
 	})

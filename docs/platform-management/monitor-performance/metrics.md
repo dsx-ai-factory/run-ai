@@ -55,13 +55,13 @@ NVIDIA Run:ai provides control-plane API which supports and aggregates analytics
 
 NVIDIA provides extended metrics as shown [here](https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/feature-overview.html#profiling-metrics).
 
-<Info>
+<Note>
 
 **Note**
 
 GPU profiling metrics are disabled by default. If unavailable, your administrator must enable it under **General settings** → Analytics → GPU profiling metrics. Before enabling, the administrator must configure GPU profiling through the DCGM Exporter and NVIDIA Run:ai Prometheus integration. For configuration steps, see [GPU profiling metrics](gpu-profiling-metrics.md).
 
-</Info>
+</Note>
 
 | Metric name in API | Applicable API endpoint | Metric name in UI | Applicable UI table |
 | --- | --- | --- | --- |
@@ -84,7 +84,7 @@ GPU profiling metrics are disabled by default. If unavailable, your administrato
 
 ### NVIDIA NIM
 
-NVIDIA NIM metrics provide workload-level observability, including key runtime and performance data such as request throughput, latency, and token usage for LLMs. See [NIM observability metrics via API](https://run-ai-docs.nvidia.com/api/2.26/api-guides/nim-observability-metrics-via-api) for more details.
+NVIDIA NIM metrics provide workload-level observability, including key runtime and performance data such as request throughput, latency, and token usage for LLMs. See [NIM observability metrics via API](../../rest-api/api-guides/nim-observability-metrics-via-api.md) for more details.
 
 | Metric name in API | Applicable API endpoint | Metric name in UI | Applicable UI table |
 | --- | --- | --- | --- |
@@ -98,6 +98,28 @@ NVIDIA NIM metrics provide workload-level observability, including key runtime a
 | <code>NIM_E2E_REQUEST_LATENCY_SECONDS</code> | <ul><li>Pods</li><li>Workloads</li></ul> | End to end request latency | Workloads |
 | <code>NIM_TIME_TO_FIRST_TOKEN_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Time to first token (TTFT) by percentiles | Workloads |
 | <code>NIM_E2E_REQUEST_LATENCY_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | End to end request latency by percentiles | Workloads |
+
+### vLLM
+
+vLLM metrics provide workload-level observability for large language model (LLM) inference workloads served with the vLLM inference engine, including request concurrency, token throughput, latency, and GPU KV-cache utilization. NVIDIA Run:ai detects a vLLM workload automatically from the container image name, or you can set it explicitly with the `run.ai/vllm-workload` label.
+
+| Metric name in API | Applicable API endpoint | Metric name in UI per grid | Applicable UI grid |
+| --- | --- | --- | --- |
+| <code>VLLM_NUM_REQUESTS_RUNNING</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Request concurrency by status | Workloads |
+| <code>VLLM_NUM_REQUESTS_WAITING</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Request concurrency by status | Workloads |
+| <code>VLLM_REQUEST_SUCCESS</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Request count by status | Workloads |
+| <code>VLLM_REQUEST_SUCCESS_RATE</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Request success rate | Workloads |
+| <code>VLLM_KV_CACHE_USAGE_PERC</code> | <ul><li>Pods</li><li>Workloads</li></ul> | GPU KV cache utilization | Workloads |
+| <code>VLLM_PROMPT_TOKENS_PER_SECOND</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Token throughput | Workloads |
+| <code>VLLM_GENERATION_TOKENS_PER_SECOND</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Token throughput | Workloads |
+| <code>VLLM_TIME_TO_FIRST_TOKEN_SECONDS</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Time to first token (TTFT) | Workloads |
+| <code>VLLM_TIME_TO_FIRST_TOKEN_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Time to first token (TTFT) by percentiles | Workloads |
+| <code>VLLM_E2E_REQUEST_LATENCY_SECONDS</code> | <ul><li>Pods</li><li>Workloads</li></ul> | End to end request latency | Workloads |
+| <code>VLLM_E2E_REQUEST_LATENCY_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | End to end request latency by percentiles | Workloads |
+| <code>VLLM_REQUEST_QUEUE_TIME_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Queue time percentiles | Workloads |
+| <code>VLLM_REQUEST_PREFILL_TIME_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
+| <code>VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
+| <code>VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES</code> | <ul><li>Pods</li><li>Workloads</li></ul> | Latency phase breakdown | Workloads |
 
 ## Supported Telemetry
 

@@ -241,11 +241,10 @@ func buildClusterFlow(s *spec.Spec, deps orchestrator2.Deps) *orchestrator2.Flow
 		flowSteps = append(flowSteps, steps.NewCASecret("install-cluster-ca", clusterCASecret, step.ClusterNamespace, step.ClusterReleaseName, caPath, clusterCASecretLabels, deps))
 	}
 
-	if !c.UsesExternalControlPlane() {
+	if !c.UsesSuppliedClusterIdentity() {
 		flowSteps = append(flowSteps, steps.NewEnsureCluster("register-cluster", actions.EnsureCluster{
-			ClusterName: c.Name,
-			Domain:      domain,
-			CACertPath:  caPath,
+			ClusterName:  c.Name,
+			ControlPlane: controlPlaneRef(c, domain, caPath),
 		}, deps))
 	}
 
@@ -267,6 +266,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 				ClusterUID:      c.UID,
 				BootstrapToken:  c.BootstrapToken,
 				ClientSecret:    c.ClientSecret,
+				Credentials:     controlPlaneCredentials(c),
 				CACertPath:      caPath,
 				WorkingDir:      workingDir,
 				LockChart:       step.ClusterChartName,
@@ -285,6 +285,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 			ClusterUID:      c.UID,
 			BootstrapToken:  c.BootstrapToken,
 			ClientSecret:    c.ClientSecret,
+			Credentials:     controlPlaneCredentials(c),
 			CACertPath:      caPath,
 			WorkingDir:      workingDir,
 			ChartPrefix:     step.ClusterChartName,
@@ -304,6 +305,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 		ClusterUID:      c.UID,
 		BootstrapToken:  c.BootstrapToken,
 		ClientSecret:    c.ClientSecret,
+		Credentials:     controlPlaneCredentials(c),
 		CACertPath:      caPath,
 		Repo:            repo,
 		IsOCI:           isOCI,
@@ -315,6 +317,26 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 		HostRouting:     c.HostRouting(),
 		ExtraValues:     clusterExtraValues(s, c),
 	}, deps), title)
+}
+
+func controlPlaneRef(c *spec.Cluster, domain, caPath string) actions.ControlPlaneRef {
+	return actions.ControlPlaneRef{
+		URL:         c.ControlPlaneURL,
+		Domain:      domain,
+		CACertPath:  caPath,
+		Credentials: controlPlaneCredentials(c),
+	}
+}
+
+func controlPlaneCredentials(c *spec.Cluster) *step.ControlPlaneCredentials {
+	if !c.UsesControlPlaneCredentials() {
+		return nil
+	}
+	return &step.ControlPlaneCredentials{
+		Username: c.ControlPlaneCredentials.Username,
+		Password: c.ControlPlaneCredentials.Password,
+		Token:    c.ControlPlaneCredentials.Token,
+	}
 }
 
 func controlPlaneValues(s *spec.Spec, caPath string) []string {
@@ -428,6 +450,7 @@ func externalConnectionClusterValues(ec *spec.ExternalConnection) []string {
 // user's custom helm values for the cluster chart.
 func clusterExtraValues(s *spec.Spec, c *spec.Cluster) []string {
 	values := externalConnectionClusterValues(s.ExternalConnection)
+	values = append(values, lwsClusterValues(s)...)
 	if usesManagedRegistrySecret(s) {
 		values = append(values, "global.additionalImagePullSecrets[0]="+cpRegistrySecret)
 	}
@@ -438,6 +461,20 @@ func clusterExtraValues(s *spec.Spec, c *spec.Cluster) []string {
 	values = append(values, systemAffinity(s, "global.affinity")...)
 	values = append(values, systemAffinity(s, "runai-operator.config.global.affinity")...)
 	return append(values, actions.MapToValues(c.CustomHelmValues)...)
+}
+
+// lwsClusterValues points RunaiConfig (spec.lws.namespace) at the namespace the
+// planned LWS install runs its controller in, so the cluster detects LWS on
+// every distribution (the OpenShift operator does not use the default).
+func lwsClusterValues(s *spec.Spec) []string {
+	if s.Features == nil || !s.Features.LWS.IsInstall() {
+		return nil
+	}
+	namespace := steps.LWSNamespace
+	if s.LWSUsesOLM() {
+		namespace = steps.LWSOperatorNamespace
+	}
+	return []string{"clusterConfig.lws.namespace=" + namespace}
 }
 
 // controlPlaneValuesAirgap renders the local chart values for air-gapped installs.
@@ -473,26 +510,38 @@ func caChainPath(tls *spec.TLS) string {
 	return tls.CAChainPath
 }
 
+// cpChartSource picks the control plane chart repository: an explicit
+// registry.chartRepository override wins; otherwise NGC installs use the NGC
+// repository (see step.NGCChartRepo) and everything else uses the chart
+// repository base from the environment (see step.ChartRepoBaseEnv).
 func cpChartSource(s *spec.Spec) (repo string, isOCI bool) {
+	if override := chartRepositoryOverride(s.Registry); override != "" {
+		return override, false
+	}
 	if isNGC(s.Registry) {
-		return ngcChartRepo(s.Registry, toConfigEnv(s.Env)), false
+		return step.NGCChartRepo(toConfigEnv(s.Env)), false
 	}
 	return step.CPChartRepo(toConfigEnv(s.Env)), false
 }
 
+// clusterChartSource mirrors cpChartSource for the cluster chart.
 func clusterChartSource(s *spec.Spec) (repo string, isOCI bool) {
+	if override := chartRepositoryOverride(s.Registry); override != "" {
+		return override, false
+	}
 	if isNGC(s.Registry) {
-		return ngcChartRepo(s.Registry, toConfigEnv(s.Env)), false
+		return step.NGCChartRepo(toConfigEnv(s.Env)), false
 	}
 	return step.ClusterChartRepo(toConfigEnv(s.Env)), false
 }
 
-// ngcChartRepo honors the configured override.
-func ngcChartRepo(r *spec.Registry, env config.RunaiEnvType) string {
-	if r.ChartRepository != "" {
-		return strings.TrimSuffix(r.ChartRepository, "/")
+// chartRepositoryOverride returns the configured chart repository, normalized
+// without a trailing slash, or "" when none is set.
+func chartRepositoryOverride(r *spec.Registry) string {
+	if r == nil {
+		return ""
 	}
-	return step.NGCChartRepo(env)
+	return strings.TrimSuffix(r.ChartRepository, "/")
 }
 
 func isNGC(r *spec.Registry) bool {

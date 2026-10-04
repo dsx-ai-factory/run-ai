@@ -2,14 +2,14 @@
 
 A workload template is a reusable setup that defines all the required configuration fields for submitting a workload. Templates simplify the submission process by allowing users to predefine settings. Researchers can quickly submit workloads using a saved template or adjust the values before submission as needed.
 
-<Info>
+<Note>
 
 **Note**
 
 * Flexible workload templates is enabled by default and applies only to flexible workload submission (enabled by default). If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload templates.
 * Templates (legacy) is deprecated and will be removed in a future release. See [Workspace Templates (Legacy)](workspace-templates/workspace-templates-legacy.md) for more details.
 
-</Info>
+</Note>
 
 ## Templates Table
 
@@ -96,14 +96,14 @@ To delete a template:
 
 If you previously created templates before the introduction of flexible workload templates, these templates are automatically migrated. Your legacy templates will appear in the new grid and will be separated by workload type - **Workspace** and **Training**.
 
-<Info>
+<Note>
 
 **Note**
 
 You will not lose your existing templates. All legacy templates remain available and can be viewed by toggling **Flexible workload templates** off. Contact your administrator to disable it under **General settings** → Workloads → Flexible workload templates.
 
-</Info>
+</Note>
 
 ## Using APIs
 
-Go to the [Workload templates](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-templates) API reference to view the available actions.
+Go to the [Workload templates](api:main-api:GET/api/v1/workload-templates) API reference to view the available actions.

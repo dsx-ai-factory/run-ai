@@ -98,7 +98,8 @@ func categoryForWrappedKind(wrappedKind string) (string, bool) {
 		return commonconstants.KindInteractiveWorkload, true
 	case "Training":
 		return commonconstants.KindTrainingWorkload, true
-	case commonconstants.KindMpiJob,
+	case "Distributed",
+		commonconstants.KindMpiJob,
 		commonconstants.KindPyTorchJob,
 		commonconstants.KindTFJob,
 		commonconstants.KindXGBoostJob,

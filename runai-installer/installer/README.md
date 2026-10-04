@@ -35,7 +35,7 @@ The installer follows a comprehensive, screen-based flow:
    - Training Operator (Kubeflow)
    - LWS - Distributed Inference (LeaderWorkerSet)
 4. **Configuration Input**: Enter and validate system configurations:
-   - NGC/JFROG credentials (with base64 validation)
+   - NGC token or registry pull secret (with base64 validation)
    - FQDN (with DNS resolution validation)
    - Cluster name (Kubernetes naming conventions)
    - Custom ports (range validation: 30000-32767)
@@ -75,7 +75,13 @@ To build the released binary for all supported platforms:
 make build
 ```
 
-This writes `bin/{linux,darwin}/{amd64,arm64}/runai-installer`.
+This writes `bin/{linux,darwin}/{amd64,arm64}/runai-installer` and
+`bin/windows/{amd64,arm64}/runai-installer.exe`.
+
+The release pipeline publishes each of these as an individual file in the NGC
+resource, named `runai-installer-<os>-<arch>[.exe]` (for example
+`runai-installer-linux-amd64`), alongside a `runai-installer.tgz` archive of
+the whole `bin/` tree and a `sha256sums.txt` covering all of them.
 
 For a single platform:
 
@@ -369,7 +375,7 @@ Each prerequisite includes:
 1. **Kubernetes Connection Failed**: Ensure `kubectl` is configured and the cluster is accessible
 2. **Timeout Errors**: Increase `--step-timeout` for slow networks or large deployments
 3. **Permission Errors**: Verify cluster-admin or equivalent permissions
-4. **Network Issues**: Ensure access to container registries (NGC, JFROG)
+4. **Network Issues**: Ensure access to the container registries (NGC or your image registry)
 
 ### Checking Logs
 

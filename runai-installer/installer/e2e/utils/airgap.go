@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,12 +19,20 @@ import (
 )
 
 const (
-	JfrogAirgapBaseURL = "https://runai.jfrog.io/artifactory/runai-airgapped-prod"
-	harborProject      = "runai"
+	// AirgapBaseURLEnv names the environment variable holding the base URL the
+	// legacy air-gap tarballs are downloaded from. The credentials come from the
+	// registry pull secret, which must carry an auth entry for that host.
+	AirgapBaseURLEnv = "E2E_AIRGAP_BASE_URL"
 
-	jfrogRegistryKey      = "https://runai.jfrog.io"
+	harborProject         = "runai"
 	airgapDownloadTimeout = 30 * time.Minute
 )
+
+// AirgapBaseURL returns the configured air-gap tarball base URL without a
+// trailing slash, or "" when none is set.
+func AirgapBaseURL() string {
+	return strings.TrimSuffix(strings.TrimSpace(os.Getenv(AirgapBaseURLEnv)), "/")
+}
 
 func HarborUser() string {
 	return os.Getenv("E2E_HARBOR_USERNAME")
@@ -40,7 +49,10 @@ func HarborRegistryURL(clusterName, kubernetesDistribution string) string {
 	return fmt.Sprintf("%s-harbor.runailabs.com/%s", clusterName, harborProject)
 }
 
-func extractJfrogAuth(dockerConfigBase64 string) (string, error) {
+// extractRegistryAuth returns the basic-auth value the pull secret holds for
+// the host of baseURL. Docker config keys may be written with or without a
+// scheme, so both forms are accepted.
+func extractRegistryAuth(dockerConfigBase64, baseURL string) (string, error) {
 	raw, err := base64.StdEncoding.DecodeString(strings.TrimSpace(dockerConfigBase64))
 	if err != nil {
 		return "", fmt.Errorf("decode docker config: %w", err)
@@ -55,26 +67,35 @@ func extractJfrogAuth(dockerConfigBase64 string) (string, error) {
 		return "", fmt.Errorf("parse docker config: %w", err)
 	}
 
-	entry, ok := cfg.Auths[jfrogRegistryKey]
-	if !ok {
-		return "", fmt.Errorf("no auth entry for %s in docker config", jfrogRegistryKey)
+	u, err := url.Parse(baseURL)
+	if err != nil || u.Host == "" {
+		return "", fmt.Errorf("parse %s %q: %w", AirgapBaseURLEnv, baseURL, err)
 	}
-	return entry.Auth, nil
+	for _, key := range []string{u.Scheme + "://" + u.Host, u.Host} {
+		if entry, ok := cfg.Auths[key]; ok {
+			return entry.Auth, nil
+		}
+	}
+	return "", fmt.Errorf("no auth entry for %s in docker config", u.Host)
 }
 
-func DownloadAirgapPackage(jfrogToken, version, destDir string) (string, error) {
-	basicAuth, err := extractJfrogAuth(jfrogToken)
+func DownloadAirgapPackage(pullSecret, version, destDir string) (string, error) {
+	baseURL := AirgapBaseURL()
+	if baseURL == "" {
+		return "", fmt.Errorf("%s is not set", AirgapBaseURLEnv)
+	}
+	basicAuth, err := extractRegistryAuth(pullSecret, baseURL)
 	if err != nil {
-		return "", fmt.Errorf("extract jfrog credentials: %w", err)
+		return "", fmt.Errorf("extract registry credentials: %w", err)
 	}
 
 	filename := fmt.Sprintf("runai-airgapped-package-%s.tar.gz", version)
-	url := fmt.Sprintf("%s/%s", JfrogAirgapBaseURL, filename)
+	downloadURL := fmt.Sprintf("%s/%s", baseURL, filename)
 	destPath := filepath.Join(destDir, filename)
 
 	client := &http.Client{Timeout: airgapDownloadTimeout}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", downloadURL, nil)
 	if err != nil {
 		return "", fmt.Errorf("create request: %w", err)
 	}
@@ -87,7 +108,7 @@ func DownloadAirgapPackage(jfrogToken, version, destDir string) (string, error) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("download %s failed with status %d", url, resp.StatusCode)
+		return "", fmt.Errorf("download %s failed with status %d", downloadURL, resp.StatusCode)
 	}
 
 	f, err := os.Create(destPath)

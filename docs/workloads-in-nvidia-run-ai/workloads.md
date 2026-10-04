@@ -18,7 +18,7 @@ The Workloads table consists of the following columns:
 | Type                   | The workload type                                                                                                                                                                                                                                                                                             |
 | Category               | The [purpose](../platform-management/monitor-performance/workload-categories.md) of the workload - Default: Build, Train, or Deploy                                                                                                                                                                           |
 | Priority               | The scheduling [priority](../platform-management/runai-scheduler/scheduling/workload-priority-control.md) assigned to the workload within its project                                                                                                                                                         |
-| Preemptible            | Is the workload [preemptible](../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#priority-and-preemption) (Yes/no)                                                                                                                                                                  |
+| Preemptibility         | The workload's [preemptibility](../platform-management/runai-scheduler/scheduling/workload-priority-control.md) - Preemptible, Semi-preemptible, or Non-preemptible                                                                                                                                           |
 | Status                 | The different [phases](workloads.md#workload-status) in a workload lifecycle                                                                                                                                                                                                                                  |
 | Project                | The project in which the workload runs                                                                                                                                                                                                                                                                        |
 | Department             | The department that the workload is associated with. This column is visible only if the department toggle is enabled by your administrator.                                                                                                                                                                   |
@@ -132,14 +132,15 @@ The Metrics screen contains a dropdown allowing you to switch between the follow
 * **GPU profiling** - Shows additional NVIDIA-specific metrics
 * **Inference** - Displays inference workload metrics including throughput, latency, and replica counts
 * **NVIDIA NIM** - Displays NIM-specific workload metrics such as request concurrency, request counts, time to first token (TTFT), latency percentiles, and GPU KV-cache utilization
+* **vLLM** - Displays vLLM-specific workload metrics such as request concurrency, request counts, token throughput, time to first token (TTFT), latency percentiles, and GPU KV-cache utilization
 
-<Info>
+<Note>
 
 **Note**
 
 GPU profiling metrics are disabled by default. If unavailable, your administrator must enable it under **General settings** → Analytics → GPU profiling metrics. Before enabling, the administrator must configure GPU profiling through the DCGM Exporter and NVIDIA Run:ai Prometheus integration. For configuration steps, see [GPU profiling metrics](../platform-management/monitor-performance/gpu-profiling-metrics.md).
 
-</Info>
+</Note>
 
 #### Resource Utilization
 
@@ -193,6 +194,33 @@ For NVIDIA NIM workloads, select **NVIDIA NIM** from the dropdown to view dedica
 * **GPU KV cache utilization**\
   Reports the percentage of GPU key-value cache currently in use over time.
 
+#### vLLM
+
+For vLLM workloads, select **vLLM** from the dropdown to view dedicated vLLM-specific metrics:
+
+* **Request concurrency by status**\
+  Shows the number of inference requests that are currently running or waiting.
+* **Request count by status**\
+  Displays the total number of inference requests completed over time, categorized as succeeded or failed.
+* **Request success rate**\
+  Shows the percentage of completed requests that succeeded over time.
+* **GPU KV cache utilization**\
+  Reports the percentage of GPU key-value cache currently in use over time.
+* **Token throughput**\
+  Displays the number of prompt and generation tokens processed per second.
+* **Time to first token (TTFT)**\
+  Shows a histogram of the time (in seconds) it takes for the model to generate the first token.
+* **Time to first token (TTFT) by percentiles**\
+  Tracks how long it takes for the model to generate the first token of a response, with percentile breakdowns (p50, p95, p99) for performance analysis.
+* **End to end request latency**\
+  Shows a histogram of the total request latency (in seconds), measured from request submission to completion.
+* **End to end request latency by percentiles**\
+  Measures the total response time from request submission to completion, with percentile values (p50, p95, p99) to help identify latency patterns.
+* **Queue time percentiles**\
+  Tracks how long requests wait before processing begins, with percentile breakdowns (p50, p95, p99).
+* **Latency phase breakdown**\
+  Shows percentile breakdowns (p50, p95, p99) of time spent in the prefill, decode, and inter-token latency phases of a request.
+
 #### Navigating the Graphs
 
 * For GPUs charts - Click the GPU legend on the right-hand side of the chart, to activate or deactivate any of the GPU lines.
@@ -216,13 +244,13 @@ Logs can also be downloaded for offline review. Each downloaded log file include
 <workload_name>_<pod_name>_<container_name>_<timestamp>.log
 ```
 
-<Info>
+<Note>
 
 **Note**
 
 Logs are available only while the workload is in a non-terminal state. Once the workload completes or fails, logs are no longer accessible.
 
-</Info>
+</Note>
 
 #### Terminal
 
@@ -232,23 +260,23 @@ You can open a terminal per pod and per container. Use the dropdown menus to sel
 
 Each terminal session is ephemeral and exists only for the duration of the connection. Closing the terminal ends the session, and no session history is preserved.
 
-<Info>
+<Note>
 
 **Note**
 
 Terminal access is available only while the workload is in a running state. Once the workload completes, fails, or is suspended, terminal access is no longer available.
 
-</Info>
+</Note>
 
 #### YAML
 
-<Info>
+<Note>
 
 **Note**
 
 The YAML tab is available for [supported workload types](submit-via-yaml.md) only.
 
-</Info>
+</Note>
 
 Displays the live Kubernetes custom resource (CR) of the selected workload element as YAML, including its spec, status, and metadata (managed fields are omitted). The CR reflects the element's current state in the cluster, so you can inspect the exact resource definition as it is reconciled.
 
@@ -261,13 +289,13 @@ The YAML tab is available in both the side panel and the expanded Structure view
 
 #### Structure
 
-<Info>
+<Note>
 
 **Note**
 
 The Structure tab is available for [supported workload types](submit-via-yaml.md) submitted via YAML only.
 
-</Info>
+</Note>
 
 Displays a visual diagram of the workload's hierarchy of workload elements. The diagram shows a root workload node at the top, with child elements arranged beneath it according to their parent-child relationships. Each element shows its GPU and CPU compute and memory allocations and its pod count.
 
@@ -345,27 +373,42 @@ To connect to an application running in the workload (for example, Jupyter Noteb
 2. Click **DELETE**
 3. On the dialog, click **DELETE** to confirm the deletion
 
-<Info>
+<Note>
 
 **Note**
 
 Once a workload is deleted, it appears under **Workload manager** -> Deleted workloads. Deleted workloads remain available for 14 days before being permanently removed.
 
-</Info>
+</Note>
 
 ## Managing Workload Properties
-Administrators can change the default priority and category assigned to a workload type by updating the mapping using the [NVIDIA Run:ai API](https://run-ai-docs.nvidia.com/api/2.26/):
+Administrators can change the default priority and category assigned to a workload type by updating the mapping using the [NVIDIA Run:ai API](../rest-api/about-the-rest-api.md):
 
 * To update the priority mapping, see [Workload priority control](../platform-management/runai-scheduler/scheduling/workload-priority-control.md#updating-the-default-priority-mapping)
 * To update the category mapping, see [Monitor workloads by category](../platform-management/monitor-performance/workload-categories.md#update-the-default-category-mapping)
 
 ## Using API
 
-Go to the [Workloads](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads) API reference to view the available actions.
+Go to the [Workloads](api:main-api:GET/api/v1/workloads) API reference to view the available actions.
 
 ## Using CLI
 
-Go to the [CLI command reference](../reference/cli/runai/) to view available actions.
+Go to the [CLI command reference](../reference/cli/runai/runai.md) to view available actions.
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes several [Workloads](../agents/tools-reference.md#workloads) tools to inspect and manage workloads via natural language:
+
+* `list_workloads` - list workloads with their status, project, cluster, and node pool
+* `get_workload_status` - check a workload's current state and why
+* `get_workload_pods` - see a workload's pods and where they're running
+* `get_workload_metrics` - track GPU, CPU, and memory usage over time
+* `get_workload_history` - see state transitions and revision history
+* `get_workload_spec` - see what a workload requested and where it's placed
+* `get_workloads_summary` - count running, pending, and failed workloads
+* `manage_workload_operations` - stop, restart, update, or delete a workload
+
+See [AI Agents](../agents/overview.md) for setup.
 
 ## Built-in Workload Environment Variables
 
