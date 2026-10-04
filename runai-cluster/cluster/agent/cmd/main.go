@@ -136,7 +136,7 @@ func main() {
 //   - /validate-project      -> projects / departments
 func registerValidatingWebhooks(mgr ctrl.Manager) {
 	allowedServiceAccounts := splitAndTrim(config.Config().AllowedServiceAccounts)
-	projectHandler := validator.NewProjectValidator(mgr.GetClient(), allowedServiceAccounts)
+	projectHandler := validator.NewProjectValidator(mgr.GetClient(), mgr.GetAPIReader(), allowedServiceAccounts)
 
 	webhookServer := webhook.NewServer(webhook.Options{
 		Port:    config.Config().WebhookPort,

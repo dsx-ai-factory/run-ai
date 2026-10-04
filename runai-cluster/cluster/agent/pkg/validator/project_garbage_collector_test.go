@@ -44,7 +44,7 @@ var _ = Describe("Project garbage collector authorization", func() {
 			}})
 		}
 		k8sClient = fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(objects...).Build()
-		handler = NewProjectValidator(k8sClient, nil)
+		handler = NewProjectValidator(k8sClient, k8sClient, nil)
 		oldProject = &unstructured.Unstructured{Object: map[string]interface{}{
 			"apiVersion": "kai.resources/v1", "kind": "Project",
 			"metadata": map[string]interface{}{"name": "project", "uid": "project-uid", "resourceVersion": "1"},
@@ -72,6 +72,11 @@ var _ = Describe("Project garbage collector authorization", func() {
 		return handler.Handle(context.Background(), req)
 	}
 	It("allows the garbage collector to remove the orphan finalizer from a deleting Project", func() {
+		Expect(handle().Allowed).To(BeTrue())
+	})
+	It("reads the collector identity without using the controller cache", func() {
+		cachedClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
+		handler = NewProjectValidator(cachedClient, k8sClient, nil)
 		Expect(handle().Allowed).To(BeTrue())
 	})
 	It("allows legacy run.ai Projects", func() {

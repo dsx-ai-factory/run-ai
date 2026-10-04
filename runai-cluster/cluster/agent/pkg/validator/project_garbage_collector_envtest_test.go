@@ -19,6 +19,7 @@ import (
 	. "github.com/onsi/gomega"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -51,6 +52,7 @@ var _ = Describe("Project orphan deletion admission", func() {
 
 		scheme := runtime.NewScheme()
 		Expect(corev1.AddToScheme(scheme)).To(Succeed())
+		Expect(rbacv1.AddToScheme(scheme)).To(Succeed())
 		Expect(admissionregistrationv1.AddToScheme(scheme)).To(Succeed())
 		admin, err := client.New(config, client.Options{Scheme: scheme})
 		Expect(err).NotTo(HaveOccurred())
@@ -79,7 +81,14 @@ var _ = Describe("Project orphan deletion admission", func() {
 		collector := impersonate("system:serviceaccount:kube-system:generic-garbage-collector", identities["generic-garbage-collector"])
 		tenant := impersonate("system:serviceaccount:tenant:generic-garbage-collector", "tenant-uid")
 
-		server := httptest.NewTLSServer(&admission.Webhook{Handler: NewProjectValidator(admin, nil)})
+		lookupConfig := rest.CopyConfig(config)
+		lookupConfig.Impersonate = rest.ImpersonationConfig{
+			UserName: "system:serviceaccount:runai:custom-nmc",
+			Groups:   []string{"system:serviceaccounts", "system:serviceaccounts:runai", "system:authenticated"},
+		}
+		lookupClient, err := client.New(lookupConfig, client.Options{Scheme: scheme})
+		Expect(err).NotTo(HaveOccurred())
+		server := httptest.NewTLSServer(&admission.Webhook{Handler: NewProjectValidator(admin, lookupClient, nil)})
 		DeferCleanup(server.Close)
 		ca := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: server.Certificate().Raw})
 		Expect(admin.Create(ctx, &admissionregistrationv1.ValidatingWebhookConfiguration{
@@ -129,6 +138,28 @@ var _ = Describe("Project orphan deletion admission", func() {
 			[]byte(`{"metadata":{"finalizers":[],"labels":{"unexpected":"change"}}}`)))
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("operation not allowed"))
+
+		// Without the cross-namespace grant, a custom NMC agent cannot verify the collector UID.
+		err = collector.Patch(ctx, project.DeepCopy(), removal)
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("forbidden"))
+		role := &rbacv1.Role{
+			ObjectMeta: metav1.ObjectMeta{Name: "runai-agent-garbage-collector-runai", Namespace: metav1.NamespaceSystem},
+			Rules: []rbacv1.PolicyRule{{APIGroups: []string{""}, Resources: []string{"serviceaccounts"},
+				ResourceNames: []string{"generic-garbage-collector"}, Verbs: []string{"get"}}},
+		}
+		Expect(admin.Create(ctx, role)).To(Succeed())
+		Expect(admin.Create(ctx, &rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{Name: role.Name, Namespace: role.Namespace},
+			RoleRef:    rbacv1.RoleRef{APIGroup: rbacv1.GroupName, Kind: "Role", Name: role.Name},
+			Subjects:   []rbacv1.Subject{{Kind: "ServiceAccount", Name: "custom-nmc", Namespace: "runai"}},
+		})).To(Succeed())
+		Eventually(func() error {
+			return lookupClient.Get(ctx, client.ObjectKey{Name: "generic-garbage-collector", Namespace: metav1.NamespaceSystem}, &corev1.ServiceAccount{})
+		}, 10*time.Second, 100*time.Millisecond).Should(Succeed())
+		Expect(apierrors.IsForbidden(lookupClient.List(ctx, &corev1.ServiceAccountList{}, client.InNamespace(metav1.NamespaceSystem)))).To(BeTrue())
+		Expect(apierrors.IsForbidden(lookupClient.Get(ctx,
+			client.ObjectKey{Name: "default", Namespace: metav1.NamespaceSystem}, &corev1.ServiceAccount{}))).To(BeTrue())
 
 		// Envtest has no garbage collector; submit the metadata patch it would send.
 		Expect(collector.Patch(ctx, project, removal)).To(Succeed())
