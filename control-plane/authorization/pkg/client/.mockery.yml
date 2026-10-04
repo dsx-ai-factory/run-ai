@@ -14,21 +14,11 @@ packages:
       dir: mocks
       include-auto-generated: true
     interfaces:
-      AccessRulesAPI:
-        config:
-          filename: AccessRulesApi.go
-      HealthAPI:
-        config:
-          filename: HealthApi.go
-      InternalAPI:
-        config:
-          filename: InternalApi.go
+      AccessRulesAPI: {}
+      HealthAPI: {}
+      InternalAPI: {}
       MappedNullable: {}
       MeAPI: {}
-      PermissionsAPI:
-        config:
-          filename: PermissionsApi.go
-      RolesAPI:
-        config:
-          filename: RolesApi.go
+      PermissionsAPI: {}
+      RolesAPI: {}
       SettingsAPI: {}
