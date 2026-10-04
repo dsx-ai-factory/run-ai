@@ -274,8 +274,7 @@ func (nodeParser *NodeParser) getNetworkTopologyLabels(node *corev1.Node) []swag
 func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagger.NodeStatusConditionDetails {
 	result := []swagger.NodeStatusConditionDetails{}
 
-	// Reports readiness, not a fault, so the generic passthrough would emit it on the healthy
-	// nodes and drop it on the broken ones. Translated separately below instead.
+	// Reports readiness, not a fault: the passthrough would emit it on the healthy nodes.
 	ignoredConditionTypes := map[corev1.NodeConditionType]bool{
 		GpuFractioningReadyConditionType: true,
 	}
