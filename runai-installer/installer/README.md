@@ -75,7 +75,13 @@ To build the released binary for all supported platforms:
 make build
 ```
 
-This writes `bin/{linux,darwin}/{amd64,arm64}/runai-installer`.
+This writes `bin/{linux,darwin}/{amd64,arm64}/runai-installer` and
+`bin/windows/{amd64,arm64}/runai-installer.exe`.
+
+The release pipeline publishes each of these as an individual file in the NGC
+resource, named `runai-installer-<os>-<arch>[.exe]` (for example
+`runai-installer-linux-amd64`), alongside a `runai-installer.tgz` archive of
+the whole `bin/` tree and a `sha256sums.txt` covering all of them.
 
 For a single platform:
 

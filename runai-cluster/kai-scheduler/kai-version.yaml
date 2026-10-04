@@ -1,6 +1,6 @@
 kai:
-  human-readable-version: v0.18.1
-  commit-hash: bdf434e5e9201cccf4e05fad04d814363653f692
-  go-module-version: v0.18.1
+  human-readable-version: v0.18.2
+  commit-hash: a9a2db77d088f88948ff4241fdc5600d65e78f4a
+  go-module-version: v0.18.2
 krm:
-  chart-version: v0.18.1
+  chart-version: v0.18.2
