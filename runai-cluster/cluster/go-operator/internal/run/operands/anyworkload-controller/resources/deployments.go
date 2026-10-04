@@ -8,6 +8,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -241,8 +242,10 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 	for _, name := range []string{d.operandName, agentServiceAccount, constants.RuntimeRulesOperandName} {
 		allowedServiceAccounts = append(allowedServiceAccounts, fmt.Sprintf("system:serviceaccount:%s:%s", d.runaiConfig.GetNamespace(), name))
 	}
-	if internal != nil {
-		allowedServiceAccounts = append(allowedServiceAccounts, internal.Global.NMC.AllowedServiceAccounts...)
+	for _, username := range outils.GetNMCAllowedServiceAccountUsernames(d.runaiConfig) {
+		if !slices.Contains(allowedServiceAccounts, username) {
+			allowedServiceAccounts = append(allowedServiceAccounts, username)
+		}
 	}
 	envVars = append(envVars, v1.EnvVar{
 		Name:  "RESTART_ALLOWED_SERVICE_ACCOUNTS",
