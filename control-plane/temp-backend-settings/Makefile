@@ -19,9 +19,6 @@ SHARED_PACKAGES_PATH_ABS=control-plane/temp-backend-settings/pkg
 
 ##@ Basic Commands
 
-mockery: generate-mocks ## Regenerate mocks (delegates to the shared target).
-.PHONY: mockery
-
 test: build-go test-go ## Run unit-tests.
 .PHONY: test
 
