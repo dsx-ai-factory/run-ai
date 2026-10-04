@@ -7,8 +7,11 @@ package nim_workloads
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
+	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -735,4 +738,80 @@ func mockClustersClientInfo(clusterId string, subdomainSupportEnabled bool, ingr
 	displayedCluster.Status.Set(clusterDisplayedStatus)
 
 	return displayedCluster
+}
+
+// TestNimReplicaComposition covers the serialized resource accepted by NIM 3.1.
+func TestNimReplicaComposition(t *testing.T) {
+	explicit := int32(2)
+	cases := []struct {
+		name         string
+		autoscaling  bool
+		replicas     *int32
+		wantReplicas *int32
+		wantError    bool
+	}{
+		{name: "autoscaling omits replicas", autoscaling: true},
+		{name: "fixed replicas remain explicit", replicas: &explicit, wantReplicas: &explicit},
+		{name: "fixed replicas default to one", wantReplicas: convutils.Ref(int32(1))},
+		{name: "explicit replicas conflict with autoscaling", autoscaling: true, replicas: &explicit, wantError: true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			input, err := os.ReadFile("testing/inputs/autoscaling_minimal.yaml")
+			if err != nil {
+				t.Fatal(err)
+			}
+			var spec api.NimServiceSpec
+			if err := yaml.Unmarshal(input, &spec); err != nil {
+				t.Fatal(err)
+			}
+			if !tc.autoscaling {
+				spec.Autoscaling.Set(nil)
+			}
+			spec.Replicas.Set(tc.replicas)
+			cluster := mockClustersClientInfo("test-cluster", false, "", false, "nvidia", "3.0.0")
+			converter := NewNimServiceComposer("test-workload", "tester", cluster, "test-project", composer.OptionsForNimService())
+			var actual nimv1alpha1.NIMServiceSpec
+			composeErr := converter.Compose(context.Background(), &spec, &actual)()
+			if tc.wantError {
+				if composeErr == nil || !strings.Contains(composeErr.Error(), "mutually exclusive") {
+					t.Fatalf("expected mutually exclusive validation, got %v", composeErr)
+				}
+				return
+			}
+			if composeErr != nil {
+				t.Fatal(composeErr)
+			}
+			encoded, err := json.Marshal(actual)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var wire map[string]json.RawMessage
+			if err := json.Unmarshal(encoded, &wire); err != nil {
+				t.Fatal(err)
+			}
+			if tc.wantReplicas == nil {
+				if value, found := wire["replicas"]; found {
+					t.Fatalf("autoscaling resource must omit replicas; got %s", value)
+				}
+				var scale struct {
+					Enabled bool `json:"enabled"`
+				}
+				if err := json.Unmarshal(wire["scale"], &scale); err != nil {
+					t.Fatal(err)
+				}
+				if !scale.Enabled {
+					t.Fatal("autoscaling must remain enabled")
+				}
+			} else {
+				var replicas int32
+				if err := json.Unmarshal(wire["replicas"], &replicas); err != nil {
+					t.Fatal(err)
+				}
+				if replicas != *tc.wantReplicas {
+					t.Fatalf("replicas: want %d, got %d", *tc.wantReplicas, replicas)
+				}
+			}
+		})
+	}
 }
