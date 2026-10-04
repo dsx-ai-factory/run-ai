@@ -47,15 +47,14 @@ accepted_risks:
   - slug: "threat-device-code-grant-not-supported"
     threat: >-
       OAuth 2.0 Device Authorization Grant (device_code, RFC 8628) was evaluated
-      as a login option for runai-cli (see RUN-41724 HLD:
-      https://nvidia.atlassian.net/wiki/spaces/Runai/pages/3806540674) to remove
-      the manual paste-back step in the `runai login sso` / remote-browser flow.
+      as a login option for runai-cli to remove the manual paste-back step in
+      the `runai login sso` / remote-browser flow.
       Won't-do: not implemented. identity-manager keeps
       oauth2.device.authorization.grant.enabled=false unconditionally for every
       client; no per-client-type exception has been introduced.
     severity: "medium"
     reason: >-
-      Rejected due to security tradeoffs documented in the HLD: (1) device codes
+      Rejected due to security tradeoffs: (1) device codes
       are valid ~10 minutes vs. near-instant code exchange in the existing local-
       redirect and remote-browser flows, a materially longer interception window;
       (2) "device code phishing" is a documented real-world attack pattern
