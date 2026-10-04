@@ -145,6 +145,41 @@ func (c *AssetsClient) DatasourceSyncUpdates(ctx context.Context, clusterId stri
 	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("%v", err))
 }
 
+// K8sObjectsSyncUpdates wraps the k8s-objects sync endpoint. The endpoint is a
+// single family-wide feed for every k8s-object asset kind (resource-claim-template
+// today, more to follow) — one call fetches updates for all kinds the control
+// plane knows about and the agent dispatches per-kind on the response.
+func (c *AssetsClient) K8sObjectsSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.K8sObjectsUpdatesResp, *openapi.Error) {
+	resp, httpResp, err := c.ApiClient.SynchronizationAPI.K8sObjectsSyncUpdates(ctx).ClusterSyncReport(request).After(fromUpdate).ClusterId(clusterId).Execute()
+	if httpResp != nil {
+		if httpResp.Body != nil {
+			defer httpResp.Body.Close()
+		}
+
+		if httpResp.StatusCode != http.StatusOK {
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				return nil, openapi.NewError(http.StatusInternalServerError, fmt.Sprintf("failed to read response payload: %v", err.Error()))
+			}
+
+			var apiError openapi.Error
+
+			jsonErr := json.Unmarshal(body, &apiError)
+			if jsonErr != nil {
+				return nil, openapi.NewError(int32(httpResp.StatusCode), string(body))
+			} else {
+				return nil, &apiError
+			}
+		}
+
+		if resp != nil {
+			return resp, nil
+		}
+	}
+
+	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("%v", err))
+}
+
 func (c *AssetsClient) ListTemplatesOfTenant(ctx context.Context) (*openapi.WorkloadTemplateListResponse, *openapi.Error) {
 	resp, httpResp, err := c.ApiClient.TemplateAPI.ListTemplates(ctx).Execute()
 	if httpResp != nil {

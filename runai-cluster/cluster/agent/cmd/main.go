@@ -39,6 +39,7 @@ import (
 	kaiv1alpha1 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1alpha1"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -68,6 +69,8 @@ func initSchemeAndLogging() {
 	_ = infw.AddToScheme(scheme)
 	_ = dinfw.AddToScheme(scheme)
 	_ = kartav1alpha1.AddToScheme(scheme)
+
+	_ = resourcev1.AddToScheme(scheme)
 }
 
 func initLogging(useDebugLogLevel bool) {

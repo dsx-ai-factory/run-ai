@@ -36,11 +36,12 @@ const (
 	projectScopeLabel    = "run.ai/project"
 	userCredentialsLabel = "run.ai/user-credentials"
 
-	pvcKindLabel            = "pvc"
-	dockerRegistryKindLabel = "docker-registry"
-	passwordKindLabel       = "password"
-	accessKeyKindLabel      = "access-key"
-	genericSecretKindLabel  = "generic"
+	pvcKindLabel                   = "pvc"
+	dockerRegistryKindLabel        = "docker-registry"
+	passwordKindLabel              = "password"
+	accessKeyKindLabel             = "access-key"
+	genericSecretKindLabel         = "generic"
+	resourceClaimTemplateKindLabel = "resource-claim-template"
 
 	assetNameAnnotation = "run.ai/asset-name"
 
@@ -217,11 +218,11 @@ func (ah *AssetsHandler) composeLabelsAndAnnotations(meta *metav1.ObjectMeta, ba
 		meta.Labels = make(map[string]string)
 	}
 
-	meta.Labels[constants.RunaiAssetLabel] = ah.getAssetKindLabel(backendUpdate.Meta.Kind)
+	meta.Labels[constants.RunaiAssetLabel] = getAssetKindLabel(backendUpdate.Meta.Kind)
 	meta.Labels[assetIdLabel] = backendUpdate.Meta.Id
 
 	if convutils.BoolIsFalse(private) {
-		ah.composeScopeLabel(meta.Labels, &backendUpdate.Meta)
+		composeScopeLabel(meta.Labels, &backendUpdate.Meta)
 	}
 
 	if meta.Annotations == nil {
@@ -456,7 +457,12 @@ func (ah *AssetsHandler) composeSecretData(clusterSecret *corev1.Secret, backend
 	return nil
 }
 
-func (ah *AssetsHandler) composeScopeLabel(labels map[string]string, meta *assetsApi.AssetMetaForSync) {
+// composeScopeLabel stamps the scope-wide Run:ai label on an in-flight k8s
+// object's label map. The resulting label is what a future replication
+// controller selects on when deciding which project namespaces should
+// receive a copy of the asset — keep the label vocabulary in sync between
+// here and that controller.
+func composeScopeLabel(labels map[string]string, meta *assetsApi.AssetMetaForSync) {
 	switch meta.Scope {
 	case assetsApi.SCOPE_TENANT:
 		labels[tenantScopeLabel] = boolTrueAsString
@@ -469,7 +475,11 @@ func (ah *AssetsHandler) composeScopeLabel(labels map[string]string, meta *asset
 	}
 }
 
-func (ah *AssetsHandler) getAssetKindLabel(kind assetsApi.AssetKind) string {
+// getAssetKindLabel maps an asset kind to the string stamped on the
+// `run.ai/asset` label of the k8s object. Keep this exhaustive — unknown
+// kinds collapse to an empty label which hides them from label-selectors
+// (e.g. replication, cleanup) that key off this label.
+func getAssetKindLabel(kind assetsApi.AssetKind) string {
 	switch kind {
 	case assetsApi.ASSETKIND_PVC:
 		return pvcKindLabel
@@ -481,6 +491,8 @@ func (ah *AssetsHandler) getAssetKindLabel(kind assetsApi.AssetKind) string {
 		return accessKeyKindLabel
 	case assetsApi.ASSETKIND_GENERIC_SECRET:
 		return genericSecretKindLabel
+	case assetsApi.ASSETKIND_RESOURCE_CLAIM_TEMPLATE:
+		return resourceClaimTemplateKindLabel
 	}
 	return ""
 }

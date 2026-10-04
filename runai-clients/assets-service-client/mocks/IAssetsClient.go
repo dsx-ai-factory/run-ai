@@ -167,6 +167,38 @@ func (_m *IAssetsClient) CredentialsSyncUpdates(ctx context.Context, clusterId s
 	return r0, r1
 }
 
+// K8sObjectsSyncUpdates provides a mock function with given fields: ctx, clusterId, fromUpdate, request
+func (_m *IAssetsClient) K8sObjectsSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.K8sObjectsUpdatesResp, *openapi.Error) {
+	ret := _m.Called(ctx, clusterId, fromUpdate, request)
+
+	if len(ret) == 0 {
+		panic("no return value specified for K8sObjectsSyncUpdates")
+	}
+
+	var r0 *openapi.K8sObjectsUpdatesResp
+	var r1 *openapi.Error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64, openapi.ClusterSyncReport) (*openapi.K8sObjectsUpdatesResp, *openapi.Error)); ok {
+		return rf(ctx, clusterId, fromUpdate, request)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, int64, openapi.ClusterSyncReport) *openapi.K8sObjectsUpdatesResp); ok {
+		r0 = rf(ctx, clusterId, fromUpdate, request)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.K8sObjectsUpdatesResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, int64, openapi.ClusterSyncReport) *openapi.Error); ok {
+		r1 = rf(ctx, clusterId, fromUpdate, request)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*openapi.Error)
+		}
+	}
+
+	return r0, r1
+}
+
 // DatasourceSyncUpdates provides a mock function with given fields: ctx, clusterId, fromUpdate, request
 func (_m *IAssetsClient) DatasourceSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.DatasourceUpdatesResp, *openapi.Error) {
 	ret := _m.Called(ctx, clusterId, fromUpdate, request)

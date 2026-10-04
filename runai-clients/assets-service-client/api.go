@@ -28,6 +28,7 @@ type IAssetsExternalClient interface {
 
 	CredentialsSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.CredentialsUpdatesResp, *openapi.Error)
 	DatasourceSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.DatasourceUpdatesResp, *openapi.Error)
+	K8sObjectsSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.K8sObjectsUpdatesResp, *openapi.Error)
 	ListTemplatesOfTenant(ctx context.Context) (*openapi.WorkloadTemplateListResponse, *openapi.Error)
 	SyncEvents(ctx context.Context, request openapi.EventsSyncRequest) (*http.Response, error)
 	SyncAssetsResourcesIds(ctx context.Context, request openapi.AssetResourcesIdsSyncRequest) (*http.Response, error)

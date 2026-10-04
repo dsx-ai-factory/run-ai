@@ -233,6 +233,20 @@ rules:
       - create
       - delete
       - watch
+  # k8s-object asset family: reconciled by the agent's K8sObjectsHandler
+  # from the control-plane sync feed (/api/v1/k8s-objects/updates). Add new
+  # resource.k8s.io kinds here as they are onboarded to the handler.
+  - apiGroups:
+      - resource.k8s.io
+    resources:
+      - resourceclaimtemplates
+    verbs:
+      - list
+      - get
+      - update
+      - create
+      - delete
+      - watch
   - apiGroups:
       - scheduling.k8s.io
     resources:
