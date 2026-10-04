@@ -30,11 +30,12 @@ type Role struct {
 	UpdatedAt   string `json:"updatedAt,omitempty"`
 }
 
-// The roles API is paginated; request the maximum page size so a single call covers every role in the tenant.
+// The roles API is paginated; request the maximum page size to keep the number of pages small.
 const rolesPageLimit = 500
 
 type rolesResponse struct {
 	Roles []Role `json:"roles"`
+	Next  *int32 `json:"next,omitempty"`
 }
 
 type RolesHTTPClient struct {
@@ -147,12 +148,30 @@ func (c *RolesHTTPClient) getValidToken(ctx context.Context) (string, error) {
 
 func (c *RolesHTTPClient) GetRoles(ctx context.Context) ([]Role, int, error) {
 	logging.Infof("[RolesHTTPClient] Fetching roles from %s", c.serverURL)
+	roles := []Role{}
+	offset := int32(0)
+	for {
+		page, statusCode, err := c.getRolesPage(ctx, offset)
+		if err != nil {
+			return nil, statusCode, err
+		}
+		roles = append(roles, page.Roles...)
+		// Stop on a next that does not move forward as well, so a bad response cannot loop forever.
+		if page.Next == nil || *page.Next <= offset {
+			logging.Infof("[RolesHTTPClient] Successfully fetched %d roles", len(roles))
+			return roles, statusCode, nil
+		}
+		offset = *page.Next
+	}
+}
+
+func (c *RolesHTTPClient) getRolesPage(ctx context.Context, offset int32) (*rolesResponse, int, error) {
 	token, err := c.getValidToken(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get valid token: %w", err)
 	}
 
-	rolesURL := fmt.Sprintf("%s/api/v2/authorization/roles?limit=%d", c.serverURL, rolesPageLimit)
+	rolesURL := fmt.Sprintf("%s/api/v2/authorization/roles?limit=%d&offset=%d", c.serverURL, rolesPageLimit, offset)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rolesURL, nil)
 	if err != nil {
@@ -213,8 +232,7 @@ func (c *RolesHTTPClient) GetRoles(ctx context.Context) ([]Role, int, error) {
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, statusCode, fmt.Errorf("failed to parse roles response: %w", err)
 	}
-	logging.Infof("[RolesHTTPClient] Successfully fetched %d roles", len(response.Roles))
-	return response.Roles, statusCode, nil
+	return &response, statusCode, nil
 }
 
 func (c *RolesHTTPClient) GetRoleIDByName(ctx context.Context, roleName string) (int32, error) {

@@ -682,6 +682,18 @@ var _ = Describe("Roles API tests", Ordered, func() {
 			validateRole(createdSystemRoleFromServer, systemScopedRole)
 		})
 
+		It("Get V2 filtered by name returns only the exact match", func() {
+			getRolesResponse, err := rolesApiService.GetRoles(ctx, 0, 0, "", "", []string{"name==" + static_roles.DepartmentAdmin.Name}, "", false)
+			Expect(err).To(BeNil())
+			Expect(getRolesResponse.Code).To(Equal(http.StatusOK))
+
+			// "Department administrator (Legacy)" shares the prefix and must not match.
+			roles := getRolesResponse.Body.(api.GetRoles200Response).Roles
+			Expect(roles).To(HaveLen(1))
+			Expect(roles[0].Name).To(Equal(static_roles.DepartmentAdmin.Name))
+			Expect(roles[0].Id).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.DepartmentAdmin.Name])))
+		})
+
 		It("Get V2 search", func() {
 			getRolesResponse, err := rolesApiService.GetRoles(ctx, 0, 0, "", "", []string{}, "tenant", false)
 			Expect(err).To(BeNil())
