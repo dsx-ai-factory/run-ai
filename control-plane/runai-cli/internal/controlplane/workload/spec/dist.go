@@ -260,16 +260,23 @@ func updateFlags(gs *GeneralSpec) {
 
 	// MPI can't and should not have master GPU.
 	if gs.framework == api.MPI {
-		compute.GpuDeviceRequest.Set(ptr.To(int32(0)))
+		compute.GpuDeviceRequest.Unset()
 		compute.GpuPortionRequest.Set(ptr.To(float64(0)))
 	} else {
-		if compute.MasterGpuDeviceRequest.IsSet() && *compute.MasterGpuDeviceRequest.Get() > 0 {
+		if compute.MasterGpuDeviceRequest.IsSet() {
 			compute.GpuDeviceRequest.Set(compute.MasterGpuDeviceRequest.Get())
 			compute.GpuPortionRequest.Set(ptr.To(float64(0)))
+			if *compute.MasterGpuDeviceRequest.Get() == 0 {
+				// A CPU-only master must not inherit the workers' fractional GPU settings.
+				compute.GpuRequestType = ""
+				compute.GpuPortionLimit.Unset()
+				compute.GpuMemoryRequest = ""
+				compute.GpuMemoryLimit = ""
+			}
 		}
 		if compute.MasterGpuPortionRequest.IsSet() && *compute.MasterGpuPortionRequest.Get() > 0 {
 			compute.GpuPortionRequest.Set(compute.MasterGpuPortionRequest.Get())
-			compute.GpuDeviceRequest.Set(ptr.To(int32(0)))
+			compute.GpuDeviceRequest.Unset()
 		}
 		if compute.MasterGpuPortionLimit.IsSet() && *compute.MasterGpuPortionLimit.Get() > 0 {
 			compute.GpuPortionLimit.Set(compute.MasterGpuPortionLimit.Get())
@@ -455,7 +462,7 @@ func uniqueMasterSpecRequired(gf *GeneralFlags) bool {
 		len(gf.Container.MasterEnvironmentVariables) > 0 ||
 		len(gf.Container.MasterDatasourceAssetIds) > 0 ||
 		len(gf.Compute.MasterExtendedResources) > 0 ||
-		gf.Compute.MasterGpuDeviceRequest.IsSet() && *gf.Compute.MasterGpuDeviceRequest.Get() > 0 ||
+		gf.Compute.MasterGpuDeviceRequest.IsSet() ||
 		gf.Compute.MasterGpuPortionLimit.IsSet() && *gf.Compute.MasterGpuPortionLimit.Get() > 0 ||
 		gf.Compute.MasterGpuPortionRequest.IsSet() && *gf.Compute.MasterGpuPortionRequest.Get() > 0 ||
 		gf.Compute.MasterCpuCoreRequest.IsSet() && *gf.Compute.MasterCpuCoreRequest.Get() > 0 ||
