@@ -12,7 +12,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/users"
 )
 
-//go:generate mockery --name UserService --output ./mocks --filename user_service.go
 type UserService interface {
 	GetUsers(ctx context.Context, realmName string, filter models.UserFilters) ([]*models.User, error)
 	CreateUser(ctx context.Context, realmName string, user *models.User) (string, error)

@@ -13,21 +13,18 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name IdpCache --output ./mocks --filename idp_cache.go
 type IdpCache interface {
 	SetIdpForRealm(ctx context.Context, realm, idpAlias string, idp *iamModels.Idp) error
 	GetIdpForRealm(ctx context.Context, realm, idpAlias string, fetchFunc func() (*iamModels.Idp, error)) (*iamModels.Idp, error)
 	DeleteIdpFromRealm(ctx context.Context, realm, idpAlias string) error
 }
 
-//go:generate mockery --name IdpMappersCache --output ./mocks --filename idp_mappers_cache.go
 type IdpMappersCache interface {
 	SetIdpMappersForRealm(ctx context.Context, realm, idpAlias string, mappers IdpMappers) error
 	GetIdpMappersForRealm(ctx context.Context, realm, idpAlias string, fetchFunc func() (*IdpMappers, error)) (*IdpMappers, error)
 	DeleteIdpMappersFromRealm(ctx context.Context, realm, idpAlias string) error
 }
 
-//go:generate mockery --name IdpsListCache --output ./mocks --filename idps_list_cache.go
 type IdpsListCache interface {
 	SetIdpsListForRealm(ctx context.Context, realm string, idps IdpsList) error
 	GetIdpsListForRealm(ctx context.Context, realm string, fetchFunc func() (*IdpsList, error)) (*IdpsList, error)

@@ -11,7 +11,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/models"
 )
 
-//go:generate mockery --name ReconcilerVersionsDal
 type ReconcilerVersionsDal interface {
 	CreateReconcilerVersions(ctx context.Context, realm *models.ReconcilerVersions) (*models.ReconcilerVersions, error)
 	UpdateServiceAccountsReconcilerVersions(ctx context.Context, tenantId string, version string) error

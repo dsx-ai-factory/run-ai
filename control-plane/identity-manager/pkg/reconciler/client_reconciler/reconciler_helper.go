@@ -16,7 +16,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name ClientReconcilerHelperInterface
 type ClientReconcilerHelperInterface interface {
 	ReconcileClient(ctx context.Context, realm string, client realm_client.Client) error
 }

@@ -11,7 +11,6 @@ import (
 	iamModels "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 )
 
-//go:generate mockery --name Client
 type Client interface {
 	GetClientID() string
 	GetClientData(ctx context.Context, client *iamModels.Client) *iamModels.Client

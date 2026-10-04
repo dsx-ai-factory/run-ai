@@ -1,0 +1,72 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+template-data:
+  unroll-variadic: true
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/cache:
+    interfaces:
+      CacheManagerInterface: {}
+      ClientCache: {}
+      IdpCache: {}
+      IdpMappersCache: {}
+      IdpsListCache: {}
+      ServiceAccountsCache: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth:
+    interfaces:
+      Auth: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak:
+    interfaces:
+      GoCloak: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/clients:
+    interfaces:
+      ClientRepository: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/idps:
+    interfaces:
+      IdpRepository: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/realms:
+    interfaces:
+      RealmRepository: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/runaicloak:
+    interfaces:
+      RunAICloakClient: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/services:
+    interfaces:
+      AuthFlowService: {}
+      AuthService: {}
+      ClientService: {}
+      IdpService: {}
+      RealmService: {}
+      UserService: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/business:
+    interfaces:
+      IdpDal:
+      RealmDal:
+      RealmSettingsDal:
+      ReconcilerVersionsDal:
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/business/authorization:
+    interfaces:
+      AuthManagerInterface:
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/realm:
+    interfaces:
+      AuthFlowUpdaterInterface:
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/realm/client:
+    interfaces:
+      Client:
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/realm/identity_provider:
+    interfaces:
+      IdpRepresentationer:
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/realm/identity_provider/mappers:
+    interfaces:
+      UserAttributeMapper:
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/reconciler:
+    interfaces:
+      MasterReconcilerI:
+      ReconcileManager:
+      Reconciler:
+      TenantResolver:
+  github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/reconciler/client_reconciler:
+    interfaces:
+      ClientReconcilerHelperInterface:

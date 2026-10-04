@@ -11,7 +11,6 @@ import (
 	iamModels "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 )
 
-//go:generate mockery --name ClientCache --output ./mocks --filename clients_cache.go
 type ClientCache interface {
 	SetClientForRealm(ctx context.Context, realm, clientId string, client iamModels.Client) error
 	GetClientForRealm(ctx context.Context, realm, clientId string, fetchFunc func() (*iamModels.Client, error)) (*iamModels.Client, error)
