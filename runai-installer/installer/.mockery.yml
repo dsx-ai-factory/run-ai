@@ -1,5 +1,5 @@
 dir: '{{.InterfaceDir}}/mocks'
-filename: 'Mock{{.InterfaceName}}.go'
+filename: '{{.InterfaceName}}.go'
 structname: 'Mock{{.InterfaceName}}'
 pkgname: mocks
 template: testify
@@ -29,7 +29,6 @@ packages:
         config:
           # Tests use the name the interface had when the mock was first generated.
           structname: MockScreenComponent
-          filename: MockScreenComponent.go
   github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/cert:
     interfaces:
       CertHandler: {}
