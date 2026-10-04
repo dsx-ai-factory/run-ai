@@ -1,0 +1,13 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+template-data:
+  unroll-variadic: true
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client:
+    interfaces:
+      ConfigClienter: {}
+      NotificationsEventClienter: {}
+      NotifyClienter: {}

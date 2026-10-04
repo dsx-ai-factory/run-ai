@@ -27,7 +27,7 @@ advanced provider serves an HTTP API to manage config at runtime.
 | openapi-lint | `openapi-lint-generic` |
 | validate | no-op |
 | purify | `purify-go` |
-| mockery / generate_mocks | Regenerate mocks per `.mockery.yaml` (pinned mockery v2.53.5) |
+| generate-mocks-local / generate-mocks / generate-mocks-client | Regenerate mocks per `.mockery.yml` / `pkg/client/.mockery.yml` (shared mockery v3 targets from golang.mk) |
 | local-deploy | `openapi-generate-code build-go docker-build-generic docker-push-generic` (amd64) |
 
 Includes: `../../build/makefile/control-plane.mk`, `index.mk`.
