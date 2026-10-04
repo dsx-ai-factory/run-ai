@@ -6,9 +6,9 @@ require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/MicahParks/keyfunc/v3 v3.8.2
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.4
+	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.5
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.19
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.20
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.6
@@ -38,8 +38,8 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect

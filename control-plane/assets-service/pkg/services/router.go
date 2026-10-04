@@ -92,6 +92,9 @@ func CreateRouter() chi.Router {
 	eventsApiService := NewEventsAPIService()
 	eventsApiController := api.NewEventsAPIController(eventsApiService)
 
+	rctApiService := NewRctApiService()
+	rctApiController := api.NewResourceClaimTemplatesAPIController(rctApiService)
+
 	router := api.NewRouter()
 
 	// The `healthApiController` must be in its own router group without middlewares like `auth.ExtractAuthInfo`,
@@ -130,7 +133,8 @@ func CreateRouter() chi.Router {
 			modelInferenceController,
 			configMapController,
 			secretVolumeController,
-			eventsApiController)
+			eventsApiController,
+			rctApiController)
 	})
 
 	return router

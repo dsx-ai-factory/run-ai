@@ -4,7 +4,8 @@ allOf:
   - $ref: "./AssetReadOnlyFields.yaml"
 example:
   name: my-asset
-  scope: tenant
+  scope: project
+  projectId: 4500001
   id: "a418ed33-9399-48c0-a890-122cadd13bfd"
   kind: s3
   createdBy: "test@run.ai"

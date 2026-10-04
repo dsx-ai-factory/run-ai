@@ -19,6 +19,7 @@ api_model_inference.go
 api_nfs.go
 api_pvc.go
 api_registry.go
+api_resource_claim_templates.go
 api_s3.go
 api_secret.go
 api_synchronization.go
@@ -272,6 +273,7 @@ docs/InternalToolInfo.md
 docs/InternalToolType.md
 docs/InvolvedObject.md
 docs/ItemRules.md
+docs/K8sObjectMeta.md
 docs/KeyValuePair.md
 docs/Label.md
 docs/MasterSpec.md
@@ -360,6 +362,11 @@ docs/PvcInstance.md
 docs/PvcRules.md
 docs/PvcVolumeMode.md
 docs/PvcsRules.md
+docs/Rct.md
+docs/RctCreationRequest.md
+docs/RctListResponse.md
+docs/RctSpec.md
+docs/RctUpdateRequest.md
 docs/Registry.md
 docs/RegistryAPI.md
 docs/RegistryCreationRequest.md
@@ -370,6 +377,7 @@ docs/RelatedUrl.md
 docs/Repositories.md
 docs/RepositoryTags.md
 docs/RequestInfo.md
+docs/ResourceClaimTemplatesAPI.md
 docs/ResponseInfo.md
 docs/RestartPolicy.md
 docs/RestartPolicyOptions.md
@@ -716,6 +724,7 @@ model_internal_tool_info.go
 model_internal_tool_type.go
 model_involved_object.go
 model_item_rules.go
+model_k8s_object_meta.go
 model_key_value_pair.go
 model_label.go
 model_master_spec.go
@@ -800,6 +809,11 @@ model_pvc_rules.go
 model_pvc_update_request.go
 model_pvc_volume_mode.go
 model_pvcs_rules.go
+model_rct.go
+model_rct_creation_request.go
+model_rct_list_response.go
+model_rct_spec.go
+model_rct_update_request.go
 model_registry.go
 model_registry_creation_request.go
 model_registry_list_response.go
@@ -929,6 +943,7 @@ test/api_model_test.go
 test/api_nfs_test.go
 test/api_pvc_test.go
 test/api_registry_test.go
+test/api_resource_claim_templates_test.go
 test/api_s3_test.go
 test/api_secret_test.go
 test/api_synchronization_test.go
