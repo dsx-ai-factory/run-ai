@@ -22,7 +22,6 @@ type IAuditInternalClient interface {
 	SaveAuditLog(ctx context.Context, auditLog openapi.AuditLog) error
 }
 
-//go:generate mockery --name IAuditClient
 type IAuditClient interface {
 	IAuditExternalClient
 	IAuditInternalClient
