@@ -31,7 +31,7 @@ const appStore = useAppStore(pinia);
 const clusters: DisplayedCluster[] = [
   {
     createdAt: "2023-06-14T11:19:48.755Z",
-    domain: "https://dev-some-sh-no-cluster.runailabs.com",
+    domain: "https://test.example.com",
     name: "some-test",
     tenantId: 1,
     uuid: "35458207-de64-49f0-8f9b-79adf7ca2072",
