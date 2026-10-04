@@ -12,7 +12,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
 )
 
-//go:generate mockery --name ScopeValidator
 type ScopeValidator interface {
 	GetPermittedScopesFromCtx(ctx context.Context) (*authorization_api.PermittedScopes, bool)
 	HasPermittedScopes(ctx context.Context) error

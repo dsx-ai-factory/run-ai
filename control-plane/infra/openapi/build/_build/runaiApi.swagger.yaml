@@ -18081,6 +18081,137 @@ components:
             - $ref: '#/components/schemas/ComputeAssetSpec'
           nullable: true
           type: object
+    K8sObjectMeta:
+      description: Metadata of the Kubernetes resource that is created by this k8sObject
+      type: object
+      nullable: true
+      properties:
+        annotations:
+          type: object
+          nullable: true
+          description: |
+            Free-form annotations attached to the resource. Keys must conform
+            to Kubernetes qualified-name syntax
+            (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set):
+            an optional DNS-subdomain prefix (≤253 chars) followed by "/" and a
+            required name component ([A-Za-z0-9] with `.`, `_`, `-` allowed
+            inside, ≤63 chars). Key syntax is enforced at runtime on both
+            create and update; annotation values have no format constraint
+            beyond the length limit below.
+          additionalProperties:
+            type: string
+            maxLength: 10000
+          maxProperties: 1000
+          example:
+            example.com/owner: team-a
+            example.com/version: '1.0'
+        labels:
+          type: object
+          nullable: true
+          description: |
+            Free-form labels attached to the resource. Keys and values must
+            conform to Kubernetes label syntax
+            (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set):
+            keys are qualified names (optional DNS-subdomain prefix ≤253 chars
+            + "/" + name component ≤63 chars); values are ≤63 chars matching
+            the same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are
+            allowed). Key syntax is validated at runtime; the value pattern
+            below is enforced by the schema as well as at runtime.
+          additionalProperties:
+            type: string
+            maxLength: 63
+            pattern: ^([A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?)?$
+          maxProperties: 1000
+          example:
+            app: my-app
+    K8sObjectSpec:
+      description: |
+        Common shape for k8s-object asset specs: the raw Kubernetes object
+        metadata (labels/annotations) and the raw Kubernetes object spec.
+        Shared between the k8s-object CRUD APIs (e.g. RctSpec) and the
+        cluster-facing k8s-objects sync API (K8sObjectsUpdate).
+      type: object
+      required:
+        - objectSpec
+      properties:
+        objectMeta:
+          $ref: '#/components/schemas/K8sObjectMeta'
+        objectSpec:
+          description: The raw Kubernetes spec of the object.
+          type: object
+          additionalProperties: true
+    RctSpec:
+      allOf:
+        - $ref: '#/components/schemas/K8sObjectSpec'
+    AssetSyncStatusEnum:
+      type: string
+      enum:
+        - Creating
+        - Deleting
+        - Failed
+        - Deletion failed
+        - Issues found
+        - No issues found
+        - No status
+        - Updating
+    ScopeId:
+      type: string
+      description: The id of the cluster, department or project, depending on the scope type.
+    AssetClusterStatusIssueEnum:
+      type: string
+      enum:
+        - ReplicationError
+        - LostPhase
+        - NotCreated
+    AssetClusterStatusIssue:
+      type: object
+      required:
+        - scopeId
+        - scopeType
+        - issue
+      properties:
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        issue:
+          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
+    AssetClusterStatusIssues:
+      type: array
+      items:
+        $ref: '#/components/schemas/AssetClusterStatusIssue'
+    AssetClusterStatusInfo:
+      properties:
+        status:
+          $ref: '#/components/schemas/AssetSyncStatusEnum'
+        issues:
+          $ref: '#/components/schemas/AssetClusterStatusIssues'
+        message:
+          type: string
+        url:
+          type: string
+      nullable: true
+      type: object
+    AssetMetaForSync:
+      allOf:
+        - $ref: '#/components/schemas/AssetCreationFields'
+        - $ref: '#/components/schemas/AssetUpdatableFields'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              $ref: '#/components/schemas/AssetId'
+        - type: object
+          required:
+            - kind
+          properties:
+            kind:
+              $ref: '#/components/schemas/AssetKind'
+        - type: object
+          properties:
+            prevName:
+              $ref: '#/components/schemas/AssetName'
     AccessKeyCreationSpec:
       properties:
         existingSecretName:
@@ -18230,55 +18361,6 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/NgcApiKeySpec'
-    AssetSyncStatusEnum:
-      type: string
-      enum:
-        - Creating
-        - Deleting
-        - Failed
-        - Deletion failed
-        - Issues found
-        - No issues found
-        - No status
-        - Updating
-    ScopeId:
-      type: string
-      description: The id of the cluster, department or project, depending on the scope type.
-    AssetClusterStatusIssueEnum:
-      type: string
-      enum:
-        - ReplicationError
-        - LostPhase
-        - NotCreated
-    AssetClusterStatusIssue:
-      type: object
-      required:
-        - scopeId
-        - scopeType
-        - issue
-      properties:
-        scopeId:
-          $ref: '#/components/schemas/ScopeId'
-        scopeType:
-          $ref: '#/components/schemas/ScopeType'
-        issue:
-          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
-    AssetClusterStatusIssues:
-      type: array
-      items:
-        $ref: '#/components/schemas/AssetClusterStatusIssue'
-    AssetClusterStatusInfo:
-      properties:
-        status:
-          $ref: '#/components/schemas/AssetSyncStatusEnum'
-        issues:
-          $ref: '#/components/schemas/AssetClusterStatusIssues'
-        message:
-          type: string
-        url:
-          type: string
-      nullable: true
-      type: object
     ClusterResourceInfo:
       properties:
         name:
@@ -18320,26 +18402,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CredentialsListResponseEntry'
-    AssetMetaForSync:
-      allOf:
-        - $ref: '#/components/schemas/AssetCreationFields'
-        - $ref: '#/components/schemas/AssetUpdatableFields'
-        - type: object
-          required:
-            - id
-          properties:
-            id:
-              $ref: '#/components/schemas/AssetId'
-        - type: object
-          required:
-            - kind
-          properties:
-            kind:
-              $ref: '#/components/schemas/AssetKind'
-        - type: object
-          properties:
-            prevName:
-              $ref: '#/components/schemas/AssetName'
     AccessKey:
       required:
         - meta

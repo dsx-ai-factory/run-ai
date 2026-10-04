@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Meta** | [**AssetMeta**](AssetMeta.md) |  | 
 **Spec** | [**RctSpec**](RctSpec.md) |  | 
+**Status** | Pointer to [**NullableAssetClusterStatusInfo**](AssetClusterStatusInfo.md) |  | [optional] 
 
 ## Methods
 
@@ -66,6 +67,41 @@ and a boolean to check if the value has been set.
 SetSpec sets Spec field to given value.
 
 
+### GetStatus
+
+`func (o *Rct) GetStatus() AssetClusterStatusInfo`
+
+GetStatus returns the Status field if non-nil, zero value otherwise.
+
+### GetStatusOk
+
+`func (o *Rct) GetStatusOk() (*AssetClusterStatusInfo, bool)`
+
+GetStatusOk returns a tuple with the Status field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStatus
+
+`func (o *Rct) SetStatus(v AssetClusterStatusInfo)`
+
+SetStatus sets Status field to given value.
+
+### HasStatus
+
+`func (o *Rct) HasStatus() bool`
+
+HasStatus returns a boolean if a field has been set.
+
+### SetStatusNil
+
+`func (o *Rct) SetStatusNil(b bool)`
+
+ SetStatusNil sets the value for Status to be an explicit nil
+
+### UnsetStatus
+`func (o *Rct) UnsetStatus()`
+
+UnsetStatus ensures that no value is present for Status, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

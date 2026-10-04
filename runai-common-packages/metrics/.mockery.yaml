@@ -28,3 +28,11 @@ packages:
       all: true
       dir: "{{.InterfaceDir}}/mocks"
       pkgname: "mocks"
+
+  github.com/prometheus/client_golang/prometheus:
+    interfaces:
+      Registerer:
+        config:
+          dir: internal/registry/mocks
+          pkgname: "mocks"
+          structname: "Registerer"

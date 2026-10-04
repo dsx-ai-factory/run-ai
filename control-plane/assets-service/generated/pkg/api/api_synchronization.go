@@ -128,6 +128,28 @@ func (c *SynchronizationAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
+		"K8sObjectsSyncUpdates": Route{
+			strings.ToUpper("Post"),
+			"/api/v1/k8s-objects/updates",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"resource-claim-templates",
+						"sync",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.K8sObjectsSyncUpdates
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
 		"CredentialsSyncUpdates": Route{
 			strings.ToUpper("Post"),
 			"/api/v1/asset/credentials/updates",
@@ -237,6 +259,115 @@ func (c *SynchronizationAPIController) ListAssetsById(w http.ResponseWriter, r *
 		return
 	}
 	result, err := c.service.ListAssetsById(r.Context(), idParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// K8sObjectsSyncUpdates - Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+func (c *SynchronizationAPIController) K8sObjectsSyncUpdates(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	var clusterIdParam string
+	if query.Has("clusterId") {
+		param := query.Get("clusterId")
+
+		clusterIdParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
+		return
+	}
+	var afterParam int64
+	if query.Has("after") {
+		param, err := parseNumericParameter[int64](
+			query.Get("after"),
+			WithParse[int64](parseInt64),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
+			return
+		}
+
+		afterParam = param
+	} else {
+	}
+	var clusterSyncReportParam ClusterSyncReport
+	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
+	if readError != nil {
+		// Handle the error
+		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
+		return
+	}
+	jsonReader := bytes.NewReader(payloadBody)
+	d := json.NewDecoder(jsonReader)
+	//d := json.NewDecoder(r.Body)
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+	d.DisallowUnknownFields()
+	if err := d.Decode(&clusterSyncReportParam); err != nil && !errors.Is(err, io.EOF) {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
+		return
+	}
+	if err := AssertClusterSyncReportRequired(clusterSyncReportParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	if err := AssertClusterSyncReportConstraints(clusterSyncReportParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	result, err := c.service.K8sObjectsSyncUpdates(r.Context(), clusterIdParam, afterParam, clusterSyncReportParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

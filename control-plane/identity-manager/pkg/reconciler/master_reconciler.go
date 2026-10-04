@@ -24,7 +24,6 @@ const (
 	MetricName     = "reconcile_duration"
 )
 
-//go:generate mockery --name MasterReconcilerI
 type MasterReconcilerI interface {
 	AddReconciler(reconcilerType api.ReconcilerType, reconciler Reconciler)
 	GetReconcilerByType(recType api.ReconcilerType) Reconciler

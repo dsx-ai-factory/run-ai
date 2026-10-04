@@ -56,6 +56,24 @@ type AssetClusterStatus struct {
 
 type AssetIdStatusMap map[string]*api.AssetClusterStatusInfo
 
+// WAIT_FOR_OFER when k8s-objects-tracker learns about a new asset kind (e.g.
+// resource-claim-template, and any further k8s-object asset), FOUR maps in this
+// file must be updated together, or the status projection will silently fall
+// through to nil / to the wrong message:
+//
+//  1. assetKindToClusterResourceType (below)      — required for
+//     HasClusterResourceMapping(kind) to return true so PatchStatusInfo stops
+//     short-circuiting.
+//  2. assetKindToTargetAssetType                  — routes to
+//     calculateAssetStatus vs calculateAssetStatusFromCredential. For k8s
+//     resources (RCT, etc.) use targetAssetType_K8SResource.
+//  3. getAssetClusterResourceName switch          — tells the calculator the
+//     name(s) to look up in the tracker's response.
+//  4. getAssetIssuesFoundMessage / getAssetNoIssuesFoundMessage /
+//     getAssetNotCreatedMessage                   — the K8SResource branch
+//     hardcodes "data source ..." today; RCT needs distinct copy
+//     ("resource claim template ...") or the tracker path will surface
+//     wrong-family messages.
 var assetKindToClusterResourceType = map[api.AssetKind]openapi.ClusterResourceType{
 	api.ASSETKIND_PVC:             openapi.CLUSTERRESOURCETYPE_PVC,
 	api.ASSETKIND_ACCESS_KEY:      openapi.CLUSTERRESOURCETYPE_SECRET,
@@ -68,6 +86,19 @@ var assetKindToClusterResourceType = map[api.AssetKind]openapi.ClusterResourceTy
 	api.ASSETKIND_SECRET_VOLUME:   openapi.CLUSTERRESOURCETYPE_SECRET,
 	api.ASSETKIND_ENVIRONMENT:     openapi.CLUSTERRESOURCETYPE_SECRET,
 	api.ASSETKIND_NGC_API_KEY:     openapi.CLUSTERRESOURCETYPE_SECRET,
+	// WAIT_FOR_OFER resource-claim-template intentionally absent until the
+	// tracker learns about resource.k8s.io/v1 resources. See the doc block
+	// above for the full checklist of maps that must be updated together.
+}
+
+// HasClusterResourceMapping reports whether the given asset kind has a
+// k8s-objects-tracker projection (a native k8s resource type the tracker can
+// report status for). Kinds without a mapping — RCT today — have their status
+// driven entirely by sync_status and must not fall through to the tracker
+// call, which would fire an HTTP request with an empty resourceType.
+func HasClusterResourceMapping(kind api.AssetKind) bool {
+	_, ok := assetKindToClusterResourceType[kind]
+	return ok
 }
 
 type UniqueKey struct {
@@ -633,6 +664,12 @@ func getAccountScopeMessage(assetKind api.AssetKind) string {
 	}
 }
 
+// WAIT_FOR_OFER the K8SResource branches in the three getAsset*Message
+// helpers below hardcode "data source ..." copy — that's correct for
+// PVC/ConfigMap but wrong for k8s-object kinds (resource-claim-template,
+// etc.). When adding a new k8s-object kind to assetKindToClusterResourceType,
+// extend each K8SResource branch to key by assetKind (or add a new target
+// type).
 func getAssetNotCreatedMessage(statusInfo *api.AssetClusterStatusInfo, assetKind api.AssetKind) {
 	statusInfo.Url = runaiSupportUrl
 	switch assetKindToTargetAssetType[assetKind] {

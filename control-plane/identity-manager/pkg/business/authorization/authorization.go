@@ -16,7 +16,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name AuthManagerInterface
 type AuthManagerInterface interface {
 	ValidatePrivilegeEscalation(ctx context.Context, authzClient auth_client.IAuthorizationClient, subjectId string) error
 	GetRealmAndTenantID(ctx context.Context, tenantId string) (*string, *string, error)

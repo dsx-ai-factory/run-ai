@@ -11,7 +11,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 )
 
-//go:generate mockery --name RealmRepository --output ./mocks --filename realm_repository.go
 type RealmRepository interface {
 	CreateRealm(ctx context.Context, realm *models.Realm) (string, error)
 	DisableRealm(ctx context.Context, realmName string) error

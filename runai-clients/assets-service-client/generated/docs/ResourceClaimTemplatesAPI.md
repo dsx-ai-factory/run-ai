@@ -150,7 +150,7 @@ Name | Type | Description  | Notes
 
 ## GetRctById
 
-> Rct GetRctById(ctx, assetId).Execute()
+> Rct GetRctById(ctx, assetId).StatusInfo(statusInfo).Execute()
 
 Retrieve a resource claim template.
 
@@ -170,10 +170,11 @@ import (
 
 func main() {
 	assetId := "38400000-8cf0-11bd-b23e-10b96e4ef00d" // string | Unique identifier of the asset.
+	statusInfo := true // bool | Whether the query should include asset status information as part of the response. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ResourceClaimTemplatesAPI.GetRctById(context.Background(), assetId).Execute()
+	resp, r, err := apiClient.ResourceClaimTemplatesAPI.GetRctById(context.Background(), assetId).StatusInfo(statusInfo).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ResourceClaimTemplatesAPI.GetRctById``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -199,6 +200,7 @@ Other parameters are passed through a pointer to a apiGetRctByIdRequest struct v
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **statusInfo** | **bool** | Whether the query should include asset status information as part of the response. | 
 
 ### Return type
 
@@ -220,7 +222,7 @@ Name | Type | Description  | Notes
 
 ## ListRcts
 
-> RctListResponse ListRcts(ctx).Offset(offset).Limit(limit).Execute()
+> RctListResponse ListRcts(ctx).Offset(offset).Limit(limit).StatusInfo(statusInfo).Execute()
 
 List resource claim templates.
 
@@ -241,10 +243,11 @@ import (
 func main() {
 	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
 	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+	statusInfo := true // bool | Whether the query should include asset status information as part of the response. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ResourceClaimTemplatesAPI.ListRcts(context.Background()).Offset(offset).Limit(limit).Execute()
+	resp, r, err := apiClient.ResourceClaimTemplatesAPI.ListRcts(context.Background()).Offset(offset).Limit(limit).StatusInfo(statusInfo).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ResourceClaimTemplatesAPI.ListRcts``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -267,6 +270,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **offset** | **int32** | The offset of the first item returned in the collection. | 
  **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+ **statusInfo** | **bool** | Whether the query should include asset status information as part of the response. | 
 
 ### Return type
 
