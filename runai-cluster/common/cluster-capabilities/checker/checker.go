@@ -255,6 +255,9 @@ const (
 	// kai.scheduler/container.<name>.gpu-memory.portion.limit) instead of the legacy
 	// RUNAI_GPU_MEMORY_LIMIT / RUNAI_GPU_PORTION_LIMIT container env vars.
 	MinVersionGpuMemoryLimitAnnotations
+
+	// MinVersionNetworkingOwnershipEnforcement - the min cluster version enforcing networking Service and Pod ownership.
+	MinVersionNetworkingOwnershipEnforcement
 	// MinVersionOAuth2ProxyTemplates - the min cluster version that provisions the proxy error-page ConfigMap.
 	MinVersionOAuth2ProxyTemplates
 	// NOTE -> Make sure to add the min version to the map below
@@ -335,6 +338,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionOfSegmentTopology:                         "2.27.0",
 	MinVersionNoNativeSubmission:                        "3.0.0",
 	MinVersionGpuMemoryLimitAnnotations:                 "3.0.0",
+	MinVersionNetworkingOwnershipEnforcement:            "3.0.0",
 	MinVersionOAuth2ProxyTemplates:                      "3.0.18",
 }
 
