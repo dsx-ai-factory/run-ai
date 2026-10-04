@@ -227,6 +227,14 @@ func TestRestartAllowedServiceAccounts(t *testing.T) {
 				"system:serviceaccount:custom-runai:runtime-rules," +
 				"system:serviceaccount:management:restart",
 		},
+		{
+			name:  "bare NMC extras",
+			extra: []string{"restart-helper"},
+			want: "system:serviceaccount:custom-runai:anyworkload-controller," +
+				"system:serviceaccount:custom-runai:runai-agent," +
+				"system:serviceaccount:custom-runai:runtime-rules," +
+				"system:serviceaccount:custom-runai:restart-helper",
+		},
 		{name: "NMC agent", agentServiceAccount: "nmc-agent", want: "system:serviceaccount:custom-runai:anyworkload-controller,system:serviceaccount:custom-runai:nmc-agent,system:serviceaccount:custom-runai:runtime-rules"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
