@@ -36,4 +36,3 @@ packages:
           dir: internal/registry/mocks
           pkgname: "mocks"
           structname: "Registerer"
-          filename: "Registerer.go"
