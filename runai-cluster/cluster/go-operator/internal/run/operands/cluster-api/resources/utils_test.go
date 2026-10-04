@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-var _ = Describe("researcher-service resources utils", func() {
+var _ = Describe("cluster-api resources utils", func() {
 	Context("getTlsSecretCertAndKey", func() {
 		It("should return tls secret cert and key", func() {
 			secret := &v1.Secret{
