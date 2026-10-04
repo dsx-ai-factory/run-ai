@@ -7,11 +7,6 @@
 # The chooser is limited to bug reports, feature requests, and documentation
 # requests. Blank issues stay off so every issue arrives with the fields triage
 # needs, and usage questions go to Discussions rather than an issue template.
-#
-# The chooser's fourth entry, "Report a security vulnerability", is not listed
-# here: GitHub adds it automatically from SECURITY.md, which routes to NVIDIA
-# PSIRT. Adding a PSIRT contact link as well would show the reporter two
-# near-identical security options.
 
 blank_issues_enabled: false
 
