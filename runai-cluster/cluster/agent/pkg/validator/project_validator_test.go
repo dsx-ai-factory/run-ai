@@ -116,7 +116,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator with service account", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{})
 		})
 
 		It("Requester is runai-agent - allow", func() {
@@ -180,7 +180,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator - service account doesn't exist", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects().Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{})
 		})
 
 		It("Don't allow requests", func() {
@@ -201,7 +201,9 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator with allowedServiceAccounts", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{"system:serviceaccount:test-namespace:test-service-account", "system:serviceaccount:kube-system:coredns"})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{
+				"system:serviceaccount:test-namespace:test-service-account", "system:serviceaccount:kube-system:coredns",
+			})
 		})
 
 		It("Requester username matches an allowed identity - allow without checking service account UIDs", func() {
@@ -285,7 +287,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator with empty allowedServiceAccounts", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{})
 		})
 
 		It("Should fall back to UID check when allowedServiceAccounts is empty", func() {
@@ -307,7 +309,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator with single allowedServiceAccount identity", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{"system:serviceaccount:kube-system:admin-controller"})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{"system:serviceaccount:kube-system:admin-controller"})
 		})
 
 		It("Username matches the single allowed identity - allow", func() {

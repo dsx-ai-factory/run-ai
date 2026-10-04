@@ -23,13 +23,14 @@ import (
 //
 //nolint:lll // kubebuilder annotation
 type ProjectValidator struct {
-	client                  client.Client
+	garbageCollectorReader  client.Reader
 	serviceAccountValidator *validator.ServiceAccountValidator
 }
 
-func NewProjectValidator(k8sClient client.Client, allowedServiceAccounts []string) *ProjectValidator {
+// NewProjectValidator uses an uncached reader for the collector lookup so it only needs get permission.
+func NewProjectValidator(k8sClient client.Client, garbageCollectorReader client.Reader, allowedServiceAccounts []string) *ProjectValidator {
 	pv := &ProjectValidator{
-		client: k8sClient,
+		garbageCollectorReader: garbageCollectorReader,
 	}
 	pv.serviceAccountValidator = validator.NewServiceAccountValidator(k8sClient, allowedServiceAccounts, pv.initValidator())
 	return pv

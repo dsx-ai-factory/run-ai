@@ -53,7 +53,7 @@ func (pv *ProjectValidator) allowOrphanFinalizerRemoval(ctx context.Context, req
 		return false, nil
 	}
 
-	account, err := GetServiceAccount(ctx, pv.client, "generic-garbage-collector", metav1.NamespaceSystem)
+	account, err := GetServiceAccount(ctx, pv.garbageCollectorReader, "generic-garbage-collector", metav1.NamespaceSystem)
 	if err != nil {
 		return false, fmt.Errorf("get garbage collector service account: %w", err)
 	}
