@@ -415,7 +415,6 @@ const WorkspaceHybrid = defineComponent({
       );
     },
     supportMultiFractionGpu(): boolean {
-      // TODO: returning false for now because the backend does not support it
       return this.clusterStore.isClusterVersionSufficient(
         this.workspaceModel.clusterId || "",
         MIN_CLUSTER_VERSION_FOR_MULTI_FRACTION_GPU,

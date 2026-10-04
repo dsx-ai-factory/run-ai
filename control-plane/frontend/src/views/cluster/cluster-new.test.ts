@@ -118,7 +118,7 @@ describe("cluster-new.vue", () => {
   beforeEach(() => {
     authStore.$patch({ accessToken: accessToken });
     clusterStore.$patch({ clusters: clusters });
-    appStore.$patch({ config: { isMultiTenant: false } }); // TODO: add tests to support isMultiTenant
+    appStore.$patch({ config: { isMultiTenant: false } });
 
     mockWindowObject();
   });
