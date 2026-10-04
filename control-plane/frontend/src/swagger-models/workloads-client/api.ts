@@ -67,6 +67,12 @@ export interface AIApplication {
      */
     'phase'?: string;
     /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof AIApplication
+     */
+    'clusterId'?: string;
+    /**
      * The id of the project.
      * @type {string}
      * @memberof AIApplication

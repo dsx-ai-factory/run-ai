@@ -104,7 +104,7 @@ export default {
     summary(): string {
       if (this.isExistingSecret) return this.secretDetails.existingSecretName || "None";
       const newSecretsAmount = this.secretDetails.keyValuePairs?.length;
-      return newSecretsAmount ? `${newSecretsAmount} New secret(s)` : "None"; // TODO: Requires product texts
+      return newSecretsAmount ? `${newSecretsAmount} New secret(s)` : "None";
     },
     noSecretText(): string {
       return "No secrets found";

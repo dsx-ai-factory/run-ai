@@ -9,6 +9,8 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -24,16 +26,29 @@ const (
 	workloadMetricsDefaultSamples = int32(20)
 	workloadMetricsMaxSamples     = int32(1000)
 	workloadMetricsDefaultWindow  = time.Hour
+	metricGroupResource           = "resource"
+	metricGroupInferenceServing   = "inference serving"
 )
 
-// Resource metrics every workload supports
+// Resource metrics every supported workload API version provides.
 var workloadResourceMetricTypes = []workloads.WorkloadMetricType{
 	workloads.WORKLOADMETRICTYPE_GPU_UTILIZATION,
 	workloads.WORKLOADMETRICTYPE_GPU_MEMORY_USAGE_BYTES,
 	workloads.WORKLOADMETRICTYPE_CPU_USAGE_CORES,
 	workloads.WORKLOADMETRICTYPE_CPU_MEMORY_USAGE_BYTES,
+}
+
+// NVLink was added after the minimum API version supported by this tool. It is
+// requested with baseline metrics first, with a baseline-only retry when the
+// API reports that the combined metric selection is invalid or unsupported.
+var workloadNVLinkMetricTypes = []workloads.WorkloadMetricType{
 	workloads.WORKLOADMETRICTYPE_NVLINK_BANDWIDTH_TOTAL,
 }
+
+var workloadResourceAndNVLinkMetricTypes = append(
+	append([]workloads.WorkloadMetricType{}, workloadResourceMetricTypes...),
+	workloadNVLinkMetricTypes...,
+)
 
 var workloadNIMMetricTypes = []workloads.WorkloadMetricType{
 	workloads.WORKLOADMETRICTYPE_NIM_NUM_REQUESTS_RUNNING,
@@ -69,9 +84,11 @@ func (in getWorkloadMetricsInput) Validate() error {
 }
 
 type getWorkloadMetricsOutput struct {
-	WorkloadID   string        `json:"workloadId"   jsonschema:"Echo of the input workloadId"`
-	Type         string        `json:"type"         jsonschema:"Workload type (Training | Workspace | Distributed | Inference | DistributedInference | non-native types)"`
-	Measurements []measurement `json:"measurements" jsonschema:"Time-series measurements for the window. For inference workloads, includes throughput/latency measurements appended after GPU/CPU measurements"`
+	WorkloadID   string            `json:"workloadId"   jsonschema:"Echo of the input workloadId"`
+	Type         string            `json:"type"         jsonschema:"Workload type (Training | Workspace | Distributed | Inference | DistributedInference | non-native types)"`
+	Measurements []measurement     `json:"measurements" jsonschema:"Scalar time-series measurements for the window. Inference LATENCY is a scalar series; NIM_E2E_REQUEST_LATENCY_SECONDS is returned under histograms instead."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Histograms   []metricHistogram `json:"histograms,omitempty" jsonschema:"Histogram time series with timestamped bucket or percentile data. NIM_E2E_REQUEST_LATENCY_SECONDS is returned here, not under scalar measurements."`  //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Warnings     []string          `json:"warnings,omitempty" jsonschema:"Non-fatal warnings that identify expected metric groups or metric types that could not be retrieved. When present, metrics are partial."`
 }
 
 func registerGetWorkloadMetrics(r *runaimcp.Registry, client *runaiclient.Client) {
@@ -79,8 +96,11 @@ func registerGetWorkloadMetrics(r *runaimcp.Registry, client *runaiclient.Client
 		Name: "get_workload_metrics",
 		Description: "Call when the user asks how a workload's (job's) resource usage changed over time — such as GPU " +
 			"utilization, GPU memory, CPU usage, or memory consumption — or, for inference workloads, request throughput " +
-			"and latency. Returns these metrics as time series: each metric is a list of timestamped values over the " +
-			"requested window. Accepts an optional time range (start/end, default the last hour) and number of samples. " +
+			"and latency. Returns scalar measurements as lists of timestamped values; NIM end-to-end request latency " +
+			"is returned separately under histograms with timestamped bucket or percentile data. Uses one combined " +
+			"resource request on supported clusters and automatically retries baseline CPU/GPU metrics without NVLink " +
+			"when the API reports that the combined metric selection is unsupported. Accepts an optional time range " +
+			"(start/end, default the last hour) and number of samples. " +
 			"If workloadId is unknown, use list_workloads to resolve it. " +
 			"Use this tool for one workload; use get_cluster_metrics for a cluster/node pool and get_org_unit_metrics for a project/department. Use list_workloads for allocated or requested GPU-count filters. " +
 			"Do not compare utilization across workloads by default. If the user insists, clarify the time window and latest/average/maximum statistic, then call this tool only when the complete candidate set has 10 or fewer workloads; otherwise ask the user to narrow the scope. " + //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
@@ -97,7 +117,8 @@ func registerGetWorkloadMetrics(r *runaimcp.Registry, client *runaiclient.Client
 // getWorkloadMetricsRun assembles a workload's metrics:
 //  1. identify the workload so we know its type;
 //  2. pin the query window (defaults: now-1h..now, 20 samples);
-//  3. fetch the core resource measurements (GPU / CPU / NVLink / NIM);
+//  3. fetch the core resource measurements (GPU / CPU / NVLink / NIM), retrying
+//     baseline resource metrics only if the API rejects the optional NVLink selection;
 //  4. for inference workloads, also fetch serving (throughput / latency) and merge the two.
 func getWorkloadMetricsRun(ctx context.Context, client *runaiclient.Client, in getWorkloadMetricsInput) (getWorkloadMetricsOutput, error) {
 	// Step 1 — identify the workload. Type decides whether we also call the serving endpoint.
@@ -105,42 +126,127 @@ func getWorkloadMetricsRun(ctx context.Context, client *runaiclient.Client, in g
 	if err != nil {
 		return getWorkloadMetricsOutput{}, fmt.Errorf("get workload %q: %w", in.WorkloadID, runaimcp.MapHTTPError(httpResp, err))
 	}
+	if wl == nil {
+		return getWorkloadMetricsOutput{}, fmt.Errorf("get workload %q returned an empty response: %w", in.WorkloadID, runaimcp.ErrUpstream)
+	}
 
 	// Step 2 — resolve the metrics window, defaulting to the last 1h with 20 samples.
 	start, end, samples := resolveMetricsWindow(in)
 
-	// Step 3 — fetch core measurements. For non-inference workloads this is the whole answer.
-	coreMeas, coreErr := fetchWorkloadMetrics(ctx, client, in.WorkloadID, start, end, samples)
-	out := getWorkloadMetricsOutput{WorkloadID: in.WorkloadID, Type: wl.Type}
-	if !isInferenceType(wl.Type) {
-		if coreErr != nil {
-			return getWorkloadMetricsOutput{}, coreErr
+	// Step 3 — use one request on clusters that support NVLink. A 400/422 may
+	// mean NVLink is unsupported, so retry baseline resource metrics alone and
+	// retain the original validation failure as an NVLink warning. Other errors
+	// are not retried because authentication, transport, or server failures are
+	// not evidence that only NVLink is unavailable.
+	resourceAndNVLinkMetrics := fetchMetricsBatch(ctx, client, in.WorkloadID, workloadResourceAndNVLinkMetricTypes, start, end, samples)
+	var batches []workloadMetricBatch
+	if !resourceAndNVLinkMetrics.retryWithoutOptionalMetrics {
+		batches = []workloadMetricBatch{{
+			name:              "resource and NVLink",
+			metricFetchResult: resourceAndNVLinkMetrics,
+		}}
+	} else {
+		resourceMetrics := fetchMetricsBatch(ctx, client, in.WorkloadID, workloadResourceMetricTypes, start, end, samples)
+		batches = []workloadMetricBatch{
+			{name: metricGroupResource, metricFetchResult: resourceMetrics},
+			{name: "NVLink", metricFetchResult: resourceAndNVLinkMetrics},
 		}
-		out.Measurements = coreMeas
-		return out, nil
 	}
 
-	// Step 4 — for inference, serving (throughput/latency) lives on a separate endpoint; fetch + merge.
-	servingMeas, servingErr := fetchInferenceWorkloadMetrics(ctx, client, in.WorkloadID, start, end, samples)
-	out.Measurements, err = combineInferenceMetrics(ctx, in.WorkloadID, coreMeas, coreErr, servingMeas, servingErr)
-	if err != nil {
-		return getWorkloadMetricsOutput{}, err
+	// NIM counters are expected only when the workload is marked as NVIDIA NIM.
+	if isNIMWorkload(wl) {
+		nimMetrics := fetchMetricsBatch(ctx, client, in.WorkloadID, workloadNIMMetricTypes, start, end, samples)
+		batches = append(batches, workloadMetricBatch{
+			name:              "NIM",
+			metricFetchResult: nimMetrics,
+		})
+	}
+
+	// Step 4 — inference serving metrics (throughput/latency) live on a separate endpoint.
+	if isInferenceType(wl.Type) {
+		servingMetrics := fetchInferenceWorkloadMetrics(ctx, client, in.WorkloadID, start, end, samples)
+		batches = append(batches, workloadMetricBatch{
+			name:              metricGroupInferenceServing,
+			metricFetchResult: servingMetrics,
+		})
+	}
+
+	return combineMetricBatches(ctx, in.WorkloadID, wl.Type, batches)
+}
+
+type workloadMetricBatch struct {
+	name string
+	metricFetchResult
+}
+
+type metricFetchResult struct {
+	measurements                []measurement
+	histograms                  []metricHistogram
+	partial                     bool
+	unavailableMetricTypes      []string
+	err                         error
+	retryWithoutOptionalMetrics bool
+}
+
+// combineMetricBatches returns every successful group and names failed expected
+// groups in warnings. If every expected group fails, the hard error names every
+// group and wraps the first error to preserve its classification.
+func combineMetricBatches(ctx context.Context, workloadID, workloadType string, batches []workloadMetricBatch) (getWorkloadMetricsOutput, error) {
+	out := getWorkloadMetricsOutput{
+		WorkloadID:   workloadID,
+		Type:         workloadType,
+		Measurements: []measurement{},
+	}
+	successfulBatches := 0
+	failedGroups := make([]string, 0, len(batches))
+	var firstErr error
+	for _, batch := range batches {
+		if batch.err == nil {
+			successfulBatches++
+			out.Measurements = append(out.Measurements, batch.measurements...)
+			out.Histograms = append(out.Histograms, batch.histograms...)
+			if batch.partial {
+				warning := fmt.Sprintf("%s metrics were partially retrieved", batch.name)
+				if len(batch.unavailableMetricTypes) > 0 {
+					warning += "; unavailable metric types: " + strings.Join(batch.unavailableMetricTypes, ", ")
+				}
+				out.Warnings = append(out.Warnings, warning)
+				zerolog.Ctx(ctx).Warn().Str("workload_id", workloadID).Str("metric_group", batch.name).
+					Strs("unavailable_metric_types", batch.unavailableMetricTypes).
+					Msgf("get_workload_metrics: %s metrics partially available", batch.name)
+			}
+			continue
+		}
+		if firstErr == nil {
+			firstErr = batch.err
+		}
+		failedGroups = append(failedGroups, batch.name)
+		zerolog.Ctx(ctx).Warn().Err(batch.err).Str("workload_id", workloadID).Str("metric_group", batch.name).
+			Msgf("get_workload_metrics: %s metrics unavailable, dropping from result", batch.name)
+		warning := fmt.Sprintf("%s metrics could not be retrieved; returned metrics are partial", batch.name)
+		if len(batch.unavailableMetricTypes) > 0 {
+			warning += "; unavailable metric types: " + strings.Join(batch.unavailableMetricTypes, ", ")
+		}
+		out.Warnings = append(out.Warnings, warning)
+	}
+	if successfulBatches == 0 {
+		return getWorkloadMetricsOutput{}, fmt.Errorf(
+			"all expected metric groups failed (%s): %w",
+			strings.Join(failedGroups, ", "), firstErr)
 	}
 	return out, nil
 }
 
-// fetchWorkloadMetrics returns resource (GPU/CPU/NVLink) measurements, plus NIM serving
-// counters when the workload is NIM-tagged.
-func fetchWorkloadMetrics(ctx context.Context, client *runaiclient.Client, workloadID string, start, end time.Time, samples int32) ([]measurement, error) {
-	resource, err := fetchMetricsBatch(ctx, client, workloadID, workloadResourceMetricTypes, start, end, samples)
-	if err != nil {
-		return nil, err
+func isNIMWorkload(wl *workloads.WorkloadDetailed) bool {
+	if wl == nil {
+		return false
 	}
-	return append(resource, fetchNIMMetrics(ctx, client, workloadID, start, end, samples)...), nil
+	value, ok := wl.AdditionalFields["nimWorkload"].(string)
+	return ok && value == "true"
 }
 
 // Fetches workload-level measurements for one set of metric types — used by both the resource and NIM batches.
-func fetchMetricsBatch(ctx context.Context, client *runaiclient.Client, workloadID string, types []workloads.WorkloadMetricType, start, end time.Time, samples int32) ([]measurement, error) {
+func fetchMetricsBatch(ctx context.Context, client *runaiclient.Client, workloadID string, types []workloads.WorkloadMetricType, start, end time.Time, samples int32) metricFetchResult {
 	resp, httpResp, err := client.Workloads.WorkloadsAPI.GetWorkloadMetrics(ctx, workloadID).
 		MetricType(types).
 		Start(start).
@@ -148,22 +254,18 @@ func fetchMetricsBatch(ctx context.Context, client *runaiclient.Client, workload
 		NumberOfSamples(samples).
 		Execute()
 	if err != nil {
-		return nil, fmt.Errorf("get workload metrics %q: %w", workloadID, runaimcp.MapHTTPError(httpResp, err))
+		return metricFetchResult{
+			err:                         fmt.Errorf("get workload metrics %q: %w", workloadID, runaimcp.MapHTTPError(httpResp, err)),
+			retryWithoutOptionalMetrics: isOptionalMetricsValidationFailure(httpResp),
+		}
 	}
-	return mapMeasurements(resp.Measurements), nil
+	if resp == nil {
+		return metricFetchResult{err: fmt.Errorf("get workload metrics %q returned an empty response: %w", workloadID, runaimcp.ErrUpstream)}
+	}
+	return mapMetricFetchResult(resp, httpResp)
 }
 
-func fetchNIMMetrics(ctx context.Context, client *runaiclient.Client, workloadID string, start, end time.Time, samples int32) []measurement {
-	nim, err := fetchMetricsBatch(ctx, client, workloadID, workloadNIMMetricTypes, start, end, samples)
-	if err != nil {
-		zerolog.Ctx(ctx).Warn().Err(err).Str("workload_id", workloadID).
-			Msg("get_workload_metrics: NIM metrics unavailable")
-		return nil
-	}
-	return nim
-}
-
-func fetchInferenceWorkloadMetrics(ctx context.Context, client *runaiclient.Client, workloadID string, start, end time.Time, samples int32) ([]measurement, error) {
+func fetchInferenceWorkloadMetrics(ctx context.Context, client *runaiclient.Client, workloadID string, start, end time.Time, samples int32) metricFetchResult {
 	resp, httpResp, err := client.Workloads.InferencesAPI.GetInferenceWorkloadMetrics(ctx, workloadID).
 		MetricType(inferenceWorkloadMetricTypes).
 		Start(start).
@@ -171,32 +273,73 @@ func fetchInferenceWorkloadMetrics(ctx context.Context, client *runaiclient.Clie
 		NumberOfSamples(samples).
 		Execute()
 	if err != nil {
-		return nil, fmt.Errorf("get inference workload metrics %q: %w", workloadID, runaimcp.MapHTTPError(httpResp, err))
+		return metricFetchResult{err: fmt.Errorf("get inference workload metrics %q: %w", workloadID, runaimcp.MapHTTPError(httpResp, err))}
 	}
-	return mapMeasurements(resp.Measurements), nil
+	if resp == nil {
+		return metricFetchResult{err: fmt.Errorf("get inference workload metrics %q returned an empty response: %w", workloadID, runaimcp.ErrUpstream)}
+	}
+	return mapMeasurementFetchResult(resp, httpResp)
 }
 
-// Returns resource + serving for inference workloads; drops a failing side and surfaces the core error if both fail.
-func combineInferenceMetrics(ctx context.Context, workloadID string, coreMeas []measurement, coreErr error, servingMeas []measurement, servingErr error) ([]measurement, error) {
-	if coreErr != nil && servingErr != nil {
-		return nil, coreErr
+func isOptionalMetricsValidationFailure(resp *http.Response) bool {
+	return resp != nil && (resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusUnprocessableEntity)
+}
+
+// A 207 response contains one values-less measurement for each metric type that
+// could not be retrieved. Preserve successful series and name each unavailable
+// type so callers can distinguish partial data from a valid empty series.
+func mapMetricFetchResult(resp *workloads.MetricsCompositeResponse, httpResp *http.Response) metricFetchResult {
+	if resp == nil {
+		return metricFetchResult{err: fmt.Errorf("empty metrics response: %w", runaimcp.ErrUpstream)}
 	}
-	for _, side := range []struct {
-		name string
-		err  error
-		meas *[]measurement
-	}{{"core", coreErr, &coreMeas}, {"serving", servingErr, &servingMeas}} {
-		if side.err != nil {
-			zerolog.Ctx(ctx).Warn().Err(side.err).Str("workload_id", workloadID).Str("side", side.name).Msgf("get_workload_metrics: %s metrics unavailable, dropping from result", side.name)
-			*side.meas = nil
+	return mapMetricResponseParts(resp.Measurements, resp.Histogram, httpResp)
+}
+
+func mapMeasurementFetchResult(resp *workloads.MetricsResponse, httpResp *http.Response) metricFetchResult {
+	if resp == nil {
+		return metricFetchResult{err: fmt.Errorf("empty metrics response: %w", runaimcp.ErrUpstream)}
+	}
+	return mapMetricResponseParts(resp.Measurements, nil, httpResp)
+}
+
+func mapMetricResponseParts(src []workloads.MeasurementResponse, histograms []workloads.HistogramSeries, httpResp *http.Response) metricFetchResult {
+	if httpResp == nil || httpResp.StatusCode != http.StatusMultiStatus {
+		return metricFetchResult{
+			measurements: mapMeasurements(src),
+			histograms:   mapMetricHistograms(histograms),
 		}
 	}
 
-	out := append(coreMeas, servingMeas...)
-	if out == nil {
-		out = []measurement{}
+	available := make([]workloads.MeasurementResponse, 0, len(src))
+	unavailable := make([]string, 0)
+	seenUnavailable := make(map[string]struct{})
+	for _, item := range src {
+		if item.Values != nil {
+			available = append(available, item)
+			continue
+		}
+		if item.Type == "" {
+			continue
+		}
+		if _, seen := seenUnavailable[item.Type]; seen {
+			continue
+		}
+		seenUnavailable[item.Type] = struct{}{}
+		unavailable = append(unavailable, item.Type)
 	}
-	return out, nil
+
+	result := metricFetchResult{
+		measurements:           mapMeasurements(available),
+		histograms:             mapMetricHistograms(histograms),
+		partial:                len(unavailable) > 0,
+		unavailableMetricTypes: unavailable,
+	}
+	if len(result.measurements) == 0 && len(result.histograms) == 0 && len(unavailable) > 0 {
+		result.err = fmt.Errorf(
+			"all returned metric types were unavailable (%s): %w",
+			strings.Join(unavailable, ", "), runaimcp.ErrUpstream)
+	}
+	return result
 }
 
 func resolveMetricsWindow(in getWorkloadMetricsInput) (time.Time, time.Time, int32) {
