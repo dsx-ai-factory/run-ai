@@ -169,7 +169,7 @@ export default defineComponent({
   },
   methods: {
     itemClicked(name: string): void {
-      this.$router.push({ name }); // TODO: get the names from the routes
+      this.$router.push({ name });
     },
   },
 });

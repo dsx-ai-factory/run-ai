@@ -189,7 +189,7 @@ var _ = Describe("Ingress", func() {
 		// (which is the single knob each test toggles).
 		makeRunaiConfigWithIngressEligible := func() *runaiv1.RunaiConfig {
 			c := utils.GetDefaultRunaiConfig()
-			c.Spec.Internal.Global.ClusterURL = "https://example.runailabs.com"
+			c.Spec.Internal.Global.ClusterURL = "https://cluster.example.com"
 			c.Spec.Global.Ingress = &global.Ingress{Enabled: pointer.Bool(true)}
 			c.Spec.Internal.ResearcherService = &runv1_internal.ResearcherService{
 				Ingress: &runv1_internal.ResearcherServiceIngress{

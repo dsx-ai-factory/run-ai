@@ -329,7 +329,6 @@ export default defineComponent({
       return this.entityType;
     },
     isEnvironmentVariablesExist(): boolean {
-      // TODO : Add check for policy defaults when adding policy
       return this.environmentVariableModel.length > 0;
     },
     securityValues(): IUidGidSupplementalGroupsModel {
