@@ -5266,7 +5266,7 @@ paths:
       - Distributed Inferences
       x-service: workloads
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -5360,7 +5360,7 @@ paths:
       - Distributed Inferences
       x-service: workloads
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -5626,7 +5626,7 @@ paths:
       - Inferences
       x-service: workloads
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -5720,7 +5720,7 @@ paths:
       - Inferences
       x-service: workloads
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync

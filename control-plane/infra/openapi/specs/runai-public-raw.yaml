@@ -9121,7 +9121,7 @@ paths:
       x-service: assets-service
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-no-authorization: true
       x-internal: true
       tags:
@@ -9158,7 +9158,7 @@ paths:
       x-service: assets-service
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       tags:
         - Inferences
       parameters:
@@ -20082,7 +20082,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20119,7 +20119,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20228,7 +20228,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20265,7 +20265,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -31766,14 +31766,6 @@ components:
             will be scheduled before all workloads in rank "Medium".
           default: MediumLow
           example: High
-        priority:
-          deprecated: true
-          description: >-
-            Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          type: string
-          nullable: true
-          example: Normal
     DepartmentForList:
       allOf:
         - $ref: '#/components/schemas/DataDepartmentFields'
@@ -31873,14 +31865,6 @@ components:
             will be scheduled before all workloads in rank "Medium".
           default: MediumLow
           example: High
-        priority:
-          deprecated: true
-          description: >-
-            Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          type: string
-          nullable: true
-          example: Normal
     DepartmentCreationRequest:
       allOf:
         - $ref: '#/components/schemas/DataDepartmentFields'

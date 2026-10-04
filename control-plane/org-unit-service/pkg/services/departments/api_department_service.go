@@ -577,12 +577,10 @@ func (s *DepartmentApiService) UpdateDepartmentResources(ctx context.Context, de
 	}
 
 	originalResourcesNodePoolToId := make(map[string]uuid.UUID)
-	originalResourcesNodePoolIdToRank := make(map[string]string)
 	for _, originalResources := range department.OrgUnitData.Resources {
 		originalResourcesNodePoolToId[originalResources.NodePoolId] = originalResources.ID
-		originalResourcesNodePoolIdToRank[originalResources.NodePoolId] = ptr.Deref(originalResources.Rank, models.DefaultResourceRank)
 	}
-	newResources, err := services.ApiResourcesToModel(ctx, resources, true, nodePools, true, originalResourcesNodePoolToId, originalResourcesNodePoolIdToRank)
+	newResources, err := services.ApiResourcesToModel(ctx, resources, true, nodePools, true, originalResourcesNodePoolToId)
 	if err != nil {
 		errResponse := services.HandleError(err, http.StatusServiceUnavailable, "failed to map resources to model")
 		return errResponse, nil
@@ -690,12 +688,10 @@ func (s *DepartmentApiService) patchDepartmentResources(
 	}
 
 	originalResourcesNodePoolToId := make(map[string]uuid.UUID)
-	originalResourcesNodePoolIdToRank := make(map[string]string)
 	for _, originalResources := range department.OrgUnitData.Resources {
 		originalResourcesNodePoolToId[originalResources.NodePoolId] = originalResources.ID
-		originalResourcesNodePoolIdToRank[originalResources.NodePoolId] = ptr.Deref(originalResources.Rank, models.DefaultResourceRank)
 	}
-	newResources, err := services.ApiResourcesToModel(ctx, resources, true, nodePools, false, originalResourcesNodePoolToId, originalResourcesNodePoolIdToRank)
+	newResources, err := services.ApiResourcesToModel(ctx, resources, true, nodePools, false, originalResourcesNodePoolToId)
 	if err != nil {
 		return nil, "", api.NewError(http.StatusInternalServerError, "failed to map resources to model", err)
 	}

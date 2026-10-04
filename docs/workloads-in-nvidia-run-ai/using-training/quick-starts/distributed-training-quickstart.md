@@ -146,8 +146,8 @@ Copy the following command to your terminal. Make sure to update the following p
 
 ```bash
 curl -L 'https://<COMPANY-URL>/api/v1/workloads/distributed' \
--H 'Content-Type: application/json' \ 
--H 'Authorization: Bearer <TOKEN>' \   
+-H 'Content-Type: application/json' \
+-H 'Authorization: Bearer <TOKEN>' \
 -d '{  
     "name": "workload-name",  
     "projectId": "<PROJECT-ID>",

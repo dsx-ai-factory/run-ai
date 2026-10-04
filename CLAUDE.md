@@ -179,3 +179,4 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - `/list-services` — show all services grouped by type
 - `/write-service-docs` — generate README + CLAUDE.md for a service
 - `/validate-service-docs` — check a service's README against its Makefile
+- `/cel-validation-advisor` — assess CEL options before adding a Kubernetes webhook or changing admission validation

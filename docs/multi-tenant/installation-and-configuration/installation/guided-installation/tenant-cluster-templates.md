@@ -17,13 +17,9 @@ Use these templates to start with a complete tenant cluster `config.yaml` instea
 
 Complete [Preparations](preparations.md) before using a template. This includes completing the applicable [System Requirements](../../system-requirements/README.md), [registering the cluster](create-a-tenant-and-cluster.md#register-the-cluster), and having the required domain, TLS certificates, networking values, and registry credentials ready.
 
-<Note>
-
-**Note**
-
-See the [Configuration Reference](configuration-reference.md) for what every field accepts.
-
-</Note>
+* See [Create a Tenant and Cluster](create-a-tenant-and-cluster.md#install-the-cluster) to understand the minimum configuration needed before adapting a template.
+* See [Prerequisites and Features](prerequisites-and-features.md) to understand the components required, depending on the workload types that tenant plans to run - each template installs a fixed set of prerequisites and features, and depending on which one you choose, you may need to adjust versions or add `customHelmValues` for your environment (for example, an explicit CUDA driver version if you plan to use GPU fractions).
+* See [Configuration Reference](configuration-reference.md) for the full set of supported fields and descriptions.
 
 ## Full Cluster Installation
 
@@ -281,17 +277,12 @@ cluster:
   controlPlaneUrl: https://<CONTROL_PLANE_DOMAIN>
   uid: <CLUSTER_UUID>
   bootstrapTokenPath: /path/to/bootstrap-token
-  tls:
-    certPath: /path/to/cluster-cert.pem
-    keyPath: /path/to/cluster-key.pem
   inference:
     wildcardDomain: "*.<INFERENCE_WILDCARD_DOMAIN>"
-    wildcardTls:
-      certPath: /path/to/inference-wildcard-cert.pem
-      keyPath: /path/to/inference-wildcard-key.pem
   customHelmValues: {}
 
 prerequisites:
+  skip: false
   gpuOperator:
     mode: install
     version: ""
@@ -302,6 +293,7 @@ prerequisites:
     version: ""
 
 features:
+  skip: false
   kubeflow:
     mode: install
     version: ""
@@ -311,16 +303,21 @@ features:
   knative:
     mode: install
     version: ""
+    customHelmValues: {}
   lws:
     mode: install
     version: ""
+    customHelmValues: {}
   nimOperator:
     mode: install
     version: ""
+    customHelmValues: {}
   grove:
     mode: install
     version: ""
+    customHelmValues: {}
   dynamo:
     mode: install
     version: ""
+    customHelmValues: {}
 ```
