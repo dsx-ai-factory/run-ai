@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package legacy_cli_backend
+package legacy_researcher_service
 
 import (
 	"context"

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package legacy_cli_backend
+package legacy_researcher_service
 
 import (
 	"context"
@@ -23,14 +23,13 @@ import (
 	gwv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
-// Package legacy_cli_backend deletes the resources the operator created for
-// the CLI backend retired in 2.26. They carry no ownerReferences, so nothing
-// else removes them from upgraded clusters. The operand is always disabled,
-// which routes its resources to deletion on every reconcile; objects that are
-// already gone and kinds whose CRD is absent are skipped.
+// Package legacy_researcher_service deletes the resources the operator created
+// for researcher-service, retired in 2.26. They carry no ownerReferences, so
+// nothing else removes them from upgraded clusters. The operand is always
+// disabled, which routes its resources to deletion on every reconcile; objects
+// that are already gone and kinds whose CRD is absent are skipped.
 //
-// Names are base64-encoded to keep the retired component's name out of
-// source. Remove this operand once every supported cluster is past 2.26.
+// Remove this operand once every supported cluster is past 2.26.
 
 //+kubebuilder:rbac:namespace=runai,groups=apps,resources=deployments,verbs=get;delete
 //+kubebuilder:rbac:namespace=runai,groups="",resources=services,verbs=get;delete
@@ -41,7 +40,7 @@ import (
 //+kubebuilder:rbac:namespace=runai,groups=route.openshift.io,resources=routes,verbs=get;delete
 
 const (
-	name = "legacy-cli-backend-cleanup"
+	name = "legacy-researcher-service-cleanup"
 
 	legacyNameB64      = "cmVzZWFyY2hlci1zZXJ2aWNl"
 	legacyIngressB64   = "cmVzZWFyY2hlci1zZXJ2aWNlLWluZ3Jlc3M="
@@ -109,7 +108,7 @@ func mustDecodeBase64(encoded string) string {
 	decoded, err := base64.StdEncoding.DecodeString(encoded)
 	if err != nil {
 		// The inputs are compile-time constants; a decode failure is a bug.
-		panic(fmt.Sprintf("legacy_cli_backend: invalid base64 constant %q: %v", encoded, err))
+		panic(fmt.Sprintf("legacy_researcher_service: invalid base64 constant %q: %v", encoded, err))
 	}
 	return string(decoded)
 }
