@@ -14,31 +14,15 @@ packages:
       include-auto-generated: true
     interfaces:
       AccessKeysAPI: {}
-      ClientsAPI:
-        config:
-          filename: ClientsApi.go
-      ConfigAPI:
-        config:
-          filename: ConfigApi.go
-      HealthAPI:
-        config:
-          filename: HealthApi.go
-      IdpsAPI:
-        config:
-          filename: IdpsApi.go
-      LoginsAPI:
-        config:
-          filename: LoginsApi.go
+      ClientsAPI: {}
+      ConfigAPI: {}
+      HealthAPI: {}
+      IdpsAPI: {}
+      LoginsAPI: {}
       LogoutAPI: {}
       OpenIDConnectAPI: {}
-      RealmAPI:
-        config:
-          filename: RealmApi.go
+      RealmAPI: {}
       ServiceAccountsAPI: {}
       SettingsAPI: {}
-      TokensAPI:
-        config:
-          filename: TokensApi.go
-      UsersAPI:
-        config:
-          filename: UsersApi.go
+      TokensAPI: {}
+      UsersAPI: {}
