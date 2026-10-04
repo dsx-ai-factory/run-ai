@@ -207,11 +207,9 @@ function validateScope(
   return false;
 }
 function validateName(name: string): boolean {
-  // TODO :: Add api uniqueness validation.
   return isNotEmpty(name) && isFirstLetterIsLowerCase(name) && isLowerCaseAndNumbers(name);
 }
 function validateImage(image: string): boolean {
-  // TODO :: add image regex
   return isNotEmpty(image);
 }
 function validateConnections(connections: Array<Connection> = []): boolean {

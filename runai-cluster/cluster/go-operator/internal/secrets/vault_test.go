@@ -20,7 +20,17 @@ import (
 
 const (
 	agentDeploymentName           = "agent"
-	installationConfigurationData = "global:\n  clusterURL: https://fox-demo.runailabs.com\n  controlPlane:\n    clusterUUID: be307c33-d79e-409b-815a-4b9ffe0b2378\n    config:\n      agent:\n        client:\n          id: a56959cb-6b5c-4bb1-83e0-966867e2b256\n          name: runai-internal.be307c33-d79e-409b-815a-4b9ffe0b2378.agent\n          secret: whooosecret\n      clusterName: fox-demo-1733726709"
+	installationConfigurationData = "global:\n" +
+		"  clusterURL: https://cluster.example.com\n" +
+		"  controlPlane:\n" +
+		"    clusterUUID: 00000000-0000-0000-0000-000000000001\n" +
+		"    config:\n" +
+		"      agent:\n" +
+		"        client:\n" +
+		"          id: 00000000-0000-0000-0000-000000000002\n" +
+		"          name: runai-internal.00000000-0000-0000-0000-000000000001.agent\n" +
+		"          secret: test-secret\n" +
+		"      clusterName: example-cluster"
 )
 
 var _ = Describe("Secret Handling", func() {
@@ -128,7 +138,7 @@ var _ = Describe("Secret Handling", func() {
 			err = json.Unmarshal(secret.Data["agent"], &extData)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(extData).To(HaveLen(1))
-			Expect(extData["CLIENT_NAME"]).To(Equal("runai-internal.be307c33-d79e-409b-815a-4b9ffe0b2378.agent"))
+			Expect(extData["CLIENT_NAME"]).To(Equal("runai-internal.00000000-0000-0000-0000-000000000001.agent"))
 		})
 
 		It("vault create a secret and proprietary values", func() {
@@ -157,8 +167,8 @@ var _ = Describe("Secret Handling", func() {
 			err = json.Unmarshal(secret.Data["agent"], &extData)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(extData).To(HaveLen(3))
-			Expect(extData["CLIENT_NAME"]).To(Equal("runai-internal.be307c33-d79e-409b-815a-4b9ffe0b2378.agent"))
-			Expect(extData["CLUSTER_UUID"]).To(Equal("be307c33-d79e-409b-815a-4b9ffe0b2378"))
+			Expect(extData["CLIENT_NAME"]).To(Equal("runai-internal.00000000-0000-0000-0000-000000000001.agent"))
+			Expect(extData["CLUSTER_UUID"]).To(Equal("00000000-0000-0000-0000-000000000001"))
 			Expect(extData["ANOTHER_SECRET"]).To(Equal("justfortesting"))
 		})
 	})

@@ -791,7 +791,6 @@ const WorkloadIndex = defineComponent({
           } else {
             errMsg = `${res.failed.length} workloads couldn't be deleted`;
           }
-          // TODO - add error message
           this.$q.notify(alertUtil.getError(errMsg));
         } else if (res.succeeded?.length && res.succeeded[0]) {
           const firstSucceededName = this.workloadStore.allWorkloadMapById.get(res.succeeded[0])?.name;
