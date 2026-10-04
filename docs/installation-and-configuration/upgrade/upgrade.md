@@ -64,7 +64,7 @@ Support-Entitled artifacts require authentication to NGC. Before upgrading, make
 * An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
 ```bash
-helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm search repo -l runai/control-plane
 ```
@@ -124,6 +124,7 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 
 * Replace `<VERSION>` with the NVIDIA Run:ai version you are upgrading to.
 * Set `supportEntitled=true` to configure the installation as Support-Entitled.
+* Set `telemetryService.enabled=true` to enable NVIDIA Run:ai's telemetry.
 * Set `global.imagePullSecrets[0].name=runai-reg-creds` to use the NGC image pull secret prepared in [Software Artifacts](#prepare-software-artifacts).
 * Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](../installation/install-using-helm/preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
   - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
@@ -144,6 +145,7 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
   -f runai_control_plane_values.yaml \
   --reset-then-reuse-values \
   --set supportEntitled=true \
+  --set telemetryService.enabled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
   --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
 ```
@@ -178,7 +180,7 @@ helm upgrade runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend
 
 **Support-Entitled**
 
-Add `--set supportEntitled=true` to the `helm upgrade` command:
+Add `--set supportEntitled=true` and `--set telemetryService.enabled=true` to the `helm upgrade` command:
 
 <Note>
 
@@ -192,7 +194,8 @@ This flag configures functionality introduced in v3.0. If you are upgrading from
 helm upgrade runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
   -f <VALUES_DIR>/control-plane-airgap-values.yaml \
   --reset-then-reuse-values \
-  --set supportEntitled=true
+  --set supportEntitled=true \
+  --set telemetryService.enabled=true
 ```
 
 </Accordion>
