@@ -17,6 +17,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/util/version"
 )
 
 var (
@@ -62,6 +63,25 @@ type AssetTestFactory interface {
 	addToWorkloadCreationReq(request *api.WorkloadCreationRequest, assetMeta *api.AssetMeta) bool
 }
 
+// AssetFilterStyle labels how an asset's list endpoint exposes filtering.
+// Generic list-filter CRUD tests target FilterStyleQueryString by default
+// (backwards-compatible with every existing asset kind); assets on the newer
+// custom-filter surface skip those and are expected to bring their own
+// per-asset tests exercising their filter API.
+type AssetFilterStyle int
+
+const (
+	// FilterStyleQueryString: legacy asset list endpoints that accept
+	// ?name, ?scope, ?projectId, ?departmentId, ?clusterId query params.
+	FilterStyleQueryString AssetFilterStyle = iota
+	// FilterStyleCustom: new-style asset list endpoints (e.g. under
+	// /api/v1/k8s-objects/*) that expose filtering through a different
+	// surface (e.g. a POST /filter body). Generic query-string filter
+	// tests are skipped for these — per-asset tests exercise the custom
+	// filter surface directly.
+	FilterStyleCustom
+)
+
 type AssetTest struct {
 	kind                      api.AssetKind
 	factory                   AssetTestFactory
@@ -75,8 +95,16 @@ type AssetTest struct {
 	supportsPresets           bool // supports preset assets
 	supportsWorkloadType      bool // supports preset assets
 	supportsAutoDeletion      bool
-	notSupportedPre217        bool // we need it for some tests which checks behavior in old clusters
-	notSupportedPre220        bool // we need it for some tests which checks behavior in old clusters
+	// minClusterVersion, when non-empty, marks the asset as requiring a
+	// Run:ai cluster at least at this version (semver-ish, matches whatever
+	// checker.NewClusterCapabilitiesCheckerForVersion parses). Generic tests
+	// that swap in an older cluster mock (e.g. OldClustersPreK8sObjectsTracker)
+	// call supportsClusterMockVersion to skip when the mock version is below
+	// this floor. Empty = no floor, compatible with any mock.
+	minClusterVersion string
+
+	filteringStyle     AssetFilterStyle // how the list endpoint accepts filters (default: query-string)
+	supportOffsetLimit bool             // list endpoint accepts ?offset= and ?limit=
 
 	renameNotAllowedDuringSync bool
 
@@ -99,6 +127,26 @@ func (a *AssetTest) canRunOnScope(scope api.Scope) bool {
 	}
 
 	return true
+}
+
+// supportsClusterMockVersion reports whether the asset can run against a
+// cluster mock reporting the given version string. Assets without a
+// minClusterVersion are always compatible. Fails closed (returns false) on
+// unparseable versions on either side — treat any parse failure as
+// "incompatible" rather than silently pretending the asset works there.
+func (a *AssetTest) supportsClusterMockVersion(v string) bool {
+	if a.minClusterVersion == "" {
+		return true
+	}
+	min, err := version.ParseGeneric(a.minClusterVersion)
+	if err != nil {
+		return false
+	}
+	actual, err := version.ParseGeneric(v)
+	if err != nil {
+		return false
+	}
+	return !actual.LessThan(min)
 }
 
 func (a *AssetTest) canRunOnlyOnScope(scope api.Scope) bool {
@@ -218,7 +266,7 @@ func NewAssetKindTable(router chi.Router) []ginkgo.TableEntry {
 			testComplianceInfo: true,
 			testStatusInfo:     true,
 			allowedScopes:      &clusterDownScopes,
-			notSupportedPre220: true,
+			minClusterVersion:  "2.20.0",
 			supportsCleanup:    true,
 		}),
 
@@ -227,7 +275,7 @@ func NewAssetKindTable(router chi.Router) []ginkgo.TableEntry {
 			testUsageInfo:              true,
 			testComplianceInfo:         true,
 			allowedScopes:              &projectScopeOnly,
-			notSupportedPre217:         true,
+			minClusterVersion:          "2.17.0",
 			skipClusterDeleteEventTest: true, // Skipping test cluster scope because it requires some refactor in the test i/f
 			supportsCleanup:            true,
 		}),
@@ -256,6 +304,26 @@ func NewAssetKindTable(router chi.Router) []ginkgo.TableEntry {
 			testStatusInfo:             false,
 			allowedScopes:              &clusterDownScopes,
 		}),
+
+		// Resource claim templates: newest asset kind, backed by the generic
+		// assets_spec table (not a dedicated per-kind spec table). Lives under
+		// /api/v1/k8s-objects/* with a lightweight list contract (offset/limit
+		// today; custom-filter API to follow). Requires cluster >= 3.1. No
+		// workload integration yet, no cluster status/sync yet — those layers
+		// ship in follow-up PRs. Cross-cutting CRUD/RBAC/tenancy tests still
+		// apply.
+		ginkgo.Entry(string(api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE), AssetTest{
+			kind:                   api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
+			factory:                NewRctTestFactory(router),
+			url:                    urlRct,
+			customAuthorization:    true, // x-no-authorization on list/create, x-authorize on by-id
+			cannotAppearInWorkload: true, // RCT not yet wired into workload create
+			supportsCleanup:        true,
+			filteringStyle:         FilterStyleCustom, // query-string filters not exposed on this endpoint
+			supportOffsetLimit:     true,
+			minClusterVersion:      "3.1.0", // matches checker.MinVersionResourceClaimTemplates
+			allowedScopes:          &clusterDownScopes,
+		}),
 	}
 }
 
@@ -277,7 +345,8 @@ type AssetSpec interface {
 		api.ConfigMapAssetSpec |
 		api.GenericSecretSpec |
 		api.SecretAssetSpec |
-		api.NgcApiKeySpec
+		api.NgcApiKeySpec |
+		api.RctSpec
 }
 
 // ListEntry is a generic list response structure for a given asset

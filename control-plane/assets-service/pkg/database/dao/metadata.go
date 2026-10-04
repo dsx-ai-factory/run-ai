@@ -52,6 +52,7 @@ var SoftDeleteAssets = datastructs.NewSet[api.AssetKind](
 	api.ASSETKIND_PASSWORD,
 	api.ASSETKIND_PVC,
 	api.ASSETKIND_NGC_API_KEY,
+	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
 )
 
 func JoinAssetMetaWorkloadSupportedTypes() string {

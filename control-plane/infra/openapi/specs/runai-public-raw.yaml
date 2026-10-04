@@ -34669,6 +34669,7 @@ components:
         - secret-volume
         - data-volume
         - ngcApiKey
+        - resource-claim-template
     UpdateCount:
       description: the value of an update counter of a data in the system.
       type: integer
@@ -34738,7 +34739,8 @@ components:
         - $ref: '#/components/schemas/AssetReadOnlyFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         id: a418ed33-9399-48c0-a890-122cadd13bfd
         kind: s3
         createdBy: test@run.ai
@@ -35079,7 +35081,8 @@ components:
         - $ref: '#/components/schemas/AssetCreationFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         workloadSupportedTypes:
           workspace: false
           training: false
@@ -35340,6 +35343,145 @@ components:
             - $ref: '#/components/schemas/ComputeAssetSpec'
           nullable: true
           type: object
+    K8sObjectMeta:
+      description: Metadata of the Kubernetes resource that is created by this k8sObject
+      type: object
+      nullable: true
+      properties:
+        annotations:
+          type: object
+          nullable: true
+          description: >
+            Free-form annotations attached to the resource. Keys must conform
+
+            to Kubernetes qualified-name syntax
+
+            (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set):
+
+            an optional DNS-subdomain prefix (≤253 chars) followed by "/" and a
+
+            required name component ([A-Za-z0-9] with `.`, `_`, `-` allowed
+
+            inside, ≤63 chars). Key syntax is enforced at runtime on both
+
+            create and update; annotation values have no format constraint
+
+            beyond the length limit below.
+          additionalProperties:
+            type: string
+            maxLength: 10000
+          maxProperties: 1000
+          example:
+            example.com/owner: team-a
+            example.com/version: '1.0'
+        labels:
+          type: object
+          nullable: true
+          description: >
+            Free-form labels attached to the resource. Keys and values must
+
+            conform to Kubernetes label syntax
+
+            (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set):
+
+            keys are qualified names (optional DNS-subdomain prefix ≤253 chars
+
+            + "/" + name component ≤63 chars); values are ≤63 chars matching
+
+            the same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are
+
+            allowed). Key syntax is validated at runtime; the value pattern
+
+            below is enforced by the schema as well as at runtime.
+          additionalProperties:
+            type: string
+            maxLength: 63
+            pattern: '^([A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?)?$'
+          maxProperties: 1000
+          example:
+            app: my-app
+    RctSpec:
+      type: object
+      required:
+        - objectSpec
+      properties:
+        objectMeta:
+          $ref: '#/components/schemas/K8sObjectMeta'
+        objectSpec:
+          description: The raw Kubernetes spec of the ResourceClaimTemplate.
+          type: object
+          additionalProperties: true
+    Rct:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetMeta'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+    RctListResponse:
+      type: object
+      required:
+        - entries
+      properties:
+        next:
+          type: integer
+          format: int32
+          description: >
+            Offset for the next page of results. Present only when there are
+            more entries beyond the current page (i.e., the number of returned
+            entries equals the limit).
+        entries:
+          type: array
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/Rct'
+      example:
+        entries:
+          - meta:
+              id: a418ed33-9399-48c0-a890-122cadd13bfd
+              name: my-rct
+              kind: resource-claim-template
+              scope: project
+              projectId: 4500001
+              createdBy: test@run.ai
+              createdAt: '2026-01-01T00:00:00Z'
+              updatedBy: test@run.ai
+              updatedAt: '2026-01-01T00:00:00Z'
+            spec:
+              objectMeta:
+                labels:
+                  app: my-app
+              objectSpec:
+                devices:
+                  requests:
+                    - name: gpu
+                      exactly:
+                        deviceClassName: gpu.nvidia.com
+                        count: 1
+                        allocationMode: ExactCount
+    RctCreationRequest:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetCreationRequest'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+    RctUpdateRequest:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetUpdateRequest'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
     AccessKeyCreationSpec:
       properties:
         existingSecretName:
