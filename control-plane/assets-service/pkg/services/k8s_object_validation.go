@@ -76,11 +76,24 @@ func validateK8sObjectMeta(meta *api.K8sObjectMeta) *api.Error {
 	if meta.Annotations != nil {
 		// Annotation values have no syntactic constraint (arbitrary strings
 		// up to the maxLength enforced by the generated model constraints);
-		// only the key is validated here.
-		for key := range *meta.Annotations {
+		// only the key is validated here. We also enforce the aggregate
+		// 256 KiB total-size limit that the Kubernetes API server applies to
+		// metadata.annotations: without this guard, a payload that fits our
+		// per-key maxLength / maxProperties schema could still be rejected
+		// at cluster-apply time with an opaque "Too long: must have at most
+		// 262144 bytes" error from kube-apiserver. len(string) in Go is
+		// already UTF-8 byte length, matching apiserver's calculation.
+		total := 0
+		for key, value := range *meta.Annotations {
 			if err := validateQualifiedName(key, PathObjectMetaAnnotations); err != nil {
 				return err
 			}
+			total += len(key) + len(value)
+		}
+		if total > validation.TotalAnnotationSizeLimitB {
+			return api.NewValidationError(fmt.Sprintf(
+				"%s: total size %d bytes exceeds Kubernetes limit of %d bytes",
+				PathObjectMetaAnnotations, total, validation.TotalAnnotationSizeLimitB))
 		}
 	}
 	return nil
