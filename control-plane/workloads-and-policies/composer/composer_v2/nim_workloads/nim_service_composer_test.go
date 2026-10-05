@@ -10,8 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
-	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -36,6 +34,13 @@ type NimServiceComposerTest struct {
 	isOpenshift      bool   // whether the cluster is an OpenShift cluster (default: false)
 	gpuVendor        string // gpu vendor (default: "nvidia", supported: "nvidia", "amd")
 	clusterVersion   string // cluster version for capability gating (default: "2.25.0")
+}
+
+type NimReplicaCompositionTest struct {
+	autoscaling  bool
+	replicas     *int32
+	wantReplicas *int32
+	wantError    bool
 }
 
 var NimServiceComposerTests = []TableEntry{
@@ -631,6 +636,53 @@ var _ = Describe("NimServiceComposer", func() {
 			RunNimServiceComposerTest(testDetails, ".")
 		}, NimServiceComposerTests)
 	})
+
+	Context("serialized replica configuration", func() {
+		DescribeTable("preserves the replica configuration accepted by NIM", func(tc NimReplicaCompositionTest) {
+			input, err := os.ReadFile("testing/inputs/autoscaling_minimal.yaml")
+			Expect(err).To(BeNil())
+
+			var spec api.NimServiceSpec
+			Expect(yaml.Unmarshal(input, &spec)).To(Succeed())
+			if !tc.autoscaling {
+				spec.Autoscaling.Set(nil)
+			}
+			spec.Replicas.Set(tc.replicas)
+			cluster := mockClustersClientInfo("test-cluster", false, "", false, "nvidia", "3.0.0")
+			converter := NewNimServiceComposer("test-workload", "tester", cluster, "test-project", composer.OptionsForNimService())
+			var actual nimv1alpha1.NIMServiceSpec
+			composeErr := converter.Compose(context.Background(), &spec, &actual)()
+			if tc.wantError {
+				Expect(composeErr).NotTo(BeNil())
+				Expect(composeErr.Error()).To(ContainSubstring("mutually exclusive"))
+				return
+			}
+			Expect(composeErr).To(BeNil())
+
+			encoded, err := json.Marshal(actual)
+			Expect(err).To(BeNil())
+			var wire map[string]json.RawMessage
+			Expect(json.Unmarshal(encoded, &wire)).To(Succeed())
+			if tc.wantReplicas == nil {
+				Expect(wire).NotTo(HaveKey("replicas"), "autoscaling resource must omit replicas")
+				var scale struct {
+					Enabled bool `json:"enabled"`
+				}
+				Expect(json.Unmarshal(wire["scale"], &scale)).To(Succeed())
+				Expect(scale.Enabled).To(BeTrue(), "autoscaling must remain enabled")
+			} else {
+				Expect(wire).To(HaveKey("replicas"))
+				var replicas int32
+				Expect(json.Unmarshal(wire["replicas"], &replicas)).To(Succeed())
+				Expect(replicas).To(Equal(*tc.wantReplicas))
+			}
+		},
+			Entry("autoscaling omits replicas", NimReplicaCompositionTest{autoscaling: true}),
+			Entry("fixed replicas remain explicit", NimReplicaCompositionTest{replicas: convutils.Ref(int32(2)), wantReplicas: convutils.Ref(int32(2))}),
+			Entry("fixed replicas default to one", NimReplicaCompositionTest{wantReplicas: convutils.Ref(int32(1))}),
+			Entry("explicit replicas conflict with autoscaling", NimReplicaCompositionTest{autoscaling: true, replicas: convutils.Ref(int32(2)), wantError: true}),
+		)
+	})
 })
 
 func RunNimServiceComposerTest(testDetails NimServiceComposerTest, basePath string) {
@@ -738,80 +790,4 @@ func mockClustersClientInfo(clusterId string, subdomainSupportEnabled bool, ingr
 	displayedCluster.Status.Set(clusterDisplayedStatus)
 
 	return displayedCluster
-}
-
-// TestNimReplicaComposition covers the serialized resource accepted by NIM 3.1.
-func TestNimReplicaComposition(t *testing.T) {
-	explicit := int32(2)
-	cases := []struct {
-		name         string
-		autoscaling  bool
-		replicas     *int32
-		wantReplicas *int32
-		wantError    bool
-	}{
-		{name: "autoscaling omits replicas", autoscaling: true},
-		{name: "fixed replicas remain explicit", replicas: &explicit, wantReplicas: &explicit},
-		{name: "fixed replicas default to one", wantReplicas: convutils.Ref(int32(1))},
-		{name: "explicit replicas conflict with autoscaling", autoscaling: true, replicas: &explicit, wantError: true},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			input, err := os.ReadFile("testing/inputs/autoscaling_minimal.yaml")
-			if err != nil {
-				t.Fatal(err)
-			}
-			var spec api.NimServiceSpec
-			if err := yaml.Unmarshal(input, &spec); err != nil {
-				t.Fatal(err)
-			}
-			if !tc.autoscaling {
-				spec.Autoscaling.Set(nil)
-			}
-			spec.Replicas.Set(tc.replicas)
-			cluster := mockClustersClientInfo("test-cluster", false, "", false, "nvidia", "3.0.0")
-			converter := NewNimServiceComposer("test-workload", "tester", cluster, "test-project", composer.OptionsForNimService())
-			var actual nimv1alpha1.NIMServiceSpec
-			composeErr := converter.Compose(context.Background(), &spec, &actual)()
-			if tc.wantError {
-				if composeErr == nil || !strings.Contains(composeErr.Error(), "mutually exclusive") {
-					t.Fatalf("expected mutually exclusive validation, got %v", composeErr)
-				}
-				return
-			}
-			if composeErr != nil {
-				t.Fatal(composeErr)
-			}
-			encoded, err := json.Marshal(actual)
-			if err != nil {
-				t.Fatal(err)
-			}
-			var wire map[string]json.RawMessage
-			if err := json.Unmarshal(encoded, &wire); err != nil {
-				t.Fatal(err)
-			}
-			if tc.wantReplicas == nil {
-				if value, found := wire["replicas"]; found {
-					t.Fatalf("autoscaling resource must omit replicas; got %s", value)
-				}
-				var scale struct {
-					Enabled bool `json:"enabled"`
-				}
-				if err := json.Unmarshal(wire["scale"], &scale); err != nil {
-					t.Fatal(err)
-				}
-				if !scale.Enabled {
-					t.Fatal("autoscaling must remain enabled")
-				}
-			} else {
-				var replicas int32
-				if err := json.Unmarshal(wire["replicas"], &replicas); err != nil {
-					t.Fatal(err)
-				}
-				if replicas != *tc.wantReplicas {
-					t.Fatalf("replicas: want %d, got %d", *tc.wantReplicas, replicas)
-				}
-			}
-		})
-	}
 }
