@@ -219,10 +219,6 @@ var Editor = models.Role{
 			Read:         true,
 		},
 		{
-			ResourceType: api.RESOURCETYPE_APPS,
-			Read:         true,
-		},
-		{
 			ResourceType: api.RESOURCETYPE_SERVICE_ACCOUNT,
 			Read:         true,
 		},

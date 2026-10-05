@@ -98,13 +98,6 @@ var CloudOperator = models.Role{
 			Read:         true,
 		},
 		{
-			ResourceType: api.RESOURCETYPE_APPS,
-			Create:       true,
-			Read:         true,
-			Update:       true,
-			Delete:       true,
-		},
-		{
 			ResourceType: api.RESOURCETYPE_SERVICE_ACCOUNT,
 			Create:       true,
 			Read:         true,
