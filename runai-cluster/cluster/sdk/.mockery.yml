@@ -1,0 +1,10 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/prometheus/definitions/remote-write-relabel-configs:
+    interfaces:
+      RemoteWriteRelabelConfigs: {}
+      RemoteWriteRelabelConfigsHandler: {}
