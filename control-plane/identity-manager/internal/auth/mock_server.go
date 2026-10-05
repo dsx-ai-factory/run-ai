@@ -56,10 +56,6 @@ func (m MockService) SetAppPermissions(_ context.Context, _ string, _ string, _ 
 	return nil
 }
 
-func (m MockService) SetServiceAccountPermissions(_ context.Context, _ string, _ string, _ authorization_api.InternalCreateAccessRuleRequestScope, _ authorization_api.AllowedInternalCreateRoles) error {
-	return nil
-}
-
 func (m MockService) PrivilegeEscalationEvaluate(_ context.Context) authorization_api.ApiPrivilegeEscalationEvaluateRequest {
 	return authorization_api.ApiPrivilegeEscalationEvaluateRequest{
 		ApiService: m,

@@ -131,7 +131,7 @@ func (flow *CreateMngTenantFlow) createApplicationAccessRules(ctx context.Contex
 		Type: authorization_api.SCOPETYPE_SYSTEM,
 		Name: ptr.String(tenantName),
 	}
-	if err := flow.authClient.SetServiceAccountPermissions(ctx, tenantId, MNG_APPLICATION_NAME, systemScope, authorization_api.ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR); err != nil {
+	if err := flow.authClient.SetAppPermissions(ctx, tenantId, MNG_APPLICATION_NAME, systemScope, authorization_api.ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR); err != nil {
 		return err
 	}
 
@@ -140,7 +140,7 @@ func (flow *CreateMngTenantFlow) createApplicationAccessRules(ctx context.Contex
 		Type: authorization_api.SCOPETYPE_TENANT,
 		Name: ptr.String(tenantName),
 	}
-	return flow.authClient.SetServiceAccountPermissions(ctx, tenantId, MNG_APPLICATION_NAME, tenantScope, authorization_api.ALLOWEDINTERNALCREATEROLES_SYSTEM_ADMINISTRATOR)
+	return flow.authClient.SetAppPermissions(ctx, tenantId, MNG_APPLICATION_NAME, tenantScope, authorization_api.ALLOWEDINTERNALCREATEROLES_SYSTEM_ADMINISTRATOR)
 }
 
 func (flow *CreateMngTenantFlow) addConsoleAdminSystemAdminRole(ctx context.Context, tenantId string, tenantName string) error {
