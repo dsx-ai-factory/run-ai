@@ -199,6 +199,7 @@ func (h *K8sObjectsHandler) setSyncCounter(highestUpdate int64) error {
 func (h *K8sObjectsHandler) processUpdatesConcurrently(numUpdates, numWorkers int, updates *K8sObjectsUpdateFromBackend, report *AssetsSyncReportInfo) error {
 	var wg sync.WaitGroup
 	var err error
+	var errMu sync.Mutex
 
 	if numWorkers <= 0 {
 		log.Warn().Msgf("number of workers changed from %d to 1", numWorkers)
@@ -222,7 +223,9 @@ func (h *K8sObjectsHandler) processUpdatesConcurrently(numUpdates, numWorkers in
 		go func() {
 			perAssetError, innerErr := h.processUpdates(updates.Assets[start:end], &wg)
 			if innerErr != nil {
+				errMu.Lock()
 				err = multierror.Append(err, innerErr)
+				errMu.Unlock()
 			}
 
 			for idx := start; idx < end; idx++ {
@@ -256,7 +259,7 @@ func (h *K8sObjectsHandler) processUpdates(updates []K8sObjectFromBackend, wg *s
 
 	projectToNamespaceMap, nsErr := h.anyKindHandler().ProjectToNamespaceList()
 	if nsErr != nil {
-		return nil, nsErr
+		return make([]error, len(updates)), nsErr
 	}
 
 	perAssetError := make([]error, len(updates))
