@@ -44,6 +44,20 @@ describe("accessRuleUtil", () => {
       expect(result[0].groupId).toBe(ResourceTypeGroupId.Organization);
       expect(result[1].groupId).toBe(ResourceTypeGroupId.Iam);
     });
+
+    it("should keep permissions without a known group after the grouped ones", () => {
+      const permissions = [
+        { resourceType: ResourceType.Users, displayName: "Users" },
+        { resourceType: ResourceType.Roles, groupId: "unknown-group", displayName: "Roles" },
+        { resourceType: ResourceType.Department, groupId: ResourceTypeGroupId.Organization, displayName: "Departments" },
+      ];
+      const result = accessRuleUtil.sortAndGroupPermissionsByGroupId(permissions as Permission[]);
+      expect(result.map((p) => p.resourceType)).toEqual([
+        ResourceType.Department,
+        ResourceType.Roles,
+        ResourceType.Users,
+      ]);
+    });
   });
 
   describe("addStatusExplanationToAccessRules", () => {

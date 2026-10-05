@@ -172,7 +172,8 @@ function getUserSubjectIds(user: IUser): Array<string> {
  * The function works in the following steps:
  * 1. It first sorts the permissions based on their display name.
  * 2. It then groups the sorted permissions by their group ID.
- * 3. Finally, it orders the groups according to the ResourceTypeGroupIdOrder and returns the result.
+ * 3. Finally, it orders the groups according to the ResourceTypeGroupIdOrder and returns the result,
+ *    followed by any permissions without a known group so none of them is dropped.
  */
 function sortAndGroupPermissionsByGroupId<T extends Pick<Permission, "displayName"> & { groupId?: ResourceTypeGroupId }>(
   permissions: T[],
@@ -189,7 +190,14 @@ function sortAndGroupPermissionsByGroupId<T extends Pick<Permission, "displayNam
     {} as Record<string, T[]>,
   );
 
-  return ResourceTypeGroupIdOrder.flatMap((key: ResourceTypeGroupId) => groupedPermissions[key] || []);
+  const ungroupedPermissions = sortedPermissions.filter(
+    (permission) => !permission.groupId || !ResourceTypeGroupIdOrder.includes(permission.groupId),
+  );
+
+  return [
+    ...ResourceTypeGroupIdOrder.flatMap((key: ResourceTypeGroupId) => groupedPermissions[key] || []),
+    ...ungroupedPermissions,
+  ];
 }
 
 function getStatusColOptions(accessRule: IAccessRuleTable): IStatusColOptions {

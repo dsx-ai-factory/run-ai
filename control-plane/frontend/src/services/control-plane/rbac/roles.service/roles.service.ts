@@ -18,7 +18,8 @@ async function list(): Promise<Role[]> {
   while (offset !== undefined) {
     const response = await authorizationApi.rolesApi.getRoles(ROLES_PAGE_SIZE, offset);
     roles.push(...response.data.roles);
-    offset = response.data.next ?? undefined;
+    const next = response.data.next;
+    offset = typeof next === "number" && next > offset ? next : undefined;
   }
   return roles;
 }

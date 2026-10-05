@@ -258,5 +258,18 @@ describe("role-permission.vue", () => {
       expect(trainingsElement.exists()).toBe(true);
       expect(trainingsElement.text()).eql("Trainings");
     });
+    test("should keep a row whose group and display name are unknown, last and labeled by resource type", async () => {
+      // Registries is not in the seeded permission store, so it has no group.
+      mountComponent({
+        role: {
+          ...systemAdmin,
+          permissions: [...systemAdmin.permissions, { resourceType: ResourceType.Registries, actions: ["read"] }],
+        },
+      });
+      const rows = wrapper.vm.groupAndSortPermissions;
+
+      expect(rows[rows.length - 1].resourceType).eql(ResourceType.Registries);
+      expect(wrapper.find(`[aid="${ResourceType.Registries}"]`).text()).eql(ResourceType.Registries);
+    });
   });
 });

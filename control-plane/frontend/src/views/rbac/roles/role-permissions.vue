@@ -87,7 +87,7 @@ export default defineComponent({
       // resource type with its group, so the group used to order the table rows is taken from there.
       return this.role.permissions.map((permission: RolePermission) => ({
         resourceType: permission.resourceType,
-        displayName: permission.displayName || "",
+        displayName: permission.displayName || permission.resourceType,
         actions: permission.actions,
         groupId: this.permissionStore.resourceTypeMap[permission.resourceType]?.groupId,
       }));
