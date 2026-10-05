@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import type { RoleV1 } from "@/swagger-models/authorization-client/api";
+import type { Role } from "@/swagger-models/authorization-client/api";
 import type { ILegacyRoleTransitionRow } from "@/models/legacy-access-rule-transition.model";
 import type { IFilterBy } from "@/models/filter.model";
 import { ECustomCell, type ICustomCellNewRoleColConfig } from "@/models/table.model";
@@ -35,7 +35,7 @@ defineOptions({ name: "legacy-access-rule-transition-table" });
 
 const props = defineProps<{
   rows: ILegacyRoleTransitionRow[];
-  availableRoles: RoleV1[];
+  availableRoles: Role[];
   loading?: boolean;
   selected: ILegacyRoleTransitionRow[];
 }>();

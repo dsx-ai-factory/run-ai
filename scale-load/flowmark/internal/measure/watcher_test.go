@@ -99,7 +99,7 @@ func TestEventBeforeMarkStampsDuration(t *testing.T) {
 	}
 }
 
-func TestNeverArrivingItemIsPendingAtTimeout(t *testing.T) {
+func TestNeverArrivingItemIsMarkedNeverArrivedAtTimeout(t *testing.T) {
 	kube, w := startWatch(t)
 
 	start := time.Now()
@@ -116,8 +116,8 @@ func TestNeverArrivingItemIsPendingAtTimeout(t *testing.T) {
 	if got["fast"].Outcome != Arrived {
 		t.Fatalf("fast must arrive: %+v", got["fast"])
 	}
-	if got["slow"].Outcome != Pending || got["slow"].Duration != 0 || got["slow"].Err != nil {
-		t.Fatalf("slow must be pending with no duration and no error, got %+v", got["slow"])
+	if got["slow"].Outcome != NeverArrived || got["slow"].Duration != 0 || got["slow"].Err != nil {
+		t.Fatalf("slow must be marked never arrived with no duration and no error, got %+v", got["slow"])
 	}
 }
 
@@ -180,8 +180,8 @@ func TestCancelledContextEndsWaitWithError(t *testing.T) {
 	if waited := time.Since(start); waited > 5*time.Second {
 		t.Fatalf("WaitAll must return promptly after cancellation, waited %s", waited)
 	}
-	if got.Outcome != Pending || !errors.Is(got.Err, ErrWatchClosed) || !errors.Is(got.Err, context.Canceled) {
-		t.Fatalf("cancellation must surface on pending items, got %+v", got)
+	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) || !errors.Is(got.Err, context.Canceled) {
+		t.Fatalf("cancellation must surface on items that never arrived, got %+v", got)
 	}
 }
 
@@ -362,8 +362,8 @@ func TestWatchThatCannotBeReopenedEndsWaitWithClosedError(t *testing.T) {
 	first.Stop()
 
 	got := byName(w.WaitAll(5 * time.Second))["w1"]
-	if got.Outcome != Pending || !errors.Is(got.Err, ErrWatchClosed) {
-		t.Fatalf("a watch that cannot be reopened must surface on pending items, got %+v", got)
+	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) {
+		t.Fatalf("a watch that cannot be reopened must surface on items that never arrived, got %+v", got)
 	}
 	if opened != 1+maxReconnects {
 		t.Fatalf("expected %d reopen attempts, got %d", maxReconnects, opened-1)
@@ -404,7 +404,7 @@ func TestAWatchTheServerKeepsEndingIsGivenUpWithTheClosedError(t *testing.T) {
 	w.MarkCreated("w1", time.Now())
 
 	got := byName(w.WaitAll(5 * time.Second))["w1"]
-	if got.Outcome != Pending || !errors.Is(got.Err, ErrWatchClosed) {
+	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) {
 		t.Fatalf("a watch that keeps closing must end as a closed watch, not a slow cluster: %+v", got)
 	}
 	if opened != 1+maxReconnectCycles || w.Reconnects() != maxReconnectCycles {
@@ -433,7 +433,7 @@ func TestAWatchTheServerKeepsFailingWithAnErrorEventIsGivenUp(t *testing.T) {
 	w.MarkCreated("w1", time.Now())
 
 	got := byName(w.WaitAll(5 * time.Second))["w1"]
-	if got.Outcome != Pending || !errors.Is(got.Err, ErrWatchClosed) {
+	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) {
 		t.Fatalf("a watch that keeps failing must end as a closed watch: %+v", got)
 	}
 	if opened != 1+maxReconnectCycles {

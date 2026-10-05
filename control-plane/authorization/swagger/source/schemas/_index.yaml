@@ -1,6 +1,4 @@
 # Roles
-RoleV1:
-  $ref: "./Roles/RoleV1.yaml"
 Role:
   $ref: "./Roles/Role.yaml"
 RoleActiveFields:
@@ -15,8 +13,6 @@ KubernetesPermissions:
   $ref: "./Roles/KubernetesPermissions.yaml"
 Roles:
   $ref: "./Roles/Roles.yaml"
-RolesV1:
-  $ref: "./Roles/RolesV1.yaml"
 RoleCreationFieldsInternal:
   $ref: "./Roles/RoleCreationFieldsInternal.yaml"
 RoleCreationFields:

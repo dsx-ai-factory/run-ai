@@ -425,12 +425,16 @@ func (nsc *NimServiceComposer) composeReplicas(src *int32, autoScaling *workload
 	target any, setter composer.FnIntSetter[int32], cookie any,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
-		if src == nil {
-			return setter(convutils.Ref(defaultReplicas), target, cookie)
+		if autoScaling != nil {
+			if src != nil {
+				return workloadsApi.NewError(http.StatusBadRequest, "autoscaling: replicas is mutually exclusive with autoscaling")
+			}
+			// Leave replicas unset when the operator manages scaling.
+			return nil
 		}
 
-		if autoScaling != nil {
-			return workloadsApi.NewError(http.StatusBadRequest, "autoscaling: replicas is mutually exclusive with autoscaling")
+		if src == nil {
+			return setter(convutils.Ref(defaultReplicas), target, cookie)
 		}
 
 		return setter(src, target, cookie)

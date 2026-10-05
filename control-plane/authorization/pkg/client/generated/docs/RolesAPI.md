@@ -7,9 +7,7 @@ Method | HTTP request | Description
 [**CreateRole**](RolesAPI.md#CreateRole) | **Post** /api/v2/authorization/roles | Create a role.
 [**DeleteRole**](RolesAPI.md#DeleteRole) | **Delete** /api/v2/authorization/roles/{roleIdPath} | Delete a role by id.
 [**GetRole**](RolesAPI.md#GetRole) | **Get** /api/v2/authorization/roles/{roleIdPath} | Get a role by id.
-[**GetRoleV1**](RolesAPI.md#GetRoleV1) | **Get** /api/v1/authorization/roles/{roleIdPath} | Get a role by id.
 [**GetRoles**](RolesAPI.md#GetRoles) | **Get** /api/v2/authorization/roles | Get a list of roles.
-[**GetRolesV1**](RolesAPI.md#GetRolesV1) | **Get** /api/v1/authorization/roles | Get a list of roles.
 [**RoleActive**](RolesAPI.md#RoleActive) | **Post** /api/v2/authorization/roles/{roleIdPath}/active | Enable or Disable a role by id.
 [**RoleDisable**](RolesAPI.md#RoleDisable) | **Post** /api/v2/authorization/roles/{roleIdPath}/disable | Disable a role by id.
 [**RoleEnable**](RolesAPI.md#RoleEnable) | **Post** /api/v2/authorization/roles/{roleIdPath}/enable | Enable a role by id.
@@ -221,76 +219,6 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetRoleV1
-
-> RoleV1 GetRoleV1(ctx, roleIdPath).Execute()
-
-Get a role by id.
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
-)
-
-func main() {
-	roleIdPath := int32(32) // int32 | The ID of the role
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.RolesAPI.GetRoleV1(context.Background(), roleIdPath).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `RolesAPI.GetRoleV1``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `GetRoleV1`: RoleV1
-	fmt.Fprintf(os.Stdout, "Response from `RolesAPI.GetRoleV1`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**roleIdPath** | **int32** | The ID of the role | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiGetRoleV1Request struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
-### Return type
-
-[**RoleV1**](RoleV1.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
 ## GetRoles
 
 > GetRoles200Response GetRoles(ctx).Limit(limit).Offset(offset).SortOrder(sortOrder).SortBy(sortBy).FilterBy(filterBy).Search(search).IncludeInternal(includeInternal).Execute()
@@ -354,72 +282,6 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**GetRoles200Response**](GetRoles200Response.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## GetRolesV1
-
-> []RoleV1 GetRolesV1(ctx).IncludeInternal(includeInternal).Execute()
-
-Get a list of roles.
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
-)
-
-func main() {
-	includeInternal := false // bool |  (optional) (default to false)
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.RolesAPI.GetRolesV1(context.Background()).IncludeInternal(includeInternal).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `RolesAPI.GetRolesV1``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `GetRolesV1`: []RoleV1
-	fmt.Fprintf(os.Stdout, "Response from `RolesAPI.GetRolesV1`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiGetRolesV1Request struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **includeInternal** | **bool** |  | [default to false]
-
-### Return type
-
-[**[]RoleV1**](RoleV1.md)
 
 ### Authorization
 

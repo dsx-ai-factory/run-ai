@@ -10,7 +10,7 @@ import { createTestingPinia } from "@pinia/testing";
 import LegacyAccessRuleTransitionTable from "./legacy-access-rule-transition-table.vue";
 import type { ILegacyRoleTransitionRow } from "@/models/legacy-access-rule-transition.model";
 import { ECustomCell, type ITableColumn } from "@/models/table.model";
-import type { RoleV1 } from "@/swagger-models/authorization-client/api";
+import type { Role } from "@/swagger-models/authorization-client/api";
 
 vi.mock("vue-router", () => ({
   useRouter: vi.fn().mockReturnValue({ resolve: vi.fn().mockReturnValue({ href: "/roles/1" }) }),
@@ -26,9 +26,9 @@ const mockRow = (overrides: Partial<ILegacyRoleTransitionRow> = {}): ILegacyRole
   ...overrides,
 });
 
-const legacyRole = { id: 99, name: "L1 researcher" } as RoleV1;
-const newRole1 = { id: 1, name: "AI practitioner" } as RoleV1;
-const newRole2 = { id: 2, name: "Project administrator" } as RoleV1;
+const legacyRole = { id: 99, name: "L1 researcher" } as Role;
+const newRole1 = { id: 1, name: "AI practitioner" } as Role;
+const newRole2 = { id: 2, name: "Project administrator" } as Role;
 
 interface ITransitionTableVm {
   roleOptions: string[];
@@ -76,14 +76,14 @@ describe("legacy-access-rule-transition-table.vue", () => {
     });
 
     it("includes roles not in ROLE_STAGE_CONFIG (unrecognized roles are allowed)", () => {
-      createComponent([], [{ id: 5, name: "Custom Role" } as RoleV1]);
+      createComponent([], [{ id: 5, name: "Custom Role" } as Role]);
       expect(vm().roleOptions).toContain("Custom Role");
     });
 
     it("includes New-stage roles from ROLE_STAGE_CONFIG", () => {
       createComponent(
         [],
-        [{ id: 1, name: "AI practitioner" } as RoleV1, { id: 2, name: "Project administrator" } as RoleV1],
+        [{ id: 1, name: "AI practitioner" } as Role, { id: 2, name: "Project administrator" } as Role],
       );
       expect(vm().roleOptions).toContain("AI practitioner");
       expect(vm().roleOptions).toContain("Project administrator");

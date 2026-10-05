@@ -165,27 +165,39 @@ function getUserSubjectIds(user: IUser): Array<string> {
 /**
  * Sorts and groups permissions by their group ID.
  *
- * @param {Permission[]} permissions - An array of permissions to be sorted and grouped.
+ * @param {T[]} permissions - An array of permissions to be sorted and grouped.
  *
- * @returns {Permission[]} - The sorted and grouped permissions.
+ * @returns {T[]} - The sorted and grouped permissions.
  *
  * The function works in the following steps:
  * 1. It first sorts the permissions based on their display name.
  * 2. It then groups the sorted permissions by their group ID.
- * 3. Finally, it orders the groups according to the ResourceTypeGroupIdOrder and returns the result.
+ * 3. Finally, it orders the groups according to the ResourceTypeGroupIdOrder and returns the result,
+ *    followed by any permissions without a known group so none of them is dropped.
  */
-function sortAndGroupPermissionsByGroupId(permissions: Permission[]): Permission[] {
+function sortAndGroupPermissionsByGroupId<T extends Pick<Permission, "displayName"> & { groupId?: ResourceTypeGroupId }>(
+  permissions: T[],
+): T[] {
   const sortedPermissions = [...permissions].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-  const groupedPermissions: Record<string, Permission[]> = sortedPermissions.reduce(
+  const groupedPermissions: Record<string, T[]> = sortedPermissions.reduce(
     (groups, permission) => {
-      groups[permission.groupId] = [...(groups[permission.groupId] || []), permission];
+      if (permission.groupId) {
+        groups[permission.groupId] = [...(groups[permission.groupId] || []), permission];
+      }
       return groups;
     },
-    {} as Record<string, Permission[]>,
+    {} as Record<string, T[]>,
   );
 
-  return ResourceTypeGroupIdOrder.flatMap((key: ResourceTypeGroupId) => groupedPermissions[key] || []);
+  const ungroupedPermissions = sortedPermissions.filter(
+    (permission) => !permission.groupId || !ResourceTypeGroupIdOrder.includes(permission.groupId),
+  );
+
+  return [
+    ...ResourceTypeGroupIdOrder.flatMap((key: ResourceTypeGroupId) => groupedPermissions[key] || []),
+    ...ungroupedPermissions,
+  ];
 }
 
 function getStatusColOptions(accessRule: IAccessRuleTable): IStatusColOptions {

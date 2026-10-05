@@ -714,37 +714,3 @@ func canEditRole(ctx context.Context, tenantId string, roleId uint) *api.Error {
 
 	return nil
 }
-
-// GetRoleV1 - Get role
-func (s *RolesApiService) GetRoleV1(ctx context.Context, roleId int32) (api.ImplResponse, error) {
-	tenantId, err := runaictx.ParseTenantId(ctx)
-	if err != nil {
-		return NewErrorResponse(api.NewError(http.StatusBadRequest, err.Error(), err)), nil
-	}
-
-	role, apiErr := dao.DbGetRoleById(ctx, tenantId, uint(roleId))
-	if apiErr != nil {
-		return NewErrorResponse(apiErr), nil
-	}
-
-	return api.Response(http.StatusOK, RoleDaoToV1Api(role)), nil
-}
-
-// GetRolesV1 - Get roles list
-func (s *RolesApiService) GetRolesV1(ctx context.Context, includeInternal bool) (api.ImplResponse, error) {
-	tenantId, err := runaictx.ParseTenantId(ctx)
-	if err != nil {
-		return NewErrorResponse(api.NewError(http.StatusBadRequest, err.Error(), err)), nil
-	}
-
-	roles, apiErr := dao.DbGetRoles(ctx, tenantId, 0, 0, "", "", nil, "", includeInternal)
-	if apiErr != nil {
-		return NewErrorResponse(apiErr), nil
-	}
-
-	resultRoles := []api.RoleV1{}
-	for _, role := range *roles {
-		resultRoles = append(resultRoles, RoleDaoToV1Api(&role))
-	}
-	return api.Response(http.StatusOK, resultRoles), nil
-}
