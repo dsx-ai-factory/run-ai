@@ -24,7 +24,6 @@ type TenantInfo struct {
 	MetricStore *models.MetricStoreDetails
 }
 
-//go:generate mockery
 type Interface interface {
 	Name() string
 	Construct(ctx context.Context, tenant *TenantInfo, builderResponse map[string]interface{}) error
