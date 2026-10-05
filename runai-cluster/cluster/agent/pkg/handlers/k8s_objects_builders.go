@@ -158,7 +158,7 @@ func (b *rctBuilder) CopySpec(dst, src client.Object) {
 }
 
 // ShouldReCreate for RCT returns true whenever the inner
-// ResourceClaimTemplateSpec really changed. sinc e it is immutable, 
+// ResourceClaimTemplateSpec really changed. sinc e it is immutable,
 // if it was really changed we need to re-create the object
 //
 // A metadata-only edit on the outer RCT (labels/annotations the agent
@@ -176,8 +176,8 @@ func (b *rctBuilder) ShouldReCreate(expected, existing client.Object) bool {
 	expectedCopy := expectedRct.DeepCopy()
 	existingCopy := existingRct.DeepCopy()
 
-    // normalize the spec by apping k8s defaults. the result of comprison will be
-    // more accurate when taking into account the defaults
+	// normalize the spec by apping k8s defaults. the result of comprison will be
+	// more accurate when taking into account the defaults
 	rctDefaultScheme.Default(expectedCopy)
 	rctDefaultScheme.Default(existingCopy)
 

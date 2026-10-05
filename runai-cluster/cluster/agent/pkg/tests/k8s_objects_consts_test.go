@@ -31,11 +31,11 @@ const (
 	rctAssetIdToDelete      = "rct-asset-id-to-delete"
 	rctAssetIdAlreadyInSync = "rct-asset-id-already-in-sync"
 
-	rctNameNewProj         = "newly-synced-proj-rct"
-	rctNameNewCluster      = "newly-synced-cluster-rct"
-	rctNameToUpdate        = "existing-rct-to-update"
-	rctNameToDelete        = "existing-rct-to-delete"
-	rctNameAlreadyInSync   = "existing-rct-already-in-sync"
+	rctNameNewProj          = "newly-synced-proj-rct"
+	rctNameNewCluster       = "newly-synced-cluster-rct"
+	rctNameToUpdate         = "existing-rct-to-update"
+	rctNameToDelete         = "existing-rct-to-delete"
+	rctNameAlreadyInSync    = "existing-rct-already-in-sync"
 	rctHighestSyncedCounter = 5
 )
 
@@ -238,8 +238,8 @@ func seedBasicRct(name, namespace, assetId string, updateCounter int64,
 				"run.ai/asset-id":         assetId,
 			},
 			Annotations: map[string]string{
-				"run.ai/asset-name":              name,
-				handlers.UpdateCountAnnotation:   strconv.FormatInt(updateCounter, 10),
+				"run.ai/asset-name":            name,
+				handlers.UpdateCountAnnotation: strconv.FormatInt(updateCounter, 10),
 			},
 		},
 		Spec: resourcev1.ResourceClaimTemplateSpec{Spec: spec},
