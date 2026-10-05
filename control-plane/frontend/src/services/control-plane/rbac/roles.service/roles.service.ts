@@ -3,19 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Permission, RoleV1 } from "@/swagger-models/authorization-client";
+import type { Permission, Role } from "@/swagger-models/authorization-client";
 import { authorizationApi } from "@/services/infra/client-apis/authorization-api/authorization-api";
+
+const ROLES_PAGE_SIZE = 500;
 
 export const rolesService = {
   list,
   isPermittedRole,
 };
-async function list(): Promise<RoleV1[]> {
-  const response = await authorizationApi.rolesApi.getRolesV1();
-  return response.data;
+async function list(): Promise<Role[]> {
+  const roles: Role[] = [];
+  let offset: number | undefined = 0;
+  while (offset !== undefined) {
+    const response = await authorizationApi.rolesApi.getRoles(ROLES_PAGE_SIZE, offset);
+    roles.push(...response.data.roles);
+    const next = response.data.next;
+    offset = typeof next === "number" && next > offset ? next : undefined;
+  }
+  return roles;
 }
 
-function isPermittedRole(role: RoleV1, permissions: Array<Permission>): boolean {
+function isPermittedRole(role: Role, permissions: Array<Permission>): boolean {
   // Check that the permissions of the current user contain at least all the resource types of the role
   for (const permission of role.permissions) {
     const rolePermission = permissions.find((p) => p.resourceType === permission.resourceType);

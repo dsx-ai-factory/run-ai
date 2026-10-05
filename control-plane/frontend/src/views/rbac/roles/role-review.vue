@@ -47,7 +47,7 @@ import { RunaiExpansionItem } from "@/components/common/runai-expansion-item";
 
 import RolePermissions from "@/views/rbac/roles/role-permissions.vue";
 // models
-import { type RoleV1 } from "@/swagger-models/authorization-client";
+import { type Role } from "@/swagger-models/authorization-client";
 import { RoleStageBadge } from "@/components/common/role-stage-badge";
 
 export default defineComponent({
@@ -55,7 +55,7 @@ export default defineComponent({
   data() {
     return {
       appStore: useAppStore(),
-      role: {} as RoleV1,
+      role: {} as Role,
       roleStore: useRoleStore(),
       roleFormState: {
         name: "",

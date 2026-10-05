@@ -287,15 +287,15 @@ func (s *DepartmentsV1ApiService) AddDepartmentAdmins(ctx context.Context, clust
 	return succeeded, failed, nil
 }
 
-func (s *DepartmentsV1ApiService) getDepartmentRole(ctx context.Context) (*openapi.RoleV1, error) {
-	getRoles := s.authorizationClient.GetRolesV1(ctx)
-	roleExecute, response, err := s.authorizationClient.GetRolesV1Execute(getRoles)
+func (s *DepartmentsV1ApiService) getDepartmentRole(ctx context.Context) (*openapi.Role, error) {
+	getRoles := s.authorizationClient.GetRoles(ctx).FilterBy([]string{"name==" + DepartmentAdminRole})
+	roleExecute, response, err := s.authorizationClient.GetRolesExecute(getRoles)
 	if err != nil || (response == nil || response.StatusCode != http.StatusOK) {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to set permissions. Error: %v", err)
 		return nil, err
 	}
-	var departmentAdminRole openapi.RoleV1
-	for _, role := range roleExecute {
+	var departmentAdminRole openapi.Role
+	for _, role := range roleExecute.Roles {
 		if role.Name == DepartmentAdminRole {
 			departmentAdminRole = role
 		}
