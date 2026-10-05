@@ -24,6 +24,7 @@ func TestValidateNetworkingEndpoints(t *testing.T) {
 		{name: "empty external access", input: `[{"externalAccess":{}}]`, wantErr: "networking[0] must contain a service or externalAccess"},
 		{name: "null service", input: `[{"services":[null]}]`, wantErr: "networking[0].services[0] must contain spec or ref"},
 		{name: "empty service", input: `[{"services":[{}]}]`, wantErr: "networking[0].services[0] must contain spec or ref"},
+		{name: "service with both spec and ref", input: `[{"services":[{"spec":{"name":"one","selector":{"app":"one"},"ports":[{"port":80}]},"ref":{"name":"one","port":80}}]}]`, wantErr: "networking[0].services[0] must not contain both spec and ref"},
 		{name: "multiple services", input: `[{"services":[{"ref":{"name":"one","port":80}},{"ref":{"name":"two","port":80}}]}]`, wantErr: "networking[0].services must contain at most one service"},
 		{name: "later invalid endpoint", input: `[{"externalAccess":{"ingress":{}}},null]`, wantErr: "networking[1] must contain a service or externalAccess"},
 		{name: "created service", input: `[{"services":[{"spec":{"name":"one","ports":[{"port":80}]}}]}]`},

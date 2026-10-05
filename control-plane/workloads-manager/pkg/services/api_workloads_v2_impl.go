@@ -1210,8 +1210,6 @@ func (w *WorkloadsV2Impl) inferProjectFromClusterAndNamespace(ctx context.Contex
 }
 
 // UpdateWorkloadNetworkingConfig updates only the networking configuration of a workload record.
-// Called after UpdateWorkloadV2 when the NIM service serving port changes, so the networking plugin
-// on the cluster receives the updated Ingress/Route spec.
 func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, workloadId string, netCfg *[]api.NetworkingEndpoint) *api.Error {
 	permittedScopes, _ := authClient.ParsePermittedScopes(ctx)
 	qRecord, dbErr := dao.DbGetWorkload(ctx, workloadId, permittedScopes)
@@ -1292,8 +1290,9 @@ func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId strin
 	return nil
 }
 
-// Validate endpoint structure before queueing it for the agent. Generated API
-// validation does not reject null array entries or enforce maxItems on pointers.
+// validateNetworkingEndpoints rejects malformed endpoint structures before queueing.
+// Generated decoding allows null array entries, and runaihttp's item-count helpers
+// do not enforce bounds on pointer-backed slices.
 func validateNetworkingEndpoints(endpoints []api.NetworkingEndpoint) *api.SubmissionErrorV2 {
 	for i, endpoint := range endpoints {
 		field := fmt.Sprintf("metadata.configuration.networking[%d]", i)
@@ -1310,8 +1309,11 @@ func validateNetworkingEndpoints(endpoints []api.NetworkingEndpoint) *api.Submis
 			return NewConfigurationError(field + ".services must contain at most one service")
 		}
 		for j, service := range *endpoint.Services {
-			if service.Spec == nil && service.Ref == nil {
+			switch {
+			case service.Spec == nil && service.Ref == nil:
 				return NewConfigurationError(fmt.Sprintf("%s.services[%d] must contain spec or ref", field, j))
+			case service.Spec != nil && service.Ref != nil:
+				return NewConfigurationError(fmt.Sprintf("%s.services[%d] must not contain both spec and ref", field, j))
 			}
 		}
 	}

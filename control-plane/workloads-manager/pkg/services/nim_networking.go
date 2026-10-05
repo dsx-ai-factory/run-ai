@@ -180,6 +180,11 @@ func nimServingPortToNetworkingConfig(workloadName string, sp *api.NimServiceSer
 		endpoint.ExternalAccess = externalAccess
 	}
 
+	// Without an exposure URL or authorization, the operator's Service needs no plugin endpoint.
+	if endpoint.Services == nil && endpoint.ExternalAccess == nil {
+		return nil, nil
+	}
+
 	return &[]api.NetworkingEndpoint{endpoint}, nil
 }
 

@@ -302,6 +302,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 					},
 					Entry("null endpoint", `[null]`, "networking[0] must contain a service or externalAccess"),
 					Entry("null service", `[{"services":[null]}]`, "networking[0].services[0] must contain spec or ref"),
+					Entry("service with both spec and ref", `[{"services":[{"spec":{"name":"one","selector":{"app":"one"},"ports":[{"port":80}]},"ref":{"name":"one","port":80}}]}]`, "networking[0].services[0] must not contain both spec and ref"),
 					Entry("multiple services", `[{"services":[{"ref":{"name":"one","port":80}},{"ref":{"name":"two","port":80}}]}]`, "networking[0].services must contain at most one service"),
 				)
 			})

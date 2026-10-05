@@ -313,6 +313,11 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 		Expect(networkingConfig(sp, nimServiceNetworkingInfo{})).To(BeNil())
 	})
 
+	It("returns nil when no authorization or exposure URL is available", func() {
+		sp := &api.NimServiceServingPort{Port: convutils.Ref(int32(8000))}
+		Expect(networkingConfig(sp, nimServiceNetworkingInfo{})).To(BeNil())
+	})
+
 	It("exposes by default when exposeExternally is nil", func() {
 		sp := &api.NimServiceServingPort{
 			Port:       convutils.Ref(int32(8000)),
