@@ -1,0 +1,4 @@
+**
+!bin/
+!bin/inference-endpoint-controller-*
+!NOTICE

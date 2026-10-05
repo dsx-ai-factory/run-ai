@@ -1,0 +1,51 @@
+suite: Inference endpoint controller RBAC
+templates:
+  - templates/clusterroles/inference-endpoint-controller.yaml
+release:
+  namespace: custom-runai
+tests:
+  - it: binds the controller service account in the release namespace
+    documentSelector:
+      path: kind
+      value: ClusterRoleBinding
+    asserts:
+      - equal:
+          path: roleRef.name
+          value: runai-inference-endpoint-controller
+      - equal:
+          path: subjects
+          value:
+            - kind: ServiceAccount
+              name: inference-endpoint-controller
+              namespace: custom-runai
+  - it: grants controller and EPP child resource permissions
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [inference.platform.run.ai]
+            resources: [inferenceendpoints/status]
+            verbs: [get, patch, update]
+      - contains:
+          path: rules
+          content:
+            apiGroups: [rbac.authorization.k8s.io]
+            resources: [rolebindings, roles]
+            verbs: [create, delete, get, list, patch, update, watch]
+  - it: scopes leader election to the controller namespace
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-runai
+      - contains:
+          path: rules
+          content:
+            apiGroups: [coordination.k8s.io]
+            resources: [leases]
+            verbs: [get, list, watch, create, update, patch, delete]

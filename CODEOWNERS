@@ -297,3 +297,9 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 # Build folders
 /build @dsx-ai-factory/infra
 **/Makefile  @dsx-ai-factory/infra 
+
+# Inference endpoint (Viper)
+/runai-cluster/cluster/inference-endpoint-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/sdk/apis/run/v1/inference-endpoint-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/go-operator/internal/run/operands/inference-endpoint-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/runai-chart/templates/clusterroles/inference-endpoint-controller.yaml @dsx-ai-factory/workloads

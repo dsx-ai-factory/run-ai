@@ -1,0 +1,37 @@
+# Experimental runtime profile selection. Requires the controller/CRD from this branch,
+# an existing compatible Gateway, and serving Pods with these labels in model-serving.
+# Weights reproduce the simulator proof; they are not recommended production defaults.
+apiVersion: inference.platform.run.ai/v1alpha1
+kind: InferenceEndpoint
+metadata:
+  name: profile-demo
+  namespace: model-serving
+spec:
+  workload:
+    selector:
+      matchLabels:
+        app: profile-backend
+    port: 8000
+  routing:
+    gatewayRef:
+      name: inference-agw
+    hostnames:
+    - profiles.test
+  epp:
+    profile: llm-d-v0.10
+    scheduling:
+      defaultProfile: balanced
+      activeProfile: balanced
+      profiles:
+      - name: balanced
+        scorers:
+        - type: queue
+          weight: 10
+        - type: kvCache
+          weight: 30
+      - name: queue-focused
+        scorers:
+        - type: queue
+          weight: 60
+        - type: kvCache
+          weight: 30

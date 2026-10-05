@@ -1,0 +1,410 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.21.0
+  name: inferenceendpoints.inference.platform.run.ai
+spec:
+  group: inference.platform.run.ai
+  names:
+    kind: InferenceEndpoint
+    listKind: InferenceEndpointList
+    plural: inferenceendpoints
+    singular: inferenceendpoint
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.routing.gatewayRef.name
+      name: Gateway
+      type: string
+    - jsonPath: .spec.routing.hostnames
+      name: Hostnames
+      type: string
+    - jsonPath: .status.conditions[?(@.type=="Ready")].status
+      name: Ready
+      type: string
+    - jsonPath: .status.conditions[?(@.type=="Ready")].reason
+      name: Reason
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          InferenceEndpoint is the Schema for the inferenceendpoints API.
+          One InferenceEndpoint produces one routing stack: an InferencePool selecting
+          the workload pods, an endpoint picker deployment, and an HTTPRoute on an
+          existing Gateway.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: spec defines the desired state of InferenceEndpoint
+            properties:
+              epp:
+                description: epp configures the endpoint picker.
+                properties:
+                  image:
+                    description: |-
+                      image overrides the profile image only when it matches the supported image.
+                      Without a profile, only EppImageGIEV15 is allowed; it receives the
+                      GIE v1.5 configuration and startup flags.
+                    minLength: 1
+                    type: string
+                  profile:
+                    description: |-
+                      profile selects a versioned configuration, image, startup flags and ports.
+                      gie-v1.5 reproduces Track A. llm-d-v0.10 supports experimental selection
+                      among preloaded scheduling profiles with a Gateway-controlled header.
+                    enum:
+                    - gie-v1.5
+                    - llm-d-v0.10
+                    type: string
+                  scheduling:
+                    description: scheduling tunes pod selection.
+                    properties:
+                      activeProfile:
+                        description: |-
+                          activeProfile is set by the Gateway in the EPP-Profile request header.
+                          Switching to another preloaded profile updates only the HTTPRoute.
+                        maxLength: 63
+                        minLength: 1
+                        pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                        type: string
+                      defaultProfile:
+                        description: |-
+                          defaultProfile is the EPP fallback for a missing or blank profile header.
+                          Changing it updates the ConfigMap and rolls the EPP Deployment.
+                        maxLength: 63
+                        minLength: 1
+                        pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                        type: string
+                      profiles:
+                        description: profiles is the preloaded catalog for llm-d-v0.10;
+                          it replaces scorers.
+                        items:
+                          description: SchedulingProfile defines one preloaded combination
+                            of scoring weights.
+                          properties:
+                            name:
+                              description: name is referenced by defaultProfile and
+                                activeProfile.
+                              maxLength: 63
+                              minLength: 1
+                              pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                              type: string
+                            scorers:
+                              description: |-
+                                scorers replace the scoring selection for this profile. At least one
+                                weight must be positive. Catalog changes roll the EPP Deployment.
+                              items:
+                                description: ScorerSpec is one scoring signal and
+                                  how much it counts.
+                                properties:
+                                  type:
+                                    description: type of the scorer.
+                                    enum:
+                                    - queue
+                                    - kvCache
+                                    - prefixCache
+                                    type: string
+                                  weight:
+                                    description: |-
+                                      weight of this scorer relative to the others. 0 keeps the scorer loaded
+                                      but ignores its opinion.
+                                    format: int32
+                                    maximum: 100
+                                    minimum: 0
+                                    type: integer
+                                required:
+                                - type
+                                - weight
+                                type: object
+                              maxItems: 3
+                              minItems: 1
+                              type: array
+                              x-kubernetes-list-map-keys:
+                              - type
+                              x-kubernetes-list-type: map
+                              x-kubernetes-validations:
+                              - message: at least one scorer weight must be positive
+                                rule: self.exists(s, s.weight > 0)
+                          required:
+                          - name
+                          - scorers
+                          type: object
+                        maxItems: 8
+                        minItems: 1
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      scorers:
+                        description: scorers and their weights. Defaults to queue
+                          30, kvCache 20, prefixCache 10.
+                        items:
+                          description: ScorerSpec is one scoring signal and how much
+                            it counts.
+                          properties:
+                            type:
+                              description: type of the scorer.
+                              enum:
+                              - queue
+                              - kvCache
+                              - prefixCache
+                              type: string
+                            weight:
+                              description: |-
+                                weight of this scorer relative to the others. 0 keeps the scorer loaded
+                                but ignores its opinion.
+                              format: int32
+                              maximum: 100
+                              minimum: 0
+                              type: integer
+                          required:
+                          - type
+                          - weight
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - type
+                        x-kubernetes-list-type: map
+                    type: object
+                    x-kubernetes-validations:
+                    - message: profiles and legacy scorers cannot be combined
+                      rule: '!has(self.profiles) || !has(self.scorers)'
+                    - message: profiles require defaultProfile and activeProfile
+                      rule: '!has(self.profiles) || (has(self.defaultProfile) && has(self.activeProfile))'
+                    - message: defaultProfile must name a configured profile
+                      rule: '!has(self.defaultProfile) || (has(self.profiles) && self.profiles.exists(p,
+                        p.name == self.defaultProfile))'
+                    - message: activeProfile must name a configured profile
+                      rule: '!has(self.activeProfile) || (has(self.profiles) && self.profiles.exists(p,
+                        p.name == self.activeProfile))'
+                type: object
+                x-kubernetes-validations:
+                - message: image-only EPP requires the approved GIE v1.5.0 image;
+                    otherwise select a supported profile
+                  rule: has(self.profile) || (has(self.image) && self.image == 'registry.k8s.io/gateway-api-inference-extension/epp:v1.5.0')
+                - message: epp.profile or epp.image is required
+                  rule: has(self.profile) || has(self.image)
+                - message: epp.image must match the selected profile's pinned image
+                  rule: '!has(self.profile) || !has(self.image) || (self.profile ==
+                    ''gie-v1.5'' && self.image == ''registry.k8s.io/gateway-api-inference-extension/epp:v1.5.0'')
+                    || (self.profile == ''llm-d-v0.10'' && self.image == ''ghcr.io/llm-d/llm-d-router-endpoint-picker:v0.10.0@sha256:2e516fa1310da7be59b82beb1445362139597d6d553ef04d546716abe3aaaa70'')'
+                - message: llm-d-v0.10 requires scheduling.profiles
+                  rule: '!(has(self.profile) && self.profile == ''llm-d-v0.10'') ||
+                    (has(self.scheduling) && has(self.scheduling.profiles))'
+                - message: scheduling.profiles requires the llm-d-v0.10 profile
+                  rule: '!has(self.scheduling) || !has(self.scheduling.profiles) ||
+                    (has(self.profile) && self.profile == ''llm-d-v0.10'')'
+              rewrites:
+                description: rewrites are model aliases and canary splits, applied
+                  live by the EPP.
+                items:
+                  description: |-
+                    RewriteSpec maps one requested model name to one or more served model
+                    names. It becomes a rule in an InferenceModelRewrite the EPP watches at
+                    runtime, so changes apply without restarting anything.
+                  properties:
+                    model:
+                      description: model is the exact name clients put in the request
+                        body.
+                      minLength: 1
+                      type: string
+                    targets:
+                      description: targets and their traffic shares. One target is
+                        an alias, several are a canary.
+                      items:
+                        description: RewriteTarget is one destination of a model rewrite
+                          rule.
+                        properties:
+                          model:
+                            description: model name sent to the pod in place of the
+                              requested one.
+                            minLength: 1
+                            type: string
+                          weight:
+                            description: |-
+                              weight is the share of requests for this target, relative to the other
+                              targets of the same rule. Weights do not need to sum to 100.
+                            format: int32
+                            minimum: 1
+                            type: integer
+                        required:
+                        - model
+                        - weight
+                        type: object
+                      minItems: 1
+                      type: array
+                  required:
+                  - model
+                  - targets
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - model
+                x-kubernetes-list-type: map
+              routing:
+                description: routing describes the Gateway attachment.
+                properties:
+                  gatewayRef:
+                    description: gatewayRef is the Gateway the generated HTTPRoute
+                      attaches to.
+                    properties:
+                      name:
+                        description: name of the Gateway.
+                        minLength: 1
+                        type: string
+                      namespace:
+                        description: |-
+                          namespace of the Gateway. Defaults to the namespace of the
+                          InferenceEndpoint.
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  hostnames:
+                    description: |-
+                      hostnames the HTTPRoute matches. At least one is required so that two
+                      endpoints on the same Gateway never collide on the shared /v1 path.
+                    items:
+                      type: string
+                    minItems: 1
+                    type: array
+                    x-kubernetes-list-type: set
+                required:
+                - gatewayRef
+                - hostnames
+                type: object
+              workload:
+                description: workload identifies the serving pods.
+                properties:
+                  port:
+                    description: |-
+                      port is the container port the pods listen on. The EPP returns
+                      podIP:port to the Gateway.
+                    format: int32
+                    maximum: 65535
+                    minimum: 1
+                    type: integer
+                  selector:
+                    description: |-
+                      selector picks the pods that serve this endpoint. It becomes the
+                      InferencePool selector.
+                    properties:
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: matchLabels must all be present on a pod for
+                          it to be selected.
+                        minProperties: 1
+                        type: object
+                    required:
+                    - matchLabels
+                    type: object
+                required:
+                - port
+                - selector
+                type: object
+            required:
+            - epp
+            - routing
+            - workload
+            type: object
+          status:
+            description: status defines the observed state of InferenceEndpoint
+            properties:
+              conditions:
+                description: |-
+                  conditions represent the current state of the InferenceEndpoint.
+                  Types: Ready, RouteAccepted.
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        lastTransitionTime is the last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: observedGeneration is the spec generation the conditions
+                  describe.
+                format: int64
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

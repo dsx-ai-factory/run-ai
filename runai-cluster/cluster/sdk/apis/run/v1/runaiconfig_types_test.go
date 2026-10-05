@@ -22,6 +22,17 @@ import (
 
 var _ = Describe("RunaiConfig", func() {
 	Context("Defaulting", func() {
+		It("inherits workload group resources when inference endpoint settings are omitted", func() {
+			configured := &global.Resources{
+				Requests: v1.ResourceList{v1.ResourceCPU: resource.MustParse("250m"), v1.ResourceMemory: resource.MustParse("64Mi")},
+				Limits:   v1.ResourceList{v1.ResourceCPU: resource.MustParse("1"), v1.ResourceMemory: resource.MustParse("128Mi")},
+			}
+			rc := &RunaiConfig{Spec: RunaiConfigSpec{Global: &global.Global{WorkloadServices: &global.WorkloadServices{Resources: configured}}}}
+			rc.SetDefaultsWhereNeeded()
+			Expect(rc.Spec.InferenceEndpointController.Resources.Requests).To(Equal(configured.Requests))
+			Expect(rc.Spec.InferenceEndpointController.Resources.Limits).To(Equal(configured.Limits))
+		})
+
 		It("should set default values", func() {
 			resource := &RunaiConfig{}
 			resource.SetDefaultsWhereNeeded()
@@ -287,6 +298,8 @@ var _ = Describe("RunaiConfig", func() {
 
 						Expect(rc.Spec.ExternalWorkloadIntegrator.Resources.Requests).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ExternalWorkloadIntegrator.Resources.Limits).To(Equal(workloadServicesExpectedResources))
+						Expect(rc.Spec.InferenceEndpointController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
+						Expect(rc.Spec.InferenceEndpointController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 
 						Expect(rc.Spec.ClusterRedis.Resources.Requests).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ClusterRedis.Resources.Limits).To(Equal(workloadServicesExpectedResources))

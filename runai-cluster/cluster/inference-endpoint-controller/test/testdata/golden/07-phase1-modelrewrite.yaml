@@ -1,0 +1,24 @@
+# Track A step 7 · 🔜 Phase 1. The page's "canary rollout, 90/10 split".
+# Client sends "model": "llama3". The EPP rewrites the JSON body before vLLM sees it:
+#   90 % stay "llama3", 10 % become "llama3-v2" (a LoRA the sim serves, see 02-sim-deployment.yaml).
+# Weights are ratios; they do not need to sum to 100.
+apiVersion: inference.networking.x-k8s.io/v1alpha2
+kind: InferenceModelRewrite
+metadata:
+  name: llama3-rewrite
+  namespace: model-serving
+spec:
+  poolRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: llama3-pool
+  rules:
+  - matches:
+    - model:
+        type: Exact
+        value: llama3
+    targets:
+    - modelRewrite: llama3
+      weight: 90
+    - modelRewrite: llama3-v2
+      weight: 10

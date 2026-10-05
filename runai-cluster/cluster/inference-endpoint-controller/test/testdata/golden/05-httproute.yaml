@@ -1,0 +1,29 @@
+# Track A step 5 · 🆕 what the controller would create.
+# Type ✅ Gateway API upstream, instance 🆕 ours.
+# Page: "Backend is kind: InferencePool, not a plain Service. 300 s timeout for streaming. Matches host + /v1/*."
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: llama3-route
+  namespace: model-serving
+  labels:
+    lab.track: a
+spec:
+  parentRefs:
+  - name: inference-agw               # admin's Gateway, referenced by name only
+    namespace: model-serving
+  hostnames:
+  - llama3.test
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /v1
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: llama3-pool
+    timeouts:
+      request: 300s
+# Report §12 finding to reproduce later (check 10): a second route that matches only /v1 on the same
+# Gateway collides unless the hostnames differ. This route has a hostname, so it is safe.

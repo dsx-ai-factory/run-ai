@@ -1,0 +1,21 @@
+# Track A step 3 · 🆕 what the controller would create.
+# Type ✅ GIE upstream, instance 🆕 ours.
+apiVersion: inference.networking.k8s.io/v1
+kind: InferencePool
+metadata:
+  name: llama3-pool
+  namespace: model-serving
+  labels:
+    lab.track: a
+spec:
+  selector:
+    matchLabels:
+      app: vllm-llama3                # <- the seam. Same label the pods carry. No API coupling.
+  targetPorts:
+  - number: 8000
+  appProtocol: http
+  endpointPickerRef:
+    name: llama3-epp                  # Service in 04-epp.yaml
+    port:
+      number: 9002                    # agentgateway requires the port to be explicit
+    failureMode: FailOpen             # if the EPP is down, fall back to plain routing instead of 5xx

@@ -6,6 +6,7 @@ package main
 # Allowed base images
 allowed_images := {
     "registry.access.redhat.com/ubi9/ubi-minimal",
+    "registry.access.redhat.com/ubi9/ubi-minimal:9.7@sha256:907b68736aa798b2d38255b7aa070b2a70acb90803864a40f05d0ec47556ddd0",
     "registry.access.redhat.com/ubi9/nodejs-18-minimal",
     "registry.access.redhat.com/ubi9/nodejs-24-minimal",
     "registry.access.redhat.com/ubi9/nodejs-24-minimal:9.8-1785358511@sha256:a0245449f38996a5c1f5b0a7fa1e7245050eb044441cb8dab61652364ea06b49",

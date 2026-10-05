@@ -1,0 +1,33 @@
+# Derived from test/testdata/golden/05-httproute.yaml. Type is upstream Gateway API, the instance is ours.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-route" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+spec:
+  parentRefs:
+  - name: {{ .GatewayName | toJSON }}          # admin's Gateway, referenced by name only
+    namespace: {{ .GatewayNamespace | toJSON }}
+  hostnames:
+{{- range .Hostnames }}
+  - {{ . | toJSON }}
+{{- end }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /v1
+{{- if .RuntimeProfiles }}
+    filters:
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        set:
+        - name: EPP-Profile
+          value: {{ .ActiveProfile | toJSON }}
+{{- end }}
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: {{ printf "%s-pool" .Name | toJSON }}
+    timeouts:
+      request: 300s
