@@ -427,12 +427,16 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 		Expect(pathObj["pathType"]).To(Equal("ImplementationSpecific"))
 	})
 
-	DescribeTable("sets the NIM Service backend on an OpenShift Route", func(authType *api.NimServiceServingPortAuthorizationType, hasAuth bool) {
+	DescribeTable("sets the NIM Service backend on an OpenShift Route", func(authType *api.NimServiceServingPortAuthorizationType, hasAuth, additionalPorts bool) {
 		sp := &api.NimServiceServingPort{
 			Port:              convutils.Ref(int32(8000)),
 			ExposeExternally:  convutils.Ref(true),
 			ExposedUrl:        convutils.Ref("https://my-nim.example.com/foo"),
 			AuthorizationType: authType,
+		}
+		if additionalPorts {
+			sp.GrpcPort = convutils.Ref(int32(8001))
+			sp.MetricsPort = convutils.Ref(int32(9000))
 		}
 		cfg := networkingConfig(sp, nimServiceNetworkingInfo{UseOpenShiftRoute: true})
 
@@ -445,10 +449,10 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 		Expect(spec["host"]).To(Equal("my-nim.example.com"))
 		Expect(spec["path"]).To(Equal("/foo"))
 		Expect(spec["to"]).To(Equal(map[string]interface{}{"kind": "Service", "name": workloadName}))
-		Expect(spec).NotTo(HaveKey("port"))
 		Expect((*endpoint.ExternalAccess.Route)["kind"]).To(Equal("Route"))
 		Expect((*endpoint.ExternalAccess.Route)["apiVersion"]).To(Equal("route.openshift.io/v1"))
 		if hasAuth {
+			Expect(spec).NotTo(HaveKey("port"))
 			Expect(endpoint.Services).NotTo(BeNil())
 			Expect(*endpoint.Services).To(HaveLen(1))
 			svc := (*endpoint.Services)[0]
@@ -456,12 +460,16 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 			Expect(svc.Authorization).NotTo(BeNil())
 			Expect(svc.Authorization.AuthorizationType).To(Equal(convutils.Ref(api.AUTHORIZATIONTYPE_AUTHENTICATED_USERS)))
 		} else {
+			Expect(spec["port"]).To(Equal(map[string]interface{}{"targetPort": "api"}))
 			Expect(endpoint.Services).To(BeNil())
 		}
 	},
-		Entry("without authorization", nil, false),
-		Entry("with explicit public access", convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_PUBLIC), false),
-		Entry("with authenticated access", convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHENTICATED_USERS), true),
+		Entry("without authorization", nil, false, false),
+		Entry("with explicit public access", convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_PUBLIC), false, false),
+		Entry("with authenticated access", convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHENTICATED_USERS), true, false),
+		Entry("without authorization and with gRPC and metrics ports", nil, false, true),
+		Entry("with explicit public access and gRPC and metrics ports", convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_PUBLIC), false, true),
+		Entry("with authenticated access and gRPC and metrics ports", convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHENTICATED_USERS), true, true),
 	)
 
 	It("sets authorizedGroups on the auth config", func() {
@@ -622,6 +630,7 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 		Expect(endpoint.ExternalAccess.Ingress).To(BeNil())
 		routeSpec := (*endpoint.ExternalAccess.Route)["spec"].(map[string]interface{})
 		Expect(routeSpec["to"]).To(Equal(map[string]interface{}{"kind": "Service", "name": workloadName}))
+		Expect(routeSpec["port"]).To(Equal(map[string]interface{}{"targetPort": "api"}))
 	})
 
 	It("returns an error when ingress is disabled and Gateway API is not enabled", func() {

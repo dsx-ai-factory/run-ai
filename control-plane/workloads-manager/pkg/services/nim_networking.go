@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"strings"
 
+	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
@@ -240,7 +241,7 @@ func nimServingPortToExternalAccess(sp *api.NimServiceServingPort, serviceName s
 
 	if ingressRouteEnabled {
 		if info.UseOpenShiftRoute {
-			ea.Route = buildOpenShiftRouteMap(host, path, serviceName)
+			ea.Route = buildOpenShiftRouteMap(host, path, serviceName, hasAuth)
 		} else {
 			ingressEA := buildIngressExternalAccess(host, path, resolveProtocol(sp), info.IngressClass, serviceName, servicePort, hasAuth)
 			if ingressEA != nil {
@@ -421,18 +422,25 @@ func buildHTTPRouteExternalAccess(host, path string, _ api.ServingPortExposedPro
 	return &api.ExternalAccess{HttpRoute: &httpRoute}
 }
 
-func buildOpenShiftRouteMap(host, path, serviceName string) *map[string]interface{} {
+func buildOpenShiftRouteMap(host, path, serviceName string, hasAuth bool) *map[string]interface{} {
+	spec := map[string]interface{}{
+		"host": host,
+		"path": path,
+		"to": map[string]interface{}{
+			"kind": constants.KindService,
+			"name": serviceName,
+		},
+	}
+	// Authenticated Routes are redirected to a single-port auth proxy by the plugin,
+	// which rewrites the backend Service but leaves the Route's port unchanged.
+	if !hasAuth {
+		spec["port"] = map[string]interface{}{"targetPort": nimv1alpha1.DefaultNamedPortAPI}
+	}
+
 	route := map[string]interface{}{
 		"apiVersion": constants.RouteV1,
 		"kind":       constants.KindRoute,
-		"spec": map[string]interface{}{
-			"host": host,
-			"path": path,
-			"to": map[string]interface{}{
-				"kind": "Service",
-				"name": serviceName,
-			},
-		},
+		"spec":       spec,
 	}
 	return &route
 }
