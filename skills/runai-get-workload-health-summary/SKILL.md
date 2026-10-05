@@ -77,11 +77,12 @@ scope.
 | --- | --- | --- |
 | `cluster_id` | Always | Selects the cluster. |
 | `filter` | Overview | Compose from phase, kind, project, department, node pool, node, age, idle threshold, over-quota, priority, image, or owner. |
-| `sort` | Optional | Supported values include `-age`, `-gpu_idle_time`, `-submit_time`, `-restart_count`, and `-error_rate`. |
+| `sort` | Optional | Use a documented `list_workloads.sortBy` field with `sortOrder=asc|desc`. Sort restart count, error rate, or measured idle duration only after fetching their evidence because those are not server fields. |
 | `limit` | Optional | Default `50`; cap output and offer to widen. |
 | `metrics_window` | Optional | Default `1h`; use for metrics and idle/error enrichment. |
+| `correlation_budget` | Failed correlation | Maximum `50` failed workloads. If the complete scoped set is larger, report correlation as incomplete and suppress node-issue labels. |
 | `workload_id` | Drill-down option A | Exact workload identifier. |
-| `workload_name` + `project` | Drill-down option B | Resolve within a project; if multiple match, prefer the most recent and state the ambiguity. |
+| `workload_name` + `project` | Drill-down option B | Resolve within a project. If multiple exact matches remain, ask the user to choose unless they explicitly requested the latest run. |
 
 ## Tools
 
@@ -89,13 +90,14 @@ scope.
 | --- | --- |
 | `list_workloads` | Filtered workload rows and name/project resolution. Follow pagination when the complete candidate set is required. |
 | `get_workloads_summary` | Count-only phase summary for a cluster, project, department, or node pool. Do not use when names or rows are required. |
-| `get_node_pods` | Pods and workload IDs on a named node; returns at most 10 pods. |
+| `get_node_pods` | Paginated pods and workload IDs on a named node; default `10`, maximum `200` per page. |
 | `list_projects` | Resolve a project name to its numeric `projectId` when policy lookup is needed. |
 | `get_workload_status` | Drill-down state, phase, recent events, project, department, and kind. |
 | `get_workload_spec` | Drill-down submitted compute, scheduling, runtime, environment, data sources, and placement. |
 | `get_workload_pods` | Drill-down pod Kubernetes phase, resources, measurements, and node placement (up to 20 pods). |
 | `get_workload_metrics` | Overview enrichment for idle/error filters and drill-down GPU-use or inference metrics. |
 | `get_workload_effective_policy` | Drill-down policy chain when available. |
+| `get_cluster_infrastructure_health` | Optional context for failed-node correlation only: node-pool size and independent unhealthy-node evidence. Do not use it for a general cluster-health request in this skill. |
 
 Use Kubernetes read-only access only when Run:ai MCP cannot answer a required
 health-summary field, such as a pod-label overview query or richer pod state in
@@ -117,10 +119,10 @@ Apply these gates in order. A stop means **zero MCP calls**.
 2. If `cluster_id` is missing or ambiguous, ask for it and stop.
 3. Classify an identified workload as drill-down. Use `workload_id` directly.
 4. If the user supplies `workload_name` and `project`, resolve it with
-   `list_workloads(clusterId, name, projectName={operator:"==",value:<name>})`.
+   `list_workloads(clusterId, name, projectName={operator:"==",value:<project>})`.
    Follow all pages, prefer the most recent `phaseUpdatedAt` only when the user
-   clearly asks for the latest run, and otherwise state ambiguity when more
-   than one candidate remains.
+   clearly asks for the latest run, and otherwise ask the user to choose by
+   full `workload_id` when more than one exact candidate remains.
 5. If the user supplies `workload_name` without `project`, ask for project
    unless a scoped summary can prove exactly one match in the requested cluster.
 6. Otherwise classify the request as overview. Before any workload call,
@@ -136,15 +138,22 @@ Apply these gates in order. A stop means **zero MCP calls**.
    not workload age. Default to `limit=50` and `metrics_window=1h` when the
    user omits them. Follow `hasMore`/`nextOffset` when correctness requires the
    complete scoped set (for example, counts, dominance, or node correlation).
+   For a bounded phase-change interval, use `phaseUpdatedAfter` for the lower
+   bound and a typed `filterBy` comparison on `phaseUpdatedAt <= <end>` for the
+   upper bound. Post-filter returned timestamps as a safety check.
+   Set `includeDetails=true` only when the answer needs creation/deletion time,
+   node pools, priority, preemptibility, or `idleAllocatedGpus`.
 2. Select the narrowest query path:
    - Any row-producing project, department, phase, type, node-pool,
      recency, priority, or GPU-idle filter -> `list_workloads`.
    - A count-only question -> `get_workloads_summary` when its schema supports
      the requested scope.
-   - A named node -> `get_node_pods(nodeName, clusterUuid)`; always enrich each
-     unique returned `workloadId` with `get_workload_status` so the health rows
-     include phase, project, and department when returned. State that the node
-     tool is capped at 10 pods.
+   - A named node -> call `get_node_pods(nodeName, clusterUuid, limit=200)` and
+     follow `hasMore`/`nextOffset`, up to `1,000` pods total. Deduplicate the
+     returned `workloadId` values, then enrich each unique ID with
+     `get_workload_status` so rows include phase, project, and department. If
+     more than 1,000 pods exist, stop, label the result truncated, and do not
+     present counts or patterns as complete.
    - Name filter without project -> ask for project unless the returned summary
      can prove a unique match.
    For a row-producing request, call `list_workloads` directly. Do not call
@@ -157,10 +166,10 @@ Apply these gates in order. A stop means **zero MCP calls**.
 
    | Overview request | Required evidence | Do not do |
    | --- | --- | --- |
-   | Workloads on a node | Call `get_node_pods`, deduplicate its workload IDs, then call `get_workload_status` for each unique ID to obtain phase and ownership. | Do not call metrics unless the user requests a metric filter or ranking. |
-   | Idle workloads | Apply project, phase, and type filters with `list_workloads`, then call `get_workload_metrics` only for the remaining candidates. | Do not treat workload age or phase duration as GPU-idle duration. |
+   | Workloads on a node | Page `get_node_pods(limit=200)` within the 1,000-pod budget, deduplicate workload IDs, then call `get_workload_status` for each unique ID to obtain phase and ownership. | Do not call metrics unless the user requests a metric filter or ranking. Do not claim completeness after the paging budget is exceeded. |
+   | Idle workloads | For a plain idle query, call `list_workloads(gpuIdleOnly=true, includeDetails=true)` after applying project/type scope. For an idle-duration threshold, use that result as the candidate set and then request metrics only for those candidates. | Do not treat `idleAllocatedGpus`, workload age, or phase duration as GPU-idle duration. |
    | Workloads using an image | Apply cheap filters first. Call `get_workload_spec` only when 10 or fewer candidates remain. | Do not make unbounded per-workload spec calls; ask the user to narrow the scope. |
-   | Failed-workload node correlation | Start from the complete scoped failed set. Before display capping, call `get_workload_status` for phase time and ownership and `get_workload_pods` for node placement for every candidate. | Do not claim `POSSIBLE_NODE_ISSUE` or `LIKELY_NODE_ISSUE` without both placement and phase-time evidence. |
+   | Failed-workload node correlation | Start from the complete scoped failed set with `includeDetails=true`. If it contains at most 50 workloads, call status and one `get_workload_pods(limit=500)` page per candidate before display capping. Collect optional scheduling-eligibility or independent node-health context only for implicated pools and nodes. | If the set exceeds 50, or any workload has more than 500 pods, report incomplete correlation and suppress node-issue labels. Pool size alone does not prove multiple nodes were eligible. Never infer a node issue from placement and `phaseUpdatedAt` alone. |
 
    For other overview requests, add metrics only for a requested metric filter
    or ranking; add pods only for requested pod state, resources, placement,
@@ -178,12 +187,21 @@ Apply these gates in order. A stop means **zero MCP calls**.
    and report how many candidate specs were inspected.
 6. Sort by the requested key, apply `limit`, and keep `workload_id` in every row.
    Print the complete workload ID; never abbreviate it with an ellipsis.
+   Use documented server-side keys with `sortOrder`, including `type`, `name`,
+   `clusterId`, `projectId`, `projectName`, `departmentId`, `departmentName`,
+   `createdAt`, `deletedAt`, `submittedBy`, `phase`, `completedAt`, `nodepool`,
+   `nodePoolName`, `distributedFramework`, `allocatedGPU`, `allocatedGpu`,
+   `idleAllocatedGpus`, `phaseUpdatedAt`, `category`, `priority`,
+   `totalPendingTimeSeconds`, `totalRunningTimeSeconds`, `priorityClassName`,
+   `preemptibility`, `guaranteedRuntimeEndsAt`, `aiApplicationId`, and
+   `aiApplicationName`. An oldest-first age view maps to
+   `sortBy=createdAt, sortOrder=asc`.
    For Kubernetes-backed restart-count or readiness overviews, label rows with
    restarts > 0 or desired-vs-ready mismatch as `DEGRADED` candidates, not root
    cause. Never claim those values came from MCP.
-   `list_workloads` has no restart-count field or sort. Never pass a restart
-   sort to it or claim the MCP sorted by restarts. Without Kubernetes evidence,
-   state that restart ordering is unavailable and leave rows unsorted.
+   `list_workloads` has no restart-count, error-rate, or measured-idle-duration
+   sort. Sort those fields only after collecting the required evidence. Without
+   that evidence, state that the requested ordering is unavailable.
 7. For failed-workload node-correlation questions, compute co-location and
    temporal patterns on the scoped failed candidate set before display capping.
    Then show only the requested `limit` rows and state when correlation used
@@ -199,22 +217,45 @@ Apply these gates in order. A stop means **zero MCP calls**.
 Run this check whenever the overview filter includes `phase=Failed` or the user
 asks whether failures share a node.
 
-1. Start with the complete scoped `list_workloads` result. For each failed
-   candidate, call `get_workload_status` for department and authoritative phase
-   time and `get_workload_pods` for node placement. Each displayed failed row
+1. Start with the complete scoped `list_workloads(includeDetails=true)` result.
+   If it contains more than `50` failed workloads, do not start per-workload
+   correlation calls. Report the count, mark correlation incomplete, suppress
+   `POSSIBLE_NODE_ISSUE` and `LIKELY_NODE_ISSUE`, and ask for narrower scope.
+2. Within the budget, call `get_workload_status` and
+   `get_workload_pods(limit=500)` once per failed candidate. If a pod response
+   has `hasMore=true`, mark that workload's placement incomplete and suppress
+   node-issue labels for the set. Each displayed failed row
    must include workload ID, name, project, department when returned, type,
    priority, preemptibility, phase-updated time, and node when returned.
    Print every workload ID in full and put the owner fields in the displayed
    row; do not leave them only in prose or tool evidence.
-2. If two or more failed workloads have pods on the same node, flag
-   `POSSIBLE_NODE_ISSUE`.
-3. If the co-located failures changed status within the temporal window
-   (default `10m`), strengthen the flag to `LIKELY_NODE_ISSUE`.
-4. Always identify affected projects and departments. A failure list is useful
+3. Inspect `phaseMessage`, `phaseReason`, conditions, and recent events before
+   interpreting co-location. If the co-located failures share an explicit
+   workload-level explanation such as the same container exit, user
+   configuration, or image/configuration error, report that shared signal and
+   do not label it a node issue. Do not turn this into root-cause diagnosis.
+4. Treat `phaseUpdatedAt` as retry-exhaustion time when status or events show
+   `BackoffLimitExceeded` or repeated retries. Do not use it as the first-fault
+   time; without an earlier returned failure timestamp, temporal correlation is
+   unavailable.
+5. When two or more failures share a node, first report the factual pattern as
+   `CORRELATED_FAILURES`. Upgrade it to `POSSIBLE_NODE_ISSUE` only when
+   placement and failure timing are complete, no shared workload-level
+   explanation is returned, and either actual scheduling evidence establishes
+   more than one eligible node or independent node-local health evidence
+   supports the pattern. Node-pool cardinality alone is not eligibility; if the
+   required evidence is unavailable, keep the factual label.
+6. Use `LIKELY_NODE_ISSUE` only when `POSSIBLE_NODE_ISSUE` is already supported,
+   the workload signals are node-directed (for example `NodeLost`), and
+   independent read-only evidence identifies the implicated node as unhealthy
+   or under node-local pressure. `get_cluster_infrastructure_health` or optional
+   Kubernetes node evidence may supply this context; absence of such evidence
+   is not proof that the node is healthy.
+7. Always identify affected projects and departments. A failure list is useful
    only when every row can be routed to an owner. Keep a department column even
    when every row shares the department used as the filter; do not rely on the
    surrounding sentence as a substitute for row-level attribution.
-5. Inference workloads are SLA-bearing. Mark them as escalation candidates even
+8. Inference workloads are SLA-bearing. Mark them as escalation candidates even
    when they are not part of the node-correlation cluster.
 
 ### Stage 4 — Drill-down
@@ -269,14 +310,17 @@ End with exactly one verdict:
 
 | Verdict | Meaning |
 | --- | --- |
-| `HEALTHY` | Running or completed as expected; pods ready; no material warnings. |
-| `DEGRADED` | Running but not fully healthy, near limit, restarting, low-use, or missing readiness. |
+| `HEALTHY` | Running or completed as expected; MCP pod phases are healthy and no material warning is present. If optional readiness evidence was collected, it must also be healthy. |
+| `DEGRADED` | Running but not fully healthy, near limit, restarting, low-use, or showing a readiness mismatch in evidence that was actually collected. |
 | `FAILED` | Terminal failed state or failed pods. |
 | `PENDING` | Waiting to start or initialize. |
 
 Flag near-cap and off-nominal signals:
 
-- GPU memory above 90%.
+- GPU-memory usage above 90% of the workload's allocated GPU-memory limit from
+  `get_workload_spec.allocatedResources.gpuMemory`. Label this denominator
+  explicitly. If the limit is missing or cannot be converted to bytes, report
+  absolute usage only and do not make a percentage-based verdict.
 - Any Kubernetes-reported restart count above 0.
 - Any Kubernetes-reported desired-vs-ready mismatch such as `3/4 Ready`.
 - Inference p95 latency above two times its target when a target is available.
@@ -319,8 +363,8 @@ Filter: phase=Failed AND age < 15m
 Results: 5 of 5 shown
 
 Pattern: 4 of 5 failed workloads share node-gpu-17.
-Co-location: node-gpu-17 -> POSSIBLE_NODE_ISSUE.
-Temporal: those 4 changed status within 3 minutes -> LIKELY_NODE_ISSUE.
+Workload evidence: all 4 report NodeLost within 3 minutes; placement and timing are complete.
+Independent node evidence: node-gpu-17 is NotReady with KubeletNotReady -> LIKELY_NODE_ISSUE.
 Attribution: node-gpu-17 affects 3 projects / 2 departments; one Inference workload is SLA-bearing -> escalate.
 
 | workload_id | name | kind | project | department | priority | preemptible | status_changed_at | node | age |

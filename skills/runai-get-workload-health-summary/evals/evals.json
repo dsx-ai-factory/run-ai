@@ -4,14 +4,16 @@
   "evals": [
     {
       "id": "A1-overview-failed-node-correlation",
-      "prompt": "In cluster 20000000-0000-4000-8000-000000000001, list failed workloads from the last 10 minutes and tell me if this looks like a node issue.",
-      "expected_output": "The skill activates in overview mode, applies phase=Failed and age<10m, includes workload_id, project, department, status_changed_at, node, kind, priority, and preemptibility for every failed row, and flags node-a-04 as LIKELY_NODE_ISSUE because 3 failures share the node within 7 seconds. It does not claim root cause.",
+      "prompt": "In cluster 20000000-0000-4000-8000-000000000001, list workloads that failed between 2026-05-31T10:42:00Z and 2026-05-31T10:52:00Z and tell me if this looks like a node issue.",
+      "expected_output": "The skill activates in overview mode, applies phase=Failed and both bounds of the explicit 10-minute window with includeDetails=true, and stays within the 50-workload correlation budget. It includes workload_id, project, department, status_changed_at, node, kind, priority, and preemptibility for every failed row. It may flag node-a-04 as LIKELY_NODE_ISSUE only after status returns node-specific phase evidence, pod placement and timing are complete, and independent infrastructure evidence reports node-a-04 NotReady. Pool size alone is not treated as scheduling eligibility. It does not claim root cause.",
       "expected_skill": "runai-get-workload-health-summary",
       "expected_script": null,
       "expected_behavior": [
         "requires cluster_id and a failed-workload overview filter",
-        "uses the complete scoped list_workloads result plus status for phase time and ownership and pods for placement",
-        "runs co-location and temporal checks",
+        "uses includeDetails=true on the complete scoped list_workloads result",
+        "applies phaseUpdatedAfter and an upper-bound phaseUpdatedAt filter",
+        "uses status for phase time, phaseMessage, phaseReason, and ownership plus pods for placement",
+        "uses independent node health rather than pool size alone before a likely node-issue label",
         "includes owner attribution",
         "keeps workload_id in every row",
         "does not diagnose root cause"
@@ -20,11 +22,12 @@
     {
       "id": "A2-overview-node-filter",
       "prompt": "Which workloads are on node-a-04 in cluster 20000000-0000-4000-8000-000000000001?",
-      "expected_output": "The skill activates in overview mode, uses the node mapping path, lists workloads on node-a-04 with workload_id, phase, kind, project, and department, and does not call metrics unless the user asks for a metric-based sort or filter.",
+      "expected_output": "The skill activates in overview mode, calls get_node_pods with limit=200 and follows hasMore/nextOffset within the 1,000-pod budget, deduplicates workload IDs, and lists workloads on node-a-04 with workload_id, phase, kind, project, and department. It does not call metrics unless the user asks for a metric-based sort or filter.",
       "expected_skill": "runai-get-workload-health-summary",
       "expected_script": null,
       "expected_behavior": [
-        "uses get_node_pods with nodeName and clusterUuid",
+        "uses paginated get_node_pods with nodeName, clusterUuid, limit, and offset",
+        "reports truncation instead of claiming completeness if the paging budget is exceeded",
         "includes workload_id and owner",
         "uses bounded status enrichment for each unique workload because get_node_pods omits phase and ownership",
         "does not call metrics without a metric filter or ranking",
@@ -34,11 +37,11 @@
     {
       "id": "A3-overview-project-idle",
       "prompt": "Show workloads idle for more than 6 hours in project ml-team on cluster 20000000-0000-4000-8000-000000000001.",
-      "expected_output": "The skill activates in overview mode, applies project=ml-team and gpu_idle_for>6h, states the 6-hour threshold, enriches candidate workloads with metrics only as needed, and reports idle-eval-7 as DEGRADED or an idle candidate without diagnosing why it is idle.",
+      "expected_output": "The skill activates in overview mode, calls list_workloads with project=ml-team, gpuIdleOnly=true, and includeDetails=true, then requests metrics only for those candidates because the request includes gpu_idle_for>6h. It states the threshold and reports idle-eval-7 as DEGRADED or an idle candidate only if returned metric timing supports it, without diagnosing why it is idle.",
       "expected_skill": "runai-get-workload-health-summary",
       "expected_script": null,
       "expected_behavior": [
-        "starts with project-scoped list_workloads",
+        "starts with project-scoped list_workloads using gpuIdleOnly=true and includeDetails=true",
         "applies metrics after cheap filters",
         "does not use workload age or phase duration as GPU idle duration",
         "reports the idle threshold",
@@ -48,13 +51,13 @@
     },
     {
       "id": "A4-overview-department-failed",
-      "prompt": "What failed in the Research department in the last 30 minutes on cluster 20000000-0000-4000-8000-000000000001?",
-      "expected_output": "The skill activates in overview mode, filters by department=Research plus phase=Failed and age<30m, leads with a dominant pattern if at least 70% share a field, and includes workload_id and owner. Separately, two failures on one node inside 10 minutes are a valid LIKELY_NODE_ISSUE correlation even when that node is under 70% of all matches; this is not a root-cause claim.",
+      "prompt": "What failed in the Research department between 2026-05-31T10:22:00Z and 2026-05-31T10:52:00Z on cluster 20000000-0000-4000-8000-000000000001?",
+      "expected_output": "The skill activates in overview mode, filters by department=Research plus phase=Failed and both bounds of the explicit 30-minute window with includeDetails=true, leads with a dominant pattern if at least 70% share a field, and includes workload_id and owner. A node-issue label requires complete placement and reliable timing, no shared workload-level explanation, and either actual scheduling-eligibility evidence or independent node evidence; co-location or pool size alone is reported only as CORRELATED_FAILURES.",
       "expected_skill": "runai-get-workload-health-summary",
       "expected_script": null,
       "expected_behavior": [
-        "uses list_workloads with a departmentName comparison",
-        "applies the age threshold",
+        "uses list_workloads with a departmentName comparison and includeDetails=true",
+        "applies both timestamp bounds",
         "surfaces dominant pattern at 70 percent concentration",
         "includes workload_id",
         "does not do root-cause analysis"
@@ -104,20 +107,21 @@
     {
       "id": "A8-overview-limit-cap",
       "prompt": "List failed workloads in cluster 20000000-0000-4000-8000-000000000001, limit 2.",
-      "expected_output": "The skill activates in overview mode, applies phase=Failed, reads the complete scoped failed set only because node correlation must be computed before display capping, shows 2 rows, reports that output is capped, and offers to widen.",
+      "expected_output": "The skill activates in overview mode, applies phase=Failed with includeDetails=true, reads the complete scoped failed set before display capping, and performs correlation only when at most 50 candidates exist. It shows 2 rows, reports that output is capped, and offers to widen. If the set exceeds the correlation budget, it reports correlation incomplete and suppresses node-issue labels.",
       "expected_skill": "runai-get-workload-health-summary",
       "expected_script": null,
       "expected_behavior": [
         "applies the requested limit",
         "mentions capped output",
         "includes workload_id in each shown row",
-        "bounds detail calls to the complete scoped failed set needed for correlation"
+        "bounds correlation enrichment to at most 50 failed workloads",
+        "suppresses node-issue labels when evidence or budget is incomplete"
       ]
     },
     {
       "id": "A9-drilldown-workload-id-healthy",
       "prompt": "How is workload 00000000-0000-4000-8000-000000000042 doing in cluster 20000000-0000-4000-8000-000000000001?",
-      "expected_output": "The skill activates in drill-down mode, returns State, Spec, Pods, Metrics, and Policy/Notes in order, reports MCP pod phases and healthy GPU utilization, does not invent desired/ready or restart counts, and ends with Status: HEALTHY.",
+      "expected_output": "The skill activates in drill-down mode, returns State, Spec, Pods, Metrics, and Policy/Notes in order, judges MCP-only pod health from returned pod phases, and does not invent desired/ready or restart counts. It computes a GPU-memory percentage only against the allocatedResources.gpuMemory value returned by spec and otherwise reports absolute bytes. It ends with Status: HEALTHY.",
       "expected_skill": "runai-get-workload-health-summary",
       "expected_script": null,
       "expected_behavior": [
@@ -126,6 +130,8 @@
         "calls get_workload_pods",
         "calls get_workload_metrics",
         "calls get_workload_effective_policy when available",
+        "does not mark missing optional readiness as degraded",
+        "labels the allocated GPU-memory denominator when computing a percentage",
         "ends with a one-line HEALTHY verdict"
       ]
     },
@@ -146,15 +152,16 @@
     {
       "id": "A11-drilldown-name-project-resolution",
       "prompt": "Is training-job-42 healthy in project ml-team on cluster 20000000-0000-4000-8000-000000000001?",
-      "expected_output": "The skill resolves training-job-42 by exact workload name and project, prefers the most recent exact match, surfaces ambiguity if multiple candidates remain, then returns the five-section drill-down.",
+      "expected_output": "The skill resolves training-job-42 by exact workload name and project using projectName.value=ml-team. If multiple exact candidates remain, it asks the user to choose by full workload_id and makes no drill-down calls. It selects the most recent candidate only when the user explicitly asks for the latest run.",
       "expected_skill": "runai-get-workload-health-summary",
       "expected_script": null,
       "expected_behavior": [
         "uses list_workloads with exact name and projectName for resolution",
+        "uses the project name rather than the workload name as projectName.value",
         "filters exact workload name matches",
         "uses project context",
-        "does not choose an unrelated workload",
-        "returns drill-down once resolved"
+        "asks for clarification instead of choosing the newest match by default",
+        "returns drill-down only after the workload is unambiguous"
       ]
     },
     {

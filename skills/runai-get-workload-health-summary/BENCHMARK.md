@@ -8,6 +8,10 @@ uses deterministic MCP replay because the supplied live `tal1` service account
 authenticates but sees zero Run:ai projects and workloads and cannot create a
 project.
 
+The replay data is an API-faithful synthetic fixture maintained against the
+current MCP schemas. It is not the ticket's v2 live recording from a seeded
+cluster; that recording remains pending access to a suitable seeded project.
+
 The results below are the baseline that identified the routing, drill-down,
 and overview-evidence problems. `SKILL.md` and the acceptance expectations were
 updated afterward. Rerun the 30 cases on all three models before treating these
@@ -35,7 +39,7 @@ before MCP, but the improvement has not yet been remeasured.
 | Dimension | Result |
 | --- | --- |
 | Security | Pass: read-only fixture, mutation refusals, no stored credentials, static security checks pass |
-| Correctness | MCP+skill: Codex 29/30, Sonnet 20/30, Opus 25/30 |
+| Correctness | Pre-revision baseline only: MCP+skill Codex 29/30, Sonnet 20/30, Opus 25/30 |
 | Discoverability | Positive, negative, and cross-skill boundaries exercised on all three models |
 | Effectiveness | Pass-rate gains: Codex +56.7 pp, Sonnet +33.3 pp, Opus +40.0 pp |
 | Efficiency | Tokens, cache, calls, cycles, runtime, answer size, and Claude cost measured |
@@ -43,7 +47,7 @@ before MCP, but the improvement has not yet been remeasured.
 ## Evidence
 
 - Eval dataset: `evals/evals.json`
-- Deterministic MCP: `evals/files/mock_mcp.py`
+- Deterministic synthetic MCP: `evals/files/mock_mcp.py`
 - MCP configuration: `evals/environment/mcp_servers.toml`
 
 Detailed local captures, live-cluster notes, comparison utilities, and review
