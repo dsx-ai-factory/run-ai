@@ -113,18 +113,3 @@ spec:
           - key: aaa
             operator: Exists
 status: {}
----
-data:
-  my-user-key: cHJpdmF0ZS12YWx1ZS0x
-kind: Secret
-metadata:
-  creationTimestamp: "2022-02-22T17:00:00Z"
-  labels:
-    app: xgboostjob
-    createdBy: XGBoostJob
-    project: team-a
-    release: job-0
-    workloadKind: DistributedWorkload
-    workloadName: job-0
-  name: dw-job-0-my-user-credential
-  namespace: runai-team-a

@@ -26,7 +26,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.18.1 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
 	github.com/kubeflow/training-operator v1.9.3 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/x448/float16 v0.8.4 // indirect

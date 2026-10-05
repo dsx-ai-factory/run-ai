@@ -731,6 +731,5 @@ const TrainingNew = defineComponent({
   },
 });
 
-//Dima todo - Type assertion to prevent TS7056 while maintaining type safety -- will be refactored later --hide the annoying warning
 export default TrainingNew as typeof TrainingNew & DefineComponent;
 </script>

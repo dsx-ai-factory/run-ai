@@ -63,6 +63,7 @@ func Operand(kbClient kc.HybridClient, runaiConfig runv1.RunaiConfig) operands.O
 			configmaps.NewProxyCert(name, kbClient, runaiConfig),
 			configmaps.NewLimitRange(name, kbClient, runaiConfig),
 			configmaps.NewNvidiaDevicePlugin(name, kbClient, runaiConfig),
+			configmaps.NewOAuth2Templates(name, kbClient, runaiConfig),
 			service_monitors.NewServiceMonitor(name, kbClient, runaiConfig),
 		},
 	}

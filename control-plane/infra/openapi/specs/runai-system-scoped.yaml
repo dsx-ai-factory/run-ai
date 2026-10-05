@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   version: 2.0.0
-  description: "# Introduction\n\nThe NVIDIA Run:ai Management Interface API is a centralized API which enables platform owners to programmatically manage tenants, clusters, and access across a multi-tenant environment. This API is designed for use by host organizations operating the centralized control plane and is not accessible to individual tenants.\n\nNVIDIA Run:ai APIs are accessed using bearer tokens. To obtain a token, you need to create an Application using the `api/v1/apps` endpoint, which returns a `clientId` and `clientSecret`. Then, generate an access token using the `/api/v1/token` by sending a `client_credentials` grant request with those credentials. \n\nTo get your access token, follow the instructions in [API Access Setup](https://run-ai-docs.nvidia.com/multi-tenant/getting-started/api-access-setup).\n"
+  description: "# Introduction\n\nThe NVIDIA Run:ai Management Interface API is a centralized API which enables platform owners to programmatically manage tenants, clusters, and access across a multi-tenant environment. This API is designed for use by host organizations operating the centralized control plane and is not accessible to individual tenants.\n\nNVIDIA Run:ai APIs are accessed using bearer tokens. To obtain a token, you need to create an Application using the `api/v1/apps` endpoint, which returns a `clientId` and `clientSecret`. Then, generate an access token using the `/api/v1/token` by sending a `client_credentials` grant request with those credentials. \n\nTo get your access token, follow the instructions in [API Access Setup](/run-ai/multi-tenant/reference/rest-api/getting-started/api-access-setup).\n"
   title: NVIDIA Run:ai
   x-logo:
     url: ./runai-logo-api.png
@@ -31,10 +31,10 @@ tags:
       Access Keys allow users to authenticate and interact programmatically with the NVIDIA Run:ai API.
       Each access key consists of a client ID and secret that can be used to obtain authentication tokens.
       Access keys can be managed by individual users for their own use, or by administrators for organization-wide access.
-      For more information, see [Access control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).
+      For more information, see [Access control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).
   - name: Access rules
     x-parent: Authentication and Authorization
-    description: "Access rules provide user authorization to system resources and entities.\nIt is managed using Role-based access control (RBAC) which is a policy-neutral \naccess control mechanism defined around roles and privileges. \nThe components of RBAC make it simple to manage access to system resources and entities.\nFor more information, see [Access control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).\n"
+    description: "Access rules provide user authorization to system resources and entities.\nIt is managed using Role-based access control (RBAC) which is a policy-neutral \naccess control mechanism defined around roles and privileges. \nThe components of RBAC make it simple to manage access to system resources and entities.\nFor more information, see [Access control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).\n"
   - name: Service Accounts
     x-parent: Authentication and Authorization
     description: "Service accounts enable programmatic access to the NVIDIA Run:ai API, allowing applications or automated systems to authenticate and interact securely. \nEach service account is associated with an access key which includes a client ID and secret used to generate access token. \nService accounts can be managed organization-wide or with a defined scope.\n"
@@ -50,7 +50,7 @@ tags:
     x-parent: Authentication and Authorization
   - name: Me
     x-parent: Authentication and Authorization
-    description: "\"Me\" returns the authenticated user's permissions within the system. \nIt provides a comprehensive view of access rules (roles, subjects and scope) assigned to the current user.\nFor more information see [Access control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).\n"
+    description: "\"Me\" returns the authenticated user's permissions within the system. \nIt provides a comprehensive view of access rules (roles, subjects and scope) assigned to the current user.\nFor more information see [Access control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).\n"
   - name: Permissions
     x-parent: Authentication and Authorization
     description: "Permissions define the actions that users can perform on specific resources within the NVIDIA Run:ai platform. \nEach permission consists of a resource type and an allowed action. \nThe Permission Sets API provides a catalog of all available permission sets in the NVIDIA Run:ai platform. \nEach permission set is a predefined collection of permissions that represent the permissions required for a role to perform specific operations. \nPermission sets serve as the building blocks for roles and are used in both NVIDIA Run:ai predefined roles and custom roles defined through the [Roles API](#tag/Roles).\n"
@@ -60,7 +60,7 @@ tags:
       View and manage configuration settings for your organization.
   - name: AuditLogs
     x-parent: Audit
-    description: The audit log provides audit trail information for user activity, changes to business objects and other important information. For more information, see [Audit log](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/procedures/event-history).
+    description: The audit log provides audit trail information for user activity, changes to business objects and other important information. For more information, see [Audit log](/run-ai/self-hosted/documentation/installation-and-configuration/operate/observability/event-history).
 paths:
   /api/v1/tenants:
     get:

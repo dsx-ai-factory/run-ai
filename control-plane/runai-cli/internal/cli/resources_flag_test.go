@@ -26,7 +26,7 @@ var _ = Describe("NullableResourcesFlag", func() {
 			err := nr.Set("nodepool=some-nodepool")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(nr.IsSet()).To(BeTrue())
-			Expect(nr.String()).To(Equal("nodepool=some-nodepool,gpu-deserved=0.00,gpu-limit=-1.00"))
+			Expect(nr.String()).To(Equal("nodepool=some-nodepool,rank=MediumLow,gpu-deserved=0.00,gpu-limit=-1.00"))
 		})
 
 		It("should fail on invalid prop name", func() {
@@ -41,14 +41,14 @@ var _ = Describe("NullableResourcesFlag", func() {
 			err := nr.Set("nodepool=some-nodepool,gpu-deserved=2.00,gpu-limit=2.1")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(nr.IsSet()).To(BeTrue())
-			Expect(nr.String()).To(Equal("nodepool=some-nodepool,gpu-deserved=2.00,gpu-limit=2.10"))
+			Expect(nr.String()).To(Equal("nodepool=some-nodepool,rank=MediumLow,gpu-deserved=2.00,gpu-limit=2.10"))
 		})
 
 		It("should set default gpu-limit on gpu-limit not explicitly set", func() {
 			err := nr.Set("nodepool=some-nodepool,gpu-deserved=3.00")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(nr.IsSet()).To(BeTrue())
-			Expect(nr.String()).To(Equal("nodepool=some-nodepool,gpu-deserved=3.00,gpu-limit=-1.00"))
+			Expect(nr.String()).To(Equal("nodepool=some-nodepool,rank=MediumLow,gpu-deserved=3.00,gpu-limit=-1.00"))
 		})
 
 		It("should fail on gpu-deserved is higher than gpu-limit", func() {
@@ -56,6 +56,26 @@ var _ = Describe("NullableResourcesFlag", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(nr.IsSet()).To(BeFalse())
 			Expect(nr.String()).To(Equal(""))
+		})
+	})
+
+	Describe("Set with rank", func() {
+		It("should set the rank", func() {
+			err := nr.Set("nodepool=some-nodepool,rank=High")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nr.String()).To(Equal("nodepool=some-nodepool,rank=High,gpu-deserved=0.00,gpu-limit=-1.00"))
+		})
+
+		It("should set the rank from the priority alias", func() {
+			err := nr.Set("nodepool=some-nodepool,priority=High")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nr.String()).To(Equal("nodepool=some-nodepool,rank=High,gpu-deserved=0.00,gpu-limit=-1.00"))
+		})
+
+		It("should fail when both rank and priority are set", func() {
+			err := nr.Set("nodepool=some-nodepool,rank=High,priority=Low")
+			Expect(err).To(HaveOccurred())
+			Expect(nr.IsSet()).To(BeFalse())
 		})
 	})
 })

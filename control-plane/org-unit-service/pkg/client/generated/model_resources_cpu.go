@@ -26,7 +26,7 @@ type ResourcesCpu struct {
 	Deserved NullableFloat64 `json:"deserved,omitempty"`
 	// The maximum resource allocation for this org-unit. Set to null for unlimited.
 	Limit NullableFloat64 `json:"limit,omitempty"`
-	// The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota) for more details.
+	// The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.
 	OverQuotaWeight NullableFloat64 `json:"overQuotaWeight,omitempty"`
 }
 

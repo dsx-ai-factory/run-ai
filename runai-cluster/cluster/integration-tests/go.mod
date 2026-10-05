@@ -8,7 +8,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller v0.0.0-00010101000000-000000000000
-	github.com/kai-scheduler/KAI-scheduler v0.18.1
+	github.com/kai-scheduler/KAI-scheduler v0.18.2
 	github.com/kubeflow/mpi-operator v0.6.0
 	github.com/kubeflow/training-operator v1.9.3
 	github.com/onsi/ginkgo/v2 v2.32.0

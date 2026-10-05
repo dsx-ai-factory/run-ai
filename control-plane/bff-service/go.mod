@@ -3,20 +3,20 @@ module github.com/dsx-ai-factory/run-ai/control-plane/bff-service
 go 1.27.1
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.9
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.10
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.4
-	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.5
+	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.5
+	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.4
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.16
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.2
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.17
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.3
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
@@ -38,8 +38,8 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
