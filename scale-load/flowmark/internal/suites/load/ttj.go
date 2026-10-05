@@ -29,6 +29,7 @@ const (
 	runLabel         = "flowmark/run"
 	progressInterval = 30 * time.Second
 	cleanupGrace     = time.Minute
+	spanTolerance    = time.Second
 )
 
 type Suite struct{}
@@ -215,19 +216,18 @@ const (
 	maxRequestsPerSecond = 1000
 )
 
-var knownKnobs = []string{"users", "rate", "duration", "image", "timeout", "setupTimeout", "spanTolerance", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "cluster", "slo"}
+var knownKnobs = []string{"users", "rate", "duration", "image", "timeout", "setupTimeout", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "cluster", "slo"}
 
 type options struct {
-	users         int
-	rate          int
-	duration      time.Duration
-	image         string
-	timeout       time.Duration
-	setupTimeout  time.Duration
-	spanTolerance time.Duration
-	limits        client.Limits
-	cluster       string
-	slo           map[string]int
+	users        int
+	rate         int
+	duration     time.Duration
+	image        string
+	timeout      time.Duration
+	setupTimeout time.Duration
+	limits       client.Limits
+	cluster      string
+	slo          map[string]int
 }
 
 func parseOptions(scenario core.Scenario) (options, error) {
@@ -258,9 +258,6 @@ func parseOptions(scenario core.Scenario) (options, error) {
 		return options{}, err
 	}
 	if opts.setupTimeout, err = scenario.Duration("setupTimeout", 5*time.Minute); err != nil {
-		return options{}, err
-	}
-	if opts.spanTolerance, err = scenario.Duration("spanTolerance", time.Second); err != nil {
 		return options{}, err
 	}
 	if opts.limits.KubeRequestsPerSecond, err = scenario.Int("kubeRequestsPerSecond", client.DefaultLimits.KubeRequestsPerSecond); err != nil {
@@ -334,7 +331,7 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 		metrics[name+"_mean_ms"] = summary.Mean.Milliseconds()
 		metrics[name+"_max_ms"] = summary.Max.Milliseconds()
 	}
-	mismatched := s.Inconsistent(opts.spanTolerance)
+	mismatched := s.Inconsistent(spanTolerance)
 	metrics["spans_consistent"] = len(mismatched) == 0
 	if opts.slo != nil {
 		metrics["slo"] = opts.slo

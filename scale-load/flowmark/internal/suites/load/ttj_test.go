@@ -24,9 +24,9 @@ func TestParseOptions(t *testing.T) {
 		wantErr string
 	}{
 		{name: "defaults", knobs: nil, check: func(o options) bool {
-			return o.users == 10 && o.rate == 2 && o.duration == 5*time.Minute && o.timeout == 10*time.Minute && o.spanTolerance == time.Second && o.slo == nil
+			return o.users == 10 && o.rate == 2 && o.duration == 5*time.Minute && o.timeout == 10*time.Minute && o.slo == nil
 		}},
-		{name: "all knobs", knobs: map[string]any{"users": 3, "rate": 5, "duration": "1m", "image": "busybox", "timeout": "2m", "setupTimeout": "1m", "spanTolerance": "500ms", "kubeRequestsPerSecond": 20, "controlPlaneRequestsPerSecond": 10, "cluster": "c1", "slo": map[string]any{"api_accepted_p90_ms": 500, "ttj_p90_ms": 10000}},
+		{name: "all knobs", knobs: map[string]any{"users": 3, "rate": 5, "duration": "1m", "image": "busybox", "timeout": "2m", "setupTimeout": "1m", "kubeRequestsPerSecond": 20, "controlPlaneRequestsPerSecond": 10, "cluster": "c1", "slo": map[string]any{"api_accepted_p90_ms": 500, "ttj_p90_ms": 10000}},
 			check: func(o options) bool {
 				return o.users == 3 && o.rate == 5 && o.duration == time.Minute && o.image == "busybox" && o.cluster == "c1" && o.slo["ttj_p90_ms"] == 10000 && o.limits.ControlPlaneRequestsPerSecond == 10
 			}},
@@ -62,7 +62,7 @@ func at(seconds float64) time.Time {
 }
 
 func testOptions() options {
-	return options{users: 10, rate: 2, duration: time.Minute, image: defaultImage, timeout: 10 * time.Minute, spanTolerance: time.Second, slo: map[string]int{"ttj_p90_ms": 10000, "api_accepted_p90_ms": 500}}
+	return options{users: 10, rate: 2, duration: time.Minute, image: defaultImage, timeout: 10 * time.Minute, slo: map[string]int{"ttj_p90_ms": 10000, "api_accepted_p90_ms": 500}}
 }
 
 func TestBuildSectionReportsEverySpanAndTheRates(t *testing.T) {

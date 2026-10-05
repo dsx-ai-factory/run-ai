@@ -81,7 +81,6 @@ Knobs of the `load-ttj` suite:
 | `image` | `registry.k8s.io/pause:3.9` | container image of every Workspace |
 | `timeout` | `10m` | how long to wait for arrivals after the last submission |
 | `setupTimeout` | `5m` | project creation, each create call, cleanup |
-| `spanTolerance` | `1s` | allowed gap when checking that the spans add up to the time to job |
 | `kubeRequestsPerSecond`, `controlPlaneRequestsPerSecond`, `cluster`, `slo` | as above | shared with `scale-burst` |
 
 Each accepted Workspace is timed in three legs on one clock: `api_accepted`
