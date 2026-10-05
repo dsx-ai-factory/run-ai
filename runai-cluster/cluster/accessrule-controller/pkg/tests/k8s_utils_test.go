@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/tests/utils"
+	utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/accessrule-controller/pkg/tests/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	runaiv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2"

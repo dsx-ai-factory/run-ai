@@ -10,7 +10,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/accessrule-controller/pkg/controllers/accessrule/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/accessrule-controller/pkg/controllers/accessrule/rolebindingsutils"
-	utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/tests/utils"
+	utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/accessrule-controller/pkg/tests/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
