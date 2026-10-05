@@ -159,9 +159,9 @@ func buildContainerArgs(config *runaiv1accessrule.AccessRuleController, runaiCon
 			strconv.Itoa(*config.Args.LegacyProjectPermissionsIntervalSeconds))
 	}
 
-	if len(runaiConfig.Spec.Internal.Global.NMC.AllowedServiceAccounts) > 0 {
+	if allowedServiceAccounts := outils.GetNMCAllowedServiceAccountUsernames(runaiConfig); len(allowedServiceAccounts) > 0 {
 		args = append(args, "--allowed-service-accounts")
-		args = append(args, strings.Join(runaiConfig.Spec.Internal.Global.NMC.AllowedServiceAccounts, ","))
+		args = append(args, strings.Join(allowedServiceAccounts, ","))
 	}
 
 	return args

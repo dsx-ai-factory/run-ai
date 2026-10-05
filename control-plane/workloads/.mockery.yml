@@ -1,0 +1,23 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend:
+    interfaces:
+      TenantSettingsClient:
+        config:
+          dir: mocks/pkg/clients/backend
+  github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/metrics_exporter:
+    interfaces:
+      ClustersClienter: {}
+      MetricsCollectorer: {}
+      MetricsExporterer: {}
+      TenantsClienter: {}
+      ExporterFactoryer:
+        config:
+          dir: '{{.InterfaceDir}}'
+          filename: mock_exporter_factory.go
+          structname: MockExporterFactoryer
+          pkgname: metrics_exporter

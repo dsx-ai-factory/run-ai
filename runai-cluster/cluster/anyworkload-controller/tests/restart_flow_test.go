@@ -185,9 +185,7 @@ var _ = Describe("Restart Flow Integration Tests", Serial, Ordered, func() {
 
 		controllerName = "restart-flow-wlr-controller"
 
-		// tamperClient acts as a regular user, saClient as a cluster service account. saUser is
-		// allowed by the system:serviceaccount: prefix rule, not the allowlist; tamperUser must
-		// not be a substring of the envtest admin username or the tamper-denial specs go blind.
+		// The trusted service account is explicitly allowlisted; the regular user is not.
 		tamperClient client.Client
 		saClient     client.Client
 		tamperUser   = "restart-flow-tamper-user"
@@ -226,7 +224,7 @@ var _ = Describe("Restart Flow Integration Tests", Serial, Ordered, func() {
 		Expect(restart.NewSetup(10, restartFlowChildDeletionTimeout)(managerCtx, k8sManager)).To(Succeed())
 
 		fw := framework.NewFramework(framework.NewRegistry(
-			restartrules.NewPlugin([]string{adminUser}),
+			restartrules.NewPlugin([]string{adminUser, saUser}),
 			nodeaffinity.NewPlugin(k8sClient),
 		), nil)
 		//nolint:staticcheck // SA1019: matches the other integration tests' recorder wiring
@@ -496,7 +494,7 @@ var _ = Describe("Restart Flow Integration Tests", Serial, Ordered, func() {
 			}, timeout, interval).Should(Succeed())
 
 			// perform write attempts
-			By("denying user tampering, allowing SA writes, and protecting the request-ref label")
+			By("denying user tampering, allowing trusted SA writes, and protecting the request-ref label")
 			Eventually(func(g Gomega) {
 				current := &dromosv1alpha1.WorkloadRunner{}
 				g.Expect(k8sClient.Get(managerCtx, client.ObjectKeyFromObject(runner), current)).To(Succeed())
@@ -508,7 +506,7 @@ var _ = Describe("Restart Flow Integration Tests", Serial, Ordered, func() {
 
 				saTouched := current.DeepCopy()
 				saTouched.Annotations["sa-touch"] = "ok"
-				g.Expect(saClient.Update(managerCtx, saTouched)).To(Succeed(), "allow service account write")
+				g.Expect(saClient.Update(managerCtx, saTouched)).To(Succeed(), "allow trusted service account write")
 
 				g.Expect(k8sClient.Get(managerCtx, client.ObjectKeyFromObject(runner), current)).To(Succeed())
 				stolen := current.DeepCopy()

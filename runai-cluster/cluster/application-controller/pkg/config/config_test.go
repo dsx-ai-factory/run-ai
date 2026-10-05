@@ -38,3 +38,23 @@ var _ = Describe("parseClientCredentials", func() {
 		Expect(creds.ClusterID).To(BeEmpty())
 	})
 })
+
+var _ = Describe("Application admission identities", func() {
+	BeforeEach(func() {
+		GinkgoT().Setenv("HELM_CACHE_HOME", "/tmp/helm/cache")
+		GinkgoT().Setenv("HELM_CONFIG_HOME", "/tmp/helm/config")
+	})
+
+	It("defaults to the application controller and agent's full usernames", func() {
+		GinkgoT().Setenv("ALLOWED_SERVICE_ACCOUNTS", "")
+		Expect(newConfig().AllowedServiceAccounts).To(Equal([]string{
+			"system:serviceaccount:runai:application-controller",
+			"system:serviceaccount:runai:runai-agent",
+		}))
+	})
+
+	It("accepts configured full usernames for a custom namespace", func() {
+		GinkgoT().Setenv("ALLOWED_SERVICE_ACCOUNTS", "system:serviceaccount:custom:application-controller")
+		Expect(newConfig().AllowedServiceAccounts).To(Equal([]string{"system:serviceaccount:custom:application-controller"}))
+	})
+})

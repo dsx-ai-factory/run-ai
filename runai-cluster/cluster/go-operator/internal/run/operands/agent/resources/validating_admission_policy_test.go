@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	legacyvalidator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils/validator"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/google/cel-go/cel"
 	"github.com/stretchr/testify/assert"
@@ -50,16 +49,16 @@ func TestAssetIdentityAdmissionPolicyDefinitions(t *testing.T) {
 	}
 }
 
-func TestAssetIdentityMatchesLegacyAuthorization(t *testing.T) {
+func TestAssetIdentityAuthorization(t *testing.T) {
 	environment, err := cel.NewEnv(cel.Variable("request", cel.DynType), cel.Variable("variables", cel.DynType))
 	require.NoError(t, err)
 	for _, patterns := range []struct {
-		name                   string
-		configured, normalized []string
+		name                     string
+		configured, allowedUsers []string
 	}{
 		{name: "no patterns"},
-		{name: "legacy configuration parsing", configured: []string{" nmc-ops, trusted-user ", "", "  "}, normalized: []string{"nmc-ops", "trusted-user"}},
-		{name: "escaped pattern", configured: []string{`quote"slash\`}, normalized: []string{`quote"slash\`}},
+		{name: "legacy configuration parsing", configured: []string{" nmc-ops, trusted-user ", "", "  "}, allowedUsers: []string{"nmc-ops-user", "prefix-trusted-user-suffix"}},
+		{name: "escaped pattern", configured: []string{`quote"slash\`}, allowedUsers: []string{`quote"slash\user`}},
 	} {
 		t.Run(patterns.name, func(t *testing.T) {
 			config := &runv1.RunaiConfig{}
@@ -92,7 +91,19 @@ func TestAssetIdentityMatchesLegacyAuthorization(t *testing.T) {
 						"variables": map[string]any{"allowedPatterns": patternValue},
 					})
 					require.NoError(t, err)
-					assert.Equal(t, legacyvalidator.AllowedServiceAccounts(username, patterns.normalized),
+					// Asset policies retain their existing authorization independently of the stricter CR webhooks.
+					allowed := false
+					for _, identity := range append([]string{
+						"system:serviceaccount:runai:runai-agent",
+						"system:serviceaccount:tenant-a:unrelated",
+						"system:serviceaccount:kube-system:persistent-volume-binder",
+						"system:serviceaccount:custom:custom-nmc",
+					}, patterns.allowedUsers...) {
+						if username == identity {
+							allowed = true
+						}
+					}
+					assert.Equal(t, allowed,
 						result.Value(), "policy=%s username=%q", policy.Name, username)
 				}
 			}
