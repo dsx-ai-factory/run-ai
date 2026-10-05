@@ -11,11 +11,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config"
 )
 
-// K8sObjectsUpdateFromBackend mirrors AssetsUpdateFromBackend for the
-// k8s-objects sync family. Separate type (rather than reusing the assets
-// one) because k8s-objects assets carry a typed K8sObjectSpec whereas the
-// legacy assets family uses an untyped Spec interface{} field with
-// per-kind type assertions in the builder.
+// K8sObjectsUpdateFromBackend mirrors AssetsUpdateFromBackend for the k8s-objects family of assets.
+// We implement it as a separate type because k8s-objects assets carry a typed K8sObjectSpec whereas the
+// legacy assets family uses an untyped Spec interface{} field with per-kind type assertions in the builder.
 type K8sObjectsUpdateFromBackend struct {
 	RequestInfo  *assetsApi.RequestInfo
 	ResponseInfo *assetsApi.ResponseInfo
@@ -23,10 +21,9 @@ type K8sObjectsUpdateFromBackend struct {
 	Assets       []K8sObjectFromBackend
 }
 
-// K8sObjectFromBackend is the per-asset shape consumed by k8sObjectBuilder
-// implementations. The Spec field is nil-safe: tombstones (IsDeleted=true)
-// arrive without a spec body since the agent only needs name/namespace to
-// delete the cluster object (the CP's ToK8sObjectsUpdate documents this).
+// K8sObjectFromBackend is the per-asset info.
+// The Spec field is nil-safe: with IsDeleted=true it can be nil, since
+// the agent only needs name/namespace to delete the cluster object.
 type K8sObjectFromBackend struct {
 	Meta        assetsApi.AssetMetaForSync
 	UpdateCount int64
@@ -37,9 +34,7 @@ type K8sObjectFromBackend struct {
 // GetK8sObjectsUpdatesFromBackend fetches the next batch of k8s-objects
 // deltas from the control plane and attaches the previous sync report in
 // the POST body — identical cursor/report pattern to the credentials and
-// datasources handlers (see assets_backend.go). A nil response is returned
-// as nil without an error so the handler can distinguish "no updates" from
-// "transport failure".
+// datasources handlers (see assets_backend.go).
 func (h *K8sObjectsHandler) GetK8sObjectsUpdatesFromBackend() (*K8sObjectsUpdateFromBackend, *assetsApi.Error) {
 	syncReport, _ := k8sObjectsSyncReport.Load(k8sObjectsSyncReportKey)
 

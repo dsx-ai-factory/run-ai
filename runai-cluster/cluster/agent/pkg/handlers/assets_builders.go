@@ -457,11 +457,8 @@ func (ah *AssetsHandler) composeSecretData(clusterSecret *corev1.Secret, backend
 	return nil
 }
 
-// composeScopeLabel stamps the scope-wide Run:ai label on an in-flight k8s
-// object's label map. The resulting label is what a future replication
-// controller selects on when deciding which project namespaces should
-// receive a copy of the asset — keep the label vocabulary in sync between
-// here and that controller.
+// composeScopeLabel stamps the Run:ai workload with a label indicating the
+// scope of the resource. this is used by the replication mechanism.
 func composeScopeLabel(labels map[string]string, meta *assetsApi.AssetMetaForSync) {
 	switch meta.Scope {
 	case assetsApi.SCOPE_TENANT:
@@ -475,10 +472,8 @@ func composeScopeLabel(labels map[string]string, meta *assetsApi.AssetMetaForSyn
 	}
 }
 
-// getAssetKindLabel maps an asset kind to the string stamped on the
-// `run.ai/asset` label of the k8s object. Keep this exhaustive — unknown
-// kinds collapse to an empty label which hides them from label-selectors
-// (e.g. replication, cleanup) that key off this label.
+// getAssetKindLabel maps an asset kind to the string that the agent stores in the `run.ai/asset` label
+// of the created k8s object.
 func getAssetKindLabel(kind assetsApi.AssetKind) string {
 	switch kind {
 	case assetsApi.ASSETKIND_PVC:
