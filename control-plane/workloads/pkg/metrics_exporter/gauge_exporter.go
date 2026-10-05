@@ -14,7 +14,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name MetricsCollectorer
 type MetricsCollectorer interface {
 	Collect(ctx context.Context, tenantIds []int32) []models.MetricRecord
 }

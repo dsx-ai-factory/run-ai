@@ -1,0 +1,32 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client:
+    interfaces:
+      IWorkloadsClient: {}
+      IWorkloadsExternalClient: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      AIApplicationsAPI: {}
+      DistributedAPI: {}
+      DistributedInferencesAPI: {}
+      EventsAPI: {}
+      HealthAPI: {}
+      InferencesAPI: {}
+      PodGroupsAPI: {}
+      PodsAPI: {}
+      RevisionsAPI: {}
+      SyncAPI: {}
+      TrainingsAPI: {}
+      UnifiedAPI: {}
+      WorkloadPropertiesAPI: {}
+      WorkloadTemplatesAPI: {}
+      WorkloadsAPI: {}
+      WorkloadsBatchAPI: {}
+      WorkspacesAPI: {}
