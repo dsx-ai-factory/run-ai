@@ -159,7 +159,6 @@ CP_GO_SERVICES=(
   assets-service
   audit-service
   authorization
-  authorization-migrator
   bff-service
   catalog-service
   cli-exposer
