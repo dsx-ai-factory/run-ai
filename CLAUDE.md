@@ -57,7 +57,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [control-plane/assets-service](control-plane/assets-service)
 - [control-plane/audit-service](control-plane/audit-service)
 - [control-plane/authorization](control-plane/authorization)
-- [control-plane/authorization-migrator](control-plane/authorization-migrator)
 - [control-plane/bff-service](control-plane/bff-service)
 - [control-plane/catalog-service](control-plane/catalog-service)
 - [control-plane/cli-exposer](control-plane/cli-exposer)
