@@ -8,7 +8,6 @@ REPO_DIR=$(shell pwd)
 # Change for every new service
 SERVICE_NAME=notifications-proxy
 
-MOCKERY=$(BIN_DIR)/mockery
 DOCKER_COMPOSE_FILE=./integration_tests/docker-compose.yaml
 # The compose file builds the slack mock on the Go this module's go.mod asks for.
 export GO_ALPINE_VERSION
