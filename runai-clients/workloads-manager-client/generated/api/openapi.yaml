@@ -4788,6 +4788,26 @@ components:
           example: 12345
           format: int64
           type: integer
+    AgentInferenceEndpoint:
+      additionalProperties: false
+      description: Server-resolved inference routing intent for the Agent. Omitted
+        for workloads without managed inference routing.
+      nullable: true
+      properties:
+        schemaVersion:
+          description: "Version of the transport envelope, currently v1. Consumers\
+            \ reject unsupported versions."
+          type: string
+        spec:
+          additionalProperties: true
+          description: "Resolved InferenceEndpoint spec, validated against the installed\
+            \ CRD when applied. Does not include resource identity, ownership, or\
+            \ status."
+          type: object
+      required:
+      - schemaVersion
+      - spec
+      type: object
     WorkloadV2UpdateConfigurationMnnvl:
       additionalProperties: false
       properties:
@@ -4901,6 +4921,8 @@ components:
                     - path: /
                       pathType: Prefix
       properties:
+        inferenceEndpoint:
+          $ref: '#/components/schemas/AgentInferenceEndpoint'
         mnnvl:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationMnnvl'
         networking:

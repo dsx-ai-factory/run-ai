@@ -21,6 +21,8 @@ var _ MappedNullable = &ClusterReportedConfig{}
 
 // ClusterReportedConfig Holds cluster configuration values.
 type ClusterReportedConfig struct {
+	// InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads.
+	InferenceEndpointSchemaVersion NullableString `json:"inferenceEndpointSchemaVersion,omitempty"`
 	// indicates if the cluster workload ownership protection is enabled
 	WorkloadOwnershipProtection NullableBool `json:"workloadOwnershipProtection,omitempty"`
 	// indicates if the cluster subdomain is enabled
@@ -83,6 +85,49 @@ func NewClusterReportedConfig() *ClusterReportedConfig {
 func NewClusterReportedConfigWithDefaults() *ClusterReportedConfig {
 	this := ClusterReportedConfig{}
 	return &this
+}
+
+// GetInferenceEndpointSchemaVersion returns the InferenceEndpointSchemaVersion field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *ClusterReportedConfig) GetInferenceEndpointSchemaVersion() string {
+	if o == nil || IsNil(o.InferenceEndpointSchemaVersion.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.InferenceEndpointSchemaVersion.Get()
+}
+
+// GetInferenceEndpointSchemaVersionOk returns a tuple with the InferenceEndpointSchemaVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ClusterReportedConfig) GetInferenceEndpointSchemaVersionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.InferenceEndpointSchemaVersion.Get(), o.InferenceEndpointSchemaVersion.IsSet()
+}
+
+// HasInferenceEndpointSchemaVersion returns a boolean if a field has been set.
+func (o *ClusterReportedConfig) HasInferenceEndpointSchemaVersion() bool {
+	if o != nil && o.InferenceEndpointSchemaVersion.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetInferenceEndpointSchemaVersion gets a reference to the given NullableString and assigns it to the InferenceEndpointSchemaVersion field.
+func (o *ClusterReportedConfig) SetInferenceEndpointSchemaVersion(v string) {
+	o.InferenceEndpointSchemaVersion.Set(&v)
+}
+
+// SetInferenceEndpointSchemaVersionNil sets the value for InferenceEndpointSchemaVersion to be an explicit nil
+func (o *ClusterReportedConfig) SetInferenceEndpointSchemaVersionNil() {
+	o.InferenceEndpointSchemaVersion.Set(nil)
+}
+
+// UnsetInferenceEndpointSchemaVersion ensures that no value is present for InferenceEndpointSchemaVersion, not even an explicit nil
+func (o *ClusterReportedConfig) UnsetInferenceEndpointSchemaVersion() {
+	o.InferenceEndpointSchemaVersion.Unset()
 }
 
 // GetWorkloadOwnershipProtection returns the WorkloadOwnershipProtection field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1256,6 +1301,9 @@ func (o ClusterReportedConfig) MarshalJSON() ([]byte, error) {
 
 func (o ClusterReportedConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.InferenceEndpointSchemaVersion.IsSet() {
+		toSerialize["inferenceEndpointSchemaVersion"] = o.InferenceEndpointSchemaVersion.Get()
+	}
 	if o.WorkloadOwnershipProtection.IsSet() {
 		toSerialize["workloadOwnershipProtection"] = o.WorkloadOwnershipProtection.Get()
 	}

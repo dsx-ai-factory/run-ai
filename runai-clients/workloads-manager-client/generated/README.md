@@ -99,6 +99,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AgentInferenceEndpoint](docs/AgentInferenceEndpoint.md)
  - [AgentNetworkingConfiguration](docs/AgentNetworkingConfiguration.md)
  - [AgentNetworkingService](docs/AgentNetworkingService.md)
  - [AgentServiceCreate](docs/AgentServiceCreate.md)

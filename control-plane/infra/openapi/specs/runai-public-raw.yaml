@@ -28135,6 +28135,14 @@ components:
       description: Holds cluster configuration values.
       type: object
       properties:
+        inferenceEndpointSchemaVersion:
+          type: string
+          nullable: true
+          description: >-
+            InferenceEndpoint integration contract declared by the operator when
+            Agent, Anyworkload and inference-endpoint-controller are enabled.
+            Omitted by older clusters. Operand readiness and administrator
+            Gateway settings must also be checked before enabling new workloads.
         workloadOwnershipProtection:
           type: boolean
           nullable: true
@@ -57734,6 +57742,29 @@ components:
       properties:
         value:
           $ref: '#/components/schemas/RunState'
+    AgentInferenceEndpoint:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: >-
+        Server-resolved inference routing intent for the Agent. Omitted for
+        workloads without managed inference routing.
+      required:
+        - schemaVersion
+        - spec
+      properties:
+        schemaVersion:
+          type: string
+          description: >-
+            Version of the transport envelope, currently v1. Consumers reject
+            unsupported versions.
+        spec:
+          type: object
+          additionalProperties: true
+          description: >-
+            Resolved InferenceEndpoint spec, validated against the installed CRD
+            when applied. Does not include resource identity, ownership, or
+            status.
     WorkloadV2UpdateConfigurationMnnvl:
       type: object
       additionalProperties: false
@@ -57868,6 +57899,10 @@ components:
                         - path: /
                           pathType: Prefix
       properties:
+        inferenceEndpoint:
+          x-internal: true
+          nullable: true
+          $ref: '#/components/schemas/AgentInferenceEndpoint'
         mnnvl:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationMnnvl'
         networking:

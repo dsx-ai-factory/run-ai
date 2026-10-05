@@ -3,6 +3,9 @@ kind: ClusterRole
 metadata:
   name: runai-anyworkload-controller-project
 rules:
+  - apiGroups: [inference.platform.run.ai]
+    resources: [inferenceendpoints]
+    verbs: [get, create, update, patch, delete]
   - apiGroups:
       - run.ai
     resources:
@@ -80,6 +83,9 @@ kind: ClusterRole
 metadata:
   name: runai-anyworkload-controller
 rules:
+  - apiGroups: [inference.platform.run.ai]
+    resources: [inferenceendpoints]
+    verbs: [get, list, watch]
   - apiGroups:
       - ""
     resources:

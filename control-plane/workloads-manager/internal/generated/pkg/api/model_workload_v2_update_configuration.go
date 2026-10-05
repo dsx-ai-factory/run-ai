@@ -23,6 +23,11 @@ var dummyWorkloadV2UpdateConfiguration = runaihttp.AssertPattern
 type WorkloadV2UpdateConfiguration struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//InferenceEndpoint *AgentInferenceEndpoint `json:"inferenceEndpoint,omitempty"`
+	InferenceEndpoint *AgentInferenceEndpoint `json:"inferenceEndpoint,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Mnnvl WorkloadV2UpdateConfigurationMnnvl `json:"mnnvl,omitempty"`
 	Mnnvl WorkloadV2UpdateConfigurationMnnvl `json:"mnnvl,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -62,6 +67,11 @@ type WorkloadV2UpdateConfiguration struct {
 
 // AssertWorkloadV2UpdateConfigurationRequired checks if the required fields are not zero-ed
 func AssertWorkloadV2UpdateConfigurationRequired(obj WorkloadV2UpdateConfiguration) error {
+	if obj.InferenceEndpoint != nil {
+		if err := AssertAgentInferenceEndpointRequired(*obj.InferenceEndpoint); err != nil {
+			return err
+		}
+	}
 	if err := AssertWorkloadV2UpdateConfigurationMnnvlRequired(obj.Mnnvl); err != nil {
 		return err
 	}
@@ -99,6 +109,16 @@ func AssertWorkloadV2UpdateConfigurationRequired(obj WorkloadV2UpdateConfigurati
 
 // AssertWorkloadV2UpdateConfigurationConstraints checks if the values respects the defined constraints
 func AssertWorkloadV2UpdateConfigurationConstraints(obj WorkloadV2UpdateConfiguration) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.InferenceEndpoint != nil {
+		if err := AssertAgentInferenceEndpointConstraints(*obj.InferenceEndpoint); err != nil {
+			return err
+		}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

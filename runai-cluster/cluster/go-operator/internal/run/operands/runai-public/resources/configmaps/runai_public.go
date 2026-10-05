@@ -161,6 +161,9 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		configuration.GatewayName = &gw.Name
 		configuration.GatewayNamespace = &gw.Namespace
 	}
+	if rp.inferenceEndpointIntegrationAvailable(ctx) {
+		configuration.InferenceEndpointSchemaVersion = ptr.To(runv1.InferenceEndpointIntegrationV1)
+	}
 
 	if aw := rp.runaiConfig.Spec.AnyworkloadController; aw != nil {
 		configuration.GitSyncImage = formatImageRef(aw.GitSyncImage)

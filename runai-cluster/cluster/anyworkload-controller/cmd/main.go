@@ -20,6 +20,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/mnnvlconv"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/ownership"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/restart"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/inferenceendpoint"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/networking"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/personalcreds"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/restartrules"
@@ -53,7 +54,7 @@ func run() error {
 	options := []app.Option{
 		app.WithScheme(scheme_init.Scheme()),
 		app.WithConfig(rcpconfig.Get[*dromosconfig.DromosConfig]()),
-		app.WithPlugins(networkingIntegration.Build, personalcreds.New, storage.New, nodeaffinity.New, mnnvl.NewBuilder(
+		app.WithPlugins(inferenceendpoint.New, networkingIntegration.Build, personalcreds.New, storage.New, nodeaffinity.New, mnnvl.NewBuilder(
 			mnnvl.WithPodAffinityProvider(mnnvlconv.ProvidePodAffinity),
 			mnnvl.WithWorkloadLabelStampDisabled(),
 		)),

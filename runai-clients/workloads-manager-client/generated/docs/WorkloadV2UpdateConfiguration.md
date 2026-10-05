@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**InferenceEndpoint** | Pointer to [**NullableAgentInferenceEndpoint**](AgentInferenceEndpoint.md) |  | [optional] 
 **Mnnvl** | Pointer to [**WorkloadV2UpdateConfigurationMnnvl**](WorkloadV2UpdateConfigurationMnnvl.md) |  | [optional] 
 **Networking** | Pointer to [**NullableAgentNetworkingConfiguration**](AgentNetworkingConfiguration.md) |  | [optional] 
 **NetworkingEndpoints** | Pointer to [**[]NetworkingEndpoint**](NetworkingEndpoint.md) | Endpoint-array networking configuration sent to agents that support the new networking shape. Supported for cluster version 2.26.0 and above.  | [optional] 
@@ -31,6 +32,41 @@ NewWorkloadV2UpdateConfigurationWithDefaults instantiates a new WorkloadV2Update
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
+### GetInferenceEndpoint
+
+`func (o *WorkloadV2UpdateConfiguration) GetInferenceEndpoint() AgentInferenceEndpoint`
+
+GetInferenceEndpoint returns the InferenceEndpoint field if non-nil, zero value otherwise.
+
+### GetInferenceEndpointOk
+
+`func (o *WorkloadV2UpdateConfiguration) GetInferenceEndpointOk() (*AgentInferenceEndpoint, bool)`
+
+GetInferenceEndpointOk returns a tuple with the InferenceEndpoint field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetInferenceEndpoint
+
+`func (o *WorkloadV2UpdateConfiguration) SetInferenceEndpoint(v AgentInferenceEndpoint)`
+
+SetInferenceEndpoint sets InferenceEndpoint field to given value.
+
+### HasInferenceEndpoint
+
+`func (o *WorkloadV2UpdateConfiguration) HasInferenceEndpoint() bool`
+
+HasInferenceEndpoint returns a boolean if a field has been set.
+
+### SetInferenceEndpointNil
+
+`func (o *WorkloadV2UpdateConfiguration) SetInferenceEndpointNil(b bool)`
+
+ SetInferenceEndpointNil sets the value for InferenceEndpoint to be an explicit nil
+
+### UnsetInferenceEndpoint
+`func (o *WorkloadV2UpdateConfiguration) UnsetInferenceEndpoint()`
+
+UnsetInferenceEndpoint ensures that no value is present for InferenceEndpoint, not even an explicit nil
 ### GetMnnvl
 
 `func (o *WorkloadV2UpdateConfiguration) GetMnnvl() WorkloadV2UpdateConfigurationMnnvl`

@@ -1,0 +1,36 @@
+suite: Anyworkload inference endpoint permissions
+templates:
+  - templates/clusterroles/anyworkload-controller.yaml
+tests:
+  - it: grants endpoint writes only through the project role
+    documentSelector:
+      path: metadata.name
+      value: runai-anyworkload-controller-project
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [inference.platform.run.ai]
+            resources: [inferenceendpoints]
+            verbs: [get, create, update, patch, delete]
+  - it: grants endpoint reads and watches cluster wide
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: kind
+          value: ClusterRole
+      - equal:
+          path: metadata.name
+          value: runai-anyworkload-controller
+      - contains:
+          path: rules
+          content:
+            apiGroups: [inference.platform.run.ai]
+            resources: [inferenceendpoints]
+            verbs: [get, list, watch]
+      - notContains:
+          path: rules
+          content:
+            apiGroups: [inference.platform.run.ai]
+            resources: [inferenceendpoints]
+            verbs: [get, create, update, patch, delete]

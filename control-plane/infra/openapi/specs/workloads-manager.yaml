@@ -1599,6 +1599,22 @@ components:
       properties:
         highestUpdate:
           $ref: '#/components/schemas/UpdateCount'
+    AgentInferenceEndpoint:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: Server-resolved inference routing intent for the Agent. Omitted for workloads without managed inference routing.
+      required:
+        - schemaVersion
+        - spec
+      properties:
+        schemaVersion:
+          type: string
+          description: Version of the transport envelope, currently v1. Consumers reject unsupported versions.
+        spec:
+          type: object
+          additionalProperties: true
+          description: Resolved InferenceEndpoint spec, validated against the installed CRD when applied. Does not include resource identity, ownership, or status.
     WorkloadV2UpdateConfigurationMnnvl:
       type: object
       additionalProperties: false
@@ -1709,6 +1725,10 @@ components:
                         - path: /
                           pathType: Prefix
       properties:
+        inferenceEndpoint:
+          x-internal: true
+          nullable: true
+          $ref: '#/components/schemas/AgentInferenceEndpoint'
         mnnvl:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationMnnvl'
         networking:

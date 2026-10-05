@@ -4918,6 +4918,11 @@
         "description": "Holds cluster configuration values.",
         "type": "object",
         "properties": {
+          "inferenceEndpointSchemaVersion": {
+            "type": "string",
+            "nullable": true,
+            "description": "InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads."
+          },
           "workloadOwnershipProtection": {
             "type": "boolean",
             "nullable": true,
