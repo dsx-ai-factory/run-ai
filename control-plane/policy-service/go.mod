@@ -41,7 +41,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
@@ -58,7 +57,6 @@ require (
 	github.com/go-faster/errors v0.8.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v1.0.1 // indirect
 	github.com/go-openapi/jsonreference v1.0.1 // indirect
@@ -83,7 +81,6 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.1 // indirect
 	github.com/golang/glog v1.2.5 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20260507013755-92041b743c96 // indirect
@@ -286,8 +283,6 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds => ../../runai-cluster/cluster/common/personalcreds
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../../runai-cluster/cluster/common/runaipublic
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../../runai-cluster/cluster/common/utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../../runai-cluster/cluster/go-operator
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../../runai-cluster/cluster/common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../../runai-cluster/cluster/sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../../runai-cluster/cluster/workload-common
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller => ../../runai-cluster/cluster/workload-controller
