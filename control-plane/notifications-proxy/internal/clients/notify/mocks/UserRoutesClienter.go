@@ -20,10 +20,19 @@ func NewUserRoutesClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *UserRoutesClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &UserRoutesClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,17 +73,38 @@ type UserRoutesClienter_CreateRoute_Call struct {
 }
 
 // CreateRoute is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - route
-func (_e *UserRoutesClienter_Expecter) CreateRoute(ctx interface{}, tenantId interface{}, userId interface{}, route interface{}) *UserRoutesClienter_CreateRoute_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - route *types.UserRouteConfig
+func (_e *UserRoutesClienter_Expecter) CreateRoute(ctx any, tenantId any, userId any, route any) *UserRoutesClienter_CreateRoute_Call {
 	return &UserRoutesClienter_CreateRoute_Call{Call: _e.mock.On("CreateRoute", ctx, tenantId, userId, route)}
 }
 
 func (_c *UserRoutesClienter_CreateRoute_Call) Run(run func(ctx context.Context, tenantId string, userId string, route *types.UserRouteConfig)) *UserRoutesClienter_CreateRoute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*types.UserRouteConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 *types.UserRouteConfig
+		if args[3] != nil {
+			arg3 = args[3].(*types.UserRouteConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -112,17 +142,38 @@ type UserRoutesClienter_DeleteRoute_Call struct {
 }
 
 // DeleteRoute is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - routeId
-func (_e *UserRoutesClienter_Expecter) DeleteRoute(ctx interface{}, tenantId interface{}, userId interface{}, routeId interface{}) *UserRoutesClienter_DeleteRoute_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - routeId string
+func (_e *UserRoutesClienter_Expecter) DeleteRoute(ctx any, tenantId any, userId any, routeId any) *UserRoutesClienter_DeleteRoute_Call {
 	return &UserRoutesClienter_DeleteRoute_Call{Call: _e.mock.On("DeleteRoute", ctx, tenantId, userId, routeId)}
 }
 
 func (_c *UserRoutesClienter_DeleteRoute_Call) Run(run func(ctx context.Context, tenantId string, userId string, routeId string)) *UserRoutesClienter_DeleteRoute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -171,16 +222,32 @@ type UserRoutesClienter_GetRoutes_Call struct {
 }
 
 // GetRoutes is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-func (_e *UserRoutesClienter_Expecter) GetRoutes(ctx interface{}, tenantId interface{}, userId interface{}) *UserRoutesClienter_GetRoutes_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+func (_e *UserRoutesClienter_Expecter) GetRoutes(ctx any, tenantId any, userId any) *UserRoutesClienter_GetRoutes_Call {
 	return &UserRoutesClienter_GetRoutes_Call{Call: _e.mock.On("GetRoutes", ctx, tenantId, userId)}
 }
 
 func (_c *UserRoutesClienter_GetRoutes_Call) Run(run func(ctx context.Context, tenantId string, userId string)) *UserRoutesClienter_GetRoutes_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -218,17 +285,38 @@ type UserRoutesClienter_UpdateRoute_Call struct {
 }
 
 // UpdateRoute is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - route
-func (_e *UserRoutesClienter_Expecter) UpdateRoute(ctx interface{}, tenantId interface{}, userId interface{}, route interface{}) *UserRoutesClienter_UpdateRoute_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - route *types.UserRouteConfig
+func (_e *UserRoutesClienter_Expecter) UpdateRoute(ctx any, tenantId any, userId any, route any) *UserRoutesClienter_UpdateRoute_Call {
 	return &UserRoutesClienter_UpdateRoute_Call{Call: _e.mock.On("UpdateRoute", ctx, tenantId, userId, route)}
 }
 
 func (_c *UserRoutesClienter_UpdateRoute_Call) Run(run func(ctx context.Context, tenantId string, userId string, route *types.UserRouteConfig)) *UserRoutesClienter_UpdateRoute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*types.UserRouteConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 *types.UserRouteConfig
+		if args[3] != nil {
+			arg3 = args[3].(*types.UserRouteConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }

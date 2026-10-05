@@ -24,7 +24,6 @@ const (
 	XScopeOrgId string = "X-Scope-OrgID"
 )
 
-//go:generate mockery
 type MetricStoreService interface {
 	CreateMetricsStoreInfra(ctx context.Context, request *MetricStoreInfraCreateRequest) (*models.MetricStoreDetails, *berrors.BusinessError)
 	DeleteMetricsStoreInfra(ctx context.Context, tenantId uint) *berrors.BusinessError

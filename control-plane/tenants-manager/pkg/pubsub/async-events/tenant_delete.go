@@ -14,7 +14,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub"
 )
 
-//go:generate mockery
 type TenantPublishServicer interface {
 	PublishTenantDeleteEvent(ctx context.Context, event *event.TenantDelete) error
 }

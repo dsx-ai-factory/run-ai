@@ -21,10 +21,19 @@ func NewReportsDeleter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ReportsDeleter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ReportsDeleter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -67,16 +76,32 @@ type ReportsDeleter_DeleteReport_Call struct {
 }
 
 // DeleteReport is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - reportId
-func (_e *ReportsDeleter_Expecter) DeleteReport(ctx interface{}, tenantId interface{}, reportId interface{}) *ReportsDeleter_DeleteReport_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - reportId string
+func (_e *ReportsDeleter_Expecter) DeleteReport(ctx any, tenantId any, reportId any) *ReportsDeleter_DeleteReport_Call {
 	return &ReportsDeleter_DeleteReport_Call{Call: _e.mock.On("DeleteReport", ctx, tenantId, reportId)}
 }
 
 func (_c *ReportsDeleter_DeleteReport_Call) Run(run func(ctx context.Context, tenantId int32, reportId string)) *ReportsDeleter_DeleteReport_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -127,15 +152,26 @@ type ReportsDeleter_GetPendingDeleteReports_Call struct {
 }
 
 // GetPendingDeleteReports is a helper method to define mock.On call
-//   - stopCtx
-//   - limit
-func (_e *ReportsDeleter_Expecter) GetPendingDeleteReports(stopCtx interface{}, limit interface{}) *ReportsDeleter_GetPendingDeleteReports_Call {
+//   - stopCtx context.Context
+//   - limit int
+func (_e *ReportsDeleter_Expecter) GetPendingDeleteReports(stopCtx any, limit any) *ReportsDeleter_GetPendingDeleteReports_Call {
 	return &ReportsDeleter_GetPendingDeleteReports_Call{Call: _e.mock.On("GetPendingDeleteReports", stopCtx, limit)}
 }
 
 func (_c *ReportsDeleter_GetPendingDeleteReports_Call) Run(run func(stopCtx context.Context, limit int)) *ReportsDeleter_GetPendingDeleteReports_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

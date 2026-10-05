@@ -17,10 +17,19 @@ func NewS3Deleter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *S3Deleter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &S3Deleter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -61,14 +70,20 @@ type S3Deleter_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - id
-func (_e *S3Deleter_Expecter) Delete(id interface{}) *S3Deleter_Delete_Call {
+//   - id string
+func (_e *S3Deleter_Expecter) Delete(id any) *S3Deleter_Delete_Call {
 	return &S3Deleter_Delete_Call{Call: _e.mock.On("Delete", id)}
 }
 
 func (_c *S3Deleter_Delete_Call) Run(run func(id string)) *S3Deleter_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

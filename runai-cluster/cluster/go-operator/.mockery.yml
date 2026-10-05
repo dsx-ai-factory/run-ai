@@ -14,3 +14,29 @@ packages:
   github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/controllers/run:
     config:
       all: true
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/clients:
+    config:
+      dir: '{{.InterfaceDir}}/mocks'
+      filename: '{{.InterfaceName}}.go'
+      structname: '{{.InterfaceName}}'
+      pkgname: mocks
+    interfaces:
+      ClusterServiceClient: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands:
+    config:
+      dir: mocks/pkg/operands
+      filename: '{{.InterfaceName}}.go'
+      structname: '{{.InterfaceName}}'
+      pkgname: mocks
+    interfaces:
+      Operand: {}
+      OperandOld: {}
+      Resource: {}
+  github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/defaulter:
+    config:
+      dir: mocks/internal_/run/defaulter
+      filename: '{{.InterfaceName}}.go'
+      structname: '{{.InterfaceName}}'
+      pkgname: mocks
+    interfaces:
+      Defaulter: {}

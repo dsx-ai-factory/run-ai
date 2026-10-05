@@ -18,10 +18,19 @@ func NewMetricQueryPicker(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MetricQueryPicker {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MetricQueryPicker{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -71,15 +80,26 @@ type MetricQueryPicker_GetQueryByVersion_Call struct {
 }
 
 // GetQueryByVersion is a helper method to define mock.On call
-//   - metricName
-//   - version
-func (_e *MetricQueryPicker_Expecter) GetQueryByVersion(metricName interface{}, version interface{}) *MetricQueryPicker_GetQueryByVersion_Call {
+//   - metricName string
+//   - version string
+func (_e *MetricQueryPicker_Expecter) GetQueryByVersion(metricName any, version any) *MetricQueryPicker_GetQueryByVersion_Call {
 	return &MetricQueryPicker_GetQueryByVersion_Call{Call: _e.mock.On("GetQueryByVersion", metricName, version)}
 }
 
 func (_c *MetricQueryPicker_GetQueryByVersion_Call) Run(run func(metricName string, version string)) *MetricQueryPicker_GetQueryByVersion_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -128,14 +148,20 @@ type MetricQueryPicker_GetQueryMinVersion_Call struct {
 }
 
 // GetQueryMinVersion is a helper method to define mock.On call
-//   - metricName
-func (_e *MetricQueryPicker_Expecter) GetQueryMinVersion(metricName interface{}) *MetricQueryPicker_GetQueryMinVersion_Call {
+//   - metricName string
+func (_e *MetricQueryPicker_Expecter) GetQueryMinVersion(metricName any) *MetricQueryPicker_GetQueryMinVersion_Call {
 	return &MetricQueryPicker_GetQueryMinVersion_Call{Call: _e.mock.On("GetQueryMinVersion", metricName)}
 }
 
 func (_c *MetricQueryPicker_GetQueryMinVersion_Call) Run(run func(metricName string)) *MetricQueryPicker_GetQueryMinVersion_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

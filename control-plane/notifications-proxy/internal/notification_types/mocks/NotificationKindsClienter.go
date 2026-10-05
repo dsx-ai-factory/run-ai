@@ -20,10 +20,19 @@ func NewNotificationKindsClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *NotificationKindsClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &NotificationKindsClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,14 +84,20 @@ type NotificationKindsClienter_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-func (_e *NotificationKindsClienter_Expecter) Get(ctx interface{}) *NotificationKindsClienter_Get_Call {
+//   - ctx context.Context
+func (_e *NotificationKindsClienter_Expecter) Get(ctx any) *NotificationKindsClienter_Get_Call {
 	return &NotificationKindsClienter_Get_Call{Call: _e.mock.On("Get", ctx)}
 }
 
 func (_c *NotificationKindsClienter_Get_Call) Run(run func(ctx context.Context)) *NotificationKindsClienter_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

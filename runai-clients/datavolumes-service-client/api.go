@@ -14,11 +14,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/internal"
 )
 
-//go:generate mockery --name IDatavolumesExternalClient
 type IDatavolumesExternalClient interface {
 }
 
-//go:generate mockery --name IDatavolumesClient
 type IDatavolumesClient interface {
 	IDatavolumesExternalClient
 	GetDatavolumeAncestorsSync(ctx context.Context, resourceId string) (*openapi.Ancestors, error)

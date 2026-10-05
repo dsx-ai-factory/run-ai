@@ -20,10 +20,19 @@ func NewSlackNotificationStateManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SlackNotificationStateManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SlackNotificationStateManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type SlackNotificationStateManager_GetDetailedSlackNotificationState_Call struct
 }
 
 // GetDetailedSlackNotificationState is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *SlackNotificationStateManager_Expecter) GetDetailedSlackNotificationState(ctx interface{}, tenantId interface{}) *SlackNotificationStateManager_GetDetailedSlackNotificationState_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *SlackNotificationStateManager_Expecter) GetDetailedSlackNotificationState(ctx any, tenantId any) *SlackNotificationStateManager_GetDetailedSlackNotificationState_Call {
 	return &SlackNotificationStateManager_GetDetailedSlackNotificationState_Call{Call: _e.mock.On("GetDetailedSlackNotificationState", ctx, tenantId)}
 }
 
 func (_c *SlackNotificationStateManager_GetDetailedSlackNotificationState_Call) Run(run func(ctx context.Context, tenantId string)) *SlackNotificationStateManager_GetDetailedSlackNotificationState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -132,15 +152,26 @@ type SlackNotificationStateManager_GetSlackNotificationState_Call struct {
 }
 
 // GetSlackNotificationState is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *SlackNotificationStateManager_Expecter) GetSlackNotificationState(ctx interface{}, tenantId interface{}) *SlackNotificationStateManager_GetSlackNotificationState_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *SlackNotificationStateManager_Expecter) GetSlackNotificationState(ctx any, tenantId any) *SlackNotificationStateManager_GetSlackNotificationState_Call {
 	return &SlackNotificationStateManager_GetSlackNotificationState_Call{Call: _e.mock.On("GetSlackNotificationState", ctx, tenantId)}
 }
 
 func (_c *SlackNotificationStateManager_GetSlackNotificationState_Call) Run(run func(ctx context.Context, tenantId string)) *SlackNotificationStateManager_GetSlackNotificationState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -189,16 +220,32 @@ type SlackNotificationStateManager_UpdateSlackNotificationState_Call struct {
 }
 
 // UpdateSlackNotificationState is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - notificationState
-func (_e *SlackNotificationStateManager_Expecter) UpdateSlackNotificationState(ctx interface{}, tenantId interface{}, notificationState interface{}) *SlackNotificationStateManager_UpdateSlackNotificationState_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - notificationState notification_state.Stater
+func (_e *SlackNotificationStateManager_Expecter) UpdateSlackNotificationState(ctx any, tenantId any, notificationState any) *SlackNotificationStateManager_UpdateSlackNotificationState_Call {
 	return &SlackNotificationStateManager_UpdateSlackNotificationState_Call{Call: _e.mock.On("UpdateSlackNotificationState", ctx, tenantId, notificationState)}
 }
 
 func (_c *SlackNotificationStateManager_UpdateSlackNotificationState_Call) Run(run func(ctx context.Context, tenantId string, notificationState notification_state.Stater)) *SlackNotificationStateManager_UpdateSlackNotificationState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(notification_state.Stater))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 notification_state.Stater
+		if args[2] != nil {
+			arg2 = args[2].(notification_state.Stater)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

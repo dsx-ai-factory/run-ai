@@ -14,7 +14,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/internal"
 )
 
-//go:generate mockery --name IAssetsExternalClient
 type IAssetsExternalClient interface {
 	ListComputeAssets(ctx context.Context, name string) (*openapi.ComputeListResponse, *http.Response, error)
 	CreateComputeAsset(ctx context.Context, request *openapi.ComputeCreationRequest) (*openapi.ComputeAsset, *http.Response, error)
@@ -35,7 +34,6 @@ type IAssetsExternalClient interface {
 	GetNgcApiKeyByIdInternal(ctx context.Context, assetId string) (*openapi.NgcApiKeyInternal, *openapi.Error)
 }
 
-//go:generate mockery --name IAssetsClient
 type IAssetsClient interface {
 	IAssetsExternalClient
 	ListCredentialsAssets(ctx context.Context, privateOnly bool) (*openapi.CredentialsListResponse, *openapi.Error)

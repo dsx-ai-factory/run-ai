@@ -13,7 +13,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/internal"
 )
 
-//go:generate mockery --name IWorkloadsManagerExternalClient
 type IWorkloadsManagerExternalClient interface {
 	BatchWorkloads(ctx context.Context, batch openapi.WorkloadsV2Batch) (*openapi.BatchResponse, *openapi.Error)
 
@@ -22,7 +21,6 @@ type IWorkloadsManagerExternalClient interface {
 	UpdateWorkloadV2(ctx context.Context, workloadId string, req openapi.WorkloadV2UpdateRequest) (*openapi.WorkloadV2, *openapi.Error)
 }
 
-//go:generate mockery --name IWorkloadsManagerClient
 type IWorkloadsManagerClient interface {
 	IWorkloadsManagerExternalClient
 

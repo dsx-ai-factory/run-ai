@@ -73,7 +73,7 @@ func NewMpiBuilderWithExistingNodeAffinity(fromObject interface{}, toResource in
 
 	workload.Labels = make(map[string]string)
 	sharedResourcesBuilder := common.NewShardResourcesBuilder(common.NewServiceBuilder(k8sClient),
-		common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift()), common.NewPvcBuilder(k8sClient), common.NewCredentialsBuilder(k8sClient))
+		common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift()), common.NewPvcBuilder(k8sClient))
 
 	job, ok := toResource.(*mpiv2beta1.MPIJob)
 	if !ok {
