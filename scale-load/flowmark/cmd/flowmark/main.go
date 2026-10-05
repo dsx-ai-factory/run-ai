@@ -45,9 +45,9 @@ func run() error {
 	kubeconfig := flag.String("kubeconfig", os.Getenv("KUBECONFIG"), "path to kubeconfig of the cluster under test (default $KUBECONFIG)")
 	cpURL := flag.String("cp-url", os.Getenv("FLOWMARK_CP_URL"), "control plane URL (default $FLOWMARK_CP_URL; credentials via FLOWMARK_CP_USER and FLOWMARK_CP_PASSWORD, or FLOWMARK_CP_TOKEN)")
 	provider := flag.String("provider", "local", "who provided the environment, e.g. ci or kind")
-	clusterType := flag.String("cluster-type", "local", "cluster class recorded with the results so runs are compared like with like")
-	cpVersion := flag.String("cp-version", "", "control plane version to record, if known")
-	clusterVersion := flag.String("cluster-version", "", "cluster version to record, if known")
+	clusterType := flag.String("cluster-type", "", "cluster class recorded with the results so runs are compared like with like (default: detected, e.g. vanilla-fake-gpu)")
+	cpVersion := flag.String("cp-version", "", "control plane version to record (default: read from the control plane)")
+	clusterVersion := flag.String("cluster-version", "", "cluster version to record (default: read from the control plane)")
 	flag.Parse()
 	if flag.NArg() > 0 {
 		return fmt.Errorf("unexpected argument %q; scenarios are selected with --only", flag.Arg(0))
@@ -79,6 +79,9 @@ func run() error {
 		ControlPlaneVersion: *cpVersion,
 		ClusterVersion:      *clusterVersion,
 	}
+	if target.ControlPlaneURL != "" {
+		describeEnvironment(ctx, target, &info)
+	}
 	if target.KubeconfigPath != "" {
 		offset, err := clockOffset(ctx, target.KubeconfigPath)
 		if err != nil {
@@ -107,6 +110,29 @@ func run() error {
 	}
 	log.Printf("wrote %s to %s, %d runs in %s", receipt.File, store, receipt.Runs, report.ManifestName)
 	return runErr
+}
+
+func describeEnvironment(ctx context.Context, target core.Target, info *report.RunInfo) {
+	clients, err := client.New(ctx, target)
+	if err != nil {
+		log.Printf("environment not described: %v", err)
+		return
+	}
+	environment, err := clients.Environment(ctx, "")
+	if err != nil {
+		log.Printf("environment not described: %v", err)
+		return
+	}
+	log.Printf("environment: %s", environment)
+	if info.ControlPlaneVersion == "" {
+		info.ControlPlaneVersion = environment.ControlPlaneVersion
+	}
+	if info.ClusterVersion == "" {
+		info.ClusterVersion = environment.ClusterVersion
+	}
+	if info.ClusterType == "" {
+		info.ClusterType = environment.ClusterType()
+	}
 }
 
 func failedCount(sections map[string]core.Section) int {
