@@ -29,10 +29,13 @@ export const useRoleStore = defineStore("Role", {
   actions: {
     async loadRoles(filterBy?: IFilterBy): Promise<void> {
       this.loading = true;
-      this.filterBy = filterBy || defaultRolesFilterBy;
-      const rolesList = await rolesService.list();
-      this.roles = filterService.filterListByTableFilters(rolesList, this.filterBy, allRoleColumns);
-      this.loading = false;
+      try {
+        this.filterBy = filterBy || defaultRolesFilterBy;
+        const rolesList = await rolesService.list();
+        this.roles = filterService.filterListByTableFilters(rolesList, this.filterBy, allRoleColumns);
+      } finally {
+        this.loading = false;
+      }
     },
     getRoleById(id: number): Role {
       return this.roles.find((role: Role) => role.id === id) as Role;

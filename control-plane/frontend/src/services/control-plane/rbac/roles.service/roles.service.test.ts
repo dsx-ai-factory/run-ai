@@ -51,6 +51,21 @@ describe("rolesService", () => {
       expect(getRoles).toHaveBeenNthCalledWith(1, 500, 0);
       expect(getRoles).toHaveBeenNthCalledWith(2, 500, 500);
     });
+
+    it.each([
+      ["next is 0", 0],
+      ["next equals the current offset", 500],
+    ])("stops when next does not move forward (%s)", async (_, staleNext) => {
+      const getRoles = vi
+        .spyOn(authorizationApi.rolesApi, "getRoles")
+        .mockResolvedValueOnce({ data: { roles: [rolesMock[0]], next: 500 } })
+        .mockResolvedValue({ data: { roles: [rolesMock[1]], next: staleNext } });
+
+      const roles = await rolesService.list();
+
+      expect(roles).toEqual([rolesMock[0], rolesMock[1]]);
+      expect(getRoles).toHaveBeenCalledTimes(2);
+    });
   });
 
   it("isPermittedRole with wide set of permissions", async () => {
