@@ -10,7 +10,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 
@@ -27,9 +27,9 @@ const (
 	AccessRuleClusterField        = "spec.clusterType"
 	ClusterNameFieldSelectorValue = "cluster-name"
 
-	RunaiAgentServiceAccountName                = operands.RunaiAgentName
-	RunaiAccessRuleControllerServiceAccountName = operands.RunaiAccessRuleControllerName
-	RunaiOperatorServiceAccountName             = operands.RunaiOperatorName
+	RunaiAgentServiceAccountName                = constants.RunaiAgentName
+	RunaiAccessRuleControllerServiceAccountName = constants.RunaiAccessRuleControllerName
+	RunaiOperatorServiceAccountName             = constants.RunaiOperatorName
 
 	AccessRuleAddedSubjectToProjectsRBPrefix = "runai/project-accessrule-"
 	AccessRuleAddedSubjectPrefix             = "runai/accessrule-"

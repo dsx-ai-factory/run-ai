@@ -9,7 +9,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -34,7 +34,7 @@ import (
 // +kubebuilder:webhook:path=/validate-workload-ownership-protection,mutating=false,failurePolicy=fail,sideEffects=None,groups=run.ai,resources=trainingworkloads;interactiveworkloads;deploymentworkloads;inferenceworkloads,verbs=delete;update,versions=v2alpha1,name=runai-workload-ownership-protection-validation.kb.io,admissionReviewVersions=v1
 
 const (
-	RunaiAgentServiceAccountName = operands.RunaiAgentName
+	RunaiAgentServiceAccountName = constants.RunaiAgentName
 
 	// GVK of the kai.resources Project, read as unstructured to avoid a typed kai SDK
 	// (and thus KAI-scheduler) dependency in this package — see departmentOfNamespace.

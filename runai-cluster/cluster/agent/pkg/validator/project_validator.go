@@ -10,8 +10,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"net/http"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils/validator"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -71,7 +71,7 @@ func (pv *ProjectValidator) Handle(ctx context.Context, req admission.Request) a
 func (pv *ProjectValidator) getRunaiAgentUID(ctx context.Context, k8sClient client.Client) (string, error) {
 	runaiAgentServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.RunaiAgentName, runaiv1.DefaultNamespace)
+		constants.RunaiAgentName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}
@@ -82,7 +82,7 @@ func (pv *ProjectValidator) getRunaiAgentUID(ctx context.Context, k8sClient clie
 func (pv *ProjectValidator) getRunaiClusterSyncUID(ctx context.Context, k8sClient client.Client) (string, error) {
 	runaiClusterSyncServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.RunaiClusterSyncName, runaiv1.DefaultNamespace)
+		constants.RunaiClusterSyncName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}
@@ -95,7 +95,7 @@ func (pv *ProjectValidator) getRunaiClusterSyncUID(ctx context.Context, k8sClien
 func (pv *ProjectValidator) getProjectControllerUID(ctx context.Context, k8sClient client.Client) (string, error) {
 	projectControllerServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.KRMProjectControllerName, runaiv1.DefaultNamespace)
+		constants.KRMProjectControllerName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}
@@ -106,7 +106,7 @@ func (pv *ProjectValidator) getProjectControllerUID(ctx context.Context, k8sClie
 func (pv *ProjectValidator) getRunaiOperatorUID(ctx context.Context, k8sClient client.Client) (string, error) {
 	runaiOperatorServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.RunaiOperatorName, runaiv1.DefaultNamespace)
+		constants.RunaiOperatorName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}
