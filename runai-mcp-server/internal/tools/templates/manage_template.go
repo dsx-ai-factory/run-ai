@@ -8,11 +8,11 @@ package templates
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 	"unicode/utf8"
 
 	workloads "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaimcp"
@@ -20,11 +20,12 @@ import (
 )
 
 type manageTemplateInput struct {
-	Action       string         `json:"action"                 jsonschema:"What to do. One of: create, update, delete."`
-	WorkloadType string         `json:"workloadType"           jsonschema:"Native workload type. One of: Training, Workspace, Distributed, Inference, DistributedInference."`
-	TemplateID   string         `json:"templateId,omitempty"   jsonschema:"Template UUID. Required for update and delete; use list_templates to resolve it. Must not be set for create."`
-	Request      map[string]any `json:"request,omitempty"      jsonschema:"Complete API request for create or update. Create requires meta.name and meta.scopeType; update requires meta.name. Supports every field of the selected workload type's template request model, including assets, spec, and distributed master fields where the API accepts them."` //nolint:lll // complete polymorphic request description
-	Confirm      bool           `json:"confirm,omitempty"      jsonschema:"Required for update and delete when the client cannot show an interactive confirmation prompt. Create does not require confirmation."`
+	Action              string         `json:"action"                 jsonschema:"What to do. One of: create, update, delete."`
+	WorkloadType        string         `json:"workloadType"           jsonschema:"Native workload type. One of: Training, Workspace, Distributed, Inference, DistributedInference."`
+	TemplateID          string         `json:"templateId,omitempty"   jsonschema:"Template UUID. Required for update and delete; use list_templates to resolve it. Must not be set for create."`
+	Request             map[string]any `json:"request,omitempty"      jsonschema:"Complete API request for create or update. Create requires meta.name and meta.scopeType; update requires meta.name. Supports every field of the selected workload type's template request model, including assets, spec, and distributed master fields where the API accepts them."` //nolint:lll // complete polymorphic request description
+	ExpectedFingerprint string         `json:"expectedFingerprint,omitempty" jsonschema:"Required for update. Pass unchanged from get_template with forUpdate=true for a best-effort stale-snapshot check. The API has no atomic conditional-update support."`                                                                                                         //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Confirm             bool           `json:"confirm,omitempty"      jsonschema:"Required for update and delete when the client cannot show an interactive confirmation prompt. Create does not require confirmation."`
 }
 
 func (in manageTemplateInput) Validate() error {
@@ -46,6 +47,9 @@ func (in manageTemplateInput) Validate() error {
 	case common.ActionCreate:
 		if in.TemplateID != "" {
 			return fmt.Errorf("templateId must not be set for create")
+		}
+		if in.ExpectedFingerprint != "" {
+			return fmt.Errorf("expectedFingerprint must not be set for create")
 		}
 		if len(in.Request) == 0 {
 			return fmt.Errorf("request is required for create")
@@ -70,13 +74,22 @@ func (in manageTemplateInput) Validate() error {
 		if err := validateTemplateRequestFields(in.WorkloadType, in.Request); err != nil {
 			return err
 		}
-		return adapter.validateUpdate(in.Request)
+		if err := adapter.validateUpdate(in.Request); err != nil {
+			return err
+		}
+		if in.ExpectedFingerprint == "" {
+			return fmt.Errorf("expectedFingerprint is required for the best-effort stale-snapshot check; call get_template with forUpdate=true")
+		}
+		return validateTemplateFingerprint(in.ExpectedFingerprint)
 	case common.ActionDelete:
 		if in.TemplateID == "" {
 			return fmt.Errorf("templateId is required for delete")
 		}
 		if len(in.Request) != 0 {
 			return fmt.Errorf("request must not be set for delete")
+		}
+		if in.ExpectedFingerprint != "" {
+			return fmt.Errorf("expectedFingerprint must not be set for delete")
 		}
 		return nil
 	default:
@@ -100,7 +113,10 @@ func registerManageTemplate(r *runaimcp.Registry, client *runaiclient.Client) {
 			"API and unknown fields are rejected. Create supports tenant, cluster, department, and project scope through " +
 			"request.meta.scopeType and request.meta.scopeId, does not support system scope, and does not require " +
 			"confirmation. Update uses a full-replacement PUT and requires the complete update request. System templates " +
-			"cannot be updated. Update and delete require " +
+			"cannot be updated; call get_template with forUpdate=true first and pass its updateRequest as the complete " +
+			"request after making the intended edits, together with expectedFingerprint unchanged. The fingerprint provides " +
+			"a best-effort stale-snapshot check before the PUT; the template API does not support an atomic update precondition. " +
+			"Update and delete require " +
 			"confirmation. Delete permanently removes a non-system template; for a system preset, it hides the preset " +
 			"only for the current tenant. Call list_templates when templateId or workloadType is unknown.",
 		ReadOnly:    false,
@@ -179,9 +195,9 @@ func getTemplateMutationTarget(
 	out := newManageTemplateOutput(in)
 	out.TemplateID = current.Meta.Id
 	out.Name = current.Meta.Name
-	currentRaw, err := gojsonq.LoadJson(current)
+	currentRaw, err := rawTemplateResponse(resp, in.TemplateID)
 	if err != nil {
-		return templateMutationTarget{}, fmt.Errorf("encode current template %q: %w", in.TemplateID, err)
+		return templateMutationTarget{}, err
 	}
 	return templateMutationTarget{template: current, raw: currentRaw, output: out}, nil
 }
@@ -193,16 +209,34 @@ func updateTemplate(
 	in manageTemplateInput,
 	target templateMutationTarget,
 ) (manageTemplateOutput, error) {
-	if target.template.Meta.ScopeType == workloads.SCOPETYPE_SYSTEM {
-		return target.output, fmt.Errorf("system templates cannot be updated: %w", runaimcp.ErrForbidden)
+	currentRequest, err := verifiedTemplateUpdateRequest(in, target)
+	if err != nil {
+		return target.output, err
 	}
-	currentRequest := buildTemplateUpdateRequest(in.WorkloadType, target.raw)
 	diff := common.DiffMaps(currentRequest, in.Request)
+	details := common.RemoveKeys(diff, templateSensitiveKeys).(map[string]any)
+	if !templateClientCanElicit(ctx) {
+		details = compactTemplateUpdateConfirmation(target.template.Meta, diff)
+	}
 	if err := common.ConfirmWrite(ctx, in.Confirm, "update", "template",
-		target.output.Name, target.output.TemplateID, diff); err != nil {
+		target.output.Name, target.output.TemplateID, details); err != nil {
 		return target.output, err
 	}
 
+	// Re-read after confirmation because an interactive prompt can remain open
+	// while another caller changes the full-replacement target.
+	confirmedTarget, err := getTemplateMutationTarget(ctx, client, in)
+	if err != nil {
+		return target.output, err
+	}
+	if _, err := verifiedTemplateUpdateRequest(in, confirmedTarget); err != nil {
+		return confirmedTarget.output, err
+	}
+	target = confirmedTarget
+
+	// The template API has no ETag, If-Match, resource-version, or equivalent
+	// update precondition. Re-reading immediately before PUT reduces stale writes,
+	// but cannot close the race if the template changes between these two calls.
 	updated, resp, err := adapter.update(ctx, client, target.output.TemplateID, in.Request)
 	if err != nil {
 		return manageTemplateOutput{}, templateMutationError("update", in.WorkloadType, target.output.TemplateID, resp, err)
@@ -218,6 +252,21 @@ func updateTemplate(
 	return target.output, nil
 }
 
+func verifiedTemplateUpdateRequest(in manageTemplateInput, target templateMutationTarget) (map[string]any, error) {
+	if target.template.Meta.ScopeType == workloads.SCOPETYPE_SYSTEM {
+		return nil, fmt.Errorf("system templates cannot be updated: %w", runaimcp.ErrForbidden)
+	}
+	currentRequest, currentFingerprint, err := templateUpdateSnapshot(in.WorkloadType, target.raw)
+	if err != nil {
+		return nil, fmt.Errorf("prepare current template %q for update: %w", target.output.TemplateID, err)
+	}
+	if currentFingerprint != in.ExpectedFingerprint {
+		return nil, fmt.Errorf("template %q changed since get_template returned the update request; retrieve it again before updating: %w",
+			target.output.TemplateID, runaimcp.ErrConflict)
+	}
+	return currentRequest, nil
+}
+
 func deleteTemplate(
 	ctx context.Context,
 	client *runaiclient.Client,
@@ -229,7 +278,10 @@ func deleteTemplate(
 	if target.template.Meta.ScopeType == workloads.SCOPETYPE_SYSTEM {
 		warning = "deleting a system template hides the preset for the current tenant"
 	}
-	details := common.WithConfirmWarning(target.raw, warning)
+	details := common.WithConfirmWarning(common.RemoveKeys(target.raw, templateSensitiveKeys).(map[string]any), warning)
+	if !templateClientCanElicit(ctx) {
+		details = compactTemplateDeleteConfirmation(target.template.Meta, warning)
+	}
 	if err := common.ConfirmWrite(ctx, in.Confirm, "delete", "template",
 		target.output.Name, target.output.TemplateID, details); err != nil {
 		return target.output, err
@@ -240,6 +292,37 @@ func deleteTemplate(
 	}
 	target.output.Applied = true
 	return target.output, nil
+}
+
+func templateClientCanElicit(ctx context.Context) bool {
+	return runaimcp.ClientCanElicitForm(runaimcp.SessionFromContext(ctx))
+}
+
+func compactTemplateUpdateConfirmation(meta workloads.TemplateMetaFields, diff map[string]any) map[string]any {
+	changedFields := make([]string, 0, len(diff))
+	for field := range diff {
+		changedFields = append(changedFields, field)
+	}
+	sort.Strings(changedFields)
+	return map[string]any{
+		"scope":         templateScopeSummary(meta),
+		"changedFields": changedFields,
+	}
+}
+
+func compactTemplateDeleteConfirmation(meta workloads.TemplateMetaFields, warning string) map[string]any {
+	return map[string]any{
+		"scope":   templateScopeSummary(meta),
+		"warning": warning,
+	}
+}
+
+func templateScopeSummary(meta workloads.TemplateMetaFields) string {
+	scope := string(meta.ScopeType)
+	if meta.ScopeId != "" {
+		return fmt.Sprintf("%s (%s)", scope, meta.ScopeId)
+	}
+	return scope
 }
 
 func newManageTemplateOutput(in manageTemplateInput) manageTemplateOutput {

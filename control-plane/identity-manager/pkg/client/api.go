@@ -14,7 +14,6 @@ import (
 	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 )
 
-//go:generate mockery --name IIdm
 type IIdm interface {
 	GetInstallerServiceAccount(ctx context.Context) (*openapi.ServiceAccountPostResponse, error)
 	GetInstallerServiceAccountForTenantId(ctx context.Context, tenantId string) (*openapi.ServiceAccountPostResponse, error)
@@ -33,7 +32,6 @@ type IIdm interface {
 	IIdmExternalClient
 }
 
-//go:generate mockery --name IIdmExternalClient
 type IIdmExternalClient interface {
 	ClientCredentialsLogin(ctx context.Context, clientId string, clientSecret string) (*openapi.TokenResponse, error)
 	ClientCredentialsLoginV2(ctx context.Context, clientId string, clientSecret string) (*openapi.OAuth2TokenResponse, error)

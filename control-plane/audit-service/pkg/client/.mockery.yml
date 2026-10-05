@@ -1,0 +1,25 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client:
+    interfaces:
+      IAuditClient: {}
+      Writer: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/generated:
+    config:
+      dir: '{{.InterfaceDir}}/../mocks'
+      include-auto-generated: true
+    interfaces:
+      AuditLogsAPI: {}
+      HealthAPI: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/write:
+    interfaces:
+      writer:
+        config:
+          dir: '{{.InterfaceDir}}'
+          filename: mock_writer.go
+          structname: mockWriter
+          pkgname: write

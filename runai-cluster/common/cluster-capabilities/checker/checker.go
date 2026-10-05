@@ -262,8 +262,10 @@ const (
 
 	// MinVersionNetworkingOwnershipEnforcement - the min cluster version enforcing networking Service and Pod ownership.
 	MinVersionNetworkingOwnershipEnforcement
+	// MinVersionOAuth2ProxyTemplates - the min cluster version that provisions the proxy error-page ConfigMap.
+	MinVersionOAuth2ProxyTemplates
 
-  // NOTE -> Make sure to add the min version to the map below
+	// NOTE -> Make sure to add the min version to the map below
 )
 
 var clusterVersionToCapabilityMap = map[int]string{
@@ -343,6 +345,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionGpuMemoryLimitAnnotations:                 "3.0.0",
 	MinVersionResourceClaimTemplates:                    "3.1.0",
 	MinVersionNetworkingOwnershipEnforcement:            "3.0.0",
+	MinVersionOAuth2ProxyTemplates:                      "3.0.18",
 }
 
 // ClustersCacheConfig is a struct that holds the configuration for the clusters cache.

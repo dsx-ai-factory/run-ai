@@ -25,7 +25,7 @@ var _ MappedNullable = &RctSpec{}
 // RctSpec struct for RctSpec
 type RctSpec struct {
 	ObjectMeta NullableK8sObjectMeta `json:"objectMeta,omitempty"`
-	// The raw Kubernetes spec of the ResourceClaimTemplate.
+	// The raw Kubernetes spec of the object.
 	ObjectSpec map[string]interface{} `json:"objectSpec"`
 }
 

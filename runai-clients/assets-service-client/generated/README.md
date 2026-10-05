@@ -184,6 +184,7 @@ Class | Method | HTTP request | Description
 *SecretAPI* | [**UpdateSecretAssetById**](docs/SecretAPI.md#updatesecretassetbyid) | **Put** /api/v1/asset/datasource/secrets/{AssetId} | Update a Secret asset.
 *SynchronizationAPI* | [**CredentialsSyncUpdates**](docs/SynchronizationAPI.md#credentialssyncupdates) | **Post** /api/v1/asset/credentials/updates | Allow cluster to request a list of updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
 *SynchronizationAPI* | [**DatasourceSyncUpdates**](docs/SynchronizationAPI.md#datasourcesyncupdates) | **Post** /api/v1/asset/datasource/updates | Allow cluster to request a list of updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+*SynchronizationAPI* | [**K8sObjectsSyncUpdates**](docs/SynchronizationAPI.md#k8sobjectssyncupdates) | **Post** /api/v1/k8s-objects/updates | Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
 *SynchronizationAPI* | [**ListAssetsById**](docs/SynchronizationAPI.md#listassetsbyid) | **Get** /api/v1/asset | List assets by their ids
 *SynchronizationAPI* | [**SyncAssetsResourcesIds**](docs/SynchronizationAPI.md#syncassetsresourcesids) | **Post** /api/v1/asset/sync/asset-resources-ids | Sync asset resources ids.
 *SynchronizationAPI* | [**SyncValidate**](docs/SynchronizationAPI.md#syncvalidate) | **Post** /api/v1/asset/sync/validate | Validate assets sync.
@@ -451,6 +452,9 @@ Class | Method | HTTP request | Description
  - [InvolvedObject](docs/InvolvedObject.md)
  - [ItemRules](docs/ItemRules.md)
  - [K8sObjectMeta](docs/K8sObjectMeta.md)
+ - [K8sObjectSpec](docs/K8sObjectSpec.md)
+ - [K8sObjectsUpdate](docs/K8sObjectsUpdate.md)
+ - [K8sObjectsUpdatesResp](docs/K8sObjectsUpdatesResp.md)
  - [KeyValuePair](docs/KeyValuePair.md)
  - [Label](docs/Label.md)
  - [MasterSpec](docs/MasterSpec.md)

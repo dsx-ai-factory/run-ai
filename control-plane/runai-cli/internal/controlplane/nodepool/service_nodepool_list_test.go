@@ -83,7 +83,7 @@ var _ = Describe("Node Service Test", func() {
 			},
 		}
 		nodes := openapi.Nodes{Nodes: nodeList}
-		mockNodeClient.EXPECT().GetNodeList(gomock.Any(), ClusterUuid).Return(&nodes, nil).AnyTimes()
+		mockNodeClient.EXPECT().GetNodeList(gomock.Any(), ClusterUuid, gomock.Any(), gomock.Any()).Return(&nodes, nil).AnyTimes()
 
 		poolStatus := openapi.NODEPOOLPHASE_READY
 		emptyPoolStatus := openapi.NODEPOOLPHASE_EMPTY

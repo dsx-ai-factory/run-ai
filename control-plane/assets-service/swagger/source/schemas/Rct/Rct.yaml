@@ -7,3 +7,5 @@ properties:
     $ref: "../Asset/AssetMeta.yaml"
   spec:
     $ref: "./RctSpec.yaml"
+  status:
+    $ref: "../Asset/AssetClusterStatusInfo.yaml"

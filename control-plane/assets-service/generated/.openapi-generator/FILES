@@ -288,6 +288,9 @@ pkg/api/model_internal_tool_type.go
 pkg/api/model_involved_object.go
 pkg/api/model_item_rules.go
 pkg/api/model_k8s_object_meta.go
+pkg/api/model_k8s_object_spec.go
+pkg/api/model_k8s_objects_update.go
+pkg/api/model_k8s_objects_updates_resp.go
 pkg/api/model_key_value_pair.go
 pkg/api/model_label.go
 pkg/api/model_master_spec.go

@@ -11,6 +11,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client v0.0.0

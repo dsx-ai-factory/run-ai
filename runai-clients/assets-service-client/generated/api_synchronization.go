@@ -52,6 +52,18 @@ type SynchronizationAPI interface {
 	DatasourceSyncUpdatesExecute(r ApiDatasourceSyncUpdatesRequest) (*DatasourceUpdatesResp, *http.Response, error)
 
 	/*
+		K8sObjectsSyncUpdates Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiK8sObjectsSyncUpdatesRequest
+	*/
+	K8sObjectsSyncUpdates(ctx context.Context) ApiK8sObjectsSyncUpdatesRequest
+
+	// K8sObjectsSyncUpdatesExecute executes the request
+	//  @return K8sObjectsUpdatesResp
+	K8sObjectsSyncUpdatesExecute(r ApiK8sObjectsSyncUpdatesRequest) (*K8sObjectsUpdatesResp, *http.Response, error)
+
+	/*
 		ListAssetsById List assets by their ids
 
 		Returns a list of assets.
@@ -341,6 +353,188 @@ func (a *SynchronizationAPIService) DatasourceSyncUpdatesExecute(r ApiDatasource
 	}
 
 	localVarPath := localBasePath + "/api/v1/asset/datasource/updates"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.clusterId == nil {
+		return localVarReturnValue, nil, reportError("clusterId is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "clusterId", r.clusterId, "form", "")
+	if r.after != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "after", r.after, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.clusterSyncReport
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiK8sObjectsSyncUpdatesRequest struct {
+	ctx               context.Context
+	ApiService        SynchronizationAPI
+	clusterId         *string
+	after             *int64
+	clusterSyncReport *ClusterSyncReport
+}
+
+// The id of the cluster
+func (r ApiK8sObjectsSyncUpdatesRequest) ClusterId(clusterId string) ApiK8sObjectsSyncUpdatesRequest {
+	r.clusterId = &clusterId
+	return r
+}
+
+// search for updates with update counter greater than the value passed for this parameter
+func (r ApiK8sObjectsSyncUpdatesRequest) After(after int64) ApiK8sObjectsSyncUpdatesRequest {
+	r.after = &after
+	return r
+}
+
+func (r ApiK8sObjectsSyncUpdatesRequest) ClusterSyncReport(clusterSyncReport ClusterSyncReport) ApiK8sObjectsSyncUpdatesRequest {
+	r.clusterSyncReport = &clusterSyncReport
+	return r
+}
+
+func (r ApiK8sObjectsSyncUpdatesRequest) Execute() (*K8sObjectsUpdatesResp, *http.Response, error) {
+	return r.ApiService.K8sObjectsSyncUpdatesExecute(r)
+}
+
+/*
+K8sObjectsSyncUpdates Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiK8sObjectsSyncUpdatesRequest
+*/
+func (a *SynchronizationAPIService) K8sObjectsSyncUpdates(ctx context.Context) ApiK8sObjectsSyncUpdatesRequest {
+	return ApiK8sObjectsSyncUpdatesRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//  @return K8sObjectsUpdatesResp
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *SynchronizationAPIService) K8sObjectsSyncUpdatesExecute(r ApiK8sObjectsSyncUpdatesRequest) (*K8sObjectsUpdatesResp, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *K8sObjectsUpdatesResp
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SynchronizationAPIService.K8sObjectsSyncUpdates")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/k8s-objects/updates"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

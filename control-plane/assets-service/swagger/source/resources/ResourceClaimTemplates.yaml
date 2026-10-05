@@ -6,11 +6,13 @@ get:
   x-service: assets-service
   x-test-coverage:
     - control-plane/assets-service/pkg/services/api_rct_service_test.go
+    - control-plane/assets-service/pkg/services/api_agent_sync_test.go
   tags:
     - Resource Claim Templates
   parameters:
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
   responses:
     200:
       description: Request completed successfully.

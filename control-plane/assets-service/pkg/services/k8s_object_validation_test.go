@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	resourcev1 "k8s.io/api/resource/v1"
+	apivalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/util/validation"
 )
 
@@ -91,6 +92,31 @@ var _ = Describe("validateK8sObjectMeta", func() {
 		Expect(err).NotTo(BeNil())
 		Expect(int(err.Code)).To(Equal(http.StatusBadRequest))
 		Expect(err.Message).To(ContainSubstring("spec.objectMeta.annotations"))
+	})
+
+	It("accepts annotations whose combined size is just under the K8s limit", func() {
+		// One annotation of (limit - key_len) bytes exactly hits the ceiling.
+		key := "example.com/big"
+		value := strings.Repeat("x", apivalidation.TotalAnnotationSizeLimitB-len(key))
+		err := validateK8sObjectMeta(&api.K8sObjectMeta{
+			Annotations: &map[string]string{key: value},
+		})
+		Expect(err).To(BeNil())
+	})
+
+	It("rejects annotations whose combined UTF-8 byte size exceeds the K8s limit", func() {
+		// 65 KiB x 5 = 325 KiB > 256 KiB. Chosen so no single key/value is
+		// huge on its own — only the aggregate trips the limit, which is the
+		// exact gap the schema's per-key maxLength can't catch.
+		anns := map[string]string{}
+		for i := 0; i < 5; i++ {
+			anns["example.com/chunk-"+string(rune('a'+i))] = strings.Repeat("x", 65*1024)
+		}
+		err := validateK8sObjectMeta(&api.K8sObjectMeta{Annotations: &anns})
+		Expect(err).NotTo(BeNil())
+		Expect(int(err.Code)).To(Equal(http.StatusBadRequest))
+		Expect(err.Message).To(ContainSubstring("spec.objectMeta.annotations"))
+		Expect(err.Message).To(ContainSubstring("exceeds Kubernetes limit"))
 	})
 })
 

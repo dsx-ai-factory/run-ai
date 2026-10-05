@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"sort"
 	"strings"
@@ -25,17 +26,26 @@ import (
 )
 
 const (
-	nodePodsListLimit = int32(500)
-	nodesListLimit    = int32(2)
-	nodePodsCap       = 10
+	nodePodsListLimit      = int32(500)
+	nodePodsDefaultLimit   = int32(10)
+	nodePodEnrichmentLimit = 8
+	nodesListLimit         = int32(2)
 )
 
 type getNodePodsInput struct {
 	NodeName    string `json:"nodeName"              jsonschema:"Node name as it appears on the cluster"`
 	ClusterUUID string `json:"clusterUuid,omitempty" jsonschema:"Cluster UUID. Optional — when omitted, the tool derives it from the pods it finds on the node. Pass it explicitly when the node is idle (no pods to derive from) or when pods on the node span multiple clusters (the tool returns an ambiguous_node validation error pointing back here)"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Limit       int32  `json:"limit,omitempty"       jsonschema:"Maximum number of pods to return. Defaults to 10, capped at 200."`
+	Offset      int32  `json:"offset,omitempty"      jsonschema:"Pagination cursor from a previous response's nextOffset. Defaults to 0."`
 }
 
 func (in getNodePodsInput) Validate() error {
+	if err := common.ValidatePagination(in.Limit, in.Offset); err != nil {
+		return err
+	}
+	if in.Offset > math.MaxInt32-effectiveNodePodsLimit(in.Limit) {
+		return fmt.Errorf("offset and limit exceed the supported 32-bit pagination range")
+	}
 	if strings.TrimSpace(in.NodeName) == "" {
 		return fmt.Errorf("nodeName is required")
 	}
@@ -54,26 +64,37 @@ type nodeGpuInfo struct {
 }
 
 type nodePodOutput struct {
-	podOutput
-	WorkloadID   string `json:"workloadId"             jsonschema:"Workload ID (UUID) the pod belongs to"`
-	WorkloadName string `json:"workloadName,omitempty" jsonschema:"Workload name. May be empty when the per-workload enrichment lookup failed and the pod listing didn't carry it"`
-	WorkloadType string `json:"workloadType,omitempty" jsonschema:"Workload type (Training | Workspace | Distributed | Inference | DistributedInference | non-native types). May be empty when the per-workload enrichment lookup failed"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Name               string                 `json:"name"                         jsonschema:"Pod name"`
+	ID                 string                 `json:"id"                           jsonschema:"Pod ID (UUID)"`
+	NodeName           string                 `json:"nodeName,omitempty"           jsonschema:"Name of the node the pod runs on"`
+	CurrentNodePool    string                 `json:"currentNodePool,omitempty"    jsonschema:"Node pool the pod is currently scheduled to"`
+	K8sPhase           string                 `json:"k8sPhase"                     jsonschema:"Kubernetes pod phase (Pending | Running | Succeeded | Failed | Unknown)"`
+	CreatedAt          string                 `json:"createdAt"                    jsonschema:"Pod creation timestamp (RFC3339)"`
+	RevisionID         string                 `json:"revisionId,omitempty"         jsonschema:"Inference revision ID (UUID); set only for inference workload pods"`
+	ClusterID          string                 `json:"clusterId,omitempty"          jsonschema:"Cluster ID the pod belongs to"`
+	RequestedResources *podRequestedResources `json:"requestedResources,omitempty" jsonschema:"What the workload asked for: each dimension is a {request, limit} pair. Compare against allocatedResources to see whether the pod got what it asked for"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	AllocatedResources *podAllocatedResources `json:"allocatedResources,omitempty" jsonschema:"What the scheduler granted: each dimension is a single number / quantity (no request/limit pair)"`
+	WorkloadID         string                 `json:"workloadId"                   jsonschema:"Workload ID (UUID) the pod belongs to"`
+	WorkloadName       string                 `json:"workloadName,omitempty"       jsonschema:"Workload name. May be empty when the per-workload enrichment lookup failed and the pod listing didn't carry it"`
+	WorkloadType       string                 `json:"workloadType,omitempty"       jsonschema:"Workload type (Training | Workspace | Distributed | Inference | DistributedInference | non-native types). May be empty when the per-workload enrichment lookup failed"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 }
 
 type getNodePodsOutput struct {
-	Name     string          `json:"name"               jsonschema:"Echo of the input nodeName"`
-	NodePool string          `json:"nodePool,omitempty" jsonschema:"Node pool the node belongs to. Omitted when node metadata could not be resolved"`
-	Status   string          `json:"status,omitempty"   jsonschema:"Calculated node status. Omitted when node metadata could not be resolved"`
-	GpuInfo  *nodeGpuInfo    `json:"gpuInfo,omitempty"  jsonschema:"GPU model and count for the node. Omitted when node metadata could not be resolved or when the node has no GPUs"`
-	Pods     []nodePodOutput `json:"pods"               jsonschema:"Up to 10 pods running on this node (sorted by pod name, capped to 10). Each entry has the same shape as get_workload_pods.pods plus workload-context fields (workloadId/workloadName/workloadType). The measurements field is never populated here — use get_workload_pods for per-pod metrics"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Name       string          `json:"name"                 jsonschema:"Echo of the input nodeName"`
+	NodePool   string          `json:"nodePool,omitempty"   jsonschema:"Node pool the node belongs to. Omitted when node metadata could not be resolved"`
+	Status     string          `json:"status,omitempty"     jsonschema:"Calculated node status. Omitted when node metadata could not be resolved"`
+	GpuInfo    *nodeGpuInfo    `json:"gpuInfo,omitempty"    jsonschema:"GPU model and count for the node. Omitted when node metadata could not be resolved or when the node has no GPUs"`
+	Pods       []nodePodOutput `json:"pods"                 jsonschema:"Requested page of pods running on this node, sorted by pod name. Each entry includes pod identity, status, resources, and workload context; use get_workload_pods for per-pod metrics"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	HasMore    bool            `json:"hasMore"              jsonschema:"True when more pods exist beyond the returned page; pass nextOffset back as offset"`
+	NextOffset int32           `json:"nextOffset,omitempty" jsonschema:"Offset to pass on the next call to fetch more pods. Only set when hasMore is true"`
 }
 
 func registerGetNodePods(r *runaimcp.Registry, client *runaiclient.Client) {
 	runaimcp.Register(r, runaimcp.Tool[getNodePodsInput, getNodePodsOutput]{
 		Name: "get_node_pods",
 		Description: "Call when the user names a specific node and asks which pods are running on it, which workloads " +
-			"(jobs) those pods belong to, or how the node's GPUs are allocated across those pods. Returns up to 10 " +
-			"pods on that node; for each pod, its name, status, requested and allocated resources, and the workload " +
+			"(jobs) those pods belong to, or how the node's GPUs are allocated across those pods. Returns a paginated " +
+			"list of pods on that node; for each pod, its name, status, requested and allocated resources, and the workload " +
 			"it belongs to (id, name, and type), plus the node's own node pool, status, and GPU type and count. " +
 			"Do NOT call to see which pods a given workload has — use get_workload_pods.",
 		ReadOnly:      true,
@@ -85,46 +106,164 @@ func registerGetNodePods(r *runaimcp.Registry, client *runaiclient.Client) {
 }
 
 // getNodePodsRun returns the pods on a node along with the node's own metadata:
-//  1. fetch pods on this node — fails the tool on error;
-//  2. sort and cap to the 10 we'll return so later steps work off the trimmed list;
-//  3. pick the cluster — caller input wins, otherwise taken from the pods;
+//  1. fetch the requested page when clusterUuid is known, otherwise scan every pod to resolve it;
+//  2. pick the cluster from the complete fetched set — caller input wins, otherwise taken from the pods;
+//  3. sort and select the requested output page when a full scan was required;
 //  4. fetch node metadata (soft fail — drops nodePool/status/gpuInfo on error);
 //  5. map each pod and fill in missing workloadName/workloadType in parallel (soft fail per workload).
 func getNodePodsRun(ctx context.Context, client *runaiclient.Client, in getNodePodsInput) (getNodePodsOutput, error) {
-	// Step 1 — list pods on the node (hard fail: the pod list is the core return value).
-	podsResp, httpResp, err := client.Workloads.PodsAPI.ListPods(ctx).
-		FilterBy([]string{common.FilterEq("nodeName", in.NodeName)}).
-		Limit(nodePodsListLimit).
-		Execute()
-	if err != nil {
-		return getNodePodsOutput{}, fmt.Errorf("list pods on node %q: %w", in.NodeName, runaimcp.MapHTTPError(httpResp, err))
+	if in.ClusterUUID != "" {
+		return getNodePodsForCluster(ctx, client, in)
 	}
 
-	// Step 2 — sort and cap so later steps work off the 10 pods we return.
-	sortUpstreamPods(podsResp.Pods)
-	visiblePods := podsResp.Pods[:min(len(podsResp.Pods), nodePodsCap)]
-
-	// Step 3 — resolve clusterUuid (caller input → derived from visible pods).
-	// No pods + no cluster input ⇒ we have nothing to call listNodes against
-	if len(visiblePods) == 0 && in.ClusterUUID == "" {
-		return getNodePodsOutput{}, fmt.Errorf("no pods found on node %q — check the node name; if the node is real but idle, retry with clusterUuid to verify it exists: %w", in.NodeName, runaimcp.ErrValidation)
-	}
-	clusterUUID, err := resolveNodeCluster(in.ClusterUUID, visiblePods)
+	// Step 1 — list every pod on the node (hard fail: both the list and cluster
+	// resolution must be based on a complete result set).
+	allPods, err := fetchAllNodePods(ctx, client, in.NodeName, "")
 	if err != nil {
 		return getNodePodsOutput{}, err
 	}
 
-	out := getNodePodsOutput{Name: in.NodeName}
+	// Step 2 — resolve clusterUuid from all matched pods, including pods beyond
+	// the requested output page.
+	// No pods + no cluster input ⇒ we have nothing to call listNodes against
+	if len(allPods) == 0 && in.ClusterUUID == "" {
+		return getNodePodsOutput{}, fmt.Errorf("no pods found on node %q — check the node name; if the node is real but idle, retry with clusterUuid to verify it exists: %w", in.NodeName, runaimcp.ErrValidation)
+	}
+	clusterUUID, err := resolveNodeCluster("", allPods)
+	if err != nil {
+		return getNodePodsOutput{}, err
+	}
+
+	// Step 3 — sort the complete set before local pagination so page boundaries
+	// are deterministic.
+	sortUpstreamPods(allPods)
+	visiblePods, hasMore, nextOffset := common.Paginate(allPods, in.Offset, effectiveNodePodsLimit(in.Limit))
+	out := getNodePodsOutput{
+		Name:       in.NodeName,
+		HasMore:    hasMore,
+		NextOffset: nextOffset,
+	}
 
 	// Step 4 — attach node metadata.
 	// Pods prove the node exists; without them, listNodes must — hence requireExists.
-	if err := attachNodeMetadata(ctx, client, clusterUUID, in.NodeName, &out, len(visiblePods) == 0); err != nil {
+	if err := attachNodeMetadata(ctx, client, clusterUUID, in.NodeName, &out, len(allPods) == 0); err != nil {
 		return getNodePodsOutput{}, err
 	}
 
 	// Step 5 — map pods, enrich.
 	out.Pods = buildNodePodOutputs(ctx, client, visiblePods)
 	return out, nil
+}
+
+// getNodePodsForCluster can use the API's pagination directly because the
+// caller already supplied the cluster needed for node metadata and there is no
+// cross-cluster ambiguity to resolve.
+func getNodePodsForCluster(ctx context.Context, client *runaiclient.Client, in getNodePodsInput) (getNodePodsOutput, error) {
+	limit := effectiveNodePodsLimit(in.Limit)
+	pods, hasMore, nextOffset, err := fetchNodePodsPage(ctx, client, in.NodeName, in.ClusterUUID, in.Offset, limit)
+	if err != nil {
+		return getNodePodsOutput{}, err
+	}
+	if _, err := resolveNodeCluster(in.ClusterUUID, pods); err != nil {
+		return getNodePodsOutput{}, err
+	}
+
+	out := getNodePodsOutput{
+		Name:       in.NodeName,
+		HasMore:    hasMore,
+		NextOffset: nextOffset,
+	}
+	if err := attachNodeMetadata(ctx, client, in.ClusterUUID, in.NodeName, &out, len(pods) == 0 && in.Offset == 0); err != nil {
+		return getNodePodsOutput{}, err
+	}
+	out.Pods = buildNodePodOutputs(ctx, client, pods)
+	return out, nil
+}
+
+func effectiveNodePodsLimit(limit int32) int32 {
+	if limit == 0 {
+		return nodePodsDefaultLimit
+	}
+	return limit
+}
+
+// fetchNodePodsPage requests one extra pod so hasMore means that another pod
+// really exists, rather than merely echoing the API's full-page cursor hint.
+func fetchNodePodsPage(ctx context.Context, client *runaiclient.Client, nodeName, clusterUUID string, offset, limit int32) ([]workloads.Pod, bool, int32, error) {
+	if limit <= 0 || limit > common.MaxLimit || offset < 0 || offset > math.MaxInt32-limit {
+		return nil, false, 0, fmt.Errorf("invalid pod pagination offset %d and limit %d: %w", offset, limit, runaimcp.ErrValidation)
+	}
+	filters := []string{common.FilterEq("nodeName", nodeName), common.FilterEq("clusterId", clusterUUID)}
+	podsResp, httpResp, err := client.Workloads.PodsAPI.ListPods(ctx).
+		FilterBy(filters).
+		Completed("false").
+		SortBy("name").
+		SortOrder("asc").
+		Limit(limit + 1).
+		Offset(offset).
+		Execute()
+	if err != nil {
+		return nil, false, 0, fmt.Errorf("list pods on node %q: %w", nodeName, runaimcp.MapHTTPError(httpResp, err))
+	}
+	if podsResp == nil {
+		return nil, false, 0, fmt.Errorf("list pods on node %q returned a nil response: %w", nodeName, runaimcp.ErrUpstream)
+	}
+
+	hasMore := int32(len(podsResp.Pods)) > limit
+	if hasMore {
+		podsResp.Pods = podsResp.Pods[:limit]
+		return podsResp.Pods, true, offset + limit, nil
+	}
+	return podsResp.Pods, false, 0, nil
+}
+
+// fetchAllNodePods follows the Workloads API's offset cursor in 500-entry
+// pages. An explicit cluster UUID scopes the pod query to that cluster; without
+// one, all clusters are scanned so ambiguity can be detected. The safety bound
+// is deliberate: if the complete set cannot be read, the tool returns an error
+// instead of deriving a cluster from partial data.
+func fetchAllNodePods(ctx context.Context, client *runaiclient.Client, nodeName, clusterUUID string) ([]workloads.Pod, error) {
+	filters := []string{common.FilterEq("nodeName", nodeName)}
+	if clusterUUID != "" {
+		filters = append(filters, common.FilterEq("clusterId", clusterUUID))
+	}
+	var all []workloads.Pod
+	for offset := int32(0); ; {
+		podsResp, httpResp, err := client.Workloads.PodsAPI.ListPods(ctx).
+			FilterBy(filters).
+			Completed("false").
+			SortBy("name").
+			SortOrder("asc").
+			Limit(nodePodsListLimit).
+			Offset(offset).
+			Execute()
+		if err != nil {
+			return nil, fmt.Errorf("list pods on node %q: %w", nodeName, runaimcp.MapHTTPError(httpResp, err))
+		}
+		if podsResp == nil {
+			return nil, fmt.Errorf("list pods on node %q returned a nil response: %w", nodeName, runaimcp.ErrUpstream)
+		}
+		all = append(all, podsResp.Pods...)
+		hasNext := podsResp.Next != nil && *podsResp.Next != 0
+		if int32(len(all)) > common.MaxPaginatedResults {
+			return nil, fmt.Errorf(
+				"node %q has more than the maximum supported %d pods; refusing to make an incomplete cluster decision: %w",
+				nodeName,
+				common.MaxPaginatedResults,
+				runaimcp.ErrUpstream,
+			)
+		}
+		if !hasNext {
+			return all, nil
+		}
+		if *podsResp.Next <= offset {
+			return nil, fmt.Errorf("list pods on node %q returned a non-advancing next offset %d: %w", nodeName, *podsResp.Next, runaimcp.ErrUpstream)
+		}
+		if len(podsResp.Pods) == 0 {
+			return nil, fmt.Errorf("list pods on node %q returned an empty page with next offset %d: %w", nodeName, *podsResp.Next, runaimcp.ErrUpstream)
+		}
+		offset = *podsResp.Next
+	}
 }
 
 func sortUpstreamPods(pods []workloads.Pod) {
@@ -174,6 +313,13 @@ func attachNodeMetadata(ctx context.Context, client *runaiclient.Client, cluster
 			evt = evt.Int("status_code", httpResp.StatusCode)
 		}
 		evt.Msg("get_node_pods: listNodes failed, omitting node metadata")
+		return nil
+	}
+	if resp == nil {
+		if requireExists {
+			return fmt.Errorf("verify node %q in cluster %q returned a nil response: %w", nodeName, clusterUUID, runaimcp.ErrUpstream)
+		}
+		logger.Warn().Str("call", "getNodes").Msg("get_node_pods: listNodes returned nil, omitting node metadata")
 		return nil
 	}
 	for _, n := range resp.Nodes {
@@ -229,7 +375,20 @@ func legacyGpuTypeForNode(httpResp *http.Response, nodeName string) string {
 func buildNodePodOutputs(ctx context.Context, client *runaiclient.Client, pods []workloads.Pod) []nodePodOutput {
 	out := make([]nodePodOutput, len(pods))
 	for i, p := range pods {
-		out[i] = nodePodOutput{podOutput: mapPodOutput(p), WorkloadID: p.WorkloadId}
+		base := mapPodOutput(p)
+		out[i] = nodePodOutput{
+			Name:               base.Name,
+			ID:                 base.ID,
+			NodeName:           base.NodeName,
+			CurrentNodePool:    base.CurrentNodePool,
+			K8sPhase:           base.K8sPhase,
+			CreatedAt:          base.CreatedAt,
+			RevisionID:         base.RevisionID,
+			ClusterID:          base.ClusterID,
+			RequestedResources: base.RequestedResources,
+			AllocatedResources: base.AllocatedResources,
+			WorkloadID:         p.WorkloadId,
+		}
 		if p.WorkloadName != nil {
 			out[i].WorkloadName = *p.WorkloadName
 		}
@@ -247,12 +406,15 @@ func enrichWorkloadContext(ctx context.Context, client *runaiclient.Client, pods
 		}
 	}
 	var wg sync.WaitGroup
+	slots := make(chan struct{}, nodePodEnrichmentLimit)
 	wg.Add(len(podsToEnrich))
 	for id, idxs := range podsToEnrich {
-		go func() {
+		slots <- struct{}{}
+		go func(workloadID string, podIndexes []int) {
 			defer wg.Done()
-			applyWorkloadContext(ctx, client, pods, id, idxs)
-		}()
+			defer func() { <-slots }()
+			applyWorkloadContext(ctx, client, pods, workloadID, podIndexes)
+		}(id, idxs)
 	}
 	wg.Wait()
 }
@@ -266,6 +428,11 @@ func applyWorkloadContext(ctx context.Context, client *runaiclient.Client, pods 
 			evt = evt.Int("status_code", httpResp.StatusCode)
 		}
 		evt.Msg("get_node_pods: workload enrichment failed")
+		return
+	}
+	if wl == nil {
+		zerolog.Ctx(ctx).Warn().Str("workload_id", id).Str("call", "getWorkload").
+			Msg("get_node_pods: workload enrichment returned nil")
 		return
 	}
 	for _, i := range idxs {

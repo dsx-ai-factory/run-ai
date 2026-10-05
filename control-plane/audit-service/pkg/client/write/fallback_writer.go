@@ -10,7 +10,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 )
 
-//go:generate mockery --name writer --inpackage
 type writer interface {
 	Write(log openapi.AuditLog) error
 }

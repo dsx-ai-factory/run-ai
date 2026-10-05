@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/rs/zerolog"
@@ -23,8 +24,16 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/common"
 )
 
+const (
+	workloadSpecFieldDistributedFramework = "distributedFramework"
+	workloadSpecFieldPreemptibility       = "preemptibility"
+)
+
+var workloadSpecSensitiveKeys = []string{"awsSessionToken"}
+
 type getWorkloadSpecInput struct {
-	WorkloadID string `json:"workloadId" jsonschema:"Workload ID (UUID)"`
+	WorkloadID      string `json:"workloadId"                jsonschema:"Workload ID (UUID)"`
+	IncludeFullSpec bool   `json:"includeFullSpec,omitempty" jsonschema:"Return the complete submitted spec instead of the default compact summary."`
 }
 
 func (in getWorkloadSpecInput) Validate() error {
@@ -49,10 +58,11 @@ type getWorkloadSpecOutput struct {
 	Type                      string                           `json:"type"                                jsonschema:"Workload type (Training | Workspace | Distributed | Inference | DistributedInference | non-native types)"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	ProjectName               string                           `json:"projectName"                         jsonschema:"Project name"`
 	DepartmentName            string                           `json:"departmentName,omitempty"            jsonschema:"Department name"`
-	Spec                      map[string]any                   `json:"spec,omitempty"                      jsonschema:"Submitted workload spec, forwarded verbatim. Shape varies by kind. Omitted when the kind-specific call failed or returned no spec"`          //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
-	AllocatedResources        map[string]any                   `json:"allocatedResources,omitempty"        jsonschema:"Resources the scheduler granted. Typical fields: gpu (float), gpuMemory (quantity), cpu (float), cpuMemory (quantity), extendedResources[]"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Spec                      map[string]any                   `json:"spec,omitempty"                      jsonschema:"Submitted workload spec. By default contains only image, compute, storage, scaling, and placement or scheduling fields; all submitted fields, including distributed master configuration, are returned when includeFullSpec is true. Omitted when unavailable."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	AllocatedResources        map[string]any                   `json:"allocatedResources,omitempty"        jsonschema:"Resources the scheduler granted. Typical fields: gpu (float), gpuMemory (quantity), cpu (float), cpuMemory (quantity), extendedResources[]"`                                                                                                                     //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	Topology                  *workloadTopologyOutput          `json:"topology,omitempty"                  jsonschema:"Network topology placement"`
 	PendingSchedulingMessages []pendingSchedulingMessageOutput `json:"pendingSchedulingMessages,omitempty" jsonschema:"Scheduler messages explaining why the workload is pending"`
+	Warnings                  []string                         `json:"warnings,omitempty"                  jsonschema:"Non-fatal notes identifying workload spec data that could not be retrieved."`
 }
 
 func registerGetWorkloadSpec(r *runaimcp.Registry, client *runaiclient.Client) {
@@ -60,8 +70,8 @@ func registerGetWorkloadSpec(r *runaimcp.Registry, client *runaiclient.Client) {
 		Name: "get_workload_spec",
 		Description: "Call when the user asks what a workload (job) requested or how it is configured — the resources " +
 			"it asked for, the image it runs, its environment variables, volumes, or node placement — or why it is " +
-			"pending scheduling. Returns the workload's requested spec (forwarded as-is, so which fields appear " +
-			"depends on the workload type), alongside its actually-allocated resources, its actual node placement, " +
+			"pending scheduling. Returns a compact requested-spec summary by default; set includeFullSpec for fields " +
+			"outside image, compute, storage, scaling, placement, and scheduling. Also returns allocated resources, actual node placement, " +
 			"and any pending-scheduling messages explaining why it has not been placed. " +
 			"If workloadId is unknown, use list_workloads to resolve it. " +
 			"Use this tool for the allocated or requested GPU count of one workload; use list_workloads to list or filter multiple workloads by allocatedGpu or requestedGpu. " +
@@ -91,6 +101,9 @@ func getWorkloadSpecRun(ctx context.Context, client *runaiclient.Client, in getW
 		}
 		return getWorkloadSpecOutput{}, fmt.Errorf("get workload %q: %w", in.WorkloadID, runaimcp.MapHTTPError(httpResp, err))
 	}
+	if wl == nil {
+		return getWorkloadSpecOutput{}, fmt.Errorf("get workload %q returned a nil response: %w", in.WorkloadID, runaimcp.ErrUpstream)
+	}
 	out := getWorkloadSpecOutput{
 		WorkloadID:                in.WorkloadID,
 		Name:                      wl.Name,
@@ -102,20 +115,36 @@ func getWorkloadSpecRun(ctx context.Context, client *runaiclient.Client, in getW
 		PendingSchedulingMessages: mapPendingSchedulingMessages(wl.PendingSchedulingMessages),
 	}
 
-	// Step 2 — fetch the submitted spec from the type-specific endpoint. Soft fail: spec is dropped on failure, runtime fields above are kept.
-	if spec, ok := fetchKindSpec(ctx, client, in.WorkloadID, wl.Type); ok {
-		out.Spec = spec
+	// Step 2 — fetch the submitted spec from the type-specific endpoint. Soft fail:
+	// spec is dropped on failure, runtime fields above are kept, and the caller is warned.
+	result := fetchKindSpec(ctx, client, in.WorkloadID, wl.Type, in.IncludeFullSpec)
+	if result.Retrieved {
+		result.Spec = common.RemoveKeys(result.Spec, workloadSpecSensitiveKeys).(map[string]any)
+		if in.IncludeFullSpec {
+			out.Spec = result.Spec
+		} else {
+			out.Spec = summarizeWorkloadSpec(result.Spec)
+		}
+	} else if result.Applicable {
+		out.Warnings = []string{fmt.Sprintf("%s workload spec could not be retrieved; runtime fields are still included", wl.Type)}
 	}
 	return out, nil
 }
 
+type kindSpecResult struct {
+	Spec       map[string]any
+	Applicable bool
+	Retrieved  bool
+}
+
 // fetchKindSpec dispatches to the type-specific endpoint; soft-fails on errors.
-func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, workloadType string) (map[string]any, bool) {
+func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, workloadType string, includeFullSpec bool) kindSpecResult {
 	var (
-		call     string
-		spec     workloads.MappedNullable
-		httpResp *http.Response
-		err      error
+		call                string
+		spec                workloads.MappedNullable
+		distributedWorkload *workloads.DistributedWorkload
+		httpResp            *http.Response
+		err                 error
 	)
 	switch workloadType {
 	case workloadTypeTraining:
@@ -129,7 +158,10 @@ func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, 
 	case workloadTypeDistributed:
 		call = "getDistributed"
 		spec, httpResp, err = execKind(client.Workloads.DistributedAPI.GetDistributed(ctx, workloadID).Execute,
-			func(r *workloads.DistributedWorkload) workloads.MappedNullable { return r.Spec })
+			func(r *workloads.DistributedWorkload) workloads.MappedNullable {
+				distributedWorkload = r
+				return r.Spec
+			})
 	case workloadTypeInference:
 		call = "getInference"
 		spec, httpResp, err = execKind(client.Workloads.InferencesAPI.GetInference(ctx, workloadID).Execute,
@@ -139,16 +171,24 @@ func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, 
 		spec, httpResp, err = execKind(client.Workloads.DistributedInferencesAPI.GetDistributedInference(ctx, workloadID).Execute,
 			func(r *workloads.DistributedInference) workloads.MappedNullable { return r.Spec })
 	default:
-		return nil, false
+		return kindSpecResult{}
 	}
 	if err != nil {
-		if rawSpec, ok := specFromSuccessfulDecodeError(httpResp, err); ok {
+		if rawSpec, ok := specFromSuccessfulResponse(httpResp, workloadType); ok {
 			zerolog.Ctx(ctx).Warn().Err(err).
 				Str("workload_id", workloadID).
 				Str("workload_type", workloadType).
 				Str("call", call).
 				Msg("get_workload_spec: recovered spec from raw successful response after generated-client decode failure")
-			return rawSpec, true
+			return kindSpecResult{Spec: rawSpec, Applicable: true, Retrieved: true}
+		}
+		if rawSpec, ok := specFromSuccessfulDecodeError(httpResp, err, workloadType); ok {
+			zerolog.Ctx(ctx).Warn().Err(err).
+				Str("workload_id", workloadID).
+				Str("workload_type", workloadType).
+				Str("call", call).
+				Msg("get_workload_spec: recovered spec from raw successful response after generated-client decode failure")
+			return kindSpecResult{Spec: rawSpec, Applicable: true, Retrieved: true}
 		}
 		evt := zerolog.Ctx(ctx).Warn().Err(err).
 			Str("workload_id", workloadID).
@@ -158,14 +198,157 @@ func fetchKindSpec(ctx context.Context, client *runaiclient.Client, workloadID, 
 			evt = evt.Int("status_code", httpResp.StatusCode)
 		}
 		evt.Msg("get_workload_spec: kind-specific spec lookup failed, omitting spec")
+		return kindSpecResult{Applicable: true}
+	}
+	// Full mode reads the untouched response so fields newer than the generated
+	// client are preserved without first converting the typed spec.
+	if includeFullSpec {
+		if rawSpec, ok := specFromSuccessfulResponse(httpResp, workloadType); ok {
+			return kindSpecResult{Spec: rawSpec, Applicable: true, Retrieved: true}
+		}
+	}
+
+	// The generated client already decoded every field needed by the compact
+	// summary. Only re-read the response as a fallback when that spec is empty.
+	typedSpec := mergeDistributedWorkloadSpec(toRawObject(spec), distributedWorkload)
+	if len(typedSpec) > 0 {
+		return kindSpecResult{Spec: typedSpec, Applicable: true, Retrieved: true}
+	}
+	if !includeFullSpec {
+		if rawSpec, ok := specFromSuccessfulResponse(httpResp, workloadType); ok {
+			return kindSpecResult{Spec: rawSpec, Applicable: true, Retrieved: true}
+		}
+	}
+	return kindSpecResult{Applicable: true}
+}
+
+var workloadSpecSummaryFields = map[string]struct{}{
+	"image": {}, "compute": {}, "storage": {},
+	workloadSpecFieldDistributedFramework: {}, "cleanPodPolicy": {}, "mpiLauncherCreationPolicy": {},
+	"nodePools": {}, "nodeAffinityRequired": {}, "nodeType": {}, "podAffinity": {}, "tolerations": {},
+	"priorityClass": {}, workloadSpecFieldPreemptibility: {}, "restartPolicy": {},
+	"replicas": {}, "workers": {}, "numWorkers": {}, "minReplicas": {}, "maxReplicas": {}, "segmentSize": {},
+	"parallelism": {}, "completions": {}, "slotsPerWorker": {}, "autoscaling": {},
+	"servingConfiguration": {}, "servingPort": {}, "startupPolicy": {},
+	"masterSpecSameAsWorker": {},
+}
+
+var workloadSpecRoleFields = map[string]struct{}{
+	"leader": {}, "worker": {}, "masterSpec": {},
+}
+
+// mergeDistributedWorkloadSpec adds the submitted master configuration, which the
+// distributed endpoint returns beside (rather than inside) its common worker spec.
+func mergeDistributedWorkloadSpec(spec map[string]any, distributed *workloads.DistributedWorkload) map[string]any {
+	if distributed == nil {
+		return spec
+	}
+	if value, set := distributed.GetMasterSpecSameAsWorkerOk(); set {
+		spec = ensureWorkloadSpec(spec)
+		if value == nil {
+			spec["masterSpecSameAsWorker"] = nil
+		} else {
+			spec["masterSpecSameAsWorker"] = *value
+		}
+	}
+	if value, set := distributed.GetMasterSpecOk(); set {
+		spec = ensureWorkloadSpec(spec)
+		spec["masterSpec"] = toRawObject(value)
+	}
+	if value, set := distributed.GetMasterAssetsOk(); set {
+		spec = ensureWorkloadSpec(spec)
+		spec["masterAssets"] = toRawObject(value)
+	}
+	return spec
+}
+
+func ensureWorkloadSpec(spec map[string]any) map[string]any {
+	if spec == nil {
+		return make(map[string]any)
+	}
+	return spec
+}
+
+// summarizeWorkloadSpec keeps only current raw spec fields needed to understand
+// images, resource requests, storage, scale, placement, and scheduling.
+func summarizeWorkloadSpec(spec map[string]any) map[string]any {
+	if len(spec) == 0 {
+		return nil
+	}
+	summary := make(map[string]any)
+	for key, value := range spec {
+		if _, ok := workloadSpecSummaryFields[key]; ok {
+			summary[key] = value
+			continue
+		}
+		if _, ok := workloadSpecRoleFields[key]; !ok {
+			continue
+		}
+		role, ok := value.(map[string]any)
+		if !ok {
+			continue
+		}
+		if roleSummary := summarizeWorkloadSpec(role); len(roleSummary) > 0 {
+			summary[key] = roleSummary
+		}
+	}
+	if len(summary) == 0 {
+		return nil
+	}
+	return summary
+}
+
+// specFromSuccessfulResponse reads the untouched response JSON for full mode
+// and as a fallback when the generated client returns an empty typed spec.
+func specFromSuccessfulResponse(httpResp *http.Response, workloadType string) (map[string]any, bool) {
+	if httpResp == nil || httpResp.Body == nil || httpResp.StatusCode < http.StatusOK || httpResp.StatusCode >= http.StatusMultipleChoices {
 		return nil, false
 	}
-	return toRawObject(spec), true
+	body, err := io.ReadAll(httpResp.Body)
+	_ = httpResp.Body.Close()
+	httpResp.Body = io.NopCloser(bytes.NewReader(body))
+	if err != nil {
+		return nil, false
+	}
+	return specFromResponseBody(body, workloadType)
+}
+
+func specFromResponseBody(body []byte, workloadType string) (map[string]any, bool) {
+	var envelope map[string]json.RawMessage
+	if err := json.Unmarshal(body, &envelope); err != nil {
+		return nil, false
+	}
+	rawSpec, exists := envelope["spec"]
+	if !exists || len(rawSpec) == 0 || bytes.Equal(rawSpec, []byte("null")) {
+		return nil, false
+	}
+
+	decoder := json.NewDecoder(bytes.NewReader(rawSpec))
+	decoder.UseNumber()
+	var spec map[string]any
+	if err := decoder.Decode(&spec); err != nil || len(spec) == 0 {
+		return nil, false
+	}
+	if workloadType == workloadTypeDistributed {
+		for _, field := range []string{"masterSpecSameAsWorker", "masterSpec", "masterAssets"} {
+			rawValue, exists := envelope[field]
+			if !exists {
+				continue
+			}
+			valueDecoder := json.NewDecoder(bytes.NewReader(rawValue))
+			valueDecoder.UseNumber()
+			var value any
+			if valueDecoder.Decode(&value) == nil {
+				spec[field] = value
+			}
+		}
+	}
+	return spec, true
 }
 
 // specFromSuccessfulDecodeError recovers spec from a successful response the generated client could not decode.
 // It preserves strict validation while preventing invalid response metadata from hiding a valid spec.
-func specFromSuccessfulDecodeError(httpResp *http.Response, err error) (map[string]any, bool) {
+func specFromSuccessfulDecodeError(httpResp *http.Response, err error, workloadType string) (map[string]any, bool) {
 	if httpResp == nil || httpResp.StatusCode < http.StatusOK || httpResp.StatusCode >= http.StatusMultipleChoices {
 		return nil, false
 	}
@@ -175,20 +358,7 @@ func specFromSuccessfulDecodeError(httpResp *http.Response, err error) (map[stri
 		return nil, false
 	}
 
-	var envelope struct {
-		Spec json.RawMessage `json:"spec"`
-	}
-	if err := json.Unmarshal(bodyError.Body(), &envelope); err != nil || len(envelope.Spec) == 0 || bytes.Equal(envelope.Spec, []byte("null")) {
-		return nil, false
-	}
-
-	decoder := json.NewDecoder(bytes.NewReader(envelope.Spec))
-	decoder.UseNumber()
-	var spec map[string]any
-	if err := decoder.Decode(&spec); err != nil || len(spec) == 0 {
-		return nil, false
-	}
-	return spec, true
+	return specFromResponseBody(bodyError.Body(), workloadType)
 }
 
 func execKind[T comparable](exec func() (T, *http.Response, error), extract func(T) workloads.MappedNullable) (workloads.MappedNullable, *http.Response, error) {

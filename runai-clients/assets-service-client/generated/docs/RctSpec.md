@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ObjectMeta** | Pointer to [**NullableK8sObjectMeta**](K8sObjectMeta.md) |  | [optional] 
-**ObjectSpec** | **map[string]interface{}** | The raw Kubernetes spec of the ResourceClaimTemplate. | 
+**ObjectSpec** | **map[string]interface{}** | The raw Kubernetes spec of the object. | 
 
 ## Methods
 

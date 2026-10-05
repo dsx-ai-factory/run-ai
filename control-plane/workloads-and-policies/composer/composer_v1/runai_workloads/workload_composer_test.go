@@ -693,6 +693,79 @@ var _ = Describe("superset composer validations", func() {
 	})
 })
 
+var _ = Describe("backoff limit composition", func() {
+	DescribeTable("standard training",
+		func(backoffLimit *int64, expected *int) {
+			spec := &workloadsApi.SupersetSpec{}
+			if backoffLimit != nil {
+				spec.BackoffLimit = *workloadsApi.NewNullableInt64(backoffLimit)
+			}
+			target := &jobs.JobSpec{}
+			jobSpecComposer := NewSupersetToJobSpecComposer(
+				string(workloadsApi.WORKLOADTYPE_TRAINING),
+				"test",
+				"test",
+				nil,
+				nil,
+				composer.FieldsComposerOptions{IgnoreMissingValues: true},
+			)
+
+			err := jobSpecComposer.Compose(context.Background(), spec, target)()
+
+			Expect(err).To(BeNil())
+			if expected == nil {
+				Expect(target.BackoffLimit).To(BeNil())
+				return
+			}
+			Expect(target.BackoffLimit).NotTo(BeNil())
+			Expect(target.BackoffLimit.Value).To(Equal(expected))
+		},
+		Entry("leaves an unset value omitted", nil, nil),
+		Entry("preserves an explicit zero", convutils.Ref(int64(0)), convutils.Ref(0)),
+		Entry("preserves a positive value", convutils.Ref(int64(3)), convutils.Ref(3)),
+	)
+
+	DescribeTable("distributed training",
+		func(backoffLimit *int64, expected *int) {
+			spec := &workloadsApi.SupersetSpec{
+				DistributedFramework: *workloadsApi.NewNullableDistributedFramework(
+					convutils.Ref(workloadsApi.DISTRIBUTEDFRAMEWORK_MPI),
+				),
+			}
+			if backoffLimit != nil {
+				spec.BackoffLimit = *workloadsApi.NewNullableInt64(backoffLimit)
+			}
+			target := &jobs.JobSpec{}
+			distributedComposer := NewDistributedWorkloadComposer(
+				"test",
+				"test",
+				nil,
+				composer.FieldsComposerOptions{IgnoreMissingValues: true},
+			)
+
+			err := distributedComposer.ComposeDistributedFields(
+				context.Background(),
+				&distributedComposer.workerJobComposer,
+				spec,
+				target,
+			)()
+
+			Expect(err).To(BeNil())
+			if expected == nil {
+				Expect(target.RunPolicy).To(BeNil())
+				return
+			}
+			Expect(target.RunPolicy).NotTo(BeNil())
+			Expect(target.RunPolicy.Values).NotTo(BeNil())
+			Expect(target.RunPolicy.Values.BackoffLimit).NotTo(BeNil())
+			Expect(target.RunPolicy.Values.BackoffLimit.Value).To(Equal(expected))
+		},
+		Entry("leaves an unset value omitted", nil, nil),
+		Entry("preserves an explicit zero", convutils.Ref(int64(0)), convutils.Ref(0)),
+		Entry("preserves a positive value", convutils.Ref(int64(3)), convutils.Ref(3)),
+	)
+})
+
 func noResourcesRequested(resources *workloadsApi.WorkloadRequestResources) bool {
 	if resources == nil {
 		return true

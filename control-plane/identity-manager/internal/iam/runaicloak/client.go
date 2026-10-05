@@ -17,7 +17,6 @@ import (
 	iamError "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/errors"
 )
 
-//go:generate mockery --name RunAICloakClient --output ./mocks --filename runaicloak_client.go
 type RunAICloakClient interface {
 	ExchangeExternalIdpToken(ctx context.Context, adminToken, realm, token, clientId, clientSecret, idpAlias string) (*Tokens, error)
 	GetClientScopes(ctx context.Context, realm, accessToken string) ([]map[string]interface{}, error)

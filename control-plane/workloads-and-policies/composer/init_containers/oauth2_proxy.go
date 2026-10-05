@@ -16,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -145,7 +146,7 @@ func BuildOAuth2ProxyContainers(info *composer.ExposedUrlInfo) ([]corev1.Contain
 			"--cookie-samesite=lax",
 			"--skip-jwt-bearer-tokens=true",
 			fmt.Sprintf("--extra-jwt-issuers=%s=runai", oidcIssuerUrl),
-			"--custom-templates-dir=/usr/share/oauth2-proxy",
+			"--custom-templates-dir=" + oauth2proxy.TemplatesPath,
 			"--pass-authorization-header=false",
 			fmt.Sprintf("--cookie-name=%s", cookiePrefix),
 		}
@@ -187,6 +188,11 @@ func BuildOAuth2ProxyContainers(info *composer.ExposedUrlInfo) ([]corev1.Contain
 
 		volumeMounts := []corev1.VolumeMount{
 			{Name: oauth2AuthVolumeName, MountPath: oauth2AuthVolumePath},
+		}
+		if info.OAuth2ProxyTemplatesSupported {
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name: oauth2proxy.VolumeName, MountPath: oauth2proxy.TemplatesPath, ReadOnly: true,
+			})
 		}
 		if cfg.IsCustomCAAuthEnabled() {
 			volumeMounts = append(volumeMounts, oauth2CAVolumeMount(cfg))
@@ -244,6 +250,16 @@ func BuildOAuth2ProxyVolumes(info *composer.ExposedUrlInfo) []corev1.Volume {
 		Name:         oauth2AuthVolumeName,
 		VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 	})
+	if info.OAuth2ProxyTemplatesSupported {
+		result = append(result, corev1.Volume{
+			Name: oauth2proxy.VolumeName,
+			VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{Name: oauth2proxy.ConfigMapName},
+				Items:                []corev1.KeyToPath{{Key: oauth2proxy.TemplateKey, Path: oauth2proxy.TemplateKey}},
+				Optional:             convutils.Ref(true),
+			}},
+		})
+	}
 
 	if info.Config.IsCustomCAAuthEnabled() {
 		result = append(result, oauth2CAVolume(info.Config))
