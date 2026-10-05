@@ -240,7 +240,7 @@ func nimServingPortToExternalAccess(sp *api.NimServiceServingPort, serviceName s
 
 	if ingressRouteEnabled {
 		if info.UseOpenShiftRoute {
-			ea.Route = buildOpenShiftRouteMap(host, path)
+			ea.Route = buildOpenShiftRouteMap(host, path, serviceName)
 		} else {
 			ingressEA := buildIngressExternalAccess(host, path, resolveProtocol(sp), info.IngressClass, serviceName, servicePort, hasAuth)
 			if ingressEA != nil {
@@ -421,13 +421,17 @@ func buildHTTPRouteExternalAccess(host, path string, _ api.ServingPortExposedPro
 	return &api.ExternalAccess{HttpRoute: &httpRoute}
 }
 
-func buildOpenShiftRouteMap(host, path string) *map[string]interface{} {
+func buildOpenShiftRouteMap(host, path, serviceName string) *map[string]interface{} {
 	route := map[string]interface{}{
 		"apiVersion": constants.RouteV1,
 		"kind":       constants.KindRoute,
 		"spec": map[string]interface{}{
 			"host": host,
 			"path": path,
+			"to": map[string]interface{}{
+				"kind": "Service",
+				"name": serviceName,
+			},
 		},
 	}
 	return &route
