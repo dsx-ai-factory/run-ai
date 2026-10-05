@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package burst
+package scale
 
 import (
 	"context"
@@ -82,7 +82,7 @@ type round struct {
 	size           int
 	timings        []measure.Timing
 	unmatched      int
-	reconnects     int
+	interruptions  int
 	submitMakespan time.Duration
 	quiesce        time.Duration
 	err            error
@@ -183,8 +183,8 @@ func describeRound(r round) string {
 	if r.unmatched > 0 {
 		text += fmt.Sprintf(", %d unmatched arrivals", r.unmatched)
 	}
-	if r.reconnects > 0 {
-		text += fmt.Sprintf(", watch reopened %d times", r.reconnects)
+	if r.interruptions > 0 {
+		text += fmt.Sprintf(", measurement interrupted %d times", r.interruptions)
 	}
 	if r.err != nil {
 		text += ": " + r.err.Error()
@@ -319,7 +319,7 @@ func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, nam
 
 	timings := watcher.WaitAll(knobs.timeout)
 	result.unmatched = watcher.Unmatched()
-	result.reconnects = watcher.Reconnects()
+	result.interruptions = watcher.Reconnects()
 	if ctx.Err() != nil {
 		result.timings = timings
 		result.err = fmt.Errorf("interrupted before teardown: %w", ctx.Err())
@@ -430,7 +430,7 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 		metrics["failed_count"+at] = summary.FailedCount
 		metrics["success_rate"+at] = summary.SuccessRate
 		metrics["unmatched_arrivals"+at] = r.unmatched
-		metrics["watch_reconnects"+at] = r.reconnects
+		metrics["measurement_interruptions"+at] = r.interruptions
 		metrics["submit_makespan_ms"+at] = r.submitMakespan.Milliseconds()
 		metrics["quiesce_ms"+at] = r.quiesce.Milliseconds()
 		if summary.SampleSize > 0 {
@@ -472,8 +472,8 @@ func roundProblems(r round, summary measure.Summary) []string {
 		}
 		problems = append(problems, message)
 	}
-	if r.reconnects > 0 {
-		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the watch was reopened %d times; latencies of workloads in flight during the gaps include the reconnect delay", r.index, r.size, r.reconnects))
+	if r.interruptions > 0 {
+		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the measurement was interrupted %d times: the cluster watch closed and was reopened; latencies of workloads in flight during the gaps are inflated", r.index, r.size, r.interruptions))
 	}
 	if summary.FailedCount > 0 {
 		message := fmt.Sprintf("round %d (%d workloads): %d creates failed", r.index, r.size, summary.FailedCount)

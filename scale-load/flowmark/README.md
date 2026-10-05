@@ -46,7 +46,8 @@ scenarios/
   scale/                    how latency grows with the number of workloads
     deployment-burst.yaml   Deployment created through Kubernetes → ExternalWorkload appears
     training-burst.yaml     Training created through the control plane → WorkloadRunner appears
-  load/                     steady submission rates; arrives with the load-ramp suite
+  load/                     how latency behaves under a steady stream of submissions
+    workspace-ttj.yaml      Workspaces submitted at a fixed rate → time to job, split into spans
 ```
 
 Knobs of the `scale-burst` suite:
@@ -70,9 +71,38 @@ Each run creates its own project, runs the rounds, deletes everything, and
 deletes the project. Latency per workload is the time from the create
 response to the first watch event of its cluster object.
 
+Knobs of the `load-ttj` suite:
+
+| knob | default | meaning |
+|---|---|---|
+| `users` | 10 | parallel submitters; the most requests in flight at once |
+| `rate` | 2 | target submissions per second; may not exceed `controlPlaneRequestsPerSecond` |
+| `duration` | `5m` | how long submissions keep coming |
+| `image` | `registry.k8s.io/pause:3.9` | container image of every Workspace |
+| `timeout` | `10m` | how long to wait for arrivals after the last submission |
+| `setupTimeout` | `5m` | project creation, each create call, cleanup |
+| `spanTolerance` | `1s` | allowed gap when checking that the spans add up to the time to job |
+| `kubeRequestsPerSecond`, `controlPlaneRequestsPerSecond`, `cluster`, `slo` | as above | shared with `scale-burst` |
+
+Each accepted Workspace is timed in three legs on one clock: `api_accepted`
+from the request to the 200, `cluster_synced` from the 200 to its
+WorkloadRunner on the cluster, `pod_created` from the WorkloadRunner to its
+first pod. `ttj`, the time to job, runs from the 200 to the first pod. A
+rejected submission lowers `success_rate` and enters no latency. The pacer
+never fires missed ticks later, so `actual_rate_per_sec` next to
+`target_rate_per_sec` shows whether the environment kept up with the load.
+
 ## Results
 
 Every run writes `reports/results-<timestamp>.json` and adds it to
 `reports/manifest.json`, the ordered list of runs. The file holds run
 metadata (start time, provider, cluster type, versions, clock offset) and one
-section per scenario
+section per scenario. A `scale-burst` section has `p50_ms@N`, `p90_ms@N`,
+`p99_ms@N`, `throughput_per_sec@N`, `pending_count@N`, `failed_count@N` and
+the knobs used, `N` being the round size; `makespan_ms@N` runs from the first
+create response to the last arrival and `throughput_per_sec@N` is the number
+of arrived workloads divided by it. A `load-ttj` section has `<span>_p50_ms`,
+`<span>_p90_ms` and `<span>_p99_ms` for `api_accepted`, `cluster_synced`,
+`pod_created` and `ttj`, plus `submitted`, `success_rate`,
+`target_rate_per_sec`, `actual_rate_per_sec` and `spans_consistent`. Pending
+workloads are never counted as zero latency.

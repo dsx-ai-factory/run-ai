@@ -21,7 +21,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/measure"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/report"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/runner"
-	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/burst"
+	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/load"
+	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/scale"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/selfcheck"
 )
 
@@ -64,7 +65,7 @@ func run() error {
 		Password:        os.Getenv("FLOWMARK_CP_PASSWORD"),
 		Token:           os.Getenv("FLOWMARK_CP_TOKEN"),
 	}
-	registry := buildRegistry(selfcheck.Suite{}, burst.Suite{})
+	registry := buildRegistry(selfcheck.Suite{}, scale.Suite{}, load.Suite{})
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	context.AfterFunc(ctx, func() {
 		log.Print("interrupted: finishing cleanup and writing the rounds that completed; a second Ctrl-C or SIGTERM quits at once without cleanup")

@@ -17,6 +17,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -246,12 +247,12 @@ func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 			}
 			switch event.Type {
 			case watch.Added, watch.Modified:
-				if obj, ok := event.Object.(*unstructured.Unstructured); ok {
+				if obj := asUnstructured(event.Object); obj != nil {
 					w.resourceVersion = obj.GetResourceVersion()
 					w.recordArrival(w.nameOf(obj), time.Now())
 				}
 			case watch.Bookmark:
-				if obj, ok := event.Object.(*unstructured.Unstructured); ok {
+				if obj := asUnstructured(event.Object); obj != nil {
 					w.resourceVersion = obj.GetResourceVersion()
 				}
 			case watch.Error:
@@ -272,6 +273,17 @@ func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 			}
 		}
 	}
+}
+
+func asUnstructured(object runtime.Object) *unstructured.Unstructured {
+	if obj, ok := object.(*unstructured.Unstructured); ok {
+		return obj
+	}
+	content, err := runtime.DefaultUnstructuredConverter.ToUnstructured(object)
+	if err != nil {
+		return nil
+	}
+	return &unstructured.Unstructured{Object: content}
 }
 
 func (w *Watcher) recordArrival(name string, at time.Time) {
