@@ -54,6 +54,7 @@ import (
 
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config"
+	agentHandlers "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/handlers"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	kainodepool "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 
@@ -94,6 +95,7 @@ var _ = Describe("Agent tests", func() {
 	workloadsPrioritiesPath := "/api/v1/workload-priorities-sync"
 	workloadsCategoriesPath := "/api/v1/workload-categories"
 	networkTopologiesPath := "/api/v1/network-topologies"
+	k8sObjectsPath := "/api/v1/k8s-objects/updates"
 
 	var agent *pkg.RunaiAgent
 	var cancel context.CancelFunc
@@ -532,6 +534,39 @@ var _ = Describe("Agent tests", func() {
 			})
 			GinkgoWriter.Printf("Created POST datasources mock server calls...")
 
+			server.RouteToHandler("POST", k8sObjectsPath, func(writer http.ResponseWriter, request *http.Request) {
+				k8sObjectsUpdates := allK8sObjectsUpdates
+
+				q := request.URL.Query()
+				after := getIntFromQuery(q, "after")
+				resObj := &assets_openapi.K8sObjectsUpdatesResp{
+					RequestInfo: &assets_openapi.RequestInfo{
+						AfterUpdate: int64(0),
+					},
+					ResponseInfo: &assets_openapi.ResponseInfo{
+						LowestUpdate:  intTo64Pointer(0),
+						HighestUpdate: intTo64Pointer(0),
+					},
+					Assets: []assets_openapi.K8sObjectsUpdate{},
+				}
+
+				for _, update := range k8sObjectsUpdates {
+					if update.UpdateCount <= int64(after) {
+						continue
+					}
+					if update.UpdateCount <= *resObj.ResponseInfo.LowestUpdate {
+						resObj.ResponseInfo.LowestUpdate = convutils.Ref(update.UpdateCount)
+					}
+					if update.UpdateCount >= *resObj.ResponseInfo.HighestUpdate {
+						resObj.ResponseInfo.HighestUpdate = convutils.Ref(update.UpdateCount)
+					}
+					resObj.Assets = append(resObj.Assets, update)
+				}
+
+				ghttp.RespondWithJSONEncoded(http.StatusOK, resObj)(writer, request)
+			})
+			GinkgoWriter.Printf("Created POST k8s-objects mock server calls...")
+
 			server.RouteToHandler("POST", credentialsAssetsPath, func(writer http.ResponseWriter, request *http.Request) {
 				credentialsUpdates := allCredentialsUpdates
 
@@ -749,6 +784,7 @@ var _ = Describe("Agent tests", func() {
 				existingPriorityClass, existingNonRunaiPriorityClass,
 				existingV2WorkloadA, existingV2WorkloadB,
 				existingClusterKarta1, existingClusterKarta3, existingKartaToBeDeleted,
+				existingRctToUpdate, existingRctToDelete, existingRctAlreadyInSync,
 			).WithInterceptorFuncs(interceptor.Funcs{
 				Create: func(ctx context.Context, client client.WithWatch, obj client.Object, opts ...client.CreateOption) error {
 					err := client.Create(ctx, obj, opts...)
@@ -1118,6 +1154,68 @@ var _ = Describe("Agent tests", func() {
 
 			// we had updates 9-15
 			validateAgentConfigWithCredentialsCounter(k8sClient, "16")
+		})
+
+		It("resource claim templates from backend created + spec-bump recreated + defaults-match left alone + deleted", func() {
+			// Capture the UIDs of the pre-seeded RCTs so the test can
+			// distinguish "same object, metadata reconciled" (same UID)
+			// from "spec diverged, delete-and-recreated" (new UID).
+			originalUpdateUID := existingRctToUpdate.UID
+			originalAlreadyInSyncUID := existingRctAlreadyInSync.UID
+
+			go agent.Start(stopper)
+
+			// New project-scoped RCT lands in the project namespace with
+			// the full Runai label/annotation stamp.
+			projRct := validateRctExistsEventually(rctNameNewProj, NamespaceForSpec1, k8sClient)
+			Expect(projRct.Labels).To(HaveKeyWithValue(clusterCommonConstants.RunaiAssetLabel, "resource-claim-template"))
+			Expect(projRct.Labels).To(HaveKeyWithValue("run.ai/asset-id", rctAssetIdCreateProj))
+			Expect(projRct.Labels).To(HaveKeyWithValue("run.ai/project", Proj1IdStr))
+			Expect(projRct.Annotations).To(HaveKeyWithValue(agentHandlers.UpdateCountAnnotation, expectedUpdateCountAnnotation(toCreateProjRct)))
+			// Inner RCT.Spec.ObjectMeta carries the user-provided labels
+			// so each spawned ResourceClaim inherits them.
+			Expect(projRct.Spec.Labels).To(HaveKeyWithValue("pod-selector", "gpu-worker"))
+
+			// Cluster-scoped RCTs land in the runai namespace, not any
+			// per-project namespace.
+			clusterRct := validateRctExistsEventually(rctNameNewCluster, clusterCommonConstants.NamespaceRunAi, k8sClient)
+			Expect(clusterRct.Labels).To(HaveKeyWithValue("run.ai/cluster-wide", "true"))
+			Expect(clusterRct.Labels).ToNot(HaveKey("run.ai/project"))
+
+			// IsDeleted asset removes the pre-seeded object.
+			validateRctDeletedEventually(rctNameToDelete, NamespaceForSpec1, k8sClient)
+
+			// Bumping Count from 2 to 4 forces delete-and-recreate
+			// (RCT.Spec is immutable on resource.k8s.io/v1), so the
+			// post-sync object MUST have a new UID.
+			Eventually(func(g Gomega) {
+				rct := getRctFromClient(rctNameToUpdate, NamespaceForSpec1, k8sClient)
+				g.Expect(rct).NotTo(BeNil())
+				g.Expect(rct.Spec.Spec.Devices.Requests).To(HaveLen(1))
+				g.Expect(rct.Spec.Spec.Devices.Requests[0].Exactly.Count).To(Equal(int64(4)))
+				g.Expect(rct.UID).NotTo(Equal(originalUpdateUID))
+			}, DefaultTimeout).Should(Succeed())
+
+			// Defaults-only diff: existing was seeded with the defaulted
+			// spec (AllocationMode=ExactCount, Count=1, Toleration.Operator=Equal);
+			// the backend update ships the undefaulted equivalent. The
+			// handler must treat them as equal (ShouldReCreate=false),
+			// so the UID stays stable while the metadata-only update
+			// still bumps the counter annotation. Without the defaulter
+			// pass in ShouldReCreate this test would catch a churn loop
+			// where every sync tick blew the object away.
+			Eventually(func(g Gomega) {
+				rct := getRctFromClient(rctNameAlreadyInSync, NamespaceForSpec1, k8sClient)
+				g.Expect(rct).NotTo(BeNil())
+				g.Expect(rct.Annotations[agentHandlers.UpdateCountAnnotation]).To(Equal(
+					expectedUpdateCountAnnotation(toReconcileAlreadyInSyncRct),
+				))
+				g.Expect(rct.UID).To(Equal(originalAlreadyInSyncUID))
+			}, DefaultTimeout).Should(Succeed())
+
+			// And the cursor advances to the highest sync counter the
+			// test produced, so the next poll resumes from there.
+			validateAgentConfigWithK8sObjectsCounter(k8sClient, strconv.Itoa(rctHighestSyncedCounter))
 		})
 
 		It("rejects interactive workloads from the legacy backend", func() {
