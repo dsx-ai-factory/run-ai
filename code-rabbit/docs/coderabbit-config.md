@@ -127,6 +127,5 @@ All configuration changes were validated with dedicated test PRs:
 ## Future Improvements
 
 - **Custom ast-grep rules**: Structural pattern matching for `db.Raw(fmt.Sprintf(...))` without bind args -- more precise than natural language instructions
-- **Audit `dao-utils.ListItemsForQuery`**: This function in `runai-common-packages` is used across services for SQL string building; needs verification that it properly escapes values
 - **Enable gosec in all services**: Currently commented out in `org-unit-service` and others; separate from CodeRabbit but complementary
 - **Additional path_instructions**: Could add rules for Helm charts, GitHub Actions workflows, or frontend security patterns as needed
