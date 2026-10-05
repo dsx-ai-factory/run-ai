@@ -12,17 +12,17 @@ import (
 )
 
 type Summary struct {
-	SampleSize   int
-	PendingCount int
-	FailedCount  int
-	SuccessRate  float64
-	P50          time.Duration
-	P90          time.Duration
-	P99          time.Duration
-	Mean         time.Duration
-	Max          time.Duration
-	Makespan     time.Duration
-	Throughput   float64
+	SampleSize        int
+	NeverArrivedCount int
+	FailedCount       int
+	SuccessRate       float64
+	P50               time.Duration
+	P90               time.Duration
+	P99               time.Duration
+	Mean              time.Duration
+	Max               time.Duration
+	Makespan          time.Duration
+	Throughput        float64
 }
 
 func Stats(timings []Timing) Summary {
@@ -40,8 +40,8 @@ func Stats(timings []Timing) Summary {
 			if timing.Arrived.After(last) {
 				last = timing.Arrived
 			}
-		case Pending:
-			summary.PendingCount++
+		case NeverArrived:
+			summary.NeverArrivedCount++
 		case Failed:
 			summary.FailedCount++
 		}
@@ -88,10 +88,10 @@ func percentile(sorted []time.Duration, p float64) time.Duration {
 
 func (s Summary) Metrics() map[string]any {
 	metrics := map[string]any{
-		"sample_size":   s.SampleSize,
-		"pending_count": s.PendingCount,
-		"failed_count":  s.FailedCount,
-		"success_rate":  s.SuccessRate,
+		"sample_size":         s.SampleSize,
+		"never_arrived_count": s.NeverArrivedCount,
+		"failed_count":        s.FailedCount,
+		"success_rate":        s.SuccessRate,
 	}
 	if s.SampleSize == 0 {
 		return metrics

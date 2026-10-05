@@ -20,10 +20,10 @@ func arrivals(base time.Time, durations ...time.Duration) []Timing {
 	return timings
 }
 
-func pendings(n int) []Timing {
+func neverArrived(n int) []Timing {
 	timings := make([]Timing, 0, n)
 	for i := range n {
-		timings = append(timings, Timing{Name: fmt.Sprintf("p%d", i), Outcome: Pending})
+		timings = append(timings, Timing{Name: fmt.Sprintf("p%d", i), Outcome: NeverArrived})
 	}
 	return timings
 }
@@ -61,17 +61,17 @@ func TestStatsPercentiles(t *testing.T) {
 	}
 }
 
-func TestStatsPendingIsExcludedNotZero(t *testing.T) {
+func TestStatsNeverArrivedIsExcludedNotZero(t *testing.T) {
 	base := time.Date(2026, 9, 17, 12, 0, 0, 0, time.UTC)
-	timings := append(arrivals(base, seconds(60, 60, 60, 60, 60)...), pendings(5)...)
+	timings := append(arrivals(base, seconds(60, 60, 60, 60, 60)...), neverArrived(5)...)
 
 	got := Stats(timings)
 
 	if got.P50 != 60*time.Second || got.P99 != 60*time.Second || got.Mean != 60*time.Second {
-		t.Fatalf("pending items must not enter the distribution: %+v", got)
+		t.Fatalf("items that never arrived must not enter the distribution: %+v", got)
 	}
-	if got.PendingCount != 5 || got.SampleSize != 5 || got.SuccessRate != 0.5 {
-		t.Fatalf("expected 5 pending, 5 samples, 50%% success, got %+v", got)
+	if got.NeverArrivedCount != 5 || got.SampleSize != 5 || got.SuccessRate != 0.5 {
+		t.Fatalf("expected 5 never arrived, 5 samples, 50%% success, got %+v", got)
 	}
 	if v, ok := got.Metrics()["p50_ms"]; !ok || v != int64(60000) {
 		t.Fatalf("p50_ms must be 60000, got %v", v)
@@ -89,8 +89,8 @@ func TestStatsFailedIsCountedNotTimed(t *testing.T) {
 	}
 }
 
-func TestStatsEmptyAndAllPending(t *testing.T) {
-	for name, timings := range map[string][]Timing{"empty": nil, "all pending": pendings(3)} {
+func TestStatsEmptyAndAllNeverArrived(t *testing.T) {
+	for name, timings := range map[string][]Timing{"empty": nil, "all never arrived": neverArrived(3)} {
 		t.Run(name, func(t *testing.T) {
 			got := Stats(timings)
 			if got.SampleSize != 0 || got.P50 != 0 || got.Throughput != 0 {
@@ -102,8 +102,8 @@ func TestStatsEmptyAndAllPending(t *testing.T) {
 					t.Fatalf("%s must be omitted when nothing arrived", key)
 				}
 			}
-			if metrics["pending_count"] != len(timings) {
-				t.Fatalf("pending_count must still be reported: %v", metrics)
+			if metrics["never_arrived_count"] != len(timings) {
+				t.Fatalf("never_arrived_count must still be reported: %v", metrics)
 			}
 		})
 	}

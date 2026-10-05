@@ -17,10 +17,9 @@ import (
 )
 
 func exampleDocument() Document {
-	offset := int64(-296)
 	return Build(map[string]core.Section{
 		"deployment-burst": {Category: core.CategoryScale, Metrics: map[string]any{
-			"flow": "deployment_to_external_workload", "p90_ms@100": int64(5754), "pending_count@100": 0, "slo_p90_ms": 5000,
+			"flow": "deployment_to_external_workload", "p90_ms@100": int64(5754), "never_arrived_count@100": 0, "slo_p90_ms": 5000,
 		}},
 		"selfcheck": {Category: core.CategoryScale, Metrics: map[string]any{"selfcheck_duration_seconds": 0.1}, Failed: true, Error: "example failure text"},
 	}, RunInfo{
@@ -30,7 +29,6 @@ func exampleDocument() Document {
 		ClusterType:         "kind-fake-gpu",
 		ControlPlaneVersion: "3.1.0",
 		ClusterVersion:      "2.26.5",
-		ClockOffsetMs:       &offset,
 	})
 }
 
@@ -66,7 +64,7 @@ func TestDocumentOmitsUnknownVersionsAndKeepsRegressionField(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(encoded)
-	for _, absent := range []string{"control_plane_version", "cluster_version", "clock_offset"} {
+	for _, absent := range []string{"control_plane_version", "cluster_version"} {
 		if strings.Contains(text, absent) {
 			t.Fatalf("%s must be omitted when unknown:\n%s", absent, text)
 		}
