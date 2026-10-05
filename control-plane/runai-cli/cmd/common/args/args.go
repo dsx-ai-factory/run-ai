@@ -91,12 +91,12 @@ func GetExecuteString(args *[]string) (string, bool) {
 	if args == nil {
 		return EmptyStr, false
 	}
-	for i := range *args {
-		if strings.Contains((*args)[i], "'") {
-			(*args)[i] = strings.ReplaceAll((*args)[i], "'", "\"")
-		}
-		if strings.Contains((*args)[i], SpaceStr) {
-			(*args)[i] = fmt.Sprintf(GroupTogetherBySingleQuote, (*args)[i])
+	for i, arg := range *args {
+		if strings.Contains(arg, "'") {
+			escapedArg := strings.ReplaceAll(arg, `"`, `\"`)
+			(*args)[i] = `"` + escapedArg + `"`
+		} else if strings.Contains(arg, SpaceStr) {
+			(*args)[i] = fmt.Sprintf(GroupTogetherBySingleQuote, arg)
 		}
 	}
 	if len(*args) > 0 {
