@@ -110,10 +110,10 @@ func (b *rctBuilder) Build(update K8sObjectFromBackend, namespace string) (clien
 	if update.Spec.HasObjectMeta() {
 		userMeta := update.Spec.GetObjectMeta()
 		if labels := userMeta.GetLabels(); len(labels) > 0 {
-			rct.Spec.ObjectMeta.Labels = cloneStringMap(labels)
+			rct.Spec.Labels = cloneStringMap(labels)
 		}
 		if annotations := userMeta.GetAnnotations(); len(annotations) > 0 {
-			rct.Spec.ObjectMeta.Annotations = cloneStringMap(annotations)
+			rct.Spec.Annotations = cloneStringMap(annotations)
 		}
 	}
 
