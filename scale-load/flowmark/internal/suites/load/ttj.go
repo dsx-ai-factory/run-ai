@@ -379,7 +379,8 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 		}
 	}
 	if outOfOrder := measure.OutOfOrder(submissions, timestampTolerance); len(outOfOrder) > 0 {
-		problems = append(problems, fmt.Sprintf("timestamps out of order for %d workloads (first: %s): a WorkloadRunner or pod was seen more than %s before the step that precedes it", len(outOfOrder), outOfOrder[0], timestampTolerance))
+		problems = append(problems, fmt.Sprintf("timestamps out of order for %d workloads (first: %s): "+
+			"a WorkloadRunner or pod was seen more than %s before the step that precedes it", len(outOfOrder), outOfOrder[0], timestampTolerance))
 	}
 	if interruptions > 0 {
 		problems = append(problems, fmt.Sprintf("the measurement was interrupted %d times: the cluster watch closed and was reopened; latencies of workloads in flight during the gaps are inflated", interruptions))
