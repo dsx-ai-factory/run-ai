@@ -7,8 +7,6 @@ include ../../build/makefile/index.mk
 # Change for every new service
 SERVICE_NAME=metrics-service
 
-MOCKERY := ${BIN_DIR}/mockery
-
 OPENAPI_GENERATOR_VERSION_SERVER=v7.12.0
 OPENAPI_GENERATOR_VERSION_CLIENT_GO=v7.12.0
 
