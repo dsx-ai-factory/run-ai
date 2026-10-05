@@ -286,6 +286,7 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../../runai-cluster/cluster/common/runaipublic
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../../runai-cluster/cluster/common/utils
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../../runai-cluster/cluster/go-operator
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../../runai-cluster/cluster/common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../../runai-cluster/cluster/sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../../runai-cluster/cluster/workload-common
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller => ../../runai-cluster/cluster/workload-controller

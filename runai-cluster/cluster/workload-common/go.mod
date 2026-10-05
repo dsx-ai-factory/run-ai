@@ -165,6 +165,7 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../common/profiling

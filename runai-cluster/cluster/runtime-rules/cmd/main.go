@@ -14,8 +14,8 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/extensions"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/extensions/distributed"
+	schemeinit "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
-	schemeinit "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 	pkg "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/kubeConfig"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/logger"

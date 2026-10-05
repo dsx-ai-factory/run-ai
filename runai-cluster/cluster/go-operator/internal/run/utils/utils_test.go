@@ -9,7 +9,7 @@ import (
 	"context"
 	"strings"
 
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

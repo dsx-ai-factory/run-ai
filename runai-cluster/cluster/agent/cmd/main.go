@@ -24,7 +24,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/validator"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	dp "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedpolicy/v2alpha1"
 	infp "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/inferencepolicy/v2alpha1"
 	ip "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/interactivepolicy/v2alpha1"
