@@ -13,7 +13,6 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client/generated"
 )
 
-//go:generate mockery --name ITempBackendSettingsClient --output ./mocks/
 type ITempBackendSettingsClient interface {
 	GetAllTenantsSettingByKey(ctx context.Context, key string) (*openapi.TenantSettingsByKey, error)
 	GetTenantSettings(ctx context.Context, excludeMigrated bool) ([]openapi.Setting, error)

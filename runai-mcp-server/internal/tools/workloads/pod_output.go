@@ -12,7 +12,7 @@ import (
 )
 
 type measurement struct {
-	Type   string             `json:"type"             jsonschema:"Metric type. Resource: GPU_UTILIZATION, GPU_MEMORY_USAGE_BYTES, CPU_USAGE_CORES, CPU_MEMORY_USAGE_BYTES, NVLINK_BANDWIDTH_TOTAL. NIM serving: NIM_NUM_REQUESTS_RUNNING, NIM_REQUEST_SUCCESS_TOTAL, NIM_REQUEST_FAILURE_TOTAL, NIM_GPU_CACHE_USAGE_PERC, NIM_E2E_REQUEST_LATENCY_SECONDS. Inference workloads also return THROUGHPUT and LATENCY. Per-pod GPU profiling (get_workload_pods only): GPU_SM_ACTIVITY_PER_GPU, GPU_SM_OCCUPANCY_PER_GPU, GPU_TENSOR_ACTIVITY_PER_GPU, GPU_MEMORY_BANDWIDTH_UTILIZATION_PER_GPU, GPU_NVLINK_TRANSMITTED_BANDWIDTH_PER_GPU, GPU_PCIE_TRANSMITTED_BANDWIDTH_PER_GPU"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Type   string             `json:"type"             jsonschema:"Scalar metric type. Resource: GPU_UTILIZATION, GPU_MEMORY_USAGE_BYTES, CPU_USAGE_CORES, CPU_MEMORY_USAGE_BYTES, NVLINK_BANDWIDTH_TOTAL. NIM scalar serving: NIM_NUM_REQUESTS_RUNNING, NIM_REQUEST_SUCCESS_TOTAL, NIM_REQUEST_FAILURE_TOTAL, NIM_GPU_CACHE_USAGE_PERC. Inference scalar serving: THROUGHPUT and LATENCY. Per-pod GPU profiling (get_workload_pods only): GPU_SM_ACTIVITY_PER_GPU, GPU_SM_OCCUPANCY_PER_GPU, GPU_TENSOR_ACTIVITY_PER_GPU, GPU_MEMORY_BANDWIDTH_UTILIZATION_PER_GPU, GPU_NVLINK_TRANSMITTED_BANDWIDTH_PER_GPU, GPU_PCIE_TRANSMITTED_BANDWIDTH_PER_GPU"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	Labels map[string]string  `json:"labels,omitempty" jsonschema:"Optional metric labels forwarded verbatim from upstream"`
 	Values []measurementValue `json:"values"           jsonschema:"Time-series samples for this metric, ordered as upstream returns them"`
 }
@@ -20,6 +20,16 @@ type measurement struct {
 type measurementValue struct {
 	Value     string `json:"value"     jsonschema:"Sample value as a string, exactly as upstream returns it (no unit conversion)"`
 	Timestamp string `json:"timestamp" jsonschema:"Sample timestamp (RFC3339)"`
+}
+
+type metricHistogram struct {
+	Type   string                 `json:"type"   jsonschema:"Histogram metric type"`
+	Values []metricHistogramValue `json:"values" jsonschema:"Timestamped histogram bucket or percentile values"`
+}
+
+type metricHistogramValue struct {
+	Timestamp string            `json:"timestamp" jsonschema:"Sample timestamp (RFC3339)"`
+	Data      map[string]string `json:"data"      jsonschema:"Histogram bucket boundaries or percentile names mapped to their values"`
 }
 
 type resourceCores struct {
@@ -66,7 +76,8 @@ type podOutput struct {
 	RequestedResources *podRequestedResources `json:"requestedResources,omitempty" jsonschema:"What the workload asked for: each dimension is a {request, limit} pair. Compare against allocatedResources to see whether the pod got what it asked for"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	AllocatedResources *podAllocatedResources `json:"allocatedResources,omitempty" jsonschema:"What the scheduler granted: each dimension is a single number / quantity (no request/limit pair)"`
 
-	Measurements *[]measurement `json:"measurements,omitempty" jsonschema:"Latest per-pod measurements (10-min server-side window, numberOfSamples=2). Populated only by get_workload_pods — get_node_pods always omits this field. In get_workload_pods, also omitted when the metrics fetch failed or when this pod is returned as part of a revision (revision pods do not carry measurements); [] when the fetch succeeded with no samples"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Measurements   *[]measurement `json:"measurements,omitempty" jsonschema:"Latest per-pod measurements (10-min server-side window, numberOfSamples=2). Populated only by get_workload_pods — get_node_pods always omits this field. In get_workload_pods, also omitted when the metrics fetch failed or when this pod is returned as part of a revision (revision pods do not carry measurements); [] when the fetch succeeded with no samples"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	MetricWarnings []string       `json:"metricWarnings,omitempty" jsonschema:"Non-fatal warnings naming per-pod metric groups or metric types that could not be retrieved. When present, measurements may be partial."`                                                                                                                                                                                                                           //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 }
 
 func mapPodOutput(p workloads.Pod) podOutput {
@@ -182,6 +193,24 @@ func mapMeasurements(src []workloads.MeasurementResponse) []measurement {
 		out = append(out, measurement{
 			Type:   m.Type,
 			Labels: m.Labels,
+			Values: values,
+		})
+	}
+	return out
+}
+
+func mapMetricHistograms(src []workloads.HistogramSeries) []metricHistogram {
+	out := make([]metricHistogram, 0, len(src))
+	for _, series := range src {
+		values := make([]metricHistogramValue, 0, len(series.Values))
+		for _, value := range series.Values {
+			values = append(values, metricHistogramValue{
+				Timestamp: common.TimestampString(value.Timestamp.Get()),
+				Data:      value.Data,
+			})
+		}
+		out = append(out, metricHistogram{
+			Type:   series.Type,
 			Values: values,
 		})
 	}

@@ -20,10 +20,19 @@ func NewUserRoutesClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *UserRoutesClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &UserRoutesClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,17 +84,38 @@ type UserRoutesClienter_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - route
-func (_e *UserRoutesClienter_Expecter) Create(ctx interface{}, tenantId interface{}, userId interface{}, route interface{}) *UserRoutesClienter_Create_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - route subscription.Subscription
+func (_e *UserRoutesClienter_Expecter) Create(ctx any, tenantId any, userId any, route any) *UserRoutesClienter_Create_Call {
 	return &UserRoutesClienter_Create_Call{Call: _e.mock.On("Create", ctx, tenantId, userId, route)}
 }
 
 func (_c *UserRoutesClienter_Create_Call) Run(run func(ctx context.Context, tenantId string, userId string, route subscription.Subscription)) *UserRoutesClienter_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(subscription.Subscription))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 subscription.Subscription
+		if args[3] != nil {
+			arg3 = args[3].(subscription.Subscription)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -123,17 +153,38 @@ type UserRoutesClienter_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - routeId
-func (_e *UserRoutesClienter_Expecter) Delete(ctx interface{}, tenantId interface{}, userId interface{}, routeId interface{}) *UserRoutesClienter_Delete_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - routeId string
+func (_e *UserRoutesClienter_Expecter) Delete(ctx any, tenantId any, userId any, routeId any) *UserRoutesClienter_Delete_Call {
 	return &UserRoutesClienter_Delete_Call{Call: _e.mock.On("Delete", ctx, tenantId, userId, routeId)}
 }
 
 func (_c *UserRoutesClienter_Delete_Call) Run(run func(ctx context.Context, tenantId string, userId string, routeId string)) *UserRoutesClienter_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -182,16 +233,32 @@ type UserRoutesClienter_GetUserSubscriptions_Call struct {
 }
 
 // GetUserSubscriptions is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-func (_e *UserRoutesClienter_Expecter) GetUserSubscriptions(ctx interface{}, tenantId interface{}, userId interface{}) *UserRoutesClienter_GetUserSubscriptions_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+func (_e *UserRoutesClienter_Expecter) GetUserSubscriptions(ctx any, tenantId any, userId any) *UserRoutesClienter_GetUserSubscriptions_Call {
 	return &UserRoutesClienter_GetUserSubscriptions_Call{Call: _e.mock.On("GetUserSubscriptions", ctx, tenantId, userId)}
 }
 
 func (_c *UserRoutesClienter_GetUserSubscriptions_Call) Run(run func(ctx context.Context, tenantId string, userId string)) *UserRoutesClienter_GetUserSubscriptions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -229,17 +296,38 @@ type UserRoutesClienter_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - route
-func (_e *UserRoutesClienter_Expecter) Update(ctx interface{}, tenantId interface{}, userId interface{}, route interface{}) *UserRoutesClienter_Update_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - route subscription.Subscription
+func (_e *UserRoutesClienter_Expecter) Update(ctx any, tenantId any, userId any, route any) *UserRoutesClienter_Update_Call {
 	return &UserRoutesClienter_Update_Call{Call: _e.mock.On("Update", ctx, tenantId, userId, route)}
 }
 
 func (_c *UserRoutesClienter_Update_Call) Run(run func(ctx context.Context, tenantId string, userId string, route subscription.Subscription)) *UserRoutesClienter_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(subscription.Subscription))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 subscription.Subscription
+		if args[3] != nil {
+			arg3 = args[3].(subscription.Subscription)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }

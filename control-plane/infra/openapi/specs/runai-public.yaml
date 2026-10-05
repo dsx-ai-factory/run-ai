@@ -17502,6 +17502,7 @@ components:
         - secret-volume
         - data-volume
         - ngcApiKey
+        - resource-claim-template
     UpdateCount:
       description: the value of an update counter of a data in the system.
       type: integer
@@ -17567,7 +17568,8 @@ components:
         - $ref: '#/components/schemas/AssetReadOnlyFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         id: a418ed33-9399-48c0-a890-122cadd13bfd
         kind: s3
         createdBy: test@run.ai
@@ -17829,7 +17831,8 @@ components:
         - $ref: '#/components/schemas/AssetCreationFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         workloadSupportedTypes:
           workspace: false
           training: false
@@ -18024,6 +18027,137 @@ components:
             - $ref: '#/components/schemas/ComputeAssetSpec'
           nullable: true
           type: object
+    K8sObjectMeta:
+      description: Metadata of the Kubernetes resource that is created by this k8sObject
+      type: object
+      nullable: true
+      properties:
+        annotations:
+          type: object
+          nullable: true
+          description: |
+            Free-form annotations attached to the resource. Keys must conform
+            to Kubernetes qualified-name syntax
+            (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set):
+            an optional DNS-subdomain prefix (≤253 chars) followed by "/" and a
+            required name component ([A-Za-z0-9] with `.`, `_`, `-` allowed
+            inside, ≤63 chars). Key syntax is enforced at runtime on both
+            create and update; annotation values have no format constraint
+            beyond the length limit below.
+          additionalProperties:
+            type: string
+            maxLength: 10000
+          maxProperties: 1000
+          example:
+            example.com/owner: team-a
+            example.com/version: '1.0'
+        labels:
+          type: object
+          nullable: true
+          description: |
+            Free-form labels attached to the resource. Keys and values must
+            conform to Kubernetes label syntax
+            (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set):
+            keys are qualified names (optional DNS-subdomain prefix ≤253 chars
+            + "/" + name component ≤63 chars); values are ≤63 chars matching
+            the same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are
+            allowed). Key syntax is validated at runtime; the value pattern
+            below is enforced by the schema as well as at runtime.
+          additionalProperties:
+            type: string
+            maxLength: 63
+            pattern: ^([A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?)?$
+          maxProperties: 1000
+          example:
+            app: my-app
+    K8sObjectSpec:
+      description: |
+        Common shape for k8s-object asset specs: the raw Kubernetes object
+        metadata (labels/annotations) and the raw Kubernetes object spec.
+        Shared between the k8s-object CRUD APIs (e.g. RctSpec) and the
+        cluster-facing k8s-objects sync API (K8sObjectsUpdate).
+      type: object
+      required:
+        - objectSpec
+      properties:
+        objectMeta:
+          $ref: '#/components/schemas/K8sObjectMeta'
+        objectSpec:
+          description: The raw Kubernetes spec of the object.
+          type: object
+          additionalProperties: true
+    RctSpec:
+      allOf:
+        - $ref: '#/components/schemas/K8sObjectSpec'
+    AssetSyncStatusEnum:
+      type: string
+      enum:
+        - Creating
+        - Deleting
+        - Failed
+        - Deletion failed
+        - Issues found
+        - No issues found
+        - No status
+        - Updating
+    ScopeId:
+      type: string
+      description: The id of the cluster, department or project, depending on the scope type.
+    AssetClusterStatusIssueEnum:
+      type: string
+      enum:
+        - ReplicationError
+        - LostPhase
+        - NotCreated
+    AssetClusterStatusIssue:
+      type: object
+      required:
+        - scopeId
+        - scopeType
+        - issue
+      properties:
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        issue:
+          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
+    AssetClusterStatusIssues:
+      type: array
+      items:
+        $ref: '#/components/schemas/AssetClusterStatusIssue'
+    AssetClusterStatusInfo:
+      properties:
+        status:
+          $ref: '#/components/schemas/AssetSyncStatusEnum'
+        issues:
+          $ref: '#/components/schemas/AssetClusterStatusIssues'
+        message:
+          type: string
+        url:
+          type: string
+      nullable: true
+      type: object
+    AssetMetaForSync:
+      allOf:
+        - $ref: '#/components/schemas/AssetCreationFields'
+        - $ref: '#/components/schemas/AssetUpdatableFields'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              $ref: '#/components/schemas/AssetId'
+        - type: object
+          required:
+            - kind
+          properties:
+            kind:
+              $ref: '#/components/schemas/AssetKind'
+        - type: object
+          properties:
+            prevName:
+              $ref: '#/components/schemas/AssetName'
     AccessKeyCreationSpec:
       properties:
         existingSecretName:
@@ -18173,55 +18307,6 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/NgcApiKeySpec'
-    AssetSyncStatusEnum:
-      type: string
-      enum:
-        - Creating
-        - Deleting
-        - Failed
-        - Deletion failed
-        - Issues found
-        - No issues found
-        - No status
-        - Updating
-    ScopeId:
-      type: string
-      description: The id of the cluster, department or project, depending on the scope type.
-    AssetClusterStatusIssueEnum:
-      type: string
-      enum:
-        - ReplicationError
-        - LostPhase
-        - NotCreated
-    AssetClusterStatusIssue:
-      type: object
-      required:
-        - scopeId
-        - scopeType
-        - issue
-      properties:
-        scopeId:
-          $ref: '#/components/schemas/ScopeId'
-        scopeType:
-          $ref: '#/components/schemas/ScopeType'
-        issue:
-          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
-    AssetClusterStatusIssues:
-      type: array
-      items:
-        $ref: '#/components/schemas/AssetClusterStatusIssue'
-    AssetClusterStatusInfo:
-      properties:
-        status:
-          $ref: '#/components/schemas/AssetSyncStatusEnum'
-        issues:
-          $ref: '#/components/schemas/AssetClusterStatusIssues'
-        message:
-          type: string
-        url:
-          type: string
-      nullable: true
-      type: object
     ClusterResourceInfo:
       properties:
         name:
@@ -18263,26 +18348,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CredentialsListResponseEntry'
-    AssetMetaForSync:
-      allOf:
-        - $ref: '#/components/schemas/AssetCreationFields'
-        - $ref: '#/components/schemas/AssetUpdatableFields'
-        - type: object
-          required:
-            - id
-          properties:
-            id:
-              $ref: '#/components/schemas/AssetId'
-        - type: object
-          required:
-            - kind
-          properties:
-            kind:
-              $ref: '#/components/schemas/AssetKind'
-        - type: object
-          properties:
-            prevName:
-              $ref: '#/components/schemas/AssetName'
     AccessKey:
       required:
         - meta
@@ -33244,6 +33309,8 @@ components:
         phase:
           type: string
           description: The actual status of the release in the cluster.
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
         projectId:
           $ref: '#/components/schemas/ProjectId'
         projectName:
@@ -33475,6 +33542,141 @@ components:
         - Required: The workload is configured to use MNNVL acceleration. The workload type and at least one project’s node pool must support MNNVL, or the request fails. When set, the workload is scheduled only on compatible nodes, and may remain pending until sufficient MNNVL-capable capacity is available.
         - None: The workload will not use MNNVL acceleration, even if MNNVL-capable nodes are available.
       example: Required
+    ExternalAccess:
+      type: object
+      description: External access configuration. Same shape as the networking plugin. Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API). Omit or leave empty for no external access.
+      nullable: true
+      properties:
+        ingress:
+          description: Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress.
+          type: object
+          nullable: true
+        route:
+          description: Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route.
+          type: object
+          nullable: true
+        httpRoute:
+          description: Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
+          type: object
+          nullable: true
+    ServiceType:
+      description: The type of Kubernetes Service to create for the endpoint.
+      type: string
+      default: ClusterIP
+      enum:
+        - ClusterIP
+        - NodePort
+        - LoadBalancer
+      nullable: true
+    ServiceProtocol:
+      description: Service port protocol.
+      type: string
+      default: TCP
+      enum:
+        - TCP
+        - UDP
+        - SCTP
+      nullable: true
+    ServicePort:
+      type: object
+      description: Service port specification.
+      properties:
+        name:
+          description: The Service port name.
+          type: string
+          minLength: 1
+          maxLength: 63
+          example: http
+          nullable: true
+        port:
+          description: The port exposed by the Service.
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 65535
+          example: 8000
+        targetPort:
+          description: The container port that receives traffic from the Service.
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 65535
+          example: 8000
+          nullable: true
+        nodePort:
+          description: The externally allocated port for NodePort Services.
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 65535
+          example: 30080
+          nullable: true
+        protocol:
+          description: Network protocol for the port.
+          $ref: '#/components/schemas/ServiceProtocol'
+      required:
+        - port
+    ServiceSpec:
+      type: object
+      description: Service specification to create for a workload endpoint.
+      nullable: true
+      properties:
+        name:
+          description: The Kubernetes Service name.
+          type: string
+          minLength: 1
+          maxLength: 63
+          example: workload-service
+        type:
+          description: Kubernetes service type that determines how the service is exposed.
+          $ref: '#/components/schemas/ServiceType'
+        selector:
+          description: Label selector to identify the pods that this service routes traffic to.
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            app: my-app
+          nullable: true
+        labels:
+          description: Labels to apply to the Kubernetes Service.
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            app: my-app
+        ports:
+          description: Ports exposed by the service.
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/ServicePort'
+      required:
+        - name
+        - selector
+        - ports
+    ServiceRef:
+      type: object
+      description: Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint.
+      nullable: true
+      properties:
+        name:
+          description: The name of the existing Kubernetes Service.
+          type: string
+          minLength: 1
+          maxLength: 63
+          example: existing-service
+        port:
+          description: The port on the existing Service to route traffic to.
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 65535
+          example: 8000
+      required:
+        - name
+        - port
     Authorization:
       type: object
       description: Authorization configuration.
@@ -33488,6 +33690,9 @@ components:
           $ref: '#/components/schemas/AuthorizedGroups'
     Workloadv2Authorization:
       type: object
+      description: |-
+        Access control for this networking endpoint. Requires externalAccess.
+        Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
       example:
         forceJsonResponse: false
         authorizationType: authenticatedUsers
@@ -33501,6 +33706,44 @@ components:
               default: false
               nullable: true
       nullable: true
+    NetworkingService:
+      type: object
+      description: Service configuration for routing traffic to the workload. Provide exactly one of spec or ref.
+      properties:
+        spec:
+          description: Specification for a new Kubernetes service to create for this endpoint. Mutually exclusive with `ref`.
+          $ref: '#/components/schemas/ServiceSpec'
+        ref:
+          description: Reference to an existing Kubernetes service. Mutually exclusive with `spec`.
+          $ref: '#/components/schemas/ServiceRef'
+        authorization:
+          description: Access control configuration for traffic through this endpoint. Required when using ref. Requires externalAccess on the endpoint.
+          $ref: '#/components/schemas/Workloadv2Authorization'
+    NetworkingEndpoint:
+      type: object
+      description: |-
+        A single networking endpoint. Provide a Service, externalAccess containing an Ingress, Route, or HTTPRoute, or both.
+        An endpoint may create or reference at most one Service. Authorization requires externalAccess.
+      properties:
+        externalAccess:
+          description: External access configuration for exposing the endpoint outside the cluster.
+          $ref: '#/components/schemas/ExternalAccess'
+        services:
+          description: Kubernetes service to create or reference for this endpoint (maximum one).
+          type: array
+          maxItems: 1
+          items:
+            $ref: '#/components/schemas/NetworkingService'
+          nullable: true
+    NetworkingConfiguration:
+      type: array
+      description: |
+        Networking endpoint configurations for the workload (external access, services with auth).
+        Requires cluster version 3.0.0 or later.
+      nullable: true
+      maxItems: 1000
+      items:
+        $ref: '#/components/schemas/NetworkingEndpoint'
     WorkloadV2UpdateConfigurationUserCredentialSource:
       type: object
       additionalProperties: false
@@ -33537,6 +33780,8 @@ components:
             - default: None
           type: string
           nullable: true
+        networking:
+          $ref: '#/components/schemas/NetworkingConfiguration'
         userCredentials:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials'
     WorkloadV2MetadataCreateParams:

@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	anyworkloadcontroller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
@@ -110,6 +111,19 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestBuildEnvVarsIncludesOAuth2ProxyTemplates(t *testing.T) {
+	runaiConfig := utils.GetDefaultRunaiConfig()
+	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	if err != nil {
+		t.Fatalf("buildEnvVars() error = %v", err)
+	}
+	value, found := envValue(envVars, oauth2proxy.TemplatesEnabledEnvVar)
+	if !found || value != "true" {
+		t.Fatalf("template enabled env = %q (present=%v), want true", value, found)
 	}
 }
 
@@ -276,4 +290,49 @@ func envValue(envVars []corev1.EnvVar, name string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func TestRestartAllowedServiceAccounts(t *testing.T) {
+	for _, tc := range []struct {
+		name                string
+		agentServiceAccount string
+		extra               []string
+		want                string
+	}{
+		{name: "built-in controllers", want: "system:serviceaccount:custom-runai:anyworkload-controller,system:serviceaccount:custom-runai:runai-agent,system:serviceaccount:custom-runai:runtime-rules"},
+		{
+			name:  "built-in controllers and configured identity",
+			extra: []string{"system:serviceaccount:management:restart"},
+			want: "system:serviceaccount:custom-runai:anyworkload-controller," +
+				"system:serviceaccount:custom-runai:runai-agent," +
+				"system:serviceaccount:custom-runai:runtime-rules," +
+				"system:serviceaccount:management:restart",
+		},
+		{
+			name:  "bare NMC extras",
+			extra: []string{"restart-helper"},
+			want: "system:serviceaccount:custom-runai:anyworkload-controller," +
+				"system:serviceaccount:custom-runai:runai-agent," +
+				"system:serviceaccount:custom-runai:runtime-rules," +
+				"system:serviceaccount:custom-runai:restart-helper",
+		},
+		{name: "NMC agent", agentServiceAccount: "nmc-agent", want: "system:serviceaccount:custom-runai:anyworkload-controller,system:serviceaccount:custom-runai:nmc-agent,system:serviceaccount:custom-runai:runtime-rules"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			config := &runaiv1.RunaiConfig{}
+			config.SetDefaultsWhereNeeded()
+			config.Namespace = "custom-runai"
+			config.Spec.Internal.Global.NMC.ServiceAccountName = tc.agentServiceAccount
+			config.Spec.Internal.Global.NMC.AllowedServiceAccounts = tc.extra
+			resource := NewDeploymentResource("anyworkload-controller", nil, config)
+			variables, err := resource.buildEnvVars(config.Spec.AnyworkloadController, config.Spec.Internal)
+			if err != nil {
+				t.Fatal(err)
+			}
+			value, found := envValue(variables, "RESTART_ALLOWED_SERVICE_ACCOUNTS")
+			if !found || value != tc.want {
+				t.Fatalf("restart identities = %q, want %q", value, tc.want)
+			}
+		})
+	}
 }

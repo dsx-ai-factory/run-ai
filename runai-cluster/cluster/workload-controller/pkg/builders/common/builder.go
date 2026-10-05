@@ -87,18 +87,6 @@ func (self *OldSharedBuilder) Build(ctx context.Context, _ *metav1.ObjectMeta, _
 		self.SharedResources.Pvcs = append(self.SharedResources.Pvcs, *pvc.(*corev1.PersistentVolumeClaim))
 	}
 
-	secretList, err := self.InternalSharedResourcesBuilder.BuildCredentials(ctx, self.Workload, ResourceBuilderOptions{})
-	if err != nil {
-		return err
-	}
-	for _, secret := range secretList {
-		secret := secret
-		if secret == nil {
-			continue
-		}
-		self.SharedResources.Secrets = append(self.SharedResources.Secrets, *secret.(*corev1.Secret))
-	}
-
 	services, err := self.InternalSharedResourcesBuilder.BuildServices(ctx, self.Workload, ResourceBuilderOptions{})
 	if err != nil {
 		return err

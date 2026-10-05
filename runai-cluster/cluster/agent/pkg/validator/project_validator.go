@@ -23,13 +23,14 @@ import (
 //
 //nolint:lll // kubebuilder annotation
 type ProjectValidator struct {
-	client                  client.Client
+	garbageCollectorReader  client.Reader
 	serviceAccountValidator *validator.ServiceAccountValidator
 }
 
-func NewProjectValidator(k8sClient client.Client, allowedServiceAccounts []string) *ProjectValidator {
+// NewProjectValidator uses an uncached reader for the collector lookup so it only needs get permission.
+func NewProjectValidator(k8sClient client.Client, garbageCollectorReader client.Reader, allowedServiceAccounts []string) *ProjectValidator {
 	pv := &ProjectValidator{
-		client: k8sClient,
+		garbageCollectorReader: garbageCollectorReader,
 	}
 	pv.serviceAccountValidator = validator.NewServiceAccountValidator(k8sClient, allowedServiceAccounts, pv.initValidator())
 	return pv
@@ -46,6 +47,15 @@ func (pv *ProjectValidator) initValidator() []validator.ValidatingFunction {
 }
 
 func (pv *ProjectValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+	// Orphan deletion completes through a garbage-collector UPDATE, after the
+	// agent's DELETE has already been authorized.
+	allowedCleanup, err := pv.allowOrphanFinalizerRemoval(ctx, req)
+	if err != nil {
+		return admission.Errored(http.StatusInternalServerError, err)
+	}
+	if allowedCleanup {
+		return admission.Allowed("")
+	}
 	serviceAccountValidatorResponse, err := pv.serviceAccountValidator.Validate(ctx, req)
 	if err != nil {
 		log.Error().Msgf("ProjectValidator: failed validating request, err: %v", err)

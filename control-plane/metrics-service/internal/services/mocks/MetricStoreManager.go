@@ -20,10 +20,19 @@ func NewMetricStoreManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MetricStoreManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MetricStoreManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type MetricStoreManager_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - ctx
-//   - metricStore
-func (_e *MetricStoreManager_Expecter) Create(ctx interface{}, metricStore interface{}) *MetricStoreManager_Create_Call {
+//   - ctx context.Context
+//   - metricStore api.MetricStore
+func (_e *MetricStoreManager_Expecter) Create(ctx any, metricStore any) *MetricStoreManager_Create_Call {
 	return &MetricStoreManager_Create_Call{Call: _e.mock.On("Create", ctx, metricStore)}
 }
 
 func (_c *MetricStoreManager_Create_Call) Run(run func(ctx context.Context, metricStore api.MetricStore)) *MetricStoreManager_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(api.MetricStore))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 api.MetricStore
+		if args[1] != nil {
+			arg1 = args[1].(api.MetricStore)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -121,15 +141,26 @@ type MetricStoreManager_DeleteByTenantId_Call struct {
 }
 
 // DeleteByTenantId is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *MetricStoreManager_Expecter) DeleteByTenantId(ctx interface{}, tenantId interface{}) *MetricStoreManager_DeleteByTenantId_Call {
+//   - ctx context.Context
+//   - tenantId int32
+func (_e *MetricStoreManager_Expecter) DeleteByTenantId(ctx any, tenantId any) *MetricStoreManager_DeleteByTenantId_Call {
 	return &MetricStoreManager_DeleteByTenantId_Call{Call: _e.mock.On("DeleteByTenantId", ctx, tenantId)}
 }
 
 func (_c *MetricStoreManager_DeleteByTenantId_Call) Run(run func(ctx context.Context, tenantId int32)) *MetricStoreManager_DeleteByTenantId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -178,15 +209,26 @@ type MetricStoreManager_GetByTenantId_Call struct {
 }
 
 // GetByTenantId is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *MetricStoreManager_Expecter) GetByTenantId(ctx interface{}, tenantId interface{}) *MetricStoreManager_GetByTenantId_Call {
+//   - ctx context.Context
+//   - tenantId int32
+func (_e *MetricStoreManager_Expecter) GetByTenantId(ctx any, tenantId any) *MetricStoreManager_GetByTenantId_Call {
 	return &MetricStoreManager_GetByTenantId_Call{Call: _e.mock.On("GetByTenantId", ctx, tenantId)}
 }
 
 func (_c *MetricStoreManager_GetByTenantId_Call) Run(run func(ctx context.Context, tenantId int32)) *MetricStoreManager_GetByTenantId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

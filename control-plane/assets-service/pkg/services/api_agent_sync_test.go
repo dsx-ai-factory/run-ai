@@ -37,11 +37,19 @@ import (
 const (
 	urlGetCredentialsUpdates = "/api/v1/asset/credentials/updates"
 	urlGetDatasourceUpdates  = "/api/v1/asset/datasource/updates"
+	urlGetK8sObjectsUpdates  = "/api/v1/k8s-objects/updates"
 
 	salesforceUrl          = "https://www.nvidia.com/en-eu/support/enterprise/#contact-us"
 	issuesFoundCredentials = "Issues were found while propagating the credential to the credentials' scope"
 	issuesFoundDatasources = "Issues were found while propagating the data source to the data source's scope"
 	noIssuesCredMessage    = "No issues were found while propagating the credential to the credentials' scope"
+
+	// rctSyncFailedMessage is the fixed string produced by
+	// dbmodel.SyncStatusRec.DetermineStatus for the k8s-object family via
+	// k8sObjectDisplayName[ASSETKIND_RESOURCE_CLAIM_TEMPLATE]. Kept alongside
+	// the credentials/datasources ones so a rename in DetermineStatus surfaces
+	// as a single-place test breakage.
+	rctSyncFailedMessage = "The resource claim template couldn't be synchronized to the cluster"
 
 	notReadyMessage        = "This data source can't be selected yet, because it is being synchronized to the cluster."
 	syncFailedMessage      = "This data source can't be selected because it could not synchronize to the cluster. Contact your administrator"
@@ -790,6 +798,183 @@ var _ = Describe("AgentSync", func() {
 			})
 		})
 
+		Context("sync handles k8s-object (RCT) assets", func() {
+			It("handles all kinds of synced k8s-object assets", func() {
+				// to be synced
+				rctReq := buildRandomClusterRctAsset(randoms)
+				rctReq.Meta.Name = "rct1"
+				rct, _, _ := createRctAsset(rctReq, router, headerForAdmin(randoms))
+
+				// not to be synced (belongs to a different family)
+				createPVCAsset(testing.BuildRandomProjectPVCAsset(randoms), router, headerForAdmin(randoms))
+
+				//
+				//  Before the agent polls, no sync_status row exists yet.
+				//  Unlike credentials/PVC (which the k8s-objects-tracker
+				//  reports on via newNotYetUpdated → CREATING), the k8s-object
+				//  family has no tracker projection, so PatchStatusInfo
+				//  short-circuits and status is nil at this point.
+				//
+				validateRctStatusForTest(randoms, router, map[string]api.AssetClusterStatusInfo{})
+
+				//
+				//  check that correct updates are reported to the agent
+				//
+				after := int64(0)
+
+				expectedUpdates := api.K8sObjectsUpdatesResp{
+					RequestInfo: api.RequestInfo{
+						AfterUpdate: after,
+					},
+					ResponseInfo: api.ResponseInfo{
+						LowestUpdate:  1,
+						HighestUpdate: 1,
+					},
+					SystemInfo: api.SystemInfo{
+						HighestUpdate: 2, // we also have the extra pvc
+					},
+					Assets: []api.K8sObjectsUpdate{
+						{
+							Meta: srcToTarget[api.AssetMeta, api.AssetMetaForSync](rct.Meta),
+							Spec: api.K8sObjectSpec{
+								ObjectSpec: rctReq.Spec.ObjectSpec,
+							},
+							IsDeleted:   pointer.Bool(false),
+							UpdateCount: 1,
+						},
+					},
+				}
+
+				updates, listErr := listK8sObjectsUpdatesForTest(randoms, router, after, nil)
+				Expect(listErr).To(BeNil())
+
+				testutils.Expect(updates).ToEqual(expectedUpdates)
+
+				after = max(after, updates.ResponseInfo.HighestUpdate)
+
+				//
+				//  Now that the sync poll ran, sync_status.sent_to_agent_apply=1
+				//  and processed_by_agent=0 → DetermineStatus returns CREATING.
+				//
+				expectedStatus := map[string]api.AssetClusterStatusInfo{
+					metaToString(rct.Meta): {Status: api.ASSETSYNCSTATUSENUM_CREATING},
+				}
+				validateRctStatusForTest(randoms, router, expectedStatus)
+
+				//
+				//  agent reports failure of the creation in the cluster
+				//
+				report := api.ClusterSyncReport{
+					Updates: []api.ClusterSyncReportUpdate{
+						{
+							Id:          expectedUpdates.Assets[0].Meta.Id,
+							UpdateCount: expectedUpdates.Assets[0].UpdateCount,
+							Message:     convutils.Ref("k8s object couldn't be applied"),
+						},
+					},
+				}
+
+				updates, listErr = listK8sObjectsUpdatesForTest(randoms, router, after, &report)
+				Expect(listErr).To(BeNil())
+				Expect(len(updates.Assets)).To(Equal(0))
+
+				//
+				//  status needs to be updated
+				//
+				expectedStatus = map[string]api.AssetClusterStatusInfo{
+					metaToString(rct.Meta): {
+						Status:  api.ASSETSYNCSTATUSENUM_FAILED,
+						Message: rctSyncFailedMessage,
+					},
+				}
+				validateRctStatusForTest(randoms, router, expectedStatus)
+
+				//
+				//   delete the RCT
+				//
+				deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlRct, rct.Meta.Id), nil)
+				Expect(err).To(BeNil())
+				deleteHttpReq.Header = *headerForAdmin(randoms)
+
+				deleteHttpResp := httptest.NewRecorder()
+				router.ServeHTTP(deleteHttpResp, deleteHttpReq)
+				Expect(deleteHttpResp.Code).To(Equal(http.StatusAccepted))
+
+				//
+				//  soft-deleted RCT is still visible via ?statusInfo=true
+				//  (dao.RctOptions{IncludeDeleted:true}) and its status flips
+				//  to DELETING via DetermineStatus.
+				//
+				expectedStatus = map[string]api.AssetClusterStatusInfo{
+					metaToString(rct.Meta): {Status: api.ASSETSYNCSTATUSENUM_DELETING},
+				}
+				validateRctStatusForTest(randoms, router, expectedStatus)
+
+				//
+				//   the agent pulled the deletion tombstone (isDeleted=true, empty spec)
+				//
+				report = api.ClusterSyncReport{
+					Updates: []api.ClusterSyncReportUpdate{},
+				}
+
+				// The soft-delete in dao.deleteAssetMeta (metadata.go:244‑254)
+				// runs TWO UpdateColumn calls (deleted_by, deleted_at). The
+				// BEFORE UPDATE trigger on assets_metadata fires on each, so
+				// the delete bumps update_count twice: create=1, pvc=2, delete
+				// consumes seq 3 and 4, leaving the tombstone at 4.
+				expectedUpdates = api.K8sObjectsUpdatesResp{
+					RequestInfo: api.RequestInfo{
+						AfterUpdate: after,
+					},
+					ResponseInfo: api.ResponseInfo{
+						LowestUpdate:  4,
+						HighestUpdate: 4,
+					},
+					SystemInfo: api.SystemInfo{
+						HighestUpdate: 4,
+					},
+					Assets: []api.K8sObjectsUpdate{
+						{
+							Meta:        srcToTarget[api.AssetMeta, api.AssetMetaForSync](rct.Meta),
+							IsDeleted:   pointer.Bool(true),
+							UpdateCount: 4,
+						},
+					},
+				}
+
+				updates, listErr = listK8sObjectsUpdatesForTest(randoms, router, after, &report)
+				Expect(listErr).To(BeNil())
+				Expect(len(updates.Assets)).To(Equal(1))
+
+				after = max(after, updates.ResponseInfo.HighestUpdate)
+
+				testutils.Expect(updates).ToEqual(expectedUpdates)
+
+				//
+				//  the agent reported success in deleting the RCT — post-sync
+				//  cleanup drops the assets_metadata and assets_spec rows.
+				//
+				report = api.ClusterSyncReport{
+					Updates: []api.ClusterSyncReportUpdate{
+						{
+							Id:          rct.Meta.Id,
+							UpdateCount: 4,
+						},
+					},
+				}
+
+				updates, listErr = listK8sObjectsUpdatesForTest(randoms, router, after, &report)
+				Expect(listErr).To(BeNil())
+				Expect(len(updates.Assets)).To(Equal(0))
+
+				//
+				//  the RCT is fully gone — list?statusInfo=true (which requests
+				//  soft-deleted rows too) returns no entries.
+				//
+				validateRctStatusForTest(randoms, router, map[string]api.AssetClusterStatusInfo{})
+			})
+		})
+
 		Context("sync skips autoDelete workload-volume pvc assets", func() {
 			It("does not sync pvc assets marked autoDelete=true", func() {
 				// persistent pvc (autoDelete=false) - owned by the asset sync agent, must be synced
@@ -1372,6 +1557,35 @@ func listCredentialsUpdatesForTest(randoms *testutils.RandomValues, router chi.R
 	return &updatesResp, nil
 }
 
+func listK8sObjectsUpdatesForTest(randoms *testutils.RandomValues, router chi.Router, after int64, report *api.ClusterSyncReport) (*api.K8sObjectsUpdatesResp, *api.Error) {
+	url := fmt.Sprintf("%s?clusterId=%s&after=%d", urlGetK8sObjectsUpdates, randoms.ClusterId, after)
+
+	if report == nil {
+		report = &api.ClusterSyncReport{}
+	}
+
+	syncHttpReq, err := http.NewRequest("POST", url, makePayload(report))
+	Expect(err).To(BeNil())
+	syncHttpReq.Header = *headerForAdmin(randoms)
+
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, syncHttpReq)
+
+	if resp.Code != http.StatusOK {
+		var updatesError api.Error
+		jsonErr := json.Unmarshal(resp.Body.Bytes(), &updatesError)
+		Expect(jsonErr).To(BeNil())
+
+		return nil, &updatesError
+	}
+
+	var updatesResp api.K8sObjectsUpdatesResp
+	jsonErr := json.Unmarshal(resp.Body.Bytes(), &updatesResp)
+	Expect(jsonErr).To(BeNil())
+
+	return &updatesResp, nil
+}
+
 func listDatasourcesUpdatesForTest(randoms *testutils.RandomValues, router chi.Router, after int64, report *api.ClusterSyncReport) (*api.DatasourceUpdatesResp, *api.Error) {
 	url := fmt.Sprintf("%s?clusterId=%s&after=%d", urlGetDatasourceUpdates, randoms.ClusterId, after)
 
@@ -1423,6 +1637,38 @@ func validateCredentialsStatusForTest(randoms *testutils.RandomValues, router ch
 	}
 
 	//testutils.Expect(actual).ToEqual(expected)
+	Expect(actual).To(HaveLen(len(expected)))
+	for k, v := range expected {
+		Expect(actual).To(HaveKeyWithValue(k, v))
+	}
+}
+
+// validateRctStatusForTest hits GET /api/v1/k8s-objects/resource-claim-templates?statusInfo=true
+// and asserts each RCT's per-cluster status matches expected. Mirrors
+// validateCredentialsStatusForTest/validateDatasourcesStatusForTest — the
+// k8s-object family has no k8s-objects-tracker projection today, so
+// PatchStatusInfo short-circuits after LoadSyncStatus and the status seen
+// here is exactly what SyncStatusRec.DetermineStatus produced.
+func validateRctStatusForTest(randoms *testutils.RandomValues, router chi.Router, expected map[string]api.AssetClusterStatusInfo) {
+	syncHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?statusInfo=true", urlRct), nil)
+	Expect(err).To(BeNil())
+	syncHttpReq.Header = *headerForAdmin(randoms)
+
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, syncHttpReq)
+	Expect(resp.Code).To(Equal(http.StatusOK))
+
+	var listResp api.RctListResponse
+	jsonErr := json.Unmarshal(resp.Body.Bytes(), &listResp)
+	Expect(jsonErr).To(BeNil())
+
+	actual := make(map[string]api.AssetClusterStatusInfo)
+	for _, entry := range listResp.Entries {
+		if entry.Status != nil {
+			actual[metaToString(entry.Meta)] = *entry.Status
+		}
+	}
+
 	Expect(actual).To(HaveLen(len(expected)))
 	for k, v := range expected {
 		Expect(actual).To(HaveKeyWithValue(k, v))

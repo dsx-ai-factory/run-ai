@@ -1298,17 +1298,6 @@ var _ = Describe("Parsers", Ordered, func() {
 				}
 			}
 
-			var previousGpuFractioningReadiness bool
-
-			BeforeEach(func() {
-				previousGpuFractioningReadiness = config.Config().EnableNodeGpuFractioningReadiness
-				config.Config().EnableNodeGpuFractioningReadiness = true
-			})
-
-			AfterEach(func() {
-				config.Config().EnableNodeGpuFractioningReadiness = previousGpuFractioningReadiness
-			})
-
 			clusterInfoConfigMap := func(gpuFractioningAvailable bool) *corev1.ConfigMap {
 				return &corev1.ConfigMap{
 					ObjectMeta: metav1.ObjectMeta{Name: "runai-public", Namespace: "runai"},
@@ -1478,34 +1467,6 @@ var _ = Describe("Parsers", Ordered, func() {
 				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
 				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
 				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
-			})
-
-			It("reports nothing when the feature is disabled", func() {
-				config.Config().EnableNodeGpuFractioningReadiness = false
-				node.Status.Conditions = []corev1.NodeCondition{
-					readyCondition,
-					gpuFractioningCondition(corev1.ConditionFalse, "GPUDriverVersionMissing", "driver label is missing"),
-				}
-
-				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
-				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
-				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
-			})
-
-			It("leaves the operator's condition untouched when the feature is disabled", func() {
-				config.Config().EnableNodeGpuFractioningReadiness = false
-				node.Status.Conditions = []corev1.NodeCondition{
-					readyCondition,
-					gpuFractioningCondition(corev1.ConditionTrue, "AllDaemonsReady", "all gpu-fractioning daemons are running"),
-				}
-
-				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
-				Expect(parsedNodeInfo.Conditions).To(ContainElement(
-					clustersvcswagger.NodeStatusConditionDetails{
-						Type:    parsers.GpuFractioningReadyConditionType,
-						Reason:  "AllDaemonsReady",
-						Message: utils.Ref("all gpu-fractioning daemons are running"),
-					}))
 			})
 
 			It("lets NotReady outrank a missing fractioning prerequisite", func() {

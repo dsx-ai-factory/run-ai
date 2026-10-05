@@ -11,12 +11,13 @@ import (
 )
 
 type ExposedUrlInfo struct {
-	Items                      map[string]*ExposedUrlInfoItem
-	ServingPortAuthorizedUsers *string
-	WorkloadName               string
-	ProjectName                string
-	IsJupyterOrTensorboard     bool
-	Config                     ClusterStorageConfig
+	Items                         map[string]*ExposedUrlInfoItem
+	ServingPortAuthorizedUsers    *string
+	WorkloadName                  string
+	ProjectName                   string
+	IsJupyterOrTensorboard        bool
+	Config                        ClusterStorageConfig
+	OAuth2ProxyTemplatesSupported bool
 
 	// ResourcePrefix is prepended to networking K8s resource names (Service,
 	// Ingress, ...) for an exposed URL, e.g. "job" → "job-<workloadName>-<nick>".

@@ -1,0 +1,57 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/business:
+    config:
+      dir: mocks/pkg/business
+    interfaces:
+      ClusterInstaller: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/business/cluster-cp-config/provider:
+    config:
+      dir: mocks/pkg/business/cluster-cp-config/provider
+    interfaces:
+      ClusterAccessControlCreator: {}
+      ClusterOAuthClientGetter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/business/cluster-infra/access-control:
+    interfaces:
+      AuthnManager: {}
+      AuthzManager: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clients:
+    interfaces:
+      ClusterCapabilityChecker:
+        config:
+          dir: mocks/pkg/services
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clients/backend:
+    config:
+      dir: mocks/pkg/clients/backend
+    interfaces:
+      TenantSettingsClient: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clients/workloads:
+    config:
+      dir: mocks/pkg/clients/workloads
+    interfaces:
+      WorkloadsClient: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services:
+    config:
+      dir: mocks/pkg/services
+    interfaces:
+      ClusterAccessControlManager: {}
+      ClusterConfigProvider: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services/cluster-state-calculator:
+    config:
+      dir: mocks/pkg/services/cluster-state-calculator
+    interfaces:
+      ClusterStateCalculator: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services/cluster-config/status-post-update-handlers:
+    interfaces:
+      Handler: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services/cluster-delete:
+    interfaces:
+      ClusterDeleter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services/cluster-installation:
+    interfaces:
+      ClusterInstallService: {}
+      HelmActions: {}

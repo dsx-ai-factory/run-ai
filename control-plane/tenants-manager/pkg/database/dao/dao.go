@@ -18,7 +18,6 @@ type TenantFilters struct {
 	Deleted bool
 }
 
-//go:generate mockery
 type Tenant interface {
 	Create(ctx context.Context, tenantSpec models.Tenant) (*models.Tenant, *DaoError)
 	Delete(ctx context.Context, tenantSpec models.Tenant) *DaoError
@@ -36,19 +35,16 @@ type Tenant interface {
 	GetTenantsCount(ctx context.Context, contractType string) (*int64, *DaoError)
 }
 
-//go:generate mockery
 type Logo interface {
 	GetByTenantId(ctx context.Context, tenantId uint) (*[]byte, *DaoError)
 	SetByTenantId(ctx context.Context, tenantId uint, logo *[]byte) *DaoError
 	GetAll(ctx context.Context, offset int, limit int) (*[]models.Logo, *DaoError)
 }
 
-//go:generate mockery
 type MetricStore interface {
 	GetByTenantId(ctx context.Context, tenantId uint) (*models.MetricStore, *DaoError)
 }
 
-//go:generate mockery
 type ProvisioningRun interface {
 	Create(ctx context.Context, tenantId uint) (*models.ProvisioningRun, *DaoError)
 	Complete(ctx context.Context, runId uint, status models.ProvisioningRunStatus, diagnostics string) *DaoError

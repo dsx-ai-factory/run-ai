@@ -67,8 +67,6 @@ github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7 h
 github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7/go.mod h1:bUUX6w7tc9iCZB8JDGbpp8tvcxENnPLmu0y/RMBdTNQ=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 h1:AyRQ8atgtE5K5sviTNpMAiHKiTa2YqHiprLr4kBcPpo=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1/go.mod h1:G/lLs3Oks3sA31Pv9QSKdjzeFC8b9CWE6ePmOHqLKvo=
-github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4 h1:YT2fav2fCN0l/OH9OO3GfTke54iKzXias7xRBkL63tc=
-github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4/go.mod h1:PTKL7n9jUSwJEEoMWSI5O5oC9ylszPWvoxX8jZ+C2xw=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 h1:U+w8rduAfGjp+7Tsj5pwOmXMNjluOfdi+v0SacCfZcM=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4/go.mod h1:PRrNF4hOfaRe8Y43i/KJDqgqysft0QAJ0GqAJnujAfg=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 h1:ADQs8tx5bIpRe7ulN9DkMcS4PmWsdnfGVqh4FKVopqg=

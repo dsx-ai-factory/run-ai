@@ -207,7 +207,11 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 	mutatedMetadata := w.applyDefaultMutations(request.Metadata, workloadType, priorityNameToValue)
 	mutatedMetadata.Name = name
 
-	configuration, configErr := w.buildConfiguration(ctx, request.Metadata.Configuration, project, workloadType, manifestResourceInfo, mutatedMetadata.Name)
+	networkingProfile := networkingSubmissionProfileForRecord(&models.WorkloadsQueueRecord{
+		TranslatedFromV1: options.TranslatedFromV1,
+		InputRequestPath: middleware.GetRequestPath(ctx),
+	})
+	configuration, configErr := w.buildConfiguration(ctx, request.Metadata.Configuration, project, workloadType, manifestResourceInfo, mutatedMetadata.Name, networkingProfile)
 	if configErr != nil {
 		validationErrors.Add(configErr)
 		return nil, validationErrors.ToSubmissionErrors()
@@ -380,7 +384,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 // user credentials, and PVCs (cluster-capability gated) identically.
 func (w *WorkloadsV2Impl) buildConfiguration(ctx context.Context, configParams api.WorkloadV2Configuration,
 	project *orgUnitApi.Project, workloadType *workloadsApi.WorkloadTypeConfig, manifestResourceInfo *ResourceInfo,
-	workloadName string,
+	workloadName string, networkingProfile api.NetworkingSubmissionProfile,
 ) (*models.WorkloadConfiguration, *api.SubmissionErrorV2) {
 	configuration, mnnvlErr := DetermineMNNVLConfiguration(ctx, configParams.Mnnvl, project, project.ClusterId, workloadType, manifestResourceInfo)
 	if mnnvlErr != nil {
@@ -388,7 +392,7 @@ func (w *WorkloadsV2Impl) buildConfiguration(ctx context.Context, configParams a
 	}
 
 	if configParams.Networking != nil {
-		if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, project.ClusterId, workloadName, configParams.Networking); networkingErr != nil {
+		if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, project.ClusterId, workloadName, configParams.Networking, networkingProfile); networkingErr != nil {
 			return nil, networkingErr
 		}
 		configuration.Networking = cloneNetworkingConfig(configParams.Networking)
@@ -798,7 +802,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 	// does send configuration, it fully replaces the previous one, so an explicit empty configuration
 	// clears networking/MNNVL/credentials/PVCs.
 	if request.Metadata.Configuration != nil {
-		configuration, configErr := w.buildConfiguration(ctx, *request.Metadata.Configuration, project, workloadType, manifestResourceInfo, qRecord.Name)
+		configuration, configErr := w.buildConfiguration(ctx, *request.Metadata.Configuration, project, workloadType, manifestResourceInfo, qRecord.Name, networkingSubmissionProfileForRecord(qRecord))
 		if configErr != nil {
 			return nil, SubmissionErrorToApiError(configErr)
 		}
@@ -1215,7 +1219,7 @@ func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, wo
 		return dbErr
 	}
 
-	if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, qRecord.ClusterId, qRecord.Name, netCfg); networkingErr != nil {
+	if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, qRecord.ClusterId, qRecord.Name, netCfg, networkingSubmissionProfileForRecord(qRecord)); networkingErr != nil {
 		return SubmissionErrorToApiError(networkingErr)
 	}
 
@@ -1240,7 +1244,7 @@ func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, wo
 	return dao.DbUpsertWorkload(ctx, qRecord)
 }
 
-func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId string, workloadName string, netCfg *[]api.NetworkingEndpoint) *api.SubmissionErrorV2 {
+func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId string, workloadName string, netCfg *[]api.NetworkingEndpoint, profile api.NetworkingSubmissionProfile) *api.SubmissionErrorV2 {
 	if netCfg == nil {
 		return nil
 	}
@@ -1253,6 +1257,19 @@ func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId strin
 	if !useWorkloadV2Networking {
 		minVersion := checker.MinVersionForSupporting(checker.MinVersionNIMIngressViaWorkloadV2)
 		return NewConfigurationError(fmt.Sprintf("metadata.configuration.networking is supported for cluster version %s and above", minVersion))
+	}
+
+	// Preserve the existing native/NIM compatibility contract. Only caller-supplied
+	// networking requires the newer cluster-side ownership enforcement.
+	if len(*netCfg) > 0 && profile != api.NETWORKINGSUBMISSIONPROFILE_GENERATED_NATIVE && profile != api.NETWORKINGSUBMISSIONPROFILE_GENERATED_NIM {
+		supportsOwnership, capErr := capChecker.ValidateClusterCapability(ctx, checker.MinVersionNetworkingOwnershipEnforcement)
+		if capErr != nil {
+			return NewConfigurationError(fmt.Sprintf("cluster capability check: %v", capErr))
+		}
+		if !supportsOwnership {
+			minVersion := checker.MinVersionForSupporting(checker.MinVersionNetworkingOwnershipEnforcement)
+			return NewConfigurationError(fmt.Sprintf("direct-v2 metadata.configuration.networking requires cluster version %s and above for networking ownership validation", minVersion))
+		}
 	}
 
 	supportsNetworkingEndpoints, capErr := capChecker.ValidateClusterCapability(ctx, checker.MinVersionWorkloadV2NetworkingEndpoints)

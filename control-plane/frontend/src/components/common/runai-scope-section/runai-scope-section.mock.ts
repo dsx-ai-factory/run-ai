@@ -19,7 +19,7 @@ export const MOCK_IDS = {
 
 export const MOCK_NAMES = {
   TENANT_NAME: "runai",
-  CLUSTER_NAME: "dima-1748428614",
+  CLUSTER_NAME: "test-cluster",
   DEPARTMENT_NAME: "default",
   PROJECT_ONE_NAME: "project-one",
   PROJECT_TWO_NAME: "project-two",

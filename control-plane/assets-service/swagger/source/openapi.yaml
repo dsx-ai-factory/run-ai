@@ -42,6 +42,13 @@ paths:
   /api/v1/asset/compute/{AssetId}:
     $ref: './resources/ComputeById.yaml'
 
+  /api/v1/k8s-objects/resource-claim-templates:
+    $ref: "./resources/ResourceClaimTemplates.yaml"
+  /api/v1/k8s-objects/resource-claim-templates/{AssetId}:
+    $ref: './resources/ResourceClaimTemplatesById.yaml'
+  /api/v1/k8s-objects/updates:
+    $ref: "./resources/K8sObjectsUpdates.yaml"
+
   /api/v1/asset/credentials:
     $ref: "./resources/Credentials.yaml"
   /api/v1/asset/credentials/updates:

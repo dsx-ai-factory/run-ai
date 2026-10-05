@@ -74,7 +74,7 @@ func NewPyTorchBuilderWithExistingNodeAffinities(fromObject interface{}, toResou
 
 	workload.Labels = make(map[string]string)
 	sharedResourcesBuilder := common.NewShardResourcesBuilder(common.NewServiceBuilder(k8sClient),
-		common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift()), common.NewPvcBuilder(k8sClient), common.NewCredentialsBuilder(k8sClient))
+		common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift()), common.NewPvcBuilder(k8sClient))
 	job, ok := toResource.(*kubeflowcommon.PyTorchJob)
 	if !ok {
 		return nil, fmt.Errorf(distcommon.JobCastErrorMsg, &kubeflowcommon.PyTorchJob{}, toResource)

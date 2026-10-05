@@ -36,7 +36,7 @@ func assetIDBatch(ids ...string) []struct {
 func TestDeleteAssetsByScope(t *testing.T) {
 	m := setupDaoMock(t)
 
-	const kinds = 17
+	const kinds = 18
 	for i := 0; i < kinds; i++ {
 		m.ExpectTransaction().Begin()
 		m.ExpectQuery(assetMetaScopeSelect, dbtesting.AnyArg(), dbtesting.AnyArg(), dbtesting.AnyArg(), dbtesting.AnyArg()).Returns(assetIDBatch())

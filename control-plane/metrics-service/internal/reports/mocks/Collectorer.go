@@ -18,10 +18,19 @@ func NewCollectorer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Collectorer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Collectorer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -51,14 +60,20 @@ type Collectorer_Collect_Call struct {
 }
 
 // Collect is a helper method to define mock.On call
-//   - report
-func (_e *Collectorer_Expecter) Collect(report interface{}) *Collectorer_Collect_Call {
+//   - report models.Report
+func (_e *Collectorer_Expecter) Collect(report any) *Collectorer_Collect_Call {
 	return &Collectorer_Collect_Call{Call: _e.mock.On("Collect", report)}
 }
 
 func (_c *Collectorer_Collect_Call) Run(run func(report models.Report)) *Collectorer_Collect_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(models.Report))
+		var arg0 models.Report
+		if args[0] != nil {
+			arg0 = args[0].(models.Report)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

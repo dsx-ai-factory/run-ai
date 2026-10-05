@@ -22,10 +22,19 @@ func NewReportsDao(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ReportsDao {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ReportsDao{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -77,17 +86,38 @@ type ReportsDao_CountReports_Call struct {
 }
 
 // CountReports is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - filterBy
-//   - search
-func (_e *ReportsDao_Expecter) CountReports(ctx interface{}, tenantId interface{}, filterBy interface{}, search interface{}) *ReportsDao_CountReports_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - filterBy []queryapi.Filter
+//   - search string
+func (_e *ReportsDao_Expecter) CountReports(ctx any, tenantId any, filterBy any, search any) *ReportsDao_CountReports_Call {
 	return &ReportsDao_CountReports_Call{Call: _e.mock.On("CountReports", ctx, tenantId, filterBy, search)}
 }
 
 func (_c *ReportsDao_CountReports_Call) Run(run func(ctx context.Context, tenantId int32, filterBy []queryapi.Filter, search string)) *ReportsDao_CountReports_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].([]queryapi.Filter), args[3].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 []queryapi.Filter
+		if args[2] != nil {
+			arg2 = args[2].([]queryapi.Filter)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -136,16 +166,32 @@ type ReportsDao_CreateReport_Call struct {
 }
 
 // CreateReport is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - report
-func (_e *ReportsDao_Expecter) CreateReport(ctx interface{}, tenantId interface{}, report interface{}) *ReportsDao_CreateReport_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - report models.Report
+func (_e *ReportsDao_Expecter) CreateReport(ctx any, tenantId any, report any) *ReportsDao_CreateReport_Call {
 	return &ReportsDao_CreateReport_Call{Call: _e.mock.On("CreateReport", ctx, tenantId, report)}
 }
 
 func (_c *ReportsDao_CreateReport_Call) Run(run func(ctx context.Context, tenantId int32, report models.Report)) *ReportsDao_CreateReport_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(models.Report))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 models.Report
+		if args[2] != nil {
+			arg2 = args[2].(models.Report)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -185,16 +231,32 @@ type ReportsDao_DeleteReport_Call struct {
 }
 
 // DeleteReport is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - reportId
-func (_e *ReportsDao_Expecter) DeleteReport(ctx interface{}, tenantId interface{}, reportId interface{}) *ReportsDao_DeleteReport_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - reportId string
+func (_e *ReportsDao_Expecter) DeleteReport(ctx any, tenantId any, reportId any) *ReportsDao_DeleteReport_Call {
 	return &ReportsDao_DeleteReport_Call{Call: _e.mock.On("DeleteReport", ctx, tenantId, reportId)}
 }
 
 func (_c *ReportsDao_DeleteReport_Call) Run(run func(ctx context.Context, tenantId int32, reportId string)) *ReportsDao_DeleteReport_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -243,16 +305,32 @@ type ReportsDao_GetReport_Call struct {
 }
 
 // GetReport is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - reportId
-func (_e *ReportsDao_Expecter) GetReport(ctx interface{}, tenantId interface{}, reportId interface{}) *ReportsDao_GetReport_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - reportId string
+func (_e *ReportsDao_Expecter) GetReport(ctx any, tenantId any, reportId any) *ReportsDao_GetReport_Call {
 	return &ReportsDao_GetReport_Call{Call: _e.mock.On("GetReport", ctx, tenantId, reportId)}
 }
 
 func (_c *ReportsDao_GetReport_Call) Run(run func(ctx context.Context, tenantId int32, reportId string)) *ReportsDao_GetReport_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -303,21 +381,62 @@ type ReportsDao_GetReports_Call struct {
 }
 
 // GetReports is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - filterBy
-//   - sortBy
-//   - sortOrder
-//   - offset
-//   - limit
-//   - search
-func (_e *ReportsDao_Expecter) GetReports(ctx interface{}, tenantId interface{}, filterBy interface{}, sortBy interface{}, sortOrder interface{}, offset interface{}, limit interface{}, search interface{}) *ReportsDao_GetReports_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - filterBy []queryapi.Filter
+//   - sortBy string
+//   - sortOrder string
+//   - offset int32
+//   - limit int32
+//   - search string
+func (_e *ReportsDao_Expecter) GetReports(ctx any, tenantId any, filterBy any, sortBy any, sortOrder any, offset any, limit any, search any) *ReportsDao_GetReports_Call {
 	return &ReportsDao_GetReports_Call{Call: _e.mock.On("GetReports", ctx, tenantId, filterBy, sortBy, sortOrder, offset, limit, search)}
 }
 
 func (_c *ReportsDao_GetReports_Call) Run(run func(ctx context.Context, tenantId int32, filterBy []queryapi.Filter, sortBy string, sortOrder string, offset int32, limit int32, search string)) *ReportsDao_GetReports_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].([]queryapi.Filter), args[3].(string), args[4].(string), args[5].(int32), args[6].(int32), args[7].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 []queryapi.Filter
+		if args[2] != nil {
+			arg2 = args[2].([]queryapi.Filter)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 string
+		if args[4] != nil {
+			arg4 = args[4].(string)
+		}
+		var arg5 int32
+		if args[5] != nil {
+			arg5 = args[5].(int32)
+		}
+		var arg6 int32
+		if args[6] != nil {
+			arg6 = args[6].(int32)
+		}
+		var arg7 string
+		if args[7] != nil {
+			arg7 = args[7].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+			arg6,
+			arg7,
+		)
 	})
 	return _c
 }
@@ -374,19 +493,41 @@ type ReportsDao_GetReportsByIds_Call struct {
 }
 
 // GetReportsByIds is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - reportIds
-//   - filterBy
-func (_e *ReportsDao_Expecter) GetReportsByIds(ctx interface{}, tenantId interface{}, reportIds interface{}, filterBy ...interface{}) *ReportsDao_GetReportsByIds_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - reportIds []string
+//   - filterBy ...queryapi.Filter
+func (_e *ReportsDao_Expecter) GetReportsByIds(ctx any, tenantId any, reportIds any, filterBy ...any) *ReportsDao_GetReportsByIds_Call {
 	return &ReportsDao_GetReportsByIds_Call{Call: _e.mock.On("GetReportsByIds",
-		append([]interface{}{ctx, tenantId, reportIds}, filterBy...)...)}
+		append([]any{ctx, tenantId, reportIds}, filterBy...)...)}
 }
 
 func (_c *ReportsDao_GetReportsByIds_Call) Run(run func(ctx context.Context, tenantId int32, reportIds []string, filterBy ...queryapi.Filter)) *ReportsDao_GetReportsByIds_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		variadicArgs := args[3].([]queryapi.Filter)
-		run(args[0].(context.Context), args[1].(int32), args[2].([]string), variadicArgs...)
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		var arg3 []queryapi.Filter
+		var variadicArgs []queryapi.Filter
+		if len(args) > 3 {
+			variadicArgs = args[3].([]queryapi.Filter)
+		}
+		arg3 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3...,
+		)
 	})
 	return _c
 }
@@ -437,16 +578,32 @@ type ReportsDao_UpdatePendingDelete_Call struct {
 }
 
 // UpdatePendingDelete is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - reportIds
-func (_e *ReportsDao_Expecter) UpdatePendingDelete(ctx interface{}, tenantId interface{}, reportIds interface{}) *ReportsDao_UpdatePendingDelete_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - reportIds []string
+func (_e *ReportsDao_Expecter) UpdatePendingDelete(ctx any, tenantId any, reportIds any) *ReportsDao_UpdatePendingDelete_Call {
 	return &ReportsDao_UpdatePendingDelete_Call{Call: _e.mock.On("UpdatePendingDelete", ctx, tenantId, reportIds)}
 }
 
 func (_c *ReportsDao_UpdatePendingDelete_Call) Run(run func(ctx context.Context, tenantId int32, reportIds []string)) *ReportsDao_UpdatePendingDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].([]string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

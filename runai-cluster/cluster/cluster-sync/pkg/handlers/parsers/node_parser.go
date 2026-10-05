@@ -274,18 +274,16 @@ func (nodeParser *NodeParser) getNetworkTopologyLabels(node *corev1.Node) []swag
 func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagger.NodeStatusConditionDetails {
 	result := []swagger.NodeStatusConditionDetails{}
 
-	gpuFractioningEnabled := config.Config().EnableNodeGpuFractioningReadiness
-
-	ignoredConditionTypes := map[corev1.NodeConditionType]bool{}
-	if gpuFractioningEnabled {
-		ignoredConditionTypes[GpuFractioningReadyConditionType] = true
+	// Reports readiness, not a fault: the passthrough would emit it on the healthy nodes.
+	ignoredConditionTypes := map[corev1.NodeConditionType]bool{
+		GpuFractioningReadyConditionType: true,
 	}
 
 	result = append(result, calculateStatusConditions(node.Status.Conditions, ignoredConditionTypes)...)
 
 	result = append(result, calculateUnschedulableCondition(node)...)
 
-	if gpuFractioningEnabled && nodeParser.gpuFractioningSupport.get() {
+	if nodeParser.gpuFractioningSupport.get() {
 		result = append(result, calculateGpuFractioningConditions(node)...)
 	}
 

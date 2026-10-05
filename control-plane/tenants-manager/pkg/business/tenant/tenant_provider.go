@@ -34,7 +34,6 @@ const (
 	pollTimeout  = 5 * time.Minute
 )
 
-//go:generate mockery
 type ProvisionConfig struct {
 	Email       string
 	Password    *string

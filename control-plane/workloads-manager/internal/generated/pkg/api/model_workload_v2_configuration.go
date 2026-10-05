@@ -28,7 +28,7 @@ type WorkloadV2Configuration struct {
 	Mnnvl *MnnvlMode `json:"mnnvl,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Networking endpoint configurations for the workload (external access, services with auth). Supported for cluster version 2.25 and above.
+	// Networking endpoint configurations for the workload (external access, services with auth). Requires cluster version 3.0.0 or later.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Networking *[]NetworkingEndpoint `json:"networking,omitempty"`
 	Networking *[]NetworkingEndpoint `json:"networking,omitempty" gorm:"serializer:json; type:jsonb;"`

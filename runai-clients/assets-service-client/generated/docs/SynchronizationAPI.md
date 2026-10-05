@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**CredentialsSyncUpdates**](SynchronizationAPI.md#CredentialsSyncUpdates) | **Post** /api/v1/asset/credentials/updates | Allow cluster to request a list of updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
 [**DatasourceSyncUpdates**](SynchronizationAPI.md#DatasourceSyncUpdates) | **Post** /api/v1/asset/datasource/updates | Allow cluster to request a list of updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+[**K8sObjectsSyncUpdates**](SynchronizationAPI.md#K8sObjectsSyncUpdates) | **Post** /api/v1/k8s-objects/updates | Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
 [**ListAssetsById**](SynchronizationAPI.md#ListAssetsById) | **Get** /api/v1/asset | List assets by their ids
 [**SyncAssetsResourcesIds**](SynchronizationAPI.md#SyncAssetsResourcesIds) | **Post** /api/v1/asset/sync/asset-resources-ids | Sync asset resources ids.
 [**SyncValidate**](SynchronizationAPI.md#SyncValidate) | **Post** /api/v1/asset/sync/validate | Validate assets sync.
@@ -133,6 +134,74 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**DatasourceUpdatesResp**](DatasourceUpdatesResp.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## K8sObjectsSyncUpdates
+
+> K8sObjectsUpdatesResp K8sObjectsSyncUpdates(ctx).ClusterId(clusterId).After(after).ClusterSyncReport(clusterSyncReport).Execute()
+
+Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client"
+)
+
+func main() {
+	clusterId := "d73a738f-fab3-430a-8fa3-5241493d7128" // string | The id of the cluster
+	after := int64(123) // int64 | search for updates with update counter greater than the value passed for this parameter (optional)
+	clusterSyncReport := *openapiclient.NewClusterSyncReport() // ClusterSyncReport |  (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.SynchronizationAPI.K8sObjectsSyncUpdates(context.Background()).ClusterId(clusterId).After(after).ClusterSyncReport(clusterSyncReport).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `SynchronizationAPI.K8sObjectsSyncUpdates``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `K8sObjectsSyncUpdates`: K8sObjectsUpdatesResp
+	fmt.Fprintf(os.Stdout, "Response from `SynchronizationAPI.K8sObjectsSyncUpdates`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiK8sObjectsSyncUpdatesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **clusterId** | **string** | The id of the cluster | 
+ **after** | **int64** | search for updates with update counter greater than the value passed for this parameter | 
+ **clusterSyncReport** | [**ClusterSyncReport**](ClusterSyncReport.md) |  | 
+
+### Return type
+
+[**K8sObjectsUpdatesResp**](K8sObjectsUpdatesResp.md)
 
 ### Authorization
 

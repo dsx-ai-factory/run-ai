@@ -309,7 +309,7 @@ const organization = {
 
 const access = {
   label: SIDE_NAV_SUBJECT_TEXTS[EMenuSubjectNames.ACCESS],
-  // Custom monochrome glyph (Figma "Custom icons for Dima" → nav/access). Renders via the
+  // Custom monochrome access glyph. Renders via the
   // runai-glyph SVG sprite, not Phosphor — there's no Phosphor equivalent for this mark.
   icon: toQuasarIconName(runaiIcons.nav.access),
   value: EMenuSubjectNames.ACCESS,

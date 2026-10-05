@@ -415,11 +415,6 @@ func (jobController *JobController) buildResourceStructs(ctx context.Context, ag
 		return err
 	}
 
-	credentialsList, err := jobController.commonResourcesBuilder.BuildCredentials(ctx, workload, options)
-	if err != nil {
-		return err
-	}
-
 	// set workload resource with the resource list
 	for _, service := range services {
 		aggr.AddDesired(service)
@@ -427,7 +422,6 @@ func (jobController *JobController) buildResourceStructs(ctx context.Context, ag
 	aggr.AddDesired(externalsServices...)
 	aggr.AddDesired(pvcList...)
 	aggr.AddDesired(computeResources.GetAll()...)
-	aggr.AddDesired(credentialsList...)
 	return nil
 }
 

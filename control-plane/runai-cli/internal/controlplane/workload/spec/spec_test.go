@@ -55,7 +55,7 @@ var _ = Describe("Spec", func() {
 			{Name: node2},
 		}
 		mockNodes := &clusterOpenapi.Nodes{Nodes: ns}
-		mockNodesClient.EXPECT().GetNodeList(gomock.Any(), clusterId).Return(mockNodes, nil).AnyTimes()
+		mockNodesClient.EXPECT().GetNodeList(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
 		mockNodesService = nodes.NewBackendNodeService(mockNodesClient)
 	})
 
@@ -1093,7 +1093,7 @@ var _ = Describe("Spec", func() {
 				forbiddenErr := &clierrors.HttpError{
 					Status: http.StatusText(http.StatusForbidden),
 				}
-				mockNodesClient.EXPECT().GetNodeList(gomock.Any(), errClusterId).Return(nil, forbiddenErr).AnyTimes()
+				mockNodesClient.EXPECT().GetNodeList(gomock.Any(), errClusterId, gomock.Any(), gomock.Any()).Return(nil, forbiddenErr).AnyTimes()
 
 				nonExistingNode1 := "blabla1"
 				nonExistingNode2 := "blabla2"
@@ -1132,7 +1132,7 @@ var _ = Describe("Distributed Inference", func() {
 	BeforeEach(func() {
 		mockNodesClient = cpmocks.NewMockNodeClient(gomock.NewController(GinkgoT()))
 		mockNodes := &clusterOpenapi.Nodes{Nodes: []clusterOpenapi.Node{{Name: "node1"}}}
-		mockNodesClient.EXPECT().GetNodeList(gomock.Any(), clusterId).Return(mockNodes, nil).AnyTimes()
+		mockNodesClient.EXPECT().GetNodeList(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
 		mockNodesService = nodes.NewBackendNodeService(mockNodesClient)
 
 		gs = NewDistributedSpec(api.LWS)

@@ -613,6 +613,303 @@
         }
       }
     },
+    "/api/v1/k8s-objects/resource-claim-templates": {
+      "get": {
+        "summary": "List resource claim templates.",
+        "description": "Use to retrieve a list of resource claim templates.",
+        "operationId": "list_rcts",
+        "x-no-authorization": true,
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go",
+          "control-plane/assets-service/pkg/services/api_agent_sync_test.go"
+        ],
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeStatus"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RctListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create resource claim template.",
+        "description": "Use to create a resource claim template and synchronize it to the cluster.",
+        "operationId": "create_rct",
+        "x-no-authorization": true,
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+        ],
+        "x-audit": true,
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RctCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request accepted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rct"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/k8s-objects/resource-claim-templates/{AssetId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AssetId"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a resource claim template.",
+        "description": "Use to retrieve the details of a resource claim template by id.",
+        "operationId": "get_rct_by_id",
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "read"
+        },
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go",
+          "control-plane/assets-service/pkg/services/api_agent_sync_test.go"
+        ],
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IncludeStatus"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rct"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a resource claim template.",
+        "description": "Use to update the details of a resource claim template by id.",
+        "operationId": "update_rct_by_id",
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "update"
+        },
+        "x-audit": true,
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RctUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request accepted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rct"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "default": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a resource claim template.",
+        "description": "Use to delete a resource claim template, by id.",
+        "operationId": "delete_rct_by_id",
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "delete"
+        },
+        "x-audit": true,
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/202Accepted"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/k8s-objects/updates": {
+      "post": {
+        "summary": "Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.",
+        "operationId": "k8s_objects_sync_updates",
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_agent_sync_test.go\""
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "sync"
+        },
+        "tags": [
+          "Synchronization"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterIdRequired"
+          },
+          {
+            "$ref": "#/components/parameters/SyncAfter"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClusterSyncReport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/K8sObjectsUpdatesResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/asset/credentials": {
       "get": {
         "summary": "List credentials.",
@@ -7298,7 +7595,8 @@
           "config-map",
           "secret-volume",
           "data-volume",
-          "ngcApiKey"
+          "ngcApiKey",
+          "resource-claim-template"
         ]
       },
       "UpdateCount": {
@@ -7388,7 +7686,8 @@
         ],
         "example": {
           "name": "my-asset",
-          "scope": "tenant",
+          "scope": "project",
+          "projectId": 4500001,
           "id": "a418ed33-9399-48c0-a890-122cadd13bfd",
           "kind": "s3",
           "createdBy": "test@run.ai",
@@ -7856,7 +8155,8 @@
         ],
         "example": {
           "name": "my-asset",
-          "scope": "tenant",
+          "scope": "project",
+          "projectId": 4500001,
           "workloadSupportedTypes": {
             "workspace": false,
             "training": false,
@@ -8178,6 +8478,398 @@
           }
         }
       },
+      "K8sObjectMeta": {
+        "description": "Metadata of the Kubernetes resource that is created by this k8sObject",
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "annotations": {
+            "type": "object",
+            "nullable": true,
+            "description": "Free-form annotations attached to the resource. Keys must conform\nto Kubernetes qualified-name syntax\n(https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set):\nan optional DNS-subdomain prefix (≤253 chars) followed by \"/\" and a\nrequired name component ([A-Za-z0-9] with `.`, `_`, `-` allowed\ninside, ≤63 chars). Key syntax is enforced at runtime on both\ncreate and update; annotation values have no format constraint\nbeyond the length limit below.\n",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 10000
+            },
+            "maxProperties": 1000,
+            "example": {
+              "example.com/owner": "team-a",
+              "example.com/version": "1.0"
+            }
+          },
+          "labels": {
+            "type": "object",
+            "nullable": true,
+            "description": "Free-form labels attached to the resource. Keys and values must\nconform to Kubernetes label syntax\n(https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set):\nkeys are qualified names (optional DNS-subdomain prefix ≤253 chars\n+ \"/\" + name component ≤63 chars); values are ≤63 chars matching\nthe same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are\nallowed). Key syntax is validated at runtime; the value pattern\nbelow is enforced by the schema as well as at runtime.\n",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 63,
+              "pattern": "^([A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?)?$"
+            },
+            "maxProperties": 1000,
+            "example": {
+              "app": "my-app"
+            }
+          }
+        }
+      },
+      "K8sObjectSpec": {
+        "description": "Common shape for k8s-object asset specs: the raw Kubernetes object\nmetadata (labels/annotations) and the raw Kubernetes object spec.\nShared between the k8s-object CRUD APIs (e.g. RctSpec) and the\ncluster-facing k8s-objects sync API (K8sObjectsUpdate).\n",
+        "type": "object",
+        "required": [
+          "objectSpec"
+        ],
+        "properties": {
+          "objectMeta": {
+            "$ref": "#/components/schemas/K8sObjectMeta"
+          },
+          "objectSpec": {
+            "description": "The raw Kubernetes spec of the object.",
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "RctSpec": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/K8sObjectSpec"
+          }
+        ]
+      },
+      "AssetSyncStatusEnum": {
+        "type": "string",
+        "enum": [
+          "Creating",
+          "Deleting",
+          "Failed",
+          "Deletion failed",
+          "Issues found",
+          "No issues found",
+          "No status",
+          "Updating"
+        ]
+      },
+      "ScopeId": {
+        "type": "string",
+        "description": "The id of the cluster, department or project, depending on the scope type."
+      },
+      "ScopeType": {
+        "type": "string",
+        "enum": [
+          "system",
+          "tenant",
+          "cluster",
+          "department",
+          "project"
+        ]
+      },
+      "AssetClusterStatusIssueEnum": {
+        "type": "string",
+        "enum": [
+          "ReplicationError",
+          "LostPhase",
+          "NotCreated"
+        ]
+      },
+      "AssetClusterStatusIssue": {
+        "type": "object",
+        "required": [
+          "scopeId",
+          "scopeType",
+          "issue"
+        ],
+        "properties": {
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "issue": {
+            "$ref": "#/components/schemas/AssetClusterStatusIssueEnum"
+          }
+        }
+      },
+      "AssetClusterStatusIssues": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AssetClusterStatusIssue"
+        }
+      },
+      "AssetClusterStatusInfo": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/AssetSyncStatusEnum"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/AssetClusterStatusIssues"
+          },
+          "message": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "Rct": {
+        "type": "object",
+        "required": [
+          "meta",
+          "spec"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/AssetMeta"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/RctSpec"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AssetClusterStatusInfo"
+          }
+        }
+      },
+      "RctListResponse": {
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Offset for the next page of results. Present only when there are more entries beyond the current page (i.e., the number of returned entries equals the limit).\n"
+          },
+          "entries": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/components/schemas/Rct"
+            }
+          }
+        },
+        "example": {
+          "entries": [
+            {
+              "meta": {
+                "id": "a418ed33-9399-48c0-a890-122cadd13bfd",
+                "name": "my-rct",
+                "kind": "resource-claim-template",
+                "scope": "project",
+                "projectId": 4500001,
+                "createdBy": "test@run.ai",
+                "createdAt": "2026-01-01T00:00:00Z",
+                "updatedBy": "test@run.ai",
+                "updatedAt": "2026-01-01T00:00:00Z"
+              },
+              "spec": {
+                "objectMeta": {
+                  "labels": {
+                    "app": "my-app"
+                  }
+                },
+                "objectSpec": {
+                  "devices": {
+                    "requests": [
+                      {
+                        "name": "gpu",
+                        "exactly": {
+                          "deviceClassName": "gpu.nvidia.com",
+                          "count": 1,
+                          "allocationMode": "ExactCount"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "RctCreationRequest": {
+        "type": "object",
+        "required": [
+          "meta",
+          "spec"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/AssetCreationRequest"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/RctSpec"
+          }
+        }
+      },
+      "RctUpdateRequest": {
+        "type": "object",
+        "required": [
+          "meta",
+          "spec"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/AssetUpdateRequest"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/RctSpec"
+          }
+        }
+      },
+      "ClusterSyncReportUpdate": {
+        "description": "success/failure report of a single update attempt of the cluster",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "a unique id of the entity being updated (asset, workload, policy, etc)."
+          },
+          "updateCount": {
+            "$ref": "#/components/schemas/UpdateCount"
+          },
+          "updateAttemptTime": {
+            "description": "the time in which the cluster attempted the update.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-06-06T12:09:18.211Z"
+          },
+          "message": {
+            "description": "optional failure message for the case that the update has failed. should be sent null if the update was successful.",
+            "type": "string",
+            "example": "mandatory image was not provided.",
+            "nullable": true
+          }
+        }
+      },
+      "ClusterSyncReport": {
+        "description": "allow cluster to report about success/failures of sync updates",
+        "properties": {
+          "updates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClusterSyncReportUpdate"
+            }
+          }
+        }
+      },
+      "RequestInfo": {
+        "required": [
+          "afterUpdate"
+        ],
+        "description": "value that the agent sent to the afterUpdate query parameter.",
+        "properties": {
+          "afterUpdate": {
+            "$ref": "#/components/schemas/UpdateCount"
+          }
+        }
+      },
+      "ResponseInfo": {
+        "description": "The lowest and highest update counts included in this bulk of updates. for example, it is possible that agent requester for afterUpdate=10 and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.",
+        "properties": {
+          "lowestUpdate": {
+            "$ref": "#/components/schemas/UpdateCount"
+          },
+          "highestUpdate": {
+            "$ref": "#/components/schemas/UpdateCount"
+          }
+        }
+      },
+      "SystemInfo": {
+        "description": "the highest update count that was assigned to the data being synchronized. for example, it is possible that the agent sent afterUpdate=12 and received a bulk containing only four updates (13, 15, 18, 19) but in the system there is already update 21 which was not included in this bulk and can be received in the following bulk.",
+        "properties": {
+          "highestUpdate": {
+            "$ref": "#/components/schemas/UpdateCount"
+          }
+        }
+      },
+      "AssetMetaForSync": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AssetCreationFields"
+          },
+          {
+            "$ref": "#/components/schemas/AssetUpdatableFields"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/AssetId"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "$ref": "#/components/schemas/AssetKind"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "prevName": {
+                "$ref": "#/components/schemas/AssetName"
+              }
+            }
+          }
+        ]
+      },
+      "K8sObjectsUpdate": {
+        "type": "object",
+        "required": [
+          "meta",
+          "updateCount"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/AssetMetaForSync"
+          },
+          "updateCount": {
+            "$ref": "#/components/schemas/UpdateCount"
+          },
+          "isDeleted": {
+            "description": "the asset has been deleted",
+            "type": "boolean",
+            "nullable": true
+          },
+          "spec": {
+            "$ref": "#/components/schemas/K8sObjectSpec"
+          }
+        }
+      },
+      "K8sObjectsUpdatesResp": {
+        "type": "object",
+        "properties": {
+          "requestInfo": {
+            "$ref": "#/components/schemas/RequestInfo"
+          },
+          "responseInfo": {
+            "$ref": "#/components/schemas/ResponseInfo"
+          },
+          "systemInfo": {
+            "$ref": "#/components/schemas/SystemInfo"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/K8sObjectsUpdate"
+            }
+          }
+        }
+      },
       "AccessKeyCreationSpec": {
         "properties": {
           "existingSecretName": {
@@ -8412,84 +9104,6 @@
           }
         }
       },
-      "AssetSyncStatusEnum": {
-        "type": "string",
-        "enum": [
-          "Creating",
-          "Deleting",
-          "Failed",
-          "Deletion failed",
-          "Issues found",
-          "No issues found",
-          "No status",
-          "Updating"
-        ]
-      },
-      "ScopeId": {
-        "type": "string",
-        "description": "The id of the cluster, department or project, depending on the scope type."
-      },
-      "ScopeType": {
-        "type": "string",
-        "enum": [
-          "system",
-          "tenant",
-          "cluster",
-          "department",
-          "project"
-        ]
-      },
-      "AssetClusterStatusIssueEnum": {
-        "type": "string",
-        "enum": [
-          "ReplicationError",
-          "LostPhase",
-          "NotCreated"
-        ]
-      },
-      "AssetClusterStatusIssue": {
-        "type": "object",
-        "required": [
-          "scopeId",
-          "scopeType",
-          "issue"
-        ],
-        "properties": {
-          "scopeId": {
-            "$ref": "#/components/schemas/ScopeId"
-          },
-          "scopeType": {
-            "$ref": "#/components/schemas/ScopeType"
-          },
-          "issue": {
-            "$ref": "#/components/schemas/AssetClusterStatusIssueEnum"
-          }
-        }
-      },
-      "AssetClusterStatusIssues": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/AssetClusterStatusIssue"
-        }
-      },
-      "AssetClusterStatusInfo": {
-        "properties": {
-          "status": {
-            "$ref": "#/components/schemas/AssetSyncStatusEnum"
-          },
-          "issues": {
-            "$ref": "#/components/schemas/AssetClusterStatusIssues"
-          },
-          "message": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          }
-        },
-        "nullable": true,
-        "type": "object"
-      },
       "ClusterResourceInfo": {
         "properties": {
           "name": {
@@ -8550,112 +9164,6 @@
             }
           }
         }
-      },
-      "ClusterSyncReportUpdate": {
-        "description": "success/failure report of a single update attempt of the cluster",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "a unique id of the entity being updated (asset, workload, policy, etc)."
-          },
-          "updateCount": {
-            "$ref": "#/components/schemas/UpdateCount"
-          },
-          "updateAttemptTime": {
-            "description": "the time in which the cluster attempted the update.",
-            "type": "string",
-            "format": "date-time",
-            "example": "2024-06-06T12:09:18.211Z"
-          },
-          "message": {
-            "description": "optional failure message for the case that the update has failed. should be sent null if the update was successful.",
-            "type": "string",
-            "example": "mandatory image was not provided.",
-            "nullable": true
-          }
-        }
-      },
-      "ClusterSyncReport": {
-        "description": "allow cluster to report about success/failures of sync updates",
-        "properties": {
-          "updates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClusterSyncReportUpdate"
-            }
-          }
-        }
-      },
-      "RequestInfo": {
-        "required": [
-          "afterUpdate"
-        ],
-        "description": "value that the agent sent to the afterUpdate query parameter.",
-        "properties": {
-          "afterUpdate": {
-            "$ref": "#/components/schemas/UpdateCount"
-          }
-        }
-      },
-      "ResponseInfo": {
-        "description": "The lowest and highest update counts included in this bulk of updates. for example, it is possible that agent requester for afterUpdate=10 and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.",
-        "properties": {
-          "lowestUpdate": {
-            "$ref": "#/components/schemas/UpdateCount"
-          },
-          "highestUpdate": {
-            "$ref": "#/components/schemas/UpdateCount"
-          }
-        }
-      },
-      "SystemInfo": {
-        "description": "the highest update count that was assigned to the data being synchronized. for example, it is possible that the agent sent afterUpdate=12 and received a bulk containing only four updates (13, 15, 18, 19) but in the system there is already update 21 which was not included in this bulk and can be received in the following bulk.",
-        "properties": {
-          "highestUpdate": {
-            "$ref": "#/components/schemas/UpdateCount"
-          }
-        }
-      },
-      "AssetMetaForSync": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssetCreationFields"
-          },
-          {
-            "$ref": "#/components/schemas/AssetUpdatableFields"
-          },
-          {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "$ref": "#/components/schemas/AssetId"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "kind"
-            ],
-            "properties": {
-              "kind": {
-                "$ref": "#/components/schemas/AssetKind"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "properties": {
-              "prevName": {
-                "$ref": "#/components/schemas/AssetName"
-              }
-            }
-          }
-        ]
       },
       "CredentialsUpdate": {
         "type": "object",
@@ -16938,6 +17446,30 @@
           "minLength": 1
         }
       },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "description": "The offset of the first item returned in the collection.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "example": 100
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "The maximum number of entries to return.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
       "IncludeStatus": {
         "name": "statusInfo",
         "in": "query",
@@ -16945,6 +17477,28 @@
         "description": "Whether the query should include asset status information as part of the response.",
         "schema": {
           "type": "boolean"
+        }
+      },
+      "ClusterIdRequired": {
+        "name": "clusterId",
+        "in": "query",
+        "description": "The id of the cluster",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "d73a738f-fab3-430a-8fa3-5241493d7128"
+        }
+      },
+      "SyncAfter": {
+        "name": "after",
+        "description": "search for updates with update counter greater than the value passed for this parameter",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "example": 123
         }
       },
       "PrivateOnly": {
@@ -16982,28 +17536,6 @@
             "genericSecret",
             "ngcApiKey"
           ]
-        }
-      },
-      "ClusterIdRequired": {
-        "name": "clusterId",
-        "in": "query",
-        "description": "The id of the cluster",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "format": "uuid",
-          "example": "d73a738f-fab3-430a-8fa3-5241493d7128"
-        }
-      },
-      "SyncAfter": {
-        "name": "after",
-        "description": "search for updates with update counter greater than the value passed for this parameter",
-        "in": "query",
-        "required": false,
-        "schema": {
-          "type": "integer",
-          "format": "int64",
-          "example": 123
         }
       },
       "SearchName": {
@@ -17126,30 +17658,6 @@
         "description": "Whether the query should include data volume usage information as part of the response.",
         "schema": {
           "type": "boolean"
-        }
-      },
-      "Offset": {
-        "name": "offset",
-        "in": "query",
-        "required": false,
-        "description": "The offset of the first item returned in the collection.",
-        "schema": {
-          "type": "integer",
-          "format": "int32",
-          "example": 100
-        }
-      },
-      "Limit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "The maximum number of entries to return.",
-        "schema": {
-          "type": "integer",
-          "format": "int32",
-          "default": 50,
-          "minimum": 1,
-          "maximum": 500
         }
       },
       "ClusterUuid": {

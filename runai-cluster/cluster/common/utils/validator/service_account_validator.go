@@ -7,9 +7,9 @@ package validator
 
 import (
 	"context"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-	"strings"
 )
 
 type ServiceAccountValidator struct {
@@ -32,7 +32,7 @@ func NewServiceAccountValidator(k8sClient client.Client, allowedServiceAccounts 
 }
 
 func (v *ServiceAccountValidator) Validate(ctx context.Context, req admission.Request) (bool, error) {
-	// If the request is from a k8s cluster component, allow it
+	// Explicit identities may be configured for controllers outside this cluster.
 	if AllowedServiceAccounts(req.UserInfo.Username, v.allowedServiceAccounts) {
 		return true, nil
 	}
@@ -56,12 +56,12 @@ func (v *ServiceAccountValidator) Validate(ctx context.Context, req admission.Re
 }
 
 func AllowedServiceAccounts(username string, allowedServiceAccounts []string) bool {
-	if strings.HasPrefix(username, "system:serviceaccount:") {
-		return true
+	if username == "" {
+		return false
 	}
-	// Allow service accounts that contain any of the configured allowed patterns in their username
-	for _, allowedPattern := range allowedServiceAccounts {
-		if strings.Contains(username, allowedPattern) {
+	// Match the full identity, including the namespace for Kubernetes service accounts.
+	for _, allowedUsername := range allowedServiceAccounts {
+		if username == allowedUsername {
 			return true
 		}
 	}

@@ -18,7 +18,6 @@ import (
 	iamMock "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/mocks"
 	businessMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/business/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/models"
-	idpMock "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/reconciler/mocks"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
 	clientMocks "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/mocks"
 )
@@ -27,16 +26,14 @@ type Mocks struct {
 	iam                  *iamMock.MockServicesContainer
 	realmDal             *businessMocks.RealmDal
 	tenantsManagerClient *clientMocks.ITenantsManager
-	idpMapperUpdater     *idpMock.IdpMapperUpdater
 }
 
 func initManagerTest(t *testing.T) (Mocks, *IamReconcileManager) {
 	mockIamServicesContainer := iamMock.NewMockServicesContainer()
 	realmDalMock := businessMocks.NewRealmDal(t)
 	tenantsManagerClient := clientMocks.NewITenantsManager(t)
-	idpMapperUpdater := idpMock.NewIdpMapperUpdater(t)
 
-	mock := Mocks{iam: mockIamServicesContainer, realmDal: realmDalMock, tenantsManagerClient: tenantsManagerClient, idpMapperUpdater: idpMapperUpdater}
+	mock := Mocks{iam: mockIamServicesContainer, realmDal: realmDalMock, tenantsManagerClient: tenantsManagerClient}
 	testSubject := &IamReconcileManager{
 		iam:                  *mockIamServicesContainer.ToServicesContainer(),
 		realmDal:             mock.realmDal,

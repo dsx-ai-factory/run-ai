@@ -34,6 +34,8 @@ pkg/api/api_pvc.go
 pkg/api/api_pvc_service.go
 pkg/api/api_registry.go
 pkg/api/api_registry_service.go
+pkg/api/api_resource_claim_templates.go
+pkg/api/api_resource_claim_templates_service.go
 pkg/api/api_s3.go
 pkg/api/api_s3_service.go
 pkg/api/api_secret.go
@@ -285,6 +287,10 @@ pkg/api/model_internal_tool_info.go
 pkg/api/model_internal_tool_type.go
 pkg/api/model_involved_object.go
 pkg/api/model_item_rules.go
+pkg/api/model_k8s_object_meta.go
+pkg/api/model_k8s_object_spec.go
+pkg/api/model_k8s_objects_update.go
+pkg/api/model_k8s_objects_updates_resp.go
 pkg/api/model_key_value_pair.go
 pkg/api/model_label.go
 pkg/api/model_master_spec.go
@@ -369,6 +375,11 @@ pkg/api/model_pvc_rules.go
 pkg/api/model_pvc_update_request.go
 pkg/api/model_pvc_volume_mode.go
 pkg/api/model_pvcs_rules.go
+pkg/api/model_rct.go
+pkg/api/model_rct_creation_request.go
+pkg/api/model_rct_list_response.go
+pkg/api/model_rct_spec.go
+pkg/api/model_rct_update_request.go
 pkg/api/model_registry.go
 pkg/api/model_registry_creation_request.go
 pkg/api/model_registry_list_response.go

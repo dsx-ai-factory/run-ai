@@ -1,0 +1,48 @@
+{{- /*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/ -}}
+{{- if .Values.operands.rbac.base.create }}
+{{- $config := deepCopy ((index .Values "runai-operator").config | default dict) }}
+{{- if dig "nmc" "enabled" false .Values.global }}
+{{- $internal := $config.internal | default dict }}
+{{- $global := $internal.global | default dict }}
+{{- $nmc := $global.nmc | default dict }}
+{{- $_ := set $nmc "serviceAccountName" (.Values.global.serviceAccountName | default "") }}
+{{- $_ := set $global "nmc" $nmc }}
+{{- $_ := set $internal "global" $global }}
+{{- $_ := set $config "internal" $internal }}
+{{- end }}
+{{- /* Match the post-install hook's precedence, including null resets. */}}
+{{- $config = mergeOverwrite $config (deepCopy (.Values.clusterConfig | default dict)) }}
+{{- $internal := $config.internal | default dict }}
+{{- $global := $internal.global | default dict }}
+{{- $nmc := $global.nmc | default dict }}
+{{- $account := $nmc.serviceAccountName | default "runai-agent" }}
+{{- $name := printf "runai-agent-garbage-collector-%s" .Release.Namespace }}
+# Orphan finalization needs a UID lookup even when NMC uses a custom agent account.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}
+  namespace: kube-system
+rules:
+  - apiGroups: [""]
+    resources: [serviceaccounts]
+    resourceNames: [generic-garbage-collector]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $account | quote }}
+    namespace: {{ .Release.Namespace | quote }}
+{{- end }}

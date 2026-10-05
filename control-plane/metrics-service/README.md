@@ -92,7 +92,8 @@ through the [`Makefile`](Makefile), which includes the shared control-plane make
 | `make purify` | `purify-go` — `go fmt` + `go vet` + `go mod tidy` |
 | `make validate` | `openapi-validate` — validate the OpenAPI spec (yaml + generated code up-to-date + public routes) |
 | `make openapi-lint` | Lint the swagger bundle |
-| `make mockery` / `make validate_mockery` | Install mockery `v2.53.6` (if needed) and regenerate test mocks |
+| `make generate-mocks` / `make generate-mocks-local` | Regenerate test mocks with mockery v3 from `.mockery.yml` (in the Go builder container / without Docker) |
+| `make generate-mocks-client` | Regenerate `pkg/client` mocks from `pkg/client/.mockery.yml` |
 | `make local-deploy` | `openapi-generate-code` + `build-go` + `docker-build-generic` + `docker-push-generic` |
 
 ### Local build (local-dev.sh)

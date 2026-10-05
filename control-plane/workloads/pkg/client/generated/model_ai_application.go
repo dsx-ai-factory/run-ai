@@ -32,6 +32,8 @@ type AIApplication struct {
 	DesiredPhase NullableString `json:"desiredPhase,omitempty"`
 	// The actual status of the release in the cluster.
 	Phase *string `json:"phase,omitempty"`
+	// The id of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
 	// The id of the project.
 	ProjectId *string `json:"projectId,omitempty" validate:"regexp=.*"`
 	// The name of the project
@@ -280,6 +282,38 @@ func (o *AIApplication) HasPhase() bool {
 // SetPhase gets a reference to the given string and assigns it to the Phase field.
 func (o *AIApplication) SetPhase(v string) {
 	o.Phase = &v
+}
+
+// GetClusterId returns the ClusterId field value if set, zero value otherwise.
+func (o *AIApplication) GetClusterId() string {
+	if o == nil || IsNil(o.ClusterId) {
+		var ret string
+		return ret
+	}
+	return *o.ClusterId
+}
+
+// GetClusterIdOk returns a tuple with the ClusterId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AIApplication) GetClusterIdOk() (*string, bool) {
+	if o == nil || IsNil(o.ClusterId) {
+		return nil, false
+	}
+	return o.ClusterId, true
+}
+
+// HasClusterId returns a boolean if a field has been set.
+func (o *AIApplication) HasClusterId() bool {
+	if o != nil && !IsNil(o.ClusterId) {
+		return true
+	}
+
+	return false
+}
+
+// SetClusterId gets a reference to the given string and assigns it to the ClusterId field.
+func (o *AIApplication) SetClusterId(v string) {
+	o.ClusterId = &v
 }
 
 // GetProjectId returns the ProjectId field value if set, zero value otherwise.
@@ -897,6 +931,9 @@ func (o AIApplication) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Phase) {
 		toSerialize["phase"] = o.Phase
+	}
+	if !IsNil(o.ClusterId) {
+		toSerialize["clusterId"] = o.ClusterId
 	}
 	if !IsNil(o.ProjectId) {
 		toSerialize["projectId"] = o.ProjectId

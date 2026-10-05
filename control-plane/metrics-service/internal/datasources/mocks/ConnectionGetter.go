@@ -20,10 +20,19 @@ func NewConnectionGetter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ConnectionGetter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ConnectionGetter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type ConnectionGetter_GetConnection_Call struct {
 }
 
 // GetConnection is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *ConnectionGetter_Expecter) GetConnection(ctx interface{}, tenantId interface{}) *ConnectionGetter_GetConnection_Call {
+//   - ctx context.Context
+//   - tenantId int32
+func (_e *ConnectionGetter_Expecter) GetConnection(ctx any, tenantId any) *ConnectionGetter_GetConnection_Call {
 	return &ConnectionGetter_GetConnection_Call{Call: _e.mock.On("GetConnection", ctx, tenantId)}
 }
 
 func (_c *ConnectionGetter_GetConnection_Call) Run(run func(ctx context.Context, tenantId int32)) *ConnectionGetter_GetConnection_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

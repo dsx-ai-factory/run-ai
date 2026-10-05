@@ -21,7 +21,8 @@ Targets come from the service `Makefile` plus the shared includes
 | `build-go-amd` | Compiles `cmd/main.go` for `GOOS=linux GOARCH=amd64` (FIPS `GOFIPS140=v1.0.0`) in the builder container → `bin/temp-backend-settings-amd64` |
 | `build-go-arm` | Same for `arm64` → `bin/temp-backend-settings-arm64` |
 | `test` | `build-go` + `test-go` — compile then run Go unit tests in the builder container |
-| `mockery` / `validate_mockery` | Installs mockery `v3.2.5` (if needed) and regenerates test mocks (`.mockery.yml`) |
+| `generate-mocks` / `generate-mocks-local` | Regenerate test mocks from `.mockery.yml` with the shared mockery v3 setup (in Docker / without Docker) |
+| `generate-mocks-client` | Regenerate `pkg/client` mocks from `pkg/client/.mockery.yml` |
 | `lint` | `lint-go` — golangci-lint in the builder container |
 | `purify` | `purify-go` — `go fmt` + `go vet` + `go mod tidy` |
 | `validate` | `openapi-validate` — validate spec + generated code up to date |
@@ -31,7 +32,7 @@ Targets come from the service `Makefile` plus the shared includes
 
 ## Key build notes
 
-- Generated code: OpenAPI server stubs (`internal/generated`) + Go client (`pkg/client/generated`) via openapi-generator `v7.12.0`. `make build` runs `openapi-build` first; run generation before hand-building and never edit generated dirs. Test mocks via `make mockery` (`.mockery.yml`).
+- Generated code: OpenAPI server stubs (`internal/generated`) + Go client (`pkg/client/generated`) via openapi-generator `v7.12.0`. `make build` runs `openapi-build` first; run generation before hand-building and never edit generated dirs. Test mocks via `make generate-mocks` or `make generate-mocks-local` (`.mockery.yml`), and `make generate-mocks-client` for `pkg/client` (`pkg/client/.mockery.yml`).
 - Runtime base image: final image is `FROM scratch`; a `registry.access.redhat.com/ubi9/ubi-minimal` stage supplies `/etc/passwd`, `/etc/group`, certs (`/etc/ssl`, `/etc/pki`) and a writable `/tmp`. Runs as user `65532:65532`. Bundles SQL migrations (`pkg/database/migrations/up|down`) and the swagger bundle.
 - Build args: `TARGETARCH` (selects `bin/temp-backend-settings-$TARGETARCH`).
 - Build command (what local-dev.sh actually runs for this service): it is in `CP_GO_SERVICES`, so `build_go_service` runs, in two steps:

@@ -21,7 +21,7 @@ Targets come from the service `Makefile` plus the shared includes
 | `build-integration-tests` | Compiles the `integration`-tagged test binary and `docker compose build`s the test images |
 | `integration-tests` | Brings up the compose stack and runs the suite (abort-on-container-exit), tearing volumes down first |
 | `integration-tests-debug` | Compose stack without the tests container (run tests from an IDE) |
-| `generate_mocks` / `validate_mockery` | Ensure/install pinned mockery (`v3.2.5`) and regenerate mocks |
+| `generate-mocks` / `generate-mocks-local` / `generate-mocks-client` | Shared targets: regenerate mocks with mockery v3 from `.mockery.yml` / `pkg/client/.mockery.yml` (`-local` runs without Docker) |
 | `lint` | `lint-go` — golangci-lint in the builder container |
 | `purify` | `purify-go` — `go fmt` + `go vet` + `go mod tidy` |
 | `validate` | `openapi-validate` — validate the OpenAPI spec |

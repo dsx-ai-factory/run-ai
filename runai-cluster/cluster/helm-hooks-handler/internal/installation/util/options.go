@@ -181,7 +181,9 @@ func (opts *Options) parseCommandLineArgs(flagSet *flag.FlagSet) {
 
 	flagSet.StringVar(&opts.NMCServiceAccountName, "nmc-service-account-name", "", "The name of the service account to use for NMC")
 
-	flagSet.Var(&opts.NMCAllowedServiceAccounts, "nmc-allowed-service-accounts", "specifies a list of service account name patterns that should be allowed to perform privileged operations in NMC installation")
+	flagSet.Var(&opts.NMCAllowedServiceAccounts, "nmc-allowed-service-accounts",
+		"service accounts allowed privileged operations in NMC: bare names use the installation namespace; "+
+			"CR webhooks match full usernames exactly; Secret/PVC policies retain legacy substring matching")
 
 	flagSet.BoolVar(&opts.Development.Headless, "development-headless", false, "Install a headless cluster")
 

@@ -17,10 +17,19 @@ func NewMockMetricCounter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMetricCounter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMetricCounter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -50,14 +59,20 @@ type MockMetricCounter_Add_Call struct {
 }
 
 // Add is a helper method to define mock.On call
-//   - value
-func (_e *MockMetricCounter_Expecter) Add(value interface{}) *MockMetricCounter_Add_Call {
+//   - value float64
+func (_e *MockMetricCounter_Expecter) Add(value any) *MockMetricCounter_Add_Call {
 	return &MockMetricCounter_Add_Call{Call: _e.mock.On("Add", value)}
 }
 
 func (_c *MockMetricCounter_Add_Call) Run(run func(value float64)) *MockMetricCounter_Add_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(float64))
+		var arg0 float64
+		if args[0] != nil {
+			arg0 = args[0].(float64)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

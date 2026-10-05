@@ -129,6 +129,12 @@ func TestValidate(t *testing.T) {
 }
 ```
 
+## Engineering Skills
+
+Shared engineering skills live in `.agents/skills/`. The `cel-validation-advisor`
+skill has a corresponding symlink under `.claude/skills/`; older skills remain
+directly in `.claude/skills/`. The shared skill documents its agent setup.
+
 ## Documentation
 
 The rest of this section covers the `docs/` tree specifically: user-facing

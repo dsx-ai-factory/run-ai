@@ -620,6 +620,6 @@ func generateMockClient(wl *Workload) *cpworkloadmocks.MockWithSuspendableAction
 func getMockNodesService(mockCtrl *gomock.Controller) *nodes.BackendNodeService {
 	mockNodeClient := cpmocks.NewMockNodeClient(mockCtrl)
 	mockNodes := getMockNodeList()
-	mockNodeClient.EXPECT().GetNodeList(gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
+	mockNodeClient.EXPECT().GetNodeList(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
 	return nodes.NewBackendNodeService(mockNodeClient)
 }
