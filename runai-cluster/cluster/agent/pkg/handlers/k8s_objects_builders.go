@@ -8,6 +8,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
@@ -49,6 +50,16 @@ type k8sObjectBuilder interface {
 	// preserving dst's resourceVersion so the subsequent Update doesn't
 	// conflict. Called from the inspector's DeepCopySpec hook.
 	CopySpec(dst, src client.Object)
+
+	// ShouldReCreate reports whether the diff between the freshly-built
+	// (expected) object and the current cluster read (existing) requires
+	// delete-and-recreate instead of an in-place update. Kinds whose spec
+	// the k8s API server marks immutable (RCT, as of resource.k8s.io/v1)
+	// must return true as soon as the immutable fields diverge; otherwise
+	// Update is rejected and the asset is stuck across every sync tick.
+	// A false return keeps the metadata-only update path, which is the
+	// right choice when only labels/annotations have changed.
+	ShouldReCreate(expected, existing client.Object) bool
 }
 
 // k8sObjectBuilders is the kind-to-builder registry. Membership here is the
@@ -130,6 +141,27 @@ func (b *rctBuilder) CopySpec(dst, src client.Object) {
 		return
 	}
 	srcRct.Spec.DeepCopyInto(&dstRct.Spec)
+}
+
+// ShouldReCreate for RCT returns true whenever the inner
+// ResourceClaimTemplateSpec diverges. resource.k8s.io/v1 marks the entire
+// RCT.Spec immutable (both the inner ObjectMeta and the inner
+// ResourceClaimSpec), so any user edit of the asset in the control plane
+// forces a delete-and-recreate — Update would be rejected with
+// "spec is immutable" and the asset would be stuck across every sync tick.
+// A metadata-only edit on the outer RCT (labels/annotations the agent
+// stamps) still goes through the in-place update path because the outer
+// ObjectMeta is mutable and the inner spec is unchanged.
+func (b *rctBuilder) ShouldReCreate(expected, existing client.Object) bool {
+	expectedRct, ok := expected.(*resourcev1.ResourceClaimTemplate)
+	if !ok {
+		return false
+	}
+	existingRct, ok := existing.(*resourcev1.ResourceClaimTemplate)
+	if !ok {
+		return false
+	}
+	return !reflect.DeepEqual(expectedRct.Spec, existingRct.Spec)
 }
 
 // applyRunaiK8sObjectMetadata stamps the Run:ai scope/kind/id/update-count

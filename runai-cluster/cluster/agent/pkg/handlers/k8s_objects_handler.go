@@ -6,6 +6,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"sync"
@@ -20,7 +21,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/hashicorp/go-multierror"
 	"github.com/rs/zerolog/log"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -265,10 +268,12 @@ func (h *K8sObjectsHandler) processUpdates(updates []K8sObjectFromBackend, wg *s
 	perAssetError := make([]error, len(updates))
 
 	type kindBucket struct {
-		toUpdate  []client.Object
-		updateRef []int
-		toDelete  []types.NamespacedName
-		deleteRef []int
+		toUpdate    []client.Object
+		updateRef   []int
+		toRecreate  []client.Object
+		recreateRef []int
+		toDelete    []types.NamespacedName
+		deleteRef   []int
 	}
 	buckets := make(map[assetsApi.AssetKind]*kindBucket, len(h.kindHandlers))
 
@@ -303,6 +308,20 @@ func (h *K8sObjectsHandler) processUpdates(updates []K8sObjectFromBackend, wg *s
 			continue
 		}
 
+		// Kinds whose Spec the k8s API server marks immutable (RCT in
+		// resource.k8s.io/v1) must be handled with a delete-and-recreate
+		// pass instead of Update, otherwise the API server returns
+		// "spec is immutable" and the asset is stuck. The ShouldReCreate
+		// probe runs against the current cluster state (via the cached
+		// reader) and only reroutes when there is actually a cluster
+		// object whose immutable fields diverge from the freshly-built
+		// one — the first-time create path still goes through toUpdate.
+		if h.needsRecreation(builder, obj) {
+			bucket.toRecreate = append(bucket.toRecreate, obj)
+			bucket.recreateRef = append(bucket.recreateRef, idx)
+			continue
+		}
+
 		bucket.toUpdate = append(bucket.toUpdate, obj)
 		bucket.updateRef = append(bucket.updateRef, idx)
 	}
@@ -310,7 +329,7 @@ func (h *K8sObjectsHandler) processUpdates(updates []K8sObjectFromBackend, wg *s
 	for kind, bucket := range buckets {
 		kindHandler := h.kindHandlers[kind]
 
-		metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionCreateOrUpdate, len(bucket.toUpdate))
+		metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionCreateOrUpdate, len(bucket.toUpdate)+len(bucket.toRecreate))
 		metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionDelete, len(bucket.toDelete))
 
 		if len(bucket.toUpdate) > 0 {
@@ -320,6 +339,16 @@ func (h *K8sObjectsHandler) processUpdates(updates []K8sObjectFromBackend, wg *s
 			}
 			for i, objErr := range perObjectErr {
 				perAssetError[bucket.updateRef[i]] = objErr
+			}
+		}
+
+		if len(bucket.toRecreate) > 0 {
+			perObjectErr, innerErr := h.recreateObjects(kind, bucket.toRecreate)
+			if innerErr != nil {
+				err = multierror.Append(err, innerErr)
+			}
+			for i, objErr := range perObjectErr {
+				perAssetError[bucket.recreateRef[i]] = objErr
 			}
 		}
 
@@ -335,6 +364,67 @@ func (h *K8sObjectsHandler) processUpdates(updates []K8sObjectFromBackend, wg *s
 	}
 
 	return perAssetError, err
+}
+
+// needsRecreation returns true when the freshly-built object differs on
+// immutable fields from the current cluster state. A missing cluster
+// object or a lookup error short-circuits to false: a first-time create
+// belongs in the normal toUpdate pass, and lookup errors (non-NotFound)
+// are left for CreateOrUpdateObjects to surface in its own per-object
+// error slice so the sync report sees them.
+func (h *K8sObjectsHandler) needsRecreation(builder k8sObjectBuilder, obj client.Object) bool {
+	existing := builder.NewEmpty()
+	key := client.ObjectKey{Namespace: obj.GetNamespace(), Name: obj.GetName()}
+	if err := h.cachedClient.Get(context.Background(), key, existing); err != nil {
+		return false
+	}
+	return builder.ShouldReCreate(obj, existing)
+}
+
+// recreateObjects deletes then re-creates each object in the slice, used
+// for kinds whose Spec is immutable at the API-server level. The two
+// operations must happen in the same sync tick because the k8s-objects
+// feed is cursor-based: an asset only reaches the agent at the counter
+// it changed on, so a Delete without a same-tick Create would leave the
+// asset gone from the cluster until the user edits it again.
+//
+// Create is wrapped in retry.OnError for IsAlreadyExists because the
+// typed client may observe stale cache state immediately after Delete;
+// the default backoff is bounded and short so a stuck finalizer surfaces
+// as an error rather than an infinite loop.
+func (h *K8sObjectsHandler) recreateObjects(kind assetsApi.AssetKind, objects []client.Object) ([]error, error) {
+	perObjectError := make([]error, len(objects))
+	var err error
+
+	for i, obj := range objects {
+		name := types.NamespacedName{Namespace: obj.GetNamespace(), Name: obj.GetName()}
+
+		log.Info().Msgf("Recreating k8s-object %s <%s/%s> because its spec diverges on an immutable field",
+			kind, name.Namespace, name.Name)
+
+		if delErr := h.runaiClient.Delete(context.Background(), obj); delErr != nil && !errors.IsNotFound(delErr) {
+			perObjectError[i] = fmt.Errorf("delete %s/%s for recreate: %w", name.Namespace, name.Name, delErr)
+			err = multierror.Append(err, perObjectError[i])
+			continue
+		}
+
+		// Create is retried via DeepCopy because the typed client sets
+		// ResourceVersion on the input when a Create returns, which would
+		// make a subsequent retry fail with "resourceVersion should not
+		// be set on objects to be created".
+		createErr := retry.OnError(retry.DefaultBackoff, errors.IsAlreadyExists, func() error {
+			fresh := obj.DeepCopyObject().(client.Object)
+			fresh.SetResourceVersion("")
+			return h.runaiClient.Create(context.Background(), fresh)
+		})
+		if createErr != nil {
+			perObjectError[i] = fmt.Errorf("create %s/%s after delete: %w", name.Namespace, name.Name, createErr)
+			err = multierror.Append(err, perObjectError[i])
+			continue
+		}
+	}
+
+	return perObjectError, err
 }
 
 // namespaceFor resolves the cluster namespace for a k8s-object asset. The
