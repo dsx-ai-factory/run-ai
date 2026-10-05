@@ -15,8 +15,28 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	resourcev1 "k8s.io/api/resource/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	resourcev1defaults "k8s.io/kubernetes/pkg/apis/resource/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+// rctDefaultScheme carries the API-server defaulters for
+// resource.k8s.io/v1 ResourceClaimTemplate (the same ones the kube-apiserver
+// runs during storage). We apply them to both specs before comparing so
+// user-sent zero values on fields the server defaults (ExactDeviceRequest
+// AllocationMode / Count, Toleration Operator, ...) do not look like a
+// diff against the stored object — otherwise ShouldReCreate would fire on
+// every sync tick for any RCT that leaves a defaulted field unset.
+//
+// scheme.Default is keyed by reflect.TypeOf, so only RegisterDefaults is
+// needed; the type scheme itself does not need to be populated.
+var rctDefaultScheme = runtime.NewScheme()
+
+func init() {
+	if err := resourcev1defaults.RegisterDefaults(rctDefaultScheme); err != nil {
+		panic(fmt.Sprintf("register resource/v1 defaulters: %v", err))
+	}
+}
 
 // k8sObjectBuilder is the per-kind extension point of K8sObjectsHandler.
 // Every asset kind that flows through the generic k8s-objects sync endpoint
@@ -138,7 +158,9 @@ func (b *rctBuilder) CopySpec(dst, src client.Object) {
 }
 
 // ShouldReCreate for RCT returns true whenever the inner
-// ResourceClaimTemplateSpec diverges.
+// ResourceClaimTemplateSpec really changed. sinc e it is immutable, 
+// if it was really changed we need to re-create the object
+//
 // A metadata-only edit on the outer RCT (labels/annotations the agent
 // stamps) still goes through the in-place update path because the outer
 // ObjectMeta is mutable and the inner spec is unchanged.
@@ -151,7 +173,15 @@ func (b *rctBuilder) ShouldReCreate(expected, existing client.Object) bool {
 	if !ok {
 		return false
 	}
-	return !reflect.DeepEqual(expectedRct.Spec, existingRct.Spec)
+	expectedCopy := expectedRct.DeepCopy()
+	existingCopy := existingRct.DeepCopy()
+
+    // normalize the spec by apping k8s defaults. the result of comprison will be
+    // more accurate when taking into account the defaults
+	rctDefaultScheme.Default(expectedCopy)
+	rctDefaultScheme.Default(existingCopy)
+
+	return !reflect.DeepEqual(expectedCopy.Spec, existingCopy.Spec)
 }
 
 // applyRunaiK8sObjectMetadata stamps the Run:ai scope/kind/id/update-count

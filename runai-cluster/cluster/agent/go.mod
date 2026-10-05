@@ -50,6 +50,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.35.4
 	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v1.5.2
+	k8s.io/kubernetes v1.35.4
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 	sigs.k8s.io/controller-runtime v0.23.3
 	sigs.k8s.io/gateway-api v1.6.1
@@ -226,7 +227,6 @@ require (
 	k8s.io/kube-openapi v0.0.0-20260519202549-bbf5c5577288 // indirect
 	k8s.io/kube-scheduler v0.35.4 // indirect
 	k8s.io/kubelet v0.35.4 // indirect
-	k8s.io/kubernetes v1.35.4 // indirect
 	k8s.io/mount-utils v0.35.4 // indirect
 	knative.dev/networking v0.0.0-20260120131110-a7cdca238a0d // indirect
 	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a // indirect
