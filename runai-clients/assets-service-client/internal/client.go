@@ -73,6 +73,16 @@ func (c *AssetsClient) RequestAssetFlatFormat(ctx context.Context, request opena
 			}
 		}
 
+		// A non-nil err on the HTTP 200 branch means the generated
+		// client hit a decode error after the body was received —
+		// resp may be partially populated. Returning (resp, nil)
+		// here would silently report that half-decoded response as
+		// success and advance the sync counter past whatever the
+		// decoder dropped, so surface the decode error instead.
+		if err != nil {
+			return nil, openapi.NewError(http.StatusInternalServerError,
+				fmt.Sprintf("decode response: %v", err))
+		}
 		if resp != nil {
 			return resp, nil
 		}
@@ -115,6 +125,16 @@ func (c *AssetsClient) CredentialsSyncUpdates(ctx context.Context, clusterId str
 			}
 		}
 
+		// A non-nil err on the HTTP 200 branch means the generated
+		// client hit a decode error after the body was received —
+		// resp may be partially populated. Returning (resp, nil)
+		// here would silently report that half-decoded response as
+		// success and advance the sync counter past whatever the
+		// decoder dropped, so surface the decode error instead.
+		if err != nil {
+			return nil, openapi.NewError(http.StatusInternalServerError,
+				fmt.Sprintf("decode response: %v", err))
+		}
 		if resp != nil {
 			return resp, nil
 		}
@@ -157,6 +177,16 @@ func (c *AssetsClient) DatasourceSyncUpdates(ctx context.Context, clusterId stri
 			}
 		}
 
+		// A non-nil err on the HTTP 200 branch means the generated
+		// client hit a decode error after the body was received —
+		// resp may be partially populated. Returning (resp, nil)
+		// here would silently report that half-decoded response as
+		// success and advance the sync counter past whatever the
+		// decoder dropped, so surface the decode error instead.
+		if err != nil {
+			return nil, openapi.NewError(http.StatusInternalServerError,
+				fmt.Sprintf("decode response: %v", err))
+		}
 		if resp != nil {
 			return resp, nil
 		}
@@ -202,6 +232,16 @@ func (c *AssetsClient) K8sObjectsSyncUpdates(ctx context.Context, clusterId stri
 			}
 		}
 
+		// A non-nil err on the HTTP 200 branch means the generated
+		// client hit a decode error after the body was received —
+		// resp may be partially populated. Returning (resp, nil)
+		// here would silently report that half-decoded response as
+		// success and advance the sync counter past whatever the
+		// decoder dropped, so surface the decode error instead.
+		if err != nil {
+			return nil, openapi.NewError(http.StatusInternalServerError,
+				fmt.Sprintf("decode response: %v", err))
+		}
 		if resp != nil {
 			return resp, nil
 		}

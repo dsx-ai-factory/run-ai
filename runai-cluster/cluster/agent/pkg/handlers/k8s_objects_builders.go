@@ -26,7 +26,7 @@ import (
 // To add a new kind:
 //  1. Implement the three methods below for the kind's typed k8s object.
 //  2. Register the builder in k8sObjectBuilders at package init.
-//  3. Add the kind to getAssetKindLabel so the stamped `run.ai/asset` label
+//  3. Add the kind to getAssetKindLabel so the `run.ai/asset` label
 //     identifies it on the cluster side.
 //  4. Register the k8s runtime scheme for the GVK in cmd/main.go.
 //  5. Grant the agent RBAC on the resource in the runai-chart.
@@ -55,19 +55,13 @@ type k8sObjectBuilder interface {
 	// (expected) object and the current cluster read (existing) requires
 	// delete-and-recreate instead of an in-place update. Kinds whose spec
 	// the k8s API server marks immutable (RCT, as of resource.k8s.io/v1)
-	// must return true as soon as the immutable fields diverge; otherwise
-	// Update is rejected and the asset is stuck across every sync tick.
-	// A false return keeps the metadata-only update path, which is the
-	// right choice when only labels/annotations have changed.
+	// must return true as soon as the immutable fields diverge
 	ShouldReCreate(expected, existing client.Object) bool
 }
 
-// k8sObjectBuilders is the kind-to-builder registry. Membership here is the
-// source of truth for which kinds the K8sObjectsHandler will attempt to
-// reconcile; anything the control plane sends with an unregistered kind is
-// surfaced as a per-asset error in the next sync report rather than
-// silently skipped, so a stale agent build pointed at a newer control
-// plane fails loudly.
+// k8sObjectBuilders is the kind-to-builder registry.
+// anything the control plane sends with an unregistered kind is surfaced as a per-asset
+// error in the next sync report rather than silently skipped,
 var k8sObjectBuilders = map[assetsApi.AssetKind]k8sObjectBuilder{
 	assetsApi.ASSETKIND_RESOURCE_CLAIM_TEMPLATE: &rctBuilder{},
 }
@@ -99,7 +93,7 @@ func (b *rctBuilder) Build(update K8sObjectFromBackend, namespace string) (clien
 	}
 	applyRunaiK8sObjectMetadata(&rct.ObjectMeta, &update.Meta, update.UpdateCount)
 
-	// The agent speaks typed k8s API objects, but the control plane carries
+	// The agent needs typed k8s API objects, but the control plane carries
 	// kind-specific specs as an untyped JSON map. Round-tripping through
 	// json.Marshal → json.Unmarshal is the only path that honors the
 	// resource.k8s.io CBOR/JSON tag conventions on nested device-request
@@ -144,11 +138,7 @@ func (b *rctBuilder) CopySpec(dst, src client.Object) {
 }
 
 // ShouldReCreate for RCT returns true whenever the inner
-// ResourceClaimTemplateSpec diverges. resource.k8s.io/v1 marks the entire
-// RCT.Spec immutable (both the inner ObjectMeta and the inner
-// ResourceClaimSpec), so any user edit of the asset in the control plane
-// forces a delete-and-recreate — Update would be rejected with
-// "spec is immutable" and the asset would be stuck across every sync tick.
+// ResourceClaimTemplateSpec diverges.
 // A metadata-only edit on the outer RCT (labels/annotations the agent
 // stamps) still goes through the in-place update path because the outer
 // ObjectMeta is mutable and the inner spec is unchanged.
