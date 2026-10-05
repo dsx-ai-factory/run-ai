@@ -97,11 +97,12 @@ func (Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario
 	log.Printf("%s: submitted %d workspaces at %.2f/s (target %d/s), %d rejected; waiting up to %s for arrivals", suiteName, pacing.Submitted, pacing.Rate(), opts.rate, rejected(submissions), opts.timeout)
 
 	filled := watchers.Fill(submissions, opts.timeout)
+	interrupted := ctx.Err()
 	spans := measure.CollectSpans(filled)
 	log.Printf("%s: %s", suiteName, describe(spans, pacing))
 
 	deleteErr := deleteWorkspaces(ctx, clients, project, opts)
-	section = buildSection(spans, pacing, filled, opts, watchers.Reconnects())
+	section = buildSection(spans, pacing, filled, opts, watchers.Reconnects(), interrupted)
 	if deleteErr != nil {
 		section.Failed = true
 		section.Error = joinMessages(section.Error, deleteErr.Error())
@@ -302,7 +303,7 @@ func wholeNumbers(knob string, raw map[string]any) (map[string]int, error) {
 	return values, nil
 }
 
-func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.Submission, opts options, interruptions int) core.Section {
+func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.Submission, opts options, interruptions int, interrupted error) core.Section {
 	ttj := measure.Stats(s.TTJ)
 	api := measure.Stats(s.ApiAccepted)
 	metrics := map[string]any{
@@ -342,7 +343,11 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 
 	var problems []string
 	if ttj.PendingCount > 0 {
-		problems = append(problems, fmt.Sprintf("%d workspaces never reached the cluster within %s", ttj.PendingCount, opts.timeout))
+		if interrupted != nil {
+			problems = append(problems, fmt.Sprintf("%d workspaces had not reached the cluster when the run was interrupted: %v", ttj.PendingCount, interrupted))
+		} else {
+			problems = append(problems, fmt.Sprintf("%d workspaces never reached the cluster within %s", ttj.PendingCount, opts.timeout))
+		}
 	}
 	if len(mismatched) > 0 {
 		problems = append(problems, fmt.Sprintf("spans do not add up for %d workspaces (first: %s); the correlation is wrong", len(mismatched), mismatched[0]))

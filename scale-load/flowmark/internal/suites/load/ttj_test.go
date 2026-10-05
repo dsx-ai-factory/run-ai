@@ -6,6 +6,7 @@
 package load
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -73,7 +74,7 @@ func TestBuildSectionReportsEverySpanAndTheRates(t *testing.T) {
 	}
 	pacing := submit.Pacing{Submitted: 3, FirstDispatch: at(0), LastDispatch: at(1.0)}
 
-	section := buildSection(measure.CollectSpans(submissions), pacing, submissions, testOptions(), 0)
+	section := buildSection(measure.CollectSpans(submissions), pacing, submissions, testOptions(), 0, nil)
 
 	if section.Category != core.CategoryLoad || section.Failed {
 		t.Fatalf("a rejected submission must not fail the section: %+v", section)
@@ -97,18 +98,22 @@ func TestBuildSectionReportsEverySpanAndTheRates(t *testing.T) {
 
 func TestBuildSectionFailsOnPendingWorkspacesAndInconsistentSpans(t *testing.T) {
 	pending := []measure.Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3)}}
-	section := buildSection(measure.CollectSpans(pending), submit.Pacing{Submitted: 1}, pending, testOptions(), 0)
+	section := buildSection(measure.CollectSpans(pending), submit.Pacing{Submitted: 1}, pending, testOptions(), 0, nil)
 	if !section.Failed || !strings.Contains(section.Error, "never reached the cluster") {
 		t.Fatalf("a pending workspace must fail the section: %+v", section)
 	}
 	if _, ok := section.Metrics["ttj_p90_ms"]; ok {
 		t.Fatal("no ttj latency may be reported when nothing arrived")
 	}
+	section = buildSection(measure.CollectSpans(pending), submit.Pacing{Submitted: 1}, pending, testOptions(), 0, context.Canceled)
+	if !section.Failed || !strings.Contains(section.Error, "when the run was interrupted") || strings.Contains(section.Error, "within") {
+		t.Fatalf("an interrupted run must say so instead of blaming the timeout: %+v", section)
+	}
 
 	good := []measure.Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3), PodCreatedAt: at(5.3)}}
 	broken := measure.CollectSpans(good)
 	broken.PodCreated = []measure.Timing{{Name: "w1", Outcome: measure.Arrived, Created: at(2.3), Arrived: at(9.3), Duration: 7 * time.Second}}
-	section = buildSection(broken, submit.Pacing{Submitted: 1}, good, testOptions(), 0)
+	section = buildSection(broken, submit.Pacing{Submitted: 1}, good, testOptions(), 0, nil)
 	if !section.Failed || !strings.Contains(section.Error, "spans do not add up") || section.Metrics["spans_consistent"] != false {
 		t.Fatalf("inconsistent spans must fail the section loudly: %+v", section)
 	}
