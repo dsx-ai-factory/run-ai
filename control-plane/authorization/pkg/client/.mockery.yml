@@ -1,0 +1,24 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client:
+    interfaces:
+      IAuthorizationClient: {}
+      IAuthorizationExternalClient: {}
+      ScopeValidator: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      AccessRulesAPI: {}
+      HealthAPI: {}
+      InternalAPI: {}
+      MappedNullable: {}
+      MeAPI: {}
+      PermissionsAPI: {}
+      RolesAPI: {}
+      SettingsAPI: {}

@@ -18,10 +18,19 @@ func NewMockCounterVecAccessor(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCounterVecAccessor {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCounterVecAccessor{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -110,15 +119,26 @@ type MockCounterVecAccessor_Register_Call struct {
 }
 
 // Register is a helper method to define mock.On call
-//   - description
-//   - labels
-func (_e *MockCounterVecAccessor_Expecter) Register(description interface{}, labels interface{}) *MockCounterVecAccessor_Register_Call {
+//   - description string
+//   - labels []string
+func (_e *MockCounterVecAccessor_Expecter) Register(description any, labels any) *MockCounterVecAccessor_Register_Call {
 	return &MockCounterVecAccessor_Register_Call{Call: _e.mock.On("Register", description, labels)}
 }
 
 func (_c *MockCounterVecAccessor_Register_Call) Run(run func(description string, labels []string)) *MockCounterVecAccessor_Register_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].([]string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []string
+		if args[1] != nil {
+			arg1 = args[1].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

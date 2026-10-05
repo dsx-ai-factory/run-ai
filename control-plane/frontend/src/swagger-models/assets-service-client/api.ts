@@ -617,7 +617,8 @@ export const AssetKind = {
     ConfigMap: 'config-map',
     SecretVolume: 'secret-volume',
     DataVolume: 'data-volume',
-    NgcApiKey: 'ngcApiKey'
+    NgcApiKey: 'ngcApiKey',
+    ResourceClaimTemplate: 'resource-claim-template'
 } as const;
 
 export type AssetKind = typeof AssetKind[keyof typeof AssetKind];
@@ -7982,6 +7983,106 @@ export interface ItemRules {
     'locked'?: Array<string>;
 }
 /**
+ * Metadata of the Kubernetes resource that is created by this k8sObject
+ * @export
+ * @interface K8sObjectMeta
+ */
+export interface K8sObjectMeta {
+    /**
+     * Free-form annotations attached to the resource. Keys must conform to Kubernetes qualified-name syntax (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set): an optional DNS-subdomain prefix (≤253 chars) followed by \"/\" and a required name component ([A-Za-z0-9] with `.`, `_`, `-` allowed inside, ≤63 chars). Key syntax is enforced at runtime on both create and update; annotation values have no format constraint beyond the length limit below. 
+     * @type {{ [key: string]: string; }}
+     * @memberof K8sObjectMeta
+     */
+    'annotations'?: { [key: string]: string; } | null;
+    /**
+     * Free-form labels attached to the resource. Keys and values must conform to Kubernetes label syntax (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set): keys are qualified names (optional DNS-subdomain prefix ≤253 chars + \"/\" + name component ≤63 chars); values are ≤63 chars matching the same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are allowed). Key syntax is validated at runtime; the value pattern below is enforced by the schema as well as at runtime. 
+     * @type {{ [key: string]: string; }}
+     * @memberof K8sObjectMeta
+     */
+    'labels'?: { [key: string]: string; } | null;
+}
+/**
+ * Common shape for k8s-object asset specs: the raw Kubernetes object metadata (labels/annotations) and the raw Kubernetes object spec. Shared between the k8s-object CRUD APIs (e.g. RctSpec) and the cluster-facing k8s-objects sync API (K8sObjectsUpdate). 
+ * @export
+ * @interface K8sObjectSpec
+ */
+export interface K8sObjectSpec {
+    /**
+     * 
+     * @type {K8sObjectMeta}
+     * @memberof K8sObjectSpec
+     */
+    'objectMeta'?: K8sObjectMeta | null;
+    /**
+     * The raw Kubernetes spec of the object.
+     * @type {{ [key: string]: any; }}
+     * @memberof K8sObjectSpec
+     */
+    'objectSpec': { [key: string]: any; };
+}
+/**
+ * 
+ * @export
+ * @interface K8sObjectsUpdate
+ */
+export interface K8sObjectsUpdate {
+    /**
+     * 
+     * @type {AssetMetaForSync}
+     * @memberof K8sObjectsUpdate
+     */
+    'meta': AssetMetaForSync;
+    /**
+     * the value of an update counter of a data in the system.
+     * @type {number}
+     * @memberof K8sObjectsUpdate
+     */
+    'updateCount': number;
+    /**
+     * the asset has been deleted
+     * @type {boolean}
+     * @memberof K8sObjectsUpdate
+     */
+    'isDeleted'?: boolean | null;
+    /**
+     * 
+     * @type {K8sObjectSpec}
+     * @memberof K8sObjectsUpdate
+     */
+    'spec'?: K8sObjectSpec;
+}
+/**
+ * 
+ * @export
+ * @interface K8sObjectsUpdatesResp
+ */
+export interface K8sObjectsUpdatesResp {
+    /**
+     * 
+     * @type {RequestInfo}
+     * @memberof K8sObjectsUpdatesResp
+     */
+    'requestInfo'?: RequestInfo;
+    /**
+     * 
+     * @type {ResponseInfo}
+     * @memberof K8sObjectsUpdatesResp
+     */
+    'responseInfo'?: ResponseInfo;
+    /**
+     * 
+     * @type {SystemInfo}
+     * @memberof K8sObjectsUpdatesResp
+     */
+    'systemInfo'?: SystemInfo;
+    /**
+     * 
+     * @type {Array<K8sObjectsUpdate>}
+     * @memberof K8sObjectsUpdatesResp
+     */
+    'assets'?: Array<K8sObjectsUpdate>;
+}
+/**
  * Details of key-value pair to be stored in the credential.
  * @export
  * @interface KeyValuePair
@@ -10496,6 +10597,107 @@ export interface PvcsRules {
      * @memberof PvcsRules
      */
     'instances'?: ItemRules | null;
+}
+/**
+ * 
+ * @export
+ * @interface Rct
+ */
+export interface Rct {
+    /**
+     * 
+     * @type {AssetMeta}
+     * @memberof Rct
+     */
+    'meta': AssetMeta;
+    /**
+     * 
+     * @type {RctSpec}
+     * @memberof Rct
+     */
+    'spec': RctSpec;
+    /**
+     * 
+     * @type {AssetClusterStatusInfo}
+     * @memberof Rct
+     */
+    'status'?: AssetClusterStatusInfo | null;
+}
+/**
+ * 
+ * @export
+ * @interface RctCreationRequest
+ */
+export interface RctCreationRequest {
+    /**
+     * 
+     * @type {AssetCreationRequest}
+     * @memberof RctCreationRequest
+     */
+    'meta': AssetCreationRequest;
+    /**
+     * 
+     * @type {RctSpec}
+     * @memberof RctCreationRequest
+     */
+    'spec': RctSpec;
+}
+/**
+ * 
+ * @export
+ * @interface RctListResponse
+ */
+export interface RctListResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more entries beyond the current page (i.e., the number of returned entries equals the limit). 
+     * @type {number}
+     * @memberof RctListResponse
+     */
+    'next'?: number;
+    /**
+     * 
+     * @type {Array<Rct>}
+     * @memberof RctListResponse
+     */
+    'entries': Array<Rct>;
+}
+/**
+ * 
+ * @export
+ * @interface RctSpec
+ */
+export interface RctSpec {
+    /**
+     * 
+     * @type {K8sObjectMeta}
+     * @memberof RctSpec
+     */
+    'objectMeta'?: K8sObjectMeta | null;
+    /**
+     * The raw Kubernetes spec of the object.
+     * @type {{ [key: string]: any; }}
+     * @memberof RctSpec
+     */
+    'objectSpec': { [key: string]: any; };
+}
+/**
+ * 
+ * @export
+ * @interface RctUpdateRequest
+ */
+export interface RctUpdateRequest {
+    /**
+     * 
+     * @type {AssetUpdateRequest}
+     * @memberof RctUpdateRequest
+     */
+    'meta': AssetUpdateRequest;
+    /**
+     * 
+     * @type {RctSpec}
+     * @memberof RctUpdateRequest
+     */
+    'spec': RctSpec;
 }
 /**
  * 
@@ -23544,6 +23746,431 @@ export class RegistryApi extends BaseAPI {
 
 
 /**
+ * ResourceClaimTemplatesApi - axios parameter creator
+ * @export
+ */
+export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Use to create a resource claim template and synchronize it to the cluster.
+         * @summary Create resource claim template.
+         * @param {RctCreationRequest} [rctCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRct: async (rctCreationRequest?: RctCreationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(rctCreationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to delete a resource claim template, by id.
+         * @summary Delete a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRctById: async (assetId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('deleteRctById', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to retrieve the details of a resource claim template by id.
+         * @summary Retrieve a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctById: async (assetId: string, statusInfo?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getRctById', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (statusInfo !== undefined) {
+                localVarQueryParameter['statusInfo'] = statusInfo;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to retrieve a list of resource claim templates.
+         * @summary List resource claim templates.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRcts: async (offset?: number, limit?: number, statusInfo?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (statusInfo !== undefined) {
+                localVarQueryParameter['statusInfo'] = statusInfo;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to update the details of a resource claim template by id.
+         * @summary Update a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {RctUpdateRequest} [rctUpdateRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRctById: async (assetId: string, rctUpdateRequest?: RctUpdateRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('updateRctById', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(rctUpdateRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ResourceClaimTemplatesApi - functional programming interface
+ * @export
+ */
+export const ResourceClaimTemplatesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ResourceClaimTemplatesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Use to create a resource claim template and synchronize it to the cluster.
+         * @summary Create resource claim template.
+         * @param {RctCreationRequest} [rctCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createRct(rctCreationRequest?: RctCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Rct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createRct(rctCreationRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to delete a resource claim template, by id.
+         * @summary Delete a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteRctById(assetId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<HttpResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRctById(assetId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to retrieve the details of a resource claim template by id.
+         * @summary Retrieve a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRctById(assetId: string, statusInfo?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Rct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRctById(assetId, statusInfo, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to retrieve a list of resource claim templates.
+         * @summary List resource claim templates.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RctListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRcts(offset, limit, statusInfo, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to update the details of a resource claim template by id.
+         * @summary Update a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {RctUpdateRequest} [rctUpdateRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateRctById(assetId: string, rctUpdateRequest?: RctUpdateRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Rct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateRctById(assetId, rctUpdateRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * ResourceClaimTemplatesApi - factory interface
+ * @export
+ */
+export const ResourceClaimTemplatesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ResourceClaimTemplatesApiFp(configuration)
+    return {
+        /**
+         * Use to create a resource claim template and synchronize it to the cluster.
+         * @summary Create resource claim template.
+         * @param {RctCreationRequest} [rctCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRct(rctCreationRequest?: RctCreationRequest, options?: any): AxiosPromise<Rct> {
+            return localVarFp.createRct(rctCreationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to delete a resource claim template, by id.
+         * @summary Delete a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRctById(assetId: string, options?: any): AxiosPromise<HttpResponse> {
+            return localVarFp.deleteRctById(assetId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to retrieve the details of a resource claim template by id.
+         * @summary Retrieve a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctById(assetId: string, statusInfo?: boolean, options?: any): AxiosPromise<Rct> {
+            return localVarFp.getRctById(assetId, statusInfo, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to retrieve a list of resource claim templates.
+         * @summary List resource claim templates.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: any): AxiosPromise<RctListResponse> {
+            return localVarFp.listRcts(offset, limit, statusInfo, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to update the details of a resource claim template by id.
+         * @summary Update a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {RctUpdateRequest} [rctUpdateRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRctById(assetId: string, rctUpdateRequest?: RctUpdateRequest, options?: any): AxiosPromise<Rct> {
+            return localVarFp.updateRctById(assetId, rctUpdateRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ResourceClaimTemplatesApi - object-oriented interface
+ * @export
+ * @class ResourceClaimTemplatesApi
+ * @extends {BaseAPI}
+ */
+export class ResourceClaimTemplatesApi extends BaseAPI {
+    /**
+     * Use to create a resource claim template and synchronize it to the cluster.
+     * @summary Create resource claim template.
+     * @param {RctCreationRequest} [rctCreationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public createRct(rctCreationRequest?: RctCreationRequest, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).createRct(rctCreationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to delete a resource claim template, by id.
+     * @summary Delete a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public deleteRctById(assetId: string, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).deleteRctById(assetId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to retrieve the details of a resource claim template by id.
+     * @summary Retrieve a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public getRctById(assetId: string, statusInfo?: boolean, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).getRctById(assetId, statusInfo, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to retrieve a list of resource claim templates.
+     * @summary List resource claim templates.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).listRcts(offset, limit, statusInfo, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to update the details of a resource claim template by id.
+     * @summary Update a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {RctUpdateRequest} [rctUpdateRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public updateRctById(assetId: string, rctUpdateRequest?: RctUpdateRequest, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).updateRctById(assetId, rctUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
  * S3Api - axios parameter creator
  * @export
  */
@@ -24692,6 +25319,56 @@ export const SynchronizationApiAxiosParamCreator = function (configuration?: Con
             };
         },
         /**
+         * 
+         * @summary Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+         * @param {string} clusterId The id of the cluster
+         * @param {number} [after] search for updates with update counter greater than the value passed for this parameter
+         * @param {ClusterSyncReport} [clusterSyncReport] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        k8sObjectsSyncUpdates: async (clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('k8sObjectsSyncUpdates', 'clusterId', clusterId)
+            const localVarPath = `/api/v1/k8s-objects/updates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (after !== undefined) {
+                localVarQueryParameter['after'] = after;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(clusterSyncReport, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns a list of assets.
          * @summary List assets by their ids
          * @param {string} id comma seperated list of asset ids
@@ -24846,6 +25523,19 @@ export const SynchronizationApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * 
+         * @summary Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+         * @param {string} clusterId The id of the cluster
+         * @param {number} [after] search for updates with update counter greater than the value passed for this parameter
+         * @param {ClusterSyncReport} [clusterSyncReport] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async k8sObjectsSyncUpdates(clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<K8sObjectsUpdatesResp>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.k8sObjectsSyncUpdates(clusterId, after, clusterSyncReport, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Returns a list of assets.
          * @summary List assets by their ids
          * @param {string} id comma seperated list of asset ids
@@ -24914,6 +25604,18 @@ export const SynchronizationApiFactory = function (configuration?: Configuration
             return localVarFp.datasourceSyncUpdates(clusterId, after, clusterSyncReport, options).then((request) => request(axios, basePath));
         },
         /**
+         * 
+         * @summary Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+         * @param {string} clusterId The id of the cluster
+         * @param {number} [after] search for updates with update counter greater than the value passed for this parameter
+         * @param {ClusterSyncReport} [clusterSyncReport] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        k8sObjectsSyncUpdates(clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options?: any): AxiosPromise<K8sObjectsUpdatesResp> {
+            return localVarFp.k8sObjectsSyncUpdates(clusterId, after, clusterSyncReport, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns a list of assets.
          * @summary List assets by their ids
          * @param {string} id comma seperated list of asset ids
@@ -24980,6 +25682,20 @@ export class SynchronizationApi extends BaseAPI {
      */
     public datasourceSyncUpdates(clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options?: AxiosRequestConfig) {
         return SynchronizationApiFp(this.configuration).datasourceSyncUpdates(clusterId, after, clusterSyncReport, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+     * @param {string} clusterId The id of the cluster
+     * @param {number} [after] search for updates with update counter greater than the value passed for this parameter
+     * @param {ClusterSyncReport} [clusterSyncReport] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SynchronizationApi
+     */
+    public k8sObjectsSyncUpdates(clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options?: AxiosRequestConfig) {
+        return SynchronizationApiFp(this.configuration).k8sObjectsSyncUpdates(clusterId, after, clusterSyncReport, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

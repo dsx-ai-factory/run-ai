@@ -1,0 +1,15 @@
+description: |
+  Common shape for k8s-object asset specs: the raw Kubernetes object
+  metadata (labels/annotations) and the raw Kubernetes object spec.
+  Shared between the k8s-object CRUD APIs (e.g. RctSpec) and the
+  cluster-facing k8s-objects sync API (K8sObjectsUpdate).
+type: object
+required:
+  - objectSpec
+properties:
+  objectMeta:
+    $ref: "./K8sObjectMeta.yaml"
+  objectSpec:
+    description: The raw Kubernetes spec of the object.
+    type: object
+    additionalProperties: true

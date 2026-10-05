@@ -32,8 +32,8 @@ github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4
 github.com/docker/go-units v0.5.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 h1:Ov1I7x8ZUcgC9yzgtUO7bOuVHvejBEphZT8GlQ2q8Uk=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1/go.mod h1:hDzQ3k8G0AiU88ODxROMfPpkNkvrBskZ1kJvgnSY+ao=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.16 h1:EMkkIAK2v0DYGwpLS4pVY2s5PLJbpcSeXOVIFvge6Ec=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.16/go.mod h1:AgQyJFZv/W7PlkpPyUOqWMZeRVGTaox/5bVeX1FDF94=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.17 h1:KmKqieTjBwYLRHmNXPSjv5DfP2LcXgjloGoyD63OIVE=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.17/go.mod h1:MmOYYlr02ttp+TNTTfByHWOxAPqGBuKAY+eqV9rN5cU=
 github.com/ebitengine/purego v0.11.1 h1:2zpWRSQNVKN4eKsKO9eM1ILDgWfYMY9GwqRmK6XeQ/0=
 github.com/ebitengine/purego v0.11.1/go.mod h1:DCHPP08djqhNSoTfImcnHYQRZmd0qhakvrozqaEYhGQ=
 github.com/felixge/httpsnoop v1.1.0 h1:3YtUj32ZZkqZtt3sZZsClsymw/QDuVfpNhoA31zeORc=
@@ -166,8 +166,8 @@ go.opentelemetry.io/otel/log v1.47.0 h1:cOTS1CcLbSQeZKanGJ+0JpF/+t4PELi3O3bbl2lq
 go.opentelemetry.io/otel/log v1.47.0/go.mod h1:9byitSQ5pLC6PpqwGXjqdMKya6ZTswHRZh2vvXT33nw=
 go.opentelemetry.io/otel/metric v1.47.0 h1:4PptaldXx3Eat1XjMZ68pPJEs5wrhlemctZE9a3UdWY=
 go.opentelemetry.io/otel/metric v1.47.0/go.mod h1:ADGSXxRrXM6bjbvLo535EstVFlPpPYZm4LBKixjDHwU=
-go.opentelemetry.io/otel/sdk v1.46.0 h1:h5CNQQjEbuQXY/JfZtgt3i7HVFV3aHPO2OAwO2eTYPI=
-go.opentelemetry.io/otel/sdk v1.46.0/go.mod h1:GAERFXFt5SYCEB+YiKUbMBeza6UaDH7GmGOZEfh2gSM=
+go.opentelemetry.io/otel/sdk v1.47.0 h1:zWXEr4j2lFefG87TU6Yg8a7ngfohIKFZHKp0Hf5hC6I=
+go.opentelemetry.io/otel/sdk v1.47.0/go.mod h1:VUc24kiOeoGsxG8G9ULx3fWKvB7jMhnGE8Oi607lgR0=
 go.opentelemetry.io/otel/sdk/metric v1.46.0 h1:0piZ26EG4RBfebb2jhDH6ERCYHoVWduc3kLgPCwSnSE=
 go.opentelemetry.io/otel/sdk/metric v1.46.0/go.mod h1:I1PbKrdVc8Qu8HYVDNtqVIwLwjNrhsV/uFuxfwg8mO4=
 go.opentelemetry.io/otel/trace v1.47.0 h1:JOjX/Oci8K94QHddo+bbfya/Ai/nf6/dt9ZfrFNWSrM=

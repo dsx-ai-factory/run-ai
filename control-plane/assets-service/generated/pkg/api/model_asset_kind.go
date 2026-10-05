@@ -29,24 +29,25 @@ type AssetKind string
 
 // List of AssetKind
 const (
-	ASSETKIND_COMPUTE           AssetKind = "compute"
-	ASSETKIND_ENVIRONMENT       AssetKind = "environment"
-	ASSETKIND_ACCESS_KEY        AssetKind = "accessKey"
-	ASSETKIND_DOCKER_REGISTRY   AssetKind = "dockerRegistry"
-	ASSETKIND_PASSWORD          AssetKind = "password"
-	ASSETKIND_GENERIC_SECRET    AssetKind = "genericSecret"
-	ASSETKIND_REGISTRY          AssetKind = "registry"
-	ASSETKIND_S3                AssetKind = "s3"
-	ASSETKIND_GIT               AssetKind = "git"
-	ASSETKIND_NFS               AssetKind = "nfs"
-	ASSETKIND_PVC               AssetKind = "pvc"
-	ASSETKIND_HOST_PATH         AssetKind = "hostPath"
-	ASSETKIND_WORKLOAD_TEMPLATE AssetKind = "workload-template"
-	ASSETKIND_MODEL             AssetKind = "model"
-	ASSETKIND_CONFIG_MAP        AssetKind = "config-map"
-	ASSETKIND_SECRET_VOLUME     AssetKind = "secret-volume"
-	ASSETKIND_DATA_VOLUME       AssetKind = "data-volume"
-	ASSETKIND_NGC_API_KEY       AssetKind = "ngcApiKey"
+	ASSETKIND_COMPUTE                 AssetKind = "compute"
+	ASSETKIND_ENVIRONMENT             AssetKind = "environment"
+	ASSETKIND_ACCESS_KEY              AssetKind = "accessKey"
+	ASSETKIND_DOCKER_REGISTRY         AssetKind = "dockerRegistry"
+	ASSETKIND_PASSWORD                AssetKind = "password"
+	ASSETKIND_GENERIC_SECRET          AssetKind = "genericSecret"
+	ASSETKIND_REGISTRY                AssetKind = "registry"
+	ASSETKIND_S3                      AssetKind = "s3"
+	ASSETKIND_GIT                     AssetKind = "git"
+	ASSETKIND_NFS                     AssetKind = "nfs"
+	ASSETKIND_PVC                     AssetKind = "pvc"
+	ASSETKIND_HOST_PATH               AssetKind = "hostPath"
+	ASSETKIND_WORKLOAD_TEMPLATE       AssetKind = "workload-template"
+	ASSETKIND_MODEL                   AssetKind = "model"
+	ASSETKIND_CONFIG_MAP              AssetKind = "config-map"
+	ASSETKIND_SECRET_VOLUME           AssetKind = "secret-volume"
+	ASSETKIND_DATA_VOLUME             AssetKind = "data-volume"
+	ASSETKIND_NGC_API_KEY             AssetKind = "ngcApiKey"
+	ASSETKIND_RESOURCE_CLAIM_TEMPLATE AssetKind = "resource-claim-template"
 )
 
 // AllowedAssetKindEnumValues is all the allowed values of AssetKind enum
@@ -69,28 +70,30 @@ var AllowedAssetKindEnumValues = []AssetKind{
 	"secret-volume",
 	"data-volume",
 	"ngcApiKey",
+	"resource-claim-template",
 }
 
 // validAssetKindEnumValue provides a map of AssetKinds for fast verification of use input
 var validAssetKindEnumValues = map[AssetKind]struct{}{
-	"compute":           {},
-	"environment":       {},
-	"accessKey":         {},
-	"dockerRegistry":    {},
-	"password":          {},
-	"genericSecret":     {},
-	"registry":          {},
-	"s3":                {},
-	"git":               {},
-	"nfs":               {},
-	"pvc":               {},
-	"hostPath":          {},
-	"workload-template": {},
-	"model":             {},
-	"config-map":        {},
-	"secret-volume":     {},
-	"data-volume":       {},
-	"ngcApiKey":         {},
+	"compute":                 {},
+	"environment":             {},
+	"accessKey":               {},
+	"dockerRegistry":          {},
+	"password":                {},
+	"genericSecret":           {},
+	"registry":                {},
+	"s3":                      {},
+	"git":                     {},
+	"nfs":                     {},
+	"pvc":                     {},
+	"hostPath":                {},
+	"workload-template":       {},
+	"model":                   {},
+	"config-map":              {},
+	"secret-volume":           {},
+	"data-volume":             {},
+	"ngcApiKey":               {},
+	"resource-claim-template": {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

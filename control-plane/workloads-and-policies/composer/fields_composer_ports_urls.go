@@ -347,12 +347,13 @@ func (fc *FieldsComposer) ComposeExposedUrls(prefix string, src []workloadsApi.E
 		}
 
 		info := &ExposedUrlInfo{
-			Items:             make(map[string]*ExposedUrlInfoItem, len(src)),
-			WorkloadName:      fc.WorkloadName,
-			ProjectName:       fc.ProjectName,
-			Config:            cfg,
-			ResourcePrefix:    fc.ResourcePrefix,
-			ForceSuffixInUrls: forceSuffix,
+			Items:                         make(map[string]*ExposedUrlInfoItem, len(src)),
+			WorkloadName:                  fc.WorkloadName,
+			ProjectName:                   fc.ProjectName,
+			Config:                        cfg,
+			ResourcePrefix:                fc.ResourcePrefix,
+			ForceSuffixInUrls:             forceSuffix,
+			OAuth2ProxyTemplatesSupported: fc.Options.OAuth2ProxyTemplatesSupported,
 		}
 
 		for idx, entry := range src {

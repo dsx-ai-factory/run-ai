@@ -1,0 +1,37 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client:
+    interfaces:
+      IAssetsClient: {}
+      IAssetsExternalClient: {}
+  github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      AssetsAPI: {}
+      ComputeAPI: {}
+      ConfigMapAPI: {}
+      CredentialsAPI: {}
+      DatasourcesAPI: {}
+      EnvironmentAPI: {}
+      GitAPI: {}
+      HealthAPI: {}
+      HostPathAPI: {}
+      InferencesAPI: {}
+      ModelAPI: {}
+      ModelInferenceAPI: {}
+      NFSAPI: {}
+      PVCAPI: {}
+      RegistryAPI: {}
+      S3API: {}
+      SecretAPI: {}
+      SynchronizationAPI: {}
+      TemplateAPI: {}
+      TrainingsAPI: {}
+      WorkloadAPI: {}
+      WorkspacesAPI: {}

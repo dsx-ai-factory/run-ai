@@ -1,0 +1,61 @@
+get:
+  summary: List resource claim templates.
+  description: Use to retrieve a list of resource claim templates.
+  operationId: list_rcts
+  x-no-authorization: true
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_rct_service_test.go
+    - control-plane/assets-service/pkg/services/api_agent_sync_test.go
+  tags:
+    - Resource Claim Templates
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Rct/RctListResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+post:
+  summary: Create resource claim template.
+  description: Use to create a resource claim template and synchronize it to the cluster.
+  operationId: create_rct
+  x-no-authorization: true
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_rct_service_test.go
+  x-audit: true
+  tags:
+    - Resource Claim Templates
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Rct/RctCreationRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Rct/Rct.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

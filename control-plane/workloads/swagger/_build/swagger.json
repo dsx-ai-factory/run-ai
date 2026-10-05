@@ -16347,7 +16347,8 @@
           "config-map",
           "secret-volume",
           "data-volume",
-          "ngcApiKey"
+          "ngcApiKey",
+          "resource-claim-template"
         ]
       },
       "AssetsMapping": {
@@ -24199,6 +24200,9 @@
           "phase": {
             "type": "string",
             "description": "The actual status of the release in the cluster."
+          },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
           },
           "projectId": {
             "$ref": "#/components/schemas/ProjectId"

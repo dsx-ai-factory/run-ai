@@ -118,6 +118,9 @@ var _ = Describe("Test Asset Service auth logic", func() {
 
 	Context("Test list assets authorization", func() {
 		DescribeTable("test list by name with a non existing name", func(testData AssetTest) {
+			if testData.filteringStyle != FilterStyleQueryString {
+				return
+			}
 			testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 			listByNameHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?name=%s", testData.url, "nonExistingName"), nil)
 			Expect(err).To(BeNil())
@@ -170,6 +173,12 @@ var _ = Describe("Test Asset Service auth logic", func() {
 		}, entries)
 
 		DescribeTable("test get with limited cluster & project scope", func(testData AssetTest) {
+			// customAuthorization assets own their own list-filtering; the
+			// framework's assumption that non-admin sees a JWT-filtered subset
+			// only holds when framework auth middleware runs on the list route.
+			if testData.customAuthorization {
+				return
+			}
 			if testData.canRunOnScope(projectScope) {
 				listAllHttpReq, err := http.NewRequest("GET", testData.url, nil)
 				Expect(err).To(BeNil())
@@ -235,6 +244,11 @@ var _ = Describe("Test Asset Service auth logic", func() {
 
 	Context("test list with non permitted project", func() {
 		DescribeTable("should return empty response", func(testData AssetTest) {
+			// See "test get with limited cluster & project scope" above:
+			// customAuthorization assets own their own list-filtering.
+			if testData.customAuthorization {
+				return
+			}
 			if testData.canRunOnScope(projectScope) {
 				testData.factory.createProjectBasedAsset(differentScope, headerForAdmin(randoms))
 

@@ -12,7 +12,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 )
 
-//go:generate mockery --name IdpRepository --output ./mocks --filename idp_repository.go
 type IdpRepository interface {
 	CreateIdp(ctx context.Context, realm string, idp models.Idp) (*string, error)
 	GetIdps(ctx context.Context, realm string) ([]*models.Idp, error)

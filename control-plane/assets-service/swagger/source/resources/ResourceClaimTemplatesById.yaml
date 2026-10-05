@@ -1,0 +1,89 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  summary: Retrieve a resource claim template.
+  description: Use to retrieve the details of a resource claim template by id.
+  operationId: get_rct_by_id
+  x-authorize:
+    resource-type: resource-claim-templates
+    action: read
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_rct_service_test.go
+    - control-plane/assets-service/pkg/services/api_agent_sync_test.go
+  tags:
+    - Resource Claim Templates
+  parameters:
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Rct/Rct.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  summary: Update a resource claim template.
+  description: Use to update the details of a resource claim template by id.
+  operationId: update_rct_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_rct_service_test.go
+  x-authorize:
+    resource-type: resource-claim-templates
+    action: update
+  x-audit: true
+  tags:
+    - Resource Claim Templates
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Rct/RctUpdateRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Rct/Rct.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    default:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  summary: Delete a resource claim template.
+  description: Use to delete a resource claim template, by id.
+  operationId: delete_rct_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_rct_service_test.go
+  x-authorize:
+    resource-type: resource-claim-templates
+    action: delete
+  x-audit: true
+  tags:
+    - Resource Claim Templates
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

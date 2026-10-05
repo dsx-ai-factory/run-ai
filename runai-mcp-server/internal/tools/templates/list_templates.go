@@ -97,7 +97,7 @@ type templateRunnableOutput struct {
 }
 
 type templateListItem struct {
-	TemplateID   string                  `json:"templateId"             jsonschema:"Template UUID to pass to manage_template."`
+	TemplateID   string                  `json:"templateId"             jsonschema:"Template UUID to pass to get_template or manage_template."`
 	Name         string                  `json:"name"                   jsonschema:"Template name."`
 	Description  *string                 `json:"description,omitempty"  jsonschema:"Template description."`
 	WorkloadType string                  `json:"workloadType"           jsonschema:"Native workload type to pass to manage_template."`
@@ -125,8 +125,9 @@ func registerListTemplates(r *runaimcp.Registry, client *runaiclient.Client) {
 		Description: "List visible Run:ai workload templates across all native workload types and scopes. Supports exact " +
 			"name, workload type, scope, cluster, department, and project filters, free-text search, sorting, ancestor " +
 			"inclusion, and limit/offset pagination provided by the List Templates API. Each result includes the template " +
-			"ID, scope metadata, and runnable status. Call this before manage_template when the template ID or workload " +
-			"type is unknown.",
+			"ID, scope metadata, and runnable status. Results intentionally omit the full spec and assets; call " +
+			"get_template with a result's templateId to inspect the complete template or prepare an update. Call this " +
+			"before manage_template when the template ID or workload type is unknown.",
 		ReadOnly: true,
 		Handler: func(ctx context.Context, in listTemplatesInput) (listTemplatesOutput, error) {
 			return listTemplatesRun(ctx, client, in)

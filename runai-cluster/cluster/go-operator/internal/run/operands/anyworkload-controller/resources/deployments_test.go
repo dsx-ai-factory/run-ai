@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	anyworkloadcontroller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
@@ -110,6 +111,19 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestBuildEnvVarsIncludesOAuth2ProxyTemplates(t *testing.T) {
+	runaiConfig := utils.GetDefaultRunaiConfig()
+	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	if err != nil {
+		t.Fatalf("buildEnvVars() error = %v", err)
+	}
+	value, found := envValue(envVars, oauth2proxy.TemplatesEnabledEnvVar)
+	if !found || value != "true" {
+		t.Fatalf("template enabled env = %q (present=%v), want true", value, found)
 	}
 }
 

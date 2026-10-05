@@ -21,10 +21,19 @@ func NewIIdm(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *IIdm {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &IIdm{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -65,16 +74,32 @@ type IIdm_AppendRedirectUriToInternalClient_Call struct {
 }
 
 // AppendRedirectUriToInternalClient is a helper method to define mock.On call
-//   - ctx
-//   - client
-//   - uri
-func (_e *IIdm_Expecter) AppendRedirectUriToInternalClient(ctx interface{}, client interface{}, uri interface{}) *IIdm_AppendRedirectUriToInternalClient_Call {
+//   - ctx context.Context
+//   - client openapi.Client
+//   - uri string
+func (_e *IIdm_Expecter) AppendRedirectUriToInternalClient(ctx any, client any, uri any) *IIdm_AppendRedirectUriToInternalClient_Call {
 	return &IIdm_AppendRedirectUriToInternalClient_Call{Call: _e.mock.On("AppendRedirectUriToInternalClient", ctx, client, uri)}
 }
 
 func (_c *IIdm_AppendRedirectUriToInternalClient_Call) Run(run func(ctx context.Context, client openapi.Client, uri string)) *IIdm_AppendRedirectUriToInternalClient_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(openapi.Client), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.Client
+		if args[1] != nil {
+			arg1 = args[1].(openapi.Client)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -123,16 +148,32 @@ type IIdm_ClientCredentialsLogin_Call struct {
 }
 
 // ClientCredentialsLogin is a helper method to define mock.On call
-//   - ctx
-//   - clientId
-//   - clientSecret
-func (_e *IIdm_Expecter) ClientCredentialsLogin(ctx interface{}, clientId interface{}, clientSecret interface{}) *IIdm_ClientCredentialsLogin_Call {
+//   - ctx context.Context
+//   - clientId string
+//   - clientSecret string
+func (_e *IIdm_Expecter) ClientCredentialsLogin(ctx any, clientId any, clientSecret any) *IIdm_ClientCredentialsLogin_Call {
 	return &IIdm_ClientCredentialsLogin_Call{Call: _e.mock.On("ClientCredentialsLogin", ctx, clientId, clientSecret)}
 }
 
 func (_c *IIdm_ClientCredentialsLogin_Call) Run(run func(ctx context.Context, clientId string, clientSecret string)) *IIdm_ClientCredentialsLogin_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -181,16 +222,32 @@ type IIdm_ClientCredentialsLoginV2_Call struct {
 }
 
 // ClientCredentialsLoginV2 is a helper method to define mock.On call
-//   - ctx
-//   - clientId
-//   - clientSecret
-func (_e *IIdm_Expecter) ClientCredentialsLoginV2(ctx interface{}, clientId interface{}, clientSecret interface{}) *IIdm_ClientCredentialsLoginV2_Call {
+//   - ctx context.Context
+//   - clientId string
+//   - clientSecret string
+func (_e *IIdm_Expecter) ClientCredentialsLoginV2(ctx any, clientId any, clientSecret any) *IIdm_ClientCredentialsLoginV2_Call {
 	return &IIdm_ClientCredentialsLoginV2_Call{Call: _e.mock.On("ClientCredentialsLoginV2", ctx, clientId, clientSecret)}
 }
 
 func (_c *IIdm_ClientCredentialsLoginV2_Call) Run(run func(ctx context.Context, clientId string, clientSecret string)) *IIdm_ClientCredentialsLoginV2_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -239,17 +296,38 @@ type IIdm_CreateClient_Call struct {
 }
 
 // CreateClient is a helper method to define mock.On call
-//   - ctx
-//   - name
-//   - clientType
-//   - tenantId
-func (_e *IIdm_Expecter) CreateClient(ctx interface{}, name interface{}, clientType interface{}, tenantId interface{}) *IIdm_CreateClient_Call {
+//   - ctx context.Context
+//   - name string
+//   - clientType string
+//   - tenantId *string
+func (_e *IIdm_Expecter) CreateClient(ctx any, name any, clientType any, tenantId any) *IIdm_CreateClient_Call {
 	return &IIdm_CreateClient_Call{Call: _e.mock.On("CreateClient", ctx, name, clientType, tenantId)}
 }
 
 func (_c *IIdm_CreateClient_Call) Run(run func(ctx context.Context, name string, clientType string, tenantId *string)) *IIdm_CreateClient_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 *string
+		if args[3] != nil {
+			arg3 = args[3].(*string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -306,15 +384,26 @@ type IIdm_CreateInternalClient_Call struct {
 }
 
 // CreateInternalClient is a helper method to define mock.On call
-//   - ctx
-//   - req
-func (_e *IIdm_Expecter) CreateInternalClient(ctx interface{}, req interface{}) *IIdm_CreateInternalClient_Call {
+//   - ctx context.Context
+//   - req openapi.ClientCreationRequest
+func (_e *IIdm_Expecter) CreateInternalClient(ctx any, req any) *IIdm_CreateInternalClient_Call {
 	return &IIdm_CreateInternalClient_Call{Call: _e.mock.On("CreateInternalClient", ctx, req)}
 }
 
 func (_c *IIdm_CreateInternalClient_Call) Run(run func(ctx context.Context, req openapi.ClientCreationRequest)) *IIdm_CreateInternalClient_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(openapi.ClientCreationRequest))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.ClientCreationRequest
+		if args[1] != nil {
+			arg1 = args[1].(openapi.ClientCreationRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -371,15 +460,26 @@ type IIdm_CreateInternalUser_Call struct {
 }
 
 // CreateInternalUser is a helper method to define mock.On call
-//   - ctx
-//   - req
-func (_e *IIdm_Expecter) CreateInternalUser(ctx interface{}, req interface{}) *IIdm_CreateInternalUser_Call {
+//   - ctx context.Context
+//   - req openapi.InternalUserCreationRequest
+func (_e *IIdm_Expecter) CreateInternalUser(ctx any, req any) *IIdm_CreateInternalUser_Call {
 	return &IIdm_CreateInternalUser_Call{Call: _e.mock.On("CreateInternalUser", ctx, req)}
 }
 
 func (_c *IIdm_CreateInternalUser_Call) Run(run func(ctx context.Context, req openapi.InternalUserCreationRequest)) *IIdm_CreateInternalUser_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(openapi.InternalUserCreationRequest))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.InternalUserCreationRequest
+		if args[1] != nil {
+			arg1 = args[1].(openapi.InternalUserCreationRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -436,16 +536,32 @@ type IIdm_CreateRealm_Call struct {
 }
 
 // CreateRealm is a helper method to define mock.On call
-//   - ctx
-//   - realmName
-//   - tenantId
-func (_e *IIdm_Expecter) CreateRealm(ctx interface{}, realmName interface{}, tenantId interface{}) *IIdm_CreateRealm_Call {
+//   - ctx context.Context
+//   - realmName string
+//   - tenantId string
+func (_e *IIdm_Expecter) CreateRealm(ctx any, realmName any, tenantId any) *IIdm_CreateRealm_Call {
 	return &IIdm_CreateRealm_Call{Call: _e.mock.On("CreateRealm", ctx, realmName, tenantId)}
 }
 
 func (_c *IIdm_CreateRealm_Call) Run(run func(ctx context.Context, realmName string, tenantId string)) *IIdm_CreateRealm_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -494,16 +610,32 @@ type IIdm_CreateServiceAccountInternally_Call struct {
 }
 
 // CreateServiceAccountInternally is a helper method to define mock.On call
-//   - ctx
-//   - name
-//   - realmName
-func (_e *IIdm_Expecter) CreateServiceAccountInternally(ctx interface{}, name interface{}, realmName interface{}) *IIdm_CreateServiceAccountInternally_Call {
+//   - ctx context.Context
+//   - name string
+//   - realmName string
+func (_e *IIdm_Expecter) CreateServiceAccountInternally(ctx any, name any, realmName any) *IIdm_CreateServiceAccountInternally_Call {
 	return &IIdm_CreateServiceAccountInternally_Call{Call: _e.mock.On("CreateServiceAccountInternally", ctx, name, realmName)}
 }
 
 func (_c *IIdm_CreateServiceAccountInternally_Call) Run(run func(ctx context.Context, name string, realmName string)) *IIdm_CreateServiceAccountInternally_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -552,15 +684,26 @@ type IIdm_DeleteClient_Call struct {
 }
 
 // DeleteClient is a helper method to define mock.On call
-//   - ctx
-//   - clientId
-func (_e *IIdm_Expecter) DeleteClient(ctx interface{}, clientId interface{}) *IIdm_DeleteClient_Call {
+//   - ctx context.Context
+//   - clientId string
+func (_e *IIdm_Expecter) DeleteClient(ctx any, clientId any) *IIdm_DeleteClient_Call {
 	return &IIdm_DeleteClient_Call{Call: _e.mock.On("DeleteClient", ctx, clientId)}
 }
 
 func (_c *IIdm_DeleteClient_Call) Run(run func(ctx context.Context, clientId string)) *IIdm_DeleteClient_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -609,16 +752,32 @@ type IIdm_DeleteInternalUserByEmail_Call struct {
 }
 
 // DeleteInternalUserByEmail is a helper method to define mock.On call
-//   - ctx
-//   - realm
-//   - email
-func (_e *IIdm_Expecter) DeleteInternalUserByEmail(ctx interface{}, realm interface{}, email interface{}) *IIdm_DeleteInternalUserByEmail_Call {
+//   - ctx context.Context
+//   - realm string
+//   - email string
+func (_e *IIdm_Expecter) DeleteInternalUserByEmail(ctx any, realm any, email any) *IIdm_DeleteInternalUserByEmail_Call {
 	return &IIdm_DeleteInternalUserByEmail_Call{Call: _e.mock.On("DeleteInternalUserByEmail", ctx, realm, email)}
 }
 
 func (_c *IIdm_DeleteInternalUserByEmail_Call) Run(run func(ctx context.Context, realm string, email string)) *IIdm_DeleteInternalUserByEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -667,16 +826,32 @@ type IIdm_DeleteRealm_Call struct {
 }
 
 // DeleteRealm is a helper method to define mock.On call
-//   - ctx
-//   - realmName
-//   - isHardDelete
-func (_e *IIdm_Expecter) DeleteRealm(ctx interface{}, realmName interface{}, isHardDelete interface{}) *IIdm_DeleteRealm_Call {
+//   - ctx context.Context
+//   - realmName string
+//   - isHardDelete bool
+func (_e *IIdm_Expecter) DeleteRealm(ctx any, realmName any, isHardDelete any) *IIdm_DeleteRealm_Call {
 	return &IIdm_DeleteRealm_Call{Call: _e.mock.On("DeleteRealm", ctx, realmName, isHardDelete)}
 }
 
 func (_c *IIdm_DeleteRealm_Call) Run(run func(ctx context.Context, realmName string, isHardDelete bool)) *IIdm_DeleteRealm_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 bool
+		if args[2] != nil {
+			arg2 = args[2].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -725,14 +900,20 @@ type IIdm_GetInstallerServiceAccount_Call struct {
 }
 
 // GetInstallerServiceAccount is a helper method to define mock.On call
-//   - ctx
-func (_e *IIdm_Expecter) GetInstallerServiceAccount(ctx interface{}) *IIdm_GetInstallerServiceAccount_Call {
+//   - ctx context.Context
+func (_e *IIdm_Expecter) GetInstallerServiceAccount(ctx any) *IIdm_GetInstallerServiceAccount_Call {
 	return &IIdm_GetInstallerServiceAccount_Call{Call: _e.mock.On("GetInstallerServiceAccount", ctx)}
 }
 
 func (_c *IIdm_GetInstallerServiceAccount_Call) Run(run func(ctx context.Context)) *IIdm_GetInstallerServiceAccount_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -781,15 +962,26 @@ type IIdm_GetInstallerServiceAccountForTenantId_Call struct {
 }
 
 // GetInstallerServiceAccountForTenantId is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *IIdm_Expecter) GetInstallerServiceAccountForTenantId(ctx interface{}, tenantId interface{}) *IIdm_GetInstallerServiceAccountForTenantId_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *IIdm_Expecter) GetInstallerServiceAccountForTenantId(ctx any, tenantId any) *IIdm_GetInstallerServiceAccountForTenantId_Call {
 	return &IIdm_GetInstallerServiceAccountForTenantId_Call{Call: _e.mock.On("GetInstallerServiceAccountForTenantId", ctx, tenantId)}
 }
 
 func (_c *IIdm_GetInstallerServiceAccountForTenantId_Call) Run(run func(ctx context.Context, tenantId string)) *IIdm_GetInstallerServiceAccountForTenantId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -838,15 +1030,26 @@ type IIdm_GetInternalClientByFilter_Call struct {
 }
 
 // GetInternalClientByFilter is a helper method to define mock.On call
-//   - ctx
-//   - filter
-func (_e *IIdm_Expecter) GetInternalClientByFilter(ctx interface{}, filter interface{}) *IIdm_GetInternalClientByFilter_Call {
+//   - ctx context.Context
+//   - filter string
+func (_e *IIdm_Expecter) GetInternalClientByFilter(ctx any, filter any) *IIdm_GetInternalClientByFilter_Call {
 	return &IIdm_GetInternalClientByFilter_Call{Call: _e.mock.On("GetInternalClientByFilter", ctx, filter)}
 }
 
 func (_c *IIdm_GetInternalClientByFilter_Call) Run(run func(ctx context.Context, filter string)) *IIdm_GetInternalClientByFilter_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -903,16 +1106,32 @@ type IIdm_GetOrCreateRealm_Call struct {
 }
 
 // GetOrCreateRealm is a helper method to define mock.On call
-//   - ctx
-//   - realmName
-//   - tenantId
-func (_e *IIdm_Expecter) GetOrCreateRealm(ctx interface{}, realmName interface{}, tenantId interface{}) *IIdm_GetOrCreateRealm_Call {
+//   - ctx context.Context
+//   - realmName string
+//   - tenantId string
+func (_e *IIdm_Expecter) GetOrCreateRealm(ctx any, realmName any, tenantId any) *IIdm_GetOrCreateRealm_Call {
 	return &IIdm_GetOrCreateRealm_Call{Call: _e.mock.On("GetOrCreateRealm", ctx, realmName, tenantId)}
 }
 
 func (_c *IIdm_GetOrCreateRealm_Call) Run(run func(ctx context.Context, realmName string, tenantId string)) *IIdm_GetOrCreateRealm_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -959,16 +1178,32 @@ type IIdm_MintInstallerBootstrapToken_Call struct {
 }
 
 // MintInstallerBootstrapToken is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - clusterId
-func (_e *IIdm_Expecter) MintInstallerBootstrapToken(ctx interface{}, tenantId interface{}, clusterId interface{}) *IIdm_MintInstallerBootstrapToken_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - clusterId string
+func (_e *IIdm_Expecter) MintInstallerBootstrapToken(ctx any, tenantId any, clusterId any) *IIdm_MintInstallerBootstrapToken_Call {
 	return &IIdm_MintInstallerBootstrapToken_Call{Call: _e.mock.On("MintInstallerBootstrapToken", ctx, tenantId, clusterId)}
 }
 
 func (_c *IIdm_MintInstallerBootstrapToken_Call) Run(run func(ctx context.Context, tenantId string, clusterId string)) *IIdm_MintInstallerBootstrapToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -1017,16 +1252,32 @@ type IIdm_RefreshToken_Call struct {
 }
 
 // RefreshToken is a helper method to define mock.On call
-//   - ctx
-//   - refreshToken
-//   - clientId
-func (_e *IIdm_Expecter) RefreshToken(ctx interface{}, refreshToken interface{}, clientId interface{}) *IIdm_RefreshToken_Call {
+//   - ctx context.Context
+//   - refreshToken string
+//   - clientId string
+func (_e *IIdm_Expecter) RefreshToken(ctx any, refreshToken any, clientId any) *IIdm_RefreshToken_Call {
 	return &IIdm_RefreshToken_Call{Call: _e.mock.On("RefreshToken", ctx, refreshToken, clientId)}
 }
 
 func (_c *IIdm_RefreshToken_Call) Run(run func(ctx context.Context, refreshToken string, clientId string)) *IIdm_RefreshToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -1075,18 +1326,44 @@ type IIdm_TokenExchange_Call struct {
 }
 
 // TokenExchange is a helper method to define mock.On call
-//   - ctx
-//   - exchangeCode
-//   - clientId
-//   - redirectUri
-//   - codeVerifier
-func (_e *IIdm_Expecter) TokenExchange(ctx interface{}, exchangeCode interface{}, clientId interface{}, redirectUri interface{}, codeVerifier interface{}) *IIdm_TokenExchange_Call {
+//   - ctx context.Context
+//   - exchangeCode string
+//   - clientId string
+//   - redirectUri string
+//   - codeVerifier string
+func (_e *IIdm_Expecter) TokenExchange(ctx any, exchangeCode any, clientId any, redirectUri any, codeVerifier any) *IIdm_TokenExchange_Call {
 	return &IIdm_TokenExchange_Call{Call: _e.mock.On("TokenExchange", ctx, exchangeCode, clientId, redirectUri, codeVerifier)}
 }
 
 func (_c *IIdm_TokenExchange_Call) Run(run func(ctx context.Context, exchangeCode string, clientId string, redirectUri string, codeVerifier string)) *IIdm_TokenExchange_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 string
+		if args[4] != nil {
+			arg4 = args[4].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
@@ -1135,17 +1412,38 @@ type IIdm_UserLogin_Call struct {
 }
 
 // UserLogin is a helper method to define mock.On call
-//   - ctx
-//   - username
-//   - password
-//   - clientId
-func (_e *IIdm_Expecter) UserLogin(ctx interface{}, username interface{}, password interface{}, clientId interface{}) *IIdm_UserLogin_Call {
+//   - ctx context.Context
+//   - username string
+//   - password string
+//   - clientId string
+func (_e *IIdm_Expecter) UserLogin(ctx any, username any, password any, clientId any) *IIdm_UserLogin_Call {
 	return &IIdm_UserLogin_Call{Call: _e.mock.On("UserLogin", ctx, username, password, clientId)}
 }
 
 func (_c *IIdm_UserLogin_Call) Run(run func(ctx context.Context, username string, password string, clientId string)) *IIdm_UserLogin_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }

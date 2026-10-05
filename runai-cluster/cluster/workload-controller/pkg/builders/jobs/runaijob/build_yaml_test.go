@@ -109,21 +109,6 @@ func initClientWithResources(t *testing.T, namespace string) client.Client {
 		},
 	}
 
-	fakeCredential := corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "my-user-credential",
-			Namespace: "runai",
-		},
-		Data: map[string][]byte{
-			// byte array with encrypted "private-value-1"
-			"my-user-key": []byte{
-				168, 221, 244, 73, 135, 225, 25, 104, 145, 32, 118, 20, 196, 29, 72, 165,
-				224, 40, 97, 180, 83, 157, 205, 140, 158, 186, 60, 73, 173, 193, 146, 219,
-				201, 199, 65, 36, 241, 251, 52, 131, 38, 155, 0,
-			},
-		},
-	}
-
 	kaiDefaultNodePool := kaiorg.NodePool{ObjectMeta: metav1.ObjectMeta{Name: "default"}}
 	kaiFakeNodePool := kaiorg.NodePool{
 		ObjectMeta: metav1.ObjectMeta{Name: "nodepoola"},
@@ -134,7 +119,7 @@ func initClientWithResources(t *testing.T, namespace string) client.Client {
 		&fakePvc, &fakePvc2, &fakePvc3, &fakePvcBlock,
 		&fakeProject, &fakeKaiProject,
 		&kaiDefaultNodePool, &kaiFakeNodePool,
-		&fakeDataVolumePvc, &fakeCredential)
+		&fakeDataVolumePvc)
 	return fakeClient
 }
 func TestBuildersRunaijob(t *testing.T) {
@@ -199,7 +184,7 @@ func TestBuildersRunaijob(t *testing.T) {
 		{TestName: "preemptibility"},
 		{TestName: "jupyter_ingess_custom_ca", TestEnvVars: &common.TestEnvVars{CustomCAEnvVarValue: "true", RedisFQDN: "cluster-redis.runai.svc.cluster.local:6379"}},
 		{TestName: "port-wo-service"},
-		{TestName: "image_pull_secrets", TestEnvVars: &common.TestEnvVars{ADSEncryptionKey: common.ADSEncryptionKey}},
+		{TestName: "image_pull_secrets"},
 	}
 	runaiBuilder, ctx, commonBuilder := createBuilders(t, nil, nil)
 	for _, curTest := range common.FilterTests(toTest) {
@@ -221,7 +206,6 @@ func createBuilders(t *testing.T,
 	pvcBuilder := common.NewPvcBuilder(k8sClient)
 	serviceBuilder := common.NewServiceBuilder(k8sClient)
 	urlExporterBuilder := common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift())
-	credentialsBuilder := common.NewCredentialsBuilder(k8sClient)
-	commonBuilder := common.NewShardResourcesBuilder(serviceBuilder, urlExporterBuilder, pvcBuilder, credentialsBuilder)
+	commonBuilder := common.NewShardResourcesBuilder(serviceBuilder, urlExporterBuilder, pvcBuilder)
 	return runaiBuilder, ctx, commonBuilder
 }

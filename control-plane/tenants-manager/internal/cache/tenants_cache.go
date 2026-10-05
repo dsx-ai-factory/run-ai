@@ -11,7 +11,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/domain/models"
 )
 
-//go:generate mockery
 type TenantsCache interface {
 	SetTenant(ctx context.Context, tenantId int32, tenant models.Tenant) error
 	GetTenant(ctx context.Context, tenantId int32, fetchFunc func() (*models.Tenant, error)) (*models.Tenant, error)

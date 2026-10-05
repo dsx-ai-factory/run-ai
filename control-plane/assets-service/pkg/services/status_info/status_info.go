@@ -81,6 +81,14 @@ func PatchStatusInfo(ctx context.Context, assetsClusterStatus *asset_cluster_sta
 		return nil // all relevant assets were patched, so no need to proceed to objects tracker status
 	}
 
+	// Kinds without a k8s-objects-tracker projection (e.g. resource-claim-template)
+	// draw their status exclusively from sync_status. Skipping the tracker
+	// step avoids a wasted HTTP call with an empty resourceType — the
+	// assets that LoadSyncStatus didn't cover simply carry no status.
+	if !asset_cluster_status.HasClusterResourceMapping(assetKind) {
+		return nil
+	}
+
 	assetsClusterStatus.StoreSyncBasedInfo(syncBasedStatus)
 
 	assetsClusterStatus.LoadAssetsStatus(ctx, assetKind)

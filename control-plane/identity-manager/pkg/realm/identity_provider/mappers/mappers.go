@@ -18,7 +18,6 @@ const (
 	ocpMapper       string = "openshift-v4-user-attribute-mapper"
 )
 
-//go:generate mockery --name UserAttributeMapper
 type UserAttributeMapper interface {
 	GenerateUserAttributeMapper(alias string, attributeMapper models.IdpAttributeMapper, value *string) *iamModels.IdpMapper
 }

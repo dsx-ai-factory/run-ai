@@ -14,7 +14,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/internal"
 )
 
-//go:generate mockery --name IK8SObjectTrackerExternalClient
 type IK8SObjectTrackerExternalClient interface {
 	CreateClusterWideConfigmap(ctx context.Context, clusterId string, name string, issues []openapi.Issue) (*openapi.ConfigMap, *http.Response, error)
 	CreateDepartmentsWideConfigmap(ctx context.Context, clusterId string, departmentId string, name string, issues []openapi.Issue) (*openapi.ConfigMap, *http.Response, error)
@@ -71,7 +70,6 @@ type IK8SObjectTrackerExternalClient interface {
 		scopeType *string, scopeId *string, secretType *openapi.SecretType) (*openapi.ClusterObjectsStatus, *openapi.Error)
 }
 
-//go:generate mockery --name IK8SObjectTrackerClient
 type IK8SObjectTrackerClient interface {
 	IK8SObjectTrackerExternalClient
 
