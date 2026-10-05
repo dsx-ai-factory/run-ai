@@ -1248,6 +1248,9 @@ func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId strin
 	if netCfg == nil {
 		return nil
 	}
+	if err := validateNetworkingEndpoints(*netCfg); err != nil {
+		return err
+	}
 
 	capChecker := checker.NewClusterCapabilitiesChecker(clusterId)
 	useWorkloadV2Networking, capErr := capChecker.ValidateClusterCapability(ctx, checker.MinVersionNIMIngressViaWorkloadV2)
@@ -1286,6 +1289,32 @@ func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId strin
 		return NewConfigurationError(fmt.Sprintf("metadata.configuration.networking includes values that require cluster version %s and above: %v", minVersion, err))
 	}
 
+	return nil
+}
+
+// Validate endpoint structure before queueing it for the agent. Generated API
+// validation does not reject null array entries or enforce maxItems on pointers.
+func validateNetworkingEndpoints(endpoints []api.NetworkingEndpoint) *api.SubmissionErrorV2 {
+	for i, endpoint := range endpoints {
+		field := fmt.Sprintf("metadata.configuration.networking[%d]", i)
+		hasService := endpoint.Services != nil && len(*endpoint.Services) > 0
+		access := endpoint.ExternalAccess
+		hasExposure := access != nil && (access.Ingress != nil || access.Route != nil || access.HttpRoute != nil)
+		if !hasService && !hasExposure {
+			return NewConfigurationError(field + " must contain a service or externalAccess with an Ingress, Route, or HTTPRoute")
+		}
+		if endpoint.Services == nil {
+			continue
+		}
+		if len(*endpoint.Services) > 1 {
+			return NewConfigurationError(field + ".services must contain at most one service")
+		}
+		for j, service := range *endpoint.Services {
+			if service.Spec == nil && service.Ref == nil {
+				return NewConfigurationError(fmt.Sprintf("%s.services[%d] must contain spec or ref", field, j))
+			}
+		}
+	}
 	return nil
 }
 
