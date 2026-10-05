@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 suite: load-ttj
+workloadType: Workspace
 users: 10
 rate: 2
 duration: 5m

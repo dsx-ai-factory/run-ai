@@ -18,15 +18,12 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
-	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/measure"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/report"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/runner"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/load"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/scale"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/suites/selfcheck"
 )
-
-const clockProbeNamespace = "default"
 
 func main() {
 	log.SetFlags(log.Ltime | log.Lmsgprefix)
@@ -83,16 +80,6 @@ func run() error {
 	if target.ControlPlaneURL != "" {
 		describeEnvironment(ctx, target, *cluster, &info)
 	}
-	if target.KubeconfigPath != "" {
-		offset, err := clockOffset(ctx, target.KubeconfigPath)
-		if err != nil {
-			log.Print(err)
-			info.ClockOffsetError = err.Error()
-		} else {
-			log.Printf("cluster clock offset %+dms", offset)
-			info.ClockOffsetMs = &offset
-		}
-	}
 
 	sections, runErr := runner.Run(ctx, target, *scenariosDir, registry, options)
 	info.FinishedAt = time.Now()
@@ -144,18 +131,6 @@ func failedCount(sections map[string]core.Section) int {
 		}
 	}
 	return failed
-}
-
-func clockOffset(ctx context.Context, kubeconfig string) (int64, error) {
-	kube, err := client.Kube(kubeconfig)
-	if err != nil {
-		return 0, err
-	}
-	offset, err := measure.ClockOffset(ctx, kube, clockProbeNamespace)
-	if err != nil {
-		return 0, fmt.Errorf("measuring the cluster clock offset: %w", err)
-	}
-	return offset.Milliseconds(), nil
 }
 
 func buildRegistry(suites ...core.Suite) map[string]core.Suite {

@@ -7,6 +7,7 @@ package measure
 
 import (
 	"errors"
+	"slices"
 	"testing"
 	"time"
 )
@@ -42,48 +43,52 @@ func TestFailedSubmissionCountsOnlyInTheApiAcceptedSpanAndNeverAsZero(t *testing
 	}
 }
 
-func TestMissingArrivalsArePendingNotZero(t *testing.T) {
+func TestMissingArrivalsAreNeverArrivedNotZero(t *testing.T) {
 	s := CollectSpans([]Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3)}})
 
 	if s.ClusterSynced[0].Outcome != Arrived {
 		t.Fatalf("the runner did arrive: %+v", s.ClusterSynced[0])
 	}
 	for name, timings := range map[string][]Timing{"podCreated": s.PodCreated, "ttj": s.TTJ} {
-		if timings[0].Outcome != Pending || timings[0].Duration != 0 {
-			t.Errorf("%s span without a pod must be pending with no duration, got %+v", name, timings[0])
+		if timings[0].Outcome != NeverArrived || timings[0].Duration != 0 {
+			t.Errorf("%s span without a pod must be marked never arrived with no duration, got %+v", name, timings[0])
 		}
 	}
-	if got := Stats(s.TTJ); got.PendingCount != 1 || got.SampleSize != 0 {
-		t.Fatalf("pending must stay out of the percentiles: %+v", got)
+	if got := Stats(s.TTJ); got.NeverArrivedCount != 1 || got.SampleSize != 0 {
+		t.Fatalf("never arrived must stay out of the percentiles: %+v", got)
 	}
 }
 
-func TestSpansAreConsistentByConstructionAndACorrelationBugIsCaught(t *testing.T) {
-	good := CollectSpans([]Submission{
-		{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3), PodCreatedAt: at(5.3)},
-		{Name: "w2", RequestedAt: at(0.5), ApiAcceptedAt: at(0.7), ClusterSyncedAt: at(1.0), PodCreatedAt: at(1.4)},
-	})
-	if names := good.Inconsistent(0); len(names) != 0 {
-		t.Fatalf("Spans from the same stamps must add up exactly, got mismatches %v", names)
+func TestOutOfOrderReportsEventsSeenBeforeTheStepThatPrecedesThem(t *testing.T) {
+	submissions := []Submission{
+		{Name: "in-order", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3), PodCreatedAt: at(5.3)},
+		{Name: "runner-before-accept", RequestedAt: at(0), ApiAcceptedAt: at(3.0), ClusterSyncedAt: at(0.8), PodCreatedAt: at(4.0)},
+		{Name: "pod-before-runner", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(5.0), PodCreatedAt: at(2.0)},
+		{Name: "both-before-accept", RequestedAt: at(0), ApiAcceptedAt: at(6.0), ClusterSyncedAt: at(2.0), PodCreatedAt: at(2.5)},
+		{Name: "rejected", RequestedAt: at(0), Err: errors.New("HTTP 429")},
+		{Name: "never-synced", RequestedAt: at(0), ApiAcceptedAt: at(0.3)},
 	}
 
-	bad := good
-	bad.PodCreated = []Timing{arrived("w1", at(2.3), at(9.3)), good.PodCreated[1]}
-	if names := bad.Inconsistent(time.Second); len(names) != 1 || names[0] != "w1" {
-		t.Fatalf("a job span that does not belong to its workspace must be reported, got %v", names)
+	names := OutOfOrder(submissions, time.Second)
+
+	if want := []string{"runner-before-accept", "pod-before-runner", "both-before-accept"}; !slices.Equal(names, want) {
+		t.Fatalf("every workload whose cluster event was seen before the step before it must be reported, want %v got %v", want, names)
+	}
+	if ttj := CollectSpans(submissions).TTJ[3]; ttj.Duration != 0 {
+		t.Fatalf("a pod seen before the 200 is a zero ttj, never negative, and only OutOfOrder exposes it: %+v", ttj)
 	}
 }
 
-func TestClusterSyncedBeforeTheAcceptIsClampedAndToleratedWithinTheGap(t *testing.T) {
-	s := CollectSpans([]Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(1.0), ClusterSyncedAt: at(0.8), PodCreatedAt: at(3.0)}})
+func TestOutOfOrderToleratesSmallSlipsBetweenTheTwoClocks(t *testing.T) {
+	submissions := []Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(1.0), ClusterSyncedAt: at(0.8), PodCreatedAt: at(3.0)}}
 
-	if s.ClusterSynced[0].Duration != 0 {
+	if s := CollectSpans(submissions); s.ClusterSynced[0].Duration != 0 {
 		t.Fatalf("a WorkloadRunner that appears before the 200 is a zero span, never negative: %+v", s.ClusterSynced[0])
 	}
-	if names := s.Inconsistent(200 * time.Millisecond); len(names) != 0 {
-		t.Fatalf("a tolerance covering the clamped 200ms must accept it, got %v", names)
+	if names := OutOfOrder(submissions, 200*time.Millisecond); len(names) != 0 {
+		t.Fatalf("a tolerance covering the 200ms slip must accept it, got %v", names)
 	}
-	if names := s.Inconsistent(100 * time.Millisecond); len(names) != 1 {
+	if names := OutOfOrder(submissions, 100*time.Millisecond); len(names) != 1 {
 		t.Fatalf("a tighter tolerance must report it, got %v", names)
 	}
 }

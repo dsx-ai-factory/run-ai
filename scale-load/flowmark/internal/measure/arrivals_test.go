@@ -84,8 +84,8 @@ func TestArrivalsLeaveStampsEmptyWhenNothingArrives(t *testing.T) {
 	if !filled[0].ClusterSyncedAt.IsZero() || !filled[0].PodCreatedAt.IsZero() {
 		t.Fatalf("nothing arrived, stamps must stay empty: %+v", filled[0])
 	}
-	if spans := CollectSpans(filled); spans.TTJ[0].Outcome != Pending {
-		t.Fatalf("a workspace that never reached the cluster is pending, got %+v", spans.TTJ[0])
+	if spans := CollectSpans(filled); spans.TTJ[0].Outcome != NeverArrived {
+		t.Fatalf("a workspace that never reached the cluster is marked never arrived, got %+v", spans.TTJ[0])
 	}
 }
 

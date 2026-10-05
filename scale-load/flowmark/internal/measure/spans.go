@@ -44,7 +44,7 @@ func CollectSpans(submissions []Submission) Spans {
 
 func span(name string, from, to time.Time) Timing {
 	if from.IsZero() || to.IsZero() {
-		return Timing{Name: name, Outcome: Pending, Created: from}
+		return Timing{Name: name, Outcome: NeverArrived, Created: from}
 	}
 	return arrived(name, from, to)
 }
@@ -53,28 +53,21 @@ func arrived(name string, from, to time.Time) Timing {
 	return Timing{Name: name, Outcome: Arrived, Created: from, Arrived: to, Duration: max(to.Sub(from), 0)}
 }
 
-func (s Spans) Inconsistent(tolerance time.Duration) []string {
-	syncedByName := indexByName(s.ClusterSynced)
-	createdByName := indexByName(s.PodCreated)
+func OutOfOrder(submissions []Submission, tolerance time.Duration) []string {
 	var names []string
-	for _, whole := range s.TTJ {
-		if whole.Outcome != Arrived {
+	for _, s := range submissions {
+		if !s.Accepted() {
 			continue
 		}
-		parts := syncedByName[whole.Name].Duration + createdByName[whole.Name].Duration
-		if gap := parts - whole.Duration; gap > tolerance || gap < -tolerance {
-			names = append(names, whole.Name)
+		if seenTooEarly(s.ClusterSyncedAt, s.ApiAcceptedAt, tolerance) || seenTooEarly(s.PodCreatedAt, s.ClusterSyncedAt, tolerance) {
+			names = append(names, s.Name)
 		}
 	}
 	return names
 }
 
-func indexByName(timings []Timing) map[string]Timing {
-	indexed := make(map[string]Timing, len(timings))
-	for _, timing := range timings {
-		indexed[timing.Name] = timing
-	}
-	return indexed
+func seenTooEarly(event, previous time.Time, tolerance time.Duration) bool {
+	return !event.IsZero() && !previous.IsZero() && previous.Sub(event) > tolerance
 }
 
 func SuccessRate(submissions []Submission) float64 {

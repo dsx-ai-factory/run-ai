@@ -10,12 +10,14 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -31,6 +33,7 @@ import (
 const (
 	deploymentType       = "Deployment"
 	trainingType         = "Training"
+	workspaceType        = "Workspace"
 	defaultImage         = "registry.k8s.io/pause:3.9"
 	defaultConcurrency   = 16
 	maxConcurrency       = 64
@@ -174,8 +177,8 @@ func describeRound(r round) string {
 	if summary.HasThroughput() {
 		text += fmt.Sprintf(", %.1f workloads/s", summary.Throughput)
 	}
-	if summary.PendingCount > 0 {
-		text += fmt.Sprintf(", %d pending", summary.PendingCount)
+	if summary.NeverArrivedCount > 0 {
+		text += fmt.Sprintf(", %d never arrived", summary.NeverArrivedCount)
 	}
 	if summary.FailedCount > 0 {
 		text += fmt.Sprintf(", %d failed", summary.FailedCount)
@@ -193,10 +196,10 @@ func describeRound(r round) string {
 }
 
 func newFlow(workloadType string, clients *client.Clients, project submit.ProjectRef, concurrency int) workloadFlow {
-	if workloadType == trainingType {
-		return &trainingFlow{clients: clients, project: project, concurrency: concurrency, created: map[string]string{}, deleteRequested: map[string]bool{}}
+	if workloadType == deploymentType {
+		return &deploymentFlow{kube: clients.Kube, concurrency: concurrency}
 	}
-	return &deploymentFlow{kube: clients.Kube, concurrency: concurrency}
+	return &controlPlaneFlow{workloadType: workloadType, clients: clients, project: project, concurrency: concurrency, created: map[string]string{}, deleteRequested: map[string]bool{}}
 }
 
 func parseSettings(scenario core.Scenario) (settings, error) {
@@ -276,12 +279,12 @@ func parseSettings(scenario core.Scenario) (settings, error) {
 		if pods < 0 || pods > maxPodsPerWorkload {
 			return settings{}, fmt.Errorf("podsPerWorkload must be between 0 and %d, got %d", maxPodsPerWorkload, pods)
 		}
-	case trainingType:
+	case trainingType, workspaceType:
 		if pods != 1 {
-			return settings{}, fmt.Errorf("podsPerWorkload must be 1 for %s, got %d", trainingType, pods)
+			return settings{}, fmt.Errorf("podsPerWorkload must be 1 for %s, got %d", knobs.workloadType, pods)
 		}
 	default:
-		return settings{}, fmt.Errorf("workloadType %q is not supported, use %s or %s", knobs.workloadType, deploymentType, trainingType)
+		return settings{}, fmt.Errorf("workloadType %q is not supported, use %s, %s or %s", knobs.workloadType, deploymentType, trainingType, workspaceType)
 	}
 	knobs.pods = int32(pods) //nolint:gosec
 	return knobs, nil
@@ -426,11 +429,10 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 		at := fmt.Sprintf("@%d", r.size)
 		summary := measure.Stats(r.timings)
 		metrics["sample_size"+at] = summary.SampleSize
-		metrics["pending_count"+at] = summary.PendingCount
+		metrics["never_arrived_count"+at] = summary.NeverArrivedCount
 		metrics["failed_count"+at] = summary.FailedCount
 		metrics["success_rate"+at] = summary.SuccessRate
 		metrics["unmatched_arrivals"+at] = r.unmatched
-		metrics["measurement_interruptions"+at] = r.interruptions
 		metrics["submit_makespan_ms"+at] = r.submitMakespan.Milliseconds()
 		metrics["quiesce_ms"+at] = r.quiesce.Milliseconds()
 		if summary.SampleSize > 0 {
@@ -460,10 +462,10 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 
 func roundProblems(r round, summary measure.Summary) []string {
 	var problems []string
-	if summary.PendingCount > 0 {
-		message := fmt.Sprintf("round %d (%d workloads): %d never reached the cluster within the timeout", r.index, r.size, summary.PendingCount)
-		if err := lastError(r.timings, measure.Pending); errors.Is(err, measure.ErrWatchClosed) {
-			message = fmt.Sprintf("round %d (%d workloads): the watch ended before %d arrived (%v)", r.index, r.size, summary.PendingCount, err)
+	if summary.NeverArrivedCount > 0 {
+		message := fmt.Sprintf("round %d (%d workloads): %d never reached the cluster within the timeout", r.index, r.size, summary.NeverArrivedCount)
+		if err := lastError(r.timings, measure.NeverArrived); errors.Is(err, measure.ErrWatchClosed) {
+			message = fmt.Sprintf("round %d (%d workloads): the watch ended before %d arrived (%v)", r.index, r.size, summary.NeverArrivedCount, err)
 		} else if err != nil {
 			message += " (" + err.Error() + ")"
 		}
@@ -547,4 +549,163 @@ func countAllInNamespace(ctx context.Context, kube k8sclient.Client, kind schema
 		return 0, fmt.Errorf("listing %s objects: %w", kind.Kind, err)
 	}
 	return len(list.Items), nil
+}
+
+type deploymentFlow struct {
+	kube        k8sclient.WithWatch
+	concurrency int
+}
+
+func (*deploymentFlow) name() string {
+	return "deployment_to_external_workload"
+}
+
+func (f *deploymentFlow) watch(ctx context.Context, namespace string) (*measure.Watcher, error) {
+	return measure.WatchExternalWorkloads(ctx, f.kube, namespace)
+}
+
+func (f *deploymentFlow) create(ctx context.Context, workload item) (string, error) {
+	deployment, err := submit.K8sDeployment(ctx, f.kube, submit.DeploymentSpec{
+		Name: workload.name, Namespace: workload.namespace, Image: workload.image, Replicas: workload.pods, Labels: workload.labels,
+	})
+	if err != nil {
+		return "", err
+	}
+	return string(deployment.UID), nil
+}
+
+func (f *deploymentFlow) teardown(ctx context.Context, namespace string, labels map[string]string) (int, error) {
+	var deployments appsv1.DeploymentList
+	if err := f.kube.List(ctx, &deployments, k8sclient.InNamespace(namespace), k8sclient.MatchingLabels(labels)); err != nil {
+		return 0, fmt.Errorf("listing the round's deployments: %w", err)
+	}
+	targets := make([]k8sclient.Object, 0, len(deployments.Items))
+	for i := range deployments.Items {
+		if deployments.Items[i].DeletionTimestamp == nil {
+			targets = append(targets, &deployments.Items[i])
+		}
+	}
+	if err := deleteAll(ctx, f.concurrency, targets, func(ctx context.Context, obj k8sclient.Object) error {
+		return k8sclient.IgnoreNotFound(f.kube.Delete(ctx, obj))
+	}); err != nil {
+		return len(deployments.Items), err
+	}
+	external, err := countAllInNamespace(ctx, f.kube, measure.ExternalWorkloadKind, namespace)
+	if err != nil {
+		return len(deployments.Items), err
+	}
+	return len(deployments.Items) + external, nil
+}
+
+type controlPlaneFlow struct {
+	workloadType string
+	clients      *client.Clients
+	project      submit.ProjectRef
+	concurrency  int
+
+	mu              sync.Mutex
+	created         map[string]string
+	deleteRequested map[string]bool
+}
+
+func (f *controlPlaneFlow) name() string {
+	return strings.ToLower(f.workloadType) + "_to_workload_runner"
+}
+
+func (f *controlPlaneFlow) watch(ctx context.Context, namespace string) (*measure.Watcher, error) {
+	return measure.WatchWorkloads(ctx, f.clients.Kube, namespace)
+}
+
+func (f *controlPlaneFlow) create(ctx context.Context, workload item) (string, error) {
+	spec := submit.WorkloadSpec{Name: workload.name, Project: f.project, Image: workload.image, Labels: workload.labels}
+	var ref submit.WorkloadRef
+	var err error
+	if f.workloadType == workspaceType {
+		ref, err = submit.Workspace(ctx, f.clients, spec)
+	} else {
+		ref, err = submit.Training(ctx, f.clients, spec)
+	}
+	if err != nil {
+		return "", err
+	}
+	f.mu.Lock()
+	f.created[ref.ID] = ref.Name
+	f.mu.Unlock()
+	return ref.Name, nil
+}
+
+func (f *controlPlaneFlow) teardown(ctx context.Context, namespace string, _ map[string]string) (int, error) {
+	listed, err := submit.ProjectWorkloadIDs(ctx, f.clients, f.project.ID, f.workloadType)
+	if err != nil {
+		return 0, err
+	}
+	f.mu.Lock()
+	if f.deleteRequested == nil {
+		f.deleteRequested = map[string]bool{}
+	}
+	for _, id := range listed {
+		if _, known := f.created[id]; !known {
+			f.created[id] = ""
+		}
+	}
+	var pending []string
+	for id := range f.created {
+		if !f.deleteRequested[id] {
+			pending = append(pending, id)
+		}
+	}
+	f.mu.Unlock()
+
+	errs := f.deleteWorkloads(ctx, pending)
+	f.mu.Lock()
+	remaining := len(f.created) - len(f.deleteRequested)
+	f.mu.Unlock()
+	if len(errs) > 0 {
+		return remaining, errors.Join(errs...)
+	}
+	runners, err := countAllInNamespace(ctx, f.clients.Kube, measure.WorkloadRunnerKind, namespace)
+	if err != nil {
+		return remaining, err
+	}
+	return remaining + runners, nil
+}
+
+func (f *controlPlaneFlow) deleteWorkloads(ctx context.Context, ids []string) []error {
+	var errs []error
+	var errsMu sync.Mutex
+	jobs := make(chan string)
+	var wg sync.WaitGroup
+	for range f.concurrency {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for id := range jobs {
+				response, err := f.delete(ctx, id)
+				if err != nil && (response == nil || response.StatusCode != http.StatusNotFound) {
+					errsMu.Lock()
+					errs = append(errs, fmt.Errorf("deleting %s %s: %w", strings.ToLower(f.workloadType), id, err))
+					errsMu.Unlock()
+					continue
+				}
+				f.mu.Lock()
+				f.deleteRequested[id] = true
+				f.mu.Unlock()
+			}
+		}()
+	}
+	for _, id := range ids {
+		jobs <- id
+	}
+	close(jobs)
+	wg.Wait()
+	return errs
+}
+
+func (f *controlPlaneFlow) delete(ctx context.Context, id string) (*http.Response, error) {
+	if f.workloadType == workspaceType {
+		_, response, err := f.clients.Workloads.WorkspacesAPI.DeleteWorkspace(ctx, id).Execute()
+		return response, err
+	}
+	_, response, err := f.clients.Workloads.TrainingsAPI.DeleteTraining(ctx, id).Execute()
+	return response, err
 }

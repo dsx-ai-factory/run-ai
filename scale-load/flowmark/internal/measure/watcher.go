@@ -33,9 +33,9 @@ var reconnectDelay = time.Second
 type Outcome string
 
 const (
-	Arrived Outcome = "arrived"
-	Pending Outcome = "pending"
-	Failed  Outcome = "failed"
+	Arrived      Outcome = "arrived"
+	NeverArrived Outcome = "never_arrived"
+	Failed       Outcome = "failed"
 )
 
 var WorkloadRunnerKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
@@ -339,7 +339,7 @@ func (w *Watcher) timings() []Timing {
 			timing.Arrived = w.arrived[name]
 			timing.Duration = max(timing.Arrived.Sub(t0), 0)
 		default:
-			timing.Outcome = Pending
+			timing.Outcome = NeverArrived
 			timing.Err = w.closed
 		}
 		result = append(result, timing)
