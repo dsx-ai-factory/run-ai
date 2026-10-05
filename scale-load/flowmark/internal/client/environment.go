@@ -88,16 +88,20 @@ func (c *Clients) Environment(ctx context.Context, clusterName string) (Environm
 	}, nil
 }
 
-func (c *Clients) ControlPlaneVersion(ctx context.Context) (string, error) {
+func (c *Clients) ControlPlaneVersion(ctx context.Context) (version string, err error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+versionPath, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("building the control plane version request: %w", err)
 	}
 	response, err := c.http.Do(request)
 	if err != nil {
 		return "", fmt.Errorf("reading the control plane version: %w", err)
 	}
-	defer func() { _ = response.Body.Close() }()
+	defer func() {
+		if closeErr := response.Body.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("closing the control plane version response: %w", closeErr)
+		}
+	}()
 	if response.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("reading the control plane version: %s", response.Status)
 	}

@@ -473,7 +473,8 @@ func roundProblems(r round, summary measure.Summary) []string {
 		problems = append(problems, message)
 	}
 	if r.interruptions > 0 {
-		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the measurement was interrupted %d times: the cluster watch closed and was reopened; latencies of workloads in flight during the gaps are inflated", r.index, r.size, r.interruptions))
+		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the measurement was interrupted %d times: the cluster watch closed and was reopened; "+
+			"latencies of workloads in flight during the gaps are inflated", r.index, r.size, r.interruptions))
 	}
 	if summary.FailedCount > 0 {
 		message := fmt.Sprintf("round %d (%d workloads): %d creates failed", r.index, r.size, summary.FailedCount)

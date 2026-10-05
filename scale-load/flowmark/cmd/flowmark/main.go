@@ -44,6 +44,7 @@ func run() error {
 	outputDir := flag.String("output", "./reports", "directory that receives results-<timestamp>.json and manifest.json")
 	kubeconfig := flag.String("kubeconfig", os.Getenv("KUBECONFIG"), "path to kubeconfig of the cluster under test (default $KUBECONFIG)")
 	cpURL := flag.String("cp-url", os.Getenv("FLOWMARK_CP_URL"), "control plane URL (default $FLOWMARK_CP_URL; credentials via FLOWMARK_CP_USER and FLOWMARK_CP_PASSWORD, or FLOWMARK_CP_TOKEN)")
+	cluster := flag.String("cluster", os.Getenv("FLOWMARK_CLUSTER"), "cluster name on the control plane whose versions are recorded, needed when it has several (default $FLOWMARK_CLUSTER)")
 	provider := flag.String("provider", "local", "who provided the environment, e.g. ci or kind")
 	clusterType := flag.String("cluster-type", "", "cluster class recorded with the results so runs are compared like with like (default: detected, e.g. vanilla-fake-gpu)")
 	cpVersion := flag.String("cp-version", "", "control plane version to record (default: read from the control plane)")
@@ -80,7 +81,7 @@ func run() error {
 		ClusterVersion:      *clusterVersion,
 	}
 	if target.ControlPlaneURL != "" {
-		describeEnvironment(ctx, target, &info)
+		describeEnvironment(ctx, target, *cluster, &info)
 	}
 	if target.KubeconfigPath != "" {
 		offset, err := clockOffset(ctx, target.KubeconfigPath)
@@ -112,18 +113,18 @@ func run() error {
 	return runErr
 }
 
-func describeEnvironment(ctx context.Context, target core.Target, info *report.RunInfo) {
+func describeEnvironment(ctx context.Context, target core.Target, cluster string, info *report.RunInfo) {
 	clients, err := client.New(ctx, target)
 	if err != nil {
 		log.Printf("environment not described: %v", err)
 		return
 	}
-	environment, err := clients.Environment(ctx, "")
+	environment, err := clients.Environment(ctx, cluster)
 	if err != nil {
 		log.Printf("environment not described: %v", err)
 		return
 	}
-	log.Printf("environment: %s", environment)
+	log.Printf("environment: %s", environment) //nolint:gosec
 	if info.ControlPlaneVersion == "" {
 		info.ControlPlaneVersion = environment.ControlPlaneVersion
 	}
