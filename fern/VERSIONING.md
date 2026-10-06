@@ -38,22 +38,22 @@ Where it runs:
 Until the cutover, the newest entry is labeled `v<X.Y>` and built from `main`,
 so `<X.Y+1>` docs merged to `main` publish under that label. Do the cutover in
 one PR to `main` when the `<X.Y+1>` docs should go public; `release-<X.Y>` must
-already exist. The example below is the 3.0 → 3.1 cutover:
+already exist.
 
 1. In `fern/docs.yml`, for **each** product (`self-hosted`, `multi-tenant`):
-   - Repoint the `v3.0` entry from `products/<product>.yml` to
-     `versions/v3.0/fern/products/<product>.yml`.
-   - Add a `v3.1` entry at the top of `versions:` with
+   - Repoint the `v<X.Y>` entry from `products/<product>.yml` to
+     `versions/v<X.Y>/fern/products/<product>.yml`.
+   - Add a `v<X.Y+1>` entry at the top of `versions:` with
      `path: products/<product>.yml`. The first entry is the default version.
 
    ```yaml
    versions:
-     - display-name: "v3.1"
-       slug: v3.1
+     - display-name: "v<X.Y+1>"
+       slug: v<X.Y+1>
        path: products/self-hosted.yml
-     - display-name: "v3.0"
-       slug: v3.0
-       path: versions/v3.0/fern/products/self-hosted.yml
+     - display-name: "v<X.Y>"
+       slug: v<X.Y>
+       path: versions/v<X.Y>/fern/products/self-hosted.yml
    ```
 
 2. Verify locally:
@@ -64,13 +64,13 @@ already exist. The example below is the 3.0 → 3.1 cutover:
    (cd fern && fern check && fern docs dev)
    ```
 
-   In the preview, open a page under `/<product>/v3.0/` and confirm its links
-   stay under `/<product>/v3.0/`.
+   In the preview, open a page under `/<product>/v<X.Y>/` and confirm its links
+   stay under `/<product>/v<X.Y>/`.
 
-3. Make sure `release-3.0` carries `tools/materialize-fern-versions.sh`,
+3. Make sure `release-<X.Y>` carries `tools/materialize-fern-versions.sh`,
    `tools/check-fern-nav.py`, and the current `fern-docs-ci.yaml`. A `push`
    workflow runs from the pushed branch's copy, so without them, docs pushes
-   to `release-3.0` are not validated against `main`. Branches cut from `main`
+   to `release-<X.Y>` are not validated against `main`. Branches cut from `main`
    after these files landed already have them.
 
 ## End of Life
