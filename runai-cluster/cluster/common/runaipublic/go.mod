@@ -13,7 +13,7 @@ require (
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.18.1 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 )

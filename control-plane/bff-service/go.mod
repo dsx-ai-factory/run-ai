@@ -3,20 +3,20 @@ module github.com/dsx-ai-factory/run-ai/control-plane/bff-service
 go 1.27.1
 
 require (
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.9
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.10
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.4
-	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.5
+	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.5
+	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.4
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.16
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.2
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.17
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.3
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
@@ -38,8 +38,8 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
@@ -59,7 +59,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.11.0 // indirect
-	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/jackc/puddle/v2 v2.2.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.20.1 // indirect
@@ -84,12 +84,12 @@ require (
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.71.0 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
-	github.com/redis/go-redis/v9 v9.22.0 // indirect
+	github.com/redis/go-redis/v9 v9.23.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/kafka-go v0.4.51 // indirect
-	github.com/shopspring/decimal v1.4.0 // indirect
+	github.com/shopspring/decimal v1.5.0 // indirect
 	github.com/sony/gobreaker v1.0.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
@@ -114,14 +114,14 @@ require (
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba // indirect
+	golang.org/x/exp v0.0.0-20261005173118-76772065c9b0 // indirect
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261005182115-fad411399dd8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8 // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect

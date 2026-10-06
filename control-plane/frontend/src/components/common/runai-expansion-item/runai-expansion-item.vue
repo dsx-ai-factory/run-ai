@@ -28,7 +28,7 @@
         </div>
         <div
           class="flex-1 runai-expansion-header-content-right justify-between text-weight-regular"
-          v-if="!isOpen || showSubHeader || hasStatusIcon"
+          v-if="!isOpen || showSubHeader || (showStatusIconWhenOpen && hasStatusIcon)"
         >
           <div class="flex-1 subheader" :aid="aidSubheader">
             <template v-if="!isOpen || showSubHeader">
@@ -131,6 +131,12 @@ export default defineComponent({
     sectionWarning: {
       type: Boolean as PropType<boolean>,
       required: false,
+      default: false,
+    },
+    // by default the status icon is shown only while collapsed, so untouched required fields
+    // in an open section do not look like errors; opt in for server-side states (e.g. expired certificate)
+    showStatusIconWhenOpen: {
+      type: Boolean as PropType<boolean>,
       default: false,
     },
     loading: {

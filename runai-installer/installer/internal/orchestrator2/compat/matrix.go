@@ -75,7 +75,7 @@ const latest = "3.0"
 var matrix = map[string]Locks{
 	"3.0": {
 		Prometheus:          "76.2.0",
-		GPUOperator:         "v26.7.0",
+		GPUOperator:         "v26.7.1",
 		GPUOperatorFake:     "0.0.62",
 		NetworkOperator:     "v26.7.0",
 		Knative:             "1.23.0",
@@ -83,7 +83,7 @@ var matrix = map[string]Locks{
 		MPIOperator:         "v0.8.2",
 		LWS:                 "0.10.0",
 		NIMOperator:         "3.1.2",
-		Grove:               "v0.1.0-alpha.10-rc1",
+		Grove:               "v0.1.0-alpha.12-rc1",
 		Dynamo:              "1.4.2",
 		NFD:                 "stable",
 		SRIOVOperator:       "stable",

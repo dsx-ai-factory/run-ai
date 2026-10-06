@@ -10,10 +10,10 @@ info:
     To create a service account, in your UI, go to Access → Service Accounts (for organization-level service accounts) or User settings → Access Keys (for user access keys), and create a new one.
 
     After you have created a new service account, you will need to assign it access rules.
-    To assign access rules to the service account, see [Create access rules](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/accessrules#create-or-delete-rules).
-    Make sure you assign the correct rules to your service account. Use the [Roles](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/roles) to assign the correct access rules.
+    To assign access rules to the service account, see [Create access rules](/run-ai/self-hosted/documentation/platform-management/authentication/access-rules).
+    Make sure you assign the correct rules to your service account. Use the [Roles](/run-ai/self-hosted/documentation/platform-management/authentication/roles) to assign the correct access rules.
 
-    To get your access token, follow the instructions in [Request a token](https://run-ai-docs.nvidia.com/self-hosted/latest/reference/api/rest-auth/#request-an-api-token).
+    To get your access token, follow the instructions in [Request a token](/run-ai/self-hosted/reference/rest-api/getting-started/how-to-authenticate-to-the-api#request-an-api-token).
   title: NVIDIA Run:ai
   x-logo:
     url: ./runai-logo-api.png

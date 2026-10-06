@@ -47,8 +47,8 @@ type AgentConfig struct {
 	// Webhook serving configuration for the project/department validating webhook.
 	CertDir     string `mapstructure:"CERT_DIR"`
 	WebhookPort int    `mapstructure:"WEBHOOK_PORT"`
-	// AllowedServiceAccounts is a comma-separated list of service account name
-	// patterns that are allowed to perform project/department operations.
+	// AllowedServiceAccounts is a comma-separated list of exact usernames allowed
+	// to perform project/department operations, including the namespace for service accounts.
 	AllowedServiceAccounts string `mapstructure:"ALLOWED_SERVICE_ACCOUNTS"`
 }
 

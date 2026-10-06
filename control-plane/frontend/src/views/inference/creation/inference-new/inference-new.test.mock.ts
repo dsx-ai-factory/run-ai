@@ -14,7 +14,7 @@ export const clusters: Array<DisplayedCluster> = [
     tenantId: 1001,
     name: "mdev3-1754230200",
     createdAt: "2025-08-03T14:10:00.521936Z",
-    domain: "https://mdev3.runailabs.com",
+    domain: "https://cluster-3.example.com",
     version: "0.0.0-10001470.master-63e91c5",
     status: {
       dependencies: {

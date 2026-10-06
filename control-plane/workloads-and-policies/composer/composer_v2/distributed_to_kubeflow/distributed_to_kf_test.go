@@ -1044,6 +1044,8 @@ func RunComposerTest(testDetails ComposerTest, basePath string) {
 
 	checkerErr = composer_v2.SetClusterDependentOptions(context.Background(), &options, clusterCapabilities)
 	Expect(checkerErr).To(BeNil(), "failed to set cluster dependent options")
+	// Existing snapshots cover clusters that still embed OAuth2 templates in the image.
+	options.OAuth2ProxyTemplatesSupported = false
 
 	requester := testDetails.requester
 	if requester == "" {

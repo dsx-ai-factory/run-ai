@@ -8,9 +8,9 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 )
@@ -50,7 +50,7 @@ require (
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.71.0 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
-	github.com/redis/go-redis/v9 v9.22.0 // indirect
+	github.com/redis/go-redis/v9 v9.23.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/kafka-go v0.4.51 // indirect

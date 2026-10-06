@@ -198,13 +198,13 @@ func TestControlPlaneURL(t *testing.T) {
 		wantErr string
 	}{
 		{name: "empty", in: "", wantErr: "--cp-url"},
-		{name: "no scheme", in: "cp.runailabs.com", wantErr: "must use https"},
-		{name: "plain http rejected", in: "http://cp.runailabs.com", wantErr: "must use https"},
+		{name: "no scheme", in: "cp.example.com", wantErr: "must use https"},
+		{name: "plain http rejected", in: "http://cp.example.com", wantErr: "must use https"},
 		{name: "no host", in: "https://", wantErr: "no host"},
-		{name: "embedded credentials rejected", in: "https://user:pw@cp.runailabs.com", wantErr: "must not contain"},
-		{name: "query rejected", in: "https://cp.runailabs.com?debug=1", wantErr: "must not contain"},
-		{name: "fragment rejected", in: "https://cp.runailabs.com#top", wantErr: "must not contain"},
-		{name: "https", in: "https://cp.runailabs.com", want: "https://cp.runailabs.com"},
+		{name: "embedded credentials rejected", in: "https://user:pw@cp.example.com", wantErr: "must not contain"},
+		{name: "query rejected", in: "https://cp.example.com?debug=1", wantErr: "must not contain"},
+		{name: "fragment rejected", in: "https://cp.example.com#top", wantErr: "must not contain"},
+		{name: "https", in: "https://cp.example.com", want: "https://cp.example.com"},
 		{name: "trailing slash trimmed", in: "https://cp.local/", want: "https://cp.local"},
 		{name: "path prefix kept", in: "https://cp.local/runai/", want: "https://cp.local/runai"},
 	}

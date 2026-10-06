@@ -136,8 +136,7 @@ func (bcf *BaseWorkloadControllerFactory) CreateController() (*JobController, er
 	serviceBuilder := common.NewServiceBuilder(bcf.client)
 	externalUrlBuilder := common.NewExternalsUrlsBuilder(bcf.client, bcf.isOpenshift)
 	pvcBuilder := common.NewPvcBuilder(bcf.client)
-	credentialsBuilder := common.NewCredentialsBuilder(bcf.client)
-	commonResourceBuilder := common.NewShardResourcesBuilder(serviceBuilder, externalUrlBuilder, pvcBuilder, credentialsBuilder)
+	commonResourceBuilder := common.NewShardResourcesBuilder(serviceBuilder, externalUrlBuilder, pvcBuilder)
 	statusUpdaterFactory, err := update.GetStatusUpdaterFactory(bcf.workloadType)
 	if err != nil {
 		// this should never happen

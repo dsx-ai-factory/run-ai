@@ -913,7 +913,7 @@ describe("workload.util", () => {
           name: "ChatbotUI",
           toolType: "chatbot-ui",
           connectionType: "ExternalUrl",
-          url: "https://mdev218.runailabs.com/p100/i100",
+          url: "https://cluster.example.com/p100/i100",
         },
       ];
       const result = workloadUtil._getWorkloadConnectionsForInference(connectionsMocks.inference, connections);
@@ -1056,7 +1056,7 @@ describe("workload.util", () => {
       it("should prefer environments[].connections[] over endpoints[] when both are present", () => {
         const currWorkload: Workload = {
           ...connectionsMocks.workspace,
-          endpoints: [{ host: "10.62.206.9", port: 32670, url: "https://mdev2.runailabs.com/p100/w100" }],
+          endpoints: [{ host: "10.62.206.9", port: 32670, url: "https://cluster-2.example.com/p100/w100" }],
         };
 
         const result = workloadUtil.getWorkloadConnectionsForGrid(currWorkload);

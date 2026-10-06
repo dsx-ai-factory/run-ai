@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 	schedulingv2alpha2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v2alpha2"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
@@ -361,6 +362,104 @@ var _ = Describe("Cluster-wide Secret replication", func() {
 
 		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: DefaultServiceAccountName, Namespace: cwTestProjectNamespace}, sa)).To(Succeed())
 		Expect(sa.ImagePullSecrets).To(BeEmpty())
+	})
+})
+
+var _ = Describe("Cluster-wide OAuth2 template ConfigMap replication", func() {
+	var (
+		k8sClient client.Client
+		handler   *ClusterWideReplicatedResourceHandler
+		project   *kaiorg.Project
+		source    *corev1.ConfigMap
+		ctx       context.Context
+	)
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		project = cwTestProject()
+		source = &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: oauth2proxy.ConfigMapName, Namespace: cwTestSchedulerNamespace,
+				Labels: map[string]string{commonconstants.ClusterWideResourceLabel: "true"},
+			},
+			Data: map[string]string{oauth2proxy.TemplateKey: "<html>Run:ai error</html>"},
+		}
+		scheme := scheme_init.Scheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		k8sClient = fake.NewClientBuilder().WithScheme(scheme).
+			WithStatusSubresource(&kaiorg.Project{}).
+			WithObjects(project.DeepCopy(), &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{Name: cwTestProjectNamespace},
+			}).Build()
+		gvkCommon, err := NewClusterWideGVKCommon(ctx, k8sClient,
+			&ClusterWideReplicatorGVKConfig{ClusterWideConfigMaps: true})
+		Expect(err).To(Succeed())
+		handler = NewClusterWideReplicatedResourceHandler(k8sClient, gvkCommon)
+		Expect(k8sClient.Create(ctx, source)).To(Succeed())
+	})
+
+	It("replicates the source to existing and subsequently created project namespaces when reconciled", func() {
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		replica := &corev1.ConfigMap{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: source.Name, Namespace: project.Status.Namespace}, replica)).To(Succeed())
+		Expect(replica.Data).To(Equal(source.Data))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, project.Name))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectIdLabelKey, string(project.UID)))
+		Expect(replica.OwnerReferences).To(BeEmpty())
+
+		newProject := cwTestProject()
+		newProject.Name, newProject.UID, newProject.Status.Namespace = "proj-2", "proj-2-uid", "ns-proj-2"
+		Expect(k8sClient.Create(ctx, newProject)).To(Succeed())
+		Expect(k8sClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: newProject.Status.Namespace}})).To(Succeed())
+		Expect(handler.HandleResource(ctx, *newProject)).To(Succeed())
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: source.Name, Namespace: newProject.Status.Namespace}, replica)).To(Succeed())
+		Expect(replica.Data).To(Equal(source.Data))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, newProject.Name))
+	})
+
+	It("propagates source changes on the next project reconcile", func() {
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		source.Data[oauth2proxy.TemplateKey] = "<html>Updated Run:ai error</html>"
+		Expect(k8sClient.Update(ctx, source)).To(Succeed())
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		replica := &corev1.ConfigMap{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: source.Name, Namespace: project.Status.Namespace}, replica)).To(Succeed())
+		Expect(replica.Data).To(Equal(source.Data))
+	})
+
+	It("adopts an ownerless existing copy even when its template already matches", func() {
+		existing := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: source.Name, Namespace: project.Status.Namespace, UID: "existing-template-uid",
+			},
+			Data: source.DeepCopy().Data,
+		}
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		replica := &corev1.ConfigMap{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), replica)).To(Succeed())
+		Expect(replica.UID).To(Equal(existing.UID))
+		Expect(replica.Data).To(Equal(source.Data))
+		Expect(replica.Labels).To(HaveKeyWithValue(commonconstants.ClusterWideResourceLabel, "true"))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, project.Name))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectIdLabelKey, string(project.UID)))
+		Expect(replica.OwnerReferences).To(BeEmpty())
+	})
+
+	It("preserves a project template marked as manually overridden", func() {
+		existing := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: source.Name, Namespace: project.Status.Namespace,
+				Labels: map[string]string{ResourceManualOverrideLabel: "true"},
+			},
+			Data: map[string]string{oauth2proxy.TemplateKey: "<html>Project error</html>"},
+		}
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		replica := &corev1.ConfigMap{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), replica)).To(Succeed())
+		Expect(replica.Data).To(Equal(existing.Data))
+		Expect(replica.Labels).NotTo(HaveKey(replicatedProjectNameLabelKey))
 	})
 })
 
