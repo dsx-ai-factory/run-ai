@@ -74,3 +74,5 @@ runai-application-packages/validation/coverage.out
 **/bin/*-arm64
 
 **/.gradle
+# Fern versioned docs, generated from release branches by tools/materialize-fern-versions.sh
+/fern/versions/
