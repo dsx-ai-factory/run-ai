@@ -205,4 +205,28 @@ describe("runai-expansion-item", () => {
     expect(footerEl.exists()).toBe(true);
     expect(footerEl.html()).toContain(footerContent);
   });
+
+  describe("status icon while open", () => {
+    const mountOpen = (props: Record<string, unknown>) =>
+      mount(RunaiExpansionItem, {
+        global: { plugins: [Quasar] },
+        slots: { default: "<div>content</div>" },
+        props: { label: "Default", defaultOpened: true, ...props },
+      });
+
+    it("should not show the invalid icon in an open section by default", () => {
+      const cmp = mountOpen({ sectionInvalid: true });
+      expect(cmp.find(".ph-warning-circle").exists()).toBe(false);
+    });
+
+    it("should show the invalid icon in an open section when showStatusIconWhenOpen is true", () => {
+      const cmp = mountOpen({ sectionInvalid: true, showStatusIconWhenOpen: true });
+      expect(cmp.find(".ph-warning-circle").exists()).toBe(true);
+    });
+
+    it("should show the warning icon in an open section when showStatusIconWhenOpen is true", () => {
+      const cmp = mountOpen({ sectionWarning: true, showStatusIconWhenOpen: true });
+      expect(cmp.find(".ph-warning-circle").exists()).toBe(true);
+    });
+  });
 });
