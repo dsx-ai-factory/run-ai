@@ -75,14 +75,31 @@ func TestLoadHistoryReturnsEverythingWhenShorterThanTheWindow(t *testing.T) {
 	}
 }
 
-func TestLoadHistoryIsEmptyWithoutAManifestOrWithoutAWindow(t *testing.T) {
+func TestLoadHistoryIsEmptyWithoutAManifestAWindowOrAClusterType(t *testing.T) {
 	store := newFakeStore()
 	if history, err := LoadHistory(context.Background(), store, kindCluster, 7); err != nil || history != nil {
 		t.Fatalf("no manifest means no history and no error, got %v / %v", history, err)
 	}
-	publishAll(t, store, nightlyDocument(1, kindCluster, 5000))
+	publishAll(t, store, nightlyDocument(1, kindCluster, 5000), nightlyDocument(2, "", 5000))
 	if history, err := LoadHistory(context.Background(), store, kindCluster, 0); err != nil || history != nil {
 		t.Fatalf("a zero window disables history, got %v / %v", history, err)
+	}
+	if history, err := LoadHistory(context.Background(), store, "", 7); err != nil || history != nil {
+		t.Fatalf("an unknown cluster type must not be matched against runs that also lack one, got %v / %v", history, err)
+	}
+}
+
+func TestLoadHistoryOrdersRunsByTheirTimestampNotByManifestOrder(t *testing.T) {
+	store := newFakeStore()
+	publishAll(t, store, nightlyDocument(3, kindCluster, 3), nightlyDocument(1, kindCluster, 1), nightlyDocument(2, kindCluster, 2))
+
+	history, err := LoadHistory(context.Background(), store, kindCluster, 2)
+
+	if err != nil || len(history) != 2 {
+		t.Fatalf("want the 2 newest runs, got %d (%v)", len(history), err)
+	}
+	if history[0].Metadata.Date.Day() != 2 || history[1].Metadata.Date.Day() != 3 {
+		t.Fatalf("a run that finished late must not hide newer runs appended before it, got days %d and %d", history[0].Metadata.Date.Day(), history[1].Metadata.Date.Day())
 	}
 }
 

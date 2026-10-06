@@ -14,7 +14,7 @@ import (
 )
 
 func LoadHistory(ctx context.Context, store Store, clusterType string, window int) ([]Document, error) {
-	if window <= 0 {
+	if window <= 0 || clusterType == "" {
 		return nil, nil
 	}
 	current, err := store.Get(ctx, ManifestName)
@@ -29,9 +29,11 @@ func LoadHistory(ctx context.Context, store Store, clusterType string, window in
 		return nil, fmt.Errorf("parse manifest: %w", err)
 	}
 
+	runs := slices.Clone(manifest.Runs)
+	slices.Sort(runs)
 	var history []Document
-	for i := len(manifest.Runs) - 1; i >= 0 && len(history) < window; i-- {
-		name := manifest.Runs[i]
+	for i := len(runs) - 1; i >= 0 && len(history) < window; i-- {
+		name := runs[i]
 		data, err := store.Get(ctx, name)
 		if err != nil {
 			return nil, fmt.Errorf("read history %s: %w", name, err)

@@ -45,18 +45,24 @@ func DetectRegressions(document Document, history []Document, config RegressionC
 	judged.Regressions = nil
 	for name, section := range document.Sections {
 		metrics := maps.Clone(section.Metrics)
+		found := map[string][]Regression{}
 		for _, metric := range kpis(section.Metrics) {
 			value, _ := number(section.Metrics[metric])
-			found := judgeAgainstMedian(name, metric, value, history, config)
-			if slo, ok := number(section.Metrics[sloKey(metric)]); ok && value > slo {
-				found = append(found, Regression{
+			found[metric] = append(found[metric], judgeAgainstMedian(name, metric, value, history, config)...)
+		}
+		for _, metric := range withSLO(section.Metrics) {
+			value, _ := number(section.Metrics[metric])
+			if slo, _ := number(section.Metrics[sloKey(metric)]); value > slo {
+				found[metric] = append(found[metric], Regression{
 					Section: name, Metric: metric, Value: value, Baseline: slo, Against: AgainstSLO,
 					Message: fmt.Sprintf("%s %s: %s is over the SLO of %s", name, metric, milliseconds(value), milliseconds(slo)),
 				})
 			}
-			if len(found) > 0 {
+		}
+		for metric, regressions := range found {
+			if len(regressions) > 0 {
 				metrics[metric+regressionSuffix] = true
-				judged.Regressions = append(judged.Regressions, found...)
+				judged.Regressions = append(judged.Regressions, regressions...)
 			}
 		}
 		section.Metrics = metrics
@@ -94,9 +100,17 @@ func judgeAgainstMedian(section, metric string, value float64, history []Documen
 }
 
 func kpis(metrics map[string]any) []string {
+	return measured(metrics, func(name string) bool { return strings.Contains(name, kpiMarker) })
+}
+
+func withSLO(metrics map[string]any) []string {
+	return measured(metrics, func(name string) bool { _, ok := number(metrics[sloKey(name)]); return ok })
+}
+
+func measured(metrics map[string]any, keep func(name string) bool) []string {
 	var names []string
 	for name, value := range metrics {
-		if _, ok := number(value); !ok || !strings.Contains(name, kpiMarker) || strings.HasPrefix(name, sloPrefix) || strings.HasSuffix(name, regressionSuffix) {
+		if _, ok := number(value); !ok || strings.HasPrefix(name, sloPrefix) || strings.HasSuffix(name, regressionSuffix) || !keep(name) {
 			continue
 		}
 		names = append(names, name)

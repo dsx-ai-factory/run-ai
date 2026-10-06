@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
@@ -52,8 +53,8 @@ func run() error {
 	if flag.NArg() > 0 {
 		return fmt.Errorf("unexpected argument %q; scenarios are selected with --only", flag.Arg(0))
 	}
-	if *regressionWindow < 0 || *regressionThreshold <= 0 {
-		return fmt.Errorf("--regression-window must be 0 or more and --regression-threshold above 0, got %d and %g", *regressionWindow, *regressionThreshold)
+	if *regressionWindow < 0 || *regressionThreshold <= 0 || math.IsNaN(*regressionThreshold) || math.IsInf(*regressionThreshold, 0) {
+		return fmt.Errorf("--regression-window must be 0 or more and --regression-threshold a number above 0, got %d and %g", *regressionWindow, *regressionThreshold)
 	}
 	log.Printf("started, scenarios from %s, results to %s", *scenariosDir, *outputDir)
 	options, err := runOptions(*only, *workloads)
@@ -111,6 +112,8 @@ func judge(ctx context.Context, store report.Store, document report.Document, co
 	switch {
 	case err != nil:
 		log.Printf("comparison with earlier runs skipped: %v", err)
+	case document.Metadata.ClusterType == "":
+		log.Print("comparison with earlier runs skipped: the cluster type is unknown, set --cluster-type or --cp-url; only SLOs are checked")
 	case config.Window == 0:
 		log.Print("comparison with earlier runs disabled, only SLOs are checked")
 	case len(history) < config.Window:

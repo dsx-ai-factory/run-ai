@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -44,8 +45,9 @@ const (
 	runLabel             = "flowmark/run"
 	roundLabel           = "flowmark/round"
 	roundSizeLabel       = "flowmark/round-size"
-	sloP90Key            = "p90_ms"
 )
+
+var sloKeys = []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms"}
 
 var knownKnobs = []string{"workloads", "workloadType", "podsPerWorkload", "image", "submitConcurrency", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "timeout", "setupTimeout", "settle", "cluster", "slo"}
 
@@ -249,6 +251,11 @@ func parseSettings(scenario core.Scenario) (settings, error) {
 	if knobs.slo, err = wholeNumbers("slo", slo); err != nil {
 		return settings{}, err
 	}
+	for key := range knobs.slo {
+		if !slices.Contains(sloKeys, key) {
+			return settings{}, fmt.Errorf("slo key %q is not a latency this suite reports; use one of %s", key, strings.Join(sloKeys, ", "))
+		}
+	}
 
 	if len(knobs.rounds) == 0 {
 		return settings{}, errors.New("workloads must list at least one round size")
@@ -419,8 +426,8 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 	}
 	if knobs.slo != nil {
 		metrics["slo"] = knobs.slo
-		if value, ok := knobs.slo[sloP90Key]; ok {
-			metrics["slo_p90_ms"] = value
+		for key, value := range knobs.slo {
+			metrics["slo_"+key] = value
 		}
 	}
 

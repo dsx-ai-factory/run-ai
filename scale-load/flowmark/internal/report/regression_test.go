@@ -10,6 +10,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
 )
 
 const burstSection = "training-burst"
@@ -127,6 +129,30 @@ func TestDayEightWalkthroughFlagsFourNightsThenTheMedianAdapts(t *testing.T) {
 	}
 }
 
+func TestSLOsApplyToAnyLatencyMetricWhileTheMedianStaysOnP90(t *testing.T) {
+	section := map[string]any{
+		"p90_ms@100": 100, "slo_p90_ms": 1000,
+		"p99_ms@100": 20000, "slo_p99_ms": 15000,
+		"max_ms@100": 70, "slo_max_ms": 50,
+		"p50_ms@100": 40,
+	}
+	document := Build(map[string]core.Section{burstSection: {Category: core.CategoryScale, Metrics: section}}, RunInfo{ClusterType: kindCluster})
+
+	judged := DetectRegressions(document, nights(1, 7, kindCluster, 100), sevenNights)
+
+	if len(judged.Regressions) != 2 || judged.Regressions[0].Metric != "max_ms@100" || judged.Regressions[1].Metric != "p99_ms@100" {
+		t.Fatalf("p99 and max are over their SLOs, p90 is not, p50 has none: %+v", judged.Regressions)
+	}
+	for _, r := range judged.Regressions {
+		if r.Against != AgainstSLO {
+			t.Fatalf("only the SLO check applies to non-p90 metrics: %+v", r)
+		}
+	}
+	if !flagged(t, judged, "p99_ms@100") || !flagged(t, judged, "max_ms@100") || flagged(t, judged, "p90_ms@100") || flagged(t, judged, "p50_ms@100") {
+		t.Fatalf("flags must sit exactly next to the breached metrics: %v", judged.Sections[burstSection].Metrics)
+	}
+}
+
 func TestKPIsAreTheP90MetricsOnly(t *testing.T) {
 	metrics := map[string]any{
 		"p90_ms@100": 1, "ttj_p90_ms": 2, "cluster_synced_p90_ms": 3,
@@ -134,6 +160,9 @@ func TestKPIsAreTheP90MetricsOnly(t *testing.T) {
 	}
 	if got := kpis(metrics); strings.Join(got, ",") != "cluster_synced_p90_ms,p90_ms@100,ttj_p90_ms" {
 		t.Fatalf("only p90 metrics are KPIs, sorted, got %v", got)
+	}
+	if got := withSLO(metrics); strings.Join(got, ",") != "p90_ms@100" {
+		t.Fatalf("only metrics with a matching slo_ key are checked against an SLO, got %v", got)
 	}
 	if sloKey("p90_ms@250") != "slo_p90_ms" || sloKey("ttj_p90_ms") != "slo_ttj_p90_ms" {
 		t.Fatal("the SLO of a round metric is the SLO of its base name")
