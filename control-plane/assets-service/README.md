@@ -153,8 +153,7 @@ Assets Service is **environment-variable driven**. Configuration structs live in
 [`pkg/config/config.go`](pkg/config/config.go); each field's key maps to its
 uppercase env-var equivalent (e.g. `service_port` → `SERVICE_PORT`). Defaults
 come from each struct's `SetDefaults`. Database connection settings are loaded
-by the shared database/dao-utils config from the `DB_*` / `MIGRATION_FILES` env
-vars.
+by the shared `runaidb` config from the `DB_*` env vars.
 
 **Server**
 
@@ -186,7 +185,7 @@ vars.
 | `DB_BACKEND_SCHEMA` | Schema of the legacy backend DB (`db_backend_schema`, default `backend`) |
 | `SYNC_BULK_SIZE` | Batch size for asset sync (default `50`) |
 
-**Database** (loaded by the shared dao-utils config)
+**Database** (loaded by the shared `runaidb` config)
 
 | Variable | Description |
 |----------|-------------|

@@ -12,9 +12,7 @@ const (
 	MaxLimit            int32 = 200
 	UpstreamPageSize    int32 = 200
 	MaxPaginatedResults int32 = 2000
-	// MaxAPIFilters mirrors dao_utils.LimitFilterOrCount without importing
-	// dao-utils, which would pull database dependencies into the MCP server.
-	MaxAPIFilters = 10
+	MaxAPIFilters             = 10
 )
 
 func ValidatePagination(limit, offset int32) error {

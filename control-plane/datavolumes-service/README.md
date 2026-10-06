@@ -167,7 +167,7 @@ shared Run:AI packages initialised in `cmd/main.go`.
 | `ORG_UNIT_SERVICE_URL` | `org-unit-service` base URL (org hierarchy) | `http://runai-backend-org-unit-service:8080` |
 | `AUTH_SERVICE_URL` | Authorization service base URL (authorization client) | — |
 | `LOG_LEVEL` | Log verbosity (shared logging package) | `info` |
-| `DATABASE_*` | PostgreSQL connection settings, consumed by the shared data-access layer (`dao-utils`, DB name `datavolumes`) | — |
+| `DATABASE_*` | PostgreSQL connection settings, consumed by the shared data-access layer (`runaidb`, DB name `datavolumes`) | — |
 
 Pub/sub (NATS) and tracing are initialised from their shared-package defaults.
 
