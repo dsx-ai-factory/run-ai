@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	controllerutils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
 	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
+	controllerutils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/controller-utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/project"
 	commonutils "github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	openshiftv1 "github.com/openshift/api/route/v1"

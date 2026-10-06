@@ -8,7 +8,7 @@ package finalizers_test
 import (
 	"context"
 
-	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
+	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/controller-utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/internal/autogenerate/mocks"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
