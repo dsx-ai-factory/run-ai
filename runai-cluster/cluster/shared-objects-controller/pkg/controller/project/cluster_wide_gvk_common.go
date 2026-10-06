@@ -246,6 +246,28 @@ func (handler *ClusterWideGVKCommon) AreEqual(ctx context.Context, left, right c
 	return false
 }
 
+// ManagedMetadataDiffers reports whether copyRunaiLabels/copyRunaiAnnotations
+// from `new` onto `existing` would change anything — dry-run of the metadata
+// half of updateExistingWithNewObject, used by kinds whose AreEqual ignores
+// metadata (RCT) to still catch managed-metadata drift.
+func (handler *ClusterWideGVKCommon) ManagedMetadataDiffers(existing, new client.Object) bool {
+	if existing == nil || new == nil {
+		return existing != new
+	}
+
+	beforeLabels := cloneStringMap(existing.GetLabels())
+	afterLabels := cloneStringMap(existing.GetLabels())
+	copyRunaiLabels(new.GetLabels(), &afterLabels)
+	if !reflect.DeepEqual(beforeLabels, afterLabels) {
+		return true
+	}
+
+	beforeAnnotations := cloneStringMap(existing.GetAnnotations())
+	afterAnnotations := cloneStringMap(existing.GetAnnotations())
+	copyRunaiAnnotations(new.GetAnnotations(), &afterAnnotations)
+	return !reflect.DeepEqual(beforeAnnotations, afterAnnotations)
+}
+
 // IsSpecImmutable reports whether the handler for the given object's kind
 // has opted into the delete-and-recreate flow. Used by the shared
 // ClusterWideReplicatedResourceHandler to pick the right code path for

@@ -220,6 +220,12 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 	handler.clusterWideGVKCommon.PreserveImmutableFields(existingNamespacedObject, newNamespacedObject)
 
 	if handler.clusterWideGVKCommon.AreEqual(ctx, newNamespacedObject, existingNamespacedObject) {
+		// Spec-immutable kinds (RCT) whose AreEqual ignores metadata still
+		// need managed-metadata drift reconciled in place — UID stays stable.
+		if handler.clusterWideGVKCommon.IsSpecImmutable(existingNamespacedObject) &&
+			handler.clusterWideGVKCommon.ManagedMetadataDiffers(existingNamespacedObject, newNamespacedObject) {
+			return handler.reconcileManagedMetadata(ctx, existingNamespacedObject, newNamespacedObject, gvk, namespace)
+		}
 		log.Ctx(ctx).Debug().Msgf("Object already exists in Namespace and no changes were detected. gvk %s, object %s, namespace %s",
 			gvk.String(), existingNamespacedObject.GetName(), namespace)
 		return nil
@@ -241,7 +247,11 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 				gvk.String(), existingNamespacedObject.GetName(), namespace, delErr.Error())
 			return delErr
 		}
-		if createErr := handler.Client.Create(ctx, newNamespacedObject); createErr != nil && !errors.IsAlreadyExists(createErr) {
+		if createErr := handler.Client.Create(ctx, newNamespacedObject); createErr != nil {
+			// Not tolerating AlreadyExists: usually means the old replica is
+			// still terminating, and swallowing it would leave no replacement
+			// until an unrelated event re-enqueues the project. Returning the
+			// error lets the controller retry.
 			log.Ctx(ctx).Error().Msgf("Failed creating object after delete-for-recreate. gvk %s, object %s, namespace %s. error: %s",
 				gvk.String(), newNamespacedObject.GetName(), namespace, createErr.Error())
 			return createErr
@@ -358,6 +368,32 @@ func (handler *ClusterWideReplicatedResourceHandler) createNamespacedObjectFromE
 	return newObject, nil
 }
 
+// reconcileManagedMetadata copies run.ai-prefixed labels/annotations from
+// newObj onto existingObj and issues an in-place Update, leaving the spec
+// (and the UID) untouched.
+func (handler *ClusterWideReplicatedResourceHandler) reconcileManagedMetadata(
+	ctx context.Context, existingObj, newObj client.Object,
+	gvk schema.GroupVersionKind, namespace string,
+) error {
+	log.Ctx(ctx).Info().Msgf("Object exists in Namespace with equivalent spec but divergent managed metadata, updating labels/annotations in place. gvk %s, object %s, namespace %s",
+		gvk.String(), existingObj.GetName(), namespace)
+
+	existingObjLabels := existingObj.GetLabels()
+	copyRunaiLabels(newObj.GetLabels(), &existingObjLabels)
+	existingObj.SetLabels(existingObjLabels)
+
+	existingObjAnnotations := existingObj.GetAnnotations()
+	copyRunaiAnnotations(newObj.GetAnnotations(), &existingObjAnnotations)
+	existingObj.SetAnnotations(existingObjAnnotations)
+
+	if err := handler.Client.Update(ctx, existingObj); err != nil {
+		log.Ctx(ctx).Error().Msgf("Failed updating managed metadata on object. gvk %s, object %s, namespace %s. error: %s",
+			gvk.String(), existingObj.GetName(), namespace, err.Error())
+		return err
+	}
+	return nil
+}
+
 func (handler *ClusterWideReplicatedResourceHandler) updateExistingWithNewObject(ctx context.Context, existingObj, newObj client.Object) {
 	existingObjLabels := existingObj.GetLabels()
 	copyRunaiLabels(newObj.GetLabels(), &existingObjLabels)
@@ -465,6 +501,17 @@ var objectNameMapper = func(object client.Object) string {
 func getObjectsNames(objects interface{}) ([]string, bool) {
 	names, ok := (funk.Map(objects, objectNameMapper)).([]string)
 	return names, ok
+}
+
+func cloneStringMap(src map[string]string) map[string]string {
+	if src == nil {
+		return nil
+	}
+	dst := make(map[string]string, len(src))
+	for k, v := range src {
+		dst[k] = v
+	}
+	return dst
 }
 
 func copyRunaiLabels(from map[string]string, to *map[string]string) {

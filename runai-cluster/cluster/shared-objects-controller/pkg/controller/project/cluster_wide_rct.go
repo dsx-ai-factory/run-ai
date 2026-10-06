@@ -69,12 +69,10 @@ func (r RctObjectInspector) AreEqual(left, right client.Object) bool {
 		return false
 	}
 
-	// Name/namespace/owner equality is a cheap pre-check; the spec+
-	// metadata compare below is where the defaulter work actually
-	// matters. We DO NOT include labels/annotations here on purpose:
-	// those are reconciled by the shared handler via
-	// copyRunaiLabels / copyRunaiAnnotations, and gating recreate on
-	// a metadata-only diff would churn the object unnecessarily.
+	// Labels/annotations are intentionally excluded: metadata drift
+	// would otherwise churn the UID via the delete-and-recreate branch.
+	// It's still reconciled — the handler routes it through
+	// ManagedMetadataDiffers → in-place Update instead.
 	if leftRct.Name != rightRct.Name ||
 		leftRct.Namespace != rightRct.Namespace ||
 		!reflect.DeepEqual(leftRct.OwnerReferences, rightRct.OwnerReferences) {

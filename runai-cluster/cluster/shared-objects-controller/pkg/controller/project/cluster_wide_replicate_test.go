@@ -18,10 +18,13 @@ import (
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	resourcev1 "k8s.io/api/resource/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 const (
@@ -701,6 +704,109 @@ var _ = Describe("Cluster-wide ResourceClaimTemplate replication", func() {
 		Expect(after.Spec.Spec.Devices.Requests[0].Exactly.Count).To(BeEquivalentTo(4))
 	})
 
+	It("reconciles managed-metadata drift in place when the RCT spec is unchanged (UID stable)", func() {
+		// Source carries an updated run.ai annotation (as if the agent
+		// bumped UpdateCountAnnotation on resync) and an updated managed
+		// label. Spec is byte-identical modulo API-server defaults.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Annotations = map[string]string{
+			"run.ai/update-count": "7",
+			"foreign-system/x":    "ignored",
+		}
+		src.Labels["run.ai/asset-id"] = "asset-new"
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.Labels["run.ai/asset-id"] = "asset-old"
+		existing.Annotations = map[string]string{
+			"run.ai/update-count": "6",
+			"user-stamped":        "keep-me",
+		}
+		existing.UID = "metadata-reconcile-stable-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID), "RCT must NOT be re-created for a metadata-only diff")
+		Expect(after.Labels).To(HaveKeyWithValue("run.ai/asset-id", "asset-new"))
+		Expect(after.Annotations).To(HaveKeyWithValue("run.ai/update-count", "7"))
+		Expect(after.Annotations).To(HaveKeyWithValue("user-stamped", "keep-me"),
+			"non-run.ai annotations on the replica must survive the metadata reconcile")
+	})
+
+	It("does not issue any Update when spec and managed metadata are already in sync (idempotent)", func() {
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Labels["run.ai/asset-id"] = "asset-1"
+		src.Annotations = map[string]string{"run.ai/update-count": "3"}
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.Labels["run.ai/asset-id"] = "asset-1"
+		existing.Annotations = map[string]string{"run.ai/update-count": "3"}
+		existing.UID = "idempotent-noop-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		resourceVersionBefore := func() string {
+			current := &resourcev1.ResourceClaimTemplate{}
+			Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), current)).To(Succeed())
+			return current.ResourceVersion
+		}()
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID))
+		Expect(after.ResourceVersion).To(Equal(resourceVersionBefore),
+			"a no-op reconcile must not bump resourceVersion with a pointless Update")
+	})
+
+	It("returns an error (so the controller retries) when Create fails after the delete-for-recreate", func() {
+		// Simulates the common race: Delete marks the old replica
+		// terminating, immediate Create then fails with AlreadyExists
+		// because the object isn't fully gone yet. We must propagate
+		// the error — swallowing it would leave the project with no
+		// replica until some unrelated event re-enqueues it.
+		scheme := scheme_init.Scheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Spec.Spec.Devices.Requests[0].Exactly.Count = 4
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+
+		k8sClientWithRace := fake.NewClientBuilder().
+			WithScheme(scheme).
+			WithStatusSubresource(&kaiorg.Project{}).
+			WithObjects(project.DeepCopy(),
+				&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: cwTestProjectNamespace}},
+				src, existing).
+			WithInterceptorFuncs(interceptor.Funcs{
+				Create: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.CreateOption) error {
+					if _, isRct := obj.(*resourcev1.ResourceClaimTemplate); isRct && obj.GetNamespace() == cwTestProjectNamespace {
+						return apierrors.NewAlreadyExists(
+							schema.GroupResource{Group: resourcev1.SchemeGroupVersion.Group, Resource: "resourceclaimtemplates"},
+							obj.GetName())
+					}
+					return c.Create(ctx, obj, opts...)
+				},
+			}).
+			Build()
+		gvkCommon, err := NewClusterWideGVKCommon(ctx, k8sClientWithRace,
+			&ClusterWideReplicatorGVKConfig{ClusterWideResourceClaimTemplates: true})
+		Expect(err).To(BeNil())
+		racingHandler := NewClusterWideReplicatedResourceHandler(k8sClientWithRace, gvkCommon)
+
+		Expect(racingHandler.HandleResource(ctx, *project)).ToNot(Succeed(),
+			"Create failure after delete-for-recreate must bubble up so controller-runtime retries")
+	})
+
 	It("deletes a replica owned by the project whose source no longer exists, but keeps unlabeled ones", func() {
 		orphan := cwRct("cw-rct", cwTestProjectNamespace, rctClusterLabels)
 		orphan.Labels[replicatedProjectNameLabelKey] = project.Name
@@ -753,6 +859,35 @@ var _ = Describe("RCT inspector helpers", func() {
 		b := cwRct("r", "runai", nil)
 		b.Spec.Spec.Devices.Requests[0].Exactly.Count = 4
 		Expect(gvkCommon.AreEqual(context.Background(), a, b)).To(BeFalse())
+	})
+
+	It("ManagedMetadataDiffers returns false when run.ai labels+annotations already match", func() {
+		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
+		existing.Annotations = map[string]string{"run.ai/update-count": "2"}
+		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
+		new.Annotations = map[string]string{"run.ai/update-count": "2"}
+		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeFalse())
+	})
+
+	It("ManagedMetadataDiffers returns true when a run.ai label value differs", func() {
+		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "old"})
+		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "new"})
+		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+	})
+
+	It("ManagedMetadataDiffers returns true when a run.ai annotation on new is missing on existing", func() {
+		existing := cwRct("r", "runai", nil)
+		new := cwRct("r", "runai", nil)
+		new.Annotations = map[string]string{"run.ai/update-count": "9"}
+		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+	})
+
+	It("ManagedMetadataDiffers ignores non-run.ai labels/annotations entirely", func() {
+		existing := cwRct("r", "runai", map[string]string{"foreign/x": "a"})
+		existing.Annotations = map[string]string{"user/notes": "keep"}
+		new := cwRct("r", "runai", map[string]string{"foreign/x": "b"})
+		new.Annotations = map[string]string{"user/notes": "overwrite?"}
+		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeFalse())
 	})
 })
 
