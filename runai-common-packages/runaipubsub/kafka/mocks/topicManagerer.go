@@ -17,10 +17,19 @@ func NewMocktopicManagerer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MocktopicManagerer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MocktopicManagerer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -61,14 +70,20 @@ type MocktopicManagerer_CreateIfNotExist_Call struct {
 }
 
 // CreateIfNotExist is a helper method to define mock.On call
-//   - topic
-func (_e *MocktopicManagerer_Expecter) CreateIfNotExist(topic interface{}) *MocktopicManagerer_CreateIfNotExist_Call {
+//   - topic string
+func (_e *MocktopicManagerer_Expecter) CreateIfNotExist(topic any) *MocktopicManagerer_CreateIfNotExist_Call {
 	return &MocktopicManagerer_CreateIfNotExist_Call{Call: _e.mock.On("CreateIfNotExist", topic)}
 }
 
 func (_c *MocktopicManagerer_CreateIfNotExist_Call) Run(run func(topic string)) *MocktopicManagerer_CreateIfNotExist_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

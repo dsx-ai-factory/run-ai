@@ -20,10 +20,19 @@ func NewConsumer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Consumer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Consumer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -90,11 +99,11 @@ func (_c *Consumer_CachedInfo_Call) RunAndReturn(run func() *jetstream.ConsumerI
 // Consume provides a mock function for the type Consumer
 func (_mock *Consumer) Consume(handler jetstream.MessageHandler, opts ...jetstream.PullConsumeOpt) (jetstream.ConsumeContext, error) {
 	// jetstream.PullConsumeOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, handler)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -129,22 +138,31 @@ type Consumer_Consume_Call struct {
 }
 
 // Consume is a helper method to define mock.On call
-//   - handler
-//   - opts
-func (_e *Consumer_Expecter) Consume(handler interface{}, opts ...interface{}) *Consumer_Consume_Call {
+//   - handler jetstream.MessageHandler
+//   - opts ...jetstream.PullConsumeOpt
+func (_e *Consumer_Expecter) Consume(handler any, opts ...any) *Consumer_Consume_Call {
 	return &Consumer_Consume_Call{Call: _e.mock.On("Consume",
-		append([]interface{}{handler}, opts...)...)}
+		append([]any{handler}, opts...)...)}
 }
 
 func (_c *Consumer_Consume_Call) Run(run func(handler jetstream.MessageHandler, opts ...jetstream.PullConsumeOpt)) *Consumer_Consume_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 jetstream.MessageHandler
+		if args[0] != nil {
+			arg0 = args[0].(jetstream.MessageHandler)
+		}
+		var arg1 []jetstream.PullConsumeOpt
 		variadicArgs := make([]jetstream.PullConsumeOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.PullConsumeOpt)
 			}
 		}
-		run(args[0].(jetstream.MessageHandler), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -162,11 +180,11 @@ func (_c *Consumer_Consume_Call) RunAndReturn(run func(handler jetstream.Message
 // Fetch provides a mock function for the type Consumer
 func (_mock *Consumer) Fetch(batch int, opts ...jetstream.FetchOpt) (jetstream.MessageBatch, error) {
 	// jetstream.FetchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, batch)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -201,22 +219,31 @@ type Consumer_Fetch_Call struct {
 }
 
 // Fetch is a helper method to define mock.On call
-//   - batch
-//   - opts
-func (_e *Consumer_Expecter) Fetch(batch interface{}, opts ...interface{}) *Consumer_Fetch_Call {
+//   - batch int
+//   - opts ...jetstream.FetchOpt
+func (_e *Consumer_Expecter) Fetch(batch any, opts ...any) *Consumer_Fetch_Call {
 	return &Consumer_Fetch_Call{Call: _e.mock.On("Fetch",
-		append([]interface{}{batch}, opts...)...)}
+		append([]any{batch}, opts...)...)}
 }
 
 func (_c *Consumer_Fetch_Call) Run(run func(batch int, opts ...jetstream.FetchOpt)) *Consumer_Fetch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		var arg1 []jetstream.FetchOpt
 		variadicArgs := make([]jetstream.FetchOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.FetchOpt)
 			}
 		}
-		run(args[0].(int), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -234,11 +261,11 @@ func (_c *Consumer_Fetch_Call) RunAndReturn(run func(batch int, opts ...jetstrea
 // FetchBytes provides a mock function for the type Consumer
 func (_mock *Consumer) FetchBytes(maxBytes int, opts ...jetstream.FetchOpt) (jetstream.MessageBatch, error) {
 	// jetstream.FetchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, maxBytes)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -273,22 +300,31 @@ type Consumer_FetchBytes_Call struct {
 }
 
 // FetchBytes is a helper method to define mock.On call
-//   - maxBytes
-//   - opts
-func (_e *Consumer_Expecter) FetchBytes(maxBytes interface{}, opts ...interface{}) *Consumer_FetchBytes_Call {
+//   - maxBytes int
+//   - opts ...jetstream.FetchOpt
+func (_e *Consumer_Expecter) FetchBytes(maxBytes any, opts ...any) *Consumer_FetchBytes_Call {
 	return &Consumer_FetchBytes_Call{Call: _e.mock.On("FetchBytes",
-		append([]interface{}{maxBytes}, opts...)...)}
+		append([]any{maxBytes}, opts...)...)}
 }
 
 func (_c *Consumer_FetchBytes_Call) Run(run func(maxBytes int, opts ...jetstream.FetchOpt)) *Consumer_FetchBytes_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		var arg1 []jetstream.FetchOpt
 		variadicArgs := make([]jetstream.FetchOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.FetchOpt)
 			}
 		}
-		run(args[0].(int), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -337,14 +373,20 @@ type Consumer_FetchNoWait_Call struct {
 }
 
 // FetchNoWait is a helper method to define mock.On call
-//   - batch
-func (_e *Consumer_Expecter) FetchNoWait(batch interface{}) *Consumer_FetchNoWait_Call {
+//   - batch int
+func (_e *Consumer_Expecter) FetchNoWait(batch any) *Consumer_FetchNoWait_Call {
 	return &Consumer_FetchNoWait_Call{Call: _e.mock.On("FetchNoWait", batch)}
 }
 
 func (_c *Consumer_FetchNoWait_Call) Run(run func(batch int)) *Consumer_FetchNoWait_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int))
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -393,14 +435,20 @@ type Consumer_Info_Call struct {
 }
 
 // Info is a helper method to define mock.On call
-//   - context1
-func (_e *Consumer_Expecter) Info(context1 interface{}) *Consumer_Info_Call {
+//   - context1 context.Context
+func (_e *Consumer_Expecter) Info(context1 any) *Consumer_Info_Call {
 	return &Consumer_Info_Call{Call: _e.mock.On("Info", context1)}
 }
 
 func (_c *Consumer_Info_Call) Run(run func(context1 context.Context)) *Consumer_Info_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -418,11 +466,11 @@ func (_c *Consumer_Info_Call) RunAndReturn(run func(context1 context.Context) (*
 // Messages provides a mock function for the type Consumer
 func (_mock *Consumer) Messages(opts ...jetstream.PullMessagesOpt) (jetstream.MessagesContext, error) {
 	// jetstream.PullMessagesOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
 
@@ -456,21 +504,25 @@ type Consumer_Messages_Call struct {
 }
 
 // Messages is a helper method to define mock.On call
-//   - opts
-func (_e *Consumer_Expecter) Messages(opts ...interface{}) *Consumer_Messages_Call {
+//   - opts ...jetstream.PullMessagesOpt
+func (_e *Consumer_Expecter) Messages(opts ...any) *Consumer_Messages_Call {
 	return &Consumer_Messages_Call{Call: _e.mock.On("Messages",
-		append([]interface{}{}, opts...)...)}
+		append([]any{}, opts...)...)}
 }
 
 func (_c *Consumer_Messages_Call) Run(run func(opts ...jetstream.PullMessagesOpt)) *Consumer_Messages_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 []jetstream.PullMessagesOpt
 		variadicArgs := make([]jetstream.PullMessagesOpt, len(args)-0)
 		for i, a := range args[0:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.PullMessagesOpt)
 			}
 		}
-		run(variadicArgs...)
+		arg0 = variadicArgs
+		run(
+			arg0...,
+		)
 	})
 	return _c
 }
@@ -488,11 +540,11 @@ func (_c *Consumer_Messages_Call) RunAndReturn(run func(opts ...jetstream.PullMe
 // Next provides a mock function for the type Consumer
 func (_mock *Consumer) Next(opts ...jetstream.FetchOpt) (jetstream.Msg, error) {
 	// jetstream.FetchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
 
@@ -526,21 +578,25 @@ type Consumer_Next_Call struct {
 }
 
 // Next is a helper method to define mock.On call
-//   - opts
-func (_e *Consumer_Expecter) Next(opts ...interface{}) *Consumer_Next_Call {
+//   - opts ...jetstream.FetchOpt
+func (_e *Consumer_Expecter) Next(opts ...any) *Consumer_Next_Call {
 	return &Consumer_Next_Call{Call: _e.mock.On("Next",
-		append([]interface{}{}, opts...)...)}
+		append([]any{}, opts...)...)}
 }
 
 func (_c *Consumer_Next_Call) Run(run func(opts ...jetstream.FetchOpt)) *Consumer_Next_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 []jetstream.FetchOpt
 		variadicArgs := make([]jetstream.FetchOpt, len(args)-0)
 		for i, a := range args[0:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.FetchOpt)
 			}
 		}
-		run(variadicArgs...)
+		arg0 = variadicArgs
+		run(
+			arg0...,
+		)
 	})
 	return _c
 }
