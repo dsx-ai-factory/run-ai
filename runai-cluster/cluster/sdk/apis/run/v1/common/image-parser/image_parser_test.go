@@ -9,7 +9,7 @@ import (
 	"context"
 	"testing"
 
-	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/common/image-parser"
+	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common/image-parser"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
