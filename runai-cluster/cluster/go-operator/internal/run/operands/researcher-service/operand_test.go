@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package legacy_researcher_service
+package researcher_service
 
 import (
 	"context"
@@ -35,19 +35,15 @@ func TestOperandOnlyDeletesRetiredObjects(t *testing.T) {
 		objects = append(objects, fmt.Sprintf("%T/%s", object, object.GetName()))
 	}
 
-	// Built from a separately encoded stem, not the operand's constants, so a
-	// wrong encoded name fails here instead of silently leaving an orphan.
-	stem := mustDecodeBase64("cmVzZWFyY2hlcg==")
-	component := stem + "-service"
 	assert.ElementsMatch(t, []string{
-		"*v1.Deployment/" + component,
-		"*v1.Service/" + component,
-		"*v1.ServiceAccount/" + component,
-		"*v1.VerticalPodAutoscaler/" + component,
-		"*v1.Ingress/" + component + "-ingress",
-		"*v1.HTTPRoute/" + component + "-httproute",
-		"*v1.Route/" + stem + "-cli-route",
-		"*v1.Route/runai-" + stem + "-route",
+		"*v1.Deployment/researcher-service",
+		"*v1.Service/researcher-service",
+		"*v1.ServiceAccount/researcher-service",
+		"*v1.VerticalPodAutoscaler/researcher-service",
+		"*v1.Ingress/researcher-service-ingress",
+		"*v1.HTTPRoute/researcher-service-httproute",
+		"*v1.Route/researcher-cli-route",
+		"*v1.Route/runai-researcher-route",
 	}, objects)
 }
 
