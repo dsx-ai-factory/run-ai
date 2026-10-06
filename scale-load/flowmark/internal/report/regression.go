@@ -45,6 +45,7 @@ func DetectRegressions(document Document, history []Document, config RegressionC
 	judged.Regressions = nil
 	for name, section := range document.Sections {
 		metrics := maps.Clone(section.Metrics)
+		maps.DeleteFunc(metrics, func(key string, _ any) bool { return strings.HasSuffix(key, regressionSuffix) })
 		found := map[string][]Regression{}
 		for _, metric := range kpis(section.Metrics) {
 			value, _ := number(section.Metrics[metric])

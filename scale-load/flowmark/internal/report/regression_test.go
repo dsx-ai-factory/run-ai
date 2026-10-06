@@ -121,6 +121,12 @@ func TestDayEightWalkthroughFlagsFourNightsThenTheMedianAdapts(t *testing.T) {
 		if judged.RegressionDetected {
 			flaggedNights = append(flaggedNights, night)
 		}
+		var window []float64
+		for _, run := range history {
+			value, _ := number(run.Sections[burstSection].Metrics["p90_ms@100"])
+			window = append(window, value)
+		}
+		t.Logf("night %2d: tonight 7000, window %v, median %.0f, flagged=%v", night, window, median(window), judged.RegressionDetected)
 		publishAll(t, store, judged)
 	}
 
@@ -150,6 +156,23 @@ func TestSLOsApplyToAnyLatencyMetricWhileTheMedianStaysOnP90(t *testing.T) {
 	}
 	if !flagged(t, judged, "p99_ms@100") || !flagged(t, judged, "max_ms@100") || flagged(t, judged, "p90_ms@100") || flagged(t, judged, "p50_ms@100") {
 		t.Fatalf("flags must sit exactly next to the breached metrics: %v", judged.Sections[burstSection].Metrics)
+	}
+}
+
+func TestJudgingAgainClearsStaleFlags(t *testing.T) {
+	flagged := DetectRegressions(nightlyDocument(1, kindCluster, 12000), nil, sevenNights)
+	if flagged.Sections[burstSection].Metrics["p90_ms@100_regression"] != true {
+		t.Fatal("precondition: the first judgement flags the SLO breach")
+	}
+	flagged.Sections[burstSection].Metrics["p90_ms@100"] = 4000
+
+	rejudged := DetectRegressions(flagged, nil, sevenNights)
+
+	if rejudged.RegressionDetected || len(rejudged.Regressions) != 0 {
+		t.Fatalf("4000 is under the SLO, nothing may be reported: %+v", rejudged.Regressions)
+	}
+	if _, stale := rejudged.Sections[burstSection].Metrics["p90_ms@100_regression"]; stale {
+		t.Fatal("a flag from an earlier judgement must not survive a clean check")
 	}
 }
 
