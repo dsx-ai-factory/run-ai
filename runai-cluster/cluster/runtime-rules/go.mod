@@ -39,8 +39,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic v0.0.0-00010101000000-000000000000 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology v0.0.0-00010101000000-000000000000 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
@@ -78,7 +76,6 @@ require (
 	github.com/opencontainers/selinux v1.13.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/samber/lo v1.53.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.67.0 // indirect
@@ -109,7 +106,6 @@ require (
 	k8s.io/kubernetes v1.35.4 // indirect
 	k8s.io/mount-utils v0.35.4 // indirect
 	sigs.k8s.io/gateway-api v1.5.0 // indirect
-	sigs.k8s.io/lws v0.7.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
 )
@@ -123,22 +119,17 @@ require (
 )
 
 require (
-	github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20250516142240-dc61b93a9b0a // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/cert-manager/cert-manager v1.20.3 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/top-owner v0.0.0-00010101000000-000000000000 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/golang/glog v1.2.5 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
-	github.com/google/go-containerregistry v0.20.5 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
@@ -163,9 +154,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.45.0 // indirect
 	go.opentelemetry.io/otel/trace v1.45.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
-	knative.dev/networking v0.0.0-20260120131110-a7cdca238a0d // indirect
 	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a // indirect
-	knative.dev/serving v0.48.1 // indirect
 )
 
 require (

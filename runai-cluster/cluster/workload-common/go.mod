@@ -8,7 +8,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-20250428095855-d1862558c98a
 	github.com/hashicorp/go-version v1.9.0
 	github.com/kubeflow/training-operator v1.9.3
