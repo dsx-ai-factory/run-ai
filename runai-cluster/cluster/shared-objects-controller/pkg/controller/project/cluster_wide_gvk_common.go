@@ -86,9 +86,9 @@ type AdditionalCallbackFn func(
 	ctx context.Context, namespace string, objectsReplicatedInNamespaceNames, unreferencedObjectNames []string) error
 
 type ClusterWideReplicatorGVKConfig struct {
-	ClusterWideSecrets               bool
-	ClusterWidePvcs                  bool
-	ClusterWideConfigMaps            bool
+	ClusterWideSecrets                bool
+	ClusterWidePvcs                   bool
+	ClusterWideConfigMaps             bool
 	ClusterWideResourceClaimTemplates bool
 }
 

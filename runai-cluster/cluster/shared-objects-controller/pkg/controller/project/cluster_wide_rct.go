@@ -10,8 +10,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/selection"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	resourcev1 "k8s.io/api/resource/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

@@ -25,9 +25,9 @@ func NewClusterWideReplicatedReconciler(
 	clusterWideSecrets, clusterWidePvcs, clusterWideConfigMaps, clusterWideResourceClaimTemplates bool,
 ) (*ClusterWideReplicatedReconciler, error) {
 	gvkCommon, err := NewClusterWideGVKCommon(ctx, c, &ClusterWideReplicatorGVKConfig{
-		ClusterWideSecrets:               clusterWideSecrets,
-		ClusterWidePvcs:                  clusterWidePvcs,
-		ClusterWideConfigMaps:            clusterWideConfigMaps,
+		ClusterWideSecrets:                clusterWideSecrets,
+		ClusterWidePvcs:                   clusterWidePvcs,
+		ClusterWideConfigMaps:             clusterWideConfigMaps,
 		ClusterWideResourceClaimTemplates: clusterWideResourceClaimTemplates,
 	})
 	if err != nil {
