@@ -19,10 +19,19 @@ func NewPubSuber(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *PubSuber {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &PubSuber{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -107,16 +116,32 @@ type PubSuber_Connect_Call struct {
 }
 
 // Connect is a helper method to define mock.On call
-//   - url
-//   - user
-//   - password
-func (_e *PubSuber_Expecter) Connect(url interface{}, user interface{}, password interface{}) *PubSuber_Connect_Call {
+//   - url string
+//   - user string
+//   - password string
+func (_e *PubSuber_Expecter) Connect(url any, user any, password any) *PubSuber_Connect_Call {
 	return &PubSuber_Connect_Call{Call: _e.mock.On("Connect", url, user, password)}
 }
 
 func (_c *PubSuber_Connect_Call) Run(run func(url string, user string, password string)) *PubSuber_Connect_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -154,15 +179,26 @@ type PubSuber_Publish_Call struct {
 }
 
 // Publish is a helper method to define mock.On call
-//   - topic
-//   - payload
-func (_e *PubSuber_Expecter) Publish(topic interface{}, payload interface{}) *PubSuber_Publish_Call {
+//   - topic string
+//   - payload []byte
+func (_e *PubSuber_Expecter) Publish(topic any, payload any) *PubSuber_Publish_Call {
 	return &PubSuber_Publish_Call{Call: _e.mock.On("Publish", topic, payload)}
 }
 
 func (_c *PubSuber_Publish_Call) Run(run func(topic string, payload []byte)) *PubSuber_Publish_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].([]byte))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []byte
+		if args[1] != nil {
+			arg1 = args[1].([]byte)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -200,16 +236,32 @@ type PubSuber_Subscribe_Call struct {
 }
 
 // Subscribe is a helper method to define mock.On call
-//   - ctx
-//   - topic
-//   - callback
-func (_e *PubSuber_Expecter) Subscribe(ctx interface{}, topic interface{}, callback interface{}) *PubSuber_Subscribe_Call {
+//   - ctx context.Context
+//   - topic string
+//   - callback func(event []byte) error
+func (_e *PubSuber_Expecter) Subscribe(ctx any, topic any, callback any) *PubSuber_Subscribe_Call {
 	return &PubSuber_Subscribe_Call{Call: _e.mock.On("Subscribe", ctx, topic, callback)}
 }
 
 func (_c *PubSuber_Subscribe_Call) Run(run func(ctx context.Context, topic string, callback func(event []byte) error)) *PubSuber_Subscribe_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(func(event []byte) error))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 func(event []byte) error
+		if args[2] != nil {
+			arg2 = args[2].(func(event []byte) error)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -236,17 +288,38 @@ type PubSuber_SubscribeAsync_Call struct {
 }
 
 // SubscribeAsync is a helper method to define mock.On call
-//   - ctx
-//   - topic
-//   - callback
-//   - errChan
-func (_e *PubSuber_Expecter) SubscribeAsync(ctx interface{}, topic interface{}, callback interface{}, errChan interface{}) *PubSuber_SubscribeAsync_Call {
+//   - ctx context.Context
+//   - topic string
+//   - callback func(event []byte) error
+//   - errChan chan error
+func (_e *PubSuber_Expecter) SubscribeAsync(ctx any, topic any, callback any, errChan any) *PubSuber_SubscribeAsync_Call {
 	return &PubSuber_SubscribeAsync_Call{Call: _e.mock.On("SubscribeAsync", ctx, topic, callback, errChan)}
 }
 
 func (_c *PubSuber_SubscribeAsync_Call) Run(run func(ctx context.Context, topic string, callback func(event []byte) error, errChan chan error)) *PubSuber_SubscribeAsync_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(func(event []byte) error), args[3].(chan error))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 func(event []byte) error
+		if args[2] != nil {
+			arg2 = args[2].(func(event []byte) error)
+		}
+		var arg3 chan error
+		if args[3] != nil {
+			arg3 = args[3].(chan error)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
