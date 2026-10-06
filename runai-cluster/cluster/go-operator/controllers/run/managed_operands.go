@@ -41,10 +41,10 @@ import (
 	project_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/project-controller"
 	prometheus "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/prometheus"
 	reconciliation_trigger "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/reconciliation-trigger"
+	researcher_service "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/researcher-service"
 	shared_objects_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/shared-objects-controller"
 	status_updater "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/status-updater"
 
-	legacy_researcher_service "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-researcher-service"
 	legacy_runtime_runner "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-runtime-runner"
 	managed_nodes_config "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/managed-nodes-config"
 	runtime_rules "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/runtime-rules"
@@ -132,7 +132,7 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addRemoteCluster(prometheus.Operand(remoteClusterClient, runaiConfig, promSharedData))
 	mo.addRemoteCluster(anyworkload_controller.Operand(remoteClusterClient, runaiConfig))
 	// Deletes what the researcher-service retired in 2.26 left behind on upgraded clusters.
-	mo.addRemoteCluster(legacy_researcher_service.Operand(remoteClusterClient, runaiConfig))
+	mo.addRemoteCluster(researcher_service.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(kai_operator.Operand(), *spec.KAIOperator.Enabled)
 	mo.addOldRemoteCluster(krm_operator.Operand(), *spec.KRMOperator.Enabled)
 	mo.addRemoteCluster(runtime_rules.Operand(remoteClusterClient, runaiConfig))
