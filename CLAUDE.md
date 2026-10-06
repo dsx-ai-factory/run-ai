@@ -152,7 +152,6 @@ service, run `/write-service-docs <path>` to document it and add it below.
 **runai-common-packages** (go)
 - [runai-common-packages/cache](runai-common-packages/cache)
 - [runai-common-packages/config](runai-common-packages/config)
-- [runai-common-packages/dao-utils](runai-common-packages/dao-utils)
 - [runai-common-packages/fips](runai-common-packages/fips)
 - [runai-common-packages/integdb](runai-common-packages/integdb)
 - [runai-common-packages/logging](runai-common-packages/logging)

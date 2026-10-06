@@ -16,7 +16,7 @@ import (
 	runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
 CACHE-CC-PREFIX	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
-DB-CC-PREFIX	dao_utils "github.com/dsx-ai-factory/run-ai/runai-common-packages/dao-utils"
+DB-CC-PREFIX	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing"
 )
@@ -28,7 +28,9 @@ func init() {
 	if err := config.InitEnvironment(); err != nil {
 		logging.Fatalf("Failed to init configuration: %v", err)
 	}
-DB-CC-PREFIX	dao_utils.Init(dao_utils.ConstructConfig("{{cookiecutter.__app_name_underscore_lower}}"))
+DB-CC-PREFIX	if err := runaidb.Init(nil); err != nil {
+DB-CC-PREFIX		logging.Fatalf("Failed to initialize database: %v", err)
+DB-CC-PREFIX	}
 CACHE-CC-PREFIX	if err := cache.Init(nil); err != nil {
 		logging.Errorf("Failed to init cache: %w", err)
 	}

@@ -42,5 +42,17 @@ var _ = Describe("Submit Common", func() {
 			Expect(ok).To(BeTrue())
 			Expect(execute).To(Equal("one 'grouped arg'"))
 		})
+
+		DescribeTable("preserves literal single quotes",
+			func(input []string, expected string) {
+				execute, ok := argsutils.GetExecuteString(&input)
+				Expect(ok).To(BeTrue())
+				Expect(execute).To(Equal(expected))
+			},
+			Entry("shell literal", []string{"sh", "-c", "echo 'value is $HOME'"}, `sh -c "echo 'value is $HOME'"`),
+			Entry("MATLAB string", []string{"matlab", "-batch", "cd('/some/long/path'); exit"}, `matlab -batch "cd('/some/long/path'); exit"`),
+			Entry("mixed quotes", []string{"sh", "-c", `printf "%s" 'value'`}, `sh -c "printf \"%s\" 'value'"`),
+			Entry("single word", []string{"can't"}, `"can't"`),
+		)
 	})
 })

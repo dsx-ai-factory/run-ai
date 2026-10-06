@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// TODO: change to dao_utils.BaseModel once we can move to uuid
 type IntBaseModel struct {
 	ID        int64
 	CreatedAt time.Time
