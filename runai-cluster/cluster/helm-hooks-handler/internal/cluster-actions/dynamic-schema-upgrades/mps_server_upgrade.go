@@ -7,8 +7,8 @@ package dynamic_schema_upgrades
 
 import (
 	"fmt"
-	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/common/image-parser"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common"
+	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common/image-parser"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
