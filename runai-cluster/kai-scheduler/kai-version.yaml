@@ -3,4 +3,4 @@ kai:
   commit-hash: a9a2db77d088f88948ff4241fdc5600d65e78f4a
   go-module-version: v0.18.2
 krm:
-  chart-version: v0.18.2
+  chart-version: v0.18.3
