@@ -24,6 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"knative.dev/pkg/apis"
 )
 
 func oauth2ParityConfig(domain string, subdomain bool) composer.ClusterStorageConfig {
@@ -100,7 +101,20 @@ func clusterOauth2Containers(ctx context.Context, exposedUrls map[string]flds.Ex
 			continue
 		}
 
-		jobUrl, err := builders.ComposeOauthIngressUrl(ctx, exposedUrl, nick, &noSuffixUrlGenerated, oauth2ParityWorkload)
+		projectName, err := project.GetProjectFromContext(ctx)
+		Expect(err).NotTo(HaveOccurred())
+		rawURL := convutils.Deref(exposedUrl.Value.Url, "")
+		if rawURL == "" {
+			suffix := nick
+			if !noSuffixUrlGenerated {
+				suffix = ""
+				noSuffixUrlGenerated = true
+			}
+			generated, err := composer.ComposeAutoExposedURL(config.GetClusterDomain(), projectName, oauth2ParityWorkload, suffix, config.SubdomainSupportEnabled())
+			Expect(err).NotTo(HaveOccurred())
+			rawURL = generated.String()
+		}
+		jobUrl, err := apis.ParseURL(rawURL)
 		Expect(err).NotTo(HaveOccurred())
 
 		cookiePrefix := fmt.Sprintf("%s-%s-auth-proxy", oauth2ParityWorkload, nick)

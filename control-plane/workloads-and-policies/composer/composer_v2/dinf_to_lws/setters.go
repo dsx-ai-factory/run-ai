@@ -11,7 +11,6 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/init_containers"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	workloadsManagerApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
@@ -86,7 +85,7 @@ func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) 
 	urlString := convutils.Deref(src.ExposedUrl, "")
 	if exposeExternally {
 		if urlString == "" {
-			autoURL, err := init_containers.ComposeAutoExposedURL(
+			autoURL, err := composer.ComposeAutoExposedURL(
 				cookie.config.ClusterDomain(),
 				cookie.projectName,
 				cookie.workloadName,

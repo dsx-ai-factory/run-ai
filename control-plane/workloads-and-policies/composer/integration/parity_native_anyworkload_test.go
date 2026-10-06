@@ -31,6 +31,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	corev1 "k8s.io/api/core/v1"
+	"knative.dev/pkg/apis"
 )
 
 const inputsBasePath = "../composer_v2/iw_tw_workloads"
@@ -394,8 +395,21 @@ func oauth2InitContainersFromNativePath(
 			continue
 		}
 
-		jobUrl, err := builders.ComposeOauthIngressUrl(ctx, exposedUrl, nick, &noSuffixUrlGenerated, workloadName)
-		Expect(err).NotTo(HaveOccurred(), "ComposeOauthIngressUrl failed for fixture %s", workloadName)
+		projectName, err := project.GetProjectFromContext(ctx)
+		Expect(err).NotTo(HaveOccurred())
+		rawURL := convutils.Deref(exposedUrl.Value.Url, "")
+		if rawURL == "" {
+			suffix := nick
+			if !noSuffixUrlGenerated {
+				suffix = ""
+				noSuffixUrlGenerated = true
+			}
+			generated, err := composer.ComposeAutoExposedURL(config.GetClusterDomain(), projectName, workloadName, suffix, config.SubdomainSupportEnabled())
+			Expect(err).NotTo(HaveOccurred())
+			rawURL = generated.String()
+		}
+		jobUrl, err := apis.ParseURL(rawURL)
+		Expect(err).NotTo(HaveOccurred(), "URL parsing failed for fixture %s", workloadName)
 
 		cookiePrefix := fmt.Sprintf("%s-%s-auth-proxy", workloadName, nick)
 		container, err := builders.GetOauth2ProxyContainer(jobUrl, *exposedUrl.Value.ContainerPort,

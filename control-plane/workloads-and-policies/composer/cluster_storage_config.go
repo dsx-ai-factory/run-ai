@@ -9,7 +9,6 @@ import (
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	sdkglobal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/global"
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -364,7 +363,7 @@ func parseReportedResourceRequirements(reported *clustersApi.ClusterReportedReso
 }
 
 func defaultUsernameLoaderResources() corev1.ResourceRequirements {
-	return workloadbuilders.DefaultUsernameLoaderInitContainerResources()
+	return sdkglobal.DefaultUsernameLoaderInitContainerResources()
 }
 
 func reportedConfig(cluster *clustersApi.DisplayedCluster) *clustersApi.ClusterReportedConfig {

@@ -17,8 +17,6 @@ import (
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	managerApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/builders/common"
 )
 
 const fakeDomain = "https://fake-domain.com"
@@ -45,16 +43,11 @@ var portsConnectionTypes = datastructs.NewSet[string](
 )
 
 var workloadTypeToInitials = map[workloadsApi.WorkloadType]string{
-	workloadsApi.WORKLOADTYPE_WORKSPACE:   common.KindInteractiveWorkloadInitial,
-	workloadsApi.WORKLOADTYPE_TRAINING:    common.KindTrainingWorkloadInitial,
-	workloadsApi.WORKLOADTYPE_DISTRIBUTED: common.KindDistributedWorkloadInitial,
-	workloadsApi.WORKLOADTYPE_INFERENCE:   common.KindInferenceWorkloadInitial,
+	workloadsApi.WORKLOADTYPE_WORKSPACE:   legacyWorkspacePrefix,
+	workloadsApi.WORKLOADTYPE_TRAINING:    legacyTrainingPrefix,
+	workloadsApi.WORKLOADTYPE_DISTRIBUTED: legacyDistributedPrefix,
+	workloadsApi.WORKLOADTYPE_INFERENCE:   NetworkingResourcePrefixInference,
 }
-
-var (
-	subdomainSupported = builders.ComposeUrlOptions{SubdomainSupported: true}
-	noSubdomainSupport = builders.ComposeUrlOptions{SubdomainSupported: false}
-)
 
 type ServiceAndPortName struct {
 	ServiceName string
@@ -91,23 +84,7 @@ func (cp *ConnectionsPreProcessor) HandlePorts(connections []workloadsApi.Connec
 		return
 	}
 
-	// activate the workload-common function that is responsible for creating the ports and service names.
-	nickPerPortType := builders.GetPortsPerServiceType(workloadInitials, cp.WorkloadName, ports, nil)
-
-	// find the port and service name that were assigned to each nick
-	nickToResourceNames := make(map[string]ServiceAndPortName)
-
-	for _, serviceNameAndPort := range nickPerPortType {
-		for idx := 0; idx < len(serviceNameAndPort.Ports); idx++ {
-			portName := serviceNameAndPort.Ports[idx].Name
-			portNick := serviceNameAndPort.PortsNick[idx]
-
-			nickToResourceNames[portNick] = ServiceAndPortName{
-				ServiceName: serviceNameAndPort.Name,
-				PortName:    portName,
-			}
-		}
-	}
+	nickToResourceNames := legacyPortResourceNames(workloadInitials, cp.WorkloadName, ports)
 
 	cp.applyPortResourceNames(connections, nickToResourceNames)
 }
@@ -211,14 +188,12 @@ func (cp *ConnectionsPreProcessor) HandleExposedUrls(connections []workloadsApi.
 		return
 	}
 
-	noSuffixGenerated := false
-	nickToUrlWithSubdomain, err := builders.GetUrlPerNick(exposedUrls, cp.ProjectName, cp.WorkloadName, fakeDomain, &noSuffixGenerated, subdomainSupported)
+	nickToUrlWithSubdomain, err := exposedURLsPerNick(exposedUrls, cp.ProjectName, cp.WorkloadName, fakeDomain, true)
 	if err != nil {
 		return
 	}
 
-	noSuffixGenerated = false
-	nickToUrlNoSubdomain, err := builders.GetUrlPerNick(exposedUrls, cp.ProjectName, cp.WorkloadName, fakeDomain, &noSuffixGenerated, noSubdomainSupport)
+	nickToUrlNoSubdomain, err := exposedURLsPerNick(exposedUrls, cp.ProjectName, cp.WorkloadName, fakeDomain, false)
 	if err != nil {
 		return
 	}
@@ -288,6 +263,10 @@ func ComposeNetworkingResourceName(prefix, workloadName, suffix string) string {
 		name = fmt.Sprintf("%s-%s-%s", prefix, workloadName, suffix)
 	}
 
+	return shortenNetworkingName(name)
+}
+
+func shortenNetworkingName(name string) string {
 	const (
 		maxResourceNameLength = 63
 		hashLength            = 10
@@ -296,7 +275,7 @@ func ComposeNetworkingResourceName(prefix, workloadName, suffix string) string {
 		return name
 	}
 
-	// Kubernetes Service names are limited to 63 characters. Preserve a useful
+	// Kubernetes Service names and DNS labels are limited to 63 characters. Preserve a useful
 	// prefix for diagnostics and add a stable hash of the complete name so that
 	// truncation cannot make two networking resources share the same name.
 	digest := fmt.Sprintf("%x", sha256.Sum256([]byte(name)))[:hashLength]

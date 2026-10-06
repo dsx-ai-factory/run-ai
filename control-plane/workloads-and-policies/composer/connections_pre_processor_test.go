@@ -18,6 +18,54 @@ import (
 )
 
 var _ = Describe("ConnectionsPreProcessor", func() {
+	DescribeTable("preserves legacy service grouping and global port indexes", func(nick, serviceName, portName string) {
+		cp := &ConnectionsPreProcessor{WorkloadType: workloadsApi.WORKLOADTYPE_TRAINING, WorkloadName: "train"}
+		ports := field_types.NewPortsField(map[string]field_types.PortItemAndRules{
+			"a-loadbalancer": {Value: &field_types.PortItemValue{ServiceType: convutils.Ref("LoadBalancer"), ContainerPort: convutils.Ref(8080)}},
+			"b-invalid":      {Value: &field_types.PortItemValue{ServiceType: convutils.Ref("invalid")}},
+			"c-nodeport":     {Value: &field_types.PortItemValue{ServiceType: convutils.Ref("NodePort"), ContainerPort: convutils.Ref(8081)}},
+			"d-serving":      {Value: &field_types.PortItemValue{ServiceType: convutils.Ref("ServingPort")}},
+			"e-default":      {Value: &field_types.PortItemValue{ContainerPort: convutils.Ref(8082)}},
+			"f-loadbalancer": {Value: &field_types.PortItemValue{ServiceType: convutils.Ref("LoadBalancer"), ContainerPort: convutils.Ref(8083)}},
+			"g-nil":          {},
+		})
+		connections := []workloadsApi.Connection{{
+			ConnectionType: string(openapi.INTERNALCONNECTIONTYPE_LOAD_BALANCER), CorrelationName: convutils.Ref(nick),
+		}}
+		cp.HandlePorts(connections, ports, nil, nil)
+		Expect(connections[0].GetServiceResourceName()).To(Equal(serviceName))
+		Expect(connections[0].GetPortResourceName()).To(Equal(portName))
+	},
+		Entry("first load balancer", "a-loadbalancer", "tw-train-1-loadbalancer", "port-train-8080-0"),
+		Entry("node port keeps its global index", "c-nodeport", "tw-train-2-nodeport", "port-train-8081-1"),
+		Entry("default service type sorts first", "e-default", "tw-train-0-clusterip", "port-train-8082-2"),
+		Entry("second load balancer shares the service", "f-loadbalancer", "tw-train-1-loadbalancer", "port-train-8083-3"),
+		Entry("invalid type is skipped", "b-invalid", "", ""),
+		Entry("serving port is skipped", "d-serving", "", ""),
+		Entry("nil item is skipped", "g-nil", "", ""),
+	)
+
+	It("assigns the suffix-free URL to the first automatic URL after custom and empty items", func() {
+		cp := &ConnectionsPreProcessor{WorkloadName: "job", ProjectName: "team"}
+		urls := field_types.NewExposedUrlField(map[string]field_types.ExposedUrlItemAndRules{
+			"a-custom": {Value: &field_types.ExposedUrlItemValue{CustomUrl: convutils.Ref(true), Url: convutils.Ref("https://custom.example.com/path")}},
+			"b-empty":  {},
+			"c-first":  {Value: &field_types.ExposedUrlItemValue{}},
+			"d-second": {Value: &field_types.ExposedUrlItemValue{}},
+		})
+		connections := []workloadsApi.Connection{}
+		for _, nick := range []string{"d-second", "c-first"} {
+			connections = append(connections, workloadsApi.Connection{
+				ConnectionType: string(openapi.INTERNALCONNECTIONTYPE_EXTERNAL_URL), CorrelationName: convutils.Ref(nick),
+			})
+		}
+		cp.HandleExposedUrls(connections, urls, nil, nil)
+		Expect(connections[0].GetExposedUrlPath()).To(Equal("/team/job/d-second"))
+		Expect(connections[0].GetExposedUrlSubDomain()).To(Equal("team-job-d-second"))
+		Expect(connections[1].GetExposedUrlPath()).To(Equal("/team/job"))
+		Expect(connections[1].GetExposedUrlSubDomain()).To(Equal("team-job"))
+	})
+
 	Describe("ComposeNetworkingResourceName", func() {
 		It("keeps networking resource names within the Kubernetes limit", func() {
 			name := ComposeNetworkingResourceName(
