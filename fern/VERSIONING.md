@@ -9,7 +9,7 @@ One Fern build of `main` publishes every supported version:
 
 | Version | Nav file in `fern/docs.yml` | Content comes from |
 |---|---|---|
-| Newest (in development on `main`) | `products/<product>.yml` | `main` |
+| Newest (built from `main`) | `products/<product>.yml` | `main` |
 | Superseded, still supported | `versions/v<X.Y>/fern/products/<product>.yml` | tip of `release-<X.Y>` |
 | End of life | `archived-versions.yml` + redirect | externally hosted docs |
 
@@ -33,25 +33,27 @@ Where it runs:
   python3 ./tools/check-fern-nav.py fern
   ```
 
-## Cutover: When `release-<X.Y>` Is Cut
+## Cutover: When `<X.Y+1>` Docs Go Public
 
-Do this in one PR to `main`, before any `<X.Y+1>` docs land on `main`.
-The example below is the 3.1 → 3.2 cutover:
+Until the cutover, the newest entry is labeled `v<X.Y>` and built from `main`,
+so `<X.Y+1>` docs merged to `main` publish under that label. Do the cutover in
+one PR to `main` when the `<X.Y+1>` docs should go public; `release-<X.Y>` must
+already exist. The example below is the 3.0 → 3.1 cutover:
 
 1. In `fern/docs.yml`, for **each** product (`self-hosted`, `multi-tenant`):
-   - Repoint the `v3.1` entry from `products/<product>.yml` to
-     `versions/v3.1/fern/products/<product>.yml`.
-   - Add a `v3.2` entry at the top of `versions:` with
+   - Repoint the `v3.0` entry from `products/<product>.yml` to
+     `versions/v3.0/fern/products/<product>.yml`.
+   - Add a `v3.1` entry at the top of `versions:` with
      `path: products/<product>.yml`. The first entry is the default version.
 
    ```yaml
    versions:
-     - display-name: "v3.2"
-       slug: v3.2
-       path: products/self-hosted.yml
      - display-name: "v3.1"
        slug: v3.1
-       path: versions/v3.1/fern/products/self-hosted.yml
+       path: products/self-hosted.yml
+     - display-name: "v3.0"
+       slug: v3.0
+       path: versions/v3.0/fern/products/self-hosted.yml
    ```
 
 2. Verify locally:
@@ -62,13 +64,13 @@ The example below is the 3.1 → 3.2 cutover:
    (cd fern && fern check && fern docs dev)
    ```
 
-   In the preview, open a page under `/<product>/v3.1/` and confirm its links
-   stay under `/<product>/v3.1/`.
+   In the preview, open a page under `/<product>/v3.0/` and confirm its links
+   stay under `/<product>/v3.0/`.
 
-3. Make sure `release-3.1` carries `tools/materialize-fern-versions.sh`,
+3. Make sure `release-3.0` carries `tools/materialize-fern-versions.sh`,
    `tools/check-fern-nav.py`, and the current `fern-docs-ci.yaml`. A `push`
    workflow runs from the pushed branch's copy, so without them, docs pushes
-   to `release-3.1` are not validated against `main`. Branches cut from `main`
+   to `release-3.0` are not validated against `main`. Branches cut from `main`
    after these files landed already have them.
 
 ## End of Life
