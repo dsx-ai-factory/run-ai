@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package builders_test
+package gpu_validator
 
 import (
 	"testing"
@@ -12,7 +12,4 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestBuilders(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Builders suite")
-}
+func TestGPUValidator(t *testing.T) { RegisterFailHandler(Fail); RunSpecs(t, "GPU validator suite") }

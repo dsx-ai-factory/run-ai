@@ -3,16 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package builders
+package gpu_validator
 
 import (
 	"context"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"strconv"
 	"strings"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	logger "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -49,38 +46,4 @@ func IsWholeWithFractionalGpu(ctx context.Context, gpu float64) bool {
 		return false
 	}
 	return IsFractionalGpu(ctx, strconv.FormatFloat(gpu, 'f', -1, 64))
-}
-
-func IsFractionalGpuOrMemroy(ctx context.Context, gpu float64, gpuMemory resource.Quantity) bool {
-	log := logger.FromContext(ctx)
-	log.V(4).Info("partial check", "gpu", gpu, "gpuMemory", gpuMemory)
-	if gpu < 1 && gpu > 0 {
-		log.V(4).Info("fractional gpu found")
-		return true
-	}
-
-	if gpuMemory.ScaledValue(resource.Mega) > 0 {
-		log.V(4).Info("fractional gpu memory found")
-		return true
-	}
-
-	log.V(4).Info("not part of gpu")
-	return false
-}
-
-func AddPartialGpuAnnotations(annotations map[string]string, gpu *field_types.NumberField, memoryQuantity resource.Quantity, gpuDevices int) {
-	// when no GPU device is set, memory fraction uses 1 GPU, so it will be clear the workload uses GPUs.
-	if gpuDevices == 0 {
-		gpuDevices = 1
-	}
-	annotations[constants.AnnotationGpuFractionDevices] = strconv.Itoa(gpuDevices)
-
-	memoryMb := int(memoryQuantity.ScaledValue(resource.Mega))
-
-	if memoryMb > 0 {
-		annotations[constants.AnnotationGpuMemory] = strconv.Itoa(memoryMb)
-	}
-	if gpu.Deref() > 0 && gpu.Deref() < 1 {
-		annotations[constants.AnnotationGpuFraction] = gpu.DerefStr()
-	}
 }

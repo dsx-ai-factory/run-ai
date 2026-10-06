@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package builders
+package networking
 
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
@@ -31,8 +32,6 @@ var _ = Describe("OAuth2Proxy tests", func() {
 		isInference            bool
 		isInferenceServingPort bool
 		cookiePrefix           string
-		containers             []corev1.Container
-		initContainers         []corev1.Container
 	)
 
 	BeforeEach(func() {
@@ -49,28 +48,17 @@ var _ = Describe("OAuth2Proxy tests", func() {
 		isInferenceServingPort = false
 		cookiePrefix = "oauth2-proxy"
 
-		containers = []corev1.Container{}
-		initContainers = []corev1.Container{}
-
-		// Set environment variables needed for tests
-		os.Setenv(ExternalUrlAuthContainerImageEnv, "oauth2-proxy:latest")
-		os.Setenv(WorkloadAuthSecretNameEnv, "oauth2-proxy-secret")
-		os.Setenv(WorkloadAuthSessionStoreTypeEnv, "redis")
-		os.Setenv(ExternalFQDNClusterProxyRedisEnv, "redis.example.com:6379")
+		// Restore the networking suite defaults after each moved auth test.
+		GinkgoT().Setenv(workloadconfig.EnvVarOauth2ProxyResources, "")
+		GinkgoT().Setenv(ExternalUrlAuthContainerImageEnv, "oauth2-proxy:latest")
+		GinkgoT().Setenv(WorkloadAuthSecretNameEnv, "oauth2-proxy-secret")
+		GinkgoT().Setenv(WorkloadAuthSessionStoreTypeEnv, "redis")
+		GinkgoT().Setenv(ExternalFQDNClusterProxyRedisEnv, "redis.example.com:6379")
 	})
 
-	AfterEach(func() {
-		// Clean up environment variables
-		os.Unsetenv(ExternalUrlAuthContainerImageEnv)
-		os.Unsetenv(WorkloadAuthSecretNameEnv)
-		os.Unsetenv(WorkloadAuthSessionStoreTypeEnv)
-		os.Unsetenv(ExternalFQDNClusterProxyRedisEnv)
-		os.Unsetenv(workloadconfig.EnvVarOauth2ProxyResources)
-	})
-
-	Context("GetOauth2ProxyContainer", func() {
+	Context("legacyOAuth2Container", func() {
 		It("should create a basic OAuth2 proxy container", func() {
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(container).NotTo(BeNil())
@@ -101,9 +89,9 @@ var _ = Describe("OAuth2Proxy tests", func() {
 		})
 
 		It("should apply configured resource requirements", func() {
-			os.Setenv(workloadconfig.EnvVarOauth2ProxyResources, `{"requests":{"cpu":"100m"},"limits":{"memory":"128Mi"}}`)
+			GinkgoT().Setenv(workloadconfig.EnvVarOauth2ProxyResources, `{"requests":{"cpu":"100m"},"limits":{"memory":"128Mi"}}`)
 
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(container.Resources).To(Equal(corev1.ResourceRequirements{
@@ -113,18 +101,18 @@ var _ = Describe("OAuth2Proxy tests", func() {
 		})
 
 		It("should reject malformed resource requirements", func() {
-			os.Setenv(workloadconfig.EnvVarOauth2ProxyResources, `{"requests":{"cpu":"not-a-quantity"}}`)
+			GinkgoT().Setenv(workloadconfig.EnvVarOauth2ProxyResources, `{"requests":{"cpu":"not-a-quantity"}}`)
 
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(container).To(BeNil())
 			Expect(err).To(MatchError(ContainSubstring(workloadconfig.EnvVarOauth2ProxyResources)))
 		})
 
 		It("should preserve explicitly empty resource requirements", func() {
-			os.Setenv(workloadconfig.EnvVarOauth2ProxyResources, `{}`)
+			GinkgoT().Setenv(workloadconfig.EnvVarOauth2ProxyResources, `{}`)
 
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(container.Resources).To(Equal(corev1.ResourceRequirements{}))
@@ -134,7 +122,7 @@ var _ = Describe("OAuth2Proxy tests", func() {
 			users := "user1@example.com,user2@example.com"
 			authorizedUsers = &users
 
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(container.Args).To(ContainElement("--authenticated-emails-file=/etc/runai/auth/users/" + GetSafeFileNameFromNick(nick)))
@@ -144,7 +132,7 @@ var _ = Describe("OAuth2Proxy tests", func() {
 			groups := "group-a,group-b"
 			authorizedGroups = &groups
 
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(container.Args).To(ContainElement("--allowed-group=group-a"))
@@ -156,7 +144,7 @@ var _ = Describe("OAuth2Proxy tests", func() {
 			groups := "invalid**group,group-b"
 			authorizedGroups = &groups
 
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("invalid group: invalid**group"))
@@ -167,7 +155,7 @@ var _ = Describe("OAuth2Proxy tests", func() {
 			isInference = true
 			isInferenceServingPort = true
 
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(container.Ports).To(HaveLen(1))
@@ -181,16 +169,16 @@ var _ = Describe("OAuth2Proxy tests", func() {
 			// Set the feature gate to true
 			featureGateUtil := featuregate.GetFeatureGateUtilInstance()
 			originalValue := featureGateUtil.FeatureGateSidecarContainersEnable
+			DeferCleanup(func() { featureGateUtil.FeatureGateSidecarContainersEnable = originalValue })
 			featureGateUtil.FeatureGateSidecarContainersEnable = true
 
-			container, err := GetOauth2ProxyContainer(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
+			container, err := legacyOAuth2Container(jobUrl, containerPort, authorizedUsers, authorizedGroups, idx, nick, isInference, isInferenceServingPort, cookiePrefix)
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(container.RestartPolicy).NotTo(BeNil())
 			Expect(*container.RestartPolicy).To(Equal(corev1.ContainerRestartPolicyAlways))
 
 			// Reset the feature gate
-			featureGateUtil.FeatureGateSidecarContainersEnable = originalValue
 		})
 	})
 
@@ -253,51 +241,37 @@ var _ = Describe("OAuth2Proxy tests", func() {
 		})
 	})
 
-	Context("IsWorkloadSupportsAuth", func() {
-		It("should detect OAuth container in regular containers", func() {
-			// Create a workload with an OAuth container
-			containers = []corev1.Container{
-				{Name: "container1"},
-				{Name: ExternalUrlAuthContainerName + "-0"},
-				{Name: "container2"},
-			}
-			initContainers = []corev1.Container{}
-
-			Expect(IsWorkloadSupportsAuth(containers, initContainers)).To(BeTrue())
-		})
-
-		It("should detect OAuth container in init containers", func() {
-			// Create a workload with an OAuth init container
-			containers = []corev1.Container{}
-			initContainers = []corev1.Container{
-				{Name: "init-container1"},
-				{Name: ExternalUrlAuthContainerName + "-0"},
-				{Name: "init-container2"},
-			}
-
-			Expect(IsWorkloadSupportsAuth(containers, initContainers)).To(BeTrue())
-		})
-
-		It("should return false when no OAuth container exists", func() {
-			// Create a workload without OAuth containers
-			containers = []corev1.Container{
-				{Name: "container1"},
-				{Name: "container2"},
-			}
-			initContainers = []corev1.Container{
-				{Name: "init-container1"},
-				{Name: "init-container2"},
-			}
-
-			Expect(IsWorkloadSupportsAuth(containers, initContainers)).To(BeFalse())
-		})
-
-		It("should handle empty container lists", func() {
-			// Empty container lists
-			containers = []corev1.Container{}
-			initContainers = []corev1.Container{}
-
-			Expect(IsWorkloadSupportsAuth(containers, initContainers)).To(BeFalse())
-		})
-	})
 })
+
+// legacyOAuth2Container adapts the retained sidecar test cases to the plugin builder.
+func legacyOAuth2Container(
+	jobUrl *apis.URL, containerPort int32, authorizedUsers *string, authorizedGroups *string,
+	idx int, nick string, omitPortDeclaration bool, forceJsonResponse bool, cookiePrefix string,
+	upstreamTimeoutSeconds ...int,
+) (*corev1.Container, error) {
+	featureGateUtil := featuregate.GetFeatureGateUtilInstance()
+
+	timeout := 0
+	if len(upstreamTimeoutSeconds) > 0 {
+		timeout = upstreamTimeoutSeconds[0]
+	}
+
+	cfg := OAuth2ProxyConfig{
+		ContainerName:              ExternalUrlAuthContainerName + "-" + strconv.Itoa(idx),
+		UpstreamURL:                "http://localhost:" + strconv.Itoa(int(containerPort)),
+		ExternalScheme:             jobUrl.Scheme,
+		ExternalHost:               jobUrl.Host,
+		ExternalPath:               jobUrl.Path,
+		Port:                       constants.ExternalUrlAuthContainerDefaultPort + int32(idx),
+		CookiePrefix:               cookiePrefix,
+		AuthorizedUsers:            authorizedUsers,
+		AuthorizedGroups:           authorizedGroups,
+		Nick:                       nick,
+		OmitPortDeclaration:        omitPortDeclaration,
+		ForceJsonResponse:          forceJsonResponse,
+		EnableSidecarRestartPolicy: featureGateUtil.FeatureGateSidecarContainersEnable,
+		UpstreamTimeoutSeconds:     timeout,
+	}
+
+	return BuildOAuth2ProxyContainer(cfg)
+}

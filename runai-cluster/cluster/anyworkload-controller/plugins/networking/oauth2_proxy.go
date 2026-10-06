@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package builders
+package networking
 
 import (
 	"errors"
@@ -11,23 +11,21 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
-	featuregate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/feature-gate"
 	commonutils "github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	corev1 "k8s.io/api/core/v1"
-	"knative.dev/pkg/apis"
 )
 
 const (
+	defaultOAuth2Scheme               = "https"
 	ExternalUrlAuthContainerName      = "runai-oauth2-proxy"
 	ExternalUrlAuthContainerImageEnv  = "RUNAI_OAUTH2_PROXY_IMAGE"
 	ExternalFQDNClusterProxyRedisEnv  = "RUNAI_OAUTH2_PROXY_REDIS_FQDN"
-	WorkloadAuthSecretNameEnv         = "RUNAI_OAUTH2_PROXY_WORKLOAD_AUTH_SECRET_NAME"
+	WorkloadAuthSecretNameEnv         = "RUNAI_OAUTH2_PROXY_WORKLOAD_AUTH_SECRET_NAME" // #nosec G101 -- Environment variable name, not a credential.
 	WorkloadAuthSessionStoreTypeEnv   = "RUNAI_OAUTH2_PROXY_SESSION_STORE_TYPE"
 	WorkloadAuthRedisSessionStoreType = "redis"
 )
@@ -90,7 +88,7 @@ func BuildOAuth2ProxyContainer(cfg OAuth2ProxyConfig) (*corev1.Container, error)
 
 	scheme := cfg.ExternalScheme
 	if scheme == "" {
-		scheme = "https"
+		scheme = defaultOAuth2Scheme
 	}
 
 	externalURL := fmt.Sprintf("%s://%s%s", scheme, cfg.ExternalHost, cfg.ExternalPath)
@@ -263,36 +261,6 @@ func GetOAuth2PathSuffixes(path string) (redirectSuffix, proxyPrefixSuffix strin
 	return "/oauth2/callback", "/oauth2"
 }
 
-// GetOauth2ProxyContainer creates an OAuth2 proxy sidecar container for workloads
-// This is a wrapper around BuildOAuth2ProxyContainer for backwards compatibility
-func GetOauth2ProxyContainer(jobUrl *apis.URL, containerPort int32, authorizedUsers *string, authorizedGroups *string, idx int, nick string, omitPortDeclaration bool, forceJsonResponse bool, cookiePrefix string, upstreamTimeoutSeconds ...int) (*corev1.Container, error) {
-	featureGateUtil := featuregate.GetFeatureGateUtilInstance()
-
-	timeout := 0
-	if len(upstreamTimeoutSeconds) > 0 {
-		timeout = upstreamTimeoutSeconds[0]
-	}
-
-	cfg := OAuth2ProxyConfig{
-		ContainerName:              ExternalUrlAuthContainerName + "-" + strconv.Itoa(idx),
-		UpstreamURL:                "http://localhost:" + strconv.Itoa(int(containerPort)),
-		ExternalScheme:             jobUrl.Scheme,
-		ExternalHost:               jobUrl.Host,
-		ExternalPath:               jobUrl.Path,
-		Port:                       constants.ExternalUrlAuthContainerDefaultPort + int32(idx),
-		CookiePrefix:               cookiePrefix,
-		AuthorizedUsers:            authorizedUsers,
-		AuthorizedGroups:           authorizedGroups,
-		Nick:                       nick,
-		OmitPortDeclaration:        omitPortDeclaration,
-		ForceJsonResponse:          forceJsonResponse,
-		EnableSidecarRestartPolicy: featureGateUtil.FeatureGateSidecarContainersEnable,
-		UpstreamTimeoutSeconds:     timeout,
-	}
-
-	return BuildOAuth2ProxyContainer(cfg)
-}
-
 // SanitizeAuthorizedGroups checks if the authorizedGroups string is in the correct format and converts it to a stripped
 // format that can be safely used as a command-line argument for the oauth2-proxy container.
 // each group in the comma-separated string is checked for validity. spaces between group names are allowed but trimmed
@@ -328,20 +296,4 @@ func getOidcIssuerUrl() string {
 	}
 
 	return workloadconfig.GetControlPlaneEndpoint() + "/auth/realms/runai"
-}
-
-func IsWorkloadSupportsAuth(containers []corev1.Container, initContainers []corev1.Container) bool {
-	for _, container := range containers {
-		if strings.Contains(container.Name, ExternalUrlAuthContainerName) {
-			return true
-		}
-	}
-
-	for _, container := range initContainers {
-		if strings.Contains(container.Name, ExternalUrlAuthContainerName) {
-			return true
-		}
-	}
-
-	return false
 }

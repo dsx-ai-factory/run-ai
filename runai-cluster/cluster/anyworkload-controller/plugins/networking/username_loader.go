@@ -3,17 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package builders
+package networking
 
 import (
 	"encoding/base64"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	sdkglobal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/global"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	commonutils "github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -46,19 +44,6 @@ func UsernameLoaderSecurityContext() *corev1.SecurityContext {
 		securityContext.RunAsUser = commonutils.Ref(UsernameLoaderRunAsUser)
 	}
 	return securityContext
-}
-
-// BuildUsernameLoaderInitContainer creates a simple init container that loads authorized users to the auth volume
-// This is a simplified version for use cases with a single set of authorized users
-//
-// Deprecated: use BuildUsernameLoaderInitContainerWithError. This compatibility
-// wrapper panics when injected-container resource configuration is invalid.
-func BuildUsernameLoaderInitContainer(authorizedUsers string, nick string) *corev1.Container {
-	container, err := BuildUsernameLoaderInitContainerWithError(authorizedUsers, nick)
-	if err != nil {
-		panic(err)
-	}
-	return container
 }
 
 // BuildUsernameLoaderInitContainerWithError creates a username-loader init
@@ -114,88 +99,4 @@ func GetSafeFileNameFromNick(nick string) string {
 	// from security perspective, we want to make sure that the nick is not used as a file name
 	// so we encode it to base64
 	return base64.StdEncoding.EncodeToString([]byte(nick))
-}
-
-func GetSortedNicknames(exposedUrls map[string]field_types.ExposedUrlItemAndRules) []string {
-	// Sort Exposed URLs by Nickname (Key)
-	sortedNicknames := make([]string, 0, len(exposedUrls))
-	for nick := range exposedUrls {
-		sortedNicknames = append(sortedNicknames, nick)
-	}
-	sort.Strings(sortedNicknames)
-	return sortedNicknames
-}
-
-// GetUsernameLoaderInitContainer creates an init container that loads the emails to the auth volume,
-// to prevent potential security issues with special characters in the email (e.g. of putting a user-input directly in the command line!)
-// it decodes the emails that were encoded in base64 format
-//
-// Deprecated: use GetUsernameLoaderInitContainerWithError. This compatibility
-// wrapper panics when injected-container resource configuration is invalid.
-func GetUsernameLoaderInitContainer(exposedUrls map[string]field_types.ExposedUrlItemAndRules, servingPortAuthorizedUsers *string) *corev1.Container {
-	container, err := GetUsernameLoaderInitContainerWithError(exposedUrls, servingPortAuthorizedUsers)
-	if err != nil {
-		panic(err)
-	}
-	return container
-}
-
-// GetUsernameLoaderInitContainerWithError composes a username-loader init
-// container and returns resource configuration errors to the caller.
-func GetUsernameLoaderInitContainerWithError(exposedUrls map[string]field_types.ExposedUrlItemAndRules, servingPortAuthorizedUsers *string) (*corev1.Container, error) {
-	if !workloadconfig.ExternalAuthUrlEnabled() {
-		return nil, nil
-	}
-
-	sortedNicknames := GetSortedNicknames(exposedUrls)
-
-	if servingPortAuthorizedUsers != nil {
-		sortedNicknames = append(sortedNicknames, "serving-port")
-		sort.Strings(sortedNicknames)
-	}
-
-	command := ""
-	for _, nick := range sortedNicknames {
-		var authorizedUsers string
-		if nick == "serving-port" {
-			authorizedUsers = *servingPortAuthorizedUsers
-		} else {
-			entry := exposedUrls[nick]
-			if entry.Value != nil && entry.Value.AuthorizedUsers != nil {
-				authorizedUsers = *exposedUrls[nick].Value.AuthorizedUsers
-			}
-		}
-
-		if authorizedUsers != "" {
-			if command != "" {
-				command += " && "
-			}
-			command = command + fmt.Sprintf("echo -e \"%s\" | base64 -d > /etc/runai/auth/users/%s",
-				CleanAndBase64Encode(authorizedUsers), GetSafeFileNameFromNick(nick))
-		}
-	}
-
-	if command == "" {
-		return nil, nil
-	}
-
-	resources, err := UsernameLoaderInitContainerResources()
-	if err != nil {
-		return nil, fmt.Errorf("get username-loader resources: %w", err)
-	}
-
-	return &corev1.Container{
-		Name:            UsernameLoaderInitContainerName,
-		Image:           workloadconfig.GetOauth2ProxyUsernameLoaderImage(),
-		ImagePullPolicy: corev1.PullIfNotPresent,
-		Command:         []string{"sh", "-c", command},
-		VolumeMounts: []corev1.VolumeMount{
-			{
-				Name:      constants.ExternalUrlAuthVolumeName,
-				MountPath: constants.ExternalUrlAuthVolumePath,
-			},
-		},
-		Resources:       resources,
-		SecurityContext: UsernameLoaderSecurityContext(),
-	}, nil
 }

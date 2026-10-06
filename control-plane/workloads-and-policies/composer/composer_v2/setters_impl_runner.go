@@ -303,8 +303,7 @@ func UrlsToWorkloadRunner(info *composer.ExposedUrlInfo, target any, cookie any)
 const runaiHostTrimPrefix = "runai."
 
 // buildExternalAccess builds the per-endpoint ExternalAccess for the cluster's
-// enabled external-access mechanisms, mirroring the V1 cluster builder's
-// dispatch in workload-common/builders/external_url.go::buildIngressOrRoute.
+// enabled external-access mechanisms.
 func buildExternalAccess(config composer.ClusterStorageConfig, serviceName, urlStr string, servicePort int32) (*openapi.ExternalAccess, *workloadsApi.Error) {
 	externalAccess := openapi.NewExternalAccess()
 	ingressEnabled := true

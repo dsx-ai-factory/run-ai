@@ -25,7 +25,7 @@ require (
 	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v1.5.2
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
-	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a // indirect
+	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a
 	sigs.k8s.io/controller-runtime v0.23.3
 	sigs.k8s.io/gateway-api v1.5.1
 	sigs.k8s.io/jobset v0.10.1
@@ -39,6 +39,7 @@ require (
 	github.com/spf13/cobra v1.10.2 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	golang.org/x/mod v0.41.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/component-base v0.35.4 // indirect
 )
 
@@ -59,7 +60,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-20260511140503-2c38687ee310 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-20260511140503-2c38687ee310
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
@@ -125,7 +126,6 @@ require (
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
-	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
@@ -223,6 +223,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
+	github.com/stretchr/testify v1.11.1
 )
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos => ../dromos

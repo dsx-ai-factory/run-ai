@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package builders
+package networking
 
 import (
 	"encoding/base64"
@@ -107,18 +107,13 @@ func TestUsernameLoaderResources(t *testing.T) {
 		}
 	})
 
-	t.Run("applies configured resources from both entry points", func(t *testing.T) {
+	t.Run("applies configured resources", func(t *testing.T) {
 		t.Setenv(workloadconfig.EnvVarUsernameLoaderResources, `{"requests":{"cpu":"25m"}}`)
 		first, err := BuildUsernameLoaderInitContainerWithError("user@example.com", "test")
 		if err != nil {
 			t.Fatal(err)
 		}
-		users := "user@example.com"
-		second, err := GetUsernameLoaderInitContainerWithError(nil, &users)
-		if err != nil {
-			t.Fatal(err)
-		}
-		for _, container := range []*corev1.Container{first, second} {
+		for _, container := range []*corev1.Container{first} {
 			if quantity := container.Resources.Requests[corev1.ResourceCPU]; !quantity.Equal(resource.MustParse("25m")) {
 				t.Fatalf("expected configured CPU request, got %s", quantity.String())
 			}

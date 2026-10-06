@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package builders
+package networking
 
 import (
-	"os"
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
@@ -19,8 +18,7 @@ import (
 
 func TestEnrichIngressWithDefaults(t *testing.T) {
 	t.Run("sets ingressClassName from config when not specified", func(t *testing.T) {
-		os.Setenv(workloadconfig.EnvVarIngressClass, "nginx")
-		defer os.Unsetenv(workloadconfig.EnvVarIngressClass)
+		t.Setenv(workloadconfig.EnvVarIngressClass, "nginx")
 
 		ingress := &networkingv1.Ingress{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
@@ -33,8 +31,7 @@ func TestEnrichIngressWithDefaults(t *testing.T) {
 	})
 
 	t.Run("preserves user-specified ingressClassName", func(t *testing.T) {
-		os.Setenv(workloadconfig.EnvVarIngressClass, "nginx")
-		defer os.Unsetenv(workloadconfig.EnvVarIngressClass)
+		t.Setenv(workloadconfig.EnvVarIngressClass, "nginx")
 
 		userClass := "traefik"
 		ingress := &networkingv1.Ingress{
@@ -76,8 +73,7 @@ func TestEnrichIngressWithDefaults(t *testing.T) {
 	})
 
 	t.Run("merges default annotations while preserving user annotations", func(t *testing.T) {
-		os.Setenv(workloadconfig.EnvVarIngressAnnotations, `{"default-key":"default-value","shared-key":"default-shared"}`)
-		defer os.Unsetenv(workloadconfig.EnvVarIngressAnnotations)
+		t.Setenv(workloadconfig.EnvVarIngressAnnotations, `{"default-key":"default-value","shared-key":"default-shared"}`)
 
 		ingress := &networkingv1.Ingress{
 			ObjectMeta: metav1.ObjectMeta{
@@ -137,8 +133,7 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 	})
 
 	t.Run("uses passthrough termination when configured by env", func(t *testing.T) {
-		os.Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, workloadconfig.OpenshiftRouteTerminationPolicyPassthrough)
-		defer os.Unsetenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy)
+		t.Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, workloadconfig.OpenshiftRouteTerminationPolicyPassthrough)
 
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
@@ -155,8 +150,7 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 	})
 
 	t.Run("falls back to edge for unknown termination policy", func(t *testing.T) {
-		os.Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, "reencrypt")
-		defer os.Unsetenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy)
+		t.Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, "reencrypt")
 
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
@@ -171,8 +165,7 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 	})
 
 	t.Run("trims subdomain when enabled", func(t *testing.T) {
-		os.Setenv(workloadconfig.EnvVarSubdomainSupport, "true")
-		defer os.Unsetenv(workloadconfig.EnvVarSubdomainSupport)
+		t.Setenv(workloadconfig.EnvVarSubdomainSupport, "true")
 
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
@@ -187,8 +180,7 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 	})
 
 	t.Run("merges default annotations while preserving user annotations", func(t *testing.T) {
-		os.Setenv(workloadconfig.EnvVarIngressAnnotations, `{"default-key":"default-value"}`)
-		defer os.Unsetenv(workloadconfig.EnvVarIngressAnnotations)
+		t.Setenv(workloadconfig.EnvVarIngressAnnotations, `{"default-key":"default-value"}`)
 
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{

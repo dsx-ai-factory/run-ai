@@ -11,7 +11,7 @@ import (
 
 	endpoints "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
@@ -169,7 +169,7 @@ func validateAuthConfig(auth *dromosv1alpha1.NetworkingAuthConfig, basePath *fie
 			errs = append(errs, field.Required(
 				basePath.Child("authorizedGroups"),
 				"authorizedGroups is required when authorizationType is authorizedGroups"))
-		} else if _, err := workloadbuilders.SanitizeAuthorizedGroups(auth.AuthorizedGroups); err != nil {
+		} else if _, err := SanitizeAuthorizedGroups(auth.AuthorizedGroups); err != nil {
 			errs = append(errs, field.Invalid(
 				basePath.Child("authorizedGroups"),
 				auth.AuthorizedGroups,

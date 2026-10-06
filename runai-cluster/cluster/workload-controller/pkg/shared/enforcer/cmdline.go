@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package builders
+package enforcer
 
 import (
 	"fmt"
+
 	"golang.org/x/exp/utf8string"
 )
 
