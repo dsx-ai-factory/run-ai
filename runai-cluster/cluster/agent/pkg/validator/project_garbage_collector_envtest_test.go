@@ -14,7 +14,7 @@ import (
 	goruntime "runtime"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
@@ -59,8 +59,8 @@ var _ = Describe("Project orphan deletion admission", func() {
 		ctx := context.Background()
 		Expect(admin.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "runai"}})).To(Succeed())
 		identities := map[string]string{}
-		for _, name := range []string{operands.RunaiAgentName, operands.RunaiClusterSyncName,
-			operands.RunaiOperatorName, operands.KRMProjectControllerName, "generic-garbage-collector"} {
+		for _, name := range []string{constants.RunaiAgentName, constants.RunaiClusterSyncName,
+			constants.RunaiOperatorName, constants.KRMProjectControllerName, "generic-garbage-collector"} {
 			namespace := "runai"
 			if name == "generic-garbage-collector" {
 				namespace = metav1.NamespaceSystem
@@ -77,7 +77,7 @@ var _ = Describe("Project orphan deletion admission", func() {
 			Expect(createErr).NotTo(HaveOccurred())
 			return result
 		}
-		agent := impersonate("system:serviceaccount:runai:"+operands.RunaiAgentName, identities[operands.RunaiAgentName])
+		agent := impersonate("system:serviceaccount:runai:"+constants.RunaiAgentName, identities[constants.RunaiAgentName])
 		collector := impersonate("system:serviceaccount:kube-system:generic-garbage-collector", identities["generic-garbage-collector"])
 		tenant := impersonate("system:serviceaccount:tenant:generic-garbage-collector", "tenant-uid")
 

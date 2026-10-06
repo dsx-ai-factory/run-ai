@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 
@@ -71,7 +71,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		agentServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.RunaiAgentName,
+				Name:      constants.RunaiAgentName,
 				UID:       types.UID(runaiAgentUID),
 			},
 		}
@@ -79,7 +79,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		CSServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.RunaiClusterSyncName,
+				Name:      constants.RunaiClusterSyncName,
 				UID:       types.UID(runaiCSUID),
 			},
 		}
@@ -87,7 +87,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		projectControllerServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.KRMProjectControllerName,
+				Name:      constants.KRMProjectControllerName,
 				UID:       types.UID(projectControllerUID),
 			},
 		}
@@ -95,7 +95,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		runaiOperatorServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.RunaiOperatorName,
+				Name:      constants.RunaiOperatorName,
 				UID:       types.UID(runaiOperatorUID),
 			},
 		}
