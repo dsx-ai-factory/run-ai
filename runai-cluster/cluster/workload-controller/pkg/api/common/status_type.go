@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"time"
 
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -183,19 +182,6 @@ type Resource struct {
 
 func (self Resource) String() string {
 	return fmt.Sprintf("%s/%s", self.Kind.String(), self.Name)
-}
-
-func CommonResourceToResource(resources []workloadbuilders.Resource) []Resource {
-	resourcesResult := make([]Resource, len(resources))
-	for i, resource := range resources {
-		resourcesResult[i] = Resource{
-			Kind:      resource.Kind,
-			Name:      resource.Name,
-			Namespace: resource.Namespace,
-		}
-	}
-
-	return resourcesResult
 }
 
 type ObservedResource struct {

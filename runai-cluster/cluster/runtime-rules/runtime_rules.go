@@ -8,7 +8,7 @@ package pkg
 import (
 	"context"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/controller"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/frameworks"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
@@ -38,12 +38,12 @@ type RuntimeRules struct {
 
 func NewRuntimeRules(k8sClient client.WithWatch, qm *queuesManager.QueuesManager, prometheusClient prometheus.Querier,
 	recorder record.EventRecorder, eventList []int, workloadValidator *validation.WorkloadValidator) *RuntimeRules {
-	// Copy controller.DistributedJobCRDsSupportedMap rather than aliasing it —
+	// Copy frameworks.DistributedJobCRDsSupportedMap rather than aliasing it —
 	// the package-level map would otherwise pick up additions from every
 	// constructor call (notably the WorkloadRunner entry below, which would leak
 	// across test cases).
-	supportedJobKinds := make(map[string]client.Object, len(controller.DistributedJobCRDsSupportedMap)+2)
-	for k, v := range controller.DistributedJobCRDsSupportedMap {
+	supportedJobKinds := make(map[string]client.Object, len(frameworks.DistributedJobCRDsSupportedMap)+2)
+	for k, v := range frameworks.DistributedJobCRDsSupportedMap {
 		supportedJobKinds[k] = v
 	}
 	supportedJobKinds[constants.KindRunaiJob] = &v1.RunaiJob{}
