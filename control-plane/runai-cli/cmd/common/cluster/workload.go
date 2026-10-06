@@ -20,7 +20,9 @@ var instance = config.GetInstance()
 
 func getRunningPhaseForWorkload(workload *apis.Workload) string {
 	switch {
-	case workload.Framework == api.NimService:
+	// Both NIM and workloads resolved through workloads-manager use the
+	// external cluster API route, whose ready phase is Running.
+	case workload.Framework == api.NimService || workload.Framework == api.UndefinedFramework:
 		return WorkloadRunningStatus
 	case workload.Type == api.Inference || workload.Type == api.DistributedInference:
 		return InferenceWorkloadRunningStatus
