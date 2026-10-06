@@ -50,13 +50,13 @@ func TestCreateApplicationAccessRules_CallsBothRoles(t *testing.T) {
 		Name: ptr.String(mngTenantName),
 	}
 
-	authClientMock.On("SetAppPermissions", mock.Anything, mngTenantId, MNG_APPLICATION_NAME, systemScope, authorization_api.ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR).Return(nil)
-	authClientMock.On("SetAppPermissions", mock.Anything, mngTenantId, MNG_APPLICATION_NAME, tenantScope, authorization_api.ALLOWEDINTERNALCREATEROLES_SYSTEM_ADMINISTRATOR).Return(nil)
+	authClientMock.On("SetServiceAccountPermissions", mock.Anything, mngTenantId, MNG_APPLICATION_NAME, systemScope, authorization_api.ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR).Return(nil)
+	authClientMock.On("SetServiceAccountPermissions", mock.Anything, mngTenantId, MNG_APPLICATION_NAME, tenantScope, authorization_api.ALLOWEDINTERNALCREATEROLES_SYSTEM_ADMINISTRATOR).Return(nil)
 
 	err := testSubject.createApplicationAccessRules(context.Background(), mngTenantId, mngTenantName)
 
 	assert.NoError(t, err)
-	authClientMock.AssertNumberOfCalls(t, "SetAppPermissions", 2)
+	authClientMock.AssertNumberOfCalls(t, "SetServiceAccountPermissions", 2)
 }
 
 func TestCreateApplicationAccessRules_StopsOnCloudOperatorError(t *testing.T) {
@@ -68,12 +68,12 @@ func TestCreateApplicationAccessRules_StopsOnCloudOperatorError(t *testing.T) {
 		Name: ptr.String(mngTenantName),
 	}
 
-	authClientMock.On("SetAppPermissions", mock.Anything, mngTenantId, MNG_APPLICATION_NAME, systemScope, authorization_api.ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR).Return(assert.AnError)
+	authClientMock.On("SetServiceAccountPermissions", mock.Anything, mngTenantId, MNG_APPLICATION_NAME, systemScope, authorization_api.ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR).Return(assert.AnError)
 
 	err := testSubject.createApplicationAccessRules(context.Background(), mngTenantId, mngTenantName)
 
 	assert.Error(t, err)
-	authClientMock.AssertNumberOfCalls(t, "SetAppPermissions", 1)
+	authClientMock.AssertNumberOfCalls(t, "SetServiceAccountPermissions", 1)
 }
 
 func TestAddConsoleAdminSystemAdminRole_HappyFlow(t *testing.T) {

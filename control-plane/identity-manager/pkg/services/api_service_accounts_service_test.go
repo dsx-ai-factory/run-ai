@@ -547,7 +547,7 @@ func TestMintInstallerBootstrapToken_RegenerateSecretError(t *testing.T) {
 	}).Return([]iamModels.Client{*perClusterClient}, nil)
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(perClusterClient, nil)
 	iamMock.MockClientService.On("RegenerateClientSecret", ctx, RealmName, *perClusterClient.ID).Return("", assert.AnError)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 
@@ -576,7 +576,7 @@ func TestMintInstallerBootstrapToken_GetClientError(t *testing.T) {
 		ClientType: ptr.To(realm_client.ClientTypeInstaller),
 	}).Return([]iamModels.Client{*perClusterClient}, nil)
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(nil, assert.AnError)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 
@@ -606,7 +606,7 @@ func TestMintInstallerBootstrapToken_MissingClientID(t *testing.T) {
 		ClientType: ptr.To(realm_client.ClientTypeInstaller),
 	}).Return([]iamModels.Client{*perClusterClient}, nil)
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(clientWithSecret, nil)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 
@@ -638,7 +638,7 @@ func TestMintInstallerBootstrapToken_AuthenticateError(t *testing.T) {
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(perClusterClient, nil)
 	iamMock.MockClientService.On("RegenerateClientSecret", ctx, RealmName, *perClusterClient.ID).Return(rotatedSecret, nil)
 	iamMock.MockAuthService.On("AuthenticateClient", ctx, RealmName, perClusterClientId, rotatedSecret).Return(nil, assert.AnError)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 
@@ -694,7 +694,7 @@ func TestMintInstallerBootstrapToken_CacheNotInitialized(t *testing.T) {
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(perClusterClient, nil)
 	iamMock.MockClientService.On("GetClientSecret", ctx, RealmName, *perClusterClient.ID).Return(existingSecret, nil)
 	iamMock.MockAuthService.On("AuthenticateClient", ctx, RealmName, perClusterClientId, existingSecret).Return(tokens, nil)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 
@@ -756,7 +756,7 @@ func TestMintInstallerBootstrapToken_UnlockUsesDetachedContext(t *testing.T) {
 	iamMock.MockAuthService.On("AuthenticateClient", ctx, RealmName, perClusterClientId, rotatedSecret).
 		Run(func(mock.Arguments) { cancel() }).
 		Return(tokens, nil)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 
@@ -820,7 +820,7 @@ func TestMintInstallerBootstrapToken_ClusterScoped_ExistingClient(t *testing.T) 
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(perClusterClient, nil)
 	iamMock.MockClientService.On("RegenerateClientSecret", ctx, RealmName, *perClusterClient.ID).Return(rotatedSecret, nil)
 	iamMock.MockAuthService.On("AuthenticateClient", ctx, RealmName, perClusterClientId, rotatedSecret).Return(tokens, nil)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 
@@ -830,7 +830,7 @@ func TestMintInstallerBootstrapToken_ClusterScoped_ExistingClient(t *testing.T) 
 	assert.Equal(t, "bootstrap-jwt", resp.Body.(api.InstallerBootstrapResponse).Token)
 
 	iamMock.MockClientService.AssertNotCalled(t, "CreateClient", mock.Anything, mock.Anything, mock.Anything)
-	authzClientMock.AssertCalled(t, "SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.AssertCalled(t, "SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION)
 }
@@ -862,7 +862,7 @@ func TestMintInstallerBootstrapToken_ClusterScoped_SelfHealsMissingClient(t *tes
 			c.Name != nil && *c.Name == perClusterClientId &&
 			c.Attributes != nil && c.Attributes.ClusterId != nil && *c.Attributes.ClusterId == clusterId
 	})).Return("keycloak-id", nil)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(perClusterClient, nil)
@@ -875,7 +875,7 @@ func TestMintInstallerBootstrapToken_ClusterScoped_SelfHealsMissingClient(t *tes
 	assert.Equal(t, "bootstrap-jwt", resp.Body.(api.InstallerBootstrapResponse).Token)
 }
 
-func TestMintInstallerBootstrapToken_ClusterScoped_SetAppPermissionsError(t *testing.T) {
+func TestMintInstallerBootstrapToken_ClusterScoped_SetServiceAccountPermissionsError(t *testing.T) {
 	iamMock, authzClientMock, _, _, _, testSubject := initServiceAccountTest(t)
 	ctx := enrichContext()
 	clusterId := "cluster-1"
@@ -886,7 +886,7 @@ func TestMintInstallerBootstrapToken_ClusterScoped_SetAppPermissionsError(t *tes
 		ClientType: ptr.To(realm_client.ClientTypeInstaller),
 	}).Return([]iamModels.Client{}, nil)
 	iamMock.MockClientService.On("CreateClient", ctx, RealmName, mock.Anything).Return("keycloak-id", nil)
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
 
 	resp, err := testSubject.MintInstallerBootstrapToken(ctx, clusterId, "")
 	assert.NotNil(t, err)
@@ -909,7 +909,7 @@ func TestMintInstallerBootstrapToken_ClusterScoped_RepairsGrantOnNextMint(t *tes
 		ClientType: ptr.To(realm_client.ClientTypeInstaller),
 	}).Return([]iamModels.Client{}, nil).Once()
 	iamMock.MockClientService.On("CreateClient", ctx, RealmName, mock.Anything).Return("keycloak-id", nil).Once()
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId, scope,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId, scope,
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(fmt.Errorf("error")).Once()
 
 	resp, err := testSubject.MintInstallerBootstrapToken(ctx, clusterId, "")
@@ -932,7 +932,7 @@ func TestMintInstallerBootstrapToken_ClusterScoped_RepairsGrantOnNextMint(t *tes
 		ClusterId:  &clusterId,
 		ClientType: ptr.To(realm_client.ClientTypeInstaller),
 	}).Return([]iamModels.Client{*perClusterClient}, nil).Once()
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId, scope,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId, scope,
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil).Once()
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(perClusterClient, nil)
 	iamMock.MockClientService.On("RegenerateClientSecret", ctx, RealmName, *perClusterClient.ID).Return(rotatedSecret, nil)
@@ -944,10 +944,10 @@ func TestMintInstallerBootstrapToken_ClusterScoped_RepairsGrantOnNextMint(t *tes
 	assert.Equal(t, "bootstrap-jwt", resp.Body.(api.InstallerBootstrapResponse).Token)
 
 	iamMock.MockClientService.AssertNumberOfCalls(t, "CreateClient", 1)
-	authzClientMock.AssertNumberOfCalls(t, "SetAppPermissions", 2)
+	authzClientMock.AssertNumberOfCalls(t, "SetServiceAccountPermissions", 2)
 }
 
-func TestMintInstallerBootstrapToken_ClusterScoped_CreateConflict_FallsBackToSetAppPermissions(t *testing.T) {
+func TestMintInstallerBootstrapToken_ClusterScoped_CreateConflict_FallsBackToSetServiceAccountPermissions(t *testing.T) {
 	iamMock, authzClientMock, _, _, _, testSubject := initServiceAccountTest(t)
 	mockInstallerBootstrapLock(t)
 	ctx := enrichContext()
@@ -971,7 +971,7 @@ func TestMintInstallerBootstrapToken_ClusterScoped_CreateConflict_FallsBackToSet
 	}).Return([]iamModels.Client{}, nil)
 	iamMock.MockClientService.On("CreateClient", ctx, RealmName, mock.Anything).
 		Return("", fmt.Errorf("keycloak error: conflict: %w", iamError.ErrConflict))
-	authzClientMock.On("SetAppPermissions", ctx, TenantId, perClusterClientId,
+	authzClientMock.On("SetServiceAccountPermissions", ctx, TenantId, perClusterClientId,
 		authorization_api.InternalCreateAccessRuleRequestScope{Id: clusterId, Type: authorization_api.SCOPETYPE_CLUSTER},
 		authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION).Return(nil)
 	iamMock.MockClientService.On("GetClientByClientId", ctx, RealmName, perClusterClientId).Return(perClusterClient, nil)

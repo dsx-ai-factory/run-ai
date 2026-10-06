@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	github.com/aws/smithy-go v1.28.2
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.10
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.3
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.0
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.5
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.20
 	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.21
