@@ -23,12 +23,12 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/networking"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/personalcreds"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/restartrules"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/app"
 	dromosconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/plugins/mnnvl"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/plugins/nodeaffinity"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/plugins/storage"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 
 	_ "github.com/dsx-ai-factory/run-ai/runai-common-packages/fips"
 )

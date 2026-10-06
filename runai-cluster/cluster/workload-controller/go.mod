@@ -210,6 +210,7 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ../common/topology
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../workload-common
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils

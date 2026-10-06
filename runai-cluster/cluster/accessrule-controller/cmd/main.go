@@ -21,7 +21,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/accessrule-controller/pkg/controllers/accessrule"
 	accessrulevalidator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/accessrule-controller/pkg/validators/accessrule"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/accessrule-controller/pkg/version"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 
 	rbacv1 "k8s.io/api/rbac/v1"
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)

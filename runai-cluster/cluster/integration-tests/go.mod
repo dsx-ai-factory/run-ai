@@ -4,8 +4,8 @@ go 1.26.8
 
 require (
 	github.com/devfile/api/v2 v2.2.2
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller v0.0.0-00010101000000-000000000000
 	github.com/kai-scheduler/KAI-scheduler v0.18.2
@@ -47,6 +47,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/node-pool-utils v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-00010101000000-000000000000 // indirect
@@ -234,6 +235,7 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters => ../common/getters
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../common/runaipublic
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ../common/topology
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator => ../external-workload-integrator
