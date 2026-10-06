@@ -23,6 +23,7 @@ const (
 
 	DatasourceAssets = "DatasourceAssets"
 	CredentialAssets = "CredentialAssets"
+	K8sObjectsAssets = "K8sObjectsAssets"
 )
 
 func GetStringVal(str *string) string {

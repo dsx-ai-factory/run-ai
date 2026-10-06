@@ -257,6 +257,58 @@ var _ = Describe("WorkloadsV2Impl", func() {
 		cleanTables()
 	})
 
+	Context("networking input validation", func() {
+		for _, operation := range []string{"create", "dry-run", "update"} {
+			Context(operation, func() {
+				DescribeTable("rejects malformed networking before queueing",
+					func(networking, message string) {
+						method, path := http.MethodPost, urlWorkloads
+						metadata := map[string]interface{}{"projectId": randoms.ProjectIdStr}
+						var id string
+						if operation == "dry-run" {
+							path += "?dryRun=true"
+						} else if operation == "update" {
+							id, _ = createWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+								Metadata: api.WorkloadV2MetadataCreateParams{
+									ProjectId: randoms.ProjectIdStr,
+									Category:  convutils.Ref("default-category"),
+									Priority:  convutils.Ref("default-priority"),
+								},
+								Manifest: sampleManifest,
+							})
+							method, path = http.MethodPut, urlWorkloads+"/"+id
+							metadata = map[string]interface{}{}
+						}
+						ctx := setContext(randoms.TenantIdStr, adminUser, nil)
+						before, err := dao.DbListUpdates(ctx, randoms.ClusterId, 0, 50)
+						Expect(err).To(BeNil())
+						// Keep JSON null entries intact through the actual HTTP decoder.
+						metadata["configuration"] = map[string]interface{}{"networking": json.RawMessage(networking)}
+						req := httptest.NewRequest(method, testHost+path, makePayload(map[string]interface{}{
+							"metadata": metadata, "manifest": sampleManifest,
+						}))
+						req.Header = *headerForAdmin(randoms)
+						resp := httptest.NewRecorder()
+						router.ServeHTTP(resp, req)
+
+						Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+						Expect(resp.Body.String()).To(ContainSubstring(message))
+						after, err := dao.DbListUpdates(ctx, randoms.ClusterId, 0, 50)
+						Expect(err).To(BeNil())
+						Expect(after).To(Equal(before))
+						if id != "" {
+							Expect(getWorkloadForTest(router, randoms, id).Workload.Metadata.Configuration.Networking).To(BeNil())
+						}
+					},
+					Entry("null endpoint", `[null]`, "networking[0] must contain a service or externalAccess"),
+					Entry("null service", `[{"services":[null]}]`, "networking[0].services[0] must contain spec or ref"),
+					Entry("service with both spec and ref", `[{"services":[{"spec":{"name":"one","selector":{"app":"one"},"ports":[{"port":80}]},"ref":{"name":"one","port":80}}]}]`, "networking[0].services[0] must not contain both spec and ref"),
+					Entry("multiple services", `[{"services":[{"ref":{"name":"one","port":80}},{"ref":{"name":"two","port":80}}]}]`, "networking[0].services must contain at most one service"),
+				)
+			})
+		}
+	})
+
 	Context("gvk policy is skipped for workloads translated from v1", func() {
 		// A gvk policy that only allows image ubuntu/redhat. The sample
 		// Deployment uses nginx:latest, so the policy fails whenever it runs.

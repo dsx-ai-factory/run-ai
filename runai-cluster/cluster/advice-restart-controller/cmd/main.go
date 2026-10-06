@@ -11,7 +11,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/apis/heimdall/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/controller"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	rcpconfig "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	kubeflowv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"

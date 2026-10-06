@@ -73,12 +73,32 @@ func (c *AssetsClient) RequestAssetFlatFormat(ctx context.Context, request opena
 			}
 		}
 
+		// A non-nil err on the HTTP 200 branch means the generated
+		// client hit a decode error after the body was received —
+		// resp may be partially populated. Returning (resp, nil)
+		// here would silently report that half-decoded response as
+		// success and advance the sync counter past whatever the
+		// decoder dropped, so surface the decode error instead.
+		if err != nil {
+			return nil, openapi.NewError(http.StatusInternalServerError,
+				fmt.Sprintf("decode response: %v", err))
+		}
 		if resp != nil {
 			return resp, nil
 		}
+		// Status was OK but the generated client decoded a nil typed
+		// response (e.g. empty body on a schema that expected a payload).
+		// Surface it as a real 500 rather than letting the final return
+		// below format "<nil>" into the 503 message.
+		return nil, openapi.NewError(http.StatusInternalServerError,
+			"empty response body with status OK")
 	}
 
-	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("%v", err))
+	if err != nil {
+		return nil, openapi.NewError(http.StatusServiceUnavailable, err.Error())
+	}
+	return nil, openapi.NewError(http.StatusServiceUnavailable,
+		"no response from assets-service and no transport error")
 }
 
 func (c *AssetsClient) CredentialsSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.CredentialsUpdatesResp, *openapi.Error) {
@@ -105,12 +125,32 @@ func (c *AssetsClient) CredentialsSyncUpdates(ctx context.Context, clusterId str
 			}
 		}
 
+		// A non-nil err on the HTTP 200 branch means the generated
+		// client hit a decode error after the body was received —
+		// resp may be partially populated. Returning (resp, nil)
+		// here would silently report that half-decoded response as
+		// success and advance the sync counter past whatever the
+		// decoder dropped, so surface the decode error instead.
+		if err != nil {
+			return nil, openapi.NewError(http.StatusInternalServerError,
+				fmt.Sprintf("decode response: %v", err))
+		}
 		if resp != nil {
 			return resp, nil
 		}
+		// Status was OK but the generated client decoded a nil typed
+		// response (e.g. empty body on a schema that expected a payload).
+		// Surface it as a real 500 rather than letting the final return
+		// below format "<nil>" into the 503 message.
+		return nil, openapi.NewError(http.StatusInternalServerError,
+			"empty response body with status OK")
 	}
 
-	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("%v", err))
+	if err != nil {
+		return nil, openapi.NewError(http.StatusServiceUnavailable, err.Error())
+	}
+	return nil, openapi.NewError(http.StatusServiceUnavailable,
+		"no response from assets-service and no transport error")
 }
 
 func (c *AssetsClient) DatasourceSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.DatasourceUpdatesResp, *openapi.Error) {
@@ -137,12 +177,87 @@ func (c *AssetsClient) DatasourceSyncUpdates(ctx context.Context, clusterId stri
 			}
 		}
 
+		// A non-nil err on the HTTP 200 branch means the generated
+		// client hit a decode error after the body was received —
+		// resp may be partially populated. Returning (resp, nil)
+		// here would silently report that half-decoded response as
+		// success and advance the sync counter past whatever the
+		// decoder dropped, so surface the decode error instead.
+		if err != nil {
+			return nil, openapi.NewError(http.StatusInternalServerError,
+				fmt.Sprintf("decode response: %v", err))
+		}
 		if resp != nil {
 			return resp, nil
 		}
+		// Status was OK but the generated client decoded a nil typed
+		// response (e.g. empty body on a schema that expected a payload).
+		// Surface it as a real 500 rather than letting the final return
+		// below format "<nil>" into the 503 message.
+		return nil, openapi.NewError(http.StatusInternalServerError,
+			"empty response body with status OK")
 	}
 
-	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("%v", err))
+	if err != nil {
+		return nil, openapi.NewError(http.StatusServiceUnavailable, err.Error())
+	}
+	return nil, openapi.NewError(http.StatusServiceUnavailable,
+		"no response from assets-service and no transport error")
+}
+
+// K8sObjectsSyncUpdates wraps the k8s-objects sync endpoint. The endpoint is a
+// single family-wide feed for every k8s-object asset kind (resource-claim-template
+// today, more to follow) — one call fetches updates for all kinds the control
+// plane knows about and the agent dispatches per-kind on the response.
+func (c *AssetsClient) K8sObjectsSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.K8sObjectsUpdatesResp, *openapi.Error) {
+	resp, httpResp, err := c.ApiClient.SynchronizationAPI.K8sObjectsSyncUpdates(ctx).ClusterSyncReport(request).After(fromUpdate).ClusterId(clusterId).Execute()
+	if httpResp != nil {
+		if httpResp.Body != nil {
+			defer httpResp.Body.Close()
+		}
+
+		if httpResp.StatusCode != http.StatusOK {
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				return nil, openapi.NewError(http.StatusInternalServerError, fmt.Sprintf("failed to read response payload: %v", err.Error()))
+			}
+
+			var apiError openapi.Error
+
+			jsonErr := json.Unmarshal(body, &apiError)
+			if jsonErr != nil {
+				return nil, openapi.NewError(int32(httpResp.StatusCode), string(body))
+			} else {
+				return nil, &apiError
+			}
+		}
+
+		// A non-nil err on the HTTP 200 branch means the generated
+		// client hit a decode error after the body was received —
+		// resp may be partially populated. Returning (resp, nil)
+		// here would silently report that half-decoded response as
+		// success and advance the sync counter past whatever the
+		// decoder dropped, so surface the decode error instead.
+		if err != nil {
+			return nil, openapi.NewError(http.StatusInternalServerError,
+				fmt.Sprintf("decode response: %v", err))
+		}
+		if resp != nil {
+			return resp, nil
+		}
+		// Status was OK but the generated client decoded a nil typed
+		// response (e.g. empty body on a schema that expected a payload).
+		// Surface it as a real 500 rather than letting the final return
+		// below format "<nil>" into the 503 message.
+		return nil, openapi.NewError(http.StatusInternalServerError,
+			"empty response body with status OK")
+	}
+
+	if err != nil {
+		return nil, openapi.NewError(http.StatusServiceUnavailable, err.Error())
+	}
+	return nil, openapi.NewError(http.StatusServiceUnavailable,
+		"no response from assets-service and no transport error")
 }
 
 func (c *AssetsClient) ListTemplatesOfTenant(ctx context.Context) (*openapi.WorkloadTemplateListResponse, *openapi.Error) {

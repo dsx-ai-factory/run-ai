@@ -19,9 +19,9 @@ import (
 	. "github.com/onsi/gomega"
 
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/test"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	v2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"

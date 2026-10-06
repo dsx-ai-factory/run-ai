@@ -213,7 +213,11 @@ var _ = Describe("NimServicesImpl", func() {
 	})
 
 	Context("successful creation", func() {
-		It("should create a NIM service workload", func() {
+		DescribeTable("creates a default NIM service workload", func(ctx SpecContext, domain *string) {
+			cluster, err := clustersClient.Get().GetClusterByUuid(ctx, randoms.ClusterId)
+			Expect(err).To(BeNil())
+			cluster.Domain.Set(domain)
+
 			toCreate := api.NimServiceCreateRequest{
 				Metadata: api.NimServiceMetadataCreateParams{
 					Name:      "nim-service-1",
@@ -236,7 +240,15 @@ var _ = Describe("NimServicesImpl", func() {
 			Expect(payload.DesiredPhase).NotTo(BeEmpty())
 
 			Expect(payload.Spec).To(Equal(sampleNimServiceSpec))
-		})
+			if domain == nil {
+				Expect(payload.Metadata.Configuration.Networking).To(BeNil())
+			} else {
+				Expect(payload.Metadata.Configuration.Networking).NotTo(BeNil())
+			}
+		},
+			Entry("with a cluster domain", convutils.Ref("https://example.com")),
+			Entry("without a cluster domain", nil),
+		)
 
 		It("preemptibility is correct", func() {
 			for idx, combination := range prioPremCombinations {

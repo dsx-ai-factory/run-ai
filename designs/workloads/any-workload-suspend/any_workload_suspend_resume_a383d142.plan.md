@@ -362,7 +362,7 @@ func DbUpdateWorkloadWithLock(ctx context.Context, record *models.WorkloadsQueue
         "updated_at":         record.UpdatedAt,
         "updated_by":         record.UpdatedBy,
     }
-    result := dao_utils.DB().WithContext(ctx).
+    result := runaidb.DB().WithContext(ctx).
         Table(models.WorkloadsQueueTableName).
         Where("id = ? AND update_count = ?", record.ID, expectedUpdateCount).
         Updates(updates)
