@@ -20,10 +20,19 @@ func NewChannelClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ChannelClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ChannelClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,16 +84,32 @@ type ChannelClienter_CreateSlack_Call struct {
 }
 
 // CreateSlack is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channel
-func (_e *ChannelClienter_Expecter) CreateSlack(ctx interface{}, tenantId interface{}, channel interface{}) *ChannelClienter_CreateSlack_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channel slack.ChannelConfig
+func (_e *ChannelClienter_Expecter) CreateSlack(ctx any, tenantId any, channel any) *ChannelClienter_CreateSlack_Call {
 	return &ChannelClienter_CreateSlack_Call{Call: _e.mock.On("CreateSlack", ctx, tenantId, channel)}
 }
 
 func (_c *ChannelClienter_CreateSlack_Call) Run(run func(ctx context.Context, tenantId string, channel slack.ChannelConfig)) *ChannelClienter_CreateSlack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(slack.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 slack.ChannelConfig
+		if args[2] != nil {
+			arg2 = args[2].(slack.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -133,15 +158,26 @@ type ChannelClienter_DeleteSlack_Call struct {
 }
 
 // DeleteSlack is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *ChannelClienter_Expecter) DeleteSlack(ctx interface{}, tenantId interface{}) *ChannelClienter_DeleteSlack_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *ChannelClienter_Expecter) DeleteSlack(ctx any, tenantId any) *ChannelClienter_DeleteSlack_Call {
 	return &ChannelClienter_DeleteSlack_Call{Call: _e.mock.On("DeleteSlack", ctx, tenantId)}
 }
 
 func (_c *ChannelClienter_DeleteSlack_Call) Run(run func(ctx context.Context, tenantId string)) *ChannelClienter_DeleteSlack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -190,15 +226,26 @@ type ChannelClienter_GetSlack_Call struct {
 }
 
 // GetSlack is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *ChannelClienter_Expecter) GetSlack(ctx interface{}, tenantId interface{}) *ChannelClienter_GetSlack_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *ChannelClienter_Expecter) GetSlack(ctx any, tenantId any) *ChannelClienter_GetSlack_Call {
 	return &ChannelClienter_GetSlack_Call{Call: _e.mock.On("GetSlack", ctx, tenantId)}
 }
 
 func (_c *ChannelClienter_GetSlack_Call) Run(run func(ctx context.Context, tenantId string)) *ChannelClienter_GetSlack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -247,16 +294,32 @@ type ChannelClienter_PatchSlack_Call struct {
 }
 
 // PatchSlack is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channel
-func (_e *ChannelClienter_Expecter) PatchSlack(ctx interface{}, tenantId interface{}, channel interface{}) *ChannelClienter_PatchSlack_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channel slack.ChannelConfig
+func (_e *ChannelClienter_Expecter) PatchSlack(ctx any, tenantId any, channel any) *ChannelClienter_PatchSlack_Call {
 	return &ChannelClienter_PatchSlack_Call{Call: _e.mock.On("PatchSlack", ctx, tenantId, channel)}
 }
 
 func (_c *ChannelClienter_PatchSlack_Call) Run(run func(ctx context.Context, tenantId string, channel slack.ChannelConfig)) *ChannelClienter_PatchSlack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(slack.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 slack.ChannelConfig
+		if args[2] != nil {
+			arg2 = args[2].(slack.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -303,15 +366,26 @@ type ChannelClienter_ValidateSlack_Call struct {
 }
 
 // ValidateSlack is a helper method to define mock.On call
-//   - ctx
-//   - config
-func (_e *ChannelClienter_Expecter) ValidateSlack(ctx interface{}, config interface{}) *ChannelClienter_ValidateSlack_Call {
+//   - ctx context.Context
+//   - config slack.ChannelConfig
+func (_e *ChannelClienter_Expecter) ValidateSlack(ctx any, config any) *ChannelClienter_ValidateSlack_Call {
 	return &ChannelClienter_ValidateSlack_Call{Call: _e.mock.On("ValidateSlack", ctx, config)}
 }
 
 func (_c *ChannelClienter_ValidateSlack_Call) Run(run func(ctx context.Context, config slack.ChannelConfig)) *ChannelClienter_ValidateSlack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(slack.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 slack.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(slack.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

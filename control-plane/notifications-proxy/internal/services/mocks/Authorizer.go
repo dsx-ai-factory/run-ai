@@ -19,10 +19,19 @@ func NewAuthorizer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Authorizer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Authorizer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -63,14 +72,20 @@ type Authorizer_IsSystem_Call struct {
 }
 
 // IsSystem is a helper method to define mock.On call
-//   - ctx
-func (_e *Authorizer_Expecter) IsSystem(ctx interface{}) *Authorizer_IsSystem_Call {
+//   - ctx context.Context
+func (_e *Authorizer_Expecter) IsSystem(ctx any) *Authorizer_IsSystem_Call {
 	return &Authorizer_IsSystem_Call{Call: _e.mock.On("IsSystem", ctx)}
 }
 
 func (_c *Authorizer_IsSystem_Call) Run(run func(ctx context.Context)) *Authorizer_IsSystem_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -108,14 +123,20 @@ type Authorizer_IsTenant_Call struct {
 }
 
 // IsTenant is a helper method to define mock.On call
-//   - ctx
-func (_e *Authorizer_Expecter) IsTenant(ctx interface{}) *Authorizer_IsTenant_Call {
+//   - ctx context.Context
+func (_e *Authorizer_Expecter) IsTenant(ctx any) *Authorizer_IsTenant_Call {
 	return &Authorizer_IsTenant_Call{Call: _e.mock.On("IsTenant", ctx)}
 }
 
 func (_c *Authorizer_IsTenant_Call) Run(run func(ctx context.Context)) *Authorizer_IsTenant_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

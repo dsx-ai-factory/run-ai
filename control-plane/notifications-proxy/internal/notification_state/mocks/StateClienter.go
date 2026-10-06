@@ -20,10 +20,19 @@ func NewStateClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *StateClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &StateClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type StateClienter_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *StateClienter_Expecter) Get(ctx interface{}, tenantId interface{}) *StateClienter_Get_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *StateClienter_Expecter) Get(ctx any, tenantId any) *StateClienter_Get_Call {
 	return &StateClienter_Get_Call{Call: _e.mock.On("Get", ctx, tenantId)}
 }
 
 func (_c *StateClienter_Get_Call) Run(run func(ctx context.Context, tenantId string)) *StateClienter_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -132,15 +152,26 @@ type StateClienter_GetDetails_Call struct {
 }
 
 // GetDetails is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *StateClienter_Expecter) GetDetails(ctx interface{}, tenantId interface{}) *StateClienter_GetDetails_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *StateClienter_Expecter) GetDetails(ctx any, tenantId any) *StateClienter_GetDetails_Call {
 	return &StateClienter_GetDetails_Call{Call: _e.mock.On("GetDetails", ctx, tenantId)}
 }
 
 func (_c *StateClienter_GetDetails_Call) Run(run func(ctx context.Context, tenantId string)) *StateClienter_GetDetails_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -189,15 +220,26 @@ type StateClienter_GetEmail_Call struct {
 }
 
 // GetEmail is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *StateClienter_Expecter) GetEmail(ctx interface{}, tenantId interface{}) *StateClienter_GetEmail_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *StateClienter_Expecter) GetEmail(ctx any, tenantId any) *StateClienter_GetEmail_Call {
 	return &StateClienter_GetEmail_Call{Call: _e.mock.On("GetEmail", ctx, tenantId)}
 }
 
 func (_c *StateClienter_GetEmail_Call) Run(run func(ctx context.Context, tenantId string)) *StateClienter_GetEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -246,15 +288,26 @@ type StateClienter_GetSlack_Call struct {
 }
 
 // GetSlack is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *StateClienter_Expecter) GetSlack(ctx interface{}, tenantId interface{}) *StateClienter_GetSlack_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *StateClienter_Expecter) GetSlack(ctx any, tenantId any) *StateClienter_GetSlack_Call {
 	return &StateClienter_GetSlack_Call{Call: _e.mock.On("GetSlack", ctx, tenantId)}
 }
 
 func (_c *StateClienter_GetSlack_Call) Run(run func(ctx context.Context, tenantId string)) *StateClienter_GetSlack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -303,15 +356,26 @@ type StateClienter_GetSlackDetails_Call struct {
 }
 
 // GetSlackDetails is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *StateClienter_Expecter) GetSlackDetails(ctx interface{}, tenantId interface{}) *StateClienter_GetSlackDetails_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *StateClienter_Expecter) GetSlackDetails(ctx any, tenantId any) *StateClienter_GetSlackDetails_Call {
 	return &StateClienter_GetSlackDetails_Call{Call: _e.mock.On("GetSlackDetails", ctx, tenantId)}
 }
 
 func (_c *StateClienter_GetSlackDetails_Call) Run(run func(ctx context.Context, tenantId string)) *StateClienter_GetSlackDetails_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -360,16 +424,32 @@ type StateClienter_UpdateEmail_Call struct {
 }
 
 // UpdateEmail is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - notificationState
-func (_e *StateClienter_Expecter) UpdateEmail(ctx interface{}, tenantId interface{}, notificationState interface{}) *StateClienter_UpdateEmail_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - notificationState notification_state.Stater
+func (_e *StateClienter_Expecter) UpdateEmail(ctx any, tenantId any, notificationState any) *StateClienter_UpdateEmail_Call {
 	return &StateClienter_UpdateEmail_Call{Call: _e.mock.On("UpdateEmail", ctx, tenantId, notificationState)}
 }
 
 func (_c *StateClienter_UpdateEmail_Call) Run(run func(ctx context.Context, tenantId string, notificationState notification_state.Stater)) *StateClienter_UpdateEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(notification_state.Stater))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 notification_state.Stater
+		if args[2] != nil {
+			arg2 = args[2].(notification_state.Stater)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -418,16 +498,32 @@ type StateClienter_UpdateSlack_Call struct {
 }
 
 // UpdateSlack is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - notificationState
-func (_e *StateClienter_Expecter) UpdateSlack(ctx interface{}, tenantId interface{}, notificationState interface{}) *StateClienter_UpdateSlack_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - notificationState notification_state.Stater
+func (_e *StateClienter_Expecter) UpdateSlack(ctx any, tenantId any, notificationState any) *StateClienter_UpdateSlack_Call {
 	return &StateClienter_UpdateSlack_Call{Call: _e.mock.On("UpdateSlack", ctx, tenantId, notificationState)}
 }
 
 func (_c *StateClienter_UpdateSlack_Call) Run(run func(ctx context.Context, tenantId string, notificationState notification_state.Stater)) *StateClienter_UpdateSlack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(notification_state.Stater))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 notification_state.Stater
+		if args[2] != nil {
+			arg2 = args[2].(notification_state.Stater)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -476,16 +572,32 @@ type StateClienter_UpdateState_Call struct {
 }
 
 // UpdateState is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - notificationState
-func (_e *StateClienter_Expecter) UpdateState(ctx interface{}, tenantId interface{}, notificationState interface{}) *StateClienter_UpdateState_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - notificationState []notification_state.Stater
+func (_e *StateClienter_Expecter) UpdateState(ctx any, tenantId any, notificationState any) *StateClienter_UpdateState_Call {
 	return &StateClienter_UpdateState_Call{Call: _e.mock.On("UpdateState", ctx, tenantId, notificationState)}
 }
 
 func (_c *StateClienter_UpdateState_Call) Run(run func(ctx context.Context, tenantId string, notificationState []notification_state.Stater)) *StateClienter_UpdateState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].([]notification_state.Stater))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []notification_state.Stater
+		if args[2] != nil {
+			arg2 = args[2].([]notification_state.Stater)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

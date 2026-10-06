@@ -20,10 +20,19 @@ func NewSubscriptionsManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SubscriptionsManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SubscriptionsManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,17 +84,38 @@ type SubscriptionsManager_CreateSubscription_Call struct {
 }
 
 // CreateSubscription is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - sub
-func (_e *SubscriptionsManager_Expecter) CreateSubscription(ctx interface{}, tenantId interface{}, userId interface{}, sub interface{}) *SubscriptionsManager_CreateSubscription_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - sub *subscription.Subscription
+func (_e *SubscriptionsManager_Expecter) CreateSubscription(ctx any, tenantId any, userId any, sub any) *SubscriptionsManager_CreateSubscription_Call {
 	return &SubscriptionsManager_CreateSubscription_Call{Call: _e.mock.On("CreateSubscription", ctx, tenantId, userId, sub)}
 }
 
 func (_c *SubscriptionsManager_CreateSubscription_Call) Run(run func(ctx context.Context, tenantId string, userId string, sub *subscription.Subscription)) *SubscriptionsManager_CreateSubscription_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(*subscription.Subscription))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 *subscription.Subscription
+		if args[3] != nil {
+			arg3 = args[3].(*subscription.Subscription)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -123,17 +153,38 @@ type SubscriptionsManager_DeleteSubscription_Call struct {
 }
 
 // DeleteSubscription is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - subscriptionId
-func (_e *SubscriptionsManager_Expecter) DeleteSubscription(ctx interface{}, tenantId interface{}, userId interface{}, subscriptionId interface{}) *SubscriptionsManager_DeleteSubscription_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - subscriptionId string
+func (_e *SubscriptionsManager_Expecter) DeleteSubscription(ctx any, tenantId any, userId any, subscriptionId any) *SubscriptionsManager_DeleteSubscription_Call {
 	return &SubscriptionsManager_DeleteSubscription_Call{Call: _e.mock.On("DeleteSubscription", ctx, tenantId, userId, subscriptionId)}
 }
 
 func (_c *SubscriptionsManager_DeleteSubscription_Call) Run(run func(ctx context.Context, tenantId string, userId string, subscriptionId string)) *SubscriptionsManager_DeleteSubscription_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -182,16 +233,32 @@ type SubscriptionsManager_GetUserSubscriptions_Call struct {
 }
 
 // GetUserSubscriptions is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-func (_e *SubscriptionsManager_Expecter) GetUserSubscriptions(ctx interface{}, tenantId interface{}, userId interface{}) *SubscriptionsManager_GetUserSubscriptions_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+func (_e *SubscriptionsManager_Expecter) GetUserSubscriptions(ctx any, tenantId any, userId any) *SubscriptionsManager_GetUserSubscriptions_Call {
 	return &SubscriptionsManager_GetUserSubscriptions_Call{Call: _e.mock.On("GetUserSubscriptions", ctx, tenantId, userId)}
 }
 
 func (_c *SubscriptionsManager_GetUserSubscriptions_Call) Run(run func(ctx context.Context, tenantId string, userId string)) *SubscriptionsManager_GetUserSubscriptions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -229,18 +296,44 @@ type SubscriptionsManager_UpdateSubscription_Call struct {
 }
 
 // UpdateSubscription is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - userId
-//   - subscriptionId
-//   - subscriptionForPut
-func (_e *SubscriptionsManager_Expecter) UpdateSubscription(ctx interface{}, tenantId interface{}, userId interface{}, subscriptionId interface{}, subscriptionForPut interface{}) *SubscriptionsManager_UpdateSubscription_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - userId string
+//   - subscriptionId string
+//   - subscriptionForPut *subscription.Subscription
+func (_e *SubscriptionsManager_Expecter) UpdateSubscription(ctx any, tenantId any, userId any, subscriptionId any, subscriptionForPut any) *SubscriptionsManager_UpdateSubscription_Call {
 	return &SubscriptionsManager_UpdateSubscription_Call{Call: _e.mock.On("UpdateSubscription", ctx, tenantId, userId, subscriptionId, subscriptionForPut)}
 }
 
 func (_c *SubscriptionsManager_UpdateSubscription_Call) Run(run func(ctx context.Context, tenantId string, userId string, subscriptionId string, subscriptionForPut *subscription.Subscription)) *SubscriptionsManager_UpdateSubscription_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(*subscription.Subscription))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 *subscription.Subscription
+		if args[4] != nil {
+			arg4 = args[4].(*subscription.Subscription)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }

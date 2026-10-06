@@ -21,10 +21,19 @@ func NewSinksClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SinksClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SinksClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -65,16 +74,32 @@ type SinksClienter_CreateSink_Call struct {
 }
 
 // CreateSink is a helper method to define mock.On call
-//   - ctx
-//   - channelId
-//   - config
-func (_e *SinksClienter_Expecter) CreateSink(ctx interface{}, channelId interface{}, config interface{}) *SinksClienter_CreateSink_Call {
+//   - ctx context.Context
+//   - channelId string
+//   - config *types.SinkConfig
+func (_e *SinksClienter_Expecter) CreateSink(ctx any, channelId any, config any) *SinksClienter_CreateSink_Call {
 	return &SinksClienter_CreateSink_Call{Call: _e.mock.On("CreateSink", ctx, channelId, config)}
 }
 
 func (_c *SinksClienter_CreateSink_Call) Run(run func(ctx context.Context, channelId string, config *types.SinkConfig)) *SinksClienter_CreateSink_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*types.SinkConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *types.SinkConfig
+		if args[2] != nil {
+			arg2 = args[2].(*types.SinkConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -112,15 +137,26 @@ type SinksClienter_DeleteSink_Call struct {
 }
 
 // DeleteSink is a helper method to define mock.On call
-//   - ctx
-//   - channelId
-func (_e *SinksClienter_Expecter) DeleteSink(ctx interface{}, channelId interface{}) *SinksClienter_DeleteSink_Call {
+//   - ctx context.Context
+//   - channelId string
+func (_e *SinksClienter_Expecter) DeleteSink(ctx any, channelId any) *SinksClienter_DeleteSink_Call {
 	return &SinksClienter_DeleteSink_Call{Call: _e.mock.On("DeleteSink", ctx, channelId)}
 }
 
 func (_c *SinksClienter_DeleteSink_Call) Run(run func(ctx context.Context, channelId string)) *SinksClienter_DeleteSink_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -169,15 +205,26 @@ type SinksClienter_GetSink_Call struct {
 }
 
 // GetSink is a helper method to define mock.On call
-//   - ctx
-//   - channelId
-func (_e *SinksClienter_Expecter) GetSink(ctx interface{}, channelId interface{}) *SinksClienter_GetSink_Call {
+//   - ctx context.Context
+//   - channelId string
+func (_e *SinksClienter_Expecter) GetSink(ctx any, channelId any) *SinksClienter_GetSink_Call {
 	return &SinksClienter_GetSink_Call{Call: _e.mock.On("GetSink", ctx, channelId)}
 }
 
 func (_c *SinksClienter_GetSink_Call) Run(run func(ctx context.Context, channelId string)) *SinksClienter_GetSink_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -226,14 +273,20 @@ type SinksClienter_GetSinks_Call struct {
 }
 
 // GetSinks is a helper method to define mock.On call
-//   - ctx
-func (_e *SinksClienter_Expecter) GetSinks(ctx interface{}) *SinksClienter_GetSinks_Call {
+//   - ctx context.Context
+func (_e *SinksClienter_Expecter) GetSinks(ctx any) *SinksClienter_GetSinks_Call {
 	return &SinksClienter_GetSinks_Call{Call: _e.mock.On("GetSinks", ctx)}
 }
 
 func (_c *SinksClienter_GetSinks_Call) Run(run func(ctx context.Context)) *SinksClienter_GetSinks_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -271,16 +324,32 @@ type SinksClienter_UpdateSink_Call struct {
 }
 
 // UpdateSink is a helper method to define mock.On call
-//   - ctx
-//   - channelId
-//   - config
-func (_e *SinksClienter_Expecter) UpdateSink(ctx interface{}, channelId interface{}, config interface{}) *SinksClienter_UpdateSink_Call {
+//   - ctx context.Context
+//   - channelId string
+//   - config *types.SinkConfig
+func (_e *SinksClienter_Expecter) UpdateSink(ctx any, channelId any, config any) *SinksClienter_UpdateSink_Call {
 	return &SinksClienter_UpdateSink_Call{Call: _e.mock.On("UpdateSink", ctx, channelId, config)}
 }
 
 func (_c *SinksClienter_UpdateSink_Call) Run(run func(ctx context.Context, channelId string, config *types.SinkConfig)) *SinksClienter_UpdateSink_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*types.SinkConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *types.SinkConfig
+		if args[2] != nil {
+			arg2 = args[2].(*types.SinkConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -329,16 +398,32 @@ type SinksClienter_ValidateSink_Call struct {
 }
 
 // ValidateSink is a helper method to define mock.On call
-//   - ctx
-//   - channelId
-//   - config
-func (_e *SinksClienter_Expecter) ValidateSink(ctx interface{}, channelId interface{}, config interface{}) *SinksClienter_ValidateSink_Call {
+//   - ctx context.Context
+//   - channelId string
+//   - config *types.SinkConfig
+func (_e *SinksClienter_Expecter) ValidateSink(ctx any, channelId any, config any) *SinksClienter_ValidateSink_Call {
 	return &SinksClienter_ValidateSink_Call{Call: _e.mock.On("ValidateSink", ctx, channelId, config)}
 }
 
 func (_c *SinksClienter_ValidateSink_Call) Run(run func(ctx context.Context, channelId string, config *types.SinkConfig)) *SinksClienter_ValidateSink_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*types.SinkConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *types.SinkConfig
+		if args[2] != nil {
+			arg2 = args[2].(*types.SinkConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

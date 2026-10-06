@@ -20,10 +20,19 @@ func NewSlackCredentialsDaoer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SlackCredentialsDaoer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SlackCredentialsDaoer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,14 +73,20 @@ type SlackCredentialsDaoer_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx
-func (_e *SlackCredentialsDaoer_Expecter) Delete(ctx interface{}) *SlackCredentialsDaoer_Delete_Call {
+//   - ctx context.Context
+func (_e *SlackCredentialsDaoer_Expecter) Delete(ctx any) *SlackCredentialsDaoer_Delete_Call {
 	return &SlackCredentialsDaoer_Delete_Call{Call: _e.mock.On("Delete", ctx)}
 }
 
 func (_c *SlackCredentialsDaoer_Delete_Call) Run(run func(ctx context.Context)) *SlackCredentialsDaoer_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -120,14 +135,20 @@ type SlackCredentialsDaoer_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-func (_e *SlackCredentialsDaoer_Expecter) Get(ctx interface{}) *SlackCredentialsDaoer_Get_Call {
+//   - ctx context.Context
+func (_e *SlackCredentialsDaoer_Expecter) Get(ctx any) *SlackCredentialsDaoer_Get_Call {
 	return &SlackCredentialsDaoer_Get_Call{Call: _e.mock.On("Get", ctx)}
 }
 
 func (_c *SlackCredentialsDaoer_Get_Call) Run(run func(ctx context.Context)) *SlackCredentialsDaoer_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -165,15 +186,26 @@ type SlackCredentialsDaoer_Save_Call struct {
 }
 
 // Save is a helper method to define mock.On call
-//   - ctx
-//   - slackCredential
-func (_e *SlackCredentialsDaoer_Expecter) Save(ctx interface{}, slackCredential interface{}) *SlackCredentialsDaoer_Save_Call {
+//   - ctx context.Context
+//   - slackCredential *slack.SlackCredentials
+func (_e *SlackCredentialsDaoer_Expecter) Save(ctx any, slackCredential any) *SlackCredentialsDaoer_Save_Call {
 	return &SlackCredentialsDaoer_Save_Call{Call: _e.mock.On("Save", ctx, slackCredential)}
 }
 
 func (_c *SlackCredentialsDaoer_Save_Call) Run(run func(ctx context.Context, slackCredential *slack.SlackCredentials)) *SlackCredentialsDaoer_Save_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*slack.SlackCredentials))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *slack.SlackCredentials
+		if args[1] != nil {
+			arg1 = args[1].(*slack.SlackCredentials)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

@@ -20,10 +20,19 @@ func NewSlackManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SlackManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SlackManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,16 +73,32 @@ type SlackManager_AuthorizeApp_Call struct {
 }
 
 // AuthorizeApp is a helper method to define mock.On call
-//   - ctx
-//   - code
-//   - state
-func (_e *SlackManager_Expecter) AuthorizeApp(ctx interface{}, code interface{}, state interface{}) *SlackManager_AuthorizeApp_Call {
+//   - ctx context.Context
+//   - code string
+//   - state string
+func (_e *SlackManager_Expecter) AuthorizeApp(ctx any, code any, state any) *SlackManager_AuthorizeApp_Call {
 	return &SlackManager_AuthorizeApp_Call{Call: _e.mock.On("AuthorizeApp", ctx, code, state)}
 }
 
 func (_c *SlackManager_AuthorizeApp_Call) Run(run func(ctx context.Context, code string, state string)) *SlackManager_AuthorizeApp_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -120,16 +145,32 @@ type SlackManager_ConnectWorkspace_Call struct {
 }
 
 // ConnectWorkspace is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - subjectEmail
-func (_e *SlackManager_Expecter) ConnectWorkspace(ctx interface{}, tenantId interface{}, subjectEmail interface{}) *SlackManager_ConnectWorkspace_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - subjectEmail string
+func (_e *SlackManager_Expecter) ConnectWorkspace(ctx any, tenantId any, subjectEmail any) *SlackManager_ConnectWorkspace_Call {
 	return &SlackManager_ConnectWorkspace_Call{Call: _e.mock.On("ConnectWorkspace", ctx, tenantId, subjectEmail)}
 }
 
 func (_c *SlackManager_ConnectWorkspace_Call) Run(run func(ctx context.Context, tenantId string, subjectEmail string)) *SlackManager_ConnectWorkspace_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -176,15 +217,26 @@ type SlackManager_CreateApp_Call struct {
 }
 
 // CreateApp is a helper method to define mock.On call
-//   - ctx
-//   - accessToken
-func (_e *SlackManager_Expecter) CreateApp(ctx interface{}, accessToken interface{}) *SlackManager_CreateApp_Call {
+//   - ctx context.Context
+//   - accessToken string
+func (_e *SlackManager_Expecter) CreateApp(ctx any, accessToken any) *SlackManager_CreateApp_Call {
 	return &SlackManager_CreateApp_Call{Call: _e.mock.On("CreateApp", ctx, accessToken)}
 }
 
 func (_c *SlackManager_CreateApp_Call) Run(run func(ctx context.Context, accessToken string)) *SlackManager_CreateApp_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -222,14 +274,20 @@ type SlackManager_DeleteApp_Call struct {
 }
 
 // DeleteApp is a helper method to define mock.On call
-//   - ctx
-func (_e *SlackManager_Expecter) DeleteApp(ctx interface{}) *SlackManager_DeleteApp_Call {
+//   - ctx context.Context
+func (_e *SlackManager_Expecter) DeleteApp(ctx any) *SlackManager_DeleteApp_Call {
 	return &SlackManager_DeleteApp_Call{Call: _e.mock.On("DeleteApp", ctx)}
 }
 
 func (_c *SlackManager_DeleteApp_Call) Run(run func(ctx context.Context)) *SlackManager_DeleteApp_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -267,15 +325,26 @@ type SlackManager_DisconnectWorkspace_Call struct {
 }
 
 // DisconnectWorkspace is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *SlackManager_Expecter) DisconnectWorkspace(ctx interface{}, tenantId interface{}) *SlackManager_DisconnectWorkspace_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *SlackManager_Expecter) DisconnectWorkspace(ctx any, tenantId any) *SlackManager_DisconnectWorkspace_Call {
 	return &SlackManager_DisconnectWorkspace_Call{Call: _e.mock.On("DisconnectWorkspace", ctx, tenantId)}
 }
 
 func (_c *SlackManager_DisconnectWorkspace_Call) Run(run func(ctx context.Context, tenantId string)) *SlackManager_DisconnectWorkspace_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -324,15 +393,26 @@ type SlackManager_GetSlackConfig_Call struct {
 }
 
 // GetSlackConfig is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *SlackManager_Expecter) GetSlackConfig(ctx interface{}, tenantId interface{}) *SlackManager_GetSlackConfig_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *SlackManager_Expecter) GetSlackConfig(ctx any, tenantId any) *SlackManager_GetSlackConfig_Call {
 	return &SlackManager_GetSlackConfig_Call{Call: _e.mock.On("GetSlackConfig", ctx, tenantId)}
 }
 
 func (_c *SlackManager_GetSlackConfig_Call) Run(run func(ctx context.Context, tenantId string)) *SlackManager_GetSlackConfig_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -381,16 +461,32 @@ type SlackManager_PatchSlackConfig_Call struct {
 }
 
 // PatchSlackConfig is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - cfg
-func (_e *SlackManager_Expecter) PatchSlackConfig(ctx interface{}, tenantId interface{}, cfg interface{}) *SlackManager_PatchSlackConfig_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - cfg slack.ChannelConfig
+func (_e *SlackManager_Expecter) PatchSlackConfig(ctx any, tenantId any, cfg any) *SlackManager_PatchSlackConfig_Call {
 	return &SlackManager_PatchSlackConfig_Call{Call: _e.mock.On("PatchSlackConfig", ctx, tenantId, cfg)}
 }
 
 func (_c *SlackManager_PatchSlackConfig_Call) Run(run func(ctx context.Context, tenantId string, cfg slack.ChannelConfig)) *SlackManager_PatchSlackConfig_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(slack.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 slack.ChannelConfig
+		if args[2] != nil {
+			arg2 = args[2].(slack.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -437,15 +533,26 @@ type SlackManager_ValidateSlack_Call struct {
 }
 
 // ValidateSlack is a helper method to define mock.On call
-//   - ctx
-//   - cfg
-func (_e *SlackManager_Expecter) ValidateSlack(ctx interface{}, cfg interface{}) *SlackManager_ValidateSlack_Call {
+//   - ctx context.Context
+//   - cfg slack.ChannelConfig
+func (_e *SlackManager_Expecter) ValidateSlack(ctx any, cfg any) *SlackManager_ValidateSlack_Call {
 	return &SlackManager_ValidateSlack_Call{Call: _e.mock.On("ValidateSlack", ctx, cfg)}
 }
 
 func (_c *SlackManager_ValidateSlack_Call) Run(run func(ctx context.Context, cfg slack.ChannelConfig)) *SlackManager_ValidateSlack_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(slack.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 slack.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(slack.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

@@ -20,10 +20,19 @@ func NewClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Clienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Clienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,16 +73,32 @@ type Clienter_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channel1
-func (_e *Clienter_Expecter) Create(ctx interface{}, tenantId interface{}, channel1 interface{}) *Clienter_Create_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channel1 channel.NotificationChannel
+func (_e *Clienter_Expecter) Create(ctx any, tenantId any, channel1 any) *Clienter_Create_Call {
 	return &Clienter_Create_Call{Call: _e.mock.On("Create", ctx, tenantId, channel1)}
 }
 
 func (_c *Clienter_Create_Call) Run(run func(ctx context.Context, tenantId string, channel1 channel.NotificationChannel)) *Clienter_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(channel.NotificationChannel))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 channel.NotificationChannel
+		if args[2] != nil {
+			arg2 = args[2].(channel.NotificationChannel)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -111,16 +136,32 @@ type Clienter_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channelId
-func (_e *Clienter_Expecter) Delete(ctx interface{}, tenantId interface{}, channelId interface{}) *Clienter_Delete_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channelId string
+func (_e *Clienter_Expecter) Delete(ctx any, tenantId any, channelId any) *Clienter_Delete_Call {
 	return &Clienter_Delete_Call{Call: _e.mock.On("Delete", ctx, tenantId, channelId)}
 }
 
 func (_c *Clienter_Delete_Call) Run(run func(ctx context.Context, tenantId string, channelId string)) *Clienter_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -169,16 +210,32 @@ type Clienter_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channelId
-func (_e *Clienter_Expecter) Get(ctx interface{}, tenantId interface{}, channelId interface{}) *Clienter_Get_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channelId string
+func (_e *Clienter_Expecter) Get(ctx any, tenantId any, channelId any) *Clienter_Get_Call {
 	return &Clienter_Get_Call{Call: _e.mock.On("Get", ctx, tenantId, channelId)}
 }
 
 func (_c *Clienter_Get_Call) Run(run func(ctx context.Context, tenantId string, channelId string)) *Clienter_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -227,15 +284,26 @@ type Clienter_GetTenantChannels_Call struct {
 }
 
 // GetTenantChannels is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *Clienter_Expecter) GetTenantChannels(ctx interface{}, tenantId interface{}) *Clienter_GetTenantChannels_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *Clienter_Expecter) GetTenantChannels(ctx any, tenantId any) *Clienter_GetTenantChannels_Call {
 	return &Clienter_GetTenantChannels_Call{Call: _e.mock.On("GetTenantChannels", ctx, tenantId)}
 }
 
 func (_c *Clienter_GetTenantChannels_Call) Run(run func(ctx context.Context, tenantId string)) *Clienter_GetTenantChannels_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -273,17 +341,38 @@ type Clienter_Patch_Call struct {
 }
 
 // Patch is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channelId
-//   - config
-func (_e *Clienter_Expecter) Patch(ctx interface{}, tenantId interface{}, channelId interface{}, config interface{}) *Clienter_Patch_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channelId string
+//   - config channel.NotificationChannel
+func (_e *Clienter_Expecter) Patch(ctx any, tenantId any, channelId any, config any) *Clienter_Patch_Call {
 	return &Clienter_Patch_Call{Call: _e.mock.On("Patch", ctx, tenantId, channelId, config)}
 }
 
 func (_c *Clienter_Patch_Call) Run(run func(ctx context.Context, tenantId string, channelId string, config channel.NotificationChannel)) *Clienter_Patch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(channel.NotificationChannel))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 channel.NotificationChannel
+		if args[3] != nil {
+			arg3 = args[3].(channel.NotificationChannel)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -321,17 +410,38 @@ type Clienter_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channelId
-//   - channel1
-func (_e *Clienter_Expecter) Update(ctx interface{}, tenantId interface{}, channelId interface{}, channel1 interface{}) *Clienter_Update_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channelId string
+//   - channel1 channel.NotificationChannel
+func (_e *Clienter_Expecter) Update(ctx any, tenantId any, channelId any, channel1 any) *Clienter_Update_Call {
 	return &Clienter_Update_Call{Call: _e.mock.On("Update", ctx, tenantId, channelId, channel1)}
 }
 
 func (_c *Clienter_Update_Call) Run(run func(ctx context.Context, tenantId string, channelId string, channel1 channel.NotificationChannel)) *Clienter_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(channel.NotificationChannel))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 channel.NotificationChannel
+		if args[3] != nil {
+			arg3 = args[3].(channel.NotificationChannel)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -378,16 +488,32 @@ type Clienter_Validate_Call struct {
 }
 
 // Validate is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - channel1
-func (_e *Clienter_Expecter) Validate(ctx interface{}, tenantId interface{}, channel1 interface{}) *Clienter_Validate_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - channel1 channel.NotificationChannel
+func (_e *Clienter_Expecter) Validate(ctx any, tenantId any, channel1 any) *Clienter_Validate_Call {
 	return &Clienter_Validate_Call{Call: _e.mock.On("Validate", ctx, tenantId, channel1)}
 }
 
 func (_c *Clienter_Validate_Call) Run(run func(ctx context.Context, tenantId string, channel1 channel.NotificationChannel)) *Clienter_Validate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(channel.NotificationChannel))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 channel.NotificationChannel
+		if args[2] != nil {
+			arg2 = args[2].(channel.NotificationChannel)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
