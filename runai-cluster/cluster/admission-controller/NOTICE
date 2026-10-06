@@ -62,7 +62,7 @@ Dependencies
 | `github.com/google/uuid` | v1.6.0 | BSD-3-Clause | https://github.com/google/uuid/blob/v1.6.0/LICENSE |
 | `github.com/json-iterator/go` | v1.1.12 | MIT | https://github.com/json-iterator/go/blob/v1.1.12/LICENSE |
 | `github.com/leodido/go-urn` | v1.5.0 | MIT | https://github.com/leodido/go-urn/blob/v1.5.0/LICENSE |
-| `github.com/mattn/go-colorable` | v0.1.15 | MIT | https://github.com/mattn/go-colorable/blob/v0.1.15/LICENSE |
+| `github.com/mattn/go-colorable` | v0.1.16 | MIT | https://github.com/mattn/go-colorable/blob/v0.1.16/LICENSE |
 | `github.com/mattn/go-isatty` | v0.0.24 | MIT | https://github.com/mattn/go-isatty/blob/v0.0.24/LICENSE |
 | `github.com/mitchellh/hashstructure/v2` | v2.0.2 | MIT | https://pkg.go.dev/github.com/mitchellh/hashstructure/v2@v2.0.2?tab=licenses |
 | `github.com/mitchellh/mapstructure` | v1.5.0 | MIT | https://github.com/mitchellh/mapstructure/blob/v1.5.0/LICENSE |

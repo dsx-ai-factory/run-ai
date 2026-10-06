@@ -5,8 +5,8 @@ go 1.27.1
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261006070819-56fe93454f92
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261006070819-56fe93454f92
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261006112235-b3dbdc76de02
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261006112235-b3dbdc76de02
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
@@ -66,7 +66,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
