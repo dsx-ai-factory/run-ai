@@ -202,7 +202,7 @@ func TestAuthHandler_Flow(t *testing.T) {
 			wantHeaders: map[string]string{
 				auth.HeaderTenantId: "42", auth.HeaderSubjectId: "app-abc123", auth.HeaderSubjectType: "ServiceAccount",
 				auth.HeaderSupplementalGroups: "100,200",
-				auth.HeaderGID:                "1000", auth.HeaderUID: "2000", auth.HeaderIsManagementTenant: "true",
+				auth.HeaderGID: "1000", auth.HeaderUID: "2000", auth.HeaderIsManagementTenant: "true",
 				auth.HeaderClientId: "app-abc123", auth.HeaderSessionId: "session-1",
 			},
 			wantMultiHeaders: map[string][]string{auth.HeaderGroups: {"eng", "ops"}},

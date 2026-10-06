@@ -43,10 +43,8 @@ func TestClusterServiceClient_APIError(t *testing.T) {
 
 // TestClusterURLEntryJSONRoundTrip guards against the bug where the url field
 // was unexported, causing encoding/json to silently discard it:
-//
-//	json.Marshal(clusterURLEntry{URL: "https://..."}) → {}
-//	json.Unmarshal("{}", &clusterURLEntry{})           → URL: ""
-//
+//   json.Marshal(clusterURLEntry{URL: "https://..."}) → {}
+//   json.Unmarshal("{}", &clusterURLEntry{})           → URL: ""
 // This meant every cache.Set stored {} and every cache.Get returned URL: "".
 func TestClusterURLEntryJSONRoundTrip(t *testing.T) {
 	entry := clusterURLEntry{URL: "https://cluster.example.com"}

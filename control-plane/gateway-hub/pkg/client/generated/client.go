@@ -35,7 +35,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	////////////////////////////// RUNAI ///////////////////////////////
+	// //////////////////////////// RUNAI ///////////////////////////////
 	runaictx "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx/http"
 	tracing "github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing/http"
 	// \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -438,7 +438,7 @@ func (c *APIClient) prepareRequest(
 			localVarRequest.Header.Add("Authorization", "Bearer "+auth)
 		}
 
-		////////////////////////////// RUNAI ///////////////////////////////
+		// //////////////////////////// RUNAI ///////////////////////////////
 		runaictx.SetHeaders(ctx, localVarRequest)
 		tracing.SetHeaders(ctx, localVarRequest)
 		//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
