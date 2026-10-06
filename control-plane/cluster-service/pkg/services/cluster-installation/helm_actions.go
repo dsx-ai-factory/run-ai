@@ -25,7 +25,6 @@ type VersionsList []struct {
 	Version string `yaml:"version"`
 }
 
-//go:generate mockery --name HelmActions
 type HelmActions interface {
 	GetVersionListFromHelm(ctx context.Context, url string) (VersionsList, error)
 }

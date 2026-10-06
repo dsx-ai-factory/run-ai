@@ -224,10 +224,10 @@ func handleEnvVars(runaiConfig *runaiv1.RunaiConfig) []v1.EnvVar {
 		v1.EnvVar{Name: "WEBHOOK_PORT", Value: strconv.Itoa(*runaiConfig.Spec.ProjectController.Service.Webhook.Port)},
 		v1.EnvVar{Name: "CERT_DIR", Value: certsDir},
 	)
-	if len(runaiConfig.Spec.Internal.Global.NMC.AllowedServiceAccounts) > 0 {
+	if allowedServiceAccounts := outils.GetNMCAllowedServiceAccountUsernames(runaiConfig); len(allowedServiceAccounts) > 0 {
 		envVars = append(envVars, v1.EnvVar{
 			Name:  "ALLOWED_SERVICE_ACCOUNTS",
-			Value: strings.Join(runaiConfig.Spec.Internal.Global.NMC.AllowedServiceAccounts, ","),
+			Value: strings.Join(allowedServiceAccounts, ","),
 		})
 	}
 	envVars = append(envVars, envVarsForHTTPProxy(runaiConfig)...)

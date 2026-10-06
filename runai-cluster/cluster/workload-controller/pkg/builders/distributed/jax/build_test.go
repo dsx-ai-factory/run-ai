@@ -17,7 +17,7 @@ import (
 
 func TestBuildersJAXJob(t *testing.T) {
 	toTest := []common.TestConfig{
-		{TestName: "basic", TestEnvVars: &common.TestEnvVars{ADSEncryptionKey: common.ADSEncryptionKey}},
+		{TestName: "basic"},
 		{TestName: "more_params"},
 		{TestName: "limits"},
 		{TestName: "volumes"},
@@ -28,7 +28,7 @@ func TestBuildersJAXJob(t *testing.T) {
 		{TestName: "basic_policy"},
 		{TestName: "s3_bucket"},
 		{TestName: "restart_policy"},
-		{TestName: "image_pull_secrets", TestEnvVars: &common.TestEnvVars{ADSEncryptionKey: common.ADSEncryptionKey}},
+		{TestName: "image_pull_secrets"},
 	}
 	for _, curTest := range toTest {
 		Init()

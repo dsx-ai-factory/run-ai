@@ -276,9 +276,10 @@ type NMC struct {
 	// +kubebuilder:validation:Optional
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 
-	// AllowedServiceAccounts specifies a list of service account name patterns that should be allowed
-	// to perform privileged operations (e.g., access rule management). Service accounts containing any
-	// of these strings in their username will be automatically allowed access.
+	// AllowedServiceAccounts specifies additional service accounts allowed to perform privileged operations.
+	// CR webhooks match full usernames exactly; bare names refer to service accounts in the installation namespace.
+	// Use system:serviceaccount:<namespace>:<name> for accounts in other namespaces.
+	// Secret/PVC admission policies retain their legacy substring matching for these entries.
 	// +kubebuilder:validation:Optional
 	AllowedServiceAccounts []string `json:"allowedServiceAccounts,omitempty"`
 

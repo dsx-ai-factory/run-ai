@@ -10,10 +10,180 @@ import RolePermissions from "@/views/rbac/roles/role-permissions.vue";
 import { Quasar } from "quasar";
 import type { TestingPinia } from "@pinia/testing";
 import { createTestingPinia } from "@pinia/testing";
-import type { RoleV1 } from "@/swagger-models/authorization-client";
+import type { ResourceTypeGroupId, Role, RolePermission } from "@/swagger-models/authorization-client";
 import { ResourceType } from "@/swagger-models/authorization-client";
-const pinia: TestingPinia = createTestingPinia({ createSpy: vi.fn });
-const systemAdmin: RoleV1 = {
+import { ResourceTypeGroupIdOrder } from "@/models/access-rule.model";
+
+type RolePermissionWithGroup = RolePermission & { groupId: ResourceTypeGroupId };
+
+const permissionsWithGroup: RolePermissionWithGroup[] = [
+  { resourceType: "users", displayName: "Users", groupId: "iam", actions: ["create", "read", "update", "delete"] },
+  {
+    resourceType: "apps",
+    displayName: "Service accounts",
+    groupId: "iam",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "access_rules",
+    displayName: "Access rules",
+    groupId: "iam",
+    actions: ["create", "read", "update", "delete"],
+  },
+  { resourceType: "roles", displayName: "Roles", groupId: "iam", actions: ["read"] },
+  {
+    resourceType: "department",
+    displayName: "Departments",
+    groupId: "organization",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "project",
+    displayName: "Projects",
+    groupId: "organization",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "workloads",
+    displayName: "Workloads",
+    groupId: "workload",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "credentials",
+    displayName: "Credentials",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "workspaces",
+    displayName: "Workspaces",
+    groupId: "workload",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "trainings",
+    displayName: "Trainings",
+    groupId: "workload",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "inferences",
+    displayName: "Inferences",
+    groupId: "workload",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "environments",
+    displayName: "Environments",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "host-path-assets",
+    displayName: "Data sources",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "nfs-assets",
+    displayName: "Data sources",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "pvc-assets",
+    displayName: "Data sources",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "cm-volume-assets",
+    displayName: "Data sources",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "secret-volume-assets",
+    displayName: "Data sources",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "git-assets",
+    displayName: "Data sources",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "s3-assets",
+    displayName: "Data sources",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "compute-resources",
+    displayName: "Compute resources",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "templates",
+    displayName: "Templates",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "cluster",
+    displayName: "Clusters",
+    groupId: "physical-resource",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "nodepools",
+    displayName: "Node pools",
+    groupId: "physical-resource",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "settings",
+    displayName: "Settings",
+    groupId: "organization",
+    actions: ["create", "read", "update", "delete"],
+  },
+  { resourceType: "events-history", displayName: "Event history", groupId: "organization", actions: ["read"] },
+  {
+    resourceType: "policies",
+    displayName: "Policies",
+    groupId: "organization",
+    actions: ["create", "read", "update", "delete"],
+  },
+  {
+    resourceType: "datavolumes",
+    displayName: "Data volumes",
+    groupId: "workload-asset",
+    actions: ["create", "read", "update", "delete"],
+  },
+  { resourceType: "tenant", displayName: "Account", groupId: "organization", actions: ["read"] },
+  { resourceType: "nodes", displayName: "Nodes", groupId: "physical-resource", actions: ["read"] },
+  {
+    resourceType: "cluster-config",
+    displayName: "Cluster configuration",
+    groupId: "physical-resource",
+    actions: ["create", "read", "update", "delete"],
+  },
+];
+
+// Like the roles API, the role's permissions carry no group; the permission store lists each resource type with its group.
+const pinia: TestingPinia = createTestingPinia({
+  createSpy: vi.fn,
+  initialState: {
+    Permission: {
+      resourceTypeMap: Object.fromEntries(permissionsWithGroup.map((p) => [p.resourceType, p])),
+    },
+  },
+});
+const systemAdmin: Role = {
   id: 1,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -23,167 +193,15 @@ const systemAdmin: RoleV1 = {
   name: "System administrator",
   description:
     "A system administrator can:\nControl all aspects of the system: users, organizations, compute resources, general settings, etc.\nThis role has global system control and should be limited to a small group of skilled IT administrators.",
-  permissions: [
-    { resourceType: "users", displayName: "Users", groupId: "iam", actions: ["create", "read", "update", "delete"] },
-    {
-      resourceType: "apps",
-      displayName: "Service accounts",
-      groupId: "iam",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "access_rules",
-      displayName: "Access rules",
-      groupId: "iam",
-      actions: ["create", "read", "update", "delete"],
-    },
-    { resourceType: "roles", displayName: "Roles", groupId: "iam", actions: ["read"] },
-    {
-      resourceType: "department",
-      displayName: "Departments",
-      groupId: "organization",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "project",
-      displayName: "Projects",
-      groupId: "organization",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "workloads",
-      displayName: "Workloads",
-      groupId: "workload",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "credentials",
-      displayName: "Credentials",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "workspaces",
-      displayName: "Workspaces",
-      groupId: "workload",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "trainings",
-      displayName: "Trainings",
-      groupId: "workload",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "inferences",
-      displayName: "Inferences",
-      groupId: "workload",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "environments",
-      displayName: "Environments",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "host-path-assets",
-      displayName: "Data sources",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "nfs-assets",
-      displayName: "Data sources",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "pvc-assets",
-      displayName: "Data sources",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "cm-volume-assets",
-      displayName: "Data sources",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "secret-volume-assets",
-      displayName: "Data sources",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "git-assets",
-      displayName: "Data sources",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "s3-assets",
-      displayName: "Data sources",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "compute-resources",
-      displayName: "Compute resources",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "templates",
-      displayName: "Templates",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "cluster",
-      displayName: "Clusters",
-      groupId: "physical-resource",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "nodepools",
-      displayName: "Node pools",
-      groupId: "physical-resource",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "settings",
-      displayName: "Settings",
-      groupId: "organization",
-      actions: ["create", "read", "update", "delete"],
-    },
-    { resourceType: "events-history", displayName: "Event history", groupId: "organization", actions: ["read"] },
-    {
-      resourceType: "policies",
-      displayName: "Policies",
-      groupId: "organization",
-      actions: ["create", "read", "update", "delete"],
-    },
-    {
-      resourceType: "datavolumes",
-      displayName: "Data volumes",
-      groupId: "workload-asset",
-      actions: ["create", "read", "update", "delete"],
-    },
-    { resourceType: "tenant", displayName: "Account", groupId: "organization", actions: ["read"] },
-    { resourceType: "nodes", displayName: "Nodes", groupId: "physical-resource", actions: ["read"] },
-    {
-      resourceType: "cluster-config",
-      displayName: "Cluster configuration",
-      groupId: "physical-resource",
-      actions: ["create", "read", "update", "delete"],
-    },
-  ],
+  permissions: permissionsWithGroup.map(({ resourceType, displayName, actions }) => ({
+    resourceType,
+    displayName,
+    actions,
+  })),
 };
 describe("role-permission.vue", () => {
   let wrapper: VueWrapper<InstanceType<typeof RolePermissions>>;
-  const mountComponent = (props: { role: RoleV1 }): void => {
+  const mountComponent = (props: { role: Role }): void => {
     wrapper = mount(RolePermissions, {
       global: {
         plugins: [Quasar, pinia],
@@ -196,6 +214,16 @@ describe("role-permission.vue", () => {
   };
 
   describe("RolePermissions component", () => {
+    test("should order rows by the entity group taken from the permission store", async () => {
+      mountComponent({ role: systemAdmin });
+      const groupIds = wrapper.vm.groupAndSortPermissions.map((permission) => permission.groupId as ResourceTypeGroupId);
+
+      expect(groupIds.length).toBeGreaterThan(0);
+      expect(groupIds[0]).eql("organization");
+      expect(groupIds).toEqual(
+        [...groupIds].sort((a, b) => ResourceTypeGroupIdOrder.indexOf(a) - ResourceTypeGroupIdOrder.indexOf(b)),
+      );
+    });
     test("should render all displayName text", async () => {
       mountComponent({ role: systemAdmin });
       wrapper.vm.groupAndSortPermissions.forEach((permission) => {
@@ -229,6 +257,19 @@ describe("role-permission.vue", () => {
       expect(workspacesElement.text()).eql("Workspaces");
       expect(trainingsElement.exists()).toBe(true);
       expect(trainingsElement.text()).eql("Trainings");
+    });
+    test("should keep a row whose group and display name are unknown, last and labeled by resource type", async () => {
+      // Registries is not in the seeded permission store, so it has no group.
+      mountComponent({
+        role: {
+          ...systemAdmin,
+          permissions: [...systemAdmin.permissions, { resourceType: ResourceType.Registries, actions: ["read"] }],
+        },
+      });
+      const rows = wrapper.vm.groupAndSortPermissions;
+
+      expect(rows[rows.length - 1].resourceType).eql(ResourceType.Registries);
+      expect(wrapper.find(`[aid="${ResourceType.Registries}"]`).text()).eql(ResourceType.Registries);
     });
   });
 });

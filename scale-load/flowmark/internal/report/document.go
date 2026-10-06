@@ -24,8 +24,6 @@ type RunInfo struct {
 	ClusterType         string
 	ControlPlaneVersion string
 	ClusterVersion      string
-	ClockOffsetMs       *int64
-	ClockOffsetError    string
 }
 
 type Metadata struct {
@@ -35,8 +33,6 @@ type Metadata struct {
 	ClusterType         string    `json:"cluster_type"`
 	ControlPlaneVersion string    `json:"control_plane_version,omitempty"`
 	ClusterVersion      string    `json:"cluster_version,omitempty"`
-	ClockOffsetMs       *int64    `json:"clock_offset_ms,omitempty"`
-	ClockOffsetError    string    `json:"clock_offset_error,omitempty"`
 }
 
 type Document struct {
@@ -56,8 +52,6 @@ func Build(sections map[string]core.Section, info RunInfo) Document {
 			ClusterType:         info.ClusterType,
 			ControlPlaneVersion: info.ControlPlaneVersion,
 			ClusterVersion:      info.ClusterVersion,
-			ClockOffsetMs:       info.ClockOffsetMs,
-			ClockOffsetError:    info.ClockOffsetError,
 		},
 		Sections: sections,
 	}

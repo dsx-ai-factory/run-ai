@@ -16,7 +16,6 @@ metrics:
   enabled: true
   serviceMonitor: {}
 readinessProbe: {}
-replicas: 1
 scale:
   enabled: true
   hpa:

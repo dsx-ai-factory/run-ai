@@ -14,12 +14,19 @@ import { useRoleStore } from "@/stores/role.store";
 import { Actions } from "@/models/roles.model";
 import { roleReviewMock } from "@/views/rbac/roles/role-review.mock";
 import { excludedResourcesTypes } from "@/models/access-rule.model";
-import { ResourceType } from "@/swagger-models/authorization-client";
+import { ResourceType, type Action } from "@/swagger-models/authorization-client";
 import { stringUtil } from "@/utils/string.util";
 
 vi.mock("@/services/control-plane/roles.service/roles.service.ts");
 
-const pinia = createTestingPinia({ createSpy: vi.fn });
+const pinia = createTestingPinia({
+  createSpy: vi.fn,
+  initialState: {
+    Permission: {
+      resourceTypeMap: Object.fromEntries(roleReviewMock.permissionsWithGroup.map((p) => [p.resourceType, p])),
+    },
+  },
+});
 
 setActivePinia(pinia);
 const rolesStore = useRoleStore(pinia);
@@ -84,7 +91,7 @@ describe("role-review.vue", () => {
       expect(roleReviewCmp.html()).toContain(permission.displayName);
 
       const allActions = Actions.map((action) => action.id);
-      const permissionActions = permission.actions;
+      const permissionActions: Action[] = permission.actions;
       const validateActions = (action: string, expectedValue: string) => {
         expect(
           roleReviewCmp.find(getActionSelector(permission.displayName as string, action)).attributes("aria-checked"),

@@ -1,0 +1,12 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/services:
+    interfaces:
+      NGCClient:
+        config:
+          # Kept where the mock has always lived (next to the client implementation).
+          dir: pkg/clients/mocks

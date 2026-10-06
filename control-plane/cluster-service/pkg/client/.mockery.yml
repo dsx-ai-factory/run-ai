@@ -8,3 +8,16 @@ packages:
     interfaces:
       IClusterClient: {}
       IClusterExternalClient: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      ClusterConfigAPI: {}
+      ClustersAPI: {}
+      ControlPlaneConfigAPI: {}
+      HealthAPI: {}
+      InternalAPI: {}
+      NetworkTopologiesAPI: {}
+      NodePoolsAPI: {}
+      NodesAPI: {}

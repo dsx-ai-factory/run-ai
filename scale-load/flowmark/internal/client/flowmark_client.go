@@ -39,6 +39,9 @@ type Clients struct {
 	ClusterService *clusterclient.APIClient
 	OrgUnits       *orgunitclient.APIClient
 	Workloads      *workloadclient.APIClient
+
+	http    *http.Client
+	baseURL string
 }
 
 func New(ctx context.Context, target core.Target) (*Clients, error) {
@@ -82,6 +85,8 @@ func NewWithLimits(ctx context.Context, target core.Target, limits Limits) (*Cli
 		Identity:    identity,
 		TokenExpiry: tokenExpiry,
 		Kube:        kube,
+		http:        httpClient,
+		baseURL:     baseURL,
 		ClusterService: clusterclient.NewAPIClient(&clusterclient.Configuration{
 			HTTPClient: httpClient,
 			Servers:    clusterclient.ServerConfigurations{{URL: baseURL}},

@@ -19,8 +19,8 @@ type Config struct {
 	// object to be fully deleted before failing the RestartRequest.
 	RestartFrameworkDeletionTimeoutSec int `mapstructure:"RESTART_FRAMEWORK_DELETION_TIMEOUT_SEC"`
 
-	// RestartAllowedServiceAccounts are extra username patterns allowed to write spec.managedBy
-	// on top of any system:serviceaccount:* requester. Comma-separated, empty by default.
+	// RestartAllowedServiceAccounts are exact usernames allowed to write spec.managedBy.
+	// The operator includes this controller's service account and any configured extra identities.
 	RestartAllowedServiceAccounts []string `mapstructure:"RESTART_ALLOWED_SERVICE_ACCOUNTS"`
 }
 

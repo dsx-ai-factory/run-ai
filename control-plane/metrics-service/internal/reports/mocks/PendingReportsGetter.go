@@ -21,10 +21,19 @@ func NewPendingReportsGetter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *PendingReportsGetter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &PendingReportsGetter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -78,15 +87,26 @@ type PendingReportsGetter_GetPendingReports_Call struct {
 }
 
 // GetPendingReports is a helper method to define mock.On call
-//   - stopCtx
-//   - limit
-func (_e *PendingReportsGetter_Expecter) GetPendingReports(stopCtx interface{}, limit interface{}) *PendingReportsGetter_GetPendingReports_Call {
+//   - stopCtx context.Context
+//   - limit int
+func (_e *PendingReportsGetter_Expecter) GetPendingReports(stopCtx any, limit any) *PendingReportsGetter_GetPendingReports_Call {
 	return &PendingReportsGetter_GetPendingReports_Call{Call: _e.mock.On("GetPendingReports", stopCtx, limit)}
 }
 
 func (_c *PendingReportsGetter_GetPendingReports_Call) Run(run func(stopCtx context.Context, limit int)) *PendingReportsGetter_GetPendingReports_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -137,14 +157,20 @@ type PendingReportsGetter_GetTotalReportsByStatus_Call struct {
 }
 
 // GetTotalReportsByStatus is a helper method to define mock.On call
-//   - stopCtx
-func (_e *PendingReportsGetter_Expecter) GetTotalReportsByStatus(stopCtx interface{}) *PendingReportsGetter_GetTotalReportsByStatus_Call {
+//   - stopCtx context.Context
+func (_e *PendingReportsGetter_Expecter) GetTotalReportsByStatus(stopCtx any) *PendingReportsGetter_GetTotalReportsByStatus_Call {
 	return &PendingReportsGetter_GetTotalReportsByStatus_Call{Call: _e.mock.On("GetTotalReportsByStatus", stopCtx)}
 }
 
 func (_c *PendingReportsGetter_GetTotalReportsByStatus_Call) Run(run func(stopCtx context.Context)) *PendingReportsGetter_GetTotalReportsByStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

@@ -6233,60 +6233,6 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/authorization/roles:
-    get:
-      summary: Get a list of roles.
-      description: Use to retrieve a list of roles. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles instead.
-      operationId: get_roles_v1
-      deprecated: true
-      tags:
-        - Roles
-      responses:
-        '200':
-          description: Executed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RolesV1'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/authorization/roles/{roleIdPath}:
-    get:
-      summary: Get a role by id.
-      description: Retrieve the details of a role by id. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles/{roleIdPath} instead.
-      operationId: get_role_v1
-      deprecated: true
-      tags:
-        - Roles
-      parameters:
-        - $ref: '#/components/parameters/RoleIdPath'
-      responses:
-        '200':
-          description: Executed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoleV1'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v2/authorization/roles:
     post:
       summary: Create a role.
@@ -27499,6 +27445,65 @@ components:
             - $ref: '#/components/schemas/StorageClassCustomization'
             - $ref: '#/components/schemas/PvcAttributesToRemove'
           nullable: true
+    RolesSortFilterFields:
+      type: string
+      enum:
+        - name
+        - createdAt
+        - createdBy
+        - custom
+        - scopeType
+        - enabled
+    RolePermissionSet:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The universally unique ID (UUID) of the permission set.
+        name:
+          type: string
+          description: The name of the permission set.
+          example: test
+    KubernetesPermissions:
+      type: object
+      properties:
+        predefinedRole:
+          type: string
+          description: The ID of an NVIDIA Run:ai predefined role. The custom role will include the mapped Kubernetes ClusterRole and its permissions.
+          example: '12'
+          nullable: true
+    RoleCreationFields:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          description: The name of the role to create. Must be unique within the given scope.
+          example: admin
+          minLength: 1
+        description:
+          type: string
+          description: A description of the role.
+          example: can manage all resources
+        enabled:
+          type: boolean
+          default: true
+          description: 'Specifies whether the role is active. Default: true'
+          nullable: true
+        permissionSets:
+          type: array
+          description: The permission sets assigned to this role. Each item includes the UUID and name of the permission set.
+          items:
+            $ref: '#/components/schemas/RolePermissionSet'
+        kubernetesPermissions:
+          allOf:
+            - $ref: '#/components/schemas/KubernetesPermissions'
+          description: Defines the Kubernetes cluster permissions associated with this role.
     ResourceType:
       type: string
       description: "Resource type enum for authorization. \n\nNote: The 'apps' resource type is DEPRECATED. Please use 'service-account' instead for managing service accounts.\n"
@@ -27549,158 +27554,6 @@ components:
         - nodepools-minimal
         - clusters-minimal
         - users-minimal
-    ResourceTypeGroupId:
-      type: string
-      enum:
-        - organization
-        - physical-resource
-        - iam
-        - workload
-        - workload-asset
-    Action:
-      type: string
-      enum:
-        - create
-        - read
-        - update
-        - delete
-        - sync
-    Permission:
-      type: object
-      required:
-        - resourceType
-        - actions
-        - groupId
-        - displayName
-      properties:
-        resourceType:
-          $ref: '#/components/schemas/ResourceType'
-        displayName:
-          type: string
-          example: Projects
-        groupId:
-          $ref: '#/components/schemas/ResourceTypeGroupId'
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Action'
-    Permissions:
-      type: array
-      items:
-        $ref: '#/components/schemas/Permission'
-      x-schema-name: Permissions
-    KubernetesPermissions:
-      type: object
-      properties:
-        predefinedRole:
-          type: string
-          description: The ID of an NVIDIA Run:ai predefined role. The custom role will include the mapped Kubernetes ClusterRole and its permissions.
-          example: '12'
-          nullable: true
-    RoleV1:
-      type: object
-      required:
-        - name
-        - description
-        - permissions
-        - id
-        - createdAt
-        - updatedAt
-        - createdBy
-        - custom
-        - effectiveEnabled
-      properties:
-        id:
-          type: integer
-          format: int32
-          example: 32
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        deletedAt:
-          type: string
-          nullable: true
-          format: date-time
-        createdBy:
-          type: string
-          example: user@run.ai
-        custom:
-          type: boolean
-        effectiveEnabled:
-          type: boolean
-          default: true
-        permissions:
-          $ref: '#/components/schemas/Permissions'
-        name:
-          type: string
-          example: admin
-        description:
-          type: string
-          example: can manage all resources
-        enabled:
-          type: boolean
-          default: true
-          nullable: true
-        kubernetesPermissions:
-          $ref: '#/components/schemas/KubernetesPermissions'
-    RolesV1:
-      type: array
-      items:
-        $ref: '#/components/schemas/RoleV1'
-    RolesSortFilterFields:
-      type: string
-      enum:
-        - name
-        - createdAt
-        - createdBy
-        - custom
-        - scopeType
-        - enabled
-    RolePermissionSet:
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: The universally unique ID (UUID) of the permission set.
-        name:
-          type: string
-          description: The name of the permission set.
-          example: test
-    RoleCreationFields:
-      type: object
-      required:
-        - name
-        - description
-      properties:
-        name:
-          type: string
-          description: The name of the role to create. Must be unique within the given scope.
-          example: admin
-          minLength: 1
-        description:
-          type: string
-          description: A description of the role.
-          example: can manage all resources
-        enabled:
-          type: boolean
-          default: true
-          description: 'Specifies whether the role is active. Default: true'
-          nullable: true
-        permissionSets:
-          type: array
-          description: The permission sets assigned to this role. Each item includes the UUID and name of the permission set.
-          items:
-            $ref: '#/components/schemas/RolePermissionSet'
-        kubernetesPermissions:
-          allOf:
-            - $ref: '#/components/schemas/KubernetesPermissions'
-          description: Defines the Kubernetes cluster permissions associated with this role.
     PermissionAction:
       type: string
       enum:
@@ -27777,6 +27630,22 @@ components:
       items:
         $ref: '#/components/schemas/Role'
       x-schema-name: Roles
+    ResourceTypeGroupId:
+      type: string
+      enum:
+        - organization
+        - physical-resource
+        - iam
+        - workload
+        - workload-asset
+    Action:
+      type: string
+      enum:
+        - create
+        - read
+        - update
+        - delete
+        - sync
     RoleCreationFieldsInternal:
       allOf:
         - $ref: '#/components/schemas/RoleCreationFields'
@@ -28214,6 +28083,30 @@ components:
             - project
         clusterId:
           $ref: '#/components/schemas/ClusterId'
+    Permission:
+      type: object
+      required:
+        - resourceType
+        - actions
+        - groupId
+        - displayName
+      properties:
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+        displayName:
+          type: string
+          example: Projects
+        groupId:
+          $ref: '#/components/schemas/ResourceTypeGroupId'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+    Permissions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Permission'
+      x-schema-name: Permissions
     PermittedScopes:
       type: object
       properties:
@@ -36667,16 +36560,6 @@ components:
       $ref: '#/components/parameters/ScopeId1'
     origin:
       $ref: '#/components/parameters/originFilter'
-    RoleIdPath:
-      name: roleIdPath
-      in: path
-      required: true
-      description: The ID of the role
-      example: 32
-      schema:
-        type: integer
-        format: int32
-        minimum: 0
     RolesSort:
       name: sortBy
       in: query
@@ -36699,6 +36582,16 @@ components:
         - name!=some-access-rule-name
         - createdAt>=2023-01-01T00:00:00Z
       explode: false
+    RoleIdPath:
+      name: roleIdPath
+      in: path
+      required: true
+      description: The ID of the role
+      example: 32
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
     PermissionSetId:
       name: permissionSetId
       in: path
