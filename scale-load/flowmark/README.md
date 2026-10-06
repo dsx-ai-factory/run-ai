@@ -32,6 +32,8 @@ failed, and the last line says what.
 
 Without make: `make build`, then `./bin/flowmark --help` lists every flag.
 `--only` and `--workloads` are what `SCENARIO` and `WORKLOADS` set.
+`--regression-window` (7) and `--regression-threshold` (0.15) tune the
+regression check described under Results.
 
 ## Scenarios
 
@@ -65,7 +67,7 @@ Knobs of the `scale-burst` suite:
 | `timeout` | `15m` | how long a round waits for all workloads to arrive |
 | `setupTimeout` | `5m` | project creation, quiesce between rounds, cleanup |
 | `settle` | `90s` | quiet time between rounds |
-| `slo` | none | e.g. `p90_ms: 5000`; copied into the results, does not fail the run |
+| `slo` | none | e.g. `p90_ms: 5000`; copied into the results, a p90 above it is reported as a regression, the run still passes |
 | `cluster` | single cluster | cluster name when the control plane has several |
 
 Each run creates its own project, runs the rounds, deletes everything, and
@@ -111,3 +113,16 @@ the measurement itself is not a metric: when the cluster watch had to be
 reopened, or a WorkloadRunner or pod was seen more than a second before the
 step that precedes it, the section fails and `error` explains why, and the
 log carries the same line.
+
+Every p90 metric is then judged twice. Against history: the p90 is compared
+with the median of the same metric in the last 7 runs of the same
+`cluster_type` found in the output directory, and more than 15% above that
+median is a regression; with fewer than 7 such runs the comparison is skipped.
+Against the SLO: a p90 above its `slo_` value from the scenario file is a
+regression regardless of history. A flagged metric gets a sibling
+`<metric>_regression: true`, `regression_detected` at the top of the file
+becomes true, and `regressions` lists every finding with a ready-made
+message, for example "training-burst p90_ms@100: 5900 ms is +18% over the
+median of 5000 ms from the last 7 runs". The same lines appear in the log. A
+regression does not change the exit code. The median adapts: a slowdown that
+lasts is reported for about four nights and then becomes the new baseline.

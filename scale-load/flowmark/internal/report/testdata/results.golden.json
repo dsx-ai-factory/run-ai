@@ -1,6 +1,16 @@
 {
   "schema": "v1",
-  "regression_detected": false,
+  "regression_detected": true,
+  "regressions": [
+    {
+      "section": "deployment-burst",
+      "metric": "p90_ms@100",
+      "value": 5754,
+      "baseline": 5000,
+      "against": "slo",
+      "message": "deployment-burst p90_ms@100: 5754 ms is over the SLO of 5000 ms"
+    }
+  ],
   "metadata": {
     "date": "2026-09-28T01:00:00Z",
     "finished_at": "2026-09-28T01:12:30Z",
@@ -15,6 +25,7 @@
       "metrics": {
         "flow": "deployment_to_external_workload",
         "p90_ms@100": 5754,
+        "p90_ms@100_regression": true,
         "never_arrived_count@100": 0,
         "slo_p90_ms": 5000
       },
