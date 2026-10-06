@@ -12,9 +12,12 @@
 # As with previews, DOCS_FERN_TOKEN lives in the private
 # run-ai/saas-configuration; this workflow only dispatches.
 #
-# NOTE: docs/ and fern/ currently exist only on main. Publishing an older ref
-# will fail fast on the saas side with an explanatory message rather than
-# publishing an empty site.
+# Publish from main. main's fern/docs.yml lists every supported version: the
+# newest is built from main itself, superseded ones from their release-<X.Y>
+# branch tip (tools/materialize-fern-versions.sh, see fern/VERSIONING.md). A
+# docs fix merged to a release branch therefore goes live on the next publish
+# of main. Publishing a release branch or tag instead would replace the whole
+# site with that ref's single-version view.
 
 name: Publish Fern Docs (trigger)
 run-name: "Publish docs: ${{ inputs.ref }}"
@@ -23,7 +26,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "dsx-ai-factory/run-ai ref to publish (branch or tag). Docs currently exist only on main."
+        description: "dsx-ai-factory/run-ai ref to publish (branch or tag). Use main: it publishes every supported version."
         required: true
         type: string
         default: main

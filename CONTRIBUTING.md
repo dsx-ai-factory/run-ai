@@ -122,7 +122,7 @@ A maintainer approval plus a green `Validate Successful Run` status are both req
 
 - Documentation source lives under [`docs/`](docs/), published via the Fern navigation config in [`fern/`](fern/).
 - Read [Documentation Agent Guide](docs/AGENTS.md) before editing, creating, or reviewing any page.
-- Run `fern docs dev` before opening the PR, and `fern check` if you changed an OpenAPI spec.
+- Run `fern docs dev` before opening the PR, and `fern check` if you changed an OpenAPI spec. Run `tools/materialize-fern-versions.sh --fetch` first: older supported versions are built from their release branch (see [Versioned Docs](fern/VERSIONING.md)).
 
 ---
 
@@ -175,7 +175,7 @@ Then run whichever language-level checks apply. These mirror the corresponding j
 | JS/TS | `npx eslint <files>` | `js-lint` in `pr-checks.yaml` |
 | Helm charts | `helm dependency update control-plane/control-plane-chart`<br>`helm lint control-plane/control-plane-chart`<br>`helm template control-plane/control-plane-chart > /dev/null` | `helm` in `pr-checks.yaml` |
 | GitHub Actions workflows | `actionlint` | `actionlint.yaml` |
-| `docs/` or `fern/` | `fern check`<br>`python3 ./tools/check-fern-nav.py fern` | `fern-docs-ci.yaml` |
+| `docs/` or `fern/` | `tools/materialize-fern-versions.sh --fetch`<br>`fern check`<br>`python3 ./tools/check-fern-nav.py fern` | `fern-docs-ci.yaml` |
 | `CODEOWNERS` | `make validate` (from the repo root) | — not run in CI; local check only |
 
 The root `Makefile`'s `validate` target is real: it runs [`validate-codeowners.py`](.github/scripts/validate-codeowners.py) against `CODEOWNERS`. Its `build`, `test`, and `lint` targets are placeholders that only echo `NA`; run those per-service instead, as shown above.

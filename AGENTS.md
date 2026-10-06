@@ -63,7 +63,9 @@ helm template control-plane/control-plane-chart > /dev/null
 actionlint
 
 # Docs (docs/ or fern/) — `fern docs dev` only starts a preview server
-# and validates nothing; `fern check` is the actual CI check.
+# and validates nothing; `fern check` is the actual CI check. Superseded
+# versions are generated from release branches first (fern/VERSIONING.md).
+tools/materialize-fern-versions.sh --fetch
 fern check
 python3 ./tools/check-fern-nav.py fern
 
