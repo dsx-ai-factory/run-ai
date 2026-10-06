@@ -223,7 +223,7 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 		// Spec-immutable kinds (RCT) whose AreEqual ignores metadata still
 		// need managed-metadata drift reconciled in place — UID stays stable.
 		if handler.clusterWideGVKCommon.IsSpecImmutable(existingNamespacedObject) &&
-			handler.clusterWideGVKCommon.ManagedMetadataDiffers(existingNamespacedObject, newNamespacedObject) {
+			handler.clusterWideGVKCommon.IsManagedMetadataDiffers(existingNamespacedObject, newNamespacedObject) {
 			return handler.reconcileManagedMetadata(ctx, existingNamespacedObject, newNamespacedObject, gvk, namespace)
 		}
 		log.Ctx(ctx).Debug().Msgf("Object already exists in Namespace and no changes were detected. gvk %s, object %s, namespace %s",
@@ -231,12 +231,8 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 		return nil
 	}
 
-	// Kinds whose Spec the apiserver treats as immutable (today: RCT on
-	// resource.k8s.io/v1) cannot be reconciled with a plain Update; the
-	// apiserver would reject it. Delete the stale object and let the
-	// next reconcile tick re-create it from source, same as how the
-	// agent handles the RCT case cluster-side. This produces one
-	// "unreferenced-then-replicated" annotation cycle, which is fine —
+	// Kinds whose Spec the apiserver treats as immutable might need to be re-created.(today: RCT on
+	// This produces one "unreferenced-then-replicated" annotation cycle, which is fine —
 	// the per-destination `clone.run.ai/<ns>` annotation is still set
 	// by createObjectsUnderNamespace on the recreate pass.
 	if handler.clusterWideGVKCommon.IsSpecImmutable(existingNamespacedObject) {

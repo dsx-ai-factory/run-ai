@@ -18,12 +18,7 @@ const (
 	rctType ObjectType = "resourcev1.ResourceClaimTemplate"
 
 	// ResourceClaimTemplateAssetKind matches the value the agent stamps in
-	// the `run.ai/asset` label on sync (see
-	// runai-cluster/cluster/agent/pkg/handlers/assets_builders.go). We
-	// filter cluster-wide / tenant-wide / department-wide RCT sources
-	// in the runai namespace by this label so the replicator never
-	// touches an unrelated RCT (e.g. one created by hand or by a
-	// different controller).
+	// the `run.ai/asset` label on sync.
 	ResourceClaimTemplateAssetKind = "resource-claim-template"
 )
 
@@ -70,7 +65,7 @@ func (r RctObjectInspector) AreEqual(left, right client.Object) bool {
 	// Spec-only compare: labels, annotations, and OwnerReferences are
 	// excluded so a metadata-only diff doesn't churn the UID via the
 	// delete-and-recreate branch — the handler reconciles those through
-	// ManagedMetadataDiffers → in-place Update instead.
+	// IsManagedMetadataDiffers → in-place Update instead.
 	if leftRct.Name != rightRct.Name || leftRct.Namespace != rightRct.Namespace {
 		return false
 	}

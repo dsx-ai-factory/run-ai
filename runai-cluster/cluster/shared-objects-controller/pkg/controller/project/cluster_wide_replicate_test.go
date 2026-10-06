@@ -921,53 +921,53 @@ var _ = Describe("RCT inspector helpers", func() {
 		Expect(gvkCommon.AreEqual(context.Background(), a, b)).To(BeFalse())
 	})
 
-	It("ManagedMetadataDiffers returns false when run.ai labels+annotations already match", func() {
+	It("IsManagedMetadataDiffers returns false when run.ai labels+annotations already match", func() {
 		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
 		existing.Annotations = map[string]string{"run.ai/update-count": "2"}
 		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
 		new.Annotations = map[string]string{"run.ai/update-count": "2"}
-		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeFalse())
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeFalse())
 	})
 
-	It("ManagedMetadataDiffers returns true when a run.ai label value differs", func() {
+	It("IsManagedMetadataDiffers returns true when a run.ai label value differs", func() {
 		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "old"})
 		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "new"})
-		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
 	})
 
-	It("ManagedMetadataDiffers returns true when a run.ai annotation on new is missing on existing", func() {
+	It("IsManagedMetadataDiffers returns true when a run.ai annotation on new is missing on existing", func() {
 		existing := cwRct("r", "runai", nil)
 		new := cwRct("r", "runai", nil)
 		new.Annotations = map[string]string{"run.ai/update-count": "9"}
-		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
 	})
 
-	It("ManagedMetadataDiffers ignores non-run.ai labels/annotations entirely", func() {
+	It("IsManagedMetadataDiffers ignores non-run.ai labels/annotations entirely", func() {
 		existing := cwRct("r", "runai", map[string]string{"foreign/x": "a"})
 		existing.Annotations = map[string]string{"user/notes": "keep"}
 		new := cwRct("r", "runai", map[string]string{"foreign/x": "b"})
 		new.Annotations = map[string]string{"user/notes": "overwrite?"}
-		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeFalse())
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeFalse())
 	})
 
-	It("ManagedMetadataDiffers returns true when existing has a managed label absent from new", func() {
+	It("IsManagedMetadataDiffers returns true when existing has a managed label absent from new", func() {
 		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1", "run.ai/stale": "x"})
 		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
-		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
 	})
 
-	It("ManagedMetadataDiffers returns true when existing has a managed annotation absent from new", func() {
+	It("IsManagedMetadataDiffers returns true when existing has a managed annotation absent from new", func() {
 		existing := cwRct("r", "runai", nil)
 		existing.Annotations = map[string]string{"run.ai/stale": "x"}
 		new := cwRct("r", "runai", nil)
-		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
 	})
 
-	It("ManagedMetadataDiffers returns true when OwnerReferences differ", func() {
+	It("IsManagedMetadataDiffers returns true when OwnerReferences differ", func() {
 		existing := cwRct("r", "runai", nil)
 		existing.OwnerReferences = cwProjectOwnerRef()
 		new := cwRct("r", "runai", nil)
-		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
 	})
 })
 

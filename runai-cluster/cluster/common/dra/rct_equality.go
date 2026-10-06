@@ -32,20 +32,23 @@ func init() {
 }
 
 // RCTSpecDiffersAfterDefaults reports whether two ResourceClaimTemplate
-// specs diverge once the Kubernetes API-server defaulters are applied to
-// both sides. The whole RCT.Spec is immutable on resource.k8s.io/v1, so
-// callers use this to decide whether a reconcile needs a delete-and-recreate
+// specs are equal or not, taking into account k8s defauults.
+// This is needed for immutable specs (such as resource-claim-templates).
+// For those, callers use this to decide whether a reconcile needs a delete-and-recreate
 // (true) or an in-place metadata update is enough (false).
-//
-// Both inputs are DeepCopied before defaulting, so neither is mutated.
-// A nil input compares equal to nil and unequal to any non-nil input.
 func RCTSpecDiffersAfterDefaults(expected, existing *resourcev1.ResourceClaimTemplate) bool {
 	if expected == nil || existing == nil {
 		return expected != existing
 	}
+
+	// Both inputs are DeepCopied before defaulting, so neither is mutated.
+	// A nil input compares equal to nil and unequal to any non-nil input.
 	expectedCopy := expected.DeepCopy()
 	existingCopy := existing.DeepCopy()
+
+	// Apply k8s defaults, this makes the comparison more accurate.
 	rctDefaultScheme.Default(expectedCopy)
 	rctDefaultScheme.Default(existingCopy)
+
 	return !reflect.DeepEqual(expectedCopy.Spec, existingCopy.Spec)
 }

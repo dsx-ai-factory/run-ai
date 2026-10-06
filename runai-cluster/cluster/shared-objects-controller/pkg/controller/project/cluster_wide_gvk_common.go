@@ -67,7 +67,7 @@ type ObjectInspector interface {
 }
 
 // immutableSpecInspector is the opt-in extension for kinds whose Spec the
-// apiserver treats as immutable (today: ResourceClaimTemplate). The shared
+// apiserver treats as immutable (e.g. ResourceClaimTemplate). The shared
 // handler checks for this interface at the Update site and routes those
 // kinds through delete-and-recreate instead of calling Client.Update,
 // which the apiserver would reject.
@@ -246,12 +246,34 @@ func (handler *ClusterWideGVKCommon) AreEqual(ctx context.Context, left, right c
 	return false
 }
 
-// ManagedMetadataDiffers reports whether reconciling `existing` toward
+// IsSpecImmutable reports whether the handler for the given object's kind
+// has requires the delete-and-recreate flow. Used by the shared
+// ClusterWideReplicatedResourceHandler to pick the right code path for
+// kinds whose Spec the apiserver treats as immutable.
+func (handler *ClusterWideGVKCommon) IsSpecImmutable(object client.Object) bool {
+	var inspector ObjectInspector
+	switch object.(type) {
+	case *corev1.Secret:
+		inspector = handler.typeToObjectInspector[secretType]
+	case *corev1.ConfigMap:
+		inspector = handler.typeToObjectInspector[configmapType]
+	case *corev1.PersistentVolumeClaim:
+		inspector = handler.typeToObjectInspector[pvcType]
+	case *resourcev1.ResourceClaimTemplate:
+		inspector = handler.typeToObjectInspector[rctType]
+	}
+	if im, ok := inspector.(immutableSpecInspector); ok {
+		return im.IsSpecImmutable()
+	}
+	return false
+}
+
+// IsManagedMetadataDiffers reports whether reconciling `existing` toward
 // `new` would change any managed metadata — run.ai/ labels, run.ai/
 // annotations, or OwnerReferences. Used by kinds whose AreEqual ignores
 // metadata (RCT) so metadata-only drift still gets caught and reconciled
 // via an in-place Update rather than a delete-and-recreate.
-func (handler *ClusterWideGVKCommon) ManagedMetadataDiffers(existing, new client.Object) bool {
+func (handler *ClusterWideGVKCommon) IsManagedMetadataDiffers(existing, new client.Object) bool {
 	if existing == nil || new == nil {
 		return existing != new
 	}
@@ -271,28 +293,6 @@ func (handler *ClusterWideGVKCommon) ManagedMetadataDiffers(existing, new client
 	}
 
 	return !reflect.DeepEqual(existing.GetOwnerReferences(), new.GetOwnerReferences())
-}
-
-// IsSpecImmutable reports whether the handler for the given object's kind
-// has opted into the delete-and-recreate flow. Used by the shared
-// ClusterWideReplicatedResourceHandler to pick the right code path for
-// kinds whose Spec the apiserver treats as immutable.
-func (handler *ClusterWideGVKCommon) IsSpecImmutable(object client.Object) bool {
-	var inspector ObjectInspector
-	switch object.(type) {
-	case *corev1.Secret:
-		inspector = handler.typeToObjectInspector[secretType]
-	case *corev1.ConfigMap:
-		inspector = handler.typeToObjectInspector[configmapType]
-	case *corev1.PersistentVolumeClaim:
-		inspector = handler.typeToObjectInspector[pvcType]
-	case *resourcev1.ResourceClaimTemplate:
-		inspector = handler.typeToObjectInspector[rctType]
-	}
-	if im, ok := inspector.(immutableSpecInspector); ok {
-		return im.IsSpecImmutable()
-	}
-	return false
 }
 
 // PreserveImmutableFields preserves immutable fields from the existing object to the new object
