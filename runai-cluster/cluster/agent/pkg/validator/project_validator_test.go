@@ -304,6 +304,32 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 				Expect(res.Result.Code).To(Equal(int32(http.StatusOK)))
 			}
 		})
+
+		It("Should allow the post-upgrade hook by username", func() {
+			req.UserInfo.UID = uuid.New().String()
+			req.UserInfo.Username = "system:serviceaccount:runai:runai-post-upgrade"
+
+			for _, operation := range operations {
+				req.Operation = operation
+				res := projectValidator.Handle(context.Background(), req)
+
+				Expect(res.Allowed).To(BeTrue())
+				Expect(res.Result.Code).To(Equal(int32(http.StatusOK)))
+			}
+		})
+
+		It("Should deny a post-upgrade service account from another namespace", func() {
+			req.UserInfo.UID = uuid.New().String()
+			req.UserInfo.Username = "system:serviceaccount:tenant:runai-post-upgrade"
+
+			for _, operation := range operations {
+				req.Operation = operation
+				res := projectValidator.Handle(context.Background(), req)
+
+				Expect(res.Allowed).To(BeFalse())
+				Expect(res.Result.Code).To(Equal(int32(http.StatusForbidden)))
+			}
+		})
 	})
 
 	Context("Test ProjectValidator with single allowedServiceAccount identity", func() {
