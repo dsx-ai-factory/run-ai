@@ -20,6 +20,7 @@ on:
     paths:
       - 'docs/**'
       - 'fern/**'
+      - 'control-plane/infra/openapi/build/_build/**'
       - 'tools/check-fern-nav.py'
       - 'local-dev.md'
       - 'CONTRIBUTING.md'
@@ -45,7 +46,7 @@ jobs:
           egress-policy: audit
 
       # Sparse, filtered checkout: the repo carries ~2.5 GB of history and the
-      # Fern build only needs fern/ + docs/ (~27 MB). Non-cone mode is
+      # Fern build only needs fern/ + docs/ + the built OpenAPI specs (~29 MB). Non-cone mode is
       # deliberate — cone mode always materializes every top-level file.
       - name: Checkout
         uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
@@ -56,6 +57,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /fern/
+            /control-plane/infra/openapi/build/_build/
             /docs/
             /tools/
             /local-dev.md
