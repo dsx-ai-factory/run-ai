@@ -111,7 +111,7 @@ NVIDIA Run:ai ensures that data remains consistent and accessible across various
 3. If the scope you selected is at the **cluster** or **department** level, you can choose how volumes are shared across projects within that scope:
    * **Separate volume for each project** (default) - A dedicated volume is created per project. Each project can access only its own allocated storage space.
    * **Shared volume between all projects** - A dedicated volume is created for all projects within the selected scope. This option always creates a new PVC - the **Existing PVC** option is not available. Recommended for collaboration and shared storage access across projects.\
-     Note: A storage class that supports shared volumes must be configured in your cluster. Contact your administrator.
+     Note: A storage class that supports shared volumes must be configured in your cluster. Contact your administrator, who must enable data sharing for the storage class as described in [Enabling Shared Volumes for a Storage Class](#enabling-shared-volumes-for-a-storage-class).
 4. Enter a **name** for the data source. The name must be unique.
 5. Optional: Provide a **description** of the data source
 6. Select PVC:
@@ -305,6 +305,14 @@ Add PVCs in advance to be used when creating a PVC-type data source via the NVID
 
 The actions taken by the admin are based on the scope (cluster, department or project) that the admin wants for data source of type PVC. Follow the steps below for each required scope:
 
+<Note>
+
+**Note**
+
+These steps require administrator permissions.
+
+</Note>
+
 ### **Cluster Scope**
 
 1. Locate the PVC in the NVIDIA Run:ai namespace (`runai`)
@@ -332,6 +340,61 @@ The PVC is now displayed for that scope in the list of existing PVCs.
 Locate the PVC in the project's namespace.
 
 The PVC is now displayed for that scope in the list of existing PVCs.
+
+## Enabling Shared Volumes for a Storage Class
+
+The **Shared volume between all projects** option is available only for storage classes that have data sharing enabled. Data sharing is not enabled automatically. An administrator must use the [Storage class configuration](api:main-api:GET/api/v1/storage-class-configuration) API to enable it explicitly for each storage class that should support shared volumes, by setting `permissions.allowDataSharing` to `true`.
+
+<Note>
+
+**Note**
+
+This procedure requires administrator permissions.
+
+</Note>
+
+Replace the following placeholders in the commands below:
+
+* `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
+* `<TOKEN>` - A valid [API access token](../../rest-api/how-to-authenticate-to-the-api.md)
+* `<ID>` - The `id` of the existing storage class configuration
+* `<CLUSTER-UUID>` - The UUID of the cluster
+* `<STORAGE-CLASS-NAME>` - The name of the Kubernetes storage class
+
+1. Check whether a storage class configuration exists for the storage class, and whether `allowDataSharing` is enabled:
+
+   ```bash
+   curl -X GET 'https://<COMPANY-URL>/api/v1/storage-class-configuration' \
+     -H 'Authorization: Bearer <TOKEN>' \
+     -H 'Content-Type: application/json'
+   ```
+
+2. If a configuration exists for the storage class but `allowDataSharing` is `false`, copy its `id` and update it:
+
+   ```bash
+   curl -X PATCH 'https://<COMPANY-URL>/api/v1/storage-class-configuration/<ID>' \
+     -H 'Authorization: Bearer <TOKEN>' \
+     -H 'Content-Type: application/json' \
+     -d '{"permissions": {"allowDataSharing": true}}'
+   ```
+
+3. If no configuration exists for the storage class, create one:
+
+   ```bash
+   curl -X POST 'https://<COMPANY-URL>/api/v1/storage-class-configuration' \
+     -H 'Authorization: Bearer <TOKEN>' \
+     -H 'Content-Type: application/json' \
+     -d '{
+       "scopeType": "cluster",
+       "scopeId": "<CLUSTER-UUID>",
+       "name": "<STORAGE-CLASS-NAME>",
+       "permissions": {
+         "allowDataSharing": true
+       }
+     }'
+   ```
+
+Repeat these steps for each storage class that should support shared volumes.
 
 ## Creating ConfigMaps in Advance
 
