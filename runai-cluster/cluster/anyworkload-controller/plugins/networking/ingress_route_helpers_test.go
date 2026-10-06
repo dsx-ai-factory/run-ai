@@ -6,19 +6,18 @@
 package networking
 
 import (
-	"testing"
-
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	openshiftv1 "github.com/openshift/api/route/v1"
-	"github.com/stretchr/testify/assert"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestEnrichIngressWithDefaults(t *testing.T) {
-	t.Run("sets ingressClassName from config when not specified", func(t *testing.T) {
-		t.Setenv(workloadconfig.EnvVarIngressClass, "nginx")
+var _ = Describe("EnrichIngressWithDefaults", func() {
+	It("sets ingressClassName from config when not specified", func() {
+		GinkgoT().Setenv(workloadconfig.EnvVarIngressClass, "nginx")
 
 		ingress := &networkingv1.Ingress{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
@@ -26,12 +25,12 @@ func TestEnrichIngressWithDefaults(t *testing.T) {
 
 		enriched := EnrichIngressWithDefaults(ingress)
 
-		assert.NotNil(t, enriched.Spec.IngressClassName)
-		assert.Equal(t, "nginx", *enriched.Spec.IngressClassName)
+		Expect(enriched.Spec.IngressClassName).NotTo(BeNil())
+		Expect(*enriched.Spec.IngressClassName).To(Equal("nginx"))
 	})
 
-	t.Run("preserves user-specified ingressClassName", func(t *testing.T) {
-		t.Setenv(workloadconfig.EnvVarIngressClass, "nginx")
+	It("preserves user-specified ingressClassName", func() {
+		GinkgoT().Setenv(workloadconfig.EnvVarIngressClass, "nginx")
 
 		userClass := "traefik"
 		ingress := &networkingv1.Ingress{
@@ -43,21 +42,21 @@ func TestEnrichIngressWithDefaults(t *testing.T) {
 
 		enriched := EnrichIngressWithDefaults(ingress)
 
-		assert.Equal(t, "traefik", *enriched.Spec.IngressClassName)
+		Expect(*enriched.Spec.IngressClassName).To(Equal("traefik"))
 	})
 
-	t.Run("adds body size annotation if not present", func(t *testing.T) {
+	It("adds body size annotation if not present", func() {
 		ingress := &networkingv1.Ingress{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
 		}
 
 		enriched := EnrichIngressWithDefaults(ingress)
 
-		assert.Contains(t, enriched.Annotations, constants.IngressBodySizeAnnotationKey)
-		assert.Equal(t, constants.IngressBodySizeAnnotationDefaultValue, enriched.Annotations[constants.IngressBodySizeAnnotationKey])
+		Expect(enriched.Annotations).To(HaveKey(constants.IngressBodySizeAnnotationKey))
+		Expect(enriched.Annotations[constants.IngressBodySizeAnnotationKey]).To(Equal(constants.IngressBodySizeAnnotationDefaultValue))
 	})
 
-	t.Run("preserves user-specified body size annotation", func(t *testing.T) {
+	It("preserves user-specified body size annotation", func() {
 		ingress := &networkingv1.Ingress{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "test",
@@ -69,11 +68,11 @@ func TestEnrichIngressWithDefaults(t *testing.T) {
 
 		enriched := EnrichIngressWithDefaults(ingress)
 
-		assert.Equal(t, "100m", enriched.Annotations[constants.IngressBodySizeAnnotationKey])
+		Expect(enriched.Annotations[constants.IngressBodySizeAnnotationKey]).To(Equal("100m"))
 	})
 
-	t.Run("merges default annotations while preserving user annotations", func(t *testing.T) {
-		t.Setenv(workloadconfig.EnvVarIngressAnnotations, `{"default-key":"default-value","shared-key":"default-shared"}`)
+	It("merges default annotations while preserving user annotations", func() {
+		GinkgoT().Setenv(workloadconfig.EnvVarIngressAnnotations, `{"default-key":"default-value","shared-key":"default-shared"}`)
 
 		ingress := &networkingv1.Ingress{
 			ObjectMeta: metav1.ObjectMeta{
@@ -88,20 +87,24 @@ func TestEnrichIngressWithDefaults(t *testing.T) {
 		enriched := EnrichIngressWithDefaults(ingress)
 
 		// User annotations take precedence
-		assert.Equal(t, "user-value", enriched.Annotations["user-key"])
-		assert.Equal(t, "user-shared", enriched.Annotations["shared-key"])
+		Expect(enriched.Annotations["user-key"]).To(Equal("user-value"))
+		Expect(enriched.Annotations["shared-key"]).To(Equal("user-shared"))
 		// Default annotations are added if not present
-		assert.Equal(t, "default-value", enriched.Annotations["default-key"])
+		Expect(enriched.Annotations["default-key"]).To(Equal("default-value"))
 	})
 
-	t.Run("returns nil for nil input", func(t *testing.T) {
+	It("returns nil for nil input", func() {
 		enriched := EnrichIngressWithDefaults(nil)
-		assert.Nil(t, enriched)
+		Expect(enriched).To(BeNil())
 	})
-}
+})
 
-func TestEnrichRouteWithDefaults(t *testing.T) {
-	t.Run("sets default TLS when not specified", func(t *testing.T) {
+var _ = Describe("EnrichRouteWithDefaults", func() {
+	BeforeEach(func() {
+		GinkgoT().Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, "")
+	})
+
+	It("sets default TLS when not specified", func() {
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
 			Spec: openshiftv1.RouteSpec{
@@ -111,12 +114,12 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 
 		enriched := EnrichRouteWithDefaults(route)
 
-		assert.NotNil(t, enriched.Spec.TLS)
-		assert.Equal(t, openshiftv1.TLSTerminationEdge, enriched.Spec.TLS.Termination)
-		assert.Equal(t, openshiftv1.InsecureEdgeTerminationPolicyRedirect, enriched.Spec.TLS.InsecureEdgeTerminationPolicy)
+		Expect(enriched.Spec.TLS).NotTo(BeNil())
+		Expect(enriched.Spec.TLS.Termination).To(Equal(openshiftv1.TLSTerminationEdge))
+		Expect(enriched.Spec.TLS.InsecureEdgeTerminationPolicy).To(Equal(openshiftv1.InsecureEdgeTerminationPolicyRedirect))
 	})
 
-	t.Run("preserves user-specified TLS", func(t *testing.T) {
+	It("preserves user-specified TLS", func() {
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
 			Spec: openshiftv1.RouteSpec{
@@ -129,11 +132,11 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 
 		enriched := EnrichRouteWithDefaults(route)
 
-		assert.Equal(t, openshiftv1.TLSTerminationPassthrough, enriched.Spec.TLS.Termination)
+		Expect(enriched.Spec.TLS.Termination).To(Equal(openshiftv1.TLSTerminationPassthrough))
 	})
 
-	t.Run("uses passthrough termination when configured by env", func(t *testing.T) {
-		t.Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, workloadconfig.OpenshiftRouteTerminationPolicyPassthrough)
+	It("uses passthrough termination when configured by env", func() {
+		GinkgoT().Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, workloadconfig.OpenshiftRouteTerminationPolicyPassthrough)
 
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
@@ -144,13 +147,13 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 
 		enriched := EnrichRouteWithDefaults(route)
 
-		assert.NotNil(t, enriched.Spec.TLS)
-		assert.Equal(t, openshiftv1.TLSTerminationPassthrough, enriched.Spec.TLS.Termination)
-		assert.Equal(t, openshiftv1.InsecureEdgeTerminationPolicyRedirect, enriched.Spec.TLS.InsecureEdgeTerminationPolicy)
+		Expect(enriched.Spec.TLS).NotTo(BeNil())
+		Expect(enriched.Spec.TLS.Termination).To(Equal(openshiftv1.TLSTerminationPassthrough))
+		Expect(enriched.Spec.TLS.InsecureEdgeTerminationPolicy).To(Equal(openshiftv1.InsecureEdgeTerminationPolicyRedirect))
 	})
 
-	t.Run("falls back to edge for unknown termination policy", func(t *testing.T) {
-		t.Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, "reencrypt")
+	It("falls back to edge for unknown termination policy", func() {
+		GinkgoT().Setenv(workloadconfig.EnvVarOpenshiftRouteTerminationPolicy, "reencrypt")
 
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
@@ -161,11 +164,11 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 
 		enriched := EnrichRouteWithDefaults(route)
 
-		assert.Equal(t, openshiftv1.TLSTerminationEdge, enriched.Spec.TLS.Termination)
+		Expect(enriched.Spec.TLS.Termination).To(Equal(openshiftv1.TLSTerminationEdge))
 	})
 
-	t.Run("trims subdomain when enabled", func(t *testing.T) {
-		t.Setenv(workloadconfig.EnvVarSubdomainSupport, "true")
+	It("trims subdomain when enabled", func() {
+		GinkgoT().Setenv(workloadconfig.EnvVarSubdomainSupport, "true")
 
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
@@ -176,11 +179,11 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 
 		enriched := EnrichRouteWithDefaults(route)
 
-		assert.NotContains(t, enriched.Spec.Host, workloadconfig.RunaiTrimStr)
+		Expect(enriched.Spec.Host).NotTo(ContainSubstring(workloadconfig.RunaiTrimStr))
 	})
 
-	t.Run("merges default annotations while preserving user annotations", func(t *testing.T) {
-		t.Setenv(workloadconfig.EnvVarIngressAnnotations, `{"default-key":"default-value"}`)
+	It("merges default annotations while preserving user annotations", func() {
+		GinkgoT().Setenv(workloadconfig.EnvVarIngressAnnotations, `{"default-key":"default-value"}`)
 
 		route := &openshiftv1.Route{
 			ObjectMeta: metav1.ObjectMeta{
@@ -196,12 +199,12 @@ func TestEnrichRouteWithDefaults(t *testing.T) {
 
 		enriched := EnrichRouteWithDefaults(route)
 
-		assert.Equal(t, "user-value", enriched.Annotations["user-key"])
-		assert.Equal(t, "default-value", enriched.Annotations["default-key"])
+		Expect(enriched.Annotations["user-key"]).To(Equal("user-value"))
+		Expect(enriched.Annotations["default-key"]).To(Equal("default-value"))
 	})
 
-	t.Run("returns nil for nil input", func(t *testing.T) {
+	It("returns nil for nil input", func() {
 		enriched := EnrichRouteWithDefaults(nil)
-		assert.Nil(t, enriched)
+		Expect(enriched).To(BeNil())
 	})
-}
+})

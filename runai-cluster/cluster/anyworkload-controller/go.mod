@@ -39,7 +39,6 @@ require (
 	github.com/spf13/cobra v1.10.2 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/component-base v0.35.4 // indirect
 )
 
@@ -223,7 +222,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
-	github.com/stretchr/testify v1.11.1
 )
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos => ../dromos
