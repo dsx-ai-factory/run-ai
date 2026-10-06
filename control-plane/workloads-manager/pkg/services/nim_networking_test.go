@@ -451,6 +451,8 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 		Expect(spec["to"]).To(Equal(map[string]interface{}{"kind": "Service", "name": workloadName}))
 		Expect((*endpoint.ExternalAccess.Route)["kind"]).To(Equal("Route"))
 		Expect((*endpoint.ExternalAccess.Route)["apiVersion"]).To(Equal("route.openshift.io/v1"))
+		Expect(*endpoint.ExternalAccess.Route).NotTo(HaveKey("metadata"))
+		Expect(*endpoint.ExternalAccess.Route).NotTo(HaveKey("status"))
 		if hasAuth {
 			Expect(spec).NotTo(HaveKey("port"))
 			Expect(endpoint.Services).NotTo(BeNil())
