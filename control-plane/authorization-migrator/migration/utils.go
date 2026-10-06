@@ -104,7 +104,7 @@ func getRoleId(db orm.DB, name string) uint {
 func getSubjectType(entityType string) api.SubjectType {
 	switch entityType {
 	case EntityTypeApp:
-		return api.SUBJECTTYPE_APP
+		return api.SUBJECTTYPE_SERVICE_ACCOUNT
 	case EntityTypeGroup:
 		return api.SUBJECTTYPE_GROUP
 	default:

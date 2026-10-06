@@ -7,8 +7,7 @@
     "provider": "ci",
     "cluster_type": "kind-fake-gpu",
     "control_plane_version": "3.1.0",
-    "cluster_version": "2.26.5",
-    "clock_offset_ms": -296
+    "cluster_version": "2.26.5"
   },
   "sections": {
     "deployment-burst": {
@@ -16,7 +15,7 @@
       "metrics": {
         "flow": "deployment_to_external_workload",
         "p90_ms@100": 5754,
-        "pending_count@100": 0,
+        "never_arrived_count@100": 0,
         "slo_p90_ms": 5000
       },
       "failed": false

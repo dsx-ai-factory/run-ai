@@ -2588,133 +2588,6 @@ func (_c *IAuthorizationClient_GetRoleExecute_Call) RunAndReturn(run func(r open
 	return _c
 }
 
-// GetRoleV1 provides a mock function for the type IAuthorizationClient
-func (_mock *IAuthorizationClient) GetRoleV1(ctx context.Context, roleIdPath int32) openapi.ApiGetRoleV1Request {
-	ret := _mock.Called(ctx, roleIdPath)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRoleV1")
-	}
-
-	var r0 openapi.ApiGetRoleV1Request
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int32) openapi.ApiGetRoleV1Request); ok {
-		r0 = returnFunc(ctx, roleIdPath)
-	} else {
-		r0 = ret.Get(0).(openapi.ApiGetRoleV1Request)
-	}
-	return r0
-}
-
-// IAuthorizationClient_GetRoleV1_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRoleV1'
-type IAuthorizationClient_GetRoleV1_Call struct {
-	*mock.Call
-}
-
-// GetRoleV1 is a helper method to define mock.On call
-//   - ctx context.Context
-//   - roleIdPath int32
-func (_e *IAuthorizationClient_Expecter) GetRoleV1(ctx any, roleIdPath any) *IAuthorizationClient_GetRoleV1_Call {
-	return &IAuthorizationClient_GetRoleV1_Call{Call: _e.mock.On("GetRoleV1", ctx, roleIdPath)}
-}
-
-func (_c *IAuthorizationClient_GetRoleV1_Call) Run(run func(ctx context.Context, roleIdPath int32)) *IAuthorizationClient_GetRoleV1_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 int32
-		if args[1] != nil {
-			arg1 = args[1].(int32)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *IAuthorizationClient_GetRoleV1_Call) Return(apiGetRoleV1Request openapi.ApiGetRoleV1Request) *IAuthorizationClient_GetRoleV1_Call {
-	_c.Call.Return(apiGetRoleV1Request)
-	return _c
-}
-
-func (_c *IAuthorizationClient_GetRoleV1_Call) RunAndReturn(run func(ctx context.Context, roleIdPath int32) openapi.ApiGetRoleV1Request) *IAuthorizationClient_GetRoleV1_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetRoleV1Execute provides a mock function for the type IAuthorizationClient
-func (_mock *IAuthorizationClient) GetRoleV1Execute(r openapi.ApiGetRoleV1Request) (*openapi.RoleV1, *http.Response, error) {
-	ret := _mock.Called(r)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRoleV1Execute")
-	}
-
-	var r0 *openapi.RoleV1
-	var r1 *http.Response
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetRoleV1Request) (*openapi.RoleV1, *http.Response, error)); ok {
-		return returnFunc(r)
-	}
-	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetRoleV1Request) *openapi.RoleV1); ok {
-		r0 = returnFunc(r)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*openapi.RoleV1)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(openapi.ApiGetRoleV1Request) *http.Response); ok {
-		r1 = returnFunc(r)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*http.Response)
-		}
-	}
-	if returnFunc, ok := ret.Get(2).(func(openapi.ApiGetRoleV1Request) error); ok {
-		r2 = returnFunc(r)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// IAuthorizationClient_GetRoleV1Execute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRoleV1Execute'
-type IAuthorizationClient_GetRoleV1Execute_Call struct {
-	*mock.Call
-}
-
-// GetRoleV1Execute is a helper method to define mock.On call
-//   - r openapi.ApiGetRoleV1Request
-func (_e *IAuthorizationClient_Expecter) GetRoleV1Execute(r any) *IAuthorizationClient_GetRoleV1Execute_Call {
-	return &IAuthorizationClient_GetRoleV1Execute_Call{Call: _e.mock.On("GetRoleV1Execute", r)}
-}
-
-func (_c *IAuthorizationClient_GetRoleV1Execute_Call) Run(run func(r openapi.ApiGetRoleV1Request)) *IAuthorizationClient_GetRoleV1Execute_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 openapi.ApiGetRoleV1Request
-		if args[0] != nil {
-			arg0 = args[0].(openapi.ApiGetRoleV1Request)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *IAuthorizationClient_GetRoleV1Execute_Call) Return(roleV1 *openapi.RoleV1, response *http.Response, err error) *IAuthorizationClient_GetRoleV1Execute_Call {
-	_c.Call.Return(roleV1, response, err)
-	return _c
-}
-
-func (_c *IAuthorizationClient_GetRoleV1Execute_Call) RunAndReturn(run func(r openapi.ApiGetRoleV1Request) (*openapi.RoleV1, *http.Response, error)) *IAuthorizationClient_GetRoleV1Execute_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // GetRoles provides a mock function for the type IAuthorizationClient
 func (_mock *IAuthorizationClient) GetRoles(ctx context.Context) openapi.ApiGetRolesRequest {
 	ret := _mock.Called(ctx)
@@ -2832,127 +2705,6 @@ func (_c *IAuthorizationClient_GetRolesExecute_Call) Return(getRoles200Response 
 }
 
 func (_c *IAuthorizationClient_GetRolesExecute_Call) RunAndReturn(run func(r openapi.ApiGetRolesRequest) (*openapi.GetRoles200Response, *http.Response, error)) *IAuthorizationClient_GetRolesExecute_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetRolesV1 provides a mock function for the type IAuthorizationClient
-func (_mock *IAuthorizationClient) GetRolesV1(ctx context.Context) openapi.ApiGetRolesV1Request {
-	ret := _mock.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRolesV1")
-	}
-
-	var r0 openapi.ApiGetRolesV1Request
-	if returnFunc, ok := ret.Get(0).(func(context.Context) openapi.ApiGetRolesV1Request); ok {
-		r0 = returnFunc(ctx)
-	} else {
-		r0 = ret.Get(0).(openapi.ApiGetRolesV1Request)
-	}
-	return r0
-}
-
-// IAuthorizationClient_GetRolesV1_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRolesV1'
-type IAuthorizationClient_GetRolesV1_Call struct {
-	*mock.Call
-}
-
-// GetRolesV1 is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *IAuthorizationClient_Expecter) GetRolesV1(ctx any) *IAuthorizationClient_GetRolesV1_Call {
-	return &IAuthorizationClient_GetRolesV1_Call{Call: _e.mock.On("GetRolesV1", ctx)}
-}
-
-func (_c *IAuthorizationClient_GetRolesV1_Call) Run(run func(ctx context.Context)) *IAuthorizationClient_GetRolesV1_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *IAuthorizationClient_GetRolesV1_Call) Return(apiGetRolesV1Request openapi.ApiGetRolesV1Request) *IAuthorizationClient_GetRolesV1_Call {
-	_c.Call.Return(apiGetRolesV1Request)
-	return _c
-}
-
-func (_c *IAuthorizationClient_GetRolesV1_Call) RunAndReturn(run func(ctx context.Context) openapi.ApiGetRolesV1Request) *IAuthorizationClient_GetRolesV1_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetRolesV1Execute provides a mock function for the type IAuthorizationClient
-func (_mock *IAuthorizationClient) GetRolesV1Execute(r openapi.ApiGetRolesV1Request) ([]openapi.RoleV1, *http.Response, error) {
-	ret := _mock.Called(r)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetRolesV1Execute")
-	}
-
-	var r0 []openapi.RoleV1
-	var r1 *http.Response
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetRolesV1Request) ([]openapi.RoleV1, *http.Response, error)); ok {
-		return returnFunc(r)
-	}
-	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetRolesV1Request) []openapi.RoleV1); ok {
-		r0 = returnFunc(r)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]openapi.RoleV1)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(openapi.ApiGetRolesV1Request) *http.Response); ok {
-		r1 = returnFunc(r)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*http.Response)
-		}
-	}
-	if returnFunc, ok := ret.Get(2).(func(openapi.ApiGetRolesV1Request) error); ok {
-		r2 = returnFunc(r)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// IAuthorizationClient_GetRolesV1Execute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRolesV1Execute'
-type IAuthorizationClient_GetRolesV1Execute_Call struct {
-	*mock.Call
-}
-
-// GetRolesV1Execute is a helper method to define mock.On call
-//   - r openapi.ApiGetRolesV1Request
-func (_e *IAuthorizationClient_Expecter) GetRolesV1Execute(r any) *IAuthorizationClient_GetRolesV1Execute_Call {
-	return &IAuthorizationClient_GetRolesV1Execute_Call{Call: _e.mock.On("GetRolesV1Execute", r)}
-}
-
-func (_c *IAuthorizationClient_GetRolesV1Execute_Call) Run(run func(r openapi.ApiGetRolesV1Request)) *IAuthorizationClient_GetRolesV1Execute_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 openapi.ApiGetRolesV1Request
-		if args[0] != nil {
-			arg0 = args[0].(openapi.ApiGetRolesV1Request)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *IAuthorizationClient_GetRolesV1Execute_Call) Return(roleV1s []openapi.RoleV1, response *http.Response, err error) *IAuthorizationClient_GetRolesV1Execute_Call {
-	_c.Call.Return(roleV1s, response, err)
-	return _c
-}
-
-func (_c *IAuthorizationClient_GetRolesV1Execute_Call) RunAndReturn(run func(r openapi.ApiGetRolesV1Request) ([]openapi.RoleV1, *http.Response, error)) *IAuthorizationClient_GetRolesV1Execute_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3834,6 +3586,81 @@ func (_c *IAuthorizationClient_SetAppPermissions_Call) Return(err error) *IAutho
 }
 
 func (_c *IAuthorizationClient_SetAppPermissions_Call) RunAndReturn(run func(ctx context.Context, tenantId string, clientId string, scope openapi.InternalCreateAccessRuleRequestScope, role openapi.AllowedInternalCreateRoles) error) *IAuthorizationClient_SetAppPermissions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SetServiceAccountPermissions provides a mock function for the type IAuthorizationClient
+func (_mock *IAuthorizationClient) SetServiceAccountPermissions(ctx context.Context, tenantId string, clientId string, scope openapi.InternalCreateAccessRuleRequestScope, role openapi.AllowedInternalCreateRoles) error {
+	ret := _mock.Called(ctx, tenantId, clientId, scope, role)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetServiceAccountPermissions")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, openapi.InternalCreateAccessRuleRequestScope, openapi.AllowedInternalCreateRoles) error); ok {
+		r0 = returnFunc(ctx, tenantId, clientId, scope, role)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// IAuthorizationClient_SetServiceAccountPermissions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetServiceAccountPermissions'
+type IAuthorizationClient_SetServiceAccountPermissions_Call struct {
+	*mock.Call
+}
+
+// SetServiceAccountPermissions is a helper method to define mock.On call
+//   - ctx context.Context
+//   - tenantId string
+//   - clientId string
+//   - scope openapi.InternalCreateAccessRuleRequestScope
+//   - role openapi.AllowedInternalCreateRoles
+func (_e *IAuthorizationClient_Expecter) SetServiceAccountPermissions(ctx any, tenantId any, clientId any, scope any, role any) *IAuthorizationClient_SetServiceAccountPermissions_Call {
+	return &IAuthorizationClient_SetServiceAccountPermissions_Call{Call: _e.mock.On("SetServiceAccountPermissions", ctx, tenantId, clientId, scope, role)}
+}
+
+func (_c *IAuthorizationClient_SetServiceAccountPermissions_Call) Run(run func(ctx context.Context, tenantId string, clientId string, scope openapi.InternalCreateAccessRuleRequestScope, role openapi.AllowedInternalCreateRoles)) *IAuthorizationClient_SetServiceAccountPermissions_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 openapi.InternalCreateAccessRuleRequestScope
+		if args[3] != nil {
+			arg3 = args[3].(openapi.InternalCreateAccessRuleRequestScope)
+		}
+		var arg4 openapi.AllowedInternalCreateRoles
+		if args[4] != nil {
+			arg4 = args[4].(openapi.AllowedInternalCreateRoles)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *IAuthorizationClient_SetServiceAccountPermissions_Call) Return(err error) *IAuthorizationClient_SetServiceAccountPermissions_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *IAuthorizationClient_SetServiceAccountPermissions_Call) RunAndReturn(run func(ctx context.Context, tenantId string, clientId string, scope openapi.InternalCreateAccessRuleRequestScope, role openapi.AllowedInternalCreateRoles) error) *IAuthorizationClient_SetServiceAccountPermissions_Call {
 	_c.Call.Return(run)
 	return _c
 }

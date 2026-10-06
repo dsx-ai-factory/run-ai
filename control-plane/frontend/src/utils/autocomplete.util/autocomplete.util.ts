@@ -57,7 +57,7 @@ import {
 } from "@/swagger-models/assets-service-client";
 import type { PolicyListEntry } from "@/swagger-models/policy-service-client";
 import type { AuditLog } from "@/swagger-models/audit-service-client";
-import type { AccessRulesSortFilterFields, AccessRule, RoleV1 } from "@/swagger-models/authorization-client";
+import type { AccessRulesSortFilterFields, AccessRule, Role } from "@/swagger-models/authorization-client";
 import type { UsersFilterSortFields, User, ServiceAccount } from "@/swagger-models/identity-manager-client";
 
 const AUTOCOMPLETE_MAX_RESULTS = 100;
@@ -410,7 +410,7 @@ function users(fieldName: UsersFilterSortFields, extractFn: (user: User) => stri
   );
 }
 
-function roles(extractFn: (role: RoleV1) => string | undefined): AutocompleteFn {
+function roles(extractFn: (role: Role) => string | undefined): AutocompleteFn {
   return createClientSideAutocomplete(() => rolesService.list(), extractFn);
 }
 

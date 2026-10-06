@@ -22,7 +22,7 @@ var _ = Describe("Migration utilities", func() {
 			func(entityType string, expected api.SubjectType) {
 				Expect(getSubjectType(entityType)).To(Equal(expected))
 			},
-			Entry("application", EntityTypeApp, api.SUBJECTTYPE_APP),
+			Entry("application", EntityTypeApp, api.SUBJECTTYPE_SERVICE_ACCOUNT),
 			Entry("group", EntityTypeGroup, api.SUBJECTTYPE_GROUP),
 			Entry("regular user", EntityTypeRegularUser, api.SUBJECTTYPE_USER),
 			Entry("unknown defaults to user", "unknown", api.SUBJECTTYPE_USER),

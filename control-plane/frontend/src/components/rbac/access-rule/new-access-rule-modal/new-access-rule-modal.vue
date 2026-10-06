@@ -97,7 +97,7 @@ import { type AccessRulesBatchCreateResponse, type PermittedScopes } from "@/swa
 import type {
   AccessRulesBatchCreateFields,
   AuthenticatedUsersAccessRuleCreationFields,
-  RoleV1,
+  Role,
 } from "@/swagger-models/authorization-client/api";
 import type { IOrgTreeNodeId } from "@/models/org-tree.model";
 import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
@@ -124,7 +124,7 @@ export default defineComponent({
       required: true,
     },
     roles: {
-      type: Array as PropType<RoleV1[]>,
+      type: Array as PropType<Role[]>,
       required: true,
     },
     allowedScopes: {

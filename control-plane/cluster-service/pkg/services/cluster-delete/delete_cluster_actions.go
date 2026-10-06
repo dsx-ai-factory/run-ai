@@ -28,7 +28,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub"
 )
 
-//go:generate mockery --name ClusterDeleter
 type ClusterDeleter interface {
 	AttemptToGracefullyDeleteCluster(ctx context.Context, cluster *models.Cluster) *api.Error
 	ForceDeleteCluster(ctx context.Context, cluster *models.Cluster) *api.Error

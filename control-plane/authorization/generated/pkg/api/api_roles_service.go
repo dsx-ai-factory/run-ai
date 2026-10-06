@@ -34,63 +34,6 @@ func NewRolesAPIService() *RolesAPIService {
 	return &RolesAPIService{}
 }
 
-// GetRolesV1 - Get a list of roles.
-// Deprecated
-func (s *RolesAPIService) GetRolesV1(ctx context.Context, includeInternal bool) (ImplResponse, error) {
-	// TODO - update GetRolesV1 with the required logic for this service method.
-	// Add api_roles_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	// TODO: Uncomment the next line to return response Response(200, []RoleV1{}) or use other options such as http.Ok ...
-	// return Response(200, []RoleV1{}), nil
-
-	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
-	// return Response(400, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
-	// return Response(401, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
-	// return Response(403, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
-	// return Response(500, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
-	// return Response(503, Error{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetRolesV1 method not implemented")
-}
-
-// GetRoleV1 - Get a role by id.
-// Deprecated
-func (s *RolesAPIService) GetRoleV1(ctx context.Context, roleIdPath int32) (ImplResponse, error) {
-	// TODO - update GetRoleV1 with the required logic for this service method.
-	// Add api_roles_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	// TODO: Uncomment the next line to return response Response(200, RoleV1{}) or use other options such as http.Ok ...
-	// return Response(200, RoleV1{}), nil
-
-	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
-	// return Response(400, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
-	// return Response(401, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
-	// return Response(403, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
-	// return Response(404, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
-	// return Response(500, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
-	// return Response(503, Error{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetRoleV1 method not implemented")
-}
-
 // GetRoles - Get a list of roles.
 func (s *RolesAPIService) GetRoles(ctx context.Context, limit int32, offset int32, sortOrder string, sortBy RolesSortFilterFields, filterBy []string, search string, includeInternal bool) (ImplResponse, error) {
 	// TODO - update GetRoles with the required logic for this service method.
