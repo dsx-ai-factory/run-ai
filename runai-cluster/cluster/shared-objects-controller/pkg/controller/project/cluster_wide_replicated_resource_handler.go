@@ -368,14 +368,14 @@ func (handler *ClusterWideReplicatedResourceHandler) createNamespacedObjectFromE
 	return newObject, nil
 }
 
-// reconcileManagedMetadata copies run.ai-prefixed labels/annotations from
-// newObj onto existingObj and issues an in-place Update, leaving the spec
-// (and the UID) untouched.
+// reconcileManagedMetadata copies run.ai-prefixed labels/annotations and
+// OwnerReferences from newObj onto existingObj and issues an in-place
+// Update, leaving the spec (and the UID) untouched.
 func (handler *ClusterWideReplicatedResourceHandler) reconcileManagedMetadata(
 	ctx context.Context, existingObj, newObj client.Object,
 	gvk schema.GroupVersionKind, namespace string,
 ) error {
-	log.Ctx(ctx).Info().Msgf("Object exists in Namespace with equivalent spec but divergent managed metadata, updating labels/annotations in place. gvk %s, object %s, namespace %s",
+	log.Ctx(ctx).Info().Msgf("Object exists in Namespace with equivalent spec but divergent managed metadata, updating metadata in place. gvk %s, object %s, namespace %s",
 		gvk.String(), existingObj.GetName(), namespace)
 
 	existingObjLabels := existingObj.GetLabels()
@@ -385,6 +385,8 @@ func (handler *ClusterWideReplicatedResourceHandler) reconcileManagedMetadata(
 	existingObjAnnotations := existingObj.GetAnnotations()
 	copyRunaiAnnotations(newObj.GetAnnotations(), &existingObjAnnotations)
 	existingObj.SetAnnotations(existingObjAnnotations)
+
+	existingObj.SetOwnerReferences(newObj.GetOwnerReferences())
 
 	if err := handler.Client.Update(ctx, existingObj); err != nil {
 		log.Ctx(ctx).Error().Msgf("Failed updating managed metadata on object. gvk %s, object %s, namespace %s. error: %s",
@@ -514,36 +516,53 @@ func cloneStringMap(src map[string]string) map[string]string {
 	return dst
 }
 
-func copyRunaiLabels(from map[string]string, to *map[string]string) {
-	if from == nil || to == nil {
+func isManagedLabelKey(key string) bool {
+	return strings.HasPrefix(key, "runai/") || strings.HasPrefix(key, "run.ai/")
+}
+
+func isManagedAnnotationKey(key string) bool {
+	return strings.HasPrefix(key, "run.ai/") || strings.HasPrefix(key, "attributes.run.ai/")
+}
+
+// reconcileManagedKeys makes `to` carry exactly the managed keys that
+// `from` carries: present ones are copied, keys matching isManaged on
+// `to` but absent from `from` are removed. Non-managed keys on `to` are
+// left alone so user-set / replica-specific metadata survives.
+func reconcileManagedKeys(from map[string]string, to *map[string]string, isManaged func(string) bool) {
+	if to == nil {
 		return
 	}
-
+	if *to == nil && len(from) == 0 {
+		return
+	}
 	if *to == nil {
 		*to = map[string]string{}
 	}
-
 	for key, value := range from {
-		if strings.HasPrefix(key, "runai/") || strings.HasPrefix(key, "run.ai/") {
+		if isManaged(key) {
 			(*to)[key] = value
+		}
+	}
+	for key := range *to {
+		if !isManaged(key) {
+			continue
+		}
+		if _, present := from[key]; !present {
+			delete(*to, key)
 		}
 	}
 }
 
+// copyRunaiLabels mirrors the source's run.ai-prefixed labels onto `to`,
+// including removing managed keys that no longer exist on the source.
+func copyRunaiLabels(from map[string]string, to *map[string]string) {
+	reconcileManagedKeys(from, to, isManagedLabelKey)
+}
+
+// copyRunaiAnnotations mirrors the source's run.ai-prefixed annotations
+// onto `to`, including removing managed keys that no longer exist on the source.
 func copyRunaiAnnotations(from map[string]string, to *map[string]string) {
-	if from == nil || to == nil {
-		return
-	}
-
-	if *to == nil {
-		*to = map[string]string{}
-	}
-
-	for key, value := range from {
-		if strings.HasPrefix(key, "run.ai/") || strings.HasPrefix(key, "attributes.run.ai/") {
-			(*to)[key] = value
-		}
-	}
+	reconcileManagedKeys(from, to, isManagedAnnotationKey)
 }
 
 func IsManuallyOverridden(meta metav1.Object) bool {

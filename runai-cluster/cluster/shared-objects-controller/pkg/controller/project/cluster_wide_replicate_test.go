@@ -767,6 +767,66 @@ var _ = Describe("Cluster-wide ResourceClaimTemplate replication", func() {
 			"a no-op reconcile must not bump resourceVersion with a pointless Update")
 	})
 
+	It("reconciles divergent OwnerReferences in place without churning the UID", func() {
+		// Source has no OwnerReferences; replica has a stale one (e.g.
+		// from a prior version of the controller). Spec is byte-equal
+		// modulo API-server defaults — only metadata diverges. Should
+		// clear the stale ref via in-place Update, not delete-and-recreate.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.OwnerReferences = cwProjectOwnerRef()
+		existing.UID = "owner-ref-reconcile-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID),
+			"RCT must NOT be re-created for an OwnerReferences-only diff")
+		Expect(after.OwnerReferences).To(BeEmpty())
+	})
+
+	It("removes managed run.ai labels/annotations from the replica when they disappear from the source", func() {
+		// Source carries one managed label/annotation; the replica
+		// still has an extra managed pair from a previous reconcile
+		// where the source had them too. Reconcile must strip the
+		// stale managed keys without touching the user-authored ones.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Labels["run.ai/asset-id"] = "a1"
+		src.Annotations = map[string]string{"run.ai/update-count": "5"}
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.Labels["run.ai/asset-id"] = "a1"
+		existing.Labels["run.ai/stale-label"] = "please-remove-me"
+		existing.Annotations = map[string]string{
+			"run.ai/update-count": "5",
+			"run.ai/stale-annot":  "please-remove-me",
+			"user-stamped":        "keep-me",
+		}
+		existing.UID = "stale-managed-keys-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID))
+		Expect(after.Labels).NotTo(HaveKey("run.ai/stale-label"))
+		Expect(after.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, project.Name),
+			"handler-stamped replicated-project labels must survive")
+		Expect(after.Annotations).NotTo(HaveKey("run.ai/stale-annot"))
+		Expect(after.Annotations).To(HaveKeyWithValue("user-stamped", "keep-me"),
+			"non-run.ai annotations must survive")
+	})
+
 	It("returns an error (so the controller retries) when Create fails after the delete-for-recreate", func() {
 		// Simulates the common race: Delete marks the old replica
 		// terminating, immediate Create then fails with AlreadyExists
@@ -888,6 +948,26 @@ var _ = Describe("RCT inspector helpers", func() {
 		new := cwRct("r", "runai", map[string]string{"foreign/x": "b"})
 		new.Annotations = map[string]string{"user/notes": "overwrite?"}
 		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeFalse())
+	})
+
+	It("ManagedMetadataDiffers returns true when existing has a managed label absent from new", func() {
+		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1", "run.ai/stale": "x"})
+		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
+		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+	})
+
+	It("ManagedMetadataDiffers returns true when existing has a managed annotation absent from new", func() {
+		existing := cwRct("r", "runai", nil)
+		existing.Annotations = map[string]string{"run.ai/stale": "x"}
+		new := cwRct("r", "runai", nil)
+		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
+	})
+
+	It("ManagedMetadataDiffers returns true when OwnerReferences differ", func() {
+		existing := cwRct("r", "runai", nil)
+		existing.OwnerReferences = cwProjectOwnerRef()
+		new := cwRct("r", "runai", nil)
+		Expect(gvkCommon.ManagedMetadataDiffers(existing, new)).To(BeTrue())
 	})
 })
 

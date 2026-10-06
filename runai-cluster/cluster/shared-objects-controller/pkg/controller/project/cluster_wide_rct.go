@@ -6,8 +6,6 @@
 package project
 
 import (
-	"reflect"
-
 	"k8s.io/apimachinery/pkg/selection"
 
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
@@ -69,13 +67,11 @@ func (r RctObjectInspector) AreEqual(left, right client.Object) bool {
 		return false
 	}
 
-	// Labels/annotations are intentionally excluded: metadata drift
-	// would otherwise churn the UID via the delete-and-recreate branch.
-	// It's still reconciled — the handler routes it through
+	// Spec-only compare: labels, annotations, and OwnerReferences are
+	// excluded so a metadata-only diff doesn't churn the UID via the
+	// delete-and-recreate branch — the handler reconciles those through
 	// ManagedMetadataDiffers → in-place Update instead.
-	if leftRct.Name != rightRct.Name ||
-		leftRct.Namespace != rightRct.Namespace ||
-		!reflect.DeepEqual(leftRct.OwnerReferences, rightRct.OwnerReferences) {
+	if leftRct.Name != rightRct.Name || leftRct.Namespace != rightRct.Namespace {
 		return false
 	}
 
