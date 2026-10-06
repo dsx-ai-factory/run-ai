@@ -5,8 +5,6 @@
 
 * `USER` (value: `"user"`)
 
-* `APP` (value: `"app"`)
-
 * `SERVICE_ACCOUNT` (value: `"service-account"`)
 
 * `GROUP` (value: `"group"`)

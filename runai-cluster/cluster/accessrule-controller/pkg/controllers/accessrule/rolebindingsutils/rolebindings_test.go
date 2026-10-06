@@ -59,4 +59,9 @@ var _ = Describe("GetSubjectKind", func() {
 	It("maps service account to the user kind", func() {
 		Expect(GetSubjectKind(v1alpha1.ServiceAccountSubject)).To(Equal(UserKind))
 	})
+
+	It("fails safe on the removed app subject type and other unknown types", func() {
+		Expect(GetSubjectKind(v1alpha1.AccessRuleSubjectType("app"))).To(BeEmpty())
+		Expect(GetSubjectKind(v1alpha1.AccessRuleSubjectType("unknown"))).To(BeEmpty())
+	})
 })
