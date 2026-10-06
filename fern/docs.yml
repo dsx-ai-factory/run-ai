@@ -12,14 +12,20 @@ navbar-links:
 - type: github
   value: https://github.com/dsx-ai-factory/run-ai
 
+# Superseded versions point at versions/v<X.Y>/..., which is generated from
+# release-<X.Y> by tools/materialize-fern-versions.sh. Cutover steps:
+# fern/VERSIONING.md.
 products:
   - display-name: Self-Hosted
     slug: self-hosted
     path: products/self-hosted.yml
     versions:
+      - display-name: "v3.1"
+        slug: v3.1
+        path: products/self-hosted.yml
       - display-name: "v3.0"
         slug: v3.0
-        path: products/self-hosted.yml
+        path: versions/v3.0/fern/products/self-hosted.yml
       - display-name: "v2.26"
         slug: v2.26
         path: archived-versions.yml
@@ -33,9 +39,12 @@ products:
     slug: multi-tenant
     path: products/multi-tenant.yml
     versions:
+      - display-name: "v3.1"
+        slug: v3.1
+        path: products/multi-tenant.yml
       - display-name: "v3.0"
         slug: v3.0
-        path: products/multi-tenant.yml
+        path: versions/v3.0/fern/products/multi-tenant.yml
       - display-name: "v2.26"
         slug: v2.26
         path: archived-versions.yml
