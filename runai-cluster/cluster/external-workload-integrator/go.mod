@@ -35,7 +35,7 @@ require (
 	github.com/ray-project/kuberay/ray-operator v1.5.1
 	github.com/rs/zerolog v1.32.0
 	github.com/run-ai/karta v0.1.1-0.20260708043952-998140308a96
-	github.com/tektoncd/pipeline v0.55.0
+	github.com/tektoncd/pipeline v1.0.2
 	go.uber.org/zap v1.28.0
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	golang.org/x/time v0.15.0

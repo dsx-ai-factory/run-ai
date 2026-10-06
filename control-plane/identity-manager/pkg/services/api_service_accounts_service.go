@@ -381,7 +381,7 @@ func (s *ServiceAccountsApiService) getOrCreateInstallerClient(ctx context.Conte
 
 func (s *ServiceAccountsApiService) deleteServiceAccountAccessRules(ctx context.Context, serviceAccountName string) error {
 	request := s.authzClient.DeleteSubjectAccessRules(ctx)
-	request = request.SubjectType(string(authorization_api.SUBJECTTYPE_APP)).SubjectId(serviceAccountName)
+	request = request.SubjectType(string(authorization_api.SUBJECTTYPE_SERVICE_ACCOUNT)).SubjectId(serviceAccountName)
 	_, err := s.authzClient.DeleteSubjectAccessRulesExecute(request)
 	if err != nil {
 		return err

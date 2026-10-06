@@ -131,10 +131,10 @@ func (a *AuthorizationClient) GetGroupsForTenant(ctx context.Context, tenantId s
 	return resData.GetNames(), nil
 }
 
-func (a *AuthorizationClient) SetAppPermissions(ctx context.Context, tenantId, clientId string, scope authorization_api.InternalCreateAccessRuleRequestScope, role authorization_api.AllowedInternalCreateRoles) error {
+func (a *AuthorizationClient) SetServiceAccountPermissions(ctx context.Context, tenantId, clientId string, scope authorization_api.InternalCreateAccessRuleRequestScope, role authorization_api.AllowedInternalCreateRoles) error {
 	ctxForRequest := context.WithValue(ctx, runaictx.CfTenantId, tenantId)
 	request := a.CreateInternalAccessRule(ctxForRequest)
-	reqBody := authorization_api.NewInternalCreateAccessRuleRequest(clientId, authorization_api.SUBJECTTYPE_APP, role)
+	reqBody := authorization_api.NewInternalCreateAccessRuleRequest(clientId, authorization_api.SUBJECTTYPE_SERVICE_ACCOUNT, role)
 	reqBody.SetScope(scope)
 
 	_, resp, err := request.InternalCreateAccessRuleRequest(*reqBody).Execute()
@@ -142,6 +142,12 @@ func (a *AuthorizationClient) SetAppPermissions(ctx context.Context, tenantId, c
 		return fmt.Errorf("failed to set runai installer permissions for tenant id %s. Response: %+v, Error: %w", tenantId, resp, err)
 	}
 	return nil
+}
+
+// Deprecated: use SetServiceAccountPermissions. Kept until consumers move to the new method; it also creates a
+// service-account rule.
+func (a *AuthorizationClient) SetAppPermissions(ctx context.Context, tenantId, clientId string, scope authorization_api.InternalCreateAccessRuleRequestScope, role authorization_api.AllowedInternalCreateRoles) error {
+	return a.SetServiceAccountPermissions(ctx, tenantId, clientId, scope, role)
 }
 
 func (a *AuthorizationClient) CalculatePermittedScopes(ctx context.Context, request authorization_api.GetPermittedScopesRequest) (*authorization_api.PermittedScopesActions, error) {

@@ -28,7 +28,7 @@ func (a *AuthzManager) CreateAccessRule(ctx context.Context, clientID, clusterUu
 
 	req := a.authorizationClient.CreateInternalAccessRule(ctx).InternalCreateAccessRuleRequest(authorizationclienttypes.InternalCreateAccessRuleRequest{
 		SubjectId:   clientID,
-		SubjectType: authorizationclienttypes.SUBJECTTYPE_APP,
+		SubjectType: authorizationclienttypes.SUBJECTTYPE_SERVICE_ACCOUNT,
 		Scope: *authorizationclienttypes.NewNullableInternalCreateAccessRuleRequestScope(&authorizationclienttypes.InternalCreateAccessRuleRequestScope{
 			Id:   clusterUuid,
 			Type: authorizationclienttypes.SCOPETYPE_CLUSTER,
