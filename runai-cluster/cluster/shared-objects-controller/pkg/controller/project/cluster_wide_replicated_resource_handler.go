@@ -225,6 +225,30 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 		return nil
 	}
 
+	// Kinds whose Spec the apiserver treats as immutable (today: RCT on
+	// resource.k8s.io/v1) cannot be reconciled with a plain Update; the
+	// apiserver would reject it. Delete the stale object and let the
+	// next reconcile tick re-create it from source, same as how the
+	// agent handles the RCT case cluster-side. This produces one
+	// "unreferenced-then-replicated" annotation cycle, which is fine —
+	// the per-destination `clone.run.ai/<ns>` annotation is still set
+	// by createObjectsUnderNamespace on the recreate pass.
+	if handler.clusterWideGVKCommon.IsSpecImmutable(existingNamespacedObject) {
+		log.Ctx(ctx).Info().Msgf("Object exists in Namespace and spec diverges on an immutable field, deleting so it will be re-created from source. gvk %s, object %s, namespace %s",
+			gvk.String(), existingNamespacedObject.GetName(), namespace)
+		if delErr := handler.Client.Delete(ctx, existingNamespacedObject); delErr != nil && !errors.IsNotFound(delErr) {
+			log.Ctx(ctx).Error().Msgf("Failed deleting object before recreate. gvk %s, object %s, namespace %s. error: %s",
+				gvk.String(), existingNamespacedObject.GetName(), namespace, delErr.Error())
+			return delErr
+		}
+		if createErr := handler.Client.Create(ctx, newNamespacedObject); createErr != nil && !errors.IsAlreadyExists(createErr) {
+			log.Ctx(ctx).Error().Msgf("Failed creating object after delete-for-recreate. gvk %s, object %s, namespace %s. error: %s",
+				gvk.String(), newNamespacedObject.GetName(), namespace, createErr.Error())
+			return createErr
+		}
+		return nil
+	}
+
 	log.Ctx(ctx).Info().Msgf("Object exists in Namespace and changes were detected, updating with new data. gvk %s, object %s, namespace %s",
 		gvk.String(), existingNamespacedObject.GetName(), namespace)
 

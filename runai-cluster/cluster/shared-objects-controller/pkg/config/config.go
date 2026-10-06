@@ -28,10 +28,11 @@ type sharedObjectsControllerConfig struct {
 }
 
 type ProjectHandlerConfig struct {
-	CreateServiceMonitors bool
-	ClusterWideSecrets    bool
-	ClusterWidePvcs       bool
-	ClusterWideConfigMaps bool
+	CreateServiceMonitors            bool
+	ClusterWideSecrets               bool
+	ClusterWidePvcs                  bool
+	ClusterWideConfigMaps            bool
+	ClusterWideResourceClaimTemplates bool
 }
 
 var config *sharedObjectsControllerConfig
@@ -99,10 +100,11 @@ func newConfig() *sharedObjectsControllerConfig {
 		BaseControllerDelay:  time.Duration(baseControllerDelayMilliseconds) * time.Millisecond,
 		MaxControllerDelay:   time.Duration(maxControllerDelaySeconds) * time.Second,
 		ProjectHandler: ProjectHandlerConfig{
-			CreateServiceMonitors: getEnvOrDefaultBool("CREATE_SERVICE_MONITORS", false),
-			ClusterWideSecrets:    getEnvOrDefaultBool("CLUSTER_WIDE_SECRETS", false),
-			ClusterWidePvcs:       getEnvOrDefaultBool("CLUSTER_WIDE_PVCS", false),
-			ClusterWideConfigMaps: getEnvOrDefaultBool("CLUSTER_WIDE_CONFIG_MAPS", true),
+			CreateServiceMonitors:            getEnvOrDefaultBool("CREATE_SERVICE_MONITORS", false),
+			ClusterWideSecrets:               getEnvOrDefaultBool("CLUSTER_WIDE_SECRETS", false),
+			ClusterWidePvcs:                  getEnvOrDefaultBool("CLUSTER_WIDE_PVCS", false),
+			ClusterWideConfigMaps:            getEnvOrDefaultBool("CLUSTER_WIDE_CONFIG_MAPS", true),
+			ClusterWideResourceClaimTemplates: getEnvOrDefaultBool("CLUSTER_WIDE_RESOURCE_CLAIM_TEMPLATES", false),
 		},
 	}
 

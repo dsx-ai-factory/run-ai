@@ -21,12 +21,14 @@ type ClusterWideReplicatedReconciler struct {
 }
 
 func NewClusterWideReplicatedReconciler(
-	ctx context.Context, c client.Client, clusterWideSecrets, clusterWidePvcs, clusterWideConfigMaps bool,
+	ctx context.Context, c client.Client,
+	clusterWideSecrets, clusterWidePvcs, clusterWideConfigMaps, clusterWideResourceClaimTemplates bool,
 ) (*ClusterWideReplicatedReconciler, error) {
 	gvkCommon, err := NewClusterWideGVKCommon(ctx, c, &ClusterWideReplicatorGVKConfig{
-		ClusterWideSecrets:    clusterWideSecrets,
-		ClusterWidePvcs:       clusterWidePvcs,
-		ClusterWideConfigMaps: clusterWideConfigMaps,
+		ClusterWideSecrets:               clusterWideSecrets,
+		ClusterWidePvcs:                  clusterWidePvcs,
+		ClusterWideConfigMaps:            clusterWideConfigMaps,
+		ClusterWideResourceClaimTemplates: clusterWideResourceClaimTemplates,
 	})
 	if err != nil {
 		return nil, err

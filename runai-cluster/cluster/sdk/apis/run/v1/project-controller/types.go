@@ -67,6 +67,11 @@ type ProjectController struct {
 	// +kubebuilder:validation:Optional
 	ClusterWidePvc *bool `json:"clusterWidePvc,omitempty"`
 
+	// ClusterWideResourceClaimTemplate specifies if cluster-wide ResourceClaimTemplates
+	// (resource.k8s.io/v1) should be copied from the runai namespace to a project's namespace
+	// +kubebuilder:validation:Optional
+	ClusterWideResourceClaimTemplate *bool `json:"clusterWideResourceClaimTemplate,omitempty"`
+
 	// LimitRange specifies if limit ranges should be defined for projects
 	// +kubebuilder:validation:Optional
 	LimitRange *bool `json:"limitRange,omitempty"`
@@ -142,6 +147,10 @@ func (p *ProjectController) SetDefaultsWhereNeeded(internalSpec *internal.Intern
 
 	if p.ClusterWidePvc == nil {
 		p.ClusterWidePvc = ptr.To[bool](true)
+	}
+
+	if p.ClusterWideResourceClaimTemplate == nil {
+		p.ClusterWideResourceClaimTemplate = ptr.To[bool](true)
 	}
 
 	if p.LimitRange == nil {

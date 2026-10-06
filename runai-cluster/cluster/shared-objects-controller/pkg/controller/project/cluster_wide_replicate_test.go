@@ -17,6 +17,7 @@ import (
 	schedulingv2alpha2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v2alpha2"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -518,6 +519,240 @@ var _ = Describe("PVC inspector helpers", func() {
 		newSecret := &corev1.Secret{Data: map[string][]byte{"new": []byte("v")}}
 		gvkCommon.PreserveImmutableFields(existing, newSecret)
 		Expect(newSecret.Data).To(Equal(map[string][]byte{"new": []byte("v")}))
+	})
+})
+
+// cwRct builds a minimal ResourceClaimTemplate with the single-GPU request the
+// assets-sync agent produces. Callers pass a labels map (scope + asset label)
+// so the different Describes can exercise cluster-wide, department-wide, and
+// non-scoped sources from the same helper. The labels map is cloned so that
+// later per-object label mutations don't leak back into the caller's map.
+func cwRct(name, namespace string, labels map[string]string) *resourcev1.ResourceClaimTemplate {
+	var labelsCopy map[string]string
+	if labels != nil {
+		labelsCopy = make(map[string]string, len(labels))
+		for k, v := range labels {
+			labelsCopy[k] = v
+		}
+	}
+	return &resourcev1.ResourceClaimTemplate{
+		TypeMeta: metav1.TypeMeta{Kind: "ResourceClaimTemplate", APIVersion: resourcev1.SchemeGroupVersion.String()},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels:    labelsCopy,
+		},
+		Spec: resourcev1.ResourceClaimTemplateSpec{
+			Spec: resourcev1.ResourceClaimSpec{
+				Devices: resourcev1.DeviceClaim{
+					Requests: []resourcev1.DeviceRequest{{
+						Name: "gpu",
+						Exactly: &resourcev1.ExactDeviceRequest{
+							DeviceClassName: "nvidia.com/gpu",
+							Tolerations: []resourcev1.DeviceToleration{{
+								Key:   "nvidia.com/gpu",
+								Value: "present",
+							}},
+						},
+					}},
+				},
+			},
+		},
+	}
+}
+
+// cwRctFullyDefaulted returns a copy of cwRct(...) with the server-side
+// defaults the apiserver would stamp (AllocationMode=ExactCount, Count=1,
+// Toleration.Operator=Equal) already set. Used by the "no churn after
+// defaults" test to simulate what an on-cluster read-back of a replicated
+// RCT looks like.
+func cwRctFullyDefaulted(name, namespace string, labels map[string]string) *resourcev1.ResourceClaimTemplate {
+	rct := cwRct(name, namespace, labels)
+	rct.Spec.Spec.Devices.Requests[0].Exactly.AllocationMode = resourcev1.DeviceAllocationModeExactCount
+	rct.Spec.Spec.Devices.Requests[0].Exactly.Count = 1
+	rct.Spec.Spec.Devices.Requests[0].Exactly.Tolerations[0].Operator = resourcev1.DeviceTolerationOpEqual
+	return rct
+}
+
+var _ = Describe("Cluster-wide ResourceClaimTemplate replication", func() {
+	var (
+		k8sClient client.Client
+		handler   *ClusterWideReplicatedResourceHandler
+		project   *kaiorg.Project
+		ctx       context.Context
+	)
+
+	rctClusterLabels := map[string]string{
+		commonconstants.ClusterWideResourceLabel: "true",
+		commonconstants.RunaiAssetLabel:          ResourceClaimTemplateAssetKind,
+	}
+	rctDep1Labels := map[string]string{
+		commonconstants.DepartmentScopeLabel: cwTestDepartment1,
+		commonconstants.RunaiAssetLabel:      ResourceClaimTemplateAssetKind,
+	}
+	rctDep2Labels := map[string]string{
+		commonconstants.DepartmentScopeLabel: cwTestDepartment2,
+		commonconstants.RunaiAssetLabel:      ResourceClaimTemplateAssetKind,
+	}
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		project = cwTestProject()
+		ns := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{Name: cwTestProjectNamespace},
+		}
+
+		scheme := scheme_init.Scheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		k8sClient = fake.NewClientBuilder().
+			WithScheme(scheme).
+			WithStatusSubresource(&kaiorg.Project{}).
+			WithObjects(project.DeepCopy(), ns).
+			Build()
+
+		gvkCommon, err := NewClusterWideGVKCommon(ctx, k8sClient,
+			&ClusterWideReplicatorGVKConfig{ClusterWideResourceClaimTemplates: true})
+		Expect(err).To(BeNil())
+		handler = NewClusterWideReplicatedResourceHandler(k8sClient, gvkCommon)
+	})
+
+	It("replicates a cluster-wide RCT into the project namespace with the replicated-project labels", func() {
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		replicated := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "cw-rct", Namespace: cwTestProjectNamespace}, replicated)).To(Succeed())
+		Expect(replicated.Labels).To(HaveKeyWithValue(commonconstants.ClusterWideResourceLabel, "true"))
+		Expect(replicated.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, project.Name))
+		Expect(replicated.Labels).To(HaveKeyWithValue(replicatedProjectIdLabelKey, string(project.UID)))
+		Expect(replicated.Spec).To(Equal(src.Spec))
+	})
+
+	It("replicates a department-wide RCT matching the project's department and ignores other departments", func() {
+		dep1 := cwRct("dep1-rct", cwTestSchedulerNamespace, rctDep1Labels)
+		dep2 := cwRct("dep2-rct", cwTestSchedulerNamespace, rctDep2Labels)
+		Expect(k8sClient.Create(ctx, dep1)).To(Succeed())
+		Expect(k8sClient.Create(ctx, dep2)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "dep1-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).To(Succeed())
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "dep2-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).ToNot(Succeed())
+	})
+
+	It("does not touch a scope-wide-labeled RCT in runai that lacks the asset-sync label (safety filter)", func() {
+		// Carries the cluster-wide scope label but NOT the run.ai/asset
+		// label. The RCT inspector's AdditionalObjectFilter is supposed
+		// to keep it out of the replicated set — otherwise a manually
+		// created RCT in runai would end up in every project.
+		src := cwRct("unmanaged-rct", cwTestSchedulerNamespace,
+			map[string]string{commonconstants.ClusterWideResourceLabel: "true"})
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "unmanaged-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).ToNot(Succeed())
+	})
+
+	It("does not recreate the replica when the only diff is API-server defaults (no churn)", func() {
+		// Source as sent by the user: zero AllocationMode/Count/Operator.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		// Existing replica as it would be read back from the apiserver:
+		// same request, but with server-side defaults populated. Pin a
+		// known UID so a recreate would move it.
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.UID = "existing-stable-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID), "RCT must not churn on a defaults-only diff")
+	})
+
+	It("delete-and-recreates the replica when the source spec actually changes", func() {
+		// Source bumped to 4 GPUs.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Spec.Spec.Devices.Requests[0].Exactly.Count = 4
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		// Existing replica is at the old (Count=1) spec, fully defaulted
+		// as the apiserver would store it.
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.UID = "old-replica-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).NotTo(Equal(existing.UID), "RCT must be re-created when its immutable spec diverges")
+		Expect(after.Spec.Spec.Devices.Requests[0].Exactly.Count).To(BeEquivalentTo(4))
+	})
+
+	It("deletes a replica owned by the project whose source no longer exists, but keeps unlabeled ones", func() {
+		orphan := cwRct("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		orphan.Labels[replicatedProjectNameLabelKey] = project.Name
+		orphan.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		orphan.OwnerReferences = cwProjectOwnerRef()
+		Expect(k8sClient.Create(ctx, orphan)).To(Succeed())
+
+		// A hand-authored RCT in the project namespace with no scope
+		// label and no replicated-project label — must not be swept.
+		userRct := cwRct("user-rct", cwTestProjectNamespace, nil)
+		Expect(k8sClient.Create(ctx, userRct)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "cw-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).ToNot(Succeed())
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "user-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).To(Succeed())
+	})
+})
+
+var _ = Describe("RCT inspector helpers", func() {
+	var gvkCommon *ClusterWideGVKCommon
+
+	BeforeEach(func() {
+		scheme := scheme_init.Scheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		k8sClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+		var err error
+		gvkCommon, err = NewClusterWideGVKCommon(context.Background(), k8sClient,
+			&ClusterWideReplicatorGVKConfig{ClusterWideResourceClaimTemplates: true})
+		Expect(err).To(BeNil())
+	})
+
+	It("IsSpecImmutable is true for RCT and false for PVC/Secret/ConfigMap", func() {
+		Expect(gvkCommon.IsSpecImmutable(&resourcev1.ResourceClaimTemplate{})).To(BeTrue())
+		Expect(gvkCommon.IsSpecImmutable(&corev1.PersistentVolumeClaim{})).To(BeFalse())
+		Expect(gvkCommon.IsSpecImmutable(&corev1.Secret{})).To(BeFalse())
+		Expect(gvkCommon.IsSpecImmutable(&corev1.ConfigMap{})).To(BeFalse())
+	})
+
+	It("AreEqual treats a defaults-only diff as equal", func() {
+		undefaulted := cwRct("r", "runai", nil)
+		defaulted := cwRctFullyDefaulted("r", "runai", nil)
+		Expect(gvkCommon.AreEqual(context.Background(), undefaulted, defaulted)).To(BeTrue())
+	})
+
+	It("AreEqual flags a real spec diff (Count change)", func() {
+		a := cwRct("r", "runai", nil)
+		b := cwRct("r", "runai", nil)
+		b.Spec.Spec.Devices.Requests[0].Exactly.Count = 4
+		Expect(gvkCommon.AreEqual(context.Background(), a, b)).To(BeFalse())
 	})
 })
 
