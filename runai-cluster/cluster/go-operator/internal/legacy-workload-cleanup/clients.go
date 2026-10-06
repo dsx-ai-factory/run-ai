@@ -9,7 +9,7 @@ import (
 	"context"
 	"fmt"
 
-	schemeinit "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	schemeinit "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"

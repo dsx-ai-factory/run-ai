@@ -513,6 +513,88 @@ func (_c *IAssetsClient_GetNgcApiKeyByIdInternal_Call) RunAndReturn(run func(ctx
 	return _c
 }
 
+// K8sObjectsSyncUpdates provides a mock function for the type IAssetsClient
+func (_mock *IAssetsClient) K8sObjectsSyncUpdates(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.K8sObjectsUpdatesResp, *openapi.Error) {
+	ret := _mock.Called(ctx, clusterId, fromUpdate, request)
+
+	if len(ret) == 0 {
+		panic("no return value specified for K8sObjectsSyncUpdates")
+	}
+
+	var r0 *openapi.K8sObjectsUpdatesResp
+	var r1 *openapi.Error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int64, openapi.ClusterSyncReport) (*openapi.K8sObjectsUpdatesResp, *openapi.Error)); ok {
+		return returnFunc(ctx, clusterId, fromUpdate, request)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int64, openapi.ClusterSyncReport) *openapi.K8sObjectsUpdatesResp); ok {
+		r0 = returnFunc(ctx, clusterId, fromUpdate, request)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.K8sObjectsUpdatesResp)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, int64, openapi.ClusterSyncReport) *openapi.Error); ok {
+		r1 = returnFunc(ctx, clusterId, fromUpdate, request)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*openapi.Error)
+		}
+	}
+	return r0, r1
+}
+
+// IAssetsClient_K8sObjectsSyncUpdates_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'K8sObjectsSyncUpdates'
+type IAssetsClient_K8sObjectsSyncUpdates_Call struct {
+	*mock.Call
+}
+
+// K8sObjectsSyncUpdates is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - fromUpdate int64
+//   - request openapi.ClusterSyncReport
+func (_e *IAssetsClient_Expecter) K8sObjectsSyncUpdates(ctx any, clusterId any, fromUpdate any, request any) *IAssetsClient_K8sObjectsSyncUpdates_Call {
+	return &IAssetsClient_K8sObjectsSyncUpdates_Call{Call: _e.mock.On("K8sObjectsSyncUpdates", ctx, clusterId, fromUpdate, request)}
+}
+
+func (_c *IAssetsClient_K8sObjectsSyncUpdates_Call) Run(run func(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport)) *IAssetsClient_K8sObjectsSyncUpdates_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 openapi.ClusterSyncReport
+		if args[3] != nil {
+			arg3 = args[3].(openapi.ClusterSyncReport)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *IAssetsClient_K8sObjectsSyncUpdates_Call) Return(k8sObjectsUpdatesResp *openapi.K8sObjectsUpdatesResp, error *openapi.Error) *IAssetsClient_K8sObjectsSyncUpdates_Call {
+	_c.Call.Return(k8sObjectsUpdatesResp, error)
+	return _c
+}
+
+func (_c *IAssetsClient_K8sObjectsSyncUpdates_Call) RunAndReturn(run func(ctx context.Context, clusterId string, fromUpdate int64, request openapi.ClusterSyncReport) (*openapi.K8sObjectsUpdatesResp, *openapi.Error)) *IAssetsClient_K8sObjectsSyncUpdates_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListComputeAssets provides a mock function for the type IAssetsClient
 func (_mock *IAssetsClient) ListComputeAssets(ctx context.Context, name string) (*openapi.ComputeListResponse, *http.Response, error) {
 	ret := _mock.Called(ctx, name)

@@ -16,11 +16,11 @@ import (
 	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/common/image-parser"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
 
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/installation/util"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/metrics"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	v1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common"

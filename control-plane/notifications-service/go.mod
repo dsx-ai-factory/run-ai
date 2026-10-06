@@ -53,7 +53,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mattn/go-sqlite3 v1.14.52 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -125,7 +125,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/xyproto/jpath v0.7.0
-	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba
+	golang.org/x/exp v0.0.0-20261005173118-76772065c9b0
 	gorm.io/datatypes v1.2.7
 	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2

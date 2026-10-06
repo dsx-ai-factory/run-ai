@@ -206,10 +206,8 @@ navigation:
           contents:
           - idps
           - users
-          - applications
           - serviceAccounts
           - accessKeys
-          - userApplications
           - tokens
           - settings
           - roles

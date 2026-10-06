@@ -9,9 +9,10 @@ import (
 	"context"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"slices"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils/validator"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -27,11 +28,17 @@ type ProjectValidator struct {
 	serviceAccountValidator *validator.ServiceAccountValidator
 }
 
+// postUpgradeServiceAccount is the post-upgrade hook's identity; it deletes the
+// migrated legacy org units. Matched by username because the hook's service account
+// is recreated on every upgrade, so its UID is never stable.
+const postUpgradeServiceAccount = "system:serviceaccount:" + runaiv1.DefaultNamespace + ":runai-post-upgrade"
+
 // NewProjectValidator uses an uncached reader for the collector lookup so it only needs get permission.
 func NewProjectValidator(k8sClient client.Client, garbageCollectorReader client.Reader, allowedServiceAccounts []string) *ProjectValidator {
 	pv := &ProjectValidator{
 		garbageCollectorReader: garbageCollectorReader,
 	}
+	allowedServiceAccounts = append(slices.Clone(allowedServiceAccounts), postUpgradeServiceAccount)
 	pv.serviceAccountValidator = validator.NewServiceAccountValidator(k8sClient, allowedServiceAccounts, pv.initValidator())
 	return pv
 }
@@ -71,7 +78,7 @@ func (pv *ProjectValidator) Handle(ctx context.Context, req admission.Request) a
 func (pv *ProjectValidator) getRunaiAgentUID(ctx context.Context, k8sClient client.Client) (string, error) {
 	runaiAgentServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.RunaiAgentName, runaiv1.DefaultNamespace)
+		constants.RunaiAgentName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}
@@ -82,7 +89,7 @@ func (pv *ProjectValidator) getRunaiAgentUID(ctx context.Context, k8sClient clie
 func (pv *ProjectValidator) getRunaiClusterSyncUID(ctx context.Context, k8sClient client.Client) (string, error) {
 	runaiClusterSyncServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.RunaiClusterSyncName, runaiv1.DefaultNamespace)
+		constants.RunaiClusterSyncName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}
@@ -95,7 +102,7 @@ func (pv *ProjectValidator) getRunaiClusterSyncUID(ctx context.Context, k8sClien
 func (pv *ProjectValidator) getProjectControllerUID(ctx context.Context, k8sClient client.Client) (string, error) {
 	projectControllerServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.KRMProjectControllerName, runaiv1.DefaultNamespace)
+		constants.KRMProjectControllerName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}
@@ -106,7 +113,7 @@ func (pv *ProjectValidator) getProjectControllerUID(ctx context.Context, k8sClie
 func (pv *ProjectValidator) getRunaiOperatorUID(ctx context.Context, k8sClient client.Client) (string, error) {
 	runaiOperatorServiceAccount, err := GetServiceAccount(
 		ctx, k8sClient,
-		operands.RunaiOperatorName, runaiv1.DefaultNamespace)
+		constants.RunaiOperatorName, runaiv1.DefaultNamespace)
 	if err != nil {
 		return "", err
 	}

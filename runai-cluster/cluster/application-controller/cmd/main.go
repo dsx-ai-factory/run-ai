@@ -17,7 +17,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 

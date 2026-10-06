@@ -6,7 +6,7 @@
 package platform_identifier
 
 import (
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	assert2 "github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	extensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"

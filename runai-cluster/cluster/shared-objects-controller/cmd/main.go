@@ -10,7 +10,7 @@ import (
 
 	"flag"
 
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/shared-objects-controller/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/shared-objects-controller/pkg/controller"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"

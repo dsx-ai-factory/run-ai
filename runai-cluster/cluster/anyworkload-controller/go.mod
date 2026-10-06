@@ -7,6 +7,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/top-owner v0.0.0-00010101000000-000000000000
@@ -32,6 +33,7 @@ require (
 )
 
 require (
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000 // indirect
 	github.com/go-openapi/swag/pools v0.27.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kai-scheduler/kai-resource-management-api v0.1.3 // indirect
@@ -197,6 +199,8 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => .
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
 
+replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
+
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../workload-common
@@ -220,7 +224,6 @@ replace k8s.io/apimachinery => k8s.io/apimachinery v0.35.4
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8

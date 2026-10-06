@@ -17,10 +17,19 @@ func NewMockpublisherer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Mockpublisherer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Mockpublisherer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -105,15 +114,26 @@ type Mockpublisherer_Publish_Call struct {
 }
 
 // Publish is a helper method to define mock.On call
-//   - topic
-//   - payload
-func (_e *Mockpublisherer_Expecter) Publish(topic interface{}, payload interface{}) *Mockpublisherer_Publish_Call {
+//   - topic string
+//   - payload []byte
+func (_e *Mockpublisherer_Expecter) Publish(topic any, payload any) *Mockpublisherer_Publish_Call {
 	return &Mockpublisherer_Publish_Call{Call: _e.mock.On("Publish", topic, payload)}
 }
 
 func (_c *Mockpublisherer_Publish_Call) Run(run func(topic string, payload []byte)) *Mockpublisherer_Publish_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].([]byte))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []byte
+		if args[1] != nil {
+			arg1 = args[1].([]byte)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

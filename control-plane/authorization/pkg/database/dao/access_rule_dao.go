@@ -639,13 +639,23 @@ func DbCreateInternalUserAccessRule(
 	return &accessRuleSpec, nil
 }
 
+// subjectTypesForDeletion treats the legacy 'app' subject type and 'service-account' as the same subject type,
+// so rules are deleted regardless of which of the two they were stored with.
+func subjectTypesForDeletion(subjectType string) []string {
+	const legacyAppSubjectType = "app"
+	if subjectType == legacyAppSubjectType || subjectType == string(api.SUBJECTTYPE_SERVICE_ACCOUNT) {
+		return []string{legacyAppSubjectType, string(api.SUBJECTTYPE_SERVICE_ACCOUNT)}
+	}
+	return []string{subjectType}
+}
+
 func DbDeleteSubjectAccessRules(ctx context.Context, tenantId uint, subjectType string, subjectId string) *api.Error {
 	dbErr := api.NewError(http.StatusInternalServerError, fmt.Sprintf("Failed to delete subject access rules of %s-%s", subjectType, subjectId), nil)
 
 	err := runaidb.DB().WithContext(ctx).Transaction(func(tx orm.DB) error {
 		_, err := tx.
 			Where("tenant_id = ?", tenantId).
-			Where("subject_type = ?", subjectType).
+			Where("subject_type IN ?", subjectTypesForDeletion(subjectType)).
 			Where("subject_id = ?", subjectId).
 			Delete(&[]models.AccessRule{})
 		return err

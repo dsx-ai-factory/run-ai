@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	github.com/aws/smithy-go v1.28.2
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.10
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.3
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.0
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.5
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.20
 	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.21
@@ -80,7 +80,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.20.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20261003200830-ebaad5f31b4d // indirect
+	github.com/google/pprof v0.0.0-20261005154351-639476b4d215 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -94,7 +94,7 @@ require (
 	github.com/lithammer/shortuuid/v4 v4.3.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20260802145828-341c2f0c90b5 // indirect
 	github.com/magiconair/properties v1.18.12 // indirect
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/maypok86/otter/v2 v2.3.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
@@ -159,15 +159,15 @@ require (
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba // indirect
+	golang.org/x/exp v0.0.0-20261005173118-76772065c9b0 // indirect
 	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
-	golang.org/x/tools v0.50.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261005182115-fad411399dd8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8 // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect

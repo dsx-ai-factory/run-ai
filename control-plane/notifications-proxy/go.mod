@@ -43,7 +43,7 @@ require (
 	github.com/lib/pq v1.12.3 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lithammer/shortuuid/v4 v4.3.0 // indirect
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/maypok86/otter/v2 v2.3.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -88,14 +88,14 @@ require (
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba // indirect
+	golang.org/x/exp v0.0.0-20261005173118-76772065c9b0 // indirect
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261005182115-fad411399dd8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8 // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect
@@ -106,7 +106,7 @@ require (
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.10
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.3
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.0
 	github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/pkg/client v1.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.7

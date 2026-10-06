@@ -40,6 +40,7 @@ const (
 
 	DatasourcesSyncCounter  = "datasources-sync-counter"
 	CredentialsSyncCounter  = "credentials-sync-counter"
+	K8sObjectsSyncCounter   = "k8s-objects-sync-counter"
 	ApplicationsSyncCounter = "applications-sync-counter"
 )
 
@@ -57,6 +58,7 @@ type AgentConfigData struct {
 
 	DatasourcesSyncCounter int64
 	CredentialsSyncCounter int64
+	K8sObjectsSyncCounter  int64
 
 	WorkloadsV2SyncCounter int64
 
@@ -77,6 +79,7 @@ func NewAgentConfig() *AgentConfigData {
 
 		DatasourcesSyncCounter: 0,
 		CredentialsSyncCounter: 0,
+		K8sObjectsSyncCounter:  0,
 
 		WorkloadsV2SyncCounter: 0,
 
@@ -147,6 +150,9 @@ func (ac *AgentConfigData) updateAgentConfigDataCounter(counterToUpdate string, 
 	case common.CredentialAssets:
 		counterKey = CredentialsSyncCounter
 		counter = ac.CredentialsSyncCounter
+	case common.K8sObjectsAssets:
+		counterKey = K8sObjectsSyncCounter
+		counter = ac.K8sObjectsSyncCounter
 	case common.WorkloadsV2Type:
 		counterKey = WorkloadsV2SyncCounter
 		counter = ac.WorkloadsV2SyncCounter
@@ -272,6 +278,16 @@ func (ac *AgentConfigData) SetData(configMap corev1.ConfigMap) (*AgentConfigData
 	}
 	agentConfigData.SetCredentialsSyncCounter(credentialsSyncCouunter)
 
+	var k8sObjectsSyncCounter int64
+	if configMap.Data[K8sObjectsSyncCounter] != "" {
+		k8sObjectsSyncCounter, err = strconv.ParseInt(configMap.Data[K8sObjectsSyncCounter], 10, 64)
+		if err != nil {
+			log.Error().Msgf("Failed to parse k8s-objects sync counter: %s, error: %s", configMap.Data[K8sObjectsSyncCounter], err.Error())
+			return &agentConfigData, err
+		}
+	}
+	agentConfigData.SetK8sObjectsSyncCounter(k8sObjectsSyncCounter)
+
 	if configMap.Data[WorkloadsV2SyncCounter] != "" {
 		workloadsV2SyncCounter, err = strconv.ParseInt(configMap.Data[WorkloadsV2SyncCounter], 10, 64)
 		if err != nil {
@@ -346,6 +362,11 @@ func (ac *AgentConfigData) SetDatasourcesSyncCounter(updateCounter int64) *Agent
 
 func (ac *AgentConfigData) SetCredentialsSyncCounter(updateCounter int64) *AgentConfigData {
 	ac.CredentialsSyncCounter = updateCounter
+	return ac
+}
+
+func (ac *AgentConfigData) SetK8sObjectsSyncCounter(updateCounter int64) *AgentConfigData {
+	ac.K8sObjectsSyncCounter = updateCounter
 	return ac
 }
 
@@ -437,6 +458,10 @@ func UpdateCredentialsAssetsSyncCounter(runaiClient client.Client, cachedClient 
 	return NewAgentConfig().SetCredentialsSyncCounter(counter).updateCluster(runaiClient, cachedClient, common.CredentialAssets)
 }
 
+func UpdateK8sObjectsAssetsSyncCounter(runaiClient client.Client, cachedClient client.Reader, counter int64) error {
+	return NewAgentConfig().SetK8sObjectsSyncCounter(counter).updateCluster(runaiClient, cachedClient, common.K8sObjectsAssets)
+}
+
 func UpdateWorkloadsV2SyncCounter(runaiClient client.Client, cachedClient client.Reader, counter int64) error {
 	return NewAgentConfig().SetWorkloadsV2Counter(counter).updateCluster(runaiClient, cachedClient, common.WorkloadsV2Type)
 }
@@ -464,6 +489,7 @@ func CreateAgentConfigMap(runaiClient client.Client) (*AgentConfigData, error) {
 
 			DatasourcesSyncCounter: "0",
 			CredentialsSyncCounter: "0",
+			K8sObjectsSyncCounter:  "0",
 
 			WorkloadsV2SyncCounter: "0",
 

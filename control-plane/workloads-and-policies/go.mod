@@ -281,6 +281,8 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common =
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ./../../runai-cluster/cluster/go-operator
 
+replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ./../../runai-cluster/cluster/common/scheme-init
+
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ./../../runai-cluster/cluster/sdk
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ./../../runai-cluster/cluster/common/utils

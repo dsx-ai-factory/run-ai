@@ -12,8 +12,8 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1
@@ -35,7 +35,7 @@ require (
 	github.com/ray-project/kuberay/ray-operator v1.5.1
 	github.com/rs/zerolog v1.32.0
 	github.com/run-ai/karta v0.1.1-0.20260708043952-998140308a96
-	github.com/tektoncd/pipeline v0.55.0
+	github.com/tektoncd/pipeline v1.0.2
 	go.uber.org/zap v1.28.0
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
 	golang.org/x/time v0.15.0
@@ -139,6 +139,7 @@ require (
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kai-scheduler/kai-resource-management-api v0.1.3
+	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/moby/spdystream v0.5.1 // indirect
@@ -226,8 +227,8 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints => ../common/endpoints
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters => ../common/getters
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../common/runaipublic
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../workload-common
 

@@ -372,7 +372,7 @@ func (s *ServiceAccountsApiService) getOrCreateInstallerClient(ctx context.Conte
 		Id:   clusterId,
 		Type: authorization_api.SCOPETYPE_CLUSTER,
 	}
-	if err := s.authzClient.SetAppPermissions(ctx, grantTenantId, clientId, scope, authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION); err != nil {
+	if err := s.authzClient.SetServiceAccountPermissions(ctx, grantTenantId, clientId, scope, authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION); err != nil {
 		return "", fmt.Errorf("failed to grant access rule for installer client %s: %w", clientId, err)
 	}
 
@@ -381,7 +381,7 @@ func (s *ServiceAccountsApiService) getOrCreateInstallerClient(ctx context.Conte
 
 func (s *ServiceAccountsApiService) deleteServiceAccountAccessRules(ctx context.Context, serviceAccountName string) error {
 	request := s.authzClient.DeleteSubjectAccessRules(ctx)
-	request = request.SubjectType(string(authorization_api.SUBJECTTYPE_APP)).SubjectId(serviceAccountName)
+	request = request.SubjectType(string(authorization_api.SUBJECTTYPE_SERVICE_ACCOUNT)).SubjectId(serviceAccountName)
 	_, err := s.authzClient.DeleteSubjectAccessRulesExecute(request)
 	if err != nil {
 		return err

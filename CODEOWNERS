@@ -24,7 +24,6 @@ code-rabbit/ @dsx-ai-factory/workloads
 
 # Suricata
 /control-plane/authorization/ @dsx-ai-factory/resource-mgmt
-/control-plane/authorization-migrator/ @dsx-ai-factory/resource-mgmt
 /control-plane/org-unit-service/ @dsx-ai-factory/resource-mgmt
 
 # Viper

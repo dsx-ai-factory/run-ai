@@ -20,10 +20,19 @@ func NewMockkafkaWriter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockkafkaWriter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockkafkaWriter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -88,11 +97,11 @@ func (_c *MockkafkaWriter_Close_Call) RunAndReturn(run func() error) *MockkafkaW
 // WriteMessages provides a mock function for the type MockkafkaWriter
 func (_mock *MockkafkaWriter) WriteMessages(ctx context.Context, msgs ...kafka.Message) error {
 	// kafka.Message
-	_va := make([]interface{}, len(msgs))
+	_va := make([]any, len(msgs))
 	for _i := range msgs {
 		_va[_i] = msgs[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -116,22 +125,31 @@ type MockkafkaWriter_WriteMessages_Call struct {
 }
 
 // WriteMessages is a helper method to define mock.On call
-//   - ctx
-//   - msgs
-func (_e *MockkafkaWriter_Expecter) WriteMessages(ctx interface{}, msgs ...interface{}) *MockkafkaWriter_WriteMessages_Call {
+//   - ctx context.Context
+//   - msgs ...kafka.Message
+func (_e *MockkafkaWriter_Expecter) WriteMessages(ctx any, msgs ...any) *MockkafkaWriter_WriteMessages_Call {
 	return &MockkafkaWriter_WriteMessages_Call{Call: _e.mock.On("WriteMessages",
-		append([]interface{}{ctx}, msgs...)...)}
+		append([]any{ctx}, msgs...)...)}
 }
 
 func (_c *MockkafkaWriter_WriteMessages_Call) Run(run func(ctx context.Context, msgs ...kafka.Message)) *MockkafkaWriter_WriteMessages_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []kafka.Message
 		variadicArgs := make([]kafka.Message, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(kafka.Message)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }

@@ -3590,6 +3590,81 @@ func (_c *IAuthorizationClient_SetAppPermissions_Call) RunAndReturn(run func(ctx
 	return _c
 }
 
+// SetServiceAccountPermissions provides a mock function for the type IAuthorizationClient
+func (_mock *IAuthorizationClient) SetServiceAccountPermissions(ctx context.Context, tenantId string, clientId string, scope openapi.InternalCreateAccessRuleRequestScope, role openapi.AllowedInternalCreateRoles) error {
+	ret := _mock.Called(ctx, tenantId, clientId, scope, role)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetServiceAccountPermissions")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, openapi.InternalCreateAccessRuleRequestScope, openapi.AllowedInternalCreateRoles) error); ok {
+		r0 = returnFunc(ctx, tenantId, clientId, scope, role)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// IAuthorizationClient_SetServiceAccountPermissions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetServiceAccountPermissions'
+type IAuthorizationClient_SetServiceAccountPermissions_Call struct {
+	*mock.Call
+}
+
+// SetServiceAccountPermissions is a helper method to define mock.On call
+//   - ctx context.Context
+//   - tenantId string
+//   - clientId string
+//   - scope openapi.InternalCreateAccessRuleRequestScope
+//   - role openapi.AllowedInternalCreateRoles
+func (_e *IAuthorizationClient_Expecter) SetServiceAccountPermissions(ctx any, tenantId any, clientId any, scope any, role any) *IAuthorizationClient_SetServiceAccountPermissions_Call {
+	return &IAuthorizationClient_SetServiceAccountPermissions_Call{Call: _e.mock.On("SetServiceAccountPermissions", ctx, tenantId, clientId, scope, role)}
+}
+
+func (_c *IAuthorizationClient_SetServiceAccountPermissions_Call) Run(run func(ctx context.Context, tenantId string, clientId string, scope openapi.InternalCreateAccessRuleRequestScope, role openapi.AllowedInternalCreateRoles)) *IAuthorizationClient_SetServiceAccountPermissions_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 openapi.InternalCreateAccessRuleRequestScope
+		if args[3] != nil {
+			arg3 = args[3].(openapi.InternalCreateAccessRuleRequestScope)
+		}
+		var arg4 openapi.AllowedInternalCreateRoles
+		if args[4] != nil {
+			arg4 = args[4].(openapi.AllowedInternalCreateRoles)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *IAuthorizationClient_SetServiceAccountPermissions_Call) Return(err error) *IAuthorizationClient_SetServiceAccountPermissions_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *IAuthorizationClient_SetServiceAccountPermissions_Call) RunAndReturn(run func(ctx context.Context, tenantId string, clientId string, scope openapi.InternalCreateAccessRuleRequestScope, role openapi.AllowedInternalCreateRoles) error) *IAuthorizationClient_SetServiceAccountPermissions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SyncAccessRules provides a mock function for the type IAuthorizationClient
 func (_mock *IAuthorizationClient) SyncAccessRules(ctx context.Context, clusterUuid string) openapi.ApiSyncAccessRulesRequest {
 	ret := _mock.Called(ctx, clusterUuid)

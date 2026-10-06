@@ -116,7 +116,7 @@ require (
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20261003200830-ebaad5f31b4d // indirect
+	github.com/google/pprof v0.0.0-20261005154351-639476b4d215 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gookit/color v1.6.1 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
@@ -134,7 +134,7 @@ require (
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/lithammer/fuzzysearch v1.1.8 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.30 // indirect

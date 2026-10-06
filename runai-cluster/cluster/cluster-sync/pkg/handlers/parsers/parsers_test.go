@@ -26,7 +26,7 @@ import (
 	"testing"
 	"time"
 
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	sdkkaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	fakerunaiclient "sigs.k8s.io/controller-runtime/pkg/client/fake"

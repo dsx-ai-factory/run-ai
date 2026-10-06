@@ -293,6 +293,127 @@ func (_c *SynchronizationAPI_DatasourceSyncUpdatesExecute_Call) RunAndReturn(run
 	return _c
 }
 
+// K8sObjectsSyncUpdates provides a mock function for the type SynchronizationAPI
+func (_mock *SynchronizationAPI) K8sObjectsSyncUpdates(ctx context.Context) openapi.ApiK8sObjectsSyncUpdatesRequest {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for K8sObjectsSyncUpdates")
+	}
+
+	var r0 openapi.ApiK8sObjectsSyncUpdatesRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context) openapi.ApiK8sObjectsSyncUpdatesRequest); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiK8sObjectsSyncUpdatesRequest)
+	}
+	return r0
+}
+
+// SynchronizationAPI_K8sObjectsSyncUpdates_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'K8sObjectsSyncUpdates'
+type SynchronizationAPI_K8sObjectsSyncUpdates_Call struct {
+	*mock.Call
+}
+
+// K8sObjectsSyncUpdates is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *SynchronizationAPI_Expecter) K8sObjectsSyncUpdates(ctx any) *SynchronizationAPI_K8sObjectsSyncUpdates_Call {
+	return &SynchronizationAPI_K8sObjectsSyncUpdates_Call{Call: _e.mock.On("K8sObjectsSyncUpdates", ctx)}
+}
+
+func (_c *SynchronizationAPI_K8sObjectsSyncUpdates_Call) Run(run func(ctx context.Context)) *SynchronizationAPI_K8sObjectsSyncUpdates_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *SynchronizationAPI_K8sObjectsSyncUpdates_Call) Return(apiK8sObjectsSyncUpdatesRequest openapi.ApiK8sObjectsSyncUpdatesRequest) *SynchronizationAPI_K8sObjectsSyncUpdates_Call {
+	_c.Call.Return(apiK8sObjectsSyncUpdatesRequest)
+	return _c
+}
+
+func (_c *SynchronizationAPI_K8sObjectsSyncUpdates_Call) RunAndReturn(run func(ctx context.Context) openapi.ApiK8sObjectsSyncUpdatesRequest) *SynchronizationAPI_K8sObjectsSyncUpdates_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// K8sObjectsSyncUpdatesExecute provides a mock function for the type SynchronizationAPI
+func (_mock *SynchronizationAPI) K8sObjectsSyncUpdatesExecute(r openapi.ApiK8sObjectsSyncUpdatesRequest) (*openapi.K8sObjectsUpdatesResp, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for K8sObjectsSyncUpdatesExecute")
+	}
+
+	var r0 *openapi.K8sObjectsUpdatesResp
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiK8sObjectsSyncUpdatesRequest) (*openapi.K8sObjectsUpdatesResp, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiK8sObjectsSyncUpdatesRequest) *openapi.K8sObjectsUpdatesResp); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.K8sObjectsUpdatesResp)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiK8sObjectsSyncUpdatesRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiK8sObjectsSyncUpdatesRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'K8sObjectsSyncUpdatesExecute'
+type SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call struct {
+	*mock.Call
+}
+
+// K8sObjectsSyncUpdatesExecute is a helper method to define mock.On call
+//   - r openapi.ApiK8sObjectsSyncUpdatesRequest
+func (_e *SynchronizationAPI_Expecter) K8sObjectsSyncUpdatesExecute(r any) *SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call {
+	return &SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call{Call: _e.mock.On("K8sObjectsSyncUpdatesExecute", r)}
+}
+
+func (_c *SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call) Run(run func(r openapi.ApiK8sObjectsSyncUpdatesRequest)) *SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiK8sObjectsSyncUpdatesRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiK8sObjectsSyncUpdatesRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call) Return(k8sObjectsUpdatesResp *openapi.K8sObjectsUpdatesResp, response *http.Response, err error) *SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call {
+	_c.Call.Return(k8sObjectsUpdatesResp, response, err)
+	return _c
+}
+
+func (_c *SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call) RunAndReturn(run func(r openapi.ApiK8sObjectsSyncUpdatesRequest) (*openapi.K8sObjectsUpdatesResp, *http.Response, error)) *SynchronizationAPI_K8sObjectsSyncUpdatesExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListAssetsById provides a mock function for the type SynchronizationAPI
 func (_mock *SynchronizationAPI) ListAssetsById(ctx context.Context) openapi.ApiListAssetsByIdRequest {
 	ret := _mock.Called(ctx)

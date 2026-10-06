@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
