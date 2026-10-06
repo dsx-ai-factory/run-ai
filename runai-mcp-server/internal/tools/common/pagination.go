@@ -35,18 +35,25 @@ func EffectiveLimit(limit int32) int32 {
 }
 
 func Paginate[T any](items []T, offset, limit int32) ([]T, bool, int32) {
-	total := int32(len(items))
-	start := offset
+	total := int64(len(items))
+	start := int64(offset)
+	if start < 0 {
+		start = 0
+	}
 	if start > total {
 		start = total
 	}
-	end := start + limit
+	pageSize := int64(limit)
+	if pageSize < 0 {
+		pageSize = 0
+	}
+	end := start + pageSize
 	if end > total {
 		end = total
 	}
 	page := items[start:end]
 	if end < total {
-		return page, true, end
+		return page, true, int32(end)
 	}
 	return page, false, 0
 }
