@@ -21,10 +21,19 @@ func NewStream(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Stream {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Stream{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -122,15 +131,26 @@ type Stream_Consumer_Call struct {
 }
 
 // Consumer is a helper method to define mock.On call
-//   - ctx
-//   - consumer
-func (_e *Stream_Expecter) Consumer(ctx interface{}, consumer interface{}) *Stream_Consumer_Call {
+//   - ctx context.Context
+//   - consumer string
+func (_e *Stream_Expecter) Consumer(ctx any, consumer any) *Stream_Consumer_Call {
 	return &Stream_Consumer_Call{Call: _e.mock.On("Consumer", ctx, consumer)}
 }
 
 func (_c *Stream_Consumer_Call) Run(run func(ctx context.Context, consumer string)) *Stream_Consumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -170,14 +190,20 @@ type Stream_ConsumerNames_Call struct {
 }
 
 // ConsumerNames is a helper method to define mock.On call
-//   - context1
-func (_e *Stream_Expecter) ConsumerNames(context1 interface{}) *Stream_ConsumerNames_Call {
+//   - context1 context.Context
+func (_e *Stream_Expecter) ConsumerNames(context1 any) *Stream_ConsumerNames_Call {
 	return &Stream_ConsumerNames_Call{Call: _e.mock.On("ConsumerNames", context1)}
 }
 
 func (_c *Stream_ConsumerNames_Call) Run(run func(context1 context.Context)) *Stream_ConsumerNames_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -226,15 +252,26 @@ type Stream_CreateConsumer_Call struct {
 }
 
 // CreateConsumer is a helper method to define mock.On call
-//   - ctx
-//   - cfg
-func (_e *Stream_Expecter) CreateConsumer(ctx interface{}, cfg interface{}) *Stream_CreateConsumer_Call {
+//   - ctx context.Context
+//   - cfg jetstream.ConsumerConfig
+func (_e *Stream_Expecter) CreateConsumer(ctx any, cfg any) *Stream_CreateConsumer_Call {
 	return &Stream_CreateConsumer_Call{Call: _e.mock.On("CreateConsumer", ctx, cfg)}
 }
 
 func (_c *Stream_CreateConsumer_Call) Run(run func(ctx context.Context, cfg jetstream.ConsumerConfig)) *Stream_CreateConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(jetstream.ConsumerConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 jetstream.ConsumerConfig
+		if args[1] != nil {
+			arg1 = args[1].(jetstream.ConsumerConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -283,15 +320,26 @@ type Stream_CreateOrUpdateConsumer_Call struct {
 }
 
 // CreateOrUpdateConsumer is a helper method to define mock.On call
-//   - ctx
-//   - cfg
-func (_e *Stream_Expecter) CreateOrUpdateConsumer(ctx interface{}, cfg interface{}) *Stream_CreateOrUpdateConsumer_Call {
+//   - ctx context.Context
+//   - cfg jetstream.ConsumerConfig
+func (_e *Stream_Expecter) CreateOrUpdateConsumer(ctx any, cfg any) *Stream_CreateOrUpdateConsumer_Call {
 	return &Stream_CreateOrUpdateConsumer_Call{Call: _e.mock.On("CreateOrUpdateConsumer", ctx, cfg)}
 }
 
 func (_c *Stream_CreateOrUpdateConsumer_Call) Run(run func(ctx context.Context, cfg jetstream.ConsumerConfig)) *Stream_CreateOrUpdateConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(jetstream.ConsumerConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 jetstream.ConsumerConfig
+		if args[1] != nil {
+			arg1 = args[1].(jetstream.ConsumerConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -340,15 +388,26 @@ type Stream_CreateOrUpdatePushConsumer_Call struct {
 }
 
 // CreateOrUpdatePushConsumer is a helper method to define mock.On call
-//   - ctx
-//   - cfg
-func (_e *Stream_Expecter) CreateOrUpdatePushConsumer(ctx interface{}, cfg interface{}) *Stream_CreateOrUpdatePushConsumer_Call {
+//   - ctx context.Context
+//   - cfg jetstream.ConsumerConfig
+func (_e *Stream_Expecter) CreateOrUpdatePushConsumer(ctx any, cfg any) *Stream_CreateOrUpdatePushConsumer_Call {
 	return &Stream_CreateOrUpdatePushConsumer_Call{Call: _e.mock.On("CreateOrUpdatePushConsumer", ctx, cfg)}
 }
 
 func (_c *Stream_CreateOrUpdatePushConsumer_Call) Run(run func(ctx context.Context, cfg jetstream.ConsumerConfig)) *Stream_CreateOrUpdatePushConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(jetstream.ConsumerConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 jetstream.ConsumerConfig
+		if args[1] != nil {
+			arg1 = args[1].(jetstream.ConsumerConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -397,15 +456,26 @@ type Stream_CreatePushConsumer_Call struct {
 }
 
 // CreatePushConsumer is a helper method to define mock.On call
-//   - ctx
-//   - cfg
-func (_e *Stream_Expecter) CreatePushConsumer(ctx interface{}, cfg interface{}) *Stream_CreatePushConsumer_Call {
+//   - ctx context.Context
+//   - cfg jetstream.ConsumerConfig
+func (_e *Stream_Expecter) CreatePushConsumer(ctx any, cfg any) *Stream_CreatePushConsumer_Call {
 	return &Stream_CreatePushConsumer_Call{Call: _e.mock.On("CreatePushConsumer", ctx, cfg)}
 }
 
 func (_c *Stream_CreatePushConsumer_Call) Run(run func(ctx context.Context, cfg jetstream.ConsumerConfig)) *Stream_CreatePushConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(jetstream.ConsumerConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 jetstream.ConsumerConfig
+		if args[1] != nil {
+			arg1 = args[1].(jetstream.ConsumerConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -443,15 +513,26 @@ type Stream_DeleteConsumer_Call struct {
 }
 
 // DeleteConsumer is a helper method to define mock.On call
-//   - ctx
-//   - consumer
-func (_e *Stream_Expecter) DeleteConsumer(ctx interface{}, consumer interface{}) *Stream_DeleteConsumer_Call {
+//   - ctx context.Context
+//   - consumer string
+func (_e *Stream_Expecter) DeleteConsumer(ctx any, consumer any) *Stream_DeleteConsumer_Call {
 	return &Stream_DeleteConsumer_Call{Call: _e.mock.On("DeleteConsumer", ctx, consumer)}
 }
 
 func (_c *Stream_DeleteConsumer_Call) Run(run func(ctx context.Context, consumer string)) *Stream_DeleteConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -489,15 +570,26 @@ type Stream_DeleteMsg_Call struct {
 }
 
 // DeleteMsg is a helper method to define mock.On call
-//   - ctx
-//   - seq
-func (_e *Stream_Expecter) DeleteMsg(ctx interface{}, seq interface{}) *Stream_DeleteMsg_Call {
+//   - ctx context.Context
+//   - seq uint64
+func (_e *Stream_Expecter) DeleteMsg(ctx any, seq any) *Stream_DeleteMsg_Call {
 	return &Stream_DeleteMsg_Call{Call: _e.mock.On("DeleteMsg", ctx, seq)}
 }
 
 func (_c *Stream_DeleteMsg_Call) Run(run func(ctx context.Context, seq uint64)) *Stream_DeleteMsg_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint64))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint64
+		if args[1] != nil {
+			arg1 = args[1].(uint64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -546,15 +638,26 @@ type Stream_GetLastMsgForSubject_Call struct {
 }
 
 // GetLastMsgForSubject is a helper method to define mock.On call
-//   - ctx
-//   - subject
-func (_e *Stream_Expecter) GetLastMsgForSubject(ctx interface{}, subject interface{}) *Stream_GetLastMsgForSubject_Call {
+//   - ctx context.Context
+//   - subject string
+func (_e *Stream_Expecter) GetLastMsgForSubject(ctx any, subject any) *Stream_GetLastMsgForSubject_Call {
 	return &Stream_GetLastMsgForSubject_Call{Call: _e.mock.On("GetLastMsgForSubject", ctx, subject)}
 }
 
 func (_c *Stream_GetLastMsgForSubject_Call) Run(run func(ctx context.Context, subject string)) *Stream_GetLastMsgForSubject_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -572,11 +675,11 @@ func (_c *Stream_GetLastMsgForSubject_Call) RunAndReturn(run func(ctx context.Co
 // GetMsg provides a mock function for the type Stream
 func (_mock *Stream) GetMsg(ctx context.Context, seq uint64, opts ...jetstream.GetMsgOpt) (*jetstream.RawStreamMsg, error) {
 	// jetstream.GetMsgOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, seq)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -611,23 +714,37 @@ type Stream_GetMsg_Call struct {
 }
 
 // GetMsg is a helper method to define mock.On call
-//   - ctx
-//   - seq
-//   - opts
-func (_e *Stream_Expecter) GetMsg(ctx interface{}, seq interface{}, opts ...interface{}) *Stream_GetMsg_Call {
+//   - ctx context.Context
+//   - seq uint64
+//   - opts ...jetstream.GetMsgOpt
+func (_e *Stream_Expecter) GetMsg(ctx any, seq any, opts ...any) *Stream_GetMsg_Call {
 	return &Stream_GetMsg_Call{Call: _e.mock.On("GetMsg",
-		append([]interface{}{ctx, seq}, opts...)...)}
+		append([]any{ctx, seq}, opts...)...)}
 }
 
 func (_c *Stream_GetMsg_Call) Run(run func(ctx context.Context, seq uint64, opts ...jetstream.GetMsgOpt)) *Stream_GetMsg_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint64
+		if args[1] != nil {
+			arg1 = args[1].(uint64)
+		}
+		var arg2 []jetstream.GetMsgOpt
 		variadicArgs := make([]jetstream.GetMsgOpt, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.GetMsgOpt)
 			}
 		}
-		run(args[0].(context.Context), args[1].(uint64), variadicArgs...)
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
 	})
 	return _c
 }
@@ -645,11 +762,11 @@ func (_c *Stream_GetMsg_Call) RunAndReturn(run func(ctx context.Context, seq uin
 // Info provides a mock function for the type Stream
 func (_mock *Stream) Info(ctx context.Context, opts ...jetstream.StreamInfoOpt) (*jetstream.StreamInfo, error) {
 	// jetstream.StreamInfoOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -684,22 +801,31 @@ type Stream_Info_Call struct {
 }
 
 // Info is a helper method to define mock.On call
-//   - ctx
-//   - opts
-func (_e *Stream_Expecter) Info(ctx interface{}, opts ...interface{}) *Stream_Info_Call {
+//   - ctx context.Context
+//   - opts ...jetstream.StreamInfoOpt
+func (_e *Stream_Expecter) Info(ctx any, opts ...any) *Stream_Info_Call {
 	return &Stream_Info_Call{Call: _e.mock.On("Info",
-		append([]interface{}{ctx}, opts...)...)}
+		append([]any{ctx}, opts...)...)}
 }
 
 func (_c *Stream_Info_Call) Run(run func(ctx context.Context, opts ...jetstream.StreamInfoOpt)) *Stream_Info_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []jetstream.StreamInfoOpt
 		variadicArgs := make([]jetstream.StreamInfoOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.StreamInfoOpt)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -739,14 +865,20 @@ type Stream_ListConsumers_Call struct {
 }
 
 // ListConsumers is a helper method to define mock.On call
-//   - context1
-func (_e *Stream_Expecter) ListConsumers(context1 interface{}) *Stream_ListConsumers_Call {
+//   - context1 context.Context
+func (_e *Stream_Expecter) ListConsumers(context1 any) *Stream_ListConsumers_Call {
 	return &Stream_ListConsumers_Call{Call: _e.mock.On("ListConsumers", context1)}
 }
 
 func (_c *Stream_ListConsumers_Call) Run(run func(context1 context.Context)) *Stream_ListConsumers_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -795,15 +927,26 @@ type Stream_OrderedConsumer_Call struct {
 }
 
 // OrderedConsumer is a helper method to define mock.On call
-//   - ctx
-//   - cfg
-func (_e *Stream_Expecter) OrderedConsumer(ctx interface{}, cfg interface{}) *Stream_OrderedConsumer_Call {
+//   - ctx context.Context
+//   - cfg jetstream.OrderedConsumerConfig
+func (_e *Stream_Expecter) OrderedConsumer(ctx any, cfg any) *Stream_OrderedConsumer_Call {
 	return &Stream_OrderedConsumer_Call{Call: _e.mock.On("OrderedConsumer", ctx, cfg)}
 }
 
 func (_c *Stream_OrderedConsumer_Call) Run(run func(ctx context.Context, cfg jetstream.OrderedConsumerConfig)) *Stream_OrderedConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(jetstream.OrderedConsumerConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 jetstream.OrderedConsumerConfig
+		if args[1] != nil {
+			arg1 = args[1].(jetstream.OrderedConsumerConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -852,16 +995,32 @@ type Stream_PauseConsumer_Call struct {
 }
 
 // PauseConsumer is a helper method to define mock.On call
-//   - ctx
-//   - consumer
-//   - pauseUntil
-func (_e *Stream_Expecter) PauseConsumer(ctx interface{}, consumer interface{}, pauseUntil interface{}) *Stream_PauseConsumer_Call {
+//   - ctx context.Context
+//   - consumer string
+//   - pauseUntil time.Time
+func (_e *Stream_Expecter) PauseConsumer(ctx any, consumer any, pauseUntil any) *Stream_PauseConsumer_Call {
 	return &Stream_PauseConsumer_Call{Call: _e.mock.On("PauseConsumer", ctx, consumer, pauseUntil)}
 }
 
 func (_c *Stream_PauseConsumer_Call) Run(run func(ctx context.Context, consumer string, pauseUntil time.Time)) *Stream_PauseConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(time.Time))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 time.Time
+		if args[2] != nil {
+			arg2 = args[2].(time.Time)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -879,11 +1038,11 @@ func (_c *Stream_PauseConsumer_Call) RunAndReturn(run func(ctx context.Context, 
 // Purge provides a mock function for the type Stream
 func (_mock *Stream) Purge(ctx context.Context, opts ...jetstream.StreamPurgeOpt) error {
 	// jetstream.StreamPurgeOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -907,22 +1066,31 @@ type Stream_Purge_Call struct {
 }
 
 // Purge is a helper method to define mock.On call
-//   - ctx
-//   - opts
-func (_e *Stream_Expecter) Purge(ctx interface{}, opts ...interface{}) *Stream_Purge_Call {
+//   - ctx context.Context
+//   - opts ...jetstream.StreamPurgeOpt
+func (_e *Stream_Expecter) Purge(ctx any, opts ...any) *Stream_Purge_Call {
 	return &Stream_Purge_Call{Call: _e.mock.On("Purge",
-		append([]interface{}{ctx}, opts...)...)}
+		append([]any{ctx}, opts...)...)}
 }
 
 func (_c *Stream_Purge_Call) Run(run func(ctx context.Context, opts ...jetstream.StreamPurgeOpt)) *Stream_Purge_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []jetstream.StreamPurgeOpt
 		variadicArgs := make([]jetstream.StreamPurgeOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.StreamPurgeOpt)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -971,15 +1139,26 @@ type Stream_PushConsumer_Call struct {
 }
 
 // PushConsumer is a helper method to define mock.On call
-//   - ctx
-//   - consumer
-func (_e *Stream_Expecter) PushConsumer(ctx interface{}, consumer interface{}) *Stream_PushConsumer_Call {
+//   - ctx context.Context
+//   - consumer string
+func (_e *Stream_Expecter) PushConsumer(ctx any, consumer any) *Stream_PushConsumer_Call {
 	return &Stream_PushConsumer_Call{Call: _e.mock.On("PushConsumer", ctx, consumer)}
 }
 
 func (_c *Stream_PushConsumer_Call) Run(run func(ctx context.Context, consumer string)) *Stream_PushConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1028,15 +1207,26 @@ type Stream_ResetConsumer_Call struct {
 }
 
 // ResetConsumer is a helper method to define mock.On call
-//   - ctx
-//   - consumer
-func (_e *Stream_Expecter) ResetConsumer(ctx interface{}, consumer interface{}) *Stream_ResetConsumer_Call {
+//   - ctx context.Context
+//   - consumer string
+func (_e *Stream_Expecter) ResetConsumer(ctx any, consumer any) *Stream_ResetConsumer_Call {
 	return &Stream_ResetConsumer_Call{Call: _e.mock.On("ResetConsumer", ctx, consumer)}
 }
 
 func (_c *Stream_ResetConsumer_Call) Run(run func(ctx context.Context, consumer string)) *Stream_ResetConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1085,16 +1275,32 @@ type Stream_ResetConsumerToSequence_Call struct {
 }
 
 // ResetConsumerToSequence is a helper method to define mock.On call
-//   - ctx
-//   - consumer
-//   - seq
-func (_e *Stream_Expecter) ResetConsumerToSequence(ctx interface{}, consumer interface{}, seq interface{}) *Stream_ResetConsumerToSequence_Call {
+//   - ctx context.Context
+//   - consumer string
+//   - seq uint64
+func (_e *Stream_Expecter) ResetConsumerToSequence(ctx any, consumer any, seq any) *Stream_ResetConsumerToSequence_Call {
 	return &Stream_ResetConsumerToSequence_Call{Call: _e.mock.On("ResetConsumerToSequence", ctx, consumer, seq)}
 }
 
 func (_c *Stream_ResetConsumerToSequence_Call) Run(run func(ctx context.Context, consumer string, seq uint64)) *Stream_ResetConsumerToSequence_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(uint64))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 uint64
+		if args[2] != nil {
+			arg2 = args[2].(uint64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -1143,15 +1349,26 @@ type Stream_ResumeConsumer_Call struct {
 }
 
 // ResumeConsumer is a helper method to define mock.On call
-//   - ctx
-//   - consumer
-func (_e *Stream_Expecter) ResumeConsumer(ctx interface{}, consumer interface{}) *Stream_ResumeConsumer_Call {
+//   - ctx context.Context
+//   - consumer string
+func (_e *Stream_Expecter) ResumeConsumer(ctx any, consumer any) *Stream_ResumeConsumer_Call {
 	return &Stream_ResumeConsumer_Call{Call: _e.mock.On("ResumeConsumer", ctx, consumer)}
 }
 
 func (_c *Stream_ResumeConsumer_Call) Run(run func(ctx context.Context, consumer string)) *Stream_ResumeConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1189,15 +1406,26 @@ type Stream_SecureDeleteMsg_Call struct {
 }
 
 // SecureDeleteMsg is a helper method to define mock.On call
-//   - ctx
-//   - seq
-func (_e *Stream_Expecter) SecureDeleteMsg(ctx interface{}, seq interface{}) *Stream_SecureDeleteMsg_Call {
+//   - ctx context.Context
+//   - seq uint64
+func (_e *Stream_Expecter) SecureDeleteMsg(ctx any, seq any) *Stream_SecureDeleteMsg_Call {
 	return &Stream_SecureDeleteMsg_Call{Call: _e.mock.On("SecureDeleteMsg", ctx, seq)}
 }
 
 func (_c *Stream_SecureDeleteMsg_Call) Run(run func(ctx context.Context, seq uint64)) *Stream_SecureDeleteMsg_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint64))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint64
+		if args[1] != nil {
+			arg1 = args[1].(uint64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1235,16 +1463,32 @@ type Stream_UnpinConsumer_Call struct {
 }
 
 // UnpinConsumer is a helper method to define mock.On call
-//   - ctx
-//   - consumer
-//   - group
-func (_e *Stream_Expecter) UnpinConsumer(ctx interface{}, consumer interface{}, group interface{}) *Stream_UnpinConsumer_Call {
+//   - ctx context.Context
+//   - consumer string
+//   - group string
+func (_e *Stream_Expecter) UnpinConsumer(ctx any, consumer any, group any) *Stream_UnpinConsumer_Call {
 	return &Stream_UnpinConsumer_Call{Call: _e.mock.On("UnpinConsumer", ctx, consumer, group)}
 }
 
 func (_c *Stream_UnpinConsumer_Call) Run(run func(ctx context.Context, consumer string, group string)) *Stream_UnpinConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -1293,15 +1537,26 @@ type Stream_UpdateConsumer_Call struct {
 }
 
 // UpdateConsumer is a helper method to define mock.On call
-//   - ctx
-//   - cfg
-func (_e *Stream_Expecter) UpdateConsumer(ctx interface{}, cfg interface{}) *Stream_UpdateConsumer_Call {
+//   - ctx context.Context
+//   - cfg jetstream.ConsumerConfig
+func (_e *Stream_Expecter) UpdateConsumer(ctx any, cfg any) *Stream_UpdateConsumer_Call {
 	return &Stream_UpdateConsumer_Call{Call: _e.mock.On("UpdateConsumer", ctx, cfg)}
 }
 
 func (_c *Stream_UpdateConsumer_Call) Run(run func(ctx context.Context, cfg jetstream.ConsumerConfig)) *Stream_UpdateConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(jetstream.ConsumerConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 jetstream.ConsumerConfig
+		if args[1] != nil {
+			arg1 = args[1].(jetstream.ConsumerConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1350,15 +1605,26 @@ type Stream_UpdatePushConsumer_Call struct {
 }
 
 // UpdatePushConsumer is a helper method to define mock.On call
-//   - ctx
-//   - cfg
-func (_e *Stream_Expecter) UpdatePushConsumer(ctx interface{}, cfg interface{}) *Stream_UpdatePushConsumer_Call {
+//   - ctx context.Context
+//   - cfg jetstream.ConsumerConfig
+func (_e *Stream_Expecter) UpdatePushConsumer(ctx any, cfg any) *Stream_UpdatePushConsumer_Call {
 	return &Stream_UpdatePushConsumer_Call{Call: _e.mock.On("UpdatePushConsumer", ctx, cfg)}
 }
 
 func (_c *Stream_UpdatePushConsumer_Call) Run(run func(ctx context.Context, cfg jetstream.ConsumerConfig)) *Stream_UpdatePushConsumer_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(jetstream.ConsumerConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 jetstream.ConsumerConfig
+		if args[1] != nil {
+			arg1 = args[1].(jetstream.ConsumerConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

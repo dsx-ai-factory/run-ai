@@ -45,7 +45,7 @@ Shared targets come from `../../build/makefile/control-plane.mk` and
   in the make call (token applied elsewhere).
 - **Config model:** config-file driven (registered typed sections with per-section
   defaults). Keys are flat; any key is overridable by its uppercase env-var name.
-  No checked-in sample config; DB keys come from shared `dao-utils`. See README.
+  No checked-in sample config; DB keys come from shared `runaidb`. See README.
 - **Client:** versioned Go client is the separate `control-plane/org-unit-service/pkg/client`
   module, not `pkg/client/`.
 

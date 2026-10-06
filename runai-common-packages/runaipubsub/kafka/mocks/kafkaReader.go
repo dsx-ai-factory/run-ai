@@ -20,10 +20,19 @@ func NewMockkafkaReader(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockkafkaReader {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockkafkaReader{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -88,11 +97,11 @@ func (_c *MockkafkaReader_Close_Call) RunAndReturn(run func() error) *MockkafkaR
 // CommitMessages provides a mock function for the type MockkafkaReader
 func (_mock *MockkafkaReader) CommitMessages(ctx context.Context, msgs ...kafka.Message) error {
 	// kafka.Message
-	_va := make([]interface{}, len(msgs))
+	_va := make([]any, len(msgs))
 	for _i := range msgs {
 		_va[_i] = msgs[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -116,22 +125,31 @@ type MockkafkaReader_CommitMessages_Call struct {
 }
 
 // CommitMessages is a helper method to define mock.On call
-//   - ctx
-//   - msgs
-func (_e *MockkafkaReader_Expecter) CommitMessages(ctx interface{}, msgs ...interface{}) *MockkafkaReader_CommitMessages_Call {
+//   - ctx context.Context
+//   - msgs ...kafka.Message
+func (_e *MockkafkaReader_Expecter) CommitMessages(ctx any, msgs ...any) *MockkafkaReader_CommitMessages_Call {
 	return &MockkafkaReader_CommitMessages_Call{Call: _e.mock.On("CommitMessages",
-		append([]interface{}{ctx}, msgs...)...)}
+		append([]any{ctx}, msgs...)...)}
 }
 
 func (_c *MockkafkaReader_CommitMessages_Call) Run(run func(ctx context.Context, msgs ...kafka.Message)) *MockkafkaReader_CommitMessages_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []kafka.Message
 		variadicArgs := make([]kafka.Message, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(kafka.Message)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -178,14 +196,20 @@ type MockkafkaReader_FetchMessage_Call struct {
 }
 
 // FetchMessage is a helper method to define mock.On call
-//   - ctx
-func (_e *MockkafkaReader_Expecter) FetchMessage(ctx interface{}) *MockkafkaReader_FetchMessage_Call {
+//   - ctx context.Context
+func (_e *MockkafkaReader_Expecter) FetchMessage(ctx any) *MockkafkaReader_FetchMessage_Call {
 	return &MockkafkaReader_FetchMessage_Call{Call: _e.mock.On("FetchMessage", ctx)}
 }
 
 func (_c *MockkafkaReader_FetchMessage_Call) Run(run func(ctx context.Context)) *MockkafkaReader_FetchMessage_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

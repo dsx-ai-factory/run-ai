@@ -10,6 +10,9 @@ That is the most common way a docs PR breaks the published site, so it gets its
 own fast, dependency-free check.
 
 Paths are resolved relative to the file that declares them, matching Fern.
+Nav files referenced from a scanned config are scanned too, so superseded
+versions under fern/versions/ are checked once they are materialized (run
+tools/materialize-fern-versions.sh first).
 
 Usage:
     tools/check-fern-nav.py [FERN_DIR]      # default: ./fern
@@ -41,10 +44,17 @@ def config_files(fern_dir: str) -> list[str]:
     return found
 
 
-def collect_refs(files: list[str]) -> dict[str, list[str]]:
-    """Map each resolved path -> the config files that reference it."""
+def collect_refs(files: list[str]) -> tuple[dict[str, list[str]], int]:
+    """Map each resolved path -> the config files that reference it.
+
+    Referenced nav files (`.yml`) are followed, which is how version nav files
+    outside fern/products/ get scanned. Also returns how many configs were read.
+    """
     refs: dict[str, list[str]] = collections.defaultdict(list)
-    for config in files:
+    queue = [os.path.normpath(f) for f in files]
+    seen = set(queue)
+    while queue:
+        config = queue.pop(0)
         base = os.path.dirname(config)
         with open(config, encoding="utf-8") as handle:
             for line in handle:
@@ -56,7 +66,14 @@ def collect_refs(files: list[str]) -> dict[str, list[str]]:
                 value = match.group("value").strip("\"'")
                 resolved = os.path.normpath(os.path.join(base, value))
                 refs[resolved].append(config)
-    return refs
+                if (
+                    resolved.endswith((".yml", ".yaml"))
+                    and resolved not in seen
+                    and os.path.isfile(resolved)
+                ):
+                    seen.add(resolved)
+                    queue.append(resolved)
+    return refs, len(seen)
 
 
 def main(argv: list[str]) -> int:
@@ -70,10 +87,10 @@ def main(argv: list[str]) -> int:
         print(f"error: no Fern config files found under {fern_dir}", file=sys.stderr)
         return 2
 
-    refs = collect_refs(files)
+    refs, scanned = collect_refs(files)
     missing = {path: srcs for path, srcs in refs.items() if not os.path.exists(path)}
 
-    print(f"scanned {len(files)} config file(s)")
+    print(f"scanned {scanned} config file(s)")
     print(f"unique path refs : {len(refs)}")
     print(f"resolve OK       : {len(refs) - len(missing)}")
     print(f"MISSING          : {len(missing)}")
@@ -92,6 +109,14 @@ def main(argv: list[str]) -> int:
     for path in sorted(missing)[:20]:
         declared_in = sorted({os.path.basename(s) for s in missing[path]})
         print(f"  {path}   (referenced by {', '.join(declared_in)})")
+
+    versions_dir = os.path.join(os.path.normpath(fern_dir), "versions") + os.sep
+    if any(path.startswith(versions_dir) for path in missing):
+        print(
+            f"\nPaths under {versions_dir} are generated from release branches: run "
+            "tools/materialize-fern-versions.sh --fetch, then re-check.",
+            file=sys.stderr,
+        )
 
     print(
         "\nEvery nav entry must point at a file that exists. Either add the missing "

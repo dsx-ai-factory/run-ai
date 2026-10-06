@@ -110,7 +110,7 @@ Suites live next to the code (`pkg/**/*_test.go`, `suite_test.go`). DB-backed su
 
 ## Configuration
 
-Configuration is **environment-variable driven**. Application settings are registered from the `ServerConfig` / `ServicesConfig` structs in [`pkg/config/config.go`](pkg/config/config.go) (each field's env-var name is the uppercase form of its key); database settings come from the shared `dao-utils` `DB_*` variables. Defaults come from each struct's `SetDefaults()`.
+Configuration is **environment-variable driven**. Application settings are registered from the `ServerConfig` / `ServicesConfig` structs in [`pkg/config/config.go`](pkg/config/config.go) (each field's env-var name is the uppercase form of its key); database settings come from the shared `runaidb` `DB_*` variables. Defaults come from each struct's `SetDefaults()`.
 
 **Application:**
 
@@ -129,7 +129,7 @@ Configuration is **environment-variable driven**. Application settings are regis
 | `PUBSUB_ENABLED` | Enable publishing change events | — |
 | `SECRETS_MOUNT_PATH` | Directory holding mounted secret files | — |
 
-**Database** (via `dao-utils`):
+**Database** (via `runaidb`):
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -140,10 +140,10 @@ Configuration is **environment-variable driven**. Application settings are regis
 | `DB_USER` | Database user | — |
 | `DB_PASSWORD` | Database password | — |
 | `DB_SSL_MODE` | SSL mode (`disable`/`require`/…) | — |
-| `MIGRATION_FILES` | Migration source URL (e.g. `file://.../migrations`) | — |
+| `DB_MIGRATION_FILES` | Migration source URL (e.g. `file://.../migrations`) | — |
 | `SERVICE_NAME` | Service name used by the DB layer | `policy-service` |
 
-(`dao-utils` also honors optional `DB_READ_HOST`/`DB_READ_PORT`, `STATEMENT_TIMEOUT`, `MAX_CONNECTIONS`, and related tuning variables.)
+(`runaidb` also honors optional `DB_READ_HOST`/`DB_READ_PORT`, `DB_STATEMENT_TIMEOUT`, `DB_MAX_CONNECTIONS`, and related tuning variables.)
 
 ## OpenAPI and code generation
 

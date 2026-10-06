@@ -7,6 +7,7 @@ package submit_test
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -276,26 +277,18 @@ var _ = Describe("Submit Test Dry Run", Ordered, func() {
 			Expect(podFieldRef.PodFieldRef.Get().GetPath()).To(Equal(fieldRefValue))
 		})
 
-		It("verify args value with different quotes set", func() {
-			commandStr := fmt.Sprintf("mpi submit test1 -p test -i ubuntu --dry-run -- 'test --bla=\"test2 desc\"'")
-			output, err := cli.RunCommand(commandStr, envMap)
+		It("preserves literal single quotes in args", func() {
+			commandArgs := []string{
+				"mpi", "submit", "quote-test", "-p", "test", "-i", "ubuntu", "--dry-run", "--",
+				"sh", "-c", "echo 'value is $HOME'",
+			}
+			output, err := cli.RunCommandStringSplit(context.Background(), commandArgs, envMap)
 			Expect(err).To(BeNil())
-			workspace1 := openapi.Workspace{}
-			err = json.Unmarshal([]byte(output), &workspace1)
+			workspace := openapi.Workspace{}
+			err = json.Unmarshal([]byte(output), &workspace)
 			Expect(err).To(BeNil())
-			Expect(workspace1.HasSpec()).To(Equal(true))
-
-			commandStr = fmt.Sprintf("mpi submit test2 -p test -i ubuntu --dry-run -- \"test --bla='test2 desc'\"")
-			output, err = cli.RunCommand(commandStr, envMap)
-			Expect(err).To(BeNil())
-			workspace2 := openapi.Workspace{}
-			err = json.Unmarshal([]byte(output), &workspace2)
-			Expect(err).To(BeNil())
-			Expect(workspace2.HasSpec()).To(Equal(true))
-
-			Expect(*workspace2.Spec.Args.Get()).To(Equal(*workspace1.Spec.Args.Get()))
-			Expect(*workspace2.Spec.Annotations[0].Value.Get()).ToNot(Equal(*workspace1.Spec.Annotations[0].Value.Get()))
-			Expect(*workspace2.Spec.Args.Get()).To(Equal("\"test --bla=\"test2 desc\"\""))
+			Expect(workspace.HasSpec()).To(BeTrue())
+			Expect(*workspace.Spec.Args.Get()).To(Equal(`sh -c "echo 'value is $HOME'"`))
 		})
 	})
 

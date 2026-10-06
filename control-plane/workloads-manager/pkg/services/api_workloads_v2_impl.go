@@ -1210,8 +1210,6 @@ func (w *WorkloadsV2Impl) inferProjectFromClusterAndNamespace(ctx context.Contex
 }
 
 // UpdateWorkloadNetworkingConfig updates only the networking configuration of a workload record.
-// Called after UpdateWorkloadV2 when the NIM service serving port changes, so the networking plugin
-// on the cluster receives the updated Ingress/Route spec.
 func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, workloadId string, netCfg *[]api.NetworkingEndpoint) *api.Error {
 	permittedScopes, _ := authClient.ParsePermittedScopes(ctx)
 	qRecord, dbErr := dao.DbGetWorkload(ctx, workloadId, permittedScopes)
@@ -1247,6 +1245,9 @@ func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, wo
 func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId string, workloadName string, netCfg *[]api.NetworkingEndpoint, profile api.NetworkingSubmissionProfile) *api.SubmissionErrorV2 {
 	if netCfg == nil {
 		return nil
+	}
+	if err := validateNetworkingEndpoints(*netCfg); err != nil {
+		return err
 	}
 
 	capChecker := checker.NewClusterCapabilitiesChecker(clusterId)
@@ -1286,6 +1287,36 @@ func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId strin
 		return NewConfigurationError(fmt.Sprintf("metadata.configuration.networking includes values that require cluster version %s and above: %v", minVersion, err))
 	}
 
+	return nil
+}
+
+// validateNetworkingEndpoints rejects malformed endpoint structures before queueing.
+// Generated decoding allows null array entries, and runaihttp's item-count helpers
+// do not enforce bounds on pointer-backed slices.
+func validateNetworkingEndpoints(endpoints []api.NetworkingEndpoint) *api.SubmissionErrorV2 {
+	for i, endpoint := range endpoints {
+		field := fmt.Sprintf("metadata.configuration.networking[%d]", i)
+		hasService := endpoint.Services != nil && len(*endpoint.Services) > 0
+		access := endpoint.ExternalAccess
+		hasExposure := access != nil && (access.Ingress != nil || access.Route != nil || access.HttpRoute != nil)
+		if !hasService && !hasExposure {
+			return NewConfigurationError(field + " must contain a service or externalAccess with an Ingress, Route, or HTTPRoute")
+		}
+		if endpoint.Services == nil {
+			continue
+		}
+		if len(*endpoint.Services) > 1 {
+			return NewConfigurationError(field + ".services must contain at most one service")
+		}
+		for j, service := range *endpoint.Services {
+			switch {
+			case service.Spec == nil && service.Ref == nil:
+				return NewConfigurationError(fmt.Sprintf("%s.services[%d] must contain spec or ref", field, j))
+			case service.Spec != nil && service.Ref != nil:
+				return NewConfigurationError(fmt.Sprintf("%s.services[%d] must not contain both spec and ref", field, j))
+			}
+		}
+	}
 	return nil
 }
 
