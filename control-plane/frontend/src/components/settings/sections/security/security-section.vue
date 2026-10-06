@@ -10,6 +10,7 @@
     :subheader="sectionSubHeader"
     :section-invalid="isCertificateExpired"
     :section-warning="isCertificateExpiringSoon"
+    show-status-icon-when-open
     @show="() => initializeSecuritySettings(true)"
   >
     <sso-settings v-if="settings" v-model:settings="settings" @certificate-status="onCertificateStatus" />
