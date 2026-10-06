@@ -65,6 +65,10 @@ func TestParseSettings(t *testing.T) {
 		{name: "wrong list type", knobs: map[string]any{"workloads": "many"}, wantErr: "must be a list"},
 		{name: "slo not a number", knobs: map[string]any{"slo": map[string]any{"p90_ms": "5s"}}, wantErr: `entry "p90_ms" must be a whole number`},
 		{name: "slo nested", knobs: map[string]any{"slo": map[string]any{"tiers": map[string]any{"gold": 1}}}, wantErr: `entry "tiers" must be a whole number`},
+		{name: "slo of another suite", knobs: map[string]any{"slo": map[string]any{"ttj_p90_ms": 10000}}, wantErr: `slo key "ttj_p90_ms" is not a latency this suite reports; use one of p50_ms, p90_ms, p99_ms, mean_ms, max_ms`},
+		{name: "slo on a count", knobs: map[string]any{"slo": map[string]any{"never_arrived_count": 0}}, wantErr: `slo key "never_arrived_count" is not a latency`},
+		{name: "slo on p99 and max", knobs: map[string]any{"slo": map[string]any{"p99_ms": 9000, "max_ms": 20000}},
+			want: settings{rounds: []int{100, 250, 500}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p99_ms": 9000, "max_ms": 20000}}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -241,6 +242,22 @@ const (
 	maxRequestsPerSecond = 1000
 )
 
+var (
+	spanNames    = []string{"api_accepted", "cluster_synced", "pod_created", "ttj"}
+	latencyStats = []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms"}
+	sloKeys      = latencySLOKeys()
+)
+
+func latencySLOKeys() []string {
+	keys := make([]string, 0, len(spanNames)*len(latencyStats))
+	for _, span := range spanNames {
+		for _, stat := range latencyStats {
+			keys = append(keys, span+"_"+stat)
+		}
+	}
+	return keys
+}
+
 var knownKnobs = []string{"users", "rate", "duration", "workloadType", "image", "timeout", "setupTimeout", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "cluster", "slo"}
 
 type options struct {
@@ -315,6 +332,12 @@ func parseOptions(scenario core.Scenario) (options, error) {
 	}
 	if opts.slo, err = wholeNumbers("slo", slo); err != nil {
 		return options{}, err
+	}
+	for key := range opts.slo {
+		if !slices.Contains(sloKeys, key) {
+			return options{}, fmt.Errorf("slo key %q is not a latency this suite reports; use <span>_<stat> with span %s and stat %s",
+				key, strings.Join(spanNames, ", "), strings.Join(latencyStats, ", "))
+		}
 	}
 	return opts, nil
 }

@@ -6,7 +6,7 @@ require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/avast/retry-go/v4 v4.7.0
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.10
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.3
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.0
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.20
 	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.6
