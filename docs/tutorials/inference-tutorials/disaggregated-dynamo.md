@@ -31,13 +31,7 @@ The following steps must be performed by your administrator.
     export NAMESPACE=dynamo-system
     export RELEASE_VERSION=1.4.2
     ```
-2.  Install CRDs:
-
-    ```bash
-    helm fetch https://helm.ngc.nvidia.com/nvidia/ai-dynamo/charts/dynamo-crds-${RELEASE_VERSION}.tgz
-    helm install dynamo-crds dynamo-crds-${RELEASE_VERSION}.tgz --namespace default
-    ```
-3.  Install the Dynamo platform:
+2.  Install the Dynamo platform:
 
     ```bash
     helm fetch https://helm.ngc.nvidia.com/nvidia/ai-dynamo/charts/dynamo-platform-${RELEASE_VERSION}.tgz
