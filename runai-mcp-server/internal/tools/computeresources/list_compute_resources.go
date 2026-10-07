@@ -156,20 +156,22 @@ func listComputeResourcesRun(ctx context.Context, client *runaiclient.Client, in
 		if !ok {
 			return listComputeResourcesOutput{}, fmt.Errorf("list compute resources: entry %d must be an object: %w", i, runaimcp.ErrUpstream)
 		}
-		id, name, scope, err := computeResourceIdentity(entry)
+		identity, err := computeResourceIdentity(entry)
 		if err != nil {
 			return listComputeResourcesOutput{}, fmt.Errorf("list compute resources: entry %d: %w", i, err)
 		}
-		if in.ComputeResourceID != "" && !strings.EqualFold(id, in.ComputeResourceID) {
+		if in.ComputeResourceID != "" && !strings.EqualFold(identity.id, in.ComputeResourceID) {
 			continue
 		}
-		if in.Name != "" && name != in.Name {
+		if in.Name != "" && identity.name != in.Name {
 			continue
 		}
-		if in.Scope != "" && !computeResourceMatchesScope(scope, in.Scope) {
+		if in.Scope != "" && !computeResourceMatchesScope(identity.scope, in.Scope) {
 			continue
 		}
-		matched = append(matched, rawComputeResourceListItem{id: id, name: name, scope: scope, raw: entry})
+		matched = append(matched, rawComputeResourceListItem{
+			id: identity.id, name: identity.name, scope: identity.scope, raw: entry,
+		})
 	}
 
 	page, hasMore, nextOffset := common.Paginate(matched, in.Offset, common.EffectiveLimit(in.Limit))

@@ -937,7 +937,7 @@ func TestComputeResourceUpdateSnapshotRejectsMissingSpec(t *testing.T) {
 func TestComputeResourceIdentityRejectsMalformedID(t *testing.T) {
 	response := computeResourceResponse("not-a-uuid", "gpu-small", "tenant", map[string]any{})
 
-	_, _, _, err := computeResourceIdentity(response)
+	_, err := computeResourceIdentity(response)
 	require.Error(t, err)
 	assert.ErrorIs(t, err, runaimcp.ErrUpstream)
 	assert.Contains(t, err.Error(), "meta.id must be a UUID")
@@ -947,7 +947,7 @@ func TestComputeResourceIdentityRejectsWrongKind(t *testing.T) {
 	response := computeResourceResponse(testComputeResourceID, "gpu-small", "tenant", map[string]any{})
 	response["meta"].(map[string]any)["kind"] = "environment"
 
-	_, _, _, err := computeResourceIdentity(response)
+	_, err := computeResourceIdentity(response)
 	require.Error(t, err)
 	assert.ErrorIs(t, err, runaimcp.ErrUpstream)
 	assert.Contains(t, err.Error(), "kind must be")
@@ -971,7 +971,7 @@ func TestComputeResourceIdentityRejectsMalformedScopeMetadata(t *testing.T) {
 			response := computeResourceResponse(testComputeResourceID, "gpu-small", test.scope, map[string]any{})
 			test.mutate(response["meta"].(map[string]any))
 
-			_, _, _, err := computeResourceIdentity(response)
+			_, err := computeResourceIdentity(response)
 			require.Error(t, err)
 			assert.ErrorIs(t, err, runaimcp.ErrUpstream)
 			assert.Contains(t, err.Error(), test.want)

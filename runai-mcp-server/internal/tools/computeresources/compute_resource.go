@@ -148,73 +148,78 @@ func isValidComputeResourceFingerprint(value string) bool {
 	return err == nil && len(decoded) == sha256.Size && computeResourceFingerprintPrefix+hex.EncodeToString(decoded) == value
 }
 
-func computeResourceIdentity(raw map[string]any) (id, name, scope string, err error) {
+type resourceIdentity struct {
+	id    string
+	name  string
+	scope string
+}
+
+func computeResourceIdentity(raw map[string]any) (resourceIdentity, error) {
 	meta, err := computeResourceMeta(raw)
 	if err != nil {
-		return "", "", "", err
+		return resourceIdentity{}, err
 	}
-	id, err = computeResourceMetaString(meta, "id")
+	id, err := computeResourceMetaString(meta, "id")
 	if err != nil {
-		return "", "", "", err
+		return resourceIdentity{}, err
 	}
 	if err := common.ValidateUUID("meta.id", id); err != nil {
-		return "", "", "", fmt.Errorf("compute resource response: %w: %w", err, runaimcp.ErrUpstream)
+		return resourceIdentity{}, fmt.Errorf("compute resource response: %w: %w", err, runaimcp.ErrUpstream)
 	}
 	kind, err := computeResourceMetaString(meta, "kind")
 	if err != nil {
-		return "", "", "", err
+		return resourceIdentity{}, err
 	}
 	if assets.AssetKind(kind) != assets.ASSETKIND_COMPUTE {
-		return "", "", "", fmt.Errorf("compute resource response kind must be %q (got %q): %w",
+		return resourceIdentity{}, fmt.Errorf("compute resource response kind must be %q (got %q): %w",
 			assets.ASSETKIND_COMPUTE, kind, runaimcp.ErrUpstream)
 	}
-	name, err = computeResourceMetaString(meta, "name")
+	name, err := computeResourceMetaString(meta, "name")
 	if err != nil {
-		return "", "", "", err
+		return resourceIdentity{}, err
 	}
-	scope, err = computeResourceMetaString(meta, computeResourceScopeField)
+	scope, err := computeResourceMetaString(meta, computeResourceScopeField)
 	if err != nil {
-		return "", "", "", err
+		return resourceIdentity{}, err
 	}
 	switch assets.Scope(scope) {
 	case assets.SCOPE_SYSTEM, assets.SCOPE_TENANT:
 	case assets.SCOPE_CLUSTER:
 		clusterID, err := computeResourceMetaString(meta, computeResourceClusterIDField)
 		if err != nil {
-			return "", "", "", err
+			return resourceIdentity{}, err
 		}
 		if err := common.ValidateUUID("meta.clusterId", clusterID); err != nil {
-			return "", "", "", fmt.Errorf("compute resource response: %w: %w", err, runaimcp.ErrUpstream)
+			return resourceIdentity{}, fmt.Errorf("compute resource response: %w: %w", err, runaimcp.ErrUpstream)
 		}
 	case assets.SCOPE_DEPARTMENT:
 		if _, err := computeResourceMetaString(meta, computeResourceDepartmentIDField); err != nil {
-			return "", "", "", err
+			return resourceIdentity{}, err
 		}
 	case assets.SCOPE_PROJECT:
 		if projectID, ok := numberAsPositiveInt32(meta[computeResourceProjectIDField]); !ok || projectID <= 0 {
-			return "", "", "", fmt.Errorf("compute resource response meta.projectId must be a positive 32-bit integer: %w", runaimcp.ErrUpstream)
+			return resourceIdentity{}, fmt.Errorf("compute resource response meta.projectId must be a positive 32-bit integer: %w", runaimcp.ErrUpstream)
 		}
 	default:
-		return "", "", "", fmt.Errorf("compute resource response has invalid scope %q: %w", scope, runaimcp.ErrUpstream)
+		return resourceIdentity{}, fmt.Errorf("compute resource response has invalid scope %q: %w", scope, runaimcp.ErrUpstream)
 	}
 	if private, exists := meta["private"]; exists && private == true {
-		return "", "", "", fmt.Errorf("compute resource response must not be private: %w", runaimcp.ErrUpstream)
+		return resourceIdentity{}, fmt.Errorf("compute resource response must not be private: %w", runaimcp.ErrUpstream)
 	}
 	if description, exists := meta["description"]; exists && description != nil {
 		value, ok := description.(string)
 		if !ok || len(value) == 0 || len(value) > 250 {
-			return "", "", "", fmt.Errorf("compute resource response description must contain between 1 and 250 UTF-8 bytes: %w", runaimcp.ErrUpstream)
+			return resourceIdentity{}, fmt.Errorf("compute resource response description must contain between 1 and 250 UTF-8 bytes: %w", runaimcp.ErrUpstream)
 		}
 	}
-	return id, name, scope, nil
+	return resourceIdentity{id: id, name: name, scope: scope}, nil
 }
 
 func computeResourceMeta(raw map[string]any) (map[string]any, error) {
-	meta, ok := raw["meta"].(map[string]any)
-	if !ok || meta == nil {
-		return nil, fmt.Errorf("compute resource response meta must be an object: %w", runaimcp.ErrUpstream)
+	if meta, ok := raw["meta"].(map[string]any); ok && meta != nil {
+		return meta, nil
 	}
-	return meta, nil
+	return nil, fmt.Errorf("compute resource response meta must be an object: %w", runaimcp.ErrUpstream)
 }
 
 func computeResourceMetaString(meta map[string]any, field string) (string, error) {

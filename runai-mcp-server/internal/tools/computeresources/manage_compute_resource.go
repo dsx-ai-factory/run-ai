@@ -169,15 +169,15 @@ func getComputeResource(
 	if err != nil {
 		return computeResourceMutationTarget{}, err
 	}
-	actualID, name, scope, err := computeResourceIdentity(raw)
+	identity, err := computeResourceIdentity(raw)
 	if err != nil {
 		return computeResourceMutationTarget{}, fmt.Errorf("get compute resource %q: %w", id, err)
 	}
-	if !strings.EqualFold(actualID, id) {
-		return computeResourceMutationTarget{}, fmt.Errorf("get compute resource %q returned id %q: %w", id, actualID, runaimcp.ErrUpstream)
+	if !strings.EqualFold(identity.id, id) {
+		return computeResourceMutationTarget{}, fmt.Errorf("get compute resource %q returned id %q: %w", id, identity.id, runaimcp.ErrUpstream)
 	}
-	target := computeResourceMutationTarget{name: name, scope: scope, raw: raw}
-	if !prepareUpdate || scope == string(assets.SCOPE_SYSTEM) {
+	target := computeResourceMutationTarget{name: identity.name, scope: identity.scope, raw: raw}
+	if !prepareUpdate || identity.scope == string(assets.SCOPE_SYSTEM) {
 		return target, nil
 	}
 	updateRequest, fingerprint, err := computeResourceUpdateSnapshot(raw)
@@ -205,23 +205,23 @@ func createComputeResource(ctx context.Context, client *runaiclient.Client, in m
 	if err != nil {
 		return manageComputeResourceOutput{}, err
 	}
-	id, name, scope, err := computeResourceIdentity(raw)
+	identity, err := computeResourceIdentity(raw)
 	if err != nil {
 		return manageComputeResourceOutput{}, err
 	}
-	if name != request.Meta.Name {
+	if identity.name != request.Meta.Name {
 		return manageComputeResourceOutput{}, fmt.Errorf("create compute resource %q returned name %q: %w",
-			request.Meta.Name, name, runaimcp.ErrUpstream)
+			request.Meta.Name, identity.name, runaimcp.ErrUpstream)
 	}
-	if scope != string(request.Meta.Scope) {
+	if identity.scope != string(request.Meta.Scope) {
 		return manageComputeResourceOutput{}, fmt.Errorf("create compute resource %q returned scope %q instead of %q: %w",
-			request.Meta.Name, scope, request.Meta.Scope, runaimcp.ErrUpstream)
+			request.Meta.Name, identity.scope, request.Meta.Scope, runaimcp.ErrUpstream)
 	}
 	if err := validateCreatedComputeResourceScope(in.Request, raw); err != nil {
 		return manageComputeResourceOutput{}, fmt.Errorf("create compute resource %q: %w", request.Meta.Name, err)
 	}
-	out.ComputeResourceID = id
-	out.Name = name
+	out.ComputeResourceID = identity.id
+	out.Name = identity.name
 	out.After = raw
 	out.Diff = common.DiffMaps(nil, out.After)
 	out.Applied = true
@@ -266,26 +266,26 @@ func updateComputeResource(ctx context.Context, client *runaiclient.Client, in m
 	if err != nil {
 		return manageComputeResourceOutput{}, err
 	}
-	updatedID, name, scope, err := computeResourceIdentity(raw)
+	identity, err := computeResourceIdentity(raw)
 	if err != nil {
 		return manageComputeResourceOutput{}, err
 	}
-	if !strings.EqualFold(updatedID, in.ComputeResourceID) {
+	if !strings.EqualFold(identity.id, in.ComputeResourceID) {
 		return manageComputeResourceOutput{}, fmt.Errorf("update compute resource %q returned id %q: %w",
-			in.ComputeResourceID, updatedID, runaimcp.ErrUpstream)
+			in.ComputeResourceID, identity.id, runaimcp.ErrUpstream)
 	}
-	if name != request.Meta.Name {
+	if identity.name != request.Meta.Name {
 		return manageComputeResourceOutput{}, fmt.Errorf("update compute resource %q returned name %q instead of %q: %w",
-			in.ComputeResourceID, name, request.Meta.Name, runaimcp.ErrUpstream)
+			in.ComputeResourceID, identity.name, request.Meta.Name, runaimcp.ErrUpstream)
 	}
-	if scope != current.scope {
+	if identity.scope != current.scope {
 		return manageComputeResourceOutput{}, fmt.Errorf("update compute resource %q changed scope from %q to %q: %w",
-			in.ComputeResourceID, current.scope, scope, runaimcp.ErrUpstream)
+			in.ComputeResourceID, current.scope, identity.scope, runaimcp.ErrUpstream)
 	}
 	if err := validateUpdatedComputeResourceRequest(in.Request, raw); err != nil {
 		return manageComputeResourceOutput{}, fmt.Errorf("update compute resource %q: %w", in.ComputeResourceID, err)
 	}
-	out.Name = name
+	out.Name = identity.name
 	out.After = raw
 	out.Diff = common.DiffMaps(out.Before, out.After)
 	out.Applied = true

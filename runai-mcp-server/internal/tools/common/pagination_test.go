@@ -67,6 +67,13 @@ func TestPaginate(t *testing.T) {
 		assert.Zero(t, next)
 	})
 
+	t.Run("negative offset starts at zero", func(t *testing.T) {
+		page, hasMore, next := Paginate(items, -1, 2)
+		assert.Equal(t, []int{0, 1}, page)
+		assert.True(t, hasMore)
+		assert.Equal(t, int32(2), next)
+	})
+
 	t.Run("maximum offset cannot overflow", func(t *testing.T) {
 		page, hasMore, next := Paginate(items, math.MaxInt32, MaxLimit)
 		assert.NotNil(t, page)
