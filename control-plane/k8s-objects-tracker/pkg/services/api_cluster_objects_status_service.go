@@ -277,6 +277,9 @@ func appendObjectStatuses(ctx context.Context, tenantId int32, objectType string
 			if err != nil {
 				return api.NewError(http.StatusBadRequest, "invalid cluster ID format", err)
 			}
+			if clusterUuid == uuid.Nil {
+				return api.NewError(http.StatusBadRequest, "invalid cluster ID, should not be empty", nil)
+			}
 			filter.ClusterId = clusterUuid
 		case authorizationClient.SCOPETYPE_DEPARTMENT:
 			filter.DepartmentId = scopeQuery.ScopeId
