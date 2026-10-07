@@ -57,7 +57,9 @@ func (s *ResourceClaimTemplatesApiService) SyncProjectResourceClaimTemplates(ctx
 // name / origin. The ancestor + descendant toggles follow the same convention
 // as the PVC list endpoint so callers can collapse across the scope hierarchy
 // where needed.
-func (s *ResourceClaimTemplatesApiService) ListResourceClaimTemplates(ctx context.Context, scopeTypeStr string, scopeId string, name string, clusterId string, origin string, includeAncestors bool, includeDescendants bool) (api.ImplResponse, error) {
+func (s *ResourceClaimTemplatesApiService) ListResourceClaimTemplates(ctx context.Context, scopeTypeStr string,
+	scopeId string, name string, clusterId string, origin string, includeAncestors bool, includeDescendants bool,
+) (api.ImplResponse, error) {
 	tenantId, apiErr := common.TenantIdFromContext(ctx)
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
