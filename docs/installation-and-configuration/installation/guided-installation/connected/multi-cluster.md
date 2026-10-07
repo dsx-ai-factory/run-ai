@@ -69,7 +69,7 @@ For a control plane installation on Kubernetes, configure:
      - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
        - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
        - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
-     - Third-party services - Add the hardened image values for the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - Third-party services - Add the image pull secret, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
      - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
@@ -86,7 +86,7 @@ For a control plane installation on Kubernetes, configure:
          enabled: true
          telemetryAuth: # Optional
            token: <SERVICE_API_KEY>
-       # Gov-ready: add the hardened control plane image values, see Gov-Ready Third-Party Services
+       # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
        global:
          fipsMode: only # Gov-ready
    ```
@@ -122,7 +122,7 @@ controlPlane:
   version: ""
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
-    # Gov-ready: add the hardened control plane image values, see Gov-Ready Third-Party Services
+    # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
     global:
       fipsMode: only # Gov-ready
 
@@ -172,7 +172,7 @@ For a control plane installation on OpenShift, configure:
      - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
        - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
        - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
-     - Third-party services - Add the hardened image values for the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - Third-party services - Add the image pull secret, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
      - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
@@ -186,7 +186,7 @@ For a control plane installation on OpenShift, configure:
          enabled: true
          telemetryAuth: # Optional
            token: <SERVICE_API_KEY>
-       # Gov-ready: add the hardened control plane image values, see Gov-Ready Third-Party Services
+       # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
        global:
          fipsMode: only # Gov-ready
    ```
@@ -209,7 +209,7 @@ controlPlane:
   version: ""
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
-    # Gov-ready: add the hardened control plane image values, see Gov-Ready Third-Party Services
+    # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
     global:
       fipsMode: only # Gov-ready
 ```
@@ -298,7 +298,7 @@ For a cluster installation on Kubernetes, configure:
    - `cluster.tls` - A certificate and private key for the cluster domain, as `certPath` and `keyPath`. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates) for which certificate you need.
    - `cluster.version` - The cluster version to install. Omit it to install the latest supported version.
    - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
-     - Third-party services - Add the hardened image values for the cluster third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#cluster-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - Third-party services - Add the image pull secret and the hardened images of the cluster third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
      - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
@@ -316,7 +316,7 @@ For a cluster installation on Kubernetes, configure:
        keyPath: /path/to/cluster-a-key.pem
      version: "" # Omit to install the latest supported version
      customHelmValues:
-       # Gov-ready: add the hardened cluster image values, see Gov-Ready Third-Party Services
+       # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
        global:
          fipsMode: only # Gov-ready
    ```
@@ -393,7 +393,7 @@ cluster:
     keyPath: /path/to/cluster-a-key.pem
   version: ""
   customHelmValues:
-    # Gov-ready: add the hardened cluster image values, see Gov-Ready Third-Party Services
+    # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
     global:
       fipsMode: only # Gov-ready
 
@@ -451,7 +451,7 @@ For a cluster installation on OpenShift, configure:
    - `cluster.controlPlaneCredentials` - Identifies this cluster to the control plane. Use the control plane administrator username and password generated during control plane installation - the installer uses these to register the cluster and fetch its bootstrap token automatically, in the same run. See [Retrieve Control Plane Credentials](#retrieve-control-plane-credentials).
    - `cluster.version` - The cluster version to install. Omit it to install the latest supported version.
    - `cluster.customHelmValues` - Merges Helm values into the cluster chart, for settings not otherwise exposed by the installer. See [Advanced Cluster Configurations](../../../configuration/cluster-config.md) for the full set of keys.
-     - Third-party services - Add the hardened image values for the cluster third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#cluster-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - Third-party services - Add the image pull secret and the hardened images of the cluster third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
      - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
@@ -465,7 +465,7 @@ For a cluster installation on OpenShift, configure:
        passwordPath: /path/to/cp-password
      version: "" # Omit to install the latest supported version
      customHelmValues:
-       # Gov-ready: add the hardened cluster image values, see Gov-Ready Third-Party Services
+       # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
        global:
          fipsMode: only # Gov-ready
    ```
@@ -527,7 +527,7 @@ cluster:
     passwordPath: /path/to/cp-password
   version: ""
   customHelmValues:
-    # Gov-ready: add the hardened cluster image values, see Gov-Ready Third-Party Services
+    # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
     global:
       fipsMode: only # Gov-ready
 

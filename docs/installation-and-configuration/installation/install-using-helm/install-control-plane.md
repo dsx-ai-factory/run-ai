@@ -46,7 +46,7 @@ Use the Helm command for the release type you are installing and update the valu
   * **Lowercase Characters**: At least 1 lowercase letter (a-z).
   * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
   * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+* Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 * Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
@@ -139,7 +139,7 @@ Use the Helm command for the release type you are installing and update the valu
   * **Lowercase Characters**: At least 1 lowercase letter (a-z).
   * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
   * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Save the values that are not images, which are the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+* Save the external PostgreSQL connection and the Keycloak and NATS settings of the control plane third-party services in a values file, and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command, next to the `-f` of the generated values file. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 * Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
@@ -211,7 +211,7 @@ Use the Helm command for the release type you are installing and update the valu
   * **Lowercase Characters**: At least 1 lowercase letter (a-z).
   * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
   * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+* Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 * Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
@@ -303,7 +303,7 @@ Use the Helm command for the release type you are installing and update the valu
   * **Lowercase Characters**: At least 1 lowercase letter (a-z).
   * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
   * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Save the values that are not images, which are the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+* Save the external PostgreSQL connection and the Keycloak and NATS settings of the control plane third-party services in a values file, and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command, next to the `-f` of the generated values file. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 * Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**

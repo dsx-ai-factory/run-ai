@@ -82,7 +82,7 @@ For a same-cluster installation on Kubernetes, configure:
    - `controlPlane.tls` - The certificate and private key for the control plane FQDN, as `certPath` and `keyPath`. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
      - `supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
-     - Third-party services - Add the values that are not images to `controlPlane.customHelmValues`: the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - Third-party services - Add the external PostgreSQL connection and the Keycloak and NATS settings of the control plane third-party services. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
      - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml
@@ -238,7 +238,7 @@ For a same-cluster installation on OpenShift, configure:
    - `controlPlane.domain` - The FQDN for the NVIDIA Run:ai UI and API. See [Domains and TLS Certificates](preparations.md#domains-and-tls-certificates).
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
      - `supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
-     - Third-party services - Add the values that are not images to `controlPlane.customHelmValues`: the external PostgreSQL connection, the Keycloak start command and user, and the NATS command. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md#control-plane-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+     - Third-party services - Add the external PostgreSQL connection and the Keycloak and NATS settings of the control plane third-party services. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
      - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```yaml

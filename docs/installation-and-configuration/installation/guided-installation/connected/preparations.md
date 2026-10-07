@@ -68,7 +68,7 @@ kubectl create secret generic <SECRET_NAME> \
 
 **Gov-ready**
 
-A Gov-ready installation also pulls the hardened third-party images from Docker Hub, which requires a separate Docker Hub access token and image pull secret. Refer to [Providing Credentials](../../../system-requirements/gov-ready-third-party-services.md#providing-credentials) for how to create them.
+A Gov-ready installation also pulls the hardened third-party images from Docker Hub, which requires a separate Docker Hub access token and image pull secret. Refer to [Docker Hub Credentials](../../../system-requirements/gov-ready-third-party-services.md#docker-hub-credentials) for how to create them.
 
 </Note>
 
