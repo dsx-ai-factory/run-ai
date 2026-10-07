@@ -277,7 +277,7 @@ func parseOptions(scenario core.Scenario) (options, error) {
 	if opts.rate < 1 || opts.rate > maxRatePerSecond {
 		return options{}, fmt.Errorf("knob \"rate\" must be between 1 and %d submissions per second, got %d", maxRatePerSecond, opts.rate)
 	}
-	if opts.duration, err = scenario.Duration("duration", 5*time.Minute); err != nil {
+	if opts.duration, err = scenario.Duration("duration", 3*time.Minute); err != nil {
 		return options{}, err
 	}
 	if opts.workloadType, err = scenario.String("workloadType", submit.WorkspaceType); err != nil {

@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
 )
@@ -186,6 +187,21 @@ func TestSLOsApplyToAnyLatencyMetricWhileTheMedianStaysOnP90(t *testing.T) {
 	}
 }
 
+func TestARoundSLOOverridesTheBaseSLO(t *testing.T) {
+	section := core.Section{Category: core.CategoryScale,
+		Metrics: map[string]any{"p90_ms@100": 7000, "p90_ms@500": 50000, "max_ms@500": 70000},
+		SLO:     map[string]int{"p90_ms": 5000, "p90_ms@500": 60000, "max_ms": 10000},
+	}
+	judged := DetectRegressions(Build(map[string]core.Section{burstSection: section}, RunInfo{ClusterType: kindCluster}), nil, sevenNights)
+
+	if len(judged.Regressions) != 2 || judged.Regressions[0].Metric != "max_ms@500" || judged.Regressions[1].Metric != "p90_ms@100" {
+		t.Fatalf("round 100 breaks the base p90, round 500 is under its own p90 limit but over the base max: %+v", judged.Regressions)
+	}
+	if judged.Regressions[0].Baseline != 10000 || judged.Regressions[1].Baseline != 5000 {
+		t.Fatalf("each breach must be judged against the limit that applied: %+v", judged.Regressions)
+	}
+}
+
 func TestJudgingAgainClearsStaleFlags(t *testing.T) {
 	flagged := DetectRegressions(nightlyDocument(1, kindCluster, 12000), nil, sevenNights)
 	if flagged.Sections[burstSection].Metrics["p90_ms@100_regression"] != true {
@@ -235,8 +251,12 @@ func TestJudgeExplainsWhatItCompared(t *testing.T) {
 
 	full := newFakeStore()
 	publishAll(t, full, nights(1, 7, kindCluster, 5000)...)
-	if _, note := Judge(ctx, full, nightlyDocument(8, kindCluster, 5500), sevenNights); !strings.Contains(note, "compared every p90 with the median of its last 7 values among 7 kind-fake-gpu runs") || !strings.HasSuffix(note, "no regression detected") {
+	if _, note := Judge(ctx, full, nightlyDocument(8, kindCluster, 5500), sevenNights); !strings.Contains(note, "compared 1 p90 metrics with the median of their last 7 values among 7 kind-fake-gpu runs") || !strings.HasSuffix(note, "no regression detected") {
 		t.Fatalf("with history the note names the window: %q", note)
+	}
+	otherScenario := Build(map[string]core.Section{"workspace-ttj": {Category: core.CategoryLoad, Metrics: map[string]any{"ttj_p90_ms": 9000}}}, RunInfo{StartedAt: time.Date(2026, 10, 8, 1, 0, 0, 0, time.UTC), ClusterType: kindCluster})
+	if _, note := Judge(ctx, full, otherScenario, sevenNights); !strings.Contains(note, "none of the 1 p90 metrics has 7 earlier values yet among the 7 kind-fake-gpu runs") {
+		t.Fatalf("seven runs that never ran this scenario must not be reported as a comparison: %q", note)
 	}
 
 	broken := newFakeStore()

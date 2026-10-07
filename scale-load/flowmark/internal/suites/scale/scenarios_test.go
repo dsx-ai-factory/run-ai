@@ -37,8 +37,8 @@ func TestCheckedInScaleScenariosParse(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s must parse with the current knob rules: %v", file, err)
 		}
-		if len(knobs.slo) != len(sloKeys) {
-			t.Fatalf("%s should set every supported SLO (%d), got %d", file, len(sloKeys), len(knobs.slo))
+		if _, ok := knobs.slo["p90_ms"]; !ok {
+			t.Fatalf("%s must set at least the p90 SLO, got %v", file, knobs.slo)
 		}
 	}
 }

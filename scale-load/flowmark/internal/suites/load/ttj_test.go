@@ -25,7 +25,7 @@ func TestParseOptions(t *testing.T) {
 		wantErr string
 	}{
 		{name: "defaults", knobs: nil, check: func(o options) bool {
-			return o.users == 10 && o.rate == 2 && o.duration == 5*time.Minute && o.timeout == 10*time.Minute && o.workloadType == "Workspace" && o.slo == nil
+			return o.users == 10 && o.rate == 2 && o.duration == 3*time.Minute && o.timeout == 10*time.Minute && o.workloadType == "Workspace" && o.slo == nil
 		}},
 		{name: "all knobs", knobs: map[string]any{"users": 3, "rate": 5, "duration": "1m", "image": "busybox", "timeout": "2m", "setupTimeout": "1m", "kubeRequestsPerSecond": 20, "controlPlaneRequestsPerSecond": 10, "cluster": "c1", "slo": map[string]any{"api_accepted_p90_ms": 500, "ttj_p90_ms": 10000, "cluster_synced_p99_ms": 12000}},
 			check: func(o options) bool {

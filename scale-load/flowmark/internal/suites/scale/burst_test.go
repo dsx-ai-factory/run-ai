@@ -67,6 +67,10 @@ func TestParseSettings(t *testing.T) {
 		{name: "slo nested", knobs: map[string]any{"slo": map[string]any{"tiers": map[string]any{"gold": 1}}}, wantErr: `entry "tiers" must be a whole number`},
 		{name: "slo of another suite", knobs: map[string]any{"slo": map[string]any{"ttj_p90_ms": 10000}}, wantErr: `slo key "ttj_p90_ms" is not a latency this suite reports; use one of p50_ms, p90_ms, p99_ms, mean_ms, max_ms`},
 		{name: "slo on a count", knobs: map[string]any{"slo": map[string]any{"never_arrived_count": 0}}, wantErr: `slo key "never_arrived_count" is not a latency`},
+		{name: "slo per round", knobs: map[string]any{"slo": map[string]any{"p90_ms": 5000, "p90_ms@500": 60000}},
+			want: settings{rounds: []int{100, 250, 500}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p90_ms": 5000, "p90_ms@500": 60000}}},
+		{name: "slo for a round that does not exist", knobs: map[string]any{"slo": map[string]any{"p90_ms@999": 1}}, wantErr: `slo key "p90_ms@999" names a round that is not in workloads [100 250 500]`},
+		{name: "slo with a bad round", knobs: map[string]any{"slo": map[string]any{"p90_ms@big": 1}}, wantErr: `names a round that is not in workloads`},
 		{name: "slo on p99 and max", knobs: map[string]any{"slo": map[string]any{"p99_ms": 9000, "max_ms": 20000}},
 			want: settings{rounds: []int{100, 250, 500}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p99_ms": 9000, "max_ms": 20000}}},
 	}
@@ -657,8 +661,8 @@ func TestSuiteRunMeasuresEveryRoundWithAFakeSession(t *testing.T) {
 			t.Fatalf("%s missing from %v", key, section.Metrics)
 		}
 	}
-	if got := controlPlane.deletes.Load(); got != 5 {
-		t.Fatalf("every training of both rounds must be deleted once, got %d", got)
+	if got := controlPlane.deletes.Load(); got != 6 {
+		t.Fatalf("the warm-up probe and every training of both rounds must be deleted once, got %d", got)
 	}
 	runners, err := countAllInNamespace(context.Background(), kube, measure.WorkloadRunnerKind, testNamespace)
 	if err != nil || runners != 0 {
@@ -672,5 +676,32 @@ func TestSuiteRunFailsWhenTheSessionCannotBeOpened(t *testing.T) {
 	}}
 	if _, err := suite.Run(context.Background(), core.Target{}, core.Scenario{Suite: suiteName}); err == nil || !strings.Contains(err.Error(), "control plane unreachable") {
 		t.Fatalf("the session error must surface unchanged: %v", err)
+	}
+}
+
+type cancellingFlow struct {
+	deploymentFlow
+	cancel context.CancelFunc
+}
+
+func (f *cancellingFlow) create(ctx context.Context, workload item) (string, error) {
+	f.cancel()
+	<-ctx.Done()
+	return "", ctx.Err()
+}
+
+func TestInterruptedCreatesAreNotCountedAsFailures(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	kube := fakeKube()
+	flow := &cancellingFlow{deploymentFlow: deploymentFlow{kube: kube, concurrency: 1}, cancel: cancel}
+
+	result := runRound(ctx, flow, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
+
+	summary := measure.Stats(result.timings)
+	if summary.FailedCount != 0 {
+		t.Fatalf("a create that died because the run was interrupted is not a rejected create: %+v", summary)
+	}
+	if result.err == nil || !strings.Contains(result.err.Error(), "interrupted before teardown") {
+		t.Fatalf("the round must report the interruption: %v", result.err)
 	}
 }

@@ -146,6 +146,9 @@ func (s Suite) Run(ctx context.Context, target core.Target, scenario core.Scenar
 	log.Printf("%s: project %q ready, namespace %s", suiteName, project.Name, project.Namespace)
 
 	flow := newFlow(knobs.workloadType, clients, project, knobs.concurrency)
+	if err := warmUp(ctx, flow, clients.Kube, project.Namespace, id, knobs); err != nil {
+		return core.Section{}, err
+	}
 	var rounds []round
 	for index, size := range knobs.rounds {
 		roundNumber := index + 1
@@ -209,6 +212,21 @@ func newControlPlaneFlow(workloadType string, clients *client.Clients, project s
 	return &controlPlaneFlow{workloadType: workloadType, clients: clients, project: project, concurrency: concurrency, created: map[string]string{}, deleteRequested: map[string]bool{}}
 }
 
+func validateSLOKey(key string, rounds []int) error {
+	stat, round, perRound := strings.Cut(key, "@")
+	if !slices.Contains(sloKeys, stat) {
+		return fmt.Errorf("slo key %q is not a latency this suite reports; use one of %s, optionally with @<round size>", key, strings.Join(sloKeys, ", "))
+	}
+	if !perRound {
+		return nil
+	}
+	size, err := strconv.Atoi(round)
+	if err != nil || !slices.Contains(rounds, size) {
+		return fmt.Errorf("slo key %q names a round that is not in workloads %v", key, rounds)
+	}
+	return nil
+}
+
 func parseSettings(scenario core.Scenario) (settings, error) {
 	if unknown := scenario.UnknownKnobs(knownKnobs...); len(unknown) > 0 {
 		return settings{}, fmt.Errorf("unknown knob %q; known knobs: %s", unknown[0], strings.Join(knownKnobs, ", "))
@@ -254,8 +272,8 @@ func parseSettings(scenario core.Scenario) (settings, error) {
 		return settings{}, err
 	}
 	for key := range knobs.slo {
-		if !slices.Contains(sloKeys, key) {
-			return settings{}, fmt.Errorf("slo key %q is not a latency this suite reports; use one of %s", key, strings.Join(sloKeys, ", "))
+		if err := validateSLOKey(key, knobs.rounds); err != nil {
+			return settings{}, err
 		}
 	}
 
@@ -297,6 +315,23 @@ func parseSettings(scenario core.Scenario) (settings, error) {
 	}
 	knobs.pods = int32(pods) //nolint:gosec
 	return knobs, nil
+}
+
+func warmUp(ctx context.Context, flow workloadFlow, kube k8sclient.Client, namespace, id string, knobs settings) error {
+	log.Printf("%s: warming up the new project with one %s workload before round 1", suiteName, knobs.workloadType)
+	probe := runRound(ctx, flow, kube, namespace, id, 0, 1, knobs)
+	summary := measure.Stats(probe.timings)
+	switch {
+	case ctx.Err() != nil:
+		return nil
+	case probe.err != nil:
+		return fmt.Errorf("warm-up: %w", probe.err)
+	case summary.NeverArrivedCount > 0:
+		return fmt.Errorf("warm-up: the probe workload never reached the cluster within %s", knobs.timeout)
+	case summary.FailedCount > 0:
+		log.Printf("%s: warm-up absorbed a rejected create: %v", suiteName, lastError(probe.timings, measure.Failed))
+	}
+	return nil
 }
 
 func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, namespace, id string, index, size int, knobs settings) round {
@@ -346,6 +381,9 @@ func burst(ctx context.Context, flow workloadFlow, watcher *measure.Watcher, nam
 				key, err := flow.create(createCtx, item{name: name, namespace: namespace, labels: labels, image: knobs.image, pods: knobs.pods})
 				cancel()
 				acceptedAt := time.Now()
+				if err != nil && ctx.Err() != nil {
+					continue
+				}
 				if err != nil {
 					watcher.MarkFailed(name, err)
 					continue

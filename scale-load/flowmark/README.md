@@ -60,7 +60,7 @@ Knobs of the `scale-burst` suite:
 
 | knob | default | meaning |
 |---|---|---|
-| `workloads` | `[100, 250, 500]` | round sizes; each round creates that many workloads |
+| `workloads` | `[100, 250, 500]` | round sizes; each round creates that many workloads. Before round 1 one workload is created and removed to warm up the new project; it is not measured |
 | `workloadType` | `Deployment` | `Deployment`, `Training` or `Workspace` |
 | `podsPerWorkload` | 1 | replicas per Deployment; must be 1 for `Training` and `Workspace` |
 | `image` | `registry.k8s.io/pause:3.9` | container image; point it at a mirror on air-gapped clusters |
@@ -70,7 +70,7 @@ Knobs of the `scale-burst` suite:
 | `timeout` | `15m` | how long a round waits for all workloads to arrive |
 | `setupTimeout` | `5m` | project creation, quiesce between rounds, cleanup |
 | `settle` | `90s` | quiet time between rounds |
-| `slo` | none | upper bounds on `p50_ms`, `p90_ms`, `p99_ms`, `mean_ms` or `max_ms`, e.g. `p90_ms: 5000`; a round above one is reported as a regression, the run still passes |
+| `slo` | none | upper bounds on `p50_ms`, `p90_ms`, `p99_ms`, `mean_ms` or `max_ms`, e.g. `p90_ms: 5000`; add `@<round size>` for one round, e.g. `p90_ms@500: 60000`, otherwise the plain key covers every round; a round above its limit is reported as a regression, the run still passes |
 | `cluster` | single cluster | cluster name when the control plane has several |
 
 Each run creates its own project, runs the rounds, deletes everything, and
@@ -83,7 +83,7 @@ Knobs of the `load-ttj` suite:
 |---|---|---|
 | `users` | 10 | parallel submitters; the most requests in flight at once |
 | `rate` | 2 | target submissions per second; may not exceed `controlPlaneRequestsPerSecond` |
-| `duration` | `5m` | how long submissions keep coming |
+| `duration` | `3m` | how long submissions keep coming |
 | `workloadType` | `Workspace` | `Workspace` or `Training`, both submitted through the control plane |
 | `image` | `registry.k8s.io/pause:3.9` | container image of every workload |
 | `timeout` | `10m` | how long to wait for arrivals after the last submission |
