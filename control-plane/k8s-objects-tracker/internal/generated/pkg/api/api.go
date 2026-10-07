@@ -107,6 +107,24 @@ type PVCsAPIRouter interface {
 	ObsoleteDeletePvc(http.ResponseWriter, *http.Request)
 }
 
+// ResourceClaimTemplatesAPIRouter defines the required methods for binding the api requests to a responses for the ResourceClaimTemplatesAPI
+// The ResourceClaimTemplatesAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a ResourceClaimTemplatesAPIServicer to perform the required actions, then write the service results to the http response.
+type ResourceClaimTemplatesAPIRouter interface {
+	ListResourceClaimTemplates(http.ResponseWriter, *http.Request)
+	SyncClusterWideResourceClaimTemplates(http.ResponseWriter, *http.Request)
+	SyncDepartmentWideResourceClaimTemplates(http.ResponseWriter, *http.Request)
+	SyncProjectResourceClaimTemplates(http.ResponseWriter, *http.Request)
+}
+
+// ResourceClaimsAPIRouter defines the required methods for binding the api requests to a responses for the ResourceClaimsAPI
+// The ResourceClaimsAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a ResourceClaimsAPIServicer to perform the required actions, then write the service results to the http response.
+type ResourceClaimsAPIRouter interface {
+	ListResourceClaims(http.ResponseWriter, *http.Request)
+	SyncProjectResourceClaims(http.ResponseWriter, *http.Request)
+}
+
 // SecretsAPIRouter defines the required methods for binding the api requests to a responses for the SecretsAPI
 // The SecretsAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a SecretsAPIServicer to perform the required actions, then write the service results to the http response.
@@ -251,6 +269,26 @@ type PVCsAPIServicer interface {
 	ObsoleteCreatePvc(context.Context, string, string, SinglePvc) (ImplResponse, error)
 	ObsoleteSyncPvc(context.Context, string, string, []SinglePvc) (ImplResponse, error)
 	ObsoleteDeletePvc(context.Context, string, string, string) (ImplResponse, error)
+}
+
+// ResourceClaimTemplatesAPIServicer defines the api actions for the ResourceClaimTemplatesAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type ResourceClaimTemplatesAPIServicer interface {
+	ListResourceClaimTemplates(context.Context, string, string, string, string, string, bool, bool) (ImplResponse, error)
+	SyncClusterWideResourceClaimTemplates(context.Context, string, ResourceClaimTemplates) (ImplResponse, error)
+	SyncDepartmentWideResourceClaimTemplates(context.Context, string, string, ResourceClaimTemplates) (ImplResponse, error)
+	SyncProjectResourceClaimTemplates(context.Context, string, string, ResourceClaimTemplates) (ImplResponse, error)
+}
+
+// ResourceClaimsAPIServicer defines the api actions for the ResourceClaimsAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type ResourceClaimsAPIServicer interface {
+	ListResourceClaims(context.Context, string, string, string, string, bool, bool) (ImplResponse, error)
+	SyncProjectResourceClaims(context.Context, string, string, ResourceClaims) (ImplResponse, error)
 }
 
 // SecretsAPIServicer defines the api actions for the SecretsAPI service

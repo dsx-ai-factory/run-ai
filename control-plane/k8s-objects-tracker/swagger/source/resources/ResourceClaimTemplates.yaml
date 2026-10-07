@@ -1,0 +1,35 @@
+get:
+  summary: list details of ResourceClaimTemplates
+  operationId: list_resource_claim_templates
+  tags:
+    - Resource Claim Templates
+  x-internal: true
+  x-no-authorization: true
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ScopeType.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ScopeId.yaml"
+    - $ref: "../parameters/query/optional/nameFilter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+    - $ref: "../parameters/query/optional/originFilter.yaml"
+    - $ref: "../parameters/query/optional/includeAncestors.yaml"
+    - $ref: "../parameters/query/optional/includeDescendants.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/ResourceClaimTemplates/ResourceClaimTemplates.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

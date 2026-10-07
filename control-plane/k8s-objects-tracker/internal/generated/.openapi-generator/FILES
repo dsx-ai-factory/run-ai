@@ -12,6 +12,10 @@ pkg/api/api_health.go
 pkg/api/api_health_service.go
 pkg/api/api_pvcs.go
 pkg/api/api_pvcs_service.go
+pkg/api/api_resource_claim_templates.go
+pkg/api/api_resource_claim_templates_service.go
+pkg/api/api_resource_claims.go
+pkg/api/api_resource_claims_service.go
 pkg/api/api_secrets.go
 pkg/api/api_secrets_service.go
 pkg/api/api_storage_class_configuration.go
@@ -54,6 +58,10 @@ pkg/api/model_pvc_phase_optional.go
 pkg/api/model_pvc_supported_access_modes.go
 pkg/api/model_pvc_volume_mode.go
 pkg/api/model_pvcs.go
+pkg/api/model_resource_claim.go
+pkg/api/model_resource_claim_template.go
+pkg/api/model_resource_claim_templates.go
+pkg/api/model_resource_claims.go
 pkg/api/model_secret.go
 pkg/api/model_secret_creation_request.go
 pkg/api/model_secret_list_info.go

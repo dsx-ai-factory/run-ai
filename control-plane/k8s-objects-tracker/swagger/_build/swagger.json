@@ -4082,6 +4082,383 @@
         }
       }
     },
+    "/api/v1/resource-claim-templates": {
+      "get": {
+        "summary": "list details of ResourceClaimTemplates",
+        "operationId": "list_resource_claim_templates",
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScopeType"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/nameFilter"
+          },
+          {
+            "$ref": "#/components/parameters/FilterByCluster"
+          },
+          {
+            "$ref": "#/components/parameters/originFilter"
+          },
+          {
+            "$ref": "#/components/parameters/includeAncestors"
+          },
+          {
+            "$ref": "#/components/parameters/includeDescendants"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaimTemplates"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/resource-claim-templates/{clusterUuid}": {
+      "post": {
+        "summary": "sync the details of cluster-wide ResourceClaimTemplates to the control plane",
+        "operationId": "sync_cluster_wide_resource_claim_templates",
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "resource-claim-template-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceClaimTemplates"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaimTemplates"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/resource-claim-templates/{clusterUuid}/departments/{departmentId}": {
+      "post": {
+        "summary": "sync the details of department-wide ResourceClaimTemplates to the control plane",
+        "operationId": "sync_department_wide_resource_claim_templates",
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "resource-claim-template-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceClaimTemplates"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaimTemplates"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace}": {
+      "post": {
+        "summary": "sync the details of project ResourceClaimTemplates to the control plane",
+        "operationId": "sync_project_resource_claim_templates",
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "resource-claim-template-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceClaimTemplates"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaimTemplates"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/resource-claims": {
+      "get": {
+        "summary": "list details of ResourceClaims",
+        "operationId": "list_resource_claims",
+        "tags": [
+          "Resource Claims"
+        ],
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_resource_claims_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScopeType"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/nameFilter"
+          },
+          {
+            "$ref": "#/components/parameters/FilterByCluster"
+          },
+          {
+            "$ref": "#/components/parameters/includeAncestors"
+          },
+          {
+            "$ref": "#/components/parameters/includeDescendants"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaims"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/resource-claims/{clusterUuid}/namespaces/{namespace}": {
+      "post": {
+        "summary": "sync the details of project ResourceClaims to the control plane",
+        "description": "ResourceClaims are only ever project-scoped - they are instantiated in a project namespace from a ResourceClaimTemplate by the Kubernetes resource claim controller.\n",
+        "operationId": "sync_project_resource_claims",
+        "tags": [
+          "Resource Claims"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "resource-claim-template-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_resource_claims_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceClaims"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaims"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/storage-class-configuration": {
       "get": {
         "summary": "List storage class configurations",
@@ -5896,6 +6273,126 @@
           }
         }
       },
+      "ResourceClaimTemplateName": {
+        "type": "string",
+        "description": "ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.\n",
+        "minLength": 1,
+        "maxLength": 253,
+        "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
+        "example": "rct-gpu-1"
+      },
+      "ResourceClaimTemplateSpec": {
+        "type": "object",
+        "description": "Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the control plane has enough fidelity to describe what will be submitted on claim creation, rather than relying on the template name alone. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimTemplateSpec`.\n",
+        "additionalProperties": true
+      },
+      "ResourceClaimTemplate": {
+        "type": "object",
+        "required": [
+          "name",
+          "namespace"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/ResourceClaimTemplateName"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "the namespace the ResourceClaimTemplate lives in",
+            "minLength": 1,
+            "maxLength": 253,
+            "example": "runai"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "assetId": {
+            "type": "string",
+            "description": "Control-plane asset id this template was created from. Present only when origin is \"assets\". Allows the control plane to join tracker rows back to the originating asset record.\n",
+            "nullable": true
+          },
+          "spec": {
+            "$ref": "#/components/schemas/ResourceClaimTemplateSpec"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/Issues"
+          }
+        }
+      },
+      "ResourceClaimTemplates": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplate"
+            }
+          }
+        }
+      },
+      "ResourceClaimName": {
+        "type": "string",
+        "description": "ResourceClaim name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.\n",
+        "minLength": 1,
+        "maxLength": 253,
+        "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$",
+        "example": "pod-x-claim-0-abcde"
+      },
+      "ResourceClaimSpec": {
+        "type": "object",
+        "description": "Raw ResourceClaim spec as sent by the agent. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimSpec`. Stored verbatim; the tracker does not interpret its contents.\n",
+        "additionalProperties": true
+      },
+      "ResourceClaim": {
+        "type": "object",
+        "description": "A ResourceClaim observed in a project namespace. Origin is always \"existing\" since claims are instantiated by the Kubernetes resource-claim controller, not created by Run.ai assets - the Run.ai control plane only owns the ResourceClaimTemplate the claim was derived from.\n",
+        "required": [
+          "name",
+          "namespace"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/ResourceClaimName"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "the namespace the ResourceClaim lives in",
+            "minLength": 1,
+            "maxLength": 253,
+            "example": "runai-project-foo"
+          },
+          "resourceClaimTemplateName": {
+            "type": "string",
+            "description": "Name of the ResourceClaimTemplate this claim was instantiated from, as reported by the agent. May be omitted when the agent could not resolve the template (e.g. the owning Pod was already gone).\n",
+            "nullable": true
+          },
+          "spec": {
+            "$ref": "#/components/schemas/ResourceClaimSpec"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/Issues"
+          }
+        }
+      },
+      "ResourceClaims": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaim"
+            }
+          }
+        }
+      },
       "TenantId": {
         "description": "The id of the tenant.",
         "type": "integer",
@@ -6065,7 +6562,9 @@
         "enum": [
           "pvc",
           "secret",
-          "config-map"
+          "config-map",
+          "resource-claim-template",
+          "resource-claim"
         ]
       },
       "ClusterObjectIssueType": {

@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/k8s-objects-tracker/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/k8s-objects-tracker/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
 	"gorm.io/gorm/clause"
 )
 
@@ -61,6 +63,38 @@ func ListStorageClassWithOptionalConfig(ctx context.Context, filter *models.Obje
 	return objects, nil
 }
 
+// UpsertObject upserts a single object and populates its ID with the stable
+// row id. The second return value reports whether the row was newly inserted
+// vs. an update of an existing one - callers that track issues or publish
+// events use this to decide whether to emit "newly created" semantics.
+//
+// Prefer this over UpsertObjects when the caller needs the row id (for
+// example to tie resource_issues rows to the object). UpsertObjects is a
+// bulk-write path that does not expose the generated id and is used by the
+// DeviceClass and StorageClass flows that have no per-row downstream work.
+func UpsertObject(ctx context.Context, obj *models.Object) (bool, *api.Error) {
+	dbErr := api.NewError(http.StatusServiceUnavailable, obj.ErrorMessage("upsert"), nil)
+	db := runaidb.DB().WithContext(ctx)
+
+	existing := &models.Object{ObjectFilters: obj.ObjectFilters}
+	err := db.Model(existing).Where(existing).First(existing)
+	switch {
+	case err == nil:
+		obj.ID = existing.ID
+		if _, err := db.Model(obj).Save(obj); err != nil {
+			return false, dbErr.WithDetails(err)
+		}
+		return false, nil
+	case errors.Is(err, orm.ErrRecordNotFound):
+		if _, err := db.Model(obj).Create(obj); err != nil {
+			return false, dbErr.WithDetails(err)
+		}
+		return true, nil
+	default:
+		return false, dbErr.WithDetails(err)
+	}
+}
+
 // UpsertObjects creates or updates multiple records
 func UpsertObjects(ctx context.Context, filter *models.ObjectFilters, objects []*models.Object) *api.Error {
 	if len(objects) == 0 {
@@ -70,7 +104,7 @@ func UpsertObjects(ctx context.Context, filter *models.ObjectFilters, objects []
 	dbErr := api.NewError(http.StatusServiceUnavailable, filterRecord.ErrorMessage("upsert"), nil)
 	db := runaidb.DB().WithContext(ctx)
 
-	if _, err := db.Clauses(clause.OnConflict{UpdateAll: true, OnConstraint: models.ObjectsUniqueConstraint}).
+	if _, err := db.Clauses(clause.OnConflict{UpdateAll: true, OnConstraint: models.ObjectsExtendedUniqueConstraint}).
 		Save(objects); err != nil {
 		return dbErr.WithDetails(err)
 	}
@@ -108,7 +142,13 @@ func DeleteTenantObjects(ctx context.Context, tenantId int32) *api.Error {
 }
 
 // DeleteObjectsNotInCluster deletes multiple/single Object records by defined filter.
-// It also filters out of the deletion, records which are representing provided 'objects' list
+// It also filters out of the deletion, records which are representing provided 'objects' list.
+//
+// We pass an empty-model receiver (not `objects`) to GORM's Delete so GORM does
+// not splice primary keys from the kept slice into the WHERE clause. Callers
+// that populate obj.ID on upsert (e.g. the per-row UpsertObject path used by
+// RCT / RC) would otherwise end up with `... AND id IN (kept.ids) AND name NOT
+// IN (kept.names)` - an impossible intersection that silently prunes nothing.
 func DeleteObjectsNotInCluster(ctx context.Context, filter *models.ObjectFilters, objects []*models.Object) *api.Error {
 	filterRecord := models.NewObject(filter)
 	dbErr := api.NewError(http.StatusServiceUnavailable, filterRecord.ErrorMessage("delete"), nil)
@@ -120,7 +160,7 @@ func DeleteObjectsNotInCluster(ctx context.Context, filter *models.ObjectFilters
 		tx = tx.Not(fmt.Sprintf("%s in ?", models.ObjectsNameColumn), extractNames(objects))
 	}
 
-	if _, err := tx.Delete(objects); err != nil {
+	if _, err := tx.Delete(&models.Object{}); err != nil {
 		return dbErr.WithDetails(err)
 	}
 	return nil

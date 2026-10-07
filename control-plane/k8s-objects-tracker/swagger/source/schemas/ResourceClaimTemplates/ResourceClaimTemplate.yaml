@@ -1,0 +1,26 @@
+type: object
+required:
+  - name
+  - namespace
+properties:
+  name:
+    $ref: "./ResourceClaimTemplateName.yaml"
+  namespace:
+    type: string
+    description: the namespace the ResourceClaimTemplate lives in
+    minLength: 1
+    maxLength: 253
+    example: runai
+  origin:
+    $ref: "../Common/Origin.yaml"
+  assetId:
+    type: string
+    description: >
+      Control-plane asset id this template was created from. Present only when
+      origin is "assets". Allows the control plane to join tracker rows back to
+      the originating asset record.
+    nullable: true
+  spec:
+    $ref: "./ResourceClaimTemplateSpec.yaml"
+  issues:
+    $ref: "../Common/Issues.yaml"

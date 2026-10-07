@@ -1,0 +1,7 @@
+type: object
+description: >
+  Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the
+  control plane has enough fidelity to describe what will be submitted on claim
+  creation, rather than relying on the template name alone. Shape follows the
+  Kubernetes `resource.k8s.io/v1` `ResourceClaimTemplateSpec`.
+additionalProperties: true

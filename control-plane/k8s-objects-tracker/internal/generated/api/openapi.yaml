@@ -6066,6 +6066,614 @@ paths:
       x-audit: false
       x-test-coverage:
       - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  /api/v1/resource-claim-templates:
+    get:
+      operationId: list_resource_claim_templates
+      parameters:
+      - description: The type of resource we want to filter by.
+        explode: true
+        in: query
+        name: scopeType
+        required: false
+        schema:
+          example: project
+          type: string
+        style: form
+      - description: filter by scope id
+        explode: true
+        in: query
+        name: scopeId
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: filter by name
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter using the Universally Unique Identifier (UUID) of the
+          cluster.
+        explode: true
+        in: query
+        name: clusterId
+        required: false
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: "filter by the origin of the resource. by default, we have to\
+          \ list only customer existing resources (to preserve backward compatibility)\
+          \ to list both existing pvc and assets related pvcs use 'all'."
+        explode: true
+        in: query
+        name: origin
+        required: false
+        schema:
+          enum:
+          - all
+          - assets
+          - existing
+          type: string
+        style: form
+      - description: "include resources of both requested scope, and its ancestors.\
+          \ for example, if project scope is requested with includeAncestors=true,\
+          \ department and cluster scoped assets will be included in the response."
+        explode: true
+        in: query
+        name: includeAncestors
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Whether the query should include from all nested layers within
+          the specified scope
+        explode: true
+        in: query
+        name: includeDescendants
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplates'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: list details of ResourceClaimTemplates
+      tags:
+      - Resource Claim Templates
+      x-no-authorization: true
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+  /api/v1/resource-claim-templates/{clusterUuid}:
+    post:
+      operationId: sync_cluster_wide_resource_claim_templates
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplates'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplates'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: sync the details of cluster-wide ResourceClaimTemplates to the control
+        plane
+      tags:
+      - Resource Claim Templates
+      x-authorize:
+        resource-type: resource-claim-template-assets
+        action: sync
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+  /api/v1/resource-claim-templates/{clusterUuid}/departments/{departmentId}:
+    post:
+      operationId: sync_department_wide_resource_claim_templates
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      - description: The id of the department.
+        explode: false
+        in: path
+        name: departmentId
+        required: true
+        schema:
+          example: "1"
+          pattern: .*
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplates'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplates'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: sync the details of department-wide ResourceClaimTemplates to the control
+        plane
+      tags:
+      - Resource Claim Templates
+      x-authorize:
+        resource-type: resource-claim-template-assets
+        action: sync
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+  /api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace}:
+    post:
+      operationId: sync_project_resource_claim_templates
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      - description: The namespace of the project.
+        explode: false
+        in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplates'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplates'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: sync the details of project ResourceClaimTemplates to the control plane
+      tags:
+      - Resource Claim Templates
+      x-authorize:
+        resource-type: resource-claim-template-assets
+        action: sync
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+  /api/v1/resource-claims:
+    get:
+      operationId: list_resource_claims
+      parameters:
+      - description: The type of resource we want to filter by.
+        explode: true
+        in: query
+        name: scopeType
+        required: false
+        schema:
+          example: project
+          type: string
+        style: form
+      - description: filter by scope id
+        explode: true
+        in: query
+        name: scopeId
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: filter by name
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter using the Universally Unique Identifier (UUID) of the
+          cluster.
+        explode: true
+        in: query
+        name: clusterId
+        required: false
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: "include resources of both requested scope, and its ancestors.\
+          \ for example, if project scope is requested with includeAncestors=true,\
+          \ department and cluster scoped assets will be included in the response."
+        explode: true
+        in: query
+        name: includeAncestors
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Whether the query should include from all nested layers within
+          the specified scope
+        explode: true
+        in: query
+        name: includeDescendants
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaims'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: list details of ResourceClaims
+      tags:
+      - Resource Claims
+      x-no-authorization: true
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claims_service_test.go
+  /api/v1/resource-claims/{clusterUuid}/namespaces/{namespace}:
+    post:
+      description: |
+        ResourceClaims are only ever project-scoped - they are instantiated in a project namespace from a ResourceClaimTemplate by the Kubernetes resource claim controller.
+      operationId: sync_project_resource_claims
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      - description: The namespace of the project.
+        explode: false
+        in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaims'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaims'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: sync the details of project ResourceClaims to the control plane
+      tags:
+      - Resource Claims
+      x-authorize:
+        resource-type: resource-claim-template-assets
+        action: sync
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claims_service_test.go
   /api/v1/storage-class-configuration:
     get:
       description: Retrieves a list of storage class configurations defined in the
@@ -8725,6 +9333,260 @@ components:
       required:
       - items
       type: object
+    ResourceClaimTemplateName:
+      description: |
+        ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+      example: rct-gpu-1
+      maxLength: 253
+      minLength: 1
+      pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+      type: string
+    ResourceClaimTemplateSpec:
+      additionalProperties: true
+      description: |
+        Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the control plane has enough fidelity to describe what will be submitted on claim creation, rather than relying on the template name alone. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimTemplateSpec`.
+      type: object
+    ResourceClaimTemplate:
+      example:
+        assetId: assetId
+        origin: assets
+        name: rct-gpu-1
+        namespace: runai
+        issues:
+        - issue: issue
+          namespace: namespace
+        - issue: issue
+          namespace: namespace
+        spec:
+          key: ""
+      properties:
+        name:
+          description: |
+            ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+          example: rct-gpu-1
+          maxLength: 253
+          minLength: 1
+          pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+          type: string
+        namespace:
+          description: the namespace the ResourceClaimTemplate lives in
+          example: runai
+          maxLength: 253
+          minLength: 1
+          type: string
+        origin:
+          $ref: '#/components/schemas/Origin'
+        assetId:
+          description: |
+            Control-plane asset id this template was created from. Present only when origin is "assets". Allows the control plane to join tracker rows back to the originating asset record.
+          nullable: true
+          type: string
+        spec:
+          additionalProperties: true
+          description: |
+            Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the control plane has enough fidelity to describe what will be submitted on claim creation, rather than relying on the template name alone. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimTemplateSpec`.
+          type: object
+        issues:
+          description: list of issues that was found while syncing the resource to
+            the cluster
+          items:
+            $ref: '#/components/schemas/Issue'
+          type: array
+      required:
+      - name
+      - namespace
+      type: object
+    ResourceClaimTemplates:
+      example:
+        items:
+        - assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+        - assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+        - assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+        - assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+        - assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplate'
+          maxItems: 10000
+          type: array
+      required:
+      - items
+      type: object
+    ResourceClaimName:
+      description: |
+        ResourceClaim name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+      example: pod-x-claim-0-abcde
+      maxLength: 253
+      minLength: 1
+      pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+      type: string
+    ResourceClaimSpec:
+      additionalProperties: true
+      description: |
+        Raw ResourceClaim spec as sent by the agent. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimSpec`. Stored verbatim; the tracker does not interpret its contents.
+      type: object
+    ResourceClaim:
+      description: |
+        A ResourceClaim observed in a project namespace. Origin is always "existing" since claims are instantiated by the Kubernetes resource-claim controller, not created by Run.ai assets - the Run.ai control plane only owns the ResourceClaimTemplate the claim was derived from.
+      example:
+        name: pod-x-claim-0-abcde
+        namespace: runai-project-foo
+        resourceClaimTemplateName: resourceClaimTemplateName
+        issues:
+        - issue: issue
+          namespace: namespace
+        - issue: issue
+          namespace: namespace
+        spec:
+          key: ""
+      properties:
+        name:
+          description: |
+            ResourceClaim name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+          example: pod-x-claim-0-abcde
+          maxLength: 253
+          minLength: 1
+          pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+          type: string
+        namespace:
+          description: the namespace the ResourceClaim lives in
+          example: runai-project-foo
+          maxLength: 253
+          minLength: 1
+          type: string
+        resourceClaimTemplateName:
+          description: |
+            Name of the ResourceClaimTemplate this claim was instantiated from, as reported by the agent. May be omitted when the agent could not resolve the template (e.g. the owning Pod was already gone).
+          nullable: true
+          type: string
+        spec:
+          additionalProperties: true
+          description: |
+            Raw ResourceClaim spec as sent by the agent. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimSpec`. Stored verbatim; the tracker does not interpret its contents.
+          type: object
+        issues:
+          description: list of issues that was found while syncing the resource to
+            the cluster
+          items:
+            $ref: '#/components/schemas/Issue'
+          type: array
+      required:
+      - name
+      - namespace
+      type: object
+    ResourceClaims:
+      example:
+        items:
+        - name: pod-x-claim-0-abcde
+          namespace: runai-project-foo
+          resourceClaimTemplateName: resourceClaimTemplateName
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+        - name: pod-x-claim-0-abcde
+          namespace: runai-project-foo
+          resourceClaimTemplateName: resourceClaimTemplateName
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+        - name: pod-x-claim-0-abcde
+          namespace: runai-project-foo
+          resourceClaimTemplateName: resourceClaimTemplateName
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+        - name: pod-x-claim-0-abcde
+          namespace: runai-project-foo
+          resourceClaimTemplateName: resourceClaimTemplateName
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+        - name: pod-x-claim-0-abcde
+          namespace: runai-project-foo
+          resourceClaimTemplateName: resourceClaimTemplateName
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+          spec:
+            key: ""
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ResourceClaim'
+          maxItems: 10000
+          type: array
+      required:
+      - items
+      type: object
     TenantId:
       description: The id of the tenant.
       example: 1001
@@ -9216,6 +10078,8 @@ components:
       - pvc
       - secret
       - config-map
+      - resource-claim-template
+      - resource-claim
       type: string
     ClusterObjectIssueType:
       enum:

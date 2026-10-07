@@ -243,7 +243,71 @@ func getClusterObjects(ctx context.Context, tenantId int32, resourceType string,
 		}
 	}
 
+	if resourceType == "" || resourceType == string(api.CLUSTERRESOURCETYPE_RESOURCE_CLAIM_TEMPLATE) {
+		if err := appendObjectStatuses(ctx, tenantId, models.ObjectTypeResourceClaimTemplate,
+			api.CLUSTERRESOURCETYPE_RESOURCE_CLAIM_TEMPLATE, scopeQuery, clusterObjectIdMap); err != nil {
+			return nil, err
+		}
+	}
+
+	if resourceType == "" || resourceType == string(api.CLUSTERRESOURCETYPE_RESOURCE_CLAIM) {
+		if err := appendObjectStatuses(ctx, tenantId, models.ObjectTypeResourceClaim,
+			api.CLUSTERRESOURCETYPE_RESOURCE_CLAIM, scopeQuery, clusterObjectIdMap); err != nil {
+			return nil, err
+		}
+	}
+
 	return clusterObjectIdMap, nil
+}
+
+// appendObjectStatuses pulls rows of a given object type into the shared
+// cluster-objects status map. Because ResourceClaimTemplate / ResourceClaim
+// are stored in the generic `objects` table (unlike PVC / Secret / ConfigMap
+// which have dedicated tables), their scope lives directly on ObjectFilters
+// rather than on a separate ScopeQuery wrapper, so we project the query here.
+func appendObjectStatuses(ctx context.Context, tenantId int32, objectType string, resourceType api.ClusterResourceType,
+	scopeQuery *models.ScopeQueryParams, out map[string]api.ClusterObjectStatus) *api.Error {
+	filter := &models.ObjectFilters{
+		TenantId: tenantId,
+		Type:     objectType,
+	}
+	if scopeQuery != nil {
+		filter.ScopeType = authorizationClient.ScopeType(scopeQuery.ScopeType)
+		switch filter.ScopeType {
+		case authorizationClient.SCOPETYPE_DEPARTMENT:
+			filter.DepartmentId = scopeQuery.ScopeId
+		case authorizationClient.SCOPETYPE_PROJECT:
+			filter.ProjectId = scopeQuery.ScopeId
+		}
+	}
+
+	objects, err := dao.ListObjects(ctx, filter)
+	if err != nil {
+		return err
+	}
+
+	for _, obj := range objects {
+		info := api.ClusterObjectStatus{
+			ResourceName: ptr.Deref(obj.Name, ""),
+			ResourceType: resourceType,
+			ScopeType:    string(obj.ScopeType),
+		}
+
+		// Pull the scope id out of whichever column the object sat in. This
+		// mirrors the dispatch in Object.ScopeIdColumn so API responses stay
+		// consistent with how the row was persisted.
+		switch obj.ScopeType {
+		case authorizationClient.SCOPETYPE_CLUSTER:
+			info.ScopeId = obj.ClusterId.String()
+		case authorizationClient.SCOPETYPE_DEPARTMENT:
+			info.ScopeId = obj.DepartmentId
+		case authorizationClient.SCOPETYPE_PROJECT:
+			info.ScopeId = obj.ProjectId
+		}
+
+		out[obj.ID.String()] = info
+	}
+	return nil
 }
 
 func getClusterObjectsIssues(ctx context.Context, resourceIds []string) (map[string][]api.ClusterObjectIssue, *api.Error) {

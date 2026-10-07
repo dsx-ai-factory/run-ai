@@ -31,3 +31,19 @@ AllPVCs:
   $ref: "./Secrets/Obsolete/AllSecrets.yaml"
 Origin:
   $ref: "./Common/Origin.yaml"
+ResourceClaimTemplate:
+  $ref: "./ResourceClaimTemplates/ResourceClaimTemplate.yaml"
+ResourceClaimTemplates:
+  $ref: "./ResourceClaimTemplates/ResourceClaimTemplates.yaml"
+ResourceClaimTemplateName:
+  $ref: "./ResourceClaimTemplates/ResourceClaimTemplateName.yaml"
+ResourceClaimTemplateSpec:
+  $ref: "./ResourceClaimTemplates/ResourceClaimTemplateSpec.yaml"
+ResourceClaim:
+  $ref: "./ResourceClaims/ResourceClaim.yaml"
+ResourceClaims:
+  $ref: "./ResourceClaims/ResourceClaims.yaml"
+ResourceClaimName:
+  $ref: "./ResourceClaims/ResourceClaimName.yaml"
+ResourceClaimSpec:
+  $ref: "./ResourceClaims/ResourceClaimSpec.yaml"

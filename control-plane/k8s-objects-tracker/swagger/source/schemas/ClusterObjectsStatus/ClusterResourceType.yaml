@@ -3,3 +3,5 @@ enum:
   - pvc
   - secret
   - config-map
+  - resource-claim-template
+  - resource-claim

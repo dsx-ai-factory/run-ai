@@ -1,0 +1,42 @@
+post:
+  summary: sync the details of project ResourceClaims to the control plane
+  description: >
+    ResourceClaims are only ever project-scoped - they are instantiated in a
+    project namespace from a ResourceClaimTemplate by the Kubernetes resource
+    claim controller.
+  operationId: sync_project_resource_claims
+  tags:
+    - Resource Claims
+  x-internal: true
+  x-authorize:
+    resource-type: resource-claim-template-assets
+    action: sync
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_resource_claims_service_test.go
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: "../parameters/path/Namespace.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/ResourceClaims/ResourceClaims.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/ResourceClaims/ResourceClaims.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
