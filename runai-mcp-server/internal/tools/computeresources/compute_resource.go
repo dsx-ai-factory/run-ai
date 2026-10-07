@@ -28,29 +28,35 @@ var knownComputeResourceResponseFields = map[string]struct{}{
 	"usedBy":     {},
 }
 
-const computeResourceFingerprintPrefix = "sha256:"
+const (
+	computeResourceFingerprintPrefix = "sha256:"
+	computeResourceScopeField        = "scope"
+	computeResourceClusterIDField    = "clusterId"
+	computeResourceDepartmentIDField = "departmentId"
+	computeResourceProjectIDField    = "projectId"
+)
 
 var knownComputeResourceMetaFields = map[string]struct{}{
-	"autoDelete":             {},
-	"clusterId":              {},
-	"createdAt":              {},
-	"createdBy":              {},
-	"deletedAt":              {},
-	"deletedBy":              {},
-	"departmentId":           {},
-	"description":            {},
-	"id":                     {},
-	"kind":                   {},
-	"name":                   {},
-	"private":                {},
-	"projectId":              {},
-	"projectName":            {},
-	"scope":                  {},
-	"tenantId":               {},
-	"updateCount":            {},
-	"updatedAt":              {},
-	"updatedBy":              {},
-	"workloadSupportedTypes": {},
+	"autoDelete":                     {},
+	computeResourceClusterIDField:    {},
+	"createdAt":                      {},
+	"createdBy":                      {},
+	"deletedAt":                      {},
+	"deletedBy":                      {},
+	computeResourceDepartmentIDField: {},
+	"description":                    {},
+	"id":                             {},
+	"kind":                           {},
+	"name":                           {},
+	"private":                        {},
+	computeResourceProjectIDField:    {},
+	"projectName":                    {},
+	computeResourceScopeField:        {},
+	"tenantId":                       {},
+	"updateCount":                    {},
+	"updatedAt":                      {},
+	"updatedBy":                      {},
+	"workloadSupportedTypes":         {},
 }
 
 func computeResourceUpdateSnapshot(raw map[string]any) (map[string]any, string, error) {
@@ -84,7 +90,13 @@ func computeResourceUpdateSnapshot(raw map[string]any) (map[string]any, string, 
 		"spec": spec,
 	}
 	identity := map[string]any{}
-	for _, field := range []string{"id", "scope", "clusterId", "departmentId", "projectId"} {
+	for _, field := range []string{
+		"id",
+		computeResourceScopeField,
+		computeResourceClusterIDField,
+		computeResourceDepartmentIDField,
+		computeResourceProjectIDField,
+	} {
 		if value, exists := meta[field]; exists {
 			identity[field] = value
 		}
@@ -160,14 +172,14 @@ func computeResourceIdentity(raw map[string]any) (id, name, scope string, err er
 	if err != nil {
 		return "", "", "", err
 	}
-	scope, err = computeResourceMetaString(meta, "scope")
+	scope, err = computeResourceMetaString(meta, computeResourceScopeField)
 	if err != nil {
 		return "", "", "", err
 	}
 	switch assets.Scope(scope) {
 	case assets.SCOPE_SYSTEM, assets.SCOPE_TENANT:
 	case assets.SCOPE_CLUSTER:
-		clusterID, err := computeResourceMetaString(meta, "clusterId")
+		clusterID, err := computeResourceMetaString(meta, computeResourceClusterIDField)
 		if err != nil {
 			return "", "", "", err
 		}
@@ -175,11 +187,11 @@ func computeResourceIdentity(raw map[string]any) (id, name, scope string, err er
 			return "", "", "", fmt.Errorf("compute resource response: %w: %w", err, runaimcp.ErrUpstream)
 		}
 	case assets.SCOPE_DEPARTMENT:
-		if _, err := computeResourceMetaString(meta, "departmentId"); err != nil {
+		if _, err := computeResourceMetaString(meta, computeResourceDepartmentIDField); err != nil {
 			return "", "", "", err
 		}
 	case assets.SCOPE_PROJECT:
-		if projectID, ok := numberAsPositiveInt32(meta["projectId"]); !ok || projectID <= 0 {
+		if projectID, ok := numberAsPositiveInt32(meta[computeResourceProjectIDField]); !ok || projectID <= 0 {
 			return "", "", "", fmt.Errorf("compute resource response meta.projectId must be a positive 32-bit integer: %w", runaimcp.ErrUpstream)
 		}
 	default:

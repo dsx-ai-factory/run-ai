@@ -20,7 +20,7 @@ import (
 type listComputeResourcesInput struct {
 	ComputeResourceID  string `json:"computeResourceId,omitempty" jsonschema:"Filter by exact compute resource asset ID (UUID)."`
 	Name               string `json:"name,omitempty"              jsonschema:"Filter by exact compute resource name."`
-	Scope              string `json:"scope,omitempty"             jsonschema:"Filter by API scope. One of: tenant, cluster, department, project. tenant includes inherited system presets; other values are exact. Mutually exclusive with includeDescendants."`
+	Scope              string `json:"scope,omitempty"             jsonschema:"Filter by API scope. One of: tenant, cluster, department, project. tenant includes inherited system presets; other values are exact. Mutually exclusive with includeDescendants."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	ClusterID          string `json:"clusterId,omitempty"         jsonschema:"Filter by cluster UUID. Higher-scope resources may also be returned unless scope is set."`
 	DepartmentID       string `json:"departmentId,omitempty"      jsonschema:"Filter by department ID. Higher-scope resources may also be returned unless scope is set."`
 	ProjectID          *int32 `json:"projectId,omitempty"         jsonschema:"Filter by positive numeric project ID. Higher-scope resources may also be returned unless scope is set."`
@@ -46,7 +46,7 @@ func (in listComputeResourcesInput) Validate() error {
 		return fmt.Errorf("scope must be one of: tenant, cluster, department, project")
 	}
 	if in.ClusterID != "" {
-		if err := common.ValidateUUID("clusterId", in.ClusterID); err != nil {
+		if err := common.ValidateUUID(computeResourceClusterIDField, in.ClusterID); err != nil {
 			return err
 		}
 	}
@@ -54,7 +54,7 @@ func (in listComputeResourcesInput) Validate() error {
 		return fmt.Errorf("projectId must be positive")
 	}
 	if in.DepartmentID != "" {
-		if _, err := common.RequiredString("departmentId", in.DepartmentID); err != nil {
+		if _, err := common.RequiredString(computeResourceDepartmentIDField, in.DepartmentID); err != nil {
 			return err
 		}
 	}

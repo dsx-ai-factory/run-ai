@@ -375,7 +375,12 @@ func validateComputeResourceRequestShape(request map[string]any, create bool) er
 		if spec, ok := request["spec"].(map[string]any); !ok || spec == nil {
 			return fmt.Errorf("request.spec must be an object for update; use an empty object to clear all compute settings")
 		}
-		for _, field := range []string{"scope", "clusterId", "departmentId", "projectId"} {
+		for _, field := range []string{
+			computeResourceScopeField,
+			computeResourceClusterIDField,
+			computeResourceDepartmentIDField,
+			computeResourceProjectIDField,
+		} {
 			if _, exists := meta[field]; exists {
 				return fmt.Errorf("request.meta.%s is create-only; update cannot move a compute resource between scopes", field)
 			}
@@ -383,15 +388,15 @@ func validateComputeResourceRequestShape(request map[string]any, create bool) er
 		return nil
 	}
 
-	scope, err := common.RequiredString("request.meta.scope", meta["scope"])
+	scope, err := common.RequiredString("request.meta.scope", meta[computeResourceScopeField])
 	if err != nil {
 		return err
 	}
-	clusterIDValue, clusterIDSet := nonNilMapField(meta, "clusterId")
+	clusterIDValue, clusterIDSet := nonNilMapField(meta, computeResourceClusterIDField)
 	clusterID, _ := clusterIDValue.(string)
-	departmentIDValue, departmentIDSet := nonNilMapField(meta, "departmentId")
+	departmentIDValue, departmentIDSet := nonNilMapField(meta, computeResourceDepartmentIDField)
 	departmentID, _ := departmentIDValue.(string)
-	projectIDValue, projectIDSet := nonNilMapField(meta, "projectId")
+	projectIDValue, projectIDSet := nonNilMapField(meta, computeResourceProjectIDField)
 	projectID, hasProjectID := numberAsPositiveInt32(projectIDValue)
 	switch assets.Scope(scope) {
 	case assets.SCOPE_TENANT:
@@ -441,11 +446,11 @@ func validateCreatedComputeResourceScope(request, response map[string]any) error
 	if requested != returned || (requested && requestedDescription != responseDescription) {
 		return fmt.Errorf("compute resource response description does not match the create request: %w", runaimcp.ErrUpstream)
 	}
-	scope, _ := requestMeta["scope"].(string)
+	scope, _ := requestMeta[computeResourceScopeField].(string)
 	switch assets.Scope(scope) {
 	case assets.SCOPE_CLUSTER:
-		expected, _ := requestMeta["clusterId"].(string)
-		actual, err := computeResourceMetaString(responseMeta, "clusterId")
+		expected, _ := requestMeta[computeResourceClusterIDField].(string)
+		actual, err := computeResourceMetaString(responseMeta, computeResourceClusterIDField)
 		if err != nil {
 			return err
 		}
@@ -453,8 +458,8 @@ func validateCreatedComputeResourceScope(request, response map[string]any) error
 			return fmt.Errorf("compute resource response clusterId is %q, expected %q: %w", actual, expected, runaimcp.ErrUpstream)
 		}
 	case assets.SCOPE_DEPARTMENT:
-		expected, _ := requestMeta["departmentId"].(string)
-		actual, err := computeResourceMetaString(responseMeta, "departmentId")
+		expected, _ := requestMeta[computeResourceDepartmentIDField].(string)
+		actual, err := computeResourceMetaString(responseMeta, computeResourceDepartmentIDField)
 		if err != nil {
 			return err
 		}
@@ -462,8 +467,8 @@ func validateCreatedComputeResourceScope(request, response map[string]any) error
 			return fmt.Errorf("compute resource response departmentId is %q, expected %q: %w", actual, expected, runaimcp.ErrUpstream)
 		}
 	case assets.SCOPE_PROJECT:
-		expected, _ := numberAsPositiveInt32(requestMeta["projectId"])
-		actual, ok := numberAsPositiveInt32(responseMeta["projectId"])
+		expected, _ := numberAsPositiveInt32(requestMeta[computeResourceProjectIDField])
+		actual, ok := numberAsPositiveInt32(responseMeta[computeResourceProjectIDField])
 		if !ok || actual != expected {
 			return fmt.Errorf("compute resource response projectId is invalid or does not match %d: %w", expected, runaimcp.ErrUpstream)
 		}
