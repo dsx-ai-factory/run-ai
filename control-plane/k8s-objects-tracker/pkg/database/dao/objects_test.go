@@ -67,7 +67,7 @@ var _ = Describe("Objects", func() {
 			m := setupDaoMock(GinkgoT())
 			tx := m.ExpectTransaction()
 			tx.Begin()
-			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT (tenant_id,type,cluster_id,name,project_id) WHERE type IN ('StorageClass','DeviceClass') DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).Returns(1)
+			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT (tenant_id,type,cluster_id,name) WHERE type IN ('StorageClass','DeviceClass') DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).Returns(1)
 			tx.Commit()
 			apiErr := UpsertObjects(ctxWithTenant(1),
 				&models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeStorageClass},
@@ -91,7 +91,7 @@ var _ = Describe("Objects", func() {
 			m := setupDaoMock(GinkgoT())
 			tx := m.ExpectTransaction()
 			tx.Begin()
-			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT (tenant_id,type,cluster_id,name,project_id) WHERE type IN ('StorageClass','DeviceClass') DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).ReturnsError(errors.New("boom"))
+			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT (tenant_id,type,cluster_id,name) WHERE type IN ('StorageClass','DeviceClass') DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).ReturnsError(errors.New("boom"))
 			tx.Rollback()
 			apiErr := UpsertObjects(ctxWithTenant(1),
 				&models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeStorageClass},

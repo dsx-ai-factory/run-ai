@@ -139,7 +139,7 @@ func objectsOnConflictFor(objectType string) (clause.OnConflict, error) {
 			UpdateAll: true,
 			Columns: []clause.Column{
 				{Name: "tenant_id"}, {Name: "type"}, {Name: "cluster_id"},
-				{Name: "name"}, {Name: "project_id"},
+				{Name: "name"},
 			},
 			TargetWhere: clause.Where{Exprs: []clause.Expression{clause.Expr{
 				SQL: fmt.Sprintf("type IN ('%s','%s')", models.ObjectTypeStorageClass, models.ObjectTypeDeviceClass),
