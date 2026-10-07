@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package integration_test
+package connections
 
 import (
 	"testing"
@@ -12,7 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestComposerIntegration(t *testing.T) {
+func TestConnections(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "composer_v2 integration tests suite")
+	RunSpecs(t, "V1 connections suite")
 }

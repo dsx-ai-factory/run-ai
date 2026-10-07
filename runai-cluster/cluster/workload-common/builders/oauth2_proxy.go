@@ -6,7 +6,6 @@
 package builders
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -17,12 +16,10 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
-	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	featuregate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/feature-gate"
 	commonutils "github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/ptr"
 	"knative.dev/pkg/apis"
 )
 
@@ -322,37 +319,6 @@ func SanitizeAuthorizedGroups(authorizedGroups string) (string, error) {
 	}
 
 	return strings.Join(validGroups, ","), nil
-}
-
-func ComposeOauthIngressUrl(ctx context.Context, exposedUrl flds.ExposedUrlItemAndRules, nick string, noSuffixUrlGenerated *bool, name string) (*apis.URL, error) {
-	// validate consistency b/w the customUrl flag and the url value
-	//
-	var url *apis.URL
-
-	customUrlEnabled := ptr.Deref(exposedUrl.Value.CustomUrl, false)
-	customUrlProvided := ptr.Deref(exposedUrl.Value.Url, "") != ""
-	if customUrlEnabled && !customUrlProvided {
-		return url, errors.New("url is mandatory when customUrl is enabled")
-	}
-	if !customUrlEnabled && customUrlProvided {
-		return url, errors.New("url should only be provided for customUrl")
-	}
-
-	var urlErr error
-	if customUrlProvided {
-		url, urlErr = apis.ParseURL(*exposedUrl.Value.Url)
-	} else {
-		urlSuffix := nick
-		if !*noSuffixUrlGenerated {
-			urlSuffix = ""
-			*noSuffixUrlGenerated = true
-		}
-		url, urlErr = ComposeExposedUrlInt(ctx, urlSuffix, name)
-	}
-	if urlErr != nil {
-		return url, urlErr
-	}
-	return url, nil
 }
 
 func getOidcIssuerUrl() string {

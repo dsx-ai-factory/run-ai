@@ -17,23 +17,18 @@ import (
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	managerApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/builders/common"
 )
 
 const fakeDomain = "https://fake-domain.com"
 
 type ConnectionsPreProcessor struct {
-	WorkloadType workloadsApi.WorkloadType
 	WorkloadName string
 	ProjectName  string
 
-	// ResourceNamePrefix overrides the workload-initials prefix (iw/tw/dw/infw).
-	// WorkloadRunner IW/TW composers use "job" to correlate notification
-	// connections with the networking resources they create. Kubeflow composers
-	// use "kf"; multi-worker networking is rejected before resource names
-	// require replica indexes. When empty, the V1 workloadTypeToInitials mapping
-	// is used.
+	// PortResourceNames is supplied by the V1 path for existing native resources.
+	PortResourceNames func(*field_types.PortsField) map[string]ServiceAndPortName
+
+	// WorkloadRunner callers select resource naming through their resource prefix.
 	ResourceNamePrefix            string
 	WorkloadV2NetworkingSupported bool
 }
@@ -42,18 +37,6 @@ var portsConnectionTypes = datastructs.NewSet[string](
 	string(assetsApi.INTERNALCONNECTIONTYPE_LOAD_BALANCER),
 	string(assetsApi.INTERNALCONNECTIONTYPE_NODE_PORT),
 	string(assetsApi.INTERNALCONNECTIONTYPE_SERVING_PORT),
-)
-
-var workloadTypeToInitials = map[workloadsApi.WorkloadType]string{
-	workloadsApi.WORKLOADTYPE_WORKSPACE:   common.KindInteractiveWorkloadInitial,
-	workloadsApi.WORKLOADTYPE_TRAINING:    common.KindTrainingWorkloadInitial,
-	workloadsApi.WORKLOADTYPE_DISTRIBUTED: common.KindDistributedWorkloadInitial,
-	workloadsApi.WORKLOADTYPE_INFERENCE:   common.KindInferenceWorkloadInitial,
-}
-
-var (
-	subdomainSupported = builders.ComposeUrlOptions{SubdomainSupported: true}
-	noSubdomainSupport = builders.ComposeUrlOptions{SubdomainSupported: false}
 )
 
 type ServiceAndPortName struct {
@@ -83,33 +66,9 @@ func (cp *ConnectionsPreProcessor) HandlePorts(connections []workloadsApi.Connec
 		return
 	}
 
-	// Resolve the prefix used by the native V1 port Service naming helper. A
-	// missing mapping is not an error - it just means there is no need to
-	// pre-process.
-	workloadInitials, typeFound := workloadTypeToInitials[cp.WorkloadType]
-	if !typeFound {
-		return
+	if cp.PortResourceNames != nil {
+		cp.applyPortResourceNames(connections, cp.PortResourceNames(ports))
 	}
-
-	// activate the workload-common function that is responsible for creating the ports and service names.
-	nickPerPortType := builders.GetPortsPerServiceType(workloadInitials, cp.WorkloadName, ports, nil)
-
-	// find the port and service name that were assigned to each nick
-	nickToResourceNames := make(map[string]ServiceAndPortName)
-
-	for _, serviceNameAndPort := range nickPerPortType {
-		for idx := 0; idx < len(serviceNameAndPort.Ports); idx++ {
-			portName := serviceNameAndPort.Ports[idx].Name
-			portNick := serviceNameAndPort.PortsNick[idx]
-
-			nickToResourceNames[portNick] = ServiceAndPortName{
-				ServiceName: serviceNameAndPort.Name,
-				PortName:    portName,
-			}
-		}
-	}
-
-	cp.applyPortResourceNames(connections, nickToResourceNames)
 }
 
 func (cp *ConnectionsPreProcessor) handleWorkloadRunnerJobPorts(connections []workloadsApi.Connection, ports *field_types.PortsField) {
@@ -211,14 +170,12 @@ func (cp *ConnectionsPreProcessor) HandleExposedUrls(connections []workloadsApi.
 		return
 	}
 
-	noSuffixGenerated := false
-	nickToUrlWithSubdomain, err := builders.GetUrlPerNick(exposedUrls, cp.ProjectName, cp.WorkloadName, fakeDomain, &noSuffixGenerated, subdomainSupported)
+	nickToUrlWithSubdomain, err := exposedURLsPerNick(exposedUrls, cp.ProjectName, cp.WorkloadName, fakeDomain, true)
 	if err != nil {
 		return
 	}
 
-	noSuffixGenerated = false
-	nickToUrlNoSubdomain, err := builders.GetUrlPerNick(exposedUrls, cp.ProjectName, cp.WorkloadName, fakeDomain, &noSuffixGenerated, noSubdomainSupport)
+	nickToUrlNoSubdomain, err := exposedURLsPerNick(exposedUrls, cp.ProjectName, cp.WorkloadName, fakeDomain, false)
 	if err != nil {
 		return
 	}
@@ -288,6 +245,10 @@ func ComposeNetworkingResourceName(prefix, workloadName, suffix string) string {
 		name = fmt.Sprintf("%s-%s-%s", prefix, workloadName, suffix)
 	}
 
+	return shortenNetworkingName(name)
+}
+
+func shortenNetworkingName(name string) string {
 	const (
 		maxResourceNameLength = 63
 		hashLength            = 10
@@ -296,7 +257,7 @@ func ComposeNetworkingResourceName(prefix, workloadName, suffix string) string {
 		return name
 	}
 
-	// Kubernetes Service names are limited to 63 characters. Preserve a useful
+	// Kubernetes Service names and DNS labels are limited to 63 characters. Preserve a useful
 	// prefix for diagnostics and add a stable hash of the complete name so that
 	// truncation cannot make two networking resources share the same name.
 	digest := fmt.Sprintf("%x", sha256.Sum256([]byte(name)))[:hashLength]

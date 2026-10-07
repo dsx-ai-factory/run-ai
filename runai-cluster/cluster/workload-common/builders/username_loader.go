@@ -12,11 +12,11 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	sdkglobal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/global"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	commonutils "github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 const (
@@ -27,24 +27,10 @@ const (
 	UsernameLoaderRunAsUser = int64(65534)
 )
 
-// DefaultUsernameLoaderInitContainerResources returns the legacy resource requirements.
-func DefaultUsernameLoaderInitContainerResources() corev1.ResourceRequirements {
-	return corev1.ResourceRequirements{
-		Requests: corev1.ResourceList{
-			corev1.ResourceCPU:    resource.MustParse("50m"),
-			corev1.ResourceMemory: resource.MustParse("50Mi"),
-		},
-		Limits: corev1.ResourceList{
-			corev1.ResourceCPU:    resource.MustParse("100m"),
-			corev1.ResourceMemory: resource.MustParse("100Mi"),
-		},
-	}
-}
-
 // UsernameLoaderInitContainerResources returns configured resource requirements,
 // preserving the legacy defaults only when configuration is unset.
 func UsernameLoaderInitContainerResources() (corev1.ResourceRequirements, error) {
-	return workloadconfig.UsernameLoaderResources(DefaultUsernameLoaderInitContainerResources())
+	return workloadconfig.UsernameLoaderResources(sdkglobal.DefaultUsernameLoaderInitContainerResources())
 }
 
 // UsernameLoaderSecurityContext returns a non-root security context for the
