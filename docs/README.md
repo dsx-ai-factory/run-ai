@@ -1,9 +1,8 @@
 ---
 hidden: true
 noIndex: true
+title: Home
 ---
-
-# NVIDIA Run:ai Self-Hosted Product Documentation
 
 NVIDIA Run:ai is an open-source AI workload and GPU orchestration platform for managing shared AI infrastructure on Kubernetes.
 

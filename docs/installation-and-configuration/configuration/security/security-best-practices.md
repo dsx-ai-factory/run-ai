@@ -107,8 +107,8 @@ A secure deployment is the foundation on which all other controls rest, and NVID
 
 ## Compliance and Data Privacy
 
-The NVIDIA Run:ai self-hosted mode keeps all models, logs, and user data entirely within your infrastructure, satisfying strict data security needs.&#x20;
+NVIDIA Run:ai keeps all models, logs, and user data entirely within your infrastructure, satisfying strict data security needs.
 
-* Use the self-hosted mode when full control over the environment is required - including deployment and day-2 operations such as upgrades, monitoring, backup, and metadata restore.
+* Maintain full control over the environment, including deployment and day-2 operations such as upgrades, monitoring, backup, and metadata restore.
 * Encrypt secrets and sensitive resources; control secret propagation.
 * Document and audit data flows for regulatory alignment.

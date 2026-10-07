@@ -77,3 +77,6 @@ redirects:
   - source: /multi-tenant/v2.24/:slug*
     destination: https://run-ai-docs.nvidia.com/multi-tenant/2.24
     permanent: false
+  - source: /index.html
+    destination: /self-hosted/documentation/home
+    permanent: true
