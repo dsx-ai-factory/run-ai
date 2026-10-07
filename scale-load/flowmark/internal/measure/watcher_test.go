@@ -407,8 +407,8 @@ func TestAWatchTheServerKeepsEndingIsGivenUpWithTheClosedError(t *testing.T) {
 	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) {
 		t.Fatalf("a watch that keeps closing must end as a closed watch, not a slow cluster: %+v", got)
 	}
-	if opened != 1+maxReconnectCycles || w.Reconnects() != maxReconnectCycles {
-		t.Fatalf("expected %d reopen cycles, got opened=%d reconnects=%d", maxReconnectCycles, opened, w.Reconnects())
+	if opened != 1+maxReconnectCycles || w.Interruptions() != maxReconnectCycles {
+		t.Fatalf("a watch that never saw an event has no resume point, so every reopen is lossy: expected %d, got opened=%d interruptions=%d", maxReconnectCycles, opened, w.Interruptions())
 	}
 }
 
@@ -483,5 +483,71 @@ func TestReopenStartsAtOnceAndResumesFromTheLastSeenResourceVersion(t *testing.T
 	}
 	if len(resumedFrom) != 2 || resumedFrom[1] != "7" {
 		t.Fatalf("the reopened watch must resume from the resourceVersion of the last event, including a Deleted one, got %v", resumedFrom)
+	}
+}
+
+func TestAReconnectWithAResumePointIsNotAnInterruption(t *testing.T) {
+	first := watch.NewFake()
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(ctx context.Context, c k8sclient.WithWatch, list k8sclient.ObjectList, opts ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			if opened == 1 {
+				return first, nil
+			}
+			return c.Watch(ctx, list, opts...)
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	seen := runner("seen")
+	seen.SetResourceVersion("12")
+	first.Add(seen)
+	waitForArrival(t, w, "seen")
+	first.Stop()
+	for w.Reconnects() == 0 {
+		time.Sleep(time.Millisecond)
+	}
+
+	if w.Reconnects() != 1 || w.Interruptions() != 0 {
+		t.Fatalf("a watch resumed from resourceVersion 12 loses nothing, reconnects=%d interruptions=%d", w.Reconnects(), w.Interruptions())
+	}
+}
+
+func TestAReconnectAfterTheServerDroppedTheVersionIsAnInterruption(t *testing.T) {
+	reconnectDelay = time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+	first := watch.NewFake()
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(ctx context.Context, c k8sclient.WithWatch, list k8sclient.ObjectList, opts ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			if opened == 1 {
+				return first, nil
+			}
+			return c.Watch(ctx, list, opts...)
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	seen := runner("seen")
+	seen.SetResourceVersion("12")
+	first.Add(seen)
+	waitForArrival(t, w, "seen")
+	first.Error(&metav1.Status{Code: 410, Reason: metav1.StatusReasonGone, Message: "too old resource version"})
+	for w.Reconnects() == 0 {
+		time.Sleep(time.Millisecond)
+	}
+
+	if w.Reconnects() != 1 || w.Interruptions() != 1 {
+		t.Fatalf("after a 410 the watch restarts without a resume point and events may be missed, reconnects=%d interruptions=%d", w.Reconnects(), w.Interruptions())
 	}
 }

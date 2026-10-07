@@ -56,6 +56,10 @@ func (a *Arrivals) Reconnects() int {
 	return a.runners.Reconnects() + a.pods.Reconnects()
 }
 
+func (a *Arrivals) Interruptions() int {
+	return a.runners.Interruptions() + a.pods.Interruptions()
+}
+
 func (a *Arrivals) Stop() {
 	a.pods.Stop()
 	a.runners.Stop()

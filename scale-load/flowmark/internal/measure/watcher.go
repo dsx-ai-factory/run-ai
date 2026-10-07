@@ -62,15 +62,16 @@ type Watcher struct {
 
 	resourceVersion string
 
-	mu         sync.Mutex
-	created    map[string]time.Time
-	arrived    map[string]time.Time
-	failed     map[string]error
-	lastMark   time.Time
-	closed     error
-	reconnects int
-	changed    chan struct{}
-	done       chan struct{}
+	mu            sync.Mutex
+	created       map[string]time.Time
+	arrived       map[string]time.Time
+	failed        map[string]error
+	lastMark      time.Time
+	closed        error
+	reconnects    int
+	interruptions int
+	changed       chan struct{}
+	done          chan struct{}
 }
 
 func Watch(ctx context.Context, kube k8sclient.WithWatch, kind schema.GroupVersionKind, namespace string, nameOf func(*unstructured.Unstructured) string) (*Watcher, error) {
@@ -122,6 +123,9 @@ func (w *Watcher) reopen(ctx context.Context) (watch.Interface, error) {
 		if err == nil {
 			w.mu.Lock()
 			w.reconnects++
+			if w.resourceVersion == "" {
+				w.interruptions++
+			}
 			w.mu.Unlock()
 			return events, nil
 		}
@@ -137,6 +141,12 @@ func (w *Watcher) Reconnects() int {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.reconnects
+}
+
+func (w *Watcher) Interruptions() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.interruptions
 }
 
 func WatchWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
@@ -235,8 +245,8 @@ func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 		case event, open := <-events.ResultChan():
 			if !open {
 				events.Stop()
-				if w.Reconnects() >= maxReconnectCycles {
-					w.close(fmt.Errorf("%w: the server ended the %s watch %d times", ErrWatchClosed, w.kind.Kind, maxReconnectCycles))
+				if w.Interruptions() >= maxReconnectCycles {
+					w.close(fmt.Errorf("%w: the %s watch lost its resume point %d times", ErrWatchClosed, w.kind.Kind, maxReconnectCycles))
 					return
 				}
 				reopened, err := w.reopen(ctx)
@@ -262,8 +272,8 @@ func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 				if status := apierrors.FromObject(event.Object); apierrors.IsGone(status) || apierrors.IsResourceExpired(status) {
 					w.resourceVersion = ""
 				}
-				if w.Reconnects() >= maxReconnectCycles {
-					w.close(fmt.Errorf("%w: the server ended the %s watch %d times", ErrWatchClosed, w.kind.Kind, maxReconnectCycles))
+				if w.Interruptions() >= maxReconnectCycles {
+					w.close(fmt.Errorf("%w: the %s watch lost its resume point %d times", ErrWatchClosed, w.kind.Kind, maxReconnectCycles))
 					return
 				}
 				reopened, err := w.reopen(ctx)

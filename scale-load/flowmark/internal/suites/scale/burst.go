@@ -98,6 +98,7 @@ type round struct {
 	size          int
 	timings       []measure.Timing
 	unmatched     int
+	reopened      int
 	interruptions int
 	err           error
 }
@@ -185,8 +186,11 @@ func describeRound(r round) string {
 	if r.unmatched > 0 {
 		text += fmt.Sprintf(", %d unmatched arrivals", r.unmatched)
 	}
-	if r.interruptions > 0 {
+	switch {
+	case r.interruptions > 0:
 		text += fmt.Sprintf(", measurement interrupted %d times", r.interruptions)
+	case r.reopened > 0:
+		text += fmt.Sprintf(", watch reopened %d times without losing events", r.reopened)
 	}
 	if r.err != nil {
 		text += ": " + r.err.Error()
@@ -310,7 +314,8 @@ func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, nam
 
 	timings := watcher.WaitAll(knobs.timeout)
 	result.unmatched = watcher.Unmatched()
-	result.interruptions = watcher.Reconnects()
+	result.reopened = watcher.Reconnects()
+	result.interruptions = watcher.Interruptions()
 	if ctx.Err() != nil {
 		result.timings = timings
 		result.err = fmt.Errorf("interrupted before teardown: %w", ctx.Err())
@@ -437,7 +442,7 @@ func roundProblems(r round, summary measure.Summary) []string {
 		problems = append(problems, message)
 	}
 	if r.interruptions > 0 {
-		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the measurement was interrupted %d times: the cluster watch closed and was reopened; "+
+		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the measurement was interrupted %d times: the cluster watch was reopened without its resume point; "+
 			"latencies of workloads in flight during the gaps are inflated", r.index, r.size, r.interruptions))
 	}
 	if summary.FailedCount > 0 {

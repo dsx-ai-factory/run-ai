@@ -115,9 +115,11 @@ rejected; the accepted ones are still timed. A workload that never reached
 the cluster fails the section, is counted in `error` and never enters a
 latency as zero. The health of
 the measurement itself is not a metric: when the cluster watch had to be
-reopened, or a WorkloadRunner or pod was seen more than a second before the
-step that precedes it, the section fails and `error` explains why, and the
-log carries the same line.
+reopened without a resume point, so events in the gap may have been missed,
+or a WorkloadRunner or pod was seen more than a second before the step that
+precedes it, the section fails and `error` explains why, and the log carries
+the same line. A watch the API server closes routinely is resumed from the
+last seen resourceVersion and is only logged.
 
 The results are then judged in two ways. Against history: every p90 is
 compared with the median of its last 7 values in earlier runs of the same

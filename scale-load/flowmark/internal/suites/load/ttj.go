@@ -99,10 +99,10 @@ func (s Suite) Run(ctx context.Context, target core.Target, scenario core.Scenar
 	watchErr := watchers.Err()
 	spans := measure.CollectSpans(filled)
 	log.Printf("%s: %s", suiteName, describe(spans, pacing))
-	log.Printf("%s: measurement %s", suiteName, describeMeasurement(watchers.Reconnects(), measure.OutOfOrder(filled, timestampTolerance)))
+	log.Printf("%s: measurement %s", suiteName, describeMeasurement(watchers.Reconnects(), watchers.Interruptions(), measure.OutOfOrder(filled, timestampTolerance)))
 
 	deleteErr := deleteWorkloads(ctx, clients, project, opts)
-	section = buildSection(spans, pacing, filled, opts, watchers.Reconnects(), interrupted, watchErr)
+	section = buildSection(spans, pacing, filled, opts, watchers.Interruptions(), interrupted, watchErr)
 	if deleteErr != nil {
 		section.Fail(deleteErr.Error())
 	}
@@ -186,13 +186,16 @@ func describe(s measure.Spans, pacing submit.Pacing) string {
 	return text
 }
 
-func describeMeasurement(interruptions int, outOfOrder []string) string {
-	if interruptions == 0 && len(outOfOrder) == 0 {
+func describeMeasurement(reopened, interruptions int, outOfOrder []string) string {
+	if reopened == 0 && len(outOfOrder) == 0 {
 		return "clean: the cluster watch stayed open and every workload's events were seen in order"
 	}
 	var parts []string
-	if interruptions > 0 {
+	switch {
+	case interruptions > 0:
 		parts = append(parts, fmt.Sprintf("interrupted %d times", interruptions))
+	case reopened > 0:
+		parts = append(parts, fmt.Sprintf("the cluster watch was reopened %d times and resumed without losing events", reopened))
 	}
 	if len(outOfOrder) > 0 {
 		parts = append(parts, fmt.Sprintf("timestamps out of order for %d workloads (first: %s)", len(outOfOrder), outOfOrder[0]))
@@ -361,7 +364,8 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 			"a WorkloadRunner or pod was seen more than %s before the step that precedes it", len(outOfOrder), outOfOrder[0], timestampTolerance))
 	}
 	if interruptions > 0 {
-		problems = append(problems, fmt.Sprintf("the measurement was interrupted %d times: the cluster watch closed and was reopened; latencies of workloads in flight during the gaps are inflated", interruptions))
+		problems = append(problems, fmt.Sprintf("the measurement was interrupted %d times: the cluster watch was reopened without its resume point; "+
+			"latencies of workloads in flight during the gaps are inflated", interruptions))
 	}
 
 	section := core.Section{Metrics: metrics, SLO: opts.slo}
