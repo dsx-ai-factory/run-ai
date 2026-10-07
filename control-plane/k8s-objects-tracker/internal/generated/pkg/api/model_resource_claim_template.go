@@ -34,10 +34,9 @@ type ResourceClaimTemplate struct {
 	Namespace string `json:"namespace" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Scope at which this template is tracked by the control plane. Determines which scope-window the row joins for list, prune, and ancestor queries.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//ScopeType string `json:"scopeType"`
-	ScopeType string `json:"scopeType" gorm:"not null;"`
+	//ScopeType ScopeType2 `json:"scopeType"`
+	ScopeType ScopeType2 `json:"scopeType" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.
@@ -116,6 +115,10 @@ func AssertResourceClaimTemplateConstraints(obj ResourceClaimTemplate) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if okValue := obj.ScopeType.IsValid(); !okValue {
+		return &UnsupportedValueError{Field: "ScopeType", Value: string(obj.ScopeType)}
+	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////

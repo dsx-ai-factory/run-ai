@@ -836,11 +836,11 @@ export interface ResourceClaimTemplate {
      */
     'namespace': string;
     /**
-     * Scope at which this template is tracked by the control plane. Determines which scope-window the row joins for list, prune, and ancestor queries. 
-     * @type {string}
+     * 
+     * @type {ScopeType2}
      * @memberof ResourceClaimTemplate
      */
-    'scopeType': ResourceClaimTemplateScopeTypeEnum;
+    'scopeType': ScopeType2;
     /**
      * Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id. 
      * @type {string}
@@ -866,15 +866,6 @@ export interface ResourceClaimTemplate {
      */
     'issues'?: Array<Issue>;
 }
-
-export const ResourceClaimTemplateScopeTypeEnum = {
-    Cluster: 'cluster',
-    Department: 'department',
-    Project: 'project'
-} as const;
-
-export type ResourceClaimTemplateScopeTypeEnum = typeof ResourceClaimTemplateScopeTypeEnum[keyof typeof ResourceClaimTemplateScopeTypeEnum];
-
 /**
  * 
  * @export
@@ -888,6 +879,23 @@ export interface ResourceClaimTemplates {
      */
     'items': Array<ResourceClaimTemplate>;
 }
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const ScopeType2 = {
+    System: 'system',
+    Tenant: 'tenant',
+    Cluster: 'cluster',
+    Department: 'department',
+    Project: 'project'
+} as const;
+
+export type ScopeType2 = typeof ScopeType2[keyof typeof ScopeType2];
+
+
 /**
  * 
  * @export

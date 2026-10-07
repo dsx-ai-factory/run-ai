@@ -14,14 +14,7 @@ properties:
     maxLength: 253
     example: runai
   scopeType:
-    type: string
-    enum:
-      - cluster
-      - department
-      - project
-    description: >
-      Scope at which this template is tracked by the control plane. Determines
-      which scope-window the row joins for list, prune, and ancestor queries.
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
   scopeId:
     type: string
     minLength: 1

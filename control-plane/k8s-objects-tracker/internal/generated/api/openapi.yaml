@@ -9438,10 +9438,18 @@ components:
       minLength: 1
       pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
       type: string
+    ScopeType-2:
+      enum:
+      - system
+      - tenant
+      - cluster
+      - department
+      - project
+      type: string
     ResourceClaimTemplate:
       example:
         scopeId: scopeId
-        scopeType: cluster
+        scopeType: system
         assetId: assetId
         origin: assets
         name: rct-gpu-1
@@ -9467,13 +9475,7 @@ components:
           minLength: 1
           type: string
         scopeType:
-          description: |
-            Scope at which this template is tracked by the control plane. Determines which scope-window the row joins for list, prune, and ancestor queries.
-          enum:
-          - cluster
-          - department
-          - project
-          type: string
+          $ref: '#/components/schemas/ScopeType-2'
         scopeId:
           description: |
             Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.
@@ -9502,7 +9504,7 @@ components:
       example:
         items:
         - scopeId: scopeId
-          scopeType: cluster
+          scopeType: system
           assetId: assetId
           origin: assets
           name: rct-gpu-1
@@ -9513,7 +9515,7 @@ components:
           - issue: issue
             namespace: namespace
         - scopeId: scopeId
-          scopeType: cluster
+          scopeType: system
           assetId: assetId
           origin: assets
           name: rct-gpu-1
@@ -9524,7 +9526,7 @@ components:
           - issue: issue
             namespace: namespace
         - scopeId: scopeId
-          scopeType: cluster
+          scopeType: system
           assetId: assetId
           origin: assets
           name: rct-gpu-1
@@ -9535,7 +9537,7 @@ components:
           - issue: issue
             namespace: namespace
         - scopeId: scopeId
-          scopeType: cluster
+          scopeType: system
           assetId: assetId
           origin: assets
           name: rct-gpu-1
@@ -9546,7 +9548,7 @@ components:
           - issue: issue
             namespace: namespace
         - scopeId: scopeId
-          scopeType: cluster
+          scopeType: system
           assetId: assetId
           origin: assets
           name: rct-gpu-1

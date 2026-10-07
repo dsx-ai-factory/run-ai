@@ -48028,6 +48028,14 @@ components:
       maxLength: 253
       pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
       example: rct-gpu-1
+    ScopeType-2:
+      type: string
+      enum:
+        - system
+        - tenant
+        - cluster
+        - department
+        - project
     ResourceClaimTemplate:
       type: object
       required:
@@ -48045,15 +48053,7 @@ components:
           maxLength: 253
           example: runai
         scopeType:
-          type: string
-          enum:
-            - cluster
-            - department
-            - project
-          description: >
-            Scope at which this template is tracked by the control plane.
-            Determines which scope-window the row joins for list, prune, and
-            ancestor queries.
+          $ref: '#/components/schemas/ScopeType-2'
         scopeId:
           type: string
           minLength: 1
