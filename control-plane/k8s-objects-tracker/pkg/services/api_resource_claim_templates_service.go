@@ -124,7 +124,7 @@ func (s *ResourceClaimTemplatesApiService) SyncResourceClaimTemplates(ctx contex
 		}
 
 		if _, apiErr := HandleResourceIssues(ctx, tenantId, clusterId,
-			rct.ScopeType, rct.ScopeId, obj.ID.String(),
+			string(rct.ScopeType), rct.ScopeId, obj.ID.String(),
 			rct.Issues, string(api.CLUSTERRESOURCETYPE_RESOURCE_CLAIM_TEMPLATE)); apiErr != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed updating resource issues for %s: %v", rct.Name, apiErr)
 			return NewErrorResponse(apiErr), nil
@@ -236,7 +236,7 @@ func (s *ResourceClaimTemplatesApiService) upsertOne(ctx context.Context, cluste
 	if rct.Name == "" {
 		return NewErrorResponse(api.NewValidationError("resource claim template name is mandatory")), nil
 	}
-	if err := common.ValidateScopeType(rct.ScopeType); err != nil {
+	if err := common.ValidateScopeType(string(rct.ScopeType)); err != nil {
 		return NewErrorResponse(err), nil
 	}
 
@@ -256,7 +256,7 @@ func (s *ResourceClaimTemplatesApiService) upsertOne(ctx context.Context, cluste
 	}
 
 	if _, apiErr := HandleResourceIssues(ctx, tenantId, clusterId,
-		rct.ScopeType, rct.ScopeId, obj.ID.String(),
+		string(rct.ScopeType), rct.ScopeId, obj.ID.String(),
 		rct.Issues, string(api.CLUSTERRESOURCETYPE_RESOURCE_CLAIM_TEMPLATE)); apiErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed updating resource issues for %s: %v", rct.Name, apiErr)
 		return NewErrorResponse(apiErr), nil

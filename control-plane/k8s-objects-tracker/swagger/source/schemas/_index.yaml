@@ -2,6 +2,8 @@ ClusterId:
   $ref: "../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
 ScopeType:
   $ref: "./Scopes/ScopeType.yaml"
+ResourceScopeType:
+  $ref: "./Scopes/ResourceScopeType.yaml"
 ScopeId:
   $ref: "./Scopes/ScopeId.yaml"
 PVCs:

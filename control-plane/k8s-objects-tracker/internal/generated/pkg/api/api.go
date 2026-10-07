@@ -278,7 +278,7 @@ type ResourceClaimTemplatesAPIServicer interface {
 	ListResourceClaimTemplates(context.Context, string, string, string, string, string) (ImplResponse, error)
 	UpdateResourceClaimTemplate(context.Context, string, ResourceClaimTemplate) (ImplResponse, error)
 	CreateResourceClaimTemplate(context.Context, string, ResourceClaimTemplate) (ImplResponse, error)
-	DeleteResourceClaimTemplate(context.Context, string, string, string, string) (ImplResponse, error)
+	DeleteResourceClaimTemplate(context.Context, string, ResourceScopeType, string, string) (ImplResponse, error)
 	SyncResourceClaimTemplates(context.Context, string, ResourceClaimTemplates) (ImplResponse, error)
 }
 

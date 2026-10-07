@@ -113,7 +113,7 @@ func (s *ResourceClaimTemplatesAPIService) CreateResourceClaimTemplate(ctx conte
 }
 
 // DeleteResourceClaimTemplate - delete a Resource Claim Template
-func (s *ResourceClaimTemplatesAPIService) DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeType string, scopeId string, name string) (ImplResponse, error) {
+func (s *ResourceClaimTemplatesAPIService) DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeType ResourceScopeType, scopeId string, name string) (ImplResponse, error) {
 	// TODO - update DeleteResourceClaimTemplate with the required logic for this service method.
 	// Add api_resource_claim_templates_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

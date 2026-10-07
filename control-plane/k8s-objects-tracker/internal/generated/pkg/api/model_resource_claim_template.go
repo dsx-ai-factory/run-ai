@@ -35,8 +35,8 @@ type ResourceClaimTemplate struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//ScopeType ScopeType2 `json:"scopeType"`
-	ScopeType ScopeType2 `json:"scopeType" gorm:"not null;"`
+	//ScopeType ResourceScopeType `json:"scopeType"`
+	ScopeType ResourceScopeType `json:"scopeType" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.

@@ -58,7 +58,7 @@ pkg/api/model_pvc_volume_mode.go
 pkg/api/model_pvcs.go
 pkg/api/model_resource_claim_template.go
 pkg/api/model_resource_claim_templates.go
-pkg/api/model_scope_type_2.go
+pkg/api/model_resource_scope_type.go
 pkg/api/model_secret.go
 pkg/api/model_secret_creation_request.go
 pkg/api/model_secret_list_info.go

@@ -48028,11 +48028,10 @@ components:
       maxLength: 253
       pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
       example: rct-gpu-1
-    ScopeType-2:
+    ResourceScopeType:
+      description: The scope type the resource is defined at.
       type: string
       enum:
-        - system
-        - tenant
         - cluster
         - department
         - project
@@ -48053,7 +48052,7 @@ components:
           maxLength: 253
           example: runai
         scopeType:
-          $ref: '#/components/schemas/ScopeType-2'
+          $ref: '#/components/schemas/ResourceScopeType'
         scopeId:
           type: string
           minLength: 1
@@ -62381,18 +62380,13 @@ components:
       schema:
         type: string
       required: true
-    ScopeType-2:
+    ResourceScopeType:
       name: scopeType
       in: query
       required: true
       description: The resource scope type to filter by.
       schema:
-        type: string
-        enum:
-          - tenant
-          - cluster
-          - department
-          - project
+        $ref: '#/components/schemas/ResourceScopeType'
     ScopeIdRequired:
       name: scopeId
       in: query

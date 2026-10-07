@@ -125,7 +125,7 @@ delete:
     - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
   parameters:
     - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
-    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ScopeType.yaml"
+    - $ref: "../parameters/query/mandatory/ResourceScopeType.yaml"
     - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ScopeIdRequired.yaml"
     - $ref: '../parameters/query/mandatory/ObjectByName.yaml'
   responses:

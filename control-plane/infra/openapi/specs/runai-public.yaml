@@ -215,7 +215,6 @@ paths:
     get:
       summary: Count nodes
       operationId: count_nodes
-      x-service: cluster-service
       description: Count nodes
       tags:
         - Nodes
@@ -249,7 +248,6 @@ paths:
   /api/v1/clusters:
     get:
       summary: Get a list of clusters.
-      x-service: cluster-service
       description: Retrieve a list of clusters with details.
       operationId: get_clusters
       tags:
@@ -278,7 +276,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     post:
       summary: Create a cluster.
-      x-service: cluster-service
       description: Use to create a Kubernetes cluster.
       operationId: create_cluster
       tags:
@@ -311,7 +308,6 @@ paths:
     get:
       summary: Get clusters minimal data
       operationId: get_clusters_minimal_data
-      x-service: cluster-service
       description: Retrieve essential cluster data required for common operations (e.g., workload submission)
       tags:
         - Clusters
@@ -339,7 +335,6 @@ paths:
     get:
       summary: Get cluster minimal data by id
       operationId: get_cluster_minimal_data_by_id
-      x-service: cluster-service
       description: Retrieve essential data for a specific cluster by ID required for common operations (e.g., workload submission)
       tags:
         - Clusters
@@ -362,7 +357,6 @@ paths:
     get:
       summary: Get cluster by id.
       description: Retrieve cluster details by Universally Unique Identifier (UUID).
-      x-service: cluster-service
       operationId: get_cluster_by_uuid
       tags:
         - Clusters
@@ -388,7 +382,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     delete:
       summary: Delete a cluster by id.
-      x-service: cluster-service
       description: "Use to delete a cluster by Universally Unique Identifier (UUID). \nWill return 202 for success if this api was called on a cluster that its version is >=2.20, \nand force query param is false or not provided.\nWill return 204 for success if force query param is true, or if cluster is in a version < 2.20\n"
       operationId: delete_cluster
       tags:
@@ -411,7 +404,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     put:
       summary: Update a cluster by id.
-      x-service: cluster-service
       description: Use to update the details of a Kubernetes cluster by Universally Unique Identifier (UUID).
       operationId: updateCluster
       tags:
@@ -442,7 +434,6 @@ paths:
     get:
       summary: Get the cluster metrics data.
       description: Retrieve the metrics data for a Kubernetes cluster by Universally Unique Identifier (UUID).
-      x-service: cluster-service
       operationId: get_cluster_metrics
       tags:
         - Clusters
@@ -487,7 +478,6 @@ paths:
       summary: Get the node pool metrics data.
       description: Retrieve the node pool metrics data by Universally Unique Identifier (UUID).
       operationId: get_nodepool_metrics
-      x-service: cluster-service
       tags:
         - NodePools
       parameters:
@@ -527,7 +517,6 @@ paths:
     post:
       summary: Create nodepool
       operationId: create_nodepool
-      x-service: cluster-service
       description: Create nodepool
       tags:
         - NodePools
@@ -556,7 +545,6 @@ paths:
     get:
       summary: Get nodepools
       operationId: get_nodepools
-      x-service: cluster-service
       description: Get nodepools
       tags:
         - NodePools
@@ -591,7 +579,6 @@ paths:
     get:
       summary: Count nodepools
       operationId: count_nodepools
-      x-service: cluster-service
       description: Count nodepools
       tags:
         - NodePools
@@ -622,7 +609,6 @@ paths:
     get:
       summary: Get nodepools minimal
       operationId: get_nodepools_minimal
-      x-service: cluster-service
       description: Retrieve essential node pool data required for common operations (e.g., workload submission)
       tags:
         - NodePools
@@ -653,7 +639,6 @@ paths:
     delete:
       summary: Delete nodepool
       operationId: delete_nodepool
-      x-service: cluster-service
       description: Delete nodepool
       tags:
         - NodePools
@@ -679,7 +664,6 @@ paths:
     put:
       summary: Update nodepool
       operationId: update_nodepool
-      x-service: cluster-service
       description: Update nodepool
       tags:
         - NodePools
@@ -714,7 +698,6 @@ paths:
     patch:
       summary: Patch nodepool fields
       operationId: patch_nodepool
-      x-service: cluster-service
       description: Update only specific fields of a nodepool
       tags:
         - NodePools
@@ -749,7 +732,6 @@ paths:
     get:
       summary: Get nodepool
       operationId: get_nodepool
-      x-service: cluster-service
       description: Get nodepool
       tags:
         - NodePools
@@ -778,7 +760,6 @@ paths:
     get:
       summary: Get nodepool minimal data by ID
       operationId: get_nodepool_minimal
-      x-service: cluster-service
       description: Retrieve essential data for a specific node pool by ID required for common operations (e.g., workload submission)
       tags:
         - NodePools
@@ -801,7 +782,6 @@ paths:
     delete:
       summary: Delete a Node Pool by id.
       operationId: legacy_delete_nodepool
-      x-service: cluster-service
       description: Use to delete a node pool by Universally Unique Identifier (UUID). Deprecated, please use /api/v1/node-pools/{id} instead.
       deprecated: true
       tags:
@@ -847,7 +827,6 @@ paths:
     put:
       summary: Update a Node Pool.
       operationId: legacy_update_nodepool
-      x-service: cluster-service
       description: Use to update the details of a node pool by Universally Unique Identifier (UUID). Deprecated, please use PATCH /api/v1/node-pools/{id} instead.
       deprecated: true
       tags:
@@ -900,7 +879,6 @@ paths:
     put:
       summary: Update labels of a Node Pool.
       operationId: legacy_update_nodepool_labels
-      x-service: cluster-service
       description: Use to update the labels of a node pool. Deprecated, please use PATCH /api/v1/node-pools/{id} instead.
       deprecated: true
       tags:
@@ -953,7 +931,6 @@ paths:
     get:
       summary: Get the cluster's Node Pools.
       operationId: legacy_get_nodepools
-      x-service: cluster-service
       description: Retrieve all the node pools with details from the cluster by Universally Unique Identifier (UUID). Deprecated, please use /api/v1/node-pools instead.
       deprecated: true
       tags:
@@ -998,7 +975,6 @@ paths:
     post:
       summary: Create a Node Pool.
       operationId: legacy_create_nodepool
-      x-service: cluster-service
       description: Use to create a node pool in a cluster by Universally Unique Identifier (UUID). Deprecated, please use /api/v1/node-pools instead.
       deprecated: true
       tags:
@@ -1043,7 +1019,6 @@ paths:
     get:
       summary: Retrieve the installation instructions of a cluster by ID.
       description: "Use to retrieve installation instruction for a cluster by Universally Unique Identifier (UUID). \nSupports clusters version 2.15 or above.\n"
-      x-service: cluster-service
       operationId: get_cluster_install_info_by_uuid
       tags:
         - Clusters
@@ -1073,7 +1048,6 @@ paths:
       summary: Get a list of nodes.
       description: Retrieve a list of nodes from all the Kubernetes clusters of the tenant.
       operationId: get_tenant_nodes
-      x-service: cluster-service
       tags:
         - Nodes
       parameters:
@@ -1105,7 +1079,6 @@ paths:
       summary: Get a node by ID.
       description: Retrieve a node by its id.
       operationId: get_node
-      x-service: cluster-service
       tags:
         - Nodes
       parameters:
@@ -1131,7 +1104,6 @@ paths:
     get:
       summary: Count tenant nodes
       operationId: count_tenant_nodes
-      x-service: cluster-service
       description: Count nodes from all the Kubernetes clusters of the tenant.
       tags:
         - Nodes
@@ -1166,7 +1138,6 @@ paths:
       summary: Get node telemetry data.
       description: Retrieve node telemetry data for use in analysis applications.
       operationId: get_node_telemetry
-      x-service: cluster-service
       tags:
         - Nodes
       parameters:
@@ -1199,7 +1170,6 @@ paths:
       summary: Get the node metrics data.
       description: Retrieve the node metrics data by Universally Unique Identifier (UUID).
       operationId: get_node_metrics
-      x-service: cluster-service
       tags:
         - Nodes
       parameters:
@@ -1237,7 +1207,6 @@ paths:
   /api/v1/network-topologies:
     get:
       summary: Get network topologies.
-      x-service: cluster-service
       description: Retrieve a list of network topologies with details.
       operationId: get_network_topologies
       tags:
@@ -1268,7 +1237,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     post:
       summary: Create network topologies
-      x-service: cluster-service
       description: Creates a network topology object based on the provided specification.
       operationId: create_network_topology
       tags:
@@ -1302,7 +1270,6 @@ paths:
   /api/v1/network-topologies/count:
     get:
       summary: Count the amount of network topologies in a tenant.
-      x-service: cluster-service
       description: Retrieve the count of network topologies in a tenant group by selected attributes
       operationId: get_network_topologies_count
       tags:
@@ -1330,7 +1297,6 @@ paths:
     get:
       summary: Get network topology by id.
       description: Retrieve network topology details by Universally Unique Identifier (UUID).
-      x-service: cluster-service
       operationId: get_network_topology_by_id
       tags:
         - Network Topologies
@@ -1355,7 +1321,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     delete:
       summary: Delete network topology by ID.
-      x-service: cluster-service
       description: Delete an existing network topology by its ID.
       operationId: delete_network_topology
       tags:
@@ -1378,10 +1343,7 @@ paths:
   /api/v1/clusters/settings:
     get:
       summary: Get cluster settings
-      x-service: cluster-service
       operationId: get_cluster_settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -1404,13 +1366,11 @@ paths:
   /api/v1/clusters/settings/{key}:
     put:
       summary: Update cluster setting by key
-      x-service: cluster-service
       operationId: update_cluster_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/ClusterSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -1438,13 +1398,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     get:
       summary: Get cluster setting by key
-      x-service: cluster-service
       operationId: get_cluster_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/ClusterSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -1471,10 +1429,7 @@ paths:
   /api/v1/node-pools/settings:
     get:
       summary: Get node pool settings
-      x-service: cluster-service
       operationId: get_node_pool_settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -1497,13 +1452,11 @@ paths:
   /api/v1/node-pools/settings/{key}:
     put:
       summary: Update node pool setting by key
-      x-service: cluster-service
       operationId: update_node_pool_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/NodePoolSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -1531,13 +1484,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     get:
       summary: Get node pool setting by key
-      x-service: cluster-service
       operationId: get_node_pool_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/NodePoolSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -1566,7 +1517,6 @@ paths:
       summary: Get ranks
       operationId: get_ranks
       description: Get ranks.
-      x-service: org-unit-service
       tags:
         - Org unit
       responses:
@@ -1595,11 +1545,8 @@ paths:
     get:
       summary: Get org unit settings
       operationId: get_org_unit_settings
-      x-service: org-unit-service
       tags:
         - Settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -1621,12 +1568,10 @@ paths:
     put:
       summary: Update org unit setting by key
       operationId: update_org_unit_setting_by_key
-      x-service: org-unit-service
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/OrgUnitSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -1655,12 +1600,10 @@ paths:
     get:
       summary: Get org unit setting by key
       operationId: get_org_unit_setting_by_key
-      x-service: org-unit-service
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/OrgUnitSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -1688,7 +1631,6 @@ paths:
     get:
       summary: List reports
       operationId: list_reports
-      x-service: org-unit-service
       tags:
         - Reports
       parameters:
@@ -1721,7 +1663,6 @@ paths:
     post:
       summary: Create a new report request.
       operationId: create_report
-      x-service: org-unit-service
       tags:
         - Reports
       requestBody:
@@ -1750,7 +1691,6 @@ paths:
     get:
       summary: Count reports
       operationId: count_reports
-      x-service: org-unit-service
       tags:
         - Reports
       parameters:
@@ -1775,7 +1715,6 @@ paths:
     get:
       summary: Reports availability
       operationId: are_reports_available
-      x-service: org-unit-service
       tags:
         - Reports
       responses:
@@ -1799,7 +1738,6 @@ paths:
     post:
       summary: Delete multiple reports in batch.
       operationId: batch_delete_reports
-      x-service: org-unit-service
       description: Deletes multiple reports in a single request. Returns per-report outcomes; deletion is processed asynchronously on the metrics side.
       tags:
         - Reports
@@ -1831,7 +1769,6 @@ paths:
     get:
       summary: Get report
       operationId: get_report_by_id
-      x-service: org-unit-service
       parameters:
         - $ref: '#/components/parameters/ReportId'
       tags:
@@ -1856,7 +1793,6 @@ paths:
     delete:
       summary: Delete report
       operationId: delete_report_by_id
-      x-service: org-unit-service
       parameters:
         - $ref: '#/components/parameters/ReportId'
       tags:
@@ -1878,7 +1814,6 @@ paths:
     get:
       summary: Download report
       operationId: download_report_by_id
-      x-service: org-unit-service
       parameters:
         - $ref: '#/components/parameters/ReportId'
       tags:
@@ -1902,7 +1837,6 @@ paths:
     post:
       summary: Create department
       operationId: create_department
-      x-service: org-unit-service
       description: Create Department
       tags:
         - Departments
@@ -1933,7 +1867,6 @@ paths:
     get:
       summary: Get departments
       operationId: get_departments
-      x-service: org-unit-service
       description: list departments
       tags:
         - Departments
@@ -1973,7 +1906,6 @@ paths:
     put:
       summary: Update department
       operationId: update_department
-      x-service: org-unit-service
       description: Update department by Id
       tags:
         - Departments
@@ -2006,7 +1938,6 @@ paths:
     get:
       summary: Get department
       operationId: get_department
-      x-service: org-unit-service
       description: Get department by Id
       tags:
         - Departments
@@ -2030,7 +1961,6 @@ paths:
     delete:
       summary: Delete department
       operationId: delete_department
-      x-service: org-unit-service
       description: Delete department by Id
       tags:
         - Departments
@@ -2053,7 +1983,6 @@ paths:
     put:
       summary: Update department resources
       operationId: update_department_resources
-      x-service: org-unit-service
       description: Update department resources by Id
       tags:
         - Departments
@@ -2090,7 +2019,6 @@ paths:
     patch:
       summary: Patch department resources
       operationId: patch_department_resources
-      x-service: org-unit-service
       description: Partial updates to specific items in the list. Should be used for update one or more attributes of an item without modifying the entire resource.
       tags:
         - Departments
@@ -2129,7 +2057,6 @@ paths:
       summary: Get department metrics data.
       operationId: get_department_metrics
       description: Retrieves department data metrics from the metrics database. Use in reporting and analysis tools.
-      x-service: org-unit-service
       tags:
         - Departments
       parameters:
@@ -2170,7 +2097,6 @@ paths:
     get:
       summary: Get departments telemetry
       operationId: get_departments_telemetry
-      x-service: org-unit-service
       tags:
         - Departments
       parameters:
@@ -2198,7 +2124,6 @@ paths:
     get:
       summary: Count departments
       operationId: count_departments
-      x-service: org-unit-service
       description: count departments
       tags:
         - Departments
@@ -2224,7 +2149,6 @@ paths:
       summary: Create project
       operationId: create_project
       description: Create a project
-      x-service: org-unit-service
       tags:
         - Projects
       requestBody:
@@ -2254,7 +2178,6 @@ paths:
     get:
       summary: Get projects
       operationId: get_projects
-      x-service: org-unit-service
       description: List projects
       tags:
         - Projects
@@ -2294,7 +2217,6 @@ paths:
     put:
       summary: Update project
       operationId: update_project
-      x-service: org-unit-service
       description: Update project by Id
       tags:
         - Projects
@@ -2327,7 +2249,6 @@ paths:
     get:
       summary: Get project
       operationId: get_project
-      x-service: org-unit-service
       description: Get a project by id
       tags:
         - Projects
@@ -2351,7 +2272,6 @@ paths:
     delete:
       summary: Delete project
       operationId: delete_project
-      x-service: org-unit-service
       description: Delete a project
       tags:
         - Projects
@@ -2378,7 +2298,6 @@ paths:
     put:
       summary: Update project resources
       operationId: update_project_resources
-      x-service: org-unit-service
       description: Update projects resources
       tags:
         - Projects
@@ -2413,7 +2332,6 @@ paths:
     patch:
       summary: Patch project resources
       operationId: patch_project_resources
-      x-service: org-unit-service
       description: Partial updates to specific items in the list. Should be used for update one or more attributes of an item without modifying the entire resource.
       tags:
         - Projects
@@ -2450,7 +2368,6 @@ paths:
       summary: Get project metrics data.
       operationId: get_project_metrics
       description: Retrieves project data metrics from the metrics database. Use in reporting and analysis tools.
-      x-service: org-unit-service
       tags:
         - Projects
       parameters:
@@ -2491,7 +2408,6 @@ paths:
     get:
       summary: Get projects telemetry
       operationId: get_projects_telemetry
-      x-service: org-unit-service
       description: Get projects telemetry data by the given query parameters
       tags:
         - Projects
@@ -2521,7 +2437,6 @@ paths:
     get:
       summary: Count projects
       operationId: count_projects
-      x-service: org-unit-service
       description: count projects
       tags:
         - Projects
@@ -2547,7 +2462,6 @@ paths:
     get:
       summary: Get departments node pool resources
       operationId: get_department_node_pool_resources
-      x-service: org-unit-service
       description: List departments node pool resources
       tags:
         - Departments
@@ -2587,7 +2501,6 @@ paths:
     get:
       summary: Count departments node pool resources
       operationId: count_department_node_pool_resources
-      x-service: org-unit-service
       description: Count departments node pool resources
       tags:
         - Departments
@@ -2613,7 +2526,6 @@ paths:
     post:
       summary: Patch multiple departments node pool resources in batch.
       operationId: batch_patch_department_node_pool_resources
-      x-service: org-unit-service
       description: Partially updates node pool resource quotas for multiple departments in a single request.
       tags:
         - Departments
@@ -2645,7 +2557,6 @@ paths:
     get:
       summary: Get projects node pool resources
       operationId: get_project_node_pool_resources
-      x-service: org-unit-service
       description: List projects node pool resources
       tags:
         - Projects
@@ -2685,7 +2596,6 @@ paths:
     get:
       summary: Count projects node pool resources
       operationId: count_project_node_pool_resources
-      x-service: org-unit-service
       description: Count projects node pool resources
       tags:
         - Projects
@@ -2711,7 +2621,6 @@ paths:
     post:
       summary: Patch multiple projects node pool resources in batch.
       operationId: batch_patch_project_node_pool_resources
-      x-service: org-unit-service
       description: Partially updates node pool resource quotas for multiple projects in a single request.
       tags:
         - Projects
@@ -2744,7 +2653,6 @@ paths:
       summary: List compute assets.
       description: Use to retrieve a list of compute assets.
       operationId: list_compute_assets
-      x-service: assets-service
       tags:
         - Compute
       parameters:
@@ -2775,7 +2683,6 @@ paths:
       summary: Create compute asset.
       description: Use to create a compute asset.
       operationId: create_compute_asset
-      x-service: assets-service
       tags:
         - Compute
       requestBody:
@@ -2807,7 +2714,6 @@ paths:
       summary: Retrieve a compute asset.
       description: Use to retrieve the details of a compute asset by id.
       operationId: get_compute_asset_by_id
-      x-service: assets-service
       tags:
         - Compute
       parameters:
@@ -2834,7 +2740,6 @@ paths:
       summary: Update a compute asset.
       description: Use to update the details of a compute asset by id.
       operationId: update_compute_asset_by_id
-      x-service: assets-service
       tags:
         - Compute
       requestBody:
@@ -2861,7 +2766,6 @@ paths:
       summary: Delete a compute asset.
       description: Use to delete a compute asset, by id.
       operationId: delete_compute_asset_by_id
-      x-service: assets-service
       tags:
         - Compute
       responses:
@@ -2880,7 +2784,6 @@ paths:
       summary: List credentials.
       description: Use to retrieve a list of all existing credentials.
       operationId: list_credentials_assets
-      x-service: assets-service
       tags:
         - Credentials
       parameters:
@@ -2912,7 +2815,6 @@ paths:
       summary: List access keys.
       description: Use to retrieve a list of S3-compatible access key credentials.
       operationId: list_access_keys
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/AssetNameFilter'
         - $ref: '#/components/parameters/AssetScopeFilter'
@@ -2942,7 +2844,6 @@ paths:
       summary: Create an access key.
       description: Use to create an S3-compatible access key credential.
       operationId: create_access_key
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -2973,7 +2874,6 @@ paths:
       summary: Get an access key.
       description: Use to retrieve the details of an S3-compatible access key credential by id.
       operationId: get_access_key_by_id
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/IncludeUsageInfo'
         - $ref: '#/components/parameters/IncludeStatus'
@@ -3000,7 +2900,6 @@ paths:
       summary: Update an access key.
       description: Use to update the details of an S3-compatible access key credential by id.
       operationId: update_access_key
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3030,7 +2929,6 @@ paths:
       summary: Delete an access key.
       description: Use to delete an S3-compatible access key credential by id.
       operationId: delete_access_key
-      x-service: assets-service
       responses:
         '202':
           $ref: '#/components/responses/202Accepted'
@@ -3053,7 +2951,6 @@ paths:
       summary: List password credentials.
       description: Use to retrieve a list of password credentials.
       operationId: list_passwords
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/AssetNameFilter'
         - $ref: '#/components/parameters/AssetScopeFilter'
@@ -3083,7 +2980,6 @@ paths:
       summary: Create a userid / password credential.
       description: Use to create a userid / password credential.
       operationId: create_password
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3114,7 +3010,6 @@ paths:
       summary: Get a userid / password credential.
       description: Use to retrieve the details of a userid / password credential asset by id.
       operationId: get_password_by_id
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/IncludeUsageInfo'
         - $ref: '#/components/parameters/IncludeStatus'
@@ -3141,7 +3036,6 @@ paths:
       summary: Update a password credential.
       description: Use to Update the details of a password credential by id.
       operationId: update_password
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3171,7 +3065,6 @@ paths:
       summary: Delete a password asset.
       description: Udse to delete a password credential by id.
       operationId: delete_password
-      x-service: assets-service
       responses:
         '202':
           $ref: '#/components/responses/202Accepted'
@@ -3194,7 +3087,6 @@ paths:
       summary: List docker registry credentials.
       description: Use to retrieve a list of docker registry credentials.
       operationId: list_docker_registries
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/AssetNameFilter'
         - $ref: '#/components/parameters/AssetScopeFilter'
@@ -3224,7 +3116,6 @@ paths:
       summary: Create a docker registry credential.
       description: Use to create a docker registry credential containing userid, password and url.
       operationId: create_docker_registry
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3255,7 +3146,6 @@ paths:
       summary: Get a docker registry credential.
       description: Use to retrieve the details of a docker registry credential by id.
       operationId: get_docker_registry_by_id
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/IncludeUsageInfo'
         - $ref: '#/components/parameters/IncludeStatus'
@@ -3282,7 +3172,6 @@ paths:
       summary: Update a docker registry credential.
       description: Use to updates the details of a docker registry credentials by id.
       operationId: update_docker_registry
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3312,7 +3201,6 @@ paths:
       summary: Delete a docker registry credential.
       description: Use to deletes a docker registry credential by id.
       operationId: delete_docker_registry
-      x-service: assets-service
       responses:
         '202':
           $ref: '#/components/responses/202Accepted'
@@ -3335,7 +3223,6 @@ paths:
       summary: List generic-secrets.
       description: Retrieve a list of generic-secret assets.
       operationId: list_generic_secret
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/AssetNameFilter'
         - $ref: '#/components/parameters/AssetScopeFilter'
@@ -3365,7 +3252,6 @@ paths:
       summary: Create a generic-secret.
       description: Use to create a generic-secret asset.
       operationId: create_generic_secret
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3398,7 +3284,6 @@ paths:
       summary: Get a generic-secret.
       description: Returns the details of a generic-secret asset, by id.
       operationId: get_generic_secret_by_id
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/IncludeUsageInfo'
         - $ref: '#/components/parameters/IncludeStatus'
@@ -3425,7 +3310,6 @@ paths:
       summary: Update a generic-secret.
       description: Updates the details of a generic-secret asset, by id.
       operationId: update_generic_secret
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3455,7 +3339,6 @@ paths:
       summary: Delete a generic-secret.
       description: Use to delete a generic-secret asset, by id.
       operationId: delete_generic_secret
-      x-service: assets-service
       responses:
         '204':
           $ref: '#/components/responses/204NoContent'
@@ -3478,7 +3361,6 @@ paths:
       summary: List ngc-api-keys.
       description: Retrieve a list of ngcApiKey assets.
       operationId: list_ngc_api_key
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/AssetNameFilter'
         - $ref: '#/components/parameters/AssetScopeFilter'
@@ -3508,7 +3390,6 @@ paths:
       summary: Create a ngc-api-key.
       description: Use to create a ngc-api-key asset.
       operationId: create_ngc_api_key
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3541,7 +3422,6 @@ paths:
       summary: Get a ngc-api-key.
       description: Returns the details of a ngc-api-key asset, by id.
       operationId: get_ngc_api_key_by_id
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/IncludeUsageInfo'
         - $ref: '#/components/parameters/IncludeStatus'
@@ -3568,7 +3448,6 @@ paths:
       summary: Update a ngc-api-key.
       description: Updates the details of a ngc-api-key asset, by id.
       operationId: update_ngc_api_key
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3598,7 +3477,6 @@ paths:
       summary: Delete a ngc-api-key.
       description: Use to delete a ngc-api-key asset, by id.
       operationId: delete_ngc_api_key
-      x-service: assets-service
       responses:
         '204':
           $ref: '#/components/responses/204NoContent'
@@ -3621,7 +3499,6 @@ paths:
       summary: Get registries.
       description: Retrieve a list of registries assets.
       operationId: list_registries
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/AssetNameFilter'
       responses:
@@ -3643,7 +3520,6 @@ paths:
       summary: Create a registry asset.
       description: Use to create a registry asset containing a registry base url and credentials.
       operationId: create_registry
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3676,7 +3552,6 @@ paths:
       summary: Get a registry.
       description: Retrieve a registry asset by id.
       operationId: get_registry_by_id
-      x-service: assets-service
       responses:
         '200':
           description: Request completed successfully.
@@ -3698,7 +3573,6 @@ paths:
       summary: Delete a registry asset.
       description: Use to delete a registry asset containing registry base url and credentials by id.
       operationId: delete_registry
-      x-service: assets-service
       responses:
         '204':
           description: Registry has been deleted.
@@ -3718,7 +3592,6 @@ paths:
       summary: Update a registry asset.
       description: Use to update a registry asset containing registry base url and credentials by id.
       operationId: update_registry
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -3752,7 +3625,6 @@ paths:
         - $ref: '#/components/parameters/SearchName'
       description: Retrieve a list of repositories from a registry asset.
       operationId: get_repositories
-      x-service: assets-service
       responses:
         '200':
           description: Request completed successfully.
@@ -3787,7 +3659,6 @@ paths:
         - $ref: '#/components/parameters/SearchName'
       description: Retrieve a list of repository tags from a repository asset.
       operationId: get_repository_tags
-      x-service: assets-service
       responses:
         '200':
           description: Request completed successfully.
@@ -3810,7 +3681,6 @@ paths:
       summary: List environment assets.
       description: Use to retrieve a list of environment assets.
       operationId: list_environment_assets
-      x-service: assets-service
       tags:
         - Environment
       parameters:
@@ -3848,7 +3718,6 @@ paths:
       summary: Create an environment asset.
       description: Use to create an environment asset.
       operationId: create_environment_asset
-      x-service: assets-service
       tags:
         - Environment
       requestBody:
@@ -3880,7 +3749,6 @@ paths:
       summary: Get an environment asset.
       description: Use to retrieve the details of environment asset by id.
       operationId: get_environment_asset_by_id
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/IncludeUsageInfo'
         - $ref: '#/components/parameters/ComplyToProject'
@@ -3908,7 +3776,6 @@ paths:
       summary: Update an environment asset.
       description: Use to update the details of environment asset by id.
       operationId: update_environment_asset_by_id
-      x-service: assets-service
       tags:
         - Environment
       requestBody:
@@ -3935,7 +3802,6 @@ paths:
       summary: Delete an environment asset.
       description: Use to delete an environment asset by id.
       operationId: delete_environment_asset_by_id
-      x-service: assets-service
       tags:
         - Environment
       responses:
@@ -3954,7 +3820,6 @@ paths:
       summary: List datasource assets.
       description: Returns a combined list of data-sources.
       operationId: list_datasource_assets
-      x-service: assets-service
       tags:
         - Datasources
       parameters:
@@ -3988,7 +3853,6 @@ paths:
       summary: List Git assets.
       description: Retrieve a list of Git datasource assets.
       operationId: list_git_assets
-      x-service: assets-service
       tags:
         - Git
       parameters:
@@ -4020,7 +3884,6 @@ paths:
       summary: Create a Git asset.
       description: Use to create a a Git datasource asset.
       operationId: create_git_asset
-      x-service: assets-service
       tags:
         - Git
       requestBody:
@@ -4052,7 +3915,6 @@ paths:
       summary: Get a Git asset.
       description: Use to retrieve the details of a Git datasource asset by id.
       operationId: get_git_asset_by_id
-      x-service: assets-service
       tags:
         - Git
       parameters:
@@ -4080,7 +3942,6 @@ paths:
       summary: Update a Git asset.
       description: Use to update the details of Git datasource asset by id.
       operationId: update_git_asset_by_id
-      x-service: assets-service
       tags:
         - Git
       requestBody:
@@ -4107,7 +3968,6 @@ paths:
       summary: Delete a Git asset.
       description: Use to delete a Git datasource asset by id.
       operationId: delete_git_asset_by_id
-      x-service: assets-service
       tags:
         - Git
       responses:
@@ -4128,7 +3988,6 @@ paths:
       summary: List host path assets.
       description: Retrieve a list of hostPath datasource assets.
       operationId: list_host_path_assets
-      x-service: assets-service
       parameters:
         - $ref: '#/components/parameters/AssetNameFilter'
         - $ref: '#/components/parameters/AssetScopeFilter'
@@ -4161,7 +4020,6 @@ paths:
       summary: Create a host path asset.
       description: Use to create a hostPath datasource asset.
       operationId: create_host_path
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -4197,7 +4055,6 @@ paths:
       summary: Get a hostPath asset.
       description: Use to retrieve the details of a hostPath datasource by id.
       operationId: get_host_path_by_id
-      x-service: assets-service
       responses:
         '200':
           description: Request completed successfully.
@@ -4221,7 +4078,6 @@ paths:
       summary: Update a hostPath asset.
       description: Use to update the details of a hostPath datasource by id.
       operationId: update_host_path_by_id
-      x-service: assets-service
       requestBody:
         required: true
         content:
@@ -4251,7 +4107,6 @@ paths:
       summary: Delete a hostPath asset.
       description: Use to delete a hostPath datasource asset by id.
       operationId: delete_host_path_by_id
-      x-service: assets-service
       responses:
         '202':
           $ref: '#/components/responses/202Accepted'
@@ -4272,7 +4127,6 @@ paths:
       summary: List NFS assets.
       description: Retrieve a list of NFS datasource assets.
       operationId: list_nfs_assets
-      x-service: assets-service
       tags:
         - NFS
       parameters:
@@ -4303,7 +4157,6 @@ paths:
       summary: Create an NFS asset.
       description: Use to create an NFS datasource asset.
       operationId: create_nfs_asset
-      x-service: assets-service
       tags:
         - NFS
       requestBody:
@@ -4335,7 +4188,6 @@ paths:
       summary: Get an NFS asset.
       description: Use to retrieve the details of NFS datasource asset by id.
       operationId: get_nfs_asset_by_id
-      x-service: assets-service
       tags:
         - NFS
       parameters:
@@ -4362,7 +4214,6 @@ paths:
       summary: Update an NFS asset.
       description: Use to update the details of NFS datasource asset by id.
       operationId: update_nfs_asset_by_id
-      x-service: assets-service
       tags:
         - NFS
       requestBody:
@@ -4389,7 +4240,6 @@ paths:
       summary: Delete an NFS asset.
       description: Use to delete an NFS datasource asset by id.
       operationId: delete_nfs_asset_by_id
-      x-service: assets-service
       tags:
         - NFS
       responses:
@@ -4408,7 +4258,6 @@ paths:
       summary: List PVC assets.
       description: Retrieves a list of PVC datasource assets.
       operationId: list_pvc_assets
-      x-service: assets-service
       tags:
         - PVC
       parameters:
@@ -4440,7 +4289,6 @@ paths:
       summary: Create a PVC asset.
       description: Use to create a PVC datasource asset.
       operationId: create_pvc_asset
-      x-service: assets-service
       tags:
         - PVC
       requestBody:
@@ -4472,7 +4320,6 @@ paths:
       summary: Get a PVC asset.
       description: Retrieve the details of a PVC datasource asset by id.
       operationId: get_pvc_asset_by_id
-      x-service: assets-service
       tags:
         - PVC
       parameters:
@@ -4500,7 +4347,6 @@ paths:
       summary: Update a PVC asset.
       description: Use to update the details of a PVC datasource asset by id.
       operationId: update_pvc_asset_by_id
-      x-service: assets-service
       tags:
         - PVC
       requestBody:
@@ -4527,7 +4373,6 @@ paths:
       summary: Delete a PVC asset.
       description: Use to delete a PVC datasource asset by id.
       operationId: delete_pvc_asset_by_id
-      x-service: assets-service
       tags:
         - PVC
       responses:
@@ -4546,7 +4391,6 @@ paths:
       summary: Get the PVC history.
       description: Retrieve PVC history details, including events, using a PVC id.
       operationId: get_pvc_history
-      x-service: assets-service
       tags:
         - PVC
       parameters:
@@ -4573,7 +4417,6 @@ paths:
       summary: List S3 assets.
       description: Retrieve a list of S3 compatible datasource assets.
       operationId: list_s3_assets
-      x-service: assets-service
       tags:
         - S3
       parameters:
@@ -4605,7 +4448,6 @@ paths:
       summary: Create an S3 asset.
       description: Use to create an S3 compatible datasource asset.
       operationId: create_s3_asset
-      x-service: assets-service
       tags:
         - S3
       requestBody:
@@ -4637,7 +4479,6 @@ paths:
       summary: Get an S3 asset.
       description: Retrieve the details of S3 compatible datasource asset by id.
       operationId: get_s3_asset_by_id
-      x-service: assets-service
       tags:
         - S3
       parameters:
@@ -4665,7 +4506,6 @@ paths:
       summary: Update an S3 asset.
       description: Use to update the details of an S3 compatible datasource asset by id.
       operationId: update_s3_asset_by_id
-      x-service: assets-service
       tags:
         - S3
       requestBody:
@@ -4694,7 +4534,6 @@ paths:
       operationId: delete_s3_asset_by_id
       parameters:
         - $ref: '#/components/parameters/AssetId'
-      x-service: assets-service
       tags:
         - S3
       responses:
@@ -4714,7 +4553,6 @@ paths:
       description: Retrieve a list of templates.
       operationId: list_templates
       deprecated: true
-      x-service: assets-service
       tags:
         - Template
       parameters:
@@ -4746,7 +4584,6 @@ paths:
       description: Use to create a template.
       operationId: create_template
       deprecated: true
-      x-service: assets-service
       tags:
         - Template
       requestBody:
@@ -4779,7 +4616,6 @@ paths:
       description: Retrieve the details of a template by id.
       operationId: get_template_by_id
       deprecated: true
-      x-service: assets-service
       tags:
         - Template
       responses:
@@ -4801,7 +4637,6 @@ paths:
       summary: Update a template.
       description: Use to update the details of a template by id.
       operationId: update_template
-      x-service: assets-service
       deprecated: true
       tags:
         - Template
@@ -4832,7 +4667,6 @@ paths:
       description: Use to delete a template by id.
       operationId: delete_template_by_id
       deprecated: true
-      x-service: assets-service
       tags:
         - Template
       responses:
@@ -4857,7 +4691,6 @@ paths:
       summary: List ConfigMap datasource assets.
       description: Retrieve a list of ConfigMap datasource assets.
       operationId: list_config_map_assets
-      x-service: assets-service
       tags:
         - ConfigMap
       parameters:
@@ -4889,7 +4722,6 @@ paths:
       summary: Create a ConfigMap datasource asset.
       description: Use to create a ConfigMap datasource asset.
       operationId: create_config_map_asset
-      x-service: assets-service
       tags:
         - ConfigMap
       requestBody:
@@ -4921,7 +4753,6 @@ paths:
       summary: Get a ConfigMap asset.
       description: Retrieve the details of ConfigMap datasource asset by id.
       operationId: get_config_map_asset_by_id
-      x-service: assets-service
       tags:
         - ConfigMap
       parameters:
@@ -4949,7 +4780,6 @@ paths:
       summary: Update a ConfigMap asset.
       description: Use to update the details of a ConfigMap datasource asset by id.
       operationId: update_config_map_asset_by_id
-      x-service: assets-service
       tags:
         - ConfigMap
       requestBody:
@@ -4976,7 +4806,6 @@ paths:
       summary: Delete a ConfigMap asset.
       description: Use to delete a ConfigMap datasource asset by id.
       operationId: delete_config_map_asset_by_id
-      x-service: assets-service
       tags:
         - ConfigMap
       responses:
@@ -4995,7 +4824,6 @@ paths:
       summary: List Secret datasource assets.
       description: Retrieve a list of Secret datasource assets.
       operationId: list_secret_assets
-      x-service: assets-service
       tags:
         - Secret
       parameters:
@@ -5027,7 +4855,6 @@ paths:
       summary: Create a Secret datasource asset.
       description: Use to create a Secret datasource asset.
       operationId: create_secret_asset
-      x-service: assets-service
       tags:
         - Secret
       requestBody:
@@ -5059,7 +4886,6 @@ paths:
       summary: Get a Secret asset.
       description: Retrieve the details of Secret datasource asset by id.
       operationId: get_secret_asset_by_id
-      x-service: assets-service
       tags:
         - Secret
       parameters:
@@ -5087,7 +4913,6 @@ paths:
       summary: Update a Secret asset.
       description: Use to update the details of a Secret datasource asset by id.
       operationId: update_Secret_asset_by_id
-      x-service: assets-service
       tags:
         - Secret
       requestBody:
@@ -5114,7 +4939,6 @@ paths:
       summary: Delete a Secret asset.
       description: Use to delete a Secret datasource asset by id.
       operationId: delete_secret_asset_by_id
-      x-service: assets-service
       tags:
         - Secret
       responses:
@@ -5133,7 +4957,6 @@ paths:
       summary: List policies
       description: Retrieve a list of all the applied policies.
       operationId: list_policies
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5171,7 +4994,6 @@ paths:
       summary: Update a training policy.
       description: Use to apply changes to a training policy for a given organizational unit.
       operationId: update_training_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5201,7 +5023,6 @@ paths:
       summary: Overwrite a training policy.
       description: Use to apply a training policy for a given organizational unit.
       operationId: overwrite_training_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5231,7 +5052,6 @@ paths:
       summary: Get a training policy.
       description: Retrieve the details of a training policy for a given organizational unit.
       operationId: get_training_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5260,7 +5080,6 @@ paths:
       summary: Delete a training policy.
       description: Use to delete a training policy for a given organizational unit.
       operationId: delete_training_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5287,7 +5106,6 @@ paths:
       summary: Update a workspace policy.
       description: Use to apply changes to a workspace policy for a given organizational unit.
       operationId: update_workspace_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5317,7 +5135,6 @@ paths:
       summary: Overwrite a workspace policy.
       description: Ue to apply a workspace policy for a given organizational unit.
       operationId: overwrite_workspace_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5347,7 +5164,6 @@ paths:
       summary: Get a workspace policy.
       description: Retrieve the details of a workspace policy for a given organizational unit.
       operationId: get_workspace_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5376,7 +5192,6 @@ paths:
       summary: Delete a workspace policy.
       description: Use to delete a workspace policy for a given organizational unit.
       operationId: delete_workspace_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5403,7 +5218,6 @@ paths:
       summary: Update a distributed policy.
       description: Use to apply changes to a distributed policy for a given organizational unit.
       operationId: update_distributed_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5433,7 +5247,6 @@ paths:
       summary: Overwrite a distributed policy.
       description: Use to apply a distributed policy for a given organizational unit.
       operationId: overwrite_distributed_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5463,7 +5276,6 @@ paths:
       summary: Get a distributed policy.
       description: Retrieve the details of a distributed policy for a given organizational unit.
       operationId: get_distributed_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5492,7 +5304,6 @@ paths:
       summary: Delete a distributed policy.
       description: Use to delete a distributed policy for a given organizational unit.
       operationId: delete_distributed_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5519,7 +5330,6 @@ paths:
       summary: Update an inference policy.
       description: Use to apply changes to an inference policy for a given organizational unit.
       operationId: update_inference_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5549,7 +5359,6 @@ paths:
       summary: Overwrite an inference policy.
       description: Use to apply an inference policy for a given organizational unit.
       operationId: overwrite_inference_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5579,7 +5388,6 @@ paths:
       summary: Get an inference policy.
       description: Retrieve the details of an inference policy for a given organizational unit.
       operationId: get_inference_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5608,7 +5416,6 @@ paths:
       summary: Delete an inference policy.
       description: Use to delete an inference policy for a given organizational unit.
       operationId: delete_inference_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5635,7 +5442,6 @@ paths:
       summary: Update a distributed inference policy.
       description: Use to apply changes to a distributed inference policy for a given organizational unit.
       operationId: update_distributed_inference_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5665,7 +5471,6 @@ paths:
       summary: Overwrite a distributed inference policy.
       description: Use to apply a distributed inference policy for a given organizational unit.
       operationId: overwrite_distributed_inference_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5695,7 +5500,6 @@ paths:
       summary: Get a distributed inference policy.
       description: Retrieve the details of a distributed inference policy for a given organizational unit.
       operationId: get_distributed_inference_policy_v2
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5724,7 +5528,6 @@ paths:
       summary: Delete a distributed inference policy.
       description: Use to delete a distributed inference policy for a given organizational unit.
       operationId: delete_distributed_inference_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5751,7 +5554,6 @@ paths:
       summary: Update NVIDIA NIM service policy.
       description: Use to apply changes to NVIDIA NIM service policy for a given organizational unit.
       operationId: update_nim_service_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5780,7 +5582,6 @@ paths:
       summary: Overwrite NVIDIA NIM service policy.
       description: Use to apply NVIDIA NIM service policy for a given organizational unit.
       operationId: overwrite_nim_service_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5809,7 +5610,6 @@ paths:
       summary: Get NVIDIA NIM service policy.
       description: Retrieve the details of NVIDIA NIM service policy for a given organizational unit.
       operationId: get_nim_service_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5838,7 +5638,6 @@ paths:
       summary: Delete NVIDIA NIM service policy.
       description: Use to delete NVIDIA NIM service policy for a given organizational unit.
       operationId: delete_nim_service_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5864,7 +5663,6 @@ paths:
       summary: Get minimal mapping info. [experimental]
       description: Retrieve the names and descriptions of fields, spec selectors, and item selectors for a workload type, without the full JQ expressions.
       operationId: get_mapping_minimal
-      x-service: policy-service
       tags:
         - Policy
       requestBody:
@@ -5894,7 +5692,6 @@ paths:
       summary: Get mapping field info. [experimental]
       description: Retrieve the detailed breakdown for one or more field references in a workload type's mapping.
       operationId: get_mapping_field_info
-      x-service: policy-service
       tags:
         - Policy
       requestBody:
@@ -5924,7 +5721,6 @@ paths:
       summary: List policies. [experimental]
       description: Retrieve a list of policies with their details, optionally filtered, sorted, and paginated.
       operationId: list_gvk_policies
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -5952,7 +5748,6 @@ paths:
       summary: Create a policy. [experimental]
       description: Create a policy for a specific workload type based on the provided specification.
       operationId: create_gvk_policy
-      x-service: policy-service
       tags:
         - Policy
       requestBody:
@@ -5979,7 +5774,6 @@ paths:
     post:
       summary: Get the effective policy by type and scope. The effective policy is a combination of the policy provided for the given scope (if exist) and the effective policies of its parent scopes.
       operationId: get_effective_policy
-      x-service: policy-service
       tags:
         - Policy
       requestBody:
@@ -6010,7 +5804,6 @@ paths:
       summary: Get a policy. [experimental]
       description: Retrieve policy details by id, including both the declared rules and the effective rules.
       operationId: get_gvk_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -6036,7 +5829,6 @@ paths:
       summary: Replace a policy. [experimental]
       description: Replace an existing policy's rules and description.
       operationId: apply_gvk_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -6067,7 +5859,6 @@ paths:
       summary: Patch a policy. [experimental]
       description: Merge rules into an existing policy, keyed by rule identity.
       operationId: patch_gvk_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -6098,7 +5889,6 @@ paths:
       summary: Delete a policy. [experimental]
       description: Delete an existing policy and all of its rules.
       operationId: delete_gvk_policy
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -6121,7 +5911,6 @@ paths:
       summary: Delete rules from a policy. [experimental]
       description: Delete one or more rules from an existing policy by reference.
       operationId: delete_gvk_policy_rules
-      x-service: policy-service
       tags:
         - Policy
       parameters:
@@ -6158,7 +5947,6 @@ paths:
       operationId: V1GetStorageClasses
       tags:
         - Storage Classes
-      x-service: k8s-objects-tracker
       parameters:
         - name: includeNone
           in: query
@@ -6192,7 +5980,6 @@ paths:
       operationId: getStorageClasses
       tags:
         - Storage Classes
-      x-service: k8s-objects-tracker
       parameters:
         - $ref: '#/components/parameters/ClusterIdRequired'
         - $ref: '#/components/parameters/nameFilter'
@@ -6223,7 +6010,6 @@ paths:
       operationId: getStorageClassesV2
       tags:
         - Storage Classes
-      x-service: k8s-objects-tracker
       parameters:
         - $ref: '#/components/parameters/ClusterIdRequired'
         - $ref: '#/components/parameters/nameFilter'
@@ -6256,7 +6042,6 @@ paths:
       tags:
         - Storage Class Configuration
       x-csp: true
-      x-service: k8s-objects-tracker
       parameters:
         - $ref: '#/components/parameters/StorageClassConfigurationFilterBy'
         - $ref: '#/components/parameters/StorageClassConfigurationSortBy'
@@ -6289,7 +6074,6 @@ paths:
       tags:
         - Storage Class Configuration
       x-csp: true
-      x-service: k8s-objects-tracker
       requestBody:
         required: true
         content:
@@ -6322,7 +6106,6 @@ paths:
         Retrieves a specific storage class configuration by its unique identifier. Use this endpoint to view detailed information about the configuration, including its permissions and customization options.
       operationId: get_storage_class_configuration_by_id
       x-csp: true
-      x-service: k8s-objects-tracker
       tags:
         - Storage Class Configuration
       parameters:
@@ -6354,7 +6137,6 @@ paths:
       description: Partially updates an existing storage class configuration by its unique identifier. Use this endpoint to modify specific fields, such as permissions, customization values, or attributes, without replacing the entire configuration.
       operationId: patch_storage_class_configuration_by_id
       x-csp: true
-      x-service: k8s-objects-tracker
       tags:
         - Storage Class Configuration
       parameters:
@@ -6392,7 +6174,6 @@ paths:
       description: Updates an existing storage class configuration by its unique identifier. Use this endpoint to fully replace an existing configuration, including permissions and customization settings.
       operationId: update_storage_class_configuration_by_id
       x-csp: true
-      x-service: k8s-objects-tracker
       tags:
         - Storage Class Configuration
       parameters:
@@ -6430,7 +6211,6 @@ paths:
       description: Deletes a specific storage class configuration by its unique identifier. Use this endpoint to permanently remove configurations that are no longer needed.
       operationId: delete_storage_class_configuration_by_id
       x-csp: true
-      x-service: k8s-objects-tracker
       tags:
         - Storage Class Configuration
       parameters:
@@ -6458,7 +6238,6 @@ paths:
       summary: Create a role.
       description: Creates a custom role with the specified permission sets.
       operationId: create_role
-      x-service: authorization
       tags:
         - Roles
       requestBody:
@@ -6489,7 +6268,6 @@ paths:
       summary: Get a list of roles.
       description: Retrieves a list of all available roles, including both NVIDIA Run:ai predefined roles and custom roles. Use this endpoint to review role configurations, permission sets and permissions.
       operationId: get_roles
-      x-service: authorization
       tags:
         - Roles
       parameters:
@@ -6529,7 +6307,6 @@ paths:
       summary: Get a role by id.
       description: Retrieves details for a specific role, including its name, description, scope, and associated permission sets.
       operationId: get_role
-      x-service: authorization
       tags:
         - Roles
       parameters:
@@ -6557,7 +6334,6 @@ paths:
       summary: Delete a role by id.
       description: Deletes a custom role. Use this endpoint to permanently remove roles that are no longer needed. NVIDIA Run:ai predefined roles cannot be deleted.
       operationId: delete_role
-      x-service: authorization
       tags:
         - Roles
       parameters:
@@ -6581,7 +6357,6 @@ paths:
       summary: Update a role by id.
       description: Updates a custom role, including its name, description, or associated permission sets. NVIDIA Run:ai predefined roles cannot be updated.
       operationId: update_role
-      x-service: authorization
       tags:
         - Roles
       parameters:
@@ -6616,7 +6391,6 @@ paths:
       summary: Enable a role by id.
       description: Enables a specific role. Disabled roles cannot be assigned to users and do not grant any permissions.
       operationId: role_enable
-      x-service: authorization
       tags:
         - Roles
       parameters:
@@ -6647,7 +6421,6 @@ paths:
       summary: Disable a role by id.
       description: Disables a specific role. Disabled roles cannot be assigned to users and do not grant any permissions.
       operationId: role_disable
-      x-service: authorization
       tags:
         - Roles
       parameters:
@@ -6678,7 +6451,6 @@ paths:
       summary: Get permission sets.
       description: Retrieve a list of all available permission sets. Each permission set defines a collection of permissions grouped by resource type and associated actions (such as create, read, update, or delete).
       operationId: get_permission_sets
-      x-service: authorization
       tags:
         - Permissions
       responses:
@@ -6708,7 +6480,6 @@ paths:
       summary: Get permission set by id.
       description: Returns information about a single permission set, including its name, description, and the list of permissions it contains.
       operationId: get_permission_set
-      x-service: authorization
       tags:
         - Permissions
       parameters:
@@ -6735,7 +6506,6 @@ paths:
       summary: Create an access rule.
       description: Use to bind a predefined role to a subject (user, group or application) in a scope.
       operationId: create_access_rule
-      x-service: authorization
       tags:
         - Access rules
       requestBody:
@@ -6768,7 +6538,6 @@ paths:
       summary: List the access rules.
       description: Retrieve a list of access rules.
       operationId: get_access_rules
-      x-service: authorization
       tags:
         - Access rules
       parameters:
@@ -6817,7 +6586,6 @@ paths:
       summary: Get an access rule.
       description: Use to retrieve the details of an access rule by id.
       operationId: get_access_rule
-      x-service: authorization
       tags:
         - Access rules
       parameters:
@@ -6843,7 +6611,6 @@ paths:
       summary: Delete an access rule.
       description: Use to delete the subject permissions assigned by access rule id.
       operationId: delete_access_rule
-      x-service: authorization
       tags:
         - Access rules
       parameters:
@@ -6866,7 +6633,6 @@ paths:
       summary: Count access rules.
       description: Use to retrieve the number of access rules.
       operationId: count_access_rules
-      x-service: authorization
       tags:
         - Access rules
       parameters:
@@ -6901,7 +6667,6 @@ paths:
     post:
       summary: Delete Multiple Access Rules
       operationId: access_rules_batch
-      x-service: authorization
       tags:
         - Access rules
       requestBody:
@@ -6931,7 +6696,6 @@ paths:
       summary: Create Multiple Access Rules
       description: Creates a batch of access rules in a single operation. Requires a list of access rule objects, each specifying the subject, role, and scope. Returns the result of the operation, including which rules were successfully created and any that failed, along with error messages if applicable.
       operationId: access_rules_batch_create
-      x-service: authorization
       tags:
         - Access rules
       requestBody:
@@ -6961,7 +6725,6 @@ paths:
       summary: Create an access rule for authenticated users/service accounts
       description: Creates an access rule bound to every authenticated user and service account for the given role and scope.
       operationId: create_authenticated_users_access_rule
-      x-service: authorization
       tags:
         - Access rules
       requestBody:
@@ -6994,7 +6757,6 @@ paths:
       summary: Get a summary of user permissions.
       description: Retrieve a summary of user permissions.
       operationId: get_permissions
-      x-service: authorization
       tags:
         - Permissions
       responses:
@@ -7014,7 +6776,6 @@ paths:
     post:
       summary: Calculate permitted scopes.
       description: Use to calculate user permitted scopes for an action on a resource.
-      x-service: authorization
       operationId: get_permitted_scopes
       tags:
         - Permissions
@@ -7056,7 +6817,6 @@ paths:
       summary: List the access rules assigned to the requesting user.
       description: Retrieve the access rules assigned to the requesting user.
       operationId: get_me_access_rules
-      x-service: authorization
       tags:
         - Me
       parameters:
@@ -7081,7 +6841,6 @@ paths:
       summary: Count the access rules assigned to the requesting user.
       description: Use to retrieve the number of access rules assigned to the requesting user.
       operationId: count_me_access_rules
-      x-service: authorization
       tags:
         - Me
       parameters:
@@ -7109,10 +6868,7 @@ paths:
   /api/v1/authorization/settings:
     get:
       summary: Get authorization settings
-      x-service: authorization
       operationId: get_authorization_settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -7135,13 +6891,11 @@ paths:
   /api/v1/authorization/settings/{key}:
     put:
       summary: Update authorization setting by key
-      x-service: authorization
       operationId: update_authorization_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/AuthorizationSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -7169,13 +6923,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     get:
       summary: Get authorization setting by key
-      x-service: authorization
       operationId: get_authorization_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/AuthorizationSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -7202,10 +6954,7 @@ paths:
   /api/v1/idps:
     get:
       summary: Get external idps list
-      x-service: identity-manager
       operationId: get_idps
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Idps
       responses:
@@ -7282,10 +7031,7 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     post:
       summary: Configure external idp
-      x-service: identity-manager
       operationId: create_idp
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Idps
       requestBody:
@@ -7376,13 +7122,11 @@ paths:
   /api/v1/idps/{idp}:
     get:
       summary: Get external idp by alias
-      x-service: identity-manager
       operationId: get_idp
       tags:
         - Idps
       parameters:
         - $ref: '#/components/parameters/idp'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -7457,13 +7201,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     delete:
       summary: Delete external idp by alias
-      x-service: identity-manager
       operationId: delete_idp
       tags:
         - Idps
       parameters:
         - $ref: '#/components/parameters/idp'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Idp successfully deleted
@@ -7479,13 +7221,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     put:
       summary: Update external idp by alias
-      x-service: identity-manager
       operationId: update_idp
       tags:
         - Idps
       parameters:
         - $ref: '#/components/parameters/idp'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         description: Updated idp object
         required: true
@@ -7568,13 +7308,11 @@ paths:
   /api/v1/idps/{idp}/mappers:
     get:
       summary: Get idp mappers
-      x-service: identity-manager
       operationId: get_idp_mappers
       tags:
         - Idps
       parameters:
         - $ref: '#/components/parameters/idp'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -7594,13 +7332,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     put:
       summary: Update idp mappers
-      x-service: identity-manager
       operationId: update_idp_mappers
       tags:
         - Idps
       parameters:
         - $ref: '#/components/parameters/idp'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         description: Map of our mappers and their source in the external idp
         required: true
@@ -7625,7 +7361,6 @@ paths:
     get:
       summary: Get users.
       description: Retrieve a list of platform users.
-      x-service: identity-manager
       operationId: get_users
       tags:
         - Users
@@ -7656,7 +7391,6 @@ paths:
     post:
       summary: Create a local user.
       description: Use to create a local platform user.
-      x-service: identity-manager
       operationId: create_user
       tags:
         - Users
@@ -7692,7 +7426,6 @@ paths:
       description: |
         Retrieve a list of users with minimal display information (id, username, firstName, lastName).
         At least one of `search`, `id`, or `filterBy` is required to scope the lookup. Requires the users-minimal:read permission.
-      x-service: identity-manager
       operationId: get_users_minimal
       tags:
         - Users
@@ -7723,7 +7456,6 @@ paths:
       summary: Count users
       operationId: count_users
       description: count users
-      x-service: identity-manager
       tags:
         - Users
       parameters:
@@ -7755,7 +7487,6 @@ paths:
     post:
       summary: Logout a user.
       description: Use to force a user to logout.
-      x-service: identity-manager
       operationId: logout_user
       tags:
         - Users
@@ -7780,7 +7511,6 @@ paths:
     post:
       summary: Reset a user's password.
       description: Use to reset a user's password.
-      x-service: identity-manager
       operationId: reset_user_password
       tags:
         - Users
@@ -7814,7 +7544,6 @@ paths:
     get:
       summary: Get a user by id.
       description: Retrieve a user's details by id.
-      x-service: identity-manager
       operationId: get_user_by_id
       tags:
         - Users
@@ -7842,7 +7571,6 @@ paths:
     patch:
       summary: Update a user by id.
       description: Use to update a local user's details by id. SSO users cannot be updated.
-      x-service: identity-manager
       operationId: patch_user_by_id
       tags:
         - Users
@@ -7876,7 +7604,6 @@ paths:
     delete:
       summary: Delete a user by id.
       description: Use to delete a user by id.
-      x-service: identity-manager
       operationId: delete_user_by_id
       tags:
         - Users
@@ -7900,7 +7627,6 @@ paths:
   /api/v1/me/password:
     post:
       summary: change user password
-      x-service: identity-manager
       operationId: change_user_password
       tags:
         - Users
@@ -7941,7 +7667,6 @@ paths:
     get:
       summary: Get a list of service accounts.
       description: Retrieve a list of service accounts.
-      x-service: identity-manager
       operationId: get_service_accounts
       tags:
         - Service Accounts
@@ -7967,7 +7692,6 @@ paths:
     post:
       summary: Create a service account.
       description: Used to create a service account.
-      x-service: identity-manager
       operationId: create_service_account
       tags:
         - Service Accounts
@@ -8003,7 +7727,6 @@ paths:
     get:
       summary: Get service account by id.
       description: Retrieve the details of a service account by id.
-      x-service: identity-manager
       operationId: get_service_account_by_id
       tags:
         - Service Accounts
@@ -8031,7 +7754,6 @@ paths:
     patch:
       summary: Update service account details by id.
       description: Use to update the details of a service account by id.
-      x-service: identity-manager
       operationId: update_service_account_by_id
       tags:
         - Service Accounts
@@ -8061,7 +7783,6 @@ paths:
     delete:
       summary: Delete a service account by id.
       description: Use to delete a service account by id.
-      x-service: identity-manager
       operationId: delete_service_account_by_id
       tags:
         - Service Accounts
@@ -8086,7 +7807,6 @@ paths:
     post:
       summary: Regenerate a service account secret.
       description: Use to regenerate the service account secret by id.
-      x-service: identity-manager
       operationId: regenerate_service_account_secret
       tags:
         - Service Accounts
@@ -8115,7 +7835,6 @@ paths:
     get:
       summary: Get a list of access keys.
       description: Retrieve a list of the user's access keys.
-      x-service: identity-manager
       operationId: get_access_keys
       tags:
         - Access Keys
@@ -8137,7 +7856,6 @@ paths:
     post:
       summary: Create an access key.
       description: Used to create an access key.
-      x-service: identity-manager
       operationId: create_access_key1
       tags:
         - Access Keys
@@ -8171,7 +7889,6 @@ paths:
     get:
       summary: Get access key by id.
       description: Retrieve the details of an access key by id.
-      x-service: identity-manager
       operationId: get_access_key_by_id1
       tags:
         - Access Keys
@@ -8197,7 +7914,6 @@ paths:
     delete:
       summary: Delete an access key by id.
       description: Use to delete an access key by id.
-      x-service: identity-manager
       operationId: delete_access_key_by_id
       tags:
         - Access Keys
@@ -8222,7 +7938,6 @@ paths:
     post:
       summary: Regenerate an access key secret.
       description: Use to regenerate the access key secret by id.
-      x-service: identity-manager
       operationId: regenerate_access_key_secret
       tags:
         - Access Keys
@@ -8257,7 +7972,6 @@ paths:
     get:
       summary: Get a list of all access keys.
       description: Retrieve a list of all access keys.
-      x-service: identity-manager
       operationId: get_access_keys_administration
       tags:
         - Access Keys
@@ -8297,7 +8011,6 @@ paths:
     delete:
       summary: Delete an access key by id for administrations.
       description: Use to delete an access key by id for administrations.
-      x-service: identity-manager
       operationId: delete_access_key_by_id_administration
       tags:
         - Access Keys
@@ -8324,7 +8037,6 @@ paths:
         - Tokens
       summary: Create an access token v1
       deprecated: true
-      x-service: identity-manager
       description: |
         Create tokens using the `grant_type` parameter.
         This endpoint is deprecated. Use `/api/v2/token` instead.
@@ -8374,7 +8086,6 @@ paths:
       tags:
         - Tokens
       summary: Create an access token v2
-      x-service: identity-manager
       description: |
         Use this endpoint to obtain an access token. Compliant with standard OAuth2 protocol and supports the common OAuth2 grant types.
       operationId: grant_token_v2
@@ -8469,10 +8180,7 @@ paths:
   /api/v1/security/settings:
     get:
       summary: Get security settings
-      x-service: identity-manager
       operationId: get_security_settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -8493,13 +8201,11 @@ paths:
   /api/v1/security/settings/{key}:
     put:
       summary: Update security setting by key
-      x-service: identity-manager
       operationId: update_security_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/settingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -8537,13 +8243,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     get:
       summary: Get security setting by key
-      x-service: identity-manager
       operationId: get_security_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/settingsKey'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -8588,7 +8292,6 @@ paths:
       summary: List workloads.
       description: Retrieve a list of active workloads with details.
       operationId: get_workloads
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -8627,7 +8330,6 @@ paths:
       summary: Get a workload.
       operationId: get_workload
       description: Retrieve workload data using a `workloadId`.
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -8654,7 +8356,6 @@ paths:
       summary: Count workloads.
       description: Retrieve the number of workloads.
       operationId: count_workloads
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -8702,7 +8403,6 @@ paths:
 
           For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
         - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -8739,7 +8439,6 @@ paths:
       summary: List pods.
       description: Retrieve a list of pods from a cluster.
       operationId: list_pods
-      x-service: workloads
       tags:
         - Pods
       parameters:
@@ -8782,7 +8481,6 @@ paths:
       summary: Get pod metrics data.
       description: Retrieve pod's metrics data for use in analysis applications.
       operationId: get_workload_pod_metrics
-      x-service: workloads
       tags:
         - Pods
       parameters:
@@ -8823,7 +8521,6 @@ paths:
       summary: Get workload pods by id.
       description: Retrieve the details of workload pods by workload id.
       operationId: get_workload_pods
-      x-service: workloads
       tags:
         - Pods
       parameters:
@@ -8865,7 +8562,6 @@ paths:
       summary: Get pods count.
       description: Retrieve the number of pods from a cluster.
       operationId: count_pods
-      x-service: workloads
       tags:
         - Pods
       parameters:
@@ -8900,7 +8596,6 @@ paths:
       summary: Get the workload events.
       description: Retrieve all the workload events using a workload id.
       operationId: get_workload_events
-      x-service: workloads
       tags:
         - Events
       parameters:
@@ -8938,7 +8633,6 @@ paths:
       summary: Get the workload history.
       description: Retrieve workload history details, including events, using a workload id.
       operationId: get_workload_history
-      x-service: workloads
       tags:
         - Events
       parameters:
@@ -8975,7 +8669,6 @@ paths:
       summary: Get workload metrics data.
       operationId: get_workload_metrics
       description: Retrieves workloads data metrics from the metrics database. Use in reporting and analysis tools.
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -9015,7 +8708,6 @@ paths:
       summary: Get workload endpoints.
       description: Retrieve the network endpoints exposed by a workload using a workload ID.
       operationId: get_workload_endpoints
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -9049,7 +8741,6 @@ paths:
       summary: Create a workspace.
       operationId: create_workspace1
       description: Create a new workspace in a specific project in the cluster.
-      x-service: workloads
       tags:
         - Workspaces
       requestBody:
@@ -9077,7 +8768,6 @@ paths:
       summary: Delete a workspace.
       description: Delete a workspace using the workspace id.
       operationId: delete_workspace
-      x-service: workloads
       tags:
         - Workspaces
       parameters:
@@ -9099,7 +8789,6 @@ paths:
       summary: Get workspace data.
       description: Retrieve workspace details using a workload id.
       operationId: get_workspace
-      x-service: workloads
       tags:
         - Workspaces
       parameters:
@@ -9126,7 +8815,6 @@ paths:
       summary: Suspend a workspace.
       description: Suspend a workspace using the workspace id.
       operationId: suspend_workspace
-      x-service: workloads
       tags:
         - Workspaces
       parameters:
@@ -9149,7 +8837,6 @@ paths:
       summary: Resume a workspace.
       description: Resume the workspace operation using the workspace id.
       operationId: resume_workspace
-      x-service: workloads
       tags:
         - Workspaces
       parameters:
@@ -9172,7 +8859,6 @@ paths:
       summary: Create a training.
       operationId: create_training1
       description: Create a training workload using container related fields.
-      x-service: workloads
       tags:
         - Trainings
       requestBody:
@@ -9200,7 +8886,6 @@ paths:
       summary: Delete a training.
       operationId: delete_training
       description: Delete a training using a workload id.
-      x-service: workloads
       tags:
         - Trainings
       parameters:
@@ -9222,7 +8907,6 @@ paths:
       summary: Get training data.
       operationId: get_training
       description: Retrieve training details using a workload id.
-      x-service: workloads
       tags:
         - Trainings
       parameters:
@@ -9249,7 +8933,6 @@ paths:
       summary: Suspend a training.
       operationId: suspend_training
       description: Suspend a training from running using a workload id.
-      x-service: workloads
       tags:
         - Trainings
       parameters:
@@ -9272,7 +8955,6 @@ paths:
       summary: Resume a training.
       operationId: resume_training
       description: Resume a training that was suspended using a workload id.
-      x-service: workloads
       tags:
         - Trainings
       parameters:
@@ -9295,7 +8977,6 @@ paths:
       summary: Create a distributed training.
       description: Use to create a distributed training.
       operationId: create_distributed
-      x-service: workloads
       tags:
         - Distributed
       requestBody:
@@ -9323,7 +9004,6 @@ paths:
       summary: Delete a distributed training by id.
       description: Use to delete a distributed training by workload id.
       operationId: delete_distributed
-      x-service: workloads
       tags:
         - Distributed
       parameters:
@@ -9345,7 +9025,6 @@ paths:
       summary: Get distributed training's data. [Experimental]
       description: Retrieve the details of a distributed training by workload id.
       operationId: get_distributed
-      x-service: workloads
       tags:
         - Distributed
       parameters:
@@ -9372,7 +9051,6 @@ paths:
       summary: Suspend a distributed training.
       operationId: suspend_distributed
       description: Suspend a distributed training from running using a workload id.
-      x-service: workloads
       tags:
         - Distributed
       parameters:
@@ -9395,7 +9073,6 @@ paths:
       summary: Resume a distributed training.
       operationId: resume_distributed
       description: Resume a distributed training that was suspended using a workload id.
-      x-service: workloads
       tags:
         - Distributed
       parameters:
@@ -9418,7 +9095,6 @@ paths:
       summary: Create a distributed inference.
       operationId: create_distributed_inference
       description: Create a distributed inference using container related fields.
-      x-service: workloads
       tags:
         - Distributed Inferences
       requestBody:
@@ -9446,7 +9122,6 @@ paths:
       summary: Delete a distributed inference.
       operationId: delete_distributed_inference
       description: Delete a distributed inference using a workload id.
-      x-service: workloads
       tags:
         - Distributed Inferences
       parameters:
@@ -9468,7 +9143,6 @@ paths:
       summary: Get a distributed inference data.
       operationId: get_distributed_inference
       description: Retrieve a distributed inference details using a workload id.
-      x-service: workloads
       tags:
         - Distributed Inferences
       parameters:
@@ -9494,7 +9168,6 @@ paths:
       summary: Update distributed inference spec.
       operationId: update_distributed_inference_spec
       description: Update the specification of an existing distributed inference workload.
-      x-service: workloads
       tags:
         - Distributed Inferences
       parameters:
@@ -9526,7 +9199,6 @@ paths:
       summary: Create an inference.
       operationId: create_inference1
       description: Create an inference using container related fields.
-      x-service: workloads
       tags:
         - Inferences
       requestBody:
@@ -9554,7 +9226,6 @@ paths:
       summary: Delete an inference.
       operationId: delete_inference
       description: Delete an inference using a workload id.
-      x-service: workloads
       tags:
         - Inferences
       parameters:
@@ -9576,7 +9247,6 @@ paths:
       summary: Get inference data.
       operationId: get_inference
       description: Retrieve inference details using a workload id.
-      x-service: workloads
       tags:
         - Inferences
       parameters:
@@ -9602,7 +9272,6 @@ paths:
       summary: Update inference spec.
       operationId: update_inference_spec
       description: Update the specification of an existing inference workload.
-      x-service: workloads
       tags:
         - Inferences
       parameters:
@@ -9634,7 +9303,6 @@ paths:
       summary: Get inference metrics data.
       description: Retrieve inference metrics data by id. Supported from control-plane version 2.18 or later.
       operationId: get_inference_workload_metrics
-      x-service: workloads
       tags:
         - Inferences
       parameters:
@@ -9674,7 +9342,6 @@ paths:
       summary: Get inference pod's metrics data.
       description: Retrieve inference metrics pod's data by workload and pod id. Supported from control-plane version 2.18 or later.
       operationId: get_inference_workload_pod_metrics
-      x-service: workloads
       tags:
         - Inferences
       parameters:
@@ -9715,7 +9382,6 @@ paths:
       summary: Get inference workload revisions by id.
       description: Retrieve the details of inference workload revisions by workload id. Supported for clusters v2.21+.
       operationId: get_inference_workload_revisions
-      x-service: workloads
       tags:
         - Revisions
       parameters:
@@ -9750,7 +9416,6 @@ paths:
       summary: Get inference workload revisions count.
       description: Retrieve the number of an inference workload revisions from a cluster. Supported for clusters v2.21+.
       operationId: count_inference_workload_revisions
-      x-service: workloads
       tags:
         - Revisions
       parameters:
@@ -9783,7 +9448,6 @@ paths:
       summary: Get revision data.
       operationId: get_revision
       description: Retrieve revision details using a revision id. Supported for clusters v2.21+.
-      x-service: workloads
       tags:
         - Revisions
       parameters:
@@ -9810,7 +9474,6 @@ paths:
       summary: Get revision pods by id.
       description: Retrieve the details of revision pods by revision id. Supported for clusters v2.21+.
       operationId: get_revision_pods
-      x-service: workloads
       tags:
         - Pods
       parameters:
@@ -9843,7 +9506,6 @@ paths:
       summary: Get revision events by id.
       description: Retrieve all the revision events using a revision id. Supported for clusters v2.21+.
       operationId: get_revision_events
-      x-service: workloads
       tags:
         - Events
       parameters:
@@ -9881,7 +9543,6 @@ paths:
       summary: Get the revision history.
       description: Retrieve revision history details, including events, using a revision id. Supported for clusters v2.21+.
       operationId: get_revision_history
-      x-service: workloads
       tags:
         - Events
       parameters:
@@ -9918,7 +9579,6 @@ paths:
       summary: List templates. [Experimental]
       description: Retrieve all available templates.
       operationId: list_templates1
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -9951,7 +9611,6 @@ paths:
       summary: Template name availability
       description: Check if a given template name creates naming conflicts under the given scope. Returns conflict (409) in case the name is not available, or 204 (no content) if it is ok.
       operationId: template_name_availability
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -9974,7 +9633,6 @@ paths:
       summary: Get a template, any type. [Experimental]
       operationId: get_template_by_id1
       description: Retrieve the details of a template using its id.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10001,7 +9659,6 @@ paths:
       summary: Count templates. [Experimental]
       description: Get the total number of templates.
       operationId: count_templates
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10027,7 +9684,6 @@ paths:
       summary: Create a new workspace template. [Experimental]
       operationId: create_workspace_template
       description: Create a new workspace template.
-      x-service: workloads
       tags:
         - Workload templates
       requestBody:
@@ -10056,7 +9712,6 @@ paths:
       summary: List all workspace templates. [Experimental]
       description: List all workspace templates.
       operationId: list_workspace_templates
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10087,7 +9742,6 @@ paths:
       summary: Retrieve a specific workspace template by ID. [Experimental]
       operationId: get_workspace_template
       description: Retrieve a specific workspace template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10113,7 +9767,6 @@ paths:
       summary: Delete a workspace template by ID. [Experimental]
       operationId: delete_workspace_template
       description: Delete a workspace template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10135,7 +9788,6 @@ paths:
       summary: Patch a workspace template by ID. [Experimental]
       operationId: patch_workspace_template
       description: Patch a workspace template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10168,7 +9820,6 @@ paths:
       summary: Update a workspace template by ID. [Experimental]
       operationId: update_workspace_template
       description: Update a workspace template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10202,7 +9853,6 @@ paths:
       summary: Create a new training template. [Experimental]
       operationId: create_training_template
       description: Create a new training template.
-      x-service: workloads
       tags:
         - Workload templates
       requestBody:
@@ -10231,7 +9881,6 @@ paths:
       summary: List all training templates. [Experimental]
       description: List all training templates.
       operationId: list_training_templates
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10262,7 +9911,6 @@ paths:
       summary: Retrieve a specific training template by ID. [Experimental]
       operationId: get_training_template
       description: Retrieve a specific training template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10288,7 +9936,6 @@ paths:
       summary: Delete a training template by ID. [Experimental]
       operationId: delete_training_template
       description: Delete a training template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10310,7 +9957,6 @@ paths:
       summary: Patch a training template by ID. [Experimental]
       operationId: patch_training_template
       description: Patch a training template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10343,7 +9989,6 @@ paths:
       summary: Update a training template by ID. [Experimental]
       operationId: update_training_template
       description: Update a training template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10377,7 +10022,6 @@ paths:
       summary: Create a new distributed training template. [Experimental]
       operationId: create_distributed_template
       description: Create a new distributed training template.
-      x-service: workloads
       tags:
         - Workload templates
       requestBody:
@@ -10406,7 +10050,6 @@ paths:
       summary: List all distributed training templates. [Experimental]
       description: List all distributed training templates.
       operationId: list_distributed_templates
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10438,7 +10081,6 @@ paths:
       summary: Get a specific distributed training template by ID. [Experimental]
       operationId: get_distributed_template
       description: Get a specific distributed training template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10464,7 +10106,6 @@ paths:
       summary: Delete a distributed training template by ID. [Experimental]
       operationId: delete_distributed_template
       description: Delete a distributed training template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10486,7 +10127,6 @@ paths:
       summary: Patch a distributed training template by ID. [Experimental]
       operationId: patch_distributed_template
       description: Patch a distributed training template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10519,7 +10159,6 @@ paths:
       summary: Update a distributed training template by ID. [Experimental]
       operationId: update_distributed_template
       description: Update a distributed training template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10553,7 +10192,6 @@ paths:
       summary: Create a new inference template.
       operationId: create_inference_template
       description: Create a new inference template.
-      x-service: workloads
       tags:
         - Workload templates
       requestBody:
@@ -10582,7 +10220,6 @@ paths:
       summary: List all inference templates.
       description: List all inference templates.
       operationId: list_inference_templates
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10613,7 +10250,6 @@ paths:
       summary: Get a specific inference template by ID.
       operationId: get_inference_template
       description: Get a specific inference template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10639,7 +10275,6 @@ paths:
       summary: Delete an inference template by ID.
       operationId: delete_inference_template
       description: Delete an inference template by ID.
-      x-service: workloads
       tags:
         - Workload templates
       parameters:
@@ -10661,7 +10296,6 @@ paths:
     post:
       summary: Workload batch operations.
       operationId: batch_workloads
-      x-service: workloads
       tags:
         - Workloads batch
       requestBody:
@@ -10692,7 +10326,6 @@ paths:
       description: |
         Retrieve the hierarchy structure elements for a workload. Returns a flat list ordered by level. Requires cluster version >= 2.25.
       operationId: get_workload_elements
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -10724,7 +10357,6 @@ paths:
       description: |
         Retrieve a specific structure element for a workload, including aggregated requested and allocated resources from pods linked to this element. Completed pods are excluded from aggregation. Requires cluster version >= 2.25.
       operationId: get_workload_element
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -10754,7 +10386,6 @@ paths:
       summary: Get element metrics data.
       operationId: get_workload_element_metrics
       description: Retrieve metrics data for a specific workload structure element. Requires cluster version 2.25 or later.
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -10796,7 +10427,6 @@ paths:
       description: |
         Returns the total count of structure elements reported by the cluster and the count of elements stored in the database for the given workload. Requires cluster version >= 2.25.
       operationId: count_workload_elements
-      x-service: workloads
       tags:
         - Workloads
       parameters:
@@ -10839,7 +10469,6 @@ paths:
       summary: List workload categories.
       description: Retrieves a list of workload categories. These categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
       operationId: list_categories
-      x-service: workloads
       tags:
         - Workload properties
       responses:
@@ -10867,7 +10496,6 @@ paths:
       summary: Get workload category by id.
       description: Retrieves a specific workload category by its ID. Workload categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
       operationId: get_category_by_id
-      x-service: workloads
       tags:
         - Workload properties
       parameters:
@@ -10900,7 +10528,6 @@ paths:
       summary: List workload types.
       description: Retrieves a list of workload types with their configurations - their corresponding workload categories and priorities.
       operationId: list_workload_types
-      x-service: workloads
       tags:
         - Workload properties
       parameters:
@@ -10930,7 +10557,6 @@ paths:
       summary: Create a workload type. [Experimental]
       description: Create a new workload type in the system by providing its identification details and configuration, making it available for use and management within the platform.
       operationId: create_workload_type
-      x-service: workloads
       tags:
         - Workload properties
       requestBody:
@@ -10962,7 +10588,6 @@ paths:
       summary: List workload type by id.
       description: Retrieves a specific workload type by its ID.
       operationId: get_workload_type
-      x-service: workloads
       tags:
         - Workload properties
       parameters:
@@ -10988,7 +10613,6 @@ paths:
       summary: Update a workload type by id.
       description: Update the default category or priority assigned to a workload type.
       operationId: update_workload_type
-      x-service: workloads
       tags:
         - Workload properties
       parameters:
@@ -11021,7 +10645,6 @@ paths:
       summary: Delete a workload type by id. [Experimental]
       description: Deletes a specific workload type by its ID.
       operationId: delete_workload_type
-      x-service: workloads
       tags:
         - Workload properties
       parameters:
@@ -11042,7 +10665,6 @@ paths:
       summary: Get workload priorities.
       description: Retrieve the list of all workload priorities available in the system
       operationId: get_workload_priorities
-      x-service: workloads
       tags:
         - Workload properties
       parameters:
@@ -11076,7 +10698,6 @@ paths:
       summary: List AI applications. [Experimental]
       description: List AI applications.
       operationId: list_applications
-      x-service: workloads
       tags:
         - AI Applications
       parameters:
@@ -11114,7 +10735,6 @@ paths:
       summary: Create AI application.
       description: Create AI application.
       operationId: create_application
-      x-service: workloads
       tags:
         - AI Applications
       requestBody:
@@ -11145,7 +10765,6 @@ paths:
         AI application. The uploaded chart is stored transiently and removed after the application is
         deployed or after it expires.
       operationId: upload_application_chart
-      x-service: workloads
       tags:
         - AI Applications
       requestBody:
@@ -11179,7 +10798,6 @@ paths:
       summary: Count AI applications. [Experimental]
       description: Get the total number of AI applications.
       operationId: count_applications
-      x-service: workloads
       tags:
         - AI Applications
       parameters:
@@ -11207,7 +10825,6 @@ paths:
       summary: Get AI application. [Experimental]
       description: Get AI application.
       operationId: get_application
-      x-service: workloads
       tags:
         - AI Applications
       parameters:
@@ -11231,7 +10848,6 @@ paths:
       summary: Delete AI application.
       description: Delete AI application.
       operationId: delete_application
-      x-service: workloads
       tags:
         - AI Applications
       parameters:
@@ -11252,11 +10868,8 @@ paths:
       summary: Get all workloads settings.
       description: Retrieve the current values of all workloads-related settings for the tenant.
       operationId: get_workloads_service_settings
-      x-service: workloads
       tags:
         - Settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Request completed successfully.
@@ -11279,7 +10892,6 @@ paths:
       summary: Get a workloads setting by key.
       description: Retrieve the current value of a specific workloads setting by its key.
       operationId: get_workloads_service_setting_by_key
-      x-service: workloads
       tags:
         - Settings
       parameters:
@@ -11288,7 +10900,6 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/WorkloadsSettingsKeyEnum'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Request completed successfully.
@@ -11310,7 +10921,6 @@ paths:
       summary: Update a workloads setting by key.
       description: Update the value of a specific workloads setting by its key.
       operationId: update_workloads_service_setting_by_key
-      x-service: workloads
       tags:
         - Settings
       parameters:
@@ -11319,7 +10929,6 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/WorkloadsSettingsKeyEnum'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -11348,7 +10957,6 @@ paths:
       summary: Create a workload.
       description: Submit a workload with metadata and a Kubernetes manifest.
       operationId: create_workload_v2
-      x-service: workloads-manager
       tags:
         - Workloads V2
       parameters:
@@ -11384,7 +10992,6 @@ paths:
       summary: Get a specific workload.
       description: Retrieve details of a specific workload by ID
       operationId: get_workload_v2_by_id
-      x-service: workloads-manager
       tags:
         - Workloads V2
       parameters:
@@ -11410,7 +11017,6 @@ paths:
       summary: Delete a workload.
       description: Delete a specific workload by ID
       operationId: delete_workload_v2
-      x-service: workloads-manager
       tags:
         - Workloads V2
       parameters:
@@ -11436,7 +11042,6 @@ paths:
       summary: Update workload spec.
       operationId: update_workload_v2
       description: Update the specification of an existing workload.
-      x-service: workloads-manager
       tags:
         - Workloads V2
       parameters:
@@ -11469,7 +11074,6 @@ paths:
       summary: Create a NVIDIA NIM service. [Experimental]
       description: Create a NVIDIA NIM service
       operationId: create_nim_service
-      x-service: workloads-manager
       tags:
         - NVIDIA NIM
       requestBody:
@@ -11502,7 +11106,6 @@ paths:
       summary: Get a NVIDIA NIM service. [Experimental]
       description: Retrieve details of a specific NVIDIA NIM service, by id
       operationId: get_nim_service_by_id
-      x-service: workloads-manager
       tags:
         - NVIDIA NIM
       parameters:
@@ -11528,7 +11131,6 @@ paths:
       summary: Update NVIDIA NIM service spec. [Experimental]
       operationId: update_nim_service_spec
       description: Update the specification of an existing NVIDIA NIM service.
-      x-service: workloads-manager
       tags:
         - NVIDIA NIM
       parameters:
@@ -11559,10 +11161,7 @@ paths:
   /api/v2/workloads/settings:
     get:
       summary: Get workloads settings
-      x-service: workloads-manager
       operationId: get_workloads_settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -11583,13 +11182,11 @@ paths:
   /api/v2/workloads/settings/{key}:
     put:
       summary: Update workloads setting by key
-      x-service: workloads-manager
       operationId: update_workloads_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/WorkloadSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -11617,13 +11214,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     get:
       summary: Get workloads setting by key
-      x-service: workloads-manager
       operationId: get_workloads_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/WorkloadSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -11647,177 +11242,14 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/tenants:
-    get:
-      summary: Get a list of tenants.
-      description: Retrieve a list of tenants and their details.
-      x-service: tenants-manager
-      operationId: get_tenants
-      tags:
-        - Tenant
-      parameters:
-        - $ref: '#/components/parameters/deleted'
-        - $ref: '#/components/parameters/filterByName'
-        - $ref: '#/components/parameters/filterByAlias'
-      responses:
-        '200':
-          description: Executed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Tenants'
-                x-schema-name: Tenants
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    post:
-      summary: Create tenant
-      x-service: tenants-manager
-      operationId: create_tenant
-      tags:
-        - Tenant
-      requestBody:
-        description: The tenant to create.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TenantCreationRequest'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TenantCreationResponse'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '409':
-          $ref: '#/components/responses/409Conflict'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/tenants/{tenantId}:
-    get:
-      summary: Get tenant
-      x-service: tenants-manager
-      operationId: get_tenant_by_id
-      tags:
-        - Tenant
-      parameters:
-        - $ref: '#/components/parameters/tenantId'
-      responses:
-        '200':
-          description: Executed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Tenant'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    patch:
-      summary: Update tenant
-      description: Update tenant properties such as alias.
-      x-service: tenants-manager
-      operationId: update_tenant_by_id
-      tags:
-        - Tenant
-      parameters:
-        - $ref: '#/components/parameters/tenantId'
-      requestBody:
-        description: The tenant properties to update.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TenantUpdateRequest'
-      responses:
-        '200':
-          description: Tenant updated successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Tenant'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '409':
-          $ref: '#/components/responses/409Conflict'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    delete:
-      summary: soft/hard delete tenant
-      x-service: tenants-manager
-      operationId: delete_tenant_by_id
-      tags:
-        - Tenant
-      parameters:
-        - $ref: '#/components/parameters/tenantId'
-        - $ref: '#/components/parameters/isHardDelete'
-      responses:
-        '200':
-          description: tenant uid that was deleted.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - uid
-                properties:
-                  uid:
-                    type: string
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/logo:
     get:
       summary: Get tenant logo. (base64)
       description: Retrieve the base64 logo file. This endpoint is deprecated and will be removed in a future release. Use GET /api/v1/branding/settings/logo instead.
-      x-service: tenants-manager
       operationId: get_tenant_logo
       deprecated: true
       tags:
         - Logo
-      parameters:
-        - $ref: '#/components/parameters/tenantId-2'
       responses:
         '200':
           description: Tenant logo (PNG or SVG).
@@ -11847,11 +11279,8 @@ paths:
     post:
       summary: Upload logo for tenant. (base64)
       description: Use to upload a base64 logo file (PNG or SVG). Max size 128kb. This endpoint is deprecated and will be removed in a future release. Use PUT /api/v1/branding/settings/logo instead.
-      x-service: tenants-manager
       operationId: upload_tenant_logo
       deprecated: true
-      parameters:
-        - $ref: '#/components/parameters/tenantId-2'
       tags:
         - Logo
       requestBody:
@@ -11883,7 +11312,6 @@ paths:
       summary: List datavolumes in permitted scopes
       description: Get requested datavolumes.
       operationId: get_datavolumes
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       parameters:
@@ -11923,7 +11351,6 @@ paths:
     post:
       summary: Create a datavolume
       operationId: create_datavolume
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       requestBody:
@@ -11954,7 +11381,6 @@ paths:
     get:
       summary: Get datavolume
       operationId: get_datavolume
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       parameters:
@@ -11979,7 +11405,6 @@ paths:
     delete:
       summary: Delete datavolume
       operationId: delete_datavolume
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       parameters:
@@ -12002,7 +11427,6 @@ paths:
     patch:
       summary: Patch datavolume
       operationId: patch_datavolume
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       parameters:
@@ -12038,7 +11462,6 @@ paths:
       summary: Data volumes name availability.
       description: Checks if a specified data volume name is available under the given scope (e.g., project or department). Returns a 204 No Content response if the name is available, or 409 Conflict if the name is already in use.
       operationId: datavolume_name_availability
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       parameters:
@@ -12060,7 +11483,6 @@ paths:
       summary: Count data volumes.
       description: Retrieve the number of data volumes.
       operationId: count_datavolumes
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       parameters:
@@ -12096,7 +11518,6 @@ paths:
     patch:
       summary: Patch the datavolume's shared scopes
       operationId: patch_datavolume_shared_scopes
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       parameters:
@@ -12130,7 +11551,6 @@ paths:
     get:
       summary: Get the datavolume's shared scopes
       operationId: get_datavolume_shared_scopes
-      x-service: datavolumes-service
       tags:
         - Datavolumes
       parameters:
@@ -12155,10 +11575,7 @@ paths:
   /api/v1/datavolumes/settings:
     get:
       summary: Get datavolumes settings
-      x-service: datavolumes-service
       operationId: get_datavolumes_settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -12181,13 +11598,11 @@ paths:
   /api/v1/datavolumes/settings/{key}:
     put:
       summary: Update datavolumes setting by key
-      x-service: datavolumes-service
       operationId: update_datavolumes_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/DatavolumesSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -12215,13 +11630,11 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     get:
       summary: Get datavolumes setting by key
-      x-service: datavolumes-service
       operationId: get_datavolumes_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/DatavolumesSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -12251,7 +11664,6 @@ paths:
       description: |
         This endpoint returns a unix script that can be used to install the Run:ai CLI.
       operationId: get_installer_unix
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       responses:
@@ -12278,7 +11690,6 @@ paths:
       description: |
         This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_commands
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       responses:
@@ -12305,7 +11716,6 @@ paths:
       description: |
         This endpoint returns a Mac script that can be used to install the Run:ai CLI.
       operationId: get_installer_mac
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       responses:
@@ -12332,7 +11742,6 @@ paths:
       description: |
         This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_commands
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       responses:
@@ -12359,7 +11768,6 @@ paths:
       description: |
         This endpoint returns a Linux script that can be used to install the Run:ai CLI.
       operationId: get_installer_linux
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       responses:
@@ -12386,7 +11794,6 @@ paths:
       description: |
         This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_commands
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       responses:
@@ -12413,7 +11820,6 @@ paths:
       description: |
         This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_windows_commands
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       responses:
@@ -12440,7 +11846,6 @@ paths:
       description: |
         This endpoint returns a binary file that run the Run:ai CLI.
       operationId: get_binary
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       parameters:
@@ -12469,7 +11874,6 @@ paths:
       description: |
         This endpoint returns a document of help for the Run:ai CLI.
       operationId: get_manual_document
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface
       parameters:
@@ -12496,7 +11900,6 @@ paths:
       description: |
         This endpoint returns a unix script that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       responses:
@@ -12524,7 +11927,6 @@ paths:
       description: |
         This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_commands_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       responses:
@@ -12552,7 +11954,6 @@ paths:
       description: |
         This endpoint returns a Mac script that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       responses:
@@ -12580,7 +11981,6 @@ paths:
       description: |
         This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_commands_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       responses:
@@ -12608,7 +12008,6 @@ paths:
       description: |
         This endpoint returns a Linux script that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       responses:
@@ -12636,7 +12035,6 @@ paths:
       description: |
         This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_commands_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       responses:
@@ -12664,7 +12062,6 @@ paths:
       description: |
         This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_windows_commands_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       responses:
@@ -12692,7 +12089,6 @@ paths:
       description: |
         This endpoint returns a binary file that run the Run:ai CLI.
       operationId: get_binary_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       parameters:
@@ -12722,7 +12118,6 @@ paths:
       description: |
         This endpoint returns a document of help for the Run:ai CLI.
       operationId: get_manual_document_deprecated
-      x-service: cli-exposer
       tags:
         - Researcher Command Line Interface Deprecated
       parameters:
@@ -12747,7 +12142,6 @@ paths:
       description: Get audit logs based on query params filter
       summary: Get audit logs
       operationId: getAuditLogs
-      x-service: audit-service
       tags:
         - AuditLogs
       parameters:
@@ -12789,7 +12183,6 @@ paths:
       description: Download audit logs as a file, based on query params filter
       summary: Download audit logs
       operationId: downloadAuditLogs
-      x-service: audit-service
       tags:
         - AuditLogs
       parameters:
@@ -12822,7 +12215,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/notification-types:
     get:
-      x-service: notifications-proxy
       tags:
         - Notification Types
       operationId: getNotificationTypes
@@ -12850,7 +12242,6 @@ paths:
   /api/v1/notification-state:
     get:
       deprecated: true
-      x-service: notifications-proxy
       tags:
         - Notification State
       operationId: getNotificationState
@@ -12877,7 +12268,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
     patch:
       deprecated: true
-      x-service: notifications-proxy
       tags:
         - Notification State
       operationId: updateNotificationState
@@ -12911,7 +12301,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/email:
     post:
-      x-service: notifications-proxy
       tags:
         - Email
       operationId: createEmail
@@ -12946,7 +12335,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     delete:
-      x-service: notifications-proxy
       tags:
         - Email
       operationId: deleteEmail
@@ -12970,7 +12358,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     get:
-      x-service: notifications-proxy
       tags:
         - Email
       operationId: getEmail
@@ -12998,7 +12385,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     put:
-      x-service: notifications-proxy
       tags:
         - Email
       operationId: updateEmail
@@ -13031,7 +12417,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     patch:
-      x-service: notifications-proxy
       tags:
         - Email
       operationId: patchEmail
@@ -13065,7 +12450,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/email/state:
     get:
-      x-service: notifications-proxy
       tags:
         - Email
       operationId: getEmailNotificationState
@@ -13091,7 +12475,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     patch:
-      x-service: notifications-proxy
       tags:
         - Email
       operationId: updateEmailNotificationState
@@ -13125,7 +12508,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/email/validate:
     post:
-      x-service: notifications-proxy
       tags:
         - Email
       operationId: validateEmail
@@ -13161,7 +12543,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/notification-channels:
     get:
-      x-service: notifications-proxy
       tags:
         - NotificationChannels
       operationId: getNotificationChannels
@@ -13189,7 +12570,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     post:
-      x-service: notifications-proxy
       tags:
         - NotificationChannels
       operationId: createNotificationChannel
@@ -13221,7 +12601,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/slack:
     get:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: getSlack
@@ -13251,7 +12630,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     patch:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: patchSlack
@@ -13271,7 +12649,6 @@ paths:
                 $ref: '#/components/schemas/SlackNotificationChannel'
   /api/v1/slack/state:
     get:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: getSlackNotificationState
@@ -13297,7 +12674,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     patch:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: updateSlackNotificationState
@@ -13331,7 +12707,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/slack/app:
     post:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: createSlackApp
@@ -13364,7 +12739,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     delete:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: deleteSlackApp
@@ -13389,7 +12763,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/slack/workspace:
     post:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: connectSlackWorkspace
@@ -13414,7 +12787,6 @@ paths:
         '500':
           $ref: '#/components/responses/500InternalServerError'
     delete:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: disconnectSlackWorkspace
@@ -13431,7 +12803,6 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
   /api/v1/slack/validate:
     post:
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: validateSlack
@@ -13468,7 +12839,6 @@ paths:
   /api/v1/notification-channels/slack/create-app:
     post:
       deprecated: true
-      x-service: notifications-proxy
       tags:
         - Slack
       operationId: createSlackAppDeprecated
@@ -13504,7 +12874,6 @@ paths:
     parameters:
       - $ref: '#/components/parameters/NotificationChannelName'
     get:
-      x-service: notifications-proxy
       tags:
         - NotificationChannels
       operationId: getNotificationChannel
@@ -13532,7 +12901,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     patch:
-      x-service: notifications-proxy
       tags:
         - NotificationChannels
       operationId: patchNotificationChannel
@@ -13561,7 +12929,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     put:
-      x-service: notifications-proxy
       tags:
         - NotificationChannels
       operationId: updateNotificationChannel
@@ -13590,7 +12957,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     delete:
-      x-service: notifications-proxy
       tags:
         - NotificationChannels
       operationId: deleteNotificationChannel
@@ -13615,7 +12981,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/validate-notification-channel:
     post:
-      x-service: notifications-proxy
       deprecated: true
       tags:
         - NotificationChannels
@@ -13653,7 +13018,6 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/subscriptions:
     get:
-      x-service: notifications-proxy
       tags:
         - Subscriptions
       operationId: getUserSubscriptions
@@ -13679,7 +13043,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     post:
-      x-service: notifications-proxy
       tags:
         - Subscriptions
       operationId: createSubscription
@@ -13715,7 +13078,6 @@ paths:
     parameters:
       - $ref: '#/components/parameters/SubscriptionId'
     put:
-      x-service: notifications-proxy
       tags:
         - Subscriptions
       operationId: updateSubscription
@@ -13748,7 +13110,6 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
     delete:
-      x-service: notifications-proxy
       tags:
         - Subscriptions
       operationId: deleteSubscription
@@ -13775,10 +13136,7 @@ paths:
     get:
       summary: Get notifications settings
       description: Returns all notifications-related settings for the tenant.
-      x-service: bff-service
       operationId: get_notifications_settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -13796,86 +13154,15 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/system-notification:
-    put:
-      summary: Update system notification
-      x-service: bff-service
-      operationId: update_system_notification
-      tags:
-        - System Notification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateSystemNotification'
-            example:
-              systemMessage:
-                $ref: ../examples/notifications_setting_examples.yaml
-      responses:
-        '200':
-          description: System setting successfully updated
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    get:
-      summary: Get system notification
-      x-service: bff-service
-      operationId: get_system_notification
-      tags:
-        - System Notification
-      responses:
-        '200':
-          description: Executed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetSystemNotification'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-    delete:
-      summary: Delete system notification
-      x-service: bff-service
-      operationId: delete_system_notification
-      tags:
-        - System Notification
-      responses:
-        '200':
-          description: Executed successfully.
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/notifications/settings/{key}:
     put:
       summary: Update notifications setting by key
       description: Updates a single notifications setting identified by the path key.
-      x-service: bff-service
       operationId: update_notifications_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/notificationsSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -13904,13 +13191,11 @@ paths:
     get:
       summary: Get notifications setting by key
       description: Returns a single notifications setting identified by the path key.
-      x-service: bff-service
       operationId: get_notifications_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/notificationsSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       responses:
         '200':
           description: Executed successfully.
@@ -13944,10 +13229,7 @@ paths:
     get:
       summary: Get branding settings
       description: Returns all branding-related settings for the tenant.
-      x-service: bff-service
       operationId: get_branding_settings
-      parameters:
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -13965,11 +13247,9 @@ paths:
     get:
       summary: Get branding setting by key
       description: Returns a single branding setting identified by the path key.
-      x-service: bff-service
       operationId: get_branding_setting_by_key
       parameters:
         - $ref: '#/components/parameters/brandingSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       tags:
         - Settings
       responses:
@@ -13997,13 +13277,11 @@ paths:
     put:
       summary: Update branding setting by key
       description: Updates a single branding setting identified by the path key.
-      x-service: bff-service
       operationId: update_branding_setting_by_key
       tags:
         - Settings
       parameters:
         - $ref: '#/components/parameters/brandingSettingsKey'
-        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
@@ -28212,17 +27490,6 @@ components:
           type: string
           description: A description of the role.
           example: can manage all resources
-        scopeType:
-          type: string
-          default: tenant
-          description: 'The type of scope where the role applies. Valid values: system, tenant'
-          enum:
-            - system
-            - tenant
-        scopeId:
-          type: string
-          description: The ID of the scope where this role is defined.
-          nullable: true
         enabled:
           type: boolean
           default: true
@@ -28388,13 +27655,6 @@ components:
             - description
     RoleEnabledDisabledFields:
       type: object
-      properties:
-        scopeType:
-          type: string
-          default: tenant
-          enum:
-            - system
-            - tenant
     PermissionSet:
       allOf:
         - $ref: '#/components/schemas/RolePermissionSet'
@@ -34946,223 +34206,6 @@ components:
           nullable: true
       example:
         enabled: false
-    Tenant:
-      type: object
-      required:
-        - id
-        - uuid
-        - name
-        - status
-        - contractType
-        - createdAt
-        - updatedAt
-        - smg
-      properties:
-        id:
-          $ref: '#/components/schemas/TenantId'
-        mimirId:
-          type: string
-        uuid:
-          type: string
-          format: uuid
-          description: The universally unique identifier of the tenant.
-        name:
-          type: string
-          description: The internal system name of the tenant.
-        displayName:
-          type: string
-          description: The name of the tenant as shown to users within the tenant.
-        alias:
-          type: string
-          description: An optional alias for the tenant.
-        smg:
-          type: boolean
-        status:
-          type: string
-          enum:
-            - Creating
-            - Failed
-            - Updating
-            - Deleted
-            - Deleting
-            - Ready
-          description: |
-            The current status of the tenant.
-            Possible values:
-            - Creating
-            - Failed
-            - Updating
-            - Deleted
-            - Deleting
-            - Ready
-        diagnostics:
-          type: string
-          description: Most recent provisioning failure message. Only populated by GET /tenants/{id} when status is Failed.
-        createdAt:
-          type: string
-          format: date-time
-          description: The date and time when the tenant was created.
-        updatedAt:
-          type: string
-          format: date-time
-          description: The date and time when the tenant was last updated.
-        contractType:
-          type: string
-          enum:
-            - normal
-            - trial
-      example:
-        id: 1
-        name: example
-        displayName: Example
-        alias: example-alias
-        status: Ready
-        tenantId: 123
-        createdAt: '2020-01-01T00:00:00Z'
-        updatedAt: '2020-01-02T00:00:00Z'
-        deletedAt: null
-    Tenants:
-      type: array
-      items:
-        $ref: '#/components/schemas/Tenant'
-      x-schema-name: Tenants
-    Roles1:
-      type: string
-      description: 'The role assigned to the tenant''s admin user. Possible value: System administrator.'
-      nullable: true
-      enum:
-        - System administrator
-        - Cloud operator
-    MetricStoreEndpoint:
-      required:
-        - url
-      type: object
-      properties:
-        url:
-          type: string
-          format: uri
-          example: http://mimir-nginx.mimir-test.svc:80/api/v1/query
-          minLength: 1
-          maxLength: 2048
-        auth:
-          nullable: true
-          type: object
-          properties:
-            basic:
-              nullable: true
-              type: object
-              properties:
-                username:
-                  type: string
-                  minLength: 1
-                  maxLength: 255
-                password:
-                  type: string
-                  minLength: 1
-                  maxLength: 500
-        headers:
-          nullable: true
-          type: object
-          additionalProperties:
-            type: string
-            maxLength: 1000
-          minProperties: 0
-          maxProperties: 50
-          example:
-            X-Scope-OrgID: id
-    MetricStore:
-      required:
-        - read
-        - write
-      type: object
-      properties:
-        read:
-          $ref: '#/components/schemas/MetricStoreEndpoint'
-        write:
-          $ref: '#/components/schemas/MetricStoreEndpoint'
-    TenantCreationRequest:
-      type: object
-      required:
-        - name
-        - email
-      properties:
-        name:
-          type: string
-          pattern: ^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$
-          description: The name of the tenant.
-          example: name
-          minLength: 2
-          maxLength: 255
-        alias:
-          type: string
-          nullable: true
-          pattern: ^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$
-          description: An optional alias for the tenant. Must be unique across all tenant names and aliases.
-          example: tenant-alias
-          minLength: 2
-          maxLength: 255
-        email:
-          type: string
-          pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
-          description: The email of the tenant's admin user.
-          example: admin@example.com
-          minLength: 5
-          maxLength: 254
-        password:
-          type: string
-          nullable: true
-          description: The password for the tenant's admin user. Must contain at least 1 special character, 1 uppercase letter, 1 lowercase letter, 1 digit, and be at least 8 characters long.
-          minLength: 8
-          maxLength: 255
-        contractType:
-          type: string
-          enum:
-            - normal
-            - ''
-        role:
-          $ref: '#/components/schemas/Roles1'
-        metricStore:
-          writeOnly: true
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/MetricStore'
-    TenantCreationResponse:
-      type: object
-      required:
-        - tenant
-      properties:
-        tenant:
-          $ref: '#/components/schemas/Tenant'
-        additionalData:
-          description: additional data for tenant creation
-          type: object
-          nullable: true
-      example:
-        tenant:
-          id: 1
-          name: example
-          displayName: Example
-          status: Ready
-          tenantId: 123
-          created_at: '2020-01-01T00:00:00Z'
-          updated_at: '2020-01-02T00:00:00Z'
-          deleted_at: null
-        additionalData:
-          tenantDomain: tenant.example.com
-          customerUser:
-            user@tenant: Abc!23
-    TenantUpdateRequest:
-      type: object
-      properties:
-        alias:
-          type: string
-          nullable: true
-          pattern: ^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$
-          description: An optional alias for the tenant. Must be unique across all tenant names and aliases.
-          example: tenant-alias
-          minLength: 2
-          maxLength: 255
     LogoCreationRequest:
       type: object
       required:
@@ -36240,43 +35283,6 @@ components:
       properties:
         adminMessage:
           $ref: '#/components/schemas/GetAdminMessage'
-    GetSystemNotification:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique identifier for the admin message
-        msg:
-          type: string
-          description: The message content displayed to users. Supports a limited HTML subset for basic formatting
-        createdAt:
-          type: integer
-          format: int64
-          description: Time the message was created, as a Unix timestamp
-        displayName:
-          type: string
-          description: Human-readable name for this setting
-          readOnly: true
-        description:
-          type: string
-          description: Short explanation of what this setting controls, shown alongside the setting
-          readOnly: true
-      example:
-        id: 550e8400-e29b-41d4-a716-446655440000
-        msg: System maintenance scheduled for this weekend
-        createdAt: 1706886400000
-        enableDismiss: true
-        displayName: System notification
-        description: A notification that will be displayed to all users
-    UpdateSystemNotification:
-      type: object
-      properties:
-        msg:
-          type: string
-          nullable: true
-          description: The message content to display to all users (supports limited HTML)
-      example:
-        msg: We are currently experiencing an unexpected outage affecting service-x. We're actively investigating the issue. We apologize for the disruption.
     notificationsSettingsKeyEnum:
       type: string
       enum:
@@ -36909,15 +35915,6 @@ components:
         format: uuid
       description: The unique identifier for the network topology
       example: 123e4567-e89b-12d3-a456-426614174000
-    TenantId:
-      name: tenantId
-      in: query
-      required: false
-      description: If exists will return the relevant resource for the tenant ID
-      example: '1008'
-      schema:
-        type: string
-        default: ''
     ClusterSettingsKey:
       name: key
       in: path
@@ -38285,45 +37282,6 @@ components:
       description: The settings key
       schema:
         $ref: '#/components/schemas/WorkloadsSettingsKeyEnum1'
-    deleted:
-      name: deleted
-      in: query
-      description: Include soft-deleted tenants in the response when `true`.
-      schema:
-        type: boolean
-        default: false
-    filterByName:
-      name: name
-      in: query
-      required: false
-      description: Filter tenants by name
-      schema:
-        type: string
-    filterByAlias:
-      name: alias
-      in: query
-      required: false
-      description: Filter tenants by alias
-      schema:
-        type: string
-    tenantId:
-      name: tenantId
-      in: path
-      required: true
-      description: The id of the tenant to retrieve
-      schema:
-        type: integer
-        format: int32
-        minimum: 0
-    tenantId-2:
-      name: tenantId
-      in: query
-      required: false
-      description: If exists will return the relevant resource for the tenant ID
-      example: '1008'
-      schema:
-        type: string
-        default: ''
     DatavolumesRequestType:
       name: requestType
       in: query

@@ -6296,12 +6296,7 @@ paths:
         name: scopeType
         required: true
         schema:
-          enum:
-          - tenant
-          - cluster
-          - department
-          - project
-          type: string
+          $ref: '#/components/schemas/ResourceScopeType'
         style: form
       - description: The scope resource id that identifies the row.
         explode: true
@@ -7713,19 +7708,14 @@ components:
       schema:
         type: string
       style: form
-    ScopeType-2:
+    ResourceScopeType:
       description: The resource scope type to filter by.
       explode: true
       in: query
       name: scopeType
       required: true
       schema:
-        enum:
-        - tenant
-        - cluster
-        - department
-        - project
-        type: string
+        $ref: '#/components/schemas/ResourceScopeType'
       style: form
     ScopeIdRequired:
       description: The scope resource id that identifies the row.
@@ -9438,10 +9428,9 @@ components:
       minLength: 1
       pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
       type: string
-    ScopeType-2:
+    ResourceScopeType:
+      description: The scope type the resource is defined at.
       enum:
-      - system
-      - tenant
       - cluster
       - department
       - project
@@ -9449,7 +9438,7 @@ components:
     ResourceClaimTemplate:
       example:
         scopeId: scopeId
-        scopeType: system
+        scopeType: cluster
         assetId: assetId
         origin: assets
         name: rct-gpu-1
@@ -9475,7 +9464,7 @@ components:
           minLength: 1
           type: string
         scopeType:
-          $ref: '#/components/schemas/ScopeType-2'
+          $ref: '#/components/schemas/ResourceScopeType'
         scopeId:
           description: |
             Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.
@@ -9504,7 +9493,7 @@ components:
       example:
         items:
         - scopeId: scopeId
-          scopeType: system
+          scopeType: cluster
           assetId: assetId
           origin: assets
           name: rct-gpu-1
@@ -9515,7 +9504,7 @@ components:
           - issue: issue
             namespace: namespace
         - scopeId: scopeId
-          scopeType: system
+          scopeType: cluster
           assetId: assetId
           origin: assets
           name: rct-gpu-1
@@ -9526,7 +9515,7 @@ components:
           - issue: issue
             namespace: namespace
         - scopeId: scopeId
-          scopeType: system
+          scopeType: cluster
           assetId: assetId
           origin: assets
           name: rct-gpu-1
@@ -9537,7 +9526,7 @@ components:
           - issue: issue
             namespace: namespace
         - scopeId: scopeId
-          scopeType: system
+          scopeType: cluster
           assetId: assetId
           origin: assets
           name: rct-gpu-1
@@ -9548,7 +9537,7 @@ components:
           - issue: issue
             namespace: namespace
         - scopeId: scopeId
-          scopeType: system
+          scopeType: cluster
           assetId: assetId
           origin: assets
           name: rct-gpu-1

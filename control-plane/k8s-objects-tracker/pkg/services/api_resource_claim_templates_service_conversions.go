@@ -35,7 +35,7 @@ type resourceClaimTemplateSpecEnvelope struct {
 // sync endpoints, callers now carry scopeType/scopeId in the body so a single
 // POST/PUT/Sync surface can accept items at any scope.
 func resourceClaimTemplateApiToDb(tenantId int32, clusterUuid uuid.UUID, rct *api.ResourceClaimTemplate) (*models.Object, *api.Error) {
-	scopeType := authclient.ScopeType(rct.ScopeType)
+	scopeType := authclient.ScopeType(string(rct.ScopeType))
 	filters := models.ObjectFilters{
 		TenantId:  tenantId,
 		Type:      models.ObjectTypeResourceClaimTemplate,
@@ -79,7 +79,7 @@ func resourceClaimTemplateDbToApi(obj *models.Object) (*api.ResourceClaimTemplat
 	rct := &api.ResourceClaimTemplate{
 		Name:      name,
 		Namespace: envelope.Namespace,
-		ScopeType: string(obj.ScopeType),
+		ScopeType: api.ScopeType2(obj.ScopeType),
 		Origin:    envelope.Origin,
 		AssetId:   envelope.AssetId,
 	}

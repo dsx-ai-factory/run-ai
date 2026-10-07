@@ -510,9 +510,9 @@ func (c *ResourceClaimTemplatesAPIController) DeleteResourceClaimTemplate(w http
 		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
-	var scopeTypeParam string
+	var scopeTypeParam ResourceScopeType
 	if query.Has("scopeType") {
-		param := query.Get("scopeType")
+		param := ResourceScopeType(query.Get("scopeType"))
 
 		scopeTypeParam = param
 	} else {

@@ -837,10 +837,10 @@ export interface ResourceClaimTemplate {
     'namespace': string;
     /**
      * 
-     * @type {ScopeType2}
+     * @type {ResourceScopeType}
      * @memberof ResourceClaimTemplate
      */
-    'scopeType': ScopeType2;
+    'scopeType': ResourceScopeType;
     /**
      * Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id. 
      * @type {string}
@@ -880,20 +880,18 @@ export interface ResourceClaimTemplates {
     'items': Array<ResourceClaimTemplate>;
 }
 /**
- * 
+ * The scope type the resource is defined at.
  * @export
  * @enum {string}
  */
 
-export const ScopeType2 = {
-    System: 'system',
-    Tenant: 'tenant',
+export const ResourceScopeType = {
     Cluster: 'cluster',
     Department: 'department',
     Project: 'project'
 } as const;
 
-export type ScopeType2 = typeof ScopeType2[keyof typeof ScopeType2];
+export type ResourceScopeType = typeof ResourceScopeType[keyof typeof ResourceScopeType];
 
 
 /**
@@ -5771,13 +5769,13 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
          * 
          * @summary delete a Resource Claim Template
          * @param {string} clusterId The id of the cluster
-         * @param {'tenant' | 'cluster' | 'department' | 'project'} scopeType The resource scope type to filter by.
+         * @param {ResourceScopeType} scopeType The resource scope type to filter by.
          * @param {string} scopeId The scope resource id that identifies the row.
          * @param {string} name filter by name
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteResourceClaimTemplate: async (clusterId: string, scopeType: 'tenant' | 'cluster' | 'department' | 'project', scopeId: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteResourceClaimTemplate: async (clusterId: string, scopeType: ResourceScopeType, scopeId: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'clusterId' is not null or undefined
             assertParamExists('deleteResourceClaimTemplate', 'clusterId', clusterId)
             // verify required parameter 'scopeType' is not null or undefined
@@ -6008,13 +6006,13 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
          * 
          * @summary delete a Resource Claim Template
          * @param {string} clusterId The id of the cluster
-         * @param {'tenant' | 'cluster' | 'department' | 'project'} scopeType The resource scope type to filter by.
+         * @param {ResourceScopeType} scopeType The resource scope type to filter by.
          * @param {string} scopeId The scope resource id that identifies the row.
          * @param {string} name filter by name
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteResourceClaimTemplate(clusterId: string, scopeType: 'tenant' | 'cluster' | 'department' | 'project', scopeId: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async deleteResourceClaimTemplate(clusterId: string, scopeType: ResourceScopeType, scopeId: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -6082,13 +6080,13 @@ export const ResourceClaimTemplatesApiFactory = function (configuration?: Config
          * 
          * @summary delete a Resource Claim Template
          * @param {string} clusterId The id of the cluster
-         * @param {'tenant' | 'cluster' | 'department' | 'project'} scopeType The resource scope type to filter by.
+         * @param {ResourceScopeType} scopeType The resource scope type to filter by.
          * @param {string} scopeId The scope resource id that identifies the row.
          * @param {string} name filter by name
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteResourceClaimTemplate(clusterId: string, scopeType: 'tenant' | 'cluster' | 'department' | 'project', scopeId: string, name: string, options?: any): AxiosPromise<void> {
+        deleteResourceClaimTemplate(clusterId: string, scopeType: ResourceScopeType, scopeId: string, name: string, options?: any): AxiosPromise<void> {
             return localVarFp.deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6154,14 +6152,14 @@ export class ResourceClaimTemplatesApi extends BaseAPI {
      * 
      * @summary delete a Resource Claim Template
      * @param {string} clusterId The id of the cluster
-     * @param {'tenant' | 'cluster' | 'department' | 'project'} scopeType The resource scope type to filter by.
+     * @param {ResourceScopeType} scopeType The resource scope type to filter by.
      * @param {string} scopeId The scope resource id that identifies the row.
      * @param {string} name filter by name
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ResourceClaimTemplatesApi
      */
-    public deleteResourceClaimTemplate(clusterId: string, scopeType: 'tenant' | 'cluster' | 'department' | 'project', scopeId: string, name: string, options?: AxiosRequestConfig) {
+    public deleteResourceClaimTemplate(clusterId: string, scopeType: ResourceScopeType, scopeId: string, name: string, options?: AxiosRequestConfig) {
         return ResourceClaimTemplatesApiFp(this.configuration).deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options).then((request) => request(this.axios, this.basePath));
     }
 

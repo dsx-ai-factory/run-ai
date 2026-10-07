@@ -61,7 +61,7 @@ var _ = Describe("resource claim templates service", func() {
 			byName[item.Name] = item
 		}
 		Expect(byName["rct-cluster-1"].Namespace).To(Equal("runai"))
-		Expect(byName["rct-cluster-1"].ScopeType).To(Equal("cluster"))
+		Expect(byName["rct-cluster-1"].ScopeType).To(Equal(api.SCOPETYPE2_CLUSTER))
 		Expect(byName["rct-cluster-1"].ScopeId).To(Equal(randomScopes.ClusterId))
 		Expect(byName["rct-cluster-1"].Origin).ToNot(BeNil())
 		Expect(*byName["rct-cluster-1"].Origin).To(Equal(api.ORIGIN_ASSETS))
@@ -233,7 +233,7 @@ func clusterRct(rs *RandomScopes, name string, opts ...rctOption) api.ResourceCl
 	rct := api.ResourceClaimTemplate{
 		Name:      name,
 		Namespace: "runai",
-		ScopeType: "cluster",
+		ScopeType: api.SCOPETYPE2_CLUSTER,
 		ScopeId:   rs.ClusterId,
 	}
 	for _, o := range opts {
@@ -246,7 +246,7 @@ func departmentRct(rs *RandomScopes, name string, opts ...rctOption) api.Resourc
 	rct := api.ResourceClaimTemplate{
 		Name:      name,
 		Namespace: "runai",
-		ScopeType: "department",
+		ScopeType: api.SCOPETYPE2_DEPARTMENT,
 		ScopeId:   rs.DepartmentId,
 	}
 	for _, o := range opts {
@@ -259,7 +259,7 @@ func projectRct(rs *RandomScopes, name string, opts ...rctOption) api.ResourceCl
 	rct := api.ResourceClaimTemplate{
 		Name:      name,
 		Namespace: fmt.Sprintf("runai-%d", rs.ProjectId),
-		ScopeType: "project",
+		ScopeType: api.SCOPETYPE2_PROJECT,
 		ScopeId:   rs.ProjectIdStr,
 	}
 	for _, o := range opts {
