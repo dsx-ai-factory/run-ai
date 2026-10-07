@@ -836,6 +836,18 @@ export interface ResourceClaimTemplate {
      */
     'namespace': string;
     /**
+     * Scope at which this template is tracked by the control plane. Determines which scope-window the row joins for list, prune, and ancestor queries. 
+     * @type {string}
+     * @memberof ResourceClaimTemplate
+     */
+    'scopeType': ResourceClaimTemplateScopeTypeEnum;
+    /**
+     * Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id. 
+     * @type {string}
+     * @memberof ResourceClaimTemplate
+     */
+    'scopeId': string;
+    /**
      * 
      * @type {Origin}
      * @memberof ResourceClaimTemplate
@@ -848,18 +860,21 @@ export interface ResourceClaimTemplate {
      */
     'assetId'?: string | null;
     /**
-     * Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the control plane has enough fidelity to describe what will be submitted on claim creation, rather than relying on the template name alone. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimTemplateSpec`. 
-     * @type {{ [key: string]: any; }}
-     * @memberof ResourceClaimTemplate
-     */
-    'spec'?: { [key: string]: any; };
-    /**
      * list of issues that was found while syncing the resource to the cluster
      * @type {Array<Issue>}
      * @memberof ResourceClaimTemplate
      */
     'issues'?: Array<Issue>;
 }
+
+export const ResourceClaimTemplateScopeTypeEnum = {
+    Cluster: 'cluster',
+    Department: 'department',
+    Project: 'project'
+} as const;
+
+export type ResourceClaimTemplateScopeTypeEnum = typeof ResourceClaimTemplateScopeTypeEnum[keyof typeof ResourceClaimTemplateScopeTypeEnum];
+
 /**
  * 
  * @export
@@ -5699,6 +5714,115 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
     return {
         /**
          * 
+         * @summary create a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createResourceClaimTemplate: async (clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('createResourceClaimTemplate', 'clusterId', clusterId)
+            // verify required parameter 'resourceClaimTemplate' is not null or undefined
+            assertParamExists('createResourceClaimTemplate', 'resourceClaimTemplate', resourceClaimTemplate)
+            const localVarPath = `/api/v1/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(resourceClaimTemplate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary delete a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {'tenant' | 'cluster' | 'department' | 'project'} scopeType The resource scope type to filter by.
+         * @param {string} scopeId The scope resource id that identifies the row.
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteResourceClaimTemplate: async (clusterId: string, scopeType: 'tenant' | 'cluster' | 'department' | 'project', scopeId: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('deleteResourceClaimTemplate', 'clusterId', clusterId)
+            // verify required parameter 'scopeType' is not null or undefined
+            assertParamExists('deleteResourceClaimTemplate', 'scopeType', scopeType)
+            // verify required parameter 'scopeId' is not null or undefined
+            assertParamExists('deleteResourceClaimTemplate', 'scopeId', scopeId)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('deleteResourceClaimTemplate', 'name', name)
+            const localVarPath = `/api/v1/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (scopeType !== undefined) {
+                localVarQueryParameter['scopeType'] = scopeType;
+            }
+
+            if (scopeId !== undefined) {
+                localVarQueryParameter['scopeId'] = scopeId;
+            }
+
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary list details of ResourceClaimTemplates
          * @param {string} [scopeType] The type of resource we want to filter by.
          * @param {string} [scopeId] filter by scope id
@@ -5767,20 +5891,19 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
             };
         },
         /**
-         * 
-         * @summary sync the details of cluster-wide ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone. 
+         * @summary sync the full set of ResourceClaimTemplates observed in a cluster
+         * @param {string} clusterId The id of the cluster
          * @param {ResourceClaimTemplates} resourceClaimTemplates 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        syncClusterWideResourceClaimTemplates: async (clusterUuid: string, resourceClaimTemplates: ResourceClaimTemplates, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'clusterUuid' is not null or undefined
-            assertParamExists('syncClusterWideResourceClaimTemplates', 'clusterUuid', clusterUuid)
+        syncResourceClaimTemplates: async (clusterId: string, resourceClaimTemplates: ResourceClaimTemplates, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('syncResourceClaimTemplates', 'clusterId', clusterId)
             // verify required parameter 'resourceClaimTemplates' is not null or undefined
-            assertParamExists('syncClusterWideResourceClaimTemplates', 'resourceClaimTemplates', resourceClaimTemplates)
-            const localVarPath = `/api/v1/resource-claim-templates/{clusterUuid}`
-                .replace(`{${"clusterUuid"}}`, encodeURIComponent(String(clusterUuid)));
+            assertParamExists('syncResourceClaimTemplates', 'resourceClaimTemplates', resourceClaimTemplates)
+            const localVarPath = `/api/v1/resource-claim-templates/sync`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -5795,6 +5918,10 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
             // authentication bearerAuth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
 
 
     
@@ -5812,23 +5939,18 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
         },
         /**
          * 
-         * @summary sync the details of department-wide ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} departmentId The id of the department.
-         * @param {ResourceClaimTemplates} resourceClaimTemplates 
+         * @summary update a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        syncDepartmentWideResourceClaimTemplates: async (clusterUuid: string, departmentId: string, resourceClaimTemplates: ResourceClaimTemplates, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'clusterUuid' is not null or undefined
-            assertParamExists('syncDepartmentWideResourceClaimTemplates', 'clusterUuid', clusterUuid)
-            // verify required parameter 'departmentId' is not null or undefined
-            assertParamExists('syncDepartmentWideResourceClaimTemplates', 'departmentId', departmentId)
-            // verify required parameter 'resourceClaimTemplates' is not null or undefined
-            assertParamExists('syncDepartmentWideResourceClaimTemplates', 'resourceClaimTemplates', resourceClaimTemplates)
-            const localVarPath = `/api/v1/resource-claim-templates/{clusterUuid}/departments/{departmentId}`
-                .replace(`{${"clusterUuid"}}`, encodeURIComponent(String(clusterUuid)))
-                .replace(`{${"departmentId"}}`, encodeURIComponent(String(departmentId)));
+        updateResourceClaimTemplate: async (clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('updateResourceClaimTemplate', 'clusterId', clusterId)
+            // verify required parameter 'resourceClaimTemplate' is not null or undefined
+            assertParamExists('updateResourceClaimTemplate', 'resourceClaimTemplate', resourceClaimTemplate)
+            const localVarPath = `/api/v1/resource-claim-templates`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -5836,13 +5958,17 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
             // authentication bearerAuth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
 
 
     
@@ -5851,55 +5977,7 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(resourceClaimTemplates, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary sync the details of project ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} namespace The namespace of the project.
-         * @param {ResourceClaimTemplates} resourceClaimTemplates 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        syncProjectResourceClaimTemplates: async (clusterUuid: string, namespace: string, resourceClaimTemplates: ResourceClaimTemplates, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'clusterUuid' is not null or undefined
-            assertParamExists('syncProjectResourceClaimTemplates', 'clusterUuid', clusterUuid)
-            // verify required parameter 'namespace' is not null or undefined
-            assertParamExists('syncProjectResourceClaimTemplates', 'namespace', namespace)
-            // verify required parameter 'resourceClaimTemplates' is not null or undefined
-            assertParamExists('syncProjectResourceClaimTemplates', 'resourceClaimTemplates', resourceClaimTemplates)
-            const localVarPath = `/api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace}`
-                .replace(`{${"clusterUuid"}}`, encodeURIComponent(String(clusterUuid)))
-                .replace(`{${"namespace"}}`, encodeURIComponent(String(namespace)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(resourceClaimTemplates, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(resourceClaimTemplate, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5918,6 +5996,32 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
     return {
         /**
          * 
+         * @summary create a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplate>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createResourceClaimTemplate(clusterId, resourceClaimTemplate, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary delete a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {'tenant' | 'cluster' | 'department' | 'project'} scopeType The resource scope type to filter by.
+         * @param {string} scopeId The scope resource id that identifies the row.
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteResourceClaimTemplate(clusterId: string, scopeType: 'tenant' | 'cluster' | 'department' | 'project', scopeId: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary list details of ResourceClaimTemplates
          * @param {string} [scopeType] The type of resource we want to filter by.
          * @param {string} [scopeId] filter by scope id
@@ -5934,41 +6038,27 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * 
-         * @summary sync the details of cluster-wide ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone. 
+         * @summary sync the full set of ResourceClaimTemplates observed in a cluster
+         * @param {string} clusterId The id of the cluster
          * @param {ResourceClaimTemplates} resourceClaimTemplates 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async syncClusterWideResourceClaimTemplates(clusterUuid: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplates>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.syncClusterWideResourceClaimTemplates(clusterUuid, resourceClaimTemplates, options);
+        async syncResourceClaimTemplates(clusterId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplates>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.syncResourceClaimTemplates(clusterId, resourceClaimTemplates, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
          * 
-         * @summary sync the details of department-wide ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} departmentId The id of the department.
-         * @param {ResourceClaimTemplates} resourceClaimTemplates 
+         * @summary update a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async syncDepartmentWideResourceClaimTemplates(clusterUuid: string, departmentId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplates>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.syncDepartmentWideResourceClaimTemplates(clusterUuid, departmentId, resourceClaimTemplates, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
-         * @summary sync the details of project ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} namespace The namespace of the project.
-         * @param {ResourceClaimTemplates} resourceClaimTemplates 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async syncProjectResourceClaimTemplates(clusterUuid: string, namespace: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplates>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.syncProjectResourceClaimTemplates(clusterUuid, namespace, resourceClaimTemplates, options);
+        async updateResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplate>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateResourceClaimTemplate(clusterId, resourceClaimTemplate, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -5981,6 +6071,30 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
 export const ResourceClaimTemplatesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ResourceClaimTemplatesApiFp(configuration)
     return {
+        /**
+         * 
+         * @summary create a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: any): AxiosPromise<ResourceClaimTemplate> {
+            return localVarFp.createResourceClaimTemplate(clusterId, resourceClaimTemplate, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary delete a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {'tenant' | 'cluster' | 'department' | 'project'} scopeType The resource scope type to filter by.
+         * @param {string} scopeId The scope resource id that identifies the row.
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteResourceClaimTemplate(clusterId: string, scopeType: 'tenant' | 'cluster' | 'department' | 'project', scopeId: string, name: string, options?: any): AxiosPromise<void> {
+            return localVarFp.deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options).then((request) => request(axios, basePath));
+        },
         /**
          * 
          * @summary list details of ResourceClaimTemplates
@@ -5998,39 +6112,26 @@ export const ResourceClaimTemplatesApiFactory = function (configuration?: Config
             return localVarFp.listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, includeAncestors, includeDescendants, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
-         * @summary sync the details of cluster-wide ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+         * Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone. 
+         * @summary sync the full set of ResourceClaimTemplates observed in a cluster
+         * @param {string} clusterId The id of the cluster
          * @param {ResourceClaimTemplates} resourceClaimTemplates 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        syncClusterWideResourceClaimTemplates(clusterUuid: string, resourceClaimTemplates: ResourceClaimTemplates, options?: any): AxiosPromise<ResourceClaimTemplates> {
-            return localVarFp.syncClusterWideResourceClaimTemplates(clusterUuid, resourceClaimTemplates, options).then((request) => request(axios, basePath));
+        syncResourceClaimTemplates(clusterId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: any): AxiosPromise<ResourceClaimTemplates> {
+            return localVarFp.syncResourceClaimTemplates(clusterId, resourceClaimTemplates, options).then((request) => request(axios, basePath));
         },
         /**
          * 
-         * @summary sync the details of department-wide ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} departmentId The id of the department.
-         * @param {ResourceClaimTemplates} resourceClaimTemplates 
+         * @summary update a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        syncDepartmentWideResourceClaimTemplates(clusterUuid: string, departmentId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: any): AxiosPromise<ResourceClaimTemplates> {
-            return localVarFp.syncDepartmentWideResourceClaimTemplates(clusterUuid, departmentId, resourceClaimTemplates, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary sync the details of project ResourceClaimTemplates to the control plane
-         * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} namespace The namespace of the project.
-         * @param {ResourceClaimTemplates} resourceClaimTemplates 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        syncProjectResourceClaimTemplates(clusterUuid: string, namespace: string, resourceClaimTemplates: ResourceClaimTemplates, options?: any): AxiosPromise<ResourceClaimTemplates> {
-            return localVarFp.syncProjectResourceClaimTemplates(clusterUuid, namespace, resourceClaimTemplates, options).then((request) => request(axios, basePath));
+        updateResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: any): AxiosPromise<ResourceClaimTemplate> {
+            return localVarFp.updateResourceClaimTemplate(clusterId, resourceClaimTemplate, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -6042,6 +6143,34 @@ export const ResourceClaimTemplatesApiFactory = function (configuration?: Config
  * @extends {BaseAPI}
  */
 export class ResourceClaimTemplatesApi extends BaseAPI {
+    /**
+     * 
+     * @summary create a Resource Claim Template
+     * @param {string} clusterId The id of the cluster
+     * @param {ResourceClaimTemplate} resourceClaimTemplate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public createResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).createResourceClaimTemplate(clusterId, resourceClaimTemplate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary delete a Resource Claim Template
+     * @param {string} clusterId The id of the cluster
+     * @param {'tenant' | 'cluster' | 'department' | 'project'} scopeType The resource scope type to filter by.
+     * @param {string} scopeId The scope resource id that identifies the row.
+     * @param {string} name filter by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public deleteResourceClaimTemplate(clusterId: string, scopeType: 'tenant' | 'cluster' | 'department' | 'project', scopeId: string, name: string, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @summary list details of ResourceClaimTemplates
@@ -6061,44 +6190,29 @@ export class ResourceClaimTemplatesApi extends BaseAPI {
     }
 
     /**
-     * 
-     * @summary sync the details of cluster-wide ResourceClaimTemplates to the control plane
-     * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+     * Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone. 
+     * @summary sync the full set of ResourceClaimTemplates observed in a cluster
+     * @param {string} clusterId The id of the cluster
      * @param {ResourceClaimTemplates} resourceClaimTemplates 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ResourceClaimTemplatesApi
      */
-    public syncClusterWideResourceClaimTemplates(clusterUuid: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig) {
-        return ResourceClaimTemplatesApiFp(this.configuration).syncClusterWideResourceClaimTemplates(clusterUuid, resourceClaimTemplates, options).then((request) => request(this.axios, this.basePath));
+    public syncResourceClaimTemplates(clusterId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).syncResourceClaimTemplates(clusterId, resourceClaimTemplates, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * 
-     * @summary sync the details of department-wide ResourceClaimTemplates to the control plane
-     * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-     * @param {string} departmentId The id of the department.
-     * @param {ResourceClaimTemplates} resourceClaimTemplates 
+     * @summary update a Resource Claim Template
+     * @param {string} clusterId The id of the cluster
+     * @param {ResourceClaimTemplate} resourceClaimTemplate 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ResourceClaimTemplatesApi
      */
-    public syncDepartmentWideResourceClaimTemplates(clusterUuid: string, departmentId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig) {
-        return ResourceClaimTemplatesApiFp(this.configuration).syncDepartmentWideResourceClaimTemplates(clusterUuid, departmentId, resourceClaimTemplates, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary sync the details of project ResourceClaimTemplates to the control plane
-     * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-     * @param {string} namespace The namespace of the project.
-     * @param {ResourceClaimTemplates} resourceClaimTemplates 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ResourceClaimTemplatesApi
-     */
-    public syncProjectResourceClaimTemplates(clusterUuid: string, namespace: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig) {
-        return ResourceClaimTemplatesApiFp(this.configuration).syncProjectResourceClaimTemplates(clusterUuid, namespace, resourceClaimTemplates, options).then((request) => request(this.axios, this.basePath));
+    public updateResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).updateResourceClaimTemplate(clusterId, resourceClaimTemplate, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

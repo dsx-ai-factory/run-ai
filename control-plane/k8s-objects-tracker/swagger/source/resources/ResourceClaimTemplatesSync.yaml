@@ -1,6 +1,15 @@
 post:
-  summary: sync the details of cluster-wide ResourceClaimTemplates to the control plane
-  operationId: sync_cluster_wide_resource_claim_templates
+  summary: sync the full set of ResourceClaimTemplates observed in a cluster
+  description: >
+    Cluster-wide full-set replace for every ResourceClaimTemplate the cluster
+    currently observes. The payload may contain items at different scopes
+    (cluster, department, project) in the same call; each item declares its
+    own scope via scopeType and scopeId in the body. Any tracked
+    ResourceClaimTemplate row for this cluster that is not present in the
+    payload is removed, regardless of its scope - the agent is asserting the
+    entire cluster inventory with each call, so a missing row means the
+    template no longer exists.
+  operationId: syncResourceClaimTemplates
   tags:
     - Resource Claim Templates
   x-internal: true
@@ -8,10 +17,11 @@ post:
     resource-type: resource-claim-templates
     action: sync
   x-service: k8s-objects-tracker
+  x-audit: false
   x-test-coverage:
     - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
   parameters:
-    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
   requestBody:
     required: true
     content:

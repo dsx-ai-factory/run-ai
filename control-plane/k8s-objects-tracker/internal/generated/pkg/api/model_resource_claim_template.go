@@ -34,6 +34,18 @@ type ResourceClaimTemplate struct {
 	Namespace string `json:"namespace" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Scope at which this template is tracked by the control plane. Determines which scope-window the row joins for list, prune, and ancestor queries.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ScopeType string `json:"scopeType"`
+	ScopeType string `json:"scopeType" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ScopeId string `json:"scopeId"`
+	ScopeId string `json:"scopeId" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Origin *Origin `json:"origin,omitempty"`
 	Origin *Origin `json:"origin,omitempty" gorm:""`
@@ -43,12 +55,6 @@ type ResourceClaimTemplate struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//AssetId *string `json:"assetId,omitempty"`
 	AssetId *string `json:"assetId,omitempty" gorm:""`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the control plane has enough fidelity to describe what will be submitted on claim creation, rather than relying on the template name alone. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimTemplateSpec`.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Spec map[string]interface{} `json:"spec,omitempty"`
-	Spec map[string]interface{} `json:"spec,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// list of issues that was found while syncing the resource to the cluster
@@ -63,6 +69,8 @@ func AssertResourceClaimTemplateRequired(obj ResourceClaimTemplate) error {
 	elements := map[string]interface{}{
 		"name":      obj.Name,
 		"namespace": obj.Namespace,
+		"scopeType": obj.ScopeType,
+		"scopeId":   obj.ScopeId,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -109,16 +117,24 @@ func AssertResourceClaimTemplateConstraints(obj ResourceClaimTemplate) error {
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
-	if obj.Origin != nil {
-		if okValue := obj.Origin.IsValid(); !okValue {
-			return &UnsupportedValueError{Field: "Origin", Value: string(*obj.Origin)}
-		}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if minLengthErr := runaihttp.AssertMinLength(obj.ScopeId, "ScopeId", 1); minLengthErr != nil {
+		return &ParsingError{Param: "ScopeId", Err: minLengthErr}
 	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.Origin != nil {
+		if okValue := obj.Origin.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "Origin", Value: string(*obj.Origin)}
+		}
+	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////

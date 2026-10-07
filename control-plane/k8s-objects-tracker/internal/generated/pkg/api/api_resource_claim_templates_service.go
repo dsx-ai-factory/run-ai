@@ -60,13 +60,13 @@ func (s *ResourceClaimTemplatesAPIService) ListResourceClaimTemplates(ctx contex
 	return Response(http.StatusNotImplemented, nil), errors.New("ListResourceClaimTemplates method not implemented")
 }
 
-// SyncClusterWideResourceClaimTemplates - sync the details of cluster-wide ResourceClaimTemplates to the control plane
-func (s *ResourceClaimTemplatesAPIService) SyncClusterWideResourceClaimTemplates(ctx context.Context, clusterUuid string, resourceClaimTemplates ResourceClaimTemplates) (ImplResponse, error) {
-	// TODO - update SyncClusterWideResourceClaimTemplates with the required logic for this service method.
+// UpdateResourceClaimTemplate - update a Resource Claim Template
+func (s *ResourceClaimTemplatesAPIService) UpdateResourceClaimTemplate(ctx context.Context, clusterId string, resourceClaimTemplate ResourceClaimTemplate) (ImplResponse, error) {
+	// TODO - update UpdateResourceClaimTemplate with the required logic for this service method.
 	// Add api_resource_claim_templates_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
-	// TODO: Uncomment the next line to return response Response(200, ResourceClaimTemplates{}) or use other options such as http.Ok ...
-	// return Response(200, ResourceClaimTemplates{}), nil
+	// TODO: Uncomment the next line to return response Response(200, ResourceClaimTemplate{}) or use other options such as http.Ok ...
+	// return Response(200, ResourceClaimTemplate{}), nil
 
 	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
 	// return Response(400, Error{}), nil
@@ -83,16 +83,16 @@ func (s *ResourceClaimTemplatesAPIService) SyncClusterWideResourceClaimTemplates
 	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
 	// return Response(503, Error{}), nil
 
-	return Response(http.StatusNotImplemented, nil), errors.New("SyncClusterWideResourceClaimTemplates method not implemented")
+	return Response(http.StatusNotImplemented, nil), errors.New("UpdateResourceClaimTemplate method not implemented")
 }
 
-// SyncDepartmentWideResourceClaimTemplates - sync the details of department-wide ResourceClaimTemplates to the control plane
-func (s *ResourceClaimTemplatesAPIService) SyncDepartmentWideResourceClaimTemplates(ctx context.Context, clusterUuid string, departmentId string, resourceClaimTemplates ResourceClaimTemplates) (ImplResponse, error) {
-	// TODO - update SyncDepartmentWideResourceClaimTemplates with the required logic for this service method.
+// CreateResourceClaimTemplate - create a Resource Claim Template
+func (s *ResourceClaimTemplatesAPIService) CreateResourceClaimTemplate(ctx context.Context, clusterId string, resourceClaimTemplate ResourceClaimTemplate) (ImplResponse, error) {
+	// TODO - update CreateResourceClaimTemplate with the required logic for this service method.
 	// Add api_resource_claim_templates_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
-	// TODO: Uncomment the next line to return response Response(200, ResourceClaimTemplates{}) or use other options such as http.Ok ...
-	// return Response(200, ResourceClaimTemplates{}), nil
+	// TODO: Uncomment the next line to return response Response(200, ResourceClaimTemplate{}) or use other options such as http.Ok ...
+	// return Response(200, ResourceClaimTemplate{}), nil
 
 	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
 	// return Response(400, Error{}), nil
@@ -109,12 +109,41 @@ func (s *ResourceClaimTemplatesAPIService) SyncDepartmentWideResourceClaimTempla
 	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
 	// return Response(503, Error{}), nil
 
-	return Response(http.StatusNotImplemented, nil), errors.New("SyncDepartmentWideResourceClaimTemplates method not implemented")
+	return Response(http.StatusNotImplemented, nil), errors.New("CreateResourceClaimTemplate method not implemented")
 }
 
-// SyncProjectResourceClaimTemplates - sync the details of project ResourceClaimTemplates to the control plane
-func (s *ResourceClaimTemplatesAPIService) SyncProjectResourceClaimTemplates(ctx context.Context, clusterUuid string, namespace string, resourceClaimTemplates ResourceClaimTemplates) (ImplResponse, error) {
-	// TODO - update SyncProjectResourceClaimTemplates with the required logic for this service method.
+// DeleteResourceClaimTemplate - delete a Resource Claim Template
+func (s *ResourceClaimTemplatesAPIService) DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeType string, scopeId string, name string) (ImplResponse, error) {
+	// TODO - update DeleteResourceClaimTemplate with the required logic for this service method.
+	// Add api_resource_claim_templates_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(204, {}) or use other options such as http.Ok ...
+	// return Response(204, nil),nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
+	// return Response(404, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("DeleteResourceClaimTemplate method not implemented")
+}
+
+// SyncResourceClaimTemplates - sync the full set of ResourceClaimTemplates observed in a cluster
+func (s *ResourceClaimTemplatesAPIService) SyncResourceClaimTemplates(ctx context.Context, clusterId string, resourceClaimTemplates ResourceClaimTemplates) (ImplResponse, error) {
+	// TODO - update SyncResourceClaimTemplates with the required logic for this service method.
 	// Add api_resource_claim_templates_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
 	// TODO: Uncomment the next line to return response Response(200, ResourceClaimTemplates{}) or use other options such as http.Ok ...
@@ -135,5 +164,5 @@ func (s *ResourceClaimTemplatesAPIService) SyncProjectResourceClaimTemplates(ctx
 	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
 	// return Response(503, Error{}), nil
 
-	return Response(http.StatusNotImplemented, nil), errors.New("SyncProjectResourceClaimTemplates method not implemented")
+	return Response(http.StatusNotImplemented, nil), errors.New("SyncResourceClaimTemplates method not implemented")
 }

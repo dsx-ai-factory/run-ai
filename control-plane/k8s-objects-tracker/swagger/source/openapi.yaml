@@ -144,12 +144,8 @@ paths:
 
   /api/v1/resource-claim-templates:
     $ref: './resources/ResourceClaimTemplates.yaml'
-  /api/v1/resource-claim-templates/{clusterUuid}:
-    $ref: './resources/ClusterResourceClaimTemplatesSync.yaml'
-  /api/v1/resource-claim-templates/{clusterUuid}/departments/{departmentId}:
-    $ref: './resources/DepartmentResourceClaimTemplatesSync.yaml'
-  /api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace}:
-    $ref: './resources/ProjectResourceClaimTemplatesSync.yaml'
+  /api/v1/resource-claim-templates/sync:
+    $ref: './resources/ResourceClaimTemplatesSync.yaml'
 
   /api/v1/storage-class-configuration:
     $ref: './resources/StorageClassConfiguration.yaml'

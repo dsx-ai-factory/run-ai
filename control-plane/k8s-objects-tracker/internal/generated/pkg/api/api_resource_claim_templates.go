@@ -32,8 +32,6 @@ import (
 	"net/http"
 	"reflect" // RUNAI
 	"strings"
-
-	"github.com/go-chi/chi/v5"
 )
 
 // ResourceClaimTemplatesAPIController binds http requests to an api service and writes the service results to the http response
@@ -121,9 +119,9 @@ func (c *ResourceClaimTemplatesAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
-		"SyncClusterWideResourceClaimTemplates": Route{
-			strings.ToUpper("Post"),
-			"/api/v1/resource-claim-templates/{clusterUuid}",
+		"UpdateResourceClaimTemplate": Route{
+			strings.ToUpper("Put"),
+			"/api/v1/resource-claim-templates",
 			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
 			BuildHandlerChain(
 				func(next http.HandlerFunc) http.HandlerFunc {
@@ -137,15 +135,15 @@ func (c *ResourceClaimTemplatesAPIController) Routes() Routes {
 				},
 				func(next http.HandlerFunc) http.HandlerFunc {
 					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
-					return c.SyncClusterWideResourceClaimTemplates
+					return c.UpdateResourceClaimTemplate
 					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
 				},
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
-		"SyncDepartmentWideResourceClaimTemplates": Route{
+		"CreateResourceClaimTemplate": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/resource-claim-templates/{clusterUuid}/departments/{departmentId}",
+			"/api/v1/resource-claim-templates",
 			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
 			BuildHandlerChain(
 				func(next http.HandlerFunc) http.HandlerFunc {
@@ -159,15 +157,37 @@ func (c *ResourceClaimTemplatesAPIController) Routes() Routes {
 				},
 				func(next http.HandlerFunc) http.HandlerFunc {
 					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
-					return c.SyncDepartmentWideResourceClaimTemplates
+					return c.CreateResourceClaimTemplate
 					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
 				},
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
-		"SyncProjectResourceClaimTemplates": Route{
+		"DeleteResourceClaimTemplate": Route{
+			strings.ToUpper("Delete"),
+			"/api/v1/resource-claim-templates",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"resource-claim-templates",
+						"delete",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.DeleteResourceClaimTemplate
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
+		"SyncResourceClaimTemplates": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace}",
+			"/api/v1/resource-claim-templates/sync",
 			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
 			BuildHandlerChain(
 				func(next http.HandlerFunc) http.HandlerFunc {
@@ -181,7 +201,7 @@ func (c *ResourceClaimTemplatesAPIController) Routes() Routes {
 				},
 				func(next http.HandlerFunc) http.HandlerFunc {
 					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
-					return c.SyncProjectResourceClaimTemplates
+					return c.SyncResourceClaimTemplates
 					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
 				},
 			),
@@ -312,14 +332,23 @@ func (c *ResourceClaimTemplatesAPIController) ListResourceClaimTemplates(w http.
 
 }
 
-// SyncClusterWideResourceClaimTemplates - sync the details of cluster-wide ResourceClaimTemplates to the control plane
-func (c *ResourceClaimTemplatesAPIController) SyncClusterWideResourceClaimTemplates(w http.ResponseWriter, r *http.Request) {
-	clusterUuidParam := chi.URLParam(r, "clusterUuid")
-	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
+// UpdateResourceClaimTemplate - update a Resource Claim Template
+func (c *ResourceClaimTemplatesAPIController) UpdateResourceClaimTemplate(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
-	var resourceClaimTemplatesParam ResourceClaimTemplates
+	var clusterIdParam string
+	if query.Has("clusterId") {
+		param := query.Get("clusterId")
+
+		clusterIdParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
+		return
+	}
+	var resourceClaimTemplateParam ResourceClaimTemplate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
 	// payloadBody is a per-request local slice, never a shared controller field,
 	// so concurrent requests on the singleton controller cannot race on it.
@@ -334,19 +363,19 @@ func (c *ResourceClaimTemplatesAPIController) SyncClusterWideResourceClaimTempla
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
-	if err := d.Decode(&resourceClaimTemplatesParam); err != nil {
+	if err := d.Decode(&resourceClaimTemplateParam); err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
-	if err := AssertResourceClaimTemplatesRequired(resourceClaimTemplatesParam); err != nil {
+	if err := AssertResourceClaimTemplateRequired(resourceClaimTemplateParam); err != nil {
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	if err := AssertResourceClaimTemplatesConstraints(resourceClaimTemplatesParam); err != nil {
+	if err := AssertResourceClaimTemplateConstraints(resourceClaimTemplateParam); err != nil {
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	result, err := c.service.SyncClusterWideResourceClaimTemplates(r.Context(), clusterUuidParam, resourceClaimTemplatesParam)
+	result, err := c.service.UpdateResourceClaimTemplate(r.Context(), clusterIdParam, resourceClaimTemplateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
@@ -398,19 +427,23 @@ func (c *ResourceClaimTemplatesAPIController) SyncClusterWideResourceClaimTempla
 
 }
 
-// SyncDepartmentWideResourceClaimTemplates - sync the details of department-wide ResourceClaimTemplates to the control plane
-func (c *ResourceClaimTemplatesAPIController) SyncDepartmentWideResourceClaimTemplates(w http.ResponseWriter, r *http.Request) {
-	clusterUuidParam := chi.URLParam(r, "clusterUuid")
-	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
+// CreateResourceClaimTemplate - create a Resource Claim Template
+func (c *ResourceClaimTemplatesAPIController) CreateResourceClaimTemplate(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
-	departmentIdParam := chi.URLParam(r, "departmentId")
-	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
+	var clusterIdParam string
+	if query.Has("clusterId") {
+		param := query.Get("clusterId")
+
+		clusterIdParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
-	var resourceClaimTemplatesParam ResourceClaimTemplates
+	var resourceClaimTemplateParam ResourceClaimTemplate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
 	// payloadBody is a per-request local slice, never a shared controller field,
 	// so concurrent requests on the singleton controller cannot race on it.
@@ -425,19 +458,19 @@ func (c *ResourceClaimTemplatesAPIController) SyncDepartmentWideResourceClaimTem
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
-	if err := d.Decode(&resourceClaimTemplatesParam); err != nil {
+	if err := d.Decode(&resourceClaimTemplateParam); err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
-	if err := AssertResourceClaimTemplatesRequired(resourceClaimTemplatesParam); err != nil {
+	if err := AssertResourceClaimTemplateRequired(resourceClaimTemplateParam); err != nil {
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	if err := AssertResourceClaimTemplatesConstraints(resourceClaimTemplatesParam); err != nil {
+	if err := AssertResourceClaimTemplateConstraints(resourceClaimTemplateParam); err != nil {
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	result, err := c.service.SyncDepartmentWideResourceClaimTemplates(r.Context(), clusterUuidParam, departmentIdParam, resourceClaimTemplatesParam)
+	result, err := c.service.CreateResourceClaimTemplate(r.Context(), clusterIdParam, resourceClaimTemplateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
@@ -489,16 +522,78 @@ func (c *ResourceClaimTemplatesAPIController) SyncDepartmentWideResourceClaimTem
 
 }
 
-// SyncProjectResourceClaimTemplates - sync the details of project ResourceClaimTemplates to the control plane
-func (c *ResourceClaimTemplatesAPIController) SyncProjectResourceClaimTemplates(w http.ResponseWriter, r *http.Request) {
-	clusterUuidParam := chi.URLParam(r, "clusterUuid")
-	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
+// DeleteResourceClaimTemplate - delete a Resource Claim Template
+func (c *ResourceClaimTemplatesAPIController) DeleteResourceClaimTemplate(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
-	namespaceParam := chi.URLParam(r, "namespace")
-	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
+	var clusterIdParam string
+	if query.Has("clusterId") {
+		param := query.Get("clusterId")
+
+		clusterIdParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
+		return
+	}
+	var scopeTypeParam string
+	if query.Has("scopeType") {
+		param := query.Get("scopeType")
+
+		scopeTypeParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "scopeType"}, nil, nil)
+		return
+	}
+	var scopeIdParam string
+	if query.Has("scopeId") {
+		param := query.Get("scopeId")
+
+		scopeIdParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "scopeId"}, nil, nil)
+		return
+	}
+	var nameParam string
+	if query.Has("name") {
+		param := query.Get("name")
+
+		nameParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "name"}, nil, nil)
+		return
+	}
+	result, err := c.service.DeleteResourceClaimTemplate(r.Context(), clusterIdParam, scopeTypeParam, scopeIdParam, nameParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// SyncResourceClaimTemplates - sync the full set of ResourceClaimTemplates observed in a cluster
+func (c *ResourceClaimTemplatesAPIController) SyncResourceClaimTemplates(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	var clusterIdParam string
+	if query.Has("clusterId") {
+		param := query.Get("clusterId")
+
+		clusterIdParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var resourceClaimTemplatesParam ResourceClaimTemplates
@@ -528,7 +623,7 @@ func (c *ResourceClaimTemplatesAPIController) SyncProjectResourceClaimTemplates(
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	result, err := c.service.SyncProjectResourceClaimTemplates(r.Context(), clusterUuidParam, namespaceParam, resourceClaimTemplatesParam)
+	result, err := c.service.SyncResourceClaimTemplates(r.Context(), clusterIdParam, resourceClaimTemplatesParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

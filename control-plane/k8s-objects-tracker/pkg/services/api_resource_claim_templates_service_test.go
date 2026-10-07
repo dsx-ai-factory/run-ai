@@ -24,10 +24,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// Test coverage for the three scope-split RCT sync endpoints + the shared list
-// endpoint. Each sync endpoint is treated as a full-set replace within its scope
-// so the prune-on-sync behaviour is exercised explicitly; separate scopes must
-// not clobber each other even when template names collide.
+// Test coverage for the collapsed RCT API: a single per-item CRUD surface
+// (POST/PUT/DELETE on the base path) plus a single Sync endpoint whose body
+// may carry items at any scope. Each sync call still performs a per-scope
+// prune so templates in windows the caller did not mention are left alone.
 
 var _ = Describe("resource claim templates service", func() {
 	var randomScopes *RandomScopes
@@ -45,23 +45,13 @@ var _ = Describe("resource claim templates service", func() {
 		clusters.SetMock(clusters.NewSimpleMock().WithCluster(randomScopes.ClusterId, &clustersApi.DisplayedCluster{}))
 	})
 
-	It("round-trips cluster-scope sync, list, and spec payload", func() {
+	It("round-trips cluster-scope sync and list payload", func() {
 		rcts := api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
-			{
-				Name:      "rct-cluster-1",
-				Namespace: "runai",
-				Origin:    originAssetsPtr(),
-				AssetId:   ptr.To("asset-1"),
-				Spec:      map[string]interface{}{"spec": map[string]interface{}{"devices": "cluster-1"}},
-			},
-			{
-				Name:      "rct-cluster-2",
-				Namespace: "runai",
-				Origin:    originExistingPtr(),
-			},
+			clusterRct(randomScopes, "rct-cluster-1", withOrigin(api.ORIGIN_ASSETS), withAssetId("asset-1")),
+			clusterRct(randomScopes, "rct-cluster-2", withOrigin(api.ORIGIN_EXISTING)),
 		}}
 
-		applyRcts(randomScopes, randomScopes.RctsClusterSyncUrl(), rcts)
+		syncRcts(randomScopes, rcts)
 
 		list := listRcts(randomScopes, randomScopes.RctsClusterListUrl())
 		Expect(list.Items).To(HaveLen(2))
@@ -71,52 +61,60 @@ var _ = Describe("resource claim templates service", func() {
 			byName[item.Name] = item
 		}
 		Expect(byName["rct-cluster-1"].Namespace).To(Equal("runai"))
+		Expect(byName["rct-cluster-1"].ScopeType).To(Equal("cluster"))
+		Expect(byName["rct-cluster-1"].ScopeId).To(Equal(randomScopes.ClusterId))
 		Expect(byName["rct-cluster-1"].Origin).ToNot(BeNil())
 		Expect(*byName["rct-cluster-1"].Origin).To(Equal(api.ORIGIN_ASSETS))
 		Expect(byName["rct-cluster-1"].AssetId).To(Equal(ptr.To("asset-1")))
-		Expect(byName["rct-cluster-1"].Spec).To(HaveKey("spec"))
 	})
 
-	It("prunes stale rows within a scope but leaves other scopes alone", func() {
-		clusterRcts := api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
-			{Name: "rct-foo", Namespace: "runai"},
-			{Name: "rct-bar", Namespace: "runai"},
+	It("sync accepts a mixed-scope payload and prunes cluster-wide", func() {
+		mixed := api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
+			clusterRct(randomScopes, "rct-foo"),
+			clusterRct(randomScopes, "rct-bar"),
+			departmentRct(randomScopes, "rct-foo"), // same name as cluster scope - must not collide
+			projectRct(randomScopes, "rct-foo"),
 		}}
-		applyRcts(randomScopes, randomScopes.RctsClusterSyncUrl(), clusterRcts)
+		syncRcts(randomScopes, mixed)
 
-		deptRcts := api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
-			{Name: "rct-foo", Namespace: "runai"}, // same name as cluster scope - must not collide
-		}}
-		applyRcts(randomScopes, randomScopes.RctsDepartmentSyncUrl(), deptRcts)
-
-		projectRcts := api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
-			{Name: "rct-foo", Namespace: fmt.Sprintf("runai-%d", randomScopes.ProjectId)},
-		}}
-		applyRcts(randomScopes, randomScopes.RctsProjectSyncUrl(), projectRcts)
-
-		// Drop rct-foo from the cluster scope sync: only rct-bar should remain
-		// there, while department and project rct-foo rows must survive.
+		// Second sync only mentions one cluster-scope row. Everything the
+		// payload did not surface - including the department and project rows
+		// - must be pruned, because the agent is reporting the full cluster
+		// inventory.
 		trimmed := api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
-			{Name: "rct-bar", Namespace: "runai"},
+			clusterRct(randomScopes, "rct-bar"),
 		}}
-		applyRcts(randomScopes, randomScopes.RctsClusterSyncUrl(), trimmed)
+		syncRcts(randomScopes, trimmed)
 
-		clusterList := listRcts(randomScopes, randomScopes.RctsClusterListUrl())
-		Expect(namesOfRcts(clusterList)).To(ConsistOf("rct-bar"))
+		Expect(namesOfRcts(listRcts(randomScopes, randomScopes.RctsClusterListUrl()))).To(ConsistOf("rct-bar"))
+		Expect(listRcts(randomScopes, randomScopes.RctsDepartmentListUrl()).Items).To(BeEmpty())
+		Expect(listRcts(randomScopes, randomScopes.RctsProjectListUrl()).Items).To(BeEmpty())
+	})
 
-		deptList := listRcts(randomScopes, randomScopes.RctsDepartmentListUrl())
-		Expect(namesOfRcts(deptList)).To(ConsistOf("rct-foo"))
+	It("sync preserves cluster-scope rows with duplicate names across scopes", func() {
+		mixed := api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
+			clusterRct(randomScopes, "rct-foo"),
+			departmentRct(randomScopes, "rct-foo"),
+			projectRct(randomScopes, "rct-foo"),
+		}}
+		syncRcts(randomScopes, mixed)
 
-		projList := listRcts(randomScopes, randomScopes.RctsProjectListUrl())
-		Expect(namesOfRcts(projList)).To(ConsistOf("rct-foo"))
+		// Re-send the same payload: every row must survive even though the
+		// name repeats across scopes. (A name-based prune would wipe two of
+		// the three rows here; the id-keyed prune does not.)
+		syncRcts(randomScopes, mixed)
+
+		Expect(namesOfRcts(listRcts(randomScopes, randomScopes.RctsClusterListUrl()))).To(ConsistOf("rct-foo"))
+		Expect(namesOfRcts(listRcts(randomScopes, randomScopes.RctsDepartmentListUrl()))).To(ConsistOf("rct-foo"))
+		Expect(namesOfRcts(listRcts(randomScopes, randomScopes.RctsProjectListUrl()))).To(ConsistOf("rct-foo"))
 	})
 
 	It("filters list by name and origin", func() {
 		rcts := api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
-			{Name: "rct-assets", Namespace: "runai", Origin: originAssetsPtr(), AssetId: ptr.To("a-1")},
-			{Name: "rct-existing", Namespace: "runai", Origin: originExistingPtr()},
+			clusterRct(randomScopes, "rct-assets", withOrigin(api.ORIGIN_ASSETS), withAssetId("a-1")),
+			clusterRct(randomScopes, "rct-existing", withOrigin(api.ORIGIN_EXISTING)),
 		}}
-		applyRcts(randomScopes, randomScopes.RctsClusterSyncUrl(), rcts)
+		syncRcts(randomScopes, rcts)
 
 		byName := listRcts(randomScopes, randomScopes.RctsClusterListUrl()+"&name=rct-assets")
 		Expect(namesOfRcts(byName)).To(ConsistOf("rct-assets"))
@@ -127,20 +125,72 @@ var _ = Describe("resource claim templates service", func() {
 		all := listRcts(randomScopes, randomScopes.RctsClusterListUrl()+"&origin=all")
 		Expect(namesOfRcts(all)).To(ConsistOf("rct-assets", "rct-existing"))
 	})
+
+	It("per-item create and update at the same name are idempotent", func() {
+		resp := createRct(randomScopes, clusterRct(randomScopes, "rct-one"))
+		Expect(resp.Code).To(Equal(http.StatusOK), resp.Body.String())
+
+		resp = updateRct(randomScopes, clusterRct(randomScopes, "rct-one", withNamespace("runai-updated")))
+		Expect(resp.Code).To(Equal(http.StatusOK), resp.Body.String())
+
+		list := listRcts(randomScopes, randomScopes.RctsClusterListUrl())
+		Expect(list.Items).To(HaveLen(1))
+		Expect(list.Items[0].Name).To(Equal("rct-one"))
+		Expect(list.Items[0].Namespace).To(Equal("runai-updated"))
+	})
+
+	It("per-item create does not prune siblings in the same window", func() {
+		syncRcts(randomScopes, api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
+			clusterRct(randomScopes, "rct-a"),
+			clusterRct(randomScopes, "rct-b"),
+		}})
+
+		resp := createRct(randomScopes, clusterRct(randomScopes, "rct-c"))
+		Expect(resp.Code).To(Equal(http.StatusOK), resp.Body.String())
+
+		Expect(namesOfRcts(listRcts(randomScopes, randomScopes.RctsClusterListUrl()))).To(ConsistOf("rct-a", "rct-b", "rct-c"))
+	})
+
+	It("per-item delete removes exactly one template", func() {
+		syncRcts(randomScopes, api.ResourceClaimTemplates{Items: []api.ResourceClaimTemplate{
+			clusterRct(randomScopes, "rct-a"),
+			clusterRct(randomScopes, "rct-b"),
+			departmentRct(randomScopes, "rct-a"),
+		}})
+
+		resp := deleteRct(randomScopes, "cluster", randomScopes.ClusterId, "rct-a")
+		Expect(resp.Code).To(Equal(http.StatusNoContent), resp.Body.String())
+
+		Expect(namesOfRcts(listRcts(randomScopes, randomScopes.RctsClusterListUrl()))).To(ConsistOf("rct-b"))
+		// department-scope rct-a must survive the cluster-scope delete.
+		Expect(namesOfRcts(listRcts(randomScopes, randomScopes.RctsDepartmentListUrl()))).To(ConsistOf("rct-a"))
+	})
+
+	It("rejects cluster-scope create whose scopeId does not equal clusterId", func() {
+		rct := clusterRct(randomScopes, "rct-mismatch")
+		rct.ScopeId = "not-the-cluster-id"
+
+		resp := createRct(randomScopes, rct)
+		Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+	})
+
+	It("rejects create whose scopeType is missing a scopeId", func() {
+		rct := departmentRct(randomScopes, "rct-no-scope")
+		rct.ScopeId = ""
+
+		resp := createRct(randomScopes, rct)
+		Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+	})
 })
 
 // --- URL helpers ------------------------------------------------------------
 
-func (rs *RandomScopes) RctsClusterSyncUrl() string {
-	return fmt.Sprintf("/api/v1/resource-claim-templates/%s", rs.ClusterId)
+func (rs *RandomScopes) rctsBaseUrl() string {
+	return fmt.Sprintf("/api/v1/resource-claim-templates?clusterId=%s", rs.ClusterId)
 }
 
-func (rs *RandomScopes) RctsDepartmentSyncUrl() string {
-	return fmt.Sprintf("/api/v1/resource-claim-templates/%s/departments/%s", rs.ClusterId, rs.DepartmentId)
-}
-
-func (rs *RandomScopes) RctsProjectSyncUrl() string {
-	return fmt.Sprintf("/api/v1/resource-claim-templates/%s/namespaces/runai-%d", rs.ClusterId, rs.ProjectId)
+func (rs *RandomScopes) rctsSyncUrl() string {
+	return fmt.Sprintf("/api/v1/resource-claim-templates/sync?clusterId=%s", rs.ClusterId)
 }
 
 func (rs *RandomScopes) RctsClusterListUrl() string {
@@ -155,16 +205,106 @@ func (rs *RandomScopes) RctsProjectListUrl() string {
 	return fmt.Sprintf("/api/v1/resource-claim-templates?clusterId=%s&scopeType=project&scopeId=%s", rs.ClusterId, rs.ProjectIdStr)
 }
 
+// --- RCT builders -----------------------------------------------------------
+
+type rctOption func(*api.ResourceClaimTemplate)
+
+func withOrigin(o api.Origin) rctOption {
+	return func(r *api.ResourceClaimTemplate) {
+		v := o
+		r.Origin = &v
+	}
+}
+
+func withAssetId(id string) rctOption {
+	return func(r *api.ResourceClaimTemplate) {
+		s := id
+		r.AssetId = &s
+	}
+}
+
+func withNamespace(ns string) rctOption {
+	return func(r *api.ResourceClaimTemplate) {
+		r.Namespace = ns
+	}
+}
+
+func clusterRct(rs *RandomScopes, name string, opts ...rctOption) api.ResourceClaimTemplate {
+	rct := api.ResourceClaimTemplate{
+		Name:      name,
+		Namespace: "runai",
+		ScopeType: "cluster",
+		ScopeId:   rs.ClusterId,
+	}
+	for _, o := range opts {
+		o(&rct)
+	}
+	return rct
+}
+
+func departmentRct(rs *RandomScopes, name string, opts ...rctOption) api.ResourceClaimTemplate {
+	rct := api.ResourceClaimTemplate{
+		Name:      name,
+		Namespace: "runai",
+		ScopeType: "department",
+		ScopeId:   rs.DepartmentId,
+	}
+	for _, o := range opts {
+		o(&rct)
+	}
+	return rct
+}
+
+func projectRct(rs *RandomScopes, name string, opts ...rctOption) api.ResourceClaimTemplate {
+	rct := api.ResourceClaimTemplate{
+		Name:      name,
+		Namespace: fmt.Sprintf("runai-%d", rs.ProjectId),
+		ScopeType: "project",
+		ScopeId:   rs.ProjectIdStr,
+	}
+	for _, o := range opts {
+		o(&rct)
+	}
+	return rct
+}
+
 // --- request helpers --------------------------------------------------------
 
-func applyRcts(rs *RandomScopes, url string, payload api.ResourceClaimTemplates) {
-	req, err := http.NewRequest("POST", url, makePayload(payload))
+func createRct(rs *RandomScopes, rct api.ResourceClaimTemplate) *httptest.ResponseRecorder {
+	req, err := http.NewRequest("POST", rs.rctsBaseUrl(), makePayload(rct))
 	Expect(err).To(BeNil())
 	req.Header = *headerForAdmin(rs)
-
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
-	Expect(resp.Code).To(Equal(http.StatusOK), fmt.Sprintf("POST %s body=%s", url, resp.Body.String()))
+	return resp
+}
+
+func updateRct(rs *RandomScopes, rct api.ResourceClaimTemplate) *httptest.ResponseRecorder {
+	req, err := http.NewRequest("PUT", rs.rctsBaseUrl(), makePayload(rct))
+	Expect(err).To(BeNil())
+	req.Header = *headerForAdmin(rs)
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+	return resp
+}
+
+func deleteRct(rs *RandomScopes, scopeType, scopeId, name string) *httptest.ResponseRecorder {
+	url := fmt.Sprintf("%s&scopeType=%s&scopeId=%s&name=%s", rs.rctsBaseUrl(), scopeType, scopeId, name)
+	req, err := http.NewRequest("DELETE", url, nil)
+	Expect(err).To(BeNil())
+	req.Header = *headerForAdmin(rs)
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+	return resp
+}
+
+func syncRcts(rs *RandomScopes, payload api.ResourceClaimTemplates) {
+	req, err := http.NewRequest("POST", rs.rctsSyncUrl(), makePayload(payload))
+	Expect(err).To(BeNil())
+	req.Header = *headerForAdmin(rs)
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+	Expect(resp.Code).To(Equal(http.StatusOK), fmt.Sprintf("POST %s body=%s", rs.rctsSyncUrl(), resp.Body.String()))
 }
 
 func listRcts(rs *RandomScopes, url string) api.ResourceClaimTemplates {
@@ -191,14 +331,4 @@ func namesOfRcts(rcts api.ResourceClaimTemplates) []string {
 		names = append(names, rct.Name)
 	}
 	return names
-}
-
-func originAssetsPtr() *api.Origin {
-	v := api.ORIGIN_ASSETS
-	return &v
-}
-
-func originExistingPtr() *api.Origin {
-	v := api.ORIGIN_EXISTING
-	return &v
 }

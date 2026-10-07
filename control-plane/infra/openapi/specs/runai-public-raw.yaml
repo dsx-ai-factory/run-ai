@@ -48028,20 +48028,13 @@ components:
       maxLength: 253
       pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
       example: rct-gpu-1
-    ResourceClaimTemplateSpec:
-      type: object
-      description: >
-        Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so
-        that the control plane has enough fidelity to describe what will be
-        submitted on claim creation, rather than relying on the template name
-        alone. Shape follows the Kubernetes `resource.k8s.io/v1`
-        `ResourceClaimTemplateSpec`.
-      additionalProperties: true
     ResourceClaimTemplate:
       type: object
       required:
         - name
         - namespace
+        - scopeType
+        - scopeId
       properties:
         name:
           $ref: '#/components/schemas/ResourceClaimTemplateName'
@@ -48051,6 +48044,24 @@ components:
           minLength: 1
           maxLength: 253
           example: runai
+        scopeType:
+          type: string
+          enum:
+            - cluster
+            - department
+            - project
+          description: >
+            Scope at which this template is tracked by the control plane.
+            Determines which scope-window the row joins for list, prune, and
+            ancestor queries.
+        scopeId:
+          type: string
+          minLength: 1
+          description: >
+            Scope identifier. For cluster scope the scopeId must equal the
+            clusterId query parameter (the request is rejected otherwise). For
+            department scope send the department id; for project scope send the
+            project id.
         origin:
           $ref: '#/components/schemas/Origin'
         assetId:
@@ -48060,8 +48071,6 @@ components:
             when origin is "assets". Allows the control plane to join tracker
             rows back to the originating asset record.
           nullable: true
-        spec:
-          $ref: '#/components/schemas/ResourceClaimTemplateSpec'
         issues:
           $ref: '#/components/schemas/Issues'
     ResourceClaimTemplates:
@@ -62372,6 +62381,27 @@ components:
       schema:
         type: string
       required: true
+    ScopeType-2:
+      name: scopeType
+      in: query
+      required: true
+      description: The resource scope type to filter by.
+      schema:
+        type: string
+        enum:
+          - tenant
+          - cluster
+          - department
+          - project
+    ScopeIdRequired:
+      name: scopeId
+      in: query
+      required: true
+      description: The scope resource id that identifies the row.
+      schema:
+        type: string
+        minLength: 1
+        example: '2'
     StorageClassConfigurationFilterBy:
       name: filterBy
       in: query

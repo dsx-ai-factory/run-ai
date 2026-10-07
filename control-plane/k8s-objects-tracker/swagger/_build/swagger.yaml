@@ -2670,34 +2670,34 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/resource-claim-templates/{clusterUuid}:
     post:
-      summary: sync the details of cluster-wide ResourceClaimTemplates to the control plane
-      operationId: sync_cluster_wide_resource_claim_templates
-      tags:
-        - Resource Claim Templates
+      summary: create a Resource Claim Template
+      operationId: createResourceClaimTemplate
       x-internal: true
       x-authorize:
         resource-type: resource-claim-templates
         action: sync
       x-service: k8s-objects-tracker
+      x-audit: false
       x-test-coverage:
         - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+      tags:
+        - Resource Claim Templates
       parameters:
-        - $ref: '#/components/parameters/ClusterUuid'
+        - $ref: '#/components/parameters/ClusterIdRequired'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResourceClaimTemplates'
+              $ref: '#/components/schemas/ResourceClaimTemplate'
       responses:
         '200':
           description: Executed successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResourceClaimTemplates'
+                $ref: '#/components/schemas/ResourceClaimTemplate'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -2708,35 +2708,34 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/resource-claim-templates/{clusterUuid}/departments/{departmentId}:
-    post:
-      summary: sync the details of department-wide ResourceClaimTemplates to the control plane
-      operationId: sync_department_wide_resource_claim_templates
-      tags:
-        - Resource Claim Templates
+    put:
+      summary: update a Resource Claim Template
+      operationId: updateResourceClaimTemplate
       x-internal: true
       x-authorize:
         resource-type: resource-claim-templates
         action: sync
       x-service: k8s-objects-tracker
+      x-audit: false
       x-test-coverage:
         - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+      tags:
+        - Resource Claim Templates
       parameters:
-        - $ref: '#/components/parameters/ClusterUuid'
-        - $ref: '#/components/parameters/DepartmentId'
+        - $ref: '#/components/parameters/ClusterIdRequired'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResourceClaimTemplates'
+              $ref: '#/components/schemas/ResourceClaimTemplate'
       responses:
         '200':
           description: Executed successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResourceClaimTemplates'
+                $ref: '#/components/schemas/ResourceClaimTemplate'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -2747,10 +2746,45 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace}:
+    delete:
+      summary: delete a Resource Claim Template
+      operationId: deleteResourceClaimTemplate
+      tags:
+        - Resource Claim Templates
+      x-internal: true
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: delete
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+        - $ref: '#/components/parameters/ScopeType-2'
+        - $ref: '#/components/parameters/ScopeIdRequired'
+        - $ref: '#/components/parameters/ObjectByName'
+      responses:
+        '204':
+          $ref: '#/components/responses/204NoContent'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/resource-claim-templates/sync:
     post:
-      summary: sync the details of project ResourceClaimTemplates to the control plane
-      operationId: sync_project_resource_claim_templates
+      summary: sync the full set of ResourceClaimTemplates observed in a cluster
+      description: |
+        Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone.
+      operationId: syncResourceClaimTemplates
       tags:
         - Resource Claim Templates
       x-internal: true
@@ -2758,11 +2792,11 @@ paths:
         resource-type: resource-claim-templates
         action: sync
       x-service: k8s-objects-tracker
+      x-audit: false
       x-test-coverage:
         - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
       parameters:
-        - $ref: '#/components/parameters/ClusterUuid'
-        - $ref: '#/components/parameters/Namespace'
+        - $ref: '#/components/parameters/ClusterIdRequired'
       requestBody:
         required: true
         content:
@@ -3238,6 +3272,27 @@ components:
       schema:
         type: string
       required: true
+    ScopeType-2:
+      name: scopeType
+      in: query
+      required: true
+      description: The resource scope type to filter by.
+      schema:
+        type: string
+        enum:
+          - tenant
+          - cluster
+          - department
+          - project
+    ScopeIdRequired:
+      name: scopeId
+      in: query
+      required: true
+      description: The scope resource id that identifies the row.
+      schema:
+        type: string
+        minLength: 1
+        example: '2'
     StorageClassConfigurationFilterBy:
       name: filterBy
       in: query
@@ -4084,16 +4139,13 @@ components:
       maxLength: 253
       pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
       example: rct-gpu-1
-    ResourceClaimTemplateSpec:
-      type: object
-      description: |
-        Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the control plane has enough fidelity to describe what will be submitted on claim creation, rather than relying on the template name alone. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimTemplateSpec`.
-      additionalProperties: true
     ResourceClaimTemplate:
       type: object
       required:
         - name
         - namespace
+        - scopeType
+        - scopeId
       properties:
         name:
           $ref: '#/components/schemas/ResourceClaimTemplateName'
@@ -4103,6 +4155,19 @@ components:
           minLength: 1
           maxLength: 253
           example: runai
+        scopeType:
+          type: string
+          enum:
+            - cluster
+            - department
+            - project
+          description: |
+            Scope at which this template is tracked by the control plane. Determines which scope-window the row joins for list, prune, and ancestor queries.
+        scopeId:
+          type: string
+          minLength: 1
+          description: |
+            Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.
         origin:
           $ref: '#/components/schemas/Origin'
         assetId:
@@ -4110,8 +4175,6 @@ components:
           description: |
             Control-plane asset id this template was created from. Present only when origin is "assets". Allows the control plane to join tracker rows back to the originating asset record.
           nullable: true
-        spec:
-          $ref: '#/components/schemas/ResourceClaimTemplateSpec'
         issues:
           $ref: '#/components/schemas/Issues'
     ResourceClaimTemplates:

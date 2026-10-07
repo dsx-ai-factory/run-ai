@@ -222,3 +222,35 @@ func extractNames(objects []*models.Object) []string {
 	}
 	return result
 }
+
+// DeleteObjectsNotInScopedKeys deletes rows matching the filter except those
+// whose composite natural key (scope_type, department_id, project_id, name) is
+// in keptKeys. Unlike DeleteObjectsNotInCluster (which filters by name alone),
+// this is identity-safe when the same name exists at multiple scopes - the
+// RCT sync endpoint uses it to prune a cluster-wide full-set payload where a
+// template name can repeat across cluster / department / project scopes.
+//
+// Passing an empty-model receiver to Delete matches the pattern
+// DeleteObjectsNotInCluster uses so GORM does not splice primary keys back
+// into the WHERE clause from a different receiver.
+func DeleteObjectsNotInScopedKeys(ctx context.Context, filter *models.ObjectFilters, keptKeys [][]interface{}) *api.Error {
+	filterRecord := models.NewObject(filter)
+	dbErr := api.NewError(http.StatusServiceUnavailable, filterRecord.ErrorMessage("delete"), nil)
+
+	db := runaidb.DB().WithContext(ctx)
+
+	tx := db.Model(filterRecord).Where(filter)
+	if len(keptKeys) > 0 {
+		tx = tx.Where(
+			fmt.Sprintf("(%s, %s, %s, %s) NOT IN ?",
+				models.ObjectScopeTypeColumn, models.ObjectsDepartmentIdColumn,
+				models.ObjectsProjectIdColumn, models.ObjectsNameColumn),
+			keptKeys,
+		)
+	}
+
+	if _, err := tx.Delete(&models.Object{}); err != nil {
+		return dbErr.WithDetails(err)
+	}
+	return nil
+}

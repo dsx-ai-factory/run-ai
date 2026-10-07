@@ -115,9 +115,10 @@ type PVCsAPIRouter interface {
 // pass the data to a ResourceClaimTemplatesAPIServicer to perform the required actions, then write the service results to the http response.
 type ResourceClaimTemplatesAPIRouter interface {
 	ListResourceClaimTemplates(http.ResponseWriter, *http.Request)
-	SyncClusterWideResourceClaimTemplates(http.ResponseWriter, *http.Request)
-	SyncDepartmentWideResourceClaimTemplates(http.ResponseWriter, *http.Request)
-	SyncProjectResourceClaimTemplates(http.ResponseWriter, *http.Request)
+	UpdateResourceClaimTemplate(http.ResponseWriter, *http.Request)
+	CreateResourceClaimTemplate(http.ResponseWriter, *http.Request)
+	DeleteResourceClaimTemplate(http.ResponseWriter, *http.Request)
+	SyncResourceClaimTemplates(http.ResponseWriter, *http.Request)
 }
 
 // SecretsAPIRouter defines the required methods for binding the api requests to a responses for the SecretsAPI
@@ -275,9 +276,10 @@ type PVCsAPIServicer interface {
 // and updated with the logic required for the API.
 type ResourceClaimTemplatesAPIServicer interface {
 	ListResourceClaimTemplates(context.Context, string, string, string, string, string, bool, bool) (ImplResponse, error)
-	SyncClusterWideResourceClaimTemplates(context.Context, string, ResourceClaimTemplates) (ImplResponse, error)
-	SyncDepartmentWideResourceClaimTemplates(context.Context, string, string, ResourceClaimTemplates) (ImplResponse, error)
-	SyncProjectResourceClaimTemplates(context.Context, string, string, ResourceClaimTemplates) (ImplResponse, error)
+	UpdateResourceClaimTemplate(context.Context, string, ResourceClaimTemplate) (ImplResponse, error)
+	CreateResourceClaimTemplate(context.Context, string, ResourceClaimTemplate) (ImplResponse, error)
+	DeleteResourceClaimTemplate(context.Context, string, string, string, string) (ImplResponse, error)
+	SyncResourceClaimTemplates(context.Context, string, ResourceClaimTemplates) (ImplResponse, error)
 }
 
 // SecretsAPIServicer defines the api actions for the SecretsAPI service
