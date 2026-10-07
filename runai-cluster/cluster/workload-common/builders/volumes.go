@@ -802,16 +802,21 @@ func GetS3Volumes(_ context.Context, storageFields *field_groups.StorageFields) 
 
 // NeedToSetupRunaiHome checks if it is necessary to mount and use runai home directory
 // The conditions are
-//  1. CreateHomeDir is requested by the user (note that if RunAsUser is requested, it implies
-//     also CreateHomeDir)
+//  1. CreateHomeDir is true, or it is unset and RunAsUser is true. RunAsUser provides the
+//     default only; an explicit CreateHomeDir value of false disables the home directory.
 //  2. Job is not of type jupyter
-//  3. The user specified value for HOME which is not the runai default
+//  3. HOME is not set or is set to the runai default
 func NeedToSetupRunaiHome(containerFields *field_groups.ContainerFields, isJupyter bool) bool {
 	if containerFields == nil || isJupyter {
 		return false
 	}
 
-	if containerFields.CreateHomeDir.Deref() || containerFields.RunAsUser.Deref() {
+	shouldCreateHomeDir := containerFields.CreateHomeDir.Deref()
+	if !containerFields.CreateHomeDir.IsValueInitialized() {
+		shouldCreateHomeDir = containerFields.RunAsUser.Deref()
+	}
+
+	if shouldCreateHomeDir {
 		for envName, envValue := range containerFields.Environment.Deref() {
 			if envName == constants.HomeDirEnvName {
 				// need to setup runai HOME if the value of HOME is not the default runai directory

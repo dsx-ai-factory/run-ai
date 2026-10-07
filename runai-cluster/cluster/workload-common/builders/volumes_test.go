@@ -1017,7 +1017,14 @@ var _ = Describe("Volumes tests", func() {
 			Expect(result).To(BeTrue())
 		})
 
-		It("should return true when RunAsUser is true and no HOME environment", func() {
+		It("should return false when CreateHomeDir is false and RunAsUser is true", func() {
+			containerFields.CreateHomeDir.Value = ptr.To(false)
+			containerFields.RunAsUser.Value = ptr.To(true)
+			result := NeedToSetupRunaiHome(containerFields, false)
+			Expect(result).To(BeFalse())
+		})
+
+		It("should return true when CreateHomeDir is unset and RunAsUser is true", func() {
 			containerFields.RunAsUser.Value = ptr.To(true)
 			result := NeedToSetupRunaiHome(containerFields, false)
 			Expect(result).To(BeTrue())
