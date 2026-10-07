@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package integration_test
+package inference_workloads
 
 import (
 	"context"
@@ -14,7 +14,6 @@ import (
 
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2/inference_workloads"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	corev1 "k8s.io/api/core/v1"
@@ -24,7 +23,7 @@ var _ = Describe("authenticated inference Knative contract", func() {
 	DescribeTable("moves serving through oauth2-proxy without restoring the legacy authenticated Service ref",
 		func(serviceSpecLabelsSupported bool, expectedNetworkingEndpoints int) {
 			spec := authenticatedNIMInferenceSpec()
-			composer := inference_workloads.NewInferenceToKnativeComposer(
+			composer := NewInferenceToKnativeComposer(
 				"my-llm",
 				"team-a",
 				"runai-team-a",
@@ -34,7 +33,7 @@ var _ = Describe("authenticated inference Knative contract", func() {
 					WorkloadV2ServiceSpecLabelsSupported: serviceSpecLabelsSupported,
 				},
 			).WithClusterStorageConfig(inferenceOAuth2ContractConfig())
-			target := inference_workloads.NewMinimalKnativeServiceTarget()
+			target := NewMinimalKnativeServiceTarget()
 
 			Expect(composer.Compose(context.Background(), convutils.Ref(spec), target)()).To(BeNil())
 

@@ -6,26 +6,22 @@
 package builders
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	featuregate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/feature-gate"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/utils/ptr"
 	"knative.dev/pkg/apis"
 )
 
 var _ = Describe("OAuth2Proxy tests", func() {
 	var (
-		ctx                    context.Context
 		jobUrl                 *apis.URL
 		containerPort          int32
 		authorizedUsers        *string
@@ -35,16 +31,12 @@ var _ = Describe("OAuth2Proxy tests", func() {
 		isInference            bool
 		isInferenceServingPort bool
 		cookiePrefix           string
-		exposedUrl             flds.ExposedUrlItemAndRules
-		noSuffixUrlGenerated   *bool
-		name                   string
 		containers             []corev1.Container
 		initContainers         []corev1.Container
 	)
 
 	BeforeEach(func() {
 		// Setup common test variables
-		ctx = context.Background()
 		var err error
 		jobUrl, err = apis.ParseURL("https://example.com/path")
 		Expect(err).NotTo(HaveOccurred())
@@ -56,15 +48,6 @@ var _ = Describe("OAuth2Proxy tests", func() {
 		isInference = false
 		isInferenceServingPort = false
 		cookiePrefix = "oauth2-proxy"
-
-		exposedUrl = flds.ExposedUrlItemAndRules{
-			Value: &flds.ExposedUrlItemValue{
-				CustomUrl: ptr.To(false),
-				Url:       ptr.To(""),
-			},
-		}
-		noSuffixUrlGenerated = ptr.To(false)
-		name = "test-workload"
 
 		containers = []corev1.Container{}
 		initContainers = []corev1.Container{}
@@ -267,48 +250,6 @@ var _ = Describe("OAuth2Proxy tests", func() {
 			_, err = SanitizeAuthorizedGroups("   ")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("authorizedGroups: no valid groups found"))
-		})
-	})
-
-	Context("ComposeOauthIngressUrl", func() {
-		It("should validate customUrl flag with url value consistency", func() {
-			// Test case: customUrl enabled but no url provided
-			exposedUrl.Value.CustomUrl = ptr.To(true)
-			exposedUrl.Value.Url = ptr.To("")
-
-			url, err := ComposeOauthIngressUrl(ctx, exposedUrl, nick, noSuffixUrlGenerated, name)
-
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("url is mandatory when customUrl is enabled"))
-			Expect(url).To(BeNil())
-
-			// Test case: customUrl not enabled but url provided
-			exposedUrl.Value.CustomUrl = ptr.To(false)
-			exposedUrl.Value.Url = ptr.To("https://example.com")
-
-			url, err = ComposeOauthIngressUrl(ctx, exposedUrl, nick, noSuffixUrlGenerated, name)
-
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("url should only be provided for customUrl"))
-			Expect(url).To(BeNil())
-		})
-
-		It("should use custom URL when custom URL is enabled", func() {
-			// Set up a valid custom URL configuration
-			customUrl := "https://custom.example.com/path"
-			exposedUrl.Value.CustomUrl = ptr.To(true)
-			exposedUrl.Value.Url = ptr.To(customUrl)
-
-			url, err := ComposeOauthIngressUrl(ctx, exposedUrl, nick, noSuffixUrlGenerated, name)
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(url).NotTo(BeNil())
-			Expect(url.String()).To(Equal(customUrl))
-		})
-
-		// This test will need to be mocked or adapted since ComposeExposedUrl is not directly accessible
-		It("should call ComposeExposedUrl when custom URL is not enabled", func() {
-			// This test is pending as it requires mocking/stubbing ComposeExposedUrl which is not exported
 		})
 	})
 

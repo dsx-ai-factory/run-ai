@@ -23,8 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
-//go:generate mockery --name EmailAPI --output ../mocks/
 type EmailAPI interface {
 
 	/*

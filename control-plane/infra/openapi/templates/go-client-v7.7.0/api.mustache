@@ -19,7 +19,6 @@ import (
 {{#generateInterfaces}}
 
 ////////////////////////////// RUNAI ///////////////////////////////
-//go:generate mockery --name {{classname}} --output ../mocks/
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 type {{classname}} interface {
 	{{#operation}}

@@ -82,7 +82,6 @@ require (
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.6 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect

@@ -24,8 +24,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
-//go:generate mockery --name DatavolumesAPI --output ../mocks/
 type DatavolumesAPI interface {
 
 	/*

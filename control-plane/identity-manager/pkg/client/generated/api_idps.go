@@ -24,8 +24,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
-//go:generate mockery --name IdpsAPI --output ../mocks/
 type IdpsAPI interface {
 
 	/*

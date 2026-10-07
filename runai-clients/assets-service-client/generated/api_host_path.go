@@ -24,8 +24,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
-//go:generate mockery --name HostPathAPI --output ../mocks/
 type HostPathAPI interface {
 
 	/*
