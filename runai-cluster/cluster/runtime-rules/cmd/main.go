@@ -17,13 +17,13 @@ import (
 	schemeinit "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	pkg "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/frameworks"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/kubeConfig"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/logger"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/prometheus"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/queuesManager"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/util"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/validation"
-	workloadcontroller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/controller"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -123,7 +123,7 @@ func runRuntimeRules(watchClient client.WithWatch, scheme *apiruntime.Scheme, ma
 
 	extensionGroupStatus, _ := extClient.List(context.Background(), jobCRDsFrameworksList)
 	// the current status of the supported frameworks
-	currentDistributedFrameworksStatus, err := workloadcontroller.GetDistributedJobFrameworksStatus(extensionGroupStatus)
+	currentDistributedFrameworksStatus, err := frameworks.GetDistributedJobFrameworksStatus(extensionGroupStatus)
 	if err != nil {
 		zap.S().Errorf("unable to get the status of distributed job frameworks. got error: %s. exiting", err.Error())
 		os.Exit(4)

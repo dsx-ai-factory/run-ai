@@ -15,6 +15,7 @@ import (
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	"github.com/rs/zerolog/log"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -41,9 +42,15 @@ func NewProjectController(ctx context.Context, c client.Client) (*ProjectControl
 		serviceMonitorReconciler: project.NewServiceMonitorReconciler(c),
 	}
 
-	if projectHandlerConfig.ClusterWideSecrets || projectHandlerConfig.ClusterWidePvcs || projectHandlerConfig.ClusterWideConfigMaps {
+	if projectHandlerConfig.ClusterWideSecrets || projectHandlerConfig.ClusterWidePvcs ||
+		projectHandlerConfig.ClusterWideConfigMaps || projectHandlerConfig.ClusterWideResourceClaimTemplates {
 		cwr, err := project.NewClusterWideReplicatedReconciler(
-			ctx, c, projectHandlerConfig.ClusterWideSecrets, projectHandlerConfig.ClusterWidePvcs, projectHandlerConfig.ClusterWideConfigMaps)
+			ctx, c,
+			projectHandlerConfig.ClusterWideSecrets,
+			projectHandlerConfig.ClusterWidePvcs,
+			projectHandlerConfig.ClusterWideConfigMaps,
+			projectHandlerConfig.ClusterWideResourceClaimTemplates,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -78,6 +85,10 @@ func (c *ProjectController) SetupWithManager(mgr ctrl.Manager) error {
 		}
 		if projectHandlerConfig.ClusterWideConfigMaps {
 			b = b.Watches(&corev1.ConfigMap{}, handler.EnqueueRequestsFromMapFunc(c.mapToAllProjects),
+				builder.WithPredicates(schedulerNamespacePredicate))
+		}
+		if projectHandlerConfig.ClusterWideResourceClaimTemplates {
+			b = b.Watches(&resourcev1.ResourceClaimTemplate{}, handler.EnqueueRequestsFromMapFunc(c.mapToAllProjects),
 				builder.WithPredicates(schedulerNamespacePredicate))
 		}
 	}

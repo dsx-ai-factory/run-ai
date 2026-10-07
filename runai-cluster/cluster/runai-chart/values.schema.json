@@ -3438,6 +3438,9 @@
         "clusterWidePvc": {
           "type": "boolean"
         },
+        "clusterWideResourceClaimTemplate": {
+          "type": "boolean"
+        },
         "limitRange": {
           "type": "boolean"
         },

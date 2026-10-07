@@ -151,10 +151,9 @@ var _ = Describe("ComputeStatus", func() {
 	)
 })
 
-// v1 parity oracle: the want strings below are copied VERBATIM from v1's status calculator test
-// (workload-controller/pkg/status/aggregator/workload_status_calculator_test.go). Only edit a string
-// here to track a change in v1 — never to make our code pass. In v2 the Failed/Degraded decision comes
-// from the WorkloadRunner phase; this table pins the message we render from its issues.
+// These expected strings preserve the message contract from the retired v1 status calculator.
+// In v2 the Failed/Degraded decision comes from the WorkloadRunner phase; this table pins the
+// message we render from its issues independently of the deleted legacy implementation.
 var _ = Describe("ComputeStatus issue messages (v1 parity)", func() {
 	DescribeTable("renders the wlr issue message exactly as v1 does",
 		func(wlrPhase dromosv1alpha1.WorkloadRunnerPhase, groups []string,
