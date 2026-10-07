@@ -11151,6 +11151,7 @@ Components:
   github.com/fxamacker/cbor/v2 v2.9.0
   github.com/fxamacker/cbor/v2 v2.9.1
   github.com/fxamacker/cbor/v2 v2.9.4
+  github.com/fxamacker/cbor/v2 v2.9.6
 
 MIT License
 
@@ -19092,6 +19093,7 @@ Components:
   github.com/aws/smithy-go/ptr v1.27.2
   github.com/aws/smithy-go/ptr v1.27.8
   github.com/aws/smithy-go/ptr v1.28.2
+  github.com/aws/smithy-go/ptr v1.28.4
   github.com/awslabs/operatorpkg v0.0.0-20261002163259-5e8ed3699dea
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.3

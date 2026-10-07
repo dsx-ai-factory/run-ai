@@ -33,7 +33,6 @@ require (
 )
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000 // indirect
 	github.com/go-openapi/swag/pools v0.27.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kai-scheduler/kai-resource-management-api v0.1.3 // indirect
@@ -99,14 +98,11 @@ require (
 	github.com/google/pprof v0.0.0-20260507013755-92041b743c96 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/itchyny/gojq v0.12.19 // indirect
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
-	github.com/kubeflow/training-operator v1.9.3 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -197,7 +193,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology =
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
 
-replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 

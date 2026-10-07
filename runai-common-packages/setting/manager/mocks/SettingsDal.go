@@ -18,10 +18,19 @@ func NewSettingsDal(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SettingsDal {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SettingsDal{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -73,15 +82,26 @@ type SettingsDal_GetSettingByKey_Call struct {
 }
 
 // GetSettingByKey is a helper method to define mock.On call
-//   - key
-//   - tenantId
-func (_e *SettingsDal_Expecter) GetSettingByKey(key interface{}, tenantId interface{}) *SettingsDal_GetSettingByKey_Call {
+//   - key string
+//   - tenantId string
+func (_e *SettingsDal_Expecter) GetSettingByKey(key any, tenantId any) *SettingsDal_GetSettingByKey_Call {
 	return &SettingsDal_GetSettingByKey_Call{Call: _e.mock.On("GetSettingByKey", key, tenantId)}
 }
 
 func (_c *SettingsDal_GetSettingByKey_Call) Run(run func(key string, tenantId string)) *SettingsDal_GetSettingByKey_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -130,14 +150,20 @@ type SettingsDal_GetSettingsByTenantId_Call struct {
 }
 
 // GetSettingsByTenantId is a helper method to define mock.On call
-//   - tenantId
-func (_e *SettingsDal_Expecter) GetSettingsByTenantId(tenantId interface{}) *SettingsDal_GetSettingsByTenantId_Call {
+//   - tenantId string
+func (_e *SettingsDal_Expecter) GetSettingsByTenantId(tenantId any) *SettingsDal_GetSettingsByTenantId_Call {
 	return &SettingsDal_GetSettingsByTenantId_Call{Call: _e.mock.On("GetSettingsByTenantId", tenantId)}
 }
 
 func (_c *SettingsDal_GetSettingsByTenantId_Call) Run(run func(tenantId string)) *SettingsDal_GetSettingsByTenantId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -175,17 +201,38 @@ type SettingsDal_SaveSetting_Call struct {
 }
 
 // SaveSetting is a helper method to define mock.On call
-//   - key
-//   - tenantId
-//   - updateByUser
-//   - value
-func (_e *SettingsDal_Expecter) SaveSetting(key interface{}, tenantId interface{}, updateByUser interface{}, value interface{}) *SettingsDal_SaveSetting_Call {
+//   - key string
+//   - tenantId string
+//   - updateByUser bool
+//   - value []byte
+func (_e *SettingsDal_Expecter) SaveSetting(key any, tenantId any, updateByUser any, value any) *SettingsDal_SaveSetting_Call {
 	return &SettingsDal_SaveSetting_Call{Call: _e.mock.On("SaveSetting", key, tenantId, updateByUser, value)}
 }
 
 func (_c *SettingsDal_SaveSetting_Call) Run(run func(key string, tenantId string, updateByUser bool, value []byte)) *SettingsDal_SaveSetting_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(bool), args[3].([]byte))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 bool
+		if args[2] != nil {
+			arg2 = args[2].(bool)
+		}
+		var arg3 []byte
+		if args[3] != nil {
+			arg3 = args[3].([]byte)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -223,15 +270,26 @@ type SettingsDal_SaveSettingByKeyForTenantsList_Call struct {
 }
 
 // SaveSettingByKeyForTenantsList is a helper method to define mock.On call
-//   - key
-//   - tenantSettings
-func (_e *SettingsDal_Expecter) SaveSettingByKeyForTenantsList(key interface{}, tenantSettings interface{}) *SettingsDal_SaveSettingByKeyForTenantsList_Call {
+//   - key string
+//   - tenantSettings []database.TenantSettingInput
+func (_e *SettingsDal_Expecter) SaveSettingByKeyForTenantsList(key any, tenantSettings any) *SettingsDal_SaveSettingByKeyForTenantsList_Call {
 	return &SettingsDal_SaveSettingByKeyForTenantsList_Call{Call: _e.mock.On("SaveSettingByKeyForTenantsList", key, tenantSettings)}
 }
 
 func (_c *SettingsDal_SaveSettingByKeyForTenantsList_Call) Run(run func(key string, tenantSettings []database.TenantSettingInput)) *SettingsDal_SaveSettingByKeyForTenantsList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].([]database.TenantSettingInput))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []database.TenantSettingInput
+		if args[1] != nil {
+			arg1 = args[1].([]database.TenantSettingInput)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -278,14 +336,20 @@ type SettingsDal_ShouldMigrateSetting_Call struct {
 }
 
 // ShouldMigrateSetting is a helper method to define mock.On call
-//   - key
-func (_e *SettingsDal_Expecter) ShouldMigrateSetting(key interface{}) *SettingsDal_ShouldMigrateSetting_Call {
+//   - key string
+func (_e *SettingsDal_Expecter) ShouldMigrateSetting(key any) *SettingsDal_ShouldMigrateSetting_Call {
 	return &SettingsDal_ShouldMigrateSetting_Call{Call: _e.mock.On("ShouldMigrateSetting", key)}
 }
 
 func (_c *SettingsDal_ShouldMigrateSetting_Call) Run(run func(key string)) *SettingsDal_ShouldMigrateSetting_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

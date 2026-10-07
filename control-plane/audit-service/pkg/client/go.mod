@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/Rican7/retry v0.3.1
-	github.com/aws/smithy-go v1.28.2
+	github.com/aws/smithy-go v1.28.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15

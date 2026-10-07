@@ -23,10 +23,19 @@ func NewDB(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *DB {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &DB{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ func (_c *DB_Actual_Call) RunAndReturn(run func() *gorm.DB) *DB_Actual_Call {
 
 // Assign provides a mock function for the type DB
 func (_mock *DB) Assign(attrs ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, attrs...)
 	ret := _mock.Called(_ca...)
 
@@ -117,21 +126,25 @@ type DB_Assign_Call struct {
 }
 
 // Assign is a helper method to define mock.On call
-//   - attrs
-func (_e *DB_Expecter) Assign(attrs ...interface{}) *DB_Assign_Call {
+//   - attrs ...interface{}
+func (_e *DB_Expecter) Assign(attrs ...any) *DB_Assign_Call {
 	return &DB_Assign_Call{Call: _e.mock.On("Assign",
-		append([]interface{}{}, attrs...)...)}
+		append([]any{}, attrs...)...)}
 }
 
 func (_c *DB_Assign_Call) Run(run func(attrs ...interface{})) *DB_Assign_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 []interface{}
 		variadicArgs := make([]interface{}, len(args)-0)
 		for i, a := range args[0:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(variadicArgs...)
+		arg0 = variadicArgs
+		run(
+			arg0...,
+		)
 	})
 	return _c
 }
@@ -195,11 +208,11 @@ func (_c *DB_Begin_Call) RunAndReturn(run func() orm.DB) *DB_Begin_Call {
 // Clauses provides a mock function for the type DB
 func (_mock *DB) Clauses(conds ...clause.Expression) orm.DB {
 	// clause.Expression
-	_va := make([]interface{}, len(conds))
+	_va := make([]any, len(conds))
 	for _i := range conds {
 		_va[_i] = conds[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
 
@@ -224,21 +237,25 @@ type DB_Clauses_Call struct {
 }
 
 // Clauses is a helper method to define mock.On call
-//   - conds
-func (_e *DB_Expecter) Clauses(conds ...interface{}) *DB_Clauses_Call {
+//   - conds ...clause.Expression
+func (_e *DB_Expecter) Clauses(conds ...any) *DB_Clauses_Call {
 	return &DB_Clauses_Call{Call: _e.mock.On("Clauses",
-		append([]interface{}{}, conds...)...)}
+		append([]any{}, conds...)...)}
 }
 
 func (_c *DB_Clauses_Call) Run(run func(conds ...clause.Expression)) *DB_Clauses_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 []clause.Expression
 		variadicArgs := make([]clause.Expression, len(args)-0)
 		for i, a := range args[0:] {
 			if a != nil {
 				variadicArgs[i] = a.(clause.Expression)
 			}
 		}
-		run(variadicArgs...)
+		arg0 = variadicArgs
+		run(
+			arg0...,
+		)
 	})
 	return _c
 }
@@ -364,14 +381,20 @@ type DB_Count_Call struct {
 }
 
 // Count is a helper method to define mock.On call
-//   - count
-func (_e *DB_Expecter) Count(count interface{}) *DB_Count_Call {
+//   - count *int64
+func (_e *DB_Expecter) Count(count any) *DB_Count_Call {
 	return &DB_Count_Call{Call: _e.mock.On("Count", count)}
 }
 
 func (_c *DB_Count_Call) Run(run func(count *int64)) *DB_Count_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*int64))
+		var arg0 *int64
+		if args[0] != nil {
+			arg0 = args[0].(*int64)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -418,14 +441,20 @@ type DB_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - value
-func (_e *DB_Expecter) Create(value interface{}) *DB_Create_Call {
+//   - value interface{}
+func (_e *DB_Expecter) Create(value any) *DB_Create_Call {
 	return &DB_Create_Call{Call: _e.mock.On("Create", value)}
 }
 
 func (_c *DB_Create_Call) Run(run func(value interface{})) *DB_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}))
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -472,15 +501,26 @@ type DB_CreateInBatches_Call struct {
 }
 
 // CreateInBatches is a helper method to define mock.On call
-//   - value
-//   - batchSize
-func (_e *DB_Expecter) CreateInBatches(value interface{}, batchSize interface{}) *DB_CreateInBatches_Call {
+//   - value interface{}
+//   - batchSize int
+func (_e *DB_Expecter) CreateInBatches(value any, batchSize any) *DB_CreateInBatches_Call {
 	return &DB_CreateInBatches_Call{Call: _e.mock.On("CreateInBatches", value, batchSize)}
 }
 
 func (_c *DB_CreateInBatches_Call) Run(run func(value interface{}, batchSize int)) *DB_CreateInBatches_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}), args[1].(int))
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -497,7 +537,7 @@ func (_c *DB_CreateInBatches_Call) RunAndReturn(run func(value interface{}, batc
 
 // Delete provides a mock function for the type DB
 func (_mock *DB) Delete(value interface{}, conds ...interface{}) (int64, error) {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, value)
 	_ca = append(_ca, conds...)
 	ret := _mock.Called(_ca...)
@@ -530,22 +570,31 @@ type DB_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - value
-//   - conds
-func (_e *DB_Expecter) Delete(value interface{}, conds ...interface{}) *DB_Delete_Call {
+//   - value interface{}
+//   - conds ...interface{}
+func (_e *DB_Expecter) Delete(value any, conds ...any) *DB_Delete_Call {
 	return &DB_Delete_Call{Call: _e.mock.On("Delete",
-		append([]interface{}{value}, conds...)...)}
+		append([]any{value}, conds...)...)}
 }
 
 func (_c *DB_Delete_Call) Run(run func(value interface{}, conds ...interface{})) *DB_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -562,7 +611,7 @@ func (_c *DB_Delete_Call) RunAndReturn(run func(value interface{}, conds ...inte
 
 // Distinct provides a mock function for the type DB
 func (_mock *DB) Distinct(args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
 
@@ -587,21 +636,25 @@ type DB_Distinct_Call struct {
 }
 
 // Distinct is a helper method to define mock.On call
-//   - args
-func (_e *DB_Expecter) Distinct(args ...interface{}) *DB_Distinct_Call {
+//   - args ...interface{}
+func (_e *DB_Expecter) Distinct(args ...any) *DB_Distinct_Call {
 	return &DB_Distinct_Call{Call: _e.mock.On("Distinct",
-		append([]interface{}{}, args...)...)}
+		append([]any{}, args...)...)}
 }
 
 func (_c *DB_Distinct_Call) Run(run func(args ...interface{})) *DB_Distinct_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 []interface{}
 		variadicArgs := make([]interface{}, len(args)-0)
 		for i, a := range args[0:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(variadicArgs...)
+		arg0 = variadicArgs
+		run(
+			arg0...,
+		)
 	})
 	return _c
 }
@@ -618,7 +671,7 @@ func (_c *DB_Distinct_Call) RunAndReturn(run func(args ...interface{}) orm.DB) *
 
 // Exec provides a mock function for the type DB
 func (_mock *DB) Exec(sql string, values ...interface{}) (int64, error) {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, sql)
 	_ca = append(_ca, values...)
 	ret := _mock.Called(_ca...)
@@ -651,22 +704,31 @@ type DB_Exec_Call struct {
 }
 
 // Exec is a helper method to define mock.On call
-//   - sql
-//   - values
-func (_e *DB_Expecter) Exec(sql interface{}, values ...interface{}) *DB_Exec_Call {
+//   - sql string
+//   - values ...interface{}
+func (_e *DB_Expecter) Exec(sql any, values ...any) *DB_Exec_Call {
 	return &DB_Exec_Call{Call: _e.mock.On("Exec",
-		append([]interface{}{sql}, values...)...)}
+		append([]any{sql}, values...)...)}
 }
 
 func (_c *DB_Exec_Call) Run(run func(sql string, values ...interface{})) *DB_Exec_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -683,7 +745,7 @@ func (_c *DB_Exec_Call) RunAndReturn(run func(sql string, values ...interface{})
 
 // Find provides a mock function for the type DB
 func (_mock *DB) Find(dest interface{}, conds ...interface{}) error {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, dest)
 	_ca = append(_ca, conds...)
 	ret := _mock.Called(_ca...)
@@ -707,22 +769,31 @@ type DB_Find_Call struct {
 }
 
 // Find is a helper method to define mock.On call
-//   - dest
-//   - conds
-func (_e *DB_Expecter) Find(dest interface{}, conds ...interface{}) *DB_Find_Call {
+//   - dest interface{}
+//   - conds ...interface{}
+func (_e *DB_Expecter) Find(dest any, conds ...any) *DB_Find_Call {
 	return &DB_Find_Call{Call: _e.mock.On("Find",
-		append([]interface{}{dest}, conds...)...)}
+		append([]any{dest}, conds...)...)}
 }
 
 func (_c *DB_Find_Call) Run(run func(dest interface{}, conds ...interface{})) *DB_Find_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -739,7 +810,7 @@ func (_c *DB_Find_Call) RunAndReturn(run func(dest interface{}, conds ...interfa
 
 // First provides a mock function for the type DB
 func (_mock *DB) First(dest interface{}, conds ...interface{}) error {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, dest)
 	_ca = append(_ca, conds...)
 	ret := _mock.Called(_ca...)
@@ -763,22 +834,31 @@ type DB_First_Call struct {
 }
 
 // First is a helper method to define mock.On call
-//   - dest
-//   - conds
-func (_e *DB_Expecter) First(dest interface{}, conds ...interface{}) *DB_First_Call {
+//   - dest interface{}
+//   - conds ...interface{}
+func (_e *DB_Expecter) First(dest any, conds ...any) *DB_First_Call {
 	return &DB_First_Call{Call: _e.mock.On("First",
-		append([]interface{}{dest}, conds...)...)}
+		append([]any{dest}, conds...)...)}
 }
 
 func (_c *DB_First_Call) Run(run func(dest interface{}, conds ...interface{})) *DB_First_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -795,7 +875,7 @@ func (_c *DB_First_Call) RunAndReturn(run func(dest interface{}, conds ...interf
 
 // FirstOrCreate provides a mock function for the type DB
 func (_mock *DB) FirstOrCreate(dest interface{}, conds ...interface{}) (int64, error) {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, dest)
 	_ca = append(_ca, conds...)
 	ret := _mock.Called(_ca...)
@@ -828,22 +908,31 @@ type DB_FirstOrCreate_Call struct {
 }
 
 // FirstOrCreate is a helper method to define mock.On call
-//   - dest
-//   - conds
-func (_e *DB_Expecter) FirstOrCreate(dest interface{}, conds ...interface{}) *DB_FirstOrCreate_Call {
+//   - dest interface{}
+//   - conds ...interface{}
+func (_e *DB_Expecter) FirstOrCreate(dest any, conds ...any) *DB_FirstOrCreate_Call {
 	return &DB_FirstOrCreate_Call{Call: _e.mock.On("FirstOrCreate",
-		append([]interface{}{dest}, conds...)...)}
+		append([]any{dest}, conds...)...)}
 }
 
 func (_c *DB_FirstOrCreate_Call) Run(run func(dest interface{}, conds ...interface{})) *DB_FirstOrCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -860,7 +949,7 @@ func (_c *DB_FirstOrCreate_Call) RunAndReturn(run func(dest interface{}, conds .
 
 // FirstOrInit provides a mock function for the type DB
 func (_mock *DB) FirstOrInit(dest interface{}, conds ...interface{}) (int64, error) {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, dest)
 	_ca = append(_ca, conds...)
 	ret := _mock.Called(_ca...)
@@ -893,22 +982,31 @@ type DB_FirstOrInit_Call struct {
 }
 
 // FirstOrInit is a helper method to define mock.On call
-//   - dest
-//   - conds
-func (_e *DB_Expecter) FirstOrInit(dest interface{}, conds ...interface{}) *DB_FirstOrInit_Call {
+//   - dest interface{}
+//   - conds ...interface{}
+func (_e *DB_Expecter) FirstOrInit(dest any, conds ...any) *DB_FirstOrInit_Call {
 	return &DB_FirstOrInit_Call{Call: _e.mock.On("FirstOrInit",
-		append([]interface{}{dest}, conds...)...)}
+		append([]any{dest}, conds...)...)}
 }
 
 func (_c *DB_FirstOrInit_Call) Run(run func(dest interface{}, conds ...interface{})) *DB_FirstOrInit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -948,14 +1046,20 @@ type DB_Group_Call struct {
 }
 
 // Group is a helper method to define mock.On call
-//   - name
-func (_e *DB_Expecter) Group(name interface{}) *DB_Group_Call {
+//   - name string
+func (_e *DB_Expecter) Group(name any) *DB_Group_Call {
 	return &DB_Group_Call{Call: _e.mock.On("Group", name)}
 }
 
 func (_c *DB_Group_Call) Run(run func(name string)) *DB_Group_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -972,7 +1076,7 @@ func (_c *DB_Group_Call) RunAndReturn(run func(name string) orm.DB) *DB_Group_Ca
 
 // Having provides a mock function for the type DB
 func (_mock *DB) Having(query interface{}, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, query)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -998,22 +1102,31 @@ type DB_Having_Call struct {
 }
 
 // Having is a helper method to define mock.On call
-//   - query
-//   - args
-func (_e *DB_Expecter) Having(query interface{}, args ...interface{}) *DB_Having_Call {
+//   - query interface{}
+//   - args ...interface{}
+func (_e *DB_Expecter) Having(query any, args ...any) *DB_Having_Call {
 	return &DB_Having_Call{Call: _e.mock.On("Having",
-		append([]interface{}{query}, args...)...)}
+		append([]any{query}, args...)...)}
 }
 
 func (_c *DB_Having_Call) Run(run func(query interface{}, args ...interface{})) *DB_Having_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1030,7 +1143,7 @@ func (_c *DB_Having_Call) RunAndReturn(run func(query interface{}, args ...inter
 
 // InnerJoins provides a mock function for the type DB
 func (_mock *DB) InnerJoins(query string, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, query)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -1056,22 +1169,31 @@ type DB_InnerJoins_Call struct {
 }
 
 // InnerJoins is a helper method to define mock.On call
-//   - query
-//   - args
-func (_e *DB_Expecter) InnerJoins(query interface{}, args ...interface{}) *DB_InnerJoins_Call {
+//   - query string
+//   - args ...interface{}
+func (_e *DB_Expecter) InnerJoins(query any, args ...any) *DB_InnerJoins_Call {
 	return &DB_InnerJoins_Call{Call: _e.mock.On("InnerJoins",
-		append([]interface{}{query}, args...)...)}
+		append([]any{query}, args...)...)}
 }
 
 func (_c *DB_InnerJoins_Call) Run(run func(query string, args ...interface{})) *DB_InnerJoins_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1088,7 +1210,7 @@ func (_c *DB_InnerJoins_Call) RunAndReturn(run func(query string, args ...interf
 
 // Joins provides a mock function for the type DB
 func (_mock *DB) Joins(query string, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, query)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -1114,22 +1236,31 @@ type DB_Joins_Call struct {
 }
 
 // Joins is a helper method to define mock.On call
-//   - query
-//   - args
-func (_e *DB_Expecter) Joins(query interface{}, args ...interface{}) *DB_Joins_Call {
+//   - query string
+//   - args ...interface{}
+func (_e *DB_Expecter) Joins(query any, args ...any) *DB_Joins_Call {
 	return &DB_Joins_Call{Call: _e.mock.On("Joins",
-		append([]interface{}{query}, args...)...)}
+		append([]any{query}, args...)...)}
 }
 
 func (_c *DB_Joins_Call) Run(run func(query string, args ...interface{})) *DB_Joins_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1146,7 +1277,7 @@ func (_c *DB_Joins_Call) RunAndReturn(run func(query string, args ...interface{}
 
 // Last provides a mock function for the type DB
 func (_mock *DB) Last(dest interface{}, conds ...interface{}) error {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, dest)
 	_ca = append(_ca, conds...)
 	ret := _mock.Called(_ca...)
@@ -1170,22 +1301,31 @@ type DB_Last_Call struct {
 }
 
 // Last is a helper method to define mock.On call
-//   - dest
-//   - conds
-func (_e *DB_Expecter) Last(dest interface{}, conds ...interface{}) *DB_Last_Call {
+//   - dest interface{}
+//   - conds ...interface{}
+func (_e *DB_Expecter) Last(dest any, conds ...any) *DB_Last_Call {
 	return &DB_Last_Call{Call: _e.mock.On("Last",
-		append([]interface{}{dest}, conds...)...)}
+		append([]any{dest}, conds...)...)}
 }
 
 func (_c *DB_Last_Call) Run(run func(dest interface{}, conds ...interface{})) *DB_Last_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1225,14 +1365,20 @@ type DB_Limit_Call struct {
 }
 
 // Limit is a helper method to define mock.On call
-//   - limit
-func (_e *DB_Expecter) Limit(limit interface{}) *DB_Limit_Call {
+//   - limit int
+func (_e *DB_Expecter) Limit(limit any) *DB_Limit_Call {
 	return &DB_Limit_Call{Call: _e.mock.On("Limit", limit)}
 }
 
 func (_c *DB_Limit_Call) Run(run func(limit int)) *DB_Limit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int))
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -1272,14 +1418,20 @@ type DB_Model_Call struct {
 }
 
 // Model is a helper method to define mock.On call
-//   - value
-func (_e *DB_Expecter) Model(value interface{}) *DB_Model_Call {
+//   - value interface{}
+func (_e *DB_Expecter) Model(value any) *DB_Model_Call {
 	return &DB_Model_Call{Call: _e.mock.On("Model", value)}
 }
 
 func (_c *DB_Model_Call) Run(run func(value interface{})) *DB_Model_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}))
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -1296,7 +1448,7 @@ func (_c *DB_Model_Call) RunAndReturn(run func(value interface{}) orm.DB) *DB_Mo
 
 // Not provides a mock function for the type DB
 func (_mock *DB) Not(query interface{}, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, query)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -1322,22 +1474,31 @@ type DB_Not_Call struct {
 }
 
 // Not is a helper method to define mock.On call
-//   - query
-//   - args
-func (_e *DB_Expecter) Not(query interface{}, args ...interface{}) *DB_Not_Call {
+//   - query interface{}
+//   - args ...interface{}
+func (_e *DB_Expecter) Not(query any, args ...any) *DB_Not_Call {
 	return &DB_Not_Call{Call: _e.mock.On("Not",
-		append([]interface{}{query}, args...)...)}
+		append([]any{query}, args...)...)}
 }
 
 func (_c *DB_Not_Call) Run(run func(query interface{}, args ...interface{})) *DB_Not_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1377,14 +1538,20 @@ type DB_Offset_Call struct {
 }
 
 // Offset is a helper method to define mock.On call
-//   - offset
-func (_e *DB_Expecter) Offset(offset interface{}) *DB_Offset_Call {
+//   - offset int
+func (_e *DB_Expecter) Offset(offset any) *DB_Offset_Call {
 	return &DB_Offset_Call{Call: _e.mock.On("Offset", offset)}
 }
 
 func (_c *DB_Offset_Call) Run(run func(offset int)) *DB_Offset_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int))
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -1402,11 +1569,11 @@ func (_c *DB_Offset_Call) RunAndReturn(run func(offset int) orm.DB) *DB_Offset_C
 // Omit provides a mock function for the type DB
 func (_mock *DB) Omit(columns ...string) orm.DB {
 	// string
-	_va := make([]interface{}, len(columns))
+	_va := make([]any, len(columns))
 	for _i := range columns {
 		_va[_i] = columns[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
 
@@ -1431,21 +1598,25 @@ type DB_Omit_Call struct {
 }
 
 // Omit is a helper method to define mock.On call
-//   - columns
-func (_e *DB_Expecter) Omit(columns ...interface{}) *DB_Omit_Call {
+//   - columns ...string
+func (_e *DB_Expecter) Omit(columns ...any) *DB_Omit_Call {
 	return &DB_Omit_Call{Call: _e.mock.On("Omit",
-		append([]interface{}{}, columns...)...)}
+		append([]any{}, columns...)...)}
 }
 
 func (_c *DB_Omit_Call) Run(run func(columns ...string)) *DB_Omit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 []string
 		variadicArgs := make([]string, len(args)-0)
 		for i, a := range args[0:] {
 			if a != nil {
 				variadicArgs[i] = a.(string)
 			}
 		}
-		run(variadicArgs...)
+		arg0 = variadicArgs
+		run(
+			arg0...,
+		)
 	})
 	return _c
 }
@@ -1462,7 +1633,7 @@ func (_c *DB_Omit_Call) RunAndReturn(run func(columns ...string) orm.DB) *DB_Omi
 
 // Or provides a mock function for the type DB
 func (_mock *DB) Or(query interface{}, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, query)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -1488,22 +1659,31 @@ type DB_Or_Call struct {
 }
 
 // Or is a helper method to define mock.On call
-//   - query
-//   - args
-func (_e *DB_Expecter) Or(query interface{}, args ...interface{}) *DB_Or_Call {
+//   - query interface{}
+//   - args ...interface{}
+func (_e *DB_Expecter) Or(query any, args ...any) *DB_Or_Call {
 	return &DB_Or_Call{Call: _e.mock.On("Or",
-		append([]interface{}{query}, args...)...)}
+		append([]any{query}, args...)...)}
 }
 
 func (_c *DB_Or_Call) Run(run func(query interface{}, args ...interface{})) *DB_Or_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1543,14 +1723,20 @@ type DB_Order_Call struct {
 }
 
 // Order is a helper method to define mock.On call
-//   - value
-func (_e *DB_Expecter) Order(value interface{}) *DB_Order_Call {
+//   - value interface{}
+func (_e *DB_Expecter) Order(value any) *DB_Order_Call {
 	return &DB_Order_Call{Call: _e.mock.On("Order", value)}
 }
 
 func (_c *DB_Order_Call) Run(run func(value interface{})) *DB_Order_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}))
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -1588,15 +1774,26 @@ type DB_Pluck_Call struct {
 }
 
 // Pluck is a helper method to define mock.On call
-//   - column
-//   - dest
-func (_e *DB_Expecter) Pluck(column interface{}, dest interface{}) *DB_Pluck_Call {
+//   - column string
+//   - dest interface{}
+func (_e *DB_Expecter) Pluck(column any, dest any) *DB_Pluck_Call {
 	return &DB_Pluck_Call{Call: _e.mock.On("Pluck", column, dest)}
 }
 
 func (_c *DB_Pluck_Call) Run(run func(column string, dest interface{})) *DB_Pluck_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(interface{}))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 interface{}
+		if args[1] != nil {
+			arg1 = args[1].(interface{})
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -1613,7 +1810,7 @@ func (_c *DB_Pluck_Call) RunAndReturn(run func(column string, dest interface{}) 
 
 // Preload provides a mock function for the type DB
 func (_mock *DB) Preload(query string, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, query)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -1639,22 +1836,31 @@ type DB_Preload_Call struct {
 }
 
 // Preload is a helper method to define mock.On call
-//   - query
-//   - args
-func (_e *DB_Expecter) Preload(query interface{}, args ...interface{}) *DB_Preload_Call {
+//   - query string
+//   - args ...interface{}
+func (_e *DB_Expecter) Preload(query any, args ...any) *DB_Preload_Call {
 	return &DB_Preload_Call{Call: _e.mock.On("Preload",
-		append([]interface{}{query}, args...)...)}
+		append([]any{query}, args...)...)}
 }
 
 func (_c *DB_Preload_Call) Run(run func(query string, args ...interface{})) *DB_Preload_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1671,7 +1877,7 @@ func (_c *DB_Preload_Call) RunAndReturn(run func(query string, args ...interface
 
 // Raw provides a mock function for the type DB
 func (_mock *DB) Raw(sql string, values ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, sql)
 	_ca = append(_ca, values...)
 	ret := _mock.Called(_ca...)
@@ -1697,22 +1903,31 @@ type DB_Raw_Call struct {
 }
 
 // Raw is a helper method to define mock.On call
-//   - sql
-//   - values
-func (_e *DB_Expecter) Raw(sql interface{}, values ...interface{}) *DB_Raw_Call {
+//   - sql string
+//   - values ...interface{}
+func (_e *DB_Expecter) Raw(sql any, values ...any) *DB_Raw_Call {
 	return &DB_Raw_Call{Call: _e.mock.On("Raw",
-		append([]interface{}{sql}, values...)...)}
+		append([]any{sql}, values...)...)}
 }
 
 func (_c *DB_Raw_Call) Run(run func(sql string, values ...interface{})) *DB_Raw_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1796,14 +2011,20 @@ type DB_RollbackTo_Call struct {
 }
 
 // RollbackTo is a helper method to define mock.On call
-//   - name
-func (_e *DB_Expecter) RollbackTo(name interface{}) *DB_RollbackTo_Call {
+//   - name string
+func (_e *DB_Expecter) RollbackTo(name any) *DB_RollbackTo_Call {
 	return &DB_RollbackTo_Call{Call: _e.mock.On("RollbackTo", name)}
 }
 
 func (_c *DB_RollbackTo_Call) Run(run func(name string)) *DB_RollbackTo_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -1951,14 +2172,20 @@ type DB_Save_Call struct {
 }
 
 // Save is a helper method to define mock.On call
-//   - value
-func (_e *DB_Expecter) Save(value interface{}) *DB_Save_Call {
+//   - value interface{}
+func (_e *DB_Expecter) Save(value any) *DB_Save_Call {
 	return &DB_Save_Call{Call: _e.mock.On("Save", value)}
 }
 
 func (_c *DB_Save_Call) Run(run func(value interface{})) *DB_Save_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}))
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -1998,14 +2225,20 @@ type DB_SavePoint_Call struct {
 }
 
 // SavePoint is a helper method to define mock.On call
-//   - name
-func (_e *DB_Expecter) SavePoint(name interface{}) *DB_SavePoint_Call {
+//   - name string
+func (_e *DB_Expecter) SavePoint(name any) *DB_SavePoint_Call {
 	return &DB_SavePoint_Call{Call: _e.mock.On("SavePoint", name)}
 }
 
 func (_c *DB_SavePoint_Call) Run(run func(name string)) *DB_SavePoint_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -2052,14 +2285,20 @@ type DB_Scan_Call struct {
 }
 
 // Scan is a helper method to define mock.On call
-//   - dest
-func (_e *DB_Expecter) Scan(dest interface{}) *DB_Scan_Call {
+//   - dest interface{}
+func (_e *DB_Expecter) Scan(dest any) *DB_Scan_Call {
 	return &DB_Scan_Call{Call: _e.mock.On("Scan", dest)}
 }
 
 func (_c *DB_Scan_Call) Run(run func(dest interface{})) *DB_Scan_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}))
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -2076,7 +2315,7 @@ func (_c *DB_Scan_Call) RunAndReturn(run func(dest interface{}) (int64, error)) 
 
 // Select provides a mock function for the type DB
 func (_mock *DB) Select(query interface{}, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, query)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -2102,22 +2341,31 @@ type DB_Select_Call struct {
 }
 
 // Select is a helper method to define mock.On call
-//   - query
-//   - args
-func (_e *DB_Expecter) Select(query interface{}, args ...interface{}) *DB_Select_Call {
+//   - query interface{}
+//   - args ...interface{}
+func (_e *DB_Expecter) Select(query any, args ...any) *DB_Select_Call {
 	return &DB_Select_Call{Call: _e.mock.On("Select",
-		append([]interface{}{query}, args...)...)}
+		append([]any{query}, args...)...)}
 }
 
 func (_c *DB_Select_Call) Run(run func(query interface{}, args ...interface{})) *DB_Select_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -2157,14 +2405,20 @@ type DB_Session_Call struct {
 }
 
 // Session is a helper method to define mock.On call
-//   - config
-func (_e *DB_Expecter) Session(config interface{}) *DB_Session_Call {
+//   - config *orm.Session
+func (_e *DB_Expecter) Session(config any) *DB_Session_Call {
 	return &DB_Session_Call{Call: _e.mock.On("Session", config)}
 }
 
 func (_c *DB_Session_Call) Run(run func(config *orm.Session)) *DB_Session_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*orm.Session))
+		var arg0 *orm.Session
+		if args[0] != nil {
+			arg0 = args[0].(*orm.Session)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -2181,7 +2435,7 @@ func (_c *DB_Session_Call) RunAndReturn(run func(config *orm.Session) orm.DB) *D
 
 // Table provides a mock function for the type DB
 func (_mock *DB) Table(name string, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, name)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -2207,22 +2461,31 @@ type DB_Table_Call struct {
 }
 
 // Table is a helper method to define mock.On call
-//   - name
-//   - args
-func (_e *DB_Expecter) Table(name interface{}, args ...interface{}) *DB_Table_Call {
+//   - name string
+//   - args ...interface{}
+func (_e *DB_Expecter) Table(name any, args ...any) *DB_Table_Call {
 	return &DB_Table_Call{Call: _e.mock.On("Table",
-		append([]interface{}{name}, args...)...)}
+		append([]any{name}, args...)...)}
 }
 
 func (_c *DB_Table_Call) Run(run func(name string, args ...interface{})) *DB_Table_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -2239,7 +2502,7 @@ func (_c *DB_Table_Call) RunAndReturn(run func(name string, args ...interface{})
 
 // Take provides a mock function for the type DB
 func (_mock *DB) Take(dest interface{}, conds ...interface{}) error {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, dest)
 	_ca = append(_ca, conds...)
 	ret := _mock.Called(_ca...)
@@ -2263,22 +2526,31 @@ type DB_Take_Call struct {
 }
 
 // Take is a helper method to define mock.On call
-//   - dest
-//   - conds
-func (_e *DB_Expecter) Take(dest interface{}, conds ...interface{}) *DB_Take_Call {
+//   - dest interface{}
+//   - conds ...interface{}
+func (_e *DB_Expecter) Take(dest any, conds ...any) *DB_Take_Call {
 	return &DB_Take_Call{Call: _e.mock.On("Take",
-		append([]interface{}{dest}, conds...)...)}
+		append([]any{dest}, conds...)...)}
 }
 
 func (_c *DB_Take_Call) Run(run func(dest interface{}, conds ...interface{})) *DB_Take_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -2296,11 +2568,11 @@ func (_c *DB_Take_Call) RunAndReturn(run func(dest interface{}, conds ...interfa
 // Transaction provides a mock function for the type DB
 func (_mock *DB) Transaction(fc func(tx orm.DB) error, opts ...*sql.TxOptions) error {
 	// *sql.TxOptions
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, fc)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -2324,22 +2596,31 @@ type DB_Transaction_Call struct {
 }
 
 // Transaction is a helper method to define mock.On call
-//   - fc
-//   - opts
-func (_e *DB_Expecter) Transaction(fc interface{}, opts ...interface{}) *DB_Transaction_Call {
+//   - fc func(tx orm.DB) error
+//   - opts ...*sql.TxOptions
+func (_e *DB_Expecter) Transaction(fc any, opts ...any) *DB_Transaction_Call {
 	return &DB_Transaction_Call{Call: _e.mock.On("Transaction",
-		append([]interface{}{fc}, opts...)...)}
+		append([]any{fc}, opts...)...)}
 }
 
 func (_c *DB_Transaction_Call) Run(run func(fc func(tx orm.DB) error, opts ...*sql.TxOptions)) *DB_Transaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 func(tx orm.DB) error
+		if args[0] != nil {
+			arg0 = args[0].(func(tx orm.DB) error)
+		}
+		var arg1 []*sql.TxOptions
 		variadicArgs := make([]*sql.TxOptions, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(*sql.TxOptions)
 			}
 		}
-		run(args[0].(func(tx orm.DB) error), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -2432,15 +2713,26 @@ type DB_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - column
-//   - value
-func (_e *DB_Expecter) Update(column interface{}, value interface{}) *DB_Update_Call {
+//   - column string
+//   - value interface{}
+func (_e *DB_Expecter) Update(column any, value any) *DB_Update_Call {
 	return &DB_Update_Call{Call: _e.mock.On("Update", column, value)}
 }
 
 func (_c *DB_Update_Call) Run(run func(column string, value interface{})) *DB_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(interface{}))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 interface{}
+		if args[1] != nil {
+			arg1 = args[1].(interface{})
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -2487,15 +2779,26 @@ type DB_UpdateColumn_Call struct {
 }
 
 // UpdateColumn is a helper method to define mock.On call
-//   - column
-//   - value
-func (_e *DB_Expecter) UpdateColumn(column interface{}, value interface{}) *DB_UpdateColumn_Call {
+//   - column string
+//   - value interface{}
+func (_e *DB_Expecter) UpdateColumn(column any, value any) *DB_UpdateColumn_Call {
 	return &DB_UpdateColumn_Call{Call: _e.mock.On("UpdateColumn", column, value)}
 }
 
 func (_c *DB_UpdateColumn_Call) Run(run func(column string, value interface{})) *DB_UpdateColumn_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(interface{}))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 interface{}
+		if args[1] != nil {
+			arg1 = args[1].(interface{})
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -2542,14 +2845,20 @@ type DB_UpdateColumns_Call struct {
 }
 
 // UpdateColumns is a helper method to define mock.On call
-//   - values
-func (_e *DB_Expecter) UpdateColumns(values interface{}) *DB_UpdateColumns_Call {
+//   - values interface{}
+func (_e *DB_Expecter) UpdateColumns(values any) *DB_UpdateColumns_Call {
 	return &DB_UpdateColumns_Call{Call: _e.mock.On("UpdateColumns", values)}
 }
 
 func (_c *DB_UpdateColumns_Call) Run(run func(values interface{})) *DB_UpdateColumns_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}))
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -2596,14 +2905,20 @@ type DB_Updates_Call struct {
 }
 
 // Updates is a helper method to define mock.On call
-//   - values
-func (_e *DB_Expecter) Updates(values interface{}) *DB_Updates_Call {
+//   - values interface{}
+func (_e *DB_Expecter) Updates(values any) *DB_Updates_Call {
 	return &DB_Updates_Call{Call: _e.mock.On("Updates", values)}
 }
 
 func (_c *DB_Updates_Call) Run(run func(values interface{})) *DB_Updates_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(interface{}))
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -2620,7 +2935,7 @@ func (_c *DB_Updates_Call) RunAndReturn(run func(values interface{}) (int64, err
 
 // Where provides a mock function for the type DB
 func (_mock *DB) Where(query interface{}, args ...interface{}) orm.DB {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, query)
 	_ca = append(_ca, args...)
 	ret := _mock.Called(_ca...)
@@ -2646,22 +2961,31 @@ type DB_Where_Call struct {
 }
 
 // Where is a helper method to define mock.On call
-//   - query
-//   - args
-func (_e *DB_Expecter) Where(query interface{}, args ...interface{}) *DB_Where_Call {
+//   - query interface{}
+//   - args ...interface{}
+func (_e *DB_Expecter) Where(query any, args ...any) *DB_Where_Call {
 	return &DB_Where_Call{Call: _e.mock.On("Where",
-		append([]interface{}{query}, args...)...)}
+		append([]any{query}, args...)...)}
 }
 
 func (_c *DB_Where_Call) Run(run func(query interface{}, args ...interface{})) *DB_Where_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 interface{}
+		if args[0] != nil {
+			arg0 = args[0].(interface{})
+		}
+		var arg1 []interface{}
 		variadicArgs := make([]interface{}, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(interface{})
 			}
 		}
-		run(args[0].(interface{}), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -2701,14 +3025,20 @@ type DB_WithContext_Call struct {
 }
 
 // WithContext is a helper method to define mock.On call
-//   - ctx
-func (_e *DB_Expecter) WithContext(ctx interface{}) *DB_WithContext_Call {
+//   - ctx context.Context
+func (_e *DB_Expecter) WithContext(ctx any) *DB_WithContext_Call {
 	return &DB_WithContext_Call{Call: _e.mock.On("WithContext", ctx)}
 }
 
 func (_c *DB_WithContext_Call) Run(run func(ctx context.Context)) *DB_WithContext_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -2726,11 +3056,11 @@ func (_c *DB_WithContext_Call) RunAndReturn(run func(ctx context.Context) orm.DB
 // WithEnricher provides a mock function for the type DB
 func (_mock *DB) WithEnricher(enrichers ...orm.Enricher) orm.DB {
 	// orm.Enricher
-	_va := make([]interface{}, len(enrichers))
+	_va := make([]any, len(enrichers))
 	for _i := range enrichers {
 		_va[_i] = enrichers[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
 
@@ -2755,21 +3085,25 @@ type DB_WithEnricher_Call struct {
 }
 
 // WithEnricher is a helper method to define mock.On call
-//   - enrichers
-func (_e *DB_Expecter) WithEnricher(enrichers ...interface{}) *DB_WithEnricher_Call {
+//   - enrichers ...orm.Enricher
+func (_e *DB_Expecter) WithEnricher(enrichers ...any) *DB_WithEnricher_Call {
 	return &DB_WithEnricher_Call{Call: _e.mock.On("WithEnricher",
-		append([]interface{}{}, enrichers...)...)}
+		append([]any{}, enrichers...)...)}
 }
 
 func (_c *DB_WithEnricher_Call) Run(run func(enrichers ...orm.Enricher)) *DB_WithEnricher_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 []orm.Enricher
 		variadicArgs := make([]orm.Enricher, len(args)-0)
 		for i, a := range args[0:] {
 			if a != nil {
 				variadicArgs[i] = a.(orm.Enricher)
 			}
 		}
-		run(variadicArgs...)
+		arg0 = variadicArgs
+		run(
+			arg0...,
+		)
 	})
 	return _c
 }
