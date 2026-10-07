@@ -117,14 +117,6 @@ type ResourceClaimTemplatesAPIRouter interface {
 	SyncProjectResourceClaimTemplates(http.ResponseWriter, *http.Request)
 }
 
-// ResourceClaimsAPIRouter defines the required methods for binding the api requests to a responses for the ResourceClaimsAPI
-// The ResourceClaimsAPIRouter implementation should parse necessary information from the http request,
-// pass the data to a ResourceClaimsAPIServicer to perform the required actions, then write the service results to the http response.
-type ResourceClaimsAPIRouter interface {
-	ListResourceClaims(http.ResponseWriter, *http.Request)
-	SyncProjectResourceClaims(http.ResponseWriter, *http.Request)
-}
-
 // SecretsAPIRouter defines the required methods for binding the api requests to a responses for the SecretsAPI
 // The SecretsAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a SecretsAPIServicer to perform the required actions, then write the service results to the http response.
@@ -280,15 +272,6 @@ type ResourceClaimTemplatesAPIServicer interface {
 	SyncClusterWideResourceClaimTemplates(context.Context, string, ResourceClaimTemplates) (ImplResponse, error)
 	SyncDepartmentWideResourceClaimTemplates(context.Context, string, string, ResourceClaimTemplates) (ImplResponse, error)
 	SyncProjectResourceClaimTemplates(context.Context, string, string, ResourceClaimTemplates) (ImplResponse, error)
-}
-
-// ResourceClaimsAPIServicer defines the api actions for the ResourceClaimsAPI service
-// This interface intended to stay up to date with the openapi yaml used to generate it,
-// while the service implementation can be ignored with the .openapi-generator-ignore file
-// and updated with the logic required for the API.
-type ResourceClaimsAPIServicer interface {
-	ListResourceClaims(context.Context, string, string, string, string, bool, bool) (ImplResponse, error)
-	SyncProjectResourceClaims(context.Context, string, string, ResourceClaims) (ImplResponse, error)
 }
 
 // SecretsAPIServicer defines the api actions for the SecretsAPI service

@@ -36,7 +36,6 @@ const (
 	ObjectTypeStorageClass          = "StorageClass"
 	ObjectTypeDeviceClass           = "DeviceClass"
 	ObjectTypeResourceClaimTemplate = "ResourceClaimTemplate"
-	ObjectTypeResourceClaim         = "ResourceClaim"
 
 	// ObjectsExtendedUniqueConstraint supersedes the original cluster-scoped-only
 	// constraint. It additionally keys on scope_type and department_id so the same

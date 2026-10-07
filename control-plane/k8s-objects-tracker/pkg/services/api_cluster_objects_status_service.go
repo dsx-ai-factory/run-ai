@@ -250,21 +250,14 @@ func getClusterObjects(ctx context.Context, tenantId int32, resourceType string,
 		}
 	}
 
-	if resourceType == "" || resourceType == string(api.CLUSTERRESOURCETYPE_RESOURCE_CLAIM) {
-		if err := appendObjectStatuses(ctx, tenantId, models.ObjectTypeResourceClaim,
-			api.CLUSTERRESOURCETYPE_RESOURCE_CLAIM, scopeQuery, clusterObjectIdMap); err != nil {
-			return nil, err
-		}
-	}
-
 	return clusterObjectIdMap, nil
 }
 
 // appendObjectStatuses pulls rows of a given object type into the shared
-// cluster-objects status map. Because ResourceClaimTemplate / ResourceClaim
-// are stored in the generic `objects` table (unlike PVC / Secret / ConfigMap
-// which have dedicated tables), their scope lives directly on ObjectFilters
-// rather than on a separate ScopeQuery wrapper, so we project the query here.
+// cluster-objects status map. Because ResourceClaimTemplate is stored in the
+// generic `objects` table (unlike PVC / Secret / ConfigMap which have
+// dedicated tables), its scope lives directly on ObjectFilters rather than on
+// a separate ScopeQuery wrapper, so we project the query here.
 func appendObjectStatuses(ctx context.Context, tenantId int32, objectType string, resourceType api.ClusterResourceType,
 	scopeQuery *models.ScopeQueryParams, out map[string]api.ClusterObjectStatus) *api.Error {
 	filter := &models.ObjectFilters{

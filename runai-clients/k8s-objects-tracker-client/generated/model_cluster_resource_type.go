@@ -27,7 +27,6 @@ const (
 	CLUSTERRESOURCETYPE_SECRET                  ClusterResourceType = "secret"
 	CLUSTERRESOURCETYPE_CONFIG_MAP              ClusterResourceType = "config-map"
 	CLUSTERRESOURCETYPE_RESOURCE_CLAIM_TEMPLATE ClusterResourceType = "resource-claim-template"
-	CLUSTERRESOURCETYPE_RESOURCE_CLAIM          ClusterResourceType = "resource-claim"
 )
 
 // All allowed values of ClusterResourceType enum
@@ -36,7 +35,6 @@ var AllowedClusterResourceTypeEnumValues = []ClusterResourceType{
 	"secret",
 	"config-map",
 	"resource-claim-template",
-	"resource-claim",
 }
 
 func (v *ClusterResourceType) UnmarshalJSON(src []byte) error {

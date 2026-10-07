@@ -1,6 +1,0 @@
-type: object
-description: >
-  Raw ResourceClaim spec as sent by the agent. Shape follows the Kubernetes
-  `resource.k8s.io/v1` `ResourceClaimSpec`. Stored verbatim; the tracker does
-  not interpret its contents.
-additionalProperties: true

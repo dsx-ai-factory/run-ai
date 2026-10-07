@@ -151,11 +151,6 @@ paths:
   /api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace}:
     $ref: './resources/ProjectResourceClaimTemplatesSync.yaml'
 
-  /api/v1/resource-claims:
-    $ref: './resources/ResourceClaims.yaml'
-  /api/v1/resource-claims/{clusterUuid}/namespaces/{namespace}:
-    $ref: './resources/ProjectResourceClaimsSync.yaml'
-
   /api/v1/storage-class-configuration:
     $ref: './resources/StorageClassConfiguration.yaml'
   /api/v1/storage-class-configuration/{id}:

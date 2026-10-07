@@ -4,4 +4,3 @@ enum:
   - secret
   - config-map
   - resource-claim-template
-  - resource-claim

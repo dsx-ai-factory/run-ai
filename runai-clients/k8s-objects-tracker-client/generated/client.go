@@ -68,8 +68,6 @@ type APIClient struct {
 
 	ResourceClaimTemplatesAPI ResourceClaimTemplatesAPI
 
-	ResourceClaimsAPI ResourceClaimsAPI
-
 	SecretsAPI SecretsAPI
 
 	StorageClassConfigurationAPI StorageClassConfigurationAPI
@@ -99,7 +97,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.HealthAPI = (*HealthAPIService)(&c.common)
 	c.PVCsAPI = (*PVCsAPIService)(&c.common)
 	c.ResourceClaimTemplatesAPI = (*ResourceClaimTemplatesAPIService)(&c.common)
-	c.ResourceClaimsAPI = (*ResourceClaimsAPIService)(&c.common)
 	c.SecretsAPI = (*SecretsAPIService)(&c.common)
 	c.StorageClassConfigurationAPI = (*StorageClassConfigurationAPIService)(&c.common)
 	c.StorageClassesAPI = (*StorageClassesAPIService)(&c.common)

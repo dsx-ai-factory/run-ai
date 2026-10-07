@@ -32,7 +32,6 @@ const (
 	CLUSTERRESOURCETYPE_SECRET                  ClusterResourceType = "secret"
 	CLUSTERRESOURCETYPE_CONFIG_MAP              ClusterResourceType = "config-map"
 	CLUSTERRESOURCETYPE_RESOURCE_CLAIM_TEMPLATE ClusterResourceType = "resource-claim-template"
-	CLUSTERRESOURCETYPE_RESOURCE_CLAIM          ClusterResourceType = "resource-claim"
 )
 
 // AllowedClusterResourceTypeEnumValues is all the allowed values of ClusterResourceType enum
@@ -41,7 +40,6 @@ var AllowedClusterResourceTypeEnumValues = []ClusterResourceType{
 	"secret",
 	"config-map",
 	"resource-claim-template",
-	"resource-claim",
 }
 
 // validClusterResourceTypeEnumValue provides a map of ClusterResourceTypes for fast verification of use input
@@ -50,7 +48,6 @@ var validClusterResourceTypeEnumValues = map[ClusterResourceType]struct{}{
 	"secret":                  {},
 	"config-map":              {},
 	"resource-claim-template": {},
-	"resource-claim":          {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

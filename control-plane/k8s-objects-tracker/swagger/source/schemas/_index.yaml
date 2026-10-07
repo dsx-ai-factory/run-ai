@@ -39,11 +39,3 @@ ResourceClaimTemplateName:
   $ref: "./ResourceClaimTemplates/ResourceClaimTemplateName.yaml"
 ResourceClaimTemplateSpec:
   $ref: "./ResourceClaimTemplates/ResourceClaimTemplateSpec.yaml"
-ResourceClaim:
-  $ref: "./ResourceClaims/ResourceClaim.yaml"
-ResourceClaims:
-  $ref: "./ResourceClaims/ResourceClaims.yaml"
-ResourceClaimName:
-  $ref: "./ResourceClaims/ResourceClaimName.yaml"
-ResourceClaimSpec:
-  $ref: "./ResourceClaims/ResourceClaimSpec.yaml"

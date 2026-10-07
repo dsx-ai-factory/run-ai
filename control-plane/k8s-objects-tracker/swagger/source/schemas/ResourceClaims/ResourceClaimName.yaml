@@ -1,9 +1,0 @@
-type: string
-description: >
-  ResourceClaim name. Must follow Kubernetes DNS-1123 subdomain rules
-  (lowercase alphanumeric, `-`, and `.`, starting and ending with an
-  alphanumeric character), up to 253 characters.
-minLength: 1
-maxLength: 253
-pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
-example: pod-x-claim-0-abcde

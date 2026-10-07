@@ -48074,64 +48074,6 @@ components:
           maxItems: 10000
           items:
             $ref: '#/components/schemas/ResourceClaimTemplate'
-    ResourceClaimName:
-      type: string
-      description: >
-        ResourceClaim name. Must follow Kubernetes DNS-1123 subdomain rules
-        (lowercase alphanumeric, `-`, and `.`, starting and ending with an
-        alphanumeric character), up to 253 characters.
-      minLength: 1
-      maxLength: 253
-      pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
-      example: pod-x-claim-0-abcde
-    ResourceClaimSpec:
-      type: object
-      description: >
-        Raw ResourceClaim spec as sent by the agent. Shape follows the
-        Kubernetes `resource.k8s.io/v1` `ResourceClaimSpec`. Stored verbatim;
-        the tracker does not interpret its contents.
-      additionalProperties: true
-    ResourceClaim:
-      type: object
-      description: >
-        A ResourceClaim observed in a project namespace. Origin is always
-        "existing" since claims are instantiated by the Kubernetes
-        resource-claim controller, not created by Run.ai assets - the Run.ai
-        control plane only owns the ResourceClaimTemplate the claim was derived
-        from.
-      required:
-        - name
-        - namespace
-      properties:
-        name:
-          $ref: '#/components/schemas/ResourceClaimName'
-        namespace:
-          type: string
-          description: the namespace the ResourceClaim lives in
-          minLength: 1
-          maxLength: 253
-          example: runai-project-foo
-        resourceClaimTemplateName:
-          type: string
-          description: >
-            Name of the ResourceClaimTemplate this claim was instantiated from,
-            as reported by the agent. May be omitted when the agent could not
-            resolve the template (e.g. the owning Pod was already gone).
-          nullable: true
-        spec:
-          $ref: '#/components/schemas/ResourceClaimSpec'
-        issues:
-          $ref: '#/components/schemas/Issues'
-    ResourceClaims:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          maxItems: 10000
-          items:
-            $ref: '#/components/schemas/ResourceClaim'
     ScopeClusterId:
       description: The ID of the cluster.
       type: string
@@ -48249,7 +48191,6 @@ components:
         - secret
         - config-map
         - resource-claim-template
-        - resource-claim
     ClusterObjectIssueType:
       type: string
       enum:

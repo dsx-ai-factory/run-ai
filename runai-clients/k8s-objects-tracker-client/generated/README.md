@@ -125,8 +125,6 @@ Class | Method | HTTP request | Description
 *ResourceClaimTemplatesAPI* | [**SyncClusterWideResourceClaimTemplates**](docs/ResourceClaimTemplatesAPI.md#syncclusterwideresourceclaimtemplates) | **Post** /api/v1/resource-claim-templates/{clusterUuid} | sync the details of cluster-wide ResourceClaimTemplates to the control plane
 *ResourceClaimTemplatesAPI* | [**SyncDepartmentWideResourceClaimTemplates**](docs/ResourceClaimTemplatesAPI.md#syncdepartmentwideresourceclaimtemplates) | **Post** /api/v1/resource-claim-templates/{clusterUuid}/departments/{departmentId} | sync the details of department-wide ResourceClaimTemplates to the control plane
 *ResourceClaimTemplatesAPI* | [**SyncProjectResourceClaimTemplates**](docs/ResourceClaimTemplatesAPI.md#syncprojectresourceclaimtemplates) | **Post** /api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace} | sync the details of project ResourceClaimTemplates to the control plane
-*ResourceClaimsAPI* | [**ListResourceClaims**](docs/ResourceClaimsAPI.md#listresourceclaims) | **Get** /api/v1/resource-claims | list details of ResourceClaims
-*ResourceClaimsAPI* | [**SyncProjectResourceClaims**](docs/ResourceClaimsAPI.md#syncprojectresourceclaims) | **Post** /api/v1/resource-claims/{clusterUuid}/namespaces/{namespace} | sync the details of project ResourceClaims to the control plane
 *SecretsAPI* | [**CreateClusterWideSecret**](docs/SecretsAPI.md#createclusterwidesecret) | **Post** /api/v1/secrets/{clusterUuid}/{secretName} | upload the details of cluster-wide secret to the control plane
 *SecretsAPI* | [**CreateDepartmentWideSecret**](docs/SecretsAPI.md#createdepartmentwidesecret) | **Post** /api/v1/secrets/{clusterUuid}/department/{departmentId}/{secretName} | upload the details of department-wide secret to the control plane
 *SecretsAPI* | [**CreateDepartmentsWideSecret**](docs/SecretsAPI.md#createdepartmentswidesecret) | **Post** /api/v1/secrets/{clusterUuid}/departments/{departmentId}/{secretName} | upload the details of department-wide secret to the control plane
@@ -200,10 +198,8 @@ Class | Method | HTTP request | Description
  - [PvcPhaseOptional](docs/PvcPhaseOptional.md)
  - [PvcSupportedAccessModes](docs/PvcSupportedAccessModes.md)
  - [PvcVolumeMode](docs/PvcVolumeMode.md)
- - [ResourceClaim](docs/ResourceClaim.md)
  - [ResourceClaimTemplate](docs/ResourceClaimTemplate.md)
  - [ResourceClaimTemplates](docs/ResourceClaimTemplates.md)
- - [ResourceClaims](docs/ResourceClaims.md)
  - [Secret](docs/Secret.md)
  - [SecretCreationRequest](docs/SecretCreationRequest.md)
  - [SecretListInfo](docs/SecretListInfo.md)
