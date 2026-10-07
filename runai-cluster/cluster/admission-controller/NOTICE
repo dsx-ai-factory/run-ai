@@ -27,7 +27,7 @@ Dependencies
 
 | Package | Version | License | License source |
 |---------|---------|---------|----------------|
-| `github.com/awslabs/operatorpkg` | v0.0.0-20261002163259-5e8ed3699dea | Apache-2.0 | https://github.com/awslabs/operatorpkg/blob/5e8ed3699dea/LICENSE |
+| `github.com/awslabs/operatorpkg` | v0.0.0-20261006163503-855c7d06c363 | Apache-2.0 | https://github.com/awslabs/operatorpkg/blob/855c7d06c363/LICENSE |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/cespare/xxhash/v2` | v2.3.0 | MIT | https://pkg.go.dev/github.com/cespare/xxhash/v2@v2.3.0?tab=licenses |
 | `github.com/davecgh/go-spew/spew` | v1.1.2-0.20180830191138-d8f796af33cc | ISC | https://github.com/davecgh/go-spew/blob/d8f796af33cc/LICENSE |
