@@ -12,7 +12,6 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-20250716113405-6ec301e09307 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-20250428095855-d1862558c98a // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
@@ -52,8 +51,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -171,8 +168,6 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../../runai-cluster/cluster/common/runaipublic
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ../../runai-cluster/cluster/common/topology
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../../runai-cluster/cluster/common/utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../../runai-cluster/cluster/go-operator
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../../runai-cluster/cluster/common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../../runai-cluster/cluster/sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../../runai-cluster/cluster/workload-common
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller => ../../runai-cluster/cluster/workload-controller

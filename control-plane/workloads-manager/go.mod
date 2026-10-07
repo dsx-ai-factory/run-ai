@@ -120,7 +120,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-20250716113405-6ec301e09307 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller v0.0.0 // indirect
@@ -142,7 +141,6 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v1.0.1 // indirect
 	github.com/go-openapi/jsonreference v1.0.1 // indirect
@@ -341,7 +339,6 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../../runai-cluster/cluster/common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds => ../../runai-cluster/cluster/common/personalcreds
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../../runai-cluster/cluster/common/utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../../runai-cluster/cluster/common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../../runai-cluster/cluster/sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../../runai-cluster/cluster/workload-common
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller => ../../runai-cluster/cluster/workload-controller
@@ -372,7 +369,6 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/workloads => ../workloads
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies => ../workloads-and-policies
 
-replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../../runai-cluster/cluster/go-operator
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 => ../../runai-cluster/cluster/dromos/api/v1alpha1
 
