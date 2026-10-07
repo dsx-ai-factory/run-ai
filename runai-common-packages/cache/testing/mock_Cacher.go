@@ -21,10 +21,19 @@ func NewMockCacher(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCacher {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCacher{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -65,14 +74,20 @@ type MockCacher_ClearCache_Call struct {
 }
 
 // ClearCache is a helper method to define mock.On call
-//   - ctx
-func (_e *MockCacher_Expecter) ClearCache(ctx interface{}) *MockCacher_ClearCache_Call {
+//   - ctx context.Context
+func (_e *MockCacher_Expecter) ClearCache(ctx any) *MockCacher_ClearCache_Call {
 	return &MockCacher_ClearCache_Call{Call: _e.mock.On("ClearCache", ctx)}
 }
 
 func (_c *MockCacher_ClearCache_Call) Run(run func(ctx context.Context)) *MockCacher_ClearCache_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -110,15 +125,26 @@ type MockCacher_ClearStore_Call struct {
 }
 
 // ClearStore is a helper method to define mock.On call
-//   - ctx
-//   - storeKey
-func (_e *MockCacher_Expecter) ClearStore(ctx interface{}, storeKey interface{}) *MockCacher_ClearStore_Call {
+//   - ctx context.Context
+//   - storeKey reflect.Type
+func (_e *MockCacher_Expecter) ClearStore(ctx any, storeKey any) *MockCacher_ClearStore_Call {
 	return &MockCacher_ClearStore_Call{Call: _e.mock.On("ClearStore", ctx, storeKey)}
 }
 
 func (_c *MockCacher_ClearStore_Call) Run(run func(ctx context.Context, storeKey reflect.Type)) *MockCacher_ClearStore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(reflect.Type))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 reflect.Type
+		if args[1] != nil {
+			arg1 = args[1].(reflect.Type)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -200,16 +226,32 @@ type MockCacher_Del_Call struct {
 }
 
 // Del is a helper method to define mock.On call
-//   - ctx
-//   - storeKey
-//   - key
-func (_e *MockCacher_Expecter) Del(ctx interface{}, storeKey interface{}, key interface{}) *MockCacher_Del_Call {
+//   - ctx context.Context
+//   - storeKey reflect.Type
+//   - key string
+func (_e *MockCacher_Expecter) Del(ctx any, storeKey any, key any) *MockCacher_Del_Call {
 	return &MockCacher_Del_Call{Call: _e.mock.On("Del", ctx, storeKey, key)}
 }
 
 func (_c *MockCacher_Del_Call) Run(run func(ctx context.Context, storeKey reflect.Type, key string)) *MockCacher_Del_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(reflect.Type), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 reflect.Type
+		if args[1] != nil {
+			arg1 = args[1].(reflect.Type)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -258,22 +300,38 @@ type MockCacher_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-//   - storeKey
-//   - key
-func (_e *MockCacher_Expecter) Get(ctx interface{}, storeKey interface{}, key interface{}) *MockCacher_Get_Call {
+//   - ctx context.Context
+//   - storeKey reflect.Type
+//   - key string
+func (_e *MockCacher_Expecter) Get(ctx any, storeKey any, key any) *MockCacher_Get_Call {
 	return &MockCacher_Get_Call{Call: _e.mock.On("Get", ctx, storeKey, key)}
 }
 
 func (_c *MockCacher_Get_Call) Run(run func(ctx context.Context, storeKey reflect.Type, key string)) *MockCacher_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(reflect.Type), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 reflect.Type
+		if args[1] != nil {
+			arg1 = args[1].(reflect.Type)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
 
-func (_c *MockCacher_Get_Call) Return(v any, err error) *MockCacher_Get_Call {
-	_c.Call.Return(v, err)
+func (_c *MockCacher_Get_Call) Return(anyMoqParam any, err error) *MockCacher_Get_Call {
+	_c.Call.Return(anyMoqParam, err)
 	return _c
 }
 
@@ -285,11 +343,11 @@ func (_c *MockCacher_Get_Call) RunAndReturn(run func(ctx context.Context, storeK
 // RegisterSharedStore provides a mock function for the type MockCacher
 func (_mock *MockCacher) RegisterSharedStore(storeKey reflect.Type, storeName string, opts ...options.Option) error {
 	// options.Option
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, storeKey, storeName)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -313,23 +371,37 @@ type MockCacher_RegisterSharedStore_Call struct {
 }
 
 // RegisterSharedStore is a helper method to define mock.On call
-//   - storeKey
-//   - storeName
-//   - opts
-func (_e *MockCacher_Expecter) RegisterSharedStore(storeKey interface{}, storeName interface{}, opts ...interface{}) *MockCacher_RegisterSharedStore_Call {
+//   - storeKey reflect.Type
+//   - storeName string
+//   - opts ...options.Option
+func (_e *MockCacher_Expecter) RegisterSharedStore(storeKey any, storeName any, opts ...any) *MockCacher_RegisterSharedStore_Call {
 	return &MockCacher_RegisterSharedStore_Call{Call: _e.mock.On("RegisterSharedStore",
-		append([]interface{}{storeKey, storeName}, opts...)...)}
+		append([]any{storeKey, storeName}, opts...)...)}
 }
 
 func (_c *MockCacher_RegisterSharedStore_Call) Run(run func(storeKey reflect.Type, storeName string, opts ...options.Option)) *MockCacher_RegisterSharedStore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 reflect.Type
+		if args[0] != nil {
+			arg0 = args[0].(reflect.Type)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []options.Option
 		variadicArgs := make([]options.Option, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
 				variadicArgs[i] = a.(options.Option)
 			}
 		}
-		run(args[0].(reflect.Type), args[1].(string), variadicArgs...)
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
 	})
 	return _c
 }
@@ -347,11 +419,11 @@ func (_c *MockCacher_RegisterSharedStore_Call) RunAndReturn(run func(storeKey re
 // RegisterStore provides a mock function for the type MockCacher
 func (_mock *MockCacher) RegisterStore(storeKey reflect.Type, storeName string, opts ...options.Option) error {
 	// options.Option
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, storeKey, storeName)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -375,23 +447,37 @@ type MockCacher_RegisterStore_Call struct {
 }
 
 // RegisterStore is a helper method to define mock.On call
-//   - storeKey
-//   - storeName
-//   - opts
-func (_e *MockCacher_Expecter) RegisterStore(storeKey interface{}, storeName interface{}, opts ...interface{}) *MockCacher_RegisterStore_Call {
+//   - storeKey reflect.Type
+//   - storeName string
+//   - opts ...options.Option
+func (_e *MockCacher_Expecter) RegisterStore(storeKey any, storeName any, opts ...any) *MockCacher_RegisterStore_Call {
 	return &MockCacher_RegisterStore_Call{Call: _e.mock.On("RegisterStore",
-		append([]interface{}{storeKey, storeName}, opts...)...)}
+		append([]any{storeKey, storeName}, opts...)...)}
 }
 
 func (_c *MockCacher_RegisterStore_Call) Run(run func(storeKey reflect.Type, storeName string, opts ...options.Option)) *MockCacher_RegisterStore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 reflect.Type
+		if args[0] != nil {
+			arg0 = args[0].(reflect.Type)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []options.Option
 		variadicArgs := make([]options.Option, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
 				variadicArgs[i] = a.(options.Option)
 			}
 		}
-		run(args[0].(reflect.Type), args[1].(string), variadicArgs...)
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
 	})
 	return _c
 }
@@ -429,17 +515,38 @@ type MockCacher_Set_Call struct {
 }
 
 // Set is a helper method to define mock.On call
-//   - ctx
-//   - storeKey
-//   - key
-//   - value
-func (_e *MockCacher_Expecter) Set(ctx interface{}, storeKey interface{}, key interface{}, value interface{}) *MockCacher_Set_Call {
+//   - ctx context.Context
+//   - storeKey reflect.Type
+//   - key string
+//   - value any
+func (_e *MockCacher_Expecter) Set(ctx any, storeKey any, key any, value any) *MockCacher_Set_Call {
 	return &MockCacher_Set_Call{Call: _e.mock.On("Set", ctx, storeKey, key, value)}
 }
 
 func (_c *MockCacher_Set_Call) Run(run func(ctx context.Context, storeKey reflect.Type, key string, value any)) *MockCacher_Set_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(reflect.Type), args[2].(string), args[3].(any))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 reflect.Type
+		if args[1] != nil {
+			arg1 = args[1].(reflect.Type)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 any
+		if args[3] != nil {
+			arg3 = args[3].(any)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
