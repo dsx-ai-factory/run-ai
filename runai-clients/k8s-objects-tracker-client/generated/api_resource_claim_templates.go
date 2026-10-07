@@ -19,7 +19,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 // //////////////////////////// RUNAI ///////////////////////////////
@@ -27,6 +26,29 @@ import (
 //
 //go:generate mockery --name ResourceClaimTemplatesAPI --output ../mocks/
 type ResourceClaimTemplatesAPI interface {
+
+	/*
+		CreateResourceClaimTemplate create a Resource Claim Template
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiCreateResourceClaimTemplateRequest
+	*/
+	CreateResourceClaimTemplate(ctx context.Context) ApiCreateResourceClaimTemplateRequest
+
+	// CreateResourceClaimTemplateExecute executes the request
+	//  @return ResourceClaimTemplate
+	CreateResourceClaimTemplateExecute(r ApiCreateResourceClaimTemplateRequest) (*ResourceClaimTemplate, *http.Response, error)
+
+	/*
+		DeleteResourceClaimTemplate delete a Resource Claim Template
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiDeleteResourceClaimTemplateRequest
+	*/
+	DeleteResourceClaimTemplate(ctx context.Context) ApiDeleteResourceClaimTemplateRequest
+
+	// DeleteResourceClaimTemplateExecute executes the request
+	DeleteResourceClaimTemplateExecute(r ApiDeleteResourceClaimTemplateRequest) (*http.Response, error)
 
 	/*
 		ListResourceClaimTemplates list details of ResourceClaimTemplates
@@ -41,60 +63,419 @@ type ResourceClaimTemplatesAPI interface {
 	ListResourceClaimTemplatesExecute(r ApiListResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error)
 
 	/*
-		SyncClusterWideResourceClaimTemplates sync the details of cluster-wide ResourceClaimTemplates to the control plane
+		SyncResourceClaimTemplates sync the full set of ResourceClaimTemplates observed in a cluster
+
+		Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists.
+
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-		@return ApiSyncClusterWideResourceClaimTemplatesRequest
+		@return ApiSyncResourceClaimTemplatesRequest
 	*/
-	SyncClusterWideResourceClaimTemplates(ctx context.Context, clusterUuid string) ApiSyncClusterWideResourceClaimTemplatesRequest
+	SyncResourceClaimTemplates(ctx context.Context) ApiSyncResourceClaimTemplatesRequest
 
-	// SyncClusterWideResourceClaimTemplatesExecute executes the request
+	// SyncResourceClaimTemplatesExecute executes the request
 	//  @return ResourceClaimTemplates
-	SyncClusterWideResourceClaimTemplatesExecute(r ApiSyncClusterWideResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error)
+	SyncResourceClaimTemplatesExecute(r ApiSyncResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error)
 
 	/*
-		SyncDepartmentWideResourceClaimTemplates sync the details of department-wide ResourceClaimTemplates to the control plane
+		UpdateResourceClaimTemplate update a Resource Claim Template
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-		@param departmentId The id of the department.
-		@return ApiSyncDepartmentWideResourceClaimTemplatesRequest
+		@return ApiUpdateResourceClaimTemplateRequest
 	*/
-	SyncDepartmentWideResourceClaimTemplates(ctx context.Context, clusterUuid string, departmentId string) ApiSyncDepartmentWideResourceClaimTemplatesRequest
+	UpdateResourceClaimTemplate(ctx context.Context) ApiUpdateResourceClaimTemplateRequest
 
-	// SyncDepartmentWideResourceClaimTemplatesExecute executes the request
-	//  @return ResourceClaimTemplates
-	SyncDepartmentWideResourceClaimTemplatesExecute(r ApiSyncDepartmentWideResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error)
-
-	/*
-		SyncProjectResourceClaimTemplates sync the details of project ResourceClaimTemplates to the control plane
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-		@param namespace The namespace of the project.
-		@return ApiSyncProjectResourceClaimTemplatesRequest
-	*/
-	SyncProjectResourceClaimTemplates(ctx context.Context, clusterUuid string, namespace string) ApiSyncProjectResourceClaimTemplatesRequest
-
-	// SyncProjectResourceClaimTemplatesExecute executes the request
-	//  @return ResourceClaimTemplates
-	SyncProjectResourceClaimTemplatesExecute(r ApiSyncProjectResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error)
+	// UpdateResourceClaimTemplateExecute executes the request
+	//  @return ResourceClaimTemplate
+	UpdateResourceClaimTemplateExecute(r ApiUpdateResourceClaimTemplateRequest) (*ResourceClaimTemplate, *http.Response, error)
 }
 
 // ResourceClaimTemplatesAPIService ResourceClaimTemplatesAPI service
 type ResourceClaimTemplatesAPIService service
 
+type ApiCreateResourceClaimTemplateRequest struct {
+	ctx                   context.Context
+	ApiService            ResourceClaimTemplatesAPI
+	clusterId             *string
+	resourceClaimTemplate *ResourceClaimTemplate
+}
+
+// The id of the cluster
+func (r ApiCreateResourceClaimTemplateRequest) ClusterId(clusterId string) ApiCreateResourceClaimTemplateRequest {
+	r.clusterId = &clusterId
+	return r
+}
+
+func (r ApiCreateResourceClaimTemplateRequest) ResourceClaimTemplate(resourceClaimTemplate ResourceClaimTemplate) ApiCreateResourceClaimTemplateRequest {
+	r.resourceClaimTemplate = &resourceClaimTemplate
+	return r
+}
+
+func (r ApiCreateResourceClaimTemplateRequest) Execute() (*ResourceClaimTemplate, *http.Response, error) {
+	return r.ApiService.CreateResourceClaimTemplateExecute(r)
+}
+
+/*
+CreateResourceClaimTemplate create a Resource Claim Template
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateResourceClaimTemplateRequest
+*/
+func (a *ResourceClaimTemplatesAPIService) CreateResourceClaimTemplate(ctx context.Context) ApiCreateResourceClaimTemplateRequest {
+	return ApiCreateResourceClaimTemplateRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//  @return ResourceClaimTemplate
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *ResourceClaimTemplatesAPIService) CreateResourceClaimTemplateExecute(r ApiCreateResourceClaimTemplateRequest) (*ResourceClaimTemplate, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ResourceClaimTemplate
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResourceClaimTemplatesAPIService.CreateResourceClaimTemplate")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/resource-claim-templates"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.clusterId == nil {
+		return localVarReturnValue, nil, reportError("clusterId is required and must be specified")
+	}
+	if r.resourceClaimTemplate == nil {
+		return localVarReturnValue, nil, reportError("resourceClaimTemplate is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "clusterId", r.clusterId, "form", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.resourceClaimTemplate
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiDeleteResourceClaimTemplateRequest struct {
+	ctx        context.Context
+	ApiService ResourceClaimTemplatesAPI
+	clusterId  *string
+	scopeType  *ResourceScopeType
+	scopeId    *string
+	name       *string
+}
+
+// The id of the cluster
+func (r ApiDeleteResourceClaimTemplateRequest) ClusterId(clusterId string) ApiDeleteResourceClaimTemplateRequest {
+	r.clusterId = &clusterId
+	return r
+}
+
+// The resource scope type to filter by.
+func (r ApiDeleteResourceClaimTemplateRequest) ScopeType(scopeType ResourceScopeType) ApiDeleteResourceClaimTemplateRequest {
+	r.scopeType = &scopeType
+	return r
+}
+
+// The scope resource id that identifies the row.
+func (r ApiDeleteResourceClaimTemplateRequest) ScopeId(scopeId string) ApiDeleteResourceClaimTemplateRequest {
+	r.scopeId = &scopeId
+	return r
+}
+
+// filter by name
+func (r ApiDeleteResourceClaimTemplateRequest) Name(name string) ApiDeleteResourceClaimTemplateRequest {
+	r.name = &name
+	return r
+}
+
+func (r ApiDeleteResourceClaimTemplateRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteResourceClaimTemplateExecute(r)
+}
+
+/*
+DeleteResourceClaimTemplate delete a Resource Claim Template
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiDeleteResourceClaimTemplateRequest
+*/
+func (a *ResourceClaimTemplatesAPIService) DeleteResourceClaimTemplate(ctx context.Context) ApiDeleteResourceClaimTemplateRequest {
+	return ApiDeleteResourceClaimTemplateRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *ResourceClaimTemplatesAPIService) DeleteResourceClaimTemplateExecute(r ApiDeleteResourceClaimTemplateRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResourceClaimTemplatesAPIService.DeleteResourceClaimTemplate")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/resource-claim-templates"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.clusterId == nil {
+		return nil, reportError("clusterId is required and must be specified")
+	}
+	if r.scopeType == nil {
+		return nil, reportError("scopeType is required and must be specified")
+	}
+	if r.scopeId == nil {
+		return nil, reportError("scopeId is required and must be specified")
+	}
+	if strlen(*r.scopeId) < 1 {
+		return nil, reportError("scopeId must have at least 1 elements")
+	}
+	if r.name == nil {
+		return nil, reportError("name is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "clusterId", r.clusterId, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "scopeType", r.scopeType, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "scopeId", r.scopeId, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "name", r.name, "form", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type ApiListResourceClaimTemplatesRequest struct {
-	ctx                context.Context
-	ApiService         ResourceClaimTemplatesAPI
-	scopeType          *string
-	scopeId            *string
-	name               *string
-	clusterId          *string
-	origin             *string
-	includeAncestors   *bool
-	includeDescendants *bool
+	ctx        context.Context
+	ApiService ResourceClaimTemplatesAPI
+	scopeType  *string
+	scopeId    *string
+	name       *string
+	clusterId  *string
+	origin     *string
 }
 
 // The type of resource we want to filter by.
@@ -124,18 +505,6 @@ func (r ApiListResourceClaimTemplatesRequest) ClusterId(clusterId string) ApiLis
 // filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use &#39;all&#39;.
 func (r ApiListResourceClaimTemplatesRequest) Origin(origin string) ApiListResourceClaimTemplatesRequest {
 	r.origin = &origin
-	return r
-}
-
-// include resources of both requested scope, and its ancestors. for example, if project scope is requested with includeAncestors&#x3D;true, department and cluster scoped assets will be included in the response.
-func (r ApiListResourceClaimTemplatesRequest) IncludeAncestors(includeAncestors bool) ApiListResourceClaimTemplatesRequest {
-	r.includeAncestors = &includeAncestors
-	return r
-}
-
-// Whether the query should include from all nested layers within the specified scope
-func (r ApiListResourceClaimTemplatesRequest) IncludeDescendants(includeDescendants bool) ApiListResourceClaimTemplatesRequest {
-	r.includeDescendants = &includeDescendants
 	return r
 }
 
@@ -193,12 +562,6 @@ func (a *ResourceClaimTemplatesAPIService) ListResourceClaimTemplatesExecute(r A
 	}
 	if r.origin != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "origin", r.origin, "form", "")
-	}
-	if r.includeAncestors != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "includeAncestors", r.includeAncestors, "form", "")
-	}
-	if r.includeDescendants != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "includeDescendants", r.includeDescendants, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -308,41 +671,47 @@ func (a *ResourceClaimTemplatesAPIService) ListResourceClaimTemplatesExecute(r A
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiSyncClusterWideResourceClaimTemplatesRequest struct {
+type ApiSyncResourceClaimTemplatesRequest struct {
 	ctx                    context.Context
 	ApiService             ResourceClaimTemplatesAPI
-	clusterUuid            string
+	clusterId              *string
 	resourceClaimTemplates *ResourceClaimTemplates
 }
 
-func (r ApiSyncClusterWideResourceClaimTemplatesRequest) ResourceClaimTemplates(resourceClaimTemplates ResourceClaimTemplates) ApiSyncClusterWideResourceClaimTemplatesRequest {
+// The id of the cluster
+func (r ApiSyncResourceClaimTemplatesRequest) ClusterId(clusterId string) ApiSyncResourceClaimTemplatesRequest {
+	r.clusterId = &clusterId
+	return r
+}
+
+func (r ApiSyncResourceClaimTemplatesRequest) ResourceClaimTemplates(resourceClaimTemplates ResourceClaimTemplates) ApiSyncResourceClaimTemplatesRequest {
 	r.resourceClaimTemplates = &resourceClaimTemplates
 	return r
 }
 
-func (r ApiSyncClusterWideResourceClaimTemplatesRequest) Execute() (*ResourceClaimTemplates, *http.Response, error) {
-	return r.ApiService.SyncClusterWideResourceClaimTemplatesExecute(r)
+func (r ApiSyncResourceClaimTemplatesRequest) Execute() (*ResourceClaimTemplates, *http.Response, error) {
+	return r.ApiService.SyncResourceClaimTemplatesExecute(r)
 }
 
 /*
-SyncClusterWideResourceClaimTemplates sync the details of cluster-wide ResourceClaimTemplates to the control plane
+SyncResourceClaimTemplates sync the full set of ResourceClaimTemplates observed in a cluster
+
+Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return ApiSyncClusterWideResourceClaimTemplatesRequest
+	@return ApiSyncResourceClaimTemplatesRequest
 */
-func (a *ResourceClaimTemplatesAPIService) SyncClusterWideResourceClaimTemplates(ctx context.Context, clusterUuid string) ApiSyncClusterWideResourceClaimTemplatesRequest {
-	return ApiSyncClusterWideResourceClaimTemplatesRequest{
-		ApiService:  a,
-		ctx:         ctx,
-		clusterUuid: clusterUuid,
+func (a *ResourceClaimTemplatesAPIService) SyncResourceClaimTemplates(ctx context.Context) ApiSyncResourceClaimTemplatesRequest {
+	return ApiSyncResourceClaimTemplatesRequest{
+		ApiService: a,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 //  @return ResourceClaimTemplates
 ///////// RUNAI (remove isResponseFile filter on pointer)//////////
-func (a *ResourceClaimTemplatesAPIService) SyncClusterWideResourceClaimTemplatesExecute(r ApiSyncClusterWideResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error) {
+func (a *ResourceClaimTemplatesAPIService) SyncResourceClaimTemplatesExecute(r ApiSyncResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
@@ -351,24 +720,24 @@ func (a *ResourceClaimTemplatesAPIService) SyncClusterWideResourceClaimTemplates
 	)
 	///////////////////////////
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResourceClaimTemplatesAPIService.SyncClusterWideResourceClaimTemplates")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResourceClaimTemplatesAPIService.SyncResourceClaimTemplates")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/resource-claim-templates/{clusterUuid}"
-	localVarPath = strings.Replace(localVarPath, "{"+"clusterUuid"+"}", url.PathEscape(parameterValueToString(r.clusterUuid, "clusterUuid")), -1)
+	localVarPath := localBasePath + "/api/v1/resource-claim-templates/sync"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if strlen(r.clusterUuid) < 1 {
-		return localVarReturnValue, nil, reportError("clusterUuid must have at least 1 elements")
+	if r.clusterId == nil {
+		return localVarReturnValue, nil, reportError("clusterId is required and must be specified")
 	}
 	if r.resourceClaimTemplates == nil {
 		return localVarReturnValue, nil, reportError("resourceClaimTemplates is required and must be specified")
 	}
 
+	parameterAddToHeaderOrQuery(localVarQueryParams, "clusterId", r.clusterId, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -479,71 +848,71 @@ func (a *ResourceClaimTemplatesAPIService) SyncClusterWideResourceClaimTemplates
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiSyncDepartmentWideResourceClaimTemplatesRequest struct {
-	ctx                    context.Context
-	ApiService             ResourceClaimTemplatesAPI
-	clusterUuid            string
-	departmentId           string
-	resourceClaimTemplates *ResourceClaimTemplates
+type ApiUpdateResourceClaimTemplateRequest struct {
+	ctx                   context.Context
+	ApiService            ResourceClaimTemplatesAPI
+	clusterId             *string
+	resourceClaimTemplate *ResourceClaimTemplate
 }
 
-func (r ApiSyncDepartmentWideResourceClaimTemplatesRequest) ResourceClaimTemplates(resourceClaimTemplates ResourceClaimTemplates) ApiSyncDepartmentWideResourceClaimTemplatesRequest {
-	r.resourceClaimTemplates = &resourceClaimTemplates
+// The id of the cluster
+func (r ApiUpdateResourceClaimTemplateRequest) ClusterId(clusterId string) ApiUpdateResourceClaimTemplateRequest {
+	r.clusterId = &clusterId
 	return r
 }
 
-func (r ApiSyncDepartmentWideResourceClaimTemplatesRequest) Execute() (*ResourceClaimTemplates, *http.Response, error) {
-	return r.ApiService.SyncDepartmentWideResourceClaimTemplatesExecute(r)
+func (r ApiUpdateResourceClaimTemplateRequest) ResourceClaimTemplate(resourceClaimTemplate ResourceClaimTemplate) ApiUpdateResourceClaimTemplateRequest {
+	r.resourceClaimTemplate = &resourceClaimTemplate
+	return r
+}
+
+func (r ApiUpdateResourceClaimTemplateRequest) Execute() (*ResourceClaimTemplate, *http.Response, error) {
+	return r.ApiService.UpdateResourceClaimTemplateExecute(r)
 }
 
 /*
-SyncDepartmentWideResourceClaimTemplates sync the details of department-wide ResourceClaimTemplates to the control plane
+UpdateResourceClaimTemplate update a Resource Claim Template
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param departmentId The id of the department.
-	@return ApiSyncDepartmentWideResourceClaimTemplatesRequest
+	@return ApiUpdateResourceClaimTemplateRequest
 */
-func (a *ResourceClaimTemplatesAPIService) SyncDepartmentWideResourceClaimTemplates(ctx context.Context, clusterUuid string, departmentId string) ApiSyncDepartmentWideResourceClaimTemplatesRequest {
-	return ApiSyncDepartmentWideResourceClaimTemplatesRequest{
-		ApiService:   a,
-		ctx:          ctx,
-		clusterUuid:  clusterUuid,
-		departmentId: departmentId,
+func (a *ResourceClaimTemplatesAPIService) UpdateResourceClaimTemplate(ctx context.Context) ApiUpdateResourceClaimTemplateRequest {
+	return ApiUpdateResourceClaimTemplateRequest{
+		ApiService: a,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ResourceClaimTemplates
+//  @return ResourceClaimTemplate
 ///////// RUNAI (remove isResponseFile filter on pointer)//////////
-func (a *ResourceClaimTemplatesAPIService) SyncDepartmentWideResourceClaimTemplatesExecute(r ApiSyncDepartmentWideResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error) {
+func (a *ResourceClaimTemplatesAPIService) UpdateResourceClaimTemplateExecute(r ApiUpdateResourceClaimTemplateRequest) (*ResourceClaimTemplate, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
+		localVarHTTPMethod  = http.MethodPut
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *ResourceClaimTemplates
+		localVarReturnValue *ResourceClaimTemplate
 	)
 	///////////////////////////
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResourceClaimTemplatesAPIService.SyncDepartmentWideResourceClaimTemplates")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResourceClaimTemplatesAPIService.UpdateResourceClaimTemplate")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/resource-claim-templates/{clusterUuid}/departments/{departmentId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"clusterUuid"+"}", url.PathEscape(parameterValueToString(r.clusterUuid, "clusterUuid")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"departmentId"+"}", url.PathEscape(parameterValueToString(r.departmentId, "departmentId")), -1)
+	localVarPath := localBasePath + "/api/v1/resource-claim-templates"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if strlen(r.clusterUuid) < 1 {
-		return localVarReturnValue, nil, reportError("clusterUuid must have at least 1 elements")
+	if r.clusterId == nil {
+		return localVarReturnValue, nil, reportError("clusterId is required and must be specified")
 	}
-	if r.resourceClaimTemplates == nil {
-		return localVarReturnValue, nil, reportError("resourceClaimTemplates is required and must be specified")
+	if r.resourceClaimTemplate == nil {
+		return localVarReturnValue, nil, reportError("resourceClaimTemplate is required and must be specified")
 	}
 
+	parameterAddToHeaderOrQuery(localVarQueryParams, "clusterId", r.clusterId, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -562,182 +931,7 @@ func (a *ResourceClaimTemplatesAPIService) SyncDepartmentWideResourceClaimTempla
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.resourceClaimTemplates
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 403 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 500 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 503 {
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type ApiSyncProjectResourceClaimTemplatesRequest struct {
-	ctx                    context.Context
-	ApiService             ResourceClaimTemplatesAPI
-	clusterUuid            string
-	namespace              string
-	resourceClaimTemplates *ResourceClaimTemplates
-}
-
-func (r ApiSyncProjectResourceClaimTemplatesRequest) ResourceClaimTemplates(resourceClaimTemplates ResourceClaimTemplates) ApiSyncProjectResourceClaimTemplatesRequest {
-	r.resourceClaimTemplates = &resourceClaimTemplates
-	return r
-}
-
-func (r ApiSyncProjectResourceClaimTemplatesRequest) Execute() (*ResourceClaimTemplates, *http.Response, error) {
-	return r.ApiService.SyncProjectResourceClaimTemplatesExecute(r)
-}
-
-/*
-SyncProjectResourceClaimTemplates sync the details of project ResourceClaimTemplates to the control plane
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@param namespace The namespace of the project.
-	@return ApiSyncProjectResourceClaimTemplatesRequest
-*/
-func (a *ResourceClaimTemplatesAPIService) SyncProjectResourceClaimTemplates(ctx context.Context, clusterUuid string, namespace string) ApiSyncProjectResourceClaimTemplatesRequest {
-	return ApiSyncProjectResourceClaimTemplatesRequest{
-		ApiService:  a,
-		ctx:         ctx,
-		clusterUuid: clusterUuid,
-		namespace:   namespace,
-	}
-}
-
-// Execute executes the request
-//  @return ResourceClaimTemplates
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
-func (a *ResourceClaimTemplatesAPIService) SyncProjectResourceClaimTemplatesExecute(r ApiSyncProjectResourceClaimTemplatesRequest) (*ResourceClaimTemplates, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ResourceClaimTemplates
-	)
-	///////////////////////////
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResourceClaimTemplatesAPIService.SyncProjectResourceClaimTemplates")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/api/v1/resource-claim-templates/{clusterUuid}/namespaces/{namespace}"
-	localVarPath = strings.Replace(localVarPath, "{"+"clusterUuid"+"}", url.PathEscape(parameterValueToString(r.clusterUuid, "clusterUuid")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterValueToString(r.namespace, "namespace")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if strlen(r.clusterUuid) < 1 {
-		return localVarReturnValue, nil, reportError("clusterUuid must have at least 1 elements")
-	}
-	if r.resourceClaimTemplates == nil {
-		return localVarReturnValue, nil, reportError("resourceClaimTemplates is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	// body params
-	localVarPostBody = r.resourceClaimTemplates
+	localVarPostBody = r.resourceClaimTemplate
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

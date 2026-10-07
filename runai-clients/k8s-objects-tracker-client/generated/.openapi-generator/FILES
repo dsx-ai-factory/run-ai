@@ -54,6 +54,7 @@ docs/PvcVolumeMode.md
 docs/ResourceClaimTemplate.md
 docs/ResourceClaimTemplates.md
 docs/ResourceClaimTemplatesAPI.md
+docs/ResourceScopeType.md
 docs/Secret.md
 docs/SecretCreationRequest.md
 docs/SecretListInfo.md
@@ -121,6 +122,7 @@ model_pvc_volume_mode.go
 model_pvcs.go
 model_resource_claim_template.go
 model_resource_claim_templates.go
+model_resource_scope_type.go
 model_secret.go
 model_secret_creation_request.go
 model_secret_list_info.go

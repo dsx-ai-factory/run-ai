@@ -6,16 +6,17 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** | ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, &#x60;-&#x60;, and &#x60;.&#x60;, starting and ending with an alphanumeric character), up to 253 characters.  | 
 **Namespace** | **string** | the namespace the ResourceClaimTemplate lives in | 
+**ScopeType** | [**ResourceScopeType**](ResourceScopeType.md) |  | 
+**ScopeId** | **string** | Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.  | 
 **Origin** | Pointer to [**NullableOrigin**](Origin.md) |  | [optional] 
 **AssetId** | Pointer to **NullableString** | Control-plane asset id this template was created from. Present only when origin is \&quot;assets\&quot;. Allows the control plane to join tracker rows back to the originating asset record.  | [optional] 
-**Spec** | Pointer to **map[string]interface{}** | Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the control plane has enough fidelity to describe what will be submitted on claim creation, rather than relying on the template name alone. Shape follows the Kubernetes &#x60;resource.k8s.io/v1&#x60; &#x60;ResourceClaimTemplateSpec&#x60;.  | [optional] 
 **Issues** | Pointer to [**[]Issue**](Issue.md) | list of issues that was found while syncing the resource to the cluster | [optional] 
 
 ## Methods
 
 ### NewResourceClaimTemplate
 
-`func NewResourceClaimTemplate(name string, namespace string, ) *ResourceClaimTemplate`
+`func NewResourceClaimTemplate(name string, namespace string, scopeType ResourceScopeType, scopeId string, ) *ResourceClaimTemplate`
 
 NewResourceClaimTemplate instantiates a new ResourceClaimTemplate object
 This constructor will assign default values to properties that have it defined,
@@ -68,6 +69,46 @@ and a boolean to check if the value has been set.
 `func (o *ResourceClaimTemplate) SetNamespace(v string)`
 
 SetNamespace sets Namespace field to given value.
+
+
+### GetScopeType
+
+`func (o *ResourceClaimTemplate) GetScopeType() ResourceScopeType`
+
+GetScopeType returns the ScopeType field if non-nil, zero value otherwise.
+
+### GetScopeTypeOk
+
+`func (o *ResourceClaimTemplate) GetScopeTypeOk() (*ResourceScopeType, bool)`
+
+GetScopeTypeOk returns a tuple with the ScopeType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetScopeType
+
+`func (o *ResourceClaimTemplate) SetScopeType(v ResourceScopeType)`
+
+SetScopeType sets ScopeType field to given value.
+
+
+### GetScopeId
+
+`func (o *ResourceClaimTemplate) GetScopeId() string`
+
+GetScopeId returns the ScopeId field if non-nil, zero value otherwise.
+
+### GetScopeIdOk
+
+`func (o *ResourceClaimTemplate) GetScopeIdOk() (*string, bool)`
+
+GetScopeIdOk returns a tuple with the ScopeId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetScopeId
+
+`func (o *ResourceClaimTemplate) SetScopeId(v string)`
+
+SetScopeId sets ScopeId field to given value.
 
 
 ### GetOrigin
@@ -140,31 +181,6 @@ HasAssetId returns a boolean if a field has been set.
 `func (o *ResourceClaimTemplate) UnsetAssetId()`
 
 UnsetAssetId ensures that no value is present for AssetId, not even an explicit nil
-### GetSpec
-
-`func (o *ResourceClaimTemplate) GetSpec() map[string]interface{}`
-
-GetSpec returns the Spec field if non-nil, zero value otherwise.
-
-### GetSpecOk
-
-`func (o *ResourceClaimTemplate) GetSpecOk() (*map[string]interface{}, bool)`
-
-GetSpecOk returns a tuple with the Spec field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetSpec
-
-`func (o *ResourceClaimTemplate) SetSpec(v map[string]interface{})`
-
-SetSpec sets Spec field to given value.
-
-### HasSpec
-
-`func (o *ResourceClaimTemplate) HasSpec() bool`
-
-HasSpec returns a boolean if a field has been set.
-
 ### GetIssues
 
 `func (o *ResourceClaimTemplate) GetIssues() []Issue`

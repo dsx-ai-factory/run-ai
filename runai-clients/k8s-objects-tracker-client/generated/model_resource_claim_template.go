@@ -27,12 +27,13 @@ type ResourceClaimTemplate struct {
 	// ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
 	Name string `json:"name" validate:"regexp=^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"`
 	// the namespace the ResourceClaimTemplate lives in
-	Namespace string         `json:"namespace"`
-	Origin    NullableOrigin `json:"origin,omitempty"`
+	Namespace string            `json:"namespace"`
+	ScopeType ResourceScopeType `json:"scopeType"`
+	// Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.
+	ScopeId string         `json:"scopeId"`
+	Origin  NullableOrigin `json:"origin,omitempty"`
 	// Control-plane asset id this template was created from. Present only when origin is \"assets\". Allows the control plane to join tracker rows back to the originating asset record.
 	AssetId NullableString `json:"assetId,omitempty"`
-	// Raw ResourceClaimTemplate spec as sent by the agent. Stored as-is so that the control plane has enough fidelity to describe what will be submitted on claim creation, rather than relying on the template name alone. Shape follows the Kubernetes `resource.k8s.io/v1` `ResourceClaimTemplateSpec`.
-	Spec map[string]interface{} `json:"spec,omitempty"`
 	// list of issues that was found while syncing the resource to the cluster
 	Issues []Issue `json:"issues,omitempty"`
 }
@@ -43,10 +44,12 @@ type _ResourceClaimTemplate ResourceClaimTemplate
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewResourceClaimTemplate(name string, namespace string) *ResourceClaimTemplate {
+func NewResourceClaimTemplate(name string, namespace string, scopeType ResourceScopeType, scopeId string) *ResourceClaimTemplate {
 	this := ResourceClaimTemplate{}
 	this.Name = name
 	this.Namespace = namespace
+	this.ScopeType = scopeType
+	this.ScopeId = scopeId
 	return &this
 }
 
@@ -104,6 +107,54 @@ func (o *ResourceClaimTemplate) GetNamespaceOk() (*string, bool) {
 // SetNamespace sets field value
 func (o *ResourceClaimTemplate) SetNamespace(v string) {
 	o.Namespace = v
+}
+
+// GetScopeType returns the ScopeType field value
+func (o *ResourceClaimTemplate) GetScopeType() ResourceScopeType {
+	if o == nil {
+		var ret ResourceScopeType
+		return ret
+	}
+
+	return o.ScopeType
+}
+
+// GetScopeTypeOk returns a tuple with the ScopeType field value
+// and a boolean to check if the value has been set.
+func (o *ResourceClaimTemplate) GetScopeTypeOk() (*ResourceScopeType, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ScopeType, true
+}
+
+// SetScopeType sets field value
+func (o *ResourceClaimTemplate) SetScopeType(v ResourceScopeType) {
+	o.ScopeType = v
+}
+
+// GetScopeId returns the ScopeId field value
+func (o *ResourceClaimTemplate) GetScopeId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ScopeId
+}
+
+// GetScopeIdOk returns a tuple with the ScopeId field value
+// and a boolean to check if the value has been set.
+func (o *ResourceClaimTemplate) GetScopeIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ScopeId, true
+}
+
+// SetScopeId sets field value
+func (o *ResourceClaimTemplate) SetScopeId(v string) {
+	o.ScopeId = v
 }
 
 // GetOrigin returns the Origin field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -192,38 +243,6 @@ func (o *ResourceClaimTemplate) UnsetAssetId() {
 	o.AssetId.Unset()
 }
 
-// GetSpec returns the Spec field value if set, zero value otherwise.
-func (o *ResourceClaimTemplate) GetSpec() map[string]interface{} {
-	if o == nil || IsNil(o.Spec) {
-		var ret map[string]interface{}
-		return ret
-	}
-	return o.Spec
-}
-
-// GetSpecOk returns a tuple with the Spec field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ResourceClaimTemplate) GetSpecOk() (map[string]interface{}, bool) {
-	if o == nil || IsNil(o.Spec) {
-		return map[string]interface{}{}, false
-	}
-	return o.Spec, true
-}
-
-// HasSpec returns a boolean if a field has been set.
-func (o *ResourceClaimTemplate) HasSpec() bool {
-	if o != nil && !IsNil(o.Spec) {
-		return true
-	}
-
-	return false
-}
-
-// SetSpec gets a reference to the given map[string]interface{} and assigns it to the Spec field.
-func (o *ResourceClaimTemplate) SetSpec(v map[string]interface{}) {
-	o.Spec = v
-}
-
 // GetIssues returns the Issues field value if set, zero value otherwise.
 func (o *ResourceClaimTemplate) GetIssues() []Issue {
 	if o == nil || IsNil(o.Issues) {
@@ -268,14 +287,13 @@ func (o ResourceClaimTemplate) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
 	toSerialize["namespace"] = o.Namespace
+	toSerialize["scopeType"] = o.ScopeType
+	toSerialize["scopeId"] = o.ScopeId
 	if o.Origin.IsSet() {
 		toSerialize["origin"] = o.Origin.Get()
 	}
 	if o.AssetId.IsSet() {
 		toSerialize["assetId"] = o.AssetId.Get()
-	}
-	if !IsNil(o.Spec) {
-		toSerialize["spec"] = o.Spec
 	}
 	if !IsNil(o.Issues) {
 		toSerialize["issues"] = o.Issues
@@ -292,6 +310,8 @@ func (o *ResourceClaimTemplate) UnmarshalJSON(data []byte) (err error) {
 	//
 	//  	"name",
 	//  	"namespace",
+	//  	"scopeType",
+	//  	"scopeId",
 	// }
 
 	allProperties := make(map[string]interface{})
