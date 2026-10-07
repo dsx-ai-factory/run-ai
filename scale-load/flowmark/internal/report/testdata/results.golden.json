@@ -21,8 +21,7 @@
       "category": "scale",
       "metrics": {
         "p90_ms@100": 5754,
-        "p90_ms@100_regression": true,
-        "never_arrived_count@100": 0
+        "p90_ms@100_regression": true
       },
       "slo": {
         "p90_ms": 5000

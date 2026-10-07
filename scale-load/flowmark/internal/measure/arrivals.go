@@ -7,6 +7,7 @@ package measure
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,6 +46,10 @@ func (a *Arrivals) Fill(submissions []Submission, timeout time.Duration) []Submi
 		filled[i] = s
 	}
 	return filled
+}
+
+func (a *Arrivals) Err() error {
+	return errors.Join(a.runners.Err(), a.pods.Err())
 }
 
 func (a *Arrivals) Reconnects() int {

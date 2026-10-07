@@ -109,12 +109,14 @@ func (w *Watcher) open(ctx context.Context) (watch.Interface, error) {
 func (w *Watcher) reopen(ctx context.Context) (watch.Interface, error) {
 	var last error
 	for attempt := 1; attempt <= maxReconnects; attempt++ {
-		timer := time.NewTimer(reconnectDelay)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			return nil, fmt.Errorf("%w: %w", ErrWatchClosed, ctx.Err())
-		case <-timer.C:
+		if attempt > 1 {
+			timer := time.NewTimer(time.Duration(attempt-1) * reconnectDelay)
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				return nil, fmt.Errorf("%w: %w", ErrWatchClosed, ctx.Err())
+			case <-timer.C:
+			}
 		}
 		events, err := w.open(ctx)
 		if err == nil {
@@ -251,7 +253,7 @@ func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 					w.resourceVersion = obj.GetResourceVersion()
 					w.recordArrival(w.nameOf(obj), time.Now())
 				}
-			case watch.Bookmark:
+			case watch.Bookmark, watch.Deleted:
 				if obj := asUnstructured(event.Object); obj != nil {
 					w.resourceVersion = obj.GetResourceVersion()
 				}
@@ -293,6 +295,12 @@ func (w *Watcher) recordArrival(name string, at time.Time) {
 	}
 	w.mu.Unlock()
 	w.signal()
+}
+
+func (w *Watcher) Err() error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.closed
 }
 
 func (w *Watcher) close(err error) {

@@ -132,7 +132,7 @@ func fakeIntegrator(t *testing.T, ctx context.Context, kube k8sclient.WithWatch)
 }
 
 func quick() settings {
-	return settings{pods: 1, image: defaultImage, concurrency: 4, timeout: 5 * time.Second, setupTimeout: 5 * time.Second, settle: 10 * time.Millisecond}
+	return settings{pods: 1, image: defaultImage, concurrency: 4, timeout: 5 * time.Second, setupTimeout: 5 * time.Second, settle: 10 * time.Millisecond, poll: 20 * time.Millisecond}
 }
 
 func TestDeploymentRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
@@ -228,7 +228,7 @@ type storedWorkload struct {
 	workloadType string
 }
 
-var controlPlaneResources = map[string]string{"trainings": trainingType, "workspaces": workspaceType}
+var controlPlaneResources = map[string]string{"trainings": submit.TrainingType, "workspaces": submit.WorkspaceType}
 
 func (cp *fakeControlPlane) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resource, id, _ := strings.Cut(strings.TrimPrefix(r.URL.Path, "/api/v1/workloads/"), "/")
@@ -297,7 +297,7 @@ func TestTrainingTeardownSendsOneDeletePerWorkloadEvenWhileTheControlPlaneStillL
 	clients := &client.Clients{Kube: kube, Workloads: workloadclient.NewAPIClient(&workloadclient.Configuration{
 		Servers: workloadclient.ServerConfigurations{{URL: server.URL}},
 	})}
-	flow := &controlPlaneFlow{workloadType: trainingType, clients: clients, project: submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, concurrency: 4, created: map[string]string{}}
+	flow := newControlPlaneFlow(submit.TrainingType, clients, submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, 4)
 
 	result := runRound(ctx, flow, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
 
@@ -322,7 +322,7 @@ func TestTrainingTeardownDeletesWorkloadsWhoseCreateFailedAfterTheServerStoredTh
 	clients := &client.Clients{Kube: kube, Workloads: workloadclient.NewAPIClient(&workloadclient.Configuration{
 		Servers: workloadclient.ServerConfigurations{{URL: server.URL}},
 	})}
-	flow := &controlPlaneFlow{workloadType: trainingType, clients: clients, project: submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, concurrency: 4, created: map[string]string{}}
+	flow := newControlPlaneFlow(submit.TrainingType, clients, submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, 4)
 
 	result := runRound(ctx, flow, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
 
@@ -346,7 +346,7 @@ func TestTrainingTeardownDeletesWorkloadsWhoseCreateFailedAfterTheServerStoredTh
 }
 
 func TestControlPlaneRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
-	for _, workloadType := range []string{trainingType, workspaceType} {
+	for _, workloadType := range []string{submit.TrainingType, submit.WorkspaceType} {
 		t.Run(workloadType, func(t *testing.T) {
 			ctx := context.Background()
 			kube := fakeKube()
@@ -356,7 +356,7 @@ func TestControlPlaneRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
 			clients := &client.Clients{Kube: kube, Workloads: workloadclient.NewAPIClient(&workloadclient.Configuration{
 				Servers: workloadclient.ServerConfigurations{{URL: server.URL}},
 			})}
-			flow := &controlPlaneFlow{workloadType: workloadType, clients: clients, project: submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, concurrency: 4, created: map[string]string{}}
+			flow := newControlPlaneFlow(workloadType, clients, submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, 4)
 
 			result := runRound(ctx, flow, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
 
@@ -428,7 +428,7 @@ func TestQuiesceWaitsForWorkloadObjectsAndEveryPodInTheNamespace(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 50*time.Millisecond)
+			err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 50*time.Millisecond, 10*time.Millisecond)
 			if tc.wantErr == "" {
 				if err != nil {
 					t.Fatalf("quiesce must succeed: %v", err)
@@ -455,7 +455,7 @@ func TestQuiesceReturnsOnceTheLastPodIsGone(t *testing.T) {
 		_ = kube.Delete(ctx, pod)
 	}()
 
-	if err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 5*time.Second); err != nil {
+	if err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 5*time.Second, 10*time.Millisecond); err != nil {
 		t.Fatalf("quiesce must succeed once the pod is gone: %v", err)
 	}
 }
@@ -473,7 +473,7 @@ func TestQuiesceDeletesEveryLabelledDeploymentAndNothingElse(t *testing.T) {
 		}
 	}
 
-	if err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 5*time.Second); err != nil {
+	if err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 5*time.Second, 10*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
 
@@ -524,7 +524,7 @@ func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 			t.Fatalf("limits live in the slo block, not among the metrics: %s", key)
 		}
 	}
-	documented := []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec", "never_arrived_count", "failed_count"}
+	documented := []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec"}
 	for _, size := range knobs.rounds {
 		for _, key := range documented {
 			if _, present := section.Metrics[fmt.Sprintf("%s@%d", key, size)]; !present {
@@ -532,7 +532,7 @@ func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 			}
 		}
 	}
-	if section.Metrics["p50_ms@2"] != int64(1000) || section.Metrics["p90_ms@3"] != int64(6000) || section.Metrics["never_arrived_count@3"] != 0 {
+	if section.Metrics["p50_ms@2"] != int64(1000) || section.Metrics["p90_ms@3"] != int64(6000) {
 		t.Fatalf("per-round metrics wrong: %v", section.Metrics)
 	}
 	if section.Metrics["throughput_per_sec@3"] != 0.5 {
@@ -558,8 +558,8 @@ func TestBuildSectionNeverArrivedRoundFailsWithoutZeros(t *testing.T) {
 	if _, present := section.Metrics["p50_ms@2"]; present {
 		t.Fatal("no latency may be reported when nothing arrived")
 	}
-	if section.Metrics["never_arrived_count@2"] != 2 {
-		t.Fatalf("never_arrived_count must be reported: %v", section.Metrics)
+	if !strings.Contains(section.Error, "2 never reached the cluster") {
+		t.Fatalf("the workloads that never arrived must be counted in the error text: %+v", section)
 	}
 }
 
@@ -577,8 +577,10 @@ func TestBuildSectionStoppedRunAndFailedCreates(t *testing.T) {
 			t.Fatalf("error must contain %q, got %q", want, section.Error)
 		}
 	}
-	if section.Metrics["failed_count@1"] != 1 || section.Metrics["never_arrived_count@2"] != 0 {
-		t.Fatalf("counts wrong: %v", section.Metrics)
+	for _, key := range []string{"failed_count@1", "never_arrived_count@2"} {
+		if _, present := section.Metrics[key]; present {
+			t.Fatalf("%s is explained in the error text, not reported as a metric", key)
+		}
 	}
 }
 
@@ -627,5 +629,48 @@ func TestDescribeRound(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestSuiteRunMeasuresEveryRoundWithAFakeSession(t *testing.T) {
+	quiescePoll = 20 * time.Millisecond
+	t.Cleanup(func() { quiescePoll = 2 * time.Second })
+	kube := fakeKube()
+	controlPlane := &fakeControlPlane{kube: kube}
+	server := httptest.NewServer(controlPlane)
+	t.Cleanup(server.Close)
+	clients := &client.Clients{Kube: kube, Workloads: workloadclient.NewAPIClient(&workloadclient.Configuration{
+		Servers: workloadclient.ServerConfigurations{{URL: server.URL}},
+	})}
+	suite := Suite{openSession: func(context.Context, core.Target, client.Limits, string, string, time.Duration) (*submit.Session, error) {
+		return &submit.Session{Clients: clients, ClusterID: "c1", RunID: "1a2b3c4d", Project: submit.ProjectRef{ID: "p1", Namespace: testNamespace, ClusterID: "c1"}}, nil
+	}}
+	scenario := core.Scenario{Suite: suiteName, Knobs: map[string]any{"workloads": []any{2, 3}, "workloadType": "Training", "settle": "10ms", "timeout": "5s", "setupTimeout": "5s"}}
+
+	section, err := suite.Run(context.Background(), core.Target{}, scenario)
+
+	if err != nil || section.Failed {
+		t.Fatalf("two clean rounds must pass: %v / %+v", err, section)
+	}
+	for _, key := range []string{"p90_ms@2", "p90_ms@3", "throughput_per_sec@3"} {
+		if _, present := section.Metrics[key]; !present {
+			t.Fatalf("%s missing from %v", key, section.Metrics)
+		}
+	}
+	if got := controlPlane.deletes.Load(); got != 5 {
+		t.Fatalf("every training of both rounds must be deleted once, got %d", got)
+	}
+	runners, err := countAllInNamespace(context.Background(), kube, measure.WorkloadRunnerKind, testNamespace)
+	if err != nil || runners != 0 {
+		t.Fatalf("the namespace must be empty after the run, got %d runners (%v)", runners, err)
+	}
+}
+
+func TestSuiteRunFailsWhenTheSessionCannotBeOpened(t *testing.T) {
+	suite := Suite{openSession: func(context.Context, core.Target, client.Limits, string, string, time.Duration) (*submit.Session, error) {
+		return nil, errors.New("control plane unreachable")
+	}}
+	if _, err := suite.Run(context.Background(), core.Target{}, core.Scenario{Suite: suiteName}); err == nil || !strings.Contains(err.Error(), "control plane unreachable") {
+		t.Fatalf("the session error must surface unchanged: %v", err)
 	}
 }

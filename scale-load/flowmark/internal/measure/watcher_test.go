@@ -440,3 +440,48 @@ func TestAWatchTheServerKeepsFailingWithAnErrorEventIsGivenUp(t *testing.T) {
 		t.Fatalf("expected %d reopen cycles, got %d opens", maxReconnectCycles, opened-1)
 	}
 }
+
+func TestReopenStartsAtOnceAndResumesFromTheLastSeenResourceVersion(t *testing.T) {
+	first := watch.NewFake()
+	var resumedFrom []string
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(ctx context.Context, c k8sclient.WithWatch, list k8sclient.ObjectList, opts ...k8sclient.ListOption) (watch.Interface, error) {
+			options := &k8sclient.ListOptions{}
+			for _, opt := range opts {
+				opt.ApplyToList(options)
+			}
+			if options.Raw != nil {
+				resumedFrom = append(resumedFrom, options.Raw.ResourceVersion)
+			}
+			if len(resumedFrom) == 1 {
+				return first, nil
+			}
+			return c.Watch(ctx, list, opts...)
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	added := runner("seen")
+	added.SetResourceVersion("5")
+	first.Add(added)
+	deleted := runner("gone")
+	deleted.SetResourceVersion("7")
+	first.Delete(deleted)
+	waitForArrival(t, w, "seen")
+	closedAt := time.Now()
+	first.Stop()
+
+	for w.Reconnects() == 0 && time.Since(closedAt) < 2*time.Second {
+		time.Sleep(time.Millisecond)
+	}
+	if elapsed := time.Since(closedAt); w.Reconnects() != 1 || elapsed > 500*time.Millisecond {
+		t.Fatalf("the first reopen attempt must not wait for the reconnect delay, reconnects=%d after %s", w.Reconnects(), elapsed)
+	}
+	if len(resumedFrom) != 2 || resumedFrom[1] != "7" {
+		t.Fatalf("the reopened watch must resume from the resourceVersion of the last event, including a Deleted one, got %v", resumedFrom)
+	}
+}

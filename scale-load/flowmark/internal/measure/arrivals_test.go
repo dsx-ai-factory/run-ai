@@ -7,6 +7,9 @@ package measure
 
 import (
 	"context"
+	"errors"
+	"k8s.io/apimachinery/pkg/watch"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 	"testing"
 	"time"
 
@@ -107,5 +110,43 @@ func TestPodWithoutOwnerIsMatchedByItsNamePrefix(t *testing.T) {
 	filled := watchers.Fill([]Submission{{Name: "w1", RequestedAt: accepted, ApiAcceptedAt: accepted}}, 2*time.Second)
 	if filled[0].PodCreatedAt.IsZero() {
 		t.Fatalf("pod w1-0-0 belongs to workspace w1 by its name, got %+v", filled[0])
+	}
+}
+
+func TestArrivalsReportADeadWatch(t *testing.T) {
+	reconnectDelay = time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+	first := watch.NewFake()
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(ctx context.Context, c k8sclient.WithWatch, list k8sclient.ObjectList, opts ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			if opened == 1 {
+				return first, nil
+			}
+			if opened == 2 {
+				return c.Watch(ctx, list, opts...)
+			}
+			return nil, errors.New("apiserver unreachable")
+		},
+	}).Build()
+	arrivals, err := OpenArrivals(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(arrivals.Stop)
+	if arrivals.Err() != nil {
+		t.Fatalf("a healthy pair of watches has no error: %v", arrivals.Err())
+	}
+
+	arrivals.MarkAccepted("w1", time.Now())
+	first.Stop()
+	filled := arrivals.Fill([]Submission{{Name: "w1", RequestedAt: time.Now(), ApiAcceptedAt: time.Now()}}, 2*time.Second)
+
+	if err := arrivals.Err(); !errors.Is(err, ErrWatchClosed) {
+		t.Fatalf("a watch that cannot be reopened must surface through Arrivals, got %v", err)
+	}
+	if !filled[0].ClusterSyncedAt.IsZero() {
+		t.Fatalf("nothing arrived, the stamp must stay empty: %+v", filled[0])
 	}
 }

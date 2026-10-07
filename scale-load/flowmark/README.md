@@ -31,7 +31,10 @@ means every scenario passed and the results were written; 1 means something
 failed, and the last line says what.
 
 Without make: `make build`, then `./bin/flowmark --help` lists every flag.
-`--only` and `--workloads` are what `SCENARIO` and `WORKLOADS` set.
+`--only` and `--workloads` are what `SCENARIO` and `WORKLOADS` set;
+`--workloads` reaches only the scenarios whose suite has that knob, so
+`make run WORKLOADS=20` leaves the load scenarios untouched. Every selected
+scenario file is checked before the first one starts.
 `--regression-window` (7) and `--regression-threshold` (0.15) tune the
 regression check described under Results.
 
@@ -102,22 +105,25 @@ Every run writes `reports/results-<timestamp>.json` and adds it to
 `reports/manifest.json`, the ordered list of runs. The file holds run
 metadata (start time, provider, cluster type, versions) and one
 section per scenario. A `scale-burst` section has `p50_ms@N`, `p90_ms@N`,
-`p99_ms@N`, `throughput_per_sec@N`, `never_arrived_count@N`, `failed_count@N` and
-the knobs used, `N` being the round size; `throughput_per_sec@N` is the number
+`p99_ms@N`, `mean_ms@N`, `max_ms@N` and `throughput_per_sec@N`, `N` being the
+round size; `throughput_per_sec@N` is the number
 of arrived workloads divided by the time from the first create response to
 the last arrival. A `load-ttj` section has `<span>_p50_ms`,
 `<span>_p90_ms` and `<span>_p99_ms` for `api_accepted`, `cluster_synced`,
-`pod_created` and `ttj`, plus `failed_count` and `never_arrived_count`.
-Workloads that never arrived are counted there and never as zero latency. The health of
+`pod_created` and `ttj`, plus `failed_count`, the creates the control plane
+rejected; the accepted ones are still timed. A workload that never reached
+the cluster fails the section, is counted in `error` and never enters a
+latency as zero. The health of
 the measurement itself is not a metric: when the cluster watch had to be
 reopened, or a WorkloadRunner or pod was seen more than a second before the
 step that precedes it, the section fails and `error` explains why, and the
 log carries the same line.
 
 The results are then judged in two ways. Against history: every p90 is
-compared with the median of the same metric in the last 7 runs of the same
+compared with the median of its last 7 values in earlier runs of the same
 `cluster_type` found in the output directory, and more than 15% above that
-median is a regression; with fewer than 7 such runs the comparison is skipped.
+median is a regression. Runs where the scenario did not run or its section
+failed do not count; with fewer than 7 values the comparison is skipped.
 Against the SLO: the limits from the scenario file are copied into the
 section's `slo` block, and every latency metric with a limit there, p90 or
 not, is a regression when above it, regardless of history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest

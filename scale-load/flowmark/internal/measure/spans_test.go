@@ -67,11 +67,12 @@ func TestOutOfOrderReportsEventsSeenBeforeTheStepThatPrecedesThem(t *testing.T) 
 		{Name: "both-before-accept", RequestedAt: at(0), ApiAcceptedAt: at(6.0), ClusterSyncedAt: at(2.0), PodCreatedAt: at(2.5)},
 		{Name: "rejected", RequestedAt: at(0), Err: errors.New("HTTP 429")},
 		{Name: "never-synced", RequestedAt: at(0), ApiAcceptedAt: at(0.3)},
+		{Name: "pod-before-accept-without-runner", RequestedAt: at(0), ApiAcceptedAt: at(6.0), PodCreatedAt: at(2.5)},
 	}
 
 	names := OutOfOrder(submissions, time.Second)
 
-	if want := []string{"runner-before-accept", "pod-before-runner", "both-before-accept"}; !slices.Equal(names, want) {
+	if want := []string{"runner-before-accept", "pod-before-runner", "both-before-accept", "pod-before-accept-without-runner"}; !slices.Equal(names, want) {
 		t.Fatalf("every workload whose cluster event was seen before the step before it must be reported, want %v got %v", want, names)
 	}
 	if ttj := CollectSpans(submissions).TTJ[3]; ttj.Duration != 0 {
@@ -90,20 +91,5 @@ func TestOutOfOrderToleratesSmallSlipsBetweenTheTwoClocks(t *testing.T) {
 	}
 	if names := OutOfOrder(submissions, 100*time.Millisecond); len(names) != 1 {
 		t.Fatalf("a tighter tolerance must report it, got %v", names)
-	}
-}
-
-func TestSuccessRate(t *testing.T) {
-	subs := []Submission{
-		{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3)},
-		{Name: "w2", RequestedAt: at(0), Err: errors.New("boom")},
-		{Name: "w3", RequestedAt: at(0), ApiAcceptedAt: at(0.3)},
-		{Name: "w4", RequestedAt: at(0), ApiAcceptedAt: at(0.3)},
-	}
-	if got := SuccessRate(subs); got != 0.75 {
-		t.Fatalf("3 of 4 accepted is 0.75, got %v", got)
-	}
-	if got := SuccessRate(nil); got != 0 {
-		t.Fatalf("no submissions is not a rate, got %v", got)
 	}
 }

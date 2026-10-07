@@ -7,6 +7,7 @@ package report
 
 import (
 	"cmp"
+	"context"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -17,6 +18,7 @@ import (
 )
 
 const (
+	HistoryDepth     = 10
 	kpiMarker        = "p90_ms"
 	regressionSuffix = "_regression"
 	AgainstMedian    = "median"
@@ -36,6 +38,27 @@ type Regression struct {
 	Baseline float64 `json:"-"`
 	Against  string  `json:"-"`
 	Change   float64 `json:"-"`
+}
+
+func Judge(ctx context.Context, store Store, document Document, config RegressionConfig) (Document, string) {
+	history, err := LoadHistory(ctx, store, document.Metadata.ClusterType, config.Window*HistoryDepth)
+	judged := DetectRegressions(document, history, config)
+	note := "no regression detected"
+	if judged.RegressionDetected {
+		note = fmt.Sprintf("%d regressions detected", len(judged.Regressions))
+	}
+	switch {
+	case err != nil:
+		return judged, fmt.Sprintf("comparison with earlier runs skipped: %v; only SLOs were checked: %s", err, note)
+	case document.Metadata.ClusterType == "":
+		return judged, "comparison with earlier runs skipped: the cluster type is unknown, set --cluster-type or --cp-url; only SLOs were checked: " + note
+	case config.Window == 0:
+		return judged, "comparison with earlier runs disabled; only SLOs were checked: " + note
+	case len(history) < config.Window:
+		return judged, fmt.Sprintf("comparison with earlier runs skipped: %d of the %d required %s runs on record; only SLOs were checked: %s", len(history), config.Window, document.Metadata.ClusterType, note)
+	default:
+		return judged, fmt.Sprintf("compared every p90 with the median of its last %d values among %d %s runs, threshold %.0f%%: %s", config.Window, len(history), document.Metadata.ClusterType, config.Threshold*100, note)
+	}
 }
 
 func DetectRegressions(document Document, history []Document, config RegressionConfig) Document {
@@ -81,7 +104,11 @@ func judgeAgainstMedian(section, metric string, value float64, history []Documen
 	}
 	var past []float64
 	for _, run := range history {
-		if previous, ok := number(run.Sections[section].Metrics[metric]); ok {
+		previousSection, ran := run.Sections[section]
+		if !ran || previousSection.Failed {
+			continue
+		}
+		if previous, ok := number(previousSection.Metrics[metric]); ok {
 			past = append(past, previous)
 		}
 	}

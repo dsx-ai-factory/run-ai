@@ -42,9 +42,14 @@ func Run(ctx context.Context, target core.Target, dir string, registry map[strin
 	}
 	log.Printf("%d scenarios: %s", len(scenarios), strings.Join(scenarioNames(scenarios), ", "))
 	if len(opts.Overrides) > 0 {
-		log.Printf("knob overrides for every scenario: %s", describeOverrides(opts.Overrides))
+		log.Printf("knob overrides, applied to the scenarios whose suite has the knob: %s", describeOverrides(opts.Overrides))
 		for i := range scenarios {
-			scenarios[i].scenario = withOverrides(scenarios[i].scenario, opts.Overrides)
+			scenarios[i].scenario = withOverrides(scenarios[i].scenario, registry[scenarios[i].scenario.Suite].Knobs(), opts.Overrides)
+		}
+	}
+	for _, s := range scenarios {
+		if err := registry[s.scenario.Suite].Validate(s.scenario); err != nil {
+			return nil, fmt.Errorf("scenario %q: %w", s.name, err)
 		}
 	}
 
@@ -52,16 +57,14 @@ func Run(ctx context.Context, target core.Target, dir string, registry map[strin
 	var errs []error
 	for _, s := range scenarios {
 		if err := ctx.Err(); err != nil {
-			return results, err
+			return results, errors.Join(append(errs, err)...)
 		}
 		log.Printf("scenario %q: started (suite %s)", s.name, s.scenario.Suite)
 		started := time.Now()
 		suite := registry[s.scenario.Suite]
 		section, err := suite.Run(ctx, target, s.scenario)
 		elapsed := time.Since(started).Round(time.Second)
-		if section.Category == "" {
-			section.Category = suite.Category()
-		}
+		section.Category = suite.Category()
 		if err != nil {
 			section.Failed = true
 			section.Error = err.Error()
@@ -106,10 +109,14 @@ func keepOnly(paths map[string]string, only []string, dir string) ([]string, err
 	return kept, nil
 }
 
-func withOverrides(scenario core.Scenario, overrides map[string]any) core.Scenario {
+func withOverrides(scenario core.Scenario, known []string, overrides map[string]any) core.Scenario {
 	knobs := make(map[string]any, len(scenario.Knobs)+len(overrides))
 	maps.Copy(knobs, scenario.Knobs)
-	maps.Copy(knobs, overrides)
+	for key, value := range overrides {
+		if slices.Contains(known, key) {
+			knobs[key] = value
+		}
+	}
 	scenario.Knobs = knobs
 	return scenario
 }

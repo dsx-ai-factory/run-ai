@@ -104,6 +104,35 @@ func TestPacerStopsWhenTheContextIsCancelled(t *testing.T) {
 	}
 }
 
+func TestPacerHoldsTheTargetRateOnTheRealClock(t *testing.T) {
+	pacer := Pacer{Rate: 200, Duration: 2 * time.Second, Users: 4}
+
+	pacing := pacer.Run(context.Background(), func(context.Context, int) {})
+
+	if rate := pacing.Rate(); rate < 0.97*200 || rate > 1.03*200 {
+		t.Fatalf("timer oversleep must not accumulate, want about 200/s got %.1f/s from %d submissions", rate, pacing.Submitted)
+	}
+}
+
+func TestPacerCancellationInterruptsASleep(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	pacer := Pacer{Rate: 1, Duration: time.Hour, Users: 1}
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		cancel()
+	}()
+
+	started := time.Now()
+	pacing := pacer.Run(ctx, func(context.Context, int) {})
+
+	if elapsed := time.Since(started); elapsed > 500*time.Millisecond {
+		t.Fatalf("cancellation must cut the one-second sleep short, the pacer ran for %s", elapsed)
+	}
+	if pacing.Submitted != 1 {
+		t.Fatalf("only the first tick fits before the cancel, got %d", pacing.Submitted)
+	}
+}
+
 func TestPacingRateNeedsTwoSubmissions(t *testing.T) {
 	if got := (Pacing{Submitted: 1}).Rate(); got != 0 {
 		t.Fatalf("one submission is not a rate, got %.2f", got)

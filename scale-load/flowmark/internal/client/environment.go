@@ -52,25 +52,10 @@ func (c *Clients) Environment(ctx context.Context, clusterName string) (Environm
 	if err != nil {
 		return Environment{}, err
 	}
-	clusters, _, err := c.ClusterService.ClustersAPI.GetClusters(ctx).Execute()
+	cluster, err := c.Cluster(ctx, clusterName)
 	if err != nil {
-		return Environment{}, fmt.Errorf("listing clusters: %w", err)
+		return Environment{}, err
 	}
-	index := 0
-	if clusterName != "" {
-		index = -1
-		for i := range clusters {
-			if clusters[i].Name == clusterName {
-				index = i
-			}
-		}
-		if index < 0 {
-			return Environment{}, fmt.Errorf("cluster %q not found on the control plane", clusterName)
-		}
-	} else if len(clusters) != 1 {
-		return Environment{}, fmt.Errorf("control plane has %d clusters, set the cluster knob to choose one", len(clusters))
-	}
-	cluster := clusters[index]
 	status := cluster.GetStatus()
 	platform := status.GetPlatform()
 

@@ -22,12 +22,19 @@ func (Suite) Category() core.Category {
 	return core.CategoryScale
 }
 
+func (Suite) Knobs() []string {
+	return nil
+}
+
+func (Suite) Validate(core.Scenario) error {
+	return nil
+}
+
 func (Suite) Run(_ context.Context, _ core.Target, scenario core.Scenario) (core.Section, error) {
 	start := time.Now()
 	time.Sleep(100 * time.Millisecond)
 
 	return core.Section{
-		Category: core.CategoryScale,
 		Metrics: map[string]any{
 			"selfcheck_duration_seconds": time.Since(start).Seconds(),
 			"knobs_received":             scenario.Knobs,

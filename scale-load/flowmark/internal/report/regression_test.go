@@ -7,6 +7,7 @@ package report
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strings"
 	"testing"
@@ -77,6 +78,34 @@ func TestRelativeCheckIsSkippedUntilTheWindowIsFull(t *testing.T) {
 
 	if judged.RegressionDetected || flagged(t, judged, "p90_ms@100") {
 		t.Fatalf("6 runs of history are not enough for a window of 7, the check must stay silent: %+v", judged.Regressions)
+	}
+}
+
+func TestMedianUsesTheLastWindowValuesOfTheMetricNotTheLastWindowRuns(t *testing.T) {
+	history := nights(1, 7, kindCluster, 5000)
+	withoutTheScenario := Build(map[string]core.Section{"workspace-ttj": {Category: core.CategoryLoad, Metrics: map[string]any{"ttj_p90_ms": 1}}}, RunInfo{ClusterType: kindCluster})
+	history = append(history, withoutTheScenario)
+
+	judged := DetectRegressions(nightlyDocument(9, kindCluster, 5900), history, sevenNights)
+
+	if !judged.RegressionDetected {
+		t.Fatalf("a night where the scenario did not run must not break the 7-value window: %+v", judged.Regressions)
+	}
+}
+
+func TestMedianIgnoresRunsWhoseSectionFailed(t *testing.T) {
+	history := nights(1, 7, kindCluster, 5000)
+	broken := nightlyDocument(8, kindCluster, 50000)
+	section := broken.Sections[burstSection]
+	section.Failed = true
+	section.Error = "20 workloads never reached the cluster"
+	broken.Sections[burstSection] = section
+	history = append(history, broken)
+
+	judged := DetectRegressions(nightlyDocument(9, kindCluster, 5900), history, sevenNights)
+
+	if !judged.RegressionDetected || judged.Regressions[0].Baseline != 5000 {
+		t.Fatalf("a failed night must not enter the baseline, want median 5000 and a flag: %+v", judged.Regressions)
 	}
 }
 
@@ -191,5 +220,35 @@ func TestKPIsAreTheP90MetricsOnly(t *testing.T) {
 	}
 	if median([]float64{5, 1, 3}) != 3 || median([]float64{4, 1, 3, 2}) != 2.5 {
 		t.Fatal("median must sort and average the two middle values for even counts")
+	}
+}
+
+func TestJudgeExplainsWhatItCompared(t *testing.T) {
+	ctx := context.Background()
+	empty := newFakeStore()
+	tonight := nightlyDocument(8, kindCluster, 12000)
+
+	judged, note := Judge(ctx, empty, tonight, sevenNights)
+	if !judged.RegressionDetected || !strings.Contains(note, "0 of the 7 required kind-fake-gpu runs") || !strings.Contains(note, "1 regressions detected") {
+		t.Fatalf("without history only the SLO fires and the note says so: %q", note)
+	}
+
+	full := newFakeStore()
+	publishAll(t, full, nights(1, 7, kindCluster, 5000)...)
+	if _, note := Judge(ctx, full, nightlyDocument(8, kindCluster, 5500), sevenNights); !strings.Contains(note, "compared every p90 with the median of its last 7 values among 7 kind-fake-gpu runs") || !strings.HasSuffix(note, "no regression detected") {
+		t.Fatalf("with history the note names the window: %q", note)
+	}
+
+	broken := newFakeStore()
+	broken.failGet[ManifestName] = errors.New("disk on fire")
+	if judged, note := Judge(ctx, broken, tonight, sevenNights); !judged.RegressionDetected || !strings.Contains(note, "skipped: read manifest: disk on fire") {
+		t.Fatalf("a broken history must not hide the SLO verdict: %q", note)
+	}
+
+	if _, note := Judge(ctx, full, nightlyDocument(8, "", 5500), sevenNights); !strings.Contains(note, "cluster type is unknown") {
+		t.Fatalf("an unknown cluster type must be called out: %q", note)
+	}
+	if _, note := Judge(ctx, full, tonight, RegressionConfig{Window: 0, Threshold: 0.15}); !strings.Contains(note, "disabled") {
+		t.Fatalf("a zero window must be reported as disabled: %q", note)
 	}
 }
