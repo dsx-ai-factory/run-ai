@@ -18,10 +18,19 @@ func NewMockCacheClientFactoryer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCacheClientFactoryer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCacheClientFactoryer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -73,14 +82,20 @@ type MockCacheClientFactoryer_CreateClient_Call struct {
 }
 
 // CreateClient is a helper method to define mock.On call
-//   - cacheType
-func (_e *MockCacheClientFactoryer_Expecter) CreateClient(cacheType interface{}) *MockCacheClientFactoryer_CreateClient_Call {
+//   - cacheType config.CacheType
+func (_e *MockCacheClientFactoryer_Expecter) CreateClient(cacheType any) *MockCacheClientFactoryer_CreateClient_Call {
 	return &MockCacheClientFactoryer_CreateClient_Call{Call: _e.mock.On("CreateClient", cacheType)}
 }
 
 func (_c *MockCacheClientFactoryer_CreateClient_Call) Run(run func(cacheType config.CacheType)) *MockCacheClientFactoryer_CreateClient_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(config.CacheType))
+		var arg0 config.CacheType
+		if args[0] != nil {
+			arg0 = args[0].(config.CacheType)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
