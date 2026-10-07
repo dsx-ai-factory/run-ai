@@ -66,11 +66,17 @@ func TestServiceAccountValidatorValidate(t *testing.T) {
 		{name: "no UID checks denies unlisted identity", username: "system:serviceaccount:tenant:default"},
 		{name: "exact allowlist needs no UID checks", username: "system:serviceaccount:runai:controller", allowed: []string{"system:serviceaccount:runai:controller"}, want: true},
 		{name: "lookup errors fail closed", username: "system:serviceaccount:tenant:default", functions: []ValidatingFunction{{Func: func(context.Context, client.Client) (string, error) { return "", lookupError }}}, wantError: lookupError},
-		{name: "missing unrelated account does not block trusted caller", username: "system:serviceaccount:runai:controller", uid: "trusted-uid", functions: []ValidatingFunction{missingAccount, {Id: "trusted-uid"}}, want: true},
+		{
+			name: "missing unrelated account does not block trusted caller", username: "system:serviceaccount:runai:controller", uid: "trusted-uid",
+			functions: []ValidatingFunction{missingAccount, {Id: "trusted-uid"}}, want: true,
+		},
 		{name: "missing account does not authorize tenant", username: "system:serviceaccount:tenant:default", uid: "tenant-uid", functions: []ValidatingFunction{missingAccount, {Id: "trusted-uid"}}},
 		{name: "all accounts missing denies caller", username: "system:serviceaccount:runai:runai-agent", uid: "deleted-uid", functions: []ValidatingFunction{missingAccount}},
 		{name: "missing account does not authorize empty UID", username: "system:serviceaccount:tenant:default", functions: []ValidatingFunction{missingAccount}},
-		{name: "other lookup errors still block later trusted UID", username: "system:serviceaccount:runai:controller", uid: "trusted-uid", functions: []ValidatingFunction{{Func: func(context.Context, client.Client) (string, error) { return "", lookupError }}, {Id: "trusted-uid"}}, wantError: lookupError},
+		{
+			name: "other lookup errors still block later trusted UID", username: "system:serviceaccount:runai:controller", uid: "trusted-uid",
+			functions: []ValidatingFunction{{Func: func(context.Context, client.Client) (string, error) { return "", lookupError }}, {Id: "trusted-uid"}}, wantError: lookupError,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			v := NewServiceAccountValidator(nil, tc.allowed, tc.functions)
