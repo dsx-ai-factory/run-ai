@@ -22,16 +22,13 @@ import (
 const fakeDomain = "https://fake-domain.com"
 
 type ConnectionsPreProcessor struct {
-	WorkloadType workloadsApi.WorkloadType
 	WorkloadName string
 	ProjectName  string
 
-	// ResourceNamePrefix overrides the workload-initials prefix (iw/tw/dw/infw).
-	// WorkloadRunner IW/TW composers use "job" to correlate notification
-	// connections with the networking resources they create. Kubeflow composers
-	// use "kf"; multi-worker networking is rejected before resource names
-	// require replica indexes. When empty, the V1 workloadTypeToInitials mapping
-	// is used.
+	// PortResourceNames is supplied by the V1 path for existing native resources.
+	PortResourceNames func(*field_types.PortsField) map[string]ServiceAndPortName
+
+	// WorkloadRunner callers select resource naming through their resource prefix.
 	ResourceNamePrefix            string
 	WorkloadV2NetworkingSupported bool
 }
@@ -41,13 +38,6 @@ var portsConnectionTypes = datastructs.NewSet[string](
 	string(assetsApi.INTERNALCONNECTIONTYPE_NODE_PORT),
 	string(assetsApi.INTERNALCONNECTIONTYPE_SERVING_PORT),
 )
-
-var workloadTypeToInitials = map[workloadsApi.WorkloadType]string{
-	workloadsApi.WORKLOADTYPE_WORKSPACE:   legacyWorkspacePrefix,
-	workloadsApi.WORKLOADTYPE_TRAINING:    legacyTrainingPrefix,
-	workloadsApi.WORKLOADTYPE_DISTRIBUTED: legacyDistributedPrefix,
-	workloadsApi.WORKLOADTYPE_INFERENCE:   NetworkingResourcePrefixInference,
-}
 
 type ServiceAndPortName struct {
 	ServiceName string
@@ -76,17 +66,9 @@ func (cp *ConnectionsPreProcessor) HandlePorts(connections []workloadsApi.Connec
 		return
 	}
 
-	// Resolve the prefix used by the native V1 port Service naming helper. A
-	// missing mapping is not an error - it just means there is no need to
-	// pre-process.
-	workloadInitials, typeFound := workloadTypeToInitials[cp.WorkloadType]
-	if !typeFound {
-		return
+	if cp.PortResourceNames != nil {
+		cp.applyPortResourceNames(connections, cp.PortResourceNames(ports))
 	}
-
-	nickToResourceNames := legacyPortResourceNames(workloadInitials, cp.WorkloadName, ports)
-
-	cp.applyPortResourceNames(connections, nickToResourceNames)
 }
 
 func (cp *ConnectionsPreProcessor) handleWorkloadRunnerJobPorts(connections []workloadsApi.Connection, ports *field_types.PortsField) {
