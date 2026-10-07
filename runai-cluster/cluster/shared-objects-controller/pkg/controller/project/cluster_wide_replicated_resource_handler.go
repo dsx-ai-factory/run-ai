@@ -177,7 +177,7 @@ func (handler *ClusterWideReplicatedResourceHandler) createNamespacedObjectIfNee
 		return nil, fmt.Errorf("failed to parse existingNamespacedClusterWideObject to client.Object")
 	}
 
-	err = handler.Client.Get(ctx,
+	err = handler.Get(ctx,
 		client.ObjectKey{Namespace: namespace, Name: clusterWideObject.GetName()},
 		existingNamespacedObject,
 	)
@@ -238,12 +238,12 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 	if handler.clusterWideGVKCommon.IsSpecImmutable(existingNamespacedObject) {
 		log.Ctx(ctx).Info().Msgf("Object exists in Namespace and spec diverges on an immutable field, deleting so it will be re-created from source. gvk %s, object %s, namespace %s",
 			gvk.String(), existingNamespacedObject.GetName(), namespace)
-		if delErr := handler.Client.Delete(ctx, existingNamespacedObject); delErr != nil && !errors.IsNotFound(delErr) {
+		if delErr := handler.Delete(ctx, existingNamespacedObject); delErr != nil && !errors.IsNotFound(delErr) {
 			log.Ctx(ctx).Error().Msgf("Failed deleting object before recreate. gvk %s, object %s, namespace %s. error: %s",
 				gvk.String(), existingNamespacedObject.GetName(), namespace, delErr.Error())
 			return delErr
 		}
-		if createErr := handler.Client.Create(ctx, newNamespacedObject); createErr != nil {
+		if createErr := handler.Create(ctx, newNamespacedObject); createErr != nil {
 			// Not tolerating AlreadyExists: usually means the old replica is
 			// still terminating, and swallowing it would leave no replacement
 			// until an unrelated event re-enqueues the project. Returning the
@@ -262,7 +262,7 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 	handler.updateExistingWithNewObject(ctx, existingNamespacedObject, newNamespacedObject)
 	handler.clusterWideGVKCommon.PreserveImmutableFields(immutableFieldsBackup, existingNamespacedObject)
 
-	err = handler.Client.Update(ctx, existingNamespacedObject)
+	err = handler.Update(ctx, existingNamespacedObject)
 	if err != nil {
 		log.Ctx(ctx).Error().Msgf("Failed updating object. gvk %s, object %s, namespace %s. error: %s",
 			gvk.String(), existingNamespacedObject.GetName(), namespace, err.Error())
@@ -284,7 +284,7 @@ func (handler *ClusterWideReplicatedResourceHandler) handleNonExisting(
 		return nil, err
 	}
 
-	err = handler.Client.Create(ctx, newNamespacedObject)
+	err = handler.Create(ctx, newNamespacedObject)
 	if err != nil && !errors.IsAlreadyExists(err) {
 		log.Ctx(ctx).Error().Msgf("Failed to create namespaced Object for Project. project %s, namespace %s, gvk %s, object %s. error: %s",
 			project.Name, namespace, gvk.String(), clusterWideObject.GetName(), err.Error())
@@ -318,7 +318,7 @@ func (handler *ClusterWideReplicatedResourceHandler) deleteObjects(
 	for _, objectToDelete := range unreferencedObjects {
 		log.Ctx(ctx).Info().Msgf("Deleting unreferenced object. gvk %s, object %s, namespace %s",
 			gvk.String(), objectToDelete.GetName(), objectToDelete.GetNamespace())
-		innerErr := handler.Client.Delete(ctx, objectToDelete)
+		innerErr := handler.Delete(ctx, objectToDelete)
 		if innerErr != nil {
 			log.Ctx(ctx).Error().Msgf("Failed to delete unreferenced object. gvk %s, object %s, namespace %s. error: %s",
 				gvk.String(), objectToDelete.GetName(), objectToDelete.GetNamespace(), innerErr.Error())
@@ -384,7 +384,7 @@ func (handler *ClusterWideReplicatedResourceHandler) reconcileManagedMetadata(
 
 	existingObj.SetOwnerReferences(newObj.GetOwnerReferences())
 
-	if err := handler.Client.Update(ctx, existingObj); err != nil {
+	if err := handler.Update(ctx, existingObj); err != nil {
 		log.Ctx(ctx).Error().Msgf("Failed updating managed metadata on object. gvk %s, object %s, namespace %s. error: %s",
 			gvk.String(), existingObj.GetName(), namespace, err.Error())
 		return err
@@ -451,7 +451,7 @@ func (handler *ClusterWideReplicatedResourceHandler) patchAnnotations(ctx contex
 		return err
 	}
 	patch := client.RawPatch(types.MergePatchType, metadata)
-	return handler.Client.Patch(ctx, obj, patch)
+	return handler.Patch(ctx, obj, patch)
 }
 
 func getUnreferencedObjects(
