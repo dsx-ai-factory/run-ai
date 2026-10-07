@@ -79,7 +79,7 @@ func resourceClaimTemplateDbToApi(obj *models.Object) (*api.ResourceClaimTemplat
 	rct := &api.ResourceClaimTemplate{
 		Name:      name,
 		Namespace: envelope.Namespace,
-		ScopeType: api.ScopeType2(obj.ScopeType),
+		ScopeType: api.ResourceScopeType(obj.ScopeType),
 		Origin:    envelope.Origin,
 		AssetId:   envelope.AssetId,
 	}

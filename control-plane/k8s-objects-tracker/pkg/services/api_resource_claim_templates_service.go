@@ -50,13 +50,13 @@ func (s *ResourceClaimTemplatesApiService) UpdateResourceClaimTemplate(ctx conte
 // DeleteResourceClaimTemplate removes a single tracked RCT. The identity
 // (clusterId, scopeType, scopeId, name) comes from the query string so DELETE
 // has no body - matching the per-item DELETE shape used by DeviceClass.
-func (s *ResourceClaimTemplatesApiService) DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeTypeStr string, scopeId string, name string) (api.ImplResponse, error) {
+func (s *ResourceClaimTemplatesApiService) DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeType api.ResourceScopeType, scopeId string, name string) (api.ImplResponse, error) {
 	tenantId, apiErr := common.TenantIdFromContext(ctx)
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
 
-	if err := common.ValidateScopeType(scopeTypeStr); err != nil {
+	if err := common.ValidateScopeType(string(scopeType)); err != nil {
 		return NewErrorResponse(err), nil
 	}
 
@@ -73,7 +73,7 @@ func (s *ResourceClaimTemplatesApiService) DeleteResourceClaimTemplate(ctx conte
 		Type:      models.ObjectTypeResourceClaimTemplate,
 		TenantId:  tenantId,
 		ClusterId: clusterUuid,
-		ScopeType: authclient.ScopeType(scopeTypeStr),
+		ScopeType: authclient.ScopeType(scopeType),
 		Name:      &name,
 	}
 	if apiErr := assignScopeId(filters, clusterUuid.String(), scopeId); apiErr != nil {
