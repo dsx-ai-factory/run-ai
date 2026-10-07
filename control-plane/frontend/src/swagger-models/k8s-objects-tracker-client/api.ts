@@ -2633,6 +2633,94 @@ export const DeviceClassesApiAxiosParamCreator = function (configuration?: Confi
     return {
         /**
          * 
+         * @summary create a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createDeviceClass: async (deviceClass: DeviceClass, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'deviceClass' is not null or undefined
+            assertParamExists('createDeviceClass', 'deviceClass', deviceClass)
+            const localVarPath = `/api/v1/device-classes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(deviceClass, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary delete a Device Class
+         * @param {string} clusterId The id of the cluster
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteDeviceClass: async (clusterId: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('deleteDeviceClass', 'clusterId', clusterId)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('deleteDeviceClass', 'name', name)
+            const localVarPath = `/api/v1/device-classes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary get device classes for a given cluster
          * @param {string} clusterId The id of the cluster
          * @param {string} [name] filter by name
@@ -2724,6 +2812,46 @@ export const DeviceClassesApiAxiosParamCreator = function (configuration?: Confi
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary update a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateDeviceClass: async (deviceClass: DeviceClass, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'deviceClass' is not null or undefined
+            assertParamExists('updateDeviceClass', 'deviceClass', deviceClass)
+            const localVarPath = `/api/v1/device-classes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(deviceClass, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -2734,6 +2862,29 @@ export const DeviceClassesApiAxiosParamCreator = function (configuration?: Confi
 export const DeviceClassesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DeviceClassesApiAxiosParamCreator(configuration)
     return {
+        /**
+         * 
+         * @summary create a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createDeviceClass(deviceClass: DeviceClass, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeviceClass>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createDeviceClass(deviceClass, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary delete a Device Class
+         * @param {string} clusterId The id of the cluster
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteDeviceClass(clusterId: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteDeviceClass(clusterId, name, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
         /**
          * 
          * @summary get device classes for a given cluster
@@ -2758,6 +2909,17 @@ export const DeviceClassesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.syncDeviceClass(clusterId, deviceClasses, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * 
+         * @summary update a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateDeviceClass(deviceClass: DeviceClass, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeviceClass>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateDeviceClass(deviceClass, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -2768,6 +2930,27 @@ export const DeviceClassesApiFp = function(configuration?: Configuration) {
 export const DeviceClassesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = DeviceClassesApiFp(configuration)
     return {
+        /**
+         * 
+         * @summary create a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createDeviceClass(deviceClass: DeviceClass, options?: any): AxiosPromise<DeviceClass> {
+            return localVarFp.createDeviceClass(deviceClass, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary delete a Device Class
+         * @param {string} clusterId The id of the cluster
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteDeviceClass(clusterId: string, name: string, options?: any): AxiosPromise<void> {
+            return localVarFp.deleteDeviceClass(clusterId, name, options).then((request) => request(axios, basePath));
+        },
         /**
          * 
          * @summary get device classes for a given cluster
@@ -2790,6 +2973,16 @@ export const DeviceClassesApiFactory = function (configuration?: Configuration, 
         syncDeviceClass(clusterId: string, deviceClasses: DeviceClasses, options?: any): AxiosPromise<DeviceClasses> {
             return localVarFp.syncDeviceClass(clusterId, deviceClasses, options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @summary update a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateDeviceClass(deviceClass: DeviceClass, options?: any): AxiosPromise<DeviceClass> {
+            return localVarFp.updateDeviceClass(deviceClass, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -2800,6 +2993,31 @@ export const DeviceClassesApiFactory = function (configuration?: Configuration, 
  * @extends {BaseAPI}
  */
 export class DeviceClassesApi extends BaseAPI {
+    /**
+     * 
+     * @summary create a Device Class
+     * @param {DeviceClass} deviceClass 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceClassesApi
+     */
+    public createDeviceClass(deviceClass: DeviceClass, options?: AxiosRequestConfig) {
+        return DeviceClassesApiFp(this.configuration).createDeviceClass(deviceClass, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary delete a Device Class
+     * @param {string} clusterId The id of the cluster
+     * @param {string} name filter by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceClassesApi
+     */
+    public deleteDeviceClass(clusterId: string, name: string, options?: AxiosRequestConfig) {
+        return DeviceClassesApiFp(this.configuration).deleteDeviceClass(clusterId, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @summary get device classes for a given cluster
@@ -2824,6 +3042,18 @@ export class DeviceClassesApi extends BaseAPI {
      */
     public syncDeviceClass(clusterId: string, deviceClasses: DeviceClasses, options?: AxiosRequestConfig) {
         return DeviceClassesApiFp(this.configuration).syncDeviceClass(clusterId, deviceClasses, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary update a Device Class
+     * @param {DeviceClass} deviceClass 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceClassesApi
+     */
+    public updateDeviceClass(deviceClass: DeviceClass, options?: AxiosRequestConfig) {
+        return DeviceClassesApiFp(this.configuration).updateDeviceClass(deviceClass, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

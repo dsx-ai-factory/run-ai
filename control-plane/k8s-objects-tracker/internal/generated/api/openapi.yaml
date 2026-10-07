@@ -5918,6 +5918,94 @@ paths:
       x-test-coverage:
       - k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go
   /api/v1/device-classes:
+    delete:
+      operationId: deleteDeviceClass
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: filter by name
+        explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: delete a Device Class
+      tags:
+      - Device Classes
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-authorize:
+        resource-type: device-classes
+        action: delete
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
     get:
       operationId: get_device_classes
       parameters:
@@ -5990,6 +6078,128 @@ paths:
         resource-type: device-classes
         action: read
       x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+    post:
+      operationId: createDeviceClass
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClass'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClass'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: create a Device Class
+      tags:
+      - Device Classes
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+    put:
+      operationId: updateDeviceClass
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClass'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClass'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: update a Device Class
+      tags:
+      - Device Classes
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
       x-test-coverage:
       - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
   /api/v1/device-classes/sync:

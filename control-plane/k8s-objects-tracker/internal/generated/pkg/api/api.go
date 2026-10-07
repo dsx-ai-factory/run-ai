@@ -54,6 +54,9 @@ type ConfigMapsAPIRouter interface {
 // pass the data to a DeviceClassesAPIServicer to perform the required actions, then write the service results to the http response.
 type DeviceClassesAPIRouter interface {
 	GetDeviceClasses(http.ResponseWriter, *http.Request)
+	UpdateDeviceClass(http.ResponseWriter, *http.Request)
+	CreateDeviceClass(http.ResponseWriter, *http.Request)
+	DeleteDeviceClass(http.ResponseWriter, *http.Request)
 	SyncDeviceClass(http.ResponseWriter, *http.Request)
 }
 
@@ -208,6 +211,9 @@ type ConfigMapsAPIServicer interface {
 // and updated with the logic required for the API.
 type DeviceClassesAPIServicer interface {
 	GetDeviceClasses(context.Context, string, string) (ImplResponse, error)
+	UpdateDeviceClass(context.Context, DeviceClass) (ImplResponse, error)
+	CreateDeviceClass(context.Context, DeviceClass) (ImplResponse, error)
+	DeleteDeviceClass(context.Context, string, string) (ImplResponse, error)
 	SyncDeviceClass(context.Context, string, DeviceClasses) (ImplResponse, error)
 }
 
