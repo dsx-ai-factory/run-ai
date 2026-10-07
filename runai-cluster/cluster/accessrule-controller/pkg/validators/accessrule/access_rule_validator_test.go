@@ -180,13 +180,53 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 				req.Operation = operation
 				res := accessRuleValidator.Handle(context.Background(), req)
 
-				Expect(res.Result.Message).To(ContainSubstring("not found"))
-				Expect(res.Result.Message).To(ContainSubstring("serviceaccount"))
+				Expect(res.Result.Message).To(ContainSubstring("operation not allowed"))
 				Expect(res.Allowed).To(BeFalse())
-				Expect(res.Result.Reason).To(BeEmpty())
-				Expect(res.Result.Code).To(Equal(int32(http.StatusInternalServerError)))
+				Expect(res.Result.Code).To(Equal(int32(http.StatusForbidden)))
 			}
 		})
+	})
+
+	Context("AccessRule cleanup after the agent ServiceAccount is deleted", func() {
+		JustBeforeEach(func() {
+			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
+			accessRuleValidator = NewAccessRuleValidator(k8sClient, nil)
+			Expect(k8sClient.Delete(context.Background(), agentServiceAccount)).To(Succeed())
+		})
+
+		DescribeTable("validates the remaining caller rather than requiring the deleted agent",
+			func(caller string, removeController, allowed bool) {
+				if removeController {
+					Expect(k8sClient.Delete(context.Background(), accessruleControllerServiceAccount)).To(Succeed())
+				}
+				switch caller {
+				case "accessrule-controller":
+					req.UserInfo.UID = accessruleControllerUID
+				case "runai-operator":
+					req.UserInfo.UID = runaiOperatorUID
+				case "runai-agent":
+					req.UserInfo.UID = runaiAgentUID
+				default:
+					req.UserInfo.UID = uuid.New().String()
+				}
+				req.UserInfo.Username = "system:serviceaccount:runai:" + caller
+				for _, operation := range operations {
+					req.Operation = operation
+					res := accessRuleValidator.Handle(context.Background(), req)
+					Expect(res.Allowed).To(Equal(allowed))
+					if allowed {
+						Expect(res.Result.Code).To(Equal(int32(http.StatusOK)))
+					} else {
+						Expect(res.Result.Code).To(Equal(int32(http.StatusForbidden)))
+					}
+				}
+			},
+			Entry("allows accessrule-controller finalizer updates", "accessrule-controller", false, true),
+			Entry("allows operator cleanup", "runai-operator", false, true),
+			Entry("allows operator cleanup after both earlier accounts are gone", "runai-operator", true, true),
+			Entry("rejects the deleted agent UID", "runai-agent", false, false),
+			Entry("rejects an unrelated caller", "tenant", false, false),
+		)
 	})
 
 	Context("Test AccessRuleValidator with allowedServiceAccounts", func() {

@@ -8,6 +8,7 @@ package validator
 import (
 	"context"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
@@ -43,6 +44,11 @@ func (v *ServiceAccountValidator) Validate(ctx context.Context, req admission.Re
 			funcId = f.Id
 		} else {
 			funcId, err = f.Func(ctx, v.Client)
+			// Uninstall can remove another trusted account before the caller's
+			// finalizer update. Missing accounts cannot authorize this request.
+			if apierrors.IsNotFound(err) {
+				continue
+			}
 			if err != nil {
 				return false, err
 			}

@@ -8,12 +8,15 @@ package validator
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	admissionv1 "k8s.io/api/admission/v1"
 	authenticationv1 "k8s.io/api/authentication/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
@@ -45,6 +48,9 @@ func TestAllowedServiceAccounts(t *testing.T) {
 
 func TestServiceAccountValidatorValidate(t *testing.T) {
 	lookupError := errors.New("service account lookup failed")
+	missingAccount := ValidatingFunction{Func: func(context.Context, client.Client) (string, error) {
+		return "", fmt.Errorf("resolve trusted account: %w", apierrors.NewNotFound(schema.GroupResource{Resource: "serviceaccounts"}, "runai-agent"))
+	}}
 	for _, tc := range []struct {
 		name      string
 		username  string
@@ -60,6 +66,11 @@ func TestServiceAccountValidatorValidate(t *testing.T) {
 		{name: "no UID checks denies unlisted identity", username: "system:serviceaccount:tenant:default"},
 		{name: "exact allowlist needs no UID checks", username: "system:serviceaccount:runai:controller", allowed: []string{"system:serviceaccount:runai:controller"}, want: true},
 		{name: "lookup errors fail closed", username: "system:serviceaccount:tenant:default", functions: []ValidatingFunction{{Func: func(context.Context, client.Client) (string, error) { return "", lookupError }}}, wantError: lookupError},
+		{name: "missing unrelated account does not block trusted caller", username: "system:serviceaccount:runai:controller", uid: "trusted-uid", functions: []ValidatingFunction{missingAccount, {Id: "trusted-uid"}}, want: true},
+		{name: "missing account does not authorize tenant", username: "system:serviceaccount:tenant:default", uid: "tenant-uid", functions: []ValidatingFunction{missingAccount, {Id: "trusted-uid"}}},
+		{name: "all accounts missing denies caller", username: "system:serviceaccount:runai:runai-agent", uid: "deleted-uid", functions: []ValidatingFunction{missingAccount}},
+		{name: "missing account does not authorize empty UID", username: "system:serviceaccount:tenant:default", functions: []ValidatingFunction{missingAccount}},
+		{name: "other lookup errors still block later trusted UID", username: "system:serviceaccount:runai:controller", uid: "trusted-uid", functions: []ValidatingFunction{{Func: func(context.Context, client.Client) (string, error) { return "", lookupError }}, {Id: "trusted-uid"}}, wantError: lookupError},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			v := NewServiceAccountValidator(nil, tc.allowed, tc.functions)
