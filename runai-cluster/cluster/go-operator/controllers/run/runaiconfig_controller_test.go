@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/common/image-parser"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
+	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common/image-parser"
 
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/installation/util"

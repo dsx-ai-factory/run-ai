@@ -6,84 +6,27 @@ licensed under the Apache License, Version 2.0. See the LICENSE file at the
 root of this repository for the full license text.
 
 This file inventories the third-party software distributed with this component
-and the license under which each dependency is made available. It is maintained
-by hand rather than generated: this component's dependency graph is not
-resolvable by build/scripts/generate-notice.py, for the reasons recorded below.
+and the license under which each dependency is made available. It is generated
+automatically; do not edit it by hand.
 
 ================================================================================
 Summary
 ================================================================================
 
-2 third-party artifacts:
+0 third-party packages:
 
-  - Apache-2.0: 2
-
-================================================================================
-Java dependencies
-================================================================================
-
-No third-party Java code is redistributed in this component's artifact.
-
-Every dependency declared in runai-custom-providers/build.gradle is either
-`compileOnly` — the Keycloak server provides it at runtime, and it is not
-bundled into the built JAR — or `testImplementation` / `testRuntimeOnly`, which
-is used only to run the test suite and is not distributed. The resulting JAR
-contains NVIDIA-authored code exclusively.
-
-For completeness, the compile-time-only dependencies are:
-
-  - org.keycloak:keycloak-core, keycloak-server-spi, keycloak-services (26.6.+)
-  - com.fasterxml.jackson.core:jackson-databind (2.+)
-  - jakarta.ws.rs:jakarta.ws.rs-api (4.0.+)
-  - org.slf4j:slf4j-api (2.0.+)
 
 ================================================================================
-Bundled assets
+Dependencies
 ================================================================================
 
-The Keycloak login theme redistributes the Roboto typeface. License, version and
-copyright below are read from each font's OpenType `name` table, which is the
-authoritative record shipped inside the binary.
-
-| Artifact | Version | License | License source |
-|----------|---------|---------|----------------|
-| `runai-theme/login/resources/fonts/Roboto-Regular.ttf` | 2.137 (2017) | Apache-2.0 | http://www.apache.org/licenses/LICENSE-2.0 |
-| `runai-theme/login/resources/fonts/Roboto-Italic.ttf` | 2.137 (2017) | Apache-2.0 | http://www.apache.org/licenses/LICENSE-2.0 |
-
-Roboto is Copyright 2011 Google Inc. All Rights Reserved, licensed under the
-Apache License, Version 2.0. The full text of that license is reproduced in the
-LICENSE file at the root of this repository.
-
-The remaining theme resources — `css/nv-login.css`, `js/distribution-assets.js`,
-the `.ftl` templates and the `.properties` message bundles — are NVIDIA-authored
-and carry SPDX Apache-2.0 headers.
+| Package | Version | License | License source |
+|---------|---------|---------|----------------|
 
 ================================================================================
 License texts
 ================================================================================
 
---------------------------------------------------------------------------------
-Applies to:
-  - runai-theme/login/resources/fonts/Roboto-Regular.ttf
-  - runai-theme/login/resources/fonts/Roboto-Italic.ttf
---------------------------------------------------------------------------------
-
-Copyright 2011 Google Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-these files except in compliance with the License. You may obtain a copy of the
-License at:
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed
-under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
-
-The complete Apache License, Version 2.0 text is in the LICENSE file at the root
-of this repository. The copyright, version and license statements above are read
-from each font's OpenType `name` table (name IDs 0, 5, 13 and 14), which is the
-authoritative record the foundry shipped inside the binary; these font files
-carry no accompanying license file of their own.
+The full text of each distinct dependency license follows, reproduced verbatim from the
+upstream project together with its copyright notice.
 
