@@ -55,7 +55,7 @@ See [Migrate GPU Fractions](migrate-gpu-fractions.md) for the full procedure.
 
 The controllers and CRDs behind native workload types (workspace, training, distributed training, standard inference, distributed inference) are removed in v3.0 and replaced by a single, unified controller and CRD.
 
-Running and pending native workloads that were submitted through a legacy workload type before upgrading are affected by the upgrade. Running workloads continue running, but some capabilities are unavailable until the workload is resubmitted, and pending workloads must be resubmitted. Identify running and pending workloads on legacy types now so you can plan for resubmission after upgrading.
+Running and pending native workloads that were submitted through a legacy workload type before upgrading are affected by the upgrade, and some capabilities are unavailable until the workload is resubmitted. Identify running and pending workloads on legacy types now so you can plan for resubmission after upgrading.
 
 See [Migrate Legacy Workloads](migrate-legacy-workloads.md) for the affected capabilities and the resubmission procedure.
 
