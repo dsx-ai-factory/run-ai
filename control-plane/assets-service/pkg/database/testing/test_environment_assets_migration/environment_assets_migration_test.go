@@ -24,6 +24,7 @@ import (
 	dbconfig "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"gorm.io/gorm"
 )
 
 const (
@@ -308,6 +309,46 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			Expect(actualCustomVLLMImage).To(Equal(customVLLMImage))
 		})
 
+		It("keeps public-image assets when migrating down and then up again", func() {
+			gpt2EnvironmentID := "0acd7192-a3e1-4b31-bd7e-1e0c0d583348"
+			jupyterEnvironmentID := "a5ec966f-d449-4c82-b4f2-66362f145fa5"
+			vllmEnvironmentID := "54892437-c334-4d51-89e6-c51d948594db"
+			expectedImages := map[string]string{
+				gpt2EnvironmentID:    "ghcr.io/huggingface/text-generation-inference:3.3.6-intel-cpu",
+				jupyterEnvironmentID: "nvcr.io/nvidia/pytorch:26.09-py3",
+				vllmEnvironmentID:    "vllm/vllm-openai:v0.6.4",
+			}
+
+			db := runaidb.DB().Actual().WithContext(context.Background())
+			result := db.Exec(`
+				INSERT INTO assets_metadata (id, kind, scope, tenant_id, name, created_by, created_at, updated_by, updated_at) VALUES
+					(?, 'environment', 'tenant', ?, 'gpt2', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'llm-server', 'Run:ai', now(), 'Run:ai', now());`,
+				gpt2EnvironmentID, tenantAId,
+				jupyterEnvironmentID, tenantBId,
+				vllmEnvironmentID, tenantCId,
+			)
+			Expect(result.Error).To(BeNil())
+
+			result = db.Exec(`
+				INSERT INTO assets_environment (asset_id, image) VALUES
+					(?, ?),
+					(?, ?),
+					(?, ?);`,
+				gpt2EnvironmentID, expectedImages[gpt2EnvironmentID],
+				jupyterEnvironmentID, expectedImages[jupyterEnvironmentID],
+				vllmEnvironmentID, expectedImages[vllmEnvironmentID],
+			)
+			Expect(result.Error).To(BeNil())
+
+			migrateTo(30010004, "down 30010001")
+			assertEnvironmentImages(db, expectedImages)
+
+			migrateTo(30010001, "up 30010004")
+			assertEnvironmentImages(db, expectedImages)
+		})
+
 		It("environment assets migration", func() {
 			// inject the preset environments and verify they are exists
 			injectPresetEnvironments()
@@ -331,6 +372,15 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 		})
 	})
 })
+
+func assertEnvironmentImages(db *gorm.DB, expectedImages map[string]string) {
+	for environmentID, expectedImage := range expectedImages {
+		var actualImage string
+		result := db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", environmentID).Scan(&actualImage)
+		Expect(result.Error).To(BeNil())
+		Expect(actualImage).To(Equal(expectedImage))
+	}
+}
 
 func injectPresetEnvironments() {
 	db := runaidb.DB().Actual().WithContext(context.Background())
