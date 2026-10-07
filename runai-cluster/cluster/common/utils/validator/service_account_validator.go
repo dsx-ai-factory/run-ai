@@ -44,8 +44,6 @@ func (v *ServiceAccountValidator) Validate(ctx context.Context, req admission.Re
 			funcId = f.Id
 		} else {
 			funcId, err = f.Func(ctx, v.Client)
-			// Uninstall can remove another trusted account before the caller's
-			// finalizer update. Missing accounts cannot authorize this request.
 			if apierrors.IsNotFound(err) {
 				continue
 			}
