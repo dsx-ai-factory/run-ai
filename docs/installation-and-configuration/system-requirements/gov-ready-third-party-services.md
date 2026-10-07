@@ -42,7 +42,7 @@ The Docker Hub credentials work the same way in [Guided Installation](../install
    --namespace=<namespace>
    ```
 
-During the installation, reference the secret in the Helm values.
+During the installation, reference the secret in the Helm values. The NVIDIA Run:ai images still need the `runai-reg-creds` secret that holds your NGC credentials, so list both secrets, with `runai-reg-creds` first. The installer sets the first entry to `runai-reg-creds`, and a list in your values that starts with another secret overrides it, so the NVIDIA Run:ai images would no longer be pulled.
 
 * **Manual Helm** - Add the values to the control plane and cluster values you pass to Helm.
 * **Guided Installation** - Add the values under `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration.
@@ -51,9 +51,11 @@ During the installation, reference the secret in the Helm values.
 # Control plane
 global:
   imagePullSecrets:
+    - name: runai-reg-creds
     - name: <dhi-secret-name>
 keycloakx:
   imagePullSecrets:
+    - name: runai-reg-creds
     - name: <dhi-secret-name>
 ```
 
@@ -61,6 +63,7 @@ keycloakx:
 # Cluster
 global:
   additionalImagePullSecrets:
+    - runai-reg-creds
     - <dhi-secret-name>
 ```
 
