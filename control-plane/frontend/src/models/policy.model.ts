@@ -26,9 +26,7 @@ import type {
 export type TPolicyScopes = "tenant" | "cluster" | "department" | "project";
 
 export type TPolicyChangeRequest =
-  | TrainingPolicyChangeRequestV2
-  | WorkspacePolicyChangeRequestV2
-  | DistributedPolicyChangeRequestV2;
+  TrainingPolicyChangeRequestV2 | WorkspacePolicyChangeRequestV2 | DistributedPolicyChangeRequestV2;
 
 export type TWorkloadPolicy = WorkspacePolicyV2 | TrainingPolicyV2 | DistributedPolicyV2 | DistributedInferencePolicyV2;
 

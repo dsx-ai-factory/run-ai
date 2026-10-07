@@ -678,8 +678,10 @@ export type IUIWorkloadStorageFields = IUIStorageFields;
 
 export type IUIDistributedWorkloadSpec = Omit<IUISuperWorkloadSpec, "leader" | "worker">;
 
-export interface IUISuperWorkloadSpec
-  extends Omit<SupersetSpec, "ports" | "exposedUrls" | "relatedUrls" | "storage" | "leader" | "worker"> {
+export interface IUISuperWorkloadSpec extends Omit<
+  SupersetSpec,
+  "ports" | "exposedUrls" | "relatedUrls" | "storage" | "leader" | "worker"
+> {
   leader?: IUIDistributedWorkloadSpec;
   worker?: IUIDistributedWorkloadSpec;
   connections?: Array<IUIConnection>;
@@ -687,11 +689,10 @@ export interface IUISuperWorkloadSpec
   mnnvl?: MnnvlMode | null;
 }
 
-export interface IUISuperWorkloadCreationRequest
-  extends Omit<
-    SupersetWorkload,
-    "spec" | "workloadId" | "requestedName" | "createdBy" | "createdAt" | "desiredPhase" | "masterSpec"
-  > {
+export interface IUISuperWorkloadCreationRequest extends Omit<
+  SupersetWorkload,
+  "spec" | "workloadId" | "requestedName" | "createdBy" | "createdAt" | "desiredPhase" | "masterSpec"
+> {
   spec: IUISuperWorkloadSpec;
   masterSpec?: IUISuperWorkloadSpec;
   // template fields

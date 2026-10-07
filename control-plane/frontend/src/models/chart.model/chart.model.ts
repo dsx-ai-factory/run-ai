@@ -378,8 +378,10 @@ export type THistogramMetricGetData = (
   args: string[],
 ) => Promise<MetricsCompositeResponse>;
 
-export interface IGenericMetricWidgetConfigWithCompositeResponse
-  extends Omit<IGenericMetricWidgetConfig, "getData" | "measurementParser"> {
+export interface IGenericMetricWidgetConfigWithCompositeResponse extends Omit<
+  IGenericMetricWidgetConfig,
+  "getData" | "measurementParser"
+> {
   getData: THistogramMetricGetData;
   histogramParser?: THistogramMetricParser;
   columnHistogramParser?: (metricsResponse: MetricsCompositeResponse) => IColumnHistogramDataParser[];

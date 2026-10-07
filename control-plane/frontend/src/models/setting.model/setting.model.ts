@@ -6,8 +6,10 @@
 import type { Mappers } from "@/swagger-models/identity-manager-client";
 import type { Setting as ServerSetting } from "@/swagger-models/temp-backend-settings-client";
 
-export interface Setting
-  extends Omit<ServerSetting, "key" | "source" | "category" | "label" | "description" | "type" | "active"> {
+export interface Setting extends Omit<
+  ServerSetting,
+  "key" | "source" | "category" | "label" | "description" | "type" | "active"
+> {
   key?: string;
   source?: string;
   category?: string;

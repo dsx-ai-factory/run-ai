@@ -74,10 +74,7 @@ export const SECRET_TYPE_TO_ASSET_KIND: Record<SecretType, TCredentialKinds> = {
 export const TYPE_SSH_KEY = "generic-ssh-key";
 
 export type TGenericFormats =
-  | typeof AssetKind.GenericSecret
-  | typeof AssetKind.AccessKey
-  | typeof AssetKind.Password
-  | typeof TYPE_SSH_KEY;
+  typeof AssetKind.GenericSecret | typeof AssetKind.AccessKey | typeof AssetKind.Password | typeof TYPE_SSH_KEY;
 
 export interface IScopeCredentialsList extends Omit<IScopeModel, "scope" | "clusterId"> {
   scope?: Scope;
@@ -115,6 +112,4 @@ export interface IUIGenericSecretCreationRequest {
   spec: IUIGenericSecretSpecDetails;
 }
 export interface IUIGenericSecretSpecDetails
-  extends GenericSecretCreationSpec,
-    PasswordCreationSpec,
-    AccessKeyCreationSpec {}
+  extends GenericSecretCreationSpec, PasswordCreationSpec, AccessKeyCreationSpec {}

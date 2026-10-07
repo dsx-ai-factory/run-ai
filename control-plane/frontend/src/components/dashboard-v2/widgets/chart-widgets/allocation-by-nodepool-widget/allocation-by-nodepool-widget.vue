@@ -475,8 +475,7 @@ function handleChartClick(params: unknown): void {
   if (!seriesData?.[eventParams.seriesIndex]) return;
 
   const dataArr = seriesData[eventParams.seriesIndex].data as
-    | Array<{ value: number; drilldown?: boolean; meta?: { entityId: string; groupByKey: string } }>
-    | undefined;
+    Array<{ value: number; drilldown?: boolean; meta?: { entityId: string; groupByKey: string } }> | undefined;
   const point = dataArr?.[eventParams.dataIndex];
   if (!point?.drilldown || !point?.meta) return;
 

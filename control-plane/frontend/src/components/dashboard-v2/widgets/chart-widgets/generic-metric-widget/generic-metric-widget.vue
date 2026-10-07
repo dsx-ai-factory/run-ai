@@ -275,8 +275,7 @@ export default defineComponent({
       this.adaptiveLegendFrame = requestAnimationFrame(() => {
         this.adaptiveLegendFrame = null;
         const chart = (this.$refs.chartRef as InstanceType<typeof VChart> | undefined)?.chart as
-          | LegendLayoutChart
-          | undefined;
+          LegendLayoutChart | undefined;
         if (!chart) return;
 
         const legend = chart.getModel().getComponent("legend", 0);

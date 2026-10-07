@@ -473,12 +473,10 @@ describe("workspace-assets-edit.vue", () => {
             environment: loadedWorkspaceByIdV2.assets.environment.id,
             compute: loadedWorkspaceByIdV2.assets.compute?.id || null,
             datasources:
-              loadedWorkspaceByIdV2.assets.datasources?.map(
-                (ds: DatasourceRef): AssetIdAndKind => ({
-                  id: ds.id,
-                  kind: ds.kind,
-                }),
-              ) || [],
+              loadedWorkspaceByIdV2.assets.datasources?.map((ds: DatasourceRef): AssetIdAndKind => ({
+                id: ds.id,
+                kind: ds.kind,
+              })) || [],
             uiVolumes: undefined,
           },
           specificEnv: {

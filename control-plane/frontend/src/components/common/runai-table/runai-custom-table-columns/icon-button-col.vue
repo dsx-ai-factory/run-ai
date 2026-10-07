@@ -47,8 +47,7 @@ export default defineComponent({
   computed: {
     iconConfig(): ICustomCellIconButtonColConfig {
       const config = getCustomCellConfig(this.column, ECustomCell.ICON_BUTTON_COL) as
-        | ICustomCellIconButtonColConfig
-        | undefined;
+        ICustomCellIconButtonColConfig | undefined;
       return (
         config ?? {
           icon: "ph-bold ph-question",

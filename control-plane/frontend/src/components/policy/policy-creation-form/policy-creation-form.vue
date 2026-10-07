@@ -627,8 +627,7 @@ export default defineComponent({
     async saveGvkPolicy(): Promise<void> {
       if (this.effectiveConfigMode === "rule-builder") {
         const rulesSection = this.$refs.rulesSection as
-          | { rulesValidationValue: string; revealValidation: () => void }
-          | undefined;
+          { rulesValidationValue: string; revealValidation: () => void } | undefined;
         if (rulesSection?.rulesValidationValue) {
           rulesSection.revealValidation();
           this.showHint();

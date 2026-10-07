@@ -32,8 +32,7 @@ const fallbackText = computed((): string => username.value || "-");
 const shouldRenderDisplayName = computed((): boolean => {
   if (!username.value) return false;
   const config = getCustomCellConfig(props.column, ECustomCell.USER_DISPLAY_NAME_COL) as
-    | ICustomCellUserDisplayNameColConfig
-    | undefined;
+    ICustomCellUserDisplayNameColConfig | undefined;
   if (config?.skipWhen && config.skipWhen(props.row)) return false;
   return true;
 });

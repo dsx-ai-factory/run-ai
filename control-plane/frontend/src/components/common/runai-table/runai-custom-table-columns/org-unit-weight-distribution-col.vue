@@ -41,8 +41,7 @@ const props = defineProps<{
 
 const config = computed(() => {
   return getCustomCellConfig(props.column, ECustomCell.WEIGHT_DISTRIBUTION_COL) as
-    | ICustomCellWeightDistributionColConfig
-    | undefined;
+    ICustomCellWeightDistributionColConfig | undefined;
 });
 
 const otherEntitiesWeight = computed(() => {

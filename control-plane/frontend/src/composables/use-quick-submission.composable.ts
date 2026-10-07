@@ -26,10 +26,7 @@ import { useWorkloadStore } from "@/stores/workload.store";
 import { HttpErrorResponse } from "@/models/http-response.model";
 
 type TQuickSubmissionRequest =
-  | WorkspaceCreationRequest
-  | TrainingCreationRequest
-  | InferenceCreationRequest
-  | DistributedCreationRequest;
+  WorkspaceCreationRequest | TrainingCreationRequest | InferenceCreationRequest | DistributedCreationRequest;
 
 const workloadCreationByType: Record<
   WorkloadType,

@@ -195,14 +195,7 @@ export default defineComponent({
         offset,
         limit,
         sortBy as
-          | "name"
-          | "projectId"
-          | "createdAt"
-          | "createdBy"
-          | "projectName"
-          | "departmentId"
-          | "clusterId"
-          | "phase",
+          "name" | "projectId" | "createdAt" | "createdBy" | "projectName" | "departmentId" | "clusterId" | "phase",
         sortOrder,
         filterBy,
         search,
@@ -316,9 +309,10 @@ export default defineComponent({
         this.scopesModalOptions.loading = true;
         this.scopesModalOptions.dvName = row.name;
         const dvSharedScopes = await dataVolumeService.getSharedScopesById(row.id);
-        this.scopesModalOptions.sharedScopes = dvSharedScopes.map(
-          (scope: SharedScope): IOrgTreeNodeId => ({ id: scope.scopeId, type: scope.scopeType }),
-        );
+        this.scopesModalOptions.sharedScopes = dvSharedScopes.map((scope: SharedScope): IOrgTreeNodeId => ({
+          id: scope.scopeId,
+          type: scope.scopeType,
+        }));
       } catch (e: unknown) {
         console.error(e);
       } finally {

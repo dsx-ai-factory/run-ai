@@ -225,30 +225,26 @@ function getDefaultFilters(sortBy: string, columns: Array<ITableColumn>, isTenan
 
 // Destructured the column object to a filter option object.
 function getFilterOptions(columns: Array<ITableColumn>): Array<IFilterOption> {
-  return columns.map(
-    ({ field, label, name, filter }: ITableColumn): IFilterOption => ({
-      field,
-      label,
-      name,
-      ...(filter?.autocompleteOptionsFn && { autocompleteOptionsFn: filter.autocompleteOptionsFn }),
-    }),
-  );
+  return columns.map(({ field, label, name, filter }: ITableColumn): IFilterOption => ({
+    field,
+    label,
+    name,
+    ...(filter?.autocompleteOptionsFn && { autocompleteOptionsFn: filter.autocompleteOptionsFn }),
+  }));
 }
 
 function getAdvancedFilterOptions(columns: Array<ITableColumn>): Array<IAdvancedFilterOption> {
-  return columns.map(
-    ({ field, label, name, filter }: ITableColumn): IAdvancedFilterOption => ({
-      field,
-      label,
-      name,
-      type: filter?.type || EColumnFilterType.FreeText,
-      ...(filter?.selectOptions && { selectOptions: filter.selectOptions }),
-      ...(filter?.excludeOperators && { excludeOperators: filter.excludeOperators }),
-      ...(filter?.inputType && { inputType: filter.inputType }),
-      ...(filter?.maxWidth && { maxWidth: filter.maxWidth }),
-      ...(filter?.autocompleteOptionsFn && { autocompleteOptionsFn: filter.autocompleteOptionsFn }),
-    }),
-  );
+  return columns.map(({ field, label, name, filter }: ITableColumn): IAdvancedFilterOption => ({
+    field,
+    label,
+    name,
+    type: filter?.type || EColumnFilterType.FreeText,
+    ...(filter?.selectOptions && { selectOptions: filter.selectOptions }),
+    ...(filter?.excludeOperators && { excludeOperators: filter.excludeOperators }),
+    ...(filter?.inputType && { inputType: filter.inputType }),
+    ...(filter?.maxWidth && { maxWidth: filter.maxWidth }),
+    ...(filter?.autocompleteOptionsFn && { autocompleteOptionsFn: filter.autocompleteOptionsFn }),
+  }));
 }
 
 function _getColumnsToFilter(displayedColumns: Array<string>, columns: Array<ITableColumn>): Array<ITableColumn> {

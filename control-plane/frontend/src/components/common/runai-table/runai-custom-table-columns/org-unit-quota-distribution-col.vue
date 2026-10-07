@@ -48,8 +48,7 @@ const props = defineProps<Props>();
 // Make config reactive
 const config = computed(() => {
   return getCustomCellConfig(props.column, ECustomCell.QUOTA_DISTRIBUTION_COL) as
-    | ICustomCellQuotaDistributionColConfig
-    | undefined;
+    ICustomCellQuotaDistributionColConfig | undefined;
 });
 
 // Check if this entity has unlimited quota (-1)

@@ -521,8 +521,7 @@ export default defineComponent({
       if (!seriesData?.[params.seriesIndex]) return;
 
       const dataArr = seriesData[params.seriesIndex].data as
-        | Array<{ value: number; drilldown?: boolean; meta?: EWorkloadTelemetryPointMeta }>
-        | undefined;
+        Array<{ value: number; drilldown?: boolean; meta?: EWorkloadTelemetryPointMeta }> | undefined;
       const point = dataArr?.[params.dataIndex];
       if (!point?.drilldown || !point?.meta) return;
 

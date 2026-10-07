@@ -392,8 +392,7 @@ describe("OrgUnitQuotaTable", () => {
       expect(gpuQuotaColumn?.customCellConfig).toBeDefined();
 
       const config = gpuQuotaColumn?.customCellConfig?.[ECustomCell.ORG_UNIT_GPU_EDITABLE_QUOTA_COL] as
-        | ICustomCellGpuQuotaColConfig
-        | undefined;
+        ICustomCellGpuQuotaColConfig | undefined;
       expect(config).toBeDefined();
       expect(config).toMatchObject({
         availableQuota: 50,
@@ -409,8 +408,7 @@ describe("OrgUnitQuotaTable", () => {
 
       const gpuQuotaColumn = columns.find((col: ITableColumn) => col.field === "gpuQuota");
       const config = gpuQuotaColumn?.customCellConfig?.[ECustomCell.ORG_UNIT_GPU_EDITABLE_QUOTA_COL] as
-        | ICustomCellGpuQuotaColConfig
-        | undefined;
+        ICustomCellGpuQuotaColConfig | undefined;
 
       expect(config?.onSave).toBeInstanceOf(Function);
     });
@@ -422,8 +420,7 @@ describe("OrgUnitQuotaTable", () => {
 
       const gpuQuotaColumn = columns.find((col: ITableColumn) => col.field === "gpuQuota");
       const config = gpuQuotaColumn?.customCellConfig?.[ECustomCell.ORG_UNIT_GPU_EDITABLE_QUOTA_COL] as
-        | ICustomCellGpuQuotaColConfig
-        | undefined;
+        ICustomCellGpuQuotaColConfig | undefined;
 
       expect(config).toBeDefined();
       config?.onSave({

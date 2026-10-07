@@ -274,8 +274,7 @@ export default defineComponent({
     // Helper to get the actual DOM element from the QMenu component
     getPopupDomEl(): HTMLElement | null {
       const popupComponent = this.$refs.popupMenu as unknown as
-        | { contentEl?: HTMLElement; $el?: HTMLElement }
-        | undefined;
+        { contentEl?: HTMLElement; $el?: HTMLElement } | undefined;
       if (!popupComponent) return null;
       return popupComponent.contentEl || popupComponent.$el || null;
     },

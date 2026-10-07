@@ -53,8 +53,7 @@ const props = defineProps<{
 
 const config = computed(() => {
   return getCustomCellConfig(props.column, ECustomCell.ORG_UNIT_EDITABLE_WEIGHT_COL) as
-    | ICustomCellEditableWeightColConfig
-    | undefined;
+    ICustomCellEditableWeightColConfig | undefined;
 });
 
 // Disabled state from config

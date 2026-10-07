@@ -51,8 +51,7 @@ const settingStore = useSettingStore();
 
 const config = computed(() => {
   return getCustomCellConfig(props.column, ECustomCell.ORG_UNIT_GPU_EDITABLE_QUOTA_COL) as
-    | ICustomCellGpuQuotaColConfig
-    | undefined;
+    ICustomCellGpuQuotaColConfig | undefined;
 });
 
 const editableValue = ref<number>(props.row.gpuQuota ?? 0);

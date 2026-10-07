@@ -282,8 +282,7 @@ export default {
         return;
       }
       const accessRuleManagement = this.$refs.accessRuleManagementRef as
-        | InstanceType<typeof AccessRuleManagement>
-        | undefined;
+        InstanceType<typeof AccessRuleManagement> | undefined;
       this.displayFormHint = !!(accessRuleManagement?.isFormOpen && accessRuleManagement?.isFormDirty);
     },
     isFormIncomplete(val: boolean): boolean | string {

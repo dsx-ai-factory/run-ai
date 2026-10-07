@@ -393,9 +393,7 @@ export default defineComponent({
     },
     generalPolicyRules(): UnifiedPolicyInfoPerReplicaTypeRules | null | undefined {
       return this.loadedPolicyInfo?.rules?.specificRunParams as unknown as
-        | UnifiedPolicyInfoPerReplicaTypeRules
-        | null
-        | undefined;
+        UnifiedPolicyInfoPerReplicaTypeRules | null | undefined;
     },
     loadedItemizeDefaults(): ILoadedItemizeDefaults | null | undefined {
       return {

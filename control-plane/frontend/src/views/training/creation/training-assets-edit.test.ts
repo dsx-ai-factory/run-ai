@@ -505,12 +505,10 @@ describe("training-assets-edit.vue", () => {
             environment: loadedTrainingByIdV2.assets.environment.id,
             compute: loadedTrainingByIdV2.assets.compute?.id || null,
             datasources:
-              loadedTrainingByIdV2.assets.datasources?.map(
-                (ds: DatasourceRef): AssetIdAndKind => ({
-                  id: ds.id,
-                  kind: ds.kind,
-                }),
-              ) || [],
+              loadedTrainingByIdV2.assets.datasources?.map((ds: DatasourceRef): AssetIdAndKind => ({
+                id: ds.id,
+                kind: ds.kind,
+              })) || [],
             uiVolumes: undefined,
           },
           specificEnv: {

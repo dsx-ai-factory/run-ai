@@ -407,14 +407,7 @@ async function listPods(
   limit?: number,
   sortOrder?: "asc" | "desc",
   sortBy?:
-    | "name"
-    | "clusterId"
-    | "workloadId"
-    | "nodeName"
-    | "currentNodepool"
-    | "createdAt"
-    | "completedAt"
-    | "deletedAt",
+    "name" | "clusterId" | "workloadId" | "nodeName" | "currentNodepool" | "createdAt" | "completedAt" | "deletedAt",
   filterBy?: Array<string>,
   verbosity?: PodVerbosity,
   completed?: string,

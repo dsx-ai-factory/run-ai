@@ -6,22 +6,16 @@
 import { Action } from "@/swagger-models/authorization-client";
 
 export type TRolesTypes =
-  | "admin"
-  | "researcher"
-  | "research_manager"
-  | "editor"
-  | "viewer"
-  | "ml_engineer"
-  | "department_admin";
+  "admin" | "researcher" | "research_manager" | "editor" | "viewer" | "ml_engineer" | "department_admin";
 
 export enum ERolesLabels {
-  "admin" = "Admin",
-  "researcher" = "Researcher",
-  "research_manager" = "Research manager",
-  "editor" = "Editor",
-  "viewer" = "Viewer",
-  "ml_engineer" = "ML engineer",
-  "department_admin" = "Department admin",
+  admin = "Admin",
+  researcher = "Researcher",
+  research_manager = "Research manager",
+  editor = "Editor",
+  viewer = "Viewer",
+  ml_engineer = "ML engineer",
+  department_admin = "Department admin",
 }
 
 export const Actions: Array<IAction> = [

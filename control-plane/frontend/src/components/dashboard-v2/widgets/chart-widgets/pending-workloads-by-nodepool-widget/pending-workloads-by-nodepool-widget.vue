@@ -462,8 +462,7 @@ function handleChartClick(params: unknown): void {
   if (!seriesData?.[eventParams.seriesIndex]) return;
 
   const dataArr = seriesData[eventParams.seriesIndex].data as
-    | Array<{ value: number; drilldown?: boolean; meta?: EWorkloadTelemetryPointMeta }>
-    | undefined;
+    Array<{ value: number; drilldown?: boolean; meta?: EWorkloadTelemetryPointMeta }> | undefined;
   const point = dataArr?.[eventParams.dataIndex];
   if (!point?.drilldown || !point?.meta) return;
 

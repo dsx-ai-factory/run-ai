@@ -224,8 +224,7 @@ export default defineComponent({
 
     const loadEntityFilters = (tableFilterName: ETableFilters) => {
       return filterService.loadFilters(window.location, tableFilterName, {}, true) as
-        | IProjectTableFilterBy
-        | IDepartmentTableFilterBy;
+        IProjectTableFilterBy | IDepartmentTableFilterBy;
     };
 
     const updateDisplayedColumns = (filters: IProjectTableFilterBy | IDepartmentTableFilterBy) => {

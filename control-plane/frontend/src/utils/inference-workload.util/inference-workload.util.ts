@@ -756,11 +756,7 @@ function convertInferenceToWorkloadUI(
 
 function servingPortInternalToolInfo(
   servingPortAccess:
-    | SpecificRunServingPortAccessServingPortAccess
-    | ServingPort
-    | SupersetServingPort
-    | undefined
-    | null,
+    SpecificRunServingPortAccessServingPortAccess | ServingPort | SupersetServingPort | undefined | null,
 ): IConnectionAccess {
   return {
     accessOption: _getServingPortAccessOption(servingPortAccess),
@@ -771,11 +767,7 @@ function servingPortInternalToolInfo(
 
 function _getServingPortAccessOption(
   servingPortAccess:
-    | SpecificRunServingPortAccessServingPortAccess
-    | ServingPort
-    | SupersetServingPort
-    | undefined
-    | null,
+    SpecificRunServingPortAccessServingPortAccess | ServingPort | SupersetServingPort | undefined | null,
 ): EAccessOptions {
   let authorizationType: EAccessOptions = EAccessOptions.PUBLIC;
   if (!servingPortAccess) return authorizationType;
