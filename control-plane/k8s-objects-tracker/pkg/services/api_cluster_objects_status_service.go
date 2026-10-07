@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"k8s.io/utils/ptr"
 
 	authorizationClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
@@ -267,6 +268,16 @@ func appendObjectStatuses(ctx context.Context, tenantId int32, objectType string
 	if scopeQuery != nil {
 		filter.ScopeType = authorizationClient.ScopeType(scopeQuery.ScopeType)
 		switch filter.ScopeType {
+		case authorizationClient.SCOPETYPE_CLUSTER:
+			// cluster_id lives in its own column on ObjectFilters, not under
+			// one of the scope-id columns. Without this, GORM's zero-value
+			// elision drops cluster_id from the WHERE and the query returns
+			// cluster-scoped rows across every cluster in the tenant.
+			clusterUuid, err := uuid.Parse(scopeQuery.ScopeId)
+			if err != nil {
+				return api.NewError(http.StatusBadRequest, "invalid cluster ID format", err)
+			}
+			filter.ClusterId = clusterUuid
 		case authorizationClient.SCOPETYPE_DEPARTMENT:
 			filter.DepartmentId = scopeQuery.ScopeId
 		case authorizationClient.SCOPETYPE_PROJECT:
