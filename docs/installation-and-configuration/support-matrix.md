@@ -40,8 +40,8 @@ Each NVIDIA Run:ai release is tested and validated against a single minor versio
 | NATS         | NVIDIA Run:ai control plane | 2.11.8            |
 | Thanos       | NVIDIA Run:ai control plane | 0.38.0            |
 | Valkey       | NVIDIA Run:ai cluster       | 9.0.4             |
-| oauth2-proxy | NVIDIA Run:ai cluster       | v7.15.4           |
-| git-sync     | NVIDIA Run:ai cluster       | v4.7.0            |
+| oauth2-proxy | NVIDIA Run:ai cluster       | 7.15.4            |
+| git-sync     | NVIDIA Run:ai cluster       | 4.7.0             |
 
 ## Supported NVIDIA GPUs
 

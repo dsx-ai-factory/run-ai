@@ -480,7 +480,7 @@ controlPlane:
       fipsMode: only
       imagePullSecrets:
         - name: runai-reg-creds
-        - name: dhi-reg-creds
+        - name: <dhi-secret-name>
       postgresql:
         auth:
           host: <POSTGRESQL_HOST>
@@ -491,21 +491,18 @@ controlPlane:
           postgresPassword: <ANY_VALUE> # Required, not used with an external instance
           dbSslMode: <SSL_MODE>
       postgresImage:
-        registry: <registry>
-        repository: <dhi-postgres-repository>
+        registry: docker.io
+        repository: <organization>/dhi-postgres
         tag: <fips-ready-tag>
     postgresql:
       enabled: false
-    grafana:
-      dbUser: grafana
-      dbPassword: <GRAFANA_PASSWORD>
     keycloakx:
       image:
-        repository: <registry>/<dhi-keycloak-repository>
+        repository: docker.io/<organization>/dhi-keycloak
         tag: <fips-ready-tag>
       imagePullSecrets:
         - name: runai-reg-creds
-        - name: dhi-reg-creds
+        - name: <dhi-secret-name>
       securityContext:
         runAsUser: 65532
       command:
@@ -518,20 +515,20 @@ controlPlane:
             --features=token-exchange,admin-fine-grained-authz:v1,fips
     traefik:
       image:
-        registry: <registry>
-        repository: <dhi-traefik-repository>
+        registry: docker.io
+        repository: <organization>/dhi-traefik
         tag: <fips-ready-tag>
     nats:
       image:
-        registry: <registry>
-        repository: <dhi-nats-repository>
+        registry: docker.io
+        repository: <organization>/dhi-nats
         tag: <fips-ready-tag>
       command:
         - /nats-server
     thanos:
       image:
-        registry: <registry>
-        repository: <dhi-thanos-repository>
+        registry: docker.io
+        repository: <organization>/dhi-thanos
         tag: <fips-ready-tag>
 
 cluster:
@@ -551,15 +548,15 @@ cluster:
       fipsMode: only
       additionalImagePullSecrets:
         - runai-reg-creds
-        - dhi-reg-creds
+        - <dhi-secret-name>
     thirdPartyImages:
       valkey:
-        registry: <registry>
-        repository: <dhi-valkey-repository>
+        registry: docker.io
+        repository: <organization>/dhi-valkey
         tag: <fips-ready-tag>
       git-sync:
-        registry: <registry>
-        repository: <dhi-git-sync-repository>
+        registry: docker.io
+        repository: <organization>/dhi-git-sync
         tag: <fips-ready-tag>
 
 prerequisites:

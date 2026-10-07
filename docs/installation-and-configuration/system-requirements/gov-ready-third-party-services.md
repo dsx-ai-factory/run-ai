@@ -11,12 +11,12 @@ Gov-ready third-party images are FIPS-enabled Docker Hardened Images (DHI). You 
 FIPS-enabled Docker Hardened Images require a paid Docker subscription (DHI Select or DHI Enterprise). To get access:
 
 1. Subscribe to Docker Hardened Images.
-2. Mirror the repositories of the images listed on this page to your Docker Hub organization. The `registry` and `repository` values in the Helm values on this page are the ones of your mirrored repositories.
+2. In Docker Hub, mirror the repository of each image listed on this page into your organization. The examples on this page use `<organization>` for your Docker Hub organization name, and `dhi-<name>` for each mirrored repository, for example `dhi-keycloak`.
 3. Create an access token with at least read-only access to those repositories. Use an Organization Access Token for an organization, or a Personal Access Token for a personal account.
 
 For the exact steps, refer to the Docker documentation on [using Docker Hardened Images](https://docs.docker.com/dhi/how-to/use/).
 
-### Providing Credentials
+### Docker Hub Credentials
 
 The Docker Hub credentials work the same way in [Guided Installation](../installation/guided-installation/README.md) and [Manual Helm](../installation/install-using-helm/preparations.md). How you provide them depends on whether your environment is connected or air-gapped.
 
@@ -24,17 +24,17 @@ The Docker Hub credentials work the same way in [Guided Installation](../install
 
 **Connected**
 
-1. Create the control plane and cluster namespaces if they do not exist yet. In Manual Helm, [Preparations](../installation/install-using-helm/preparations.md) already includes this step. In Guided Installation, the installer normally creates the namespaces, so create them now only to have a place for the secret. The installer uses the existing namespaces.
+1. Create the control plane and cluster namespaces. This step is required in both Manual Helm and Guided Installation, because the secret must exist in each namespace before you install.
 
    ```bash
    kubectl create namespace runai-backend
    kubectl create namespace runai
    ```
 
-2. Create a Kubernetes image pull secret named `dhi-reg-creds` from your access token in each namespace. You can use another name, but it must differ from `runai-reg-creds`, which holds the NVIDIA Run:ai registry credentials. Use your Docker ID as the username for a Personal Access Token, or your organization name for an Organization Access Token.
+2. Create a Kubernetes image pull secret from your access token in each namespace. Replace `<dhi-secret-name>` with a name of your choice, and use the same name wherever you reference the secret. Use your Docker ID as the username for a Personal Access Token, or your organization name for an Organization Access Token.
 
    ```bash
-   kubectl create secret docker-registry dhi-reg-creds \
+   kubectl create secret docker-registry <dhi-secret-name> \
    --docker-server=docker.io \
    --docker-username=<docker-id-or-organization> \
    --docker-password=<access-token> \
@@ -42,29 +42,26 @@ The Docker Hub credentials work the same way in [Guided Installation](../install
    --namespace=<namespace>
    ```
 
-During the installation, reference the secrets in the Helm values. List both secrets: `runai-reg-creds` for the NVIDIA Run:ai images from NGC, and `dhi-reg-creds` for the hardened images from Docker Hub.
+During the installation, reference the secret in the Helm values.
 
-* **Manual Helm** - You create `runai-reg-creds` as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts). Add the values to the control plane and cluster values you pass to Helm.
-* **Guided Installation** - The installer creates `runai-reg-creds` for you. Add the values under `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration.
+* **Manual Helm** - Add the values to the control plane and cluster values you pass to Helm.
+* **Guided Installation** - Add the values under `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration.
 
 ```yaml
 # Control plane
 global:
   imagePullSecrets:
-    - name: runai-reg-creds
-    - name: dhi-reg-creds
+    - name: <dhi-secret-name>
 keycloakx:
   imagePullSecrets:
-    - name: runai-reg-creds
-    - name: dhi-reg-creds
+    - name: <dhi-secret-name>
 ```
 
 ```yaml
 # Cluster
 global:
   additionalImagePullSecrets:
-    - runai-reg-creds
-    - dhi-reg-creds
+    - <dhi-secret-name>
 ```
 
 </Accordion>
@@ -77,24 +74,32 @@ Your cluster cannot reach Docker Hub, so you do not create a Kubernetes secret. 
 
 You do this in the pack configuration, the file you pass to `airgap pack`. Add an `imageOverrides` entry for each hardened image, so that the bundle contains it instead of the default image, and a `registryAuth` entry with your Docker Hub credentials. Use your Docker ID as the username for a Personal Access Token, or your organization name for an Organization Access Token, and the access token as the password.
 
+<Note>
+
+**Note**
+
+To fill in a `source`, copy the full image reference of the repository and tag from your Docker Hub dashboard and paste it in, instead of typing the organization, repository, and tag separately.
+
+</Note>
+
 ```yaml
 imageOverrides:
   # Control plane
   - name: keycloak
-    source: docker.io/<organization>/<dhi-keycloak-repository>:<fips-ready-tag>
+    source: docker.io/<organization>/dhi-keycloak:<fips-ready-tag>
   - name: postgres
-    source: docker.io/<organization>/<dhi-postgres-repository>:<fips-ready-tag>
+    source: docker.io/<organization>/dhi-postgres:<fips-ready-tag>
   - name: traefik
-    source: docker.io/<organization>/<dhi-traefik-repository>:<fips-ready-tag>
+    source: docker.io/<organization>/dhi-traefik:<fips-ready-tag>
   - name: nats
-    source: docker.io/<organization>/<dhi-nats-repository>:<fips-ready-tag>
+    source: docker.io/<organization>/dhi-nats:<fips-ready-tag>
   - name: thanos
-    source: docker.io/<organization>/<dhi-thanos-repository>:<fips-ready-tag>
+    source: docker.io/<organization>/dhi-thanos:<fips-ready-tag>
   # Cluster
   - name: valkey
-    source: docker.io/<organization>/<dhi-valkey-repository>:<fips-ready-tag>
+    source: docker.io/<organization>/dhi-valkey:<fips-ready-tag>
   - name: git-sync
-    source: docker.io/<organization>/<dhi-git-sync-repository>:<fips-ready-tag>
+    source: docker.io/<organization>/dhi-git-sync:<fips-ready-tag>
 
 registryAuth:
   - registry: docker.io
@@ -112,14 +117,14 @@ Then pack, load, and install as usual. For the full procedure, refer to [Air-Gap
 
 Write the values in a file or in the installer configuration, depending on the installation path:
 
-* **Manual Helm** - Save the values in a YAML file and pass it with `-f` to the `helm upgrade` commands in [Install the Control Plane](../installation/install-using-helm/install-control-plane.md#installation) and [Install the Cluster](../installation/install-using-helm/helm-install.md#installation). Use one file for the control plane values and one for the cluster values, because they belong to different charts.
+* **Manual Helm** - Save the values in a YAML file and pass it with `-f` to the `helm upgrade` commands in [Install the Control Plane](../installation/install-using-helm/install-control-plane.md#installation) and [Install the Cluster](../installation/install-using-helm/helm-install.md#installation). Use one file for the control plane values and one for the cluster values, because they belong to different charts. In air-gapped installations, pass this file in addition to the values file that `airgap load` generates.
 * **Guided Installation** - Add the control plane values under `controlPlane.customHelmValues` and the cluster values under `cluster.customHelmValues` in the installer configuration.
 
 <Note>
 
 **Note**
 
-In air-gapped installations, you do not set the image `registry`, `repository`, and `tag` values in the sections below. You enter the image locations in the pack configuration, and the values generated by the load step set them for the install. For details, refer to the Air-gapped section in [Providing Credentials](#providing-credentials).
+In air-gapped installations, you do not set the image `registry`, `repository`, and `tag` values in the sections below. You enter the image locations in the pack configuration, and the values generated by the load step set them for the install. Set only the other values from the sections below. For details, refer to the Air-gapped section in [Docker Hub Credentials](#docker-hub-credentials).
 
 </Note>
 
@@ -132,10 +137,10 @@ In a Gov-ready installation, PostgreSQL must be an externally managed instance. 
 | Component | Supports External Instance | Description | Gov-Ready Change |
 | --------- | -------------------------- | ----------- | ---------------- |
 | Keycloak | No | Provides identity federation, SSO, and OAuth2/OIDC authentication for the NVIDIA Run:ai platform | Replace the image, add the `fips` feature to the start command, and run as user ID `65532` |
-| PostgreSQL | Yes. Required for Gov-ready. | Stores all platform data including workloads, projects, users, and configuration | Use your own FIPS-ready instance, and replace the PostgreSQL wait image |
+| PostgreSQL | Yes, mandatory | Stores all platform data including workloads, projects, users, and configuration | Use your own FIPS-ready instance, and replace the PostgreSQL wait image |
 | Traefik | No | API gateway for token verification and micro-service routing | Replace the image |
-| NATS | Yes | Message broker for caching and asynchronous communication between platform services | Replace the image and override the command |
-| Thanos | Yes | Long-term metrics storage for the NVIDIA Run:ai control plane | Replace the image |
+| NATS | Yes, optional | Message broker for caching and asynchronous communication between platform services | Replace the image and override the command |
+| Thanos | Yes, optional | Long-term metrics storage for the NVIDIA Run:ai control plane | Replace the image |
 
 ### Keycloak
 
@@ -146,8 +151,8 @@ Replace the Keycloak image, add the `fips` feature to the start command, and run
 ```yaml
 keycloakx:
   image:
-    repository: <registry>/<dhi-keycloak-repository>
-    tag: <fips-ready-tag>                # tested with 26.6
+    repository: docker.io/<organization>/dhi-keycloak
+    tag: <fips-ready-tag>
   securityContext:
     runAsUser: 65532
   command:
@@ -166,16 +171,15 @@ PostgreSQL is the centralized database for the NVIDIA Run:ai control plane. Gov-
 
 #### Using an External PostgreSQL Instance
 
-To use your external instance, set `postgresql.enabled: false`, configure `global.postgresql.auth.*` with the connection details of your server, and update `grafana.dbUser` and `grafana.dbPassword`.
+To use your external instance, set `postgresql.enabled: false`, configure `global.postgresql.auth.*` with the connection details of your server.
 
-Before installing, provision the database, role, and Grafana user on your PostgreSQL server. NVIDIA Run:ai uses the role to create a user for each service, and each service has its own schema in the database. Each service user has permissions only on its own schema. The role owns the database, so that it has administrative permissions over it:
+Before installing, provision the database and role on your PostgreSQL server. NVIDIA Run:ai uses the role to create a user for each service, and each service has its own schema in the database. Each service user has permissions only on its own schema. The role owns the database, so that it has administrative permissions over it:
 
 1.  Create an SQL script file, edit the parameters below, and save it locally:
 
     * Replace `<DATABASE_NAME>` with a dedicated database name for NVIDIA Run:ai in your PostgreSQL database.
     * Replace `<ROLE_NAME>` with a dedicated role name (user) for the NVIDIA Run:ai database.
     * Replace `<ROLE_PASSWORD>` with a password for the new PostgreSQL role.
-    * Replace `<GRAFANA_PASSWORD>` with the password to be set for Grafana integration.
 
     ```sql
     -- Create the role with login and password
@@ -183,16 +187,6 @@ Before installing, provision the database, role, and Grafana user on your Postgr
 
     -- Create a new database for runai, owned by the role
     CREATE DATABASE <DATABASE_NAME> OWNER <ROLE_NAME>;
-
-    -- Connect to the newly created database
-    \c <DATABASE_NAME>
-
-    -- grafana
-    CREATE ROLE grafana WITH LOGIN PASSWORD '<GRAFANA_PASSWORD>';
-    CREATE SCHEMA grafana authorization grafana;
-    ALTER USER grafana set search_path='grafana';
-    -- Exit psql
-    \q
     ```
 2.  Run the following command on a machine where PostgreSQL client (`pgsql`) is installed:
 
@@ -233,9 +227,9 @@ NVIDIA Run:ai services use a PostgreSQL client image in init containers to wait 
 ```yaml
 global:
   postgresImage:
-    registry: <registry>
-    repository: <dhi-postgres-repository>
-    tag: <fips-ready-tag>                # tested with 16.15
+    registry: docker.io
+    repository: <organization>/dhi-postgres
+    tag: <fips-ready-tag>
 ```
 
 ### Traefik
@@ -247,9 +241,9 @@ Replace the Traefik image:
 ```yaml
 traefik:
   image:
-    registry: <registry>
-    repository: <dhi-traefik-repository>
-    tag: <fips-ready-tag>                # tested with 3.7.11
+    registry: docker.io
+    repository: <organization>/dhi-traefik
+    tag: <fips-ready-tag>
 ```
 
 ### NATS
@@ -261,8 +255,8 @@ Replace the NATS image and override the command. The hardened image places the b
 ```yaml
 nats:
   image:
-    registry: <registry>
-    repository: <dhi-nats-repository>
+    registry: docker.io
+    repository: <organization>/dhi-nats
     tag: <fips-ready-tag>
   command:
     - /nats-server
@@ -290,9 +284,9 @@ Replace the Thanos image:
 ```yaml
 thanos:
   image:
-    registry: <registry>
-    repository: <dhi-thanos-repository>
-    tag: <fips-ready-tag>                # tested with 0.42
+    registry: docker.io
+    repository: <organization>/dhi-thanos
+    tag: <fips-ready-tag>
 ```
 
 #### Using an External Thanos Instance
@@ -320,9 +314,9 @@ NVIDIA Run:ai cluster services support the workloads running on a NVIDIA Run:ai 
 ```yaml
 thirdPartyImages:
   valkey:
-    registry: <registry>
-    repository: <dhi-valkey-repository>
-    tag: <fips-ready-tag>                # tested with 9.1.1-fips
+    registry: docker.io
+    repository: <organization>/dhi-valkey
+    tag: <fips-ready-tag>
 ```
 
 ### git-sync
@@ -330,9 +324,9 @@ thirdPartyImages:
 ```yaml
 thirdPartyImages:
   git-sync:
-    registry: <registry>
-    repository: <dhi-git-sync-repository>
-    tag: <fips-ready-tag>                # tested with 4.7.1-fips
+    registry: docker.io
+    repository: <organization>/dhi-git-sync
+    tag: <fips-ready-tag>
 ```
 
 ## Next Steps

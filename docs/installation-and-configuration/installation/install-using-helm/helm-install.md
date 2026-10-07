@@ -68,7 +68,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
 3. Modify the UI-generated command as follows:
    * If you are using a local certificate authority, add `--set global.customCA.enabled=true` to the Helm command as described in the [Cluster Local CA](preparations.md#cluster-local-ca) section.
    * The recommended ingress controller is HAProxy. If you are using a different ingress controller, update the ingress class to match the ingress controller configured during the [control plane installation](install-control-plane.md#kubernetes).
-   * Save the image pull secrets and the hardened image values of the cluster third-party services in a values file and add `-f <GOV_READY_VALUES_FILE>` to the Helm command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#cluster-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+   * Save the image pull secrets and the hardened image values of the cluster third-party services in a values file and add `-f <GOV_READY_VALUES_FILE>` to the Helm command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
    * Add `--set global.fipsMode=only` to the Helm command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 ```bash
@@ -173,7 +173,7 @@ In the next section, the NVIDIA Run:ai cluster installation steps will be presen
 2. The NVIDIA Run:ai platform displays the Helm installation command in the cluster wizard.
 3. Modify the UI-generated command as follows:
    * If you are using a local certificate authority, add `--set global.customCA.enabled=true` to the Helm command as described in the [Cluster Local CA](preparations.md#cluster-local-ca) section.
-   * Save the image pull secrets and the hardened image values of the cluster third-party services in a values file and add `-f <GOV_READY_VALUES_FILE>` to the Helm command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#cluster-services) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+   * Save the image pull secrets and the hardened image values of the cluster third-party services in a values file and add `-f <GOV_READY_VALUES_FILE>` to the Helm command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
    * Add `--set global.fipsMode=only` to the Helm command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 ```bash

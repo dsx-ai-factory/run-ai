@@ -396,7 +396,7 @@ Creating this secret alone does not configure the control plane to use it - you 
 
 **Gov-ready**
 
-A Gov-ready installation also pulls the hardened third-party images from Docker Hub, which requires a separate Docker Hub access token and image pull secret in the `runai-backend` and `runai` namespaces. Refer to [Providing Credentials](../../system-requirements/gov-ready-third-party-services.md#providing-credentials) for how to create them and reference them in the Helm values.
+A Gov-ready installation also pulls the hardened third-party images from Docker Hub, which requires a separate Docker Hub access token and image pull secret in the `runai-backend` and `runai` namespaces. Refer to [Docker Hub Credentials](../../system-requirements/gov-ready-third-party-services.md#docker-hub-credentials) for how to create them and reference them in the Helm values.
 
 </Note>
 
@@ -438,9 +438,8 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
    - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
-     - Third-party services - Add an entry for each hardened third-party image: `keycloak`, `postgres` (the PostgreSQL wait image), `traefik`, `nats`, and `thanos` for the control plane, and `valkey` and `git-sync` for the cluster. Each `source` is the full reference of the hardened image in your Docker Hub organization, including the tag. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#providing-credentials) for the entries. <Badge intent="info" minimal outlined>Gov-ready</Badge>
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
-     - Docker Hub credentials - Add an entry for `docker.io` with your Docker ID or organization name and an access token, so that the pack can pull the hardened images. You do not create a Kubernetes secret. See [Providing Credentials](../../system-requirements/gov-ready-third-party-services.md#providing-credentials). <Badge intent="info" minimal outlined>Gov-ready</Badge>
+   - Third-party services - Add an entry to `imageOverrides` for each hardened third-party image, and an entry to `registryAuth` for `docker.io` with your Docker Hub credentials. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the full example. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```bash
    cat > airgap-pack.yaml <<'EOF'
@@ -544,7 +543,7 @@ Creating this secret alone does not configure the control plane to use it - you 
 
 **Gov-ready**
 
-A Gov-ready installation also pulls the hardened third-party images from Docker Hub, which requires a separate Docker Hub access token and image pull secret in the `runai-backend` and `runai` namespaces. Refer to [Providing Credentials](../../system-requirements/gov-ready-third-party-services.md#providing-credentials) for how to create them and reference them in the Helm values.
+A Gov-ready installation also pulls the hardened third-party images from Docker Hub, which requires a separate Docker Hub access token and image pull secret in the `runai-backend` and `runai` namespaces. Refer to [Docker Hub Credentials](../../system-requirements/gov-ready-third-party-services.md#docker-hub-credentials) for how to create them and reference them in the Helm values.
 
 </Note>
 
@@ -586,9 +585,8 @@ On that connected machine, download the `runai-installer` binary and use its `ai
 
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
    - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
-     - Third-party services - Add an entry for each hardened third-party image: `keycloak`, `postgres` (the PostgreSQL wait image), `traefik`, `nats`, and `thanos` for the control plane, and `valkey` and `git-sync` for the cluster. Each `source` is the full reference of the hardened image in your Docker Hub organization, including the tag. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#providing-credentials) for the entries. <Badge intent="info" minimal outlined>Gov-ready</Badge>
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
-     - Docker Hub credentials - Add an entry for `docker.io` with your Docker ID or organization name and an access token, so that the pack can pull the hardened images. You do not create a Kubernetes secret. See [Providing Credentials](../../system-requirements/gov-ready-third-party-services.md#providing-credentials). <Badge intent="info" minimal outlined>Gov-ready</Badge>
+   - Third-party services - Add an entry to `imageOverrides` for each hardened third-party image, and an entry to `registryAuth` for `docker.io` with your Docker Hub credentials. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the full example. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```bash
    cat > airgap-pack.yaml <<'EOF'

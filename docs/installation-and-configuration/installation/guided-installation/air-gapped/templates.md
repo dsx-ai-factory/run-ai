@@ -267,9 +267,6 @@ controlPlane:
           dbSslMode: <SSL_MODE>
     postgresql:
       enabled: false
-    grafana:
-      dbUser: grafana
-      dbPassword: <GRAFANA_PASSWORD>
     keycloakx:
       securityContext:
         runAsUser: 65532
