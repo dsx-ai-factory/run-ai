@@ -5,8 +5,8 @@ go 1.27.1
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261006190130-be70304295d7
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261006190130-be70304295d7
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261007054512-225ef558227d
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261007054512-225ef558227d
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.1
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
