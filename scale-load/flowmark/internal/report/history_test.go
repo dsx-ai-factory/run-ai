@@ -20,7 +20,7 @@ const (
 )
 
 func nightlyDocument(night int, clusterType string, p90 int) Document {
-	return Build(map[string]core.Section{"training-burst": {Category: core.CategoryScale, Metrics: map[string]any{"p90_ms@100": p90, "slo_p90_ms": 10000}}},
+	return Build(map[string]core.Section{"training-burst": {Category: core.CategoryScale, Metrics: map[string]any{"p90_ms@100": p90}, SLO: map[string]int{"p90_ms": 10000}}},
 		RunInfo{StartedAt: time.Date(2026, 10, night, 1, 0, 0, 0, time.UTC), Provider: "ci", ClusterType: clusterType})
 }
 

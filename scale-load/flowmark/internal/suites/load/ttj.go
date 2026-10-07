@@ -31,6 +31,7 @@ const (
 	progressInterval   = 30 * time.Second
 	cleanupGrace       = time.Minute
 	timestampTolerance = time.Second
+	rateShortfall      = 0.10
 )
 
 type Suite struct{}
@@ -361,19 +362,9 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 	ttj := measure.Stats(s.TTJ)
 	api := measure.Stats(s.ApiAccepted)
 	metrics := map[string]any{
-		"flow":                           strings.ToLower(opts.workloadType) + "_to_pod",
-		"workload_type":                  opts.workloadType,
-		"users":                          opts.users,
-		"target_rate_per_sec":            opts.rate,
-		"actual_rate_per_sec":            pacing.Rate(),
-		"duration_ms":                    opts.duration.Milliseconds(),
-		"image":                          opts.image,
-		"kube_requests_per_sec":          opts.limits.KubeRequestsPerSecond,
-		"control_plane_requests_per_sec": opts.limits.ControlPlaneRequestsPerSecond,
-		"submitted":                      pacing.Submitted,
-		"failed_count":                   api.FailedCount,
-		"never_arrived_count":            ttj.NeverArrivedCount,
-		"success_rate":                   measure.SuccessRate(submissions),
+		"workload_type":       opts.workloadType,
+		"failed_count":        api.FailedCount,
+		"never_arrived_count": ttj.NeverArrivedCount,
 	}
 	for name, timings := range map[string][]measure.Timing{"api_accepted": s.ApiAccepted, "cluster_synced": s.ClusterSynced, "pod_created": s.PodCreated, "ttj": s.TTJ} {
 		summary := measure.Stats(timings)
@@ -386,14 +377,11 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 		metrics[name+"_mean_ms"] = summary.Mean.Milliseconds()
 		metrics[name+"_max_ms"] = summary.Max.Milliseconds()
 	}
-	if opts.slo != nil {
-		metrics["slo"] = opts.slo
-		for key, value := range opts.slo {
-			metrics["slo_"+key] = value
-		}
-	}
 
 	var problems []string
+	if achieved := pacing.Rate(); pacing.Submitted >= 2 && achieved < float64(opts.rate)*(1-rateShortfall) {
+		problems = append(problems, fmt.Sprintf("the pacer kept only %.2f/s of the %d/s target: the environment could not absorb the load", achieved, opts.rate))
+	}
 	if ttj.NeverArrivedCount > 0 {
 		if interrupted != nil {
 			problems = append(problems, fmt.Sprintf("%d workloads had not reached the cluster when the run was interrupted: %v", ttj.NeverArrivedCount, interrupted))
@@ -409,7 +397,7 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 		problems = append(problems, fmt.Sprintf("the measurement was interrupted %d times: the cluster watch closed and was reopened; latencies of workloads in flight during the gaps are inflated", interruptions))
 	}
 
-	section := core.Section{Category: core.CategoryLoad, Metrics: metrics}
+	section := core.Section{Category: core.CategoryLoad, Metrics: metrics, SLO: opts.slo}
 	if len(problems) > 0 {
 		section.Failed = true
 		section.Error = strings.Join(problems, "; ")

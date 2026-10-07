@@ -67,8 +67,8 @@ func TestSLOBreachIsFlaggedWithoutAnyHistory(t *testing.T) {
 	if r := judged.Regressions[0]; r.Against != AgainstSLO || r.Baseline != 10000 || !strings.Contains(r.Message, "over the SLO of 10000 ms") {
 		t.Fatalf("the culprit must blame the SLO: %+v", r)
 	}
-	if judged.Sections[burstSection].Metrics["slo_p90_ms_regression"] != nil {
-		t.Fatal("the SLO key itself is not a KPI and must never be flagged")
+	if judged.Sections[burstSection].SLO["p90_ms"] != 10000 {
+		t.Fatal("the slo block must survive judging untouched")
 	}
 }
 
@@ -136,13 +136,11 @@ func TestDayEightWalkthroughFlagsFourNightsThenTheMedianAdapts(t *testing.T) {
 }
 
 func TestSLOsApplyToAnyLatencyMetricWhileTheMedianStaysOnP90(t *testing.T) {
-	section := map[string]any{
-		"p90_ms@100": 100, "slo_p90_ms": 1000,
-		"p99_ms@100": 20000, "slo_p99_ms": 15000,
-		"max_ms@100": 70, "slo_max_ms": 50,
-		"p50_ms@100": 40,
+	section := core.Section{Category: core.CategoryScale,
+		Metrics: map[string]any{"p90_ms@100": 100, "p99_ms@100": 20000, "max_ms@100": 70, "p50_ms@100": 40},
+		SLO:     map[string]int{"p90_ms": 1000, "p99_ms": 15000, "max_ms": 50},
 	}
-	document := Build(map[string]core.Section{burstSection: {Category: core.CategoryScale, Metrics: section}}, RunInfo{ClusterType: kindCluster})
+	document := Build(map[string]core.Section{burstSection: section}, RunInfo{ClusterType: kindCluster})
 
 	judged := DetectRegressions(document, nights(1, 7, kindCluster, 100), sevenNights)
 
@@ -179,15 +177,16 @@ func TestJudgingAgainClearsStaleFlags(t *testing.T) {
 func TestKPIsAreTheP90MetricsOnly(t *testing.T) {
 	metrics := map[string]any{
 		"p90_ms@100": 1, "ttj_p90_ms": 2, "cluster_synced_p90_ms": 3,
-		"p50_ms@100": 4, "slo_p90_ms": 5, "p90_ms@100_regression": true, "flow": "x", "max_ms": 6,
+		"p50_ms@100": 4, "p90_ms@100_regression": true, "flow": "x", "max_ms": 6,
 	}
 	if got := kpis(metrics); strings.Join(got, ",") != "cluster_synced_p90_ms,p90_ms@100,ttj_p90_ms" {
 		t.Fatalf("only p90 metrics are KPIs, sorted, got %v", got)
 	}
-	if got := withSLO(metrics); strings.Join(got, ",") != "p90_ms@100" {
-		t.Fatalf("only metrics with a matching slo_ key are checked against an SLO, got %v", got)
+	section := core.Section{Metrics: metrics, SLO: map[string]int{"p90_ms": 5}}
+	if got := withSLO(section); strings.Join(got, ",") != "p90_ms@100" {
+		t.Fatalf("only metrics with a limit in the slo block are checked against an SLO, got %v", got)
 	}
-	if sloKey("p90_ms@250") != "slo_p90_ms" || sloKey("ttj_p90_ms") != "slo_ttj_p90_ms" {
+	if sloName("p90_ms@250") != "p90_ms" || sloName("ttj_p90_ms") != "ttj_p90_ms" {
 		t.Fatal("the SLO of a round metric is the SLO of its base name")
 	}
 	if median([]float64{5, 1, 3}) != 3 || median([]float64{4, 1, 3, 2}) != 2.5 {

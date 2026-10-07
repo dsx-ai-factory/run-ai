@@ -159,8 +159,8 @@ func TestDeploymentRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
 	if err := kube.List(ctx, &left, k8sclient.InNamespace(testNamespace)); err != nil || len(left.Items) != 0 {
 		t.Fatalf("quiesce must delete the round's deployments, %d left (%v)", len(left.Items), err)
 	}
-	if result.submitMakespan <= 0 || result.quiesce <= 0 || result.unmatched != 0 {
-		t.Fatalf("makespans must be measured and nothing may be unmatched: %+v", result)
+	if result.unmatched != 0 {
+		t.Fatalf("nothing may be unmatched: %+v", result)
 	}
 }
 
@@ -363,9 +363,6 @@ func TestControlPlaneRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
 			if result.err != nil {
 				t.Fatalf("round must succeed: %v", result.err)
 			}
-			if want := strings.ToLower(workloadType) + "_to_workload_runner"; flow.name() != want {
-				t.Fatalf("flow name must follow the type, got %q", flow.name())
-			}
 			summary := measure.Stats(result.timings)
 			if summary.SampleSize != 5 || summary.NeverArrivedCount != 0 {
 				t.Fatalf("all 5 workloads must be measured: %+v", summary)
@@ -502,27 +499,32 @@ func timing(name string, outcome measure.Outcome, d time.Duration, err error) me
 func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 	knobs := settings{rounds: []int{2, 3}, workloadType: "Deployment", pods: 1, settle: time.Second, slo: map[string]int{"p90_ms": 5000}}
 	rounds := []round{
-		{index: 1, size: 2, submitMakespan: time.Second, quiesce: 2 * time.Second, timings: []measure.Timing{timing("a", measure.Arrived, time.Second, nil), timing("b", measure.Arrived, 3*time.Second, nil)}},
-		{index: 2, size: 3, submitMakespan: time.Second, quiesce: 2 * time.Second, timings: []measure.Timing{timing("c", measure.Arrived, 4*time.Second, nil), timing("d", measure.Arrived, 5*time.Second, nil), timing("e", measure.Arrived, 6*time.Second, nil)}},
+		{index: 1, size: 2, timings: []measure.Timing{timing("a", measure.Arrived, time.Second, nil), timing("b", measure.Arrived, 3*time.Second, nil)}},
+		{index: 2, size: 3, timings: []measure.Timing{timing("c", measure.Arrived, 4*time.Second, nil), timing("d", measure.Arrived, 5*time.Second, nil), timing("e", measure.Arrived, 6*time.Second, nil)}},
 	}
 
-	section := buildSection("deployment_to_external_workload", rounds, knobs)
+	section := buildSection(rounds, knobs)
 
 	if section.Failed || section.Error != "" {
 		t.Fatalf("clean rounds must not fail: %+v", section)
 	}
-	if section.Metrics["flow"] != "deployment_to_external_workload" || section.Metrics["settle_ms"] != int64(1000) {
-		t.Fatalf("flow and settle must be reported: %v", section.Metrics)
+	if section.Metrics["workload_type"] != "Deployment" {
+		t.Fatalf("the workload type must be reported: %v", section.Metrics)
 	}
-	for _, key := range []string{"image", "submit_concurrency", "kube_requests_per_sec", "control_plane_requests_per_sec"} {
-		if _, present := section.Metrics[key]; !present {
-			t.Fatalf("submission settings must be reported, %s missing", key)
+	for _, key := range []string{"flow", "kube_requests_per_sec", "control_plane_requests_per_sec", "rounds", "submit_concurrency", "settle_ms", "sample_size@2", "makespan_ms@2", "pods_per_workload", "submit_makespan_ms@2", "unmatched_arrivals@2", "image", "slo", "success_rate@2"} {
+		if _, present := section.Metrics[key]; present {
+			t.Fatalf("%s is a scenario knob, not a result, and must stay out of the report", key)
 		}
 	}
-	if section.Metrics["slo_p90_ms"] != 5000 || !maps.Equal(section.Metrics["slo"].(map[string]int), knobs.slo) {
-		t.Fatalf("SLO must be copied from the yaml: %v / %v", section.Metrics["slo_p90_ms"], section.Metrics["slo"])
+	if section.SLO["p90_ms"] != 5000 {
+		t.Fatalf("SLO must be copied from the yaml into the section's slo block: %v", section.SLO)
 	}
-	documented := []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec", "makespan_ms", "submit_makespan_ms", "quiesce_ms", "sample_size", "never_arrived_count", "failed_count", "unmatched_arrivals", "success_rate"}
+	for key := range section.Metrics {
+		if strings.HasPrefix(key, "slo") {
+			t.Fatalf("limits live in the slo block, not among the metrics: %s", key)
+		}
+	}
+	documented := []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec", "never_arrived_count", "failed_count"}
 	for _, size := range knobs.rounds {
 		for _, key := range documented {
 			if _, present := section.Metrics[fmt.Sprintf("%s@%d", key, size)]; !present {
@@ -533,6 +535,9 @@ func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 	if section.Metrics["p50_ms@2"] != int64(1000) || section.Metrics["p90_ms@3"] != int64(6000) || section.Metrics["never_arrived_count@3"] != 0 {
 		t.Fatalf("per-round metrics wrong: %v", section.Metrics)
 	}
+	if section.Metrics["throughput_per_sec@3"] != 0.5 {
+		t.Fatalf("3 arrivals whose last one lands 6 s after the first create is 0.5 per second, written with one decimal: %v", section.Metrics["throughput_per_sec@3"])
+	}
 }
 
 func TestBuildSectionNeverArrivedRoundFailsWithoutZeros(t *testing.T) {
@@ -542,13 +547,13 @@ func TestBuildSectionNeverArrivedRoundFailsWithoutZeros(t *testing.T) {
 		timing("b", measure.NeverArrived, 0, errors.New("watch closed by the server")),
 	}}}
 
-	section := buildSection("deployment_to_external_workload", rounds, knobs)
+	section := buildSection(rounds, knobs)
 
 	if !section.Failed || !strings.Contains(section.Error, "round 1 (2 workloads): 2 never reached the cluster") || !strings.Contains(section.Error, "watch closed") {
 		t.Fatalf("a round where nothing arrived must fail with a clear message: %+v", section)
 	}
-	if !strings.Contains(section.Error, "2 objects arrived that matched no submitted workload") || section.Metrics["unmatched_arrivals@2"] != 2 {
-		t.Fatalf("unmatched arrivals must be reported next to the never arrived count: %+v", section)
+	if !strings.Contains(section.Error, "2 objects arrived that matched no submitted workload") {
+		t.Fatalf("unmatched arrivals must be explained in the error text: %+v", section)
 	}
 	if _, present := section.Metrics["p50_ms@2"]; present {
 		t.Fatal("no latency may be reported when nothing arrived")
@@ -565,14 +570,14 @@ func TestBuildSectionStoppedRunAndFailedCreates(t *testing.T) {
 		{index: 2, size: 2, err: errors.New("namespace did not quiesce within 5m"), timings: []measure.Timing{timing("b", measure.Arrived, time.Second, nil), timing("c", measure.Arrived, time.Second, nil)}},
 	}
 
-	section := buildSection("training_to_workload_runner", rounds, knobs)
+	section := buildSection(rounds, knobs)
 
 	for _, want := range []string{"round 1 (1 workloads): 1 creates failed (HTTP 429 from the control plane)", "round 2 (2 workloads): namespace did not quiesce", "run stopped after 2 of 3 rounds"} {
 		if !strings.Contains(section.Error, want) {
 			t.Fatalf("error must contain %q, got %q", want, section.Error)
 		}
 	}
-	if section.Metrics["failed_count@1"] != 1 || section.Metrics["sample_size@2"] != 2 {
+	if section.Metrics["failed_count@1"] != 1 || section.Metrics["never_arrived_count@2"] != 0 {
 		t.Fatalf("counts wrong: %v", section.Metrics)
 	}
 }

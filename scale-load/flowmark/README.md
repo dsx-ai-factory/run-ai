@@ -92,9 +92,9 @@ Each accepted Workspace is timed in three legs on one clock: `api_accepted`
 from the request to the 200, `cluster_synced` from the 200 to its
 WorkloadRunner on the cluster, `pod_created` from the WorkloadRunner to its
 first pod. `ttj`, the time to job, runs from the 200 to the first pod. A
-rejected submission lowers `success_rate` and enters no latency. The pacer
-never fires missed ticks later, so `actual_rate_per_sec` next to
-`target_rate_per_sec` shows whether the environment kept up with the load.
+rejected submission counts in `failed_count` and enters no latency. The pacer
+never fires missed ticks later; when the achieved rate ends more than 10%
+under the target, the section fails and says so.
 
 ## Results
 
@@ -103,13 +103,12 @@ Every run writes `reports/results-<timestamp>.json` and adds it to
 metadata (start time, provider, cluster type, versions) and one
 section per scenario. A `scale-burst` section has `p50_ms@N`, `p90_ms@N`,
 `p99_ms@N`, `throughput_per_sec@N`, `never_arrived_count@N`, `failed_count@N` and
-the knobs used, `N` being the round size; `makespan_ms@N` runs from the first
-create response to the last arrival and `throughput_per_sec@N` is the number
-of arrived workloads divided by it. A `load-ttj` section has `<span>_p50_ms`,
+the knobs used, `N` being the round size; `throughput_per_sec@N` is the number
+of arrived workloads divided by the time from the first create response to
+the last arrival. A `load-ttj` section has `<span>_p50_ms`,
 `<span>_p90_ms` and `<span>_p99_ms` for `api_accepted`, `cluster_synced`,
-`pod_created` and `ttj`, plus `submitted`, `success_rate`,
-`target_rate_per_sec` and `actual_rate_per_sec`. Workloads that never arrived
-are counted in `never_arrived_count` and never as zero latency. The health of
+`pod_created` and `ttj`, plus `failed_count` and `never_arrived_count`.
+Workloads that never arrived are counted there and never as zero latency. The health of
 the measurement itself is not a metric: when the cluster watch had to be
 reopened, or a WorkloadRunner or pod was seen more than a second before the
 step that precedes it, the section fails and `error` explains why, and the
@@ -119,9 +118,9 @@ The results are then judged in two ways. Against history: every p90 is
 compared with the median of the same metric in the last 7 runs of the same
 `cluster_type` found in the output directory, and more than 15% above that
 median is a regression; with fewer than 7 such runs the comparison is skipped.
-Against the SLO: every latency metric that has an `slo_` value from the
-scenario file, p90 or not, is a regression when above it, regardless of
-history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest
+Against the SLO: the limits from the scenario file are copied into the
+section's `slo` block, and every latency metric with a limit there, p90 or
+not, is a regression when above it, regardless of history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest
 workload of the night, so one unlucky pod makes it fire. A flagged metric gets
 a sibling `<metric>_regression: true`, `regression_detected` at the top of the
 file becomes true, and `regressions` lists every finding with a ready-made

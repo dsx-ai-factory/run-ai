@@ -84,19 +84,39 @@ func TestBuildSectionReportsEverySpanAndTheRates(t *testing.T) {
 		t.Fatalf("a rejected submission must not fail the section: %+v", section)
 	}
 	m := section.Metrics
-	for _, key := range []string{"api_accepted_p90_ms", "cluster_synced_p90_ms", "pod_created_p90_ms", "ttj_p90_ms", "ttj_p50_ms", "ttj_p99_ms", "actual_rate_per_sec", "target_rate_per_sec", "success_rate", "failed_count", "never_arrived_count", "slo_ttj_p90_ms"} {
+	for _, key := range []string{"api_accepted_p90_ms", "cluster_synced_p90_ms", "pod_created_p90_ms", "ttj_p90_ms", "ttj_p50_ms", "ttj_p99_ms", "failed_count", "never_arrived_count"} {
 		if _, ok := m[key]; !ok {
 			t.Errorf("metric %s is missing", key)
 		}
 	}
-	if m["submitted"] != 3 || m["failed_count"] != 1 || m["never_arrived_count"] != 0 {
+	if m["failed_count"] != 1 || m["never_arrived_count"] != 0 {
 		t.Fatalf("counts wrong: %v", m)
 	}
-	if rate, _ := m["success_rate"].(float64); rate < 0.66 || rate > 0.67 {
-		t.Fatalf("2 of 3 accepted is 0.67, got %v", m["success_rate"])
+	for _, key := range []string{"users", "duration_ms", "image", "slo", "success_rate", "flow", "submitted", "target_rate_per_sec", "actual_rate_per_sec"} {
+		if _, present := m[key]; present {
+			t.Fatalf("%s is a scenario knob or derivable, it must stay out of the report", key)
+		}
 	}
-	if m["ttj_p90_ms"] != int64(5000) || m["slo_ttj_p90_ms"] != 10000 {
-		t.Fatalf("ttj p90 of [3100, 5000] is 5000 next to its SLO: %v / %v", m["ttj_p90_ms"], m["slo_ttj_p90_ms"])
+	if m["ttj_p90_ms"] != int64(5000) || section.SLO["ttj_p90_ms"] != 10000 {
+		t.Fatalf("ttj p90 of [3100, 5000] is 5000 and its SLO sits in the slo block: %v / %v", m["ttj_p90_ms"], section.SLO)
+	}
+}
+
+func TestBuildSectionFailsWhenThePacerFellBehind(t *testing.T) {
+	arrived := []measure.Submission{
+		{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3), PodCreatedAt: at(5.3)},
+		{Name: "w2", RequestedAt: at(30), ApiAcceptedAt: at(30.3), ClusterSyncedAt: at(32.3), PodCreatedAt: at(35.3)},
+	}
+	kept := submit.Pacing{Submitted: 121, FirstDispatch: at(0), LastDispatch: at(60)}
+	if section := buildSection(measure.CollectSpans(arrived), kept, arrived, testOptions(), 0, nil); section.Failed {
+		t.Fatalf("2.00/s against a 2/s target is on pace: %+v", section)
+	}
+
+	behind := submit.Pacing{Submitted: 61, FirstDispatch: at(0), LastDispatch: at(60)}
+	section := buildSection(measure.CollectSpans(arrived), behind, arrived, testOptions(), 0, nil)
+
+	if !section.Failed || !strings.Contains(section.Error, "kept only 1.00/s of the 2/s target") {
+		t.Fatalf("a pacer more than 10%% under its target must fail the section and say so: %+v", section)
 	}
 }
 

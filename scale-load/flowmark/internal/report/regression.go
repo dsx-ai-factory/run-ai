@@ -18,7 +18,6 @@ import (
 
 const (
 	kpiMarker        = "p90_ms"
-	sloPrefix        = "slo_"
 	regressionSuffix = "_regression"
 	AgainstMedian    = "median"
 	AgainstSLO       = "slo"
@@ -32,11 +31,11 @@ type RegressionConfig struct {
 type Regression struct {
 	Section  string  `json:"section"`
 	Metric   string  `json:"metric"`
-	Value    float64 `json:"value"`
-	Baseline float64 `json:"baseline"`
-	Against  string  `json:"against"`
-	Change   float64 `json:"change,omitempty"`
 	Message  string  `json:"message"`
+	Value    float64 `json:"-"`
+	Baseline float64 `json:"-"`
+	Against  string  `json:"-"`
+	Change   float64 `json:"-"`
 }
 
 func DetectRegressions(document Document, history []Document, config RegressionConfig) Document {
@@ -51,9 +50,9 @@ func DetectRegressions(document Document, history []Document, config RegressionC
 			value, _ := number(section.Metrics[metric])
 			found[metric] = append(found[metric], judgeAgainstMedian(name, metric, value, history, config)...)
 		}
-		for _, metric := range withSLO(section.Metrics) {
+		for _, metric := range withSLO(section) {
 			value, _ := number(section.Metrics[metric])
-			if slo, _ := number(section.Metrics[sloKey(metric)]); value > slo {
+			if slo := float64(section.SLO[sloName(metric)]); value > slo {
 				found[metric] = append(found[metric], Regression{
 					Section: name, Metric: metric, Value: value, Baseline: slo, Against: AgainstSLO,
 					Message: fmt.Sprintf("%s %s: %s is over the SLO of %s", name, metric, milliseconds(value), milliseconds(slo)),
@@ -104,14 +103,14 @@ func kpis(metrics map[string]any) []string {
 	return measured(metrics, func(name string) bool { return strings.Contains(name, kpiMarker) })
 }
 
-func withSLO(metrics map[string]any) []string {
-	return measured(metrics, func(name string) bool { _, ok := number(metrics[sloKey(name)]); return ok })
+func withSLO(section core.Section) []string {
+	return measured(section.Metrics, func(name string) bool { _, ok := section.SLO[sloName(name)]; return ok })
 }
 
 func measured(metrics map[string]any, keep func(name string) bool) []string {
 	var names []string
 	for name, value := range metrics {
-		if _, ok := number(value); !ok || strings.HasPrefix(name, sloPrefix) || strings.HasSuffix(name, regressionSuffix) || !keep(name) {
+		if _, ok := number(value); !ok || strings.HasSuffix(name, regressionSuffix) || !keep(name) {
 			continue
 		}
 		names = append(names, name)
@@ -120,9 +119,9 @@ func measured(metrics map[string]any, keep func(name string) bool) []string {
 	return names
 }
 
-func sloKey(metric string) string {
+func sloName(metric string) string {
 	base, _, _ := strings.Cut(metric, "@")
-	return sloPrefix + base
+	return base
 }
 
 func median(values []float64) float64 {

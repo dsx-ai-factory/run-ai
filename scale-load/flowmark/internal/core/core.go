@@ -141,6 +141,7 @@ const (
 type Section struct {
 	Category Category       `json:"category"`
 	Metrics  map[string]any `json:"metrics"`
+	SLO      map[string]int `json:"slo,omitempty"`
 	Failed   bool           `json:"failed"`
 	Error    string         `json:"error,omitempty"`
 }

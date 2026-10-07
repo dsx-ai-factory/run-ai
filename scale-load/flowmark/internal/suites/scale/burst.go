@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"slices"
 	"sort"
@@ -76,21 +77,18 @@ type item struct {
 }
 
 type workloadFlow interface {
-	name() string
 	watch(ctx context.Context, namespace string) (*measure.Watcher, error)
 	create(ctx context.Context, workload item) (string, error)
 	teardown(ctx context.Context, namespace string, labels map[string]string) (int, error)
 }
 
 type round struct {
-	index          int
-	size           int
-	timings        []measure.Timing
-	unmatched      int
-	interruptions  int
-	submitMakespan time.Duration
-	quiesce        time.Duration
-	err            error
+	index         int
+	size          int
+	timings       []measure.Timing
+	unmatched     int
+	interruptions int
+	err           error
 }
 
 const suiteName = "scale-burst"
@@ -167,7 +165,7 @@ func (Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario
 			}
 		}
 	}
-	return buildSection(flow.name(), rounds, knobs), nil
+	return buildSection(rounds, knobs), nil
 }
 
 func describeRound(r round) string {
@@ -323,9 +321,7 @@ func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, nam
 
 	labels := map[string]string{runLabel: id, roundLabel: strconv.Itoa(index), roundSizeLabel: strconv.Itoa(size)}
 	var names sync.Map
-	submitStart := time.Now()
 	burst(ctx, flow, watcher, &names, namespace, id, index, size, labels, knobs)
-	result.submitMakespan = time.Since(submitStart)
 
 	timings := watcher.WaitAll(knobs.timeout)
 	result.unmatched = watcher.Unmatched()
@@ -343,9 +339,7 @@ func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, nam
 	sort.Slice(timings, func(i, j int) bool { return timings[i].Name < timings[j].Name })
 	result.timings = timings
 
-	quiesceStart := time.Now()
 	result.err = quiesce(ctx, flow, kube, namespace, labels, knobs.setupTimeout)
-	result.quiesce = time.Since(quiesceStart)
 	return result
 }
 
@@ -412,36 +406,15 @@ func settle(ctx context.Context, pause time.Duration) {
 	}
 }
 
-func buildSection(flowName string, rounds []round, knobs settings) core.Section {
-	metrics := map[string]any{
-		"flow":                           flowName,
-		"rounds":                         knobs.rounds,
-		"workload_type":                  knobs.workloadType,
-		"pods_per_workload":              knobs.pods,
-		"image":                          knobs.image,
-		"submit_concurrency":             knobs.concurrency,
-		"kube_requests_per_sec":          knobs.limits.KubeRequestsPerSecond,
-		"control_plane_requests_per_sec": knobs.limits.ControlPlaneRequestsPerSecond,
-		"settle_ms":                      knobs.settle.Milliseconds(),
-	}
-	if knobs.slo != nil {
-		metrics["slo"] = knobs.slo
-		for key, value := range knobs.slo {
-			metrics["slo_"+key] = value
-		}
-	}
+func buildSection(rounds []round, knobs settings) core.Section {
+	metrics := map[string]any{"workload_type": knobs.workloadType}
 
 	var problems []string
 	for _, r := range rounds {
 		at := fmt.Sprintf("@%d", r.size)
 		summary := measure.Stats(r.timings)
-		metrics["sample_size"+at] = summary.SampleSize
 		metrics["never_arrived_count"+at] = summary.NeverArrivedCount
 		metrics["failed_count"+at] = summary.FailedCount
-		metrics["success_rate"+at] = summary.SuccessRate
-		metrics["unmatched_arrivals"+at] = r.unmatched
-		metrics["submit_makespan_ms"+at] = r.submitMakespan.Milliseconds()
-		metrics["quiesce_ms"+at] = r.quiesce.Milliseconds()
 		if summary.SampleSize > 0 {
 			metrics["p50_ms"+at] = summary.P50.Milliseconds()
 			metrics["p90_ms"+at] = summary.P90.Milliseconds()
@@ -450,8 +423,7 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 			metrics["max_ms"+at] = summary.Max.Milliseconds()
 		}
 		if summary.HasThroughput() {
-			metrics["makespan_ms"+at] = summary.Makespan.Milliseconds()
-			metrics["throughput_per_sec"+at] = summary.Throughput
+			metrics["throughput_per_sec"+at] = math.Round(summary.Throughput*10) / 10
 		}
 		problems = append(problems, roundProblems(r, summary)...)
 	}
@@ -459,7 +431,7 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 		problems = append(problems, fmt.Sprintf("run stopped after %d of %d rounds", len(rounds), len(knobs.rounds)))
 	}
 
-	section := core.Section{Category: core.CategoryScale, Metrics: metrics}
+	section := core.Section{Category: core.CategoryScale, Metrics: metrics, SLO: knobs.slo}
 	if len(problems) > 0 {
 		section.Failed = true
 		section.Error = strings.Join(problems, "; ")
@@ -563,10 +535,6 @@ type deploymentFlow struct {
 	concurrency int
 }
 
-func (*deploymentFlow) name() string {
-	return "deployment_to_external_workload"
-}
-
 func (f *deploymentFlow) watch(ctx context.Context, namespace string) (*measure.Watcher, error) {
 	return measure.WatchExternalWorkloads(ctx, f.kube, namespace)
 }
@@ -613,10 +581,6 @@ type controlPlaneFlow struct {
 	mu              sync.Mutex
 	created         map[string]string
 	deleteRequested map[string]bool
-}
-
-func (f *controlPlaneFlow) name() string {
-	return strings.ToLower(f.workloadType) + "_to_workload_runner"
 }
 
 func (f *controlPlaneFlow) watch(ctx context.Context, namespace string) (*measure.Watcher, error) {

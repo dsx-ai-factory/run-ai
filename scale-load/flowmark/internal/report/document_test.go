@@ -19,8 +19,8 @@ import (
 func exampleDocument() Document {
 	return DetectRegressions(Build(map[string]core.Section{
 		"deployment-burst": {Category: core.CategoryScale, Metrics: map[string]any{
-			"flow": "deployment_to_external_workload", "p90_ms@100": int64(5754), "never_arrived_count@100": 0, "slo_p90_ms": 5000,
-		}},
+			"p90_ms@100": int64(5754), "never_arrived_count@100": 0,
+		}, SLO: map[string]int{"p90_ms": 5000}},
 		"selfcheck": {Category: core.CategoryScale, Metrics: map[string]any{"selfcheck_duration_seconds": 0.1}, Failed: true, Error: "example failure text"},
 	}, RunInfo{
 		StartedAt:           time.Date(2026, 9, 28, 1, 0, 0, 0, time.UTC),
