@@ -1,4 +1,5 @@
 ---
+hidden: true
 noIndex: true
 ---
 

@@ -4,7 +4,7 @@ instances:
 - url: nvidia-run-ai.docs.buildwithfern.com/run-ai
   custom-domain: docs.nvidia.com/run-ai
   multi-source: true
-title: NVIDIA Run:ai Self-Hosted Product Documentation
+title: NVIDIA Run:ai Documentation
 global-theme: nvidia
 logo:
   right-text: Run:ai
