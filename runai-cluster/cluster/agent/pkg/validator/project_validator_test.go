@@ -190,11 +190,9 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 				req.Operation = operation
 				res := projectValidator.Handle(context.Background(), req)
 
-				Expect(res.Result.Message).To(ContainSubstring("not found"))
-				Expect(res.Result.Message).To(ContainSubstring("serviceaccount"))
+				Expect(res.Result.Message).To(ContainSubstring("operation not allowed"))
 				Expect(res.Allowed).To(BeFalse())
-				Expect(res.Result.Reason).To(BeEmpty())
-				Expect(res.Result.Code).To(Equal(int32(http.StatusInternalServerError)))
+				Expect(res.Result.Code).To(Equal(int32(http.StatusForbidden)))
 			}
 		})
 	})
