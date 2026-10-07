@@ -35,7 +35,7 @@ func NewResourceClaimTemplatesAPIService() *ResourceClaimTemplatesAPIService {
 }
 
 // ListResourceClaimTemplates - list details of ResourceClaimTemplates
-func (s *ResourceClaimTemplatesAPIService) ListResourceClaimTemplates(ctx context.Context, scopeType string, scopeId string, name string, clusterId string, origin string, includeAncestors bool, includeDescendants bool) (ImplResponse, error) {
+func (s *ResourceClaimTemplatesAPIService) ListResourceClaimTemplates(ctx context.Context, scopeType string, scopeId string, name string, clusterId string, origin string) (ImplResponse, error) {
 	// TODO - update ListResourceClaimTemplates with the required logic for this service method.
 	// Add api_resource_claim_templates_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

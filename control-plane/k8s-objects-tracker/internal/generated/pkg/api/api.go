@@ -275,7 +275,7 @@ type PVCsAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type ResourceClaimTemplatesAPIServicer interface {
-	ListResourceClaimTemplates(context.Context, string, string, string, string, string, bool, bool) (ImplResponse, error)
+	ListResourceClaimTemplates(context.Context, string, string, string, string, string) (ImplResponse, error)
 	UpdateResourceClaimTemplate(context.Context, string, ResourceClaimTemplate) (ImplResponse, error)
 	CreateResourceClaimTemplate(context.Context, string, ResourceClaimTemplate) (ImplResponse, error)
 	DeleteResourceClaimTemplate(context.Context, string, string, string, string) (ImplResponse, error)

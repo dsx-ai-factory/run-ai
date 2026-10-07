@@ -5829,12 +5829,10 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
          * @param {string} [name] filter by name
          * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
          * @param {'all' | 'assets' | 'existing'} [origin] filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use \&#39;all\&#39;.
-         * @param {boolean} [includeAncestors] include resources of both requested scope, and its ancestors. for example, if project scope is requested with includeAncestors&#x3D;true, department and cluster scoped assets will be included in the response.
-         * @param {boolean} [includeDescendants] Whether the query should include from all nested layers within the specified scope
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listResourceClaimTemplates: async (scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', includeAncestors?: boolean, includeDescendants?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listResourceClaimTemplates: async (scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/resource-claim-templates`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -5871,14 +5869,6 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
                 localVarQueryParameter['origin'] = origin;
             }
 
-            if (includeAncestors !== undefined) {
-                localVarQueryParameter['includeAncestors'] = includeAncestors;
-            }
-
-            if (includeDescendants !== undefined) {
-                localVarQueryParameter['includeDescendants'] = includeDescendants;
-            }
-
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -5891,7 +5881,7 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
             };
         },
         /**
-         * Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone. 
+         * Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists. 
          * @summary sync the full set of ResourceClaimTemplates observed in a cluster
          * @param {string} clusterId The id of the cluster
          * @param {ResourceClaimTemplates} resourceClaimTemplates 
@@ -6028,17 +6018,15 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
          * @param {string} [name] filter by name
          * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
          * @param {'all' | 'assets' | 'existing'} [origin] filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use \&#39;all\&#39;.
-         * @param {boolean} [includeAncestors] include resources of both requested scope, and its ancestors. for example, if project scope is requested with includeAncestors&#x3D;true, department and cluster scoped assets will be included in the response.
-         * @param {boolean} [includeDescendants] Whether the query should include from all nested layers within the specified scope
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', includeAncestors?: boolean, includeDescendants?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplates>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, includeAncestors, includeDescendants, options);
+        async listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplates>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone. 
+         * Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists. 
          * @summary sync the full set of ResourceClaimTemplates observed in a cluster
          * @param {string} clusterId The id of the cluster
          * @param {ResourceClaimTemplates} resourceClaimTemplates 
@@ -6103,16 +6091,14 @@ export const ResourceClaimTemplatesApiFactory = function (configuration?: Config
          * @param {string} [name] filter by name
          * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
          * @param {'all' | 'assets' | 'existing'} [origin] filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use \&#39;all\&#39;.
-         * @param {boolean} [includeAncestors] include resources of both requested scope, and its ancestors. for example, if project scope is requested with includeAncestors&#x3D;true, department and cluster scoped assets will be included in the response.
-         * @param {boolean} [includeDescendants] Whether the query should include from all nested layers within the specified scope
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', includeAncestors?: boolean, includeDescendants?: boolean, options?: any): AxiosPromise<ResourceClaimTemplates> {
-            return localVarFp.listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, includeAncestors, includeDescendants, options).then((request) => request(axios, basePath));
+        listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', options?: any): AxiosPromise<ResourceClaimTemplates> {
+            return localVarFp.listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, options).then((request) => request(axios, basePath));
         },
         /**
-         * Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone. 
+         * Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists. 
          * @summary sync the full set of ResourceClaimTemplates observed in a cluster
          * @param {string} clusterId The id of the cluster
          * @param {ResourceClaimTemplates} resourceClaimTemplates 
@@ -6179,18 +6165,16 @@ export class ResourceClaimTemplatesApi extends BaseAPI {
      * @param {string} [name] filter by name
      * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
      * @param {'all' | 'assets' | 'existing'} [origin] filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use \&#39;all\&#39;.
-     * @param {boolean} [includeAncestors] include resources of both requested scope, and its ancestors. for example, if project scope is requested with includeAncestors&#x3D;true, department and cluster scoped assets will be included in the response.
-     * @param {boolean} [includeDescendants] Whether the query should include from all nested layers within the specified scope
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ResourceClaimTemplatesApi
      */
-    public listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', includeAncestors?: boolean, includeDescendants?: boolean, options?: AxiosRequestConfig) {
-        return ResourceClaimTemplatesApiFp(this.configuration).listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, includeAncestors, includeDescendants, options).then((request) => request(this.axios, this.basePath));
+    public listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone. 
+     * Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists. 
      * @summary sync the full set of ResourceClaimTemplates observed in a cluster
      * @param {string} clusterId The id of the cluster
      * @param {ResourceClaimTemplates} resourceClaimTemplates 

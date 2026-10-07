@@ -2651,8 +2651,6 @@ paths:
         - $ref: '#/components/parameters/nameFilter'
         - $ref: '#/components/parameters/FilterByCluster'
         - $ref: '#/components/parameters/originFilter'
-        - $ref: '#/components/parameters/includeAncestors'
-        - $ref: '#/components/parameters/includeDescendants'
       responses:
         '200':
           description: Executed successfully.
@@ -2783,7 +2781,7 @@ paths:
     post:
       summary: sync the full set of ResourceClaimTemplates observed in a cluster
       description: |
-        Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone.
+        Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists.
       operationId: syncResourceClaimTemplates
       tags:
         - Resource Claim Templates

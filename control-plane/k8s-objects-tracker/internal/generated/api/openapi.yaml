@@ -6441,25 +6441,6 @@ paths:
           - existing
           type: string
         style: form
-      - description: "include resources of both requested scope, and its ancestors.\
-          \ for example, if project scope is requested with includeAncestors=true,\
-          \ department and cluster scoped assets will be included in the response."
-        explode: true
-        in: query
-        name: includeAncestors
-        required: false
-        schema:
-          type: boolean
-        style: form
-      - description: Whether the query should include from all nested layers within
-          the specified scope
-        explode: true
-        in: query
-        name: includeDescendants
-        required: false
-        schema:
-          type: boolean
-        style: form
       responses:
         "200":
           content:
@@ -6684,7 +6665,7 @@ paths:
   /api/v1/resource-claim-templates/sync:
     post:
       description: |
-        Full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Pruning is applied per (cluster, scopeType, scopeId) window: rows in a window that was present in the payload but no longer contains a given template are removed; rows in a window not touched by the payload are left alone.
+        Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists.
       operationId: syncResourceClaimTemplates
       parameters:
       - description: The id of the cluster

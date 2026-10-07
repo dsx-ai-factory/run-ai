@@ -152,11 +152,11 @@ func (s *ResourceClaimTemplatesApiService) SyncResourceClaimTemplates(ctx contex
 }
 
 // ListResourceClaimTemplates lists tracked RCTs filtered by scope / cluster /
-// name / origin. The ancestor + descendant toggles follow the same convention
-// as the PVC list endpoint so callers can collapse across the scope hierarchy
-// where needed.
+// name / origin. Cross-scope expansion (ancestors / descendants) is not wired
+// in - the objects table does not go through BuildScopeQuery (which is
+// PVC-specific) and no caller needs it today.
 func (s *ResourceClaimTemplatesApiService) ListResourceClaimTemplates(ctx context.Context, scopeTypeStr string,
-	scopeId string, name string, clusterId string, origin string, includeAncestors bool, includeDescendants bool,
+	scopeId string, name string, clusterId string, origin string,
 ) (api.ImplResponse, error) {
 	tenantId, apiErr := common.TenantIdFromContext(ctx)
 	if apiErr != nil {
@@ -197,13 +197,6 @@ func (s *ResourceClaimTemplatesApiService) ListResourceClaimTemplates(ctx contex
 			}
 		}
 	}
-
-	// NOTE: includeAncestors / includeDescendants are accepted for symmetry with
-	// the PVC list contract but ignored for now - the objects table does not go
-	// through BuildScopeQuery (which is Pvc-specific). Wiring them in is a
-	// follow-up once an actual caller requires cross-scope expansion.
-	_ = includeAncestors
-	_ = includeDescendants
 
 	objects, apiErr := dao.ListObjects(ctx, filter)
 	if apiErr != nil {

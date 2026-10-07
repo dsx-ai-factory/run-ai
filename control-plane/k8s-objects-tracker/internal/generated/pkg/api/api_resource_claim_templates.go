@@ -252,35 +252,7 @@ func (c *ResourceClaimTemplatesAPIController) ListResourceClaimTemplates(w http.
 		originParam = param
 	} else {
 	}
-	var includeAncestorsParam bool
-	if query.Has("includeAncestors") {
-		param, err := parseBoolParameter(
-			query.Get("includeAncestors"),
-			WithParse[bool](parseBool),
-		)
-		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
-			return
-		}
-
-		includeAncestorsParam = param
-	} else {
-	}
-	var includeDescendantsParam bool
-	if query.Has("includeDescendants") {
-		param, err := parseBoolParameter(
-			query.Get("includeDescendants"),
-			WithParse[bool](parseBool),
-		)
-		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeDescendants", Err: err}, nil, nil)
-			return
-		}
-
-		includeDescendantsParam = param
-	} else {
-	}
-	result, err := c.service.ListResourceClaimTemplates(r.Context(), scopeTypeParam, scopeIdParam, nameParam, clusterIdParam, originParam, includeAncestorsParam, includeDescendantsParam)
+	result, err := c.service.ListResourceClaimTemplates(r.Context(), scopeTypeParam, scopeIdParam, nameParam, clusterIdParam, originParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

@@ -14,8 +14,6 @@ get:
     - $ref: "../parameters/query/optional/nameFilter.yaml"
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
     - $ref: "../parameters/query/optional/originFilter.yaml"
-    - $ref: "../parameters/query/optional/includeAncestors.yaml"
-    - $ref: "../parameters/query/optional/includeDescendants.yaml"
   responses:
     200:
       description: Executed successfully.
