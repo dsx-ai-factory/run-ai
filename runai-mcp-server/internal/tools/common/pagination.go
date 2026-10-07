@@ -40,7 +40,7 @@ func Paginate[T any](items []T, offset, limit int32) ([]T, bool, int32) {
 	if start > total {
 		start = total
 	}
-	pageSize := int64(limit)
+	pageSize := max(0, int64(limit))
 	if pageSize < 0 {
 		pageSize = 0
 	}
