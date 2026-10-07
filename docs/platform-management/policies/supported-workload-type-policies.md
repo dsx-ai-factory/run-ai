@@ -93,8 +93,9 @@ To add a rule:
 3. Under **Set the spec selector and its parameters**, choose a **Spec selector**. If the selector requires additional input, fill in the fields that appear below it.
 4. When applicable, under **Set the item selector and its parameters**, choose an **Item selector**. If the selector requires additional input, fill in the fields that appear below it. The item selector step only appears for fields that require it.
 5. Under **Add enforcements and set their values**, click **+ ENFORCEMENT**, select an **Enforcement type**, and set its values. You can add multiple enforcements. The enforcement section becomes available once the required fields, spec selector, and item selector (if applicable) are configured. See [Enforcement types](supported-workload-type-policies.md#enforcement-types) for more details.
-6. Click **SAVE RULE**
-7. Repeat for additional rules, then click **SAVE POLICY**
+6. When applicable, under **Override by descendant scope**, select **Not allowed** or **Allowed**. The setting only appears for cluster- and department-scoped policies. See [Overriding Rules Across Scopes](supported-workload-type-policies.md#overriding-rules-across-scopes) for more details.
+7. Click **SAVE RULE**
+8. Repeat for additional rules, then click **SAVE POLICY**
 
 <Note>
 
