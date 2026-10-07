@@ -133,7 +133,7 @@ func (handler *ClusterWideGVKCommon) ListObjectsWithLabel(ctx context.Context, n
 		listOptions = append(listOptions, client.MatchingLabelsSelector{Selector: mergedLabelSelector})
 	}
 
-	err = handler.List(ctx, objectList, listOptions...)
+	err = handler.Client.List(ctx, objectList, listOptions...)
 	if err != nil {
 		if labelKey != "" {
 			log.Ctx(ctx).Error().Err(err).Msgf(
