@@ -30,6 +30,8 @@ const (
 	tenantAId = 1001
 	tenantBId = 1002
 	tenantCId = 1003
+	tenantDId = 1004
+	tenantEId = 1005
 )
 
 func TestEnvironmentAssetsMigration(t *ginkgoTesting.T) {
@@ -75,45 +77,83 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 		})
 
 		It("replaces the legacy GPT-2 image without changing customized environments", func() {
-			legacyEnvironmentID := "7d098107-131b-456f-a38c-9f4cc983b587"
-			customEnvironmentID := "fd09b64d-ef9b-4bb0-a3af-16534020c0b7"
-			legacyImage := "runai.jfrog.io/core-llm/" + "quickstart-inference:gpt2-cpu"
+			gcrEnvironmentID := "7d098107-131b-456f-a38c-9f4cc983b587"
+			jfrogEnvironmentID := "fd09b64d-ef9b-4bb0-a3af-16534020c0b7"
+			customSettingsEnvironmentID := "31dd81b6-f53e-46f4-a86c-4868743a05b7"
+			customImageEnvironmentID := "9840b53e-c2ce-40d6-a27f-e3cdfa2c25f7"
+			gcrImage := "gcr.io/run-ai-demo/" + "quickstart-inference:gpt2-cpu"
+			jfrogImage := "runai.jfrog.io/core-llm/" + "quickstart-inference:gpt2-cpu"
 			replacementImage := "ghcr.io/huggingface/text-generation-inference:3.3.6-intel-cpu"
 			customImage := "example.com/custom/gpt2:latest"
+			customEnvironmentVariables := `[{"name":"CUSTOM_VARIABLE","value":"custom-value"}]`
+			customConnections := `[{"name":"Custom","internalToolInfo":{"toolType":"custom","containerPort":1234,"connectionType":"ServingPort","servingPortInfo":{"protocol":"http"}}}]`
+			replacementConnections := `[{"name":"ServingPort","internalToolInfo":{"toolType":"custom","containerPort":3000,"connectionType":"ServingPort","servingPortInfo":{"protocol":"http"}}}]`
 
 			db := runaidb.DB().Actual().WithContext(context.Background())
 			result := db.Exec(`
 				INSERT INTO assets_metadata (id, kind, scope, tenant_id, name, created_by, created_at, updated_by, updated_at) VALUES
 					(?, 'environment', 'tenant', ?, 'gpt2', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'gpt2', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'gpt2', 'Run:ai', now(), 'Run:ai', now()),
 					(?, 'environment', 'tenant', ?, 'gpt2', 'Run:ai', now(), 'Run:ai', now());`,
-				legacyEnvironmentID, tenantAId,
-				customEnvironmentID, tenantBId,
+				gcrEnvironmentID, tenantAId,
+				jfrogEnvironmentID, tenantBId,
+				customSettingsEnvironmentID, tenantCId,
+				customImageEnvironmentID, tenantDId,
 			)
 			Expect(result.Error).To(BeNil())
 
 			result = db.Exec(`
-				INSERT INTO assets_environment (asset_id, image) VALUES
-					(?, ?),
-					(?, ?);`,
-				legacyEnvironmentID, legacyImage,
-				customEnvironmentID, customImage,
+				INSERT INTO assets_environment (asset_id, image, command, args, environment_variables, connections) VALUES
+					(?, ?, NULL, NULL, '[]'::jsonb, '[]'::jsonb),
+					(?, ?, NULL, NULL, '[]'::jsonb, '[]'::jsonb),
+					(?, ?, 'custom-command', 'custom-args', ?::jsonb, ?::jsonb),
+					(?, ?, NULL, NULL, '[]'::jsonb, '[]'::jsonb);`,
+				gcrEnvironmentID, gcrImage,
+				jfrogEnvironmentID, jfrogImage,
+				customSettingsEnvironmentID, jfrogImage, customEnvironmentVariables, customConnections,
+				customImageEnvironmentID, customImage,
 			)
 			Expect(result.Error).To(BeNil())
 
-			migrateTo(20250005, "up 20250006")
+			migrateTo(30010001, "up 30010002")
 
-			var actualLegacyImage string
-			result = db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", legacyEnvironmentID).Scan(&actualLegacyImage)
-			Expect(result.Error).To(BeNil())
-			Expect(actualLegacyImage).To(Equal(replacementImage))
+			type environmentSpec struct {
+				Image                string
+				Command              *string
+				Args                 *string
+				EnvironmentVariables string
+				Connections          string
+			}
 
-			var actualLegacyCommand string
-			result = db.Raw("SELECT command FROM assets_environment WHERE asset_id = ?", legacyEnvironmentID).Scan(&actualLegacyCommand)
+			for _, environmentID := range []string{gcrEnvironmentID, jfrogEnvironmentID} {
+				var actual environmentSpec
+				result = db.Raw(`SELECT image, command, args, environment_variables::text AS environment_variables,
+					connections::text AS connections FROM assets_environment WHERE asset_id = ?`, environmentID).Scan(&actual)
+				Expect(result.Error).To(BeNil())
+				Expect(actual.Image).To(Equal(replacementImage))
+				Expect(actual.Command).NotTo(BeNil())
+				Expect(*actual.Command).To(Equal("text-generation-launcher"))
+				Expect(actual.Args).NotTo(BeNil())
+				Expect(*actual.Args).To(Equal("--model-id gpt2 --port 3000"))
+				Expect(actual.EnvironmentVariables).To(MatchJSON(`[]`))
+				Expect(actual.Connections).To(MatchJSON(replacementConnections))
+			}
+
+			var actualCustomSettings environmentSpec
+			result = db.Raw(`SELECT image, command, args, environment_variables::text AS environment_variables,
+				connections::text AS connections FROM assets_environment WHERE asset_id = ?`, customSettingsEnvironmentID).Scan(&actualCustomSettings)
 			Expect(result.Error).To(BeNil())
-			Expect(actualLegacyCommand).To(Equal("text-generation-launcher"))
+			Expect(actualCustomSettings.Image).To(Equal(replacementImage))
+			Expect(actualCustomSettings.Command).NotTo(BeNil())
+			Expect(*actualCustomSettings.Command).To(Equal("custom-command"))
+			Expect(actualCustomSettings.Args).NotTo(BeNil())
+			Expect(*actualCustomSettings.Args).To(Equal("custom-args"))
+			Expect(actualCustomSettings.EnvironmentVariables).To(MatchJSON(customEnvironmentVariables))
+			Expect(actualCustomSettings.Connections).To(MatchJSON(customConnections))
 
 			var actualCustomImage string
-			result = db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", customEnvironmentID).Scan(&actualCustomImage)
+			result = db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", customImageEnvironmentID).Scan(&actualCustomImage)
 			Expect(result.Error).To(BeNil())
 			Expect(actualCustomImage).To(Equal(customImage))
 		})
@@ -122,6 +162,8 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			legacyEnvironmentID := "10a96a7b-e5cc-4dcc-ac38-ef206a06d4b4"
 			customCommandEnvironmentID := "89247adf-c729-4550-81aa-fd3e17533046"
 			customImageEnvironmentID := "57eb91a4-b44c-499d-92b7-95230a1b542e"
+			missingSpecEnvironmentID := "6d9a2313-f447-40af-bd61-56bafa249e52"
+			customMissingSpecEnvironmentID := "41153629-3970-47b3-9c9f-c2976cfe20c2"
 			legacyImage := "gcr.io/run-ai-demo/" + "jupyter-tensorboard"
 			replacementImage := "nvcr.io/nvidia/pytorch:26.09-py3"
 			replacementArgs := `-c "tensorboard --logdir \"${LOG_DIR:-./}\" --bind_all & exec jupyter lab --ip=0.0.0.0 --allow-root --ServerApp.token="`
@@ -132,10 +174,14 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 				INSERT INTO assets_metadata (id, kind, scope, tenant_id, name, created_by, created_at, updated_by, updated_at) VALUES
 					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now()),
 					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now()),
 					(?, 'environment', 'tenant', ?, 'jupyter-tensorboard', 'Run:ai', now(), 'Run:ai', now());`,
 				legacyEnvironmentID, tenantAId,
 				customCommandEnvironmentID, tenantBId,
 				customImageEnvironmentID, tenantCId,
+				missingSpecEnvironmentID, tenantDId,
+				customMissingSpecEnvironmentID, tenantEId,
 			)
 			Expect(result.Error).To(BeNil())
 
@@ -150,7 +196,7 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			)
 			Expect(result.Error).To(BeNil())
 
-			migrateTo(20250006, "up 20250007")
+			migrateTo(30010002, "up 30010003")
 
 			type environmentSpec struct {
 				Image   string
@@ -182,36 +228,62 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			Expect(actualCustomImage.Image).To(Equal(customImage))
 			Expect(actualCustomImage.Command).To(BeNil())
 			Expect(actualCustomImage.Args).To(BeNil())
+
+			var actualInsertedSpec environmentSpec
+			result = db.Raw("SELECT image, command, args FROM assets_environment WHERE asset_id = ?", missingSpecEnvironmentID).Scan(&actualInsertedSpec)
+			Expect(result.Error).To(BeNil())
+			Expect(actualInsertedSpec.Image).To(Equal(replacementImage))
+			Expect(actualInsertedSpec.Command).NotTo(BeNil())
+			Expect(*actualInsertedSpec.Command).To(Equal("bash"))
+			Expect(actualInsertedSpec.Args).NotTo(BeNil())
+			Expect(*actualInsertedSpec.Args).To(Equal(replacementArgs))
+
+			var customMissingSpecCount int64
+			result = db.Raw("SELECT COUNT(*) FROM assets_environment WHERE asset_id = ?", customMissingSpecEnvironmentID).Scan(&customMissingSpecCount)
+			Expect(result.Error).To(BeNil())
+			Expect(customMissingSpecCount).To(BeZero())
 		})
 
-		It("replaces the legacy vLLM 0.6.4 image without changing custom images", func() {
-			legacyVLLMEnvironmentID := "c6a8d1c6-79a0-4d32-a35d-f66db4894871"
+		It("replaces every legacy vLLM image without changing custom images", func() {
+			gcrVLLMEnvironmentID := "c6a8d1c6-79a0-4d32-a35d-f66db4894871"
+			v055VLLMEnvironmentID := "92108029-12d3-49e4-9b49-05d8994693c5"
+			v064VLLMEnvironmentID := "9c1af535-8390-41dc-8e84-25ade989fc4e"
 			customVLLMEnvironmentID := "79bb39a1-b5b4-45b5-8558-24fa5fc0bd74"
-			legacyVLLMImage := "runai.jfrog.io/core-llm/" + "runai-vllm:v0.6.4-0.10.0"
+			gcrVLLMImage := "gcr.io/run-ai-demo/" + "llm"
+			v055VLLMImage := "runai.jfrog.io/core-llm/" + "runai-vllm:v0.5.5-0.5.0"
+			v064VLLMImage := "runai.jfrog.io/core-llm/" + "runai-vllm:v0.6.4-0.10.0"
 			customVLLMImage := "example.com/custom/vllm:latest"
-			replacementVLLMImage := "docker.io/vllm/vllm-openai:v0.6.4"
+			replacementVLLMImage := "vllm/vllm-openai:v0.6.4"
 			replacementVLLMArgs := `-c "if [ -n \"$RUNAI_MODEL_NAME\" ]; then exec python3 -m vllm.entrypoints.openai.api_server --model \"$RUNAI_MODEL\" --served-model-name \"$RUNAI_MODEL_NAME\" --host 0.0.0.0 --port 8000; else exec python3 -m vllm.entrypoints.openai.api_server --model \"$RUNAI_MODEL\" --host 0.0.0.0 --port 8000; fi"`
 
 			db := runaidb.DB().Actual().WithContext(context.Background())
 			result := db.Exec(`
 				INSERT INTO assets_metadata (id, kind, scope, tenant_id, name, created_by, created_at, updated_by, updated_at) VALUES
 					(?, 'environment', 'tenant', ?, 'llm-server', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'llm-server', 'Run:ai', now(), 'Run:ai', now()),
+					(?, 'environment', 'tenant', ?, 'llm-server', 'Run:ai', now(), 'Run:ai', now()),
 					(?, 'environment', 'tenant', ?, 'llm-server', 'Run:ai', now(), 'Run:ai', now());`,
-				legacyVLLMEnvironmentID, tenantAId,
-				customVLLMEnvironmentID, tenantBId,
+				gcrVLLMEnvironmentID, tenantAId,
+				v055VLLMEnvironmentID, tenantBId,
+				v064VLLMEnvironmentID, tenantCId,
+				customVLLMEnvironmentID, tenantDId,
 			)
 			Expect(result.Error).To(BeNil())
 
 			result = db.Exec(`
 				INSERT INTO assets_environment (asset_id, image, command, args) VALUES
 					(?, ?, NULL, NULL),
+					(?, ?, NULL, NULL),
+					(?, ?, NULL, NULL),
 					(?, ?, NULL, NULL);`,
-				legacyVLLMEnvironmentID, legacyVLLMImage,
+				gcrVLLMEnvironmentID, gcrVLLMImage,
+				v055VLLMEnvironmentID, v055VLLMImage,
+				v064VLLMEnvironmentID, v064VLLMImage,
 				customVLLMEnvironmentID, customVLLMImage,
 			)
 			Expect(result.Error).To(BeNil())
 
-			migrateTo(20250007, "up 20250008")
+			migrateTo(30010003, "up 30010004")
 
 			type environmentSpec struct {
 				Image   string
@@ -219,14 +291,16 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 				Args    *string
 			}
 
-			var actualVLLM environmentSpec
-			result = db.Raw("SELECT image, command, args FROM assets_environment WHERE asset_id = ?", legacyVLLMEnvironmentID).Scan(&actualVLLM)
-			Expect(result.Error).To(BeNil())
-			Expect(actualVLLM.Image).To(Equal(replacementVLLMImage))
-			Expect(actualVLLM.Command).NotTo(BeNil())
-			Expect(*actualVLLM.Command).To(Equal("bash"))
-			Expect(actualVLLM.Args).NotTo(BeNil())
-			Expect(*actualVLLM.Args).To(Equal(replacementVLLMArgs))
+			for _, environmentID := range []string{gcrVLLMEnvironmentID, v055VLLMEnvironmentID, v064VLLMEnvironmentID} {
+				var actualVLLM environmentSpec
+				result = db.Raw("SELECT image, command, args FROM assets_environment WHERE asset_id = ?", environmentID).Scan(&actualVLLM)
+				Expect(result.Error).To(BeNil())
+				Expect(actualVLLM.Image).To(Equal(replacementVLLMImage))
+				Expect(actualVLLM.Command).NotTo(BeNil())
+				Expect(*actualVLLM.Command).To(Equal("bash"))
+				Expect(actualVLLM.Args).NotTo(BeNil())
+				Expect(*actualVLLM.Args).To(Equal(replacementVLLMArgs))
+			}
 
 			var actualCustomVLLMImage string
 			result = db.Raw("SELECT image FROM assets_environment WHERE asset_id = ?", customVLLMEnvironmentID).Scan(&actualCustomVLLMImage)
