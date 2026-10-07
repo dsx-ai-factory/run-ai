@@ -45,7 +45,7 @@ The Docker Hub credentials work the same way in [Guided Installation](../install
 During the installation, reference the secret in the Helm values. The NVIDIA Run:ai images still need the `runai-reg-creds` secret that holds your NGC credentials, so list both secrets, with `runai-reg-creds` first. The installer sets the first entry to `runai-reg-creds`, and a list in your values that starts with another secret overrides it, so the NVIDIA Run:ai images would no longer be pulled.
 
 * **Manual Helm** - Add the values to the control plane and cluster values you pass to Helm.
-* **Guided Installation** - Add the values under `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration.
+* **Guided Installation** - Add the values under `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration. Refer to [Guided Installation](../installation/guided-installation/README.md).
 
 ```yaml
 # Control plane
@@ -121,7 +121,7 @@ Then pack, load, and install as usual. For the full procedure, refer to [Air-Gap
 Write the values in a file or in the installer configuration, depending on the installation path:
 
 * **Manual Helm** - Save the values in a YAML file and pass it with `-f` to the `helm upgrade` commands in [Install the Control Plane](../installation/install-using-helm/install-control-plane.md#installation) and [Install the Cluster](../installation/install-using-helm/helm-install.md#installation). Use one file for the control plane values and one for the cluster values, because they belong to different charts. In air-gapped installations, pass this file in addition to the values file that `airgap load` generates.
-* **Guided Installation** - Add the control plane values under `controlPlane.customHelmValues` and the cluster values under `cluster.customHelmValues` in the installer configuration.
+* **Guided Installation** - Add the control plane values under `controlPlane.customHelmValues` and the cluster values under `cluster.customHelmValues` in the installer configuration. Refer to [Guided Installation](../installation/guided-installation/README.md).
 
 <Note>
 
