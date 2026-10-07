@@ -95,7 +95,12 @@ func UpsertObject(ctx context.Context, obj *models.Object) (bool, *api.Error) {
 	}
 }
 
-// UpsertObjects creates or updates multiple records
+// UpsertObjects creates or updates multiple records.
+//
+// Each tracked kind has its own partial unique index (see migration
+// 03000002), so the ON CONFLICT target has to be type-aware: Postgres won't
+// match a plain `ON CONFLICT (cols)` against a partial unique index unless
+// the predicate is also supplied.
 func UpsertObjects(ctx context.Context, filter *models.ObjectFilters, objects []*models.Object) *api.Error {
 	if len(objects) == 0 {
 		return nil
@@ -104,12 +109,56 @@ func UpsertObjects(ctx context.Context, filter *models.ObjectFilters, objects []
 	dbErr := api.NewError(http.StatusServiceUnavailable, filterRecord.ErrorMessage("upsert"), nil)
 	db := runaidb.DB().WithContext(ctx)
 
-	if _, err := db.Clauses(clause.OnConflict{UpdateAll: true, OnConstraint: models.ObjectsExtendedUniqueConstraint}).
-		Save(objects); err != nil {
+	onConflict, err := objectsOnConflictFor(filter.Type)
+	if err != nil {
+		return dbErr.WithDetails(err)
+	}
+
+	if _, err := db.Clauses(onConflict).Save(objects); err != nil {
 		return dbErr.WithDetails(err)
 	}
 
 	return nil
+}
+
+// objectsOnConflictFor returns the ON CONFLICT clause that matches the
+// partial unique index for the given object type. Every tracked kind must be
+// listed here explicitly - a missing entry is a schema bug, not a silent
+// fallback, so the caller gets a hard error rather than an upsert that
+// silently inserts duplicates.
+//
+// The TargetWhere predicate is written with inline string literals (no `?`
+// placeholders) so Postgres can prove it implies the partial-index predicate
+// at plan time. A parameterised predicate (e.g. `type IN ($1,$2)`) does not
+// imply the literal `type IN ('StorageClass','DeviceClass')` on the index
+// side, so PG falls back to "no matching arbiter index" and the upsert errors.
+func objectsOnConflictFor(objectType string) (clause.OnConflict, error) {
+	switch objectType {
+	case models.ObjectTypeStorageClass, models.ObjectTypeDeviceClass:
+		return clause.OnConflict{
+			UpdateAll: true,
+			Columns: []clause.Column{
+				{Name: "tenant_id"}, {Name: "type"}, {Name: "cluster_id"},
+				{Name: "name"}, {Name: "project_id"},
+			},
+			TargetWhere: clause.Where{Exprs: []clause.Expression{clause.Expr{
+				SQL: fmt.Sprintf("type IN ('%s','%s')", models.ObjectTypeStorageClass, models.ObjectTypeDeviceClass),
+			}}},
+		}, nil
+	case models.ObjectTypeResourceClaimTemplate:
+		return clause.OnConflict{
+			UpdateAll: true,
+			Columns: []clause.Column{
+				{Name: "tenant_id"}, {Name: "cluster_id"}, {Name: "scope_type"},
+				{Name: "name"}, {Name: "project_id"}, {Name: "department_id"},
+			},
+			TargetWhere: clause.Where{Exprs: []clause.Expression{clause.Expr{
+				SQL: fmt.Sprintf("type = '%s'", models.ObjectTypeResourceClaimTemplate),
+			}}},
+		}, nil
+	default:
+		return clause.OnConflict{}, fmt.Errorf("unsupported object type for upsert: %q", objectType)
+	}
 }
 
 // Delete deletes multiple/single Object records by defined filters

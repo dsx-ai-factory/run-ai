@@ -36,12 +36,6 @@ const (
 	ObjectTypeStorageClass          = "StorageClass"
 	ObjectTypeDeviceClass           = "DeviceClass"
 	ObjectTypeResourceClaimTemplate = "ResourceClaimTemplate"
-
-	// ObjectsExtendedUniqueConstraint supersedes the original cluster-scoped-only
-	// constraint. It additionally keys on scope_type and department_id so the same
-	// (type, name) can coexist across different scopes - e.g. a cluster-scoped RCT
-	// named "foo" and a department-scoped RCT named "foo".
-	ObjectsExtendedUniqueConstraint = "unique_tenant_type_cluster_scope_name_project_department"
 )
 
 // ObjectFilters is a set of filters we can filter by.

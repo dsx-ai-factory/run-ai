@@ -52,17 +52,38 @@ var _ = Describe("Objects", func() {
 	Describe("UpsertObjects", func() {
 		It("succeeds with an empty list", func() {
 			setupDaoMock(GinkgoT())
-			apiErr := UpsertObjects(ctxWithTenant(1), &models.ObjectFilters{TenantId: 1}, []*models.Object{})
+			apiErr := UpsertObjects(ctxWithTenant(1), &models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeStorageClass}, []*models.Object{})
 			Expect(apiErr).To(BeNil())
 		})
 
-		It("succeeds", func() {
+		It("fails fast for an unknown object type", func() {
+			setupDaoMock(GinkgoT())
+			apiErr := UpsertObjects(ctxWithTenant(1), &models.ObjectFilters{TenantId: 1},
+				[]*models.Object{{ObjectFilters: models.ObjectFilters{TenantId: 1, Name: ptr.To("o1")}}})
+			Expect(apiErr).ToNot(BeNil())
+		})
+
+		It("succeeds for a cluster-scoped kind (StorageClass / DeviceClass)", func() {
 			m := setupDaoMock(GinkgoT())
 			tx := m.ExpectTransaction()
 			tx.Begin()
-			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT ON CONSTRAINT unique_tenant_type_cluster_scope_name_project_department DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).Returns(1)
+			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT (tenant_id,type,cluster_id,name,project_id) WHERE type IN ('StorageClass','DeviceClass') DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).Returns(1)
 			tx.Commit()
-			apiErr := UpsertObjects(ctxWithTenant(1), &models.ObjectFilters{TenantId: 1}, []*models.Object{{ObjectFilters: models.ObjectFilters{TenantId: 1, Name: ptr.To("o1")}}})
+			apiErr := UpsertObjects(ctxWithTenant(1),
+				&models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeStorageClass},
+				[]*models.Object{{ObjectFilters: models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeStorageClass, Name: ptr.To("o1")}}})
+			Expect(apiErr).To(BeNil())
+		})
+
+		It("succeeds for ResourceClaimTemplate (scope-aware target)", func() {
+			m := setupDaoMock(GinkgoT())
+			tx := m.ExpectTransaction()
+			tx.Begin()
+			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT (tenant_id,cluster_id,scope_type,name,project_id,department_id) WHERE type = 'ResourceClaimTemplate' DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).Returns(1)
+			tx.Commit()
+			apiErr := UpsertObjects(ctxWithTenant(1),
+				&models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeResourceClaimTemplate},
+				[]*models.Object{{ObjectFilters: models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeResourceClaimTemplate, Name: ptr.To("o1")}}})
 			Expect(apiErr).To(BeNil())
 		})
 
@@ -70,9 +91,11 @@ var _ = Describe("Objects", func() {
 			m := setupDaoMock(GinkgoT())
 			tx := m.ExpectTransaction()
 			tx.Begin()
-			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT ON CONSTRAINT unique_tenant_type_cluster_scope_name_project_department DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).ReturnsError(errors.New("boom"))
+			m.ExpectExec(`INSERT INTO objects (id,tenant_id,type,project_id,cluster_id,department_id,scope_type,name,spec) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT (tenant_id,type,cluster_id,name,project_id) WHERE type IN ('StorageClass','DeviceClass') DO UPDATE SET tenant_id=excluded.tenant_id,type=excluded.type,project_id=excluded.project_id,cluster_id=excluded.cluster_id,department_id=excluded.department_id,scope_type=excluded.scope_type,name=excluded.name,spec=excluded.spec`).ReturnsError(errors.New("boom"))
 			tx.Rollback()
-			apiErr := UpsertObjects(ctxWithTenant(1), &models.ObjectFilters{TenantId: 1}, []*models.Object{{ObjectFilters: models.ObjectFilters{TenantId: 1, Name: ptr.To("o1")}}})
+			apiErr := UpsertObjects(ctxWithTenant(1),
+				&models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeStorageClass},
+				[]*models.Object{{ObjectFilters: models.ObjectFilters{TenantId: 1, Type: models.ObjectTypeStorageClass, Name: ptr.To("o1")}}})
 			Expect(apiErr).ToNot(BeNil())
 		})
 	})
