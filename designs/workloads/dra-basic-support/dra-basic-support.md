@@ -55,7 +55,7 @@ The feature designed here serves two purposes:
 
    3. Creation rejected if the spec contains a `DeviceClass` that does not exist in the cluster.  
 
-   4. Listing **compute assets** returns the DRA `ResourceClaimTemplate`s as well (they surface in the compute asset list alongside compute assets). No need to include the spec itself (TBD)
+      
 
       
 
@@ -93,6 +93,7 @@ The feature designed here serves two purposes:
 ### Out of Scope
 
 1. Reacting to a `DeviceClass` that is **removed after** a template was created (reflecting a degraded / unschedulable status on the template). Creation-time validation is covered by DoD 4.3; runtime removal is out of scope for now.
+1. Listing **compute assets** returns the DRA `ResourceClaimTemplate`s as well (they surface in the compute asset list alongside compute assets). No need to include the spec itself (TBD).
 
 ### Possible Additions
 
@@ -490,7 +491,7 @@ No need to change the `workloads_view` as we do not have this information in the
 | # | Task | Notes / references | Effort / comments |
 | :-- | :-- | :-- | :-- |
 | 1 | `k8s-objects-tracker` tracks `DeviceClass`es (incl. APIs) | DoD 2; §4.3 — cluster-scoped, storage-class pattern (`v2` read + `v1` sync). Precondition for DeviceClass validation. | Done |
-| 2 | New asset support — management | DoD 4 (incl. 4.4); §3 (Assets), §4.1 — enhanced-assets k8s-object: generic JSON spec table, CRUD APIs, and surfacing the templates in the **compute asset list**. | — |
+| 2 | New asset support — management | DoD 4 (incl. 4.4); §3 (Assets), §4.1 — enhanced-assets k8s-object: generic JSON spec table, CRUD APIs. | Done |
 | 3 | Modern filtering for the new asset list APIs | §3 (Filtering), §4.1 — adopt the `queryapi` `filterBy` standard; scope-hierarchy expansion via `includeAncestors`/`includeDescendants`; denormalize `departmentId`/`clusterId` onto project-scoped rows so descendants is a column predicate. | — |
 | 4 | New RBAC resource type + permission sets | DoD 3 — new `ResourceClaimTemplate` resource type with **Edit Access** and **View Access** permission sets. | Done |
 | 5 | New asset support — `DeviceClass` validation | DoD 4.3 — reject creation when `deviceClassName` is absent from the cluster's tracked `DeviceClass`es. | — |

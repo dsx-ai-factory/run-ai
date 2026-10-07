@@ -9,10 +9,10 @@ import (
 	"context"
 	"testing"
 
+	schemeinit "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	legacycleanup "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/legacy-workload-cleanup"
 	cleanupoperand "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-workload-cleanup"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
-	schemeinit "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"

@@ -74,7 +74,7 @@ func NewXGBoostJobBuilderWithExistingNodeAffinities(fromObject interface{}, toRe
 	mergedWorkload.CopyTo(workload)
 	workload.Labels = make(map[string]string)
 	sharedResourcesBuilder := common.NewShardResourcesBuilder(common.NewServiceBuilder(k8sClient),
-		common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift()), common.NewPvcBuilder(k8sClient), common.NewCredentialsBuilder(k8sClient))
+		common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift()), common.NewPvcBuilder(k8sClient))
 	result := &Builder{
 		DistributedBuilder: distcommon.DistributedBuilder{
 			PodLabels:      podLabels,

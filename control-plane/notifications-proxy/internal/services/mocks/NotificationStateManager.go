@@ -20,10 +20,19 @@ func NewNotificationStateManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *NotificationStateManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &NotificationStateManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type NotificationStateManager_GetDetailedNotificationState_Call struct {
 }
 
 // GetDetailedNotificationState is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *NotificationStateManager_Expecter) GetDetailedNotificationState(ctx interface{}, tenantId interface{}) *NotificationStateManager_GetDetailedNotificationState_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *NotificationStateManager_Expecter) GetDetailedNotificationState(ctx any, tenantId any) *NotificationStateManager_GetDetailedNotificationState_Call {
 	return &NotificationStateManager_GetDetailedNotificationState_Call{Call: _e.mock.On("GetDetailedNotificationState", ctx, tenantId)}
 }
 
 func (_c *NotificationStateManager_GetDetailedNotificationState_Call) Run(run func(ctx context.Context, tenantId string)) *NotificationStateManager_GetDetailedNotificationState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -132,15 +152,26 @@ type NotificationStateManager_GetNotificationState_Call struct {
 }
 
 // GetNotificationState is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *NotificationStateManager_Expecter) GetNotificationState(ctx interface{}, tenantId interface{}) *NotificationStateManager_GetNotificationState_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *NotificationStateManager_Expecter) GetNotificationState(ctx any, tenantId any) *NotificationStateManager_GetNotificationState_Call {
 	return &NotificationStateManager_GetNotificationState_Call{Call: _e.mock.On("GetNotificationState", ctx, tenantId)}
 }
 
 func (_c *NotificationStateManager_GetNotificationState_Call) Run(run func(ctx context.Context, tenantId string)) *NotificationStateManager_GetNotificationState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -189,16 +220,32 @@ type NotificationStateManager_UpdateNotificationState_Call struct {
 }
 
 // UpdateNotificationState is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - notificationState
-func (_e *NotificationStateManager_Expecter) UpdateNotificationState(ctx interface{}, tenantId interface{}, notificationState interface{}) *NotificationStateManager_UpdateNotificationState_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - notificationState []notification_state.Stater
+func (_e *NotificationStateManager_Expecter) UpdateNotificationState(ctx any, tenantId any, notificationState any) *NotificationStateManager_UpdateNotificationState_Call {
 	return &NotificationStateManager_UpdateNotificationState_Call{Call: _e.mock.On("UpdateNotificationState", ctx, tenantId, notificationState)}
 }
 
 func (_c *NotificationStateManager_UpdateNotificationState_Call) Run(run func(ctx context.Context, tenantId string, notificationState []notification_state.Stater)) *NotificationStateManager_UpdateNotificationState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].([]notification_state.Stater))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []notification_state.Stater
+		if args[2] != nil {
+			arg2 = args[2].([]notification_state.Stater)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

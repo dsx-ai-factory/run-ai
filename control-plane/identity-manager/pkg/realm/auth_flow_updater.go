@@ -24,7 +24,6 @@ const (
 
 type AuthFlowUpdaterConfig struct{}
 
-//go:generate mockery --name AuthFlowUpdaterInterface
 type AuthFlowUpdaterInterface interface {
 	UpdateAuthFlows(ctx context.Context, realmName string) error
 }

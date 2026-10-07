@@ -25,8 +25,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name NGCClient
-
 // ngcClient implements the NGCClient interface
 type ngcClient struct {
 	httpClient *http.Client

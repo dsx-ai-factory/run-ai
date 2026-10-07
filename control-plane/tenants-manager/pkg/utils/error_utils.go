@@ -15,7 +15,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/database/dao"
 )
 
-//go:generate mockery
 type ErrorUtilser interface {
 	TenantErrorToResponse(err *dao.DaoError) *api.Error
 	GetTenantErrorToResponseFromSubEntity(err *dao.DaoError) *api.Error

@@ -4,8 +4,8 @@ go 1.26.8
 
 require (
 	github.com/devfile/api/v2 v2.2.2
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller v0.0.0-00010101000000-000000000000
 	github.com/kai-scheduler/KAI-scheduler v0.18.2
@@ -62,7 +62,6 @@ require (
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-openapi/swag/cmdutils v0.27.1 // indirect
 	github.com/go-openapi/swag/conv v0.27.1 // indirect
 	github.com/go-openapi/swag/fileutils v0.27.1 // indirect
@@ -111,7 +110,7 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/tektoncd/pipeline v0.55.0 // indirect
+	github.com/tektoncd/pipeline v1.0.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -234,10 +233,10 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters => ../common/getters
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../common/runaipublic
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ../common/topology
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator => ../external-workload-integrator
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../../../runai-cluster/cluster/workload-common

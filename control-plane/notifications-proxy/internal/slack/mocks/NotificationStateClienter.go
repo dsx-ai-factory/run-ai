@@ -20,10 +20,19 @@ func NewNotificationStateClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *NotificationStateClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &NotificationStateClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,15 +73,26 @@ type NotificationStateClienter_UpdateSlackNotificationState_Call struct {
 }
 
 // UpdateSlackNotificationState is a helper method to define mock.On call
-//   - ctx
-//   - slackState
-func (_e *NotificationStateClienter_Expecter) UpdateSlackNotificationState(ctx interface{}, slackState interface{}) *NotificationStateClienter_UpdateSlackNotificationState_Call {
+//   - ctx context.Context
+//   - slackState slack.NotificationState
+func (_e *NotificationStateClienter_Expecter) UpdateSlackNotificationState(ctx any, slackState any) *NotificationStateClienter_UpdateSlackNotificationState_Call {
 	return &NotificationStateClienter_UpdateSlackNotificationState_Call{Call: _e.mock.On("UpdateSlackNotificationState", ctx, slackState)}
 }
 
 func (_c *NotificationStateClienter_UpdateSlackNotificationState_Call) Run(run func(ctx context.Context, slackState slack.NotificationState)) *NotificationStateClienter_UpdateSlackNotificationState_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(slack.NotificationState))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 slack.NotificationState
+		if args[1] != nil {
+			arg1 = args[1].(slack.NotificationState)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

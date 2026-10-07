@@ -1,3 +1,3 @@
 api:
   specs:
-    - openapi: ./openapi.yml
+    - openapi: ../../../control-plane/infra/openapi/build/_build/runai-system-scoped.yaml

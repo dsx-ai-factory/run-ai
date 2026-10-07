@@ -27,7 +27,6 @@ import (
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
-	rss "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/researcher-service/resources"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -184,16 +183,6 @@ func checkDependencies(ctx context.Context, kubeClient kube_client.HybridClient,
 		}
 		if !gwStatus.Ready {
 			multiErr.Append(fmt.Errorf(format, "gateway-api", gwStatus.Reasons))
-		}
-	}
-
-	if ingressEnabled {
-		ingressStatus, ingressErr := rss.IngressStatus(ctx, kubeClient, runaiConfig)
-		if ingressErr != nil {
-			multiErr.Append(fmt.Errorf(format, "ingress-controller", ingressErr))
-		}
-		if !ingressStatus.Ready {
-			multiErr.Append(fmt.Errorf(format, "ingress-controller", ingressStatus.Reasons))
 		}
 	}
 

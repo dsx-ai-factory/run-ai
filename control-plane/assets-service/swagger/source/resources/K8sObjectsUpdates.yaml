@@ -1,0 +1,43 @@
+post:
+  summary: Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster
+    and to send success/failure about the result of previous sync.
+  operationId: k8s_objects_sync_updates
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_agent_sync_test.go"
+  x-internal: true
+  x-authorize:
+    # Even though this API may serve additional k8s-object kinds in the
+    # future, binding it to any related resource-type is fine here: the
+    # `sync` action gates the cluster agent's own credentials, not a
+    # per-kind end-user permission.
+    resource-type: resource-claim-templates
+    action: sync
+  tags:
+    - Synchronization
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SyncAfter.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/sync/ClusterSyncReport.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/K8sObject/K8sObjectsUpdatesResp.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

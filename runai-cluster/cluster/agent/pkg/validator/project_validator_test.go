@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 
@@ -71,7 +71,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		agentServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.RunaiAgentName,
+				Name:      constants.RunaiAgentName,
 				UID:       types.UID(runaiAgentUID),
 			},
 		}
@@ -79,7 +79,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		CSServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.RunaiClusterSyncName,
+				Name:      constants.RunaiClusterSyncName,
 				UID:       types.UID(runaiCSUID),
 			},
 		}
@@ -87,7 +87,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		projectControllerServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.KRMProjectControllerName,
+				Name:      constants.KRMProjectControllerName,
 				UID:       types.UID(projectControllerUID),
 			},
 		}
@@ -95,7 +95,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 		runaiOperatorServiceAccount = &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: runaiv1.DefaultNamespace,
-				Name:      operands.RunaiOperatorName,
+				Name:      constants.RunaiOperatorName,
 				UID:       types.UID(runaiOperatorUID),
 			},
 		}
@@ -116,7 +116,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator with service account", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{})
 		})
 
 		It("Requester is runai-agent - allow", func() {
@@ -180,7 +180,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator - service account doesn't exist", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects().Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{})
 		})
 
 		It("Don't allow requests", func() {
@@ -201,10 +201,12 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator with allowedServiceAccounts", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{"test-service", "system:serviceaccount:kube-system"})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{
+				"system:serviceaccount:test-namespace:test-service-account", "system:serviceaccount:kube-system:coredns",
+			})
 		})
 
-		It("Requester username contains allowed pattern - allow without checking service account UIDs", func() {
+		It("Requester username matches an allowed identity - allow without checking service account UIDs", func() {
 			// Set a random UID that doesn't match any service account
 			req.UserInfo.UID = uuid.New().String()
 			req.UserInfo.Username = "system:serviceaccount:test-namespace:test-service-account"
@@ -220,7 +222,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Requester username contains second allowed pattern - allow", func() {
+		It("Requester username matches the second allowed identity - allow", func() {
 			req.UserInfo.UID = uuid.New().String()
 			req.UserInfo.Username = "system:serviceaccount:kube-system:coredns"
 
@@ -235,7 +237,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Requester username doesn't contain any allowed pattern - fall back to UID check", func() {
+		It("Requester username does not match any allowed identity - fall back to UID check", func() {
 			// Set the UID to runai-agent so it should be allowed by UID check
 			req.UserInfo.UID = runaiAgentUID
 			req.UserInfo.Username = "system:serviceaccount:default:some-other-service"
@@ -251,7 +253,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Requester username contain system:serviceaccount pattern - allow", func() {
+		It("Unlisted service account - deny", func() {
 			req.UserInfo.UID = uuid.New().String()
 			req.UserInfo.Username = "system:serviceaccount:default:unauthorized-service"
 
@@ -259,13 +261,13 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 				req.Operation = operation
 				res := projectValidator.Handle(context.Background(), req)
 
-				Expect(res.Result.Message).To(BeEmpty())
-				Expect(res.Allowed).To(BeTrue())
-				Expect(res.Result.Reason).To(BeEmpty())
-				Expect(res.Result.Code).To(Equal(int32(http.StatusOK)))
+				Expect(res.Result.Message).To(ContainSubstring("operation not allowed"))
+				Expect(res.Allowed).To(BeFalse())
+				Expect(res.Result.Reason).To(Not(BeEmpty()))
+				Expect(res.Result.Code).To(Equal(int32(http.StatusForbidden)))
 			}
 		})
-		It("Requester username  doesn't contain any allowed pattern  and uid is not allowed - deny", func() {
+		It("Requester username  does not match any allowed identity  and uid is not allowed - deny", func() {
 			req.UserInfo.UID = uuid.New().String()
 			req.UserInfo.Username = "system:not-allowed"
 
@@ -285,7 +287,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 	Context("Test ProjectValidator with empty allowedServiceAccounts", func() {
 		JustBeforeEach(func() {
 			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{})
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{})
 		})
 
 		It("Should fall back to UID check when allowedServiceAccounts is empty", func() {
@@ -302,15 +304,41 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 				Expect(res.Result.Code).To(Equal(int32(http.StatusOK)))
 			}
 		})
-	})
 
-	Context("Test ProjectValidator with single allowedServiceAccount pattern", func() {
-		JustBeforeEach(func() {
-			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
-			projectValidator = NewProjectValidator(k8sClient, []string{"admin"})
+		It("Should allow the post-upgrade hook by username", func() {
+			req.UserInfo.UID = uuid.New().String()
+			req.UserInfo.Username = "system:serviceaccount:runai:runai-post-upgrade"
+
+			for _, operation := range operations {
+				req.Operation = operation
+				res := projectValidator.Handle(context.Background(), req)
+
+				Expect(res.Allowed).To(BeTrue())
+				Expect(res.Result.Code).To(Equal(int32(http.StatusOK)))
+			}
 		})
 
-		It("Username contains the single allowed pattern - allow", func() {
+		It("Should deny a post-upgrade service account from another namespace", func() {
+			req.UserInfo.UID = uuid.New().String()
+			req.UserInfo.Username = "system:serviceaccount:tenant:runai-post-upgrade"
+
+			for _, operation := range operations {
+				req.Operation = operation
+				res := projectValidator.Handle(context.Background(), req)
+
+				Expect(res.Allowed).To(BeFalse())
+				Expect(res.Result.Code).To(Equal(int32(http.StatusForbidden)))
+			}
+		})
+	})
+
+	Context("Test ProjectValidator with single allowedServiceAccount identity", func() {
+		JustBeforeEach(func() {
+			k8sClient = fakeClient.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
+			projectValidator = NewProjectValidator(k8sClient, k8sClient, []string{"system:serviceaccount:kube-system:admin-controller"})
+		})
+
+		It("Username matches the single allowed identity - allow", func() {
 			req.UserInfo.UID = uuid.New().String()
 			req.UserInfo.Username = "system:serviceaccount:kube-system:admin-controller"
 
@@ -325,7 +353,7 @@ var _ = Describe("Test Workload Ownership Protection Webhook", Ordered, func() {
 			}
 		})
 
-		It("Username doesn't contain the pattern - deny if UID also not allowed", func() {
+		It("Username does not match the identity - deny if UID also not allowed", func() {
 			req.UserInfo.UID = uuid.New().String()
 			req.UserInfo.Username = "system:not-allowed"
 

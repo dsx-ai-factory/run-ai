@@ -9,7 +9,7 @@ import (
 	"context"
 	"testing"
 
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/stretchr/testify/assert"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"

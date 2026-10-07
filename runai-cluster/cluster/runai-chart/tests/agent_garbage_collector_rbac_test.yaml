@@ -1,0 +1,127 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+suite: Agent garbage collector lookup permissions
+templates:
+  - templates/clusterroles/agent-garbage-collector.yaml
+tests:
+  - it: grants only get on the named garbage collector service account
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: Role
+      - equal:
+          path: metadata.namespace
+          value: kube-system
+      - equal:
+          path: rules
+          value:
+            - apiGroups: [""]
+              resources: [serviceaccounts]
+              resourceNames: [generic-garbage-collector]
+              verbs: [get]
+  - it: binds the default agent account in the installation namespace
+    release:
+      namespace: custom-runai
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: metadata.namespace
+          value: kube-system
+      - equal:
+          path: roleRef
+          value:
+            apiGroup: rbac.authorization.k8s.io
+            kind: Role
+            name: runai-agent-garbage-collector-custom-runai
+      - equal:
+          path: subjects
+          value:
+            - kind: ServiceAccount
+              name: runai-agent
+              namespace: custom-runai
+  - it: binds the NMC account used by the agent rather than the default account
+    release:
+      namespace: custom-runai
+    set:
+      global.nmc.enabled: true
+      global.nmc.remoteCluster.apiServer.url: https://example.com
+      global.serviceAccountName: custom-nmc
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: subjects
+          value:
+            - kind: ServiceAccount
+              name: custom-nmc
+              namespace: custom-runai
+  - it: uses the default agent when NMC is disabled
+    set:
+      global.nmc.enabled: false
+      global.nmc.remoteCluster.apiServer.url: https://example.com
+      global.serviceAccountName: custom-nmc
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: runai-agent
+  - it: binds an account supplied in the initial RunaiConfig
+    set:
+      runai-operator.config.internal.global.nmc.serviceAccountName: initial-nmc
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: initial-nmc
+  - it: follows a clusterConfig override of the NMC Helm setting
+    set:
+      global.nmc.enabled: true
+      global.nmc.remoteCluster.apiServer.url: https://example.com
+      global.serviceAccountName: custom-nmc
+      clusterConfig.internal.global.nmc.serviceAccountName: overridden-nmc
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: overridden-nmc
+  - it: follows a clusterConfig reset to the default agent account
+    set:
+      global.nmc.enabled: true
+      global.nmc.remoteCluster.apiServer.url: https://example.com
+      global.serviceAccountName: custom-nmc
+      clusterConfig.internal.global.nmc.serviceAccountName: ""
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: runai-agent
+  - it: clears the initial account when enabled NMC specifies the default account
+    set:
+      runai-operator.config.internal.global.nmc.serviceAccountName: initial-nmc
+      global.nmc.enabled: true
+      global.nmc.remoteCluster.apiServer.url: https://example.com
+      global.serviceAccountName: ""
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: runai-agent
+  - it: follows a clusterConfig null reset of the NMC configuration
+    set:
+      global.nmc.enabled: true
+      global.nmc.remoteCluster.apiServer.url: https://example.com
+      global.serviceAccountName: custom-nmc
+      clusterConfig.internal.global.nmc: null
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: runai-agent
+  - it: respects externally managed operand RBAC
+    set:
+      operands.rbac.base.create: false
+    asserts:
+      - hasDocuments:
+          count: 0

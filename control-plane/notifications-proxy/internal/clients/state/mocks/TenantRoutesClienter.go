@@ -20,10 +20,19 @@ func NewTenantRoutesClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *TenantRoutesClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &TenantRoutesClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,15 +73,26 @@ type TenantRoutesClienter_CreateOrUpdateRoute_Call struct {
 }
 
 // CreateOrUpdateRoute is a helper method to define mock.On call
-//   - ctx
-//   - route
-func (_e *TenantRoutesClienter_Expecter) CreateOrUpdateRoute(ctx interface{}, route interface{}) *TenantRoutesClienter_CreateOrUpdateRoute_Call {
+//   - ctx context.Context
+//   - route *types.BasicRouteConfig
+func (_e *TenantRoutesClienter_Expecter) CreateOrUpdateRoute(ctx any, route any) *TenantRoutesClienter_CreateOrUpdateRoute_Call {
 	return &TenantRoutesClienter_CreateOrUpdateRoute_Call{Call: _e.mock.On("CreateOrUpdateRoute", ctx, route)}
 }
 
 func (_c *TenantRoutesClienter_CreateOrUpdateRoute_Call) Run(run func(ctx context.Context, route *types.BasicRouteConfig)) *TenantRoutesClienter_CreateOrUpdateRoute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*types.BasicRouteConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *types.BasicRouteConfig
+		if args[1] != nil {
+			arg1 = args[1].(*types.BasicRouteConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -121,15 +141,26 @@ type TenantRoutesClienter_GetRoute_Call struct {
 }
 
 // GetRoute is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *TenantRoutesClienter_Expecter) GetRoute(ctx interface{}, tenantId interface{}) *TenantRoutesClienter_GetRoute_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *TenantRoutesClienter_Expecter) GetRoute(ctx any, tenantId any) *TenantRoutesClienter_GetRoute_Call {
 	return &TenantRoutesClienter_GetRoute_Call{Call: _e.mock.On("GetRoute", ctx, tenantId)}
 }
 
 func (_c *TenantRoutesClienter_GetRoute_Call) Run(run func(ctx context.Context, tenantId string)) *TenantRoutesClienter_GetRoute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

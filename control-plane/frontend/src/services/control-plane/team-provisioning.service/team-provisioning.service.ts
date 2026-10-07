@@ -24,7 +24,7 @@ import {
   type AccessRulesBatchCreateResponseFailedInner,
   SubjectType,
   ScopeType,
-  type RoleV1,
+  type Role,
 } from "@/swagger-models/authorization-client";
 import { ErrorAlert } from "@/utils/error-alert.util";
 
@@ -463,13 +463,13 @@ async function getAIPractitionerRoleId(): Promise<number> {
     const roles = await rolesService.list();
 
     // Try to find exact AI practitioner role
-    const aiPractitionerRole = roles.find((role: RoleV1) => role.name === AI_PRACTITIONER_ROLE_NAME);
+    const aiPractitionerRole = roles.find((role: Role) => role.name === AI_PRACTITIONER_ROLE_NAME);
     if (aiPractitionerRole) {
       return aiPractitionerRole.id;
     }
 
     // Fallback to any practitioner role
-    const fallbackRole = roles.find((role: RoleV1) => role.name.toLowerCase().includes("practitioner"));
+    const fallbackRole = roles.find((role: Role) => role.name.toLowerCase().includes("practitioner"));
 
     if (!fallbackRole) {
       throw new Error("No practitioner role found");
@@ -487,7 +487,7 @@ async function getAIPractitionerRoleId(): Promise<number> {
 async function getSystemAdminRoleId(): Promise<number> {
   try {
     const roles = await rolesService.list();
-    const systemAdminRole = roles.find((role: RoleV1) => role.name === SYSTEM_ADMIN_ROLE_NAME);
+    const systemAdminRole = roles.find((role: Role) => role.name === SYSTEM_ADMIN_ROLE_NAME);
 
     if (!systemAdminRole) {
       throw new Error("System administrator role not found");

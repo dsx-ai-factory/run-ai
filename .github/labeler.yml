@@ -244,16 +244,6 @@ authorization:
     - *no-integration_tests-dir
     - *no-mocks-dir
 
-authorization-migrator:
-- changed-files:
-  - all-globs-to-any-file:
-    - 'control-plane/authorization-migrator/**/*.{go,sql}'
-    - *no-test-go
-    - *no-tests-dir
-    - *no-integration-tests-dir
-    - *no-integration_tests-dir
-    - *no-mocks-dir
-
 bff-service:
 - changed-files:
   - all-globs-to-any-file:

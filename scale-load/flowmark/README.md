@@ -32,6 +32,8 @@ failed, and the last line says what.
 
 Without make: `make build`, then `./bin/flowmark --help` lists every flag.
 `--only` and `--workloads` are what `SCENARIO` and `WORKLOADS` set.
+`--regression-window` (7) and `--regression-threshold` (0.15) tune the
+regression check described under Results.
 
 ## Scenarios
 
@@ -46,7 +48,9 @@ scenarios/
   scale/                    how latency grows with the number of workloads
     deployment-burst.yaml   Deployment created through Kubernetes → ExternalWorkload appears
     training-burst.yaml     Training created through the control plane → WorkloadRunner appears
-  load/                     steady submission rates; arrives with the load-ramp suite
+    workspace-burst.yaml    Workspace created through the control plane → WorkloadRunner appears
+  load/                     how latency behaves under a steady stream of submissions
+    workspace-ttj.yaml      Workspaces submitted at a fixed rate → time to job, split into spans
 ```
 
 Knobs of the `scale-burst` suite:
@@ -54,8 +58,8 @@ Knobs of the `scale-burst` suite:
 | knob | default | meaning |
 |---|---|---|
 | `workloads` | `[100, 250, 500]` | round sizes; each round creates that many workloads |
-| `workloadType` | `Deployment` | `Deployment` or `Training` |
-| `podsPerWorkload` | 1 | replicas per Deployment; must be 1 for `Training` |
+| `workloadType` | `Deployment` | `Deployment`, `Training` or `Workspace` |
+| `podsPerWorkload` | 1 | replicas per Deployment; must be 1 for `Training` and `Workspace` |
 | `image` | `registry.k8s.io/pause:3.9` | container image; point it at a mirror on air-gapped clusters |
 | `submitConcurrency` | 16 | parallel create and delete calls |
 | `kubeRequestsPerSecond` | 50 | Kubernetes client rate limit |
@@ -63,16 +67,65 @@ Knobs of the `scale-burst` suite:
 | `timeout` | `15m` | how long a round waits for all workloads to arrive |
 | `setupTimeout` | `5m` | project creation, quiesce between rounds, cleanup |
 | `settle` | `90s` | quiet time between rounds |
-| `slo` | none | e.g. `p90_ms: 5000`; copied into the results, does not fail the run |
+| `slo` | none | upper bounds on `p50_ms`, `p90_ms`, `p99_ms`, `mean_ms` or `max_ms`, e.g. `p90_ms: 5000`; a round above one is reported as a regression, the run still passes |
 | `cluster` | single cluster | cluster name when the control plane has several |
 
 Each run creates its own project, runs the rounds, deletes everything, and
 deletes the project. Latency per workload is the time from the create
 response to the first watch event of its cluster object.
 
+Knobs of the `load-ttj` suite:
+
+| knob | default | meaning |
+|---|---|---|
+| `users` | 10 | parallel submitters; the most requests in flight at once |
+| `rate` | 2 | target submissions per second; may not exceed `controlPlaneRequestsPerSecond` |
+| `duration` | `5m` | how long submissions keep coming |
+| `workloadType` | `Workspace` | `Workspace` or `Training`, both submitted through the control plane |
+| `image` | `registry.k8s.io/pause:3.9` | container image of every workload |
+| `timeout` | `10m` | how long to wait for arrivals after the last submission |
+| `setupTimeout` | `5m` | project creation, each create call, cleanup |
+| `slo` | none | upper bounds named `<span>_<stat>`, e.g. `ttj_p90_ms: 10000`, `cluster_synced_p99_ms: 12000`; `p90_ms` alone belongs to `scale-burst` |
+| `kubeRequestsPerSecond`, `controlPlaneRequestsPerSecond`, `cluster` | as above | shared with `scale-burst` |
+
+Each accepted Workspace is timed in three legs on one clock: `api_accepted`
+from the request to the 200, `cluster_synced` from the 200 to its
+WorkloadRunner on the cluster, `pod_created` from the WorkloadRunner to its
+first pod. `ttj`, the time to job, runs from the 200 to the first pod. A
+rejected submission lowers `success_rate` and enters no latency. The pacer
+never fires missed ticks later, so `actual_rate_per_sec` next to
+`target_rate_per_sec` shows whether the environment kept up with the load.
+
 ## Results
 
 Every run writes `reports/results-<timestamp>.json` and adds it to
 `reports/manifest.json`, the ordered list of runs. The file holds run
-metadata (start time, provider, cluster type, versions, clock offset) and one
-section per scenario
+metadata (start time, provider, cluster type, versions) and one
+section per scenario. A `scale-burst` section has `p50_ms@N`, `p90_ms@N`,
+`p99_ms@N`, `throughput_per_sec@N`, `never_arrived_count@N`, `failed_count@N` and
+the knobs used, `N` being the round size; `makespan_ms@N` runs from the first
+create response to the last arrival and `throughput_per_sec@N` is the number
+of arrived workloads divided by it. A `load-ttj` section has `<span>_p50_ms`,
+`<span>_p90_ms` and `<span>_p99_ms` for `api_accepted`, `cluster_synced`,
+`pod_created` and `ttj`, plus `submitted`, `success_rate`,
+`target_rate_per_sec` and `actual_rate_per_sec`. Workloads that never arrived
+are counted in `never_arrived_count` and never as zero latency. The health of
+the measurement itself is not a metric: when the cluster watch had to be
+reopened, or a WorkloadRunner or pod was seen more than a second before the
+step that precedes it, the section fails and `error` explains why, and the
+log carries the same line.
+
+The results are then judged in two ways. Against history: every p90 is
+compared with the median of the same metric in the last 7 runs of the same
+`cluster_type` found in the output directory, and more than 15% above that
+median is a regression; with fewer than 7 such runs the comparison is skipped.
+Against the SLO: every latency metric that has an `slo_` value from the
+scenario file, p90 or not, is a regression when above it, regardless of
+history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest
+workload of the night, so one unlucky pod makes it fire. A flagged metric gets
+a sibling `<metric>_regression: true`, `regression_detected` at the top of the
+file becomes true, and `regressions` lists every finding with a ready-made
+message, for example "training-burst p90_ms@100: 5900 ms is +18% over the
+median of 5000 ms from the last 7 runs". The same lines appear in the log. A
+regression does not change the exit code. The median adapts: a slowdown that
+lasts is reported for about four nights and then becomes the new baseline.

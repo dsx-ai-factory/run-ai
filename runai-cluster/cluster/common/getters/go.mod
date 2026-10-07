@@ -140,7 +140,6 @@ replace (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../../../../control-plane/cluster-service/pkg/client
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../../common/utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../../go-operator
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../../sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants => ../../../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ../../../common/profiling

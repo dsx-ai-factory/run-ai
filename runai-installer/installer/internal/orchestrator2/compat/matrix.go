@@ -83,7 +83,7 @@ var matrix = map[string]Locks{
 		MPIOperator:         "v0.8.2",
 		LWS:                 "0.10.0",
 		NIMOperator:         "3.1.2",
-		Grove:               "v0.1.0-alpha.10-rc1",
+		Grove:               "v0.1.0-alpha.12-rc1",
 		Dynamo:              "1.4.2",
 		NFD:                 "stable",
 		SRIOVOperator:       "stable",

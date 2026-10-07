@@ -28,7 +28,7 @@ func TestBuildersMpiNvidia(t *testing.T) {
 		{TestName: "command_args"},
 		{TestName: "pod_affinity"},
 		{TestName: "probes"},
-		{TestName: "master_basic", TestEnvVars: &common.TestEnvVars{ADSEncryptionKey: common.ADSEncryptionKey}},
+		{TestName: "master_basic"},
 		{TestName: "master_more_params"},
 		{TestName: "master_only_params"},
 		{TestName: "master_only_privileged_true"},
@@ -42,7 +42,7 @@ func TestBuildersMpiNvidia(t *testing.T) {
 		{TestName: "s3_master_bucket"},
 		{TestName: "restart_policy"},
 		{TestName: "launcher_create_policy"},
-		{TestName: "image_pull_secrets", TestEnvVars: &common.TestEnvVars{ADSEncryptionKey: common.ADSEncryptionKey}},
+		{TestName: "image_pull_secrets"},
 		{TestName: "basic_with_topology"},
 	}
 

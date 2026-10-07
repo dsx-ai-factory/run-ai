@@ -111,14 +111,15 @@ func (dinfComposer *DistributedInferenceToLWSComposer) buildAuthProxySidecar(
 		return init_containers.BuildOauth2ProxySidecar(
 			&target.LeaderWorkerSet.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec,
 			init_containers.ServingProxySpec{
-				ContainerPort:    *port,
-				ServingURL:       cookie.servingURL,
-				CookiePrefix:     cookie.serviceName,
-				AuthorizedUsers:  strings.Join(authInfo.AuthorizedUsers, ","),
-				AuthorizedGroups: strings.Join(authInfo.AuthorizedGroups, ","),
-				WorkloadName:     cookie.workloadName,
-				ProjectName:      cookie.projectName,
-				Config:           cookie.config,
+				ContainerPort:                 *port,
+				ServingURL:                    cookie.servingURL,
+				CookiePrefix:                  cookie.serviceName,
+				AuthorizedUsers:               strings.Join(authInfo.AuthorizedUsers, ","),
+				AuthorizedGroups:              strings.Join(authInfo.AuthorizedGroups, ","),
+				WorkloadName:                  cookie.workloadName,
+				ProjectName:                   cookie.projectName,
+				Config:                        cookie.config,
+				OAuth2ProxyTemplatesSupported: dinfComposer.fc.Options.OAuth2ProxyTemplatesSupported,
 			},
 		)
 	}

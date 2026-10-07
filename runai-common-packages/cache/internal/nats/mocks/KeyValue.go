@@ -20,10 +20,19 @@ func NewKeyValue(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *KeyValue {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &KeyValue{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -88,11 +97,11 @@ func (_c *KeyValue_Bucket_Call) RunAndReturn(run func() string) *KeyValue_Bucket
 // Create provides a mock function for the type KeyValue
 func (_mock *KeyValue) Create(ctx context.Context, key string, value []byte, opts ...jetstream.KVCreateOpt) (uint64, error) {
 	// jetstream.KVCreateOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, key, value)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -125,24 +134,43 @@ type KeyValue_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - value
-//   - opts
-func (_e *KeyValue_Expecter) Create(ctx interface{}, key interface{}, value interface{}, opts ...interface{}) *KeyValue_Create_Call {
+//   - ctx context.Context
+//   - key string
+//   - value []byte
+//   - opts ...jetstream.KVCreateOpt
+func (_e *KeyValue_Expecter) Create(ctx any, key any, value any, opts ...any) *KeyValue_Create_Call {
 	return &KeyValue_Create_Call{Call: _e.mock.On("Create",
-		append([]interface{}{ctx, key, value}, opts...)...)}
+		append([]any{ctx, key, value}, opts...)...)}
 }
 
 func (_c *KeyValue_Create_Call) Run(run func(ctx context.Context, key string, value []byte, opts ...jetstream.KVCreateOpt)) *KeyValue_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []byte
+		if args[2] != nil {
+			arg2 = args[2].([]byte)
+		}
+		var arg3 []jetstream.KVCreateOpt
 		variadicArgs := make([]jetstream.KVCreateOpt, len(args)-3)
 		for i, a := range args[3:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.KVCreateOpt)
 			}
 		}
-		run(args[0].(context.Context), args[1].(string), args[2].([]byte), variadicArgs...)
+		arg3 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3...,
+		)
 	})
 	return _c
 }
@@ -160,11 +188,11 @@ func (_c *KeyValue_Create_Call) RunAndReturn(run func(ctx context.Context, key s
 // Delete provides a mock function for the type KeyValue
 func (_mock *KeyValue) Delete(ctx context.Context, key string, opts ...jetstream.KVDeleteOpt) error {
 	// jetstream.KVDeleteOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, key)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -188,23 +216,37 @@ type KeyValue_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - opts
-func (_e *KeyValue_Expecter) Delete(ctx interface{}, key interface{}, opts ...interface{}) *KeyValue_Delete_Call {
+//   - ctx context.Context
+//   - key string
+//   - opts ...jetstream.KVDeleteOpt
+func (_e *KeyValue_Expecter) Delete(ctx any, key any, opts ...any) *KeyValue_Delete_Call {
 	return &KeyValue_Delete_Call{Call: _e.mock.On("Delete",
-		append([]interface{}{ctx, key}, opts...)...)}
+		append([]any{ctx, key}, opts...)...)}
 }
 
 func (_c *KeyValue_Delete_Call) Run(run func(ctx context.Context, key string, opts ...jetstream.KVDeleteOpt)) *KeyValue_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []jetstream.KVDeleteOpt
 		variadicArgs := make([]jetstream.KVDeleteOpt, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.KVDeleteOpt)
 			}
 		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
 	})
 	return _c
 }
@@ -253,15 +295,26 @@ type KeyValue_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-//   - key
-func (_e *KeyValue_Expecter) Get(ctx interface{}, key interface{}) *KeyValue_Get_Call {
+//   - ctx context.Context
+//   - key string
+func (_e *KeyValue_Expecter) Get(ctx any, key any) *KeyValue_Get_Call {
 	return &KeyValue_Get_Call{Call: _e.mock.On("Get", ctx, key)}
 }
 
 func (_c *KeyValue_Get_Call) Run(run func(ctx context.Context, key string)) *KeyValue_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -310,16 +363,32 @@ type KeyValue_GetRevision_Call struct {
 }
 
 // GetRevision is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - revision
-func (_e *KeyValue_Expecter) GetRevision(ctx interface{}, key interface{}, revision interface{}) *KeyValue_GetRevision_Call {
+//   - ctx context.Context
+//   - key string
+//   - revision uint64
+func (_e *KeyValue_Expecter) GetRevision(ctx any, key any, revision any) *KeyValue_GetRevision_Call {
 	return &KeyValue_GetRevision_Call{Call: _e.mock.On("GetRevision", ctx, key, revision)}
 }
 
 func (_c *KeyValue_GetRevision_Call) Run(run func(ctx context.Context, key string, revision uint64)) *KeyValue_GetRevision_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(uint64))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 uint64
+		if args[2] != nil {
+			arg2 = args[2].(uint64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -337,11 +406,11 @@ func (_c *KeyValue_GetRevision_Call) RunAndReturn(run func(ctx context.Context, 
 // History provides a mock function for the type KeyValue
 func (_mock *KeyValue) History(ctx context.Context, key string, opts ...jetstream.WatchOpt) ([]jetstream.KeyValueEntry, error) {
 	// jetstream.WatchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, key)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -376,23 +445,37 @@ type KeyValue_History_Call struct {
 }
 
 // History is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - opts
-func (_e *KeyValue_Expecter) History(ctx interface{}, key interface{}, opts ...interface{}) *KeyValue_History_Call {
+//   - ctx context.Context
+//   - key string
+//   - opts ...jetstream.WatchOpt
+func (_e *KeyValue_Expecter) History(ctx any, key any, opts ...any) *KeyValue_History_Call {
 	return &KeyValue_History_Call{Call: _e.mock.On("History",
-		append([]interface{}{ctx, key}, opts...)...)}
+		append([]any{ctx, key}, opts...)...)}
 }
 
 func (_c *KeyValue_History_Call) Run(run func(ctx context.Context, key string, opts ...jetstream.WatchOpt)) *KeyValue_History_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []jetstream.WatchOpt
 		variadicArgs := make([]jetstream.WatchOpt, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.WatchOpt)
 			}
 		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
 	})
 	return _c
 }
@@ -410,11 +493,11 @@ func (_c *KeyValue_History_Call) RunAndReturn(run func(ctx context.Context, key 
 // Keys provides a mock function for the type KeyValue
 func (_mock *KeyValue) Keys(ctx context.Context, opts ...jetstream.WatchOpt) ([]string, error) {
 	// jetstream.WatchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -449,22 +532,31 @@ type KeyValue_Keys_Call struct {
 }
 
 // Keys is a helper method to define mock.On call
-//   - ctx
-//   - opts
-func (_e *KeyValue_Expecter) Keys(ctx interface{}, opts ...interface{}) *KeyValue_Keys_Call {
+//   - ctx context.Context
+//   - opts ...jetstream.WatchOpt
+func (_e *KeyValue_Expecter) Keys(ctx any, opts ...any) *KeyValue_Keys_Call {
 	return &KeyValue_Keys_Call{Call: _e.mock.On("Keys",
-		append([]interface{}{ctx}, opts...)...)}
+		append([]any{ctx}, opts...)...)}
 }
 
 func (_c *KeyValue_Keys_Call) Run(run func(ctx context.Context, opts ...jetstream.WatchOpt)) *KeyValue_Keys_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []jetstream.WatchOpt
 		variadicArgs := make([]jetstream.WatchOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.WatchOpt)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -482,11 +574,11 @@ func (_c *KeyValue_Keys_Call) RunAndReturn(run func(ctx context.Context, opts ..
 // ListKeys provides a mock function for the type KeyValue
 func (_mock *KeyValue) ListKeys(ctx context.Context, opts ...jetstream.WatchOpt) (jetstream.KeyLister, error) {
 	// jetstream.WatchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -521,22 +613,31 @@ type KeyValue_ListKeys_Call struct {
 }
 
 // ListKeys is a helper method to define mock.On call
-//   - ctx
-//   - opts
-func (_e *KeyValue_Expecter) ListKeys(ctx interface{}, opts ...interface{}) *KeyValue_ListKeys_Call {
+//   - ctx context.Context
+//   - opts ...jetstream.WatchOpt
+func (_e *KeyValue_Expecter) ListKeys(ctx any, opts ...any) *KeyValue_ListKeys_Call {
 	return &KeyValue_ListKeys_Call{Call: _e.mock.On("ListKeys",
-		append([]interface{}{ctx}, opts...)...)}
+		append([]any{ctx}, opts...)...)}
 }
 
 func (_c *KeyValue_ListKeys_Call) Run(run func(ctx context.Context, opts ...jetstream.WatchOpt)) *KeyValue_ListKeys_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []jetstream.WatchOpt
 		variadicArgs := make([]jetstream.WatchOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.WatchOpt)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -554,11 +655,11 @@ func (_c *KeyValue_ListKeys_Call) RunAndReturn(run func(ctx context.Context, opt
 // ListKeysFiltered provides a mock function for the type KeyValue
 func (_mock *KeyValue) ListKeysFiltered(ctx context.Context, filters ...string) (jetstream.KeyLister, error) {
 	// string
-	_va := make([]interface{}, len(filters))
+	_va := make([]any, len(filters))
 	for _i := range filters {
 		_va[_i] = filters[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -593,22 +694,31 @@ type KeyValue_ListKeysFiltered_Call struct {
 }
 
 // ListKeysFiltered is a helper method to define mock.On call
-//   - ctx
-//   - filters
-func (_e *KeyValue_Expecter) ListKeysFiltered(ctx interface{}, filters ...interface{}) *KeyValue_ListKeysFiltered_Call {
+//   - ctx context.Context
+//   - filters ...string
+func (_e *KeyValue_Expecter) ListKeysFiltered(ctx any, filters ...any) *KeyValue_ListKeysFiltered_Call {
 	return &KeyValue_ListKeysFiltered_Call{Call: _e.mock.On("ListKeysFiltered",
-		append([]interface{}{ctx}, filters...)...)}
+		append([]any{ctx}, filters...)...)}
 }
 
 func (_c *KeyValue_ListKeysFiltered_Call) Run(run func(ctx context.Context, filters ...string)) *KeyValue_ListKeysFiltered_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []string
 		variadicArgs := make([]string, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(string)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -626,11 +736,11 @@ func (_c *KeyValue_ListKeysFiltered_Call) RunAndReturn(run func(ctx context.Cont
 // Purge provides a mock function for the type KeyValue
 func (_mock *KeyValue) Purge(ctx context.Context, key string, opts ...jetstream.KVDeleteOpt) error {
 	// jetstream.KVDeleteOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, key)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -654,23 +764,37 @@ type KeyValue_Purge_Call struct {
 }
 
 // Purge is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - opts
-func (_e *KeyValue_Expecter) Purge(ctx interface{}, key interface{}, opts ...interface{}) *KeyValue_Purge_Call {
+//   - ctx context.Context
+//   - key string
+//   - opts ...jetstream.KVDeleteOpt
+func (_e *KeyValue_Expecter) Purge(ctx any, key any, opts ...any) *KeyValue_Purge_Call {
 	return &KeyValue_Purge_Call{Call: _e.mock.On("Purge",
-		append([]interface{}{ctx, key}, opts...)...)}
+		append([]any{ctx, key}, opts...)...)}
 }
 
 func (_c *KeyValue_Purge_Call) Run(run func(ctx context.Context, key string, opts ...jetstream.KVDeleteOpt)) *KeyValue_Purge_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []jetstream.KVDeleteOpt
 		variadicArgs := make([]jetstream.KVDeleteOpt, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.KVDeleteOpt)
 			}
 		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
 	})
 	return _c
 }
@@ -688,11 +812,11 @@ func (_c *KeyValue_Purge_Call) RunAndReturn(run func(ctx context.Context, key st
 // PurgeDeletes provides a mock function for the type KeyValue
 func (_mock *KeyValue) PurgeDeletes(ctx context.Context, opts ...jetstream.KVPurgeOpt) error {
 	// jetstream.KVPurgeOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -716,22 +840,31 @@ type KeyValue_PurgeDeletes_Call struct {
 }
 
 // PurgeDeletes is a helper method to define mock.On call
-//   - ctx
-//   - opts
-func (_e *KeyValue_Expecter) PurgeDeletes(ctx interface{}, opts ...interface{}) *KeyValue_PurgeDeletes_Call {
+//   - ctx context.Context
+//   - opts ...jetstream.KVPurgeOpt
+func (_e *KeyValue_Expecter) PurgeDeletes(ctx any, opts ...any) *KeyValue_PurgeDeletes_Call {
 	return &KeyValue_PurgeDeletes_Call{Call: _e.mock.On("PurgeDeletes",
-		append([]interface{}{ctx}, opts...)...)}
+		append([]any{ctx}, opts...)...)}
 }
 
 func (_c *KeyValue_PurgeDeletes_Call) Run(run func(ctx context.Context, opts ...jetstream.KVPurgeOpt)) *KeyValue_PurgeDeletes_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []jetstream.KVPurgeOpt
 		variadicArgs := make([]jetstream.KVPurgeOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.KVPurgeOpt)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -778,16 +911,32 @@ type KeyValue_Put_Call struct {
 }
 
 // Put is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - value
-func (_e *KeyValue_Expecter) Put(ctx interface{}, key interface{}, value interface{}) *KeyValue_Put_Call {
+//   - ctx context.Context
+//   - key string
+//   - value []byte
+func (_e *KeyValue_Expecter) Put(ctx any, key any, value any) *KeyValue_Put_Call {
 	return &KeyValue_Put_Call{Call: _e.mock.On("Put", ctx, key, value)}
 }
 
 func (_c *KeyValue_Put_Call) Run(run func(ctx context.Context, key string, value []byte)) *KeyValue_Put_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].([]byte))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []byte
+		if args[2] != nil {
+			arg2 = args[2].([]byte)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -834,16 +983,32 @@ type KeyValue_PutString_Call struct {
 }
 
 // PutString is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - value
-func (_e *KeyValue_Expecter) PutString(ctx interface{}, key interface{}, value interface{}) *KeyValue_PutString_Call {
+//   - ctx context.Context
+//   - key string
+//   - value string
+func (_e *KeyValue_Expecter) PutString(ctx any, key any, value any) *KeyValue_PutString_Call {
 	return &KeyValue_PutString_Call{Call: _e.mock.On("PutString", ctx, key, value)}
 }
 
 func (_c *KeyValue_PutString_Call) Run(run func(ctx context.Context, key string, value string)) *KeyValue_PutString_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -892,14 +1057,20 @@ type KeyValue_Status_Call struct {
 }
 
 // Status is a helper method to define mock.On call
-//   - ctx
-func (_e *KeyValue_Expecter) Status(ctx interface{}) *KeyValue_Status_Call {
+//   - ctx context.Context
+func (_e *KeyValue_Expecter) Status(ctx any) *KeyValue_Status_Call {
 	return &KeyValue_Status_Call{Call: _e.mock.On("Status", ctx)}
 }
 
 func (_c *KeyValue_Status_Call) Run(run func(ctx context.Context)) *KeyValue_Status_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -946,17 +1117,38 @@ type KeyValue_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - value
-//   - revision
-func (_e *KeyValue_Expecter) Update(ctx interface{}, key interface{}, value interface{}, revision interface{}) *KeyValue_Update_Call {
+//   - ctx context.Context
+//   - key string
+//   - value []byte
+//   - revision uint64
+func (_e *KeyValue_Expecter) Update(ctx any, key any, value any, revision any) *KeyValue_Update_Call {
 	return &KeyValue_Update_Call{Call: _e.mock.On("Update", ctx, key, value, revision)}
 }
 
 func (_c *KeyValue_Update_Call) Run(run func(ctx context.Context, key string, value []byte, revision uint64)) *KeyValue_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].([]byte), args[3].(uint64))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []byte
+		if args[2] != nil {
+			arg2 = args[2].([]byte)
+		}
+		var arg3 uint64
+		if args[3] != nil {
+			arg3 = args[3].(uint64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -974,11 +1166,11 @@ func (_c *KeyValue_Update_Call) RunAndReturn(run func(ctx context.Context, key s
 // Watch provides a mock function for the type KeyValue
 func (_mock *KeyValue) Watch(ctx context.Context, keys string, opts ...jetstream.WatchOpt) (jetstream.KeyWatcher, error) {
 	// jetstream.WatchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, keys)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -1013,23 +1205,37 @@ type KeyValue_Watch_Call struct {
 }
 
 // Watch is a helper method to define mock.On call
-//   - ctx
-//   - keys
-//   - opts
-func (_e *KeyValue_Expecter) Watch(ctx interface{}, keys interface{}, opts ...interface{}) *KeyValue_Watch_Call {
+//   - ctx context.Context
+//   - keys string
+//   - opts ...jetstream.WatchOpt
+func (_e *KeyValue_Expecter) Watch(ctx any, keys any, opts ...any) *KeyValue_Watch_Call {
 	return &KeyValue_Watch_Call{Call: _e.mock.On("Watch",
-		append([]interface{}{ctx, keys}, opts...)...)}
+		append([]any{ctx, keys}, opts...)...)}
 }
 
 func (_c *KeyValue_Watch_Call) Run(run func(ctx context.Context, keys string, opts ...jetstream.WatchOpt)) *KeyValue_Watch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []jetstream.WatchOpt
 		variadicArgs := make([]jetstream.WatchOpt, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.WatchOpt)
 			}
 		}
-		run(args[0].(context.Context), args[1].(string), variadicArgs...)
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
 	})
 	return _c
 }
@@ -1047,11 +1253,11 @@ func (_c *KeyValue_Watch_Call) RunAndReturn(run func(ctx context.Context, keys s
 // WatchAll provides a mock function for the type KeyValue
 func (_mock *KeyValue) WatchAll(ctx context.Context, opts ...jetstream.WatchOpt) (jetstream.KeyWatcher, error) {
 	// jetstream.WatchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -1086,22 +1292,31 @@ type KeyValue_WatchAll_Call struct {
 }
 
 // WatchAll is a helper method to define mock.On call
-//   - ctx
-//   - opts
-func (_e *KeyValue_Expecter) WatchAll(ctx interface{}, opts ...interface{}) *KeyValue_WatchAll_Call {
+//   - ctx context.Context
+//   - opts ...jetstream.WatchOpt
+func (_e *KeyValue_Expecter) WatchAll(ctx any, opts ...any) *KeyValue_WatchAll_Call {
 	return &KeyValue_WatchAll_Call{Call: _e.mock.On("WatchAll",
-		append([]interface{}{ctx}, opts...)...)}
+		append([]any{ctx}, opts...)...)}
 }
 
 func (_c *KeyValue_WatchAll_Call) Run(run func(ctx context.Context, opts ...jetstream.WatchOpt)) *KeyValue_WatchAll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []jetstream.WatchOpt
 		variadicArgs := make([]jetstream.WatchOpt, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.WatchOpt)
 			}
 		}
-		run(args[0].(context.Context), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -1119,11 +1334,11 @@ func (_c *KeyValue_WatchAll_Call) RunAndReturn(run func(ctx context.Context, opt
 // WatchFiltered provides a mock function for the type KeyValue
 func (_mock *KeyValue) WatchFiltered(ctx context.Context, keys []string, opts ...jetstream.WatchOpt) (jetstream.KeyWatcher, error) {
 	// jetstream.WatchOpt
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, keys)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -1158,23 +1373,37 @@ type KeyValue_WatchFiltered_Call struct {
 }
 
 // WatchFiltered is a helper method to define mock.On call
-//   - ctx
-//   - keys
-//   - opts
-func (_e *KeyValue_Expecter) WatchFiltered(ctx interface{}, keys interface{}, opts ...interface{}) *KeyValue_WatchFiltered_Call {
+//   - ctx context.Context
+//   - keys []string
+//   - opts ...jetstream.WatchOpt
+func (_e *KeyValue_Expecter) WatchFiltered(ctx any, keys any, opts ...any) *KeyValue_WatchFiltered_Call {
 	return &KeyValue_WatchFiltered_Call{Call: _e.mock.On("WatchFiltered",
-		append([]interface{}{ctx, keys}, opts...)...)}
+		append([]any{ctx, keys}, opts...)...)}
 }
 
 func (_c *KeyValue_WatchFiltered_Call) Run(run func(ctx context.Context, keys []string, opts ...jetstream.WatchOpt)) *KeyValue_WatchFiltered_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []string
+		if args[1] != nil {
+			arg1 = args[1].([]string)
+		}
+		var arg2 []jetstream.WatchOpt
 		variadicArgs := make([]jetstream.WatchOpt, len(args)-2)
 		for i, a := range args[2:] {
 			if a != nil {
 				variadicArgs[i] = a.(jetstream.WatchOpt)
 			}
 		}
-		run(args[0].(context.Context), args[1].([]string), variadicArgs...)
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
 	})
 	return _c
 }

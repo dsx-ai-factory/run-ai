@@ -107,7 +107,7 @@ import {
   AccessRulesBatchAction,
   type AccessRulesBatchCreateResponse,
   type PermittedScopes,
-  type RoleV1,
+  type Role,
 } from "@/swagger-models/authorization-client";
 import { ECustomCell } from "@/models/table.model";
 import type { ITableColumn } from "@/models/table.model";
@@ -175,7 +175,7 @@ export default defineComponent({
       isDeleteModalOpen: false as boolean,
       isNewAccessRuleModalOpen: false as boolean,
       isTransitionModalOpen: false as boolean,
-      roles: [] as Array<RoleV1>,
+      roles: [] as Array<Role>,
       deletableAccessRulesIds: [] as number[],
       lastSysAdminDeletionError: false,
       allowedCreateScopes: {} as PermittedScopes,
@@ -345,9 +345,9 @@ export default defineComponent({
       this.isTransitionModalOpen = false;
       await this.legacyAccessRuleStore.loadLegacyAccessRules();
     },
-    getPermittedRoles(): Array<RoleV1> {
+    getPermittedRoles(): Array<Role> {
       return this.roleStore.roleList.filter(
-        (role: RoleV1) =>
+        (role: Role) =>
           role.effectiveEnabled && rolesService.isPermittedRole(role, this.permissionStore.permissionsList),
       );
     },

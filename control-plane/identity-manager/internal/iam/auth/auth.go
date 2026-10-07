@@ -22,7 +22,6 @@ type Configuration struct {
 	Password string
 }
 
-//go:generate mockery --name Auth --output ./mocks --filename auth.go
 type Auth interface {
 	GetAdminToken(context.Context) (*string, error)
 	GetHost() string

@@ -25,7 +25,7 @@ func TestBuildersXGBoost(t *testing.T) {
 		{TestName: "ephemeral"},
 		{TestName: "command_args"},
 		{TestName: "pod_affinity"},
-		{TestName: "master_basic", TestEnvVars: &common.TestEnvVars{ADSEncryptionKey: common.ADSEncryptionKey}},
+		{TestName: "master_basic"},
 		{TestName: "master_more_params"},
 		{TestName: "master_only_params"},
 		{TestName: "master_only_privileged_true"},
@@ -34,7 +34,7 @@ func TestBuildersXGBoost(t *testing.T) {
 		{TestName: "basic_policy"},
 		{TestName: "master_with_policy"},
 		{TestName: "s3_bucket"},
-		{TestName: "image_pull_secrets", TestEnvVars: &common.TestEnvVars{ADSEncryptionKey: common.ADSEncryptionKey}},
+		{TestName: "image_pull_secrets"},
 	}
 	for _, curTest := range toTest {
 		Init()

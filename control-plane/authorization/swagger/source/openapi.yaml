@@ -25,13 +25,6 @@ paths:
         200:
           description: Executed successfully.
 
-  /api/v1/authorization/roles:
-    x-scope: [system, tenant]
-    $ref: './resources/RolesV1.yaml'
-  /api/v1/authorization/roles/{roleIdPath}:
-    x-scope: [system, tenant]
-    $ref: './resources/RoleByIdV1.yaml'
-
   /api/v2/authorization/roles:
     x-scope: [ system, tenant ]
     $ref: './resources/Roles.yaml'

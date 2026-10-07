@@ -19,10 +19,19 @@ func NewMockMetricsWriterer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMetricsWriterer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMetricsWriterer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -52,19 +61,50 @@ type MockMetricsWriterer_RecordOperation_Call struct {
 }
 
 // RecordOperation is a helper method to define mock.On call
-//   - cacheType
-//   - storeName
-//   - operationType
-//   - duration
-//   - err
-//   - miss
-func (_e *MockMetricsWriterer_Expecter) RecordOperation(cacheType interface{}, storeName interface{}, operationType interface{}, duration interface{}, err interface{}, miss interface{}) *MockMetricsWriterer_RecordOperation_Call {
+//   - cacheType string
+//   - storeName string
+//   - operationType OperationType
+//   - duration time.Duration
+//   - err error
+//   - miss bool
+func (_e *MockMetricsWriterer_Expecter) RecordOperation(cacheType any, storeName any, operationType any, duration any, err any, miss any) *MockMetricsWriterer_RecordOperation_Call {
 	return &MockMetricsWriterer_RecordOperation_Call{Call: _e.mock.On("RecordOperation", cacheType, storeName, operationType, duration, err, miss)}
 }
 
 func (_c *MockMetricsWriterer_RecordOperation_Call) Run(run func(cacheType string, storeName string, operationType OperationType, duration time.Duration, err error, miss bool)) *MockMetricsWriterer_RecordOperation_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(OperationType), args[3].(time.Duration), args[4].(error), args[5].(bool))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 OperationType
+		if args[2] != nil {
+			arg2 = args[2].(OperationType)
+		}
+		var arg3 time.Duration
+		if args[3] != nil {
+			arg3 = args[3].(time.Duration)
+		}
+		var arg4 error
+		if args[4] != nil {
+			arg4 = args[4].(error)
+		}
+		var arg5 bool
+		if args[5] != nil {
+			arg5 = args[5].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+		)
 	})
 	return _c
 }

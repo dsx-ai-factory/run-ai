@@ -20,10 +20,10 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-20250716113405-6ec301e09307
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller v0.0.0
@@ -50,6 +50,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.35.4
 	k8s.io/apimachinery v0.36.2
 	k8s.io/client-go v1.5.2
+	k8s.io/kubernetes v1.35.4
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 	sigs.k8s.io/controller-runtime v0.23.3
 	sigs.k8s.io/gateway-api v1.6.1
@@ -79,11 +80,11 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.6 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.26 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch v5.9.11+incompatible // indirect
@@ -96,7 +97,6 @@ require (
 	github.com/go-chi/chi/v5 v5.3.2 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-logr/zapr v1.3.0 // indirect
 	github.com/go-openapi/jsonpointer v1.0.1 // indirect
 	github.com/go-openapi/jsonreference v1.0.1 // indirect
 	github.com/go-openapi/swag v0.29.2 // indirect
@@ -181,13 +181,14 @@ require (
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.71.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 // indirect
-	go.opentelemetry.io/otel v1.46.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.46.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.46.0 // indirect
-	go.opentelemetry.io/otel/metric v1.46.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.46.0 // indirect
-	go.opentelemetry.io/otel/trace v1.46.0 // indirect
-	go.opentelemetry.io/proto/otlp v1.11.0 // indirect
+	go.opentelemetry.io/otel v1.47.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0 // indirect
+	go.opentelemetry.io/otel/log v1.47.0 // indirect
+	go.opentelemetry.io/otel/metric v1.47.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.47.0 // indirect
+	go.opentelemetry.io/otel/trace v1.47.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
@@ -203,8 +204,8 @@ require (
 	golang.org/x/time v0.16.0 // indirect
 	golang.org/x/tools v0.50.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260921155816-b14227669459 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
@@ -225,7 +226,6 @@ require (
 	k8s.io/kube-openapi v0.0.0-20260519202549-bbf5c5577288 // indirect
 	k8s.io/kube-scheduler v0.35.4 // indirect
 	k8s.io/kubelet v0.35.4 // indirect
-	k8s.io/kubernetes v1.35.4 // indirect
 	k8s.io/mount-utils v0.35.4 // indirect
 	knative.dev/networking v0.0.0-20260120131110-a7cdca238a0d // indirect
 	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a // indirect
@@ -254,9 +254,9 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/extensions => ../common/extensions
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds => ../common/personalcreds
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../common/runaipublic
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ../common/topology
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ../workload-common
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller => ../workload-controller

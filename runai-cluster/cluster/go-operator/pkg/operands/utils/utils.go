@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"path"
 	"slices"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	me "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/multi-error"
@@ -522,6 +523,29 @@ func GetNMCServiceAccountNameOrDefault(runaiConfig *runaiv1.RunaiConfig, def str
 	}
 
 	return def
+}
+
+// GetNMCAllowedServiceAccountUsernames scopes bare names to the installation namespace
+// while preserving explicit identities for controllers in other namespaces.
+func GetNMCAllowedServiceAccountUsernames(runaiConfig *runaiv1.RunaiConfig) []string {
+	if runaiConfig.Spec.Internal == nil || runaiConfig.Spec.Internal.Global == nil {
+		return nil
+	}
+	nmc := runaiConfig.Spec.Internal.Global.NMC
+	accounts := append([]string{nmc.ServiceAccountName}, nmc.AllowedServiceAccounts...)
+	var usernames []string
+	for _, account := range accounts {
+		if account == "" {
+			continue
+		}
+		if !strings.Contains(account, ":") {
+			account = fmt.Sprintf("system:serviceaccount:%s:%s", runaiConfig.GetNamespace(), account)
+		}
+		if !slices.Contains(usernames, account) {
+			usernames = append(usernames, account)
+		}
+	}
+	return usernames
 }
 
 func Deref[T any](p *T) T {

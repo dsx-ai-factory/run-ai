@@ -11,7 +11,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/models"
 )
 
-//go:generate mockery --name RealmSettingsDal
 type RealmSettingsDal interface {
 	SaveRealmSetting(ctx context.Context, realmSetting *models.RealmSettings) error
 	GetRealmSettingByKey(ctx context.Context, tenantId string, settingKey string) (*models.RealmSettings, error)

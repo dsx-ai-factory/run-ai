@@ -49,7 +49,6 @@ type InstallationData struct {
 	LastLiveness         *time.Time
 }
 
-//go:generate mockery --name ClusterInstallService
 type ClusterInstallService interface {
 	GetClusterSupportedVersions(ctx context.Context, config *config.Installation) (map[string]string, error)
 	GetInstallationString(data *InstallationData) string

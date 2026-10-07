@@ -24,8 +24,9 @@ var _ MappedNullable = &Rct{}
 
 // Rct struct for Rct
 type Rct struct {
-	Meta AssetMeta `json:"meta"`
-	Spec RctSpec   `json:"spec"`
+	Meta   AssetMeta                      `json:"meta"`
+	Spec   RctSpec                        `json:"spec"`
+	Status NullableAssetClusterStatusInfo `json:"status,omitempty"`
 }
 
 type _Rct Rct
@@ -97,6 +98,49 @@ func (o *Rct) SetSpec(v RctSpec) {
 	o.Spec = v
 }
 
+// GetStatus returns the Status field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *Rct) GetStatus() AssetClusterStatusInfo {
+	if o == nil || IsNil(o.Status.Get()) {
+		var ret AssetClusterStatusInfo
+		return ret
+	}
+	return *o.Status.Get()
+}
+
+// GetStatusOk returns a tuple with the Status field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Rct) GetStatusOk() (*AssetClusterStatusInfo, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Status.Get(), o.Status.IsSet()
+}
+
+// HasStatus returns a boolean if a field has been set.
+func (o *Rct) HasStatus() bool {
+	if o != nil && o.Status.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetStatus gets a reference to the given NullableAssetClusterStatusInfo and assigns it to the Status field.
+func (o *Rct) SetStatus(v AssetClusterStatusInfo) {
+	o.Status.Set(&v)
+}
+
+// SetStatusNil sets the value for Status to be an explicit nil
+func (o *Rct) SetStatusNil() {
+	o.Status.Set(nil)
+}
+
+// UnsetStatus ensures that no value is present for Status, not even an explicit nil
+func (o *Rct) UnsetStatus() {
+	o.Status.Unset()
+}
+
 func (o Rct) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -109,6 +153,9 @@ func (o Rct) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["meta"] = o.Meta
 	toSerialize["spec"] = o.Spec
+	if o.Status.IsSet() {
+		toSerialize["status"] = o.Status.Get()
+	}
 	return toSerialize, nil
 }
 

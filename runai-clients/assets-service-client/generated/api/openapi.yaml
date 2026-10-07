@@ -1082,6 +1082,15 @@ paths:
           minimum: 1
           type: integer
         style: form
+      - description: Whether the query should include asset status information as
+          part of the response.
+        explode: true
+        in: query
+        name: statusInfo
+        required: false
+        schema:
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -1123,6 +1132,7 @@ paths:
       x-service: assets-service
       x-test-coverage:
       - control-plane/assets-service/pkg/services/api_rct_service_test.go
+      - control-plane/assets-service/pkg/services/api_agent_sync_test.go
     post:
       description: Use to create a resource claim template and synchronize it to the
         cluster.
@@ -1277,6 +1287,15 @@ paths:
           minLength: 1
           type: string
         style: simple
+      - description: Whether the query should include asset status information as
+          part of the response.
+        explode: true
+        in: query
+        name: statusInfo
+        required: false
+        schema:
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -1329,6 +1348,7 @@ paths:
       x-service: assets-service
       x-test-coverage:
       - control-plane/assets-service/pkg/services/api_rct_service_test.go
+      - control-plane/assets-service/pkg/services/api_agent_sync_test.go
     put:
       description: Use to update the details of a resource claim template by id.
       operationId: update_rct_by_id
@@ -1401,6 +1421,99 @@ paths:
         resource-type: resource-claim-templates
         action: update
       x-audit: true
+  /api/v1/k8s-objects/updates:
+    post:
+      operationId: k8s_objects_sync_updates
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: search for updates with update counter greater than the value
+          passed for this parameter
+        explode: true
+        in: query
+        name: after
+        required: false
+        schema:
+          example: 123
+          format: int64
+          type: integer
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClusterSyncReport'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/K8sObjectsUpdatesResp'
+          description: Request completed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Allow cluster to request a list of k8sObjects updates that needs to
+        be synced to the cluster and to send success/failure about the result of previous
+        sync.
+      tags:
+      - Synchronization
+      x-service: assets-service
+      x-test-coverage:
+      - control-plane/assets-service/pkg/services/api_agent_sync_test.go"
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: sync
   /api/v1/asset/credentials:
     get:
       description: Use to retrieve a list of all existing credentials.
@@ -12533,6 +12646,29 @@ components:
       schema:
         type: boolean
       style: form
+    ClusterIdRequired:
+      description: The id of the cluster
+      explode: true
+      in: query
+      name: clusterId
+      required: true
+      schema:
+        example: d73a738f-fab3-430a-8fa3-5241493d7128
+        format: uuid
+        type: string
+      style: form
+    SyncAfter:
+      description: search for updates with update counter greater than the value passed
+        for this parameter
+      explode: true
+      in: query
+      name: after
+      required: false
+      schema:
+        example: 123
+        format: int64
+        type: integer
+      style: form
     PrivateOnly:
       description: Whether the query should include private assets. mutually exclusive
         with `includePrivate` parameter.
@@ -12572,29 +12708,6 @@ components:
         type: string
       style: form
       x-internal: true
-    ClusterIdRequired:
-      description: The id of the cluster
-      explode: true
-      in: query
-      name: clusterId
-      required: true
-      schema:
-        example: d73a738f-fab3-430a-8fa3-5241493d7128
-        format: uuid
-        type: string
-      style: form
-    SyncAfter:
-      description: search for updates with update counter greater than the value passed
-        for this parameter
-      explode: true
-      in: query
-      name: after
-      required: false
-      schema:
-        example: 123
-        format: int64
-        type: integer
-      style: form
     SearchName:
       allowReserved: true
       description: Filter results that contains searchName.
@@ -14902,7 +15015,12 @@ components:
           nullable: true
           type: object
       type: object
-    RctSpec:
+    K8sObjectSpec:
+      description: |
+        Common shape for k8s-object asset specs: the raw Kubernetes object
+        metadata (labels/annotations) and the raw Kubernetes object spec.
+        Shared between the k8s-object CRUD APIs (e.g. RctSpec) and the
+        cluster-facing k8s-objects sync API (K8sObjectsUpdate).
       example:
         objectMeta:
           annotations:
@@ -14917,10 +15035,99 @@ components:
           $ref: '#/components/schemas/K8sObjectMeta'
         objectSpec:
           additionalProperties: true
-          description: The raw Kubernetes spec of the ResourceClaimTemplate.
+          description: The raw Kubernetes spec of the object.
           type: object
       required:
       - objectSpec
+      type: object
+    RctSpec:
+      allOf:
+      - $ref: '#/components/schemas/K8sObjectSpec'
+      example:
+        objectMeta:
+          annotations:
+            example.com/owner: team-a
+            example.com/version: "1.0"
+          labels:
+            app: my-app
+        objectSpec:
+          key: ""
+    AssetSyncStatusEnum:
+      enum:
+      - Creating
+      - Deleting
+      - Failed
+      - Deletion failed
+      - Issues found
+      - No issues found
+      - No status
+      - Updating
+      type: string
+    ScopeId:
+      description: "The id of the cluster, department or project, depending on the\
+        \ scope type."
+      type: string
+    ScopeType:
+      enum:
+      - system
+      - tenant
+      - cluster
+      - department
+      - project
+      type: string
+    AssetClusterStatusIssueEnum:
+      enum:
+      - ReplicationError
+      - LostPhase
+      - NotCreated
+      type: string
+    AssetClusterStatusIssue:
+      example:
+        scopeId: scopeId
+        issue: ReplicationError
+        scopeType: system
+      properties:
+        scopeId:
+          description: "The id of the cluster, department or project, depending on\
+            \ the scope type."
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        issue:
+          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
+      required:
+      - issue
+      - scopeId
+      - scopeType
+      type: object
+    AssetClusterStatusIssues:
+      items:
+        $ref: '#/components/schemas/AssetClusterStatusIssue'
+      type: array
+    AssetClusterStatusInfo:
+      example:
+        message: message
+        issues:
+        - scopeId: scopeId
+          issue: ReplicationError
+          scopeType: system
+        - scopeId: scopeId
+          issue: ReplicationError
+          scopeType: system
+        url: url
+        status: Creating
+      nullable: true
+      properties:
+        status:
+          $ref: '#/components/schemas/AssetSyncStatusEnum'
+        issues:
+          items:
+            $ref: '#/components/schemas/AssetClusterStatusIssue'
+          type: array
+        message:
+          type: string
+        url:
+          type: string
       type: object
     Rct:
       example:
@@ -14948,11 +15155,24 @@ components:
               app: my-app
           objectSpec:
             key: ""
+        status:
+          message: message
+          issues:
+          - scopeId: scopeId
+            issue: ReplicationError
+            scopeType: system
+          - scopeId: scopeId
+            issue: ReplicationError
+            scopeType: system
+          url: url
+          status: Creating
       properties:
         meta:
           $ref: '#/components/schemas/AssetMeta'
         spec:
           $ref: '#/components/schemas/RctSpec'
+        status:
+          $ref: '#/components/schemas/AssetClusterStatusInfo'
       required:
       - meta
       - spec
@@ -15047,6 +15267,264 @@ components:
       required:
       - meta
       - spec
+      type: object
+    ClusterSyncReportUpdate:
+      description: success/failure report of a single update attempt of the cluster
+      example:
+        updateCount: 12345
+        updateAttemptTime: 2024-06-06T12:09:18.211Z
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        message: mandatory image was not provided.
+      properties:
+        id:
+          description: "a unique id of the entity being updated (asset, workload,\
+            \ policy, etc)."
+          format: uuid
+          type: string
+        updateCount:
+          description: the value of an update counter of a data in the system.
+          example: 12345
+          format: int64
+          type: integer
+        updateAttemptTime:
+          description: the time in which the cluster attempted the update.
+          example: 2024-06-06T12:09:18.211Z
+          format: date-time
+          type: string
+        message:
+          description: optional failure message for the case that the update has failed.
+            should be sent null if the update was successful.
+          example: mandatory image was not provided.
+          nullable: true
+          type: string
+    ClusterSyncReport:
+      description: allow cluster to report about success/failures of sync updates
+      example:
+        updates:
+        - updateCount: 12345
+          updateAttemptTime: 2024-06-06T12:09:18.211Z
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          message: mandatory image was not provided.
+        - updateCount: 12345
+          updateAttemptTime: 2024-06-06T12:09:18.211Z
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          message: mandatory image was not provided.
+      properties:
+        updates:
+          items:
+            $ref: '#/components/schemas/ClusterSyncReportUpdate'
+          type: array
+    RequestInfo:
+      description: value that the agent sent to the afterUpdate query parameter.
+      example:
+        afterUpdate: 12345
+      properties:
+        afterUpdate:
+          description: the value of an update counter of a data in the system.
+          example: 12345
+          format: int64
+          type: integer
+      required:
+      - afterUpdate
+    ResponseInfo:
+      description: "The lowest and highest update counts included in this bulk of\
+        \ updates. for example, it is possible that agent requester for afterUpdate=10\
+        \ and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12,\
+        \ highestUpdate=18."
+      example:
+        lowestUpdate: 12345
+        highestUpdate: 12345
+      properties:
+        lowestUpdate:
+          description: the value of an update counter of a data in the system.
+          example: 12345
+          format: int64
+          type: integer
+        highestUpdate:
+          description: the value of an update counter of a data in the system.
+          example: 12345
+          format: int64
+          type: integer
+    SystemInfo:
+      description: "the highest update count that was assigned to the data being synchronized.\
+        \ for example, it is possible that the agent sent afterUpdate=12 and received\
+        \ a bulk containing only four updates (13, 15, 18, 19) but in the system there\
+        \ is already update 21 which was not included in this bulk and can be received\
+        \ in the following bulk."
+      example:
+        highestUpdate: 12345
+      properties:
+        highestUpdate:
+          description: the value of an update counter of a data in the system.
+          example: 12345
+          format: int64
+          type: integer
+    AssetMetaForSync:
+      allOf:
+      - $ref: '#/components/schemas/AssetCreationFields'
+      - $ref: '#/components/schemas/AssetUpdatableFields'
+      - properties:
+          id:
+            $ref: '#/components/schemas/AssetId'
+        required:
+        - id
+        type: object
+      - properties:
+          kind:
+            $ref: '#/components/schemas/AssetKind'
+        required:
+        - kind
+        type: object
+      - properties:
+          prevName:
+            $ref: '#/components/schemas/AssetName'
+        type: object
+      example:
+        private: false
+        kind: compute
+        scope: system
+        departmentId: departmentId
+        autoDelete: false
+        name: my-asset
+        description: description of my asset.
+        prevName: my-asset
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        id: null
+        workloadSupportedTypes:
+          workspace: true
+          inference: true
+          distFramework: MPI
+          distributed: true
+          training: true
+        projectId: 0
+    K8sObjectsUpdate:
+      example:
+        updateCount: 12345
+        isDeleted: true
+        meta:
+          private: false
+          kind: compute
+          scope: system
+          departmentId: departmentId
+          autoDelete: false
+          name: my-asset
+          description: description of my asset.
+          prevName: my-asset
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          id: null
+          workloadSupportedTypes:
+            workspace: true
+            inference: true
+            distFramework: MPI
+            distributed: true
+            training: true
+          projectId: 0
+        spec:
+          objectMeta:
+            annotations:
+              example.com/owner: team-a
+              example.com/version: "1.0"
+            labels:
+              app: my-app
+          objectSpec:
+            key: ""
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetMetaForSync'
+        updateCount:
+          description: the value of an update counter of a data in the system.
+          example: 12345
+          format: int64
+          type: integer
+        isDeleted:
+          description: the asset has been deleted
+          nullable: true
+          type: boolean
+        spec:
+          $ref: '#/components/schemas/K8sObjectSpec'
+      required:
+      - meta
+      - updateCount
+      type: object
+    K8sObjectsUpdatesResp:
+      example:
+        systemInfo:
+          highestUpdate: 12345
+        assets:
+        - updateCount: 12345
+          isDeleted: true
+          meta:
+            private: false
+            kind: compute
+            scope: system
+            departmentId: departmentId
+            autoDelete: false
+            name: my-asset
+            description: description of my asset.
+            prevName: my-asset
+            clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+            id: null
+            workloadSupportedTypes:
+              workspace: true
+              inference: true
+              distFramework: MPI
+              distributed: true
+              training: true
+            projectId: 0
+          spec:
+            objectMeta:
+              annotations:
+                example.com/owner: team-a
+                example.com/version: "1.0"
+              labels:
+                app: my-app
+            objectSpec:
+              key: ""
+        - updateCount: 12345
+          isDeleted: true
+          meta:
+            private: false
+            kind: compute
+            scope: system
+            departmentId: departmentId
+            autoDelete: false
+            name: my-asset
+            description: description of my asset.
+            prevName: my-asset
+            clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+            id: null
+            workloadSupportedTypes:
+              workspace: true
+              inference: true
+              distFramework: MPI
+              distributed: true
+              training: true
+            projectId: 0
+          spec:
+            objectMeta:
+              annotations:
+                example.com/owner: team-a
+                example.com/version: "1.0"
+              labels:
+                app: my-app
+            objectSpec:
+              key: ""
+        requestInfo:
+          afterUpdate: 12345
+        responseInfo:
+          lowestUpdate: 12345
+          highestUpdate: 12345
+      properties:
+        requestInfo:
+          $ref: '#/components/schemas/RequestInfo'
+        responseInfo:
+          $ref: '#/components/schemas/ResponseInfo'
+        systemInfo:
+          $ref: '#/components/schemas/SystemInfo'
+        assets:
+          items:
+            $ref: '#/components/schemas/K8sObjectsUpdate'
+          type: array
       type: object
     AccessKeyCreationSpec:
       example:
@@ -15277,83 +15755,6 @@ components:
           - $ref: '#/components/schemas/NgcApiKeySpec'
           nullable: true
           type: object
-    AssetSyncStatusEnum:
-      enum:
-      - Creating
-      - Deleting
-      - Failed
-      - Deletion failed
-      - Issues found
-      - No issues found
-      - No status
-      - Updating
-      type: string
-    ScopeId:
-      description: "The id of the cluster, department or project, depending on the\
-        \ scope type."
-      type: string
-    ScopeType:
-      enum:
-      - system
-      - tenant
-      - cluster
-      - department
-      - project
-      type: string
-    AssetClusterStatusIssueEnum:
-      enum:
-      - ReplicationError
-      - LostPhase
-      - NotCreated
-      type: string
-    AssetClusterStatusIssue:
-      example:
-        scopeId: scopeId
-        issue: ReplicationError
-        scopeType: system
-      properties:
-        scopeId:
-          description: "The id of the cluster, department or project, depending on\
-            \ the scope type."
-          type: string
-        scopeType:
-          $ref: '#/components/schemas/ScopeType'
-        issue:
-          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
-      required:
-      - issue
-      - scopeId
-      - scopeType
-      type: object
-    AssetClusterStatusIssues:
-      items:
-        $ref: '#/components/schemas/AssetClusterStatusIssue'
-      type: array
-    AssetClusterStatusInfo:
-      example:
-        message: message
-        issues:
-        - scopeId: scopeId
-          issue: ReplicationError
-          scopeType: system
-        - scopeId: scopeId
-          issue: ReplicationError
-          scopeType: system
-        url: url
-        status: Creating
-      nullable: true
-      properties:
-        status:
-          $ref: '#/components/schemas/AssetSyncStatusEnum'
-        issues:
-          items:
-            $ref: '#/components/schemas/AssetClusterStatusIssue'
-          type: array
-        message:
-          type: string
-        url:
-          type: string
-      type: object
     ClusterResourceInfo:
       example:
         name: password-credential-1
@@ -15695,135 +16096,6 @@ components:
           type: array
       required:
       - entries
-    ClusterSyncReportUpdate:
-      description: success/failure report of a single update attempt of the cluster
-      example:
-        updateCount: 12345
-        updateAttemptTime: 2024-06-06T12:09:18.211Z
-        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        message: mandatory image was not provided.
-      properties:
-        id:
-          description: "a unique id of the entity being updated (asset, workload,\
-            \ policy, etc)."
-          format: uuid
-          type: string
-        updateCount:
-          description: the value of an update counter of a data in the system.
-          example: 12345
-          format: int64
-          type: integer
-        updateAttemptTime:
-          description: the time in which the cluster attempted the update.
-          example: 2024-06-06T12:09:18.211Z
-          format: date-time
-          type: string
-        message:
-          description: optional failure message for the case that the update has failed.
-            should be sent null if the update was successful.
-          example: mandatory image was not provided.
-          nullable: true
-          type: string
-    ClusterSyncReport:
-      description: allow cluster to report about success/failures of sync updates
-      example:
-        updates:
-        - updateCount: 12345
-          updateAttemptTime: 2024-06-06T12:09:18.211Z
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          message: mandatory image was not provided.
-        - updateCount: 12345
-          updateAttemptTime: 2024-06-06T12:09:18.211Z
-          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-          message: mandatory image was not provided.
-      properties:
-        updates:
-          items:
-            $ref: '#/components/schemas/ClusterSyncReportUpdate'
-          type: array
-    RequestInfo:
-      description: value that the agent sent to the afterUpdate query parameter.
-      example:
-        afterUpdate: 12345
-      properties:
-        afterUpdate:
-          description: the value of an update counter of a data in the system.
-          example: 12345
-          format: int64
-          type: integer
-      required:
-      - afterUpdate
-    ResponseInfo:
-      description: "The lowest and highest update counts included in this bulk of\
-        \ updates. for example, it is possible that agent requester for afterUpdate=10\
-        \ and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12,\
-        \ highestUpdate=18."
-      example:
-        lowestUpdate: 12345
-        highestUpdate: 12345
-      properties:
-        lowestUpdate:
-          description: the value of an update counter of a data in the system.
-          example: 12345
-          format: int64
-          type: integer
-        highestUpdate:
-          description: the value of an update counter of a data in the system.
-          example: 12345
-          format: int64
-          type: integer
-    SystemInfo:
-      description: "the highest update count that was assigned to the data being synchronized.\
-        \ for example, it is possible that the agent sent afterUpdate=12 and received\
-        \ a bulk containing only four updates (13, 15, 18, 19) but in the system there\
-        \ is already update 21 which was not included in this bulk and can be received\
-        \ in the following bulk."
-      example:
-        highestUpdate: 12345
-      properties:
-        highestUpdate:
-          description: the value of an update counter of a data in the system.
-          example: 12345
-          format: int64
-          type: integer
-    AssetMetaForSync:
-      allOf:
-      - $ref: '#/components/schemas/AssetCreationFields'
-      - $ref: '#/components/schemas/AssetUpdatableFields'
-      - properties:
-          id:
-            $ref: '#/components/schemas/AssetId'
-        required:
-        - id
-        type: object
-      - properties:
-          kind:
-            $ref: '#/components/schemas/AssetKind'
-        required:
-        - kind
-        type: object
-      - properties:
-          prevName:
-            $ref: '#/components/schemas/AssetName'
-        type: object
-      example:
-        private: false
-        kind: compute
-        scope: system
-        departmentId: departmentId
-        autoDelete: false
-        name: my-asset
-        description: description of my asset.
-        prevName: my-asset
-        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
-        id: null
-        workloadSupportedTypes:
-          workspace: true
-          inference: true
-          distFramework: MPI
-          distributed: true
-          training: true
-        projectId: 0
     CredentialsUpdate:
       example:
         updateCount: 12345

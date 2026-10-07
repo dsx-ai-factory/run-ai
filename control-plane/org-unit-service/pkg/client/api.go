@@ -16,7 +16,6 @@ import (
 	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 )
 
-//go:generate mockery --name IOrgUnitExternalClient
 type IOrgUnitExternalClient interface {
 	GetProjectsSync(ctx context.Context, clusterId string, limit int32, offset int32, UpdatedAfter time.Time, excludePermissions bool) (*openapi.GetSyncProjects200Response, error)
 	UpdateProjectsStatus(ctx context.Context, projectStatusUpdateRequest openapi.ProjectStatusUpdateRequest) (*http.Response, error)
@@ -25,7 +24,6 @@ type IOrgUnitExternalClient interface {
 	UpdateDepartmentsStatus(ctx context.Context, departmentId string, departmentStatusUpdateRequest openapi.DepartmentStatusUpdateRequest) (*http.Response, error)
 }
 
-//go:generate mockery --name IOrgUnitClient
 type IOrgUnitClient interface {
 	IOrgUnitExternalClient
 	NodePoolCreated(ctx context.Context, clusterId string, nodePoolId string, nodePoolName string) error

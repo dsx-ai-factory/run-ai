@@ -17,10 +17,19 @@ func NewWaitGrouper(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *WaitGrouper {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &WaitGrouper{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -50,14 +59,20 @@ type WaitGrouper_Add_Call struct {
 }
 
 // Add is a helper method to define mock.On call
-//   - n
-func (_e *WaitGrouper_Expecter) Add(n interface{}) *WaitGrouper_Add_Call {
+//   - n int
+func (_e *WaitGrouper_Expecter) Add(n any) *WaitGrouper_Add_Call {
 	return &WaitGrouper_Add_Call{Call: _e.mock.On("Add", n)}
 }
 
 func (_c *WaitGrouper_Add_Call) Run(run func(n int)) *WaitGrouper_Add_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int))
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

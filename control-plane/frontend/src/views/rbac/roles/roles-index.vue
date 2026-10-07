@@ -74,7 +74,7 @@ import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import { RunaiTableNoData } from "@/components/common/runai-table/runai-table-no-data";
 import RunaiTable from "@/components/common/runai-table/runai-table.vue";
 import { usePermissionStore } from "@/stores/permissions.store";
-import type { Role, RoleV1 } from "@/swagger-models/authorization-client";
+import type { Role } from "@/swagger-models/authorization-client";
 
 export default defineComponent({
   components: {
@@ -102,7 +102,7 @@ export default defineComponent({
     await this.loadRoles();
   },
   computed: {
-    roles(): Array<RoleV1> {
+    roles(): Array<Role> {
       return this.roleStore.roleList;
     },
     selectedRowsAmount(): number {

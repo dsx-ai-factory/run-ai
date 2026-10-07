@@ -13,7 +13,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name TenantResolver
 type TenantResolver interface {
 	GetRealmTenantId(ctx context.Context, realm string) string
 }

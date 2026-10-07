@@ -13,7 +13,6 @@ import (
 	clusterdelete "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services/cluster-delete"
 )
 
-//go:generate mockery --name Handler
 type Handler interface {
 	HandleClusterConfigStatusChange(ctx context.Context, cluster *models.Cluster, clusterConfig *models.ClusterConfig)
 }

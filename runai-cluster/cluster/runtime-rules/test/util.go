@@ -13,8 +13,8 @@ import (
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 	mpi "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/mpijob/v1alpha2"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	"go.uber.org/zap"

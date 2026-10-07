@@ -678,12 +678,12 @@ func servingPortToServingPortField(src *composer.ServingPortInfo, target any, _ 
 }
 
 func intToRunPolicyBackoffLimit(src *int64, target any, _ any) *workloadsApi.Error {
-	if convutils.Deref(src, 0) != 0 {
+	if src != nil {
 		targetPtr, err := ensureRunPolicyField(target)
 		if err != nil {
 			return err
 		}
-		return nonZeroIntToIntField(src, &((*targetPtr).Values.BackoffLimit), nil)
+		return intToIntField(src, &((*targetPtr).Values.BackoffLimit), nil)
 	}
 	return nil
 }

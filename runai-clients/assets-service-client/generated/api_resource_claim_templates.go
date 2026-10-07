@@ -423,6 +423,13 @@ type ApiGetRctByIdRequest struct {
 	ctx        context.Context
 	ApiService ResourceClaimTemplatesAPI
 	assetId    string
+	statusInfo *bool
+}
+
+// Whether the query should include asset status information as part of the response.
+func (r ApiGetRctByIdRequest) StatusInfo(statusInfo bool) ApiGetRctByIdRequest {
+	r.statusInfo = &statusInfo
+	return r
 }
 
 func (r ApiGetRctByIdRequest) Execute() (*Rct, *http.Response, error) {
@@ -473,6 +480,9 @@ func (a *ResourceClaimTemplatesAPIService) GetRctByIdExecute(r ApiGetRctByIdRequ
 		return localVarReturnValue, nil, reportError("assetId must have at least 1 elements")
 	}
 
+	if r.statusInfo != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "statusInfo", r.statusInfo, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -575,6 +585,7 @@ type ApiListRctsRequest struct {
 	ApiService ResourceClaimTemplatesAPI
 	offset     *int32
 	limit      *int32
+	statusInfo *bool
 }
 
 // The offset of the first item returned in the collection.
@@ -586,6 +597,12 @@ func (r ApiListRctsRequest) Offset(offset int32) ApiListRctsRequest {
 // The maximum number of entries to return.
 func (r ApiListRctsRequest) Limit(limit int32) ApiListRctsRequest {
 	r.limit = &limit
+	return r
+}
+
+// Whether the query should include asset status information as part of the response.
+func (r ApiListRctsRequest) StatusInfo(statusInfo bool) ApiListRctsRequest {
+	r.statusInfo = &statusInfo
 	return r
 }
 
@@ -639,6 +656,9 @@ func (a *ResourceClaimTemplatesAPIService) ListRctsExecute(r ApiListRctsRequest)
 	} else {
 		var defaultValue int32 = 50
 		r.limit = &defaultValue
+	}
+	if r.statusInfo != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "statusInfo", r.statusInfo, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

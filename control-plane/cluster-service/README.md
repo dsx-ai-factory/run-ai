@@ -193,9 +193,9 @@ The registered configuration sections and their notable keys/defaults:
 | ApplicationMetricStore | `application_metric_store_write_url` / `_username` / `_password` / `_headers` / `application_metric_store_label` | `label=applicative_runai` |
 | ImagePullSecret | `image_pull_secret_enabled`, `static_image_pull_secret` (secret) | — |
 
-The service also registers the shared **database** config (from the `dao-utils`
+The service also registers the shared **database** config (from the `runaidb`
 package, schema `cluster_service`) and the **authorization client** config.
-Database connection settings therefore follow the shared `dao-utils` env
+Database connection settings therefore follow the shared `runaidb` env
 conventions rather than being declared in this repo.
 
 ## OpenAPI and code generation

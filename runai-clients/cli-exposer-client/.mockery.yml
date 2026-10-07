@@ -1,0 +1,14 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      HealthAPI: {}
+      ResearcherCommandLineInterfaceAPI: {}
+      ResearcherCommandLineInterfaceDeprecatedAPI: {}

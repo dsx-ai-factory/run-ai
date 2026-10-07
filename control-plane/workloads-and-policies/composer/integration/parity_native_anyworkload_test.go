@@ -23,6 +23,7 @@ import (
 
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	featuregate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/feature-gate"
@@ -100,6 +101,7 @@ var _ = Describe("native vs anyworkload composer parity for oauth2-proxy", func(
 		}
 		GinkgoT().Setenv(builders.ExternalUrlAuthContainerImageEnv, oauth2ParityImage)
 		GinkgoT().Setenv(config.EnvVarOauth2ProxyUsernameLoaderImage, oauth2ParityUsernameLoaderImage)
+		GinkgoT().Setenv(oauth2proxy.TemplatesEnabledEnvVar, "true")
 		// The cluster only stamps the oauth2-proxy sidecar RestartPolicy when the
 		// sidecar-containers feature gate is on; the anyworkload constructor sets
 		// it unconditionally at the K8s 1.29 floor. Enable the gate so both agree.

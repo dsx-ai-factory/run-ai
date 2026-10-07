@@ -26,7 +26,7 @@ pull in).
 
 - No generated code, no OpenAPI/swagger, no `pkg/client`. Config is struct-tag
   driven (`config/config.go`) with env-var overrides; DB config comes from the
-  shared `dao-utils` package.
+  shared `runaidb` package.
 - Runtime base image: final image is `FROM scratch`; a
   `registry.access.redhat.com/ubi9/ubi-minimal` stage supplies `/etc/passwd`,
   `/etc/group`, certs (`/etc/ssl`, `/etc/pki`) and a writable `/tmp`. Runs as

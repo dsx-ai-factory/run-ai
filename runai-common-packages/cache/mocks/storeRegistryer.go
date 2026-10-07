@@ -18,10 +18,19 @@ func NewStoreRegistryer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *StoreRegistryer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &StoreRegistryer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,14 +73,20 @@ type StoreRegistryer_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - t
-func (_e *StoreRegistryer_Expecter) Get(t interface{}) *StoreRegistryer_Get_Call {
+//   - t string
+func (_e *StoreRegistryer_Expecter) Get(t any) *StoreRegistryer_Get_Call {
 	return &StoreRegistryer_Get_Call{Call: _e.mock.On("Get", t)}
 }
 
 func (_c *StoreRegistryer_Get_Call) Run(run func(t string)) *StoreRegistryer_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -111,14 +126,20 @@ type StoreRegistryer_GetOrDefault_Call struct {
 }
 
 // GetOrDefault is a helper method to define mock.On call
-//   - t
-func (_e *StoreRegistryer_Expecter) GetOrDefault(t interface{}) *StoreRegistryer_GetOrDefault_Call {
+//   - t string
+func (_e *StoreRegistryer_Expecter) GetOrDefault(t any) *StoreRegistryer_GetOrDefault_Call {
 	return &StoreRegistryer_GetOrDefault_Call{Call: _e.mock.On("GetOrDefault", t)}
 }
 
 func (_c *StoreRegistryer_GetOrDefault_Call) Run(run func(t string)) *StoreRegistryer_GetOrDefault_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -191,15 +212,26 @@ type StoreRegistryer_Set_Call struct {
 }
 
 // Set is a helper method to define mock.On call
-//   - t
-//   - storeConfig
-func (_e *StoreRegistryer_Expecter) Set(t interface{}, storeConfig interface{}) *StoreRegistryer_Set_Call {
+//   - t string
+//   - storeConfig *options.Store
+func (_e *StoreRegistryer_Expecter) Set(t any, storeConfig any) *StoreRegistryer_Set_Call {
 	return &StoreRegistryer_Set_Call{Call: _e.mock.On("Set", t, storeConfig)}
 }
 
 func (_c *StoreRegistryer_Set_Call) Run(run func(t string, storeConfig *options.Store)) *StoreRegistryer_Set_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(*options.Store))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 *options.Store
+		if args[1] != nil {
+			arg1 = args[1].(*options.Store)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

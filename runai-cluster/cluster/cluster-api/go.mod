@@ -10,7 +10,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0
@@ -240,10 +240,11 @@ replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/extensions => ../common/extensions
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters => ../../cluster/common/getters
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../common/runaipublic
+
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology => ../common/topology
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
 
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/researcher-service => ../researcher-service
 

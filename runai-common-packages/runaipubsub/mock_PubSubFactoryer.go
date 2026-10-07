@@ -19,10 +19,19 @@ func NewMockPubSubFactoryer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockPubSubFactoryer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockPubSubFactoryer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -74,15 +83,26 @@ type MockPubSubFactoryer_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - logger1
-//   - psType
-func (_e *MockPubSubFactoryer_Expecter) Create(logger1 interface{}, psType interface{}) *MockPubSubFactoryer_Create_Call {
+//   - logger1 logger.Loggerer
+//   - psType config.PubSubType
+func (_e *MockPubSubFactoryer_Expecter) Create(logger1 any, psType any) *MockPubSubFactoryer_Create_Call {
 	return &MockPubSubFactoryer_Create_Call{Call: _e.mock.On("Create", logger1, psType)}
 }
 
 func (_c *MockPubSubFactoryer_Create_Call) Run(run func(logger1 logger.Loggerer, psType config.PubSubType)) *MockPubSubFactoryer_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(logger.Loggerer), args[1].(config.PubSubType))
+		var arg0 logger.Loggerer
+		if args[0] != nil {
+			arg0 = args[0].(logger.Loggerer)
+		}
+		var arg1 config.PubSubType
+		if args[1] != nil {
+			arg1 = args[1].(config.PubSubType)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

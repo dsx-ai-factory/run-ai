@@ -21,10 +21,19 @@ func NewMockMetricsRegistrar(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMetricsRegistrar {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMetricsRegistrar{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -120,14 +129,20 @@ type MockMetricsRegistrar_Counter_Call struct {
 }
 
 // Counter is a helper method to define mock.On call
-//   - name
-func (_e *MockMetricsRegistrar_Expecter) Counter(name interface{}) *MockMetricsRegistrar_Counter_Call {
+//   - name string
+func (_e *MockMetricsRegistrar_Expecter) Counter(name any) *MockMetricsRegistrar_Counter_Call {
 	return &MockMetricsRegistrar_Counter_Call{Call: _e.mock.On("Counter", name)}
 }
 
 func (_c *MockMetricsRegistrar_Counter_Call) Run(run func(name string)) *MockMetricsRegistrar_Counter_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -167,14 +182,20 @@ type MockMetricsRegistrar_CounterVec_Call struct {
 }
 
 // CounterVec is a helper method to define mock.On call
-//   - name
-func (_e *MockMetricsRegistrar_Expecter) CounterVec(name interface{}) *MockMetricsRegistrar_CounterVec_Call {
+//   - name string
+func (_e *MockMetricsRegistrar_Expecter) CounterVec(name any) *MockMetricsRegistrar_CounterVec_Call {
 	return &MockMetricsRegistrar_CounterVec_Call{Call: _e.mock.On("CounterVec", name)}
 }
 
 func (_c *MockMetricsRegistrar_CounterVec_Call) Run(run func(name string)) *MockMetricsRegistrar_CounterVec_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -214,14 +235,20 @@ type MockMetricsRegistrar_Gauge_Call struct {
 }
 
 // Gauge is a helper method to define mock.On call
-//   - name
-func (_e *MockMetricsRegistrar_Expecter) Gauge(name interface{}) *MockMetricsRegistrar_Gauge_Call {
+//   - name string
+func (_e *MockMetricsRegistrar_Expecter) Gauge(name any) *MockMetricsRegistrar_Gauge_Call {
 	return &MockMetricsRegistrar_Gauge_Call{Call: _e.mock.On("Gauge", name)}
 }
 
 func (_c *MockMetricsRegistrar_Gauge_Call) Run(run func(name string)) *MockMetricsRegistrar_Gauge_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -261,14 +288,20 @@ type MockMetricsRegistrar_GaugeVec_Call struct {
 }
 
 // GaugeVec is a helper method to define mock.On call
-//   - name
-func (_e *MockMetricsRegistrar_Expecter) GaugeVec(name interface{}) *MockMetricsRegistrar_GaugeVec_Call {
+//   - name string
+func (_e *MockMetricsRegistrar_Expecter) GaugeVec(name any) *MockMetricsRegistrar_GaugeVec_Call {
 	return &MockMetricsRegistrar_GaugeVec_Call{Call: _e.mock.On("GaugeVec", name)}
 }
 
 func (_c *MockMetricsRegistrar_GaugeVec_Call) Run(run func(name string)) *MockMetricsRegistrar_GaugeVec_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -400,14 +433,20 @@ type MockMetricsRegistrar_Histogram_Call struct {
 }
 
 // Histogram is a helper method to define mock.On call
-//   - name
-func (_e *MockMetricsRegistrar_Expecter) Histogram(name interface{}) *MockMetricsRegistrar_Histogram_Call {
+//   - name string
+func (_e *MockMetricsRegistrar_Expecter) Histogram(name any) *MockMetricsRegistrar_Histogram_Call {
 	return &MockMetricsRegistrar_Histogram_Call{Call: _e.mock.On("Histogram", name)}
 }
 
 func (_c *MockMetricsRegistrar_Histogram_Call) Run(run func(name string)) *MockMetricsRegistrar_Histogram_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -447,14 +486,20 @@ type MockMetricsRegistrar_HistogramVec_Call struct {
 }
 
 // HistogramVec is a helper method to define mock.On call
-//   - name
-func (_e *MockMetricsRegistrar_Expecter) HistogramVec(name interface{}) *MockMetricsRegistrar_HistogramVec_Call {
+//   - name string
+func (_e *MockMetricsRegistrar_Expecter) HistogramVec(name any) *MockMetricsRegistrar_HistogramVec_Call {
 	return &MockMetricsRegistrar_HistogramVec_Call{Call: _e.mock.On("HistogramVec", name)}
 }
 
 func (_c *MockMetricsRegistrar_HistogramVec_Call) Run(run func(name string)) *MockMetricsRegistrar_HistogramVec_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -494,14 +539,20 @@ type MockMetricsRegistrar_Summary_Call struct {
 }
 
 // Summary is a helper method to define mock.On call
-//   - name
-func (_e *MockMetricsRegistrar_Expecter) Summary(name interface{}) *MockMetricsRegistrar_Summary_Call {
+//   - name string
+func (_e *MockMetricsRegistrar_Expecter) Summary(name any) *MockMetricsRegistrar_Summary_Call {
 	return &MockMetricsRegistrar_Summary_Call{Call: _e.mock.On("Summary", name)}
 }
 
 func (_c *MockMetricsRegistrar_Summary_Call) Run(run func(name string)) *MockMetricsRegistrar_Summary_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -541,14 +592,20 @@ type MockMetricsRegistrar_SummaryVec_Call struct {
 }
 
 // SummaryVec is a helper method to define mock.On call
-//   - name
-func (_e *MockMetricsRegistrar_Expecter) SummaryVec(name interface{}) *MockMetricsRegistrar_SummaryVec_Call {
+//   - name string
+func (_e *MockMetricsRegistrar_Expecter) SummaryVec(name any) *MockMetricsRegistrar_SummaryVec_Call {
 	return &MockMetricsRegistrar_SummaryVec_Call{Call: _e.mock.On("SummaryVec", name)}
 }
 
 func (_c *MockMetricsRegistrar_SummaryVec_Call) Run(run func(name string)) *MockMetricsRegistrar_SummaryVec_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

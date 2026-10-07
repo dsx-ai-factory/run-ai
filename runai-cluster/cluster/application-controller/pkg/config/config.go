@@ -122,7 +122,8 @@ func getEnvOrDefaultString(environmentVariableName string, defaultValue string) 
 }
 
 func newConfig() *applicationControllerConfig {
-	allowedServiceAccounts := getEnvOrDefaultString("ALLOWED_SERVICE_ACCOUNTS", "application-controller")
+	allowedServiceAccounts := getEnvOrDefaultString("ALLOWED_SERVICE_ACCOUNTS",
+		"system:serviceaccount:runai:application-controller,system:serviceaccount:runai:runai-agent")
 
 	ans := &applicationControllerConfig{
 		K8sClientConfigQPS:     getEnvOrDefaultInt("K8S_CLIENT_CONFIG_QPS", 50),

@@ -94,6 +94,26 @@ func TestNewManagedOperandsIncludesCleanupOnlyOnLocalCluster(t *testing.T) {
 	require.Nil(t, findOperandByName(mo.GetRemoteClusterOperands(), "legacy-workload-cleanup"))
 }
 
+func TestNewManagedOperandsDeletesLegacyResearcherServiceOnRemoteCluster(t *testing.T) {
+	ctx := context.Background()
+	apiContext := &ContextMock{}
+	fc := createEmptyKubeClientMock(apiContext)
+	kbClient := kc.New(fc, fc, nil)
+	runaiConfig := createTestRunaiConfig()
+
+	mo := NewManagedOperands(ctx, kbClient, kbClient, &runaiConfig)
+	cleanup := findOperandByName(mo.GetRemoteClusterOperands(), "legacy-researcher-service-cleanup")
+	require.NotNil(t, cleanup)
+	require.False(t, cleanup.Enabled())
+	require.NotEmpty(t, cleanup.Resources())
+	require.Nil(t, findOperandByName(mo.GetLocalClusterOperands(), "legacy-researcher-service-cleanup"))
+
+	resources, err := ResourcesForOperands(ctx, []operands.Operand{cleanup})
+	require.NoError(t, err)
+	assert.Empty(t, resources.CreateOrUpdate)
+	assert.Len(t, resources.Delete, len(cleanup.Resources()))
+}
+
 func TestManagedOperands_EnabledVsAllOperands(t *testing.T) {
 	ctx := context.Background()
 	apiContext := &ContextMock{}

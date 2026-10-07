@@ -14,13 +14,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name Reconciler
 type Reconciler interface {
 	// Reconcile reconciles the resource.
 	Reconcile(ctx context.Context, realm string, force bool) error
 }
 
-//go:generate mockery --name ReconcileManager
 type ReconcileManager interface {
 	ShouldReconcile() bool
 	ShouldUpdateTenants(ctx context.Context) bool

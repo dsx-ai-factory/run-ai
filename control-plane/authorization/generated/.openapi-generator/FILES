@@ -89,7 +89,6 @@ pkg/api/model_role_creation_fields_internal.go
 pkg/api/model_role_enabled_disabled_fields.go
 pkg/api/model_role_permission.go
 pkg/api/model_role_permission_set.go
-pkg/api/model_role_v1.go
 pkg/api/model_roles_sort_filter_fields.go
 pkg/api/model_scope_type.go
 pkg/api/model_subject_type.go

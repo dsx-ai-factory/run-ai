@@ -247,16 +247,17 @@ func (itc *InferenceToKnativeComposer) buildAuthProxySidecar(
 		return init_containers.BuildOauth2ProxySidecar(
 			&target.Service.Spec.Template.Spec.PodSpec,
 			init_containers.ServingProxySpec{
-				ContainerPort:          userPort,
-				ServingURL:             servingURL,
-				CookiePrefix:           fmt.Sprintf("InferenceWorkload-%s-%s-0", itc.fc.Namespace, itc.fc.WorkloadName),
-				AuthorizedUsers:        auth.AuthorizedUsers,
-				AuthorizedGroups:       auth.AuthorizedGroups,
-				UpstreamTimeoutSeconds: convutils.Deref(target.Service.Spec.Template.Spec.TimeoutSeconds, 0),
-				WorkloadName:           itc.fc.WorkloadName,
-				ProjectName:            itc.fc.ProjectName,
-				Config:                 config,
-				ExposedURLInfo:         exposedURLInfo,
+				ContainerPort:                 userPort,
+				ServingURL:                    servingURL,
+				CookiePrefix:                  fmt.Sprintf("InferenceWorkload-%s-%s-0", itc.fc.Namespace, itc.fc.WorkloadName),
+				AuthorizedUsers:               auth.AuthorizedUsers,
+				AuthorizedGroups:              auth.AuthorizedGroups,
+				UpstreamTimeoutSeconds:        convutils.Deref(target.Service.Spec.Template.Spec.TimeoutSeconds, 0),
+				WorkloadName:                  itc.fc.WorkloadName,
+				ProjectName:                   itc.fc.ProjectName,
+				Config:                        config,
+				ExposedURLInfo:                exposedURLInfo,
+				OAuth2ProxyTemplatesSupported: itc.fc.Options.OAuth2ProxyTemplatesSupported,
 				// Knative admits only one port-declaring spec.container:
 				// hand the readiness probe to the serving proxy and clear
 				// the user container's ports so it becomes a helper behind

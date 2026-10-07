@@ -1,28 +1,20 @@
 dir: '{{.InterfaceDir}}/mocks'
-structname: Mock{{.InterfaceName}}
+filename: '{{.InterfaceName}}.go'
+structname: 'Mock{{.InterfaceName}}'
 pkgname: mocks
 template: testify
 packages:
-  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/helm:
-    interfaces:
-      HelmClientAPI: {}
-  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/installations/base:
-    interfaces:
-      HelmInstaller: {}
-      InstallStep: {}
-  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/installations/prereq/components:
+  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/prereq/components:
     interfaces:
       Prerequisite: {}
-  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/installations/prereq/steps:
+  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/prereq/steps:
     interfaces:
       CRDChecker: {}
       TrainingOperatorExecutor: {}
-  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/installations/runaiinstall/cert:
+  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step:
     interfaces:
-      CertHandler: {}
-  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/k8s:
-    interfaces:
-      K8sClients: {}
+      HelmInstaller: {}
+      InstallStep: {}
   github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/tui/inputs:
     interfaces:
       Input: {}
@@ -31,3 +23,18 @@ packages:
       Options: {}
       OptionsSelector: {}
       Screen: {}
+  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/tui/screens/screen_component:
+    interfaces:
+      ScreenFrame:
+        config:
+          # Tests use the name the interface had when the mock was first generated.
+          structname: MockScreenComponent
+  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/cert:
+    interfaces:
+      CertHandler: {}
+  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient:
+    interfaces:
+      HelmClientAPI: {}
+  github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/k8sclient:
+    interfaces:
+      K8sClients: {}

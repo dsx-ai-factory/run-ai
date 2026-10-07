@@ -140,7 +140,7 @@ var _ = Describe("AccessRule DAO SQL", func() {
 
 			mocker.ExpectTransaction().Begin()
 			mocker.ExpectExec(
-				`UPDATE access_rules SET deleted_at=? WHERE tenant_id = ? AND subject_type = ? AND subject_id = ? AND access_rules.deleted_at IS NULL`,
+				`UPDATE access_rules SET deleted_at=? WHERE tenant_id = ? AND subject_type IN (?) AND subject_id = ? AND access_rules.deleted_at IS NULL`,
 				dbtesting.AnyTime(), int64(sqlTestTenantID), string(api.SUBJECTTYPE_USER), "user@example.com",
 			).Returns(2)
 			mocker.ExpectTransaction().Commit()
@@ -149,12 +149,30 @@ var _ = Describe("AccessRule DAO SQL", func() {
 			Expect(apiErr).To(BeNil())
 		})
 
+		DescribeTable("treats the legacy app subject type and service-account as the same",
+			func(subjectType string) {
+				mocker := setupSQLMock()
+
+				mocker.ExpectTransaction().Begin()
+				mocker.ExpectExec(
+					`UPDATE access_rules SET deleted_at=? WHERE tenant_id = ? AND subject_type IN (?,?) AND subject_id = ? AND access_rules.deleted_at IS NULL`,
+					dbtesting.AnyTime(), int64(sqlTestTenantID), "app", string(api.SUBJECTTYPE_SERVICE_ACCOUNT), "my-service-account",
+				).Returns(1)
+				mocker.ExpectTransaction().Commit()
+
+				apiErr := dao.DbDeleteSubjectAccessRules(context.Background(), sqlTestTenantID, subjectType, "my-service-account")
+				Expect(apiErr).To(BeNil())
+			},
+			Entry("deleting by app", "app"),
+			Entry("deleting by service-account", string(api.SUBJECTTYPE_SERVICE_ACCOUNT)),
+		)
+
 		It("returns error on DB failure", func() {
 			mocker := setupSQLMock()
 
 			mocker.ExpectTransaction().Begin()
 			mocker.ExpectExec(
-				`UPDATE access_rules SET deleted_at=? WHERE tenant_id = ? AND subject_type = ? AND subject_id = ? AND access_rules.deleted_at IS NULL`,
+				`UPDATE access_rules SET deleted_at=? WHERE tenant_id = ? AND subject_type IN (?) AND subject_id = ? AND access_rules.deleted_at IS NULL`,
 				dbtesting.AnyTime(), int64(sqlTestTenantID), string(api.SUBJECTTYPE_USER), "user@example.com",
 			).ReturnsError(errors.New("delete failed"))
 			mocker.ExpectTransaction().Rollback()

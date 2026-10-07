@@ -8,8 +8,8 @@ package common
 import (
 	"context"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
 	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/controller-utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
 	twv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	client2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/utils/testing_utils/client"

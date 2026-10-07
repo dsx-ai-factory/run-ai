@@ -7,9 +7,11 @@ package list
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/charmbracelet/bubbles/table"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli/structs"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node/list/manipulate"
@@ -30,11 +32,21 @@ type Output struct {
 	nodeTelemetries api.NodeTelemetriesByType
 }
 
-func NewOutput(nodeList []openapi.Node, nodeTelemetries api.NodeTelemetriesByType) (*Output, error) {
+func NewOutput(nodeList []openapi.Node, nodeTelemetries api.NodeTelemetriesByType, next *structs.NextToken) (*Output, error) {
+	var nextToken *string
+
+	if next != nil {
+		encoded, err := next.Encode()
+		if err != nil {
+			return nil, err
+		}
+		nextToken = &encoded
+	}
+
 	return &Output{
 		data: manipulate.Data{
 			Nodes:     nodeList,
-			NextToken: nil,
+			NextToken: nextToken,
 		},
 		nodeTelemetries: nodeTelemetries,
 	}, nil
@@ -61,7 +73,11 @@ func (o *Output) Data() [][]string {
 }
 
 func (o *Output) GenerateTable() (string, error) {
-	return uitable.NewTableDisplay(o).Generate()
+	display, err := uitable.NewTableDisplay(o).Generate()
+	if o.data.NextToken != nil {
+		display += fmt.Sprintf("\r\n\n next token: %s", *o.data.NextToken)
+	}
+	return display, err
 }
 
 func (o *Output) getDataStructure() interface{} {

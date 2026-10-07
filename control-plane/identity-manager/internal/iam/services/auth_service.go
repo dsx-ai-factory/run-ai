@@ -12,7 +12,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/auth"
 )
 
-//go:generate mockery --name AuthService --output ./mocks --filename auth_service.go
 type AuthService interface {
 	GetUserInfo(ctx context.Context, realm string, accessToken string) (*models.UserInfo, error)
 	RefreshToken(ctx context.Context, realm string, refreshToken string, clientId string, clientSecret string) (*models.Tokens, error)

@@ -88,10 +88,6 @@ type PermissionsAPIRouter interface {
 // The RolesAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a RolesAPIServicer to perform the required actions, then write the service results to the http response.
 type RolesAPIRouter interface {
-	// Deprecated
-	GetRolesV1(http.ResponseWriter, *http.Request)
-	// Deprecated
-	GetRoleV1(http.ResponseWriter, *http.Request)
 	GetRoles(http.ResponseWriter, *http.Request)
 	CreateRole(http.ResponseWriter, *http.Request)
 	GetRole(http.ResponseWriter, *http.Request)
@@ -179,10 +175,6 @@ type PermissionsAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type RolesAPIServicer interface {
-	// Deprecated
-	GetRolesV1(context.Context, bool) (ImplResponse, error)
-	// Deprecated
-	GetRoleV1(context.Context, int32) (ImplResponse, error)
 	GetRoles(context.Context, int32, int32, string, RolesSortFilterFields, []string, string, bool) (ImplResponse, error)
 	CreateRole(context.Context, RoleCreationFieldsInternal) (ImplResponse, error)
 	GetRole(context.Context, int32) (ImplResponse, error)

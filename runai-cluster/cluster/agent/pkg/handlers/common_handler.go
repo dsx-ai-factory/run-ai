@@ -158,6 +158,56 @@ func (h *CommonHandler) CreateOrUpdateObjects(objects []client.Object) (map[stri
 	return h.CreateOrUpdateObjectsIgnoreConflicts(objects, "")
 }
 
+// RecreateObjects deletes and re-creates each object in a single call,
+// used for kinds whose Spec is immutable at the API-server level
+// (resource.k8s.io/v1 ResourceClaimTemplate is the first). Caller is
+// responsible for having decided that recreate is actually needed —
+// typically via a diff check against the current cluster state before
+// bucketing the object into this pass.
+//
+// Delete and Create are issued in the same call because some sync feeds
+// are cursor-based and only deliver each asset once at the counter it
+// changed on: a Delete-only pass would leave the asset gone from the
+// cluster until the user edited it again. Create is wrapped in
+// retry.OnError for IsAlreadyExists because the typed client may observe
+// stale cache state immediately after Delete; the default backoff is
+// bounded and short so a stuck finalizer surfaces as an error rather
+// than an infinite loop.
+func (h *CommonHandler) RecreateObjects(objects []client.Object) ([]error, error) {
+	perObjectError := make([]error, len(objects))
+	var err error
+
+	for i, obj := range objects {
+		name := types.NamespacedName{Namespace: obj.GetNamespace(), Name: obj.GetName()}
+
+		log.Info().Msgf("Recreating %s <%s/%s> because its spec diverges on an immutable field",
+			h.objectTypeStr(), name.Namespace, name.Name)
+
+		if delErr := h.runaiClient.Delete(context.Background(), obj); delErr != nil && !errors.IsNotFound(delErr) {
+			perObjectError[i] = fmt.Errorf("delete %s/%s for recreate: %w", name.Namespace, name.Name, delErr)
+			err = multierror.Append(err, perObjectError[i])
+			continue
+		}
+
+		// DeepCopy inside the retry because the typed client sets
+		// ResourceVersion on the input when a Create returns, which would
+		// make the next retry fail with "resourceVersion should not be
+		// set on objects to be created".
+		createErr := retry.OnError(retry.DefaultBackoff, errors.IsAlreadyExists, func() error {
+			fresh := obj.DeepCopyObject().(client.Object)
+			fresh.SetResourceVersion("")
+			return h.runaiClient.Create(context.Background(), fresh)
+		})
+		if createErr != nil {
+			perObjectError[i] = fmt.Errorf("create %s/%s after delete: %w", name.Namespace, name.Name, createErr)
+			err = multierror.Append(err, perObjectError[i])
+			continue
+		}
+	}
+
+	return perObjectError, err
+}
+
 // ProjectToNamespaceList returns a map from project ID to namespace.
 func (h *CommonHandler) ProjectToNamespaceList() (map[string]string, error) {
 	projectIdToNamespace := map[string]string{}

@@ -8,7 +8,9 @@ package builders
 import (
 	"context"
 	"fmt"
+
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_groups"
 	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
@@ -904,9 +906,21 @@ func ComposeAuthVolume() corev1.Volume {
 }
 
 // ComposeAuthProxyVolumes creates all volumes needed for OAuth2 proxy authentication
-// Includes the auth volume and optionally the custom CA volume
+// Includes the auth volume and the configured templates and custom CA volumes.
 func ComposeAuthProxyVolumes() []corev1.Volume {
 	volumes := []corev1.Volume{ComposeAuthVolume()}
+	if config.OAuth2ProxyTemplatesEnabled() {
+		volumes = append(volumes, corev1.Volume{
+			Name: oauth2proxy.VolumeName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: oauth2proxy.ConfigMapName},
+					Items:                []corev1.KeyToPath{{Key: oauth2proxy.TemplateKey, Path: oauth2proxy.TemplateKey}},
+					Optional:             utils.Ref(true),
+				},
+			},
+		})
+	}
 
 	if config.IsCustomCAEnabled(EnvVarPrefixCARunAi) {
 		volumes = append(volumes, ComposeCAVolume(EnvVarPrefixCARunAi))

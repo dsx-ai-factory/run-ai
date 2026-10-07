@@ -11,7 +11,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 )
 
-//go:generate mockery --name ClientRepository --output ./mocks --filename client_repository_v2.go
 type ClientRepository interface {
 	CreateClient(ctx context.Context, realm string, client *models.Client) (string, error)
 	UpdateClient(ctx context.Context, realm string, client *models.Client) error

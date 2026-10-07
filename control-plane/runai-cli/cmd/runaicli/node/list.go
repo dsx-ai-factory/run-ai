@@ -11,6 +11,7 @@ import (
 	nodecp "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node"
 
 	commonNode "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/completion/node"
+	apilist "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/list"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node/list/manipulate"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/settings"
 
@@ -28,6 +29,7 @@ import (
 
 var (
 	Output listCommon.Output
+	Page   apilist.PageOptions
 )
 
 // List represents the list command
@@ -39,6 +41,10 @@ var List = &cobra.Command{
 	Args:  cobra.NoArgs,
 
 	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if Page.Offset < 0 {
+			return fmt.Errorf(apilist.ErrNegativeOffset, Page.Offset)
+		}
+
 		err := commonconfig.SetOutput(&Output)
 		if err != nil {
 			return cmdtxn.CmdErrorPrintAndSet(cmd, consts.ErrorOutputType, err)
@@ -79,6 +85,8 @@ func init() {
 	listCommon.FlagOutputType(List, &Output)
 	listCommon.FlagOutputTypeWithColumns(List, &Output)
 
+	apilist.SetPageFlags(List, &Page)
+
 	// Register autocomplete function for columns flag
 	_ = List.RegisterFlagCompletionFunc(listCommon.ColumnsStr, commonNode.ColumnsFlagCompletion)
 }
@@ -90,7 +98,7 @@ func executeNodeList() (*nodeservice.Output, error) {
 	token := instance.GetToken()
 	clusterUuid := instance.GetConfigValue(config.ClusterUUID)
 
-	return nodecp.GetNodeList(ctx, cpUrl, token, clusterUuid)
+	return nodecp.GetNodeList(ctx, cpUrl, token, clusterUuid, Page)
 }
 
 func HandleColumnsFlags(cmd *cobra.Command, output listCommon.Output) error {

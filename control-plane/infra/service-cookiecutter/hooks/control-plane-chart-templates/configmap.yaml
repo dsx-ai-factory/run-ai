@@ -6,7 +6,8 @@
 {{- $top := first . }}
 data:
   SERVICE_PORT: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].service.port | quote }}
-DB-CC-PREFIX  MIGRATION_FILES: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.migrationFiles | quote }}
+DB-CC-PREFIX  SERVICE_NAME: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].name | quote }}
+DB-CC-PREFIX  DB_MIGRATION_FILES: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.migrationFiles | quote }}
 DB-CC-PREFIX  DB_NAME: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
 DB-CC-PREFIX  DB_HOST: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
 DB-CC-PREFIX  DB_SSL_MODE: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}

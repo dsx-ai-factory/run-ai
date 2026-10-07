@@ -250,6 +250,7 @@ type SecretAPIRouter interface {
 type SynchronizationAPIRouter interface {
 	// Deprecated
 	ListAssetsById(http.ResponseWriter, *http.Request)
+	K8sObjectsSyncUpdates(http.ResponseWriter, *http.Request)
 	CredentialsSyncUpdates(http.ResponseWriter, *http.Request)
 	DatasourceSyncUpdates(http.ResponseWriter, *http.Request)
 	SyncValidate(http.ResponseWriter, *http.Request)
@@ -521,9 +522,9 @@ type RegistryAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type ResourceClaimTemplatesAPIServicer interface {
-	ListRcts(context.Context, int32, int32) (ImplResponse, error)
+	ListRcts(context.Context, int32, int32, bool) (ImplResponse, error)
 	CreateRct(context.Context, RctCreationRequest) (ImplResponse, error)
-	GetRctById(context.Context, string) (ImplResponse, error)
+	GetRctById(context.Context, string, bool) (ImplResponse, error)
 	UpdateRctById(context.Context, string, RctUpdateRequest) (ImplResponse, error)
 	DeleteRctById(context.Context, string) (ImplResponse, error)
 }
@@ -559,6 +560,7 @@ type SecretAPIServicer interface {
 type SynchronizationAPIServicer interface {
 	// Deprecated
 	ListAssetsById(context.Context, string) (ImplResponse, error)
+	K8sObjectsSyncUpdates(context.Context, string, int64, ClusterSyncReport) (ImplResponse, error)
 	CredentialsSyncUpdates(context.Context, string, int64, ClusterSyncReport) (ImplResponse, error)
 	DatasourceSyncUpdates(context.Context, string, int64, ClusterSyncReport) (ImplResponse, error)
 	SyncValidate(context.Context, ValidateSyncRequest) (ImplResponse, error)

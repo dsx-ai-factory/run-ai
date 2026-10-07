@@ -18,10 +18,19 @@ func NewResultMapBuilder(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ResultMapBuilder {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ResultMapBuilder{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,17 +73,38 @@ type ResultMapBuilder_Build_Call struct {
 }
 
 // Build is a helper method to define mock.On call
-//   - results
-//   - labels
-//   - metricDisplayNames
-//   - tenantId
-func (_e *ResultMapBuilder_Expecter) Build(results interface{}, labels interface{}, metricDisplayNames interface{}, tenantId interface{}) *ResultMapBuilder_Build_Call {
+//   - results map[string]*api.GetMetrics200Response
+//   - labels []string
+//   - metricDisplayNames []string
+//   - tenantId int32
+func (_e *ResultMapBuilder_Expecter) Build(results any, labels any, metricDisplayNames any, tenantId any) *ResultMapBuilder_Build_Call {
 	return &ResultMapBuilder_Build_Call{Call: _e.mock.On("Build", results, labels, metricDisplayNames, tenantId)}
 }
 
 func (_c *ResultMapBuilder_Build_Call) Run(run func(results map[string]*api.GetMetrics200Response, labels []string, metricDisplayNames []string, tenantId int32)) *ResultMapBuilder_Build_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(map[string]*api.GetMetrics200Response), args[1].([]string), args[2].([]string), args[3].(int32))
+		var arg0 map[string]*api.GetMetrics200Response
+		if args[0] != nil {
+			arg0 = args[0].(map[string]*api.GetMetrics200Response)
+		}
+		var arg1 []string
+		if args[1] != nil {
+			arg1 = args[1].([]string)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		var arg3 int32
+		if args[3] != nil {
+			arg3 = args[3].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }

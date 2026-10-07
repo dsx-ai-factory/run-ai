@@ -28,15 +28,13 @@ type SharedResourcesBuilder struct {
 	serviceBuilder      ResourceBuilder
 	ExternalUrlsBuilder ExternalBuilder
 	PVCBuilder          ResourceBuilder
-	credentialsBuilder  ResourceBuilder
 }
 
-func NewShardResourcesBuilder(service ResourceBuilder, urlsBuilder ExternalBuilder, pvcBuilder ResourceBuilder, credentialsBuilder ResourceBuilder) *SharedResourcesBuilder {
+func NewShardResourcesBuilder(service ResourceBuilder, urlsBuilder ExternalBuilder, pvcBuilder ResourceBuilder) *SharedResourcesBuilder {
 	return &SharedResourcesBuilder{
 		serviceBuilder:      service,
 		ExternalUrlsBuilder: urlsBuilder,
 		PVCBuilder:          pvcBuilder,
-		credentialsBuilder:  credentialsBuilder,
 	}
 }
 
@@ -55,15 +53,10 @@ func (self *SharedResourcesBuilder) GetPreview(ctx context.Context, workload *jo
 	if err != nil {
 		return nil, fmt.Errorf("unable to get external urls preview resources, %v", err)
 	}
-	credentials, err := self.credentialsBuilder.GetPreview(ctx, workload)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get credentials preview resources, %w", err)
-	}
 
 	resultResources = append(resultResources, pvcList...)
 	resultResources = append(resultResources, services...)
 	resultResources = append(resultResources, externalObj...)
-	resultResources = append(resultResources, credentials...)
 	return resultResources, nil
 }
 
@@ -111,18 +104,6 @@ func (self *SharedResourcesBuilder) BuildPVC(ctx context.Context, workload *job.
 	}
 	if len(objets) == 0 {
 		logCB.Info("No pvc's were generated from Workload")
-	}
-	return objets, nil
-}
-
-func (self *SharedResourcesBuilder) BuildCredentials(ctx context.Context, workload *job.JobWorkload, options ResourceBuilderOptions) ([]client.Object, error) {
-	logCB.Info("Generating job credentials from Workload")
-	objets, err := self.credentialsBuilder.Build(ctx, workload, options)
-	if err != nil {
-		return nil, fmt.Errorf("unable to build credentials, %v", err)
-	}
-	if len(objets) == 0 {
-		logCB.Info("No credentials were generated from Workload")
 	}
 	return objets, nil
 }

@@ -5,8 +5,8 @@ go 1.26.8
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/evanphx/json-patch v5.9.11+incompatible
@@ -205,8 +205,8 @@ require (
 replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic => ../common/runaipublic
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ../go-operator
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils => ../../common/cert-utils
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants => ../../common/constants

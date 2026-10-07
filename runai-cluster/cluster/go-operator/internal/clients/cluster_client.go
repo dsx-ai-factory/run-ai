@@ -23,7 +23,6 @@ type ControlPlaneDetails struct {
 	ClusterUUID  string
 }
 
-//go:generate mockery --name ClusterServiceClient
 type ClusterServiceClient interface {
 	GetClusterInternalConfig(ctx context.Context) (*openapi.GetInternalClusterConfigResponse, error)
 	PutRemoteConfigStatus(ctx context.Context, putRequest *openapi.PutClusterConfigStatusRequest) error

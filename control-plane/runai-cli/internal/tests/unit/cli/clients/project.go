@@ -205,7 +205,7 @@ func MockProject(mockCtrl *gomock.Controller) {
 	nodeTelemetryResponse := getMockTelemetryResponse(map[string]string{NodeName: FreeGpu, OtherNodeName: strconv.Itoa(GpuCount)})
 	mockNodeClient.EXPECT().GetNodesTelemetry(gomock.Any(), ClusterUuid, nodes.RequiredNodeTelemetryTypes).Return(nodeTelemetryResponse, nil).AnyTimes()
 
-	mockNodeClient.EXPECT().GetNodeList(gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
+	mockNodeClient.EXPECT().GetNodeList(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
 
 	departmentList := getMockDepartmentList()
 	mockDepartmentClient.EXPECT().GetDepartmentList(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(departmentList, nil).AnyTimes()

@@ -260,7 +260,21 @@ func (c *ResourceClaimTemplatesAPIController) ListRcts(w http.ResponseWriter, r 
 		var param int32 = 50
 		limitParam = param
 	}
-	result, err := c.service.ListRcts(r.Context(), offsetParam, limitParam)
+	var statusInfoParam bool
+	if query.Has("statusInfo") {
+		param, err := parseBoolParameter(
+			query.Get("statusInfo"),
+			WithParse[bool](parseBool),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil, nil)
+			return
+		}
+
+		statusInfoParam = param
+	} else {
+	}
+	result, err := c.service.ListRcts(r.Context(), offsetParam, limitParam, statusInfoParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
@@ -395,12 +409,31 @@ func (c *ResourceClaimTemplatesAPIController) CreateRct(w http.ResponseWriter, r
 
 // GetRctById - Retrieve a resource claim template.
 func (c *ResourceClaimTemplatesAPIController) GetRctById(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
 		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
-	result, err := c.service.GetRctById(r.Context(), assetIdParam)
+	var statusInfoParam bool
+	if query.Has("statusInfo") {
+		param, err := parseBoolParameter(
+			query.Get("statusInfo"),
+			WithParse[bool](parseBool),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil, nil)
+			return
+		}
+
+		statusInfoParam = param
+	} else {
+	}
+	result, err := c.service.GetRctById(r.Context(), assetIdParam, statusInfoParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

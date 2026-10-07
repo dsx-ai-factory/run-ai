@@ -27,7 +27,7 @@ type RctSpec struct {
 	ObjectMeta *K8sObjectMeta `json:"objectMeta,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The raw Kubernetes spec of the ResourceClaimTemplate.
+	// The raw Kubernetes spec of the object.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ObjectSpec map[string]interface{} `json:"objectSpec"`
 	ObjectSpec map[string]interface{} `json:"objectSpec" gorm:"serializer:json; type:jsonb;not null;"`

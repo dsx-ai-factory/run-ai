@@ -18,10 +18,19 @@ func NewMigrator(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Migrator {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Migrator{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -62,14 +71,20 @@ type Migrator_Migrate_Call struct {
 }
 
 // Migrate is a helper method to define mock.On call
-//   - conf
-func (_e *Migrator_Expecter) Migrate(conf interface{}) *Migrator_Migrate_Call {
+//   - conf *config.Config
+func (_e *Migrator_Expecter) Migrate(conf any) *Migrator_Migrate_Call {
 	return &Migrator_Migrate_Call{Call: _e.mock.On("Migrate", conf)}
 }
 
 func (_c *Migrator_Migrate_Call) Run(run func(conf *config.Config)) *Migrator_Migrate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*config.Config))
+		var arg0 *config.Config
+		if args[0] != nil {
+			arg0 = args[0].(*config.Config)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

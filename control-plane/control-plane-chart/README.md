@@ -108,9 +108,9 @@ key per service. Highlights:
   `bffService`, `frontend`, `policyService`, `workloads`, `workloadsManager`,
   `orgUnitService`, `metricsService`, `assetsService`, `auditService`,
   `catalogService`, `notificationsService`, `datavolumes`, `cliExposer`,
-  `secretGenerator`, migrators (`authorizationMigrator`, `clusterMigrator`,
-  `metricStoresMigrator`), etc. — each carries its own `image`, `resources`,
-  `replicas`, config and secret references.
+  `secretGenerator`, migrators (`clusterMigrator`, `metricStoresMigrator`),
+  etc. — each carries its own `image`, `resources`, `replicas`, config and
+  secret references.
 - **Subchart blocks** — `postgresql`, `keycloakx`, `nats`, `thanos`,
   `unleashEdge`, `telemetryService` — expose each dependency's own values.
 

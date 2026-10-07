@@ -46,11 +46,19 @@ func CreateRct(ctx context.Context, request api.RctCreationRequest, nameValidati
 	}, nil
 }
 
+// RctOptions carries the optional flags of the RCT read paths. IncludeDeleted
+// mirrors the credentials/PVC pattern: when the caller wants status_info the
+// list must also return soft-deleted rows so the UI can render DELETING /
+// DELETION_FAILED for RCTs that are mid-tombstone.
+type RctOptions struct {
+	IncludeDeleted bool
+}
+
 // ListRcts returns a paginated list of resource claim template assets. The
 // offset/limit contract matches the swagger: fetch limit+1 rows so we can set
 // RctListResponse.Next when the next page exists (i.e. when the returned page
 // is full).
-func ListRcts(ctx context.Context, offset, limit int32) (*api.RctListResponse, *api.Error) {
+func ListRcts(ctx context.Context, offset, limit int32, options RctOptions) (*api.RctListResponse, *api.Error) {
 	combinedList := make([]dbmodel.AssetSpecCombinedRec, 0)
 	query := dbmodel.AssetMetaRec{
 		AssetMeta: dbmodel.AssetMeta{
@@ -63,6 +71,10 @@ func ListRcts(ctx context.Context, offset, limit int32) (*api.RctListResponse, *
 		return nil, err
 	}
 	applyAssetsSpecTenantFilter(ctx, result)
+
+	if options.IncludeDeleted {
+		result = result.Unscoped()
+	}
 
 	// Fetch limit+1 so we can detect "is there a next page" without a count query.
 	fetchLimit := int(limit) + 1
@@ -103,7 +115,7 @@ func ListRcts(ctx context.Context, offset, limit int32) (*api.RctListResponse, *
 // GetRctById fetches a single resource claim template joined from
 // assets_metadata + assets_spec, unmarshals the JSON spec into the typed
 // RctSpec, and returns the typed asset.
-func GetRctById(ctx context.Context, id string) (*api.Rct, *api.Error) {
+func GetRctById(ctx context.Context, id string, options RctOptions) (*api.Rct, *api.Error) {
 	var combinedRec dbmodel.AssetSpecCombinedRec
 	query := dbmodel.AssetMetaRec{
 		AssetMeta: dbmodel.AssetMeta{
@@ -117,6 +129,10 @@ func GetRctById(ctx context.Context, id string) (*api.Rct, *api.Error) {
 		return nil, err
 	}
 	applyAssetsSpecTenantFilter(ctx, result)
+
+	if options.IncludeDeleted {
+		result = result.Unscoped()
+	}
 
 	scanRows, scanErr := result.Scan(&combinedRec)
 	if scanErr != nil || scanRows == 0 {

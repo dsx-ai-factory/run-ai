@@ -17,10 +17,19 @@ func NewSessionCreator(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SessionCreator {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SessionCreator{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -61,16 +70,32 @@ type SessionCreator_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - user
-//   - password
-//   - schema
-func (_e *SessionCreator_Expecter) Create(user interface{}, password interface{}, schema interface{}) *SessionCreator_Create_Call {
+//   - user string
+//   - password string
+//   - schema string
+func (_e *SessionCreator_Expecter) Create(user any, password any, schema any) *SessionCreator_Create_Call {
 	return &SessionCreator_Create_Call{Call: _e.mock.On("Create", user, password, schema)}
 }
 
 func (_c *SessionCreator_Create_Call) Run(run func(user string, password string, schema string)) *SessionCreator_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

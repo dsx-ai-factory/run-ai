@@ -31,6 +31,11 @@ type Rct struct {
 	//Spec RctSpec `json:"spec"`
 	Spec RctSpec `json:"spec" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Status *AssetClusterStatusInfo `json:"status,omitempty"`
+	Status *AssetClusterStatusInfo `json:"status,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertRctRequired checks if the required fields are not zero-ed
@@ -50,6 +55,11 @@ func AssertRctRequired(obj Rct) error {
 	}
 	if err := AssertRctSpecRequired(obj.Spec); err != nil {
 		return err
+	}
+	if obj.Status != nil {
+		if err := AssertAssetClusterStatusInfoRequired(*obj.Status); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -71,6 +81,16 @@ func AssertRctConstraints(obj Rct) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if err := AssertRctSpecConstraints(obj.Spec); err != nil {
 		return err
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Status != nil {
+		if err := AssertAssetClusterStatusInfoConstraints(*obj.Status); err != nil {
+			return err
+		}
 	}
 	return nil
 }

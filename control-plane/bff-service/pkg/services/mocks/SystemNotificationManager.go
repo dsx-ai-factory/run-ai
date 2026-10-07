@@ -20,10 +20,19 @@ func NewSystemNotificationManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SystemNotificationManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SystemNotificationManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,14 +84,20 @@ type SystemNotificationManager_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-func (_e *SystemNotificationManager_Expecter) Get(ctx interface{}) *SystemNotificationManager_Get_Call {
+//   - ctx context.Context
+func (_e *SystemNotificationManager_Expecter) Get(ctx any) *SystemNotificationManager_Get_Call {
 	return &SystemNotificationManager_Get_Call{Call: _e.mock.On("Get", ctx)}
 }
 
 func (_c *SystemNotificationManager_Get_Call) Run(run func(ctx context.Context)) *SystemNotificationManager_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -120,14 +135,20 @@ type SystemNotificationManager_Invalidate_Call struct {
 }
 
 // Invalidate is a helper method to define mock.On call
-//   - ctx
-func (_e *SystemNotificationManager_Expecter) Invalidate(ctx interface{}) *SystemNotificationManager_Invalidate_Call {
+//   - ctx context.Context
+func (_e *SystemNotificationManager_Expecter) Invalidate(ctx any) *SystemNotificationManager_Invalidate_Call {
 	return &SystemNotificationManager_Invalidate_Call{Call: _e.mock.On("Invalidate", ctx)}
 }
 
 func (_c *SystemNotificationManager_Invalidate_Call) Run(run func(ctx context.Context)) *SystemNotificationManager_Invalidate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -165,15 +186,26 @@ type SystemNotificationManager_Set_Call struct {
 }
 
 // Set is a helper method to define mock.On call
-//   - ctx
-//   - message
-func (_e *SystemNotificationManager_Expecter) Set(ctx interface{}, message interface{}) *SystemNotificationManager_Set_Call {
+//   - ctx context.Context
+//   - message *system_notification.Message
+func (_e *SystemNotificationManager_Expecter) Set(ctx any, message any) *SystemNotificationManager_Set_Call {
 	return &SystemNotificationManager_Set_Call{Call: _e.mock.On("Set", ctx, message)}
 }
 
 func (_c *SystemNotificationManager_Set_Call) Run(run func(ctx context.Context, message *system_notification.Message)) *SystemNotificationManager_Set_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*system_notification.Message))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *system_notification.Message
+		if args[1] != nil {
+			arg1 = args[1].(*system_notification.Message)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

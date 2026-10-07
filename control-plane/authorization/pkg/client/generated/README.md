@@ -110,9 +110,7 @@ Class | Method | HTTP request | Description
 *RolesAPI* | [**CreateRole**](docs/RolesAPI.md#createrole) | **Post** /api/v2/authorization/roles | Create a role.
 *RolesAPI* | [**DeleteRole**](docs/RolesAPI.md#deleterole) | **Delete** /api/v2/authorization/roles/{roleIdPath} | Delete a role by id.
 *RolesAPI* | [**GetRole**](docs/RolesAPI.md#getrole) | **Get** /api/v2/authorization/roles/{roleIdPath} | Get a role by id.
-*RolesAPI* | [**GetRoleV1**](docs/RolesAPI.md#getrolev1) | **Get** /api/v1/authorization/roles/{roleIdPath} | Get a role by id.
 *RolesAPI* | [**GetRoles**](docs/RolesAPI.md#getroles) | **Get** /api/v2/authorization/roles | Get a list of roles.
-*RolesAPI* | [**GetRolesV1**](docs/RolesAPI.md#getrolesv1) | **Get** /api/v1/authorization/roles | Get a list of roles.
 *RolesAPI* | [**RoleActive**](docs/RolesAPI.md#roleactive) | **Post** /api/v2/authorization/roles/{roleIdPath}/active | Enable or Disable a role by id.
 *RolesAPI* | [**RoleDisable**](docs/RolesAPI.md#roledisable) | **Post** /api/v2/authorization/roles/{roleIdPath}/disable | Disable a role by id.
 *RolesAPI* | [**RoleEnable**](docs/RolesAPI.md#roleenable) | **Post** /api/v2/authorization/roles/{roleIdPath}/enable | Enable a role by id.
@@ -193,7 +191,6 @@ Class | Method | HTTP request | Description
  - [RoleEnabledDisabledFields](docs/RoleEnabledDisabledFields.md)
  - [RolePermission](docs/RolePermission.md)
  - [RolePermissionSet](docs/RolePermissionSet.md)
- - [RoleV1](docs/RoleV1.md)
  - [RolesSortFilterFields](docs/RolesSortFilterFields.md)
  - [ScopeType](docs/ScopeType.md)
  - [SubjectType](docs/SubjectType.md)

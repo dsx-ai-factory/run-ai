@@ -16,7 +16,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/internal"
 )
 
-//go:generate mockery --name IPolicyExternalClient
 type IPolicyExternalClient interface {
 	UpdateSyncStatusWorkspace(ctx context.Context, syncStatus openapi.SyncStatusUpdate) (*http.Response, error)
 	UpdateSyncStatusTraining(ctx context.Context, syncStatus openapi.SyncStatusUpdate) (*http.Response, error)
@@ -35,7 +34,6 @@ type IPolicyExternalClient interface {
 	GetAssetChangedHook(ctx context.Context, assetId string, notification *openapi.AssetChangeNotification) (*http.Response, error)
 }
 
-//go:generate mockery --name IPolicyClient
 type IPolicyClient interface {
 	IPolicyExternalClient
 

@@ -274,6 +274,9 @@ docs/InternalToolType.md
 docs/InvolvedObject.md
 docs/ItemRules.md
 docs/K8sObjectMeta.md
+docs/K8sObjectSpec.md
+docs/K8sObjectsUpdate.md
+docs/K8sObjectsUpdatesResp.md
 docs/KeyValuePair.md
 docs/Label.md
 docs/MasterSpec.md
@@ -725,6 +728,9 @@ model_internal_tool_type.go
 model_involved_object.go
 model_item_rules.go
 model_k8s_object_meta.go
+model_k8s_object_spec.go
+model_k8s_objects_update.go
+model_k8s_objects_updates_resp.go
 model_key_value_pair.go
 model_label.go
 model_master_spec.go

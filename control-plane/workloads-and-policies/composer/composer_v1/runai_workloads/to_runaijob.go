@@ -113,7 +113,7 @@ func (jsw *JobSpecComposer) Compose(ctx context.Context, src *workloadsApi.Super
 			jsw.fc.ComposePreemptibility(ctx, src.Preemptibility.Get(), &target.Preemptibility, stringToStringField, nil),
 			jsw.fc.ComposeAutoDeletionAfterTermination(src.AutoDeletionTimeAfterCompletionSeconds.Get(), &target.AutoDeletionTimeAfterCompletionSeconds, intToIntField, nil),
 			jsw.fc.CopyBoolean(src.TerminateAfterPreemption.Get(), &target.TerminateAfterPreemption, boolToBoolField, nil),
-			jsw.fc.CopyInt(src.BackoffLimit.Get(), &target.BackoffLimit, nonZeroIntToIntField, nil),
+			jsw.fc.CopyInt(src.BackoffLimit.Get(), &target.BackoffLimit, intToIntField, nil),
 			jsw.fc.CopyInt(src.Completions.Get(), &target.Completions, nonZeroIntToIntField, nil),
 			jsw.fc.ComposeParallelism(src.Parallelism.Get(), src.Completions.Get(), &target.Parallelism, nonZeroIntToIntField, nil),
 			jsw.fc.ComposeTerminationGracePeriod(ctx, src.TerminationGracePeriodSeconds.Get(), &target.TerminationGracePeriodSeconds, nonZeroIntToIntField, nil),

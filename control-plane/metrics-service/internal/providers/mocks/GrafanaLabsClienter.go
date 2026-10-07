@@ -20,10 +20,19 @@ func NewGrafanaLabsClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *GrafanaLabsClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &GrafanaLabsClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,16 +84,32 @@ type GrafanaLabsClienter_CreateAccessPolicy_Call struct {
 }
 
 // CreateAccessPolicy is a helper method to define mock.On call
-//   - ctx
-//   - policyScope
-//   - instance
-func (_e *GrafanaLabsClienter_Expecter) CreateAccessPolicy(ctx interface{}, policyScope interface{}, instance interface{}) *GrafanaLabsClienter_CreateAccessPolicy_Call {
+//   - ctx context.Context
+//   - policyScope string
+//   - instance *grafana.Instance
+func (_e *GrafanaLabsClienter_Expecter) CreateAccessPolicy(ctx any, policyScope any, instance any) *GrafanaLabsClienter_CreateAccessPolicy_Call {
 	return &GrafanaLabsClienter_CreateAccessPolicy_Call{Call: _e.mock.On("CreateAccessPolicy", ctx, policyScope, instance)}
 }
 
 func (_c *GrafanaLabsClienter_CreateAccessPolicy_Call) Run(run func(ctx context.Context, policyScope string, instance *grafana.Instance)) *GrafanaLabsClienter_CreateAccessPolicy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*grafana.Instance))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *grafana.Instance
+		if args[2] != nil {
+			arg2 = args[2].(*grafana.Instance)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -133,15 +158,26 @@ type GrafanaLabsClienter_CreateInstance_Call struct {
 }
 
 // CreateInstance is a helper method to define mock.On call
-//   - ctx
-//   - datasourceId
-func (_e *GrafanaLabsClienter_Expecter) CreateInstance(ctx interface{}, datasourceId interface{}) *GrafanaLabsClienter_CreateInstance_Call {
+//   - ctx context.Context
+//   - datasourceId string
+func (_e *GrafanaLabsClienter_Expecter) CreateInstance(ctx any, datasourceId any) *GrafanaLabsClienter_CreateInstance_Call {
 	return &GrafanaLabsClienter_CreateInstance_Call{Call: _e.mock.On("CreateInstance", ctx, datasourceId)}
 }
 
 func (_c *GrafanaLabsClienter_CreateInstance_Call) Run(run func(ctx context.Context, datasourceId string)) *GrafanaLabsClienter_CreateInstance_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -190,16 +226,32 @@ type GrafanaLabsClienter_CreateToken_Call struct {
 }
 
 // CreateToken is a helper method to define mock.On call
-//   - ctx
-//   - region
-//   - policy
-func (_e *GrafanaLabsClienter_Expecter) CreateToken(ctx interface{}, region interface{}, policy interface{}) *GrafanaLabsClienter_CreateToken_Call {
+//   - ctx context.Context
+//   - region string
+//   - policy *grafana.Policy
+func (_e *GrafanaLabsClienter_Expecter) CreateToken(ctx any, region any, policy any) *GrafanaLabsClienter_CreateToken_Call {
 	return &GrafanaLabsClienter_CreateToken_Call{Call: _e.mock.On("CreateToken", ctx, region, policy)}
 }
 
 func (_c *GrafanaLabsClienter_CreateToken_Call) Run(run func(ctx context.Context, region string, policy *grafana.Policy)) *GrafanaLabsClienter_CreateToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*grafana.Policy))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *grafana.Policy
+		if args[2] != nil {
+			arg2 = args[2].(*grafana.Policy)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -237,16 +289,32 @@ type GrafanaLabsClienter_DeleteAccessPolicy_Call struct {
 }
 
 // DeleteAccessPolicy is a helper method to define mock.On call
-//   - ctx
-//   - accessPolicyId
-//   - region
-func (_e *GrafanaLabsClienter_Expecter) DeleteAccessPolicy(ctx interface{}, accessPolicyId interface{}, region interface{}) *GrafanaLabsClienter_DeleteAccessPolicy_Call {
+//   - ctx context.Context
+//   - accessPolicyId string
+//   - region string
+func (_e *GrafanaLabsClienter_Expecter) DeleteAccessPolicy(ctx any, accessPolicyId any, region any) *GrafanaLabsClienter_DeleteAccessPolicy_Call {
 	return &GrafanaLabsClienter_DeleteAccessPolicy_Call{Call: _e.mock.On("DeleteAccessPolicy", ctx, accessPolicyId, region)}
 }
 
 func (_c *GrafanaLabsClienter_DeleteAccessPolicy_Call) Run(run func(ctx context.Context, accessPolicyId string, region string)) *GrafanaLabsClienter_DeleteAccessPolicy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -284,15 +352,26 @@ type GrafanaLabsClienter_DeleteInstance_Call struct {
 }
 
 // DeleteInstance is a helper method to define mock.On call
-//   - ctx
-//   - datasourceId
-func (_e *GrafanaLabsClienter_Expecter) DeleteInstance(ctx interface{}, datasourceId interface{}) *GrafanaLabsClienter_DeleteInstance_Call {
+//   - ctx context.Context
+//   - datasourceId string
+func (_e *GrafanaLabsClienter_Expecter) DeleteInstance(ctx any, datasourceId any) *GrafanaLabsClienter_DeleteInstance_Call {
 	return &GrafanaLabsClienter_DeleteInstance_Call{Call: _e.mock.On("DeleteInstance", ctx, datasourceId)}
 }
 
 func (_c *GrafanaLabsClienter_DeleteInstance_Call) Run(run func(ctx context.Context, datasourceId string)) *GrafanaLabsClienter_DeleteInstance_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -330,16 +409,32 @@ type GrafanaLabsClienter_DeleteToken_Call struct {
 }
 
 // DeleteToken is a helper method to define mock.On call
-//   - ctx
-//   - tokenId
-//   - region
-func (_e *GrafanaLabsClienter_Expecter) DeleteToken(ctx interface{}, tokenId interface{}, region interface{}) *GrafanaLabsClienter_DeleteToken_Call {
+//   - ctx context.Context
+//   - tokenId string
+//   - region string
+func (_e *GrafanaLabsClienter_Expecter) DeleteToken(ctx any, tokenId any, region any) *GrafanaLabsClienter_DeleteToken_Call {
 	return &GrafanaLabsClienter_DeleteToken_Call{Call: _e.mock.On("DeleteToken", ctx, tokenId, region)}
 }
 
 func (_c *GrafanaLabsClienter_DeleteToken_Call) Run(run func(ctx context.Context, tokenId string, region string)) *GrafanaLabsClienter_DeleteToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

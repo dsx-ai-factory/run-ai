@@ -40,9 +40,10 @@ type ServingProxySpec struct {
 
 	// Required — used by BuildOAuth2Proxy* helpers for naming/labeling and
 	// cluster-config lookups.
-	WorkloadName string
-	ProjectName  string
-	Config       composer.ClusterStorageConfig
+	WorkloadName                  string
+	ProjectName                   string
+	Config                        composer.ClusterStorageConfig
+	OAuth2ProxyTemplatesSupported bool
 
 	// Optional. When non-nil, the caller's exposed-URL items are merged into
 	// the same info map alongside the serving-port item; each merged item is
@@ -119,10 +120,11 @@ func BuildOauth2ProxySidecar(podSpec *corev1.PodSpec, spec ServingProxySpec) *wo
 		}
 	}
 	info := &composer.ExposedUrlInfo{
-		Items:        items,
-		WorkloadName: spec.WorkloadName,
-		ProjectName:  spec.ProjectName,
-		Config:       spec.Config,
+		Items:                         items,
+		WorkloadName:                  spec.WorkloadName,
+		ProjectName:                   spec.ProjectName,
+		Config:                        spec.Config,
+		OAuth2ProxyTemplatesSupported: spec.OAuth2ProxyTemplatesSupported,
 	}
 	if spec.ExposedURLInfo != nil {
 		info.ResourcePrefix = spec.ExposedURLInfo.ResourcePrefix

@@ -74,7 +74,7 @@ func NewTFJobBuilderWithExistingNodeAffinities(fromObject interface{}, toResourc
 		return nil, fmt.Errorf(distcommon.JobCastErrorMsg, &kubeflowcommon.TFJob{}, toResource)
 	}
 	sharedResourcesBuilder := common.NewShardResourcesBuilder(common.NewServiceBuilder(k8sClient),
-		common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift()), common.NewPvcBuilder(k8sClient), common.NewCredentialsBuilder(k8sClient))
+		common.NewExternalsUrlsBuilder(k8sClient, workloadconfig.IsOpenshift()), common.NewPvcBuilder(k8sClient))
 	result := &Builder{
 		DistributedBuilder: distcommon.DistributedBuilder{
 			PodLabels:      podLabels,

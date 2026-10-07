@@ -40,18 +40,18 @@ func (m *MockNodeClient) EXPECT() *MockNodeClientMockRecorder {
 }
 
 // GetNodeList mocks base method.
-func (m *MockNodeClient) GetNodeList(ctx context.Context, clusterUuid string) (*openapi.Nodes, error) {
+func (m *MockNodeClient) GetNodeList(ctx context.Context, clusterUuid string, offset, limit int32) (*openapi.Nodes, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNodeList", ctx, clusterUuid)
+	ret := m.ctrl.Call(m, "GetNodeList", ctx, clusterUuid, offset, limit)
 	ret0, _ := ret[0].(*openapi.Nodes)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetNodeList indicates an expected call of GetNodeList.
-func (mr *MockNodeClientMockRecorder) GetNodeList(ctx, clusterUuid interface{}) *gomock.Call {
+func (mr *MockNodeClientMockRecorder) GetNodeList(ctx, clusterUuid, offset, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNodeList", reflect.TypeOf((*MockNodeClient)(nil).GetNodeList), ctx, clusterUuid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNodeList", reflect.TypeOf((*MockNodeClient)(nil).GetNodeList), ctx, clusterUuid, offset, limit)
 }
 
 // GetNodesTelemetry mocks base method.

@@ -1,10 +1,2 @@
-type: object
-required:
-  - objectSpec
-properties:
-  objectMeta:
-    $ref: "../K8sObject/K8sObjectMeta.yaml"
-  objectSpec:
-    description: The raw Kubernetes spec of the ResourceClaimTemplate.
-    type: object
-    additionalProperties: true
+allOf:
+  - $ref: "../K8sObject/K8sObjectSpec.yaml"

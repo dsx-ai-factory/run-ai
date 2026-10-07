@@ -153,33 +153,6 @@ func RoleDaoToApi(role *models.Role) api.Role {
 	}
 }
 
-func RoleDaoToV1Api(role *models.Role) api.RoleV1 {
-	k8sPermissions := api.KubernetesPermissions{}
-	if role.ClusterRolePredefinedId != nil {
-		k8sPermissions.PredefinedRole = ptr.To(fmt.Sprintf("%d", *role.ClusterRolePredefinedId))
-	}
-	effectiveEnable := role.Enabled
-	if role.EffectiveEnabled != nil {
-		effectiveEnable = *role.EffectiveEnabled
-	}
-	permissions := PermissionsSetDaoToPermissionApi(role.PermissionSets)
-	return api.RoleV1{
-		Name:                  role.Name,
-		Description:           role.Description,
-		Permissions:           permissions,
-		ScopeType:             string(role.ScopeType),
-		ScopeId:               role.ScopeId,
-		Enabled:               ptr.To(role.Enabled),
-		KubernetesPermissions: k8sPermissions,
-		Id:                    int32(role.ID),
-		CreatedAt:             role.CreatedAt,
-		UpdatedAt:             role.UpdatedAt,
-		CreatedBy:             role.CreatedBy,
-		Custom:                role.Custom,
-		EffectiveEnabled:      effectiveEnable,
-	}
-}
-
 func AccessRuleDaoToApi(accessRule *models.AccessRule) api.AccessRule {
 	return api.AccessRule{
 		ScopeId:     accessRule.ScopeId,
@@ -358,46 +331,6 @@ func RolePermissionsDaoToApi(permissions []*models.RolePermission) []api.Permiss
 	}
 	result = addMissingResourceTypesV1(result)
 	return result
-}
-
-func PermissionsSetDaoToPermissionApi(permissionSets *[]models.PermissionSet) []api.Permission {
-	apiPermissions := []api.Permission{}
-	apiPermissionsMap := map[string]api.Permission{}
-	for _, ps := range *permissionSets {
-		for _, permission := range ps.Permissions {
-			// Filtering out unknown resource types.
-			// This case could happen when running in gradual rollout and the new code adds a new resource type but the old services are getting it from the DB but cant parse it into the enum
-			if !api.ResourceType.IsValid(permission.ResourceType) {
-				continue
-			}
-
-			apiPermission, found := apiPermissionsMap[string(permission.ResourceType)]
-			if !found {
-				apiPermission = api.Permission{
-					ResourceType: permission.ResourceType,
-					DisplayName:  GetResourceTypeDisplayName(permission.ResourceType),
-					GroupId:      GetResourceTypeGroupId(permission.ResourceType),
-					Actions:      []api.Action{},
-				}
-			}
-
-			actions := apiPermission.Actions
-			actions = AppendAction(actions, permission.Create, api.ACTION_CREATE)
-			actions = AppendAction(actions, permission.Read, api.ACTION_READ)
-			actions = AppendAction(actions, permission.Update, api.ACTION_UPDATE)
-			actions = AppendAction(actions, permission.Delete, api.ACTION_DELETE)
-			apiPermission.Actions = actions
-
-			apiPermissionsMap[string(permission.ResourceType)] = apiPermission
-		}
-	}
-	for _, apiPermission := range apiPermissionsMap {
-		apiPermissions = append(apiPermissions, apiPermission)
-	}
-
-	apiPermissions = addMissingResourceTypesV1(apiPermissions)
-
-	return apiPermissions
 }
 
 func PermissionsSetDaoToRolePermApi(permissionSets *[]models.PermissionSet) ([]api.RolePermissionSet, []api.RolePermission) {

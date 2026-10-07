@@ -17,10 +17,19 @@ func NewLogger(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Logger {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Logger{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -40,7 +49,7 @@ func (_m *Logger) EXPECT() *Logger_Expecter {
 
 // Debugf provides a mock function for the type Logger
 func (_mock *Logger) Debugf(format string, args ...any) {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, format)
 	_ca = append(_ca, args...)
 	_mock.Called(_ca...)
@@ -53,22 +62,31 @@ type Logger_Debugf_Call struct {
 }
 
 // Debugf is a helper method to define mock.On call
-//   - format
-//   - args
-func (_e *Logger_Expecter) Debugf(format interface{}, args ...interface{}) *Logger_Debugf_Call {
+//   - format string
+//   - args ...any
+func (_e *Logger_Expecter) Debugf(format any, args ...any) *Logger_Debugf_Call {
 	return &Logger_Debugf_Call{Call: _e.mock.On("Debugf",
-		append([]interface{}{format}, args...)...)}
+		append([]any{format}, args...)...)}
 }
 
 func (_c *Logger_Debugf_Call) Run(run func(format string, args ...any)) *Logger_Debugf_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []any
 		variadicArgs := make([]any, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(any)
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -85,7 +103,7 @@ func (_c *Logger_Debugf_Call) RunAndReturn(run func(format string, args ...any))
 
 // Errorf provides a mock function for the type Logger
 func (_mock *Logger) Errorf(format string, args ...any) {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, format)
 	_ca = append(_ca, args...)
 	_mock.Called(_ca...)
@@ -98,22 +116,31 @@ type Logger_Errorf_Call struct {
 }
 
 // Errorf is a helper method to define mock.On call
-//   - format
-//   - args
-func (_e *Logger_Expecter) Errorf(format interface{}, args ...interface{}) *Logger_Errorf_Call {
+//   - format string
+//   - args ...any
+func (_e *Logger_Expecter) Errorf(format any, args ...any) *Logger_Errorf_Call {
 	return &Logger_Errorf_Call{Call: _e.mock.On("Errorf",
-		append([]interface{}{format}, args...)...)}
+		append([]any{format}, args...)...)}
 }
 
 func (_c *Logger_Errorf_Call) Run(run func(format string, args ...any)) *Logger_Errorf_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []any
 		variadicArgs := make([]any, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(any)
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -130,7 +157,7 @@ func (_c *Logger_Errorf_Call) RunAndReturn(run func(format string, args ...any))
 
 // Infof provides a mock function for the type Logger
 func (_mock *Logger) Infof(format string, args ...any) {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, format)
 	_ca = append(_ca, args...)
 	_mock.Called(_ca...)
@@ -143,22 +170,31 @@ type Logger_Infof_Call struct {
 }
 
 // Infof is a helper method to define mock.On call
-//   - format
-//   - args
-func (_e *Logger_Expecter) Infof(format interface{}, args ...interface{}) *Logger_Infof_Call {
+//   - format string
+//   - args ...any
+func (_e *Logger_Expecter) Infof(format any, args ...any) *Logger_Infof_Call {
 	return &Logger_Infof_Call{Call: _e.mock.On("Infof",
-		append([]interface{}{format}, args...)...)}
+		append([]any{format}, args...)...)}
 }
 
 func (_c *Logger_Infof_Call) Run(run func(format string, args ...any)) *Logger_Infof_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []any
 		variadicArgs := make([]any, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(any)
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }
@@ -175,7 +211,7 @@ func (_c *Logger_Infof_Call) RunAndReturn(run func(format string, args ...any)) 
 
 // Warnf provides a mock function for the type Logger
 func (_mock *Logger) Warnf(format string, args ...any) {
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, format)
 	_ca = append(_ca, args...)
 	_mock.Called(_ca...)
@@ -188,22 +224,31 @@ type Logger_Warnf_Call struct {
 }
 
 // Warnf is a helper method to define mock.On call
-//   - format
-//   - args
-func (_e *Logger_Expecter) Warnf(format interface{}, args ...interface{}) *Logger_Warnf_Call {
+//   - format string
+//   - args ...any
+func (_e *Logger_Expecter) Warnf(format any, args ...any) *Logger_Warnf_Call {
 	return &Logger_Warnf_Call{Call: _e.mock.On("Warnf",
-		append([]interface{}{format}, args...)...)}
+		append([]any{format}, args...)...)}
 }
 
 func (_c *Logger_Warnf_Call) Run(run func(format string, args ...any)) *Logger_Warnf_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []any
 		variadicArgs := make([]any, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(any)
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }

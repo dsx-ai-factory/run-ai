@@ -18,10 +18,19 @@ func NewMockCounterVecRegisterer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCounterVecRegisterer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCounterVecRegisterer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,14 +73,20 @@ type MockCounterVecRegisterer_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - name
-func (_e *MockCounterVecRegisterer_Expecter) Get(name interface{}) *MockCounterVecRegisterer_Get_Call {
+//   - name string
+func (_e *MockCounterVecRegisterer_Expecter) Get(name any) *MockCounterVecRegisterer_Get_Call {
 	return &MockCounterVecRegisterer_Get_Call{Call: _e.mock.On("Get", name)}
 }
 
 func (_c *MockCounterVecRegisterer_Get_Call) Run(run func(name string)) *MockCounterVecRegisterer_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -111,16 +126,32 @@ type MockCounterVecRegisterer_Register_Call struct {
 }
 
 // Register is a helper method to define mock.On call
-//   - name
-//   - description
-//   - labels
-func (_e *MockCounterVecRegisterer_Expecter) Register(name interface{}, description interface{}, labels interface{}) *MockCounterVecRegisterer_Register_Call {
+//   - name string
+//   - description string
+//   - labels []string
+func (_e *MockCounterVecRegisterer_Expecter) Register(name any, description any, labels any) *MockCounterVecRegisterer_Register_Call {
 	return &MockCounterVecRegisterer_Register_Call{Call: _e.mock.On("Register", name, description, labels)}
 }
 
 func (_c *MockCounterVecRegisterer_Register_Call) Run(run func(name string, description string, labels []string)) *MockCounterVecRegisterer_Register_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].([]string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []string
+		if args[2] != nil {
+			arg2 = args[2].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

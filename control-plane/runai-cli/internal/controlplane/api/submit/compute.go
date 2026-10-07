@@ -64,7 +64,7 @@ func (c *Compute) GenerateComputeSpec() (*openapi.WorkspaceSpecSpecAllOfCompute,
 	fieldsSet := false
 
 	if c.GpuDeviceRequest.IsSet() {
-		specset.SetNullableInt32(*c.GpuDeviceRequest.Get(), &compute.GpuDevicesRequest)
+		compute.GpuDevicesRequest.Set(c.GpuDeviceRequest.Get())
 		fieldsSet = true
 	}
 
