@@ -5,7 +5,7 @@ post:
     - Resource Claim Templates
   x-internal: true
   x-authorize:
-    resource-type: resource-claim-template-assets
+    resource-type: resource-claim-templates
     action: sync
   x-service: k8s-objects-tracker
   x-test-coverage:

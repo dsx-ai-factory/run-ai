@@ -6276,7 +6276,7 @@ paths:
       tags:
       - Resource Claim Templates
       x-authorize:
-        resource-type: resource-claim-template-assets
+        resource-type: resource-claim-templates
         action: sync
       x-service: k8s-objects-tracker
       x-test-coverage:
@@ -6369,7 +6369,7 @@ paths:
       tags:
       - Resource Claim Templates
       x-authorize:
-        resource-type: resource-claim-template-assets
+        resource-type: resource-claim-templates
         action: sync
       x-service: k8s-objects-tracker
       x-test-coverage:
@@ -6459,7 +6459,7 @@ paths:
       tags:
       - Resource Claim Templates
       x-authorize:
-        resource-type: resource-claim-template-assets
+        resource-type: resource-claim-templates
         action: sync
       x-service: k8s-objects-tracker
       x-test-coverage:

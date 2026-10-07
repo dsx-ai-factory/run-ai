@@ -129,7 +129,7 @@ func (c *ResourceClaimTemplatesAPIController) Routes() Routes {
 				func(next http.HandlerFunc) http.HandlerFunc {
 					return c.authorizationClient.AuthorizeMiddleware(
 						next,
-						"resource-claim-template-assets",
+						"resource-claim-templates",
 						"sync",
 						false,
 						"",
@@ -151,7 +151,7 @@ func (c *ResourceClaimTemplatesAPIController) Routes() Routes {
 				func(next http.HandlerFunc) http.HandlerFunc {
 					return c.authorizationClient.AuthorizeMiddleware(
 						next,
-						"resource-claim-template-assets",
+						"resource-claim-templates",
 						"sync",
 						false,
 						"",
@@ -173,7 +173,7 @@ func (c *ResourceClaimTemplatesAPIController) Routes() Routes {
 				func(next http.HandlerFunc) http.HandlerFunc {
 					return c.authorizationClient.AuthorizeMiddleware(
 						next,
-						"resource-claim-template-assets",
+						"resource-claim-templates",
 						"sync",
 						false,
 						"",
