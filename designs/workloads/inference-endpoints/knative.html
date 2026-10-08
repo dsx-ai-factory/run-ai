@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knative · Inference · Run:ai API → InferenceEndpoint · request flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#1a1a2e; --bg-slide:#16213e; --bg-card:#0f3460; --text:#e8e8e8; --text-dim:#a0a0b0; --text-bright:#fff;
+    --code-bg:#0d1117; --border:#2a3a5e; --nvidia-green:#76b900; --runai-purple:#7b61ff; --new-blue:#3fa9f5; --warn:#f5a623; --bad:#ff5c5c; }
+  body.light { --bg:#fafbfc; --bg-slide:#fff; --bg-card:#f2f4f8; --text:#1a1a2e; --text-dim:#5a6072; --text-bright:#0a0a1a;
+    --code-bg:#f4f6fa; --border:#d8dde6; --nvidia-green:#4d7a00; --runai-purple:#5b43d6; --new-blue:#1f7fc4; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;line-height:1.5;font-size:15px}
+  header{position:sticky;top:0;z-index:10;background:var(--bg-slide);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  header .brand{font-size:12px;letter-spacing:.14em;color:var(--nvidia-green);font-weight:600} header .title{font-weight:600;color:var(--text-bright)}
+  header nav a{color:var(--text-dim);text-decoration:none;margin-left:6px;font-size:13px;padding:6px 10px;border-radius:6px;border:1px solid transparent;display:inline-block}
+  header nav a:hover{color:var(--text-bright)} header nav a[data-tab].active{color:var(--text-bright);background:var(--bg-card);border-color:var(--nvidia-green)}
+  main > section{display:none} main > section.active{display:block;animation:fade .15s ease-in} @keyframes fade{from{opacity:0}to{opacity:1}}
+  .tabnav{display:flex;justify-content:space-between;margin-top:28px;padding-top:16px;border-top:1px solid var(--border)} .tabnav a{color:var(--runai-purple);text-decoration:none;font-size:14px}
+  header nav a.sib{color:var(--runai-purple)}
+  header button{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit;font-size:13px;margin-left:14px}
+  main{max-width:1120px;margin:0 auto;padding:32px} section{margin-bottom:56px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--nvidia-green);font-weight:600}
+  h1{font-size:34px;line-height:1.15;margin:8px 0 12px;color:var(--text-bright)} h2{font-size:24px;margin:6px 0 14px;color:var(--text-bright)} h3{font-size:17px;margin:22px 0 8px;color:var(--text-bright)}
+  p.caption{color:var(--text-dim);font-size:14px;margin:6px 0 14px}
+  .card{background:var(--bg-slide);border:1px solid var(--border);border-radius:10px;padding:20px 22px}
+  .tldr{border-left:4px solid var(--nvidia-green)} .tldr ol{margin:8px 0 0 18px;padding:0} .tldr li{margin:6px 0}
+  .onething{border-left:4px solid var(--runai-purple);margin-top:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px} @media(max-width:860px){.grid2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:10px 0 6px;font-size:14px} th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--text-bright);font-weight:600;background:var(--bg-card)} td:first-child{color:var(--text-bright);font-weight:500}
+  code,pre{font-family:'JetBrains Mono',monospace;font-size:13px} code{background:var(--code-bg);padding:1px 6px;border-radius:4px;border:1px solid var(--border)}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0;line-height:1.55} pre code{background:none;border:0;padding:0}
+  .ok{color:var(--nvidia-green)} .warn{color:var(--warn)} .bad{color:var(--bad)} .new{color:var(--new-blue)} .planned{color:var(--runai-purple)}
+  .badge{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:999px;border:1px solid;margin-right:6px;white-space:nowrap}
+  .b-exists{color:var(--nvidia-green);border-color:var(--nvidia-green)} .b-new{color:var(--new-blue);border-color:var(--new-blue)} .b-planned{color:var(--runai-purple);border-color:var(--runai-purple)}
+  .legend{color:var(--text-dim);font-size:13px;margin-top:8px}
+  svg{width:100%;height:auto;display:block;font-family:'Inter',sans-serif} svg text{fill:var(--text)}
+  svg .box{fill:var(--bg-card);stroke-width:1.4} svg .exists{stroke:var(--text-dim)} svg .nw{stroke:var(--new-blue)} svg .pl{stroke:var(--runai-purple);stroke-dasharray:5 3}
+  svg .tag{font-size:10px;font-weight:600} svg .tag.exists{fill:var(--nvidia-green)} svg .tag.nw{fill:var(--new-blue)} svg .tag.pl{fill:var(--runai-purple)}
+  svg .label{font-size:13px;fill:var(--text-bright)} svg .sub{font-size:11px;fill:var(--text-dim)}
+  svg .arrow{fill:none;stroke:var(--text-dim);stroke-width:1.4} svg .arrow.cfg{stroke-dasharray:4 3} svg .arrow.hot{stroke:var(--nvidia-green)} svg .arrow.cold{stroke:var(--warn)} svg .arrow.int{stroke:var(--new-blue);stroke-dasharray:2 3}
+  svg .alabel{font-size:11px;fill:var(--text-dim)} svg .alabel.hot{fill:var(--nvidia-green)} svg .alabel.cold{fill:var(--warn)} svg .alabel.int{fill:var(--new-blue)}
+  svg .life{stroke:var(--border);stroke-width:1;stroke-dasharray:3 3}
+  svg .step{font-size:11px;font-weight:700;fill:var(--bg)} svg .stepbg{fill:var(--nvidia-green)} svg .stepbg.int{fill:var(--new-blue)} svg .stepbg.cold{fill:var(--warn)} svg .stepbg.bad{fill:var(--bad)}
+  svg .group{fill:none;stroke:var(--border);stroke-dasharray:6 4}
+  svg .mapbox{fill:var(--code-bg);stroke:var(--border)}
+  .remember{border-left:4px solid var(--nvidia-green);font-style:italic}
+  footer{color:var(--text-dim);font-size:12px;text-align:center;padding:30px 0 50px;border-top:1px solid var(--border)}
+  ul.plain{margin:6px 0 0 18px;padding:0} ul.plain li{margin:5px 0}
+</style></head>
+<body>
+<header>
+  <div><div class="brand">NVIDIA · RUN:AI · INFERENCE ENDPOINTS</div><div class="title">Knative · Inference</div></div>
+  <nav><a href="#why" data-tab="why">Why not as-is</a> <a href="#options" data-tab="options">Options & KServe</a> <a href="#arch" data-tab="arch">Option A · flows</a> <a href="#abilities" data-tab="abilities">Keeps / loses</a> <a href="#risks" data-tab="risks">Changes & effort</a> <a href="#mapping" data-tab="mapping">API → CRD</a> &nbsp;|&nbsp; <a class="sib" href="index.html">⌂ Start</a> <a class="sib" href="lws.html">LWS</a> <a class="sib" href="nimservice.html">NIMService</a> <button id="theme">Light / dark</button></nav>
+</header>
+<main>
+
+<section id="mapping">
+  <div class="eyebrow">Per-workload design note · 07 October 2026 · point of view, not a decision</div>
+  <h1>Knative behind the Endpoint Picker:<br>keep the engine, share the steering wheel</h1>
+  <table><thead><tr><th style="width:24%">InferenceEndpoint.spec field</th><th style="width:26%">Source in the Run:ai workload API</th><th style="width:11%">Who fills it</th><th>Mapping rule</th></tr></thead><tbody><tr><td colspan="4" style="background:var(--bg-card);color:var(--text-bright);font-weight:600">spec.workload</td></tr><tr><td style='padding-left:22px'><code>workload.selector.matchLabels</code></td><td>resolved Knative Service → Route → latest ready Revision <span class='planned'>🔜</span></td><td>Run:ai</td><td>Option A: <code>serving.knative.dev/revision=&lt;name&gt;</code>, one pool per revision, weights mirrored from the Knative Route. Option B: Knative emits the pool itself. Neither exists in v1alpha1.</td></tr><tr><td style='padding-left:22px'><code>workload.port</code></td><td><code>spec.servingPort.container</code> is <strong>not</strong> used <span class='planned'>🔜</span></td><td>Run:ai</td><td>Must be queue-proxy <code>8012</code>. queue-proxy fronts oauth2-proxy (4180) and the model and reports concurrency to KPA. Using the container port breaks accounting and auth.</td></tr><tr><td colspan="4" style="background:var(--bg-card);color:var(--text-bright);font-weight:600">spec.routing</td></tr><tr><td style='padding-left:22px'><code>routing.gatewayRef.name</code></td><td>cluster setting <code>gatewayName</code></td><td>Admin</td><td>With <code>clusterLocalAccessOnly: true</code> the admin must pick an internal-only Gateway.</td></tr><tr><td style='padding-left:22px'><code>routing.gatewayRef.namespace</code></td><td>cluster setting <code>gatewayNamespace</code></td><td>Admin</td><td>Defaults to the endpoint namespace.</td></tr><tr><td style='padding-left:22px'><code>routing.hostnames[]</code></td><td>resolved Knative URL host (Knative generates it from name + namespace + domain)</td><td>Run:ai</td><td>Clients keep the same hostname after cutover. <code>spec.exposedUrls[]</code> are not mapped; they stay on the Knative path.</td></tr><tr><td colspan="4" style="background:var(--bg-card);color:var(--text-bright);font-weight:600">spec.epp</td></tr><tr><td style='padding-left:22px'><code>epp.profile</code></td><td>cluster EPP policy</td><td>Admin</td><td><code>gie-v1.5</code>, upstream image. Option A keeps EPP unchanged; the cold-path fallback is a Gateway feature.</td></tr><tr><td style='padding-left:22px'><code>epp.image</code></td><td>cluster EPP policy</td><td>Admin</td><td>Omitted; pinned by the profile. No fork needed for Option A.</td></tr><tr><td style='padding-left:22px'><code>epp.scheduling.scorers[]</code></td><td>cluster EPP policy</td><td>Admin</td><td>Scorers scrape the model metrics port on the Pod IP, not 8012.</td></tr><tr><td style='padding-left:22px'><code>epp.scheduling.profiles[] · defaultProfile · activeProfile</code></td><td>—</td><td>—</td><td>Not used for Knative.</td></tr><tr><td colspan="4" style="background:var(--bg-card);color:var(--text-bright);font-weight:600">spec.rewrites[]</td></tr><tr><td style='padding-left:22px'><code>rewrites[].model</code></td><td>— (not in today's API)</td><td>User (advanced, 🔜)</td><td>Must not be combined with Knative revision traffic split for the same cutover; they split on different axes.</td></tr><tr><td style='padding-left:22px'><code>rewrites[].targets[].model · weight</code></td><td>— (not in today's API)</td><td>User (advanced, 🔜)</td><td>Same caveat.</td></tr><tr><td colspan="4" style="background:var(--bg-card);color:var(--text-bright);font-weight:600">spec.objectives[] <span class="planned">🔜 PLANNED</span></td></tr><tr><td style='padding-left:22px'><code>objectives[].model</code></td><td>— (not in today's API)</td><td>User / admin 🔜</td><td>Model name the lane applies to; usually the same names as <code>rewrites[].model</code>.</td></tr><tr><td style='padding-left:22px'><code>objectives[].priority</code></td><td>— (not in today's API; candidate: a new <code>servingPort.priority</code> or project-level policy)</td><td>User / admin 🔜</td><td>Higher wins when the pool is saturated; EPP sheds or queues lower lanes first. Renders one <code>InferenceObjective</code> per entry. Ownership (user vs admin) still to decide.</td></tr></tbody></table>
+  <p class="caption"><strong>API fields with no destination in the new CRD:</strong> <code>spec.servingPort.protocol</code> (grpc out of scope), <code>authorizationType / users / groups</code> (stay in the revision Pod sidecar), <code>spec.autoscaling.*</code> (stays in Knative; scale-to-zero needs the Activator fallback or Option B), <code>spec.servingConfiguration.requestTimeoutSeconds</code> (route timeout is hard-coded 300 s today; needs <code>routing.requestTimeout</code> 🔜), <code>spec.exposedUrls[]</code>.</p>
+</section>
+
+<section id="why">
+  <div class="eyebrow">01 · Why EPP cannot simply be bolted onto Knative</div>
+  <h2>Knative already owns routing, activation and revisions. GIE wants the same seat.</h2>
+  <div class="card"><svg viewBox="0 0 1080 440" role="img" aria-label="Who picks the Pod and what happens at zero: Knative today vs GIE"><defs>
+  <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--text-dim)"/></marker>
+  <marker id="mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--nvidia-green)"/></marker>
+  <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--new-blue)"/></marker>
+  <marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--warn)"/></marker>
+</defs>
+  <!-- LEFT: Knative today -->
+  <text x="270" y="22" text-anchor="middle" class="label" font-weight="600">Knative today · who picks the Pod</text>
+  <rect x="160" y="40" width="220" height="40" rx="6" class="box exists"/><text x="270" y="65" text-anchor="middle" class="label">Knative ingress</text>
+  <rect x="160" y="100" width="220" height="40" rx="20" fill="var(--bg-card)" stroke="var(--text-dim)"/><text x="270" y="125" text-anchor="middle" class="label">revision has ready Pods?</text>
+  <path d="M270 80 V100" class="arrow" marker-end="url(#mg)"/>
+  <path d="M160 120 H80 V170" class="arrow cold" marker-end="url(#mc)"/><text x="20" y="158" class="alabel cold">no (scaled to zero)</text>
+  <rect x="20" y="170" width="200" height="78" rx="6" class="box exists"/><text x="120" y="190" text-anchor="middle" class="label">Activator</text><text x="120" y="208" text-anchor="middle" class="sub">holds the request</text><text x="120" y="224" text-anchor="middle" class="sub">asks KPA: scale 0 → 1</text><text x="120" y="240" text-anchor="middle" class="sub">forwards to the first ready Pod</text>
+  <path d="M380 120 H460 V170" class="arrow hot" marker-end="url(#mh)"/><text x="470" y="158" class="alabel hot">yes</text>
+  <rect x="320" y="170" width="220" height="78" rx="6" class="box exists"/><text x="430" y="190" text-anchor="middle" class="label">Revision Service</text><text x="430" y="208" text-anchor="middle" class="sub">kube-proxy: RANDOM per connection</text><text x="430" y="224" text-anchor="middle" class="sub">load-blind, cache-blind</text><text x="430" y="240" text-anchor="middle" class="sub">50 % / 50 %</text>
+  <rect x="80" y="300" width="140" height="44" rx="12" class="box exists"/><text x="150" y="318" text-anchor="middle" class="label">Pod A</text><text x="150" y="334" text-anchor="middle" class="sub">queue 8 · KV 85 %</text>
+  <rect x="330" y="300" width="140" height="44" rx="12" class="box exists"/><text x="400" y="318" text-anchor="middle" class="label">Pod B</text><text x="400" y="334" text-anchor="middle" class="sub">queue 2 · KV 40 %</text>
+  <path d="M120 248 L140 300" class="arrow cold" marker-end="url(#mc)"/><text x="40" y="280" class="alabel cold">wake-up works ✓</text>
+  <path d="M400 248 L170 300" class="arrow hot" stroke-dasharray="3 3" marker-end="url(#mh)"/><path d="M430 248 L400 300" class="arrow hot" stroke-dasharray="3 3" marker-end="url(#mh)"/>
+  <text x="270" y="372" text-anchor="middle" class="sub">Pod pick INSIDE Knative, in two places. Neither looks at load, but zero is handled.</text>
+
+  <!-- divider -->
+  <path d="M560 30 V400" class="life"/>
+
+  <!-- RIGHT: GIE -->
+  <text x="820" y="22" text-anchor="middle" class="label" font-weight="600">GIE · who picks the Pod</text>
+  <rect x="690" y="40" width="200" height="40" rx="6" class="box nw"/><text x="790" y="54" text-anchor="middle" class="tag nw">🆕 NEW</text><text x="790" y="71" text-anchor="middle" class="label">Gateway + HTTPRoute</text>
+  <rect x="900" y="40" width="170" height="40" rx="6" class="box nw"/><text x="985" y="54" text-anchor="middle" class="tag nw">🆕 NEW</text><text x="985" y="71" text-anchor="middle" class="label">EPP</text>
+  <path d="M890 55 H900" class="arrow" marker-end="url(#mg)"/><path d="M900 68 H890" class="arrow" marker-end="url(#mg)"/>
+  <rect x="690" y="100" width="380" height="40" rx="20" fill="var(--bg-card)" stroke="var(--text-dim)"/><text x="880" y="125" text-anchor="middle" class="label">InferencePool has ready Pods?</text>
+  <path d="M880 80 V100" class="arrow" marker-end="url(#mg)"/>
+  <path d="M690 120 H640 V170" class="arrow bad" marker-end="url(#mg)"/><text x="582" y="158" class="alabel bad">no (scaled to zero)</text>
+  <rect x="580" y="170" width="200" height="78" rx="6" fill="none" stroke="var(--bad)" stroke-dasharray="4 3"/><text x="680" y="190" text-anchor="middle" class="label" style="fill:var(--bad)">nothing</text><text x="680" y="208" text-anchor="middle" class="sub" style="fill:var(--bad)">EPP has no Pod to return</text><text x="680" y="224" text-anchor="middle" class="sub" style="fill:var(--bad)">nothing calls the Activator</text><text x="680" y="240" text-anchor="middle" class="sub" style="fill:var(--bad)">Gateway → 5xx</text>
+  <path d="M1070 120 H1060 V170" class="arrow hot" marker-end="url(#mh)"/><text x="985" y="158" class="alabel hot">yes</text>
+  <rect x="800" y="170" width="270" height="78" rx="6" class="box nw"/><text x="935" y="190" text-anchor="middle" class="label">EPP scoring, per request</text><text x="935" y="208" text-anchor="middle" class="sub">reads /metrics of every Pod in the pool</text><text x="935" y="224" text-anchor="middle" class="sub">queue×30 + kvCache×20 + prefixCache×10</text><text x="935" y="240" text-anchor="middle" class="sub">→ ONE Pod IP:port</text>
+  <rect x="720" y="300" width="140" height="44" rx="12" class="box exists"/><text x="790" y="318" text-anchor="middle" class="label">Pod A</text><text x="790" y="334" text-anchor="middle" class="sub">queue 8 · KV 85 % → 10</text>
+  <rect x="920" y="300" width="140" height="44" rx="12" class="box exists"/><text x="990" y="318" text-anchor="middle" class="label">Pod B</text><text x="990" y="334" text-anchor="middle" class="sub">queue 2 · KV 40 % → 50</text>
+  <path d="M960 248 L990 300" class="arrow hot" marker-end="url(#mh)"/><text x="1000" y="280" class="alabel hot">picks B ✓</text>
+  <path d="M900 248 L800 300" class="arrow" stroke-dasharray="2 4"/><text x="740" y="280" class="alabel">not chosen</text>
+  <text x="680" y="280" text-anchor="middle" class="alabel bad">no wake-up ✗</text>
+  <text x="820" y="372" text-anchor="middle" class="sub">Pod pick OUTSIDE the stack, from live load. But at zero there is no fallback, and EPP must be the HTTPRoute backend.</text>
+
+  <!-- conflict banner -->
+  <rect x="20" y="396" width="1040" height="36" rx="6" fill="none" stroke="var(--bad)" stroke-dasharray="4 3"/>
+  <text x="540" y="411" text-anchor="middle" class="sub" style="fill:var(--bad)">Conflict 1: both want to say "this Pod"; Knative writes the HTTPRoute, GIE needs to be its backend.</text>
+  <text x="540" y="426" text-anchor="middle" class="sub" style="fill:var(--bad)">Conflict 2: Knative has a wake-up path at zero; a plain InferencePool has none. Option A fills that red box with a Gateway failover to the Activator.</text>
+</svg>
+    <p class="caption">Same two Pods, same load, on both sides. Left: Knative picks blindly but handles zero through the Activator. Right: GIE (Gateway API Inference Extension) picks from live load but has nothing to answer when the pool is empty. The red box is the hole Option A plugs with a Gateway backend failover to the Activator.</p>
+    <div class="legend"><span class="badge b-new">🆕 NEW</span> rendered by the InferenceEndpoint controller today · <span class="badge b-planned">🔜 PLANNED</span> proposed, not built · <span class="ok">green</span> request path · <span class="warn">orange</span> cold / fallback path · <span class="new">blue dotted</span> internal · dashed grey = config / metrics</div>
+  </div>
+
+  <h3>The four structural conflicts</h3>
+  <table><thead><tr><th style="width:6%">#</th><th style="width:26%">Conflict</th><th>Why it blocks a plain InferenceEndpoint</th><th style="width:26%">What would fix it</th></tr></thead><tbody>
+    <tr><td>1</td><td>Route ownership</td><td>Knative reconciles its own Ingress / HTTPRoute from the Route object and overwrites foreign edits. We cannot point its backend at an InferencePool.</td><td>Knative learns the InferencePool backend kind (<strong>upstream change</strong>), or we add a <em>second</em> route on a second hostname.</td></tr>
+    <tr><td>2</td><td>Scale to zero</td><td>A pool is a Pod selector. At zero it is empty and EPP has nothing to return; nothing calls the Activator.</td><td>Gateway backend failover to the Activator (our hack, upstream EPP untouched), or Knative keeps routing at zero (upstream).</td></tr>
+    <tr><td>3</td><td>Revisions</td><td>Knative splits traffic by revision percentage, tags and gradual rollout. A pool has no notion of a revision.</td><td>One pool per revision with mirrored weights (fragile), or Knative emits per-revision pools (upstream).</td></tr>
+    <tr><td>4</td><td>Accounting and auth in queue-proxy</td><td>KPA scales on concurrency reported by queue-proxy; the oauth2-proxy sits behind it. Routing to the model port bypasses both.</td><td>Pool target port = 8012, always. Solvable on our side.</td></tr>
+  </tbody></table>
+  <p class="caption">Conflict 4 is ours to solve. Conflicts 1 to 3 are Knative's design, and every way around them is either an upstream change or a re-implementation of Knative behaviour outside Knative.</p>
+
+  <div class="card onething"><strong>🔧 If you only do one thing:</strong> accept the premise before choosing an option: <em>with Knative in the picture, EPP needs either a change in Knative or a second front door that re-implements part of Knative.</em> The options tab is about which price to pay, or whether to avoid Knative for EPP-routed workloads altogether.</div>
+</section>
+
+<section id="options">
+  <div class="eyebrow">02 · Options · keep Knative, change Knative, or do not use Knative for EPP-routed serving</div>
+  <h2>First, what KServe is: one CRD family, three stacks</h2>
+  <div class="card"><svg viewBox="0 0 1080 520" role="img" aria-label="KServe deployment modes and their stacks"><defs>
+  <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--text-dim)"/></marker>
+  <marker id="mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--nvidia-green)"/></marker>
+  <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--new-blue)"/></marker>
+  <marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--warn)"/></marker>
+</defs>
+  <rect x="390" y="10" width="300" height="56" rx="8" class="box exists"/><text x="540" y="32" text-anchor="middle" class="label" font-weight="600">KServe</text><text x="540" y="52" text-anchor="middle" class="sub">CNCF model-serving layer · CRDs: InferenceService, LLMInferenceService</text>
+  <path d="M540 66 V90 H180 V110" class="arrow" marker-end="url(#mg)"/><path d="M540 90 V110" class="arrow" marker-end="url(#mg)"/><path d="M540 90 H900 V110" class="arrow" marker-end="url(#mg)"/>
+  <text x="180" y="104" text-anchor="middle" class="alabel">deploymentMode: Serverless</text>
+  <text x="540" y="104" text-anchor="middle" class="alabel">deploymentMode: RawDeployment</text>
+  <text x="900" y="104" text-anchor="middle" class="alabel">kind: LLMInferenceService (alpha)</text>
+
+  <!-- column 1: Serverless -->
+  <rect x="40" y="110" width="280" height="40" rx="6" class="box exists"/><text x="180" y="135" text-anchor="middle" class="label" font-weight="600">1 · Serverless (Knative)</text>
+  <rect x="40" y="166" width="280" height="34" rx="6" class="box exists"/><text x="180" y="188" text-anchor="middle" class="sub">Knative ingress (Kourier / Istio / net-gateway-api)</text>
+  <rect x="40" y="208" width="280" height="34" rx="6" class="box exists"/><text x="180" y="230" text-anchor="middle" class="sub">Activator + KPA · scale to zero · revisions</text>
+  <rect x="40" y="250" width="280" height="34" rx="6" class="box exists"/><text x="180" y="272" text-anchor="middle" class="sub">Knative Service → Revision → Pods</text>
+  <rect x="40" y="292" width="280" height="34" rx="12" class="box exists"/><text x="180" y="314" text-anchor="middle" class="sub">Pod: queue-proxy → (auth) → model server</text>
+  <path d="M180 150 V166" class="arrow"/><path d="M180 200 V208" class="arrow"/><path d="M180 242 V250" class="arrow"/><path d="M180 284 V292" class="arrow"/>
+  <rect x="40" y="345" width="280" height="60" rx="6" fill="none" stroke="var(--bad)" stroke-dasharray="4 3"/><text x="180" y="365" text-anchor="middle" class="sub" style="fill:var(--bad)">EPP: same conflict as our Knative page</text><text x="180" y="381" text-anchor="middle" class="sub" style="fill:var(--bad)">Knative owns the route; needs Option A or B</text><text x="180" y="397" text-anchor="middle" class="sub" style="fill:var(--bad)">= today's Run:ai Inference type, via KServe</text>
+
+  <!-- column 2: RawDeployment -->
+  <rect x="400" y="110" width="280" height="40" rx="6" class="box exists"/><text x="540" y="135" text-anchor="middle" class="label" font-weight="600">2 · RawDeployment (no Knative)</text>
+  <rect x="400" y="166" width="280" height="34" rx="6" class="box exists"/><text x="540" y="188" text-anchor="middle" class="sub">Ingress or Gateway API HTTPRoute (KServe-managed)</text>
+  <rect x="400" y="208" width="280" height="34" rx="6" class="box exists"/><text x="540" y="230" text-anchor="middle" class="sub">HPA (CPU / GPU / custom) or KEDA · minReplicas ≥ 1</text>
+  <rect x="400" y="250" width="280" height="34" rx="6" class="box exists"/><text x="540" y="272" text-anchor="middle" class="sub">Deployment + Service</text>
+  <rect x="400" y="292" width="280" height="34" rx="12" class="box exists"/><text x="540" y="314" text-anchor="middle" class="sub">Pod: (auth sidecar) → model server</text>
+  <path d="M540 150 V166" class="arrow"/><path d="M540 200 V208" class="arrow"/><path d="M540 242 V250" class="arrow"/><path d="M540 284 V292" class="arrow"/>
+  <rect x="400" y="345" width="280" height="60" rx="6" class="box nw"/><text x="540" y="365" text-anchor="middle" class="sub" style="fill:var(--new-blue)">EPP: our InferenceEndpoint, as for LWS</text><text x="540" y="381" text-anchor="middle" class="sub" style="fill:var(--new-blue)">pool selector = Deployment Pod labels</text><text x="540" y="397" text-anchor="middle" class="sub" style="fill:var(--new-blue)">works today · no scale to zero (KEDA HTTP add-on optional)</text>
+
+  <!-- column 3: LLMInferenceService -->
+  <rect x="760" y="110" width="280" height="40" rx="6" class="box pl"/><text x="900" y="135" text-anchor="middle" class="label" font-weight="600">3 · LLMInferenceService (GIE native)</text>
+  <rect x="760" y="166" width="280" height="34" rx="6" class="box pl"/><text x="900" y="188" text-anchor="middle" class="sub">Gateway API HTTPRoute → InferencePool (KServe-managed)</text>
+  <rect x="760" y="208" width="280" height="34" rx="6" class="box pl"/><text x="900" y="230" text-anchor="middle" class="sub">EPP / llm-d scheduler (KServe-managed)</text>
+  <rect x="760" y="250" width="280" height="34" rx="6" class="box pl"/><text x="900" y="272" text-anchor="middle" class="sub">Deployments or LWS · prefill / decode · multi-node</text>
+  <rect x="760" y="292" width="280" height="34" rx="12" class="box exists"/><text x="900" y="314" text-anchor="middle" class="sub">Pod: vLLM (llm-d images)</text>
+  <path d="M900 150 V166" class="arrow"/><path d="M900 200 V208" class="arrow"/><path d="M900 242 V250" class="arrow"/><path d="M900 284 V292" class="arrow"/>
+  <rect x="760" y="345" width="280" height="60" rx="6" class="box pl"/><text x="900" y="365" text-anchor="middle" class="sub" style="fill:var(--runai-purple)">EPP: built in; KServe renders pool + EPP</text><text x="900" y="381" text-anchor="middle" class="sub" style="fill:var(--runai-purple)">our CRD would be redundant for this type</text><text x="900" y="397" text-anchor="middle" class="sub" style="fill:var(--runai-purple)">alpha · verify version before relying on it</text>
+
+  <!-- bottom line -->
+  <text x="540" y="440" text-anchor="middle" class="label">Option A / B ⟷ column 1 · Option C ⟷ column 2 · Option D ⟷ column 3</text>
+  <text x="540" y="462" text-anchor="middle" class="sub">Only column 1 has Knative in the data path. Columns 2 and 3 are Deployment-shaped, so an InferencePool can select their Pods directly.</text>
+  <text x="540" y="482" text-anchor="middle" class="sub">Column 2 is the shortest path to EPP today; column 3 is where the ecosystem is heading.</text>
+</svg>
+    <p class="caption">KServe does not force Knative. The deployment mode picks the stack under the same user-facing CRD. The red, blue and purple boxes say what EPP integration means in each column.</p>
+    <div class="legend"><span class="badge b-new">🆕 NEW</span> rendered by the InferenceEndpoint controller today · <span class="badge b-planned">🔜 PLANNED</span> proposed, not built · <span class="ok">green</span> request path · <span class="warn">orange</span> cold / fallback path · <span class="new">blue dotted</span> internal · dashed grey = config / metrics</div>
+  </div>
+
+  <h2 style="margin-top:36px">Four ways to get EPP in front of a Run:ai inference workload</h2>
+  <div class="card"><svg viewBox="0 0 1080 420" role="img" aria-label="Four options"><defs>
+  <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--text-dim)"/></marker>
+  <marker id="mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--nvidia-green)"/></marker>
+  <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--new-blue)"/></marker>
+  <marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--warn)"/></marker>
+</defs>
+  <text x="150" y="22" text-anchor="middle" class="label" font-weight="600">A · Knative + fallback hack</text>
+  <rect x="40" y="40" width="220" height="36" rx="6" class="box pl"/><text x="150" y="63" text-anchor="middle" class="label">Gateway (failover) + EPP (upstream)</text>
+  <rect x="40" y="96" width="220" height="36" rx="6" class="box exists"/><text x="150" y="119" text-anchor="middle" class="label">Activator (fallback backendRef)</text>
+  <rect x="40" y="152" width="220" height="36" rx="12" class="box exists"/><text x="150" y="175" text-anchor="middle" class="label">Pod: queue-proxy → model</text>
+  <path d="M150 76 V96" class="arrow cold" marker-end="url(#mc)"/><path d="M150 132 V152" class="arrow" marker-end="url(#mg)"/><path d="M60 76 L60 152" class="arrow hot" marker-end="url(#mh)"/>
+  <text x="150" y="215" text-anchor="middle" class="sub">no upstream · loses Knative routing</text>
+  <text x="150" y="231" text-anchor="middle" class="sub">features · M spike, L prod</text>
+
+  <text x="410" y="22" text-anchor="middle" class="label" font-weight="600">B · Knative upstream</text>
+  <rect x="300" y="40" width="220" height="36" rx="6" class="box exists"/><text x="410" y="63" text-anchor="middle" class="label">Knative ingress (net-gateway-api)</text>
+  <rect x="300" y="96" width="220" height="36" rx="6" class="box pl"/><text x="410" y="119" text-anchor="middle" class="label">InferencePool backend 🔜</text>
+  <rect x="300" y="152" width="220" height="36" rx="12" class="box exists"/><text x="410" y="175" text-anchor="middle" class="label">Pod: queue-proxy → model</text>
+  <path d="M410 76 V96" class="arrow hot" marker-end="url(#mh)"/><path d="M410 132 V152" class="arrow hot" marker-end="url(#mh)"/>
+  <text x="410" y="215" text-anchor="middle" class="sub">keeps everything · needs Knative</text>
+  <text x="410" y="231" text-anchor="middle" class="sub">PR + release · quarters</text>
+
+  <text x="670" y="22" text-anchor="middle" class="label" font-weight="600">C · KServe RawDeployment</text>
+  <rect x="560" y="40" width="220" height="36" rx="6" class="box nw"/><text x="670" y="63" text-anchor="middle" class="label">Gateway + EPP (as LWS)</text>
+  <rect x="560" y="96" width="220" height="36" rx="6" class="box nw"/><text x="670" y="119" text-anchor="middle" class="label">InferencePool → Deployment Pods</text>
+  <rect x="560" y="152" width="220" height="36" rx="12" class="box exists"/><text x="670" y="175" text-anchor="middle" class="label">Pod: model (+ auth sidecar)</text>
+  <path d="M670 76 V96" class="arrow hot" marker-end="url(#mh)"/><path d="M670 132 V152" class="arrow hot" marker-end="url(#mh)"/>
+  <text x="670" y="215" text-anchor="middle" class="sub">no Knative · EPP works today</text>
+  <text x="670" y="231" text-anchor="middle" class="sub">HPA / KEDA · no Activator</text>
+
+  <text x="930" y="22" text-anchor="middle" class="label" font-weight="600">D · KServe LLMInferenceService</text>
+  <rect x="820" y="40" width="220" height="36" rx="6" class="box pl"/><text x="930" y="63" text-anchor="middle" class="label">KServe-managed Gateway + EPP</text>
+  <rect x="820" y="96" width="220" height="36" rx="6" class="box pl"/><text x="930" y="119" text-anchor="middle" class="label">KServe-managed InferencePool</text>
+  <rect x="820" y="152" width="220" height="36" rx="12" class="box exists"/><text x="930" y="175" text-anchor="middle" class="label">Pods (P/D, multi-node)</text>
+  <path d="M930 76 V96" class="arrow hot" marker-end="url(#mh)"/><path d="M930 132 V152" class="arrow hot" marker-end="url(#mh)"/>
+  <text x="930" y="215" text-anchor="middle" class="sub">GIE native · KServe owns the CRs</text>
+  <text x="930" y="231" text-anchor="middle" class="sub">alpha · overlaps our controller</text>
+
+  <rect x="40" y="270" width="1000" height="120" rx="10" class="group"/>
+  <text x="60" y="294" class="label">Where our InferenceEndpoint fits</text>
+  <text x="60" y="316" class="sub">A: renders route (pool + fallback backendRef) + pool + upstream EPP.   B: renders pool + EPP only; Knative owns the route.</text>
+  <text x="60" y="334" class="sub">C: renders route + pool + EPP exactly like LWS / NIM; the Deployment selector is the pool selector.</text>
+  <text x="60" y="352" class="sub">D: redundant. KServe renders the same objects; our CRD would wrap or defer to KServe's.</text>
+  <text x="60" y="376" class="sub">Common to all: workload.port must be the port that fronts accounting / auth; scorers need vLLM-style metrics.</text>
+</svg>
+    <p class="caption">A and B keep Knative. C and D swap the serving stack for KServe, which can run <em>without</em> Knative. The moment Knative is out of the path, EPP works the way it already does for LWS.</p>
+    <div class="legend"><span class="badge b-new">🆕 NEW</span> rendered by the InferenceEndpoint controller today · <span class="badge b-planned">🔜 PLANNED</span> proposed, not built · <span class="ok">green</span> request path · <span class="warn">orange</span> cold / fallback path · <span class="new">blue dotted</span> internal · dashed grey = config / metrics</div>
+  </div>
+
+  <h3>KServe in one paragraph</h3>
+  <p>KServe is the CNCF model-serving layer that sits <em>above</em> the runtime. Its <code>InferenceService</code> CRD has a <strong>deployment mode</strong> switch: <code>Serverless</code> uses Knative underneath (revisions, Activator, scale to zero), <code>RawDeployment</code> uses a plain Kubernetes Deployment + Service + HPA with no Knative at all. Newer KServe versions add <code>LLMInferenceService</code>, an LLM-specific CRD that wires Gateway API and the GIE scheduler (InferencePool + EPP) natively, including prefill/decode and multi-node layouts. Verify the exact version matrix before committing; the mode names are stable, the LLM CRD is alpha.</p>
+
+  <h3>Side by side</h3>
+  <table><thead><tr><th style="width:20%"></th><th>A · Knative + fallback</th><th>B · Knative upstream</th><th>C · KServe RawDeployment</th><th>D · KServe LLMInferenceService</th></tr></thead><tbody>
+    <tr><td>Knative in the path</td><td>yes</td><td>yes</td><td class="ok">no</td><td class="ok">no</td></tr>
+    <tr><td>EPP works without upstream change</td><td class="ok">yes, upstream image; needs a Gateway with backend failover</td><td class="bad">no</td><td class="ok">yes, today</td><td class="ok">yes, KServe does it</td></tr>
+    <tr><td>Scale to zero</td><td class="ok">kept via Gateway failover → Activator</td><td class="ok">native</td><td class="warn">only with KEDA HTTP add-on (its interceptor buffers like Activator) or minReplicas ≥ 1</td><td class="warn">same as C</td></tr>
+    <tr><td>Request-driven autoscaling</td><td class="ok">KPA via queue-proxy</td><td class="ok">KPA</td><td class="warn">HPA on CPU/GPU or custom metrics; KEDA on queue depth</td><td class="warn">same as C</td></tr>
+    <tr><td>Revision split / canary</td><td class="warn">mirrored by us</td><td class="ok">native</td><td class="warn">KServe canary on RawDeployment is ingress-weight based; verify with Gateway API</td><td class="warn">model-name rewrites only</td></tr>
+    <tr><td>Auth sidecar</td><td class="ok">behind queue-proxy</td><td class="ok">same</td><td class="ok">Run:ai composer can add the sidecar as for LWS</td><td class="warn">KServe owns the Pod template; sidecar injection to verify</td></tr>
+    <tr><td>Who owns route / pool / EPP</td><td>our controller</td><td>Knative (route), ours (pool, EPP)</td><td>our controller, same as LWS</td><td class="warn">KServe; our CRD becomes a wrapper or is dropped for this type</td></tr>
+    <tr><td>Fit with the current CRD</td><td class="warn">needs Knative backend mode</td><td class="warn">needs "pool-only" mode</td><td class="ok">no change: selector + port</td><td class="bad">overlap, two controllers rendering the same kinds</td></tr>
+    <tr><td>Run:ai composer change</td><td>none</td><td>annotation on ksvc</td><td class="warn">new composer: Inference → KServe InferenceService (RawDeployment)</td><td class="warn">new composer: Inference → LLMInferenceService</td></tr>
+    <tr><td>Effort to demo</td><td>S</td><td>S (fork) / XL (merge)</td><td class="ok">M (composer) + 0 (endpoint)</td><td>M to L, plus KServe install</td></tr>
+    <tr><td>Maturity</td><td>hack</td><td>clean, far</td><td class="ok">GA path in KServe</td><td class="warn">alpha</td></tr>
+  </tbody></table>
+
+  <h3>"If we do not pick Knative, do we get EPP for free?"</h3>
+  <div class="card">
+<pre><code>Yes, for routing.  A RawDeployment inference workload is:  Deployment → Pods (+ optional auth sidecar) + Service + HPA
+That is exactly the shape LWS has today, minus the leader/worker split. So:
+  workload.selector  = the Deployment's Pod labels          ✓ same as LWS
+  workload.port      = model port, or 4180 if protected       ✓ same rule as LWS
+  routing / epp      = unchanged                              ✓
+  Before / After     = the LWS pictures with "leader" replaced by "replica"
+
+No, for the things Knative gave you:
+  scale to zero + request buffering   ✗ unless KEDA HTTP add-on (interceptor) or minReplicas ≥ 1
+  concurrency-based autoscaling       ✗ HPA/KEDA on other signals
+  revision traffic split, tags        ✗ model-name rewrites are the only split left</code></pre>
+    <p class="caption">So the real question is not "Knative or EPP". It is "do these workloads need scale-to-zero and revision rollout badly enough to pay for A or B".</p>
+  </div>
+
+  <h3>Recommendation (point of view)</h3>
+  <table><thead><tr><th style="width:30%">Workload profile</th><th>Pick</th></tr></thead><tbody>
+    <tr><td>Always-on LLM serving, GPU pinned, latency matters</td><td class="ok"><strong>C</strong>: KServe RawDeployment (or a plain Run:ai Deployment-based inference type). EPP today, no Knative, same code path as LWS.</td></tr>
+    <tr><td>Bursty, many small models, idle most of the day</td><td>Keep Knative <strong>without</strong> EPP for now; propose <strong>B</strong> upstream. Scale-to-zero is worth more than smart Pod picking here.</td></tr>
+    <tr><td>Need both today</td><td class="warn"><strong>A</strong> as a time-boxed spike, single revision, feature-flagged.</td></tr>
+    <tr><td>Prefill/decode, multi-node LLM at scale</td><td>Watch <strong>D</strong>. Do not build on it until it leaves alpha; decide then whether our CRD wraps it or steps aside.</td></tr>
+  </tbody></table>
+  <div class="card onething" style="margin-top:18px"><strong>🔧 If you only do one thing:</strong> split the Inference workload type by autoscaling need. Knative-backed for scale-to-zero, Deployment-backed (KServe Raw or native) for EPP. One type, two stacks, chosen by a field the user already fills: <code>spec.autoscaling.minReplicas</code> = 0 or not.</div>
+</section>
+
+<section id="arch">
+  <div class="eyebrow">01 · Architecture and request flows · before / after (Option A)</div>
+  <h2>Before: Knative picks the Pod and wakes it. After: EPP picks when warm; the Gateway fails over to the Activator when cold.</h2>
+
+  <h3>Before · Knative serving as Run:ai composes it today</h3>
+  <div class="card"><svg viewBox="0 0 1080 470" role="img" aria-label="Knative serving today"><defs>
+  <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--text-dim)"/></marker>
+  <marker id="mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--nvidia-green)"/></marker>
+  <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--new-blue)"/></marker>
+  <marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--warn)"/></marker>
+</defs>
+  <rect x="440" y="10" width="200" height="44" rx="6" class="box exists"/><text x="540" y="44" text-anchor="middle" class="label">Client</text>
+  <path d="M540 54 V92" class="arrow hot" marker-end="url(#mh)"/><text x="552" y="78" class="alabel hot">① HTTPS https://model.ns.example.com/v1/…</text>
+  <rect x="340" y="92" width="400" height="50" rx="6" class="box exists"/><text x="540" y="126" text-anchor="middle" class="label">Knative ingress (Kourier / Istio / net-gateway-api) · host → Route · TLS</text>
+  <rect x="340" y="170" width="400" height="44" rx="22" fill="var(--bg-card)" stroke="var(--text-dim)"/><text x="540" y="197" text-anchor="middle" class="label">② revision has ready Pods?  (Knative decides)</text>
+  <path d="M540 142 V170" class="arrow" marker-end="url(#mg)"/>
+  <path d="M340 192 H200 V250" class="arrow cold" marker-end="url(#mc)"/><text x="60" y="232" class="alabel cold">no → cold / buffered path</text>
+  <rect x="60" y="250" width="280" height="56" rx="6" class="box exists"/><text x="200" y="286" text-anchor="middle" class="label">Activator · buffers · asks KPA for capacity</text>
+  <path d="M740 192 H880 V250" class="arrow hot" marker-end="url(#mh)"/><text x="760" y="232" class="alabel hot">yes → warm path</text>
+  <rect x="740" y="250" width="280" height="56" rx="6" class="box exists"/><text x="880" y="286" text-anchor="middle" class="label">Revision private Service · random pick</text>
+  <rect x="60" y="340" width="280" height="44" rx="6" class="box exists"/><text x="200" y="374" text-anchor="middle" class="label">KPA autoscaler · 0 → N → 0</text>
+  <path d="M200 306 V340" class="arrow cfg" marker-end="url(#mg)"/><text x="210" y="328" class="alabel">report demand</text>
+  <rect x="380" y="340" width="320" height="100" rx="12" class="box exists"/><text x="540" y="378" text-anchor="middle" class="label">Revision Pod</text><text x="540" y="398" text-anchor="middle" class="sub">queue-proxy :8012 → oauth2-proxy* :4180 → model :container</text><text x="540" y="416" text-anchor="middle" class="sub">queue-proxy counts concurrency and reports to KPA</text>
+  <path d="M340 290 L380 360" class="arrow cold" marker-end="url(#mc)"/><text x="300" y="320" class="alabel cold">③ forward when ready</text>
+  <path d="M740 290 L700 360" class="arrow hot" marker-end="url(#mh)"/><text x="690" y="320" class="alabel hot">③ one Pod</text>
+  <path d="M200 384 V420 H380" class="arrow cfg" marker-end="url(#mg)"/><text x="210" y="412" class="alabel">scale Deployment</text>
+  <text x="540" y="462" text-anchor="middle" class="sub">Knative Service → Route → Revision(s): Knative owns routing, activation, revision split and autoscaling</text>
+</svg>
+    <p class="caption">Knative already has a smart front door: it buffers at zero, scales on concurrency, and splits traffic by revision. The only blind spot is the final Pod pick, which is random.</p>
+    <div class="legend"><span class="badge b-new">🆕 NEW</span> rendered by the InferenceEndpoint controller today · <span class="badge b-planned">🔜 PLANNED</span> proposed, not built · <span class="ok">green</span> request path · <span class="warn">orange</span> cold / fallback path · <span class="new">blue dotted</span> internal · dashed grey = config / metrics</div>
+  </div>
+<pre><code>1. Client sends the request to the Knative URL; the Knative ingress terminates TLS and finds the Route.
+2. Ask: does the revision have ready Pods?
+   → no:  Activator buffers the request and asks KPA for capacity.          <span class="ok">✓ scale from zero</span>
+   → yes: the revision Service picks a Pod at random.                        <span class="warn">⚠ no KV / prefix awareness</span>
+3. Request enters queue-proxy :8012 → oauth2-proxy (if protected) → model.  <span class="ok">✓ accounting + auth</span>
+4. queue-proxy reports concurrency; KPA scales 0 → N → 0.
+5. Response streams back the same way.                                       <span class="ok">✓</span></code></pre>
+
+  <h3>After · Option A, same workload, Gateway + EPP in front</h3>
+  <div class="card"><svg viewBox="0 0 1080 470" role="img" aria-label="Knative Option A architecture"><defs>
+  <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--text-dim)"/></marker>
+  <marker id="mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--nvidia-green)"/></marker>
+  <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--new-blue)"/></marker>
+  <marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--warn)"/></marker>
+</defs>
+      <rect x="440" y="10" width="200" height="44" rx="6" class="box exists"/><text x="540" y="44" text-anchor="middle" class="label">Client</text>
+      <path d="M540 54 V100" class="arrow" marker-end="url(#mg)"/><text x="552" y="82" class="alabel">POST /v1/… Host: model.example.com</text>
+      <rect x="340" y="100" width="400" height="60" rx="6" class="box pl"/><text x="540" y="116" text-anchor="middle" class="tag pl">🔜 PLANNED</text><text x="540" y="134" text-anchor="middle" class="label">Gateway + HTTPRoute [ref:1] · pool primary, Activator fallback</text><text x="540" y="150" text-anchor="middle" class="sub">sets Knative-Serving-Namespace / Knative-Serving-Revision</text>
+      <rect x="800" y="100" width="260" height="60" rx="6" class="box nw"/><text x="930" y="116" text-anchor="middle" class="tag nw">🆕 NEW</text><text x="930" y="134" text-anchor="middle" class="label">EPP, upstream image [ref:2]</text><text x="930" y="150" text-anchor="middle" class="sub">pool = Pods of ONE revision · port 8012</text>
+      <path d="M740 122 H800" class="arrow" marker-end="url(#mg)"/><path d="M800 140 H740" class="arrow" marker-end="url(#mg)"/><text x="744" y="116" class="alabel">ext_proc</text><text x="744" y="156" class="alabel">IP:port</text>
+      <rect x="20" y="100" width="260" height="60" rx="6" class="box pl"/><text x="150" y="116" text-anchor="middle" class="tag pl">🔜 PLANNED</text><text x="150" y="134" text-anchor="middle" class="label">InferenceEndpoint controller [ref:3]</text><text x="150" y="150" text-anchor="middle" class="sub">one pool per revision; watches Knative Route</text>
+      <path d="M280 130 H340" class="arrow cfg" marker-end="url(#mg)"/>
+      <path d="M540 160 V200" class="arrow"/>
+      <rect x="430" y="200" width="220" height="40" rx="20" fill="var(--bg-card)" stroke="var(--text-dim)"/><text x="540" y="225" text-anchor="middle" class="label">pool has endpoints? (Gateway decides)</text>
+      <path d="M430 220 H250 V300" class="arrow hot" marker-end="url(#mh)"/><text x="262" y="260" class="alabel hot">yes → scored Pod IP:8012</text>
+      <rect x="120" y="300" width="260" height="70" rx="12" class="box exists"/><text x="250" y="336" text-anchor="middle" class="label">Revision Pod</text><text x="250" y="354" text-anchor="middle" class="sub">queue-proxy :8012 → oauth2-proxy* :4180 → model</text>
+      <path d="M650 220 H830 V300" class="arrow cold" marker-end="url(#mc)"/><text x="662" y="260" class="alabel cold">no → fallback backendRef: activator-service :8012</text>
+      <rect x="700" y="300" width="260" height="70" rx="6" class="box exists"/><text x="830" y="336" text-anchor="middle" class="label">Activator [ref:4]</text><text x="830" y="354" text-anchor="middle" class="sub">buffers, pokes autoscaler, forwards when ready</text>
+      <path d="M700 335 H380" class="arrow" marker-end="url(#mg)"/><text x="470" y="328" class="alabel">forward after scale-up</text>
+      <rect x="440" y="410" width="200" height="44" rx="6" class="box exists"/><text x="540" y="444" text-anchor="middle" class="label">KPA autoscaler</text>
+      <path d="M250 370 V432 H440" class="arrow cfg" marker-end="url(#mg)"/><text x="262" y="426" class="alabel">concurrency stats</text>
+      <path d="M830 370 V432 H640" class="arrow cfg" marker-end="url(#mg)"/><text x="690" y="426" class="alabel">report demand</text>
+      <path d="M930 160 V260 H380 V300" class="arrow cfg" marker-end="url(#mg)"/><text x="400" y="292" class="alabel">scrape model /metrics on Pod IP (separate port)</text>
+    </svg>
+    <p class="caption">EPP picks the Pod on the warm path through queue-proxy. When the pool has zero endpoints the Gateway itself fails over to a second backendRef, the Activator Service, so Knative's cold path is reused, not rebuilt, and EPP stays the upstream image.</p>
+    <div class="legend"><span class="badge b-new">🆕 NEW</span> rendered by the InferenceEndpoint controller today · <span class="badge b-planned">🔜 PLANNED</span> proposed, not built · <span class="ok">green</span> request path · <span class="warn">orange</span> cold / fallback path · <span class="new">blue dotted</span> internal · dashed grey = config / metrics</div>
+  </div>
+<pre><code>1. Client sends the request to the hostname in routing.hostnames; the Gateway terminates TLS.
+2. Gateway asks EPP over gRPC; the route already carries the Knative namespace / revision headers.
+3. Ask: does the InferencePool have any endpoint?
+   → yes: Gateway asks EPP; EPP scores queue · KV · prefix and returns Pod IP:8012.   <span class="ok">✓ smart pick, still via queue-proxy</span>
+   → no:  Gateway skips EPP and fails over to the Activator Service backendRef :8012. <span class="ok">✓ Knative wakes the revision as today</span>
+4. Gateway forwards the request to that address.
+5. queue-proxy → oauth2-proxy (if protected) → model; KPA accounting unchanged.  <span class="ok">✓</span>
+6. Response streams back through the Gateway. EPP is not in the stream.        <span class="ok">✓</span>
+Never: the model container port, or a Pod of another revision.                 <span class="bad">✗</span></code></pre>
+
+  <h3>Step by step, side by side</h3>
+  <table><thead><tr><th style="width:18%">Step</th><th style="width:28%">Before</th><th style="width:30%">After (Option A)</th><th>Changed?</th></tr></thead><tbody>
+    <tr><td>TLS + host match</td><td>Knative ingress</td><td>Gateway listener + HTTPRoute</td><td>🔁 replaced on the new URL</td></tr>
+    <tr><td>Decide cold vs warm</td><td>Knative ingress / Activator</td><td>Gateway: pool has endpoints or not (backend failover)</td><td>🔁 moved into the Gateway</td></tr>
+    <tr><td>Wake from zero</td><td>Activator + KPA</td><td>Activator + KPA (fallback backendRef)</td><td class="ok">✅ reused</td></tr>
+    <tr><td>Pick a Pod when warm</td><td>revision Service, random</td><td>EPP, scored by queue / KV / prefix</td><td>🔁 the point of the change</td></tr>
+    <tr><td>Which port</td><td>queue-proxy 8012</td><td><code>workload.port</code> = 8012</td><td class="warn">⚠ never the container port</td></tr>
+    <tr><td>Accounting + auth</td><td>queue-proxy → oauth2-proxy</td><td>queue-proxy → oauth2-proxy</td><td class="ok">✅ same</td></tr>
+    <tr><td>Revision split</td><td>Knative Route</td><td>one pool per revision, weights mirrored</td><td class="warn">⚠ re-implemented</td></tr>
+    <tr><td>Burst buffering when warm (TBC &gt; 0)</td><td>Activator</td><td>bypassed</td><td class="bad">❌ lost in Option A</td></tr>
+    <tr><td>Old URL</td><td>Knative ingress</td><td>still Knative ingress</td><td class="ok">✅ parallel until DNS switch</td></tr>
+  </tbody></table>
+
+  <h3>What the endpoint touches, and what it never touches</h3>
+  <table><thead><tr><th style="width:26%">Knative component</th><th style="width:22%">Touched?</th><th>How it stays intact</th></tr></thead><tbody>
+    <tr><td>Knative Service / Route / Revision</td><td class="ok">❌ never patched</td><td>Controller reads the Route status to find revisions; writes nothing to Knative objects.</td></tr>
+    <tr><td>Knative ingress + its HTTPRoute / Ingress</td><td class="ok">❌ untouched</td><td>Keeps serving the Knative URL. Our HTTPRoute is a separate object on a separate hostname.</td></tr>
+    <tr><td>Activator</td><td class="warn">used as a fallback backend</td><td>Not modified, not in the pool. The Gateway routes to it only when the pool has zero endpoints, with the revision headers set by our route filter. Shared infra: a wrong header would misroute, so the controller must derive it from the Route it watches.</td></tr>
+    <tr><td>KPA autoscaler</td><td class="ok">❌ untouched</td><td>Still fed by queue-proxy because the pool targets 8012.</td></tr>
+    <tr><td>Revision Pods</td><td class="ok">❌ no sidecar, no label</td><td>Pool selects on <code>serving.knative.dev/revision</code>, a label Knative already sets. Metrics read on a separate port.</td></tr>
+    <tr><td>oauth2-proxy sidecar</td><td class="ok">✅ preserved</td><td>Behind queue-proxy; intact as long as the port is 8012.</td></tr>
+    <tr><td>Lost abilities</td><td class="bad">see next tab</td><td>Burst buffering, Activator retries, traffic tags, gradual rollout, DomainMapping, auto-TLS are lost or replaced in Option A. Option B keeps them.</td></tr>
+    <tr><td>If EPP dies</td><td>pool <code>failureMode</code></td><td>Must be <code>FailClose</code> in Knative mode: <code>FailOpen</code> would route to an empty pool at zero and never reach Activator.</td></tr>
+  </tbody></table>
+
+  <h3>Detailed sequence · warm path</h3>
+  <div class="card"><svg viewBox="0 0 1080 520" role="img" aria-label="Request flow sequence"><defs>
+  <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--text-dim)"/></marker>
+  <marker id="mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--nvidia-green)"/></marker>
+  <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--new-blue)"/></marker>
+  <marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--warn)"/></marker>
+</defs>
+<rect x="20" y="10" width="130" height="40" rx="6" class="box exists"/>
+<text x="85.0" y="35" text-anchor="middle" class="label">Client</text>
+<rect x="190" y="10" width="150" height="40" rx="6" class="box pl"/>
+<text x="265.0" y="35" text-anchor="middle" class="label">Gateway</text>
+<rect x="380" y="10" width="150" height="40" rx="6" class="box nw"/>
+<text x="455.0" y="28" text-anchor="middle" class="label">EPP</text><text x="455.0" y="42" text-anchor="middle" class="sub">upstream image</text>
+<rect x="570" y="10" width="180" height="40" rx="6" class="box exists"/>
+<text x="660.0" y="28" text-anchor="middle" class="label">Revision Pod</text><text x="660.0" y="42" text-anchor="middle" class="sub">queue-proxy :8012</text>
+<rect x="790" y="10" width="130" height="40" rx="6" class="box exists"/>
+<text x="855.0" y="35" text-anchor="middle" class="label">oauth2-proxy* → model</text>
+<rect x="950" y="10" width="120" height="40" rx="6" class="box exists"/>
+<text x="1010.0" y="35" text-anchor="middle" class="label">KPA</text>
+<path d="M85.0 50 V490" class="life"/>
+<path d="M265.0 50 V490" class="life"/>
+<path d="M455.0 50 V490" class="life"/>
+<path d="M660.0 50 V490" class="life"/>
+<path d="M855.0 50 V490" class="life"/>
+<path d="M1010.0 50 V490" class="life"/>
+<path d="M455.0 85 H660.0" class="arrow cfg" marker-end="url(#mg)"/>
+<text x="465.0" y="79" class="alabel ">0 · continuous: scrape model /metrics on Pod IP (metrics port)</text>
+<path d="M85.0 130 H265.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="95.0" y="124" class="alabel hot">POST /v1/chat/completions · Host model.example.com</text>
+<circle cx="65.0" cy="130" r="9" class="stepbg"/><text x="65.0" y="134" text-anchor="middle" class="step">1</text>
+<path d="M265.0 170 H455.0" class="arrow " marker-end="url(#mg)"/>
+<text x="275.0" y="164" class="alabel ">ext_proc + headers Knative-Serving-Namespace / -Revision</text>
+<circle cx="245.0" cy="170" r="9" class="stepbg"/><text x="245.0" y="174" text-anchor="middle" class="step">2</text>
+<rect x="385.0" y="190" width="140" height="70" rx="6" class="mapbox"/>
+<text x="455.0" y="208" text-anchor="middle" class="sub">pool has ready Pods → warm</text>
+<text x="455.0" y="224" text-anchor="middle" class="sub">score queue · KV · prefix</text>
+<text x="455.0" y="240" text-anchor="middle" class="sub">pick Pod 10.0.3.7</text>
+<circle cx="397.0" cy="190" r="9" class="stepbg"/><text x="397.0" y="194" text-anchor="middle" class="step">3</text>
+<path d="M455.0 285 H265.0" class="arrow " marker-end="url(#mg)"/>
+<text x="275.0" y="279" class="alabel ">destination 10.0.3.7:8012</text>
+<circle cx="475.0" cy="285" r="9" class="stepbg"/><text x="475.0" y="289" text-anchor="middle" class="step">4</text>
+<path d="M265.0 325 H660.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="275.0" y="319" class="alabel hot">forward to queue-proxy :8012</text>
+<circle cx="245.0" cy="325" r="9" class="stepbg"/><text x="245.0" y="329" text-anchor="middle" class="step">5</text>
+<path d="M660.0 365 H855.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="670.0" y="359" class="alabel hot">→ :4180 auth* → model</text>
+<circle cx="640.0" cy="365" r="9" class="stepbg"/><text x="640.0" y="369" text-anchor="middle" class="step">6</text>
+<path d="M660.0 395 H1010.0" class="arrow cfg" marker-end="url(#mg)"/>
+<text x="670.0" y="389" class="alabel ">report concurrency</text>
+<circle cx="640.0" cy="395" r="9" class="stepbg"/><text x="640.0" y="399" text-anchor="middle" class="step">7</text>
+<path d="M855.0 435 H265.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="275.0" y="429" class="alabel hot">SSE stream via queue-proxy</text>
+<circle cx="875.0" cy="435" r="9" class="stepbg"/><text x="875.0" y="439" text-anchor="middle" class="step">8</text>
+<path d="M265.0 470 H85.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="95.0" y="464" class="alabel hot">200 · stream</text>
+<circle cx="285.0" cy="470" r="9" class="stepbg"/><text x="285.0" y="474" text-anchor="middle" class="step">9</text>
+<text x="20" y="505" class="sub">* oauth2-proxy only when authorizationType ≠ public. queue-proxy keeps Knative request accounting intact.</text>
+</svg>
+    <p class="caption">EPP picks the Pod but the request still enters through queue-proxy, so KPA accounting and the auth sidecar are untouched.</p>
+    <div class="legend"><span class="badge b-new">🆕 NEW</span> rendered by the InferenceEndpoint controller today · <span class="badge b-planned">🔜 PLANNED</span> proposed, not built · <span class="ok">green</span> request path · <span class="warn">orange</span> cold / fallback path · <span class="new">blue dotted</span> internal · dashed grey = config / metrics</div>
+  </div>
+<pre><code>0. EPP scrapes model metrics on each revision Pod's metrics port (not 8012).
+1. Client sends the request to the Gateway hostname.
+2. Gateway asks EPP; the route already added the two Knative routing headers.
+3. EPP sees ready Pods, scores them, picks one.
+4. EPP answers with Pod IP:8012.
+5. Gateway forwards to queue-proxy.                                 <span class="ok">✓ Knative accounting preserved</span>
+6. queue-proxy → oauth2-proxy (if protected) → model.               <span class="ok">✓ auth preserved</span>
+7. queue-proxy reports concurrency to KPA as always.
+8. Tokens stream back through queue-proxy and the Gateway.
+9. Client gets 200 and the stream.                                  <span class="ok">✓</span></code></pre>
+
+  <h3>Detailed sequence · cold path (revision at zero)</h3>
+  <div class="card"><svg viewBox="0 0 1080 560" role="img" aria-label="Request flow sequence"><defs>
+  <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--text-dim)"/></marker>
+  <marker id="mh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--nvidia-green)"/></marker>
+  <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--new-blue)"/></marker>
+  <marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="var(--warn)"/></marker>
+</defs>
+<rect x="20" y="10" width="120" height="40" rx="6" class="box exists"/>
+<text x="80.0" y="35" text-anchor="middle" class="label">Client</text>
+<rect x="170" y="10" width="140" height="40" rx="6" class="box pl"/>
+<text x="240.0" y="35" text-anchor="middle" class="label">Gateway</text>
+<rect x="340" y="10" width="140" height="40" rx="6" class="box nw"/>
+<text x="410.0" y="28" text-anchor="middle" class="label">EPP</text><text x="410.0" y="42" text-anchor="middle" class="sub">upstream image</text>
+<rect x="510" y="10" width="150" height="40" rx="6" class="box exists"/>
+<text x="585.0" y="28" text-anchor="middle" class="label">Activator</text><text x="585.0" y="42" text-anchor="middle" class="sub">:8012</text>
+<rect x="690" y="10" width="130" height="40" rx="6" class="box exists"/>
+<text x="755.0" y="28" text-anchor="middle" class="label">Autoscaler</text><text x="755.0" y="42" text-anchor="middle" class="sub">KPA</text>
+<rect x="850" y="10" width="210" height="40" rx="6" class="box exists"/>
+<text x="955.0" y="28" text-anchor="middle" class="label">New Revision Pod</text><text x="955.0" y="42" text-anchor="middle" class="sub">queue-proxy → auth* → model</text>
+<path d="M80.0 50 V530" class="life"/>
+<path d="M240.0 50 V530" class="life"/>
+<path d="M410.0 50 V530" class="life"/>
+<path d="M585.0 50 V530" class="life"/>
+<path d="M755.0 50 V530" class="life"/>
+<path d="M955.0 50 V530" class="life"/>
+<path d="M80.0 110 H240.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="90.0" y="104" class="alabel hot">POST /v1/chat/completions</text>
+<circle cx="60.0" cy="110" r="9" class="stepbg"/><text x="60.0" y="114" text-anchor="middle" class="step">1</text>
+<path d="M240.0 150 H410.0" class="arrow " marker-end="url(#mg)"/>
+<text x="250.0" y="144" class="alabel ">ext_proc + Knative headers</text>
+<circle cx="220.0" cy="150" r="9" class="stepbg"/><text x="220.0" y="154" text-anchor="middle" class="step">2</text>
+<rect x="155.0" y="170" width="170" height="54" rx="6" class="mapbox"/>
+<text x="240.0" y="188" text-anchor="middle" class="sub">pool has 0 endpoints</text>
+<text x="240.0" y="204" text-anchor="middle" class="sub">→ fallback backendRef, EPP skipped</text>
+<circle cx="167.0" cy="170" r="9" class="stepbg cold"/><text x="167.0" y="174" text-anchor="middle" class="step">3</text>
+<path d="M240.0 250 H410.0" class="arrow cfg" marker-end="url(#mg)"/>
+<text x="250.0" y="244" class="alabel ">(not consulted)</text>
+<path d="M240.0 290 H585.0" class="arrow cold" marker-end="url(#mc)"/>
+<text x="250.0" y="284" class="alabel cold">forward to activator-service :8012 + Knative-Serving-Revision header</text>
+<circle cx="220.0" cy="290" r="9" class="stepbg cold"/><text x="220.0" y="294" text-anchor="middle" class="step">4</text>
+<path d="M585.0 325 H755.0" class="arrow cfg" marker-end="url(#mg)"/>
+<text x="595.0" y="319" class="alabel ">need capacity for revision X</text>
+<circle cx="565.0" cy="325" r="9" class="stepbg"/><text x="565.0" y="329" text-anchor="middle" class="step">6</text>
+<rect x="520.0" y="340" width="130" height="34" rx="6" class="mapbox"/>
+<text x="585.0" y="358" text-anchor="middle" class="sub">hold request (buffer)</text>
+<path d="M755.0 395 H955.0" class="arrow cfg" marker-end="url(#mg)"/>
+<text x="765.0" y="389" class="alabel ">scale Deployment 0 → 1 · Pod starts · model loads</text>
+<circle cx="735.0" cy="395" r="9" class="stepbg"/><text x="735.0" y="399" text-anchor="middle" class="step">7</text>
+<path d="M955.0 425 H585.0" class="arrow cfg" marker-end="url(#mg)"/>
+<text x="595.0" y="419" class="alabel ">ready</text>
+<path d="M585.0 455 H955.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="595.0" y="449" class="alabel hot">forward held request → queue-proxy :8012</text>
+<circle cx="565.0" cy="455" r="9" class="stepbg"/><text x="565.0" y="459" text-anchor="middle" class="step">8</text>
+<path d="M955.0 490 H240.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="250.0" y="484" class="alabel hot">stream back (via Activator)</text>
+<circle cx="975.0" cy="490" r="9" class="stepbg"/><text x="975.0" y="494" text-anchor="middle" class="step">9</text>
+<path d="M240.0 515 H80.0" class="arrow hot" marker-end="url(#mh)"/>
+<text x="90.0" y="509" class="alabel hot">200 · stream</text>
+<circle cx="260.0" cy="515" r="9" class="stepbg"/><text x="260.0" y="519" text-anchor="middle" class="step">10</text>
+<text x="20" y="545" class="sub">Next request: pool is no longer empty, so EPP answers with a Pod again. Cold-start latency is unchanged from Knative today.</text>
+</svg>
+    <p class="caption">The only new thing is step 3: the Gateway sees an empty pool and uses the fallback backendRef instead of asking EPP. From step 4 on, this is Knative's own cold start.</p>
+    <div class="legend"><span class="badge b-new">🆕 NEW</span> rendered by the InferenceEndpoint controller today · <span class="badge b-planned">🔜 PLANNED</span> proposed, not built · <span class="ok">green</span> request path · <span class="warn">orange</span> cold / fallback path · <span class="new">blue dotted</span> internal · dashed grey = config / metrics</div>
+  </div>
+<pre><code>1. Client sends the request.
+2. Gateway asks EPP.
+3. Gateway sees the InferencePool has zero endpoints → uses the fallback backendRef.   <span class="ok">✓ the trick, EPP not involved</span>
+4. (EPP is not consulted on the cold path.)
+5. Gateway forwards to the Activator; the Knative-Serving-Revision header tells it which revision.
+6. Activator asks KPA for capacity and holds the request.
+7. KPA scales the revision 0 → 1; the Pod starts and loads the model.
+8. Activator forwards the held request to the new Pod's queue-proxy.
+9. Response streams back via Activator and the Gateway.
+10. Client gets 200. Next request takes the warm path.              <span class="ok">✓</span></code></pre>
+  <p class="caption">🧠 Knative is the doorman, EPP is the maître d'. Option A seats people only when the room is open and hands you back to the doorman when it isn't.</p>
+</section>
+
+<section id="abilities">
+  <div class="eyebrow">03 · What Knative keeps and loses (Option A vs Option B)</div>
+  <h2>Option A swaps the steering wheel; Option B only changes the tyres</h2>
+  <table><thead><tr><th style="width:26%">Knative ability</th><th style="width:18%">Option A</th><th style="width:18%">Option B</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Scale to zero and wake-up</td><td class="ok">✅ kept</td><td class="ok">✅ kept</td><td>A: Gateway failover to the Activator. B: Knative routes to Activator at zero as today.</td></tr>
+    <tr><td>KPA autoscaling</td><td class="ok">✅ kept</td><td class="ok">✅ kept</td><td>Traffic stays on queue-proxy.</td></tr>
+    <tr><td>Auth sidecar</td><td class="ok">✅ kept</td><td class="ok">✅ kept</td><td>Port 8012 fronts oauth2-proxy.</td></tr>
+    <tr><td>Activator burst buffering (TBC &gt; 0)</td><td class="bad">❌ lost</td><td class="warn">⚠️ partial</td><td>A bypasses Activator when any Pod exists. B: Knative decides Activator vs pool mode.</td></tr>
+    <tr><td>Activator retry on Pod failure</td><td class="bad">❌ lost</td><td class="warn">⚠️ partial</td><td>Same reason.</td></tr>
+    <tr><td>Knative load balancing</td><td>🔁 EPP</td><td>🔁 EPP</td><td>Intended.</td></tr>
+    <tr><td>Revision traffic split</td><td class="warn">⚠️ mirrored by us</td><td class="ok">✅ native</td><td>A: one pool per revision, weights copied from the Route.</td></tr>
+    <tr><td>Traffic tags, gradual rollout, DomainMapping, auto-TLS</td><td class="bad">❌ lost / replaced</td><td class="ok">✅ kept</td><td>A has one hostname set and its own TLS. B leaves Knative's route untouched.</td></tr>
+    <tr><td>Per-revision request timeout</td><td class="warn">⚠️ ours applies first</td><td class="ok">✅ kept</td><td>Needs <code>routing.requestTimeout</code>.</td></tr>
+    <tr><td>Works without upstream change</td><td class="ok">✅</td><td class="bad">❌</td><td>B needs net-gateway-api to learn InferencePool backends.</td></tr>
+    <tr><td>Works with Kourier / Istio ingress class</td><td class="ok">✅</td><td class="bad">❌</td><td>B requires Knative on net-gateway-api.</td></tr>
+  </tbody></table>
+</section>
+
+<section id="risks">
+  <div class="eyebrow">04 · What to change, where, effort</div>
+  <h2>Option A change list</h2>
+  <table><thead><tr><th style="width:5%">#</th><th style="width:33%">Where</th><th>What</th><th style="width:7%">Size</th></tr></thead><tbody>
+    <tr><td>A1</td><td><code>api/v1alpha1/inferenceendpoint_types.go</code></td><td>Add a <code>knativeRef</code> backend mode, mutually exclusive with <code>selector</code> (CEL). Activator Service address in controller config, not per endpoint.</td><td>S</td></tr>
+    <tr><td>A2</td><td><code>internal/controller/inferenceendpoint_controller.go</code></td><td>Resolve latest ready Revision from the Knative Route; selector <code>serving.knative.dev/revision=…</code>; force port 8012; watch Routes and Revisions; RBAC for <code>serving.knative.dev</code>.</td><td>M</td></tr>
+    <tr><td>A3</td><td><code>internal/render/templates/route.yaml</code></td><td>Second <code>backendRef</code> to <code>activator-service :8012</code> marked as failover (Gateway-specific field, e.g. Envoy Gateway <code>fallback: true</code>); <code>RequestHeaderModifier</code> for the two Knative headers; make path prefix and timeout template inputs.</td><td>S</td></tr>
+    <tr><td>A4</td><td><code>internal/render/templates/pool.yaml</code></td><td><code>failureMode: FailClose</code> in Knative mode. Today the default is <code>FailOpen</code>, which would route to an empty pool when EPP is down and skip Activator.</td><td>S</td></tr>
+    <tr><td>A5</td><td><code>internal/render/templates/epp.yaml</code></td><td>Metrics data source on the model metrics port. EPP image stays the pinned upstream GIE v1.5.0; no fork.</td><td>S</td></tr>
+    <tr><td>A6</td><td>cluster prerequisite</td><td>Gateway implementation with backend failover (Envoy Gateway active-passive, kgateway priorities). Document it next to the GIE-capable Gateway requirement.</td><td>S</td></tr>
+    <tr><td>A7</td><td>types + controller</td><td><code>BackendsAvailable</code> condition; <code>Ready</code> must not require backends in Knative mode (zero is valid).</td><td>S</td></tr>
+    <tr><td>A8</td><td>Ginkgo suites, golden files</td><td>Knative-mode rendering and revision re-render tests.</td><td>M</td></tr>
+    <tr><td>A9</td><td>chart ClusterRole, <code>config/rbac/role.yaml</code></td><td>get/list/watch Routes and Revisions.</td><td>S</td></tr>
+    <tr><td>A10</td><td>go-operator operand, <code>RunaiConfig</code> CRD</td><td>Feature flag <code>knativeBackend.enabled</code>, default off; Activator Service address override.</td><td>S</td></tr>
+    <tr><td>A11</td><td>Kind smoke + <code>runai-e2e-internal</code></td><td>Knative Serving + GIE-capable Gateway; scale-to-zero round trip.</td><td>M</td></tr>
+  </tbody></table>
+  <p class="caption">Spike (prove or kill): <strong>S</strong>, under a week, no EPP fork. Production, single revision: <strong>M</strong>, about 2 to 3 weeks. Multi-revision split: +M. Option B: S to spike, L code + XL calendar for upstream.</p>
+  <h3>Spike order, stop at first failure</h3>
+  <table><thead><tr><th style="width:6%">#</th><th style="width:36%">Check</th><th>Pass looks like</th></tr></thead><tbody>
+    <tr><td>1</td><td>Gateway fails over when the InferencePool has zero endpoints</td><td>HTTPRoute with the pool as primary and <code>activator-service</code> as fallback backendRef; scale the revision to zero; a request lands on the Activator. If this fails on your Gateway, Option A is dead there.</td></tr>
+    <tr><td>2</td><td>Activator accepts the request with the two routing headers</td><td>Revision scales from zero and the response returns.</td></tr>
+    <tr><td>3</td><td>Warm path through queue-proxy :8012</td><td>KPA sees concurrency; scorers read model metrics from the separate port.</td></tr>
+    <tr><td>4</td><td>Scale back to zero while the route stays up</td><td>Pool empties; next request goes through Activator again.</td></tr>
+    <tr><td>5</td><td>Auth and streaming</td><td>Protected revision denies / allows correctly; SSE completes within the route timeout.</td></tr>
+  </tbody></table>
+  <h3>Code references</h3>
+  <table><thead><tr><th style="width:12%">Ref</th><th>Location</th></tr></thead><tbody>
+    <tr><td>[ref:1]</td><td><code>runai-cluster/cluster/inference-endpoint-controller/internal/render/templates/route.yaml</code></td></tr>
+    <tr><td>[ref:2]</td><td>Upstream GIE EPP v1.5.0, unchanged; failover is a Gateway feature, not an EPP one</td></tr>
+    <tr><td>[ref:3]</td><td><code>runai-cluster/cluster/inference-endpoint-controller/internal/controller/inferenceendpoint_controller.go</code></td></tr>
+    <tr><td>[ref:4]</td><td>Knative Serving Activator, <code>knative-serving/activator-service</code> :8012</td></tr>
+    <tr><td>composer</td><td><code>control-plane/workloads-and-policies/composer/composer_v2/inference_workloads/inference_to_knative.go</code> (oauth2-proxy on 4180, exposed-URL proxies shifted to 4181)</td></tr>
+  </tbody></table>
+</section>
+</main>
+<footer>One of three per-workload pages: <a href="lws.html" style="color:var(--runai-purple)">LWS</a> · <a href="knative.html" style="color:var(--runai-purple)">Knative</a> · <a href="nimservice.html" style="color:var(--runai-purple)">NIMService</a> · 07 October 2026</footer>
+<script>
+  (function(){
+    const tabs=[...document.querySelectorAll('header nav a[data-tab]')];
+    const ids=tabs.map(a=>a.dataset.tab);
+    const secs=ids.map(id=>document.getElementById(id)).filter(Boolean);
+    // prev / next footer links inside each section
+    secs.forEach((sec,i)=>{
+      const nav=document.createElement('div'); nav.className='tabnav';
+      const prev=i>0?`<a href="#${ids[i-1]}">← ${tabs[i-1].textContent}</a>`:'<span></span>';
+      const next=i<secs.length-1?`<a href="#${ids[i+1]}">${tabs[i+1].textContent} →</a>`:'<span></span>';
+      nav.innerHTML=prev+next; sec.appendChild(nav);
+    });
+    function show(id){
+      if(!ids.includes(id)) id=ids[0];
+      secs.forEach(s=>s.classList.toggle('active',s.id===id));
+      tabs.forEach(a=>a.classList.toggle('active',a.dataset.tab===id));
+      window.scrollTo(0,0);
+    }
+    window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+    show(location.hash.slice(1));
+  })();
+  const btn=document.getElementById('theme');
+  if(localStorage.getItem('ie-theme')==='light')document.body.classList.add('light');
+  btn.addEventListener('click',()=>{document.body.classList.toggle('light');localStorage.setItem('ie-theme',document.body.classList.contains('light')?'light':'dark');});
+</script>
+</body></html>
