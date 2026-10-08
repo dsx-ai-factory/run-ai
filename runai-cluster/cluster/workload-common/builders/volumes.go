@@ -812,6 +812,9 @@ func NeedToSetupRunaiHome(containerFields *field_groups.ContainerFields, isJupyt
 	}
 
 	shouldCreateHomeDir := containerFields.CreateHomeDir.Deref()
+	// RunAsUser historically implies a managed home directory.
+	// Fall back to RunAsUser only when CreateHomeDir is unset;
+	// an explicit true or false value takes precedence.
 	if !containerFields.CreateHomeDir.IsValueInitialized() {
 		shouldCreateHomeDir = containerFields.RunAsUser.Deref()
 	}
