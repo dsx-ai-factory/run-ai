@@ -7,6 +7,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	trackerclient "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
@@ -19,8 +20,9 @@ import (
 )
 
 // DeviceClassHandler syncs cluster DeviceClasses to the k8s-objects-tracker.
-// The tracker only supports a full-set sync (there are no incremental create/update/delete
-// endpoints), so every change triggers a re-sync of the complete set.
+// Mirrors the StorageClass pattern: informer events drive per-item POST/PUT/DELETE
+// for low-latency updates, while HandleSyncEvent performs a periodic full-set
+// reconciliation that also prunes server-side rows no longer present in the cluster.
 type DeviceClassHandler struct {
 	backendClient *runaiBackendClient.BackendClient
 	cachedReader  client.Reader
@@ -33,26 +35,66 @@ func NewDeviceClassHandler(cachedReader client.Reader, runaiBackendClient *runai
 	}
 }
 
-// HandleUpdateItem is invoked (via the rate limiter) on any DeviceClass change. The key is
-// ignored on purpose: the tracker only accepts the full set, so we re-sync everything.
-func (deviceClassHandler *DeviceClassHandler) HandleUpdateItem(_ client.ObjectKey) error {
-	return deviceClassHandler.sync()
+// HandleUpdateItem is the rate-limited callback used for update events: it
+// re-reads the object from the cache (so we send the latest observed state,
+// not whichever version was queued) and forwards it as a per-item update.
+func (deviceClassHandler *DeviceClassHandler) HandleUpdateItem(key client.ObjectKey) error {
+	deviceClass := &resourcev1.DeviceClass{}
+	if err := deviceClassHandler.cachedReader.Get(context.Background(), key, deviceClass); err != nil {
+		return err
+	}
+	return deviceClassHandler.HandleDeviceClassUpdate(deviceClass)
 }
 
+func (deviceClassHandler *DeviceClassHandler) HandleDeviceClassAdd(deviceClass *resourcev1.DeviceClass) error {
+	zap.S().Infof("Adding DeviceClass < Name: %v >", deviceClass.Name)
+	parsed := parsers.ParseDeviceClassToServerScheme(deviceClass)
+
+	_, res, err := deviceClassHandler.backendClient.K8sObjectTrackerClient.CreateDeviceClass(
+		deviceClassHandler.backendClient.Context(), parsed)
+	if res != nil {
+		_ = res.Body.Close()
+	}
+
+	return deviceClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Added DeviceClass %s", parsed.DeviceClassName))
+}
+
+func (deviceClassHandler *DeviceClassHandler) HandleDeviceClassUpdate(deviceClass *resourcev1.DeviceClass) error {
+	zap.S().Debugf("Updating DeviceClass < Name: %v >", deviceClass.Name)
+	parsed := parsers.ParseDeviceClassToServerScheme(deviceClass)
+
+	_, res, err := deviceClassHandler.backendClient.K8sObjectTrackerClient.UpdateDeviceClass(
+		deviceClassHandler.backendClient.Context(), parsed)
+	if res != nil {
+		_ = res.Body.Close()
+	}
+
+	return deviceClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Updated DeviceClass %s", parsed.DeviceClassName))
+}
+
+func (deviceClassHandler *DeviceClassHandler) HandleDeviceClassDelete(deviceClass *resourcev1.DeviceClass) error {
+	zap.S().Debugf("Deleting DeviceClass < Name: %v >", deviceClass.Name)
+
+	res, err := deviceClassHandler.backendClient.K8sObjectTrackerClient.DeleteDeviceClass(
+		deviceClassHandler.backendClient.Context(), config.Config().ClusterUuid, deviceClass.Name)
+	if res != nil {
+		_ = res.Body.Close()
+	}
+
+	return deviceClassHandler.backendClient.HandleHttpResponse(res, err, fmt.Sprintf("Deleted DeviceClass %s", deviceClass.Name))
+}
+
+// HandleSyncEvent performs a full-set reconciliation. It lists every DeviceClass
+// in the cluster and sends them in one request; the server upserts all and prunes
+// anything no longer in the list (drift correction for missed per-item events).
 func (deviceClassHandler *DeviceClassHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 	zap.S().Infof("Start syncing DeviceClasses")
 
-	if err := deviceClassHandler.sync(); err != nil {
-		zap.S().Errorf("Had an error while syncing DeviceClasses: %+v", err)
-	}
-}
-
-func (deviceClassHandler *DeviceClassHandler) sync() error {
 	deviceClassesList := resourcev1.DeviceClassList{}
 	if err := deviceClassHandler.cachedReader.List(context.Background(), &deviceClassesList); err != nil {
 		zap.S().Errorf("Failed listing device classes, error: %s", err.Error())
-		return err
+		return
 	}
 
 	// Initialize with an empty (non-nil) slice so an empty cluster sends [] rather than null.
@@ -67,5 +109,7 @@ func (deviceClassHandler *DeviceClassHandler) sync() error {
 		_ = res.Body.Close()
 	}
 
-	return deviceClassHandler.backendClient.HandleHttpResponse(res, httpErr, "Sync deviceClass data")
+	if err := deviceClassHandler.backendClient.HandleHttpResponse(res, httpErr, "Sync deviceClass data"); err != nil {
+		zap.S().Errorf("Had an error while syncing DeviceClasses: %+v", err)
+	}
 }

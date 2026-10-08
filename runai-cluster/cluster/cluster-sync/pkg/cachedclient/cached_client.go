@@ -181,6 +181,11 @@ var (
 		Version: resourcev1.SchemeGroupVersion.Version,
 		Kind:    "DeviceClass",
 	}
+	ResourceClaimTemplateType = SupportedType{
+		Group:   resourcev1.SchemeGroupVersion.Group,
+		Version: resourcev1.SchemeGroupVersion.Version,
+		Kind:    "ResourceClaimTemplate",
+	}
 	ExternalWorkloadType = SupportedType{
 		Group:   v1alpha1.SchemeGroupVersion.Group,
 		Version: v1alpha1.SchemeGroupVersion.Version,
@@ -258,6 +263,7 @@ var (
 		InteractiveWorkloadType,
 		StorageClassType,
 		DeviceClassType,
+		ResourceClaimTemplateType,
 		ExternalWorkloadType,
 		InteractivePolicyType,
 		TrainingPolicyType,
@@ -327,6 +333,7 @@ func isOptionalInformer(gvk SupportedType) bool {
 		gvk == RevisionType ||
 		gvk == NodeResourceTopologyType ||
 		gvk == DeviceClassType ||
+		gvk == ResourceClaimTemplateType ||
 		isLegacyWorkloadType(gvk) ||
 		isLegacyPolicyType(gvk)
 }
