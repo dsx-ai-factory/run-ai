@@ -381,8 +381,8 @@ INSERT INTO assets_environment (
     override_uid_gid_in_workspace, uid_gid_source
 ) VALUES
 ('01ef611d-ce9b-4bff-a29f-6ba4bb4224dc', 'tensorboard', '--logdir ./ --host 0.0.0.0 --path_prefix /${RUNAI_PROJECT}/${RUNAI_JOB_NAME}', NULL, 'tensorflow/tensorflow:2.20.0', 'IfNotPresent', NULL, NULL, NULL, '[{"name": "TensorBoard", "internalToolInfo": {"toolType": "tensorboard", "containerPort": 6006, "connectionType": "ExternalUrl", "externalUrlInfo": {}}}]', NULL, NULL, NULL, NULL, NULL, '[]', 'f', NULL, NULL, NULL, 'fromTheImage'),
-('102d4a7b-2345-47d4-bcc1-52347eef1b4e', 'start-notebook.sh', '--NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token=''''', '[]', 'jupyter/scipy-notebook', 'IfNotPresent', NULL, NULL, NULL, '[{"name": "Jupyter", "internalToolInfo": {"toolType": "jupyter-notebook", "containerPort": 8888, "connectionType": "ExternalUrl", "externalUrlInfo": {}}}]', NULL, NULL, NULL, NULL, NULL, '[]', 'f', NULL, NULL, NULL, 'fromTheImage'),
-('6d9a2313-f447-40af-bd61-56bafa249e52', NULL, NULL, '[{"name": "LOG_DIR", "value": "./"}]', 'gcr.io/run-ai-demo/jupyter-tensorboard', 'IfNotPresent', NULL, NULL, NULL, '[{"name": "Jupyter", "internalToolInfo": {"toolType": "jupyter-notebook", "containerPort": 8888, "connectionType": "ExternalUrl", "externalUrlInfo": {}}}, {"name": "TensorBoard", "internalToolInfo": {"toolType": "tensorboard", "containerPort": 6006, "connectionType": "ExternalUrl", "externalUrlInfo": {}}}]', NULL, NULL, NULL, NULL, NULL, '[]', 'f', NULL, NULL, NULL, 'fromTheImage')
+('102d4a7b-2345-47d4-bcc1-52347eef1b4e', 'start-notebook.sh', '--NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token=''''', '[]', 'jupyter/scipy-notebook', 'IfNotPresent', NULL, NULL, NULL, '[{"name": "Jupyter", "internalToolInfo": {"toolType": "jupyter-notebook", "containerPort": 8888, "connectionType": "ExternalUrl", "externalUrlInfo": {}}}]', NULL, NULL, NULL, NULL, NULL, '[]', 'f', NULL, NULL, NULL, 'fromTheImage')
+-- The omitted jupyter-tensorboard environment row referenced an internal image.
 ON CONFLICT (asset_id) DO NOTHING;
 
 --
@@ -403,4 +403,3 @@ INSERT INTO assets_metadata (
 ('d6fdb301-2515-4193-be5b-e42ca100ee09', 'compute', 'tenant', 2147483647, NULL, NULL, 'two-gpus', 'runai', '2023-02-14 18:48:28.422635+00', 'runai', '2023-02-14 18:48:28.422635+00', NULL, 'f', NULL, NULL),
 ('f461ea2f-f937-4387-9976-b4cc4bae6e38', 'compute', 'tenant', 2147483647, NULL, NULL, 'small-fraction', 'runai', '2023-02-14 18:47:27.732118+00', 'runai', '2023-02-14 18:47:27.732118+00', NULL, 'f', NULL, NULL)
 ON CONFLICT (id) DO NOTHING;
-

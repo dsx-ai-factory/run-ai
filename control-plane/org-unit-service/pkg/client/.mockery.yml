@@ -22,3 +22,4 @@ packages:
       ProjectsAPI: {}
       ProjectsV1API: {}
       ReportsAPI: {}
+      SettingsAPI: {}

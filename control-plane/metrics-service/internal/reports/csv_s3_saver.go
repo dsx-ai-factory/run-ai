@@ -41,7 +41,7 @@ func NewCSVS3Saver() (S3Saver, error) {
 	}
 
 	return CSVS3Saver{
-		s3Client: &client,
+		s3Client: client,
 	}, nil
 }
 

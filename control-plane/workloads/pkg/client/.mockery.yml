@@ -19,9 +19,11 @@ packages:
       EventsAPI: {}
       HealthAPI: {}
       InferencesAPI: {}
+      MetricsAPI: {}
       PodGroupsAPI: {}
       PodsAPI: {}
       RevisionsAPI: {}
+      SettingsAPI: {}
       SyncAPI: {}
       TrainingsAPI: {}
       UnifiedAPI: {}

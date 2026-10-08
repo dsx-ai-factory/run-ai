@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
+	legacyconnections "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/connections"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -106,11 +107,15 @@ func nativeWorkloadGroupVersion(workloadType string) (*string, *string) {
 // (iw/tw/dw/infw).
 func (nsw *NotificationsComposer) WithConnectionsPreProcessor(projectName string, resourceNamePrefix string) *NotificationsComposer {
 	nsw.connectionsPreProcessor = &composer.ConnectionsPreProcessor{
-		WorkloadType:                  workloadsApi.WorkloadType(nsw.Output.Type),
 		WorkloadName:                  nsw.Output.Name,
 		ProjectName:                   projectName,
 		ResourceNamePrefix:            resourceNamePrefix,
 		WorkloadV2NetworkingSupported: nsw.fc.Options.WorkloadV2NetworkingSupported,
+	}
+	if resourceNamePrefix == "" {
+		nsw.connectionsPreProcessor.PortResourceNames = func(ports *field_types.PortsField) map[string]composer.ServiceAndPortName {
+			return legacyconnections.PortResourceNames(workloadsApi.WorkloadType(nsw.Output.Type), nsw.Output.Name, ports)
+		}
 	}
 
 	return nsw

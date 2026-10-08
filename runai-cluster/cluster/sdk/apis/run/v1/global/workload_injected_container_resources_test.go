@@ -77,3 +77,17 @@ var _ = Describe("WorkloadInjectedContainerResourceRequirements", func() {
 		})
 	})
 })
+
+var _ = Describe("DefaultUsernameLoaderInitContainerResources", func() {
+	It("preserves the fallback values and returns independent resource maps", func() {
+		first := DefaultUsernameLoaderInitContainerResources()
+		first.Requests[corev1.ResourceCPU] = resource.MustParse("1")
+		first.Limits[corev1.ResourceMemory] = resource.MustParse("1Gi")
+
+		actual := DefaultUsernameLoaderInitContainerResources()
+		Expect(actual.Requests.Cpu().String()).To(Equal("50m"))
+		Expect(actual.Requests.Memory().String()).To(Equal("50Mi"))
+		Expect(actual.Limits.Cpu().String()).To(Equal("100m"))
+		Expect(actual.Limits.Memory().String()).To(Equal("100Mi"))
+	})
+})

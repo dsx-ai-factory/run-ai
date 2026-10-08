@@ -627,6 +627,82 @@ func (_c *IK8SObjectTrackerExternalClient_CreateDepartmentsWideConfigmap_Call) R
 	return _c
 }
 
+// CreateDeviceClass provides a mock function for the type IK8SObjectTrackerExternalClient
+func (_mock *IK8SObjectTrackerExternalClient) CreateDeviceClass(ctx context.Context, deviceClass openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error) {
+	ret := _mock.Called(ctx, deviceClass)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateDeviceClass")
+	}
+
+	var r0 *openapi.DeviceClass
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error)); ok {
+		return returnFunc(ctx, deviceClass)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, openapi.DeviceClass) *openapi.DeviceClass); ok {
+		r0 = returnFunc(ctx, deviceClass)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.DeviceClass)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, openapi.DeviceClass) *http.Response); ok {
+		r1 = returnFunc(ctx, deviceClass)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, openapi.DeviceClass) error); ok {
+		r2 = returnFunc(ctx, deviceClass)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// IK8SObjectTrackerExternalClient_CreateDeviceClass_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateDeviceClass'
+type IK8SObjectTrackerExternalClient_CreateDeviceClass_Call struct {
+	*mock.Call
+}
+
+// CreateDeviceClass is a helper method to define mock.On call
+//   - ctx context.Context
+//   - deviceClass openapi.DeviceClass
+func (_e *IK8SObjectTrackerExternalClient_Expecter) CreateDeviceClass(ctx any, deviceClass any) *IK8SObjectTrackerExternalClient_CreateDeviceClass_Call {
+	return &IK8SObjectTrackerExternalClient_CreateDeviceClass_Call{Call: _e.mock.On("CreateDeviceClass", ctx, deviceClass)}
+}
+
+func (_c *IK8SObjectTrackerExternalClient_CreateDeviceClass_Call) Run(run func(ctx context.Context, deviceClass openapi.DeviceClass)) *IK8SObjectTrackerExternalClient_CreateDeviceClass_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.DeviceClass
+		if args[1] != nil {
+			arg1 = args[1].(openapi.DeviceClass)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_CreateDeviceClass_Call) Return(deviceClass1 *openapi.DeviceClass, response *http.Response, err error) *IK8SObjectTrackerExternalClient_CreateDeviceClass_Call {
+	_c.Call.Return(deviceClass1, response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_CreateDeviceClass_Call) RunAndReturn(run func(ctx context.Context, deviceClass openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error)) *IK8SObjectTrackerExternalClient_CreateDeviceClass_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateProjectPvc provides a mock function for the type IK8SObjectTrackerExternalClient
 func (_mock *IK8SObjectTrackerExternalClient) CreateProjectPvc(ctx context.Context, clusterId string, projectId string, name string, request openapi.PVCCreationRequest) (*openapi.PVC, *http.Response, error) {
 	ret := _mock.Called(ctx, clusterId, projectId, name, request)
@@ -1455,6 +1531,80 @@ func (_c *IK8SObjectTrackerExternalClient_DeleteDepartmentsWideConfigmap_Call) R
 }
 
 func (_c *IK8SObjectTrackerExternalClient_DeleteDepartmentsWideConfigmap_Call) RunAndReturn(run func(ctx context.Context, clusterId string, departmentId string, name string) (*http.Response, error)) *IK8SObjectTrackerExternalClient_DeleteDepartmentsWideConfigmap_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteDeviceClass provides a mock function for the type IK8SObjectTrackerExternalClient
+func (_mock *IK8SObjectTrackerExternalClient) DeleteDeviceClass(ctx context.Context, clusterId string, name string) (*http.Response, error) {
+	ret := _mock.Called(ctx, clusterId, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteDeviceClass")
+	}
+
+	var r0 *http.Response
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) (*http.Response, error)); ok {
+		return returnFunc(ctx, clusterId, name)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) *http.Response); ok {
+		r0 = returnFunc(ctx, clusterId, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = returnFunc(ctx, clusterId, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteDeviceClass'
+type IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call struct {
+	*mock.Call
+}
+
+// DeleteDeviceClass is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - name string
+func (_e *IK8SObjectTrackerExternalClient_Expecter) DeleteDeviceClass(ctx any, clusterId any, name any) *IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call {
+	return &IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call{Call: _e.mock.On("DeleteDeviceClass", ctx, clusterId, name)}
+}
+
+func (_c *IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call) Run(run func(ctx context.Context, clusterId string, name string)) *IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call) Return(response *http.Response, err error) *IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call {
+	_c.Call.Return(response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call) RunAndReturn(run func(ctx context.Context, clusterId string, name string) (*http.Response, error)) *IK8SObjectTrackerExternalClient_DeleteDeviceClass_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3307,6 +3457,88 @@ func (_c *IK8SObjectTrackerExternalClient_SyncDeviceClass_Call) RunAndReturn(run
 	return _c
 }
 
+// SyncResourceClaimTemplates provides a mock function for the type IK8SObjectTrackerExternalClient
+func (_mock *IK8SObjectTrackerExternalClient) SyncResourceClaimTemplates(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error) {
+	ret := _mock.Called(ctx, clusterId, rcts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SyncResourceClaimTemplates")
+	}
+
+	var r0 *openapi.ResourceClaimTemplates
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error)); ok {
+		return returnFunc(ctx, clusterId, rcts)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []openapi.ResourceClaimTemplate) *openapi.ResourceClaimTemplates); ok {
+		r0 = returnFunc(ctx, clusterId, rcts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ResourceClaimTemplates)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, []openapi.ResourceClaimTemplate) *http.Response); ok {
+		r1 = returnFunc(ctx, clusterId, rcts)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, []openapi.ResourceClaimTemplate) error); ok {
+		r2 = returnFunc(ctx, clusterId, rcts)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SyncResourceClaimTemplates'
+type IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call struct {
+	*mock.Call
+}
+
+// SyncResourceClaimTemplates is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - rcts []openapi.ResourceClaimTemplate
+func (_e *IK8SObjectTrackerExternalClient_Expecter) SyncResourceClaimTemplates(ctx any, clusterId any, rcts any) *IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call {
+	return &IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call{Call: _e.mock.On("SyncResourceClaimTemplates", ctx, clusterId, rcts)}
+}
+
+func (_c *IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call) Run(run func(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate)) *IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []openapi.ResourceClaimTemplate
+		if args[2] != nil {
+			arg2 = args[2].([]openapi.ResourceClaimTemplate)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call) Return(resourceClaimTemplates1 *openapi.ResourceClaimTemplates, response *http.Response, err error) *IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call {
+	_c.Call.Return(resourceClaimTemplates1, response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call) RunAndReturn(run func(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error)) *IK8SObjectTrackerExternalClient_SyncResourceClaimTemplates_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SyncProjectPvcs provides a mock function for the type IK8SObjectTrackerExternalClient
 func (_mock *IK8SObjectTrackerExternalClient) SyncProjectPvcs(ctx context.Context, clusterId string, projectId string, pvcs []openapi.PVC) (*openapi.PVCs, *http.Response, error) {
 	ret := _mock.Called(ctx, clusterId, projectId, pvcs)
@@ -3649,6 +3881,82 @@ func (_c *IK8SObjectTrackerExternalClient_SyncStorageClass_Call) Return(storageC
 }
 
 func (_c *IK8SObjectTrackerExternalClient_SyncStorageClass_Call) RunAndReturn(run func(ctx context.Context, clusterId string, storageClasses []openapi.StorageClass) (*openapi.StorageClasses, *http.Response, error)) *IK8SObjectTrackerExternalClient_SyncStorageClass_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateDeviceClass provides a mock function for the type IK8SObjectTrackerExternalClient
+func (_mock *IK8SObjectTrackerExternalClient) UpdateDeviceClass(ctx context.Context, deviceClass openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error) {
+	ret := _mock.Called(ctx, deviceClass)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateDeviceClass")
+	}
+
+	var r0 *openapi.DeviceClass
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error)); ok {
+		return returnFunc(ctx, deviceClass)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, openapi.DeviceClass) *openapi.DeviceClass); ok {
+		r0 = returnFunc(ctx, deviceClass)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.DeviceClass)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, openapi.DeviceClass) *http.Response); ok {
+		r1 = returnFunc(ctx, deviceClass)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, openapi.DeviceClass) error); ok {
+		r2 = returnFunc(ctx, deviceClass)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateDeviceClass'
+type IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call struct {
+	*mock.Call
+}
+
+// UpdateDeviceClass is a helper method to define mock.On call
+//   - ctx context.Context
+//   - deviceClass openapi.DeviceClass
+func (_e *IK8SObjectTrackerExternalClient_Expecter) UpdateDeviceClass(ctx any, deviceClass any) *IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call {
+	return &IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call{Call: _e.mock.On("UpdateDeviceClass", ctx, deviceClass)}
+}
+
+func (_c *IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call) Run(run func(ctx context.Context, deviceClass openapi.DeviceClass)) *IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.DeviceClass
+		if args[1] != nil {
+			arg1 = args[1].(openapi.DeviceClass)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call) Return(deviceClass1 *openapi.DeviceClass, response *http.Response, err error) *IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call {
+	_c.Call.Return(deviceClass1, response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call) RunAndReturn(run func(ctx context.Context, deviceClass openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error)) *IK8SObjectTrackerExternalClient_UpdateDeviceClass_Call {
 	_c.Call.Return(run)
 	return _c
 }

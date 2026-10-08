@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/common"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields"
@@ -101,7 +100,7 @@ func validateGroups(value interface{}) error {
 
 func validateShellCommand(value interface{}) error {
 	valueStr := fmt.Sprintf("%v", value)
-	_, err := workloadbuilders.ParseCommandLine(valueStr)
+	_, err := ParseCommandLine(valueStr)
 	if err != nil {
 		return fmt.Errorf("'%s' cannot be used to form a valid command: %v", valueStr, err)
 	}

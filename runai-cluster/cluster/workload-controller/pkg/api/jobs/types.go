@@ -15,10 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_groups"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	rjv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/common"
-	mpiv2beta1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/mpijob/v2beta1"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/builders/factory"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logger "sigs.k8s.io/controller-runtime/pkg/log"
@@ -131,27 +128,6 @@ func (self *JobWorkload) IsStatusChanged(originalWorkload *JobWorkload) bool {
 func (self *JobWorkload) Succeeded(mergeStack *enforcer2.MergeStack) *JobWorkload {
 	self.Status.CreationStatus = common.StatusSubmitted
 	return self
-}
-
-// Builder return a builder based on the job
-//
-//	interactive/training -> mpi or runai builder depending on the mpi field
-func (self *JobWorkload) Builder(options factory.BuilderOptions, k8sClient client.Client,
-	podLabels map[string]string, podAnnotations map[string]string) factory.Builder {
-	if self.Spec.Mpi.Deref() {
-		builderConstructor := factory.BuildersRegistry[factory.MpiOldBuilder]
-		if builderConstructor != nil {
-			return builderConstructor(self, &mpiv2beta1.MPIJob{}, k8sClient, options, podLabels, podAnnotations)
-		}
-	} else {
-		builderConstructor := factory.BuildersRegistry[factory.RunaiJobBuilder]
-		if builderConstructor != nil {
-			return builderConstructor(self, &rjv1.RunaiJob{}, k8sClient, options, podLabels, podAnnotations)
-		}
-	}
-
-	log.Info("Failed to allocate builder, this can only happen during testing/debugging")
-	return nil
 }
 
 type JobStackCreator interface {

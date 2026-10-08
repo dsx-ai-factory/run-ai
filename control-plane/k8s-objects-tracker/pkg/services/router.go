@@ -41,6 +41,9 @@ func CreateRouter() chi.Router {
 	deviceClassesApiService := NewDeviceClassesApiService()
 	deviceClassesApiController := api.NewDeviceClassesAPIController(deviceClassesApiService)
 
+	resourceClaimTemplatesApiService := NewResourceClaimTemplatesApiService()
+	resourceClaimTemplatesApiController := api.NewResourceClaimTemplatesAPIController(resourceClaimTemplatesApiService)
+
 	router := api.NewRouter()
 
 	router.Group(func(router chi.Router) {
@@ -61,6 +64,7 @@ func CreateRouter() chi.Router {
 			clusterObjectsStatusApiController,
 			storageClassesApiController,
 			deviceClassesApiController,
+			resourceClaimTemplatesApiController,
 		)
 	})
 

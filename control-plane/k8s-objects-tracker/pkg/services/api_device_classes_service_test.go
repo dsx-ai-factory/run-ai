@@ -8,6 +8,7 @@ package services
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 
@@ -46,6 +47,91 @@ var _ = Describe("device classes test", func() {
 		syncUrl := deviceClassesSyncUrl + clusterId
 		otherGetUrl := deviceClassesUrl + otherClusterId
 		otherSyncUrl := deviceClassesSyncUrl + otherClusterId
+		dcUrl := deviceClassesUrl + clusterId
+		deletionUrl := dcUrl + "&name=%s"
+
+		It("create 2, list, delete 1, list (sibling cluster is untouched)", func() {
+			respRecorder := getDeviceClasses(getUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+			Expect(len(unmarshalDeviceClasses(respRecorder.Body).Items)).To(Equal(0))
+
+			respRecorder = createDeviceClass("gpu.nvidia.com", clusterId)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			respRecorder = createDeviceClass("mrdma.google.com", clusterId)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			// Seed a device class in a sibling cluster to verify the per-item
+			// delete scopes to the request's clusterId.
+			respRecorder = createDeviceClass("gpu.nvidia.com", otherClusterId)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			respRecorder = getDeviceClasses(getUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+			dcs := unmarshalDeviceClasses(respRecorder.Body)
+			Expect(len(dcs.Items)).To(Equal(2))
+			Expect(deviceClassNames(dcs)).To(ContainElements("gpu.nvidia.com", "mrdma.google.com"))
+
+			respRecorder = deleteDeviceClass("gpu.nvidia.com", deletionUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			respRecorder = getDeviceClasses(getUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+			dcs = unmarshalDeviceClasses(respRecorder.Body)
+			Expect(len(dcs.Items)).To(Equal(1))
+			Expect(dcs.Items[0].DeviceClassName).To(Equal("mrdma.google.com"))
+
+			// Sibling cluster's record must survive the scoped delete.
+			respRecorder = getDeviceClasses(otherGetUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+			otherDcs := unmarshalDeviceClasses(respRecorder.Body)
+			Expect(len(otherDcs.Items)).To(Equal(1))
+			Expect(otherDcs.Items[0].DeviceClassName).To(Equal("gpu.nvidia.com"))
+		})
+
+		It("create then update (same name) is idempotent", func() {
+			respRecorder := createDeviceClass("gpu.nvidia.com", clusterId)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			respRecorder = updateDeviceClass("gpu.nvidia.com", clusterId)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			respRecorder = getDeviceClasses(getUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+			dcs := unmarshalDeviceClasses(respRecorder.Body)
+			Expect(len(dcs.Items)).To(Equal(1))
+			Expect(dcs.Items[0].DeviceClassName).To(Equal("gpu.nvidia.com"))
+		})
+
+		It("per-item create does not prune other items in the cluster", func() {
+			dcsList := api.DeviceClasses{Items: []api.DeviceClass{
+				{DeviceClassName: "gpu.nvidia.com"},
+				{DeviceClassName: "mrdma.google.com"},
+			}}
+
+			respRecorder := syncDeviceClasses(dcsList, syncUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			// A per-item create for a new name must not remove the two already in the cluster.
+			respRecorder = createDeviceClass("tpu.google.com", clusterId)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+
+			respRecorder = getDeviceClasses(getUrl)
+			Expect(respRecorder.Code).To(Equal(http.StatusOK))
+			dcs := unmarshalDeviceClasses(respRecorder.Body)
+			Expect(len(dcs.Items)).To(Equal(3))
+			Expect(deviceClassNames(dcs)).To(ContainElements("gpu.nvidia.com", "mrdma.google.com", "tpu.google.com"))
+		})
+
+		It("delete rejects malformed clusterId", func() {
+			respRecorder := deleteDeviceClass("gpu.nvidia.com", deviceClassesUrl+"not-a-uuid&name=%s")
+			Expect(respRecorder.Code).To(Equal(http.StatusBadRequest))
+		})
+
+		It("create rejects malformed clusterId in the body", func() {
+			respRecorder := createDeviceClass("gpu.nvidia.com", "not-a-uuid")
+			Expect(respRecorder.Code).To(Equal(http.StatusBadRequest))
+		})
 
 		It("sync 2, list, sync only 1, list (stale is pruned; other clusters are untouched)", func() {
 			dcsList := api.DeviceClasses{Items: []api.DeviceClass{
@@ -121,6 +207,23 @@ func syncDeviceClasses(payloadObject any, url string) *httptest.ResponseRecorder
 
 func getDeviceClasses(url string) *httptest.ResponseRecorder {
 	request, _ := http.NewRequest("GET", url, nil)
+	return sendStorageClassApiRequest(request)
+}
+
+func createDeviceClass(name, deviceClassClusterId string) *httptest.ResponseRecorder {
+	payload := api.DeviceClass{DeviceClassName: name, ClusterId: deviceClassClusterId}
+	request, _ := http.NewRequest("POST", deviceClassesUrl+deviceClassClusterId, makePayload(payload))
+	return sendStorageClassApiRequest(request)
+}
+
+func updateDeviceClass(name, deviceClassClusterId string) *httptest.ResponseRecorder {
+	payload := api.DeviceClass{DeviceClassName: name, ClusterId: deviceClassClusterId}
+	request, _ := http.NewRequest("PUT", deviceClassesUrl+deviceClassClusterId, makePayload(payload))
+	return sendStorageClassApiRequest(request)
+}
+
+func deleteDeviceClass(name, deletionUrl string) *httptest.ResponseRecorder {
+	request, _ := http.NewRequest("DELETE", fmt.Sprintf(deletionUrl, name), nil)
 	return sendStorageClassApiRequest(request)
 }
 

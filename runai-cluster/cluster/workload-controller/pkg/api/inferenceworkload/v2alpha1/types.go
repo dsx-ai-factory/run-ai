@@ -12,9 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/common"
 	ip "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/inferencepolicy/v2alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/builders/factory"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -57,13 +55,6 @@ type InferenceWorkloadList struct {
 
 func init() {
 	SchemeBuilder.Register(&InferenceWorkload{}, &InferenceWorkloadList{})
-}
-
-// Builder return the factory of the inference builder
-func (iw *InferenceWorkload) Builder(options factory.BuilderOptions, k8sClient client.Client,
-	podLabels map[string]string, podAnnotations map[string]string) factory.Builder {
-	builderConstructor := factory.BuildersRegistry[factory.InferenceBuilder]
-	return builderConstructor(iw, &servingv1.Service{}, k8sClient, options, podLabels, podAnnotations)
 }
 
 func GetNewInferenceWorkloadFn() client.Object {

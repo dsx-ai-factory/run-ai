@@ -203,7 +203,8 @@ export interface ClusterObjectsStatus {
 export const ClusterResourceType = {
     Pvc: 'pvc',
     Secret: 'secret',
-    ConfigMap: 'config-map'
+    ConfigMap: 'config-map',
+    ResourceClaimTemplate: 'resource-claim-template'
 } as const;
 
 export type ClusterResourceType = typeof ClusterResourceType[keyof typeof ClusterResourceType];
@@ -814,6 +815,83 @@ export const PvcVolumeMode = {
 } as const;
 
 export type PvcVolumeMode = typeof PvcVolumeMode[keyof typeof PvcVolumeMode];
+
+
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplate
+ */
+export interface ResourceClaimTemplate {
+    /**
+     * ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters. 
+     * @type {string}
+     * @memberof ResourceClaimTemplate
+     */
+    'name': string;
+    /**
+     * the namespace the ResourceClaimTemplate lives in
+     * @type {string}
+     * @memberof ResourceClaimTemplate
+     */
+    'namespace': string;
+    /**
+     * 
+     * @type {ResourceScopeType}
+     * @memberof ResourceClaimTemplate
+     */
+    'scopeType': ResourceScopeType;
+    /**
+     * Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id. 
+     * @type {string}
+     * @memberof ResourceClaimTemplate
+     */
+    'scopeId': string;
+    /**
+     * 
+     * @type {Origin}
+     * @memberof ResourceClaimTemplate
+     */
+    'origin'?: Origin | null;
+    /**
+     * Control-plane asset id this template was created from. Present only when origin is \"assets\". Allows the control plane to join tracker rows back to the originating asset record. 
+     * @type {string}
+     * @memberof ResourceClaimTemplate
+     */
+    'assetId'?: string | null;
+    /**
+     * list of issues that was found while syncing the resource to the cluster
+     * @type {Array<Issue>}
+     * @memberof ResourceClaimTemplate
+     */
+    'issues'?: Array<Issue>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplates
+ */
+export interface ResourceClaimTemplates {
+    /**
+     * 
+     * @type {Array<ResourceClaimTemplate>}
+     * @memberof ResourceClaimTemplates
+     */
+    'items': Array<ResourceClaimTemplate>;
+}
+/**
+ * The scope type the resource is defined at.
+ * @export
+ * @enum {string}
+ */
+
+export const ResourceScopeType = {
+    Cluster: 'cluster',
+    Department: 'department',
+    Project: 'project'
+} as const;
+
+export type ResourceScopeType = typeof ResourceScopeType[keyof typeof ResourceScopeType];
 
 
 /**
@@ -2576,6 +2654,94 @@ export const DeviceClassesApiAxiosParamCreator = function (configuration?: Confi
     return {
         /**
          * 
+         * @summary create a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createDeviceClass: async (deviceClass: DeviceClass, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'deviceClass' is not null or undefined
+            assertParamExists('createDeviceClass', 'deviceClass', deviceClass)
+            const localVarPath = `/api/v1/device-classes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(deviceClass, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary delete a Device Class
+         * @param {string} clusterId The id of the cluster
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteDeviceClass: async (clusterId: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('deleteDeviceClass', 'clusterId', clusterId)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('deleteDeviceClass', 'name', name)
+            const localVarPath = `/api/v1/device-classes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary get device classes for a given cluster
          * @param {string} clusterId The id of the cluster
          * @param {string} [name] filter by name
@@ -2667,6 +2833,46 @@ export const DeviceClassesApiAxiosParamCreator = function (configuration?: Confi
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary update a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateDeviceClass: async (deviceClass: DeviceClass, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'deviceClass' is not null or undefined
+            assertParamExists('updateDeviceClass', 'deviceClass', deviceClass)
+            const localVarPath = `/api/v1/device-classes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(deviceClass, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -2677,6 +2883,29 @@ export const DeviceClassesApiAxiosParamCreator = function (configuration?: Confi
 export const DeviceClassesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DeviceClassesApiAxiosParamCreator(configuration)
     return {
+        /**
+         * 
+         * @summary create a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createDeviceClass(deviceClass: DeviceClass, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeviceClass>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createDeviceClass(deviceClass, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary delete a Device Class
+         * @param {string} clusterId The id of the cluster
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteDeviceClass(clusterId: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteDeviceClass(clusterId, name, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
         /**
          * 
          * @summary get device classes for a given cluster
@@ -2701,6 +2930,17 @@ export const DeviceClassesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.syncDeviceClass(clusterId, deviceClasses, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * 
+         * @summary update a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateDeviceClass(deviceClass: DeviceClass, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeviceClass>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateDeviceClass(deviceClass, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -2711,6 +2951,27 @@ export const DeviceClassesApiFp = function(configuration?: Configuration) {
 export const DeviceClassesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = DeviceClassesApiFp(configuration)
     return {
+        /**
+         * 
+         * @summary create a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createDeviceClass(deviceClass: DeviceClass, options?: any): AxiosPromise<DeviceClass> {
+            return localVarFp.createDeviceClass(deviceClass, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary delete a Device Class
+         * @param {string} clusterId The id of the cluster
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteDeviceClass(clusterId: string, name: string, options?: any): AxiosPromise<void> {
+            return localVarFp.deleteDeviceClass(clusterId, name, options).then((request) => request(axios, basePath));
+        },
         /**
          * 
          * @summary get device classes for a given cluster
@@ -2733,6 +2994,16 @@ export const DeviceClassesApiFactory = function (configuration?: Configuration, 
         syncDeviceClass(clusterId: string, deviceClasses: DeviceClasses, options?: any): AxiosPromise<DeviceClasses> {
             return localVarFp.syncDeviceClass(clusterId, deviceClasses, options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @summary update a Device Class
+         * @param {DeviceClass} deviceClass 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateDeviceClass(deviceClass: DeviceClass, options?: any): AxiosPromise<DeviceClass> {
+            return localVarFp.updateDeviceClass(deviceClass, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -2743,6 +3014,31 @@ export const DeviceClassesApiFactory = function (configuration?: Configuration, 
  * @extends {BaseAPI}
  */
 export class DeviceClassesApi extends BaseAPI {
+    /**
+     * 
+     * @summary create a Device Class
+     * @param {DeviceClass} deviceClass 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceClassesApi
+     */
+    public createDeviceClass(deviceClass: DeviceClass, options?: AxiosRequestConfig) {
+        return DeviceClassesApiFp(this.configuration).createDeviceClass(deviceClass, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary delete a Device Class
+     * @param {string} clusterId The id of the cluster
+     * @param {string} name filter by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceClassesApi
+     */
+    public deleteDeviceClass(clusterId: string, name: string, options?: AxiosRequestConfig) {
+        return DeviceClassesApiFp(this.configuration).deleteDeviceClass(clusterId, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @summary get device classes for a given cluster
@@ -2767,6 +3063,18 @@ export class DeviceClassesApi extends BaseAPI {
      */
     public syncDeviceClass(clusterId: string, deviceClasses: DeviceClasses, options?: AxiosRequestConfig) {
         return DeviceClassesApiFp(this.configuration).syncDeviceClass(clusterId, deviceClasses, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary update a Device Class
+     * @param {DeviceClass} deviceClass 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceClassesApi
+     */
+    public updateDeviceClass(deviceClass: DeviceClass, options?: AxiosRequestConfig) {
+        return DeviceClassesApiFp(this.configuration).updateDeviceClass(deviceClass, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -5400,6 +5708,501 @@ export class PVCsApi extends BaseAPI {
      */
     public syncProjectsPvcsV2(clusterUuid: string, namespace: string, pVCs: PVCs, options?: AxiosRequestConfig) {
         return PVCsApiFp(this.configuration).syncProjectsPvcsV2(clusterUuid, namespace, pVCs, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * ResourceClaimTemplatesApi - axios parameter creator
+ * @export
+ */
+export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary create a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createResourceClaimTemplate: async (clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('createResourceClaimTemplate', 'clusterId', clusterId)
+            // verify required parameter 'resourceClaimTemplate' is not null or undefined
+            assertParamExists('createResourceClaimTemplate', 'resourceClaimTemplate', resourceClaimTemplate)
+            const localVarPath = `/api/v1/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(resourceClaimTemplate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary delete a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceScopeType} scopeType The resource scope type to filter by.
+         * @param {string} scopeId The scope resource id that identifies the row.
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteResourceClaimTemplate: async (clusterId: string, scopeType: ResourceScopeType, scopeId: string, name: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('deleteResourceClaimTemplate', 'clusterId', clusterId)
+            // verify required parameter 'scopeType' is not null or undefined
+            assertParamExists('deleteResourceClaimTemplate', 'scopeType', scopeType)
+            // verify required parameter 'scopeId' is not null or undefined
+            assertParamExists('deleteResourceClaimTemplate', 'scopeId', scopeId)
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('deleteResourceClaimTemplate', 'name', name)
+            const localVarPath = `/api/v1/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (scopeType !== undefined) {
+                localVarQueryParameter['scopeType'] = scopeType;
+            }
+
+            if (scopeId !== undefined) {
+                localVarQueryParameter['scopeId'] = scopeId;
+            }
+
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary list details of ResourceClaimTemplates
+         * @param {string} [scopeType] The type of resource we want to filter by.
+         * @param {string} [scopeId] filter by scope id
+         * @param {string} [name] filter by name
+         * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
+         * @param {'all' | 'assets' | 'existing'} [origin] filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use \&#39;all\&#39;.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listResourceClaimTemplates: async (scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (scopeType !== undefined) {
+                localVarQueryParameter['scopeType'] = scopeType;
+            }
+
+            if (scopeId !== undefined) {
+                localVarQueryParameter['scopeId'] = scopeId;
+            }
+
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (origin !== undefined) {
+                localVarQueryParameter['origin'] = origin;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists. 
+         * @summary sync the full set of ResourceClaimTemplates observed in a cluster
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplates} resourceClaimTemplates 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        syncResourceClaimTemplates: async (clusterId: string, resourceClaimTemplates: ResourceClaimTemplates, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('syncResourceClaimTemplates', 'clusterId', clusterId)
+            // verify required parameter 'resourceClaimTemplates' is not null or undefined
+            assertParamExists('syncResourceClaimTemplates', 'resourceClaimTemplates', resourceClaimTemplates)
+            const localVarPath = `/api/v1/resource-claim-templates/sync`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(resourceClaimTemplates, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary update a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateResourceClaimTemplate: async (clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('updateResourceClaimTemplate', 'clusterId', clusterId)
+            // verify required parameter 'resourceClaimTemplate' is not null or undefined
+            assertParamExists('updateResourceClaimTemplate', 'resourceClaimTemplate', resourceClaimTemplate)
+            const localVarPath = `/api/v1/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(resourceClaimTemplate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ResourceClaimTemplatesApi - functional programming interface
+ * @export
+ */
+export const ResourceClaimTemplatesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ResourceClaimTemplatesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary create a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplate>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createResourceClaimTemplate(clusterId, resourceClaimTemplate, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary delete a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceScopeType} scopeType The resource scope type to filter by.
+         * @param {string} scopeId The scope resource id that identifies the row.
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteResourceClaimTemplate(clusterId: string, scopeType: ResourceScopeType, scopeId: string, name: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary list details of ResourceClaimTemplates
+         * @param {string} [scopeType] The type of resource we want to filter by.
+         * @param {string} [scopeId] filter by scope id
+         * @param {string} [name] filter by name
+         * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
+         * @param {'all' | 'assets' | 'existing'} [origin] filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use \&#39;all\&#39;.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplates>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists. 
+         * @summary sync the full set of ResourceClaimTemplates observed in a cluster
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplates} resourceClaimTemplates 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async syncResourceClaimTemplates(clusterId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplates>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.syncResourceClaimTemplates(clusterId, resourceClaimTemplates, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary update a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplate>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateResourceClaimTemplate(clusterId, resourceClaimTemplate, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * ResourceClaimTemplatesApi - factory interface
+ * @export
+ */
+export const ResourceClaimTemplatesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ResourceClaimTemplatesApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary create a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: any): AxiosPromise<ResourceClaimTemplate> {
+            return localVarFp.createResourceClaimTemplate(clusterId, resourceClaimTemplate, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary delete a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceScopeType} scopeType The resource scope type to filter by.
+         * @param {string} scopeId The scope resource id that identifies the row.
+         * @param {string} name filter by name
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteResourceClaimTemplate(clusterId: string, scopeType: ResourceScopeType, scopeId: string, name: string, options?: any): AxiosPromise<void> {
+            return localVarFp.deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary list details of ResourceClaimTemplates
+         * @param {string} [scopeType] The type of resource we want to filter by.
+         * @param {string} [scopeId] filter by scope id
+         * @param {string} [name] filter by name
+         * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
+         * @param {'all' | 'assets' | 'existing'} [origin] filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use \&#39;all\&#39;.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', options?: any): AxiosPromise<ResourceClaimTemplates> {
+            return localVarFp.listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists. 
+         * @summary sync the full set of ResourceClaimTemplates observed in a cluster
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplates} resourceClaimTemplates 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        syncResourceClaimTemplates(clusterId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: any): AxiosPromise<ResourceClaimTemplates> {
+            return localVarFp.syncResourceClaimTemplates(clusterId, resourceClaimTemplates, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary update a Resource Claim Template
+         * @param {string} clusterId The id of the cluster
+         * @param {ResourceClaimTemplate} resourceClaimTemplate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: any): AxiosPromise<ResourceClaimTemplate> {
+            return localVarFp.updateResourceClaimTemplate(clusterId, resourceClaimTemplate, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ResourceClaimTemplatesApi - object-oriented interface
+ * @export
+ * @class ResourceClaimTemplatesApi
+ * @extends {BaseAPI}
+ */
+export class ResourceClaimTemplatesApi extends BaseAPI {
+    /**
+     * 
+     * @summary create a Resource Claim Template
+     * @param {string} clusterId The id of the cluster
+     * @param {ResourceClaimTemplate} resourceClaimTemplate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public createResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).createResourceClaimTemplate(clusterId, resourceClaimTemplate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary delete a Resource Claim Template
+     * @param {string} clusterId The id of the cluster
+     * @param {ResourceScopeType} scopeType The resource scope type to filter by.
+     * @param {string} scopeId The scope resource id that identifies the row.
+     * @param {string} name filter by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public deleteResourceClaimTemplate(clusterId: string, scopeType: ResourceScopeType, scopeId: string, name: string, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).deleteResourceClaimTemplate(clusterId, scopeType, scopeId, name, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary list details of ResourceClaimTemplates
+     * @param {string} [scopeType] The type of resource we want to filter by.
+     * @param {string} [scopeId] filter by scope id
+     * @param {string} [name] filter by name
+     * @param {string} [clusterId] Filter using the Universally Unique Identifier (UUID) of the cluster.
+     * @param {'all' | 'assets' | 'existing'} [origin] filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use \&#39;all\&#39;.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public listResourceClaimTemplates(scopeType?: string, scopeId?: string, name?: string, clusterId?: string, origin?: 'all' | 'assets' | 'existing', options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).listResourceClaimTemplates(scopeType, scopeId, name, clusterId, origin, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists. 
+     * @summary sync the full set of ResourceClaimTemplates observed in a cluster
+     * @param {string} clusterId The id of the cluster
+     * @param {ResourceClaimTemplates} resourceClaimTemplates 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public syncResourceClaimTemplates(clusterId: string, resourceClaimTemplates: ResourceClaimTemplates, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).syncResourceClaimTemplates(clusterId, resourceClaimTemplates, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary update a Resource Claim Template
+     * @param {string} clusterId The id of the cluster
+     * @param {ResourceClaimTemplate} resourceClaimTemplate 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public updateResourceClaimTemplate(clusterId: string, resourceClaimTemplate: ResourceClaimTemplate, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).updateResourceClaimTemplate(clusterId, resourceClaimTemplate, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
