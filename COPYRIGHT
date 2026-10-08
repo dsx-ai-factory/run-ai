@@ -18846,12 +18846,14 @@ Components:
   github.com/prometheus/client_golang v1.23.2
   github.com/prometheus/client_golang/prometheus v1.23.2
   github.com/prometheus/client_golang/prometheus v1.24.1
+  github.com/prometheus/client_golang/prometheus v1.25.0
   github.com/prometheus/client_model/go v0.6.2
   github.com/prometheus/client_model/go v0.6.3
   github.com/prometheus/common v0.67.1
   github.com/prometheus/common v0.67.5
   github.com/prometheus/common v0.70.1
   github.com/prometheus/common v0.71.0
+  github.com/prometheus/common v0.72.0
   github.com/prometheus/procfs v0.20.1
   github.com/prometheus/procfs v0.21.1
   github.com/prometheus/procfs v0.22.0
@@ -21624,6 +21626,7 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil v1.23.2
   github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil v1.24.1
+  github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil v1.25.0
 
 Copyright (c) 2013 The Go Authors. All rights reserved.
 
@@ -35286,6 +35289,7 @@ NOTICE of github.com/prometheus/client_golang
 Components:
   github.com/prometheus/client_golang v1.23.2
   github.com/prometheus/client_golang v1.24.1
+  github.com/prometheus/client_golang v1.25.0
 
 Prometheus instrumentation library for Go applications
 Copyright 2012-2015 The Prometheus Authors
@@ -35324,6 +35328,7 @@ Components:
   github.com/prometheus/common v0.67.5
   github.com/prometheus/common v0.70.1
   github.com/prometheus/common v0.71.0
+  github.com/prometheus/common v0.72.0
 
 Common libraries shared by Prometheus Go components.
 Copyright 2015 The Prometheus Authors
