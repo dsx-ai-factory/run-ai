@@ -68,6 +68,34 @@ var _ = Describe("overrideFromWorkloadRunner ewi-status guard", func() {
 		Expect(string(fields.Phase)).To(Equal("Failed"))
 	})
 
+	It("surfaces the admission rejection reason from a failed WorkloadRunner", func() {
+		const rejectionReason = "admission webhook denied the request: policy disallow-host-path-runai-projects, rule no-host-path failed at /spec/volumes/0/hostPath"
+
+		scheme := runtime.NewScheme()
+		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
+		Expect(dromosv1alpha1.AddToScheme(scheme)).To(Succeed())
+		wlr := &dromosv1alpha1.WorkloadRunner{
+			ObjectMeta: metav1.ObjectMeta{Name: wlrName, Namespace: ns},
+			Status: dromosv1alpha1.WorkloadRunnerStatus{
+				Phase: dromosv1alpha1.WorkloadRunnerPhaseFailed,
+				Issues: []dromosv1alpha1.Issue{{
+					Group:       "Internal",
+					Description: rejectionReason,
+					IsCritical:  true,
+				}},
+			},
+		}
+		parser := NewWorkloadParser(fakeclient.NewClientBuilder().WithScheme(scheme).WithObjects(wlr).Build())
+		creatingMessage := "Workload is being created"
+		fields := openapi.WorkloadSyncFields{Phase: "Creating", PhaseMessage: &creatingMessage}
+
+		parser.overrideFromWorkloadRunner(newExternalWorkload(nil), &fields)
+
+		Expect(string(fields.Phase)).To(Equal("Failed"))
+		Expect(fields.PhaseMessage).NotTo(BeNil())
+		Expect(*fields.PhaseMessage).To(Equal(rejectionReason))
+	})
+
 	It("still maps WorkloadIssue conditions when the WorkloadRunner fetch fails", func() {
 		scheme := runtime.NewScheme()
 		Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
