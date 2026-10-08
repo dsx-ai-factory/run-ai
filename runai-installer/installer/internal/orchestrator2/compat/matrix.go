@@ -84,7 +84,7 @@ var matrix = map[string]Locks{
 		LWS:                 "0.10.0",
 		NIMOperator:         "3.1.2",
 		Grove:               "v0.1.0-alpha.12-rc1",
-		Dynamo:              "1.4.2",
+		Dynamo:              "1.5.1",
 		NFD:                 "stable",
 		SRIOVOperator:       "stable",
 		Serverless:          "stable",
