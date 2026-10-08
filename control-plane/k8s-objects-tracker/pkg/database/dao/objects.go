@@ -17,6 +17,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/k8s-objects-tracker/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
+	"github.com/google/uuid"
 	"gorm.io/gorm/clause"
 )
 
@@ -230,6 +231,12 @@ func extractNames(objects []*models.Object) []string {
 // RCT sync endpoint uses it to prune a cluster-wide full-set payload where a
 // template name can repeat across cluster / department / project scopes.
 //
+// Any resource_issues rows pointing at the deleted objects (resource_id =
+// objects.id) are removed in the same transaction so the sync does not leave
+// orphan issues behind. The whole thing happens in one transaction so an
+// error on the issues delete aborts the object delete too, keeping the two
+// tables consistent even on partial failure.
+//
 // Passing an empty-model receiver to Delete matches the pattern
 // DeleteObjectsNotInCluster uses so GORM does not splice primary keys back
 // into the WHERE clause from a different receiver.
@@ -237,11 +244,15 @@ func DeleteObjectsNotInScopedKeys(ctx context.Context, filter *models.ObjectFilt
 	filterRecord := models.NewObject(filter)
 	dbErr := api.NewError(http.StatusServiceUnavailable, filterRecord.ErrorMessage("delete"), nil)
 
-	db := runaidb.DB().WithContext(ctx)
+	tx := runaidb.DB().WithContext(ctx).Begin()
+	committed := false
+	defer orm.FinalizeTransaction(tx, &committed)
 
-	tx := db.Model(filterRecord).Where(filter)
+	// 1. Collect the ids about to be pruned so we can wipe their
+	//    resource_issues before the FK target disappears.
+	idQuery := tx.Model(filterRecord).Where(filter)
 	if len(keptKeys) > 0 {
-		tx = tx.Where(
+		idQuery = idQuery.Where(
 			fmt.Sprintf("(%s, %s, %s, %s) NOT IN ?",
 				models.ObjectScopeTypeColumn, models.ObjectsDepartmentIdColumn,
 				models.ObjectsProjectIdColumn, models.ObjectsNameColumn),
@@ -249,8 +260,42 @@ func DeleteObjectsNotInScopedKeys(ctx context.Context, filter *models.ObjectFilt
 		)
 	}
 
-	if _, err := tx.Delete(&models.Object{}); err != nil {
+	var prunedIds []string
+	if err := idQuery.Pluck(models.ObjectsIdColumn, &prunedIds); err != nil {
 		return dbErr.WithDetails(err)
 	}
+
+	// 2. Delete the dangling resource_issues keyed by resource_id = objects.id.
+	//    Scoped by tenant_id (always) and cluster_id (whenever the caller
+	//    supplied one) so we never reach beyond the filter's blast radius.
+	if len(prunedIds) > 0 {
+		issuesTx := tx.Where(fmt.Sprintf("%s = ?", models.TenantIdColumn), filter.TenantId)
+		if filter.ClusterId != uuid.Nil {
+			issuesTx = issuesTx.Where(fmt.Sprintf("%s = ?", models.ClusterIdColumn), filter.ClusterId.String())
+		}
+		if _, err := issuesTx.Where(fmt.Sprintf("%s IN ?", models.ResourceIdColumn), prunedIds).
+			Delete(&models.ResourceIssue{}); err != nil {
+			return dbErr.WithDetails(err)
+		}
+	}
+
+	// 3. Delete the objects themselves.
+	deleteTx := tx.Model(filterRecord).Where(filter)
+	if len(keptKeys) > 0 {
+		deleteTx = deleteTx.Where(
+			fmt.Sprintf("(%s, %s, %s, %s) NOT IN ?",
+				models.ObjectScopeTypeColumn, models.ObjectsDepartmentIdColumn,
+				models.ObjectsProjectIdColumn, models.ObjectsNameColumn),
+			keptKeys,
+		)
+	}
+	if _, err := deleteTx.Delete(&models.Object{}); err != nil {
+		return dbErr.WithDetails(err)
+	}
+
+	if commitErr := tx.Commit(); commitErr != nil {
+		return dbErr.WithDetails(commitErr)
+	}
+	committed = true
 	return nil
 }
