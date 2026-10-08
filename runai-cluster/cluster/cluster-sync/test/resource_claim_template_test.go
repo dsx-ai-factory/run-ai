@@ -15,6 +15,7 @@ import (
 	trackerclient "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
+	cs_constants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/controllers"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/test/fakecachedclient"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
@@ -22,22 +23,28 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
+	resourcev1 "k8s.io/api/resource/v1"
+	"k8s.io/apimachinery/pkg/types"
 	fakerunaiclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-// Exercises the ResourceClaimTemplate controller/handler. Unlike DeviceClass,
-// RCTs intentionally go through a single collapsed /sync endpoint (no per-item
-// CRUD surface - see the handler for the why), so every informer event funnels
-// through the same coalesced resync key. The test asserts that:
+// Exercises the ResourceClaimTemplate controller/handler after it was aligned
+// with the DeviceClass pattern:
 //
-//   - the full-set sync carries exactly the RCTs the handler is expected to
-//     keep (project-scope with the control-plane project id resolved from the
-//     kai Project, cluster/department-scope in the runai namespace, and
-//     asset-owned templates), and
-//   - RCTs the handler must drop as replicas never leak out: cluster/
-//     department-scope templates outside the runai namespace, and project-
-//     scope templates in namespaces that are not surfaced by GetAllProjects
-//     or whose Project does not expose its id label.
+//   - informer Add -> per-item POST (CreateResourceClaimTemplate)
+//   - informer Update -> rate-limited PUT (UpdateResourceClaimTemplate)
+//   - informer Delete -> per-item DELETE (DeleteResourceClaimTemplate)
+//   - liveness sync -> full-set /sync (SyncResourceClaimTemplates) which also
+//     prunes anything the control plane still has but the cluster does not.
+//
+// Pre-existing objects reach the control plane through the startup /sync -
+// their Add events typically race the liveness ping and are rejected by the
+// `IsRunaiBackendAvailable` filter, so per-item CRUD assertions only cover
+// events that happen AFTER backend-available flips true.
+//
+// Replicas (cluster/department-scope outside the runai namespace, project-
+// scope in unmanaged namespaces, project-scope whose Project has no id label)
+// must never reach any endpoint.
 var _ = Describe("A resource_claim_template controller test", func() {
 	var (
 		server           *ghttp.Server
@@ -48,14 +55,67 @@ var _ = Describe("A resource_claim_template controller test", func() {
 		ctx     context.Context
 		cancel  context.CancelFunc
 
-		// Captures every sync body the handler POSTs. The RCT handler
-		// coalesces informer events through a single workqueue key, so
-		// we see one call per rate-limited tick rather than one per
-		// event - tests look at the latest captured body under the
-		// mutex rather than racing on a specific call ordinal.
-		syncMu     sync.Mutex
-		syncBodies []trackerclient.ResourceClaimTemplates
+		callsMu      sync.Mutex
+		createdCalls []trackerclient.ResourceClaimTemplate
+		updatedCalls []trackerclient.ResourceClaimTemplate
+		deletedCalls []deletedRctCall
+		syncBodies   []trackerclient.ResourceClaimTemplates
 	)
+
+	resetCalls := func() {
+		callsMu.Lock()
+		defer callsMu.Unlock()
+		createdCalls = nil
+		updatedCalls = nil
+		deletedCalls = nil
+		syncBodies = nil
+	}
+
+	namesOf := func(items []trackerclient.ResourceClaimTemplate) []string {
+		names := make([]string, 0, len(items))
+		for i := range items {
+			names = append(names, items[i].Name)
+		}
+		return names
+	}
+
+	createdNames := func() []string {
+		callsMu.Lock()
+		defer callsMu.Unlock()
+		return namesOf(createdCalls)
+	}
+
+	updatedNames := func() []string {
+		callsMu.Lock()
+		defer callsMu.Unlock()
+		return namesOf(updatedCalls)
+	}
+
+	currentDeletedCalls := func() []deletedRctCall {
+		callsMu.Lock()
+		defer callsMu.Unlock()
+		return append([]deletedRctCall{}, deletedCalls...)
+	}
+
+	latestSyncNames := func() []string {
+		callsMu.Lock()
+		defer callsMu.Unlock()
+		if len(syncBodies) == 0 {
+			return nil
+		}
+		return namesOf(syncBodies[len(syncBodies)-1].Items)
+	}
+
+	createdByName := func(name string) (trackerclient.ResourceClaimTemplate, bool) {
+		callsMu.Lock()
+		defer callsMu.Unlock()
+		for i := range createdCalls {
+			if createdCalls[i].Name == name {
+				return createdCalls[i], true
+			}
+		}
+		return trackerclient.ResourceClaimTemplate{}, false
+	}
 
 	BeforeEach(func() {
 		server = CreateBasicRunaiBackend()
@@ -64,143 +124,113 @@ var _ = Describe("A resource_claim_template controller test", func() {
 		server.AllowUnhandledRequests = true
 	})
 
-	// Resets the shared sync accumulator for every spec. The handler's
-	// coalesced sync key means older spec bodies would otherwise bleed
-	// across Serial It-blocks that share this Context's BeforeEach.
-	resetSyncBodies := func() {
-		syncMu.Lock()
-		defer syncMu.Unlock()
-		syncBodies = nil
-	}
-
-	latestSync := func() trackerclient.ResourceClaimTemplates {
-		syncMu.Lock()
-		defer syncMu.Unlock()
-		if len(syncBodies) == 0 {
-			return trackerclient.ResourceClaimTemplates{}
-		}
-		return syncBodies[len(syncBodies)-1]
-	}
-
-	latestItemNames := func() []string {
-		latest := latestSync()
-		names := make([]string, 0, len(latest.Items))
-		for i := range latest.Items {
-			names = append(names, latest.Items[i].Name)
-		}
-		return names
-	}
-
-	findItem := func(name string) *trackerclient.ResourceClaimTemplate {
-		latest := latestSync()
-		for i := range latest.Items {
-			if latest.Items[i].Name == name {
-				return &latest.Items[i]
-			}
-		}
-		return nil
-	}
-
-	Context("runai backend is alive, mix of scoped and replica RCTs live in the cluster", Serial, func() {
-		// --- Projects wiring the handler's namespace -> project-id map. ---
-		// The handler reads kai.resources Projects (not legacy v2.Projects)
-		// via util.GetAllProjects; the project id label is what the sync
-		// payload's scopeId must carry for project-scoped RCTs.
+	Context("backend is alive, mix of scoped and replica RCTs live in the cluster", Serial, func() {
+		// Projects wiring the handler's namespace -> project-id resolver.
+		// The per-item path goes through util.GetProjectIdFromNamespaceName
+		// (which reads the Namespace RunaiQueueLabel then fetches the kai
+		// Project), so the fixture must include the Namespace.
 		var (
 			projectWithIdNamespace = "runai-ofer"
-			projectWithIdValue     = "4500002"
-			projectNoIdNamespace   = "runai-no-id"
+			projectName            = "ofer"
+			projectIdValue         = "4500002"
+			departmentIdLabel      = "4500003"
 
-			departmentIdLabel = "4500003"
-
-			projectWithId    = BuildKaiProject("ofer", projectWithIdValue, projectWithIdNamespace)
-			projectWithoutId = BuildKaiProject("no-id", "", projectNoIdNamespace)
+			runaiManagedNs = BuildNamespace(projectWithIdNamespace,
+				map[string]string{cs_constants.RunaiQueueLabel: projectName})
+			kaiProject    = BuildKaiProject(projectName, projectIdValue, projectWithIdNamespace)
+			legacyProject = BuildProject(projectName, projectIdValue, projectWithIdNamespace)
 		)
 
-		// --- RCTs the handler must ship. ---
+		// Pre-existing RCTs - these reach the server through startup /sync.
 		var (
-			projectRct = BuildResourceClaimTemplate(
+			existingProjectRct = BuildResourceClaimTemplate(
 				"rct-project", projectWithIdNamespace, nil)
-
-			clusterRct = BuildResourceClaimTemplate(
+			existingClusterRct = BuildResourceClaimTemplate(
 				"rct-cluster", runaijobv1.DefaultNamespace, map[string]string{
 					commonconstants.ClusterWideResourceLabel: "true",
 				})
-
-			departmentRct = BuildResourceClaimTemplate(
+			existingDepartmentRct = BuildResourceClaimTemplate(
 				"rct-department", runaijobv1.DefaultNamespace, map[string]string{
 					commonconstants.DepartmentScopeLabel: departmentIdLabel,
 				})
-
-			assetRct = BuildResourceClaimTemplate(
-				"rct-asset", projectWithIdNamespace, map[string]string{
-					commonconstants.RunaiAssetLabel:   "ResourceClaimTemplate",
-					commonconstants.RunaiAssetIdLabel: "asset-xyz",
-				})
 		)
 
-		// --- RCTs the handler must drop silently. ---
+		// Replicas the handler must drop (and so must never show up in
+		// any per-item or /sync body).
 		var (
-			// Project namespace exists but the Project has no id
-			// label; the handler can't resolve a scopeId so this is
-			// treated as a replica.
-			projectNoIdRct = BuildResourceClaimTemplate(
-				"rct-project-no-id", projectNoIdNamespace, nil)
-
-			// Namespace is not Run:ai-managed at all (no Project
-			// backs it); same code path as the no-id case.
-			projectUnmanagedRct = BuildResourceClaimTemplate(
-				"rct-project-unmanaged", "random-ns", nil)
-
-			// Cluster-scoped template outside the runai namespace -
-			// a per-project copy left behind by replication - must
-			// never be reported back to the control plane.
 			clusterReplicaRct = BuildResourceClaimTemplate(
 				"rct-cluster-replica", projectWithIdNamespace, map[string]string{
 					commonconstants.ClusterWideResourceLabel: "true",
 				})
-
-			// Same rule applies to department-scope templates.
-			departmentReplicaRct = BuildResourceClaimTemplate(
-				"rct-department-replica", projectWithIdNamespace, map[string]string{
-					commonconstants.DepartmentScopeLabel: departmentIdLabel,
-				})
+			projectUnmanagedRct = BuildResourceClaimTemplate(
+				"rct-project-unmanaged", "random-ns", nil)
 		)
 
-		shippedNames := []string{
-			projectRct.Name,
-			clusterRct.Name,
-			departmentRct.Name,
-			assetRct.Name,
-		}
-		droppedNames := []string{
-			projectNoIdRct.Name,
-			projectUnmanagedRct.Name,
-			clusterReplicaRct.Name,
-			departmentReplicaRct.Name,
+		shippedExistingNames := []string{
+			existingProjectRct.Name,
+			existingClusterRct.Name,
+			existingDepartmentRct.Name,
 		}
 
 		BeforeEach(func() {
-			resetSyncBodies()
+			resetCalls()
+
+			server.RouteToHandler("POST", "/api/v1/resource-claim-templates", func(writer http.ResponseWriter, request *http.Request) {
+				var payload trackerclient.ResourceClaimTemplate
+				ghttp.VerifyContentType("application/json")(writer, request)
+				Expect(json.NewDecoder(request.Body).Decode(&payload)).To(Succeed())
+				Expect(request.URL.Query().Get("clusterId")).To(Equal(ClusterIdForTests))
+				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
+
+				callsMu.Lock()
+				createdCalls = append(createdCalls, payload)
+				callsMu.Unlock()
+			})
+
+			server.RouteToHandler("PUT", "/api/v1/resource-claim-templates", func(writer http.ResponseWriter, request *http.Request) {
+				var payload trackerclient.ResourceClaimTemplate
+				ghttp.VerifyContentType("application/json")(writer, request)
+				Expect(json.NewDecoder(request.Body).Decode(&payload)).To(Succeed())
+				Expect(request.URL.Query().Get("clusterId")).To(Equal(ClusterIdForTests))
+				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
+
+				callsMu.Lock()
+				updatedCalls = append(updatedCalls, payload)
+				callsMu.Unlock()
+			})
+
+			server.RouteToHandler("DELETE", "/api/v1/resource-claim-templates", func(writer http.ResponseWriter, request *http.Request) {
+				ghttp.RespondWith(http.StatusNoContent, "")(writer, request)
+				q := request.URL.Query()
+
+				callsMu.Lock()
+				deletedCalls = append(deletedCalls, deletedRctCall{
+					clusterId: q.Get("clusterId"),
+					scopeType: q.Get("scopeType"),
+					scopeId:   q.Get("scopeId"),
+					name:      q.Get("name"),
+				})
+				callsMu.Unlock()
+			})
 
 			server.RouteToHandler("POST", "/api/v1/resource-claim-templates/sync", func(writer http.ResponseWriter, request *http.Request) {
 				var payload trackerclient.ResourceClaimTemplates
 				ghttp.VerifyContentType("application/json")(writer, request)
 				Expect(json.NewDecoder(request.Body).Decode(&payload)).To(Succeed())
+				Expect(request.URL.Query().Get("clusterId")).To(Equal(ClusterIdForTests))
 				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
 
-				syncMu.Lock()
+				callsMu.Lock()
 				syncBodies = append(syncBodies, payload)
-				syncMu.Unlock()
+				callsMu.Unlock()
 			})
 
 			fakeClientBuilder := fakerunaiclient.NewClientBuilder().
 				WithScheme(GetTestScheme()).
 				WithObjects(
-					projectWithId, projectWithoutId,
-					projectRct, clusterRct, departmentRct, assetRct,
-					projectNoIdRct, projectUnmanagedRct,
-					clusterReplicaRct, departmentReplicaRct,
+					runaiManagedNs, kaiProject, legacyProject,
+					existingProjectRct, existingClusterRct, existingDepartmentRct,
+					clusterReplicaRct, projectUnmanagedRct,
 				)
 
 			fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
@@ -219,80 +249,118 @@ var _ = Describe("A resource_claim_template controller test", func() {
 			server.Reset()
 		})
 
-		It("ships every scoped RCT and drops every replica/unresolvable RCT", func() {
-			// Wait for the sync body to stabilize at the expected
-			// set. Successive coalesced syncs may arrive before the
-			// informer finishes replaying every initial Add, so poll
-			// the latest body rather than the first one.
-			Eventually(latestItemNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedNames))
+		It("ships the full inventory (and only the full inventory) through startup /sync", func() {
+			Eventually(latestSyncNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedExistingNames))
 
-			// The dropped set must never appear - even on an
-			// intermediate sync. Scan every captured body.
-			syncMu.Lock()
+			// No replica may appear in any sync body - even intermediate ones.
+			callsMu.Lock()
 			bodies := append([]trackerclient.ResourceClaimTemplates{}, syncBodies...)
-			syncMu.Unlock()
+			callsMu.Unlock()
 			for _, body := range bodies {
 				for _, item := range body.Items {
-					Expect(droppedNames).ToNot(ContainElement(item.Name),
-						"replica/unresolvable RCT %q leaked into a sync body", item.Name)
+					Expect(item.Name).ToNot(BeElementOf(
+						clusterReplicaRct.Name,
+						projectUnmanagedRct.Name,
+					), "replica leaked into a /sync body")
 				}
 			}
 		})
 
-		It("rewrites the project RCT scopeId to the control-plane project id", func() {
-			Eventually(latestItemNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedNames))
+		It("POSTs a newly-added project RCT per-item, with the resolved project id", func() {
+			// Wait for startup /sync so the per-item filter guard
+			// (IsRunaiBackendAvailable) has flipped true.
+			Eventually(latestSyncNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedExistingNames))
 
-			item := findItem(projectRct.Name)
-			Expect(item).ToNot(BeNil())
-			Expect(item.ScopeType).To(Equal(trackerclient.ResourceScopeType(auth_client.SCOPETYPE_PROJECT)))
-			Expect(item.ScopeId).To(Equal(projectWithIdValue))
-			Expect(item.Namespace).To(Equal(projectWithIdNamespace))
-			Expect(item.Origin.IsSet()).To(BeTrue())
-			Expect(*item.Origin.Get()).To(Equal(trackerclient.ORIGIN_EXISTING))
-		})
-
-		It("stamps the cluster uuid on cluster-scope RCTs and the department id on department-scope RCTs", func() {
-			Eventually(latestItemNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedNames))
-
-			cluster := findItem(clusterRct.Name)
-			Expect(cluster).ToNot(BeNil())
-			Expect(cluster.ScopeType).To(Equal(trackerclient.ResourceScopeType(auth_client.SCOPETYPE_CLUSTER)))
-			Expect(cluster.ScopeId).To(Equal(ClusterIdForTests))
-
-			department := findItem(departmentRct.Name)
-			Expect(department).ToNot(BeNil())
-			Expect(department.ScopeType).To(Equal(trackerclient.ResourceScopeType(auth_client.SCOPETYPE_DEPARTMENT)))
-			Expect(department.ScopeId).To(Equal(departmentIdLabel))
-		})
-
-		It("marks asset-owned RCTs as origin=assets and propagates the asset id", func() {
-			Eventually(latestItemNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedNames))
-
-			item := findItem(assetRct.Name)
-			Expect(item).ToNot(BeNil())
-			Expect(item.Origin.IsSet()).To(BeTrue())
-			Expect(*item.Origin.Get()).To(Equal(trackerclient.ORIGIN_ASSETS))
-			Expect(item.AssetId.IsSet()).To(BeTrue())
-			Expect(*item.AssetId.Get()).To(Equal("asset-xyz"))
-		})
-
-		It("re-syncs the full inventory after an informer Add (any event triggers the coalesced resync)", func() {
-			Eventually(latestItemNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedNames))
-
-			added := BuildResourceClaimTemplate("rct-project-added", projectWithIdNamespace, nil)
+			added := BuildResourceClaimTemplate("rct-project-new", projectWithIdNamespace, nil)
 			Expect(fakeCachedClient.Create(context.TODO(), added)).To(Succeed())
 
-			expected := append([]string{added.Name}, shippedNames...)
-			Eventually(latestItemNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(expected))
+			Eventually(createdNames).WithTimeout(threeSecondTimeout).Should(ContainElement(added.Name))
+
+			captured, ok := createdByName(added.Name)
+			Expect(ok).To(BeTrue())
+			Expect(captured.ScopeType).To(Equal(trackerclient.ResourceScopeType(auth_client.SCOPETYPE_PROJECT)))
+			Expect(captured.ScopeId).To(Equal(projectIdValue))
+			Expect(captured.Namespace).To(Equal(projectWithIdNamespace))
 		})
 
-		It("re-syncs after a Delete, surfacing the shrunk inventory", func() {
-			Eventually(latestItemNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedNames))
+		It("POSTs a newly-added cluster-scope RCT per-item with the cluster uuid as scopeId", func() {
+			Eventually(latestSyncNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedExistingNames))
 
-			Expect(fakeCachedClient.Delete(context.TODO(), departmentRct)).To(Succeed())
+			added := BuildResourceClaimTemplate("rct-cluster-new", runaijobv1.DefaultNamespace, map[string]string{
+				commonconstants.ClusterWideResourceLabel: "true",
+			})
+			Expect(fakeCachedClient.Create(context.TODO(), added)).To(Succeed())
 
-			remaining := []string{projectRct.Name, clusterRct.Name, assetRct.Name}
-			Eventually(latestItemNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(remaining))
+			Eventually(createdNames).WithTimeout(threeSecondTimeout).Should(ContainElement(added.Name))
+
+			captured, ok := createdByName(added.Name)
+			Expect(ok).To(BeTrue())
+			Expect(captured.ScopeType).To(Equal(trackerclient.ResourceScopeType(auth_client.SCOPETYPE_CLUSTER)))
+			Expect(captured.ScopeId).To(Equal(ClusterIdForTests))
+		})
+
+		It("does NOT POST a newly-added replica RCT (cluster-scope label in a project namespace)", func() {
+			Eventually(latestSyncNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedExistingNames))
+
+			// Capture the names seen so far, then add a replica and
+			// make sure the per-item POST stream never grows past it.
+			replica := BuildResourceClaimTemplate("rct-cluster-replica-new", projectWithIdNamespace, map[string]string{
+				commonconstants.ClusterWideResourceLabel: "true",
+			})
+			Expect(fakeCachedClient.Create(context.TODO(), replica)).To(Succeed())
+
+			// Also add a non-replica so we have something to wait on;
+			// if the replica had leaked, it would show up alongside.
+			bystander := BuildResourceClaimTemplate("rct-bystander", runaijobv1.DefaultNamespace, map[string]string{
+				commonconstants.ClusterWideResourceLabel: "true",
+			})
+			Expect(fakeCachedClient.Create(context.TODO(), bystander)).To(Succeed())
+
+			Eventually(createdNames).WithTimeout(threeSecondTimeout).Should(ContainElement(bystander.Name))
+			Expect(createdNames()).ToNot(ContainElement(replica.Name))
+		})
+
+		It("PUTs a mutated RCT per-item via the rate-limited queue", func() {
+			Eventually(latestSyncNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedExistingNames))
+
+			current := &resourcev1.ResourceClaimTemplate{}
+			Expect(fakeCachedClient.Get(context.TODO(),
+				types.NamespacedName{Name: existingProjectRct.Name, Namespace: projectWithIdNamespace},
+				current)).To(Succeed())
+			if current.Annotations == nil {
+				current.Annotations = map[string]string{}
+			}
+			current.Annotations["edited"] = "true"
+			Expect(fakeCachedClient.Update(context.TODO(), current)).To(Succeed())
+
+			Eventually(updatedNames).WithTimeout(threeSecondTimeout).Should(ContainElement(existingProjectRct.Name))
+		})
+
+		It("DELETEs an RCT per-item with its full scope identity", func() {
+			Eventually(latestSyncNames).WithTimeout(threeSecondTimeout).Should(ConsistOf(shippedExistingNames))
+
+			toDelete := &resourcev1.ResourceClaimTemplate{}
+			Expect(fakeCachedClient.Get(context.TODO(),
+				types.NamespacedName{Name: existingClusterRct.Name, Namespace: runaijobv1.DefaultNamespace},
+				toDelete)).To(Succeed())
+			Expect(fakeCachedClient.Delete(context.TODO(), toDelete)).To(Succeed())
+
+			// Cluster-scope delete carries scopeType=cluster and
+			// scopeId=<cluster uuid>, matching the identity the
+			// parser stamps on cluster-scoped create requests.
+			Eventually(currentDeletedCalls).WithTimeout(threeSecondTimeout).Should(ContainElement(deletedRctCall{
+				clusterId: ClusterIdForTests,
+				scopeType: string(auth_client.SCOPETYPE_CLUSTER),
+				scopeId:   ClusterIdForTests,
+				name:      existingClusterRct.Name,
+			}))
 		})
 	})
 })
+
+type deletedRctCall struct {
+	clusterId string
+	scopeType string
+	scopeId   string
+	name      string
+}

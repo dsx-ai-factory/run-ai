@@ -55,6 +55,14 @@ type IK8SObjectTrackerExternalClient interface {
 	DeleteDeviceClass(ctx context.Context, clusterId string, name string) (*http.Response, error)
 	SyncDeviceClass(ctx context.Context, clusterId string, deviceClasses []openapi.DeviceClass) (*openapi.DeviceClasses, *http.Response, error)
 
+	// ResourceClaimTemplate uses the same per-item CRUD + full-set sync shape
+	// as DeviceClass. Per-item ops hit a single row (no pruning); SyncResourceClaimTemplates
+	// is reserved for the periodic drift reconciliation that upserts the full
+	// inventory and removes anything no longer in the cluster. clusterId
+	// travels in the query because the RCT body schema does not carry it.
+	CreateResourceClaimTemplate(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error)
+	UpdateResourceClaimTemplate(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error)
+	DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeType openapi.ResourceScopeType, scopeId string, name string) (*http.Response, error)
 	SyncResourceClaimTemplates(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error)
 
 	ListSecrets(ctx context.Context, clusterId string) (*openapi.SecretListResponse, *http.Response, error)
