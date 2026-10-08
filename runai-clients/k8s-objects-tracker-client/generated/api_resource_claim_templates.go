@@ -23,8 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
-//go:generate mockery --name ResourceClaimTemplatesAPI --output ../mocks/
 type ResourceClaimTemplatesAPI interface {
 
 	/*
