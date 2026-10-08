@@ -10,7 +10,6 @@ import {
   ERunaiCredentialSource,
   ERunaiCredentialType,
 } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
-import { AssetKind, type CredentialsListResponseEntry } from "@/swagger-models/assets-service-client";
 
 function createWrapper(nimOnly = true) {
   return shallowMount(FormNgcCatalogImageSection, {
@@ -39,7 +38,6 @@ describe("NIM catalog authentication", () => {
     expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toEqual({
       credentialName: "personal-key",
       credentialSource: ERunaiCredentialSource.MyCredentials,
-      runtimeCredentialName: "personal-key",
     });
 
     credentialSelector.vm.$emit("update:model-value", {
@@ -50,29 +48,9 @@ describe("NIM catalog authentication", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.findComponent({ name: "ngc-image-tag-selector" }).exists()).toBe(false);
     expect(wrapper.emitted("update:model-value")?.at(-1)).toEqual([null]);
-    expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toMatchObject({ runtimeCredentialName: "" });
-  });
-
-  it("resolves separate image-pull and runtime secrets for a shared NGC credential", () => {
-    const wrapper = createWrapper();
-    const credential = {
-      meta: { id: "shared-key-id", name: "shared-key", kind: AssetKind.NgcApiKey, private: false },
-      clusterInfo: {
-        resources: [{ name: "shared-key-dockerregistry-123" }, { name: "shared-key-genericsecret-456" }],
-      },
-    } as CredentialsListResponseEntry;
-    const imagePullName = wrapper.vm.resolveCredentialName(credential);
-    expect(imagePullName).toBe("shared-key-dockerregistry-123");
-    wrapper.vm.onCredentialSelectorChanged({
-      id: credential.meta.id,
-      credentialName: imagePullName,
-      source: ERunaiCredentialSource.SharedSecret,
-      type: ERunaiCredentialType.NgcApiKey,
-    });
     expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toEqual({
-      credentialName: "shared-key-dockerregistry-123",
-      credentialSource: ERunaiCredentialSource.SharedSecret,
-      runtimeCredentialName: "shared-key-genericsecret-456",
+      credentialName: "",
+      credentialSource: ERunaiCredentialSource.MyCredentials,
     });
   });
 

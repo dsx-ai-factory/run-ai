@@ -26,8 +26,7 @@
             allowedTypes: [ERunaiCredentialType.NgcApiKey],
             disable: true,
           }"
-          :credential-select-config="{ required: true, showCreateNewBtn: true }"
-          :name-resolver="nimOnly ? resolveCredentialName : undefined"
+          :credential-select-config="nimOnly ? { required: true, showCreateNewBtn: true } : { showCreateNewBtn: true }"
         />
       </div>
     </template>
@@ -51,16 +50,10 @@ import { RunaiRadioOptions } from "@/components/common/runai-radio-options";
 import { RunaiCredentialSelectorBySource } from "@/components/common/runai-credential-selector-by-source";
 import type { ICredentialSelectorModel } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
 import {
-  createResourceNameResolver,
   ERunaiCredentialSource,
   ERunaiCredentialType,
 } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
 import { NgcImageTagSelector } from "@/components/environment/ngc-image-tag-selector";
-
-import { AssetKind, type CredentialsListResponseEntry } from "@/swagger-models/assets-service-client";
-
-const imagePullNameResolver = createResourceNameResolver(AssetKind.DockerRegistry);
-const runtimeNameResolver = createResourceNameResolver(AssetKind.GenericSecret);
 
 export enum EImagesType {
   Guest = "guest",
@@ -107,7 +100,6 @@ export default defineComponent({
         id: undefined,
       } as ICredentialSelectorModel,
       selectedCredentialId: null as string | null,
-      runtimeCredentialNames: {} as Record<string, string>,
       imagesTypeOptions: [
         {
           value: EImagesType.Guest,
@@ -145,10 +137,6 @@ export default defineComponent({
     },
   },
   methods: {
-    resolveCredentialName(credential: CredentialsListResponseEntry): string {
-      this.runtimeCredentialNames[credential.meta.id] = runtimeNameResolver(credential);
-      return imagePullNameResolver(credential);
-    },
     onImagesTypeSelected(imagesType: EImagesType): void {
       if (this.nimOnly && imagesType === EImagesType.Guest) return;
       this.selectedImagesType = imagesType;
@@ -168,9 +156,6 @@ export default defineComponent({
       this.$emit("credential-changed", {
         credentialName: model.credentialName,
         credentialSource: model.source,
-        runtimeCredentialName: this.nimOnly
-          ? this.runtimeCredentialNames[model.id || ""] || model.credentialName
-          : undefined,
       });
     },
     onImageValueChanged(value: string | null): void {
