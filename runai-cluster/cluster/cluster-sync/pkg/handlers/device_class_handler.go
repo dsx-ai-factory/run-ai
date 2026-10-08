@@ -41,7 +41,7 @@ func NewDeviceClassHandler(cachedReader client.Reader, runaiBackendClient *runai
 func (deviceClassHandler *DeviceClassHandler) HandleUpdateItem(key client.ObjectKey) error {
 	deviceClass := &resourcev1.DeviceClass{}
 	if err := deviceClassHandler.cachedReader.Get(context.Background(), key, deviceClass); err != nil {
-		return err
+		return fmt.Errorf("get DeviceClass %s: %w", key.Name, err)
 	}
 	return deviceClassHandler.HandleDeviceClassUpdate(deviceClass)
 }

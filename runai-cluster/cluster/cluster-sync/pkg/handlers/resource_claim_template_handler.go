@@ -142,7 +142,18 @@ func (h *ResourceClaimTemplateHandler) HandleSyncEvent(waitGroup *sync.WaitGroup
 	// RCTs can carry the control-plane project id (e.g. "4500002") rather
 	// than the raw namespace. The per-item CRUD path uses a lighter
 	// per-item lookup; both must agree on which RCTs are replicas.
-	projectIdByNamespace := h.projectIdsByNamespace()
+	//
+	// If listing projects fails we MUST NOT fall back to an empty map:
+	// every project-scope RCT would then look unresolvable and be dropped
+	// from the payload, and the server-side prune would then delete all
+	// project-scope rows on our behalf. Abort the sync instead so the
+	// next tick retries from a consistent view.
+	projectIdByNamespace, err := h.projectIdsByNamespace()
+	if err != nil {
+		zap.S().Errorf("Aborting ResourceClaimTemplate sync: %v",
+			fmt.Errorf("list projects: %w", err))
+		return
+	}
 
 	items := make([]trackerclient.ResourceClaimTemplate, 0, len(rcts.Items))
 	for i := range rcts.Items {
@@ -153,8 +164,14 @@ func (h *ResourceClaimTemplateHandler) HandleSyncEvent(waitGroup *sync.WaitGroup
 			return id, ok
 		})
 		if err != nil {
-			zap.S().Warnf("Skipping RCT %s/%s during sync: %v", rct.Namespace, rct.Name, err)
-			continue
+			// Same correctness constraint as the GetAllProjects
+			// failure above: dropping a single RCT from a /sync
+			// payload is semantically "the cluster no longer has
+			// it", so the server-side prune would delete its row.
+			// Abort instead and let the next tick retry.
+			zap.S().Errorf("Aborting ResourceClaimTemplate sync: failed to resolve %s/%s: %v",
+				rct.Namespace, rct.Name, err)
+			return
 		}
 		if skip {
 			continue
@@ -223,11 +240,15 @@ func (h *ResourceClaimTemplateHandler) resolveForServer(
 // projectIdsByNamespace resolves the control-plane project id for every
 // Run:ai-managed project namespace. Projects whose id label is empty are
 // skipped so their RCTs look like replicas and are filtered out above.
-func (h *ResourceClaimTemplateHandler) projectIdsByNamespace() map[string]string {
+//
+// The error from GetAllProjects is propagated rather than swallowed: an
+// empty map here would make every project-scope RCT look like a replica and
+// trigger a server-side prune of all project-scope rows via the next /sync
+// call. The caller is responsible for aborting the sync in that case.
+func (h *ResourceClaimTemplateHandler) projectIdsByNamespace() (map[string]string, error) {
 	projects, err := util.GetAllProjects(h.cachedReader)
 	if err != nil {
-		zap.S().Warnf("Failed listing projects while syncing RCTs: %v", err)
-		return map[string]string{}
+		return nil, fmt.Errorf("list projects: %w", err)
 	}
 
 	result := make(map[string]string, len(projects))
@@ -238,5 +259,5 @@ func (h *ResourceClaimTemplateHandler) projectIdsByNamespace() map[string]string
 		}
 		result[project.Namespace] = project.ProjectId
 	}
-	return result
+	return result, nil
 }
