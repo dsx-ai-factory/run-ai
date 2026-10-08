@@ -30,7 +30,7 @@ replace (
 )
 
 require (
-	github.com/awslabs/operatorpkg v0.0.0-20261002163259-5e8ed3699dea // indirect
+	github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -108,6 +108,7 @@ require (
 	k8s.io/dynamic-resource-allocation v0.35.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20251125145642-4e65d59e963e // indirect
+	k8s.io/kubernetes v1.35.4 // indirect
 	sigs.k8s.io/json v0.0.0-20260909141634-11ed52e25bc5 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.2 // indirect
