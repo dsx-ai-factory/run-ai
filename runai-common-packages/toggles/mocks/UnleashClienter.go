@@ -18,10 +18,19 @@ func NewUnleashClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *UnleashClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &UnleashClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -86,11 +95,11 @@ func (_c *UnleashClienter_Close_Call) RunAndReturn(run func() error) *UnleashCli
 // IsEnabled provides a mock function for the type UnleashClienter
 func (_mock *UnleashClienter) IsEnabled(feature string, options ...unleash.FeatureOption) bool {
 	// unleash.FeatureOption
-	_va := make([]interface{}, len(options))
+	_va := make([]any, len(options))
 	for _i := range options {
 		_va[_i] = options[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, feature)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -114,22 +123,31 @@ type UnleashClienter_IsEnabled_Call struct {
 }
 
 // IsEnabled is a helper method to define mock.On call
-//   - feature
-//   - options
-func (_e *UnleashClienter_Expecter) IsEnabled(feature interface{}, options ...interface{}) *UnleashClienter_IsEnabled_Call {
+//   - feature string
+//   - options ...unleash.FeatureOption
+func (_e *UnleashClienter_Expecter) IsEnabled(feature any, options ...any) *UnleashClienter_IsEnabled_Call {
 	return &UnleashClienter_IsEnabled_Call{Call: _e.mock.On("IsEnabled",
-		append([]interface{}{feature}, options...)...)}
+		append([]any{feature}, options...)...)}
 }
 
 func (_c *UnleashClienter_IsEnabled_Call) Run(run func(feature string, options ...unleash.FeatureOption)) *UnleashClienter_IsEnabled_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []unleash.FeatureOption
 		variadicArgs := make([]unleash.FeatureOption, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(unleash.FeatureOption)
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }

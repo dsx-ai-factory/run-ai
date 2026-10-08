@@ -27,7 +27,7 @@ import (
 )
 
 // known-good fixture: encryptionKey decrypts encryptedValue to "private-value-1"
-// (same fixture used by workload-common/builders/credentials_test.go).
+// for verifying the personal-credential copy path.
 const encryptionKey = "905c18f0839affcddca117dcac633f79"
 
 var encryptedValue = []byte{

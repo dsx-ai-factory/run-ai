@@ -1,0 +1,1643 @@
+{
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster across multiple urls in sorted order / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://a.example.com/x/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/x/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=a.example.com",
+        "--cookie-domain=a.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/x"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    },
+    {
+      "name": "runai-oauth2-proxy-1",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:9090",
+        "--redirect-url=https://b.example.com/y/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4181",
+        "--proxy-prefix=/y/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=b.example.com",
+        "--cookie-domain=b.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-1-auth-proxy",
+        "--authenticated-emails-file=/etc/runai/auth/users/dXJsLTE="
+      ],
+      "ports": [
+        {
+          "name": "port-4181",
+          "containerPort": 4181,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/y"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster for a mix of custom and auto-generated urls / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://mock-q7z3k.example.com/team-a/my-workload/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/team-a/my-workload/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=mock-q7z3k.example.com",
+        "--cookie-domain=mock-q7z3k.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/team-a/my-workload"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    },
+    {
+      "name": "runai-oauth2-proxy-1",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:9090",
+        "--redirect-url=https://app.example.com/app/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4181",
+        "--proxy-prefix=/app/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=app.example.com",
+        "--cookie-domain=app.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-1-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4181",
+          "containerPort": 4181,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/app"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster for a root-path url / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://app.example.com/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=app.example.com",
+        "--cookie-domain=app.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster for a url authorized by groups / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://app.example.com/app/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/app/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=app.example.com",
+        "--cookie-domain=app.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--allowed-group=group-a",
+        "--allowed-group=group-b",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/app"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster for a url authorized by users / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://app.example.com/app/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/app/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=app.example.com",
+        "--cookie-domain=app.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--authenticated-emails-file=/etc/runai/auth/users/dXJsLTA="
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/app"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster for a url with no specific authorization / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://app.example.com/app/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/app/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=app.example.com",
+        "--cookie-domain=app.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/app"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster for an auto-generated path-based url / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://mock-q7z3k.example.com/team-a/my-workload/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/team-a/my-workload/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=mock-q7z3k.example.com",
+        "--cookie-domain=mock-q7z3k.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/team-a/my-workload"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster for an auto-generated subdomain url / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://team-a-my-workload.mock-q7z3k.example.com/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=team-a-my-workload.mock-q7z3k.example.com",
+        "--cookie-domain=team-a-my-workload.mock-q7z3k.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster for multiple auto-generated urls where only the first is suffixless / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-0",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://mock-q7z3k.example.com/team-a/my-workload/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4180",
+        "--proxy-prefix=/team-a/my-workload/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=mock-q7z3k.example.com",
+        "--cookie-domain=mock-q7z3k.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-0-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4180",
+          "containerPort": 4180,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/team-a/my-workload"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    },
+    {
+      "name": "runai-oauth2-proxy-1",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:9090",
+        "--redirect-url=https://mock-q7z3k.example.com/team-a/my-workload/url-1/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4181",
+        "--proxy-prefix=/team-a/my-workload/url-1/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=mock-q7z3k.example.com",
+        "--cookie-domain=mock-q7z3k.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-1-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4181",
+          "containerPort": 4181,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/team-a/my-workload/url-1"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildOAuth2ProxyContainers parity with the cluster builder mirrors the cluster when a nil item sorts before a real one / clusterOauth2Containers": [
+    {
+      "name": "runai-oauth2-proxy-1",
+      "image": "test.registry/oauth2-proxy:parity",
+      "args": [
+        "--provider=keycloak-oidc",
+        "--upstream=http://localhost:8080",
+        "--redirect-url=https://app.example.com/app/oauth2/callback",
+        "--oidc-issuer-url=/auth/realms/runai",
+        "--scope=openid",
+        "--http-address=0.0.0.0:4181",
+        "--proxy-prefix=/app/oauth2",
+        "--skip-provider-button=true",
+        "--whitelist-domain=app.example.com",
+        "--cookie-domain=app.example.com",
+        "--cookie-httponly=true",
+        "--cookie-secure=true",
+        "--code-challenge-method=S256",
+        "--cookie-refresh=10m",
+        "--cookie-samesite=lax",
+        "--skip-jwt-bearer-tokens=true",
+        "--extra-jwt-issuers=/auth/realms/runai=runai",
+        "--custom-templates-dir=/usr/share/oauth2-proxy",
+        "--pass-authorization-header=false",
+        "--cookie-name=my-workload-url-1-auth-proxy",
+        "--email-domain=*"
+      ],
+      "ports": [
+        {
+          "name": "port-4181",
+          "containerPort": 4181,
+          "protocol": "TCP"
+        }
+      ],
+      "envFrom": [
+        {
+          "secretRef": {}
+        }
+      ],
+      "env": [
+        {
+          "name": "OAUTH2_PROXY_COOKIE_PATH",
+          "value": "/app"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "runai-auth",
+          "mountPath": "/etc/runai/auth/users"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder credential variations plaintext access key id and secret access key / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--endpoint",
+        "https://s3.amazonaws.com",
+        "b",
+        "/p"
+      ],
+      "env": [
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "value": "AKIAEXAMPLE"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "value": "plaintext-secret"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder credential variations public bucket with endpoint and no credentials / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--endpoint",
+        "https://uswest.s3.amazonaws",
+        "public-bucket",
+        "/container/everyones"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/container/everyones",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder credential variations secret-backed access key id and secret access key / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--endpoint",
+        "https://s3.amazonaws.com",
+        "private-bucket",
+        "/container/my-bucket"
+      ],
+      "env": [
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "my-access-key-secret",
+              "key": "AccessKeyId"
+            }
+          }
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "my-access-key-secret",
+              "key": "SecretKey"
+            }
+          }
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/container/my-bucket",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder credential variations secret-backed credentials with a session token / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "b",
+        "/p"
+      ],
+      "env": [
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "s",
+              "key": "AccessKeyId"
+            }
+          }
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "s",
+              "key": "SecretKey"
+            }
+          }
+        },
+        {
+          "name": "AWS_SESSION_TOKEN",
+          "value": "my-session-token"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder credential variations secret-backed with only the access key id key set / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "b",
+        "/p"
+      ],
+      "env": [
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "s",
+              "key": "AccessKeyId"
+            }
+          }
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder credential variations secret-backed with only the secret access key key set / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "b",
+        "/p"
+      ],
+      "env": [
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "s",
+              "key": "SecretKey"
+            }
+          }
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder credential variations session token without any access credentials / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "b",
+        "/p"
+      ],
+      "env": [
+        {
+          "name": "AWS_SESSION_TOKEN",
+          "value": "tok"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder custom CA mirrors the cluster when the s3 custom CA is enabled / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "b",
+        "/p"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        },
+        {
+          "name": "runai-ca-cert",
+          "mountPath": "/etc/ssl/certs/runai-ca.pem",
+          "subPath": "runai-ca.pem"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder documented per-bucket image override divergence CP uses the configured image while the cluster honors the reserved per-bucket image / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "custom-goofys:override",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "b",
+        "/p"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder endpoint handling omits the endpoint flag when no url is provided / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "b",
+        "/p"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder multiple buckets and exclusions keeps s3-fs index alignment when a nil item sorts before a real one / GetS3container": [
+    {
+      "name": "s3-fs-1",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "b",
+        "/p"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-1",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder multiple buckets and exclusions mirrors the cluster across three buckets in sorted order / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--endpoint",
+        "https://s3.amazonaws.com",
+        "private-bucket",
+        "/container/my-bucket"
+      ],
+      "env": [
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "k",
+              "key": "AccessKeyId"
+            }
+          }
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "k",
+              "key": "SecretKey"
+            }
+          }
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/container/my-bucket",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    },
+    {
+      "name": "s3-fs-1",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--endpoint",
+        "https://uswest.s3.amazonaws",
+        "public-bucket",
+        "/container/everyones"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-1",
+          "mountPath": "/container/everyones",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    },
+    {
+      "name": "s3-fs-2",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--endpoint",
+        "https://s3.amazonaws.com",
+        "token-bucket",
+        "/container/secret"
+      ],
+      "env": [
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "k",
+              "key": "AccessKeyId"
+            }
+          }
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "k",
+              "key": "SecretKey"
+            }
+          }
+        },
+        {
+          "name": "AWS_SESSION_TOKEN",
+          "value": "tok"
+        }
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-2",
+          "mountPath": "/container/secret",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder no buckets should produce nothing on both sides when there are no s3 buckets / GetS3container": null,
+  "BuildS3InitContainers parity with the cluster builder run-as uid and gid threads both uid and gid into the goofys command / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--uid",
+        "1000",
+        "--gid",
+        "2000",
+        "b",
+        "/p"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder run-as uid and gid threads only gid when uid is unset / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--gid",
+        "2000",
+        "b",
+        "/p"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3InitContainers parity with the cluster builder run-as uid and gid threads only uid when gid is unset / GetS3container": [
+    {
+      "name": "s3-fs-0",
+      "image": "nvcr.io/nvidia/runai/goofys:2.26.30",
+      "command": [
+        "goofys",
+        "-f",
+        "--dir-mode",
+        "0777",
+        "--file-mode",
+        "0777",
+        "-o",
+        "allow_other",
+        "--debug_s3",
+        "--uid",
+        "1000",
+        "b",
+        "/p"
+      ],
+      "resources": {},
+      "restartPolicy": "Always",
+      "volumeMounts": [
+        {
+          "name": "s3-0",
+          "mountPath": "/p",
+          "mountPropagation": "Bidirectional"
+        }
+      ],
+      "imagePullPolicy": "IfNotPresent",
+      "securityContext": {
+        "privileged": true
+      }
+    }
+  ],
+  "BuildS3Volumes and BuildS3MainVolumeMounts parity with the cluster builder keeps index alignment when a nil item sorts before a real one / GetS3VolumeMounts": [
+    {
+      "name": "s3-1",
+      "mountPath": "/p",
+      "mountPropagation": "HostToContainer"
+    }
+  ],
+  "BuildS3Volumes and BuildS3MainVolumeMounts parity with the cluster builder keeps index alignment when a nil item sorts before a real one / GetS3Volumes": [
+    {
+      "name": "s3-1",
+      "emptyDir": {}
+    }
+  ],
+  "BuildS3Volumes and BuildS3MainVolumeMounts parity with the cluster builder multiple buckets in sorted order / GetS3VolumeMounts": [
+    {
+      "name": "s3-0",
+      "mountPath": "/p0",
+      "mountPropagation": "HostToContainer"
+    },
+    {
+      "name": "s3-1",
+      "mountPath": "/p1",
+      "mountPropagation": "HostToContainer"
+    }
+  ],
+  "BuildS3Volumes and BuildS3MainVolumeMounts parity with the cluster builder multiple buckets in sorted order / GetS3Volumes": [
+    {
+      "name": "s3-0",
+      "emptyDir": {}
+    },
+    {
+      "name": "s3-1",
+      "emptyDir": {}
+    }
+  ],
+  "BuildS3Volumes and BuildS3MainVolumeMounts parity with the cluster builder single bucket / GetS3VolumeMounts": [
+    {
+      "name": "s3-0",
+      "mountPath": "/mnt/data",
+      "mountPropagation": "HostToContainer"
+    }
+  ],
+  "BuildS3Volumes and BuildS3MainVolumeMounts parity with the cluster builder single bucket / GetS3Volumes": [
+    {
+      "name": "s3-0",
+      "emptyDir": {}
+    }
+  ],
+  "BuildUsernameLoaderInitContainer parity with the cluster builder mirrors the cluster across multiple urls in sorted order / GetUsernameLoaderInitContainer": {
+    "name": "runai-auth-user-loader",
+    "image": "registry.example/username-loader:test",
+    "command": [
+      "sh",
+      "-c",
+      "echo -e \"YWxpY2VAZXhhbXBsZS5jb20=\" | base64 -d \u003e /etc/runai/auth/users/dXJsLTA= \u0026\u0026 echo -e \"Ym9iQGV4YW1wbGUuY29t\" | base64 -d \u003e /etc/runai/auth/users/dXJsLTE="
+    ],
+    "resources": {
+      "limits": {
+        "cpu": "100m",
+        "memory": "100Mi"
+      },
+      "requests": {
+        "cpu": "50m",
+        "memory": "50Mi"
+      }
+    },
+    "volumeMounts": [
+      {
+        "name": "runai-auth",
+        "mountPath": "/etc/runai/auth/users"
+      }
+    ],
+    "imagePullPolicy": "IfNotPresent",
+    "securityContext": {
+      "runAsUser": 65534,
+      "runAsNonRoot": true,
+      "allowPrivilegeEscalation": false
+    }
+  },
+  "BuildUsernameLoaderInitContainer parity with the cluster builder mirrors the cluster for a single url with authorized users / GetUsernameLoaderInitContainer": {
+    "name": "runai-auth-user-loader",
+    "image": "registry.example/username-loader:test",
+    "command": [
+      "sh",
+      "-c",
+      "echo -e \"YWxpY2VAZXhhbXBsZS5jb20KYm9iQGV4YW1wbGUuY29t\" | base64 -d \u003e /etc/runai/auth/users/dXJsLTA="
+    ],
+    "resources": {
+      "limits": {
+        "cpu": "100m",
+        "memory": "100Mi"
+      },
+      "requests": {
+        "cpu": "50m",
+        "memory": "50Mi"
+      }
+    },
+    "volumeMounts": [
+      {
+        "name": "runai-auth",
+        "mountPath": "/etc/runai/auth/users"
+      }
+    ],
+    "imagePullPolicy": "IfNotPresent",
+    "securityContext": {
+      "runAsUser": 65534,
+      "runAsNonRoot": true,
+      "allowPrivilegeEscalation": false
+    }
+  },
+  "BuildUsernameLoaderInitContainer parity with the cluster builder mirrors the cluster when a nil item sorts before a real one / GetUsernameLoaderInitContainer": {
+    "name": "runai-auth-user-loader",
+    "image": "registry.example/username-loader:test",
+    "command": [
+      "sh",
+      "-c",
+      "echo -e \"YWxpY2VAZXhhbXBsZS5jb20=\" | base64 -d \u003e /etc/runai/auth/users/dXJsLTE="
+    ],
+    "resources": {
+      "limits": {
+        "cpu": "100m",
+        "memory": "100Mi"
+      },
+      "requests": {
+        "cpu": "50m",
+        "memory": "50Mi"
+      }
+    },
+    "volumeMounts": [
+      {
+        "name": "runai-auth",
+        "mountPath": "/etc/runai/auth/users"
+      }
+    ],
+    "imagePullPolicy": "IfNotPresent",
+    "securityContext": {
+      "runAsUser": 65534,
+      "runAsNonRoot": true,
+      "allowPrivilegeEscalation": false
+    }
+  },
+  "BuildUsernameLoaderInitContainer parity with the cluster builder mirrors the cluster when a serving-port user set is present / GetUsernameLoaderInitContainer": {
+    "name": "runai-auth-user-loader",
+    "image": "registry.example/username-loader:test",
+    "command": [
+      "sh",
+      "-c",
+      "echo -e \"Y2Fyb2xAZXhhbXBsZS5jb20=\" | base64 -d \u003e /etc/runai/auth/users/c2VydmluZy1wb3J0 \u0026\u0026 echo -e \"YWxpY2VAZXhhbXBsZS5jb20=\" | base64 -d \u003e /etc/runai/auth/users/dXJsLTA="
+    ],
+    "resources": {
+      "limits": {
+        "cpu": "100m",
+        "memory": "100Mi"
+      },
+      "requests": {
+        "cpu": "50m",
+        "memory": "50Mi"
+      }
+    },
+    "volumeMounts": [
+      {
+        "name": "runai-auth",
+        "mountPath": "/etc/runai/auth/users"
+      }
+    ],
+    "imagePullPolicy": "IfNotPresent",
+    "securityContext": {
+      "runAsUser": 65534,
+      "runAsNonRoot": true,
+      "allowPrivilegeEscalation": false
+    }
+  },
+  "BuildUsernameLoaderInitContainer parity with the cluster builder mirrors the cluster when no users are present / GetUsernameLoaderInitContainer": null
+}

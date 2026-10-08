@@ -27,9 +27,9 @@ func TestParseOptions(t *testing.T) {
 		{name: "defaults", knobs: nil, check: func(o options) bool {
 			return o.users == 10 && o.rate == 2 && o.duration == 5*time.Minute && o.timeout == 10*time.Minute && o.workloadType == "Workspace" && o.slo == nil
 		}},
-		{name: "all knobs", knobs: map[string]any{"users": 3, "rate": 5, "duration": "1m", "image": "busybox", "timeout": "2m", "setupTimeout": "1m", "kubeRequestsPerSecond": 20, "controlPlaneRequestsPerSecond": 10, "cluster": "c1", "slo": map[string]any{"api_accepted_p90_ms": 500, "ttj_p90_ms": 10000}},
+		{name: "all knobs", knobs: map[string]any{"users": 3, "rate": 5, "duration": "1m", "image": "busybox", "timeout": "2m", "setupTimeout": "1m", "kubeRequestsPerSecond": 20, "controlPlaneRequestsPerSecond": 10, "cluster": "c1", "slo": map[string]any{"api_accepted_p90_ms": 500, "ttj_p90_ms": 10000, "cluster_synced_p99_ms": 12000}},
 			check: func(o options) bool {
-				return o.users == 3 && o.rate == 5 && o.duration == time.Minute && o.image == "busybox" && o.cluster == "c1" && o.slo["ttj_p90_ms"] == 10000 && o.limits.ControlPlaneRequestsPerSecond == 10
+				return o.users == 3 && o.rate == 5 && o.duration == time.Minute && o.image == "busybox" && o.cluster == "c1" && o.slo["ttj_p90_ms"] == 10000 && o.slo["cluster_synced_p99_ms"] == 12000 && o.limits.ControlPlaneRequestsPerSecond == 10
 			}},
 		{name: "training workloads", knobs: map[string]any{"workloadType": "Training"}, check: func(o options) bool { return o.workloadType == "Training" }},
 		{name: "unknown workload type", knobs: map[string]any{"workloadType": "Deployment"}, wantErr: `"workloadType" must be Workspace or Training`},
@@ -37,6 +37,8 @@ func TestParseOptions(t *testing.T) {
 		{name: "rate above the control plane limit", knobs: map[string]any{"rate": 30, "controlPlaneRequestsPerSecond": 25}, wantErr: "cannot exceed controlPlaneRequestsPerSecond"},
 		{name: "zero users", knobs: map[string]any{"users": 0}, wantErr: `"users" must be between 1 and 64`},
 		{name: "slo not a number", knobs: map[string]any{"slo": map[string]any{"ttj_p90_ms": "10s"}}, wantErr: "must be a whole number"},
+		{name: "slo of another suite", knobs: map[string]any{"slo": map[string]any{"p90_ms": 10000}}, wantErr: `slo key "p90_ms" is not a latency this suite reports; use <span>_<stat> with span api_accepted, cluster_synced, pod_created, ttj and stat p50_ms, p90_ms, p99_ms, mean_ms, max_ms`},
+		{name: "slo on a rate", knobs: map[string]any{"slo": map[string]any{"success_rate": 1}}, wantErr: `slo key "success_rate" is not a latency`},
 		{name: "duration not a duration", knobs: map[string]any{"duration": 5}, wantErr: "must be a duration string"},
 	}
 	for _, tc := range cases {

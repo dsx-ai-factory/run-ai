@@ -6,7 +6,8 @@ licensed under the Apache License, Version 2.0. See the LICENSE file at the
 root of this repository for the full license text.
 
 This file inventories the third-party software distributed with this component
-and the license under which each dependency is made available.
+and the license under which each dependency is made available. It is generated
+automatically; do not edit it by hand.
 
 ================================================================================
 Summary
@@ -35,7 +36,7 @@ Dependencies
 | `github.com/ThreeDotsLabs/watermill` | v1.5.3 | MIT | https://github.com/ThreeDotsLabs/watermill/blob/v1.5.3/LICENSE |
 | `github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream` | v1.4.5 | MIT | https://github.com/ThreeDotsLabs/watermill-redisstream/blob/v1.4.5/LICENSE |
 | `github.com/andybalholm/brotli` | v1.2.6 | MIT | https://github.com/andybalholm/brotli/blob/v1.2.6/LICENSE |
-| `github.com/aws/smithy-go/ptr` | v1.28.2 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.2/LICENSE |
+| `github.com/aws/smithy-go/ptr` | v1.28.4 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.4/LICENSE |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/cenkalti/backoff/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v4@v4.3.0?tab=licenses |
 | `github.com/cenkalti/backoff/v5` | v5.0.3 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v5@v5.0.3?tab=licenses |
@@ -73,7 +74,7 @@ Dependencies
 | `github.com/lib/pq` | v1.12.3 | MIT | https://github.com/lib/pq/blob/v1.12.3/LICENSE |
 | `github.com/lithammer/shortuuid/v3` | v3.0.7 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v3@v3.0.7?tab=licenses |
 | `github.com/lithammer/shortuuid/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v4@v4.3.0?tab=licenses |
-| `github.com/mattn/go-colorable` | v0.1.15 | MIT | https://github.com/mattn/go-colorable/blob/v0.1.15/LICENSE |
+| `github.com/mattn/go-colorable` | v0.1.16 | MIT | https://github.com/mattn/go-colorable/blob/v0.1.16/LICENSE |
 | `github.com/mattn/go-isatty` | v0.0.24 | MIT | https://github.com/mattn/go-isatty/blob/v0.0.24/LICENSE |
 | `github.com/maypok86/otter/v2` | v2.3.0 | Apache-2.0 | https://pkg.go.dev/github.com/maypok86/otter/v2@v2.3.0?tab=licenses |
 | `github.com/mitchellh/mapstructure` | v1.5.0 | MIT | https://github.com/mitchellh/mapstructure/blob/v1.5.0/LICENSE |
@@ -128,7 +129,7 @@ Dependencies
 | `go.uber.org/atomic` | v1.12.0 | MIT | https://pkg.go.dev/go.uber.org/atomic@v1.12.0?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.5 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.5?tab=licenses |
 | `golang.org/x/crypto` | v0.57.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.57.0?tab=licenses |
-| `golang.org/x/exp/slices` | v0.0.0-20261005173118-76772065c9b0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261005173118-76772065c9b0?tab=licenses |
+| `golang.org/x/exp/slices` | v0.0.0-20261007192929-f45ad48fbe92 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261007192929-f45ad48fbe92?tab=licenses |
 | `golang.org/x/net` | v0.59.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.59.0?tab=licenses |
 | `golang.org/x/sync/semaphore` | v0.23.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.23.0?tab=licenses |
 | `golang.org/x/sys` | v0.48.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.48.0?tab=licenses |
@@ -4579,4 +4580,115 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+================================================================================
+Notices from third-party components
+================================================================================
+
+The NOTICE file each of these components distributes, reproduced verbatim as
+section 4(d) of the Apache License, Version 2.0 requires.
+
+--------------------------------------------------------------------------------
+Notice of:
+  - `github.com/aws/smithy-go` v1.28.4
+--------------------------------------------------------------------------------
+
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+--------------------------------------------------------------------------------
+Notice of:
+  - `github.com/prometheus/client_golang` v1.24.1
+--------------------------------------------------------------------------------
+
+Prometheus instrumentation library for Go applications
+Copyright 2012-2015 The Prometheus Authors
+
+This product includes software developed at
+SoundCloud Ltd. (http://soundcloud.com/).
+
+
+The following components are included in this product:
+
+perks - a fork of https://github.com/bmizerany/perks
+https://github.com/beorn7/perks
+Copyright 2013-2015 Blake Mizerany, Björn Rabenstein
+See https://github.com/beorn7/perks/blob/master/README.md for license details.
+
+Go support for Protocol Buffers - Google's data interchange format
+http://github.com/golang/protobuf/
+Copyright 2010 The Go Authors
+See source code for license details.
+
+--------------------------------------------------------------------------------
+Notice of:
+  - `github.com/prometheus/client_model` v0.6.3
+--------------------------------------------------------------------------------
+
+Data model artifacts for Prometheus.
+Copyright 2012-2015 The Prometheus Authors
+
+This product includes software developed at
+SoundCloud Ltd. (http://soundcloud.com/).
+
+--------------------------------------------------------------------------------
+Notice of:
+  - `github.com/prometheus/common` v0.71.0
+--------------------------------------------------------------------------------
+
+Common libraries shared by Prometheus Go components.
+Copyright 2015 The Prometheus Authors
+
+This product includes software developed at
+SoundCloud Ltd. (http://soundcloud.com/).
+
+--------------------------------------------------------------------------------
+Notice of:
+  - `github.com/prometheus/procfs` v0.22.0
+--------------------------------------------------------------------------------
+
+procfs provides functions to retrieve system, kernel and process
+metrics from the pseudo-filesystem proc.
+
+Copyright 2014-2015 The Prometheus Authors
+
+This product includes software developed at
+SoundCloud Ltd. (http://soundcloud.com/).
+
+--------------------------------------------------------------------------------
+Notice of:
+  - `go.yaml.in/yaml/v3` v3.0.5
+--------------------------------------------------------------------------------
+
+Copyright 2011-2016 Canonical Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+--------------------------------------------------------------------------------
+Notice of:
+  - `google.golang.org/grpc` v1.84.0
+--------------------------------------------------------------------------------
+
+Copyright 2014 gRPC authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 

@@ -21,3 +21,4 @@ packages:
       NetworkTopologiesAPI: {}
       NodePoolsAPI: {}
       NodesAPI: {}
+      SettingsAPI: {}

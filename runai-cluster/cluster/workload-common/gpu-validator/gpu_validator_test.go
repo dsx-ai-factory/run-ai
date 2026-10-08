@@ -68,7 +68,7 @@ var someMigProfile = ptr.To("profile1")
 func createGinkgoTestEntryFromGpuTestEntries(tests []gpuTestEntry) []TableEntry {
 	var testEntries []TableEntry
 	for _, entry := range tests {
-		testEntries = append(testEntries, Entry(entry.description, &entry.resourceFields, entry.migProfile, entry.NvidiaError))
+		testEntries = append(testEntries, Entry(entry.description, &entry.resourceFields, entry.NvidiaError))
 	}
 	return testEntries
 }

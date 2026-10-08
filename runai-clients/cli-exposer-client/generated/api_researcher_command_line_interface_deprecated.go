@@ -25,8 +25,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
-//go:generate mockery --name ResearcherCommandLineInterfaceDeprecatedAPI --output ../mocks/
 type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 
 	/*

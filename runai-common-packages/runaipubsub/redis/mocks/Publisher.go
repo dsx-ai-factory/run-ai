@@ -18,10 +18,19 @@ func NewPublisher(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Publisher {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Publisher{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -86,11 +95,11 @@ func (_c *Publisher_Close_Call) RunAndReturn(run func() error) *Publisher_Close_
 // Publish provides a mock function for the type Publisher
 func (_mock *Publisher) Publish(topic string, messages ...*message.Message) error {
 	// *message.Message
-	_va := make([]interface{}, len(messages))
+	_va := make([]any, len(messages))
 	for _i := range messages {
 		_va[_i] = messages[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, topic)
 	_ca = append(_ca, _va...)
 	ret := _mock.Called(_ca...)
@@ -114,22 +123,31 @@ type Publisher_Publish_Call struct {
 }
 
 // Publish is a helper method to define mock.On call
-//   - topic
-//   - messages
-func (_e *Publisher_Expecter) Publish(topic interface{}, messages ...interface{}) *Publisher_Publish_Call {
+//   - topic string
+//   - messages ...*message.Message
+func (_e *Publisher_Expecter) Publish(topic any, messages ...any) *Publisher_Publish_Call {
 	return &Publisher_Publish_Call{Call: _e.mock.On("Publish",
-		append([]interface{}{topic}, messages...)...)}
+		append([]any{topic}, messages...)...)}
 }
 
 func (_c *Publisher_Publish_Call) Run(run func(topic string, messages ...*message.Message)) *Publisher_Publish_Call {
 	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []*message.Message
 		variadicArgs := make([]*message.Message, len(args)-1)
 		for i, a := range args[1:] {
 			if a != nil {
 				variadicArgs[i] = a.(*message.Message)
 			}
 		}
-		run(args[0].(string), variadicArgs...)
+		arg1 = variadicArgs
+		run(
+			arg0,
+			arg1...,
+		)
 	})
 	return _c
 }

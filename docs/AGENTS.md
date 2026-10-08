@@ -5,7 +5,7 @@ For repository-wide context — products, sources of truth, and the
 documentation-impact trigger — see the root `AGENTS.md`.
 
 **Never edit these, even if explicitly asked:** `docs/reference/cli/runai/`
-(generated CLI command pages) and `fern/apis/` (generated OpenAPI specs). See
+(generated CLI command pages) and `control-plane/infra/openapi/build/_build/` (generated OpenAPI specs). See
 Auto-Generated Content below.
 
 ## How to Approach Documentation Work
@@ -48,7 +48,7 @@ Use this table to determine the documentation action before starting work.
 | New quick start (single feature or workload type walkthrough) | Load `docs/.agents/skills/runai-docs-quickstart/SKILL.md` | `docs/workloads-in-nvidia-run-ai/using-training/quick-starts/standard-training-quickstart.md` |
 | New feature guide (scheduler feature, GPU optimization, topology, NUMA) | Load `docs/.agents/skills/runai-docs-feature-guide/SKILL.md` | `docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md` |
 | New CLI flag or command | Never edit `docs/reference/cli/runai/` — it is generated. | — |
-| New or changed API endpoint or field | Never edit `fern/apis/` — the OpenAPI specs are generated. | — |
+| New or changed API endpoint or field | Never edit `control-plane/infra/openapi/build/_build/` — the OpenAPI specs are generated. | — |
 | New or changed MCP server tool | Load `docs/.agents/skills/update-mcp-server-docs/SKILL.md` | `docs/installation-and-configuration/mcp-server.md` |
 | Installation flow, prerequisites/features, or installer config reference | Load `docs/.agents/skills/runai-docs-installation/SKILL.md` | `docs/installation-and-configuration/installation/guided-installation/README.md` |
 | New feature, enhancement, or behavior change with no dedicated skill above | See How to Approach Documentation Work above | — |
@@ -137,7 +137,7 @@ the source location elsewhere in this repo:
 | Section | Source location |
 |---|---|
 | CLI reference (`docs/reference/cli/runai/`) | `control-plane/runai-cli/docs` |
-| OpenAPI specs (`fern/apis/`) | Swagger source files at `control-plane/<service>/swagger/source` |
+| OpenAPI specs (`control-plane/infra/openapi/build/_build/`) | Swagger source files at `control-plane/<service>/swagger/source` |
 
 ## Fern Components
 
@@ -166,7 +166,7 @@ Run these commands before opening a pull request:
 | Command | When to run |
 |---|---|
 | `fern docs dev` | After any change to `docs/` or `fern/` — validates the full site locally |
-| `fern check` | After adding or changing OpenAPI specs in `fern/apis/` |
+| `fern check` | After adding or changing OpenAPI specs (or `fern/apis/*/generators.yml`) |
 
 If `fern docs dev` fails, resolve all errors before opening the PR. Do not open
 a PR with a broken local build.

@@ -17,10 +17,19 @@ func NewMockMemoryRetrieverer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMemoryRetrieverer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMemoryRetrieverer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -70,14 +79,20 @@ type MockMemoryRetrieverer_RetrieveMemory_Call struct {
 }
 
 // RetrieveMemory is a helper method to define mock.On call
-//   - storeName
-func (_e *MockMemoryRetrieverer_Expecter) RetrieveMemory(storeName interface{}) *MockMemoryRetrieverer_RetrieveMemory_Call {
+//   - storeName string
+func (_e *MockMemoryRetrieverer_Expecter) RetrieveMemory(storeName any) *MockMemoryRetrieverer_RetrieveMemory_Call {
 	return &MockMemoryRetrieverer_RetrieveMemory_Call{Call: _e.mock.On("RetrieveMemory", storeName)}
 }
 
 func (_c *MockMemoryRetrieverer_RetrieveMemory_Call) Run(run func(storeName string)) *MockMemoryRetrieverer_RetrieveMemory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

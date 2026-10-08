@@ -19,6 +19,7 @@ packages:
       CredentialsAPI: {}
       DatasourcesAPI: {}
       EnvironmentAPI: {}
+      EventsAPI: {}
       GitAPI: {}
       HealthAPI: {}
       HostPathAPI: {}
@@ -28,6 +29,7 @@ packages:
       NFSAPI: {}
       PVCAPI: {}
       RegistryAPI: {}
+      ResourceClaimTemplatesAPI: {}
       S3API: {}
       SecretAPI: {}
       SynchronizationAPI: {}

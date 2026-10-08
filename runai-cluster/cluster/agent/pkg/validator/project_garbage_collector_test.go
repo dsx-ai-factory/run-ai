@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -37,8 +37,8 @@ var _ = Describe("Project garbage collector authorization", func() {
 		objects := []client.Object{&corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{
 			Name: "generic-garbage-collector", Namespace: "kube-system", UID: "gc-uid",
 		}}}
-		for _, name := range []string{operands.RunaiAgentName, operands.RunaiClusterSyncName,
-			operands.RunaiOperatorName, operands.KRMProjectControllerName} {
+		for _, name := range []string{constants.RunaiAgentName, constants.RunaiClusterSyncName,
+			constants.RunaiOperatorName, constants.KRMProjectControllerName} {
 			objects = append(objects, &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{
 				Name: name, Namespace: "runai", UID: types.UID(name + "-uid"),
 			}})

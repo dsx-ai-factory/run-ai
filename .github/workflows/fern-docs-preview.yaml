@@ -23,6 +23,7 @@ on:
     paths:
       - 'docs/**'
       - 'fern/**'
+      - 'control-plane/infra/openapi/build/_build/**'
       - '.github/workflows/fern-docs-preview.yaml'
 
 permissions:

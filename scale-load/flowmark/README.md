@@ -32,6 +32,8 @@ failed, and the last line says what.
 
 Without make: `make build`, then `./bin/flowmark --help` lists every flag.
 `--only` and `--workloads` are what `SCENARIO` and `WORKLOADS` set.
+`--regression-window` (7) and `--regression-threshold` (0.15) tune the
+regression check described under Results.
 
 ## Scenarios
 
@@ -65,7 +67,7 @@ Knobs of the `scale-burst` suite:
 | `timeout` | `15m` | how long a round waits for all workloads to arrive |
 | `setupTimeout` | `5m` | project creation, quiesce between rounds, cleanup |
 | `settle` | `90s` | quiet time between rounds |
-| `slo` | none | e.g. `p90_ms: 5000`; copied into the results, does not fail the run |
+| `slo` | none | upper bounds on `p50_ms`, `p90_ms`, `p99_ms`, `mean_ms` or `max_ms`, e.g. `p90_ms: 5000`; a round above one is reported as a regression, the run still passes |
 | `cluster` | single cluster | cluster name when the control plane has several |
 
 Each run creates its own project, runs the rounds, deletes everything, and
@@ -83,7 +85,8 @@ Knobs of the `load-ttj` suite:
 | `image` | `registry.k8s.io/pause:3.9` | container image of every workload |
 | `timeout` | `10m` | how long to wait for arrivals after the last submission |
 | `setupTimeout` | `5m` | project creation, each create call, cleanup |
-| `kubeRequestsPerSecond`, `controlPlaneRequestsPerSecond`, `cluster`, `slo` | as above | shared with `scale-burst` |
+| `slo` | none | upper bounds named `<span>_<stat>`, e.g. `ttj_p90_ms: 10000`, `cluster_synced_p99_ms: 12000`; `p90_ms` alone belongs to `scale-burst` |
+| `kubeRequestsPerSecond`, `controlPlaneRequestsPerSecond`, `cluster` | as above | shared with `scale-burst` |
 
 Each accepted Workspace is timed in three legs on one clock: `api_accepted`
 from the request to the 200, `cluster_synced` from the 200 to its
@@ -111,3 +114,18 @@ the measurement itself is not a metric: when the cluster watch had to be
 reopened, or a WorkloadRunner or pod was seen more than a second before the
 step that precedes it, the section fails and `error` explains why, and the
 log carries the same line.
+
+The results are then judged in two ways. Against history: every p90 is
+compared with the median of the same metric in the last 7 runs of the same
+`cluster_type` found in the output directory, and more than 15% above that
+median is a regression; with fewer than 7 such runs the comparison is skipped.
+Against the SLO: every latency metric that has an `slo_` value from the
+scenario file, p90 or not, is a regression when above it, regardless of
+history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest
+workload of the night, so one unlucky pod makes it fire. A flagged metric gets
+a sibling `<metric>_regression: true`, `regression_detected` at the top of the
+file becomes true, and `regressions` lists every finding with a ready-made
+message, for example "training-burst p90_ms@100: 5900 ms is +18% over the
+median of 5000 ms from the last 7 runs". The same lines appear in the log. A
+regression does not change the exit code. The median adapts: a slowdown that
+lasts is reported for about four nights and then becomes the new baseline.

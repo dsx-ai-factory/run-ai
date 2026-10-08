@@ -20,10 +20,19 @@ func NewSettingsManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SettingsManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SettingsManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,16 +84,32 @@ type SettingsManager_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - settingKey
-func (_e *SettingsManager_Expecter) Get(ctx interface{}, tenantId interface{}, settingKey interface{}) *SettingsManager_Get_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - settingKey string
+func (_e *SettingsManager_Expecter) Get(ctx any, tenantId any, settingKey any) *SettingsManager_Get_Call {
 	return &SettingsManager_Get_Call{Call: _e.mock.On("Get", ctx, tenantId, settingKey)}
 }
 
 func (_c *SettingsManager_Get_Call) Run(run func(ctx context.Context, tenantId string, settingKey string)) *SettingsManager_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -133,16 +158,32 @@ type SettingsManager_GetAll_Call struct {
 }
 
 // GetAll is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - category
-func (_e *SettingsManager_Expecter) GetAll(ctx interface{}, tenantId interface{}, category interface{}) *SettingsManager_GetAll_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - category string
+func (_e *SettingsManager_Expecter) GetAll(ctx any, tenantId any, category any) *SettingsManager_GetAll_Call {
 	return &SettingsManager_GetAll_Call{Call: _e.mock.On("GetAll", ctx, tenantId, category)}
 }
 
 func (_c *SettingsManager_GetAll_Call) Run(run func(ctx context.Context, tenantId string, category string)) *SettingsManager_GetAll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -180,14 +221,20 @@ type SettingsManager_Register_Call struct {
 }
 
 // Register is a helper method to define mock.On call
-//   - setting
-func (_e *SettingsManager_Expecter) Register(setting interface{}) *SettingsManager_Register_Call {
+//   - setting manager.Settinger
+func (_e *SettingsManager_Expecter) Register(setting any) *SettingsManager_Register_Call {
 	return &SettingsManager_Register_Call{Call: _e.mock.On("Register", setting)}
 }
 
 func (_c *SettingsManager_Register_Call) Run(run func(setting manager.Settinger)) *SettingsManager_Register_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(manager.Settinger))
+		var arg0 manager.Settinger
+		if args[0] != nil {
+			arg0 = args[0].(manager.Settinger)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -234,14 +281,20 @@ type SettingsManager_ShouldMigrateSetting_Call struct {
 }
 
 // ShouldMigrateSetting is a helper method to define mock.On call
-//   - key
-func (_e *SettingsManager_Expecter) ShouldMigrateSetting(key interface{}) *SettingsManager_ShouldMigrateSetting_Call {
+//   - key string
+func (_e *SettingsManager_Expecter) ShouldMigrateSetting(key any) *SettingsManager_ShouldMigrateSetting_Call {
 	return &SettingsManager_ShouldMigrateSetting_Call{Call: _e.mock.On("ShouldMigrateSetting", key)}
 }
 
 func (_c *SettingsManager_ShouldMigrateSetting_Call) Run(run func(key string)) *SettingsManager_ShouldMigrateSetting_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -279,18 +332,44 @@ type SettingsManager_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - settingKey
-//   - updateByCustomer
-//   - value
-func (_e *SettingsManager_Expecter) Update(ctx interface{}, tenantId interface{}, settingKey interface{}, updateByCustomer interface{}, value interface{}) *SettingsManager_Update_Call {
+//   - ctx context.Context
+//   - tenantId string
+//   - settingKey string
+//   - updateByCustomer bool
+//   - value interface{}
+func (_e *SettingsManager_Expecter) Update(ctx any, tenantId any, settingKey any, updateByCustomer any, value any) *SettingsManager_Update_Call {
 	return &SettingsManager_Update_Call{Call: _e.mock.On("Update", ctx, tenantId, settingKey, updateByCustomer, value)}
 }
 
 func (_c *SettingsManager_Update_Call) Run(run func(ctx context.Context, tenantId string, settingKey string, updateByCustomer bool, value interface{})) *SettingsManager_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(bool), args[4].(interface{}))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 bool
+		if args[3] != nil {
+			arg3 = args[3].(bool)
+		}
+		var arg4 interface{}
+		if args[4] != nil {
+			arg4 = args[4].(interface{})
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
@@ -328,15 +407,26 @@ type SettingsManager_UpdateAllTenantsByKey_Call struct {
 }
 
 // UpdateAllTenantsByKey is a helper method to define mock.On call
-//   - settingKey
-//   - tenantIdToSettingValue
-func (_e *SettingsManager_Expecter) UpdateAllTenantsByKey(settingKey interface{}, tenantIdToSettingValue interface{}) *SettingsManager_UpdateAllTenantsByKey_Call {
+//   - settingKey string
+//   - tenantIdToSettingValue []manager.TenantSettingValueForBackendResponse
+func (_e *SettingsManager_Expecter) UpdateAllTenantsByKey(settingKey any, tenantIdToSettingValue any) *SettingsManager_UpdateAllTenantsByKey_Call {
 	return &SettingsManager_UpdateAllTenantsByKey_Call{Call: _e.mock.On("UpdateAllTenantsByKey", settingKey, tenantIdToSettingValue)}
 }
 
 func (_c *SettingsManager_UpdateAllTenantsByKey_Call) Run(run func(settingKey string, tenantIdToSettingValue []manager.TenantSettingValueForBackendResponse)) *SettingsManager_UpdateAllTenantsByKey_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].([]manager.TenantSettingValueForBackendResponse))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 []manager.TenantSettingValueForBackendResponse
+		if args[1] != nil {
+			arg1 = args[1].([]manager.TenantSettingValueForBackendResponse)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

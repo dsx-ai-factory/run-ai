@@ -17,7 +17,7 @@ import (
 )
 
 func exampleDocument() Document {
-	return Build(map[string]core.Section{
+	return DetectRegressions(Build(map[string]core.Section{
 		"deployment-burst": {Category: core.CategoryScale, Metrics: map[string]any{
 			"flow": "deployment_to_external_workload", "p90_ms@100": int64(5754), "never_arrived_count@100": 0, "slo_p90_ms": 5000,
 		}},
@@ -29,7 +29,7 @@ func exampleDocument() Document {
 		ClusterType:         "kind-fake-gpu",
 		ControlPlaneVersion: "3.1.0",
 		ClusterVersion:      "2.26.5",
-	})
+	}), nil, RegressionConfig{Window: 7, Threshold: 0.15})
 }
 
 func TestDocumentMatchesGoldenShape(t *testing.T) {

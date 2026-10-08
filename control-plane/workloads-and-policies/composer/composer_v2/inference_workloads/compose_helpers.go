@@ -27,7 +27,7 @@ func inferenceServingURL(config composer.ClusterStorageConfig, projectName, work
 	if clusterLocal {
 		return fmt.Sprintf("http://%s.%s.svc.cluster.local/", workloadName, namespace), nil
 	}
-	parsed, err := init_containers.ComposeAutoExposedURL(
+	parsed, err := composer.ComposeAutoExposedURL(
 		config.ClusterDomain(),
 		projectName,
 		workloadName,

@@ -157,6 +157,11 @@ func (in *ProjectController) DeepCopyInto(out *ProjectController) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.ClusterWideResourceClaimTemplate != nil {
+		in, out := &in.ClusterWideResourceClaimTemplate, &out.ClusterWideResourceClaimTemplate
+		*out = new(bool)
+		**out = **in
+	}
 	if in.LimitRange != nil {
 		in, out := &in.LimitRange, &out.LimitRange
 		*out = new(bool)

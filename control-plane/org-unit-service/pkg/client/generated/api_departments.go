@@ -25,8 +25,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
-//go:generate mockery --name DepartmentsAPI --output ../mocks/
 type DepartmentsAPI interface {
 
 	/*

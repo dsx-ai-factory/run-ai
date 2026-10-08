@@ -7883,6 +7883,11 @@ spec:
                       ClusterWidePvc specifies if cluster-wide pvcs should be copied
                       from the runai namespace to a project's namespace
                     type: boolean
+                  clusterWideResourceClaimTemplate:
+                    description: |-
+                      ClusterWideResourceClaimTemplate specifies if cluster-wide ResourceClaimTemplates
+                      (resource.k8s.io/v1) should be copied from the runai namespace to a project's namespace
+                    type: boolean
                   clusterWideSecret:
                     description: |-
                       ClusterWideSecret specifies if cluster-wide secrets should be copied

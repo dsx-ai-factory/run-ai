@@ -17,10 +17,19 @@ func NewMigrationRunner(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MigrationRunner {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MigrationRunner{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -105,14 +114,20 @@ type MigrationRunner_Force_Call struct {
 }
 
 // Force is a helper method to define mock.On call
-//   - version
-func (_e *MigrationRunner_Expecter) Force(version interface{}) *MigrationRunner_Force_Call {
+//   - version int
+func (_e *MigrationRunner_Expecter) Force(version any) *MigrationRunner_Force_Call {
 	return &MigrationRunner_Force_Call{Call: _e.mock.On("Force", version)}
 }
 
 func (_c *MigrationRunner_Force_Call) Run(run func(version int)) *MigrationRunner_Force_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int))
+		var arg0 int
+		if args[0] != nil {
+			arg0 = args[0].(int)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -150,14 +165,20 @@ type MigrationRunner_Migrate_Call struct {
 }
 
 // Migrate is a helper method to define mock.On call
-//   - version
-func (_e *MigrationRunner_Expecter) Migrate(version interface{}) *MigrationRunner_Migrate_Call {
+//   - version uint
+func (_e *MigrationRunner_Expecter) Migrate(version any) *MigrationRunner_Migrate_Call {
 	return &MigrationRunner_Migrate_Call{Call: _e.mock.On("Migrate", version)}
 }
 
 func (_c *MigrationRunner_Migrate_Call) Run(run func(version uint)) *MigrationRunner_Migrate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uint))
+		var arg0 uint
+		if args[0] != nil {
+			arg0 = args[0].(uint)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

@@ -80,7 +80,6 @@ require (
 replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ./../../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ./../utils
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator => ./../../go-operator
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ./../../sdk
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants => ./../../../common/constants
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling => ./../../../common/profiling

@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -15,6 +16,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/k8s-objects-tracker/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/k8s-objects-tracker/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
+	"github.com/google/uuid"
 	"gorm.io/gorm/clause"
 )
 
@@ -61,7 +64,44 @@ func ListStorageClassWithOptionalConfig(ctx context.Context, filter *models.Obje
 	return objects, nil
 }
 
-// UpsertObjects creates or updates multiple records
+// UpsertObject upserts a single object and populates its ID with the stable
+// row id. The second return value reports whether the row was newly inserted
+// vs. an update of an existing one - callers that track issues or publish
+// events use this to decide whether to emit "newly created" semantics.
+//
+// Prefer this over UpsertObjects when the caller needs the row id (for
+// example to tie resource_issues rows to the object). UpsertObjects is a
+// bulk-write path that does not expose the generated id and is used by the
+// DeviceClass and StorageClass flows that have no per-row downstream work.
+func UpsertObject(ctx context.Context, obj *models.Object) (bool, *api.Error) {
+	dbErr := api.NewError(http.StatusServiceUnavailable, obj.ErrorMessage("upsert"), nil)
+	db := runaidb.DB().WithContext(ctx)
+
+	existing := &models.Object{ObjectFilters: obj.ObjectFilters}
+	err := db.Model(existing).Where(existing).First(existing)
+	switch {
+	case err == nil:
+		obj.ID = existing.ID
+		if _, err := db.Model(obj).Save(obj); err != nil {
+			return false, dbErr.WithDetails(err)
+		}
+		return false, nil
+	case errors.Is(err, orm.ErrRecordNotFound):
+		if _, err := db.Model(obj).Create(obj); err != nil {
+			return false, dbErr.WithDetails(err)
+		}
+		return true, nil
+	default:
+		return false, dbErr.WithDetails(err)
+	}
+}
+
+// UpsertObjects creates or updates multiple records.
+//
+// Each tracked kind has its own partial unique index (see migration
+// 03000002), so the ON CONFLICT target has to be type-aware: Postgres won't
+// match a plain `ON CONFLICT (cols)` against a partial unique index unless
+// the predicate is also supplied.
 func UpsertObjects(ctx context.Context, filter *models.ObjectFilters, objects []*models.Object) *api.Error {
 	if len(objects) == 0 {
 		return nil
@@ -70,12 +110,56 @@ func UpsertObjects(ctx context.Context, filter *models.ObjectFilters, objects []
 	dbErr := api.NewError(http.StatusServiceUnavailable, filterRecord.ErrorMessage("upsert"), nil)
 	db := runaidb.DB().WithContext(ctx)
 
-	if _, err := db.Clauses(clause.OnConflict{UpdateAll: true, OnConstraint: models.ObjectsUniqueConstraint}).
-		Save(objects); err != nil {
+	onConflict, err := objectsOnConflictFor(filter.Type)
+	if err != nil {
+		return dbErr.WithDetails(err)
+	}
+
+	if _, err := db.Clauses(onConflict).Save(objects); err != nil {
 		return dbErr.WithDetails(err)
 	}
 
 	return nil
+}
+
+// objectsOnConflictFor returns the ON CONFLICT clause that matches the
+// partial unique index for the given object type. Every tracked kind must be
+// listed here explicitly - a missing entry is a schema bug, not a silent
+// fallback, so the caller gets a hard error rather than an upsert that
+// silently inserts duplicates.
+//
+// The TargetWhere predicate is written with inline string literals (no `?`
+// placeholders) so Postgres can prove it implies the partial-index predicate
+// at plan time. A parameterised predicate (e.g. `type IN ($1,$2)`) does not
+// imply the literal `type IN ('StorageClass','DeviceClass')` on the index
+// side, so PG falls back to "no matching arbiter index" and the upsert errors.
+func objectsOnConflictFor(objectType string) (clause.OnConflict, error) {
+	switch objectType {
+	case models.ObjectTypeStorageClass, models.ObjectTypeDeviceClass:
+		return clause.OnConflict{
+			UpdateAll: true,
+			Columns: []clause.Column{
+				{Name: "tenant_id"}, {Name: "type"}, {Name: "cluster_id"},
+				{Name: "name"},
+			},
+			TargetWhere: clause.Where{Exprs: []clause.Expression{clause.Expr{
+				SQL: fmt.Sprintf("type IN ('%s','%s')", models.ObjectTypeStorageClass, models.ObjectTypeDeviceClass),
+			}}},
+		}, nil
+	case models.ObjectTypeResourceClaimTemplate:
+		return clause.OnConflict{
+			UpdateAll: true,
+			Columns: []clause.Column{
+				{Name: "tenant_id"}, {Name: "cluster_id"}, {Name: "scope_type"},
+				{Name: "name"}, {Name: "project_id"}, {Name: "department_id"},
+			},
+			TargetWhere: clause.Where{Exprs: []clause.Expression{clause.Expr{
+				SQL: fmt.Sprintf("type = '%s'", models.ObjectTypeResourceClaimTemplate),
+			}}},
+		}, nil
+	default:
+		return clause.OnConflict{}, fmt.Errorf("unsupported object type for upsert: %q", objectType)
+	}
 }
 
 // Delete deletes multiple/single Object records by defined filters
@@ -108,7 +192,13 @@ func DeleteTenantObjects(ctx context.Context, tenantId int32) *api.Error {
 }
 
 // DeleteObjectsNotInCluster deletes multiple/single Object records by defined filter.
-// It also filters out of the deletion, records which are representing provided 'objects' list
+// It also filters out of the deletion, records which are representing provided 'objects' list.
+//
+// We pass an empty-model receiver (not `objects`) to GORM's Delete so GORM does
+// not splice primary keys from the kept slice into the WHERE clause. Callers
+// that populate obj.ID on upsert (e.g. the per-row UpsertObject path used by
+// RCT / RC) would otherwise end up with `... AND id IN (kept.ids) AND name NOT
+// IN (kept.names)` - an impossible intersection that silently prunes nothing.
 func DeleteObjectsNotInCluster(ctx context.Context, filter *models.ObjectFilters, objects []*models.Object) *api.Error {
 	filterRecord := models.NewObject(filter)
 	dbErr := api.NewError(http.StatusServiceUnavailable, filterRecord.ErrorMessage("delete"), nil)
@@ -120,7 +210,7 @@ func DeleteObjectsNotInCluster(ctx context.Context, filter *models.ObjectFilters
 		tx = tx.Not(fmt.Sprintf("%s in ?", models.ObjectsNameColumn), extractNames(objects))
 	}
 
-	if _, err := tx.Delete(objects); err != nil {
+	if _, err := tx.Delete(&models.Object{}); err != nil {
 		return dbErr.WithDetails(err)
 	}
 	return nil
@@ -132,4 +222,80 @@ func extractNames(objects []*models.Object) []string {
 		result[i] = *object.Name
 	}
 	return result
+}
+
+// DeleteObjectsNotInScopedKeys deletes rows matching the filter except those
+// whose composite natural key (scope_type, department_id, project_id, name) is
+// in keptKeys. Unlike DeleteObjectsNotInCluster (which filters by name alone),
+// this is identity-safe when the same name exists at multiple scopes - the
+// RCT sync endpoint uses it to prune a cluster-wide full-set payload where a
+// template name can repeat across cluster / department / project scopes.
+//
+// Any resource_issues rows pointing at the deleted objects (resource_id =
+// objects.id) are removed in the same transaction so the sync does not leave
+// orphan issues behind. The whole thing happens in one transaction so an
+// error on the issues delete aborts the object delete too, keeping the two
+// tables consistent even on partial failure.
+//
+// Passing an empty-model receiver to Delete matches the pattern
+// DeleteObjectsNotInCluster uses so GORM does not splice primary keys back
+// into the WHERE clause from a different receiver.
+func DeleteObjectsNotInScopedKeys(ctx context.Context, filter *models.ObjectFilters, keptKeys [][]interface{}) *api.Error {
+	filterRecord := models.NewObject(filter)
+	dbErr := api.NewError(http.StatusServiceUnavailable, filterRecord.ErrorMessage("delete"), nil)
+
+	tx := runaidb.DB().WithContext(ctx).Begin()
+	committed := false
+	defer orm.FinalizeTransaction(tx, &committed)
+
+	// 1. Collect the ids about to be pruned so we can wipe their
+	//    resource_issues before the FK target disappears.
+	idQuery := tx.Model(filterRecord).Where(filter)
+	if len(keptKeys) > 0 {
+		idQuery = idQuery.Where(
+			fmt.Sprintf("(%s, %s, %s, %s) NOT IN ?",
+				models.ObjectScopeTypeColumn, models.ObjectsDepartmentIdColumn,
+				models.ObjectsProjectIdColumn, models.ObjectsNameColumn),
+			keptKeys,
+		)
+	}
+
+	var prunedIds []string
+	if err := idQuery.Pluck(models.ObjectsIdColumn, &prunedIds); err != nil {
+		return dbErr.WithDetails(err)
+	}
+
+	// 2. Delete the dangling resource_issues keyed by resource_id = objects.id.
+	//    Scoped by tenant_id (always) and cluster_id (whenever the caller
+	//    supplied one) so we never reach beyond the filter's blast radius.
+	if len(prunedIds) > 0 {
+		issuesTx := tx.Where(fmt.Sprintf("%s = ?", models.TenantIdColumn), filter.TenantId)
+		if filter.ClusterId != uuid.Nil {
+			issuesTx = issuesTx.Where(fmt.Sprintf("%s = ?", models.ClusterIdColumn), filter.ClusterId.String())
+		}
+		if _, err := issuesTx.Where(fmt.Sprintf("%s IN ?", models.ResourceIdColumn), prunedIds).
+			Delete(&models.ResourceIssue{}); err != nil {
+			return dbErr.WithDetails(err)
+		}
+	}
+
+	// 3. Delete the objects themselves.
+	deleteTx := tx.Model(filterRecord).Where(filter)
+	if len(keptKeys) > 0 {
+		deleteTx = deleteTx.Where(
+			fmt.Sprintf("(%s, %s, %s, %s) NOT IN ?",
+				models.ObjectScopeTypeColumn, models.ObjectsDepartmentIdColumn,
+				models.ObjectsProjectIdColumn, models.ObjectsNameColumn),
+			keptKeys,
+		)
+	}
+	if _, err := deleteTx.Delete(&models.Object{}); err != nil {
+		return dbErr.WithDetails(err)
+	}
+
+	if commitErr := tx.Commit(); commitErr != nil {
+		return dbErr.WithDetails(commitErr)
+	}
+	committed = true
+	return nil
 }

@@ -1,0 +1,35 @@
+type: object
+required:
+  - name
+  - namespace
+  - scopeType
+  - scopeId
+properties:
+  name:
+    $ref: "./ResourceClaimTemplateName.yaml"
+  namespace:
+    type: string
+    description: the namespace the ResourceClaimTemplate lives in
+    minLength: 1
+    maxLength: 253
+    example: runai
+  scopeType:
+    $ref: "../Scopes/ResourceScopeType.yaml"
+  scopeId:
+    type: string
+    minLength: 1
+    description: >
+      Scope identifier. For cluster scope the scopeId must equal the clusterId
+      query parameter (the request is rejected otherwise). For department scope
+      send the department id; for project scope send the project id.
+  origin:
+    $ref: "../Common/Origin.yaml"
+  assetId:
+    type: string
+    description: >
+      Control-plane asset id this template was created from. Present only when
+      origin is "assets". Allows the control plane to join tracker rows back to
+      the originating asset record.
+    nullable: true
+  issues:
+    $ref: "../Common/Issues.yaml"

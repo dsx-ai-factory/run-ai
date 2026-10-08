@@ -8,8 +8,8 @@ package validation
 import (
 	"fmt"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/frameworks"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
-	workloadcontroller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/controller"
 )
 
 const (
@@ -17,10 +17,10 @@ const (
 )
 
 type DistributedValidator struct {
-	frameworksStatus map[string]workloadcontroller.DistributedJobFrameworksStatus
+	frameworksStatus map[string]frameworks.DistributedJobFrameworksStatus
 }
 
-func NewDistributedValidator(frameworksStatus map[string]workloadcontroller.DistributedJobFrameworksStatus) *DistributedValidator {
+func NewDistributedValidator(frameworksStatus map[string]frameworks.DistributedJobFrameworksStatus) *DistributedValidator {
 	return &DistributedValidator{frameworksStatus: frameworksStatus}
 }
 

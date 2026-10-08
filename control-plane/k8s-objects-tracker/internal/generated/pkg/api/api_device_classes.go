@@ -128,6 +128,72 @@ func (c *DeviceClassesAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
+		"UpdateDeviceClass": Route{
+			strings.ToUpper("Put"),
+			"/api/v1/device-classes",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"device-classes",
+						"sync",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.UpdateDeviceClass
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
+		"CreateDeviceClass": Route{
+			strings.ToUpper("Post"),
+			"/api/v1/device-classes",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"device-classes",
+						"sync",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.CreateDeviceClass
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
+		"DeleteDeviceClass": Route{
+			strings.ToUpper("Delete"),
+			"/api/v1/device-classes",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"device-classes",
+						"delete",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.DeleteDeviceClass
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
 		"SyncDeviceClass": Route{
 			strings.ToUpper("Post"),
 			"/api/v1/device-classes/sync",
@@ -220,6 +286,208 @@ func (c *DeviceClassesAPIController) GetDeviceClasses(w http.ResponseWriter, r *
 
 		return
 	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// UpdateDeviceClass - update a Device Class
+func (c *DeviceClassesAPIController) UpdateDeviceClass(w http.ResponseWriter, r *http.Request) {
+	var deviceClassParam DeviceClass
+	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
+	if readError != nil {
+		// Handle the error
+		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
+		return
+	}
+	jsonReader := bytes.NewReader(payloadBody)
+	d := json.NewDecoder(jsonReader)
+	//d := json.NewDecoder(r.Body)
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+	d.DisallowUnknownFields()
+	if err := d.Decode(&deviceClassParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
+		return
+	}
+	if err := AssertDeviceClassRequired(deviceClassParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	if err := AssertDeviceClassConstraints(deviceClassParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	result, err := c.service.UpdateDeviceClass(r.Context(), deviceClassParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// CreateDeviceClass - create a Device Class
+func (c *DeviceClassesAPIController) CreateDeviceClass(w http.ResponseWriter, r *http.Request) {
+	var deviceClassParam DeviceClass
+	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
+	if readError != nil {
+		// Handle the error
+		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
+		return
+	}
+	jsonReader := bytes.NewReader(payloadBody)
+	d := json.NewDecoder(jsonReader)
+	//d := json.NewDecoder(r.Body)
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+	d.DisallowUnknownFields()
+	if err := d.Decode(&deviceClassParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
+		return
+	}
+	if err := AssertDeviceClassRequired(deviceClassParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	if err := AssertDeviceClassConstraints(deviceClassParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	result, err := c.service.CreateDeviceClass(r.Context(), deviceClassParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// DeleteDeviceClass - delete a Device Class
+func (c *DeviceClassesAPIController) DeleteDeviceClass(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	var clusterIdParam string
+	if query.Has("clusterId") {
+		param := query.Get("clusterId")
+
+		clusterIdParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
+		return
+	}
+	var nameParam string
+	if query.Has("name") {
+		param := query.Get("name")
+
+		nameParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "name"}, nil, nil)
+		return
+	}
+	result, err := c.service.DeleteDeviceClass(r.Context(), clusterIdParam, nameParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
 
 	////////////////////////////// RUNAI END ///////////////////////////////
 

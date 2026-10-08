@@ -142,6 +142,11 @@ paths:
   /api/v1/device-classes/sync:
     $ref: './resources/DeviceClassSync.yaml'
 
+  /api/v1/resource-claim-templates:
+    $ref: './resources/ResourceClaimTemplates.yaml'
+  /api/v1/resource-claim-templates/sync:
+    $ref: './resources/ResourceClaimTemplatesSync.yaml'
+
   /api/v1/storage-class-configuration:
     $ref: './resources/StorageClassConfiguration.yaml'
   /api/v1/storage-class-configuration/{id}:

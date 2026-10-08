@@ -19,10 +19,19 @@ func NewFactory(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Factory {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Factory{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -111,14 +120,20 @@ type Factory_CreateMigrator_Call struct {
 }
 
 // CreateMigrator is a helper method to define mock.On call
-//   - db
-func (_e *Factory_Expecter) CreateMigrator(db interface{}) *Factory_CreateMigrator_Call {
+//   - db orm.DB
+func (_e *Factory_Expecter) CreateMigrator(db any) *Factory_CreateMigrator_Call {
 	return &Factory_CreateMigrator_Call{Call: _e.mock.On("CreateMigrator", db)}
 }
 
 func (_c *Factory_CreateMigrator_Call) Run(run func(db orm.DB)) *Factory_CreateMigrator_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(orm.DB))
+		var arg0 orm.DB
+		if args[0] != nil {
+			arg0 = args[0].(orm.DB)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -158,14 +173,20 @@ type Factory_CreateSessionCreator_Call struct {
 }
 
 // CreateSessionCreator is a helper method to define mock.On call
-//   - db
-func (_e *Factory_Expecter) CreateSessionCreator(db interface{}) *Factory_CreateSessionCreator_Call {
+//   - db orm.DB
+func (_e *Factory_Expecter) CreateSessionCreator(db any) *Factory_CreateSessionCreator_Call {
 	return &Factory_CreateSessionCreator_Call{Call: _e.mock.On("CreateSessionCreator", db)}
 }
 
 func (_c *Factory_CreateSessionCreator_Call) Run(run func(db orm.DB)) *Factory_CreateSessionCreator_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(orm.DB))
+		var arg0 orm.DB
+		if args[0] != nil {
+			arg0 = args[0].(orm.DB)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
