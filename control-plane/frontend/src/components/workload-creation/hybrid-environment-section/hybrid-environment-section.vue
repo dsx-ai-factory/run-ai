@@ -31,6 +31,7 @@
       :is-required="requiredFields?.image"
       :tooltip-text="isLinked ? linkedDisableText : undefined"
       :support-authenticated-ngc="supportAuthenticatedNgc"
+      :nim-only="isDistributedInference"
       :scope-id="scopeId"
       :scope-type="scopeType"
       :cluster-id="clusterId"
@@ -153,6 +154,7 @@ import type { ICredentialChangedEvent } from "@/components/common/runai-credenti
 import { ERunaiCredentialSource } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
 import { useClusterStore } from "@/stores/cluster.store";
 import { MIN_CLUSTER_VERSION_FOR_NGC_API_KEY } from "@/common/version.constant";
+import { ENimEnvVariableNames } from "@/models/inference.model";
 
 export default defineComponent({
   name: "hybrid-environment-section",
@@ -364,27 +366,38 @@ export default defineComponent({
       this.$emit("update", { ...this.workloadSpec, servingPort });
     },
     onCredentialChanged(credentialEvent: ICredentialChangedEvent): void {
-      if (!this.supportImagePullSecrets) return;
-      const { credentialName, credentialSource } = credentialEvent;
+      const { credentialName, credentialSource, runtimeCredentialName } = credentialEvent;
+      const spec = { ...this.workloadSpec };
+      if (this.isDistributedInference && runtimeCredentialName !== undefined) {
+        const credential = runtimeCredentialName
+          ? { name: runtimeCredentialName, key: ENimEnvVariableNames.NgcApiKey }
+          : undefined;
+        const isPersonal = credentialSource === ERunaiCredentialSource.MyCredentials;
+        spec.environmentVariables = inferenceWorkloadUtil.replaceEnvironmentVariable(
+          spec.environmentVariables,
+          ENimEnvVariableNames.NgcApiKey,
+          undefined,
+          isPersonal ? undefined : credential,
+          isPersonal ? credential : undefined,
+        );
+        // The catalog clears the image before emitting the credential change in the same render cycle.
+        spec.image = null;
+      }
+      if (!this.supportImagePullSecrets) {
+        if (this.isDistributedInference && runtimeCredentialName !== undefined) this.$emit("update", spec);
+        return;
+      }
       if (!credentialName) {
-        this.updateImagePullSecrets([]);
+        this.$emit("update", { ...spec, imagePullSecrets: [] });
         return;
       }
 
       if (credentialSource === ERunaiCredentialSource.MyCredentials) {
-        this.updateImagePullSecrets([
-          {
-            name: credentialName,
-            userCredential: true,
-          },
-        ]);
+        spec.imagePullSecrets = [{ name: credentialName, userCredential: true }];
       } else if (credentialSource === ERunaiCredentialSource.SharedSecret) {
-        this.updateImagePullSecrets([
-          {
-            name: credentialName,
-          },
-        ]);
+        spec.imagePullSecrets = [{ name: credentialName }];
       }
+      this.$emit("update", spec);
     },
   },
 });

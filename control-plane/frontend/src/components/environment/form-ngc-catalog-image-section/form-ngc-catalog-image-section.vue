@@ -5,8 +5,9 @@
 
 <template>
   <section class="form-ngc-image-section">
-    <template v-if="supportAuthenticatedNgc">
+    <template v-if="supportAuthenticatedNgc || nimOnly">
       <runai-radio-options
+        v-if="!nimOnly"
         class="q-mt-lg q-mb-md"
         :options="imagesTypeOptions"
         v-model="selectedImagesType"
@@ -25,7 +26,8 @@
             allowedTypes: [ERunaiCredentialType.NgcApiKey],
             disable: true,
           }"
-          :credential-select-config="{ showCreateNewBtn: true }"
+          :credential-select-config="{ required: true, showCreateNewBtn: true }"
+          :name-resolver="nimOnly ? resolveCredentialName : undefined"
         />
       </div>
     </template>
@@ -33,6 +35,7 @@
       v-if="showImageSelector && ngcCatalogRegistryId"
       :registry-id="ngcCatalogRegistryId"
       :credential-id="selectedCredentialId || undefined"
+      :nim-only="nimOnly"
       @update:model-value="onImageValueChanged"
     />
   </section>
@@ -48,10 +51,16 @@ import { RunaiRadioOptions } from "@/components/common/runai-radio-options";
 import { RunaiCredentialSelectorBySource } from "@/components/common/runai-credential-selector-by-source";
 import type { ICredentialSelectorModel } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
 import {
+  createResourceNameResolver,
   ERunaiCredentialSource,
   ERunaiCredentialType,
 } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
 import { NgcImageTagSelector } from "@/components/environment/ngc-image-tag-selector";
+
+import { AssetKind, type CredentialsListResponseEntry } from "@/swagger-models/assets-service-client";
+
+const imagePullNameResolver = createResourceNameResolver(AssetKind.DockerRegistry);
+const runtimeNameResolver = createResourceNameResolver(AssetKind.GenericSecret);
 
 export enum EImagesType {
   Guest = "guest",
@@ -66,6 +75,10 @@ export default defineComponent({
     supportAuthenticatedNgc: {
       type: Boolean as PropType<boolean>,
       required: false,
+      default: false,
+    },
+    nimOnly: {
+      type: Boolean,
       default: false,
     },
     scopeId: {
@@ -94,6 +107,7 @@ export default defineComponent({
         id: undefined,
       } as ICredentialSelectorModel,
       selectedCredentialId: null as string | null,
+      runtimeCredentialNames: {} as Record<string, string>,
       imagesTypeOptions: [
         {
           value: EImagesType.Guest,
@@ -104,7 +118,7 @@ export default defineComponent({
           label: "Authenticated",
         },
       ] as ISelectOption[],
-      selectedImagesType: EImagesType.Guest as EImagesType | null,
+      selectedImagesType: this.nimOnly ? EImagesType.Authenticated : EImagesType.Guest,
       EImagesType,
       ERunaiCredentialType,
       ERunaiCredentialSource,
@@ -125,13 +139,18 @@ export default defineComponent({
     },
     showImageSelector(): boolean {
       return (
-        this.selectedImagesType === EImagesType.Guest ||
+        (!this.nimOnly && this.selectedImagesType === EImagesType.Guest) ||
         (this.selectedImagesType === EImagesType.Authenticated && !!this.selectedCredentialId)
       );
     },
   },
   methods: {
+    resolveCredentialName(credential: CredentialsListResponseEntry): string {
+      this.runtimeCredentialNames[credential.meta.id] = runtimeNameResolver(credential);
+      return imagePullNameResolver(credential);
+    },
     onImagesTypeSelected(imagesType: EImagesType): void {
+      if (this.nimOnly && imagesType === EImagesType.Guest) return;
       this.selectedImagesType = imagesType;
       this.selectedCredentialId = null;
       this.credentialSelectorModel = {
@@ -149,6 +168,9 @@ export default defineComponent({
       this.$emit("credential-changed", {
         credentialName: model.credentialName,
         credentialSource: model.source,
+        runtimeCredentialName: this.nimOnly
+          ? this.runtimeCredentialNames[model.id || ""] || model.credentialName
+          : undefined,
       });
     },
     onImageValueChanged(value: string | null): void {

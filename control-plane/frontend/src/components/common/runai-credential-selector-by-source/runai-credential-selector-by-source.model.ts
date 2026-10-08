@@ -119,6 +119,7 @@ export type TResolvedCredentialSelectorGrid = {
 };
 
 export interface ICredentialChangedEvent {
+  runtimeCredentialName?: string;
   credentialName: string | null;
   credentialSource: ERunaiCredentialSource;
 }

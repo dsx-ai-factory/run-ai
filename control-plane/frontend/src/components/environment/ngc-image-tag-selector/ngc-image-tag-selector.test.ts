@@ -47,4 +47,24 @@ describe("ngc-image-tag-selector", () => {
     expect(getImages).toHaveBeenCalledWith("registry-id", "nvidia/pytorch", "credential-id");
     expect(wrapper.vm.imageOptions).toEqual([{ label: "nvidia/pytorch", value: "nvidia/pytorch" }]);
   });
+  test("limits NIM catalog browsing to the NIM namespace", async () => {
+    getImages.mockResolvedValue({
+      images: ["nvidia/pytorch", "nim/nvidia/llama", "nim/other/model", "not-nim/model"],
+      prefix: "nvcr.io/",
+    });
+    const wrapper = mount(NgcImageTagSelector, {
+      global: { plugins: [Quasar] },
+      props: { registryId: "registry-id", credentialId: "credential-id", nimOnly: true },
+    });
+    await flushPromises();
+    expect(getImages).toHaveBeenCalledWith("registry-id", "nim/", "credential-id");
+    expect(wrapper.vm.imageOptions).toEqual([
+      { label: "nim/nvidia/llama", value: "nim/nvidia/llama" },
+      { label: "nim/other/model", value: "nim/other/model" },
+    ]);
+    wrapper.vm.onImageFilter("llama", (update) => update());
+    await flushPromises();
+    expect(getImages).toHaveBeenLastCalledWith("registry-id", "llama", "credential-id");
+    expect(wrapper.vm.imageOptions.some((option) => option.value === "nvidia/pytorch")).toBe(false);
+  });
 });
