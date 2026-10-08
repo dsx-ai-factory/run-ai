@@ -1346,6 +1346,9 @@ func effectiveCreateHomeDir(createHomeDir *bool, security *workloadsApi.Workspac
 	}
 
 	shouldCreateHomeDir := runAsUser
+	// RunAsUser historically implies a managed home directory.
+	// Fall back to RunAsUser only when CreateHomeDir is unset;
+	// an explicit true or false value takes precedence.
 	if createHomeDir != nil {
 		shouldCreateHomeDir = *createHomeDir
 	}
