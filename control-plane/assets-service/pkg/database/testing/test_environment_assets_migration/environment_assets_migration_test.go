@@ -117,7 +117,7 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			)
 			Expect(result.Error).To(BeNil())
 
-			migrateTo(30010001, "up 30010002")
+			migrateTo(30000001, "up 30000002")
 
 			type environmentSpec struct {
 				Image                string
@@ -197,7 +197,7 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			)
 			Expect(result.Error).To(BeNil())
 
-			migrateTo(30010002, "up 30010003")
+			migrateTo(30000002, "up 30000003")
 
 			type environmentSpec struct {
 				Image   string
@@ -284,7 +284,7 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			)
 			Expect(result.Error).To(BeNil())
 
-			migrateTo(30010003, "up 30010004")
+			migrateTo(30000003, "up 30000004")
 
 			type environmentSpec struct {
 				Image   string
@@ -342,10 +342,10 @@ var _ = Describe("Environment Assets Migration", Ordered, func() {
 			)
 			Expect(result.Error).To(BeNil())
 
-			migrateTo(30010004, "down 30010001")
+			migrateTo(30000004, "down 30000001")
 			assertEnvironmentImages(db, expectedImages)
 
-			migrateTo(30010001, "up 30010004")
+			migrateTo(30000001, "up 30000004")
 			assertEnvironmentImages(db, expectedImages)
 		})
 
