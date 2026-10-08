@@ -18,10 +18,19 @@ func NewReportsUpdater(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ReportsUpdater {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ReportsUpdater{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -62,17 +71,38 @@ type ReportsUpdater_UpdateReportStatus_Call struct {
 }
 
 // UpdateReportStatus is a helper method to define mock.On call
-//   - tenantId
-//   - reportId
-//   - status
-//   - previousStatus
-func (_e *ReportsUpdater_Expecter) UpdateReportStatus(tenantId interface{}, reportId interface{}, status interface{}, previousStatus interface{}) *ReportsUpdater_UpdateReportStatus_Call {
+//   - tenantId int32
+//   - reportId string
+//   - status api.ReportStatus
+//   - previousStatus *api.ReportStatus
+func (_e *ReportsUpdater_Expecter) UpdateReportStatus(tenantId any, reportId any, status any, previousStatus any) *ReportsUpdater_UpdateReportStatus_Call {
 	return &ReportsUpdater_UpdateReportStatus_Call{Call: _e.mock.On("UpdateReportStatus", tenantId, reportId, status, previousStatus)}
 }
 
 func (_c *ReportsUpdater_UpdateReportStatus_Call) Run(run func(tenantId int32, reportId string, status api.ReportStatus, previousStatus *api.ReportStatus)) *ReportsUpdater_UpdateReportStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int32), args[1].(string), args[2].(api.ReportStatus), args[3].(*api.ReportStatus))
+		var arg0 int32
+		if args[0] != nil {
+			arg0 = args[0].(int32)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 api.ReportStatus
+		if args[2] != nil {
+			arg2 = args[2].(api.ReportStatus)
+		}
+		var arg3 *api.ReportStatus
+		if args[3] != nil {
+			arg3 = args[3].(*api.ReportStatus)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -110,18 +140,44 @@ type ReportsUpdater_UpdateReportStatusWithMessage_Call struct {
 }
 
 // UpdateReportStatusWithMessage is a helper method to define mock.On call
-//   - tenantId
-//   - reportId
-//   - status
-//   - message
-//   - previousStatus
-func (_e *ReportsUpdater_Expecter) UpdateReportStatusWithMessage(tenantId interface{}, reportId interface{}, status interface{}, message interface{}, previousStatus interface{}) *ReportsUpdater_UpdateReportStatusWithMessage_Call {
+//   - tenantId int32
+//   - reportId string
+//   - status api.ReportStatus
+//   - message string
+//   - previousStatus *api.ReportStatus
+func (_e *ReportsUpdater_Expecter) UpdateReportStatusWithMessage(tenantId any, reportId any, status any, message any, previousStatus any) *ReportsUpdater_UpdateReportStatusWithMessage_Call {
 	return &ReportsUpdater_UpdateReportStatusWithMessage_Call{Call: _e.mock.On("UpdateReportStatusWithMessage", tenantId, reportId, status, message, previousStatus)}
 }
 
 func (_c *ReportsUpdater_UpdateReportStatusWithMessage_Call) Run(run func(tenantId int32, reportId string, status api.ReportStatus, message string, previousStatus *api.ReportStatus)) *ReportsUpdater_UpdateReportStatusWithMessage_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int32), args[1].(string), args[2].(api.ReportStatus), args[3].(string), args[4].(*api.ReportStatus))
+		var arg0 int32
+		if args[0] != nil {
+			arg0 = args[0].(int32)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 api.ReportStatus
+		if args[2] != nil {
+			arg2 = args[2].(api.ReportStatus)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 *api.ReportStatus
+		if args[4] != nil {
+			arg4 = args[4].(*api.ReportStatus)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }

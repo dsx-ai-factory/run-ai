@@ -19,10 +19,19 @@ func NewTenantsClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *TenantsClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &TenantsClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -72,15 +81,26 @@ type TenantsClienter_TenantExist_Call struct {
 }
 
 // TenantExist is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *TenantsClienter_Expecter) TenantExist(ctx interface{}, tenantId interface{}) *TenantsClienter_TenantExist_Call {
+//   - ctx context.Context
+//   - tenantId int32
+func (_e *TenantsClienter_Expecter) TenantExist(ctx any, tenantId any) *TenantsClienter_TenantExist_Call {
 	return &TenantsClienter_TenantExist_Call{Call: _e.mock.On("TenantExist", ctx, tenantId)}
 }
 
 func (_c *TenantsClienter_TenantExist_Call) Run(run func(ctx context.Context, tenantId int32)) *TenantsClienter_TenantExist_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

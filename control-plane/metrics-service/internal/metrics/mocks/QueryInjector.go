@@ -18,10 +18,19 @@ func NewQueryInjector(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *QueryInjector {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &QueryInjector{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -71,15 +80,26 @@ type QueryInjector_Inject_Call struct {
 }
 
 // Inject is a helper method to define mock.On call
-//   - query
-//   - metricInformation
-func (_e *QueryInjector_Expecter) Inject(query interface{}, metricInformation interface{}) *QueryInjector_Inject_Call {
+//   - query string
+//   - metricInformation *services.MetricInformation
+func (_e *QueryInjector_Expecter) Inject(query any, metricInformation any) *QueryInjector_Inject_Call {
 	return &QueryInjector_Inject_Call{Call: _e.mock.On("Inject", query, metricInformation)}
 }
 
 func (_c *QueryInjector_Inject_Call) Run(run func(query string, metricInformation *services.MetricInformation)) *QueryInjector_Inject_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(*services.MetricInformation))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 *services.MetricInformation
+		if args[1] != nil {
+			arg1 = args[1].(*services.MetricInformation)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

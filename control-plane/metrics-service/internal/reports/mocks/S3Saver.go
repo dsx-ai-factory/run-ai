@@ -18,10 +18,19 @@ func NewS3Saver(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *S3Saver {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &S3Saver{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -62,18 +71,44 @@ type S3Saver_Save_Call struct {
 }
 
 // Save is a helper method to define mock.On call
-//   - tenantId
-//   - id
-//   - iterator
-//   - labels
-//   - metrics
-func (_e *S3Saver_Expecter) Save(tenantId interface{}, id interface{}, iterator interface{}, labels interface{}, metrics interface{}) *S3Saver_Save_Call {
+//   - tenantId int32
+//   - id string
+//   - iterator reports.ResultMapIterator
+//   - labels []string
+//   - metrics []string
+func (_e *S3Saver_Expecter) Save(tenantId any, id any, iterator any, labels any, metrics any) *S3Saver_Save_Call {
 	return &S3Saver_Save_Call{Call: _e.mock.On("Save", tenantId, id, iterator, labels, metrics)}
 }
 
 func (_c *S3Saver_Save_Call) Run(run func(tenantId int32, id string, iterator reports.ResultMapIterator, labels []string, metrics []string)) *S3Saver_Save_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int32), args[1].(string), args[2].(reports.ResultMapIterator), args[3].([]string), args[4].([]string))
+		var arg0 int32
+		if args[0] != nil {
+			arg0 = args[0].(int32)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 reports.ResultMapIterator
+		if args[2] != nil {
+			arg2 = args[2].(reports.ResultMapIterator)
+		}
+		var arg3 []string
+		if args[3] != nil {
+			arg3 = args[3].([]string)
+		}
+		var arg4 []string
+		if args[4] != nil {
+			arg4 = args[4].([]string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
