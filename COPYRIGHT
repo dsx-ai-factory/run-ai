@@ -287,21 +287,6 @@ Components:
    limitations under the License.
 
 --------------------------------------------------------------------------------
-Copyright Adam Hintz - MIT
-License Text(https://spdx.org/licenses/MIT.html)
-Components:
-  github.com/antihax/optional v1.0.0
-
-The MIT License (MIT)
-Copyright (c) 2016 Adam Hintz
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
---------------------------------------------------------------------------------
 Copyright Adele Reed, mattn, oliverpool - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
@@ -312,34 +297,6 @@ MIT License
 Copyright (c) 2014 mattn
 Copyright (c) 2017 oliverpool
 Copyright (c) 2019 Adele Reed
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
---------------------------------------------------------------------------------
-Copyright Adrian Stoewer <adrian.stoewer@rz.ifi.lmu.de> - MIT
-License Text(https://spdx.org/licenses/MIT.html)
-Components:
-  github.com/stoewer/go-strcase v1.3.1
-
-The MIT License (MIT)
-
-Copyright (c) 2017, Adrian Stoewer <adrian.stoewer@rz.ifi.lmu.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -4839,7 +4796,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright Alex Saskevich - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260127142750-a19766b6e2d4
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/internal/third_party/govalidator v0.0.0-20260519202549-bbf5c5577288
 
@@ -6576,7 +6532,6 @@ SOFTWARE.
 Copyright by the Brotli Authors - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/andybalholm/brotli v1.2.1
   github.com/andybalholm/brotli v1.2.6
 
 Copyright (c) 2009, 2010, 2013-2016 by the Brotli Authors.
@@ -6658,8 +6613,6 @@ Copyright Caleb Spare - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/cespare/xxhash/v2 v2.3.0
-  github.com/klauspost/compress/zstd/internal/xxhash v1.18.7
-  github.com/klauspost/compress/zstd/internal/xxhash v1.19.2
   github.com/klauspost/compress/zstd/internal/xxhash v1.20.1
 
 Copyright (c) 2016 Caleb Spare
@@ -7388,8 +7341,8 @@ THE SOFTWARE.
 Copyright ClickHouse, Inc - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/ClickHouse/clickhouse-go/v2 v2.47.0
   github.com/ClickHouse/clickhouse-go/v2 v2.48.0
+  github.com/ClickHouse/clickhouse-go/v2 v2.49.0
 
 Copyright 2016-2023 ClickHouse, Inc.
 
@@ -7599,7 +7552,6 @@ Copyright 2016-2023 ClickHouse, Inc.
 Copyright ClickHouse, Inc - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/ClickHouse/ch-go v0.73.0
   github.com/ClickHouse/ch-go v0.74.0
 
 Copyright 2016-2023 ClickHouse, Inc.
@@ -10960,6 +10912,7 @@ Copyright Dustin Sallings <dustin@spy.net> - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/dustin/go-humanize v1.0.1
+  github.com/dustin/go-humanize v1.1.0
 
 Copyright (c) 2005-2008  Dustin Sallings <dustin@spy.net>
 
@@ -11668,34 +11621,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --------------------------------------------------------------------------------
-Copyright Gin-Gonic - MIT
-License Text(https://spdx.org/licenses/MIT.html)
-Components:
-  github.com/gin-contrib/pprof v1.5.4
-
-MIT License
-
-Copyright (c) 2016 Gin-Gonic
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
---------------------------------------------------------------------------------
 Copyright Go kit - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
@@ -12343,7 +12268,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Copyright Jack Christensen - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/jackc/pgx/v5 v5.10.0
   github.com/jackc/pgx/v5 v5.11.0
 
 Copyright (c) 2013-2021 Jack Christensen
@@ -13267,8 +13191,6 @@ Copyright Klaus Post, The filepathx Authors, The Go Authors and 2 others - Apach
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/klauspost/compress v1.18.6
-  github.com/klauspost/compress v1.18.7
-  github.com/klauspost/compress v1.19.2
   github.com/klauspost/compress v1.20.1
 
 Copyright (c) 2012 The Go Authors. All rights reserved.
@@ -13580,8 +13502,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Copyright Klaus Post, The Snappy-Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  github.com/klauspost/compress/s2 v1.18.7
-  github.com/klauspost/compress/s2 v1.19.2
   github.com/klauspost/compress/s2 v1.20.1
 
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -13766,8 +13686,6 @@ Copyright Manuel Martínez-Almeida - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/gin-contrib/sse v0.1.0
-  github.com/gin-contrib/sse v1.1.0
-  github.com/gin-gonic/gin v1.12.0
   github.com/gin-gonic/gin v1.9.1
 
 The MIT License (MIT)
@@ -13791,20 +13709,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
---------------------------------------------------------------------------------
-Copyright Marten Seemann - MIT
-License Text(https://spdx.org/licenses/MIT.html)
-Components:
-  github.com/quic-go/qpack v0.6.0
-
-Copyright 2019 Marten Seemann
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --------------------------------------------------------------------------------
 Copyright Marvin Wendt (MarvinJWendt) - MIT
@@ -13843,34 +13747,6 @@ Components:
 MIT License
 
 Copyright (c) 2022 Marvin Wendt (MarvinJWendt)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
---------------------------------------------------------------------------------
-Copyright Masaaki Goshima - MIT
-License Text(https://spdx.org/licenses/MIT.html)
-Components:
-  github.com/goccy/go-yaml v1.19.2
-
-MIT License
-
-Copyright (c) 2019 Masaaki Goshima
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -15952,7 +15828,6 @@ Components:
   github.com/jinzhu/now v1.1.5
   gorm.io/datatypes v1.2.7
   gorm.io/driver/mysql v1.6.0
-  gorm.io/driver/postgres v1.6.2
   gorm.io/driver/postgres v1.6.3
 
 The MIT License (MIT)
@@ -16224,7 +16099,6 @@ Copyright Onsi Fakhouri - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/onsi/ginkgo/v2 v2.27.2
-  github.com/onsi/ginkgo/v2 v2.31.0
   github.com/onsi/ginkgo/v2 v2.32.0
   github.com/onsi/ginkgo/v2 v2.33.0
   github.com/onsi/gomega v1.38.2
@@ -16667,7 +16541,6 @@ THE SOFTWARE.
 Copyright Peter Kieltyka (https://github.com/pkieltyka), Google Inc - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/go-chi/chi/v5 v5.2.4
   github.com/go-chi/chi/v5 v5.3.2
 
 Copyright (c) 2015-present Peter Kieltyka (https://github.com/pkieltyka), Google Inc.
@@ -16726,7 +16599,7 @@ SOFTWARE.
 Copyright Philip Hofer - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/tinylib/msgp/msgp v1.6.4
+  github.com/tinylib/msgp/msgp v1.6.5
 
 Copyright (c) 2014 Philip Hofer
 Portions Copyright (c) 2009 The Go Authors (license at http://golang.org) where indicated
@@ -16783,7 +16656,6 @@ SOFTWARE.
 Copyright Pierre Curto - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  github.com/pierrec/lz4/v4 v4.1.27
   github.com/pierrec/lz4/v4 v4.1.31
   github.com/pierrec/lz4/v4 v4.1.33
 
@@ -17191,7 +17063,6 @@ Components:
 Copyright Red Hat, Inc - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/openshift/api v0.0.0-20260513233232-73d7ca93df6d
   github.com/openshift/api v0.0.0-20260605005319-1194f4c62539
   github.com/openshift/api v0.0.0-20260727141720-967cc4c36c9b
   github.com/openshift/api/route/v1 v0.0.0-20260605005319-1194f4c62539
@@ -17699,7 +17570,6 @@ Copyright Samuel Berthe - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/samber/lo v1.51.0
-  github.com/samber/lo v1.52.0
   github.com/samber/lo v1.53.0
 
 MIT License
@@ -18532,7 +18402,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright the authors of cel.dev/expr, cloud.google.com/go/auth, cloud.google.com/go/auth/oauth2adapt and 122 others - (MPL-2.0 OR Apache-2.0) / Apache-2.0
 License Text(http://www.apache.org/licenses/LICENSE-2.0)
 Components:
-  cel.dev/expr v0.25.1
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
@@ -18583,57 +18452,44 @@ Components:
   github.com/go-openapi/strfmt v0.27.3
   github.com/go-openapi/swag v0.23.0
   github.com/go-openapi/swag v0.25.1
-  github.com/go-openapi/swag v0.25.4
   github.com/go-openapi/swag v0.27.1
   github.com/go-openapi/swag v0.29.2
   github.com/go-openapi/swag/cmdutils v0.25.1
-  github.com/go-openapi/swag/cmdutils v0.25.4
   github.com/go-openapi/swag/cmdutils v0.27.1
   github.com/go-openapi/swag/cmdutils v0.29.2
   github.com/go-openapi/swag/conv v0.25.1
-  github.com/go-openapi/swag/conv v0.25.4
   github.com/go-openapi/swag/conv v0.27.1
   github.com/go-openapi/swag/conv v0.29.2
   github.com/go-openapi/swag/fileutils v0.25.1
-  github.com/go-openapi/swag/fileutils v0.25.4
   github.com/go-openapi/swag/fileutils v0.27.1
   github.com/go-openapi/swag/fileutils v0.29.2
   github.com/go-openapi/swag/jsonname v0.25.1
-  github.com/go-openapi/swag/jsonname v0.25.4
   github.com/go-openapi/swag/jsonutils v0.25.1
-  github.com/go-openapi/swag/jsonutils v0.25.4
   github.com/go-openapi/swag/jsonutils v0.27.1
   github.com/go-openapi/swag/jsonutils v0.29.2
   github.com/go-openapi/swag/loading v0.25.1
-  github.com/go-openapi/swag/loading v0.25.4
   github.com/go-openapi/swag/loading v0.27.1
   github.com/go-openapi/swag/loading v0.29.2
   github.com/go-openapi/swag/mangling v0.25.1
-  github.com/go-openapi/swag/mangling v0.25.4
   github.com/go-openapi/swag/mangling v0.27.1
   github.com/go-openapi/swag/mangling v0.29.2
   github.com/go-openapi/swag/netutils v0.25.1
-  github.com/go-openapi/swag/netutils v0.25.4
   github.com/go-openapi/swag/netutils v0.27.1
   github.com/go-openapi/swag/netutils v0.29.2
   github.com/go-openapi/swag/pools v0.27.1
   github.com/go-openapi/swag/pools v0.29.2
   github.com/go-openapi/swag/stringutils v0.25.1
-  github.com/go-openapi/swag/stringutils v0.25.4
   github.com/go-openapi/swag/stringutils v0.27.1
   github.com/go-openapi/swag/stringutils v0.29.2
   github.com/go-openapi/swag/typeutils v0.25.1
-  github.com/go-openapi/swag/typeutils v0.25.4
   github.com/go-openapi/swag/typeutils v0.27.1
   github.com/go-openapi/swag/typeutils v0.29.2
   github.com/go-openapi/swag/yamlutils v0.25.1
-  github.com/go-openapi/swag/yamlutils v0.25.4
   github.com/go-openapi/swag/yamlutils v0.27.1
   github.com/go-openapi/swag/yamlutils v0.29.2
   github.com/go-openapi/validate v1.0.0
   github.com/golang/mock/gomock v1.6.0
   github.com/google/btree v1.1.3
-  github.com/google/cel-go v0.26.0
   github.com/google/cel-go v0.29.0
   github.com/google/gnostic-models v0.7.0
   github.com/google/gnostic-models v0.7.1
@@ -18645,7 +18501,6 @@ Components:
   github.com/googleapis/enterprise-certificate-proxy/client v0.3.23
   github.com/googleapis/google-cloud-go-testing/storage/stiface v0.0.0-20210719221736-1c9a4c676720
   github.com/jmespath/go-jmespath v0.4.1-0.20220621161143-b0104c826a24
-  github.com/kai-scheduler/KAI-scheduler/pkg v0.16.9
   github.com/kai-scheduler/KAI-scheduler/pkg v0.18.2
   github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2 v0.18.2
   github.com/kubeflow/mpi-operator/pkg/apis/kubeflow/v2beta1 v0.6.0
@@ -18658,6 +18513,7 @@ Components:
   github.com/moby/moby/api v1.55.0
   github.com/moby/moby/api v1.56.1
   github.com/moby/moby/client v0.5.1
+  github.com/moby/moby/client v0.6.0
   github.com/moby/spdystream v0.5.1
   github.com/moby/sys/mountinfo v0.7.2
   github.com/moby/sys/sequential v0.7.0
@@ -18665,21 +18521,17 @@ Components:
   github.com/moby/sys/userns v0.1.0
   github.com/sethvargo/go-retry v0.3.0
   github.com/sethvargo/go-retry v0.4.0
-  github.com/tektoncd/pipeline/pkg v0.55.0
+  github.com/tektoncd/pipeline v1.0.2
   github.com/tklauser/numcpus v0.12.0
   go.opencensus.io v0.24.0
   go.uber.org/mock/gomock v0.6.0
-  google.golang.org/genproto/googleapis/api v0.0.0-20260427160629-7cedc36a6bc4
   google.golang.org/genproto/googleapis/api v0.0.0-20260720211330-0afa2a65878a
   google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459
   google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc
   google.golang.org/genproto/googleapis/api v0.0.0-20261005182115-fad411399dd8
   google.golang.org/genproto/googleapis/api/expr/v1alpha1 v0.0.0-20260720211330-0afa2a65878a
-  google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20260526163538-3dc84a4a5aaa
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20260928230214-8a89bd6388cc
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261005182115-fad411399dd8
-  google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4
-  google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa
   google.golang.org/genproto/googleapis/rpc v0.0.0-20260720211330-0afa2a65878a
   google.golang.org/genproto/googleapis/rpc v0.0.0-20260921155816-b14227669459
   google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc
@@ -18687,8 +18539,6 @@ Components:
   google.golang.org/genproto/googleapis/rpc/status v0.0.0-20260720211330-0afa2a65878a
   google.golang.org/genproto/googleapis/type v0.0.0-20260319201613-d00831a3d3e7
   google.golang.org/genproto/googleapis/type v0.0.0-20261005182115-fad411399dd8
-  google.golang.org/grpc v1.82.1
-  google.golang.org/grpc v1.83.1
   google.golang.org/grpc v1.83.2
   google.golang.org/grpc v1.84.0
   k8s.io/api v0.35.4
@@ -18734,22 +18584,18 @@ Components:
   k8s.io/kube-aggregator/pkg/apis/apiregistration v0.35.4
   k8s.io/kube-openapi/pkg v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg v0.0.0-20251125145642-4e65d59e963e
-  k8s.io/kube-openapi/pkg v0.0.0-20260127142750-a19766b6e2d4
   k8s.io/kube-openapi/pkg v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg v0.0.0-20260721132016-d427ff9ee9ad
-  k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260127142750-a19766b6e2d4
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20251125145642-4e65d59e963e
-  k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260127142750-a19766b6e2d4
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260721132016-d427ff9ee9ad
-  k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260127142750-a19766b6e2d4
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/validation/strfmt v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-scheduler v0.35.4
@@ -18966,7 +18812,7 @@ the license terms, and this copy of it was never filled in, so it is omitted
 here rather than reproduced with unresolved placeholders.]
 
 --------------------------------------------------------------------------------
-Copyright the authors of contrib.go.opencensus.io/exporter/ocagent, contrib.go.opencensus.io/exporter/prometheus, github.com/NVIDIA/k8s-nim-operator and 47 others - Apache-2.0
+Copyright the authors of contrib.go.opencensus.io/exporter/ocagent, contrib.go.opencensus.io/exporter/prometheus, github.com/NVIDIA/k8s-nim-operator and 46 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d
@@ -18978,21 +18824,17 @@ Components:
   github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2
   github.com/devfile/api/v2/pkg v2.2.2
   github.com/go-logr/stdr v1.2.2
-  github.com/go-openapi/jsonpointer v0.22.4
   github.com/go-openapi/jsonpointer v1.0.0
   github.com/go-openapi/jsonpointer v1.0.1
   github.com/go-openapi/jsonpointer v1.0.2
-  github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1 v0.1.1
   github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1 v0.1.3
   github.com/kserve/kserve/pkg v0.17.1
   github.com/moby/docker-image-spec/specs-go/v1 v1.3.1
   github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
   github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee
   github.com/nats-io/nats.go v1.48.0
-  github.com/nats-io/nats.go v1.53.1
   github.com/nats-io/nats.go v1.54.0
   github.com/nats-io/nkeys v0.4.11
-  github.com/nats-io/nkeys v0.4.15
   github.com/nats-io/nkeys v0.4.16
   github.com/nats-io/nuid v1.0.1
   github.com/oklog/ulid v1.3.1
@@ -19002,13 +18844,10 @@ Components:
   github.com/openshift/library-go/pkg v0.0.0-20260409165127-c57da2bf5720
   github.com/prometheus/alertmanager/api/v2 v0.34.1
   github.com/prometheus/client_golang v1.23.2
-  github.com/prometheus/client_golang/prometheus v1.22.0
   github.com/prometheus/client_golang/prometheus v1.23.2
   github.com/prometheus/client_golang/prometheus v1.24.1
   github.com/prometheus/client_model/go v0.6.2
   github.com/prometheus/client_model/go v0.6.3
-  github.com/prometheus/common v0.64.0
-  github.com/prometheus/common v0.66.1
   github.com/prometheus/common v0.67.1
   github.com/prometheus/common v0.67.5
   github.com/prometheus/common v0.70.1
@@ -19023,11 +18862,9 @@ Components:
   github.com/run-ai/karta/pkg/jq v0.1.1-0.20260708043952-998140308a96
   github.com/spiffe/go-spiffe/v2 v2.8.1
   github.com/spiffe/go-spiffe/v2 v2.9.0
-  go.mongodb.org/mongo-driver/v2 v2.5.0
   go.opentelemetry.io/auto/sdk v1.2.1
   go.opentelemetry.io/contrib/detectors/gcp v1.44.0
   go.opentelemetry.io/contrib/detectors/gcp v1.47.0
-  go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.61.0
   go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.67.0
   go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.69.0
   go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.71.0
@@ -19036,36 +18873,28 @@ Components:
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
   go.opentelemetry.io/otel v1.43.0
-  go.opentelemetry.io/otel v1.44.0
   go.opentelemetry.io/otel v1.45.0
   go.opentelemetry.io/otel v1.46.0
   go.opentelemetry.io/otel v1.47.0
-  go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.43.0
   go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.45.0
   go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.46.0
   go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0
-  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.43.0
   go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.44.0
   go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.46.0
   go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0
   go.opentelemetry.io/otel/log v1.47.0
   go.opentelemetry.io/otel/metric v1.43.0
-  go.opentelemetry.io/otel/metric v1.44.0
   go.opentelemetry.io/otel/metric v1.45.0
   go.opentelemetry.io/otel/metric v1.46.0
   go.opentelemetry.io/otel/metric v1.47.0
-  go.opentelemetry.io/otel/sdk v1.43.0
-  go.opentelemetry.io/otel/sdk v1.44.0
   go.opentelemetry.io/otel/sdk v1.45.0
   go.opentelemetry.io/otel/sdk v1.46.0
   go.opentelemetry.io/otel/sdk v1.47.0
   go.opentelemetry.io/otel/sdk/metric v1.47.0
   go.opentelemetry.io/otel/trace v1.43.0
-  go.opentelemetry.io/otel/trace v1.44.0
   go.opentelemetry.io/otel/trace v1.45.0
   go.opentelemetry.io/otel/trace v1.46.0
   go.opentelemetry.io/otel/trace v1.47.0
-  go.opentelemetry.io/proto/otlp v1.10.0
   go.opentelemetry.io/proto/otlp v1.11.0
   go.opentelemetry.io/proto/otlp v1.11.1
   knative.dev/networking/pkg v0.0.0-20260120131110-a7cdca238a0d
@@ -19455,10 +19284,7 @@ here rather than reproduced with unresolved placeholders.]
 Copyright the authors of github.com/aws/smithy-go/ptr, github.com/awslabs/operatorpkg, github.com/santhosh-tekuri/jsonschema/v6 and 3 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/aws/smithy-go/ptr v1.24.1
   github.com/aws/smithy-go/ptr v1.26.0
-  github.com/aws/smithy-go/ptr v1.27.8
-  github.com/aws/smithy-go/ptr v1.28.1
   github.com/aws/smithy-go/ptr v1.28.2
   github.com/aws/smithy-go/ptr v1.28.4
   github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363
@@ -20031,7 +19857,6 @@ Copyright the authors of github.com/go-sql-driver/mysql - MPL-2.0
 License Text(https://spdx.org/licenses/MPL-2.0.html)
 Components:
   github.com/go-sql-driver/mysql v1.10.1
-  github.com/go-sql-driver/mysql v1.9.3
 
 Mozilla Public License Version 2.0
 ==================================
@@ -21606,7 +21431,6 @@ Copyright The github.com/redis/go-redis Authors - BSD-2-Clause
 License Text(https://spdx.org/licenses/BSD-2-Clause.html)
 Components:
   github.com/redis/go-redis/v9 v9.10.0
-  github.com/redis/go-redis/v9 v9.14.0
   github.com/redis/go-redis/v9 v9.22.0
   github.com/redis/go-redis/v9 v9.23.0
 
@@ -21672,26 +21496,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  golang.org/x/crypto v0.53.0
-  golang.org/x/crypto v0.55.0
   golang.org/x/crypto v0.57.0
   golang.org/x/crypto/sha3 v0.52.0
   golang.org/x/crypto/sha3 v0.56.0
   golang.org/x/crypto/sha3 v0.57.0
   golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329
-  golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90
   golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a
   golang.org/x/exp v0.0.0-20260529124908-c761662dc8c9
-  golang.org/x/exp v0.0.0-20260611194520-c48552f49976
   golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba
   golang.org/x/exp v0.0.0-20261007192929-f45ad48fbe92
-  golang.org/x/exp/slices v0.0.0-20250819193227-8b4c13bb791b
   golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp/slices v0.0.0-20260908205506-85c1c2202aba
-  golang.org/x/exp/slices v0.0.0-20261005173118-76772065c9b0
   golang.org/x/exp/slices v0.0.0-20261007192929-f45ad48fbe92
-  golang.org/x/mod/semver v0.37.0
   golang.org/x/mod/semver v0.41.0
   golang.org/x/net v0.55.0
   golang.org/x/net v0.56.0
@@ -21701,16 +21518,11 @@ Components:
   golang.org/x/oauth2 v0.32.0
   golang.org/x/oauth2 v0.36.0
   golang.org/x/oauth2 v0.37.0
-  golang.org/x/sync v0.20.0
-  golang.org/x/sync v0.21.0
   golang.org/x/sync v0.23.0
   golang.org/x/sync/errgroup v0.20.0
   golang.org/x/sync/errgroup v0.23.0
-  golang.org/x/sync/semaphore v0.22.0
   golang.org/x/sync/semaphore v0.23.0
   golang.org/x/sys v0.45.0
-  golang.org/x/sys v0.46.0
-  golang.org/x/sys v0.47.0
   golang.org/x/sys v0.48.0
   golang.org/x/sys/unix v0.46.0
   golang.org/x/term v0.43.0
@@ -21718,14 +21530,11 @@ Components:
   golang.org/x/term v0.45.0
   golang.org/x/term v0.46.0
   golang.org/x/text v0.37.0
-  golang.org/x/text v0.38.0
-  golang.org/x/text v0.41.0
   golang.org/x/text v0.42.0
   golang.org/x/time/rate v0.14.0
   golang.org/x/time/rate v0.15.0
   golang.org/x/time/rate v0.16.0
   golang.org/x/time/rate v0.9.0
-  golang.org/x/tools v0.46.0
   golang.org/x/tools v0.49.0
   golang.org/x/tools v0.50.0
   golang.org/x/tools v0.51.0
@@ -21762,13 +21571,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  filippo.io/edwards25519 v1.1.1
   filippo.io/edwards25519 v1.2.0
   github.com/ProtonMail/go-crypto v1.5.2
-  github.com/andybalholm/brotli/flate v1.2.1
   github.com/aws/aws-sdk-go/internal/sync/singleflight v1.55.6
   github.com/aws/aws-sdk-go/internal/sync/singleflight v1.55.8
-  github.com/go-faster/errors v0.7.1
   github.com/go-faster/errors v0.8.0
   github.com/grafana/regexp v0.0.0-20250905093917-f7b3be9d1853
   github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de
@@ -21816,7 +21622,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil v1.22.0
   github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil v1.23.2
   github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil v1.24.1
 
@@ -21854,7 +21659,6 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20251125145642-4e65d59e963e
-  k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260127142750-a19766b6e2d4
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260317180543-43fb72c5454a
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260519202549-bbf5c5577288
@@ -23616,7 +23420,7 @@ Components:
 Copyright The KubeVirt Authors - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  kubevirt.io/api v1.8.4
+  kubevirt.io/api v1.9.0
   kubevirt.io/containerized-data-importer-api/pkg/apis/core v1.65.0
 
 
@@ -24263,42 +24067,10 @@ Components:
    limitations under the License.
 
 --------------------------------------------------------------------------------
-Copyright the quic-go authors & Google, Inc - MIT
-License Text(https://spdx.org/licenses/MIT.html)
-Components:
-  github.com/quic-go/quic-go v0.59.1
-
-MIT License
-
-Copyright (c) 2016 the quic-go authors & Google, Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
---------------------------------------------------------------------------------
 Copyright The Snappy-Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
-  github.com/klauspost/compress/internal/snapref v1.18.7
-  github.com/klauspost/compress/internal/snapref v1.19.2
   github.com/klauspost/compress/internal/snapref v1.20.1
-  github.com/klauspost/compress/snappy v1.18.7
-  github.com/klauspost/compress/snappy v1.19.2
   github.com/klauspost/compress/snappy v1.20.1
 
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
@@ -24644,10 +24416,8 @@ Copyright Three Dots Labs - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/ThreeDotsLabs/watermill v1.3.5
-  github.com/ThreeDotsLabs/watermill v1.5.1
   github.com/ThreeDotsLabs/watermill v1.5.3
   github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream v1.3.0
-  github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream v1.4.4
   github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream v1.4.5
 
 MIT License
@@ -24901,7 +24671,6 @@ Copyright Ugorji Nwoke - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/ugorji/go/codec v1.2.11
-  github.com/ugorji/go/codec v1.3.1
 
 The MIT License (MIT)
 
@@ -25246,7 +25015,6 @@ THE SOFTWARE.
 Copyright zstone12 - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  gorm.io/plugin/opentelemetry v0.1.15
   gorm.io/plugin/opentelemetry v0.1.16
 
 MIT License
@@ -26400,11 +26168,12 @@ Copyright 2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 Copyright 2014-2015 Stripe, Inc.
 
 --------------------------------------------------------------------------------
-NOTICE of github.com/aws/smithy-go
+NOTICE of github.com/aws/smithy-go, github.com/awslabs/operatorpkg
 Components:
   github.com/aws/smithy-go v1.26.0
   github.com/aws/smithy-go v1.28.2
   github.com/aws/smithy-go v1.28.4
+  github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
@@ -35436,6 +35205,7 @@ agreements or legal obligations associated with the project components.
 NOTICE of github.com/minio/minio-go/v7
 Components:
   github.com/minio/minio-go/v7 v7.0.77
+  github.com/minio/minio-go/v7 v7.3.0
 
 MinIO Cloud Storage, (C) 2014-2020 MinIO, Inc.
 
@@ -35696,6 +35466,17 @@ We also use code from a large number of npm packages. For details, see:
   the npm_licenses.tar.bz2 archive in release tarballs and Docker images.
 
 --------------------------------------------------------------------------------
+NOTICE of github.com/prometheus/statsd_exporter
+Components:
+  github.com/prometheus/statsd_exporter v0.27.1
+
+StatsD-to-Prometheus exporter
+Copyright 2013-2015 The Prometheus Authors
+
+This product includes software developed at
+SoundCloud Ltd. (http://soundcloud.com/).
+
+--------------------------------------------------------------------------------
 NOTICE of github.com/run-ai/karta
 Components:
   github.com/run-ai/karta v0.1.0
@@ -35841,6 +35622,30 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+--------------------------------------------------------------------------------
+NOTICE of sigs.k8s.io/karpenter
+Components:
+  sigs.k8s.io/karpenter v1.14.1
+
+When donating the karpenter-core project to the CNCF, not all contributors were reached
+to sign the CNCF CLA prior to donation. As such, according to the CNCF rules to donate a repository,
+we must add a NOTICE referencing section 7 of the CLA with a list of developers who could not be reached.
+
+`7. Should You wish to submit work that is not Your original creation, You may
+submit it to the Foundation separately from any Contribution, identifying the
+complete details of its source and of any license or other restriction
+(including, but not limited to, related patents, trademarks, and license
+agreements) of which you are personally aware, and conspicuously marking the
+work as "Submitted on behalf of a third-party: [named here]".`
+
+Submitted on behalf of a third-party: @sergkondr
+Submitted on behalf of a third-party: @abeer-stripe
+Submitted on behalf of a third-party: @shikai93
+Submitted on behalf of a third-party: @lucass4
+Submitted on behalf of a third-party: @wkaczynski
+Submitted on behalf of a third-party: @spring1843
+Submitted on behalf of a third-party: @splichy
 
 --------------------------------------------------------------------------------
 NOTICE of sigs.k8s.io/randfill
