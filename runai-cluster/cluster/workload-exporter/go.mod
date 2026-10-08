@@ -92,7 +92,6 @@ require (
 	github.com/google/cel-go v0.29.0 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/go-containerregistry v0.20.5 // indirect
 	github.com/google/pprof v0.0.0-20260507013755-92041b743c96 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
@@ -103,7 +102,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kai-scheduler/kai-resource-management-api v0.1.3
-	github.com/kubeflow/training-operator v1.9.3 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
@@ -187,9 +185,7 @@ require (
 	k8s.io/kubelet v0.35.4 // indirect
 	k8s.io/kubernetes v1.35.4 // indirect
 	k8s.io/mount-utils v0.35.4 // indirect
-	knative.dev/networking v0.0.0-20260120131110-a7cdca238a0d // indirect
 	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a // indirect
-	knative.dev/serving v0.48.1 // indirect
 	sigs.k8s.io/gateway-api v1.5.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect

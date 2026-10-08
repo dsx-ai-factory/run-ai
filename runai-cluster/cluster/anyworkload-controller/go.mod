@@ -192,7 +192,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology =
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils => ../common/utils
 
-
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk
