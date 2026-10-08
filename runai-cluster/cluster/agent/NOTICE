@@ -13,14 +13,14 @@ automatically; do not edit it by hand.
 Summary
 ================================================================================
 
-188 third-party packages:
+186 third-party packages:
 
-  - Apache-2.0: 96
+  - Apache-2.0: 95
   - MIT: 50
   - BSD-3-Clause: 31
   - MPL-2.0: 5
   - BSD-2-Clause: 3
-  - ISC: 3
+  - ISC: 2
 
 ================================================================================
 Dependencies
@@ -35,7 +35,6 @@ Dependencies
 | `github.com/aws/smithy-go/ptr` | v1.28.2 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.2/LICENSE |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/blang/semver/v4` | v4.0.0 | MIT | https://pkg.go.dev/github.com/blang/semver/v4@v4.0.0?tab=licenses |
-| `github.com/blendle/zapdriver` | v1.3.1 | ISC | https://github.com/blendle/zapdriver/blob/v1.3.1/LICENSE |
 | `github.com/cenkalti/backoff/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v4@v4.3.0?tab=licenses |
 | `github.com/cenkalti/backoff/v5` | v5.0.3 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v5@v5.0.3?tab=licenses |
 | `github.com/cert-manager/cert-manager/pkg/apis` | v1.20.3 | Apache-2.0 | https://github.com/cert-manager/cert-manager/blob/v1.20.3/LICENSE |
@@ -209,7 +208,6 @@ Dependencies
 | `k8s.io/mount-utils` | v0.35.4 | Apache-2.0 | https://pkg.go.dev/k8s.io/mount-utils@v0.35.4?tab=licenses |
 | `k8s.io/utils` | v0.0.0-20260707023825-cf1189d6abe3 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
 | `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20260707023825-cf1189d6abe3 | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
-| `knative.dev/pkg` | v0.0.0-20260120122510-4a022ed9999a | Apache-2.0 | https://pkg.go.dev/knative.dev/pkg@v0.0.0-20260120122510-4a022ed9999a?tab=licenses |
 | `sigs.k8s.io/controller-runtime` | v0.23.3 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.23.3?tab=licenses |
 | `sigs.k8s.io/gateway-api/apis/v1` | v1.6.1 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/gateway-api@v1.6.1?tab=licenses |
 | `sigs.k8s.io/json` | v0.0.0-20250730193827-2d320260d730 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/json@v0.0.0-20250730193827-2d320260d730?tab=licenses |
@@ -773,27 +771,6 @@ THE SOFTWARE.
 
 --------------------------------------------------------------------------------
 Applies to:
-  - github.com/blendle/zapdriver
---------------------------------------------------------------------------------
-
-ISC License
-
-Copyright (c) Blendle
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted, provided that the above
-copyright notice and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
---------------------------------------------------------------------------------
-Applies to:
   - github.com/cenkalti/backoff/v4
   - github.com/cenkalti/backoff/v5
 --------------------------------------------------------------------------------
@@ -846,7 +823,6 @@ Applies to:
   - go.opentelemetry.io/otel/sdk
   - go.opentelemetry.io/otel/trace
   - go.opentelemetry.io/proto/otlp
-  - knative.dev/pkg
 --------------------------------------------------------------------------------
 
                                  Apache License
