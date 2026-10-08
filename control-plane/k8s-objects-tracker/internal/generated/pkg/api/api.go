@@ -54,6 +54,9 @@ type ConfigMapsAPIRouter interface {
 // pass the data to a DeviceClassesAPIServicer to perform the required actions, then write the service results to the http response.
 type DeviceClassesAPIRouter interface {
 	GetDeviceClasses(http.ResponseWriter, *http.Request)
+	UpdateDeviceClass(http.ResponseWriter, *http.Request)
+	CreateDeviceClass(http.ResponseWriter, *http.Request)
+	DeleteDeviceClass(http.ResponseWriter, *http.Request)
 	SyncDeviceClass(http.ResponseWriter, *http.Request)
 }
 
@@ -105,6 +108,17 @@ type PVCsAPIRouter interface {
 	ObsoleteCreatePvc(http.ResponseWriter, *http.Request)
 	ObsoleteSyncPvc(http.ResponseWriter, *http.Request)
 	ObsoleteDeletePvc(http.ResponseWriter, *http.Request)
+}
+
+// ResourceClaimTemplatesAPIRouter defines the required methods for binding the api requests to a responses for the ResourceClaimTemplatesAPI
+// The ResourceClaimTemplatesAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a ResourceClaimTemplatesAPIServicer to perform the required actions, then write the service results to the http response.
+type ResourceClaimTemplatesAPIRouter interface {
+	ListResourceClaimTemplates(http.ResponseWriter, *http.Request)
+	UpdateResourceClaimTemplate(http.ResponseWriter, *http.Request)
+	CreateResourceClaimTemplate(http.ResponseWriter, *http.Request)
+	DeleteResourceClaimTemplate(http.ResponseWriter, *http.Request)
+	SyncResourceClaimTemplates(http.ResponseWriter, *http.Request)
 }
 
 // SecretsAPIRouter defines the required methods for binding the api requests to a responses for the SecretsAPI
@@ -198,6 +212,9 @@ type ConfigMapsAPIServicer interface {
 // and updated with the logic required for the API.
 type DeviceClassesAPIServicer interface {
 	GetDeviceClasses(context.Context, string, string) (ImplResponse, error)
+	UpdateDeviceClass(context.Context, DeviceClass) (ImplResponse, error)
+	CreateDeviceClass(context.Context, DeviceClass) (ImplResponse, error)
+	DeleteDeviceClass(context.Context, string, string) (ImplResponse, error)
 	SyncDeviceClass(context.Context, string, DeviceClasses) (ImplResponse, error)
 }
 
@@ -251,6 +268,18 @@ type PVCsAPIServicer interface {
 	ObsoleteCreatePvc(context.Context, string, string, SinglePvc) (ImplResponse, error)
 	ObsoleteSyncPvc(context.Context, string, string, []SinglePvc) (ImplResponse, error)
 	ObsoleteDeletePvc(context.Context, string, string, string) (ImplResponse, error)
+}
+
+// ResourceClaimTemplatesAPIServicer defines the api actions for the ResourceClaimTemplatesAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type ResourceClaimTemplatesAPIServicer interface {
+	ListResourceClaimTemplates(context.Context, string, string, string, string, string) (ImplResponse, error)
+	UpdateResourceClaimTemplate(context.Context, string, ResourceClaimTemplate) (ImplResponse, error)
+	CreateResourceClaimTemplate(context.Context, string, ResourceClaimTemplate) (ImplResponse, error)
+	DeleteResourceClaimTemplate(context.Context, string, ResourceScopeType, string, string) (ImplResponse, error)
+	SyncResourceClaimTemplates(context.Context, string, ResourceClaimTemplates) (ImplResponse, error)
 }
 
 // SecretsAPIServicer defines the api actions for the SecretsAPI service

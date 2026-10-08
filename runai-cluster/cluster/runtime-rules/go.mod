@@ -37,7 +37,6 @@ require (
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
@@ -120,7 +119,6 @@ require (
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
-	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/cert-manager/cert-manager v1.20.3 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1
@@ -131,7 +129,6 @@ require (
 	github.com/golang/glog v1.2.5 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
@@ -154,7 +151,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.45.0 // indirect
 	go.opentelemetry.io/otel/trace v1.45.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
-	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a // indirect
 )
 
 require (

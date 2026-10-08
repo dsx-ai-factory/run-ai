@@ -11,7 +11,7 @@ import (
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/testutil"
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -141,7 +141,7 @@ var _ = Describe("HandleAdditionalResources", func() {
 			Expect(deployList.Items[0].Spec.Template.Spec.Containers[0].Resources.Limits.Memory().Equal(resource.MustParse("128Mi"))).To(BeTrue())
 			initContainers := deployList.Items[0].Spec.Template.Spec.InitContainers
 			Expect(initContainers).To(HaveLen(1))
-			Expect(initContainers[0].Name).To(Equal(workloadbuilders.UsernameLoaderInitContainerName))
+			Expect(initContainers[0].Name).To(Equal(UsernameLoaderInitContainerName))
 			Expect(initContainers[0].Resources.Requests.Cpu().Equal(resource.MustParse("25m"))).To(BeTrue())
 			Expect(initContainers[0].Resources.Limits.Memory().Equal(resource.MustParse("64Mi"))).To(BeTrue())
 

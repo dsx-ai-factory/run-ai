@@ -8,7 +8,7 @@ package networking
 import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	openshiftv1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -81,7 +81,7 @@ func composeAuthProxyDeployment(
 }
 
 func (p *Plugin) buildAuthProxyVolumes() []corev1.Volume {
-	return workloadbuilders.ComposeAuthProxyVolumes()
+	return ComposeAuthProxyVolumes()
 }
 
 func (p *Plugin) buildAuthProxyInitContainers(config *dromosv1alpha1.NetworkingConfig, nick string) ([]corev1.Container, error) {
@@ -94,7 +94,7 @@ func (p *Plugin) buildAuthProxyInitContainers(config *dromosv1alpha1.NetworkingC
 		return nil, nil
 	}
 
-	initContainer, err := workloadbuilders.BuildUsernameLoaderInitContainerWithError(auth.AuthorizedUsers, nick)
+	initContainer, err := BuildUsernameLoaderInitContainerWithError(auth.AuthorizedUsers, nick)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func buildOAuth2ProxyContainerFromAuth(
 	authorizedUsers, authorizedGroups *string,
 	forceJsonResponse bool,
 ) (*corev1.Container, error) {
-	cfg := workloadbuilders.OAuth2ProxyConfig{
+	cfg := OAuth2ProxyConfig{
 		ContainerName:              OAuth2ProxyContainerName,
 		UpstreamURL:                upstreamURL,
 		ExternalHost:               externalHost,
@@ -149,7 +149,7 @@ func buildOAuth2ProxyContainerFromAuth(
 		EnableSidecarRestartPolicy: false,
 		ReverseProxy:               true,
 	}
-	return workloadbuilders.BuildOAuth2ProxyContainer(cfg)
+	return BuildOAuth2ProxyContainer(cfg)
 }
 
 func (p *Plugin) buildAuthProxyService(
@@ -234,7 +234,7 @@ func (p *Plugin) buildIngress(
 		}
 	}
 
-	return workloadbuilders.EnrichIngressWithDefaults(ingress)
+	return EnrichIngressWithDefaults(ingress)
 }
 
 func (p *Plugin) buildRoute(
@@ -257,7 +257,7 @@ func (p *Plugin) buildRoute(
 		}
 	}
 
-	route = workloadbuilders.EnrichRouteWithDefaults(route)
+	route = EnrichRouteWithDefaults(route)
 
 	return route
 }

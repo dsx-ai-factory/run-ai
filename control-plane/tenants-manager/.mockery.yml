@@ -41,8 +41,8 @@ packages:
       dir: pkg/client/mocks
       include-auto-generated: true
     interfaces:
-      HealthAPI:
-      InternalAPI:
-      LogoAPI:
-      TenantAPI:
-      TenantsAPI:
+      HealthAPI: {}
+      InternalAPI: {}
+      LogoAPI: {}
+      TenantAPI: {}
+      TenantsAPI: {}

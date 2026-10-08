@@ -12,8 +12,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -25,23 +24,6 @@ func usernameLoaderConfig() composer.ClusterStorageConfig {
 	config := composer.DefaultClusterStorageConfig().(composer.StaticClusterStorageConfig)
 	config.SetOauth2ProxyUserLoaderImage(testUsernameLoaderImage)
 	return config
-}
-
-func exposedUrlsMapFromInfo(info *composer.ExposedUrlInfo) map[string]flds.ExposedUrlItemAndRules {
-	out := make(map[string]flds.ExposedUrlItemAndRules, len(info.Items))
-	for nick, item := range info.Items {
-		if item == nil {
-			out[nick] = flds.ExposedUrlItemAndRules{Value: nil}
-			continue
-		}
-		out[nick] = flds.ExposedUrlItemAndRules{
-			Value: &flds.ExposedUrlItemValue{
-				ContainerPort:   item.ContainerPort,
-				AuthorizedUsers: item.AuthorizedUsers,
-			},
-		}
-	}
-	return out
 }
 
 var _ = Describe("BuildUsernameLoaderInitContainer", func() {
@@ -234,7 +216,7 @@ var _ = Describe("BuildUsernameLoaderInitContainer parity with the cluster build
 
 	expectParity := func() {
 		GinkgoHelper()
-		clusterOut := builders.GetUsernameLoaderInitContainer(exposedUrlsMapFromInfo(info), info.ServingPortAuthorizedUsers)
+		clusterOut := legacyOutput[*corev1.Container]("GetUsernameLoaderInitContainer")
 		cpOut, err := BuildUsernameLoaderInitContainer(info)
 		Expect(err).To(BeNil())
 		Expect(cpOut).To(Equal(clusterOut))

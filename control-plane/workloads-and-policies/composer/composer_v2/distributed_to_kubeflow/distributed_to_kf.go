@@ -1345,7 +1345,12 @@ func effectiveCreateHomeDir(createHomeDir *bool, security *workloadsApi.Workspac
 		}
 	}
 
-	if !convutils.BoolIsTrue(createHomeDir) && !runAsUser {
+	shouldCreateHomeDir := runAsUser
+	if createHomeDir != nil {
+		shouldCreateHomeDir = *createHomeDir
+	}
+
+	if !shouldCreateHomeDir {
 		return createHomeDir
 	}
 

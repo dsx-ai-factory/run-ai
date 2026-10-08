@@ -160,7 +160,6 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/novln/docker-parser v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/openshift/api v0.0.0-20260605005319-1194f4c62539 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect

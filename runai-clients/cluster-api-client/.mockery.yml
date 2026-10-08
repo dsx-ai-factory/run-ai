@@ -11,4 +11,5 @@ packages:
     interfaces:
       ClusterAPIAPI: {}
       HealthAPI: {}
+      K8sObjectAPI: {}
       StatusAPI: {}

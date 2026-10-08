@@ -48018,6 +48018,70 @@ components:
           maxItems: 1000
           items:
             $ref: '#/components/schemas/DeviceClass'
+    ResourceClaimTemplateName:
+      type: string
+      description: >
+        ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain
+        rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an
+        alphanumeric character), up to 253 characters.
+      minLength: 1
+      maxLength: 253
+      pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+      example: rct-gpu-1
+    ResourceScopeType:
+      description: The scope type the resource is defined at.
+      type: string
+      enum:
+        - cluster
+        - department
+        - project
+    ResourceClaimTemplate:
+      type: object
+      required:
+        - name
+        - namespace
+        - scopeType
+        - scopeId
+      properties:
+        name:
+          $ref: '#/components/schemas/ResourceClaimTemplateName'
+        namespace:
+          type: string
+          description: the namespace the ResourceClaimTemplate lives in
+          minLength: 1
+          maxLength: 253
+          example: runai
+        scopeType:
+          $ref: '#/components/schemas/ResourceScopeType'
+        scopeId:
+          type: string
+          minLength: 1
+          description: >
+            Scope identifier. For cluster scope the scopeId must equal the
+            clusterId query parameter (the request is rejected otherwise). For
+            department scope send the department id; for project scope send the
+            project id.
+        origin:
+          $ref: '#/components/schemas/Origin'
+        assetId:
+          type: string
+          description: >
+            Control-plane asset id this template was created from. Present only
+            when origin is "assets". Allows the control plane to join tracker
+            rows back to the originating asset record.
+          nullable: true
+        issues:
+          $ref: '#/components/schemas/Issues'
+    ResourceClaimTemplates:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplate'
     ScopeClusterId:
       description: The ID of the cluster.
       type: string
@@ -48134,6 +48198,7 @@ components:
         - pvc
         - secret
         - config-map
+        - resource-claim-template
     ClusterObjectIssueType:
       type: string
       enum:
@@ -62315,6 +62380,22 @@ components:
       schema:
         type: string
       required: true
+    ResourceScopeType:
+      name: scopeType
+      in: query
+      required: true
+      description: The resource scope type to filter by.
+      schema:
+        $ref: '#/components/schemas/ResourceScopeType'
+    ScopeIdRequired:
+      name: scopeId
+      in: query
+      required: true
+      description: The scope resource id that identifies the row.
+      schema:
+        type: string
+        minLength: 1
+        example: '2'
     StorageClassConfigurationFilterBy:
       name: filterBy
       in: query

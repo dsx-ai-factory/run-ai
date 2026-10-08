@@ -90,8 +90,11 @@ Class | Method | HTTP request | Description
 *ConfigMapsAPI* | [**SyncClusterWideConfigmapsV1**](docs/ConfigMapsAPI.md#syncclusterwideconfigmapsv1) | **Post** /api/v1/config-maps/{clusterUuid} | sync the details of cluster-wide ConfigMaps to the control plane
 *ConfigMapsAPI* | [**SyncDepartmentsWideConfigmapV1**](docs/ConfigMapsAPI.md#syncdepartmentswideconfigmapv1) | **Post** /api/v1/config-maps/{clusterUuid}/departments/{departmentId} | sync the details of department-wide ConfigMaps to the control plane
 *ConfigMapsAPI* | [**SyncProjectsConfigmapsV1**](docs/ConfigMapsAPI.md#syncprojectsconfigmapsv1) | **Post** /api/v1/config-maps/{clusterUuid}/namespaces/{namespace} | sync the details of project ConfigMaps to the control plane
+*DeviceClassesAPI* | [**CreateDeviceClass**](docs/DeviceClassesAPI.md#createdeviceclass) | **Post** /api/v1/device-classes | create a Device Class
+*DeviceClassesAPI* | [**DeleteDeviceClass**](docs/DeviceClassesAPI.md#deletedeviceclass) | **Delete** /api/v1/device-classes | delete a Device Class
 *DeviceClassesAPI* | [**GetDeviceClasses**](docs/DeviceClassesAPI.md#getdeviceclasses) | **Get** /api/v1/device-classes | get device classes for a given cluster
 *DeviceClassesAPI* | [**SyncDeviceClass**](docs/DeviceClassesAPI.md#syncdeviceclass) | **Post** /api/v1/device-classes/sync | Sync cluster Device Classes
+*DeviceClassesAPI* | [**UpdateDeviceClass**](docs/DeviceClassesAPI.md#updatedeviceclass) | **Put** /api/v1/device-classes | update a Device Class
 *HealthAPI* | [**Health**](docs/HealthAPI.md#health) | **Get** / | health check
 *PVCsAPI* | [**CreateClusterWidePvcV1**](docs/PVCsAPI.md#createclusterwidepvcv1) | **Post** /api/v1/pvcs/{clusterUuid}/{pvcName} | upload the name of cluster-wide pvc to the control plane
 *PVCsAPI* | [**CreateClusterWidePvcV2**](docs/PVCsAPI.md#createclusterwidepvcv2) | **Post** /api/v2/pvcs/{clusterUuid}/{pvcName} | upload the details of cluster-wide pvc to the control plane
@@ -121,6 +124,11 @@ Class | Method | HTTP request | Description
 *PVCsAPI* | [**SyncProjectPvcNamesV1**](docs/PVCsAPI.md#syncprojectpvcnamesv1) | **Post** /api/v1/pvcs/{clusterUuid}/namespace/{namespace} | sync the names of project pvcs to the control plane
 *PVCsAPI* | [**SyncProjectPvcsV2**](docs/PVCsAPI.md#syncprojectpvcsv2) | **Post** /api/v2/pvcs/{clusterUuid}/namespace/{namespace} | sync the details of project pvcs to the control plane
 *PVCsAPI* | [**SyncProjectsPvcsV2**](docs/PVCsAPI.md#syncprojectspvcsv2) | **Post** /api/v2/pvcs/{clusterUuid}/namespaces/{namespace} | sync the details of project pvcs to the control plane
+*ResourceClaimTemplatesAPI* | [**CreateResourceClaimTemplate**](docs/ResourceClaimTemplatesAPI.md#createresourceclaimtemplate) | **Post** /api/v1/resource-claim-templates | create a Resource Claim Template
+*ResourceClaimTemplatesAPI* | [**DeleteResourceClaimTemplate**](docs/ResourceClaimTemplatesAPI.md#deleteresourceclaimtemplate) | **Delete** /api/v1/resource-claim-templates | delete a Resource Claim Template
+*ResourceClaimTemplatesAPI* | [**ListResourceClaimTemplates**](docs/ResourceClaimTemplatesAPI.md#listresourceclaimtemplates) | **Get** /api/v1/resource-claim-templates | list details of ResourceClaimTemplates
+*ResourceClaimTemplatesAPI* | [**SyncResourceClaimTemplates**](docs/ResourceClaimTemplatesAPI.md#syncresourceclaimtemplates) | **Post** /api/v1/resource-claim-templates/sync | sync the full set of ResourceClaimTemplates observed in a cluster
+*ResourceClaimTemplatesAPI* | [**UpdateResourceClaimTemplate**](docs/ResourceClaimTemplatesAPI.md#updateresourceclaimtemplate) | **Put** /api/v1/resource-claim-templates | update a Resource Claim Template
 *SecretsAPI* | [**CreateClusterWideSecret**](docs/SecretsAPI.md#createclusterwidesecret) | **Post** /api/v1/secrets/{clusterUuid}/{secretName} | upload the details of cluster-wide secret to the control plane
 *SecretsAPI* | [**CreateDepartmentWideSecret**](docs/SecretsAPI.md#createdepartmentwidesecret) | **Post** /api/v1/secrets/{clusterUuid}/department/{departmentId}/{secretName} | upload the details of department-wide secret to the control plane
 *SecretsAPI* | [**CreateDepartmentsWideSecret**](docs/SecretsAPI.md#createdepartmentswidesecret) | **Post** /api/v1/secrets/{clusterUuid}/departments/{departmentId}/{secretName} | upload the details of department-wide secret to the control plane
@@ -194,6 +202,9 @@ Class | Method | HTTP request | Description
  - [PvcPhaseOptional](docs/PvcPhaseOptional.md)
  - [PvcSupportedAccessModes](docs/PvcSupportedAccessModes.md)
  - [PvcVolumeMode](docs/PvcVolumeMode.md)
+ - [ResourceClaimTemplate](docs/ResourceClaimTemplate.md)
+ - [ResourceClaimTemplates](docs/ResourceClaimTemplates.md)
+ - [ResourceScopeType](docs/ResourceScopeType.md)
  - [Secret](docs/Secret.md)
  - [SecretCreationRequest](docs/SecretCreationRequest.md)
  - [SecretListInfo](docs/SecretListInfo.md)

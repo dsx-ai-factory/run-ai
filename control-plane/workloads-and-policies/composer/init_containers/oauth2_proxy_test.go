@@ -6,8 +6,6 @@
 package init_containers
 
 import (
-	"context"
-	"fmt"
 	"maps"
 	"net/http"
 	"slices"
@@ -16,15 +14,13 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	featuregate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/feature-gate"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/project"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"knative.dev/pkg/apis"
 )
 
 func oauth2ParityConfig(domain string, subdomain bool) composer.ClusterStorageConfig {
@@ -88,42 +84,6 @@ func oauth2InfoFromExposedUrls(exposedUrls map[string]flds.ExposedUrlItemAndRule
 		}
 	}
 	return info
-}
-
-func clusterOauth2Containers(ctx context.Context, exposedUrls map[string]flds.ExposedUrlItemAndRules, isJupyterOrTensorboard bool) []corev1.Container {
-	GinkgoHelper()
-
-	result := make([]corev1.Container, 0)
-	noSuffixUrlGenerated := isJupyterOrTensorboard
-	for idx, nick := range slices.Sorted(maps.Keys(exposedUrls)) {
-		exposedUrl := exposedUrls[nick]
-		if exposedUrl.Value == nil {
-			continue
-		}
-
-		projectName, err := project.GetProjectFromContext(ctx)
-		Expect(err).NotTo(HaveOccurred())
-		rawURL := convutils.Deref(exposedUrl.Value.Url, "")
-		if rawURL == "" {
-			suffix := nick
-			if !noSuffixUrlGenerated {
-				suffix = ""
-				noSuffixUrlGenerated = true
-			}
-			generated, err := composer.ComposeAutoExposedURL(config.GetClusterDomain(), projectName, oauth2ParityWorkload, suffix, config.SubdomainSupportEnabled())
-			Expect(err).NotTo(HaveOccurred())
-			rawURL = generated.String()
-		}
-		jobUrl, err := apis.ParseURL(rawURL)
-		Expect(err).NotTo(HaveOccurred())
-
-		cookiePrefix := fmt.Sprintf("%s-%s-auth-proxy", oauth2ParityWorkload, nick)
-		container, err := builders.GetOauth2ProxyContainer(jobUrl, *exposedUrl.Value.ContainerPort,
-			exposedUrl.Value.AuthorizedUsers, exposedUrl.Value.AuthorizedGroups, idx, nick, false, false, cookiePrefix)
-		Expect(err).NotTo(HaveOccurred())
-		result = append(result, *container)
-	}
-	return result
 }
 
 var _ = Describe("BuildOAuth2ProxyContainers", func() {
@@ -533,7 +493,7 @@ var _ = Describe("BuildOAuth2ProxyContainers parity with the cluster builder", f
 		for _, name := range oauth2ParityEnvVars {
 			GinkgoT().Setenv(name, "")
 		}
-		GinkgoT().Setenv(builders.ExternalUrlAuthContainerImageEnv, oauth2ParityImage)
+		GinkgoT().Setenv("RUNAI_OAUTH2_PROXY_IMAGE", oauth2ParityImage)
 		fg := featuregate.GetFeatureGateUtilInstance()
 		fgPrev = fg.FeatureGateSidecarContainersEnable
 		fg.FeatureGateSidecarContainersEnable = true
@@ -566,11 +526,10 @@ var _ = Describe("BuildOAuth2ProxyContainers parity with the cluster builder", f
 
 	expectParity := func(subdomain, isJupyterOrTensorboard bool) {
 		GinkgoHelper()
-		ctx := project.SetProjectInContext(context.Background(), oauth2ParityProject)
 		if subdomain {
 			GinkgoT().Setenv(config.EnvVarSubdomainSupport, "true")
 		}
-		clusterOut := clusterOauth2Containers(ctx, exposedUrls, isJupyterOrTensorboard)
+		clusterOut := legacyOutput[[]corev1.Container]("clusterOauth2Containers")
 		cpOut, err := BuildOAuth2ProxyContainers(oauth2InfoFromExposedUrls(exposedUrls, subdomain, isJupyterOrTensorboard))
 		Expect(err).To(BeNil())
 		Expect(cpOut).To(Equal(clusterOut))
