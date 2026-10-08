@@ -16,6 +16,10 @@ type MockIdmClient struct{}
 
 func NewMockIdmClient() *MockIdmClient { return &MockIdmClient{} }
 
+func (n *MockIdmClient) MintInstallerBootstrapToken(_ context.Context, _ string, _ string) (string, error) {
+	return "", nil
+}
+
 func (n *MockIdmClient) GetInstallerServiceAccount(_ context.Context) (*openapi.ServiceAccountPostResponse, error) {
 	return nil, nil
 }
