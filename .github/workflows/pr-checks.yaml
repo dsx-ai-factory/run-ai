@@ -118,7 +118,7 @@ jobs:
           working-directory: ${{ matrix.module }}
           only-new-issues: true
           install-mode: goinstall
-          version: v2.13.2
+          version: v2.9.0
 
   govulncheck:
     needs: discover
