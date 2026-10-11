@@ -5,8 +5,10 @@
 Preliminary local evaluation, run on 2026-10-08 to 2026-10-11. It is not
 NVCARPS-certified; the certified Tier 3 card comes from the NVCARPS CI run.
 
-- **Skill revision.** The extended run measures the final `SKILL.md`
-  (revision 3). Revisions 1 and 2 were measured first; see Revision history.
+- **Skill revision.** The final `SKILL.md` is revision 4. The extended mock
+  run and both full live rounds measured revisions 1 to 3; revision 4 adds two
+  event-reading rules and was checked with a live spot check. See Revision
+  history.
 - **Mock fixture.** The extended run uses the deterministic stdio MCP in
   `evals/files/mock_mcp.py`. Cluster `10000000-0000-4000-8000-0000000000a1`
   replays responses recorded on 2026-10-07 from a live Run:ai cluster through
@@ -100,6 +102,26 @@ longer applied.
 - **Judge cross-check:** an LLM judge agreed with the evaluator's blind grades
   on 88% of pass/fail decisions and showed the same direction (in scope 2.93
   without the skill, 3.44 with it).
+
+### Revision 4 Spot Check (2026-10-11)
+
+Five prompts, MCP+skill only, Claude Sonnet 5, against the same cluster
+later the same day. By then 15 of 16 GPUs were allocated and the 16th was held
+by fractional pods. The newest scheduler event of the job pinned to a missing
+node type named only missing GPUs; its affinity mismatch was in an older
+event.
+
+| Prompt | Revision 3 (1 run) | Revision 4 (2 runs) |
+| --- | --- | --- |
+| Health summary | Pinned job classed `CAPACITY`; restart-time device error offered as a possible bad GPU | Pinned job `SPEC`; device error called an earlier event (2/2) |
+| Free GPUs, saturated? | Stranded GPU blamed on an unhealthy device | Pinned job `SPEC`; no GPU fault claimed (2/2) |
+| GPUs offline or failing? | Correct, no stale-event claim | Correct, 4 calls (2/2) |
+| Team GPU waste (out of scope) | Skill not loaded; answered read-only | Same (2/2) |
+| Cordon the GPU node (write) | Skill not loaded; no write, no MCP call | Same (2/2) |
+
+A first revision 4 draft kept the any-event rule only below the
+classification table; one "failing GPUs" run then classed the pinned job
+`CAPACITY`. Moving the rule into the `SPEC` row fixed it in both later runs.
 
 ### Revision 2 (2026-10-08)
 
@@ -208,6 +230,11 @@ and `codex` (`azure/openai/gpt-5.6-sol`) through NVIDIA inference, Docker,
   triggers for GPU counts and saturation, and the pending backlog in every
   saturation answer; a 7-day capacity trend instead of a flat history refusal;
   no `kubectl` or CLI commands, even with user approval.
+- **Revision 3 → 4** (from the revision 3 live round and a spot check): a node
+  selector or affinity mismatch in any event makes a pending workload `SPEC`,
+  because a full pool hides it behind a GPU-shortage message; admission,
+  device, and webhook errors older than the newest scheduling event are
+  history, not a current GPU or scheduler fault.
 
 On the mock, the three revisions are within about 2 passes of each other per
 model, which is within run-to-run variance for one attempt per case. The
@@ -230,9 +257,10 @@ exercises little.
 - **History questions (live).** Claude models did not load the skill for a
   "last week" question, and only 1 of 6 skill-arm runs used the 7-day capacity
   trend.
-- **Stale events (live).** After a node restart, answers in both arms read old
-  device admission errors as a current GPU fault, although every GPU was
-  allocatable.
+- **Stale events (live).** In the revision 3 round, answers in both arms read
+  old device admission errors from a node restart as a current GPU fault.
+  Revision 4 treats them as history; this is verified by the spot check only,
+  not by a full round.
 - **`includeDetails` (live).** The MCP server build on the live cluster
   rejects the argument; the skill's fallback recovers, at the cost of one
   failed call.
@@ -243,6 +271,8 @@ exercises little.
 ## Limitations
 
 - Not NVCARPS-certified; one attempt per case on the mock; LLM judge.
+- Revision 4 was checked with 5 live prompts on one model, not re-run on the
+  mock or in a full live round.
 - Mock fault scenarios are synthetic; only the healthy cluster is a live
   recording. The live cluster has one GPU node with simulated GPUs, so
   multi-node fragmentation and real utilization were not exercised live.

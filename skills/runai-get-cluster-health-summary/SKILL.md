@@ -160,9 +160,19 @@ Skip this stage when the summary reports zero pending workloads.
 
 | Class | Rule | Effect |
 | --- | --- | --- |
-| `SPEC` | `phaseMessage`, `phaseReason`, a condition, or an event names a workload-side block: node selector or affinity with no match, quota exceeded for non-preemptible work, image, volume, policy. | Not a cluster fault. Report it and route (Hand-off). |
+| `SPEC` | `phaseMessage`, `phaseReason`, a condition, or **any** event (not only the newest) names a workload-side block: node selector or affinity with no match, quota exceeded for non-preemptible work, image, volume, policy. | Not a cluster fault. Report it and route (Hand-off). |
 | `CAPACITY` | Not `SPEC`, and every requested pool has `gpusFree < requestedGpu`; or a not-enough-resources reason is reported. | Pool is full. Not a fault. |
 | `SCHEDULER_SUSPECT` | Not `SPEC`, no reason reported, and a requested pool has `gpusFree >= requestedGpu` (or `gpusFree > 0` when `requestedGpu` is null). | Free GPUs are not being scheduled. |
+
+Read every returned event with its timestamp, not only the newest:
+
+- A node selector or affinity mismatch in any event makes the workload `SPEC`,
+  even when newer events name only missing GPUs. Once the pool is full, the
+  scheduler reports the GPU shortage first and stops naming the mismatch.
+- An admission, device, or webhook error older than the workload's newest
+  scheduling event is history, for example from a node or control-plane
+  restart. Never report it as a current GPU or scheduler fault; if you mention
+  it, call it an earlier event.
 
 When a not-enough-resources reason appears although the pool shows enough
 `gpusFree`, keep `CAPACITY` and name the possible cause from the evidence,
