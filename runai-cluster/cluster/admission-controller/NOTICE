@@ -39,7 +39,7 @@ Dependencies
 | `github.com/gabriel-vasile/mimetype` | v1.4.15 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.15/LICENSE |
 | `github.com/go-logr/logr` | v1.4.4 | Apache-2.0 | https://github.com/go-logr/logr/blob/v1.4.4/LICENSE |
 | `github.com/go-openapi/jsonpointer` | v1.0.2 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.2/LICENSE |
-| `github.com/go-openapi/jsonreference` | v0.21.6 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v0.21.6/LICENSE |
+| `github.com/go-openapi/jsonreference` | v1.0.0 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.0/LICENSE |
 | `github.com/go-openapi/swag` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/v0.29.2/LICENSE |
 | `github.com/go-openapi/swag/cmdutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/cmdutils/v0.29.2/cmdutils/LICENSE |
 | `github.com/go-openapi/swag/conv` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/conv/v0.29.2/conv/LICENSE |
@@ -103,17 +103,17 @@ Dependencies
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
 | `gopkg.in/evanphx/json-patch.v4` | v4.13.0 | BSD-3-Clause | https://pkg.go.dev/gopkg.in/evanphx/json-patch.v4@v4.13.0?tab=licenses |
 | `gopkg.in/inf.v0` | v0.9.1 | BSD-3-Clause | https://pkg.go.dev/gopkg.in/inf.v0@v0.9.1?tab=licenses |
-| `k8s.io/api` | v0.36.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/api@v0.36.1?tab=licenses |
-| `k8s.io/apiextensions-apiserver/pkg/apis/apiextensions` | v0.36.0 | Apache-2.0 | https://pkg.go.dev/k8s.io/apiextensions-apiserver@v0.36.0?tab=licenses |
-| `k8s.io/apimachinery/pkg` | v0.36.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/apimachinery@v0.36.1?tab=licenses |
-| `k8s.io/apimachinery/third_party/forked/golang` | v0.36.1 | BSD-3-Clause | https://pkg.go.dev/k8s.io/apimachinery@v0.36.1?tab=licenses |
-| `k8s.io/client-go` | v0.36.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/client-go@v0.36.1?tab=licenses |
-| `k8s.io/component-base/cli/flag` | v0.36.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/component-base@v0.36.1?tab=licenses |
-| `k8s.io/dynamic-resource-allocation` | v0.35.4 | Apache-2.0 | https://pkg.go.dev/k8s.io/dynamic-resource-allocation@v0.35.4?tab=licenses |
+| `k8s.io/api` | v0.37.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/api@v0.37.1?tab=licenses |
+| `k8s.io/apiextensions-apiserver/pkg/apis/apiextensions` | v0.37.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/apiextensions-apiserver@v0.37.1?tab=licenses |
+| `k8s.io/apimachinery/pkg` | v0.37.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/apimachinery@v0.37.1?tab=licenses |
+| `k8s.io/apimachinery/third_party/forked/golang` | v0.37.1 | BSD-3-Clause | https://pkg.go.dev/k8s.io/apimachinery@v0.37.1?tab=licenses |
+| `k8s.io/client-go` | v0.37.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/client-go@v0.37.1?tab=licenses |
+| `k8s.io/component-base/cli/flag` | v0.37.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/component-base@v0.37.1?tab=licenses |
+| `k8s.io/dynamic-resource-allocation` | v0.37.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/dynamic-resource-allocation@v0.37.1?tab=licenses |
 | `k8s.io/klog/v2` | v2.140.0 | Apache-2.0 | https://pkg.go.dev/k8s.io/klog/v2@v2.140.0?tab=licenses |
-| `k8s.io/kube-openapi/pkg` | v0.0.0-20260414162039-ec9c827d403f | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260414162039-ec9c827d403f?tab=licenses |
-| `k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json` | v0.0.0-20260414162039-ec9c827d403f | BSD-3-Clause | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260414162039-ec9c827d403f?tab=licenses |
-| `k8s.io/kube-openapi/pkg/validation/spec` | v0.0.0-20260414162039-ec9c827d403f | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260414162039-ec9c827d403f?tab=licenses |
+| `k8s.io/kube-openapi/pkg` | v0.0.0-20260721132016-d427ff9ee9ad | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
+| `k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json` | v0.0.0-20260721132016-d427ff9ee9ad | BSD-3-Clause | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
+| `k8s.io/kube-openapi/pkg/validation/spec` | v0.0.0-20260721132016-d427ff9ee9ad | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?tab=licenses |
 | `k8s.io/utils` | v0.0.0-20260707023825-cf1189d6abe3 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
 | `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20260707023825-cf1189d6abe3 | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
 | `k8s.io/utils/third_party/forked/golang/btree` | v0.0.0-20260707023825-cf1189d6abe3 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
@@ -3705,7 +3705,7 @@ limitations under the License.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/go-openapi/jsonreference` v0.21.6
+  - `github.com/go-openapi/jsonreference` v1.0.0
 --------------------------------------------------------------------------------
 
 Copyright 2015-2025 go-swagger maintainers
