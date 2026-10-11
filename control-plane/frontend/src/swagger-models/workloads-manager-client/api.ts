@@ -1338,21 +1338,35 @@ export interface NimServiceSpecAllOfCompute {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof NimServiceSpecAllOfCompute
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated in 3.1; use gpuMemoryPortionLimit. Scheduled for removal in 3.2. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated in 3.1; use gpuMemoryPortionRequest. Scheduled for removal in 3.2. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**

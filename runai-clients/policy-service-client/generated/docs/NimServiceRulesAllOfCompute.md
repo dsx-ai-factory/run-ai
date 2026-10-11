@@ -10,6 +10,8 @@ Name | Type | Description | Notes
 **CpuMemoryRequest** | Pointer to [**NullableQuantityRules**](QuantityRules.md) |  | [optional] 
 **GpuDevicesRequest** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **GpuMemoryLimit** | Pointer to [**NullableQuantityRules**](QuantityRules.md) |  | [optional] 
+**GpuMemoryPortionLimit** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
+**GpuMemoryPortionRequest** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
 **GpuMemoryRequest** | Pointer to [**NullableQuantityRules**](QuantityRules.md) |  | [optional] 
 **GpuPortionLimit** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
 **GpuPortionRequest** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
@@ -244,6 +246,76 @@ HasGpuMemoryLimit returns a boolean if a field has been set.
 `func (o *NimServiceRulesAllOfCompute) UnsetGpuMemoryLimit()`
 
 UnsetGpuMemoryLimit ensures that no value is present for GpuMemoryLimit, not even an explicit nil
+### GetGpuMemoryPortionLimit
+
+`func (o *NimServiceRulesAllOfCompute) GetGpuMemoryPortionLimit() NumberRules`
+
+GetGpuMemoryPortionLimit returns the GpuMemoryPortionLimit field if non-nil, zero value otherwise.
+
+### GetGpuMemoryPortionLimitOk
+
+`func (o *NimServiceRulesAllOfCompute) GetGpuMemoryPortionLimitOk() (*NumberRules, bool)`
+
+GetGpuMemoryPortionLimitOk returns a tuple with the GpuMemoryPortionLimit field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuMemoryPortionLimit
+
+`func (o *NimServiceRulesAllOfCompute) SetGpuMemoryPortionLimit(v NumberRules)`
+
+SetGpuMemoryPortionLimit sets GpuMemoryPortionLimit field to given value.
+
+### HasGpuMemoryPortionLimit
+
+`func (o *NimServiceRulesAllOfCompute) HasGpuMemoryPortionLimit() bool`
+
+HasGpuMemoryPortionLimit returns a boolean if a field has been set.
+
+### SetGpuMemoryPortionLimitNil
+
+`func (o *NimServiceRulesAllOfCompute) SetGpuMemoryPortionLimitNil(b bool)`
+
+ SetGpuMemoryPortionLimitNil sets the value for GpuMemoryPortionLimit to be an explicit nil
+
+### UnsetGpuMemoryPortionLimit
+`func (o *NimServiceRulesAllOfCompute) UnsetGpuMemoryPortionLimit()`
+
+UnsetGpuMemoryPortionLimit ensures that no value is present for GpuMemoryPortionLimit, not even an explicit nil
+### GetGpuMemoryPortionRequest
+
+`func (o *NimServiceRulesAllOfCompute) GetGpuMemoryPortionRequest() NumberRules`
+
+GetGpuMemoryPortionRequest returns the GpuMemoryPortionRequest field if non-nil, zero value otherwise.
+
+### GetGpuMemoryPortionRequestOk
+
+`func (o *NimServiceRulesAllOfCompute) GetGpuMemoryPortionRequestOk() (*NumberRules, bool)`
+
+GetGpuMemoryPortionRequestOk returns a tuple with the GpuMemoryPortionRequest field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuMemoryPortionRequest
+
+`func (o *NimServiceRulesAllOfCompute) SetGpuMemoryPortionRequest(v NumberRules)`
+
+SetGpuMemoryPortionRequest sets GpuMemoryPortionRequest field to given value.
+
+### HasGpuMemoryPortionRequest
+
+`func (o *NimServiceRulesAllOfCompute) HasGpuMemoryPortionRequest() bool`
+
+HasGpuMemoryPortionRequest returns a boolean if a field has been set.
+
+### SetGpuMemoryPortionRequestNil
+
+`func (o *NimServiceRulesAllOfCompute) SetGpuMemoryPortionRequestNil(b bool)`
+
+ SetGpuMemoryPortionRequestNil sets the value for GpuMemoryPortionRequest to be an explicit nil
+
+### UnsetGpuMemoryPortionRequest
+`func (o *NimServiceRulesAllOfCompute) UnsetGpuMemoryPortionRequest()`
+
+UnsetGpuMemoryPortionRequest ensures that no value is present for GpuMemoryPortionRequest, not even an explicit nil
 ### GetGpuMemoryRequest
 
 `func (o *NimServiceRulesAllOfCompute) GetGpuMemoryRequest() QuantityRules`

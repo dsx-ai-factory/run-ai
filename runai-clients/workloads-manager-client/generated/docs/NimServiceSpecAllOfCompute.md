@@ -10,9 +10,11 @@ Name | Type | Description | Notes
 **CpuMemoryRequest** | Pointer to **NullableString** | The amount of CPU memory to allocate for this workload (1G, 20M, .etc). The workload will receive at least this amount of memory. Note that the workload will not be scheduled unless the system can guarantee this amount of memory to the workload | [optional] 
 **GpuDevicesRequest** | Pointer to **NullableInt32** | Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion. | [optional] 
 **GpuMemoryLimit** | Pointer to **NullableString** | Limitation on the memory consumed by the workload, per GPU device. The system guarantees The gpuMemoryLimit must be no less than gpuMemoryRequest. | [optional] 
+**GpuMemoryPortionLimit** | Pointer to **NullableFloat64** | Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest. | [optional] 
+**GpuMemoryPortionRequest** | Pointer to **NullableFloat64** | GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion. | [optional] 
 **GpuMemoryRequest** | Pointer to **NullableString** | Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload. | [optional] 
-**GpuPortionLimit** | Pointer to **NullableFloat64** | Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest. | [optional] 
-**GpuPortionRequest** | Pointer to **NullableFloat64** | Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs. | [optional] 
+**GpuPortionLimit** | Pointer to **NullableFloat64** | Deprecated in 3.1; use gpuMemoryPortionLimit. Scheduled for removal in 3.2. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest. | [optional] 
+**GpuPortionRequest** | Pointer to **NullableFloat64** | Deprecated in 3.1; use gpuMemoryPortionRequest. Scheduled for removal in 3.2. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs. | [optional] 
 **GpuRequestType** | Pointer to [**NullableGpuRequestType**](GpuRequestType.md) |  | [optional] 
 
 ## Methods
@@ -244,6 +246,76 @@ HasGpuMemoryLimit returns a boolean if a field has been set.
 `func (o *NimServiceSpecAllOfCompute) UnsetGpuMemoryLimit()`
 
 UnsetGpuMemoryLimit ensures that no value is present for GpuMemoryLimit, not even an explicit nil
+### GetGpuMemoryPortionLimit
+
+`func (o *NimServiceSpecAllOfCompute) GetGpuMemoryPortionLimit() float64`
+
+GetGpuMemoryPortionLimit returns the GpuMemoryPortionLimit field if non-nil, zero value otherwise.
+
+### GetGpuMemoryPortionLimitOk
+
+`func (o *NimServiceSpecAllOfCompute) GetGpuMemoryPortionLimitOk() (*float64, bool)`
+
+GetGpuMemoryPortionLimitOk returns a tuple with the GpuMemoryPortionLimit field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuMemoryPortionLimit
+
+`func (o *NimServiceSpecAllOfCompute) SetGpuMemoryPortionLimit(v float64)`
+
+SetGpuMemoryPortionLimit sets GpuMemoryPortionLimit field to given value.
+
+### HasGpuMemoryPortionLimit
+
+`func (o *NimServiceSpecAllOfCompute) HasGpuMemoryPortionLimit() bool`
+
+HasGpuMemoryPortionLimit returns a boolean if a field has been set.
+
+### SetGpuMemoryPortionLimitNil
+
+`func (o *NimServiceSpecAllOfCompute) SetGpuMemoryPortionLimitNil(b bool)`
+
+ SetGpuMemoryPortionLimitNil sets the value for GpuMemoryPortionLimit to be an explicit nil
+
+### UnsetGpuMemoryPortionLimit
+`func (o *NimServiceSpecAllOfCompute) UnsetGpuMemoryPortionLimit()`
+
+UnsetGpuMemoryPortionLimit ensures that no value is present for GpuMemoryPortionLimit, not even an explicit nil
+### GetGpuMemoryPortionRequest
+
+`func (o *NimServiceSpecAllOfCompute) GetGpuMemoryPortionRequest() float64`
+
+GetGpuMemoryPortionRequest returns the GpuMemoryPortionRequest field if non-nil, zero value otherwise.
+
+### GetGpuMemoryPortionRequestOk
+
+`func (o *NimServiceSpecAllOfCompute) GetGpuMemoryPortionRequestOk() (*float64, bool)`
+
+GetGpuMemoryPortionRequestOk returns a tuple with the GpuMemoryPortionRequest field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuMemoryPortionRequest
+
+`func (o *NimServiceSpecAllOfCompute) SetGpuMemoryPortionRequest(v float64)`
+
+SetGpuMemoryPortionRequest sets GpuMemoryPortionRequest field to given value.
+
+### HasGpuMemoryPortionRequest
+
+`func (o *NimServiceSpecAllOfCompute) HasGpuMemoryPortionRequest() bool`
+
+HasGpuMemoryPortionRequest returns a boolean if a field has been set.
+
+### SetGpuMemoryPortionRequestNil
+
+`func (o *NimServiceSpecAllOfCompute) SetGpuMemoryPortionRequestNil(b bool)`
+
+ SetGpuMemoryPortionRequestNil sets the value for GpuMemoryPortionRequest to be an explicit nil
+
+### UnsetGpuMemoryPortionRequest
+`func (o *NimServiceSpecAllOfCompute) UnsetGpuMemoryPortionRequest()`
+
+UnsetGpuMemoryPortionRequest ensures that no value is present for GpuMemoryPortionRequest, not even an explicit nil
 ### GetGpuMemoryRequest
 
 `func (o *NimServiceSpecAllOfCompute) GetGpuMemoryRequest() string`

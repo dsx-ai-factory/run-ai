@@ -9852,21 +9852,35 @@ export interface NimServiceDefaultsAllOfCompute {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof NimServiceDefaultsAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof NimServiceDefaultsAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof NimServiceDefaultsAllOfCompute
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated in 3.1; use gpuMemoryPortionLimit. Scheduled for removal in 3.2. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof NimServiceDefaultsAllOfCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated in 3.1; use gpuMemoryPortionRequest. Scheduled for removal in 3.2. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof NimServiceDefaultsAllOfCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -10666,6 +10680,18 @@ export interface NimServiceRulesAllOfCompute {
     'gpuMemoryLimit'?: QuantityRules | null;
     /**
      * 
+     * @type {NumberRules}
+     * @memberof NimServiceRulesAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: NumberRules | null;
+    /**
+     * 
+     * @type {NumberRules}
+     * @memberof NimServiceRulesAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: NumberRules | null;
+    /**
+     * 
      * @type {QuantityRules}
      * @memberof NimServiceRulesAllOfCompute
      */
@@ -10674,14 +10700,16 @@ export interface NimServiceRulesAllOfCompute {
      * 
      * @type {NumberRules}
      * @memberof NimServiceRulesAllOfCompute
+     * @deprecated
      */
-    'gpuPortionLimit'?: NumberRules | null;
+    'gpuPortionLimit'?: NumberRules;
     /**
      * 
      * @type {NumberRules}
      * @memberof NimServiceRulesAllOfCompute
+     * @deprecated
      */
-    'gpuPortionRequest'?: NumberRules | null;
+    'gpuPortionRequest'?: NumberRules;
     /**
      * 
      * @type {GpuRequestRules}
@@ -15673,15 +15701,29 @@ export interface SupersetDefaultsAllOfCompute {
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
      * @type {number}
      * @memberof SupersetDefaultsAllOfCompute
      */
-    'gpuPortionLimit'?: number | null;
+    'gpuMemoryPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated in 3.1; use gpuMemoryPortionLimit. Scheduled for removal in 3.2. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof SupersetDefaultsAllOfCompute
+     * @deprecated
+     */
+    'gpuPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof SupersetDefaultsAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
+     * Deprecated in 3.1; use gpuMemoryPortionRequest. Scheduled for removal in 3.2. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * @type {number}
+     * @memberof SupersetDefaultsAllOfCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -16487,13 +16529,27 @@ export interface SupersetRulesAllOfCompute {
      * @type {NumberRules}
      * @memberof SupersetRulesAllOfCompute
      */
-    'gpuPortionLimit'?: NumberRules | null;
+    'gpuMemoryPortionLimit'?: NumberRules | null;
+    /**
+     * 
+     * @type {SupersetRulesAllOfComputeGpuPortionLimit}
+     * @memberof SupersetRulesAllOfCompute
+     * @deprecated
+     */
+    'gpuPortionLimit'?: SupersetRulesAllOfComputeGpuPortionLimit;
     /**
      * 
      * @type {NumberRules}
      * @memberof SupersetRulesAllOfCompute
      */
-    'gpuPortionRequest'?: NumberRules | null;
+    'gpuMemoryPortionRequest'?: NumberRules | null;
+    /**
+     * 
+     * @type {SupersetRulesAllOfComputeGpuPortionLimit}
+     * @memberof SupersetRulesAllOfCompute
+     * @deprecated
+     */
+    'gpuPortionRequest'?: SupersetRulesAllOfComputeGpuPortionLimit;
     /**
      * 
      * @type {GpuRequestRules}
@@ -16506,6 +16562,55 @@ export interface SupersetRulesAllOfCompute {
      * @memberof SupersetRulesAllOfCompute
      */
     'largeShmRequest'?: BooleanRules | null;
+}
+/**
+ * 
+ * @export
+ * @interface SupersetRulesAllOfComputeGpuPortionLimit
+ */
+export interface SupersetRulesAllOfComputeGpuPortionLimit {
+    /**
+     * 
+     * @type {SourceOfRule}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'sourceOfRule'?: SourceOfRule | null;
+    /**
+     * Whether the field is mandatory. default to false.
+     * @type {boolean}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'required'?: boolean | null;
+    /**
+     * Whether the value of the field is editable. default to true
+     * @type {boolean}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'canEdit'?: boolean | null;
+    /**
+     * The minimum value that the field can be assigned to.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'min'?: number | null;
+    /**
+     * The maximum value that the field can be assigned to.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'max'?: number | null;
+    /**
+     * The minimal difference between two values the field can be assigned to. For example, min=2, max=3, step=0.25 implies that the values the field can hold are 2, 2.25, 2.5 and 3.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'step'?: number | null;
+    /**
+     * 
+     * @type {DefaultFromRule}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'defaultFrom'?: DefaultFromRule | null;
 }
 /**
  * 

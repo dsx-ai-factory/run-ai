@@ -17,6 +17,10 @@ properties:
     $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuDevicesRequest.yaml
   gpuMemoryLimit:
     $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuMemoryLimit.yaml
+  gpuMemoryPortionLimit:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuMemoryPortionLimit.yaml
+  gpuMemoryPortionRequest:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuMemoryPortionRequest.yaml
   gpuMemoryRequest:
     $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuMemoryRequest.yaml
   gpuPortionLimit:

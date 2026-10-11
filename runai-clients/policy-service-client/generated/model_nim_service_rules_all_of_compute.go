@@ -22,14 +22,18 @@ var _ MappedNullable = &NimServiceRulesAllOfCompute{}
 
 // NimServiceRulesAllOfCompute struct for NimServiceRulesAllOfCompute
 type NimServiceRulesAllOfCompute struct {
-	CpuCoreLimit      NullableNumberRules     `json:"cpuCoreLimit,omitempty"`
-	CpuCoreRequest    NullableNumberRules     `json:"cpuCoreRequest,omitempty"`
-	CpuMemoryLimit    NullableQuantityRules   `json:"cpuMemoryLimit,omitempty"`
-	CpuMemoryRequest  NullableQuantityRules   `json:"cpuMemoryRequest,omitempty"`
-	GpuDevicesRequest NullableIntegerRules    `json:"gpuDevicesRequest,omitempty"`
-	GpuMemoryLimit    NullableQuantityRules   `json:"gpuMemoryLimit,omitempty"`
-	GpuMemoryRequest  NullableQuantityRules   `json:"gpuMemoryRequest,omitempty"`
-	GpuPortionLimit   NullableNumberRules     `json:"gpuPortionLimit,omitempty"`
+	CpuCoreLimit            NullableNumberRules   `json:"cpuCoreLimit,omitempty"`
+	CpuCoreRequest          NullableNumberRules   `json:"cpuCoreRequest,omitempty"`
+	CpuMemoryLimit          NullableQuantityRules `json:"cpuMemoryLimit,omitempty"`
+	CpuMemoryRequest        NullableQuantityRules `json:"cpuMemoryRequest,omitempty"`
+	GpuDevicesRequest       NullableIntegerRules  `json:"gpuDevicesRequest,omitempty"`
+	GpuMemoryLimit          NullableQuantityRules `json:"gpuMemoryLimit,omitempty"`
+	GpuMemoryPortionLimit   NullableNumberRules   `json:"gpuMemoryPortionLimit,omitempty"`
+	GpuMemoryPortionRequest NullableNumberRules   `json:"gpuMemoryPortionRequest,omitempty"`
+	GpuMemoryRequest        NullableQuantityRules `json:"gpuMemoryRequest,omitempty"`
+	// Deprecated
+	GpuPortionLimit NullableNumberRules `json:"gpuPortionLimit,omitempty"`
+	// Deprecated
 	GpuPortionRequest NullableNumberRules     `json:"gpuPortionRequest,omitempty"`
 	GpuRequestType    NullableGpuRequestRules `json:"gpuRequestType,omitempty"`
 }
@@ -309,6 +313,92 @@ func (o *NimServiceRulesAllOfCompute) UnsetGpuMemoryLimit() {
 	o.GpuMemoryLimit.Unset()
 }
 
+// GetGpuMemoryPortionLimit returns the GpuMemoryPortionLimit field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRulesAllOfCompute) GetGpuMemoryPortionLimit() NumberRules {
+	if o == nil || IsNil(o.GpuMemoryPortionLimit.Get()) {
+		var ret NumberRules
+		return ret
+	}
+	return *o.GpuMemoryPortionLimit.Get()
+}
+
+// GetGpuMemoryPortionLimitOk returns a tuple with the GpuMemoryPortionLimit field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRulesAllOfCompute) GetGpuMemoryPortionLimitOk() (*NumberRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuMemoryPortionLimit.Get(), o.GpuMemoryPortionLimit.IsSet()
+}
+
+// HasGpuMemoryPortionLimit returns a boolean if a field has been set.
+func (o *NimServiceRulesAllOfCompute) HasGpuMemoryPortionLimit() bool {
+	if o != nil && o.GpuMemoryPortionLimit.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuMemoryPortionLimit gets a reference to the given NullableNumberRules and assigns it to the GpuMemoryPortionLimit field.
+func (o *NimServiceRulesAllOfCompute) SetGpuMemoryPortionLimit(v NumberRules) {
+	o.GpuMemoryPortionLimit.Set(&v)
+}
+
+// SetGpuMemoryPortionLimitNil sets the value for GpuMemoryPortionLimit to be an explicit nil
+func (o *NimServiceRulesAllOfCompute) SetGpuMemoryPortionLimitNil() {
+	o.GpuMemoryPortionLimit.Set(nil)
+}
+
+// UnsetGpuMemoryPortionLimit ensures that no value is present for GpuMemoryPortionLimit, not even an explicit nil
+func (o *NimServiceRulesAllOfCompute) UnsetGpuMemoryPortionLimit() {
+	o.GpuMemoryPortionLimit.Unset()
+}
+
+// GetGpuMemoryPortionRequest returns the GpuMemoryPortionRequest field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRulesAllOfCompute) GetGpuMemoryPortionRequest() NumberRules {
+	if o == nil || IsNil(o.GpuMemoryPortionRequest.Get()) {
+		var ret NumberRules
+		return ret
+	}
+	return *o.GpuMemoryPortionRequest.Get()
+}
+
+// GetGpuMemoryPortionRequestOk returns a tuple with the GpuMemoryPortionRequest field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRulesAllOfCompute) GetGpuMemoryPortionRequestOk() (*NumberRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuMemoryPortionRequest.Get(), o.GpuMemoryPortionRequest.IsSet()
+}
+
+// HasGpuMemoryPortionRequest returns a boolean if a field has been set.
+func (o *NimServiceRulesAllOfCompute) HasGpuMemoryPortionRequest() bool {
+	if o != nil && o.GpuMemoryPortionRequest.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuMemoryPortionRequest gets a reference to the given NullableNumberRules and assigns it to the GpuMemoryPortionRequest field.
+func (o *NimServiceRulesAllOfCompute) SetGpuMemoryPortionRequest(v NumberRules) {
+	o.GpuMemoryPortionRequest.Set(&v)
+}
+
+// SetGpuMemoryPortionRequestNil sets the value for GpuMemoryPortionRequest to be an explicit nil
+func (o *NimServiceRulesAllOfCompute) SetGpuMemoryPortionRequestNil() {
+	o.GpuMemoryPortionRequest.Set(nil)
+}
+
+// UnsetGpuMemoryPortionRequest ensures that no value is present for GpuMemoryPortionRequest, not even an explicit nil
+func (o *NimServiceRulesAllOfCompute) UnsetGpuMemoryPortionRequest() {
+	o.GpuMemoryPortionRequest.Unset()
+}
+
 // GetGpuMemoryRequest returns the GpuMemoryRequest field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *NimServiceRulesAllOfCompute) GetGpuMemoryRequest() QuantityRules {
 	if o == nil || IsNil(o.GpuMemoryRequest.Get()) {
@@ -353,6 +443,7 @@ func (o *NimServiceRulesAllOfCompute) UnsetGpuMemoryRequest() {
 }
 
 // GetGpuPortionLimit returns the GpuPortionLimit field value if set, zero value otherwise (both if not set or set to explicit null).
+// Deprecated
 func (o *NimServiceRulesAllOfCompute) GetGpuPortionLimit() NumberRules {
 	if o == nil || IsNil(o.GpuPortionLimit.Get()) {
 		var ret NumberRules
@@ -364,6 +455,7 @@ func (o *NimServiceRulesAllOfCompute) GetGpuPortionLimit() NumberRules {
 // GetGpuPortionLimitOk returns a tuple with the GpuPortionLimit field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
+// Deprecated
 func (o *NimServiceRulesAllOfCompute) GetGpuPortionLimitOk() (*NumberRules, bool) {
 	if o == nil {
 		return nil, false
@@ -381,6 +473,7 @@ func (o *NimServiceRulesAllOfCompute) HasGpuPortionLimit() bool {
 }
 
 // SetGpuPortionLimit gets a reference to the given NullableNumberRules and assigns it to the GpuPortionLimit field.
+// Deprecated
 func (o *NimServiceRulesAllOfCompute) SetGpuPortionLimit(v NumberRules) {
 	o.GpuPortionLimit.Set(&v)
 }
@@ -396,6 +489,7 @@ func (o *NimServiceRulesAllOfCompute) UnsetGpuPortionLimit() {
 }
 
 // GetGpuPortionRequest returns the GpuPortionRequest field value if set, zero value otherwise (both if not set or set to explicit null).
+// Deprecated
 func (o *NimServiceRulesAllOfCompute) GetGpuPortionRequest() NumberRules {
 	if o == nil || IsNil(o.GpuPortionRequest.Get()) {
 		var ret NumberRules
@@ -407,6 +501,7 @@ func (o *NimServiceRulesAllOfCompute) GetGpuPortionRequest() NumberRules {
 // GetGpuPortionRequestOk returns a tuple with the GpuPortionRequest field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
+// Deprecated
 func (o *NimServiceRulesAllOfCompute) GetGpuPortionRequestOk() (*NumberRules, bool) {
 	if o == nil {
 		return nil, false
@@ -424,6 +519,7 @@ func (o *NimServiceRulesAllOfCompute) HasGpuPortionRequest() bool {
 }
 
 // SetGpuPortionRequest gets a reference to the given NullableNumberRules and assigns it to the GpuPortionRequest field.
+// Deprecated
 func (o *NimServiceRulesAllOfCompute) SetGpuPortionRequest(v NumberRules) {
 	o.GpuPortionRequest.Set(&v)
 }
@@ -508,6 +604,12 @@ func (o NimServiceRulesAllOfCompute) ToMap() (map[string]interface{}, error) {
 	}
 	if o.GpuMemoryLimit.IsSet() {
 		toSerialize["gpuMemoryLimit"] = o.GpuMemoryLimit.Get()
+	}
+	if o.GpuMemoryPortionLimit.IsSet() {
+		toSerialize["gpuMemoryPortionLimit"] = o.GpuMemoryPortionLimit.Get()
+	}
+	if o.GpuMemoryPortionRequest.IsSet() {
+		toSerialize["gpuMemoryPortionRequest"] = o.GpuMemoryPortionRequest.Get()
 	}
 	if o.GpuMemoryRequest.IsSet() {
 		toSerialize["gpuMemoryRequest"] = o.GpuMemoryRequest.Get()

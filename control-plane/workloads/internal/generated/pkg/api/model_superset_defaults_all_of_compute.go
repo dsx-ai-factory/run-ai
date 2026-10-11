@@ -73,13 +73,27 @@ type SupersetDefaultsAllOfCompute struct {
 	GpuMemoryRequest *string `json:"gpuMemoryRequest,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+	// Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryPortionLimit *float64 `json:"gpuMemoryPortionLimit,omitempty"`
+	GpuMemoryPortionLimit *float64 `json:"gpuMemoryPortionLimit,omitempty" gorm:"-"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Deprecated in 3.1; use gpuMemoryPortionLimit. Scheduled for removal in 3.2. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+	// Deprecated
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuPortionLimit *float64 `json:"gpuPortionLimit,omitempty"`
 	GpuPortionLimit *float64 `json:"gpuPortionLimit,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+	// GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryPortionRequest *float64 `json:"gpuMemoryPortionRequest,omitempty"`
+	GpuMemoryPortionRequest *float64 `json:"gpuMemoryPortionRequest,omitempty" gorm:"-"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Deprecated in 3.1; use gpuMemoryPortionRequest. Scheduled for removal in 3.2. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+	// Deprecated
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuPortionRequest *float64 `json:"gpuPortionRequest,omitempty"`
 	GpuPortionRequest *float64 `json:"gpuPortionRequest,omitempty" gorm:""`
@@ -187,8 +201,24 @@ func AssertSupersetDefaultsAllOfComputeConstraints(obj SupersetDefaultsAllOfComp
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuMemoryPortionLimit != nil && *obj.GpuMemoryPortionLimit < 0 {
+		return &ParsingError{Param: "GpuMemoryPortionLimit", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuPortionLimit != nil && *obj.GpuPortionLimit < 0 {
 		return &ParsingError{Param: "GpuPortionLimit", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuMemoryPortionRequest != nil && *obj.GpuMemoryPortionRequest < 0 {
+		return &ParsingError{Param: "GpuMemoryPortionRequest", Err: errors.New(errMsgMinValueConstraint)}
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////

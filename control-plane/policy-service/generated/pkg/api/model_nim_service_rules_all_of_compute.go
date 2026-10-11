@@ -53,15 +53,27 @@ type NimServiceRulesAllOfCompute struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryPortionLimit *NumberRules `json:"gpuMemoryPortionLimit,omitempty"`
+	GpuMemoryPortionLimit *NumberRules `json:"gpuMemoryPortionLimit,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryPortionRequest *NumberRules `json:"gpuMemoryPortionRequest,omitempty"`
+	GpuMemoryPortionRequest *NumberRules `json:"gpuMemoryPortionRequest,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuMemoryRequest *QuantityRules `json:"gpuMemoryRequest,omitempty"`
 	GpuMemoryRequest *QuantityRules `json:"gpuMemoryRequest,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Deprecated
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuPortionLimit *NumberRules `json:"gpuPortionLimit,omitempty"`
 	GpuPortionLimit *NumberRules `json:"gpuPortionLimit,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Deprecated
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuPortionRequest *NumberRules `json:"gpuPortionRequest,omitempty"`
 	GpuPortionRequest *NumberRules `json:"gpuPortionRequest,omitempty" gorm:"serializer:json; type:jsonb;"`
@@ -102,6 +114,16 @@ func AssertNimServiceRulesAllOfComputeRequired(obj NimServiceRulesAllOfCompute) 
 	}
 	if obj.GpuMemoryLimit != nil {
 		if err := AssertQuantityRulesRequired(*obj.GpuMemoryLimit); err != nil {
+			return err
+		}
+	}
+	if obj.GpuMemoryPortionLimit != nil {
+		if err := AssertNumberRulesRequired(*obj.GpuMemoryPortionLimit); err != nil {
+			return err
+		}
+	}
+	if obj.GpuMemoryPortionRequest != nil {
+		if err := AssertNumberRulesRequired(*obj.GpuMemoryPortionRequest); err != nil {
 			return err
 		}
 	}
@@ -187,6 +209,26 @@ func AssertNimServiceRulesAllOfComputeConstraints(obj NimServiceRulesAllOfComput
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuMemoryLimit != nil {
 		if err := AssertQuantityRulesConstraints(*obj.GpuMemoryLimit); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuMemoryPortionLimit != nil {
+		if err := AssertNumberRulesConstraints(*obj.GpuMemoryPortionLimit); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuMemoryPortionRequest != nil {
+		if err := AssertNumberRulesConstraints(*obj.GpuMemoryPortionRequest); err != nil {
 			return err
 		}
 	}

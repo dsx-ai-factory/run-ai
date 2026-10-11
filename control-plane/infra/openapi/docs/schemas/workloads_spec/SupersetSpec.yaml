@@ -42,6 +42,10 @@ allOf:
           $ref: ./compute/GpuDevicesRequest.yaml
         gpuMemoryLimit:
           $ref: ./compute/GpuMemoryLimit.yaml
+        gpuMemoryPortionLimit:
+          $ref: ./compute/GpuMemoryPortionLimit.yaml
+        gpuMemoryPortionRequest:
+          $ref: ./compute/GpuMemoryPortionRequest.yaml
         gpuMemoryRequest:
           $ref: ./compute/GpuMemoryRequest.yaml
         gpuPortionLimit:

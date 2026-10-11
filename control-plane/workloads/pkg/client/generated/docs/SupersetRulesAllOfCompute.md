@@ -12,7 +12,9 @@ Name | Type | Description | Notes
 **GpuDevicesRequest** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **GpuMemoryLimit** | Pointer to [**NullableQuantityRules**](QuantityRules.md) |  | [optional] 
 **GpuMemoryRequest** | Pointer to [**NullableQuantityRules**](QuantityRules.md) |  | [optional] 
+**GpuMemoryPortionLimit** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
 **GpuPortionLimit** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
+**GpuMemoryPortionRequest** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
 **GpuPortionRequest** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
 **GpuRequestType** | Pointer to [**NullableGpuRequestRules**](GpuRequestRules.md) |  | [optional] 
 **LargeShmRequest** | Pointer to [**NullableBooleanRules**](BooleanRules.md) |  | [optional] 
@@ -316,6 +318,41 @@ HasGpuMemoryRequest returns a boolean if a field has been set.
 `func (o *SupersetRulesAllOfCompute) UnsetGpuMemoryRequest()`
 
 UnsetGpuMemoryRequest ensures that no value is present for GpuMemoryRequest, not even an explicit nil
+### GetGpuMemoryPortionLimit
+
+`func (o *SupersetRulesAllOfCompute) GetGpuMemoryPortionLimit() NumberRules`
+
+GetGpuMemoryPortionLimit returns the GpuMemoryPortionLimit field if non-nil, zero value otherwise.
+
+### GetGpuMemoryPortionLimitOk
+
+`func (o *SupersetRulesAllOfCompute) GetGpuMemoryPortionLimitOk() (*NumberRules, bool)`
+
+GetGpuMemoryPortionLimitOk returns a tuple with the GpuMemoryPortionLimit field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuMemoryPortionLimit
+
+`func (o *SupersetRulesAllOfCompute) SetGpuMemoryPortionLimit(v NumberRules)`
+
+SetGpuMemoryPortionLimit sets GpuMemoryPortionLimit field to given value.
+
+### HasGpuMemoryPortionLimit
+
+`func (o *SupersetRulesAllOfCompute) HasGpuMemoryPortionLimit() bool`
+
+HasGpuMemoryPortionLimit returns a boolean if a field has been set.
+
+### SetGpuMemoryPortionLimitNil
+
+`func (o *SupersetRulesAllOfCompute) SetGpuMemoryPortionLimitNil(b bool)`
+
+ SetGpuMemoryPortionLimitNil sets the value for GpuMemoryPortionLimit to be an explicit nil
+
+### UnsetGpuMemoryPortionLimit
+`func (o *SupersetRulesAllOfCompute) UnsetGpuMemoryPortionLimit()`
+
+UnsetGpuMemoryPortionLimit ensures that no value is present for GpuMemoryPortionLimit, not even an explicit nil
 ### GetGpuPortionLimit
 
 `func (o *SupersetRulesAllOfCompute) GetGpuPortionLimit() NumberRules`
@@ -351,6 +388,41 @@ HasGpuPortionLimit returns a boolean if a field has been set.
 `func (o *SupersetRulesAllOfCompute) UnsetGpuPortionLimit()`
 
 UnsetGpuPortionLimit ensures that no value is present for GpuPortionLimit, not even an explicit nil
+### GetGpuMemoryPortionRequest
+
+`func (o *SupersetRulesAllOfCompute) GetGpuMemoryPortionRequest() NumberRules`
+
+GetGpuMemoryPortionRequest returns the GpuMemoryPortionRequest field if non-nil, zero value otherwise.
+
+### GetGpuMemoryPortionRequestOk
+
+`func (o *SupersetRulesAllOfCompute) GetGpuMemoryPortionRequestOk() (*NumberRules, bool)`
+
+GetGpuMemoryPortionRequestOk returns a tuple with the GpuMemoryPortionRequest field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuMemoryPortionRequest
+
+`func (o *SupersetRulesAllOfCompute) SetGpuMemoryPortionRequest(v NumberRules)`
+
+SetGpuMemoryPortionRequest sets GpuMemoryPortionRequest field to given value.
+
+### HasGpuMemoryPortionRequest
+
+`func (o *SupersetRulesAllOfCompute) HasGpuMemoryPortionRequest() bool`
+
+HasGpuMemoryPortionRequest returns a boolean if a field has been set.
+
+### SetGpuMemoryPortionRequestNil
+
+`func (o *SupersetRulesAllOfCompute) SetGpuMemoryPortionRequestNil(b bool)`
+
+ SetGpuMemoryPortionRequestNil sets the value for GpuMemoryPortionRequest to be an explicit nil
+
+### UnsetGpuMemoryPortionRequest
+`func (o *SupersetRulesAllOfCompute) UnsetGpuMemoryPortionRequest()`
+
+UnsetGpuMemoryPortionRequest ensures that no value is present for GpuMemoryPortionRequest, not even an explicit nil
 ### GetGpuPortionRequest
 
 `func (o *SupersetRulesAllOfCompute) GetGpuPortionRequest() NumberRules`
