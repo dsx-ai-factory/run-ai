@@ -145,8 +145,8 @@ func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32,
 	// anchor is passed here), and the DAO intersects that with the requested
 	// scope subtree. This way the RBAC rules stay identical to every other asset
 	// list while the scope anchor only narrows the results.
-	queryParams := &query_types.QueryParams{}
-	permittedScopes, authError := query_types.ApplyRbacRules(ctx, queryParams)
+	rbacQueryParams := &query_types.QueryParams{}
+	permittedScopes, authError := query_types.ApplyRbacRules(ctx, rbacQueryParams)
 	if authError != nil {
 		return NewErrorResponse(authError), nil
 	}
@@ -157,7 +157,7 @@ func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32,
 	result, actionError := dao.ListRcts(ctx, dao.RctListParams{
 		Offset:             offset,
 		Limit:              limit,
-		QueryParams:        queryParams,
+		QueryParams:        rbacQueryParams,
 		Filters:            filters,
 		IncludeAncestors:   includeAncestors,
 		IncludeDescendants: includeDescendants,
