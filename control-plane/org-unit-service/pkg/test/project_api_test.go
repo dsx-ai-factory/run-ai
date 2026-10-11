@@ -1766,6 +1766,52 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(err).To(BeNil())
 			Expect(getResponse.Body.(api.Project).Status.NodePoolQuotaStatuses).To(Equal(nodePoolQuotaStatuses))
 		})
+
+		It("test update project does not overwrite a status synced during the update", func() {
+			projectApiService = projects.NewProjectApiService(projectDeletionService, &clusterServiceClient, nil)
+			name := createProjectName()
+			createResponse, err := projectApiService.CreateProject(ctx, getProjectCreateRequest(name, name, departmentId, clusterId))
+			Expect(err).To(BeNil())
+			Expect(createResponse.Code).To(Equal(http.StatusCreated))
+			created := createResponse.Body.(api.Project)
+			projectIds = append(projectIds, created.Id)
+
+			nodePool := created.Resources[0].NodePool
+			setNonPreemptibleGpu := func(gpu float64) {
+				response, err := projectApiService.UpdateProjectStatus(ctx, api.ProjectStatusUpdateRequest{
+					Id:        created.Id,
+					ClusterId: clusterId,
+					Status: api.ProjectStatus{
+						Phase:     "Ready",
+						Namespace: ptr.To(fmt.Sprintf("runai-%s", name)),
+						NodePoolQuotaStatuses: []api.QuotaStatusNodePool{{
+							NodePoolName:            nodePool.Name,
+							NodePoolId:              nodePool.Id,
+							AllocatedNonPreemptible: api.QuotaStatusResource{Gpu: gpu},
+						}},
+					},
+				})
+				Expect(err).To(BeNil())
+				Expect(response.Code).To(Equal(http.StatusOK))
+			}
+
+			setNonPreemptibleGpu(1)
+			projectId, err := strconv.ParseInt(created.Id, 10, 64)
+			Expect(err).To(BeNil())
+			staleProject, err := dao.GetProjectById(ctx, projectId, TestTenant, models.SlimVerbosity)
+			Expect(err).To(BeNil())
+			setNonPreemptibleGpu(2)
+
+			staleProject.OrgUnitData.Resources[0].GpuLimit = ptr.To(float64(4))
+			_, err = dao.UpdateProject(ctx, staleProject, false, false)
+			Expect(err).To(BeNil())
+
+			getResponse, err := projectApiService.GetProject(ctx, created.Id)
+			Expect(err).To(BeNil())
+			got := getResponse.Body.(api.Project)
+			Expect(*got.Resources[0].Gpu.Limit).To(Equal(float64(4)))
+			Expect(got.Status.NodePoolQuotaStatuses[0].AllocatedNonPreemptible.Gpu).To(Equal(float64(2)))
+		})
 	})
 
 	Context("test update project resources", func() {
