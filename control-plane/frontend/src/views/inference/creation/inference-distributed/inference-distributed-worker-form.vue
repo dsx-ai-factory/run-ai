@@ -20,6 +20,7 @@
       @submit="$emit(EEmitName.Submit)"
     >
       <hybrid-environment-section
+        authenticated-ngc-only
         :key="`he-${hybridContext.selectedTemplates.value.environment.sectionKey}`"
         :render-key="hybridContext.selectedTemplates.value.environment.renderKey.toString()"
         :selected-name="hybridContext.selectedEnvironmentName.value"
@@ -41,8 +42,12 @@
         :validate-empty-env-vars="!uiState.isWorkloadTemplate"
         @toggle-linked="hybridContext.toggleEnvironmentLinked"
         support-authenticated-ngc
-        :scope-id="hybridContext.hybridWorkloadModel.value.scopeId?.toString() || ''"
-        :scope-type="hybridContext.hybridWorkloadModel.value.scopeType"
+        :scope-id="
+          uiState.isWorkloadTemplate
+            ? hybridContext.hybridWorkloadModel.value.scopeId || ''
+            : hybridContext.hybridWorkloadModel.value.projectId
+        "
+        :scope-type="uiState.isWorkloadTemplate ? hybridContext.hybridWorkloadModel.value.scopeType : 'project'"
         :hide-specific-sections="{ tools: true }"
       />
 
