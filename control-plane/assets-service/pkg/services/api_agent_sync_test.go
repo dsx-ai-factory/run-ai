@@ -809,13 +809,15 @@ var _ = Describe("AgentSync", func() {
 				createPVCAsset(testing.BuildRandomProjectPVCAsset(randoms), router, headerForAdmin(randoms))
 
 				//
-				//  Before the agent polls, no sync_status row exists yet.
-				//  Unlike credentials/PVC (which the k8s-objects-tracker
-				//  reports on via newNotYetUpdated → CREATING), the k8s-object
-				//  family has no tracker projection, so PatchStatusInfo
-				//  short-circuits and status is nil at this point.
+				//  Before the agent polls, no sync_status row exists yet. Like
+				//  credentials/PVC, the RCT now has a k8s-objects-tracker
+				//  projection, so PatchStatusInfo falls through to the tracker:
+				//  the resource isn't reported yet and, within the creation
+				//  grace window, newNotYetUpdated reports CREATING.
 				//
-				validateRctStatusForTest(randoms, router, map[string]api.AssetClusterStatusInfo{})
+				validateRctStatusForTest(randoms, router, map[string]api.AssetClusterStatusInfo{
+					metaToString(rct.Meta): {Status: api.ASSETSYNCSTATUSENUM_CREATING},
+				})
 
 				//
 				//  check that correct updates are reported to the agent
@@ -1645,10 +1647,11 @@ func validateCredentialsStatusForTest(randoms *testutils.RandomValues, router ch
 
 // validateRctStatusForTest hits GET /api/v1/k8s-objects/resource-claim-templates?statusInfo=true
 // and asserts each RCT's per-cluster status matches expected. Mirrors
-// validateCredentialsStatusForTest/validateDatasourcesStatusForTest — the
-// k8s-object family has no k8s-objects-tracker projection today, so
-// PatchStatusInfo short-circuits after LoadSyncStatus and the status seen
-// here is exactly what SyncStatusRec.DetermineStatus produced.
+// validateCredentialsStatusForTest/validateDatasourcesStatusForTest. RCT now
+// has a k8s-objects-tracker projection, so once a sync_status row exists its
+// status comes from SyncStatusRec.DetermineStatus (LoadSyncStatus covers it and
+// PatchStatusInfo short-circuits); before that, status falls through to the
+// tracker like PVC does.
 func validateRctStatusForTest(randoms *testutils.RandomValues, router chi.Router, expected map[string]api.AssetClusterStatusInfo) {
 	syncHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?statusInfo=true", urlRct), nil)
 	Expect(err).To(BeNil())
