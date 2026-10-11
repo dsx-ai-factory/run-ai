@@ -15,7 +15,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
@@ -80,6 +79,13 @@ func extractScopeAnchor(ctx context.Context, filters []queryapi.Filter, includeA
 			return nil, nil, api.NewValidationError(fmt.Sprintf("the %s scope filter must use the '==' operator", anchorField))
 		}
 
+		// Likewise a scope anchor identifies exactly one node, so a multi-valued
+		// filter (queryapi's "a||b") is rejected rather than silently collapsing
+		// to the first value.
+		if len(filter.Values) != 1 {
+			return nil, nil, api.NewValidationError(fmt.Sprintf("the %s scope filter must specify exactly one value", anchorField))
+		}
+
 		anchors = append(anchors, scopeAnchor{scope: anchorScope, id: firstFilterValue(filter)})
 	}
 
@@ -103,7 +109,7 @@ func extractScopeAnchor(ctx context.Context, filters []queryapi.Filter, includeA
 		case api.SCOPE_PROJECT:
 			resp, ancestorsErr := org_unit.Get().GetProjectAncestors(ctx, anchor.id)
 			if ancestorsErr != nil {
-				return nil, nil, api.NewError(http.StatusServiceUnavailable, "failed to interrogate the ancestors of the project", errors.New(ancestorsErr.Message))
+				return nil, nil, api.NewError(int(ancestorsErr.GetCode()), "failed to interrogate the ancestors of the project", errors.New(ancestorsErr.Message))
 			}
 			anchor.ancestorDepartmentId = resp.DepartmentId.Get()
 			anchor.ancestorClusterId = resp.ClusterUuid.Get()
