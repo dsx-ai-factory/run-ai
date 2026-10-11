@@ -1,4 +1,4 @@
-description: Deprecated in 3.1; use gpuMemoryPortionLimit. Scheduled for removal in 3.2.
+description: Deprecated. Use gpuMemoryPortionLimit instead.
   Limitations on the portion consumed by the workload, per GPU device. The system guarantees
   The gpuPotionLimit must be no less than the gpuPortionRequest.
 type: number
