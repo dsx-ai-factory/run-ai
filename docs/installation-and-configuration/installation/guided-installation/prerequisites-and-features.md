@@ -208,7 +208,7 @@ With `prerequisites.networkOperator.mode: install`, the installer does the follo
 When installing the Network Operator:
 
 * To configure SR-IOV InfiniBand support on Kubernetes, set the required values via `customHelmValues` - see [Network Operator Deployment with an SR-IOV InfiniBand Network](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-with-an-sr-iov-infiniband-network) for which values to set. This does not apply to OpenShift - configure SR-IOV support via the SR-IOV Network Operator directly.
-* For air-gapped installation, follow the instructions in [Network Operator Deployment in an Air-gapped Environment](https://docs.nvidia.com/networking/display/kubernetes2540/advanced/proxy-airgapped.html#network-operator-deployment-in-an-air-gapped-environment).
+* For air-gapped installation, follow the instructions in [Network Operator Deployment in an Air-gapped Environment](https://docs.nvidia.com/networking/display/kubernetes2670/advanced/proxy-airgapped.html#network-operator-deployment-in-an-air-gapped-environment).
 * For Gov-ready installations, follow the instructions in [Install the Gov-Ready Network Operator](https://docs.nvidia.com/networking/display/kubernetes2670/install-network-operator-gov-ready.html).
 
 ### NVIDIA Dynamic Resource Allocation (DRA) Driver

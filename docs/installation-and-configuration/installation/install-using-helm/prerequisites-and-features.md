@@ -166,7 +166,7 @@ The Network Operator must be installed and configured as follows:
 
 * Install the Network Operator as detailed in [Network Operator Deployment on Vanilla Kubernetes Cluster](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-on-vanilla-kubernetes-cluster).
 * Configure SR-IOV InfiniBand support as detailed in [Network Operator Deployment with an SR-IOV InfiniBand Network](https://docs.nvidia.com/networking/display/kubernetes2440/getting-started-kubernetes.html#network-operator-deployment-with-an-sr-iov-infiniband-network).
-* For air-gapped installation, follow the instructions in [Network Operator Deployment in an Air-gapped Environment](https://docs.nvidia.com/networking/display/kubernetes2540/advanced/proxy-airgapped.html#network-operator-deployment-in-an-air-gapped-environment).
+* For air-gapped installation, follow the instructions in [Network Operator Deployment in an Air-gapped Environment](https://docs.nvidia.com/networking/display/kubernetes2670/advanced/proxy-airgapped.html#network-operator-deployment-in-an-air-gapped-environment).
 * For Gov-ready installations, follow the instructions in [Install the Gov-Ready Network Operator](https://docs.nvidia.com/networking/display/kubernetes2670/install-network-operator-gov-ready.html).
 
 ### NVIDIA Dynamic Resource Allocation (DRA) Driver
