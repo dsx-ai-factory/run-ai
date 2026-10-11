@@ -18443,6 +18443,7 @@ Components:
   github.com/go-openapi/jsonreference v0.21.4
   github.com/go-openapi/jsonreference v0.21.5
   github.com/go-openapi/jsonreference v0.21.6
+  github.com/go-openapi/jsonreference v1.0.0
   github.com/go-openapi/jsonreference v1.0.1
   github.com/go-openapi/jsonreference v1.0.3
   github.com/go-openapi/loads v0.25.3
@@ -18542,7 +18543,6 @@ Components:
   google.golang.org/grpc v1.83.2
   google.golang.org/grpc v1.84.0
   k8s.io/api v0.35.4
-  k8s.io/api v0.36.1
   k8s.io/api v0.36.2
   k8s.io/api v0.36.4
   k8s.io/api v0.37.0
@@ -18555,7 +18555,6 @@ Components:
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.36.4
   k8s.io/apiextensions-apiserver/pkg/apis/apiextensions v0.37.1
   k8s.io/apimachinery/pkg v0.35.4
-  k8s.io/apimachinery/pkg v0.36.1
   k8s.io/apimachinery/pkg v0.36.2
   k8s.io/apimachinery/pkg v0.36.4
   k8s.io/apimachinery/pkg v0.37.0
@@ -18568,7 +18567,6 @@ Components:
   k8s.io/cli-runtime/pkg v0.36.2
   k8s.io/cli-runtime/pkg v0.37.1
   k8s.io/client-go v0.35.4
-  k8s.io/client-go v0.36.1
   k8s.io/client-go v0.36.4
   k8s.io/client-go v0.37.0
   k8s.io/client-go v0.37.1
@@ -18577,18 +18575,18 @@ Components:
   k8s.io/code-generator v0.35.4
   k8s.io/component-base v0.35.4
   k8s.io/component-base v0.36.2
-  k8s.io/component-base/cli/flag v0.36.1
+  k8s.io/component-base/cli/flag v0.37.1
   k8s.io/component-base/version v0.37.1
   k8s.io/component-helpers v0.35.4
   k8s.io/component-helpers v0.36.2
   k8s.io/component-helpers/resource v0.35.4
   k8s.io/dynamic-resource-allocation v0.35.4
   k8s.io/dynamic-resource-allocation v0.36.2
+  k8s.io/dynamic-resource-allocation v0.37.1
   k8s.io/dynamic-resource-allocation/cel v0.35.4
   k8s.io/kube-aggregator/pkg/apis/apiregistration v0.35.4
   k8s.io/kube-openapi/pkg v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg v0.0.0-20260317180543-43fb72c5454a
-  k8s.io/kube-openapi/pkg v0.0.0-20260414162039-ec9c827d403f
   k8s.io/kube-openapi/pkg v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg v0.0.0-20260721132016-d427ff9ee9ad
@@ -18596,7 +18594,6 @@ Components:
   k8s.io/kube-openapi/pkg/validation/errors v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260317180543-43fb72c5454a
-  k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260414162039-ec9c827d403f
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/validation/spec v0.0.0-20260721132016-d427ff9ee9ad
@@ -21588,7 +21585,6 @@ Components:
   github.com/moby/spdystream/spdy v0.5.1
   github.com/xhit/go-str2duration/v2 v2.1.0
   k8s.io/apimachinery/third_party/forked/golang v0.35.4
-  k8s.io/apimachinery/third_party/forked/golang v0.36.1
   k8s.io/apimachinery/third_party/forked/golang v0.36.2
   k8s.io/apimachinery/third_party/forked/golang v0.36.4
   k8s.io/apimachinery/third_party/forked/golang v0.37.0
@@ -21668,7 +21664,6 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20250910181357-589584f1c912
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260317180543-43fb72c5454a
-  k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260414162039-ec9c827d403f
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260501160325-927ab1f70cd6
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260519202549-bbf5c5577288
   k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json v0.0.0-20260721132016-d427ff9ee9ad
@@ -26305,6 +26300,7 @@ NOTICE of github.com/go-openapi/jsonreference
 Components:
   github.com/go-openapi/jsonreference v0.21.5
   github.com/go-openapi/jsonreference v0.21.6
+  github.com/go-openapi/jsonreference v1.0.0
   github.com/go-openapi/jsonreference v1.0.1
   github.com/go-openapi/jsonreference v1.0.3
 
