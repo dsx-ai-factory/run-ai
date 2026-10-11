@@ -46,6 +46,5 @@ func CreateTables() {}
 
 func CleanTables() {
 	_, _ = runaidb.DB().Unscoped().Where("1 = 1").Delete(&models.AccessRule{})
-	_, _ = runaidb.DB().Unscoped().Where("1 = 1").Delete(&models.Permission{})
 	_, _ = runaidb.DB().Unscoped().Where("1 = 1").Delete(&models.Role{})
 }
