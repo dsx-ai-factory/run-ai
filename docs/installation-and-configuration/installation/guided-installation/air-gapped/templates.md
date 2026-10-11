@@ -45,7 +45,8 @@ controlPlane:
   tls:
     certPath: /path/to/cp-cert.pem
     keyPath: /path/to/cp-key.pem
-  customHelmValues: {}
+  customHelmValues:
+    supportEntitled: true # Support-Entitled Release only
 
 cluster:
   enabled: true
@@ -99,7 +100,8 @@ controlPlane:
   tls:
     certPath: /path/to/cp-cert.pem
     keyPath: /path/to/cp-key.pem
-  customHelmValues: {}
+  customHelmValues:
+    supportEntitled: true # Support-Entitled Release only
 
 externalConnection:
   type: ingress
@@ -166,7 +168,8 @@ controlPlane:
   tls:
     certPath: /path/to/cp-cert.pem
     keyPath: /path/to/cp-key.pem
-  customHelmValues: {}
+  customHelmValues:
+    supportEntitled: true # Support-Entitled Release only
 
 cluster:
   enabled: true
@@ -212,7 +215,8 @@ airgap:
 controlPlane:
   enabled: true
   domain: <DOMAIN>
-  customHelmValues: {}
+  customHelmValues:
+    supportEntitled: true # Support-Entitled Release only
 
 cluster:
   enabled: true
@@ -254,6 +258,7 @@ controlPlane:
     certPath: /path/to/cp-cert.pem
     keyPath: /path/to/cp-key.pem
   customHelmValues:
+    supportEntitled: true # Support-Entitled Release only
     global:
       fipsMode: only
       postgresql:
