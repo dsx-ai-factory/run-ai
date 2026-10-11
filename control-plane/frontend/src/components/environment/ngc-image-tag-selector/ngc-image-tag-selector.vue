@@ -62,10 +62,6 @@ export default defineComponent({
       type: String as PropType<string>,
       required: true,
     },
-    nimOnly: {
-      type: Boolean,
-      default: false,
-    },
     credentialId: {
       type: String as PropType<string | undefined>,
       required: false,
@@ -128,14 +124,9 @@ export default defineComponent({
       const requestId = ++this.imageRequestId;
       try {
         this.loadingImages = true;
-        const images = await catalogService.getImages(
-          this.registryId,
-          search || (this.nimOnly ? "nim/" : undefined),
-          this.credentialId,
-        );
+        const images = await catalogService.getImages(this.registryId, search, this.credentialId);
         if (requestId !== this.imageRequestId) return; // Prevent stale responses from overwriting the latest results.
-        const availableImages = this.nimOnly ? images.images.filter((image) => image.startsWith("nim/")) : images.images;
-        this.imageOptions = availableImages.map((image) => {
+        this.imageOptions = images.images.map((image) => {
           return {
             label: image,
             value: image,

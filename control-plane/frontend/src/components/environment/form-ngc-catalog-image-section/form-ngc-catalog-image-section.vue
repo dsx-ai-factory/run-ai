@@ -5,9 +5,9 @@
 
 <template>
   <section class="form-ngc-image-section">
-    <template v-if="supportAuthenticatedNgc || nimOnly">
+    <template v-if="supportAuthenticatedNgc || authenticatedOnly">
       <runai-radio-options
-        v-if="!nimOnly"
+        v-if="!authenticatedOnly"
         class="q-mt-lg q-mb-md"
         :options="imagesTypeOptions"
         v-model="selectedImagesType"
@@ -26,7 +26,9 @@
             allowedTypes: [ERunaiCredentialType.NgcApiKey],
             disable: true,
           }"
-          :credential-select-config="nimOnly ? { required: true, showCreateNewBtn: true } : { showCreateNewBtn: true }"
+          :credential-select-config="
+            authenticatedOnly ? { required: true, showCreateNewBtn: true } : { showCreateNewBtn: true }
+          "
         />
       </div>
     </template>
@@ -34,7 +36,6 @@
       v-if="showImageSelector && ngcCatalogRegistryId"
       :registry-id="ngcCatalogRegistryId"
       :credential-id="selectedCredentialId || undefined"
-      :nim-only="nimOnly"
       @update:model-value="onImageValueChanged"
     />
   </section>
@@ -70,7 +71,7 @@ export default defineComponent({
       required: false,
       default: false,
     },
-    nimOnly: {
+    authenticatedOnly: {
       type: Boolean,
       default: false,
     },
@@ -110,7 +111,7 @@ export default defineComponent({
           label: "Authenticated",
         },
       ] as ISelectOption[],
-      selectedImagesType: this.nimOnly ? EImagesType.Authenticated : EImagesType.Guest,
+      selectedImagesType: this.authenticatedOnly ? EImagesType.Authenticated : EImagesType.Guest,
       EImagesType,
       ERunaiCredentialType,
       ERunaiCredentialSource,
@@ -131,14 +132,14 @@ export default defineComponent({
     },
     showImageSelector(): boolean {
       return (
-        (!this.nimOnly && this.selectedImagesType === EImagesType.Guest) ||
+        (!this.authenticatedOnly && this.selectedImagesType === EImagesType.Guest) ||
         (this.selectedImagesType === EImagesType.Authenticated && !!this.selectedCredentialId)
       );
     },
   },
   methods: {
     onImagesTypeSelected(imagesType: EImagesType): void {
-      if (this.nimOnly && imagesType === EImagesType.Guest) return;
+      if (this.authenticatedOnly && imagesType === EImagesType.Guest) return;
       this.selectedImagesType = imagesType;
       this.selectedCredentialId = null;
       this.credentialSelectorModel = {

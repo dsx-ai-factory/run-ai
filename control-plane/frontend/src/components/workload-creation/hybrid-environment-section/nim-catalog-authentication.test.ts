@@ -9,10 +9,10 @@ import { describe, expect, it, vi } from "vitest";
 import HybridEnvironmentSection from "./hybrid-environment-section.vue";
 import { ERunaiCredentialSource } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
 
-function createWrapper(isDistributedInference = true, supportImagePullSecrets = true) {
+function createWrapper(authenticatedNgcOnly = true, supportImagePullSecrets = true) {
   return shallowMount(HybridEnvironmentSection, {
     props: {
-      isDistributedInference,
+      authenticatedNgcOnly,
       supportImagePullSecrets,
       supportAuthenticatedNgc: true,
       workloadSpec: {
@@ -28,9 +28,9 @@ function createWrapper(isDistributedInference = true, supportImagePullSecrets = 
 }
 
 describe("distributed inference NGC credentials", () => {
-  it("requires authenticated NIM catalog browsing for distributed inference", () => {
+  it("requires authenticated catalog browsing for distributed inference", () => {
     const wrapper = createWrapper();
-    expect(wrapper.findComponent({ name: "form-image-origin-section" }).props("nimOnly")).toBe(true);
+    expect(wrapper.findComponent({ name: "form-image-origin-section" }).props("authenticatedOnly")).toBe(true);
   });
 
   it("leaves custom mirror images and their existing runtime configuration untouched", () => {
@@ -47,7 +47,7 @@ describe("distributed inference NGC credentials", () => {
 
   it("keeps ordinary workloads outside the NIM catalog requirement", () => {
     const wrapper = createWrapper(false);
-    expect(wrapper.findComponent({ name: "form-image-origin-section" }).props("nimOnly")).toBe(false);
+    expect(wrapper.findComponent({ name: "form-image-origin-section" }).props("authenticatedOnly")).toBe(false);
     wrapper.vm.onCredentialChanged({
       credentialName: "image-key",
       credentialSource: ERunaiCredentialSource.MyCredentials,

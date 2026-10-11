@@ -11,14 +11,14 @@ import {
   ERunaiCredentialType,
 } from "@/components/common/runai-credential-selector-by-source/runai-credential-selector-by-source.model";
 
-function createWrapper(nimOnly = true) {
+function createWrapper(authenticatedOnly = true) {
   return shallowMount(FormNgcCatalogImageSection, {
-    props: { nimOnly, supportAuthenticatedNgc: true, ngcCatalogRegistryId: "ngc-registry" },
+    props: { authenticatedOnly, supportAuthenticatedNgc: true, ngcCatalogRegistryId: "ngc-registry" },
   });
 }
 
-describe("NIM catalog authentication", () => {
-  it("requires a credential before showing the NIM image picker and offers no guest option", async () => {
+describe("Distributed catalog authentication", () => {
+  it("requires a credential before showing the catalog image picker and offers no guest option", async () => {
     const wrapper = createWrapper();
     expect(wrapper.findComponent({ name: "runai-radio-options" }).exists()).toBe(false);
     const credentialSelector = wrapper.findComponent({ name: "runai-credential-selector-by-source" });
@@ -34,7 +34,7 @@ describe("NIM catalog authentication", () => {
     await wrapper.vm.$nextTick();
 
     const imageSelector = wrapper.findComponent({ name: "ngc-image-tag-selector" });
-    expect(imageSelector.props()).toMatchObject({ credentialId: "personal-key-id", nimOnly: true });
+    expect(imageSelector.props()).toMatchObject({ credentialId: "personal-key-id" });
     expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toEqual({
       credentialName: "personal-key",
       credentialSource: ERunaiCredentialSource.MyCredentials,
@@ -51,6 +51,18 @@ describe("NIM catalog authentication", () => {
     expect(wrapper.emitted("credential-changed")?.at(-1)?.[0]).toEqual({
       credentialName: "",
       credentialSource: ERunaiCredentialSource.MyCredentials,
+    });
+  });
+
+  it("uses the selected project scope for shared-credential browsing", () => {
+    const wrapper = shallowMount(FormNgcCatalogImageSection, {
+      props: { authenticatedOnly: true, scopeId: "42", scopeType: "project", clusterId: "test-cluster" },
+    });
+    expect(wrapper.findComponent({ name: "runai-credential-selector-by-source" }).props("scopeModel")).toEqual({
+      scope: null,
+      projectId: 42,
+      clusterId: "test-cluster",
+      departmentId: undefined,
     });
   });
 
