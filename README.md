@@ -98,7 +98,7 @@ Each service directory has a Makefile with standard targets (`make build`, `make
 
 ## Installation
 
-NVIDIA Run:ai can be deployed on Kubernetes or OpenShift in connected or air-gapped environments. To understand the full setup lifecycle, see the [Installation and Configuration Overview](https://docs.nvidia.com/run-ai/self-hosted/documentation/installation-and-configuration/overview).
+NVIDIA Run:ai can be deployed on Kubernetes or OpenShift in connected or air-gapped environments. To understand the full installation lifecycle, see the [Installation and Configuration Overview](https://docs.nvidia.com/run-ai/self-hosted/documentation/installation-and-configuration/overview).
 
 **Before you start:**
 

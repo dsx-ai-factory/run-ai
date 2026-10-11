@@ -23,7 +23,7 @@ Every multi-tenant deployment includes exactly one NVIDIA Run:ai control plane, 
 
 <img src="../../assets/self-hosted.svg" alt="NVIDIA Run:ai multi-tenant deployment: Run:ai Control Plane and one Run:ai Cluster per tenant, running on the host organization's and each tenant's own Kubernetes clusters, cloud or on-prem" width="480" />
 
-## Setup Lifecycle
+## Installation Lifecycle
 
 Setting up NVIDIA Run:ai multi-tenant follows a three-phase lifecycle, repeated for each new tenant.
 
@@ -38,7 +38,7 @@ Day 0 covers the planning and preparation before installing the control plane, a
 * Provision an external metrics store (Grafana Labs or Mimir) for the control plane
 * Enable external access for administrators, users, and tenant clusters to reach the NVIDIA Run:ai control plane
 
-### Day 1: Installation and Configuration
+### Day 1: Setup
 
 Day 1 gets the control plane running, and onboards each tenant.
 
@@ -62,7 +62,7 @@ Day 2 covers the ongoing operational tasks that keep the control plane and every
 
 Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. Upgrade the control plane first, then each tenant's cluster. To upgrade NVIDIA Run:ai, see [Upgrade](upgrade/plan-the-upgrade.md).
 
-## Understanding Installation
+## Understanding the Installation
 
 ### Deployment Model
 

@@ -245,7 +245,8 @@ NVIDIA Run:ai uses [Knative Serving](https://knative.dev/docs/serving/) to enabl
 
 **Note**
 
-By default, Knative pulls its `queue-proxy` sidecar image from the public registry. In air-gapped environments, update the `queue-sidecar-image` field in the `config-deployment` ConfigMap (in the `knative-serving` namespace) to point to your local registry instead. See the [Knative `config-deployment` ConfigMap](https://knative.dev/docs/serving/configuration/deployment/) for the field definition.
+* On OpenShift, Knative is installed through the OpenShift Serverless operator, which supports Knative 1.17 only.
+* By default, Knative pulls its `queue-proxy` sidecar image from the public registry. In air-gapped environments, update the `queue-sidecar-image` field in the `config-deployment` ConfigMap (in the `knative-serving` namespace) to point to your local registry instead. See the [Knative `config-deployment` ConfigMap](https://knative.dev/docs/serving/configuration/deployment/) for the field definition.
 
 </Note>
 
