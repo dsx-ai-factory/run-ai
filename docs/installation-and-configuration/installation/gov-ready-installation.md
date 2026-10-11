@@ -16,13 +16,17 @@ Review the [system requirements](../system-requirements/README.md) for your depl
 
 ## Third-Party Services
 
-Gov-ready uses an external PostgreSQL instance and FIPS-validated hardened images for the third-party services. The hardened images are Docker Hardened Images (DHI), which you pull from Docker Hub (`docker.io`) from repositories mirrored to your Docker Hub organization, using your Docker Hub credentials. For the image registry settings, registry credentials, and Helm values each service requires, refer to [Gov-Ready Third-Party Services](../system-requirements/gov-ready-third-party-services.md).
+Gov-ready uses an external PostgreSQL instance and FIPS-validated hardened images for the third-party services. The hardened images are Docker Hardened Images (DHI), which you pull from Docker Hub (`docker.io`) from repositories in your Docker Hub organization, using your Docker Hub credentials. For the image registry settings, registry credentials, and Helm values each service requires, refer to [Gov-Ready Third-Party Services](../system-requirements/gov-ready-third-party-services.md).
 
 Pass the Gov-ready values to the installation as custom Helm values:
 
-- **Guided Installation (connected)** - Add the values under `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration. Create the registry secret for the hardened images before installation.
-- **Manual Helm (connected)** - Save the values in a values file and pass the file with `-f` when installing the control plane and cluster. Create the registry secret for the hardened images before installation.
-- **Air-gapped (Guided Installation and Manual Helm)** - Add the hardened images and registry credentials to the pack configuration when preparing the air-gapped bundle. You do not create a Kubernetes secret, because the load step generates the required image values.
+- **Guided Installation** - Add the values under `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration.
+- **Manual Helm** - Save the values in a values file and pass the file with `-f` when installing the control plane and cluster. In air-gapped environments, pass it in addition to the values files that `airgap load` generates.
+
+The hardened images are provided differently in connected and air-gapped environments:
+
+- **Connected** - Create the registry secret for the hardened images before installation, and set the image values.
+- **Air-gapped** - Add the hardened images and your Docker Hub credentials to the pack configuration when preparing the air-gapped bundle. You do not create a Kubernetes secret or set the image values. The load step generates them. Set only the other values, such as the external PostgreSQL connection.
 
 ## Prerequisites and Features
 
@@ -36,7 +40,7 @@ Install the prerequisites and features as described in the installation procedur
 In addition to the third-party service values, enable FIPS mode when installing both the control plane and the cluster by setting `global.fipsMode: only` in the control plane and cluster configuration.
 
 - **Guided Installation** - Add `global.fipsMode: only` under both `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration.
-- **Manual Helm** - Add `global.fipsMode: only` to the values files passed to the control plane and cluster installation.
+- **Manual Helm** - Add `--set global.fipsMode=only` to the `helm upgrade` commands for the control plane and the cluster.
 
 ## Next Steps
 
