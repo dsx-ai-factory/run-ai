@@ -1,6 +1,6 @@
 {
   "skill_name": "runai-get-cluster-health-summary",
-  "description": "Trigger, routing, and output-quality cases for the cluster health summary skill. Positive cases return one HEALTHY / DEGRADED / STUCK verdict per node pool with the dominant blocker, separate a stuck scheduler from a full pool, and stay read-only; route-out cases name the sibling skill with zero MCP calls. Cluster 10000000-0000-4000-8000-0000000000a1 replays a live recording of an idle, healthy cluster; cluster 20000000-0000-4000-8000-0000000000c1 is a synthetic cluster with one fault per node pool.",
+  "description": "Trigger, routing, and output-quality cases for the cluster health summary skill. Positive cases return one HEALTHY / DEGRADED / STUCK verdict per node pool with the dominant blocker, separate a stuck scheduler from a full pool, and stay read-only; route-out cases hand off to the owning skill when it is installed, and otherwise name it and may answer the narrow question read-only. Cluster 10000000-0000-4000-8000-0000000000a1 replays a live recording of an idle, healthy cluster; cluster 20000000-0000-4000-8000-0000000000c1 is a synthetic cluster with one fault per node pool.",
   "evals": [
     {
       "id": "A1-lab-cluster-verdict-per-pool",
@@ -166,12 +166,12 @@
     {
       "id": "B3-one-workload-routes-out",
       "prompt": "How is workload embed-1 in project search-svc doing?",
-      "expected_output": "runai-get-cluster-health-summary must not produce a health summary or verdict: one workload's health belongs to runai-get-workload-health-summary. If the cluster health skill is loaded, it names runai-get-workload-health-summary; because that skill is not installed here, it may give a short read-only answer to the narrow question from MCP (usually one or two calls). Any facts stated must come from the tools.",
+      "expected_output": "runai-get-cluster-health-summary must not produce a health summary or verdict: one workload's health belongs to runai-get-workload-health-summary. When runai-get-workload-health-summary is installed, the agent hands off to it (loading it directly is correct) and does not answer in place of it. When it is not installed and the cluster health skill is loaded, it names runai-get-workload-health-summary and may give a short read-only answer to the narrow question from MCP (usually one or two calls). Any facts stated must come from the tools.",
       "expected_skill": "runai-get-workload-health-summary",
       "expected_script": null,
       "expected_behavior": [
         "does not run the cluster health workflow or give a health verdict",
-        "if loaded, names runai-get-workload-health-summary",
+        "uses runai-get-workload-health-summary when it is installed; otherwise, if loaded, names it",
         "states no facts the tools did not return"
       ]
     },
@@ -193,12 +193,12 @@
     {
       "id": "B5-failed-workload-root-cause",
       "prompt": "Why did my training job seg-train-2 fail?",
-      "expected_output": "runai-get-cluster-health-summary must not produce a health summary or verdict: the root cause of one failed workload belongs to runai-diagnose-failed-workload. If the cluster health skill is loaded, it names runai-diagnose-failed-workload; because that skill is not installed here, it may give a short read-only answer to the narrow question from MCP (usually one or two calls). Any facts stated must come from the tools.",
+      "expected_output": "runai-get-cluster-health-summary must not produce a health summary or verdict: the root cause of one failed workload belongs to runai-diagnose-failed-workload. When runai-diagnose-failed-workload is installed, the agent hands off to it (loading it directly is correct) and does not answer in place of it. When it is not installed and the cluster health skill is loaded, it names runai-diagnose-failed-workload and may give a short read-only answer to the narrow question from MCP (usually one or two calls). Any facts stated must come from the tools.",
       "expected_skill": "runai-diagnose-failed-workload",
       "expected_script": null,
       "expected_behavior": [
         "does not run the cluster health workflow or give a health verdict",
-        "if loaded, names runai-diagnose-failed-workload",
+        "uses runai-diagnose-failed-workload when it is installed; otherwise, if loaded, names it",
         "states no facts the tools did not return"
       ]
     },

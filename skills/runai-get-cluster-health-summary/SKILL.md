@@ -91,7 +91,7 @@ the full answer. Write requests are the exception: make zero MCP calls.
 | Input | Required | Default | Notes |
 | --- | --- | --- | --- |
 | `cluster_id` | Yes | — | Cluster UUID. See Stage 1 to resolve it. |
-| `node_pool` | No | all pools | Scope every call to one pool. |
+| `node_pool` | No | all pools | Scope the health and inventory calls to one pool (Stage 2). |
 | `pending_threshold` | No | `15m` | A pending workload counts only after this wait. |
 | `pending_sample` | No | `5` | Oldest pending workloads to inspect. |
 
@@ -122,8 +122,9 @@ Apply in order. A stop means no further MCP calls.
 
 ### Stage 2 — Collect the snapshot
 
-Call these four in parallel, scoped with `clusterId` (and `nodePoolName` when
-the user named a pool):
+Call these four in parallel with `clusterId`. When the user named a pool, also
+pass `nodePoolName`, but only to `get_cluster_infrastructure_health` and
+`get_cluster_physical_inventory`; `list_node_pools` rejects it:
 
 1. `list_node_pools` — pool `phase` and which pool `isDefault`.
 2. `get_cluster_infrastructure_health` — unhealthy nodes per pool.
@@ -163,6 +164,7 @@ Skip this stage when the summary reports zero pending workloads.
 | `SPEC` | `phaseMessage`, `phaseReason`, a condition, or **any** event (not only the newest) names a workload-side block: node selector or affinity with no match, quota exceeded for non-preemptible work, image, volume, policy. | Not a cluster fault. Report it and route (Hand-off). |
 | `CAPACITY` | Not `SPEC`, and every requested pool has `gpusFree < requestedGpu`; or a not-enough-resources reason is reported. | Pool is full. Not a fault. |
 | `SCHEDULER_SUSPECT` | Not `SPEC`, no reason reported, and a requested pool has `gpusFree >= requestedGpu` (or `gpusFree > 0` when `requestedGpu` is null). | Free GPUs are not being scheduled. |
+| `UNCLASSIFIED` | None of the above, for example `requestedGpu` is null, the requested pools have no free GPUs, and no reason is reported. | GPU demand unknown. Report it with its wait; no verdict effect. |
 
 Read every returned event with its timestamp, not only the newest:
 
@@ -171,7 +173,8 @@ Read every returned event with its timestamp, not only the newest:
   scheduler reports the GPU shortage first and stops naming the mismatch.
 - An admission, device, or webhook error older than the workload's newest
   scheduling event is history, for example from a node or control-plane
-  restart. Never report it as a current GPU or scheduler fault; if you mention
+  restart. It never makes the workload `SPEC`, even when it names a quota or
+  policy. Never report it as a current GPU or scheduler fault; if you mention
   it, call it an earlier event.
 
 When a not-enough-resources reason appears although the pool shows enough
@@ -203,6 +206,7 @@ Notes that never change a verdict:
 - A NotReady node **without GPUs** is a note on its pool.
 - A pool with `phase` `Empty` has no nodes; it is a note, not a fault.
 - `SPEC` pending is a workload problem, not a pool problem.
+- `UNCLASSIFIED` pending is reported with its wait but never sets a verdict.
 - Utilization and failed-workload counts are context.
 - A taint such as `runai=drain` or a cordon condition on an unhealthy node
   means the outage can be intentional maintenance; say so.
@@ -246,8 +250,8 @@ These statements are mandatory when they apply:
 - `SCHEDULER_SUSPECT` workload → `runai-diagnose-pending-workload` with its ID
   when available; otherwise give the workload ID and say the scheduler logs
   are the next evidence.
-- `SPEC` workload → `runai-diagnose-pending-workload`; quota reasons →
-  `runai-audit-assigned-quota`.
+- `SPEC` or `UNCLASSIFIED` workload → `runai-diagnose-pending-workload`; quota
+  reasons → `runai-audit-assigned-quota`.
 - Unhealthy GPU node, or a suspected bad GPU on a Ready node →
   `runai-diagnose-node-health` when available.
 - Failed workloads near an unhealthy node → `runai-get-workload-health-summary`.
@@ -259,7 +263,7 @@ These statements are mandatory when they apply:
 
 These use invented names; they are not taken from any test data.
 
-### Degraded cluster
+### Stuck cluster
 
 ```text
 <cluster-id>: STUCK (as of 09:10Z) — pool-c has 6 free GPUs but 1 workload has waited 52m with no reason.

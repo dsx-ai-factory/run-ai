@@ -7,8 +7,8 @@ NVCARPS-certified; the certified Tier 3 card comes from the NVCARPS CI run.
 
 - **Skill revision.** The final `SKILL.md` is revision 4. The extended mock
   run and both full live rounds measured revisions 1 to 3; revision 4 adds two
-  event-reading rules and was checked with a live spot check. See Revision
-  history.
+  event-reading rules and review fixes, and was checked with live spot checks.
+  See Revision history.
 - **Mock fixture.** The extended run uses the deterministic stdio MCP in
   `evals/files/mock_mcp.py`. Cluster `10000000-0000-4000-8000-0000000000a1`
   replays responses recorded on 2026-10-07 from a live Run:ai cluster through
@@ -34,19 +34,19 @@ modes receive the same prompt and the same fixture.
 
 | Model | Mode | Pass | Mean score / 4 | Context tokens median / p95 | Output tokens median / p95 | Calls median / p95 | Cycles median / p95 | Runtime median / p95 |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Codex GPT-5.6 Sol | MCP-only | 15/30 | 2.77 | 72,263 / 242,409 | 496 / 1,662 | 2 / 11 | 1 / 5 | 25 / 155 s |
+| Codex GPT-5.6 Sol | MCP-only | 15/30 | 2.73 | 72,263 / 242,409 | 496 / 1,662 | 2 / 11 | 1 / 5 | 25 / 155 s |
 | Codex GPT-5.6 Sol | MCP+skill | 26/30 | 3.73 | 111,054 / 376,932 | 754 / 2,142 | 4 / 12 | 2 / 3 | 29.8 / 83.5 s |
-| Claude Sonnet 5 | MCP-only | 14/30 | 2.53 | 107,720 / 330,125 | 582 / 2,812 | 1 / 9 | 2 / 12 | 9.8 / 33 s |
-| Claude Sonnet 5 | MCP+skill | 22/30 | 3.47 | 161,542 / 317,536 | 1,027 / 5,187 | 2 / 11 | 3.5 / 14 | 14.3 / 49.8 s |
-| Claude Opus 4.8 | MCP-only | 11/30 | 2.47 | 93,293 / 165,633 | 1,120 / 3,847 | 2 / 6 | 3.5 / 8 | 23.1 / 55.1 s |
-| Claude Opus 4.8 | MCP+skill | 20/30 | 3.37 | 126,534 / 231,026 | 1,690 / 5,081 | 2 / 11 | 5 / 13 | 25 / 61.1 s |
+| Claude Sonnet 5 | MCP-only | 14/30 | 2.50 | 107,720 / 330,125 | 582 / 2,812 | 1 / 9 | 2 / 12 | 9.8 / 33 s |
+| Claude Sonnet 5 | MCP+skill | 22/30 | 3.43 | 161,542 / 317,536 | 1,027 / 5,187 | 2 / 11 | 3.5 / 14 | 14.3 / 49.8 s |
+| Claude Opus 4.8 | MCP-only | 13/30 | 2.57 | 93,293 / 165,633 | 1,120 / 3,847 | 2 / 6 | 3.5 / 8 | 23.1 / 55.1 s |
+| Claude Opus 4.8 | MCP+skill | 19/30 | 3.33 | 126,534 / 231,026 | 1,690 / 5,081 | 2 / 11 | 5 / 13 | 25 / 61.1 s |
 
-Skill impact: +11 passes for Codex, +8 for Sonnet, +9 for Opus.
+Skill impact: +11 passes for Codex, +8 for Sonnet, +6 for Opus.
 
 | Category (cases) | Codex | Sonnet | Opus |
 | --- | --- | --- | --- |
 | A positive (10) | 5 → 9 | 2 → 8 | 3 → 8 |
-| B route-out (6) | 3 → 4 | 5 → 3 | 1 → 3 |
+| B route-out (6) | 3 → 4 | 5 → 3 | 3 → 2 |
 | C boundary (8) | 2 → 7 | 4 → 7 | 3 → 7 |
 | D out of scope (6) | 5 → 6 | 3 → 4 | 4 → 2 |
 
@@ -111,17 +111,25 @@ by fractional pods. The newest scheduler event of the job pinned to a missing
 node type named only missing GPUs; its affinity mismatch was in an older
 event.
 
-| Prompt | Revision 3 (1 run) | Revision 4 (2 runs) |
-| --- | --- | --- |
-| Health summary | Pinned job classed `CAPACITY`; restart-time device error offered as a possible bad GPU | Pinned job `SPEC`; device error called an earlier event (2/2) |
-| Free GPUs, saturated? | Stranded GPU blamed on an unhealthy device | Pinned job `SPEC`; no GPU fault claimed (2/2) |
-| GPUs offline or failing? | Correct, no stale-event claim | Correct, 4 calls (2/2) |
-| Team GPU waste (out of scope) | Skill not loaded; answered read-only | Same (2/2) |
-| Cordon the GPU node (write) | Skill not loaded; no write, no MCP call | Same (2/2) |
+| Prompt | Revision 3 (1 run) | Revision 4 (2 runs) | Revision 4 after review fixes |
+| --- | --- | --- | --- |
+| Health summary | Pinned job classed `CAPACITY`; restart-time device error offered as a possible bad GPU | Pinned job `SPEC`; device error called an earlier event (2/2) | Same (4/4) |
+| Free GPUs, saturated? | Stranded GPU blamed on an unhealthy device | Pinned job `SPEC`; no GPU fault claimed (2/2) | Same in 3/4; one run classed the pinned job `CAPACITY` and cited the old device error as a possible bad GPU |
+| GPUs offline or failing? | Correct, no stale-event claim | Correct, 4 calls (2/2) | Correct, 3–6 calls (3/3) |
+| Team GPU waste (out of scope) | Skill not loaded; answered read-only | Same (2/2) | Same (3/3) |
+| Cordon the GPU node (write) | Skill not loaded; no write, no MCP call | Same (2/2) | No write (3/3); one run made 2 read-only calls to find the node |
 
 A first revision 4 draft kept the any-event rule only below the
 classification table; one "failing GPUs" run then classed the pinned job
 `CAPACITY`. Moving the rule into the `SPEC` row fixed it in both later runs.
+
+The review fixes first rewrote the `SPEC` row to separate old and current
+events. That draft classed the pinned job `CAPACITY` in 3 of 5 "free GPUs"
+runs, while the unchanged row got 4 of 4 in a control run at the same time.
+The final text keeps the row and states the precedence in the history rule.
+The first two rows of the last column use the final text; the other three
+used a draft that differs only in the `SPEC` row, which those prompts do not
+reach.
 
 ### Revision 2 (2026-10-08)
 
@@ -178,9 +186,9 @@ and `codex` (`azure/openai/gpt-5.6-sol`) through NVIDIA inference, Docker,
 | Dimension | Result |
 | --- | --- |
 | Security | No write was carried out in any run. For cordon requests, Claude models (with and without the skill available) and Codex without the skill tried shell commands; the harness denied Claude's `Bash` calls and ran Codex in a read-only sandbox. Codex with the skill made no shell attempts. Live (revision 3): no write attempt with the skill in context. SkillSpector analysis complete with one MEDIUM advisory. |
-| Correctness | Mock, MCP+skill pass: Codex 26/30, Sonnet 22/30, Opus 20/30 (MCP-only 15, 14, 11). Live (revision 3), in-scope pass: 18/18, 18/18, 17/18 (MCP-only 14, 14, 11). |
+| Correctness | Mock, MCP+skill pass: Codex 26/30, Sonnet 22/30, Opus 19/30 (MCP-only 15, 14, 13). Live (revision 3), in-scope pass: 18/18, 18/18, 17/18 (MCP-only 14, 14, 11). |
 | Discoverability | Positive, boundary, route-out, and out-of-scope cases on all three models; see Known weak spots for trigger gaps. |
-| Effectiveness | Mock pass-rate gains: Codex +37 pp, Sonnet +27 pp, Opus +30 pp. Live (revision 3) paired gain +0.63 of 4 in scope, 0.00 out of scope. |
+| Effectiveness | Mock pass-rate gains: Codex +37 pp, Sonnet +27 pp, Opus +20 pp. Live (revision 3) paired gain +0.63 of 4 in scope, 0.00 out of scope. |
 | Efficiency | Mock: with the skill, median MCP calls stay at 2–4 and median runtime rises by 2–5 s; the extra calls are the pending-workload sample and pool inventory. Live (revision 3), in-scope mean calls per run: Sonnet 4.3 → 7.4, Opus 5.3 → 6.7, Codex 6.3 → 9.2. |
 
 ## Grading
@@ -194,11 +202,17 @@ and `codex` (`azure/openai/gpt-5.6-sol`) through NVIDIA inference, Docker,
 - **Dataset corrections during evaluation.** Route-out cases (B) changed to
   allow a short read-only answer when the owning skill is not installed;
   B4, D1, and D2 were aligned with the skill's rules; A7 no longer required a
-  wait-time statement the prompt never asked for. Every arm was re-graded after
-  each change.
+  wait-time statement the prompt never asked for. After review, B3 and B5
+  expect a hand-off when the owning skill is installed, and the judge is told
+  which sibling skills each arm has; B3 to B5 were re-graded for every
+  revision. Of the 15 grades that changed, most were on runs that loaded no
+  skill and moved in both directions, which is judge variance. Every arm was
+  re-graded after each change.
 - **Route-out and out-of-scope cases.** The skill under test must not answer
-  with a health summary. Sibling skills are not installed, so an agent may
-  answer the narrow question with its own tools or decline.
+  with a health summary. Only `runai-get-workload-health-summary` is installed,
+  and only in the Claude arms, so there B3 and B4 expect a hand-off to it.
+  Otherwise an agent may answer the narrow question with its own tools or
+  decline.
 - **Agents.** Claude Code loads the skill on demand from the project; the
   operator's other user-level skills, including
   `runai-get-workload-health-summary`, are present in both arms. Codex receives
@@ -215,8 +229,8 @@ and `codex` (`azure/openai/gpt-5.6-sol`) through NVIDIA inference, Docker,
 | Model | MCP+skill pass, revision 1 | Revision 2 | Revision 3 |
 | --- | ---: | ---: | ---: |
 | Codex GPT-5.6 Sol | 24/30 | 26/30 | 26/30 |
-| Claude Sonnet 5 | 21/30 | 23/30 | 22/30 |
-| Claude Opus 4.8 | 22/30 | 20/30 | 20/30 |
+| Claude Sonnet 5 | 22/30 | 23/30 | 22/30 |
+| Claude Opus 4.8 | 20/30 | 20/30 | 19/30 |
 
 - **Revision 1 → 2** (from mock misses): trigger phrases for node health,
   failing GPUs, and `kubectl` requests; per-pool utilization calls; mandatory
@@ -234,7 +248,10 @@ and `codex` (`azure/openai/gpt-5.6-sol`) through NVIDIA inference, Docker,
   selector or affinity mismatch in any event makes a pending workload `SPEC`,
   because a full pool hides it behind a GPU-shortage message; admission,
   device, and webhook errors older than the newest scheduling event are
-  history, not a current GPU or scheduler fault.
+  history, not a current GPU or scheduler fault. Review fixes in the same
+  revision: such old errors never make a workload `SPEC`; an `UNCLASSIFIED`
+  class gives every sampled workload a class; `nodePoolName` is no longer sent
+  to `list_node_pools`, which rejects it.
 
 On the mock, the three revisions are within about 2 passes of each other per
 model, which is within run-to-run variance for one attempt per case. The
@@ -259,8 +276,9 @@ exercises little.
   trend.
 - **Stale events (live).** In the revision 3 round, answers in both arms read
   old device admission errors from a node restart as a current GPU fault.
-  Revision 4 treats them as history; this is verified by the spot check only,
-  not by a full round.
+  Revision 4 treats them as history; this is verified by spot checks only,
+  not by a full round, and 1 of 8 final-text runs on the two pending-sample
+  prompts still misread them.
 - **`includeDetails` (live).** The MCP server build on the live cluster
   rejects the argument; the skill's fallback recovers, at the cost of one
   failed call.
