@@ -11,13 +11,10 @@ package dao
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
-	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbtables"
@@ -88,9 +85,9 @@ func RctFilterFieldsToColumn() queryapi.APIFieldsMapping {
 	return queryapi.APIFieldsMapping{
 		"name":         queryapi.NewFieldMapping(rctMetaColumn(dbtables.AssetMetaColumnName)),
 		"description":  queryapi.NewFieldMapping(rctMetaColumn("description")),
-		"clusterId":    queryapi.NewFieldMapping(rctScopeColumnCluster, queryapi.UUIDValidator{}),
-		"departmentId": queryapi.NewFieldMapping(rctScopeColumnDepartment),
-		"projectId":    queryapi.NewFieldMapping(rctScopeColumnProject),
+		"clusterId":    queryapi.NewFieldMapping(scopeColumnCluster, queryapi.UUIDValidator{}),
+		"departmentId": queryapi.NewFieldMapping(scopeColumnDepartment),
+		"projectId":    queryapi.NewFieldMapping(scopeColumnProject),
 		"createdAt":    queryapi.NewFieldMapping(rctMetaColumn("created_at"), queryapi.DateValidator{}),
 		"createdBy":    queryapi.NewFieldMapping(rctMetaColumn("created_by")),
 		"updatedAt":    queryapi.NewFieldMapping(rctMetaColumn("updated_at"), queryapi.DateValidator{}),
@@ -108,22 +105,6 @@ func rctMetaColumn(column string) string {
 	return fmt.Sprintf("%s.%s", dbtables.TableNameAssetsMeta, column)
 }
 
-var (
-	rctScopeColumnCluster    = rctMetaColumn("cluster_id")
-	rctScopeColumnDepartment = rctMetaColumn("department_id")
-	rctScopeColumnProject    = rctMetaColumn("project_id")
-)
-
-// rctScopeAnchor is the single scope filter requested by the caller, together
-// with the ancestor ids resolved from the org-unit tree (when includeAncestors
-// is set). It is the input to the scope-hierarchy SQL builder.
-type rctScopeAnchor struct {
-	scope                api.Scope
-	id                   string
-	ancestorDepartmentId *string
-	ancestorClusterId    *string
-}
-
 // ListRcts returns a paginated list of resource claim template assets. The
 // offset/limit contract matches the swagger: fetch limit+1 rows so we can set
 // RctListResponse.Next when the next page exists (i.e. when the returned page
@@ -138,7 +119,7 @@ func ListRcts(ctx context.Context, params RctListParams) (*api.RctListResponse, 
 		},
 	}
 
-	remainingFilters, anchor, scopeErr := extractRctScopeAnchor(ctx, params.Filters, params.IncludeAncestors)
+	remainingFilters, anchor, scopeErr := extractScopeAnchor(ctx, params.Filters, params.IncludeAncestors)
 	if scopeErr != nil {
 		return nil, scopeErr
 	}
@@ -150,7 +131,7 @@ func ListRcts(ctx context.Context, params RctListParams) (*api.RctListResponse, 
 	applyAssetsSpecTenantFilter(ctx, result)
 
 	if anchor != nil {
-		scopeQuery, scopeBuildErr := buildRctScopeQuery(anchor, params.IncludeAncestors, params.IncludeDescendants)
+		scopeQuery, scopeBuildErr := buildScopeQuery(anchor, params.IncludeAncestors, params.IncludeDescendants)
 		if scopeBuildErr != nil {
 			return nil, scopeBuildErr
 		}
@@ -202,122 +183,6 @@ func ListRcts(ctx context.Context, params RctListParams) (*api.RctListResponse, 
 	}
 
 	return &response, nil
-}
-
-// extractRctScopeAnchor pulls the (at most one) scope anchor out of the parsed
-// filterBy predicates and returns the remaining generic predicates alongside
-// it. When includeAncestors is set, the anchor's ancestor ids are resolved from
-// the org-unit tree so the scope-hierarchy SQL can include parent scopes. A
-// query without a scope anchor returns a nil anchor (list everything the RBAC
-// block permits).
-func extractRctScopeAnchor(ctx context.Context, filters []queryapi.Filter, includeAncestors bool) ([]queryapi.Filter, *rctScopeAnchor, *api.Error) {
-	remaining := make([]queryapi.Filter, 0, len(filters))
-	anchors := make([]rctScopeAnchor, 0, 1)
-
-	for _, filter := range filters {
-		switch filter.Field {
-		case rctScopeColumnCluster:
-			anchors = append(anchors, rctScopeAnchor{scope: api.SCOPE_CLUSTER, id: firstFilterValue(filter)})
-		case rctScopeColumnDepartment:
-			anchors = append(anchors, rctScopeAnchor{scope: api.SCOPE_DEPARTMENT, id: firstFilterValue(filter)})
-		case rctScopeColumnProject:
-			anchors = append(anchors, rctScopeAnchor{scope: api.SCOPE_PROJECT, id: firstFilterValue(filter)})
-		default:
-			remaining = append(remaining, filter)
-		}
-	}
-
-	if len(anchors) == 0 {
-		return remaining, nil, nil
-	}
-	if len(anchors) > 1 {
-		return nil, nil, api.NewValidationError("only one of clusterId, departmentId or projectId may be used to filter by scope")
-	}
-
-	anchor := anchors[0]
-
-	if anchor.scope == api.SCOPE_PROJECT {
-		if _, convErr := strconv.Atoi(anchor.id); convErr != nil {
-			return nil, nil, api.NewValidationError("projectId filter value must be a numeric project id")
-		}
-	}
-
-	if includeAncestors {
-		switch anchor.scope {
-		case api.SCOPE_PROJECT:
-			resp, ancestorsErr := org_unit.Get().GetProjectAncestors(ctx, anchor.id)
-			if ancestorsErr != nil {
-				return nil, nil, api.NewError(http.StatusServiceUnavailable, "failed to interrogate the ancestors of the project", errors.New(ancestorsErr.Message))
-			}
-			anchor.ancestorDepartmentId = resp.DepartmentId.Get()
-			anchor.ancestorClusterId = resp.ClusterUuid.Get()
-		case api.SCOPE_DEPARTMENT:
-			resp, ancestorsErr := org_unit.Get().GetDepartmentAncestors(ctx, anchor.id)
-			if ancestorsErr != nil {
-				return nil, nil, api.NewError(int(ancestorsErr.GetCode()), "failed to interrogate the ancestors of the department", errors.New(ancestorsErr.Message))
-			}
-			anchor.ancestorClusterId = resp.ClusterUuid.Get()
-		}
-	}
-
-	return remaining, &anchor, nil
-}
-
-// buildRctScopeQuery builds the parenthesized scope-hierarchy OR-group for the
-// requested anchor. The base term is the anchor scope itself; includeAncestors
-// adds the parent scopes (resolved ids plus tenant/system), and
-// includeDescendants adds the child scopes (keyed off the denormalized
-// department_id/cluster_id columns carried by every descendant row).
-func buildRctScopeQuery(anchor *rctScopeAnchor, includeAncestors, includeDescendants bool) (*database.ParametrizedQuery, *api.Error) {
-	meta := dbtables.TableNameAssetsMeta
-	scopeQuery := database.NewParametrizedQuery()
-
-	switch anchor.scope {
-	case api.SCOPE_PROJECT:
-		projectId, convErr := strconv.Atoi(anchor.id)
-		if convErr != nil {
-			return nil, api.NewValidationError("projectId filter value must be a numeric project id")
-		}
-		scopeQuery.Add(fmt.Sprintf("(%s.scope = ? and %s.project_id = ?)", meta, meta), api.SCOPE_PROJECT, projectId)
-		if includeAncestors {
-			if anchor.ancestorDepartmentId != nil {
-				scopeQuery.Add(fmt.Sprintf(" or (%s.scope = ? and %s.department_id = ?)", meta, meta), api.SCOPE_DEPARTMENT, *anchor.ancestorDepartmentId)
-			}
-			if anchor.ancestorClusterId != nil {
-				scopeQuery.Add(fmt.Sprintf(" or (%s.scope = ? and %s.cluster_id = ?)", meta, meta), api.SCOPE_CLUSTER, *anchor.ancestorClusterId)
-			}
-			scopeQuery.Add(fmt.Sprintf(" or (%s.scope = ?) or (%s.scope = ?)", meta, meta), api.SCOPE_TENANT, api.SCOPE_SYSTEM)
-		}
-		// Projects are leaf scopes: includeDescendants has no effect.
-	case api.SCOPE_DEPARTMENT:
-		scopeQuery.Add(fmt.Sprintf("(%s.scope = ? and %s.department_id = ?)", meta, meta), api.SCOPE_DEPARTMENT, anchor.id)
-		if includeAncestors {
-			if anchor.ancestorClusterId != nil {
-				scopeQuery.Add(fmt.Sprintf(" or (%s.scope = ? and %s.cluster_id = ?)", meta, meta), api.SCOPE_CLUSTER, *anchor.ancestorClusterId)
-			}
-			scopeQuery.Add(fmt.Sprintf(" or (%s.scope = ?) or (%s.scope = ?)", meta, meta), api.SCOPE_TENANT, api.SCOPE_SYSTEM)
-		}
-		if includeDescendants {
-			scopeQuery.Add(fmt.Sprintf(" or (%s.scope = ? and %s.department_id = ?)", meta, meta), api.SCOPE_PROJECT, anchor.id)
-		}
-	case api.SCOPE_CLUSTER:
-		scopeQuery.Add(fmt.Sprintf("(%s.scope = ? and %s.cluster_id = ?)", meta, meta), api.SCOPE_CLUSTER, anchor.id)
-		if includeAncestors {
-			scopeQuery.Add(fmt.Sprintf(" or (%s.scope = ?) or (%s.scope = ?)", meta, meta), api.SCOPE_TENANT, api.SCOPE_SYSTEM)
-		}
-		if includeDescendants {
-			scopeQuery.Add(fmt.Sprintf(" or ((%s.scope = ? or %s.scope = ?) and %s.cluster_id = ?)", meta, meta, meta), api.SCOPE_DEPARTMENT, api.SCOPE_PROJECT, anchor.id)
-		}
-	}
-
-	return scopeQuery, nil
-}
-
-func firstFilterValue(filter queryapi.Filter) string {
-	if len(filter.Values) > 0 {
-		return filter.Values[0]
-	}
-	return ""
 }
 
 // GetRctById fetches a single resource claim template joined from

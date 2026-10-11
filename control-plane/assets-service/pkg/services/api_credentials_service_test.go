@@ -330,9 +330,9 @@ var _ = Describe("credentials specific tests", func() {
 			resp = fetchCredentialsAssets(router, randoms, fmt.Sprintf("%s?departmentId=%s&scope=department", urlCredentials, randoms.DepartmentId))
 			expectCredentialsAssets(resp.Entries, []string{departmentGenericSecret.Meta.Id})
 
-			// Test with department id and includeDescendants - expect to get the department asset, all assets that are above (1 cluster, 1 tenant) and all that are below (2 projects, which now carry the denormalized departmentId)
+			// Test with department id and includeDescendants - expect to get the department asset, all assets that are above (1 cluster, 1 tenant) and no descendants (department doesn't support includeDescendants yet)
 			resp = fetchCredentialsAssets(router, randoms, fmt.Sprintf("%s?departmentId=%s&includeDescendants=true", urlCredentials, randoms.DepartmentId))
-			expectCredentialsAssets(resp.Entries, []string{clusterAccessKey.Meta.Id, tenantPassword.Meta.Id, departmentGenericSecret.Meta.Id, projectNgcApiKey.Meta.Id, anotherProjectNgcApiKey.Meta.Id})
+			expectCredentialsAssets(resp.Entries, []string{clusterAccessKey.Meta.Id, tenantPassword.Meta.Id, departmentGenericSecret.Meta.Id})
 
 			// Test with project id - expect to get the project asset and all assets that are above (1 department, 1 cluster, 1 tenant)
 			resp = fetchCredentialsAssets(router, randoms, fmt.Sprintf("%s?projectId=%v", urlCredentials, randoms.ProjectId))

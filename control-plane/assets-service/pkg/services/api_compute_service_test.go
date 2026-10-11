@@ -808,9 +808,9 @@ var _ = Describe("compute asset specific tests", func() {
 			resp = fetchComputeAssets(router, randoms, fmt.Sprintf("%s?departmentId=%s&scope=department", urlCompute, randoms.DepartmentId))
 			expectComputeAssets(resp.Entries, []string{departmentCompute.Meta.Id})
 
-			// Test with department id and includeDescendants - expect to get the department asset, all assets that are above (1 cluster, 1 tenant) and all that are below (2 projects, which now carry the denormalized departmentId)
+			// Test with department id and includeDescendants - expect to get the department asset, all assets that are above (1 cluster, 1 tenant) and no descendants (department doesn't support includeDescendants yet)
 			resp = fetchComputeAssets(router, randoms, fmt.Sprintf("%s?departmentId=%s&includeDescendants=true", urlCompute, randoms.DepartmentId))
-			expectComputeAssets(resp.Entries, []string{clusterCompute.Meta.Id, tenantCompute.Meta.Id, departmentCompute.Meta.Id, projectCompute.Meta.Id, anotherProjectCompute.Meta.Id})
+			expectComputeAssets(resp.Entries, []string{clusterCompute.Meta.Id, tenantCompute.Meta.Id, departmentCompute.Meta.Id})
 
 			// Test with project id - expect to get the project asset and all assets that are above (1 department, 1 cluster, 1 tenant)
 			resp = fetchComputeAssets(router, randoms, fmt.Sprintf("%s?projectId=%v", urlCompute, randoms.ProjectId))

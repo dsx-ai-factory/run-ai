@@ -623,9 +623,9 @@ var _ = Describe("environment specific tests", func() {
 			resp = fetchEnvironments(router, randoms, fmt.Sprintf("%s?departmentId=%s&scope=department", urlEnvironment, randoms.DepartmentId))
 			expectedEnvironments(resp.Entries, []string{departmentEnvironment.Meta.Id})
 
-			// Test with department id and descendants, expect to get the department asset, all assets that are above (1 cluster, 1 tenant) and all that is below (2 projects, which now carry the denormalized departmentId)
+			// Test with department id and descendants, expect to get the department asset, all assets that are above (1 cluster, 1 tenant) and all that is below (2 projects)
 			resp = fetchEnvironments(router, randoms, fmt.Sprintf("%s?departmentId=%s&includeDescendants=true", urlEnvironment, randoms.DepartmentId))
-			expectedEnvironments(resp.Entries, []string{clusterEnvironment.Meta.Id, tenantEnvironment.Meta.Id, departmentEnvironment.Meta.Id, projectEnvironment.Meta.Id, anotherProjectEnvironment.Meta.Id})
+			expectedEnvironments(resp.Entries, []string{clusterEnvironment.Meta.Id, tenantEnvironment.Meta.Id, departmentEnvironment.Meta.Id})
 
 			// Test with project id, expect to get the project asset, all assets that are above (1 department, 1 cluster, 1 tenant)
 			resp = fetchEnvironments(router, randoms, fmt.Sprintf("%s?projectId=%v", urlEnvironment, randoms.ProjectId))

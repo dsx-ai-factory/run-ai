@@ -365,15 +365,20 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 			Expect(meta.Scope).To(Equal(api.SCOPE_PROJECT))
 			Expect(meta.ProjectId).ToNot(BeNil())
 
-			// departmentId is forbidden in a project-scoped creation request,
-			// so it must be resolved from the project's ancestors and stored
-			// so hierarchy filtering can use it as a plain column predicate.
-			Expect(meta.DepartmentId).ToNot(BeNil(), "project-scoped asset should carry the resolved departmentId")
-			Expect(*meta.DepartmentId).To(Equal(randoms.DepartmentId))
-
-			// clusterId is completed from the same ancestors.
+			// clusterId is always completed from the project's ancestors.
 			Expect(meta.ClusterId).ToNot(BeNil())
 			Expect(*meta.ClusterId).To(Equal(randoms.ClusterId))
+
+			// departmentId is forbidden in a project-scoped creation request. It
+			// is only resolved from the project's ancestors and denormalized for
+			// kinds that use the new scope-hierarchy filtering; every other kind
+			// leaves it unset so its creation behavior is unchanged.
+			if KindsSupportingFiltering.Has(testData.kind) {
+				Expect(meta.DepartmentId).ToNot(BeNil(), "project-scoped asset should carry the resolved departmentId")
+				Expect(*meta.DepartmentId).To(Equal(randoms.DepartmentId))
+			} else {
+				Expect(meta.DepartmentId).To(BeNil(), "project-scoped asset must not denormalize departmentId for kinds without scope filtering")
+			}
 		}, entries)
 	})
 
