@@ -579,11 +579,16 @@ func (a *ResourceClaimTemplatesAPIService) GetRctByIdExecute(r ApiGetRctByIdRequ
 }
 
 type ApiListRctsRequest struct {
-	ctx        context.Context
-	ApiService ResourceClaimTemplatesAPI
-	offset     *int32
-	limit      *int32
-	statusInfo *bool
+	ctx                context.Context
+	ApiService         ResourceClaimTemplatesAPI
+	offset             *int32
+	limit              *int32
+	sortOrder          *string
+	sortBy             *string
+	filterBy           *[]string
+	includeAncestors   *bool
+	includeDescendants *bool
+	statusInfo         *bool
 }
 
 // The offset of the first item returned in the collection.
@@ -595,6 +600,36 @@ func (r ApiListRctsRequest) Offset(offset int32) ApiListRctsRequest {
 // The maximum number of entries to return.
 func (r ApiListRctsRequest) Limit(limit int32) ApiListRctsRequest {
 	r.limit = &limit
+	return r
+}
+
+// Sort results in descending or ascending order.
+func (r ApiListRctsRequest) SortOrder(sortOrder string) ApiListRctsRequest {
+	r.sortOrder = &sortOrder
+	return r
+}
+
+// Sort results by parameter.
+func (r ApiListRctsRequest) SortBy(sortBy string) ApiListRctsRequest {
+	r.sortBy = &sortBy
+	return r
+}
+
+// Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+func (r ApiListRctsRequest) FilterBy(filterBy []string) ApiListRctsRequest {
+	r.filterBy = &filterBy
+	return r
+}
+
+// When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+func (r ApiListRctsRequest) IncludeAncestors(includeAncestors bool) ApiListRctsRequest {
+	r.includeAncestors = &includeAncestors
+	return r
+}
+
+// Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
+func (r ApiListRctsRequest) IncludeDescendants(includeDescendants bool) ApiListRctsRequest {
+	r.includeDescendants = &includeDescendants
 	return r
 }
 
@@ -654,6 +689,27 @@ func (a *ResourceClaimTemplatesAPIService) ListRctsExecute(r ApiListRctsRequest)
 	} else {
 		var defaultValue int32 = 50
 		r.limit = &defaultValue
+	}
+	if r.sortOrder != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sortOrder", r.sortOrder, "form", "")
+	} else {
+		var defaultValue string = "asc"
+		r.sortOrder = &defaultValue
+	}
+	if r.sortBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sortBy", r.sortBy, "form", "")
+	}
+	if r.filterBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "filterBy", r.filterBy, "form", "csv")
+	}
+	if r.includeAncestors != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeAncestors", r.includeAncestors, "form", "")
+	} else {
+		var defaultValue bool = true
+		r.includeAncestors = &defaultValue
+	}
+	if r.includeDescendants != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeDescendants", r.includeDescendants, "form", "")
 	}
 	if r.statusInfo != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "statusInfo", r.statusInfo, "form", "")

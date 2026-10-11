@@ -354,6 +354,29 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 		}, entries)
 	})
 
+	Context("create a project scoped asset -> departmentId is denormalized onto the row", func() {
+		DescribeTable("project-scoped assets carry the department resolved from the project's ancestors", func(testData AssetTest) {
+			if !testData.canRunOnScope(api.SCOPE_PROJECT) {
+				return
+			}
+
+			meta, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
+
+			Expect(meta.Scope).To(Equal(api.SCOPE_PROJECT))
+			Expect(meta.ProjectId).ToNot(BeNil())
+
+			// departmentId is forbidden in a project-scoped creation request,
+			// so it must be resolved from the project's ancestors and stored
+			// so hierarchy filtering can use it as a plain column predicate.
+			Expect(meta.DepartmentId).ToNot(BeNil(), "project-scoped asset should carry the resolved departmentId")
+			Expect(*meta.DepartmentId).To(Equal(randoms.DepartmentId))
+
+			// clusterId is completed from the same ancestors.
+			Expect(meta.ClusterId).ToNot(BeNil())
+			Expect(*meta.ClusterId).To(Equal(randoms.ClusterId))
+		}, entries)
+	})
+
 	Context("create two assets -> delete one of them", func() {
 		DescribeTable("only the non deleted asset is listed", func(testData AssetTest) {
 			meta1, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))

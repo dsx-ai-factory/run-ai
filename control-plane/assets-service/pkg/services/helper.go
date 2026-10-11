@@ -77,6 +77,12 @@ func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreation
 		}
 
 		meta.ClusterId = resp.ClusterUuid.Get()
+
+		// Denormalize the department onto project-scoped rows (as workloads
+		// and policies already do). This allows us to implement scope filters.
+		if meta.Scope == api.SCOPE_PROJECT {
+			meta.DepartmentId = resp.DepartmentId.Get()
+		}
 	}
 
 	if meta.ClusterId != nil {

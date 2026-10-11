@@ -108,6 +108,8 @@ github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.5 h1:
 github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.5/go.mod h1:88LeTHkbnaJnuq/RjNo6xN1DUVgoOifebJx8vr08rFQ=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 h1:J1ASSQ3OzfMeOKupHiTuW+0KUCfpBvh+Qzw1/3kxzbM=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1/go.mod h1:DSr8RPeZxAZ4pYxwkx4j5R/PD4AOxuHR0Ph8RM4VSg4=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2 h1:eSHzDHEbsMP5nJnSghHIlbm81ABBIEy9FH1nxBRNSs4=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2/go.mod h1:YBoIgKSc1OJeRrQTERdrzQL3ank++7UrXxiEsZkuIYM=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo v1.1.1 h1:+1LuU858MoSBRov4h1uidhDNiNO4hYlgj9opJi2Sx6Q=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo v1.1.1/go.mod h1:z97RMkbaML/3/u805trrZByGhaA8uHVyy6fkti17QrU=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2 h1:NhxiElE7Mc8DFzVNLkBl8ySJbtMWeWhVv9tQjt1KGz4=

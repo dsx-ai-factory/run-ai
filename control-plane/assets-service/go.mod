@@ -17,6 +17,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo v1.1.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0

@@ -222,7 +222,7 @@ Name | Type | Description  | Notes
 
 ## ListRcts
 
-> RctListResponse ListRcts(ctx).Offset(offset).Limit(limit).StatusInfo(statusInfo).Execute()
+> RctListResponse ListRcts(ctx).Offset(offset).Limit(limit).SortOrder(sortOrder).SortBy(sortBy).FilterBy(filterBy).IncludeAncestors(includeAncestors).IncludeDescendants(includeDescendants).StatusInfo(statusInfo).Execute()
 
 List resource claim templates.
 
@@ -243,11 +243,16 @@ import (
 func main() {
 	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
 	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+	sortOrder := "sortOrder_example" // string | Sort results in descending or ascending order. (optional) (default to "asc")
+	sortBy := "sortBy_example" // string | Sort results by parameter. (optional)
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal, `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts with and `=$` Ends with. Dates are in ISO 8601 timestamp format and available for operators `==`, `!=`, `<=` and `>=`. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned. (optional)
+	includeAncestors := true // bool | When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors=true to also include resource claim templates from the anchor's ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior. (optional) (default to true)
+	includeDescendants := true // bool | Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope. (optional)
 	statusInfo := true // bool | Whether the query should include asset status information as part of the response. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ResourceClaimTemplatesAPI.ListRcts(context.Background()).Offset(offset).Limit(limit).StatusInfo(statusInfo).Execute()
+	resp, r, err := apiClient.ResourceClaimTemplatesAPI.ListRcts(context.Background()).Offset(offset).Limit(limit).SortOrder(sortOrder).SortBy(sortBy).FilterBy(filterBy).IncludeAncestors(includeAncestors).IncludeDescendants(includeDescendants).StatusInfo(statusInfo).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ResourceClaimTemplatesAPI.ListRcts``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -270,6 +275,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **offset** | **int32** | The offset of the first item returned in the collection. | 
  **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+ **sortOrder** | **string** | Sort results in descending or ascending order. | [default to &quot;asc&quot;]
+ **sortBy** | **string** | Sort results by parameter. | 
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned. | 
+ **includeAncestors** | **bool** | When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior. | [default to true]
+ **includeDescendants** | **bool** | Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope. | 
  **statusInfo** | **bool** | Whether the query should include asset status information as part of the response. | 
 
 ### Return type

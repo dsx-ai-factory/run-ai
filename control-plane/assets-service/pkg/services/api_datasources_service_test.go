@@ -662,9 +662,9 @@ var _ = Describe("datasources specific tests", func() {
 			resp = fetchDatasourceAssets(router, randoms, fmt.Sprintf("%s?departmentId=%s&scope=department", urlDatasource, randoms.DepartmentId))
 			expectDatasourceAssets(resp.Entries, []string{departmentGit.Meta.Id})
 
-			// Test with department id and includeDescendants - expect to get the department asset, all assets that are above (1 cluster, 1 tenant) and no descendants (department doesn't support includeDescendants yet)
+			// Test with department id and includeDescendants - expect to get the department asset, all assets that are above (1 cluster, 1 tenant) and all that are below (2 projects, which now carry the denormalized departmentId)
 			resp = fetchDatasourceAssets(router, randoms, fmt.Sprintf("%s?departmentId=%s&includeDescendants=true", urlDatasource, randoms.DepartmentId))
-			expectDatasourceAssets(resp.Entries, []string{clusterHostPath.Meta.Id, tenantNfs.Meta.Id, departmentGit.Meta.Id})
+			expectDatasourceAssets(resp.Entries, []string{clusterHostPath.Meta.Id, tenantNfs.Meta.Id, departmentGit.Meta.Id, projectS3.Meta.Id, anotherProjectS3.Meta.Id})
 
 			// Test with project id - expect to get the project asset and all assets that are above (1 department, 1 cluster, 1 tenant)
 			resp = fetchDatasourceAssets(router, randoms, fmt.Sprintf("%s?projectId=%v", urlDatasource, randoms.ProjectId))
