@@ -650,7 +650,7 @@ func newTenantScopeStatus(assetKind api.AssetKind) api.AssetClusterStatusInfo {
 func getAccountScopeMessage(assetKind api.AssetKind) string {
 	switch assetKindToTargetAssetType[assetKind] {
 	case targetAssetType_K8SResource:
-		return "Status cannot be displayed because the data source's scope is an account"
+		return "Status cannot be displayed because the resource's scope is an account"
 	case targetAssetType_Secret:
 		return "Status cannot be displayed because the credentials' scope is an account"
 	case targetAssetType_Credential:
@@ -676,7 +676,7 @@ func getAssetNotCreatedMessage(statusInfo *api.AssetClusterStatusInfo, assetKind
 			statusInfo.Message = "The resource claim template couldn't be synchronized in the cluster"
 			return
 		}
-		statusInfo.Message = "The data source couldn't be synchronized in the cluster"
+		statusInfo.Message = "The resource couldn't be synchronized in the cluster"
 	case targetAssetType_Secret:
 		statusInfo.Message = "The credential couldn't be synchronized in the cluster"
 	case targetAssetType_Credential:
@@ -715,7 +715,7 @@ func getAssetNoIssuesFoundMessage(statusInfo *api.AssetClusterStatusInfo, assetK
 			statusInfo.Message = "No issues were found while propagating the resource claim template to the resource claim template's scope"
 			return
 		}
-		statusInfo.Message = "No issues were found while propagating the data source to the data source's scope"
+		statusInfo.Message = "No issues were found while propagating the resource to the resource's scope"
 	case targetAssetType_Secret:
 		statusInfo.Message = "No issues were found while propagating the credential to the credentials' scope"
 	case targetAssetType_Credential:
