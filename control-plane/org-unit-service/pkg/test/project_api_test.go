@@ -1723,6 +1723,49 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(updated.Status.QuotaStatus.AllocatedNonPreemptible.Gpu).To(Equal(float64(1)))
 			Expect(updated.Status.AdditionalStatusData).NotTo(BeNil())
 		})
+
+		It("test update project keeps node pool quota statuses", func() {
+			projectApiService = projects.NewProjectApiService(projectDeletionService, &clusterServiceClient, nil)
+			name := createProjectName()
+			createResponse, err := projectApiService.CreateProject(ctx, getProjectCreateRequest(name, name, departmentId, clusterId))
+			Expect(err).To(BeNil())
+			Expect(createResponse.Code).To(Equal(http.StatusCreated))
+			created := createResponse.Body.(api.Project)
+			projectIds = append(projectIds, created.Id)
+
+			nodePool := created.Resources[0].NodePool
+			nodePoolQuotaStatuses := []api.QuotaStatusNodePool{{
+				NodePoolName:            nodePool.Name,
+				NodePoolId:              nodePool.Id,
+				Allocated:               api.QuotaStatusResource{Gpu: 2, Cpu: 4, Memory: 8000},
+				AllocatedNonPreemptible: api.QuotaStatusResource{Gpu: 1, Cpu: 2, Memory: 4000},
+				Requested:               api.QuotaStatusResource{Gpu: 3, Cpu: 6, Memory: 12000},
+			}}
+			updateStatusResponse, err := projectApiService.UpdateProjectStatus(ctx, api.ProjectStatusUpdateRequest{
+				Id:        created.Id,
+				ClusterId: clusterId,
+				Status: api.ProjectStatus{
+					Phase:                 "Ready",
+					Namespace:             ptr.To(fmt.Sprintf("runai-%s", name)),
+					NodePoolQuotaStatuses: nodePoolQuotaStatuses,
+				},
+			})
+			Expect(err).To(BeNil())
+			Expect(updateStatusResponse.Code).To(Equal(http.StatusOK))
+
+			updateRequest := getProjectUpdateRequest(created)
+			updateRequest.Resources[0].Gpu.Limit = ptr.To(float64(4))
+			updateResponse, err := projectApiService.UpdateProject(ctx, created.Id, updateRequest)
+			Expect(err).To(BeNil())
+			Expect(updateResponse.Code).To(Equal(http.StatusOK))
+			updated := updateResponse.Body.(api.Project)
+			Expect(*updated.Resources[0].Gpu.Limit).To(Equal(float64(4)))
+			Expect(updated.Status.NodePoolQuotaStatuses).To(Equal(nodePoolQuotaStatuses))
+
+			getResponse, err := projectApiService.GetProject(ctx, created.Id)
+			Expect(err).To(BeNil())
+			Expect(getResponse.Body.(api.Project).Status.NodePoolQuotaStatuses).To(Equal(nodePoolQuotaStatuses))
+		})
 	})
 
 	Context("test update project resources", func() {
