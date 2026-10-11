@@ -31,7 +31,7 @@ Dependencies
 |---------|---------|---------|----------------|
 | `filippo.io/edwards25519` | v1.2.0 | BSD-3-Clause | https://pkg.go.dev/filippo.io/edwards25519@v1.2.0?tab=licenses |
 | `github.com/ClickHouse/ch-go` | v0.74.0 | Apache-2.0 | https://github.com/ClickHouse/ch-go/blob/v0.74.0/LICENSE |
-| `github.com/ClickHouse/clickhouse-go/v2` | v2.48.0 | Apache-2.0 | https://pkg.go.dev/github.com/ClickHouse/clickhouse-go/v2@v2.48.0?tab=licenses |
+| `github.com/ClickHouse/clickhouse-go/v2` | v2.49.0 | Apache-2.0 | https://pkg.go.dev/github.com/ClickHouse/clickhouse-go/v2@v2.49.0?tab=licenses |
 | `github.com/Nerzal/gocloak/v13` | v13.9.0 | Apache-2.0 | https://github.com/Nerzal/gocloak/blob/v13.9.0/LICENSE |
 | `github.com/Rican7/retry` | v0.3.1 | MIT | https://github.com/Rican7/retry/blob/v0.3.1/LICENSE |
 | `github.com/ThreeDotsLabs/watermill` | v1.5.3 | MIT | https://github.com/ThreeDotsLabs/watermill/blob/v1.5.3/LICENSE |
@@ -91,10 +91,10 @@ Dependencies
 | `github.com/pelletier/go-toml/v2` | v2.4.3 | MIT | https://pkg.go.dev/github.com/pelletier/go-toml/v2@v2.4.3?tab=licenses |
 | `github.com/pierrec/lz4/v4` | v4.1.33 | BSD-3-Clause | https://pkg.go.dev/github.com/pierrec/lz4/v4@v4.1.33?tab=licenses |
 | `github.com/pkg/errors` | v0.9.1 | BSD-2-Clause | https://github.com/pkg/errors/blob/v0.9.1/LICENSE |
-| `github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil` | v1.24.1 | BSD-3-Clause | https://github.com/prometheus/client_golang/blob/v1.24.1/internal/github.com/golang/gddo/LICENSE |
-| `github.com/prometheus/client_golang/prometheus` | v1.24.1 | Apache-2.0 | https://github.com/prometheus/client_golang/blob/v1.24.1/LICENSE |
+| `github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil` | v1.25.0 | BSD-3-Clause | https://github.com/prometheus/client_golang/blob/v1.25.0/internal/github.com/golang/gddo/LICENSE |
+| `github.com/prometheus/client_golang/prometheus` | v1.25.0 | Apache-2.0 | https://github.com/prometheus/client_golang/blob/v1.25.0/LICENSE |
 | `github.com/prometheus/client_model/go` | v0.6.3 | Apache-2.0 | https://github.com/prometheus/client_model/blob/v0.6.3/LICENSE |
-| `github.com/prometheus/common` | v0.71.0 | Apache-2.0 | https://github.com/prometheus/common/blob/v0.71.0/LICENSE |
+| `github.com/prometheus/common` | v0.72.0 | Apache-2.0 | https://github.com/prometheus/common/blob/v0.72.0/LICENSE |
 | `github.com/prometheus/procfs` | v0.22.0 | Apache-2.0 | https://github.com/prometheus/procfs/blob/v0.22.0/LICENSE |
 | `github.com/redis/go-redis/v9` | v9.23.0 | BSD-2-Clause | https://pkg.go.dev/github.com/redis/go-redis/v9@v9.23.0?tab=licenses |
 | `github.com/rs/zerolog` | v1.35.1 | MIT | https://github.com/rs/zerolog/blob/v1.35.1/LICENSE |
@@ -5086,7 +5086,7 @@ Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/prometheus/client_golang` v1.24.1
+  - `github.com/prometheus/client_golang` v1.25.0
 --------------------------------------------------------------------------------
 
 Prometheus instrumentation library for Go applications
@@ -5121,7 +5121,7 @@ SoundCloud Ltd. (http://soundcloud.com/).
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/prometheus/common` v0.71.0
+  - `github.com/prometheus/common` v0.72.0
 --------------------------------------------------------------------------------
 
 Common libraries shared by Prometheus Go components.

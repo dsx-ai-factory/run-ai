@@ -466,7 +466,7 @@ func initializeS3Client() (*minio.Client, error) {
 		return nil, fmt.Errorf("bucket does not exist: %v", err)
 	}
 
-	return &client, nil
+	return client, nil
 }
 
 func createMetric(clusterIdsToFilter []string) *ExampleMetricAggregation {

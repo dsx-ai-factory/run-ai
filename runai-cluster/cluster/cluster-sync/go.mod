@@ -241,7 +241,6 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init => ../common/scheme-init
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ../sdk

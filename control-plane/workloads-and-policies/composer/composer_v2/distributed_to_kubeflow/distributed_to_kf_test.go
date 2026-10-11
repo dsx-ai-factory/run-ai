@@ -1224,6 +1224,25 @@ var _ = Describe("distributed composer template variable expansion", func() {
 	})
 })
 
+var _ = Describe("effective create home directory", func() {
+	security := &workloadsApi.WorkspaceSpecSpecAllOfSecurity{}
+	security.SetUidGidSource(workloadsApi.UIDGIDSOURCE_CUSTOM)
+
+	It("honors an explicit false value when run as user is enabled", func() {
+		result := effectiveCreateHomeDir(convutils.Ref(false), security, nil)
+
+		Expect(result).NotTo(BeNil())
+		Expect(*result).To(BeFalse())
+	})
+
+	It("uses run as user as the default when create home directory is unset", func() {
+		result := effectiveCreateHomeDir(nil, security, nil)
+
+		Expect(result).NotTo(BeNil())
+		Expect(*result).To(BeTrue())
+	})
+})
+
 var _ = Describe("distributed composer validations", func() {
 	Context("segmented PyTorch annotations", func() {
 		DescribeTable("projects explicit workload topology to the job and keeps segment topology on workers",
