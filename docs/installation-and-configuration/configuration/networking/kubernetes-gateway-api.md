@@ -278,6 +278,14 @@ Add a standard inference listener to the existing Gateway resource:
 
 NVIDIA Run:ai uses Knative Serving to support standard inference workloads. Inference traffic arrives at the Gateway and is forwarded to Knative Serving through Kourier, which routes it to the individual inference endpoints.
 
+<Note>
+
+**Note**
+
+On OpenShift, Knative is installed through the OpenShift Serverless operator, which supports Knative 1.17 only.
+
+</Note>
+
 <Tabs>
 
 <Tab title="Guided Installation">

@@ -54,10 +54,7 @@ helm search repo -l runai/control-plane
 
 **Support-Entitled**
 
-Support-Entitled artifacts require authentication to NGC. Before upgrading, make sure that:
-
-* You have an NGC Personal Key.
-* An image pull secret is already configured using the same NGC Personal Key, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
+Before upgrading, make sure an image pull secret is already configured, as described in [Software Artifacts](../installation/install-using-helm/preparations.md#software-artifacts).
 
 ```bash
 helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
@@ -109,7 +106,7 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 
 **Note**
 
-These flags configure functionality introduced in v3.0. If you are upgrading from v2.26 or earlier, add them explicitly as shown. `--reset-then-reuse-values` preserves the values from your current release (for example, your domain and tenant administrator settings), so you do not need to pass those again. Once you are on v3.0 or above, it also preserves these flags, so you do not need to pass them again in later upgrades.
+These flags are new in v3.0, so add them explicitly when upgrading from v2.26 or earlier. `--reset-then-reuse-values` keeps the rest of your current configuration, such as your domain and tenant administrator settings. When you upgrade from v3.0 or later, it also keeps these flags, so you do not need to pass them again.
 
 </Note>
 
