@@ -62,14 +62,7 @@ To set the replica count, use the following NVIDIA Run:ai control plane Helm fla
 --set <service>.replicaCount=2
 ```
 
-Replicas for following services should not be increased: `postgres`, `keycloak`, `grafana`, `thanos`, `nats`, `redoc`, `cluster-migrator`, `identity provider reconciler`, `settings migrator`.
-
-For Grafana, enable autoscaling first and then set the number of minReplicas. Use the following NVIDIA Run:ai control plane Helm flags:
-
-```bash
---set grafana.autoscaling.enabled=true \
---set grafana.autoscaling.minReplicas=2
-```
+Replicas for following services should not be increased: `postgres`, `keycloak`, `thanos`, `nats`, `redoc`, `cluster-migrator`, `identity provider reconciler`, `settings migrator`.
 
 ### Thanos
 

@@ -11,8 +11,10 @@ Gov-ready third-party images are FIPS-enabled Docker Hardened Images (DHI). You 
 FIPS-enabled Docker Hardened Images require a paid Docker subscription (DHI Select or DHI Enterprise). To get access:
 
 1. Subscribe to Docker Hardened Images.
-2. In Docker Hub, mirror the repository of each image listed on this page into your organization. The examples on this page use `<organization>` for your Docker Hub organization name, and `dhi-<name>` for each mirrored repository, for example `dhi-keycloak`.
+2. In Docker Hub, add the repository of each image listed on this page to your Docker Hub organization, using the Docker Hub UI or the `docker dhi mirror start` command. This is required to get the FIPS variants, in both connected and air-gapped environments.
 3. Create an access token with at least read-only access to those repositories. Use an Organization Access Token for an organization, or a Personal Access Token for a personal account.
+
+To add the repositories, you need to be an organization owner or editor, or have the Docker Hub permission for adding Docker Hardened Image repositories. The examples on this page use `<organization>` for your Docker Hub organization name, and `dhi-<name>` for each repository, for example `dhi-keycloak`.
 
 For the exact steps, refer to the Docker documentation on [using Docker Hardened Images](https://docs.docker.com/dhi/how-to/use/).
 
@@ -44,7 +46,7 @@ The Docker Hub credentials work the same way in [Guided Installation](../install
 
 During the installation, reference the secret in the Helm values. The NVIDIA Run:ai images still need the `runai-reg-creds` secret that holds your NGC credentials, so list both secrets, with `runai-reg-creds` first. The installer sets the first entry to `runai-reg-creds`, and a list in your values that starts with another secret overrides it, so the NVIDIA Run:ai images would no longer be pulled.
 
-* **Manual Helm** - Add the values to the control plane and cluster values you pass to Helm.
+* **Manual Helm** - Add the values to the control plane and cluster values you pass to Helm. Refer to [Manual Helm](../installation/install-using-helm/preparations.md).
 * **Guided Installation** - Add the values under `controlPlane.customHelmValues` and `cluster.customHelmValues` in the installer configuration. Refer to [Guided Installation](../installation/guided-installation/README.md).
 
 ```yaml
@@ -73,9 +75,7 @@ global:
 
 **Air-gapped**
 
-Your cluster cannot reach Docker Hub, so you do not create a Kubernetes secret. Instead, add the hardened images and your Docker Hub credentials when you prepare the air-gapped bundle, in either Guided Installation or Manual Helm.
-
-You do this in the pack configuration, the file you pass to `airgap pack`. Add an `imageOverrides` entry for each hardened image, so that the bundle contains it instead of the default image, and a `registryAuth` entry with your Docker Hub credentials. Use your Docker ID as the username for a Personal Access Token, or your organization name for an Organization Access Token, and the access token as the password.
+Your cluster cannot reach Docker Hub, so you do not create a Kubernetes secret. Instead, you provide the hardened images and your Docker Hub credentials in the pack configuration, the file you pass to `airgap pack`. Add an `imageOverrides` entry for each hardened image, so that the bundle contains it instead of the default image, and a `registryAuth` entry with your Docker Hub credentials. Use your Docker ID as the username for a Personal Access Token, or your organization name for an Organization Access Token, and the access token as the password.
 
 <Note>
 
@@ -110,9 +110,9 @@ registryAuth:
     passwordPath: /path/to/docker-access-token
 ```
 
-Each `source` is the full image reference of the hardened image in your mirrored repository, including the tag. The `postgres` entry is the PostgreSQL wait image.
+Each `source` is the full image reference of the hardened image in your Docker Hub organization, including the tag. The `postgres` entry is the PostgreSQL wait image.
 
-Then pack, load, and install as usual. For the full procedure, refer to [Air-Gapped Bundle](../installation/guided-installation/air-gapped/preparations.md#air-gapped-bundle) in Guided Installation, or [Preparations](../installation/install-using-helm/preparations.md) in Manual Helm. For the pack configuration fields, refer to [Pack an Air-Gapped Bundle](../installation/guided-installation/configuration-reference.md#pack-an-air-gapped-bundle).
+Then pack and load the bundle. For the full procedure, refer to [Air-Gapped Bundle](../installation/guided-installation/air-gapped/preparations.md#air-gapped-bundle) in Guided Installation, or [Preparations](../installation/install-using-helm/preparations.md) in Manual Helm. For the values you set at install time, refer to [Where to Set the Values](#where-to-set-the-values).
 
 </Accordion>
 
@@ -120,16 +120,26 @@ Then pack, load, and install as usual. For the full procedure, refer to [Air-Gap
 
 Write the values in a file or in the installer configuration, depending on the installation path:
 
-* **Manual Helm** - Save the values in a YAML file and pass it with `-f` to the `helm upgrade` commands in [Install the Control Plane](../installation/install-using-helm/install-control-plane.md#installation) and [Install the Cluster](../installation/install-using-helm/helm-install.md#installation). Use one file for the control plane values and one for the cluster values, because they belong to different charts. In air-gapped installations, pass this file in addition to the values file that `airgap load` generates.
+* **Manual Helm** - Save the values in a YAML file and pass it with `-f` to the `helm upgrade` commands in [Install the Control Plane](../installation/install-using-helm/install-control-plane.md#installation) and [Install the Cluster](../installation/install-using-helm/helm-install.md#installation). Use one file for the control plane values and one for the cluster values, because they belong to different charts.
 * **Guided Installation** - Add the control plane values under `controlPlane.customHelmValues` and the cluster values under `cluster.customHelmValues` in the installer configuration. Refer to [Guided Installation](../installation/guided-installation/README.md).
 
-<Note>
+### Air-Gapped Installations
 
-**Note**
+In an air-gapped installation, the hardened images reach your cluster through the air-gapped bundle, in three stages:
 
-In air-gapped installations, you do not set the image `registry`, `repository`, and `tag` values in the sections below. You enter the image locations in the pack configuration, and the values generated by the load step set them for the install. Set only the other values from the sections below. For details, refer to the Air-gapped section in [Docker Hub Credentials](#docker-hub-credentials).
+1. **Pack** - On a machine that can reach Docker Hub, `airgap pack` pulls the hardened images from your Docker Hub organization and adds them to the bundle, together with the other NVIDIA Run:ai images.
+2. **Load** - Inside the air-gapped network, `airgap load` pushes every image in the bundle to your own private registry. You do not copy the hardened images to your private registry yourself.
+3. **Install** - The values files that `airgap load` generates point the services at your private registry, so the installation pulls the hardened images from there and Docker Hub is never contacted.
 
-</Note>
+An air-gapped installation provides values in three places:
+
+| Where | What you provide | When |
+| ----- | ---------------- | ---- |
+| Pack configuration | `imageOverrides` and `registryAuth` for the hardened images and your Docker Hub credentials. Refer to the Air-gapped section in [Docker Hub Credentials](#docker-hub-credentials). | `airgap pack` |
+| Load configuration | Your private registry, in the `registry` section. The load step generates the image values. | `airgap load` |
+| Install values | Everything that is not an image, such as the external PostgreSQL connection and the Keycloak and NATS settings, as described in the sections below | Installation |
+
+In the sections below, do not set the image `registry`, `repository`, and `tag` values. You enter the image locations in the pack configuration, and the values generated by the load step set them. Set only the other values. In Manual Helm, pass your values file in addition to the values file that `airgap load` generates.
 
 ## Control Plane Services
 
@@ -149,7 +159,7 @@ In a Gov-ready installation, PostgreSQL must be an externally managed instance. 
 
 Keycloak provides authentication and identity management for the NVIDIA Run:ai control plane. It is deployed as part of the control plane Helm chart using [Keycloakx](https://artifacthub.io/packages/helm/codecentric/keycloakx) (`keycloakx`), and is not supported as an external service. For Helm configuration fields and changing the admin password, refer to [Advanced Control Plane Configurations](../configuration/control-plane-config.md#keycloak).
 
-Replace the Keycloak image, add the `fips` feature to the start command, and run the container as user ID `65532`. The hardened image restricts its files to that user, and Keycloak does not start without it. Compared with the default start command, the only difference is `fips` added to `--features`. Because Helm replaces the whole `command` value, the example shows the full command.
+Replace the Keycloak image, add the `fips` feature to the start command, and run the container as user ID `65532`. The hardened image restricts its files to that user, and Keycloak does not start without it. Compared with the default start command, the only difference is `fips` added to `--features`. Helm replaces the whole `command` value, so the example shows the full command.
 
 ```yaml
 keycloakx:
@@ -331,7 +341,3 @@ thirdPartyImages:
     repository: <organization>/dhi-git-sync
     tag: <fips-ready-tag>
 ```
-
-## Next Steps
-
-Continue with [Gov-Ready Installation](../installation/gov-ready-installation.md).
