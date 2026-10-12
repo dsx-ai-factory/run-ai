@@ -37,9 +37,9 @@ type Metadata struct {
 
 type Document struct {
 	Schema             string                  `json:"schema"`
+	Metadata           Metadata                `json:"metadata"`
 	RegressionDetected bool                    `json:"regression_detected"`
 	Regressions        []Regression            `json:"regressions,omitempty"`
-	Metadata           Metadata                `json:"metadata"`
 	Sections           map[string]core.Section `json:"sections"`
 }
 

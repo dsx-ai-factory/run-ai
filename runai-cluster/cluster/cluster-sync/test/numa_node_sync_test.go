@@ -26,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	fakerunaiclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -146,6 +147,92 @@ var _ = Describe("NUMA node sync", func() {
 			handler.SyncAll()
 			Eventually(syncRequests).Should(Receive())
 			Expect(handler.HandleAdd(nrt)).To(Succeed())
+			Consistently(syncRequests).ShouldNot(Receive())
+		})
+	})
+
+	Context("when a node pool's NUMA-aware scheduling is toggled", func() {
+		It("sends the pool's NUMA nodes once the setting is turned on", func() {
+			nodePool := buildNodePoolForNumaSync("numa-pool", false)
+			fakeClient := fakecachedclient.NewFakeCachedClient(
+				fakerunaiclient.NewClientBuilder().WithScheme(GetTestScheme()).WithObjects(
+					buildNrt("node-a", "node-0"),
+					buildNodeForNumaSync("node-a", "numa-pool"),
+					nodePool,
+				),
+			)
+			numaNodeHandler := handlers.NewNumaNodeHandler(
+				backendclient.NewBackendClient(server.URL(), nil),
+				fakeClient,
+			)
+			nodeHandler := handlers.NewNodeHandler(
+				backendclient.NewBackendClient(server.URL(), nil),
+				fakeClient,
+			)
+			nodeHandler.SetNumaNodeHandler(numaNodeHandler)
+
+			numaNodeHandler.SyncAll()
+			Expect((<-syncRequests).Nodes).To(BeEmpty())
+
+			nodePool.Spec.SchedulingShardConfig.Plugins["numa"] = kaiv1.PluginConfig{
+				Enabled: ptr.To(true),
+			}
+			Expect(fakeClient.Update(context.Background(), nodePool)).To(Succeed())
+
+			nodeHandler.SyncNumaNodesForNodepool("numa-pool")
+			request := <-syncRequests
+			Expect(request.Nodes).To(HaveLen(1))
+			Expect(request.Nodes[0].Name).To(Equal("node-a"))
+			Expect(request.Nodes[0].NumaNodes).To(HaveLen(1))
+			Expect(request.Nodes[0].NumaNodes[0].Name).To(Equal("node-0"))
+		})
+
+		It("clears the pool's NUMA nodes once the setting is turned off", func() {
+			nodePool := buildNodePoolForNumaSync("numa-pool", true)
+			fakeClient := fakecachedclient.NewFakeCachedClient(
+				fakerunaiclient.NewClientBuilder().WithScheme(GetTestScheme()).WithObjects(
+					buildNrt("node-a", "node-0"),
+					buildNodeForNumaSync("node-a", "numa-pool"),
+					nodePool,
+				),
+			)
+			numaNodeHandler := handlers.NewNumaNodeHandler(
+				backendclient.NewBackendClient(server.URL(), nil),
+				fakeClient,
+			)
+			nodeHandler := handlers.NewNodeHandler(
+				backendclient.NewBackendClient(server.URL(), nil),
+				fakeClient,
+			)
+			nodeHandler.SetNumaNodeHandler(numaNodeHandler)
+
+			numaNodeHandler.SyncAll()
+			Expect((<-syncRequests).Nodes).To(HaveLen(1))
+
+			nodePool.Spec.SchedulingShardConfig.Plugins["numa"] = kaiv1.PluginConfig{
+				Enabled: ptr.To(false),
+			}
+			Expect(fakeClient.Update(context.Background(), nodePool)).To(Succeed())
+
+			nodeHandler.SyncNumaNodesForNodepool("numa-pool")
+			request := <-syncRequests
+			// deleteMissing lets the control plane drop the NUMA rows of the
+			// nodes that fell out of the snapshot.
+			Expect(request.DeleteMissing).NotTo(BeNil())
+			Expect(*request.DeleteMissing).To(BeTrue())
+			Expect(request.Nodes).To(BeEmpty())
+		})
+
+		It("does nothing when NUMA sync is disabled", func() {
+			fakeClient := fakecachedclient.NewFakeCachedClient(
+				fakerunaiclient.NewClientBuilder().WithScheme(GetTestScheme()),
+			)
+			nodeHandler := handlers.NewNodeHandler(
+				backendclient.NewBackendClient(server.URL(), nil),
+				fakeClient,
+			)
+
+			nodeHandler.SyncNumaNodesForNodepool("numa-pool")
 			Consistently(syncRequests).ShouldNot(Receive())
 		})
 	})

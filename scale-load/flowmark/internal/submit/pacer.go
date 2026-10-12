@@ -73,7 +73,10 @@ func (p Pacer) Run(ctx context.Context, submit func(ctx context.Context, index i
 			}
 			pacing.LastDispatch = dispatched
 			pacing.Submitted++
-			next = dispatched.Add(interval)
+			next = next.Add(interval)
+			if next.Before(dispatched) {
+				next = dispatched
+			}
 		case <-ctx.Done():
 		}
 	}

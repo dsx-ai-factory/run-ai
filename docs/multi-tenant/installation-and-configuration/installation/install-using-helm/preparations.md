@@ -41,9 +41,9 @@ Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-sid
 
 NVIDIA Run:ai Support-Entitled Release installations require an NGC Personal Key to authenticate to the NVIDIA Run:ai container registry (`nvcr.io`). Generate a Personal Key from the [NGC Personal Keys](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#ngc-api-keys) page.
 
-Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password. Use this key to create the `runai-reg-creds` secret described in [Software Artifacts](#software-artifacts) below.
+Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password. The Personal Key is used during installation, to pull the NVIDIA Run:ai container images. Use this key to create the `runai-reg-creds` secret described in [Software Artifacts](#software-artifacts) below.
 
-For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. Pass the resulting key as `telemetryService.telemetryAuth.token` during installation, or reference a secret you create yourself beforehand via `telemetryService.telemetryAuth.existingSecret`/`secretKey`. Create the `runai-backend` namespace first, as described in [Control Plane Namespace](#control-plane-namespace), then create the secret:
+For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. The Personal Key is used during installation. The Service API Key is used at runtime, after installation, by the NVIDIA Run:ai control plane to report telemetry. Pass the resulting key as `telemetryService.telemetryAuth.token` during installation, or reference a secret you create yourself beforehand via `telemetryService.telemetryAuth.existingSecret`/`secretKey`. Create the `runai-backend` namespace first, as described in [Control Plane Namespace](#control-plane-namespace), then create the secret:
 
 ```bash
 kubectl create secret generic <SECRET_NAME> \
@@ -246,7 +246,7 @@ This section applies only to NVIDIA Run:ai Support-Entitled Release installation
 
 </Note>
 
-For Support-Entitled Release, you must create a Kubernetes secret for registry access. NVIDIA Run:ai container images are hosted in the NVIDIA NGC container registry under `nvidia/runai`. Using the NGC Personal Key from [Registry Credentials](#registry-credentials) above, create the required secret:
+For Support-Entitled Release, you must create a Kubernetes secret for registry access. NVIDIA Run:ai container images are hosted in the NVIDIA NGC container registry under `nvidia/runai-oss`. Using the NGC Personal Key from [Registry Credentials](#registry-credentials) above, create the required secret:
 
 ```bash
 kubectl create secret docker-registry runai-reg-creds \
@@ -277,7 +277,7 @@ This section applies only to NVIDIA Run:ai Support-Entitled Release installation
 
 </Note>
 
-For Support-Entitled Release, you must create a Kubernetes secret for registry access. NVIDIA Run:ai container images are hosted in the NVIDIA NGC container registry under `nvidia/runai`. Using the NGC Personal Key from [Registry Credentials](#registry-credentials) above, create the required secret:
+For Support-Entitled Release, you must create a Kubernetes secret for registry access. NVIDIA Run:ai container images are hosted in the NVIDIA NGC container registry under `nvidia/runai-oss`. Using the NGC Personal Key from [Registry Credentials](#registry-credentials) above, create the required secret:
 
 ```bash
 oc create secret docker-registry runai-reg-creds \

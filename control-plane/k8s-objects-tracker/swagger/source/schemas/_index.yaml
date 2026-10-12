@@ -2,6 +2,8 @@ ClusterId:
   $ref: "../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
 ScopeType:
   $ref: "./Scopes/ScopeType.yaml"
+ResourceScopeType:
+  $ref: "./Scopes/ResourceScopeType.yaml"
 ScopeId:
   $ref: "./Scopes/ScopeId.yaml"
 PVCs:
@@ -31,3 +33,9 @@ AllPVCs:
   $ref: "./Secrets/Obsolete/AllSecrets.yaml"
 Origin:
   $ref: "./Common/Origin.yaml"
+ResourceClaimTemplate:
+  $ref: "./ResourceClaimTemplates/ResourceClaimTemplate.yaml"
+ResourceClaimTemplates:
+  $ref: "./ResourceClaimTemplates/ResourceClaimTemplates.yaml"
+ResourceClaimTemplateName:
+  $ref: "./ResourceClaimTemplates/ResourceClaimTemplateName.yaml"

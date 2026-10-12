@@ -1,0 +1,8 @@
+name: scopeId
+in: query
+required: true
+description: The scope resource id that identifies the row.
+schema:
+  type: string
+  minLength: 1
+  example: "2"

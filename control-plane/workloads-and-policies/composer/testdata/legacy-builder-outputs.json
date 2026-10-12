@@ -1,0 +1,516 @@
+{
+  "BuildGitSyncInitContainers parity Authentication scenarios should mirror cluster output for a custom image / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "custom-git-sync:latest",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Authentication scenarios should mirror cluster output for password authenticating method via secret / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_USERNAME",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "git-creds",
+              "key": "username-key"
+            }
+          }
+        },
+        {
+          "name": "GITSYNC_PASSWORD",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "git-creds",
+              "key": "password-key"
+            }
+          }
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Authentication scenarios should mirror cluster output for plain text username and password / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_USERNAME",
+          "value": "user"
+        },
+        {
+          "name": "GITSYNC_PASSWORD",
+          "value": "pass"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Authentication scenarios should mirror cluster output for ssh-key authenticating method / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        },
+        {
+          "name": "GITSYNC_SSH",
+          "value": "true"
+        },
+        {
+          "name": "GITSYNC_SSH_KNOWN_HOSTS",
+          "value": "false"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "git-ssh-secret-0",
+          "mountPath": "/etc/git-secret"
+        },
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Authentication scenarios should mirror cluster output for username and password from secret / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_USERNAME",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "git-creds",
+              "key": "username-key"
+            }
+          }
+        },
+        {
+          "name": "GITSYNC_PASSWORD",
+          "valueFrom": {
+            "secretKeyRef": {
+              "name": "git-creds",
+              "key": "password-key"
+            }
+          }
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Basic functionality should mirror cluster output when nil items are mixed in / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-valid-item",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-valid-item"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-1",
+          "mountPath": "/code-valid-item"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Basic functionality should mirror cluster output with repository and branch / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_REF",
+          "value": "main"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Basic functionality should mirror cluster output with repository and revision / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_REF",
+          "value": "a1b2c3d4"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Basic functionality should return empty when no gitsync items are specified / GetGitSyncInitContainers": [],
+  "BuildGitSyncInitContainers parity Custom CA should mirror cluster output when custom CA is enabled / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        },
+        {
+          "name": "runai-ca-cert",
+          "mountPath": "/etc/ssl/certs/runai-ca.pem",
+          "subPath": "runai-ca.pem"
+        }
+      ]
+    }
+  ],
+  "BuildGitSyncInitContainers parity Documented SecurityContext divergence from the cluster builder should drop the DefaultJupyter SecurityContext that cluster sets when isJupyter is true / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ],
+      "securityContext": {
+        "runAsUser": 1000,
+        "runAsGroup": 100
+      }
+    }
+  ],
+  "BuildGitSyncInitContainers parity Documented SecurityContext divergence from the cluster builder should drop the SecurityContext that cluster sets from NB_UID/NB_GID env vars / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ],
+      "securityContext": {
+        "runAsUser": 1002,
+        "runAsGroup": 1003
+      }
+    }
+  ],
+  "BuildGitSyncInitContainers parity Documented SecurityContext divergence from the cluster builder should drop the SecurityContext that cluster sets from runAsUser/Uid/Gid / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ],
+      "securityContext": {
+        "runAsUser": 1001,
+        "runAsGroup": 1001
+      }
+    }
+  ],
+  "BuildGitSyncInitContainers parity Multiple git sync items should mirror cluster output for multiple git sync items / GetGitSyncInitContainers": [
+    {
+      "name": "git-sync-repo1",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo1.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo1"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-0",
+          "mountPath": "/code-repo1"
+        }
+      ]
+    },
+    {
+      "name": "git-sync-repo2",
+      "image": "registry.example/git-sync:test",
+      "env": [
+        {
+          "name": "GITSYNC_REPO",
+          "value": "https://github.com/example/repo2.git"
+        },
+        {
+          "name": "GITSYNC_ROOT",
+          "value": "/code-repo2"
+        },
+        {
+          "name": "GITSYNC_ONE_TIME",
+          "value": "true"
+        },
+        {
+          "name": "HOME",
+          "value": "/tmp"
+        }
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "code-sync-1",
+          "mountPath": "/code-repo2"
+        }
+      ]
+    }
+  ]
+}

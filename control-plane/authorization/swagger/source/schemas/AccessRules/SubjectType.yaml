@@ -1,8 +1,9 @@
 type: string
 description: |
   Subject type enum for access rules.
-  
-  Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
+
+  Note: The 'app' subject type is DEPRECATED and no longer supported. Please use 'service-account' instead for service accounts.
+  Requests that create an access rule with 'app' are rejected with 415 Unsupported Media Type.
 enum:
   - user
   - app

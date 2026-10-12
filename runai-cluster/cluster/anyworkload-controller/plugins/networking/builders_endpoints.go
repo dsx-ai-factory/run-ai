@@ -12,7 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	endpoints "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -98,7 +98,7 @@ func (p *Plugin) buildEndpointAuthProxyInitContainers(
 	if svc == nil || svc.Auth == nil || svc.Auth.AuthorizedUsers == "" {
 		return nil, nil
 	}
-	initContainer, err := workloadbuilders.BuildUsernameLoaderInitContainerWithError(svc.Auth.AuthorizedUsers, nick)
+	initContainer, err := BuildUsernameLoaderInitContainerWithError(svc.Auth.AuthorizedUsers, nick)
 	if err != nil {
 		return nil, err
 	}

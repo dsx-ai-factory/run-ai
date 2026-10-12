@@ -87,6 +87,11 @@ func run() error {
 		describeEnvironment(ctx, target, *cluster, &info)
 	}
 
+	store, err := report.NewLocal(*outputDir)
+	if err != nil {
+		return fmt.Errorf("report: %w", err)
+	}
+
 	sections, runErr := runner.Run(ctx, target, *scenariosDir, registry, options)
 	info.FinishedAt = time.Now()
 	if len(sections) == 0 {
@@ -94,41 +99,17 @@ func run() error {
 	}
 	log.Printf("%d scenarios finished in %s, %d failed", len(sections), info.FinishedAt.Sub(info.StartedAt).Round(time.Second), failedCount(sections))
 
-	store, err := report.NewLocal(*outputDir)
-	if err != nil {
-		return errors.Join(runErr, fmt.Errorf("report: %w", err))
+	document, note := report.Judge(ctx, store, report.Build(sections, info), report.RegressionConfig{Window: *regressionWindow, Threshold: *regressionThreshold})
+	log.Print(note)
+	for _, regression := range document.Regressions {
+		log.Printf("regression: %s", regression.Message) //nolint:gosec
 	}
-	document := judge(ctx, store, report.Build(sections, info), report.RegressionConfig{Window: *regressionWindow, Threshold: *regressionThreshold})
 	receipt, err := report.Publish(ctx, store, document)
 	if err != nil {
 		return errors.Join(runErr, fmt.Errorf("report: %w", err))
 	}
 	log.Printf("wrote %s to %s, %d runs in %s", receipt.File, store, receipt.Runs, report.ManifestName)
 	return runErr
-}
-
-func judge(ctx context.Context, store report.Store, document report.Document, config report.RegressionConfig) report.Document {
-	history, err := report.LoadHistory(ctx, store, document.Metadata.ClusterType, config.Window)
-	switch {
-	case err != nil:
-		log.Printf("comparison with earlier runs skipped: %v", err)
-	case document.Metadata.ClusterType == "":
-		log.Print("comparison with earlier runs skipped: the cluster type is unknown, set --cluster-type or --cp-url; only SLOs are checked")
-	case config.Window == 0:
-		log.Print("comparison with earlier runs disabled, only SLOs are checked")
-	case len(history) < config.Window:
-		log.Printf("comparison with earlier runs skipped: %d of the %d required %s runs on record, only SLOs are checked", len(history), config.Window, document.Metadata.ClusterType)
-	default:
-		log.Printf("comparing every p90 with the median of the last %d %s runs, threshold %.0f%%", config.Window, document.Metadata.ClusterType, config.Threshold*100)
-	}
-	judged := report.DetectRegressions(document, history, config)
-	for _, regression := range judged.Regressions {
-		log.Printf("regression: %s", regression.Message) //nolint:gosec
-	}
-	if !judged.RegressionDetected {
-		log.Print("no regression detected")
-	}
-	return judged
 }
 
 func describeEnvironment(ctx context.Context, target core.Target, cluster string, info *report.RunInfo) {

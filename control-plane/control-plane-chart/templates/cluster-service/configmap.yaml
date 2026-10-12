@@ -86,7 +86,6 @@ data:
   PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
   {{- end }}
   ASYNC_CLUSTER_DELETE_ENABLED: {{ $top.Values.clusterService.config.asyncClusterDeletion.enabled | quote }}
-  NODEPOOL_OVERRIDE_BACKEND: {{ $top.Values.clusterMigrator.config.markCompleted | quote }}
   MAX_WAIT_FOR_CLUSTER_REMOTE_CONFIG_STATUS_UPDATE: {{ $top.Values.clusterService.config.maxWaitForClusterRemoteConfigStatusUpdate | quote }}
   CACHE_TTL_HOURS: {{ $top.Values.clusterService.config.cacheTtl | quote }}
   MAX_WAIT_FOR_CLUSTER_GRACEFUL_DELETE: {{ $top.Values.clusterService.config.maxWaitForClusterGracefulDelete | quote }}

@@ -1,6 +1,6 @@
 # Deploy Infrastructure Quick Start
 
-This guide walks through the initial deployment of NVIDIA Run:ai infrastructure: preparing your environment, installing the platform, and completing the onboarding wizard. This is part of Day 1 of the platform lifecycle - installation and configuration - and assumes Day 0 planning is complete. For the full picture, see the [Installation and Configuration overview](../../installation-and-configuration/overview.md).
+This guide walks through the initial deployment of NVIDIA Run:ai infrastructure: preparing your environment, installing the platform, and completing the onboarding wizard. This is part of Day 1 (Setup) of the platform lifecycle and assumes Day 0 planning is complete. For the full picture, see the [Installation and Configuration overview](../../installation-and-configuration/overview.md).
 
 <figure><img src="../../assets/infra-admin.png" alt=""/><figcaption></figcaption></figure>
 

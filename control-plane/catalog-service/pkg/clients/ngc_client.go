@@ -280,19 +280,12 @@ func (c *ngcClient) buildNgcAuthenticatedTagsUrl(imageName string) (string, erro
 		return "", fmt.Errorf("failed to parse NGC image name: %v", err)
 	}
 
-	// Build URL with query parameters for authenticated access
-	params := url.Values{}
-	if orgName != "" {
-		params.Add("orgName", orgName)
-	}
-	if name != "" {
-		params.Add("name", name)
-	}
+	ngcFullUrl := fmt.Sprintf("%s/%s", constants.NgcAuthenticatedTagsBaseURL, orgName)
 	if teamName != "" {
-		params.Add("teamName", teamName)
+		ngcFullUrl = fmt.Sprintf("%s/team/%s", ngcFullUrl, teamName)
 	}
 
-	ngcFullUrl := fmt.Sprintf("%s?%s", constants.NgcAuthenticatedTagsBaseURL, params.Encode())
+	ngcFullUrl = fmt.Sprintf("%s/repos/%s/images", ngcFullUrl, name)
 
 	return ngcFullUrl, nil
 }

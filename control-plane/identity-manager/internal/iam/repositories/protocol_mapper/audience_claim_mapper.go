@@ -21,7 +21,7 @@ func NewRunaiDummyAudienceProtocolMapper() gocloak.ProtocolMapperRepresentation 
 
 func NewAudienceProtocolMapper(name, aud string) gocloak.ProtocolMapperRepresentation {
 	config := map[string]string{
-		"included.client.audience": aud,
+		"included.custom.audience": aud,
 		"id.token.claim":           "true",
 		"access.token.claim":       "true",
 	}

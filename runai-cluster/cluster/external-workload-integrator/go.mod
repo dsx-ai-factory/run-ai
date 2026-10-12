@@ -139,7 +139,6 @@ require (
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kai-scheduler/kai-resource-management-api v0.1.3
-	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/moby/spdystream v0.5.1 // indirect

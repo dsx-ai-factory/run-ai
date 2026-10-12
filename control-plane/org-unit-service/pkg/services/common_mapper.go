@@ -96,13 +96,19 @@ func MapRequestToOrgUnitData(
 	var err error
 	if originalOrgUnitData != nil {
 		originalResourcesNodePoolToId := make(map[string]uuid.UUID)
+		originalResourcesNodePoolIdToStatus := make(map[string]models.ResourcesStatus)
 		for _, originalResources := range originalOrgUnitData.Resources {
 			originalResourcesNodePoolToId[originalResources.NodePoolId] = originalResources.ID
+			originalResourcesNodePoolIdToStatus[originalResources.NodePoolId] = originalResources.ResourcesStatus
 		}
 		data.ID = originalOrgUnitData.ID
 		data.Resources, err = ApiResourcesToModel(ctx, resources, isDepartment, nodePoolsMetadata, true, originalResourcesNodePoolToId)
 		if err != nil {
 			return data, err
+		}
+		// Status columns are written by the cluster sync; carry them over so the save doesn't null them.
+		for i := range data.Resources {
+			data.Resources[i].ResourcesStatus = originalResourcesNodePoolIdToStatus[data.Resources[i].NodePoolId]
 		}
 	} else {
 		data.Resources, err = ApiNewResourcesToModel(ctx, resources, isDepartment, nodePoolsMetadata)

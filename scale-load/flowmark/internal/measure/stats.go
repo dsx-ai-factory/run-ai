@@ -15,7 +15,6 @@ type Summary struct {
 	SampleSize        int
 	NeverArrivedCount int
 	FailedCount       int
-	SuccessRate       float64
 	P50               time.Duration
 	P90               time.Duration
 	P99               time.Duration
@@ -48,9 +47,6 @@ func Stats(timings []Timing) Summary {
 	}
 
 	summary.SampleSize = len(durations)
-	if total := len(timings); total > 0 {
-		summary.SuccessRate = float64(summary.SampleSize) / float64(total)
-	}
 	if summary.SampleSize == 0 {
 		return summary
 	}
@@ -84,27 +80,4 @@ func percentile(sorted []time.Duration, p float64) time.Duration {
 		rank = 1
 	}
 	return sorted[rank-1]
-}
-
-func (s Summary) Metrics() map[string]any {
-	metrics := map[string]any{
-		"sample_size":         s.SampleSize,
-		"never_arrived_count": s.NeverArrivedCount,
-		"failed_count":        s.FailedCount,
-		"success_rate":        s.SuccessRate,
-	}
-	if s.SampleSize == 0 {
-		return metrics
-	}
-	metrics["p50_ms"] = s.P50.Milliseconds()
-	metrics["p90_ms"] = s.P90.Milliseconds()
-	metrics["p99_ms"] = s.P99.Milliseconds()
-	metrics["mean_ms"] = s.Mean.Milliseconds()
-	metrics["max_ms"] = s.Max.Milliseconds()
-	if !s.HasThroughput() {
-		return metrics
-	}
-	metrics["makespan_ms"] = s.Makespan.Milliseconds()
-	metrics["throughput_per_sec"] = s.Throughput
-	return metrics
 }

@@ -15,10 +15,6 @@ var ServiceAccountsRead = models.PermissionSet{
 	Description: "Grants permissions to view service accounts.",
 	Permissions: []models.RolePermission{
 		{
-			ResourceType: api.RESOURCETYPE_APPS,
-			Read:         true,
-		},
-		{
 			ResourceType: api.RESOURCETYPE_SERVICE_ACCOUNT,
 			Read:         true,
 		},

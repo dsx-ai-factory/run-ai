@@ -25,7 +25,7 @@ func TestParseOptions(t *testing.T) {
 		wantErr string
 	}{
 		{name: "defaults", knobs: nil, check: func(o options) bool {
-			return o.users == 10 && o.rate == 2 && o.duration == 5*time.Minute && o.timeout == 10*time.Minute && o.workloadType == "Workspace" && o.slo == nil
+			return o.users == 10 && o.rate == 2 && o.duration == 3*time.Minute && o.timeout == 10*time.Minute && o.workloadType == "Workspace" && o.slo == nil
 		}},
 		{name: "all knobs", knobs: map[string]any{"users": 3, "rate": 5, "duration": "1m", "image": "busybox", "timeout": "2m", "setupTimeout": "1m", "kubeRequestsPerSecond": 20, "controlPlaneRequestsPerSecond": 10, "cluster": "c1", "slo": map[string]any{"api_accepted_p90_ms": 500, "ttj_p90_ms": 10000, "cluster_synced_p99_ms": 12000}},
 			check: func(o options) bool {
@@ -67,7 +67,7 @@ func at(seconds float64) time.Time {
 }
 
 func testOptions() options {
-	return options{users: 10, rate: 2, duration: time.Minute, workloadType: workspaceType, image: defaultImage, timeout: 10 * time.Minute, slo: map[string]int{"ttj_p90_ms": 10000, "api_accepted_p90_ms": 500}}
+	return options{users: 10, rate: 2, duration: time.Minute, workloadType: submit.WorkspaceType, image: defaultImage, timeout: 10 * time.Minute, slo: map[string]int{"ttj_p90_ms": 10000, "api_accepted_p90_ms": 500}}
 }
 
 func TestBuildSectionReportsEverySpanAndTheRates(t *testing.T) {
@@ -78,44 +78,71 @@ func TestBuildSectionReportsEverySpanAndTheRates(t *testing.T) {
 	}
 	pacing := submit.Pacing{Submitted: 3, FirstDispatch: at(0), LastDispatch: at(1.0)}
 
-	section := buildSection(measure.CollectSpans(submissions), pacing, submissions, testOptions(), 0, nil)
+	section := buildSection(measure.CollectSpans(submissions), pacing, submissions, testOptions(), 0, nil, nil)
 
-	if section.Category != core.CategoryLoad || section.Failed {
+	if section.Failed {
 		t.Fatalf("a rejected submission must not fail the section: %+v", section)
 	}
 	m := section.Metrics
-	for _, key := range []string{"api_accepted_p90_ms", "cluster_synced_p90_ms", "pod_created_p90_ms", "ttj_p90_ms", "ttj_p50_ms", "ttj_p99_ms", "actual_rate_per_sec", "target_rate_per_sec", "success_rate", "failed_count", "never_arrived_count", "slo_ttj_p90_ms"} {
+	for _, key := range []string{"api_accepted_p90_ms", "cluster_synced_p90_ms", "pod_created_p90_ms", "ttj_p90_ms", "ttj_p50_ms", "ttj_p99_ms", "failed_count"} {
 		if _, ok := m[key]; !ok {
 			t.Errorf("metric %s is missing", key)
 		}
 	}
-	if m["submitted"] != 3 || m["failed_count"] != 1 || m["never_arrived_count"] != 0 {
-		t.Fatalf("counts wrong: %v", m)
+	if m["failed_count"] != 1 {
+		t.Fatalf("the rejected submission must be counted: %v", m)
 	}
-	if rate, _ := m["success_rate"].(float64); rate < 0.66 || rate > 0.67 {
-		t.Fatalf("2 of 3 accepted is 0.67, got %v", m["success_rate"])
+	if _, present := m["never_arrived_count"]; present {
+		t.Fatal("never_arrived_count is explained in the error text, not reported as a metric")
 	}
-	if m["ttj_p90_ms"] != int64(5000) || m["slo_ttj_p90_ms"] != 10000 {
-		t.Fatalf("ttj p90 of [3100, 5000] is 5000 next to its SLO: %v / %v", m["ttj_p90_ms"], m["slo_ttj_p90_ms"])
+	for _, key := range []string{"users", "duration_ms", "image", "slo", "success_rate", "flow", "submitted", "target_rate_per_sec", "actual_rate_per_sec"} {
+		if _, present := m[key]; present {
+			t.Fatalf("%s is a scenario knob or derivable, it must stay out of the report", key)
+		}
+	}
+	if m["ttj_p90_ms"] != int64(5000) || section.SLO["ttj_p90_ms"] != 10000 {
+		t.Fatalf("ttj p90 of [3100, 5000] is 5000 and its SLO sits in the slo block: %v / %v", m["ttj_p90_ms"], section.SLO)
+	}
+}
+
+func TestBuildSectionFailsWhenThePacerFellBehind(t *testing.T) {
+	arrived := []measure.Submission{
+		{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3), PodCreatedAt: at(5.3)},
+		{Name: "w2", RequestedAt: at(30), ApiAcceptedAt: at(30.3), ClusterSyncedAt: at(32.3), PodCreatedAt: at(35.3)},
+	}
+	kept := submit.Pacing{Submitted: 121, FirstDispatch: at(0), LastDispatch: at(60)}
+	if section := buildSection(measure.CollectSpans(arrived), kept, arrived, testOptions(), 0, nil, nil); section.Failed {
+		t.Fatalf("2.00/s against a 2/s target is on pace: %+v", section)
+	}
+
+	behind := submit.Pacing{Submitted: 61, FirstDispatch: at(0), LastDispatch: at(60)}
+	section := buildSection(measure.CollectSpans(arrived), behind, arrived, testOptions(), 0, nil, nil)
+
+	if !section.Failed || !strings.Contains(section.Error, "kept only 1.00/s of the 2/s target") {
+		t.Fatalf("a pacer more than 10%% under its target must fail the section and say so: %+v", section)
 	}
 }
 
 func TestBuildSectionFailsOnNeverArrivedWorkloadsAndTimestampsOutOfOrder(t *testing.T) {
 	neverArrived := []measure.Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3)}}
-	section := buildSection(measure.CollectSpans(neverArrived), submit.Pacing{Submitted: 1}, neverArrived, testOptions(), 0, nil)
+	section := buildSection(measure.CollectSpans(neverArrived), submit.Pacing{Submitted: 1}, neverArrived, testOptions(), 0, nil, nil)
 	if !section.Failed || !strings.Contains(section.Error, "never reached the cluster") {
 		t.Fatalf("a workload that never arrived must fail the section: %+v", section)
 	}
 	if _, ok := section.Metrics["ttj_p90_ms"]; ok {
 		t.Fatal("no ttj latency may be reported when nothing arrived")
 	}
-	section = buildSection(measure.CollectSpans(neverArrived), submit.Pacing{Submitted: 1}, neverArrived, testOptions(), 0, context.Canceled)
-	if !section.Failed || !strings.Contains(section.Error, "when the run was interrupted") || strings.Contains(section.Error, "within") {
+	section = buildSection(measure.CollectSpans(neverArrived), submit.Pacing{Submitted: 1}, neverArrived, testOptions(), 0, context.Canceled, nil)
+	if !section.Failed || !strings.Contains(section.Error, "the run was interrupted after 1 submissions") || !strings.Contains(section.Error, "1 workloads had not reached the cluster") || strings.Contains(section.Error, "within") {
 		t.Fatalf("an interrupted run must say so instead of blaming the timeout: %+v", section)
+	}
+	complete := []measure.Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3), PodCreatedAt: at(5.3)}}
+	if section := buildSection(measure.CollectSpans(complete), submit.Pacing{Submitted: 1}, complete, testOptions(), 0, context.Canceled, nil); !section.Failed || !strings.Contains(section.Error, "interrupted") {
+		t.Fatalf("an interrupted run fails even when everything submitted so far arrived: %+v", section)
 	}
 
 	podBeforeAccept := []measure.Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(6.0), ClusterSyncedAt: at(2.0), PodCreatedAt: at(2.5)}}
-	section = buildSection(measure.CollectSpans(podBeforeAccept), submit.Pacing{Submitted: 1}, podBeforeAccept, testOptions(), 0, nil)
+	section = buildSection(measure.CollectSpans(podBeforeAccept), submit.Pacing{Submitted: 1}, podBeforeAccept, testOptions(), 0, nil, nil)
 	if !section.Failed || !strings.Contains(section.Error, "timestamps out of order") {
 		t.Fatalf("timestamps out of order must fail the section loudly: %+v", section)
 	}
@@ -124,8 +151,17 @@ func TestBuildSectionFailsOnNeverArrivedWorkloadsAndTimestampsOutOfOrder(t *test
 			t.Fatalf("measurement health belongs in the log and the error text, not in the metrics: %s", key)
 		}
 	}
-	interruptedSection := buildSection(measure.CollectSpans(neverArrived), submit.Pacing{Submitted: 1}, neverArrived, testOptions(), 2, nil)
+	interruptedSection := buildSection(measure.CollectSpans(neverArrived), submit.Pacing{Submitted: 1}, neverArrived, testOptions(), 2, nil, nil)
 	if !strings.Contains(interruptedSection.Error, "interrupted 2 times") {
 		t.Fatalf("watch interruptions must be explained in the error text: %+v", interruptedSection)
+	}
+}
+
+func TestBuildSectionBlamesADeadWatchNotTheCluster(t *testing.T) {
+	unresolved := []measure.Submission{{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3)}}
+	section := buildSection(measure.CollectSpans(unresolved), submit.Pacing{Submitted: 1}, unresolved, testOptions(), 0, nil, measure.ErrWatchClosed)
+
+	if !section.Failed || !strings.Contains(section.Error, "the cluster watch died, 1 workloads could not be followed") || strings.Contains(section.Error, "never reached the cluster") {
+		t.Fatalf("a dead watch is a measurement failure, not a slow cluster: %+v", section)
 	}
 }

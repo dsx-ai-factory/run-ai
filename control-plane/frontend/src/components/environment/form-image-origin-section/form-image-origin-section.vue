@@ -27,6 +27,7 @@
     <form-ngc-catalog-image-section
       v-else-if="imageOriginValue === EImageOrigin.NGC"
       :support-authenticated-ngc="supportAuthenticatedNgc"
+      :authenticated-only="authenticatedOnly"
       :scope-id="scopeId"
       :scope-type="scopeType"
       :cluster-id="clusterId"
@@ -98,6 +99,10 @@ export default defineComponent({
       default: false,
     },
     supportAuthenticatedNgc: {
+      type: Boolean,
+      default: false,
+    },
+    authenticatedOnly: {
       type: Boolean,
       default: false,
     },

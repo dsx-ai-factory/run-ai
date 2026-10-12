@@ -3013,8 +3013,6 @@ clusterMigrator:
   config:
     logLevel: Info
     migrationVersion: v1
-    #   migrationType could be "clusters", "nodepools", "nodepool_system_settings" or "all". default "clusters"
-    migrationType: all
     tenantsToMigrate: ''
     tenantsToNotMigrate: ''
     markCompleted: true

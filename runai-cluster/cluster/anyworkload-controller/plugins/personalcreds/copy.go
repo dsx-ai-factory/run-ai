@@ -13,7 +13,7 @@ import (
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile/issue"
-	cryptoutils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders/utils"
+	workloadconfig "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/config"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -41,7 +41,7 @@ func (p *Plugin) HandleAdditionalResources(
 		return state.AddPluginIssue(ctx, p, runner, fmt.Errorf("invalid %s annotation: %w", pcreds.Annotation, err), true, "", issue.Internal)
 	}
 
-	key, err := cryptoutils.GetEncryptionKey()
+	key, err := workloadconfig.GetAdsEncryptionKey()
 	if err != nil {
 		return state.AddPluginIssue(ctx, p, runner, fmt.Errorf("encryption key unavailable: %w", err), true, "", issue.Internal)
 	}

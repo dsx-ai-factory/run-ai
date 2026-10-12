@@ -10,5 +10,8 @@ packages:
       include-auto-generated: true
     interfaces:
       HealthAPI: {}
+      HelmReposAPI: {}
       ImagesAPI: {}
+      InferencesAPI: {}
       RegistriesAPI: {}
+      SettingsAPI: {}

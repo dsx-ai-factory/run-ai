@@ -184,6 +184,14 @@ If you require both the MPI Operator and Kubeflow Training Operator, follow the 
 
 NVIDIA Run:ai uses [Knative Serving](https://knative.dev/docs/serving/) to enable standard (single-node) inference. Knative Serving lets a tenant serve AI models as production workloads, using NVIDIA NIM, vLLM, or custom inference servers. It provides serverless, dynamic autoscaling (including scale to zero when idle), rolling updates without disrupting served traffic, and endpoints reachable via external access (a wildcard FQDN) or internal, cluster-local access. Supports Knative versions 1.19 to 1.21.
 
+<Note>
+
+**Note**
+
+On OpenShift, Knative is installed through the OpenShift Serverless operator, which supports Knative 1.17 only.
+
+</Note>
+
 To configure inference:
 
 * **Inference request metrics (OTLP)** - For Knative Serving 1.19 or later, add the `observability` block to your `KnativeServing` YAML to export request metrics to the NVIDIA Run:ai API and UI. See [Inference Request Metrics (OTLP)](#inference-request-metrics-otlp) below.

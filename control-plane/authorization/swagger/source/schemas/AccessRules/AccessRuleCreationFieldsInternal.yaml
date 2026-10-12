@@ -8,7 +8,7 @@ properties:
   subjectId:
     type: string
     example: "user@run.ai"
-    description: The unique identifier of the subject (e.g., user, group, or app).
+    description: The unique identifier of the subject (e.g., user, group, or service account).
   roleId:
     type: integer
     format: int32

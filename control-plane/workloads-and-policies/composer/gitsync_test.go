@@ -6,14 +6,12 @@
 package composer
 
 import (
-	"context"
-
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_groups"
 	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -115,14 +113,12 @@ var _ = Describe("BuildGitSyncInitContainers resources", func() {
 
 var _ = Describe("BuildGitSyncInitContainers parity", func() {
 	var (
-		ctx             context.Context
 		containerFields *field_groups.ContainerFields
 		storageFields   *field_groups.StorageFields
 		cfg             ClusterStorageConfig
 	)
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		for _, name := range gitSyncEnvVars {
 			GinkgoT().Setenv(name, "")
 		}
@@ -144,7 +140,7 @@ var _ = Describe("BuildGitSyncInitContainers parity", func() {
 	})
 
 	expectParity := func() {
-		clusterOut := builders.GetGitSyncInitContainers(ctx, containerFields, storageFields, false)
+		clusterOut := legacyOutput[[]corev1.Container]("GetGitSyncInitContainers")
 		cpOut, err := BuildGitSyncInitContainers(gitSyncInfoFromStorageFields(storageFields, cfg))
 		Expect(err).To(BeNil())
 		Expect(cpOut).To(Equal(clusterOut))
@@ -256,7 +252,7 @@ var _ = Describe("BuildGitSyncInitContainers parity", func() {
 
 	Context("Documented SecurityContext divergence from the cluster builder", func() {
 		expectSecurityContextDivergence := func() {
-			clusterOut := builders.GetGitSyncInitContainers(ctx, containerFields, storageFields, false)
+			clusterOut := legacyOutput[[]corev1.Container]("GetGitSyncInitContainers")
 			cpOut, err := BuildGitSyncInitContainers(gitSyncInfoFromStorageFields(storageFields, cfg))
 			Expect(err).To(BeNil())
 
@@ -302,7 +298,7 @@ var _ = Describe("BuildGitSyncInitContainers parity", func() {
 				Value: &flds.GitSyncItemValue{Repository: &repoUrl},
 			}
 
-			clusterIsJupyter := builders.GetGitSyncInitContainers(ctx, containerFields, storageFields, true)
+			clusterIsJupyter := legacyOutput[[]corev1.Container]("GetGitSyncInitContainers")
 			cpOut, err := BuildGitSyncInitContainers(gitSyncInfoFromStorageFields(storageFields, cfg))
 			Expect(err).To(BeNil())
 
@@ -310,8 +306,8 @@ var _ = Describe("BuildGitSyncInitContainers parity", func() {
 			Expect(clusterIsJupyter).To(HaveLen(1))
 			Expect(cpOut[0].SecurityContext).To(BeNil())
 			Expect(clusterIsJupyter[0].SecurityContext).NotTo(BeNil())
-			Expect(*clusterIsJupyter[0].SecurityContext.RunAsUser).To(Equal(builders.DefaultJupyterUid))
-			Expect(*clusterIsJupyter[0].SecurityContext.RunAsGroup).To(Equal(builders.DefaultJupyterGid))
+			Expect(*clusterIsJupyter[0].SecurityContext.RunAsUser).To(Equal(int64(1000)))
+			Expect(*clusterIsJupyter[0].SecurityContext.RunAsGroup).To(Equal(int64(100)))
 		})
 	})
 

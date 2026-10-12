@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/ClickHouse/ch-go v0.74.0 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.48.0 // indirect
+	github.com/ClickHouse/clickhouse-go/v2 v2.49.0 // indirect
 	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/ThreeDotsLabs/watermill v1.5.3 // indirect
@@ -54,9 +54,9 @@ require (
 	github.com/paulmach/orb v0.13.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.33 // indirect
-	github.com/prometheus/client_golang v1.24.1 // indirect
+	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.71.0 // indirect
+	github.com/prometheus/common v0.72.0 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
 	github.com/redis/go-redis/v9 v9.23.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
@@ -88,7 +88,7 @@ require (
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/exp v0.0.0-20261005173118-76772065c9b0 // indirect
+	golang.org/x/exp v0.0.0-20261007192929-f45ad48fbe92 // indirect
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect

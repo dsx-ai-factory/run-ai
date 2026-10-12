@@ -28,3 +28,105 @@ get:
       $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
     503:
       $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+
+post:
+  summary: create a Device Class
+  operationId: createDeviceClass
+  x-internal: true
+  x-authorize:
+    resource-type: device-classes
+    action: sync
+  x-service: k8s-objects-tracker
+  x-audit: false
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  tags:
+    - Device Classes
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/DeviceClass/DeviceClass.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/DeviceClass/DeviceClass.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+
+put:
+  summary: update a Device Class
+  operationId: updateDeviceClass
+  x-internal: true
+  x-authorize:
+    resource-type: device-classes
+    action: sync
+  x-service: k8s-objects-tracker
+  x-audit: false
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  tags:
+    - Device Classes
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/DeviceClass/DeviceClass.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/DeviceClass/DeviceClass.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+
+delete:
+  summary: delete a Device Class
+  operationId: deleteDeviceClass
+  tags:
+    - Device Classes
+  x-internal: true
+  x-service: k8s-objects-tracker
+  x-audit: false
+  x-authorize:
+    resource-type: device-classes
+    action: delete
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+    - $ref: '../parameters/query/mandatory/ObjectByName.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

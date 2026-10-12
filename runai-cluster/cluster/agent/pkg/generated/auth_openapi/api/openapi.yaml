@@ -525,7 +525,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: unexpected error
       summary: "Create an access rule. Bind a predefined role to a subject (user,\
-        \ group or app) in some scope."
+        \ group or service account) in some scope."
       tags:
       - AccessRules
       x-authorize:
@@ -1913,11 +1913,10 @@ components:
       - $ref: '#/components/schemas/AccessRuleStatusRequest'
       - $ref: '#/components/schemas/AccessRuleForSync_allOf'
     SubjectType:
-      description: "Subject type enum for access rules.\n\nNote: The 'app' subject\
-        \ type is DEPRECATED. Please use 'service-account' instead for service accounts.\n"
+      description: |
+        Subject type enum for access rules.
       enum:
       - user
-      - app
       - service-account
       - group
       type: string

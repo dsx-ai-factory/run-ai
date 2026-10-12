@@ -19,8 +19,11 @@ import (
 type fakeSuite struct {
 	name          string
 	category      core.Category
+	knobs         []string
+	validate      error
 	fail          bool
 	failedSection bool
+	onRun         func()
 	calls         int
 	got           core.Scenario
 }
@@ -34,9 +37,16 @@ func (f *fakeSuite) Category() core.Category {
 	return f.category
 }
 
+func (f *fakeSuite) Knobs() []string { return f.knobs }
+
+func (f *fakeSuite) Validate(scenario core.Scenario) error { return f.validate }
+
 func (f *fakeSuite) Run(ctx context.Context, target core.Target, scenario core.Scenario) (core.Section, error) {
 	f.calls++
 	f.got = scenario
+	if f.onRun != nil {
+		f.onRun()
+	}
 	if f.fail {
 		return core.Section{}, fmt.Errorf("boom")
 	}
@@ -227,8 +237,10 @@ func TestRunOnlyUnknownNameFailsBeforeAnythingRuns(t *testing.T) {
 func TestRunOverridesReplaceKnobsWithoutTouchingOthers(t *testing.T) {
 	dir := t.TempDir()
 	writeScenario(t, dir, "alpha.yaml", "suite: fake-a\nworkloads: [100, 250, 500]\nworkloadType: Training\n")
-	a := &fakeSuite{name: "fake-a"}
-	registry := map[string]core.Suite{"fake-a": a}
+	writeScenarioIn(t, dir, "load", "beta.yaml", "suite: fake-b\nrate: 2\n")
+	a := &fakeSuite{name: "fake-a", knobs: []string{"workloads", "workloadType"}}
+	b := &fakeSuite{name: "fake-b", category: core.CategoryLoad, knobs: []string{"rate"}}
+	registry := map[string]core.Suite{"fake-a": a, "fake-b": b}
 
 	overrides := map[string]any{"workloads": []any{100}}
 	if _, err := Run(context.Background(), core.Target{}, dir, registry, Options{Overrides: overrides}); err != nil {
@@ -240,6 +252,45 @@ func TestRunOverridesReplaceKnobsWithoutTouchingOthers(t *testing.T) {
 	}
 	if kind, _ := a.got.String("workloadType", ""); kind != "Training" {
 		t.Errorf("untouched knob workloadType changed to %q", kind)
+	}
+	if _, present := b.got.Knobs["workloads"]; present {
+		t.Errorf("an override must not reach a suite that has no such knob: %v", b.got.Knobs)
+	}
+}
+
+func TestRunValidatesEveryScenarioBeforeStartingAny(t *testing.T) {
+	dir := t.TempDir()
+	writeScenario(t, dir, "good.yaml", "suite: fake-a\n")
+	writeScenario(t, dir, "bad.yaml", "suite: fake-b\n")
+	a := &fakeSuite{name: "fake-a"}
+	b := &fakeSuite{name: "fake-b", validate: fmt.Errorf("unknown knob \"workloadTipe\"")}
+
+	_, err := Run(context.Background(), core.Target{}, dir, map[string]core.Suite{"fake-a": a, "fake-b": b}, Options{})
+
+	if err == nil || !strings.Contains(err.Error(), `scenario "bad": unknown knob`) {
+		t.Fatalf("a bad scenario must be reported by name before the run: %v", err)
+	}
+	if a.calls != 0 {
+		t.Fatalf("no scenario may start when another one is invalid, ran %d", a.calls)
+	}
+}
+
+func TestInterruptionKeepsTheFailuresOfEarlierScenarios(t *testing.T) {
+	dir := t.TempDir()
+	writeScenario(t, dir, "a.yaml", "suite: fake-a\n")
+	writeScenario(t, dir, "b.yaml", "suite: fake-b\n")
+	ctx, cancel := context.WithCancel(context.Background())
+	a := &fakeSuite{name: "fake-a", fail: true}
+	b := &fakeSuite{name: "fake-b"}
+	a.onRun = cancel
+
+	_, err := Run(ctx, core.Target{}, dir, map[string]core.Suite{"fake-a": a, "fake-b": b}, Options{})
+
+	if err == nil || !strings.Contains(err.Error(), `scenario "a": boom`) || !strings.Contains(err.Error(), "context canceled") {
+		t.Fatalf("the final error must carry the earlier failure and the interruption: %v", err)
+	}
+	if b.calls != 0 {
+		t.Fatalf("nothing may start after the interruption, b ran %d times", b.calls)
 	}
 }
 

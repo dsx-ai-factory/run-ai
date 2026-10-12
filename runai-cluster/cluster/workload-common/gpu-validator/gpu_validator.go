@@ -10,7 +10,7 @@ import (
 	"errors"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_groups"
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	"k8s.io/utils/ptr"
 )
 
@@ -87,7 +87,7 @@ func (self *gpuValidator) ValidateWorkloadAnyGPU(ctx context.Context, resourceFi
 	}
 
 	//backward compatibility without gpuDevices
-	if workloadbuilders.IsWholeWithFractionalGpu(ctx, resourceFields.Gpu.Deref()) {
+	if IsWholeWithFractionalGpu(ctx, resourceFields.Gpu.Deref()) {
 		return errors.New(WholeGPUWithFractionalGPUError)
 	}
 
@@ -122,7 +122,7 @@ func (self *gpuValidator) DetermineGpuDevicesAndFraction(ctx context.Context,
 		if gpuSpecified {
 			// only gpu specified, so either 1 gpu with specified gpu portion, or whole number (integer) or gpu devices
 			gpuValue := resourceFields.Gpu.DerefStr()
-			if workloadbuilders.IsFractionalGpu(ctx, gpuValue) {
+			if IsFractionalGpu(ctx, gpuValue) {
 				return 1, ptr.To(gpuValue), nil // 1 gpu, fractional
 			} else {
 				return int(resourceFields.Gpu.Deref()), nil, nil // whole number of gpus
@@ -147,7 +147,7 @@ func (self *gpuValidator) DetermineGpuDevicesAndFraction(ctx context.Context,
 			return gpuDevices, nil, errors.New("when the value of 'gpuDevices' is 0, 'gpu' should not be specified")
 		}
 		gpuValueStr := resourceFields.Gpu.DerefStr()
-		if workloadbuilders.IsFractionalGpu(ctx, gpuValueStr) {
+		if IsFractionalGpu(ctx, gpuValueStr) {
 			// combination of gpuDevices + fractional gpu
 			return gpuDevices, &gpuValueStr, nil
 		}

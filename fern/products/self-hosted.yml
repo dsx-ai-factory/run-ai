@@ -56,13 +56,20 @@ navigation:
         path: ../../docs/installation-and-configuration/system-requirements/infrastructure-requirements.md
       - page: Networking Setup
         path: ../../docs/installation-and-configuration/system-requirements/networking-setup.md
-      - page: Third-Party Services
-        path: ../../docs/installation-and-configuration/system-requirements/third-party-services.md
+      - section: Third-Party Services
+        slug: third-party-services
+        contents:
+        - page: Standard Third-Party Services
+          path: ../../docs/installation-and-configuration/system-requirements/third-party-services.md
+        - page: Gov-Ready Third-Party Services
+          path: ../../docs/installation-and-configuration/system-requirements/gov-ready-third-party-services.md
       - page: External Access to Critical Services
         path: ../../docs/installation-and-configuration/system-requirements/external-access-to-critical-services.md
     - section: Installation
       slug: install
       contents:
+      - page: Gov-Ready Installation
+        path: ../../docs/installation-and-configuration/installation/gov-ready-installation.md
       - section: Guided Installation (Recommended)
         slug: guided-installation
         path: ../../docs/installation-and-configuration/installation/guided-installation/README.md

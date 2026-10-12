@@ -57,6 +57,81 @@ func (s *DeviceClassesAPIService) GetDeviceClasses(ctx context.Context, clusterI
 	return Response(http.StatusNotImplemented, nil), errors.New("GetDeviceClasses method not implemented")
 }
 
+// UpdateDeviceClass - update a Device Class
+func (s *DeviceClassesAPIService) UpdateDeviceClass(ctx context.Context, deviceClass DeviceClass) (ImplResponse, error) {
+	// TODO - update UpdateDeviceClass with the required logic for this service method.
+	// Add api_device_classes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, DeviceClass{}) or use other options such as http.Ok ...
+	// return Response(200, DeviceClass{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("UpdateDeviceClass method not implemented")
+}
+
+// CreateDeviceClass - create a Device Class
+func (s *DeviceClassesAPIService) CreateDeviceClass(ctx context.Context, deviceClass DeviceClass) (ImplResponse, error) {
+	// TODO - update CreateDeviceClass with the required logic for this service method.
+	// Add api_device_classes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, DeviceClass{}) or use other options such as http.Ok ...
+	// return Response(200, DeviceClass{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("CreateDeviceClass method not implemented")
+}
+
+// DeleteDeviceClass - delete a Device Class
+func (s *DeviceClassesAPIService) DeleteDeviceClass(ctx context.Context, clusterId string, name string) (ImplResponse, error) {
+	// TODO - update DeleteDeviceClass with the required logic for this service method.
+	// Add api_device_classes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(204, {}) or use other options such as http.Ok ...
+	// return Response(204, nil),nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
+	// return Response(404, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("DeleteDeviceClass method not implemented")
+}
+
 // SyncDeviceClass - Sync cluster Device Classes
 func (s *DeviceClassesAPIService) SyncDeviceClass(ctx context.Context, clusterId string, deviceClasses DeviceClasses) (ImplResponse, error) {
 	// TODO - update SyncDeviceClass with the required logic for this service method.

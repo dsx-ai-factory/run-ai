@@ -66,6 +66,8 @@ type APIClient struct {
 
 	PVCsAPI PVCsAPI
 
+	ResourceClaimTemplatesAPI ResourceClaimTemplatesAPI
+
 	SecretsAPI SecretsAPI
 
 	StorageClassConfigurationAPI StorageClassConfigurationAPI
@@ -94,6 +96,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.DeviceClassesAPI = (*DeviceClassesAPIService)(&c.common)
 	c.HealthAPI = (*HealthAPIService)(&c.common)
 	c.PVCsAPI = (*PVCsAPIService)(&c.common)
+	c.ResourceClaimTemplatesAPI = (*ResourceClaimTemplatesAPIService)(&c.common)
 	c.SecretsAPI = (*SecretsAPIService)(&c.common)
 	c.StorageClassConfigurationAPI = (*StorageClassConfigurationAPIService)(&c.common)
 	c.StorageClassesAPI = (*StorageClassesAPIService)(&c.common)
