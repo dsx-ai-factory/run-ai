@@ -69,8 +69,10 @@ func TestParseSettings(t *testing.T) {
 		{name: "slo on a count", knobs: map[string]any{"slo": map[string]any{"never_arrived_count": 0}}, wantErr: `slo key "never_arrived_count" is not a latency`},
 		{name: "slo per round", knobs: map[string]any{"slo": map[string]any{"p90_ms": 5000, "p90_ms@500": 60000}},
 			want: settings{rounds: []int{100, 250, 500}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p90_ms": 5000, "p90_ms@500": 60000}}},
-		{name: "slo for a round that does not exist", knobs: map[string]any{"slo": map[string]any{"p90_ms@999": 1}}, wantErr: `slo key "p90_ms@999" names a round that is not in workloads [100 250 500]`},
-		{name: "slo with a bad round", knobs: map[string]any{"slo": map[string]any{"p90_ms@big": 1}}, wantErr: `names a round that is not in workloads`},
+		{name: "slo for a round not in this run is kept for the file and ignored at run time", knobs: map[string]any{"workloads": []any{20}, "slo": map[string]any{"p90_ms": 5000, "p90_ms@500": 60000}},
+			want: settings{rounds: []int{20}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p90_ms": 5000, "p90_ms@500": 60000}}},
+		{name: "slo with a bad round", knobs: map[string]any{"slo": map[string]any{"p90_ms@big": 1}}, wantErr: `slo key "p90_ms@big" must end with a round size`},
+		{name: "slo with a zero round", knobs: map[string]any{"slo": map[string]any{"p90_ms@0": 1}}, wantErr: `must end with a round size`},
 		{name: "slo on p99 and max", knobs: map[string]any{"slo": map[string]any{"p99_ms": 9000, "max_ms": 20000}},
 			want: settings{rounds: []int{100, 250, 500}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p99_ms": 9000, "max_ms": 20000}}},
 	}
@@ -633,6 +635,19 @@ func TestDescribeRound(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestSectionKeepsOnlyTheSLOsOfTheRoundsThatRan(t *testing.T) {
+	knobs := quick()
+	knobs.rounds = []int{20}
+	knobs.slo = map[string]int{"p90_ms": 8000, "p90_ms@250": 40000, "p90_ms@500": 160000, "max_ms@500": 180000}
+	rounds := []round{{index: 1, size: 20, timings: []measure.Timing{timing("a", measure.Arrived, time.Second, nil), timing("b", measure.Arrived, 2*time.Second, nil)}}}
+
+	section := buildSection(rounds, knobs)
+
+	if len(section.SLO) != 1 || section.SLO["p90_ms"] != 8000 {
+		t.Fatalf("a --workloads override must not drag the limits of rounds that did not run into the report: %v", section.SLO)
 	}
 }
 

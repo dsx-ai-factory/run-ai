@@ -212,7 +212,7 @@ func newControlPlaneFlow(workloadType string, clients *client.Clients, project s
 	return &controlPlaneFlow{workloadType: workloadType, clients: clients, project: project, concurrency: concurrency, created: map[string]string{}, deleteRequested: map[string]bool{}}
 }
 
-func validateSLOKey(key string, rounds []int) error {
+func validateSLOKey(key string) error {
 	stat, round, perRound := strings.Cut(key, "@")
 	if !slices.Contains(sloKeys, stat) {
 		return fmt.Errorf("slo key %q is not a latency this suite reports; use one of %s, optionally with @<round size>", key, strings.Join(sloKeys, ", "))
@@ -220,11 +220,26 @@ func validateSLOKey(key string, rounds []int) error {
 	if !perRound {
 		return nil
 	}
-	size, err := strconv.Atoi(round)
-	if err != nil || !slices.Contains(rounds, size) {
-		return fmt.Errorf("slo key %q names a round that is not in workloads %v", key, rounds)
+	if size, err := strconv.Atoi(round); err != nil || size < 1 {
+		return fmt.Errorf("slo key %q must end with a round size, e.g. %s@500", key, stat)
 	}
 	return nil
+}
+
+func applicableSLOs(slo map[string]int, rounds []int) map[string]int {
+	if slo == nil {
+		return nil
+	}
+	applicable := make(map[string]int, len(slo))
+	for key, value := range slo {
+		if _, round, perRound := strings.Cut(key, "@"); perRound {
+			if size, _ := strconv.Atoi(round); !slices.Contains(rounds, size) {
+				continue
+			}
+		}
+		applicable[key] = value
+	}
+	return applicable
 }
 
 func parseSettings(scenario core.Scenario) (settings, error) {
@@ -272,7 +287,7 @@ func parseSettings(scenario core.Scenario) (settings, error) {
 		return settings{}, err
 	}
 	for key := range knobs.slo {
-		if err := validateSLOKey(key, knobs.rounds); err != nil {
+		if err := validateSLOKey(key); err != nil {
 			return settings{}, err
 		}
 	}
@@ -457,7 +472,7 @@ func buildSection(rounds []round, knobs settings) core.Section {
 		problems = append(problems, fmt.Sprintf("run stopped after %d of %d rounds", len(rounds), len(knobs.rounds)))
 	}
 
-	section := core.Section{Metrics: metrics, SLO: knobs.slo}
+	section := core.Section{Metrics: metrics, SLO: applicableSLOs(knobs.slo, knobs.rounds)}
 	if len(problems) > 0 {
 		section.Failed = true
 		section.Error = strings.Join(problems, "; ")
