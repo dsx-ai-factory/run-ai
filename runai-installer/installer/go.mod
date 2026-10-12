@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-installer/installer
 
-go 1.27.1
+go 1.27.2
 
 replace github.com/dsx-ai-factory/run-ai/runai-installer/clients => ../clients
 
