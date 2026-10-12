@@ -7,6 +7,7 @@ SERVICE_NAME=flowmark
 TAG_FORMAT=scale-load/$(SERVICE_NAME)
 DOCKER_WORK_DIR=/local/scale-load/${SERVICE_NAME}
 GOLANG_LINTER_CONFIG_PATH=../.golangci.yaml
+GOLANGCI_LINT_VERSION=v2.14.0
 BIN_DIR=$(shell pwd)/bin
 
 build:
