@@ -12,6 +12,7 @@
     "config:recommended",
     "mergeConfidence:all-badges",
     "github>run-ai/runai-actions//renovate/presets/go-common",
+    "github>run-ai/runai-actions//renovate/presets/custom_annotation",
     "github>run-ai/runai-actions//renovate/presets/runai-internal",
     "github>run-ai/runai-actions//renovate/presets/mockery",
     "github>run-ai/runai-actions//renovate/presets/notice(NVIDIA Run:ai)",
