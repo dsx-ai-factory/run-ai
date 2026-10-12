@@ -18451,7 +18451,7 @@ the license terms, and this copy of it was never filled in, so it is omitted
 here rather than reproduced with unresolved placeholders.]
 
 --------------------------------------------------------------------------------
-Copyright the authors of contrib.go.opencensus.io/exporter/ocagent, contrib.go.opencensus.io/exporter/prometheus, github.com/NVIDIA/k8s-nim-operator and 46 others - Apache-2.0
+Copyright the authors of contrib.go.opencensus.io/exporter/ocagent, contrib.go.opencensus.io/exporter/prometheus, github.com/NVIDIA/k8s-nim-operator and 47 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d
@@ -18478,6 +18478,7 @@ Components:
   github.com/nats-io/nuid v1.0.1
   github.com/oklog/ulid v1.3.1
   github.com/oklog/ulid/v2 v2.1.2
+  github.com/open-telemetry/opentelemetry-java-instrumentation v2.29.0
   github.com/openshift/cluster-monitoring-operator/pkg v0.1.1-0.20260630153100-436164286f78
   github.com/openshift/custom-resource-status/conditions/v1 v1.1.2
   github.com/openshift/library-go/pkg v0.0.0-20260409165127-c57da2bf5720
@@ -34893,6 +34894,101 @@ Modifications Copyright 2014-2021 Docker Inc.
 
 The BSD license text and Go patent grant are included in
 spdy/LICENSE and spdy/PATENTS.
+
+--------------------------------------------------------------------------------
+NOTICE of github.com/open-telemetry/opentelemetry-java-instrumentation [META-INF/licenses/byte-buddy-dep-1.18.10.jar/META-INF/NOTICE]
+Components:
+  github.com/open-telemetry/opentelemetry-java-instrumentation [META-INF/licenses/byte-buddy-dep-1.18.10.jar/META-INF/NOTICE] v2.29.0
+
+Copyright 2014 - Present Rafael Winterhalter
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+--------------------------------------------------------------------------------
+NOTICE of github.com/open-telemetry/opentelemetry-java-instrumentation [META-INF/licenses/jackson-annotations-2.22.jar/META-INF/NOTICE], github.com/open-telemetry/opentelemetry-java-instrumentation [META-INF/licenses/jackson-databind-2.22.0.jar/META-INF/NOTICE]
+Components:
+  github.com/open-telemetry/opentelemetry-java-instrumentation [META-INF/licenses/jackson-annotations-2.22.jar/META-INF/NOTICE] v2.29.0
+  github.com/open-telemetry/opentelemetry-java-instrumentation [META-INF/licenses/jackson-databind-2.22.0.jar/META-INF/NOTICE] v2.29.0
+
+# Jackson JSON processor
+
+Jackson is a high-performance, Free/Open Source JSON processing library.
+It was originally written by Tatu Saloranta (tatu.saloranta@iki.fi), and has
+been in development since 2007.
+It is currently developed by a community of developers.
+
+## Copyright
+
+Copyright 2007-, Tatu Saloranta (tatu.saloranta@iki.fi)
+
+## Licensing
+
+Jackson 2.x core and extension components are licensed under Apache License 2.0
+To find the details that apply to this artifact see the accompanying LICENSE file.
+
+## Credits
+
+A list of contributors may be found from CREDITS(-2.x) file, which is included
+in some artifacts (usually source distributions); but is always available
+from the source code management (SCM) system project uses.
+
+--------------------------------------------------------------------------------
+NOTICE of github.com/open-telemetry/opentelemetry-java-instrumentation [META-INF/licenses/jackson-core-2.22.0.jar/META-INF/NOTICE]
+Components:
+  github.com/open-telemetry/opentelemetry-java-instrumentation [META-INF/licenses/jackson-core-2.22.0.jar/META-INF/NOTICE] v2.29.0
+
+# Jackson JSON processor
+
+Jackson is a high-performance, Free/Open Source JSON processing library.
+It was originally written by Tatu Saloranta (tatu.saloranta@iki.fi), and has
+been in development since 2007.
+It is currently developed by a community of developers.
+
+## Copyright
+
+Copyright 2007-, Tatu Saloranta (tatu.saloranta@iki.fi)
+
+## Licensing
+
+Jackson 2.x core and extension components are licensed under Apache License 2.0
+To find the details that apply to this artifact see the accompanying LICENSE file.
+
+## Credits
+
+A list of contributors may be found from CREDITS(-2.x) file, which is included
+in some artifacts (usually source distributions); but is always available
+from the source code management (SCM) system project uses.
+
+## FastDoubleParser
+
+jackson-core bundles a shaded copy of FastDoubleParser <https://github.com/wrandelshofer/FastDoubleParser>.
+That code is available under an MIT license <https://github.com/wrandelshofer/FastDoubleParser/blob/main/LICENSE>
+under the following copyright.
+
+Copyright © 2023 Werner Randelshofer, Switzerland. MIT License.
+
+See FastDoubleParser-LICENSE and also FastDoubleParser-ThirdParty-LICENSE for details of other source code
+included in FastDoubleParser and the licenses and copyrights that apply to that code.
+
+## Schubfach
+
+jackson-core bundles a copy of the Schubfach number writing code <https://github.com/c4f7fcce9cb06515/Schubfach>.
+That code is available under an MIT license <https://github.com/c4f7fcce9cb06515/Schubfach/blob/master/todec/LICENSE>
+under the following copyright.
+
+Copyright 2018-2020 Raffaello Giulietti
+
+See Schubfach-LICENSE.
 
 --------------------------------------------------------------------------------
 NOTICE of github.com/prometheus/alertmanager
