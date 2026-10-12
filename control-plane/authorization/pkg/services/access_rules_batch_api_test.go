@@ -195,8 +195,10 @@ var _ = Describe("Access rules batch API tests", Ordered, func() {
 		})
 
 		It("Some failed Deletion Batch", func() {
+			viewer, apiErr := dao.DbGetRoleById(ctx, tenantId, dao.MapStaticRoleNameToRoleId[static_roles.Viewer.Name])
+			Expect(apiErr).To(BeNil())
 			var almostAllPermissions []*models.Permission
-			for _, permission := range static_roles.Viewer.Permissions {
+			for _, permission := range viewer.Permissions {
 				if permission.ResourceType == api.RESOURCETYPE_DEPARTMENT {
 					continue
 				}

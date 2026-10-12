@@ -206,6 +206,7 @@ func startWatchClients(kubeConfig *rest.Config, scheme *apiruntime.Scheme, ctx c
 	controllers.AddDepartmentHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddStorageClassHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddDeviceClassHandlerToCache(runaiBackendClient, cachedClient)
+	controllers.AddResourceClaimTemplateHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddPriorityClassHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddNetworkTopologyHandlerToCache(runaiBackendClient, cachedClient)
 	controllers.AddApplicationHandlerToCache(runaiBackendClient, cachedClient)

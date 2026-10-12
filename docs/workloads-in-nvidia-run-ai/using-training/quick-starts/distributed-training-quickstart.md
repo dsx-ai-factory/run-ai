@@ -73,7 +73,8 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
     In the next step:
 10. Under **Environment**, enter the **Image URL** - `kubeflow/pytorch-dist-mnist:latest`
-11. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘small-fraction’** compute resource for your workload.
+11. Under **Runtime settings**, click **+COMMAND & ARGUMENTS**, then set the **Arguments** to `--epochs 100`.
+12. Under **Compute resources**, click the **load** icon. A side pane appears, displaying a list of available compute resources. Select the **‘small-fraction’** compute resource for your workload.
     * If ‘small-fraction’ is not displayed, follow the below steps to create a one-time compute resource configuration:
       * Set **GPU devices** per pod - 1
       * Enable **GPU fractioning** to set the GPU memory per device:
@@ -81,8 +82,8 @@ To use the API, you will need to obtain a token as shown in [API authentication]
         * Set the memory **Request** - 10 (the workload will allocate 10% of the GPU memory)
       * Optional: set the **CPU compute per pod** - 0.1 cores (default)
       * Optional: set the **CPU memory per pod** - 100 MB (default)
-12. Click **CONTINUE**
-13. Click **CREATE TRAINING**
+13. Click **CONTINUE**
+14. Click **CREATE TRAINING**
 
 </Tab>
 
@@ -104,6 +105,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
     * Click **+NEW ENVIRONMENT**
     * Enter pytorch-dt as the **name** for the environment. The name must be unique.
     * Enter `kubeflow/pytorch-dist-mnist:latest` as the **Image URL**
+    * Set the runtime settings for the environment. Click **+COMMAND & ARGUMENTS** and enter the arguments - `--epochs 100`
     * Click **CREATE ENVIRONMENT**
 
     The newly created environment will be selected automatically
@@ -135,7 +137,8 @@ runai project set "project-name"
 runai training pytorch submit "workload-name" \
 -i kubeflow/pytorch-dist-mnist:latest --workers 2 \
 --gpu-request-type portion --gpu-portion-request 0.1 \
---gpu-devices-request 1 --cpu-memory-request 100M
+--gpu-devices-request 1 --cpu-memory-request 100M \
+-- --epochs 100
 ```
 
 </Tab>
@@ -161,9 +164,11 @@ curl -L 'https://<COMPANY-URL>/api/v1/workloads/distributed' \
             "gpuPortionRequest": 0.1
         },
         "image": "kubeflow/pytorch-dist-mnist:latest",  
+        "args": "--epochs 100",
         "numWorkers": 2, 
         "distributedFramework": "PyTorch" 
-    } 
+    },
+    "masterSpecSameAsWorker": true
 }
 ```
 

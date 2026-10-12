@@ -2,17 +2,16 @@
 
 `cluster-migrator` is a **run-once database migration job** in the Run:ai
 control plane, owned by the **Griffin** team. It is not a long-running service
-and exposes **no HTTP API**. It copies cluster-related data out of the legacy
-2.15 `backend` schema and into the schemas used by the newer
-`cluster-service`/`org-unit-service` world (2.16+), translating each record into
-the new shape as it goes. The source data is only read — it is never modified —
+and exposes **no HTTP API**. It copies each tenant's node-pool system settings out
+of the legacy `backend` schema and onto that tenant's node pools in the
+`cluster_service` schema. The source data is only read — it is never modified —
 so the job is safe to re-run and to roll back to.
 
 The job is executed by the control-plane Helm chart during install/upgrade (as a
 Kubernetes `Job`, `runai-backend-cluster-migrator`). It runs after the target
 schemas exist and before the services that own those schemas begin serving, so
-that upgraded tenants come up with their clusters, node pools and node-pool
-system settings already present.
+that upgraded tenants come up with their node-pool system settings already
+present.
 
 ## Contents
 
@@ -28,33 +27,31 @@ system settings already present.
 
 The job connects to a single PostgreSQL database and opens three GORM
 connections against different schemas: the **source** schema (`backend`, the
-legacy 2.15 data), the **target** schema (`cluster_service`, the destination),
+legacy data), the **target** schema (`cluster_service`, the destination),
 and a schema-less "global" connection. On start it auto-migrates its own
-bookkeeping tables (`ClustersMigrationControl`,
-`NodepoolSystemSettingsMigrationControl`) in the target schema; these record
-which migrations have already completed so the job is idempotent.
+bookkeeping table (`NodepoolSystemSettingsMigrationControl`) in the target
+schema; it records which tenants have already been migrated so the job is
+idempotent.
 
-`cmd/main.go` then runs one or more migration phases depending on the configured
-migration type (`clusters`, `nodepools`, `nodepool_system_settings`, or `all`).
-Each phase first checks its version-control marker and exits early if the
-migration is already done, so re-running the job is a no-op once it has
-succeeded.
+`cmd/main.go` then runs the migration. It first checks the version-control
+marker and exits early if the migration is already done, so re-running the job
+is a no-op once it has succeeded.
 
 ## What it migrates
 
-- **Clusters** (`clusters/migration`) — reads `cluster_uuid`, `cluster_name`,
-  `tenant_id`, `domain`, `version`, `last_liveness`, `created_at`/`updated_at`
-  from the legacy `backend.clusters` table and writes the equivalent rows into
-  the `cluster_service` schema. If the source table does not exist
-  (Postgres `42P01`), the job concludes migration is unnecessary and finishes.
-- **Node pools** (`nodepools/migration`) — migrates per-tenant node-pool
-  definitions into the new schema.
-- **Node-pool system settings** (`nodepoolsystemsettings/migration`) — migrates
-  node-pool-level system settings; a failure here is fatal so the job surfaces
-  incomplete migrations loudly.
+- **Node-pool system settings** (`nodepoolsystemsettings/migration`) — reads
+  each tenant's `project.quota.cpu_resources` and
+  `project.quota.manual_over_quota` from `backend.tenant_settings` and writes
+  them to the `allow_cpu_quota` and `allow_adjustable_weights` columns of every
+  node pool the tenant has. Those columns come from cluster-service's 2.24.1
+  schema migration, so the job first waits up to 10 minutes for them to exist.
+  A failure here is fatal so the job surfaces incomplete migrations loudly.
 
-Each phase is guarded by a control/version table so partial progress is tracked
-and completed phases are skipped on the next run.
+Progress is tracked per tenant in a control table, so tenants already migrated
+are skipped on the next run.
+
+The 2.15 → 2.16 migrations that copied clusters and node pools out of the
+`backend` schema were removed once those versions were no longer supported.
 
 ## Repository layout
 
@@ -63,12 +60,7 @@ and completed phases are skipped on the next run.
 ├── cmd/                        # Job entry point (main.go)
 ├── config/                     # ConfigData struct + defaults (env/config driven)
 ├── database/                   # GORM connections, DAOs, and models
-│   └── models/                 # Cluster, nodepool, tenant, and migration-control models
-├── clusters/
-│   ├── migration/              # Cluster copy logic
-│   └── version_control/        # Cluster migration completion markers
-├── nodepools/
-│   └── migration/              # Node-pool migration logic (+ tests)
+│   └── models/                 # Tenant, tenant-setting and migration-control models
 ├── nodepoolsystemsettings/
 │   └── migration/              # Node-pool system-settings migration logic (+ tests)
 ├── Dockerfile
@@ -139,11 +131,12 @@ To iterate on just the control plane and reuse an existing cluster:
 
 | Target | Description |
 |--------|-------------|
-| `make test` | Runs the Ginkgo unit-test suites under `nodepools/migration` and `nodepoolsystemsettings/migration` |
+| `make test` | Runs the Ginkgo suite under `nodepoolsystemsettings/migration` |
 | `make lint` | golangci-lint |
 
-The tests are plain Ginkgo unit tests; there is no docker-compose integration
-suite for this job.
+The suite starts a throwaway Postgres container through `integdb`
+(testcontainers) and applies cluster-service's migrations to it, so Docker must
+be running.
 
 ## Configuration
 
@@ -156,11 +149,10 @@ Database connection settings come from the shared DAO config.
 
 | Key / env var | Description | Default |
 |---|---|---|
-| `db_migration_type` / `DB_MIGRATION_TYPE` | Which phase(s) to run: `clusters`, `nodepools`, `nodepool_system_settings`, or `all` | `clusters` |
 | `db_migration_version` / `DB_MIGRATION_VERSION` | Migration version marker; bump to force a re-run (e.g. `v2`) | `v1` |
 | `db_schema_source_backend` / `DB_SCHEMA_SOURCE_BACKEND` | Legacy source schema | `backend` |
 | `db_schema_target` / `DB_SCHEMA_TARGET` | Destination schema | `cluster_service` |
-| `should_mark_completed` / `SHOULD_MARK_COMPLETED` | Mark migration complete without copying | `false` |
+| `should_mark_completed` / `SHOULD_MARK_COMPLETED` | After the run, record a global completed marker so later runs skip the migration | `false` |
 | `tenants_to_migrate` / `TENANTS_TO_MIGRATE` | Restrict to these tenant ids | `[]` (all) |
 | `tenants_to_not_migrate` / `TENANTS_TO_NOT_MIGRATE` | Exclude these tenant ids | `[]` |
 

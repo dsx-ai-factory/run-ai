@@ -87,7 +87,7 @@ Each chart also bundles the third-party services it depends on (PostgreSQL, Keyc
 
 Start with [Connected Installation](connected/preparations.md) for an internet-connected environment, or [Air-Gapped Installation](air-gapped/preparations.md) for one with no outbound internet access. Each covers:
 
-* **Preparations** - System requirements, prerequisites and features, registry credentials, and downloading the installer (plus, for air-gapped, building the [air-gapped bundle](air-gapped/preparations.md#air-gapped-bundle)).
+* **Preparations** - System requirements, prerequisites and features, registry credentials, and downloading the installer. For air-gapped installations, this also includes building the [air-gapped bundle](air-gapped/preparations.md#air-gapped-bundle).
 * **Same-Cluster Installation** - Install the control plane and cluster together, on one Kubernetes cluster.
 * **Multi-Cluster Installation** - Install the control plane and one or more clusters on separate Kubernetes clusters.
 * **Configuration Templates** - Complete, ready-to-use configurations for specific use cases.

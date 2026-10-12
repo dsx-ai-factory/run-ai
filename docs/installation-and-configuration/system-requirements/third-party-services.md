@@ -35,16 +35,15 @@ PostgreSQL is the centralized database for the NVIDIA Run:ai control plane. It i
 
 #### Using an External PostgreSQL Instance
 
-To replace the deployed PostgreSQL with an external managed database, set `postgresql.enabled: false`, configure `global.postgresql.auth.*` with the external server connection details, and update `grafana.dbUser` and `grafana.dbPassword`.
+To replace the deployed PostgreSQL with an external managed database, set `postgresql.enabled: false` and configure `global.postgresql.auth.*` with the external server connection details.
 
-Before installing, provision the database, role, and Grafana user on your external PostgreSQL server:
+Before installing, provision the database and role on your external PostgreSQL server:
 
 1.  Create an SQL script file, edit the parameters below, and save it locally:
 
     * Replace `<DATABASE_NAME>` with a dedicated database name for NVIDIA Run:ai in your PostgreSQL database.
     * Replace `<ROLE_NAME>` with a dedicated role name (user) for the NVIDIA Run:ai database.
     * Replace `<ROLE_PASSWORD>` with a password for the new PostgreSQL role.
-    * Replace `<GRAFANA_PASSWORD>` with the password to be set for Grafana integration.
 
     ```sql
     -- Create a new database for runai
@@ -55,16 +54,6 @@ Before installing, provision the database, role, and Grafana user on your extern
 
     -- Grant all privileges on the database to the role
     GRANT ALL PRIVILEGES ON DATABASE <DATABASE_NAME> TO <ROLE_NAME>; 
-
-    -- Connect to the newly created database
-    \c <DATABASE_NAME> 
-
-    -- grafana
-    CREATE ROLE grafana WITH LOGIN PASSWORD '<GRAFANA_PASSWORD>'; 
-    CREATE SCHEMA grafana authorization grafana;
-    ALTER USER grafana set search_path='grafana';
-    -- Exit psql
-    \q
     ```
 2.  Run the following command on a machine where PostgreSQL client (`pgsql`) is installed:
 
