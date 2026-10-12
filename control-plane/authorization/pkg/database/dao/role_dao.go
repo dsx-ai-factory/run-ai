@@ -46,14 +46,6 @@ func createNonExistingRole(ctx context.Context, roleRequest models.Role) (uint, 
 	return roleRequest.ID, nil
 }
 
-func deletePermissionsWithoutSet(ctx context.Context, roleRequest models.Role) {
-	// if the role was migrated from legacy - remove its permissions - do not fail the whole process if fails
-	_, err := runaidb.DB().WithContext(ctx).Where("role_id = ?", roleRequest.ID).Delete(&models.Permission{})
-	if err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to delete old role %s permissions. error: %+v", roleRequest.Name, err)
-	}
-}
-
 func getOrCreatePermissionSet(tx orm.DB, roleRequest models.Role, existingRole *models.Role) (*models.PermissionSet, error) {
 	var permissionSet *models.PermissionSet
 	var err error

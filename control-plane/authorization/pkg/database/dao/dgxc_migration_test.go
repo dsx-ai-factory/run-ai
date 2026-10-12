@@ -490,7 +490,7 @@ func exec(t *testing.T, sql string, args ...any) {
 
 func resetDB(t *testing.T) {
 	t.Helper()
-	for _, table := range []string{"access_rules", "disabled_roles", "role_to_permission_set", "permissions", "roles", "permission_sets", "settings"} {
+	for _, table := range []string{"access_rules", "disabled_roles", "role_to_permission_set", "roles", "permission_sets", "settings"} {
 		exec(t, "DELETE FROM "+table)
 	}
 }

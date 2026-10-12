@@ -29,7 +29,7 @@ The following steps must be performed by your administrator.
 
     ```bash
     export NAMESPACE=dynamo-system
-    export RELEASE_VERSION=1.4.2
+    export RELEASE_VERSION=1.5.0
     ```
 2.  Install the Dynamo platform:
 
@@ -240,7 +240,7 @@ spec:
           mountPoint: /opt/models
       extraPodSpec:
         mainContainer:
-          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.4.2
+          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
           workingDir: /workspace/examples/backends/vllm
       envs:
         - name: HF_HOME
@@ -276,7 +276,7 @@ spec:
           command:
           - /bin/sh
           - -c
-          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.4.2
+          image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
           workingDir: /workspace/examples/backends/vllm
       replicas: 1
       resources:
@@ -340,7 +340,7 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
                     ],
                     "extraPodSpec": {
                         "mainContainer": {
-                            "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.4.2",
+                            "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0",
                             "workingDir": "/workspace/examples/backends/vllm"
                         }
                     },
@@ -401,7 +401,7 @@ curl -L 'https://<COMPANY-URL>/api/v2/workloads' \
                                 "/bin/sh",
                                 "-c"
                             ],
-                            "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.4.2",
+                            "image": "nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0",
                             "workingDir": "/workspace/examples/backends/vllm"
                         }
                     },
@@ -454,7 +454,7 @@ Copy the following command to your terminal. For more details, see [CLI referenc
               mountPoint: /opt/models
           extraPodSpec:
             mainContainer:
-              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.4.2
+              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
               workingDir: /workspace/examples/backends/vllm
           envs:
             - name: HF_HOME
@@ -490,7 +490,7 @@ Copy the following command to your terminal. For more details, see [CLI referenc
               command:
               - /bin/sh
               - -c
-              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.4.2
+              image: nvcr.io/nvidia/ai-dynamo/vllm-runtime:1.5.0
               workingDir: /workspace/examples/backends/vllm
           replicas: 1
           resources:

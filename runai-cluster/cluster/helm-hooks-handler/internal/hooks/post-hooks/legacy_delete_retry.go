@@ -23,7 +23,7 @@ import (
 // wrapped in an InternalError when the webhook's failurePolicy is Fail.
 const webhookCallFailurePrefix = "failed calling webhook"
 
-// Retry settings for legacy object deletes that fail because the API server could
+// Retry settings for legacy object cleanup that fails because the API server could
 // not reach the admission webhook guarding them. Package variables so tests can
 // shorten them.
 var (
@@ -44,45 +44,53 @@ var (
 // and NoMatch mean the object is already gone and count as success.
 func deleteLegacyObject(ctx context.Context, k8sClient client.Client, obj client.Object, kind string, logger logr.Logger) error {
 	logger.Info("Deleting legacy "+kind, "name", obj.GetName())
+	return retryLegacyOperation(ctx, obj, kind, "delete", logger, func(ctx context.Context) error {
+		return k8sClient.Delete(ctx, obj)
+	})
+}
+
+// Finalizer patches and deletes can both race with admission webhook startup.
+// Bound each operation, including its API calls, with the same retry deadline.
+func retryLegacyOperation(ctx context.Context, obj client.Object, kind, operation string, logger logr.Logger, call func(context.Context) error) error {
 	ctx, cancel := context.WithTimeout(ctx, webhookRetryTimeout)
 	defer cancel()
 
 	var lastWebhookErr error
 	for {
-		err := k8sClient.Delete(ctx, obj)
+		err := call(ctx)
 		switch {
 		case err == nil || apierrors.IsNotFound(err) || meta.IsNoMatchError(err):
 			return nil
 		case isWebhookCallFailure(err):
 			lastWebhookErr = err
 		case ctx.Err() != nil:
-			// The delete itself was cut off, by the retry deadline or by the caller.
-			return retryStopped(ctx, kind, obj, lastWebhookErr)
+			// The API call itself was cut off, by the retry deadline or by the caller.
+			return retryStopped(ctx, kind, obj, operation, lastWebhookErr)
 		default:
-			return fmt.Errorf("failed to delete legacy %s %q: %w", kind, obj.GetName(), err)
+			return fmt.Errorf("failed to %s legacy %s %q: %w", operation, kind, obj.GetName(), err)
 		}
 
-		logger.Info("Admission webhook not reachable yet, retrying legacy delete", "kind", kind, "name", obj.GetName(), "error", lastWebhookErr.Error())
+		logger.Info("Admission webhook not reachable yet, retrying legacy cleanup", "operation", operation, "kind", kind, "name", obj.GetName(), "error", lastWebhookErr.Error())
 		// Waits for the retry interval or the remaining deadline, whichever ends first.
 		select {
 		case <-ctx.Done():
-			return retryStopped(ctx, kind, obj, lastWebhookErr)
+			return retryStopped(ctx, kind, obj, operation, lastWebhookErr)
 		case <-time.After(webhookRetryInterval):
 		}
 	}
 }
 
-// retryStopped builds the error for a delete that ran out of time. On the retry
+// retryStopped builds the error for an operation that ran out of time. On the retry
 // deadline it carries the last webhook failure seen, if any, so the log explains
 // what the hook was waiting for; on caller cancellation it carries the context error.
-func retryStopped(ctx context.Context, kind string, obj client.Object, lastWebhookErr error) error {
+func retryStopped(ctx context.Context, kind string, obj client.Object, operation string, lastWebhookErr error) error {
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 		if lastWebhookErr != nil {
-			return fmt.Errorf("failed to delete legacy %s %q: admission webhook still unreachable after %s: %w", kind, obj.GetName(), webhookRetryTimeout, lastWebhookErr)
+			return fmt.Errorf("failed to %s legacy %s %q: admission webhook still unreachable after %s: %w", operation, kind, obj.GetName(), webhookRetryTimeout, lastWebhookErr)
 		}
-		return fmt.Errorf("failed to delete legacy %s %q: no answer from the API server within %s: %w", kind, obj.GetName(), webhookRetryTimeout, ctx.Err())
+		return fmt.Errorf("failed to %s legacy %s %q: no answer from the API server within %s: %w", operation, kind, obj.GetName(), webhookRetryTimeout, ctx.Err())
 	}
-	return fmt.Errorf("failed to delete legacy %s %q: %w", kind, obj.GetName(), ctx.Err())
+	return fmt.Errorf("failed to %s legacy %s %q: %w", operation, kind, obj.GetName(), ctx.Err())
 }
 
 // isWebhookCallFailure reports whether err is the API server failing to call an

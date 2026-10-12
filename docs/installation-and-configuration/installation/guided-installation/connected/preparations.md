@@ -28,7 +28,7 @@ Your [deployment model](../../../system-requirements/deployment-model.md) determ
 
 GPU Operator and Prometheus are required for every installation. Network Operator, and features such as Knative and Kubeflow, apply only if your environment or planned workload types need them. Your planned workload types may also affect the networking configuration required for the installation, including wildcard domains and TLS certificates. See [Prerequisites and Features](../prerequisites-and-features.md) to determine which prerequisites and features you need and how to configure them.
 
-In connected environments, the installer can install supported prerequisites and features for you. By default, it installs the latest supported version; to use a different supported version, specify the `version` field for that component according to the versions listed in the [Support Matrix](../../../support-matrix.md).
+In connected environments, the installer can set up supported prerequisites and features for you. By default, it uses the latest supported version; to use a different supported version, specify the `version` field for that component according to the versions listed in the [Support Matrix](../../../support-matrix.md).
 
 <Note>
 

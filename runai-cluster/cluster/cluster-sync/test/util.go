@@ -32,6 +32,7 @@ import (
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	kubeflowv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	schedulingv1 "k8s.io/api/scheduling/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -210,6 +211,41 @@ func BuildStorageClass(name string, isDefault bool) *storagev1.StorageClass {
 			Annotations: map[string]string{
 				IsDefaultClassLabel: strconv.FormatBool(isDefault),
 			},
+		},
+	}
+}
+
+// BuildDeviceClass builds a cluster-scoped DeviceClass fixture used by the
+// device-class controller/handler tests. The name is enough to drive the
+// per-item sync (parser only reads the name - see device_class_parser.go).
+func BuildDeviceClass(name string) *resourcev1.DeviceClass {
+	return &resourcev1.DeviceClass{
+		ObjectMeta: metav1.ObjectMeta{
+			UID:  types.UID(fmt.Sprintf("device-class-%s", name)),
+			Name: name,
+		},
+	}
+}
+
+// BuildResourceClaimTemplate builds a ResourceClaimTemplate fixture whose
+// labels line up with the scope the handler/parser is expected to infer. The
+// callers set `labels` to one of:
+//
+//   - {ClusterWideResourceLabel: "true"}  → cluster scope (must live in the
+//     Run:ai `runai` namespace to make it past the handler filter)
+//   - {DepartmentScopeLabel: "<id>"}      → department scope (same ns rule)
+//   - no scope label                      → project scope (handler resolves
+//     the project id from the namespace via GetAllProjects)
+//
+// Namespace is passed through so project-scope RCTs can be dropped into a
+// project namespace, and cluster/department ones into `runai`.
+func BuildResourceClaimTemplate(name, namespace string, labels map[string]string) *resourcev1.ResourceClaimTemplate {
+	return &resourcev1.ResourceClaimTemplate{
+		ObjectMeta: metav1.ObjectMeta{
+			UID:       types.UID(fmt.Sprintf("rct-%s-%s", namespace, name)),
+			Name:      name,
+			Namespace: namespace,
+			Labels:    labels,
 		},
 	}
 }
