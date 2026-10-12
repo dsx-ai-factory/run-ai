@@ -44,8 +44,10 @@ func OpenSession(ctx context.Context, target core.Target, limits client.Limits, 
 		return nil, err
 	}
 	session := &Session{Clients: clients, ClusterID: selected.Uuid, RunID: runID, timeout: setupTimeout}
-	session.Project, err = Project(setupCtx, clients, session.ClusterID, projectPrefix+"-"+runID, setupTimeout)
+	name := projectPrefix + "-" + runID
+	session.Project, err = Project(setupCtx, clients, session.ClusterID, name, setupTimeout)
 	if err != nil {
+		session.Project.Name = name
 		return nil, errors.Join(err, session.Close())
 	}
 	return session, nil

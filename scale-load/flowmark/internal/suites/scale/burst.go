@@ -323,7 +323,7 @@ func warmUp(ctx context.Context, flow workloadFlow, kube k8sclient.Client, names
 	summary := measure.Stats(probe.timings)
 	switch {
 	case ctx.Err() != nil:
-		return nil
+		return fmt.Errorf("warm-up: %w", ctx.Err())
 	case probe.err != nil:
 		return fmt.Errorf("warm-up: %w", probe.err)
 	case summary.NeverArrivedCount > 0:

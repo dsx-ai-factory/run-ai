@@ -8,6 +8,7 @@ package measure
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -407,8 +408,8 @@ func TestAWatchTheServerKeepsEndingIsGivenUpWithTheClosedError(t *testing.T) {
 	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) {
 		t.Fatalf("a watch that keeps closing must end as a closed watch, not a slow cluster: %+v", got)
 	}
-	if opened != 1+maxReconnectCycles || w.Interruptions() != maxReconnectCycles {
-		t.Fatalf("a watch that never saw an event has no resume point, so every reopen is lossy: expected %d, got opened=%d interruptions=%d", maxReconnectCycles, opened, w.Interruptions())
+	if opened != 1+maxConsecutiveClosures || w.Interruptions() != maxConsecutiveClosures {
+		t.Fatalf("a watch that never saw an event has no resume point, so every reopen is lossy: expected %d, got opened=%d interruptions=%d", maxConsecutiveClosures, opened, w.Interruptions())
 	}
 }
 
@@ -436,8 +437,8 @@ func TestAWatchTheServerKeepsFailingWithAnErrorEventIsGivenUp(t *testing.T) {
 	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) {
 		t.Fatalf("a watch that keeps failing must end as a closed watch: %+v", got)
 	}
-	if opened != 1+maxReconnectCycles {
-		t.Fatalf("expected %d reopen cycles, got %d opens", maxReconnectCycles, opened-1)
+	if opened != 1+maxConsecutiveClosures {
+		t.Fatalf("expected %d reopen cycles, got %d opens", maxConsecutiveClosures, opened-1)
 	}
 }
 
@@ -549,5 +550,46 @@ func TestAReconnectAfterTheServerDroppedTheVersionIsAnInterruption(t *testing.T)
 
 	if w.Reconnects() != 1 || w.Interruptions() != 1 {
 		t.Fatalf("after a 410 the watch restarts without a resume point and events may be missed, reconnects=%d interruptions=%d", w.Reconnects(), w.Interruptions())
+	}
+}
+
+func TestAWatchTheServerKeepsClosingWithoutEventsIsGivenUpEvenWithAResumePoint(t *testing.T) {
+	reconnectDelay = time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(context.Context, k8sclient.WithWatch, k8sclient.ObjectList, ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			events := watch.NewFake()
+			if opened == 1 {
+				seen := runner("seen")
+				seen.SetResourceVersion("12")
+				go func() {
+					events.Add(seen)
+					events.Stop()
+				}()
+				return events, nil
+			}
+			events.Stop()
+			return events, nil
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+	w.MarkCreated("w1", time.Now())
+
+	got := byName(w.WaitAll(10 * time.Second))["w1"]
+
+	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) || !strings.Contains(got.Err.Error(), "times in a row") {
+		t.Fatalf("a server that keeps closing the watch without events must be given up, got %+v", got)
+	}
+	if w.Interruptions() != 0 {
+		t.Fatalf("every reopen resumed from resourceVersion 12, none was lossy, got %d interruptions", w.Interruptions())
+	}
+	if opened != 1+maxConsecutiveClosures {
+		t.Fatalf("expected the first watch plus %d consecutive reopens before giving up, got %d opens", maxConsecutiveClosures, opened)
 	}
 }

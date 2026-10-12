@@ -125,7 +125,8 @@ The results are then judged in two ways. Against history: every p90 is
 compared with the median of its last 7 values in earlier runs of the same
 `cluster_type` found in the output directory, and more than 15% above that
 median is a regression. Runs where the scenario did not run or its section
-failed do not count; with fewer than 7 values the comparison is skipped.
+failed do not count, an earlier file that cannot be read is skipped and named
+in the log, and with fewer than 7 values the comparison is skipped.
 Against the SLO: the limits from the scenario file are copied into the
 section's `slo` block, and every latency metric with a limit there, p90 or
 not, is a regression when above it, regardless of history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest

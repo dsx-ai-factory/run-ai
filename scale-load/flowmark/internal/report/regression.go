@@ -41,11 +41,14 @@ type Regression struct {
 }
 
 func Judge(ctx context.Context, store Store, document Document, config RegressionConfig) (Document, string) {
-	history, err := LoadHistory(ctx, store, document.Metadata.ClusterType, config.Window*HistoryDepth)
+	history, skipped, err := LoadHistory(ctx, store, document.Metadata.ClusterType, config.Window*HistoryDepth)
 	judged := DetectRegressions(document, history, config)
 	note := "no regression detected"
 	if judged.RegressionDetected {
 		note = fmt.Sprintf("%d regressions detected", len(judged.Regressions))
+	}
+	if len(skipped) > 0 {
+		note += fmt.Sprintf("; %d earlier runs could not be read and were skipped (%s)", len(skipped), strings.Join(skipped, "; "))
 	}
 	switch {
 	case err != nil:

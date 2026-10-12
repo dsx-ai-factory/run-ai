@@ -126,7 +126,7 @@ func TestOtherClusterTypesNeverEnterTheWindow(t *testing.T) {
 	publishAll(t, store, nights(1, 7, vanillaCluster, 1000)...)
 	publishAll(t, store, nights(8, 13, kindCluster, 5000)...)
 
-	history, err := LoadHistory(context.Background(), store, kindCluster, 7)
+	history, _, err := LoadHistory(context.Background(), store, kindCluster, 7)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +143,7 @@ func TestDayEightWalkthroughFlagsFourNightsThenTheMedianAdapts(t *testing.T) {
 
 	var flaggedNights []int
 	for night := 8; night <= 14; night++ {
-		history, err := LoadHistory(context.Background(), store, kindCluster, sevenNights.Window)
+		history, _, err := LoadHistory(context.Background(), store, kindCluster, sevenNights.Window)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -270,5 +270,21 @@ func TestJudgeExplainsWhatItCompared(t *testing.T) {
 	}
 	if _, note := Judge(ctx, full, tonight, RegressionConfig{Window: 0, Threshold: 0.15}); !strings.Contains(note, "disabled") {
 		t.Fatalf("a zero window must be reported as disabled: %q", note)
+	}
+}
+
+func TestJudgeStillComparesWhenAnOldRunIsUnreadable(t *testing.T) {
+	store := newFakeStore()
+	publishAll(t, store, nights(1, 8, kindCluster, 5000)...)
+	oldest := nightlyDocument(1, kindCluster, 5000).FileName()
+	store.objects[oldest] = []byte("{broken")
+
+	judged, note := Judge(context.Background(), store, nightlyDocument(9, kindCluster, 5900), sevenNights)
+
+	if !judged.RegressionDetected || len(judged.Regressions) != 1 || judged.Regressions[0].Against != AgainstMedian {
+		t.Fatalf("seven readable runs are a full window even when an older one is broken: %+v", judged.Regressions)
+	}
+	if !strings.Contains(note, "1 earlier runs could not be read and were skipped") || !strings.Contains(note, oldest) {
+		t.Fatalf("the skipped file must be named in the note: %q", note)
 	}
 }

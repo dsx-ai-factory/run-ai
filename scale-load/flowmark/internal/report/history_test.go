@@ -7,6 +7,7 @@ package report
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -45,7 +46,7 @@ func TestLoadHistoryReturnsTheNewestRunsOfTheSameClusterTypeOldestFirst(t *testi
 	}
 	publishAll(t, store, published...)
 
-	history, err := LoadHistory(context.Background(), store, kindCluster, 3)
+	history, _, err := LoadHistory(context.Background(), store, kindCluster, 3)
 
 	if err != nil {
 		t.Fatal(err)
@@ -68,7 +69,7 @@ func TestLoadHistoryReturnsEverythingWhenShorterThanTheWindow(t *testing.T) {
 	store := newFakeStore()
 	publishAll(t, store, nightlyDocument(1, kindCluster, 5000), nightlyDocument(2, vanillaCluster, 5000), nightlyDocument(3, kindCluster, 5000))
 
-	history, err := LoadHistory(context.Background(), store, kindCluster, 7)
+	history, _, err := LoadHistory(context.Background(), store, kindCluster, 7)
 
 	if err != nil || len(history) != 2 {
 		t.Fatalf("2 matching runs exist, want both, got %d (%v)", len(history), err)
@@ -77,14 +78,14 @@ func TestLoadHistoryReturnsEverythingWhenShorterThanTheWindow(t *testing.T) {
 
 func TestLoadHistoryIsEmptyWithoutAManifestAWindowOrAClusterType(t *testing.T) {
 	store := newFakeStore()
-	if history, err := LoadHistory(context.Background(), store, kindCluster, 7); err != nil || history != nil {
+	if history, _, err := LoadHistory(context.Background(), store, kindCluster, 7); err != nil || history != nil {
 		t.Fatalf("no manifest means no history and no error, got %v / %v", history, err)
 	}
 	publishAll(t, store, nightlyDocument(1, kindCluster, 5000), nightlyDocument(2, "", 5000))
-	if history, err := LoadHistory(context.Background(), store, kindCluster, 0); err != nil || history != nil {
+	if history, _, err := LoadHistory(context.Background(), store, kindCluster, 0); err != nil || history != nil {
 		t.Fatalf("a zero window disables history, got %v / %v", history, err)
 	}
-	if history, err := LoadHistory(context.Background(), store, "", 7); err != nil || history != nil {
+	if history, _, err := LoadHistory(context.Background(), store, "", 7); err != nil || history != nil {
 		t.Fatalf("an unknown cluster type must not be matched against runs that also lack one, got %v / %v", history, err)
 	}
 }
@@ -93,7 +94,7 @@ func TestLoadHistoryOrdersRunsByTheirTimestampNotByManifestOrder(t *testing.T) {
 	store := newFakeStore()
 	publishAll(t, store, nightlyDocument(3, kindCluster, 3), nightlyDocument(1, kindCluster, 1), nightlyDocument(2, kindCluster, 2))
 
-	history, err := LoadHistory(context.Background(), store, kindCluster, 2)
+	history, _, err := LoadHistory(context.Background(), store, kindCluster, 2)
 
 	if err != nil || len(history) != 2 {
 		t.Fatalf("want the 2 newest runs, got %d (%v)", len(history), err)
@@ -103,20 +104,26 @@ func TestLoadHistoryOrdersRunsByTheirTimestampNotByManifestOrder(t *testing.T) {
 	}
 }
 
-func TestLoadHistoryFailsLoudOnAMissingOrCorruptRun(t *testing.T) {
+func TestLoadHistorySkipsAndNamesAMissingOrCorruptRun(t *testing.T) {
 	store := newFakeStore()
-	publishAll(t, store, nightlyDocument(1, kindCluster, 5000), nightlyDocument(2, kindCluster, 5000))
+	publishAll(t, store, nightlyDocument(1, kindCluster, 5000), nightlyDocument(2, kindCluster, 5000), nightlyDocument(3, kindCluster, 5000))
 	missing := nightlyDocument(2, kindCluster, 5000).FileName()
 	delete(store.objects, missing)
-	if _, err := LoadHistory(context.Background(), store, kindCluster, 7); err == nil || !strings.Contains(err.Error(), "read history "+missing) {
-		t.Fatalf("a run listed in the manifest but absent from the store must be reported, got %v", err)
-	}
-
-	store = newFakeStore()
-	publishAll(t, store, nightlyDocument(1, kindCluster, 5000))
 	corrupt := nightlyDocument(1, kindCluster, 5000).FileName()
 	store.objects[corrupt] = []byte("{not json")
-	if _, err := LoadHistory(context.Background(), store, kindCluster, 7); err == nil || !strings.Contains(err.Error(), "parse history "+corrupt) {
-		t.Fatalf("a corrupt run must be reported by name, got %v", err)
+
+	history, skipped, err := LoadHistory(context.Background(), store, kindCluster, 7)
+
+	if err != nil || len(history) != 1 || history[0].Metadata.Date.Day() != 3 {
+		t.Fatalf("the readable run must still be used, got %d runs (%v)", len(history), err)
+	}
+	if len(skipped) != 2 || !strings.Contains(skipped[0], "read history "+missing) || !strings.Contains(skipped[1], "parse history "+corrupt) {
+		t.Fatalf("every unreadable run must be named: %v", skipped)
+	}
+
+	broken := newFakeStore()
+	broken.failGet[ManifestName] = errors.New("disk on fire")
+	if _, _, err := LoadHistory(context.Background(), broken, kindCluster, 7); err == nil || !strings.Contains(err.Error(), "read manifest") {
+		t.Fatalf("a manifest that cannot be read is still fatal: %v", err)
 	}
 }

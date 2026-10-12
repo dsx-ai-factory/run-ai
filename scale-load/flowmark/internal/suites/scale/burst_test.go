@@ -705,3 +705,15 @@ func TestInterruptedCreatesAreNotCountedAsFailures(t *testing.T) {
 		t.Fatalf("the round must report the interruption: %v", result.err)
 	}
 }
+
+func TestWarmUpReturnsTheCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	kube := fakeKube()
+	flow := &cancellingFlow{deploymentFlow: deploymentFlow{kube: kube, concurrency: 1}, cancel: cancel}
+
+	err := warmUp(ctx, flow, kube, testNamespace, "1a2b3c4d", quick())
+
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("a run cancelled during warm-up must stop before round 1: %v", err)
+	}
+}
