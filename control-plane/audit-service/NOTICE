@@ -54,7 +54,7 @@ Dependencies
 | `github.com/go-playground/validator/v10` | v10.30.5 | MIT | https://github.com/go-playground/validator/blob/v10.30.5/LICENSE |
 | `github.com/go-sql-driver/mysql` | v1.10.1 | MPL-2.0 | https://github.com/go-sql-driver/mysql/blob/v1.10.1/LICENSE |
 | `github.com/go-viper/mapstructure/v2` | v2.5.0 | MIT | https://pkg.go.dev/github.com/go-viper/mapstructure/v2@v2.5.0?tab=licenses |
-| `github.com/gocarina/gocsv` | v0.0.0-20260926200228-b2c6eb8fefab | MIT | https://github.com/gocarina/gocsv/blob/b2c6eb8fefab/LICENSE |
+| `github.com/gocarina/gocsv` | v0.0.0-20261012193826-401c25af6907 | MIT | https://github.com/gocarina/gocsv/blob/401c25af6907/LICENSE |
 | `github.com/golang-migrate/migrate/v4` | v4.20.1 | MIT | https://pkg.go.dev/github.com/golang-migrate/migrate/v4@v4.20.1?tab=licenses |
 | `github.com/google/uuid` | v1.6.0 | BSD-3-Clause | https://github.com/google/uuid/blob/v1.6.0/LICENSE |
 | `github.com/grpc-ecosystem/grpc-gateway/v2` | v2.31.0 | BSD-3-Clause | https://pkg.go.dev/github.com/grpc-ecosystem/grpc-gateway/v2@v2.31.0?tab=licenses |

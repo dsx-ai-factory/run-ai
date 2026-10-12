@@ -112,8 +112,8 @@ github.com/go-sql-driver/mysql v1.10.1 h1:arlSnNLq6a5yxGxV7qg9lF4j0C+KwD6NbQyKr9
 github.com/go-sql-driver/mysql v1.10.1/go.mod h1:M+cqaI7+xxXGG9swrdeUIoPG3Y3KCkF0pZej+SK+nWk=
 github.com/go-viper/mapstructure/v2 v2.5.0 h1:vM5IJoUAy3d7zRSVtIwQgBj7BiWtMPfmPEgAXnvj1Ro=
 github.com/go-viper/mapstructure/v2 v2.5.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
-github.com/gocarina/gocsv v0.0.0-20260926200228-b2c6eb8fefab h1:zMBDFE5FAMuDWBE0a6Ma0p5RAbKNoUeFS0v/j1bAAak=
-github.com/gocarina/gocsv v0.0.0-20260926200228-b2c6eb8fefab/go.mod h1:5YoVOkjYAQumqlV356Hj3xeYh4BdZuLE0/nRkf2NKkI=
+github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907 h1:MVuIVNIHXT01Nxrr2om3bIh9BWgvCJ7Nk8tmgq+LnVM=
+github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907/go.mod h1:5YoVOkjYAQumqlV356Hj3xeYh4BdZuLE0/nRkf2NKkI=
 github.com/golang-migrate/migrate/v4 v4.20.1 h1:2N/ToVTKrKl58ynBpgeVJ4In7VcLCjWTZtm4eP1LxhU=
 github.com/golang-migrate/migrate/v4 v4.20.1/go.mod h1:DDPgKVb4ovSWc4FwSPfV2Uz1160f4XBiTHTrAJtljmM=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=

@@ -20,7 +20,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29
 	github.com/go-chi/chi/v5 v5.4.0
-	github.com/gocarina/gocsv v0.0.0-20260926200228-b2c6eb8fefab
+	github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.35.1
