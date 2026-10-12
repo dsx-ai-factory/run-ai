@@ -47,7 +47,6 @@ folder: every suite declares its category and the runner checks the two match.
 
 ```
 scenarios/
-  selfcheck.yaml            checks the wiring, needs no environment
   scale/                    how latency grows with the number of workloads
     deployment-burst.yaml   Deployment created through Kubernetes → ExternalWorkload appears
     training-burst.yaml     Training created through the control plane → WorkloadRunner appears
@@ -55,6 +54,11 @@ scenarios/
   load/                     how latency behaves under a steady stream of submissions
     workspace-ttj.yaml      Workspaces submitted at a fixed rate → time to job, split into spans
 ```
+
+The selfcheck scenario is not a test and stays out of this tree. It lives
+next to its suite as `internal/suites/selfcheck/selfcheck.yaml`; run it with
+`--scenarios internal/suites/selfcheck` to check the wiring without an
+environment.
 
 Knobs of the `scale-burst` suite:
 

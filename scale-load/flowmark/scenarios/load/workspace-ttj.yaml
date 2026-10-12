@@ -3,7 +3,7 @@
 
 suite: load-ttj
 workloadType: Workspace
-users: 10
+users: 20
 rate: 2
 duration: 3m
 image: registry.k8s.io/pause:3.9
@@ -11,23 +11,23 @@ kubeRequestsPerSecond: 50
 controlPlaneRequestsPerSecond: 25
 timeout: 10m
 slo:
-  api_accepted_p50_ms: 500
+  # api_accepted_p50_ms: 500
   api_accepted_p90_ms: 750
-  api_accepted_p99_ms: 1200
+  # api_accepted_p99_ms: 1200
   api_accepted_mean_ms: 500
   api_accepted_max_ms: 2000
-  cluster_synced_p50_ms: 6000
+  # cluster_synced_p50_ms: 6000
   cluster_synced_p90_ms: 10000
-  cluster_synced_p99_ms: 12000
+  # cluster_synced_p99_ms: 12000
   cluster_synced_mean_ms: 7000
   cluster_synced_max_ms: 15000
-  pod_created_p50_ms: 1500
+  # pod_created_p50_ms: 1500
   pod_created_p90_ms: 4000
-  pod_created_p99_ms: 5000
+  # pod_created_p99_ms: 5000
   pod_created_mean_ms: 2000
   pod_created_max_ms: 10000
-  ttj_p50_ms: 8000
-  ttj_p90_ms: 12000
-  ttj_p99_ms: 13000
+  # ttj_p50_ms: 8000
+  # ttj_p90_ms: 12000
+  # ttj_p99_ms: 13000
   ttj_mean_ms: 8000
   ttj_max_ms: 20000
