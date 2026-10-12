@@ -31,7 +31,8 @@ type ComputeAssetSpec struct {
 	// The amount of CPU memory to allocate for this workload (1G, 20M, .etc). The workload will receive at least this amount of memory. Note that the workload will not be scheduled unless the system can guarantee this amount of memory to the workload
 	CpuMemoryRequest NullableString `json:"cpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
 	// Extended resources and their quantity.
-	ExtendedResources []ExtendedResource `json:"extendedResources,omitempty"`
+	ExtendedResources []ExtendedResource     `json:"extendedResources,omitempty"`
+	GpuComputeMode    NullableGpuComputeMode `json:"gpuComputeMode,omitempty"`
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
 	GpuDevicesRequest NullableInt32 `json:"gpuDevicesRequest,omitempty"`
 	// Limitation on the memory consumed by the workload, per GPU device. The system guarantees The gpuMemoryLimit must be no less than gpuMemoryRequest.
@@ -273,6 +274,49 @@ func (o *ComputeAssetSpec) HasExtendedResources() bool {
 // SetExtendedResources gets a reference to the given []ExtendedResource and assigns it to the ExtendedResources field.
 func (o *ComputeAssetSpec) SetExtendedResources(v []ExtendedResource) {
 	o.ExtendedResources = v
+}
+
+// GetGpuComputeMode returns the GpuComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *ComputeAssetSpec) GetGpuComputeMode() GpuComputeMode {
+	if o == nil || IsNil(o.GpuComputeMode.Get()) {
+		var ret GpuComputeMode
+		return ret
+	}
+	return *o.GpuComputeMode.Get()
+}
+
+// GetGpuComputeModeOk returns a tuple with the GpuComputeMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ComputeAssetSpec) GetGpuComputeModeOk() (*GpuComputeMode, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuComputeMode.Get(), o.GpuComputeMode.IsSet()
+}
+
+// HasGpuComputeMode returns a boolean if a field has been set.
+func (o *ComputeAssetSpec) HasGpuComputeMode() bool {
+	if o != nil && o.GpuComputeMode.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuComputeMode gets a reference to the given NullableGpuComputeMode and assigns it to the GpuComputeMode field.
+func (o *ComputeAssetSpec) SetGpuComputeMode(v GpuComputeMode) {
+	o.GpuComputeMode.Set(&v)
+}
+
+// SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+func (o *ComputeAssetSpec) SetGpuComputeModeNil() {
+	o.GpuComputeMode.Set(nil)
+}
+
+// UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
+func (o *ComputeAssetSpec) UnsetGpuComputeMode() {
+	o.GpuComputeMode.Unset()
 }
 
 // GetGpuDevicesRequest returns the GpuDevicesRequest field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -692,6 +736,9 @@ func (o ComputeAssetSpec) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ExtendedResources != nil {
 		toSerialize["extendedResources"] = o.ExtendedResources
+	}
+	if o.GpuComputeMode.IsSet() {
+		toSerialize["gpuComputeMode"] = o.GpuComputeMode.Get()
 	}
 	if o.GpuDevicesRequest.IsSet() {
 		toSerialize["gpuDevicesRequest"] = o.GpuDevicesRequest.Get()

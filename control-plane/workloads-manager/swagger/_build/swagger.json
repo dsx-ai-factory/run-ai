@@ -2602,6 +2602,16 @@
         "maximum": 3600,
         "nullable": true
       },
+      "ComputeMode": {
+        "description": "Effective GPU compute sharing mode saved when the workload was submitted. This describes the submitted configuration, not observed GPU hardware state. Present for GPU workloads; ignored in requests.",
+        "type": "string",
+        "enum": [
+          "time-slicing",
+          "sm-sharing"
+        ],
+        "nullable": true,
+        "readOnly": true
+      },
       "CpuCoreLimit": {
         "description": "Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.",
         "format": "double",
@@ -2633,6 +2643,17 @@
         "example": "20M",
         "maxLength": 63,
         "nullable": true
+      },
+      "GpuComputeMode": {
+        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.",
+        "type": "string",
+        "minLength": 1,
+        "enum": [
+          "time-slicing",
+          "sm-sharing"
+        ],
+        "nullable": true,
+        "x-gorm-ignore": true
       },
       "GpuDevicesRequest": {
         "description": "Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.",
@@ -3512,6 +3533,9 @@
               "compute": {
                 "nullable": true,
                 "properties": {
+                  "computeMode": {
+                    "$ref": "#/components/schemas/ComputeMode"
+                  },
                   "cpuCoreLimit": {
                     "$ref": "#/components/schemas/CpuCoreLimit"
                   },
@@ -3523,6 +3547,9 @@
                   },
                   "cpuMemoryRequest": {
                     "$ref": "#/components/schemas/CpuMemoryRequest"
+                  },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
                   },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"

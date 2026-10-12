@@ -103,6 +103,7 @@ docs/ComputeAsset.md
 docs/ComputeAssetSpec.md
 docs/ComputeCreationRequest.md
 docs/ComputeListResponse.md
+docs/ComputeMode.md
 docs/ComputeUpdateRequest.md
 docs/ConcurrencyHardLimitField.md
 docs/ConfigMap.md
@@ -225,6 +226,7 @@ docs/GitRules.md
 docs/GitSecretRef.md
 docs/GitUpdateRequest.md
 docs/GitsRules.md
+docs/GpuComputeMode.md
 docs/GpuRequestType.md
 docs/HealthAPI.md
 docs/HistoryRecord.md
@@ -566,6 +568,7 @@ model_compute_asset.go
 model_compute_asset_spec.go
 model_compute_creation_request.go
 model_compute_list_response.go
+model_compute_mode.go
 model_compute_update_request.go
 model_concurrency_hard_limit_field.go
 model_config_map.go
@@ -682,6 +685,7 @@ model_git_rules.go
 model_git_secret_ref.go
 model_git_update_request.go
 model_gits_rules.go
+model_gpu_compute_mode.go
 model_gpu_request_type.go
 model_history_record.go
 model_history_record_meta.go

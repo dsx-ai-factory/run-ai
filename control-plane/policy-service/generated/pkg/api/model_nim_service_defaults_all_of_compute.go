@@ -50,6 +50,11 @@ type NimServiceDefaultsAllOfCompute struct {
 	CpuMemoryRequest *string `json:"cpuMemoryRequest,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty"`
+	GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty" gorm:"-"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuDevicesRequest *int32 `json:"gpuDevicesRequest,omitempty"`
@@ -143,6 +148,17 @@ func AssertNimServiceDefaultsAllOfComputeConstraints(obj NimServiceDefaultsAllOf
 	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.GpuComputeMode != nil {
+		if okValue := obj.GpuComputeMode.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "GpuComputeMode", Value: string(*obj.GpuComputeMode)}
+		}
+	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuDevicesRequest != nil && *obj.GpuDevicesRequest < 0 {

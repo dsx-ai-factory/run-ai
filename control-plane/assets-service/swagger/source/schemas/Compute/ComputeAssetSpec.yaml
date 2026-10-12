@@ -13,6 +13,8 @@ properties:
     $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuMemoryRequest.yaml
   extendedResources:
     $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/ExtendedResources.yaml
+  gpuComputeMode:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuComputeMode.yaml
   gpuDevicesRequest:
     $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuDevicesRequest.yaml
   gpuMemoryLimit:

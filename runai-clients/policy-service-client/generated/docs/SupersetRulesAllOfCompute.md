@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **GpuPortionLimit** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
 **GpuMemoryPortionRequest** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
 **GpuPortionRequest** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
+**GpuComputeMode** | Pointer to [**NullableGpuComputeModeRules**](GpuComputeModeRules.md) |  | [optional] 
 **GpuRequestType** | Pointer to [**NullableGpuRequestRules**](GpuRequestRules.md) |  | [optional] 
 **LargeShmRequest** | Pointer to [**NullableBooleanRules**](BooleanRules.md) |  | [optional] 
 
@@ -458,6 +459,41 @@ HasGpuPortionRequest returns a boolean if a field has been set.
 `func (o *SupersetRulesAllOfCompute) UnsetGpuPortionRequest()`
 
 UnsetGpuPortionRequest ensures that no value is present for GpuPortionRequest, not even an explicit nil
+### GetGpuComputeMode
+
+`func (o *SupersetRulesAllOfCompute) GetGpuComputeMode() GpuComputeModeRules`
+
+GetGpuComputeMode returns the GpuComputeMode field if non-nil, zero value otherwise.
+
+### GetGpuComputeModeOk
+
+`func (o *SupersetRulesAllOfCompute) GetGpuComputeModeOk() (*GpuComputeModeRules, bool)`
+
+GetGpuComputeModeOk returns a tuple with the GpuComputeMode field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuComputeMode
+
+`func (o *SupersetRulesAllOfCompute) SetGpuComputeMode(v GpuComputeModeRules)`
+
+SetGpuComputeMode sets GpuComputeMode field to given value.
+
+### HasGpuComputeMode
+
+`func (o *SupersetRulesAllOfCompute) HasGpuComputeMode() bool`
+
+HasGpuComputeMode returns a boolean if a field has been set.
+
+### SetGpuComputeModeNil
+
+`func (o *SupersetRulesAllOfCompute) SetGpuComputeModeNil(b bool)`
+
+ SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+
+### UnsetGpuComputeMode
+`func (o *SupersetRulesAllOfCompute) UnsetGpuComputeMode()`
+
+UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
 ### GetGpuRequestType
 
 `func (o *SupersetRulesAllOfCompute) GetGpuRequestType() GpuRequestRules`

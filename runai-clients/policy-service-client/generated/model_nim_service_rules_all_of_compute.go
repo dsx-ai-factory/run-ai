@@ -22,15 +22,16 @@ var _ MappedNullable = &NimServiceRulesAllOfCompute{}
 
 // NimServiceRulesAllOfCompute struct for NimServiceRulesAllOfCompute
 type NimServiceRulesAllOfCompute struct {
-	CpuCoreLimit            NullableNumberRules   `json:"cpuCoreLimit,omitempty"`
-	CpuCoreRequest          NullableNumberRules   `json:"cpuCoreRequest,omitempty"`
-	CpuMemoryLimit          NullableQuantityRules `json:"cpuMemoryLimit,omitempty"`
-	CpuMemoryRequest        NullableQuantityRules `json:"cpuMemoryRequest,omitempty"`
-	GpuDevicesRequest       NullableIntegerRules  `json:"gpuDevicesRequest,omitempty"`
-	GpuMemoryLimit          NullableQuantityRules `json:"gpuMemoryLimit,omitempty"`
-	GpuMemoryPortionLimit   NullableNumberRules   `json:"gpuMemoryPortionLimit,omitempty"`
-	GpuMemoryPortionRequest NullableNumberRules   `json:"gpuMemoryPortionRequest,omitempty"`
-	GpuMemoryRequest        NullableQuantityRules `json:"gpuMemoryRequest,omitempty"`
+	CpuCoreLimit            NullableNumberRules         `json:"cpuCoreLimit,omitempty"`
+	CpuCoreRequest          NullableNumberRules         `json:"cpuCoreRequest,omitempty"`
+	CpuMemoryLimit          NullableQuantityRules       `json:"cpuMemoryLimit,omitempty"`
+	CpuMemoryRequest        NullableQuantityRules       `json:"cpuMemoryRequest,omitempty"`
+	GpuComputeMode          NullableGpuComputeModeRules `json:"gpuComputeMode,omitempty"`
+	GpuDevicesRequest       NullableIntegerRules        `json:"gpuDevicesRequest,omitempty"`
+	GpuMemoryLimit          NullableQuantityRules       `json:"gpuMemoryLimit,omitempty"`
+	GpuMemoryPortionLimit   NullableNumberRules         `json:"gpuMemoryPortionLimit,omitempty"`
+	GpuMemoryPortionRequest NullableNumberRules         `json:"gpuMemoryPortionRequest,omitempty"`
+	GpuMemoryRequest        NullableQuantityRules       `json:"gpuMemoryRequest,omitempty"`
 	// Deprecated
 	GpuPortionLimit NullableNumberRules `json:"gpuPortionLimit,omitempty"`
 	// Deprecated
@@ -225,6 +226,49 @@ func (o *NimServiceRulesAllOfCompute) SetCpuMemoryRequestNil() {
 // UnsetCpuMemoryRequest ensures that no value is present for CpuMemoryRequest, not even an explicit nil
 func (o *NimServiceRulesAllOfCompute) UnsetCpuMemoryRequest() {
 	o.CpuMemoryRequest.Unset()
+}
+
+// GetGpuComputeMode returns the GpuComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRulesAllOfCompute) GetGpuComputeMode() GpuComputeModeRules {
+	if o == nil || IsNil(o.GpuComputeMode.Get()) {
+		var ret GpuComputeModeRules
+		return ret
+	}
+	return *o.GpuComputeMode.Get()
+}
+
+// GetGpuComputeModeOk returns a tuple with the GpuComputeMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRulesAllOfCompute) GetGpuComputeModeOk() (*GpuComputeModeRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuComputeMode.Get(), o.GpuComputeMode.IsSet()
+}
+
+// HasGpuComputeMode returns a boolean if a field has been set.
+func (o *NimServiceRulesAllOfCompute) HasGpuComputeMode() bool {
+	if o != nil && o.GpuComputeMode.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuComputeMode gets a reference to the given NullableGpuComputeModeRules and assigns it to the GpuComputeMode field.
+func (o *NimServiceRulesAllOfCompute) SetGpuComputeMode(v GpuComputeModeRules) {
+	o.GpuComputeMode.Set(&v)
+}
+
+// SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+func (o *NimServiceRulesAllOfCompute) SetGpuComputeModeNil() {
+	o.GpuComputeMode.Set(nil)
+}
+
+// UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
+func (o *NimServiceRulesAllOfCompute) UnsetGpuComputeMode() {
+	o.GpuComputeMode.Unset()
 }
 
 // GetGpuDevicesRequest returns the GpuDevicesRequest field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -598,6 +642,9 @@ func (o NimServiceRulesAllOfCompute) ToMap() (map[string]interface{}, error) {
 	}
 	if o.CpuMemoryRequest.IsSet() {
 		toSerialize["cpuMemoryRequest"] = o.CpuMemoryRequest.Get()
+	}
+	if o.GpuComputeMode.IsSet() {
+		toSerialize["gpuComputeMode"] = o.GpuComputeMode.Get()
 	}
 	if o.GpuDevicesRequest.IsSet() {
 		toSerialize["gpuDevicesRequest"] = o.GpuDevicesRequest.Get()

@@ -43,6 +43,11 @@ type NimServiceRulesAllOfCompute struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuComputeMode *GpuComputeModeRules `json:"gpuComputeMode,omitempty"`
+	GpuComputeMode *GpuComputeModeRules `json:"gpuComputeMode,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuDevicesRequest *IntegerRules `json:"gpuDevicesRequest,omitempty"`
 	GpuDevicesRequest *IntegerRules `json:"gpuDevicesRequest,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -104,6 +109,11 @@ func AssertNimServiceRulesAllOfComputeRequired(obj NimServiceRulesAllOfCompute) 
 	}
 	if obj.CpuMemoryRequest != nil {
 		if err := AssertQuantityRulesRequired(*obj.CpuMemoryRequest); err != nil {
+			return err
+		}
+	}
+	if obj.GpuComputeMode != nil {
+		if err := AssertGpuComputeModeRulesRequired(*obj.GpuComputeMode); err != nil {
 			return err
 		}
 	}
@@ -189,6 +199,16 @@ func AssertNimServiceRulesAllOfComputeConstraints(obj NimServiceRulesAllOfComput
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.CpuMemoryRequest != nil {
 		if err := AssertQuantityRulesConstraints(*obj.CpuMemoryRequest); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuComputeMode != nil {
+		if err := AssertGpuComputeModeRulesConstraints(*obj.GpuComputeMode); err != nil {
 			return err
 		}
 	}

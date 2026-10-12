@@ -7840,6 +7840,17 @@ components:
       minimum: 0
       nullable: true
       type: number
+    GpuComputeMode:
+      description: GPU compute sharing mode. Policy and template defaults apply before
+        the built-in time-slicing fallback. Explicit modes require an available GPU
+        fractioning runtime on the selected cluster.
+      enum:
+      - time-slicing
+      - sm-sharing
+      minLength: 1
+      nullable: true
+      type: string
+      x-gorm-ignore: true
     GpuRequestType:
       description: "Sets the unit type for GPU resources requests. Stated in terms\
         \ of portion or memory. Sets the unit type for other GPU request fields. If\
@@ -7889,6 +7900,7 @@ components:
         gpuMemoryRequest: 10M
         gpuMemoryPortionLimit: 0.5
         gpuPortionRequest: 0.5
+        gpuComputeMode: time-slicing
         gpuMemoryPortionRequest: 0.5
         largeShmRequest: false
         cpuCoreRequest: 0.5
@@ -8004,6 +8016,8 @@ components:
           minimum: 0
           nullable: true
           type: number
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestType'
         largeShmRequest:
@@ -12153,6 +12167,35 @@ components:
         instances:
           $ref: '#/components/schemas/ItemRules'
       type: object
+    GpuComputeModeOptions:
+      nullable: true
+      properties:
+        options:
+          description: Limit the permitted values for gpuComputeMode to a given set
+            of values.
+          items:
+            $ref: '#/components/schemas/GpuComputeModeOptions_options_inner'
+          nullable: true
+          type: array
+      type: object
+    GpuComputeModeRules:
+      allOf:
+      - $ref: '#/components/schemas/StringRulesCommon'
+      - $ref: '#/components/schemas/GpuComputeModeOptions'
+      example:
+        sourceOfRule:
+          scope: project
+          projectId: 3
+        blocked: true
+        canEdit: true
+        options:
+        - displayed: displayed
+          value: null
+        - displayed: displayed
+          value: null
+        required: true
+      nullable: true
+      type: object
     GpuRequestOptions:
       nullable: true
       properties:
@@ -12319,6 +12362,18 @@ components:
           step: 4.965218492984954
           required: true
         gpuPortionRequest: ""
+        gpuComputeMode:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          blocked: true
+          canEdit: true
+          options:
+          - displayed: displayed
+            value: null
+          - displayed: displayed
+            value: null
+          required: true
         gpuMemoryPortionRequest:
           sourceOfRule:
             scope: project
@@ -12380,6 +12435,8 @@ components:
           allOf:
           - $ref: '#/components/schemas/NumberRules'
           deprecated: true
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeModeRules'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestRules'
         largeShmRequest:
@@ -16763,6 +16820,7 @@ components:
           gpuMemoryRequest: 10M
           gpuMemoryPortionLimit: 0.5
           gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           largeShmRequest: false
           cpuCoreRequest: 0.5
@@ -18029,6 +18087,7 @@ components:
             gpuMemoryRequest: 10M
             gpuMemoryPortionLimit: 0.5
             gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             largeShmRequest: false
             cpuCoreRequest: 0.5
@@ -19127,6 +19186,7 @@ components:
             gpuMemoryRequest: 10M
             gpuMemoryPortionLimit: 0.5
             gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             largeShmRequest: false
             cpuCoreRequest: 0.5
@@ -20399,6 +20459,18 @@ components:
             step: 4.965218492984954
             required: true
           gpuPortionRequest: ""
+          gpuComputeMode:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            blocked: true
+            canEdit: true
+            options:
+            - displayed: displayed
+              value: null
+            - displayed: displayed
+              value: null
+            required: true
           gpuMemoryPortionRequest:
             sourceOfRule:
               scope: project
@@ -21891,6 +21963,18 @@ components:
               step: 4.965218492984954
               required: true
             gpuPortionRequest: ""
+            gpuComputeMode:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              blocked: true
+              canEdit: true
+              options:
+              - displayed: displayed
+                value: null
+              - displayed: displayed
+                value: null
+              required: true
             gpuMemoryPortionRequest:
               sourceOfRule:
                 scope: project
@@ -23362,6 +23446,18 @@ components:
               step: 4.965218492984954
               required: true
             gpuPortionRequest: ""
+            gpuComputeMode:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              blocked: true
+              canEdit: true
+              options:
+              - displayed: displayed
+                value: null
+              - displayed: displayed
+                value: null
+              required: true
             gpuMemoryPortionRequest:
               sourceOfRule:
                 scope: project
@@ -24652,6 +24748,7 @@ components:
               gpuMemoryRequest: 10M
               gpuMemoryPortionLimit: 0.5
               gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
               gpuMemoryPortionRequest: 0.5
               largeShmRequest: false
               cpuCoreRequest: 0.5
@@ -25750,6 +25847,7 @@ components:
               gpuMemoryRequest: 10M
               gpuMemoryPortionLimit: 0.5
               gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
               gpuMemoryPortionRequest: 0.5
               largeShmRequest: false
               cpuCoreRequest: 0.5
@@ -27039,6 +27137,18 @@ components:
                 step: 4.965218492984954
                 required: true
               gpuPortionRequest: ""
+              gpuComputeMode:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - displayed: displayed
+                  value: null
+                - displayed: displayed
+                  value: null
+                required: true
               gpuMemoryPortionRequest:
                 sourceOfRule:
                   scope: project
@@ -28510,6 +28620,18 @@ components:
                 step: 4.965218492984954
                 required: true
               gpuPortionRequest: ""
+              gpuComputeMode:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - displayed: displayed
+                  value: null
+                - displayed: displayed
+                  value: null
+                required: true
               gpuMemoryPortionRequest:
                 sourceOfRule:
                   scope: project
@@ -29795,6 +29917,7 @@ components:
                   gpuMemoryRequest: 10M
                   gpuMemoryPortionLimit: 0.5
                   gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
                   gpuMemoryPortionRequest: 0.5
                   largeShmRequest: false
                   cpuCoreRequest: 0.5
@@ -30893,6 +31016,7 @@ components:
                   gpuMemoryRequest: 10M
                   gpuMemoryPortionLimit: 0.5
                   gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
                   gpuMemoryPortionRequest: 0.5
                   largeShmRequest: false
                   cpuCoreRequest: 0.5
@@ -32182,6 +32306,18 @@ components:
                     step: 4.965218492984954
                     required: true
                   gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
                   gpuMemoryPortionRequest:
                     sourceOfRule:
                       scope: project
@@ -33653,6 +33789,18 @@ components:
                     step: 4.965218492984954
                     required: true
                   gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
                   gpuMemoryPortionRequest:
                     sourceOfRule:
                       scope: project
@@ -34920,6 +35068,7 @@ components:
                   gpuMemoryRequest: 10M
                   gpuMemoryPortionLimit: 0.5
                   gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
                   gpuMemoryPortionRequest: 0.5
                   largeShmRequest: false
                   cpuCoreRequest: 0.5
@@ -36018,6 +36167,7 @@ components:
                   gpuMemoryRequest: 10M
                   gpuMemoryPortionLimit: 0.5
                   gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
                   gpuMemoryPortionRequest: 0.5
                   largeShmRequest: false
                   cpuCoreRequest: 0.5
@@ -37307,6 +37457,18 @@ components:
                     step: 4.965218492984954
                     required: true
                   gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
                   gpuMemoryPortionRequest:
                     sourceOfRule:
                       scope: project
@@ -38778,6 +38940,18 @@ components:
                     step: 4.965218492984954
                     required: true
                   gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
                   gpuMemoryPortionRequest:
                     sourceOfRule:
                       scope: project
@@ -40506,6 +40680,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -41604,6 +41779,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -42893,6 +43069,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -44364,6 +44552,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -45633,6 +45833,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -46731,6 +46932,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -48020,6 +48222,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -49491,6 +49705,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -50770,6 +50996,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -51868,6 +52095,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -53157,6 +53385,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -54628,6 +54868,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -55901,6 +56153,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -56999,6 +57252,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -58288,6 +58542,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -59759,6 +60025,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -62679,6 +62957,7 @@ components:
                   gpuMemoryRequest: 10M
                   gpuMemoryPortionLimit: 0.5
                   gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
                   gpuMemoryPortionRequest: 0.5
                   largeShmRequest: false
                   cpuCoreRequest: 0.5
@@ -63777,6 +64056,7 @@ components:
                   gpuMemoryRequest: 10M
                   gpuMemoryPortionLimit: 0.5
                   gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
                   gpuMemoryPortionRequest: 0.5
                   largeShmRequest: false
                   cpuCoreRequest: 0.5
@@ -65066,6 +65346,18 @@ components:
                     step: 4.965218492984954
                     required: true
                   gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
                   gpuMemoryPortionRequest:
                     sourceOfRule:
                       scope: project
@@ -66537,6 +66829,18 @@ components:
                     step: 4.965218492984954
                     required: true
                   gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
                   gpuMemoryPortionRequest:
                     sourceOfRule:
                       scope: project
@@ -67806,6 +68110,7 @@ components:
                   gpuMemoryRequest: 10M
                   gpuMemoryPortionLimit: 0.5
                   gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
                   gpuMemoryPortionRequest: 0.5
                   largeShmRequest: false
                   cpuCoreRequest: 0.5
@@ -68904,6 +69209,7 @@ components:
                   gpuMemoryRequest: 10M
                   gpuMemoryPortionLimit: 0.5
                   gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
                   gpuMemoryPortionRequest: 0.5
                   largeShmRequest: false
                   cpuCoreRequest: 0.5
@@ -70193,6 +70499,18 @@ components:
                     step: 4.965218492984954
                     required: true
                   gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
                   gpuMemoryPortionRequest:
                     sourceOfRule:
                       scope: project
@@ -71664,6 +71982,18 @@ components:
                     step: 4.965218492984954
                     required: true
                   gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
                   gpuMemoryPortionRequest:
                     sourceOfRule:
                       scope: project
@@ -75409,6 +75739,20 @@ components:
           type: string
       required:
       - value
+    GpuComputeModeOptions_options_inner:
+      example:
+        displayed: displayed
+        value: null
+      properties:
+        value:
+          $ref: '#/components/schemas/GpuComputeMode'
+        displayed:
+          description: Textual description of the value
+          nullable: true
+          pattern: .*
+          type: string
+      required:
+      - value
     GpuRequestOptions_options_inner:
       example:
         displayed: displayed
@@ -76924,6 +77268,7 @@ components:
           gpuMemoryRequest: 10M
           gpuMemoryPortionLimit: 0.5
           gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           largeShmRequest: false
           cpuCoreRequest: 0.5
@@ -78242,6 +78587,18 @@ components:
             step: 4.965218492984954
             required: true
           gpuPortionRequest: ""
+          gpuComputeMode:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            blocked: true
+            canEdit: true
+            options:
+            - displayed: displayed
+              value: null
+            - displayed: displayed
+              value: null
+            required: true
           gpuMemoryPortionRequest:
             sourceOfRule:
               scope: project
@@ -79617,6 +79974,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -80715,6 +81073,7 @@ components:
                 gpuMemoryRequest: 10M
                 gpuMemoryPortionLimit: 0.5
                 gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
                 gpuMemoryPortionRequest: 0.5
                 largeShmRequest: false
                 cpuCoreRequest: 0.5
@@ -82004,6 +82363,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -83475,6 +83846,18 @@ components:
                   step: 4.965218492984954
                   required: true
                 gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
                 gpuMemoryPortionRequest:
                   sourceOfRule:
                     scope: project
@@ -84288,6 +84671,8 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuDevicesRequest:
           description: "Requested number of GPU devices. Currently if more than one\
             \ device is requested, it is not possible to provide values for gpuMemory\
@@ -84449,6 +84834,8 @@ components:
           $ref: '#/components/schemas/QuantityRules'
         cpuMemoryRequest:
           $ref: '#/components/schemas/QuantityRules'
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeModeRules'
         gpuDevicesRequest:
           $ref: '#/components/schemas/IntegerRules'
         gpuMemoryLimit:

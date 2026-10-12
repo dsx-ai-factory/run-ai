@@ -6688,6 +6688,89 @@ export interface GitsRules {
     'instances'?: ItemRules | null;
 }
 /**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeOptions
+ */
+export interface GpuComputeModeOptions {
+    /**
+     * Limit the permitted values for gpuComputeMode to a given set of values.
+     * @type {Array<GpuComputeModeOptionsOptionsInner>}
+     * @memberof GpuComputeModeOptions
+     */
+    'options'?: Array<GpuComputeModeOptionsOptionsInner> | null;
+}
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeOptionsOptionsInner
+ */
+export interface GpuComputeModeOptionsOptionsInner {
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof GpuComputeModeOptionsOptionsInner
+     */
+    'value': GpuComputeMode | null;
+    /**
+     * Textual description of the value
+     * @type {string}
+     * @memberof GpuComputeModeOptionsOptionsInner
+     */
+    'displayed'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeRules
+ */
+export interface GpuComputeModeRules {
+    /**
+     * 
+     * @type {SourceOfRule}
+     * @memberof GpuComputeModeRules
+     */
+    'sourceOfRule'?: SourceOfRule | null;
+    /**
+     * Whether the field is mandatory, default to false.
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'required'?: boolean | null;
+    /**
+     * Whether the value of the field is editable, default to true
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'canEdit'?: boolean | null;
+    /**
+     * Blocks the field to prevent workloads from specifying any value for it.
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'blocked'?: boolean | null;
+    /**
+     * Limit the permitted values for gpuComputeMode to a given set of values.
+     * @type {Array<GpuComputeModeOptionsOptionsInner>}
+     * @memberof GpuComputeModeRules
+     */
+    'options'?: Array<GpuComputeModeOptionsOptionsInner> | null;
+}
+/**
  * 
  * @export
  * @interface GpuRequestOptions
@@ -9840,6 +9923,12 @@ export interface NimServiceDefaultsAllOfCompute {
      */
     'cpuMemoryRequest'?: string | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof NimServiceDefaultsAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof NimServiceDefaultsAllOfCompute
@@ -10666,6 +10755,12 @@ export interface NimServiceRulesAllOfCompute {
      * @memberof NimServiceRulesAllOfCompute
      */
     'cpuMemoryRequest'?: QuantityRules | null;
+    /**
+     * 
+     * @type {GpuComputeModeRules}
+     * @memberof NimServiceRulesAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeModeRules | null;
     /**
      * 
      * @type {IntegerRules}
@@ -15728,6 +15823,12 @@ export interface SupersetDefaultsAllOfCompute {
     'gpuPortionRequest'?: number | null;
     /**
      * 
+     * @type {GpuComputeMode}
+     * @memberof SupersetDefaultsAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
+     * 
      * @type {GpuRequestType}
      * @memberof SupersetDefaultsAllOfCompute
      */
@@ -16550,6 +16651,12 @@ export interface SupersetRulesAllOfCompute {
      * @deprecated
      */
     'gpuPortionRequest'?: SupersetRulesAllOfComputeGpuPortionLimit;
+    /**
+     * 
+     * @type {GpuComputeModeRules}
+     * @memberof SupersetRulesAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeModeRules | null;
     /**
      * 
      * @type {GpuRequestRules}

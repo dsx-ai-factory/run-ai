@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **CpuCoreRequest** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
 **CpuMemoryLimit** | Pointer to [**NullableQuantityRules**](QuantityRules.md) |  | [optional] 
 **CpuMemoryRequest** | Pointer to [**NullableQuantityRules**](QuantityRules.md) |  | [optional] 
+**GpuComputeMode** | Pointer to [**NullableGpuComputeModeRules**](GpuComputeModeRules.md) |  | [optional] 
 **GpuDevicesRequest** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **GpuMemoryLimit** | Pointer to [**NullableQuantityRules**](QuantityRules.md) |  | [optional] 
 **GpuMemoryPortionLimit** | Pointer to [**NullableNumberRules**](NumberRules.md) |  | [optional] 
@@ -176,6 +177,41 @@ HasCpuMemoryRequest returns a boolean if a field has been set.
 `func (o *NimServiceRulesAllOfCompute) UnsetCpuMemoryRequest()`
 
 UnsetCpuMemoryRequest ensures that no value is present for CpuMemoryRequest, not even an explicit nil
+### GetGpuComputeMode
+
+`func (o *NimServiceRulesAllOfCompute) GetGpuComputeMode() GpuComputeModeRules`
+
+GetGpuComputeMode returns the GpuComputeMode field if non-nil, zero value otherwise.
+
+### GetGpuComputeModeOk
+
+`func (o *NimServiceRulesAllOfCompute) GetGpuComputeModeOk() (*GpuComputeModeRules, bool)`
+
+GetGpuComputeModeOk returns a tuple with the GpuComputeMode field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuComputeMode
+
+`func (o *NimServiceRulesAllOfCompute) SetGpuComputeMode(v GpuComputeModeRules)`
+
+SetGpuComputeMode sets GpuComputeMode field to given value.
+
+### HasGpuComputeMode
+
+`func (o *NimServiceRulesAllOfCompute) HasGpuComputeMode() bool`
+
+HasGpuComputeMode returns a boolean if a field has been set.
+
+### SetGpuComputeModeNil
+
+`func (o *NimServiceRulesAllOfCompute) SetGpuComputeModeNil(b bool)`
+
+ SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+
+### UnsetGpuComputeMode
+`func (o *NimServiceRulesAllOfCompute) UnsetGpuComputeMode()`
+
+UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
 ### GetGpuDevicesRequest
 
 `func (o *NimServiceRulesAllOfCompute) GetGpuDevicesRequest() IntegerRules`

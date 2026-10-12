@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **GpuPortionLimit** | Pointer to **NullableFloat64** | Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest. | [optional] 
 **GpuMemoryPortionRequest** | Pointer to **NullableFloat64** | GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion. | [optional] 
 **GpuPortionRequest** | Pointer to **NullableFloat64** | Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs. | [optional] 
+**GpuComputeMode** | Pointer to [**NullableGpuComputeMode**](GpuComputeMode.md) |  | [optional] 
 **GpuRequestType** | Pointer to [**NullableGpuRequestType**](GpuRequestType.md) |  | [optional] 
 **LargeShmRequest** | Pointer to **NullableBool** | A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM. | [optional] 
 
@@ -458,6 +459,41 @@ HasGpuPortionRequest returns a boolean if a field has been set.
 `func (o *SupersetDefaultsAllOfCompute) UnsetGpuPortionRequest()`
 
 UnsetGpuPortionRequest ensures that no value is present for GpuPortionRequest, not even an explicit nil
+### GetGpuComputeMode
+
+`func (o *SupersetDefaultsAllOfCompute) GetGpuComputeMode() GpuComputeMode`
+
+GetGpuComputeMode returns the GpuComputeMode field if non-nil, zero value otherwise.
+
+### GetGpuComputeModeOk
+
+`func (o *SupersetDefaultsAllOfCompute) GetGpuComputeModeOk() (*GpuComputeMode, bool)`
+
+GetGpuComputeModeOk returns a tuple with the GpuComputeMode field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuComputeMode
+
+`func (o *SupersetDefaultsAllOfCompute) SetGpuComputeMode(v GpuComputeMode)`
+
+SetGpuComputeMode sets GpuComputeMode field to given value.
+
+### HasGpuComputeMode
+
+`func (o *SupersetDefaultsAllOfCompute) HasGpuComputeMode() bool`
+
+HasGpuComputeMode returns a boolean if a field has been set.
+
+### SetGpuComputeModeNil
+
+`func (o *SupersetDefaultsAllOfCompute) SetGpuComputeModeNil(b bool)`
+
+ SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+
+### UnsetGpuComputeMode
+`func (o *SupersetDefaultsAllOfCompute) UnsetGpuComputeMode()`
+
+UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
 ### GetGpuRequestType
 
 `func (o *SupersetDefaultsAllOfCompute) GetGpuRequestType() GpuRequestType`

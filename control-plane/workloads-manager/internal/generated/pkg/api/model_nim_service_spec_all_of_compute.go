@@ -26,6 +26,11 @@ var dummyNimServiceSpecAllOfCompute = runaihttp.AssertPattern
 
 type NimServiceSpecAllOfCompute struct {
 
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ComputeMode *ComputeMode `json:"computeMode,omitempty"`
+	ComputeMode *ComputeMode `json:"computeMode,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//CpuCoreLimit *float64 `json:"cpuCoreLimit,omitempty"`
@@ -48,6 +53,11 @@ type NimServiceSpecAllOfCompute struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//CpuMemoryRequest *string `json:"cpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
 	CpuMemoryRequest *string `json:"cpuMemoryRequest,omitempty" gorm:"" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty"`
+	GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty" gorm:"-"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
@@ -107,6 +117,17 @@ func AssertNimServiceSpecAllOfComputeRequired(obj NimServiceSpecAllOfCompute) er
 
 // AssertNimServiceSpecAllOfComputeConstraints checks if the values respects the defined constraints
 func AssertNimServiceSpecAllOfComputeConstraints(obj NimServiceSpecAllOfCompute) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.ComputeMode != nil {
+		if okValue := obj.ComputeMode.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "ComputeMode", Value: string(*obj.ComputeMode)}
+		}
+	}
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.CpuCoreLimit != nil && *obj.CpuCoreLimit < 0 {
 		return &ParsingError{Param: "CpuCoreLimit", Err: errors.New(errMsgMinValueConstraint)}
 	}
@@ -143,6 +164,17 @@ func AssertNimServiceSpecAllOfComputeConstraints(obj NimServiceSpecAllOfCompute)
 	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.GpuComputeMode != nil {
+		if okValue := obj.GpuComputeMode.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "GpuComputeMode", Value: string(*obj.GpuComputeMode)}
+		}
+	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuDevicesRequest != nil && *obj.GpuDevicesRequest < 0 {

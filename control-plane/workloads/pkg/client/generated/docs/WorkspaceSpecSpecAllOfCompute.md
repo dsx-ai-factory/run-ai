@@ -4,11 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ComputeMode** | Pointer to [**NullableComputeMode**](ComputeMode.md) |  | [optional] 
 **CpuCoreLimit** | Pointer to **NullableFloat64** | Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs. | [optional] 
 **CpuCoreRequest** | Pointer to **NullableFloat64** | CPU units to allocate for the created workload (0.5, 1, .etc). The workload will receive at least this amount of CPU. Note that the workload will not be scheduled unless the system can guarantee this amount of CPUs to the workload. | [optional] 
 **CpuMemoryLimit** | Pointer to **NullableString** | Limitations on the CPU memory to allocate for this workload (1G, 20M, .etc). The system guarantees that this workload will not be able to consume more than this amount of memory. The workload will receive an error when trying to allocate more memory than this limit. | [optional] 
 **CpuMemoryRequest** | Pointer to **NullableString** | The amount of CPU memory to allocate for this workload (1G, 20M, .etc). The workload will receive at least this amount of memory. Note that the workload will not be scheduled unless the system can guarantee this amount of memory to the workload | [optional] 
 **ExtendedResources** | Pointer to [**[]ExtendedResource**](ExtendedResource.md) | Extended resources and their quantity. | [optional] 
+**GpuComputeMode** | Pointer to [**NullableGpuComputeMode**](GpuComputeMode.md) |  | [optional] 
 **GpuDevicesRequest** | Pointer to **NullableInt32** | Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion. | [optional] 
 **GpuMemoryLimit** | Pointer to **NullableString** | Limitation on the memory consumed by the workload, per GPU device. The system guarantees The gpuMemoryLimit must be no less than gpuMemoryRequest. | [optional] 
 **GpuMemoryPortionLimit** | Pointer to **NullableFloat64** | Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest. | [optional] 
@@ -38,6 +40,41 @@ NewWorkspaceSpecSpecAllOfComputeWithDefaults instantiates a new WorkspaceSpecSpe
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
+### GetComputeMode
+
+`func (o *WorkspaceSpecSpecAllOfCompute) GetComputeMode() ComputeMode`
+
+GetComputeMode returns the ComputeMode field if non-nil, zero value otherwise.
+
+### GetComputeModeOk
+
+`func (o *WorkspaceSpecSpecAllOfCompute) GetComputeModeOk() (*ComputeMode, bool)`
+
+GetComputeModeOk returns a tuple with the ComputeMode field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetComputeMode
+
+`func (o *WorkspaceSpecSpecAllOfCompute) SetComputeMode(v ComputeMode)`
+
+SetComputeMode sets ComputeMode field to given value.
+
+### HasComputeMode
+
+`func (o *WorkspaceSpecSpecAllOfCompute) HasComputeMode() bool`
+
+HasComputeMode returns a boolean if a field has been set.
+
+### SetComputeModeNil
+
+`func (o *WorkspaceSpecSpecAllOfCompute) SetComputeModeNil(b bool)`
+
+ SetComputeModeNil sets the value for ComputeMode to be an explicit nil
+
+### UnsetComputeMode
+`func (o *WorkspaceSpecSpecAllOfCompute) UnsetComputeMode()`
+
+UnsetComputeMode ensures that no value is present for ComputeMode, not even an explicit nil
 ### GetCpuCoreLimit
 
 `func (o *WorkspaceSpecSpecAllOfCompute) GetCpuCoreLimit() float64`
@@ -213,6 +250,41 @@ HasExtendedResources returns a boolean if a field has been set.
 `func (o *WorkspaceSpecSpecAllOfCompute) UnsetExtendedResources()`
 
 UnsetExtendedResources ensures that no value is present for ExtendedResources, not even an explicit nil
+### GetGpuComputeMode
+
+`func (o *WorkspaceSpecSpecAllOfCompute) GetGpuComputeMode() GpuComputeMode`
+
+GetGpuComputeMode returns the GpuComputeMode field if non-nil, zero value otherwise.
+
+### GetGpuComputeModeOk
+
+`func (o *WorkspaceSpecSpecAllOfCompute) GetGpuComputeModeOk() (*GpuComputeMode, bool)`
+
+GetGpuComputeModeOk returns a tuple with the GpuComputeMode field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuComputeMode
+
+`func (o *WorkspaceSpecSpecAllOfCompute) SetGpuComputeMode(v GpuComputeMode)`
+
+SetGpuComputeMode sets GpuComputeMode field to given value.
+
+### HasGpuComputeMode
+
+`func (o *WorkspaceSpecSpecAllOfCompute) HasGpuComputeMode() bool`
+
+HasGpuComputeMode returns a boolean if a field has been set.
+
+### SetGpuComputeModeNil
+
+`func (o *WorkspaceSpecSpecAllOfCompute) SetGpuComputeModeNil(b bool)`
+
+ SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+
+### UnsetGpuComputeMode
+`func (o *WorkspaceSpecSpecAllOfCompute) UnsetGpuComputeMode()`
+
+UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
 ### GetGpuDevicesRequest
 
 `func (o *WorkspaceSpecSpecAllOfCompute) GetGpuDevicesRequest() int32`

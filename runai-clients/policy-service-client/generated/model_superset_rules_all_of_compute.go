@@ -35,9 +35,10 @@ type SupersetRulesAllOfCompute struct {
 	GpuPortionLimit         NullableNumberRules `json:"gpuPortionLimit,omitempty"`
 	GpuMemoryPortionRequest NullableNumberRules `json:"gpuMemoryPortionRequest,omitempty"`
 	// Deprecated
-	GpuPortionRequest NullableNumberRules     `json:"gpuPortionRequest,omitempty"`
-	GpuRequestType    NullableGpuRequestRules `json:"gpuRequestType,omitempty"`
-	LargeShmRequest   NullableBooleanRules    `json:"largeShmRequest,omitempty"`
+	GpuPortionRequest NullableNumberRules         `json:"gpuPortionRequest,omitempty"`
+	GpuComputeMode    NullableGpuComputeModeRules `json:"gpuComputeMode,omitempty"`
+	GpuRequestType    NullableGpuRequestRules     `json:"gpuRequestType,omitempty"`
+	LargeShmRequest   NullableBooleanRules        `json:"largeShmRequest,omitempty"`
 }
 
 // NewSupersetRulesAllOfCompute instantiates a new SupersetRulesAllOfCompute object
@@ -579,6 +580,49 @@ func (o *SupersetRulesAllOfCompute) UnsetGpuPortionRequest() {
 	o.GpuPortionRequest.Unset()
 }
 
+// GetGpuComputeMode returns the GpuComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetRulesAllOfCompute) GetGpuComputeMode() GpuComputeModeRules {
+	if o == nil || IsNil(o.GpuComputeMode.Get()) {
+		var ret GpuComputeModeRules
+		return ret
+	}
+	return *o.GpuComputeMode.Get()
+}
+
+// GetGpuComputeModeOk returns a tuple with the GpuComputeMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetRulesAllOfCompute) GetGpuComputeModeOk() (*GpuComputeModeRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuComputeMode.Get(), o.GpuComputeMode.IsSet()
+}
+
+// HasGpuComputeMode returns a boolean if a field has been set.
+func (o *SupersetRulesAllOfCompute) HasGpuComputeMode() bool {
+	if o != nil && o.GpuComputeMode.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuComputeMode gets a reference to the given NullableGpuComputeModeRules and assigns it to the GpuComputeMode field.
+func (o *SupersetRulesAllOfCompute) SetGpuComputeMode(v GpuComputeModeRules) {
+	o.GpuComputeMode.Set(&v)
+}
+
+// SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+func (o *SupersetRulesAllOfCompute) SetGpuComputeModeNil() {
+	o.GpuComputeMode.Set(nil)
+}
+
+// UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
+func (o *SupersetRulesAllOfCompute) UnsetGpuComputeMode() {
+	o.GpuComputeMode.Unset()
+}
+
 // GetGpuRequestType returns the GpuRequestType field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *SupersetRulesAllOfCompute) GetGpuRequestType() GpuRequestRules {
 	if o == nil || IsNil(o.GpuRequestType.Get()) {
@@ -710,6 +754,9 @@ func (o SupersetRulesAllOfCompute) ToMap() (map[string]interface{}, error) {
 	}
 	if o.GpuPortionRequest.IsSet() {
 		toSerialize["gpuPortionRequest"] = o.GpuPortionRequest.Get()
+	}
+	if o.GpuComputeMode.IsSet() {
+		toSerialize["gpuComputeMode"] = o.GpuComputeMode.Get()
 	}
 	if o.GpuRequestType.IsSet() {
 		toSerialize["gpuRequestType"] = o.GpuRequestType.Get()

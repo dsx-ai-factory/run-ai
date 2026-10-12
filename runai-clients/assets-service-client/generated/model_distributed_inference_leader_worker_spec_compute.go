@@ -22,6 +22,7 @@ var _ MappedNullable = &DistributedInferenceLeaderWorkerSpecCompute{}
 
 // DistributedInferenceLeaderWorkerSpecCompute struct for DistributedInferenceLeaderWorkerSpecCompute
 type DistributedInferenceLeaderWorkerSpecCompute struct {
+	ComputeMode NullableComputeMode `json:"computeMode,omitempty"`
 	// Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
 	CpuCoreLimit NullableFloat64 `json:"cpuCoreLimit,omitempty"`
 	// CPU units to allocate for the created workload (0.5, 1, .etc). The workload will receive at least this amount of CPU. Note that the workload will not be scheduled unless the system can guarantee this amount of CPUs to the workload.
@@ -31,7 +32,8 @@ type DistributedInferenceLeaderWorkerSpecCompute struct {
 	// The amount of CPU memory to allocate for this workload (1G, 20M, .etc). The workload will receive at least this amount of memory. Note that the workload will not be scheduled unless the system can guarantee this amount of memory to the workload
 	CpuMemoryRequest NullableString `json:"cpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
 	// Extended resources and their quantity.
-	ExtendedResources []ExtendedResource `json:"extendedResources,omitempty"`
+	ExtendedResources []ExtendedResource     `json:"extendedResources,omitempty"`
+	GpuComputeMode    NullableGpuComputeMode `json:"gpuComputeMode,omitempty"`
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
 	GpuDevicesRequest NullableInt32 `json:"gpuDevicesRequest,omitempty"`
 	// Limitation on the memory consumed by the workload, per GPU device. The system guarantees The gpuMemoryLimit must be no less than gpuMemoryRequest.
@@ -68,6 +70,49 @@ func NewDistributedInferenceLeaderWorkerSpecCompute() *DistributedInferenceLeade
 func NewDistributedInferenceLeaderWorkerSpecComputeWithDefaults() *DistributedInferenceLeaderWorkerSpecCompute {
 	this := DistributedInferenceLeaderWorkerSpecCompute{}
 	return &this
+}
+
+// GetComputeMode returns the ComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceLeaderWorkerSpecCompute) GetComputeMode() ComputeMode {
+	if o == nil || IsNil(o.ComputeMode.Get()) {
+		var ret ComputeMode
+		return ret
+	}
+	return *o.ComputeMode.Get()
+}
+
+// GetComputeModeOk returns a tuple with the ComputeMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceLeaderWorkerSpecCompute) GetComputeModeOk() (*ComputeMode, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ComputeMode.Get(), o.ComputeMode.IsSet()
+}
+
+// HasComputeMode returns a boolean if a field has been set.
+func (o *DistributedInferenceLeaderWorkerSpecCompute) HasComputeMode() bool {
+	if o != nil && o.ComputeMode.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetComputeMode gets a reference to the given NullableComputeMode and assigns it to the ComputeMode field.
+func (o *DistributedInferenceLeaderWorkerSpecCompute) SetComputeMode(v ComputeMode) {
+	o.ComputeMode.Set(&v)
+}
+
+// SetComputeModeNil sets the value for ComputeMode to be an explicit nil
+func (o *DistributedInferenceLeaderWorkerSpecCompute) SetComputeModeNil() {
+	o.ComputeMode.Set(nil)
+}
+
+// UnsetComputeMode ensures that no value is present for ComputeMode, not even an explicit nil
+func (o *DistributedInferenceLeaderWorkerSpecCompute) UnsetComputeMode() {
+	o.ComputeMode.Unset()
 }
 
 // GetCpuCoreLimit returns the CpuCoreLimit field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -273,6 +318,49 @@ func (o *DistributedInferenceLeaderWorkerSpecCompute) HasExtendedResources() boo
 // SetExtendedResources gets a reference to the given []ExtendedResource and assigns it to the ExtendedResources field.
 func (o *DistributedInferenceLeaderWorkerSpecCompute) SetExtendedResources(v []ExtendedResource) {
 	o.ExtendedResources = v
+}
+
+// GetGpuComputeMode returns the GpuComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceLeaderWorkerSpecCompute) GetGpuComputeMode() GpuComputeMode {
+	if o == nil || IsNil(o.GpuComputeMode.Get()) {
+		var ret GpuComputeMode
+		return ret
+	}
+	return *o.GpuComputeMode.Get()
+}
+
+// GetGpuComputeModeOk returns a tuple with the GpuComputeMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceLeaderWorkerSpecCompute) GetGpuComputeModeOk() (*GpuComputeMode, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuComputeMode.Get(), o.GpuComputeMode.IsSet()
+}
+
+// HasGpuComputeMode returns a boolean if a field has been set.
+func (o *DistributedInferenceLeaderWorkerSpecCompute) HasGpuComputeMode() bool {
+	if o != nil && o.GpuComputeMode.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuComputeMode gets a reference to the given NullableGpuComputeMode and assigns it to the GpuComputeMode field.
+func (o *DistributedInferenceLeaderWorkerSpecCompute) SetGpuComputeMode(v GpuComputeMode) {
+	o.GpuComputeMode.Set(&v)
+}
+
+// SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+func (o *DistributedInferenceLeaderWorkerSpecCompute) SetGpuComputeModeNil() {
+	o.GpuComputeMode.Set(nil)
+}
+
+// UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
+func (o *DistributedInferenceLeaderWorkerSpecCompute) UnsetGpuComputeMode() {
+	o.GpuComputeMode.Unset()
 }
 
 // GetGpuDevicesRequest returns the GpuDevicesRequest field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -678,6 +766,9 @@ func (o DistributedInferenceLeaderWorkerSpecCompute) MarshalJSON() ([]byte, erro
 
 func (o DistributedInferenceLeaderWorkerSpecCompute) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.ComputeMode.IsSet() {
+		toSerialize["computeMode"] = o.ComputeMode.Get()
+	}
 	if o.CpuCoreLimit.IsSet() {
 		toSerialize["cpuCoreLimit"] = o.CpuCoreLimit.Get()
 	}
@@ -692,6 +783,9 @@ func (o DistributedInferenceLeaderWorkerSpecCompute) ToMap() (map[string]interfa
 	}
 	if o.ExtendedResources != nil {
 		toSerialize["extendedResources"] = o.ExtendedResources
+	}
+	if o.GpuComputeMode.IsSet() {
+		toSerialize["gpuComputeMode"] = o.GpuComputeMode.Get()
 	}
 	if o.GpuDevicesRequest.IsSet() {
 		toSerialize["gpuDevicesRequest"] = o.GpuDevicesRequest.Get()

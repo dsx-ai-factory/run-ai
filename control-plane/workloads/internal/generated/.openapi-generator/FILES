@@ -112,6 +112,7 @@ pkg/api/model_compliance_issues.go
 pkg/api/model_compliance_issues_compliance_issues_inner.go
 pkg/api/model_compliance_issues_v2.go
 pkg/api/model_compliance_issues_v2_compliance_issues_inner.go
+pkg/api/model_compute_mode.go
 pkg/api/model_concurrency_hard_limit_field.go
 pkg/api/model_condition.go
 pkg/api/model_config_map.go
@@ -262,6 +263,10 @@ pkg/api/model_git_rules.go
 pkg/api/model_git_secret_ref.go
 pkg/api/model_gits_defaults.go
 pkg/api/model_gits_rules.go
+pkg/api/model_gpu_compute_mode.go
+pkg/api/model_gpu_compute_mode_options.go
+pkg/api/model_gpu_compute_mode_options_options_inner.go
+pkg/api/model_gpu_compute_mode_rules.go
 pkg/api/model_gpu_over_provisioning_setting.go
 pkg/api/model_gpu_request_options.go
 pkg/api/model_gpu_request_options_options_inner.go

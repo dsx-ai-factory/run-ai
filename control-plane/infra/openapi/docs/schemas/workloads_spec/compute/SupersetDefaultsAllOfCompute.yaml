@@ -25,6 +25,8 @@ properties:
     $ref: ./GpuMemoryPortionRequest.yaml
   gpuPortionRequest:
     $ref: ./GpuPortionRequest.yaml
+  gpuComputeMode:
+    $ref: ./GpuComputeMode.yaml
   gpuRequestType:
     $ref: ./GpuRequestType.yaml
   largeShmRequest:

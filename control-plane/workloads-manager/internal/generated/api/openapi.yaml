@@ -5287,6 +5287,16 @@ components:
       minimum: 60
       nullable: true
       type: integer
+    ComputeMode:
+      description: "Effective GPU compute sharing mode saved when the workload was\
+        \ submitted. This describes the submitted configuration, not observed GPU\
+        \ hardware state. Present for GPU workloads; ignored in requests."
+      enum:
+      - time-slicing
+      - sm-sharing
+      nullable: true
+      readOnly: true
+      type: string
     CpuCoreLimit:
       description: "Limitations on the number of CPUs consumed by the workload (0.5,\
         \ 1, .etc). The system guarantees that this workload will not be able to consume\
@@ -5326,6 +5336,17 @@ components:
       nullable: true
       pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
       type: string
+    GpuComputeMode:
+      description: GPU compute sharing mode. Policy and template defaults apply before
+        the built-in time-slicing fallback. Explicit modes require an available GPU
+        fractioning runtime on the selected cluster.
+      enum:
+      - time-slicing
+      - sm-sharing
+      minLength: 1
+      nullable: true
+      type: string
+      x-gorm-ignore: true
     GpuDevicesRequest:
       description: "Requested number of GPU devices. Currently if more than one device\
         \ is requested, it is not possible to provide values for gpuMemory or gpuPortion."
@@ -6396,17 +6417,19 @@ components:
           value: initial-research
         compute:
           cpuMemoryLimit: 30M
-          gpuMemoryRequest: 10M
-          gpuMemoryPortionLimit: 0.5
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
-          gpuMemoryPortionRequest: 0.5
           cpuCoreLimit: 2
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          computeMode: time-slicing
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           runAsGid: 30
@@ -6652,17 +6675,19 @@ components:
             value: initial-research
           compute:
             cpuMemoryLimit: 30M
-            gpuMemoryRequest: 10M
-            gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
-            gpuMemoryPortionRequest: 0.5
             cpuCoreLimit: 2
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            computeMode: time-slicing
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -7239,17 +7264,19 @@ components:
             value: initial-research
           compute:
             cpuMemoryLimit: 30M
-            gpuMemoryRequest: 10M
-            gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
-            gpuMemoryPortionRequest: 0.5
             cpuCoreLimit: 2
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            computeMode: time-slicing
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -7562,17 +7589,19 @@ components:
             value: initial-research
           compute:
             cpuMemoryLimit: 30M
-            gpuMemoryRequest: 10M
-            gpuMemoryPortionLimit: 0.5
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
-            gpuMemoryPortionRequest: 0.5
             cpuCoreLimit: 2
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            computeMode: time-slicing
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -8015,19 +8044,23 @@ components:
     NimServiceSpec_allOf_compute:
       example:
         cpuMemoryLimit: 30M
-        gpuMemoryRequest: 10M
-        gpuMemoryPortionLimit: 0.5
-        gpuPortionRequest: 0.5
         gpuMemoryLimit: 10M
-        gpuMemoryPortionRequest: 0.5
         cpuCoreLimit: 2
-        cpuCoreRequest: 0.5
-        gpuPortionLimit: 0.5
         gpuRequestType: portion
         cpuMemoryRequest: 20M
         gpuDevicesRequest: 1
+        gpuMemoryRequest: 10M
+        gpuMemoryPortionLimit: 0.5
+        gpuPortionRequest: 0.5
+        computeMode: time-slicing
+        gpuComputeMode: time-slicing
+        gpuMemoryPortionRequest: 0.5
+        cpuCoreRequest: 0.5
+        gpuPortionLimit: 0.5
       nullable: true
       properties:
+        computeMode:
+          $ref: '#/components/schemas/ComputeMode'
         cpuCoreLimit:
           description: "Limitations on the number of CPUs consumed by the workload\
             \ (0.5, 1, .etc). The system guarantees that this workload will not be\
@@ -8067,6 +8100,8 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuDevicesRequest:
           description: "Requested number of GPU devices. Currently if more than one\
             \ device is requested, it is not possible to provide values for gpuMemory\

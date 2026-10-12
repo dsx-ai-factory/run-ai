@@ -22,6 +22,7 @@ var _ MappedNullable = &NimServiceSpecAllOfCompute{}
 
 // NimServiceSpecAllOfCompute struct for NimServiceSpecAllOfCompute
 type NimServiceSpecAllOfCompute struct {
+	ComputeMode NullableComputeMode `json:"computeMode,omitempty"`
 	// Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
 	CpuCoreLimit NullableFloat64 `json:"cpuCoreLimit,omitempty"`
 	// CPU units to allocate for the created workload (0.5, 1, .etc). The workload will receive at least this amount of CPU. Note that the workload will not be scheduled unless the system can guarantee this amount of CPUs to the workload.
@@ -29,7 +30,8 @@ type NimServiceSpecAllOfCompute struct {
 	// Limitations on the CPU memory to allocate for this workload (1G, 20M, .etc). The system guarantees that this workload will not be able to consume more than this amount of memory. The workload will receive an error when trying to allocate more memory than this limit.
 	CpuMemoryLimit NullableString `json:"cpuMemoryLimit,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
 	// The amount of CPU memory to allocate for this workload (1G, 20M, .etc). The workload will receive at least this amount of memory. Note that the workload will not be scheduled unless the system can guarantee this amount of memory to the workload
-	CpuMemoryRequest NullableString `json:"cpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	CpuMemoryRequest NullableString         `json:"cpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
+	GpuComputeMode   NullableGpuComputeMode `json:"gpuComputeMode,omitempty"`
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
 	GpuDevicesRequest NullableInt32 `json:"gpuDevicesRequest,omitempty"`
 	// Limitation on the memory consumed by the workload, per GPU device. The system guarantees The gpuMemoryLimit must be no less than gpuMemoryRequest.
@@ -64,6 +66,49 @@ func NewNimServiceSpecAllOfCompute() *NimServiceSpecAllOfCompute {
 func NewNimServiceSpecAllOfComputeWithDefaults() *NimServiceSpecAllOfCompute {
 	this := NimServiceSpecAllOfCompute{}
 	return &this
+}
+
+// GetComputeMode returns the ComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceSpecAllOfCompute) GetComputeMode() ComputeMode {
+	if o == nil || IsNil(o.ComputeMode.Get()) {
+		var ret ComputeMode
+		return ret
+	}
+	return *o.ComputeMode.Get()
+}
+
+// GetComputeModeOk returns a tuple with the ComputeMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceSpecAllOfCompute) GetComputeModeOk() (*ComputeMode, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ComputeMode.Get(), o.ComputeMode.IsSet()
+}
+
+// HasComputeMode returns a boolean if a field has been set.
+func (o *NimServiceSpecAllOfCompute) HasComputeMode() bool {
+	if o != nil && o.ComputeMode.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetComputeMode gets a reference to the given NullableComputeMode and assigns it to the ComputeMode field.
+func (o *NimServiceSpecAllOfCompute) SetComputeMode(v ComputeMode) {
+	o.ComputeMode.Set(&v)
+}
+
+// SetComputeModeNil sets the value for ComputeMode to be an explicit nil
+func (o *NimServiceSpecAllOfCompute) SetComputeModeNil() {
+	o.ComputeMode.Set(nil)
+}
+
+// UnsetComputeMode ensures that no value is present for ComputeMode, not even an explicit nil
+func (o *NimServiceSpecAllOfCompute) UnsetComputeMode() {
+	o.ComputeMode.Unset()
 }
 
 // GetCpuCoreLimit returns the CpuCoreLimit field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -236,6 +281,49 @@ func (o *NimServiceSpecAllOfCompute) SetCpuMemoryRequestNil() {
 // UnsetCpuMemoryRequest ensures that no value is present for CpuMemoryRequest, not even an explicit nil
 func (o *NimServiceSpecAllOfCompute) UnsetCpuMemoryRequest() {
 	o.CpuMemoryRequest.Unset()
+}
+
+// GetGpuComputeMode returns the GpuComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceSpecAllOfCompute) GetGpuComputeMode() GpuComputeMode {
+	if o == nil || IsNil(o.GpuComputeMode.Get()) {
+		var ret GpuComputeMode
+		return ret
+	}
+	return *o.GpuComputeMode.Get()
+}
+
+// GetGpuComputeModeOk returns a tuple with the GpuComputeMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceSpecAllOfCompute) GetGpuComputeModeOk() (*GpuComputeMode, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuComputeMode.Get(), o.GpuComputeMode.IsSet()
+}
+
+// HasGpuComputeMode returns a boolean if a field has been set.
+func (o *NimServiceSpecAllOfCompute) HasGpuComputeMode() bool {
+	if o != nil && o.GpuComputeMode.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuComputeMode gets a reference to the given NullableGpuComputeMode and assigns it to the GpuComputeMode field.
+func (o *NimServiceSpecAllOfCompute) SetGpuComputeMode(v GpuComputeMode) {
+	o.GpuComputeMode.Set(&v)
+}
+
+// SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+func (o *NimServiceSpecAllOfCompute) SetGpuComputeModeNil() {
+	o.GpuComputeMode.Set(nil)
+}
+
+// UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
+func (o *NimServiceSpecAllOfCompute) UnsetGpuComputeMode() {
+	o.GpuComputeMode.Unset()
 }
 
 // GetGpuDevicesRequest returns the GpuDevicesRequest field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -598,6 +686,9 @@ func (o NimServiceSpecAllOfCompute) MarshalJSON() ([]byte, error) {
 
 func (o NimServiceSpecAllOfCompute) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.ComputeMode.IsSet() {
+		toSerialize["computeMode"] = o.ComputeMode.Get()
+	}
 	if o.CpuCoreLimit.IsSet() {
 		toSerialize["cpuCoreLimit"] = o.CpuCoreLimit.Get()
 	}
@@ -609,6 +700,9 @@ func (o NimServiceSpecAllOfCompute) ToMap() (map[string]interface{}, error) {
 	}
 	if o.CpuMemoryRequest.IsSet() {
 		toSerialize["cpuMemoryRequest"] = o.CpuMemoryRequest.Get()
+	}
+	if o.GpuComputeMode.IsSet() {
+		toSerialize["gpuComputeMode"] = o.GpuComputeMode.Get()
 	}
 	if o.GpuDevicesRequest.IsSet() {
 		toSerialize["gpuDevicesRequest"] = o.GpuDevicesRequest.Get()

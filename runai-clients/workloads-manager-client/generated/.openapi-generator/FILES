@@ -24,6 +24,7 @@ docs/ComplianceIssues.md
 docs/ComplianceIssuesComplianceIssuesInner.md
 docs/ComplianceIssuesV2.md
 docs/ComplianceIssuesV2ComplianceIssuesInner.md
+docs/ComputeMode.md
 docs/DesiredPhase.md
 docs/EnvironmentVariable.md
 docs/EnvironmentVariableConfigMap.md
@@ -35,6 +36,7 @@ docs/ExternalAccess.md
 docs/GVK.md
 docs/GetYamlSubmission.md
 docs/GetYamlSubmissionValue.md
+docs/GpuComputeMode.md
 docs/GpuRequestType.md
 docs/HealthAPI.md
 docs/ImagePullPolicy.md
@@ -139,6 +141,7 @@ model_compliance_issues.go
 model_compliance_issues_compliance_issues_inner.go
 model_compliance_issues_v2.go
 model_compliance_issues_v2_compliance_issues_inner.go
+model_compute_mode.go
 model_desired_phase.go
 model_environment_variable.go
 model_environment_variable_config_map.go
@@ -149,6 +152,7 @@ model_error.go
 model_external_access.go
 model_get_yaml_submission.go
 model_get_yaml_submission_value.go
+model_gpu_compute_mode.go
 model_gpu_request_type.go
 model_gvk.go
 model_image_pull_policy.go

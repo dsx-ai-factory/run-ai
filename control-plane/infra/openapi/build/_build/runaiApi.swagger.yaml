@@ -17905,6 +17905,15 @@ components:
         $ref: '#/components/schemas/ExtendedResource'
       maxItems: 1000
       nullable: true
+    GpuComputeMode:
+      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+      type: string
+      minLength: 1
+      enum:
+        - time-slicing
+        - sm-sharing
+      nullable: true
+      x-gorm-ignore: true
     GpuDevicesRequest:
       description: Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
       type: integer
@@ -17984,6 +17993,8 @@ components:
           $ref: '#/components/schemas/CpuMemoryRequest'
         extendedResources:
           $ref: '#/components/schemas/ExtendedResources'
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuDevicesRequest:
           $ref: '#/components/schemas/GpuDevicesRequest'
         gpuMemoryLimit:
@@ -21863,6 +21874,14 @@ components:
         - Distributed
         - Inference
         - DistributedInference
+    ComputeMode:
+      description: Effective GPU compute sharing mode saved when the workload was submitted. This describes the submitted configuration, not observed GPU hardware state. Present for GPU workloads; ignored in requests.
+      type: string
+      enum:
+        - time-slicing
+        - sm-sharing
+      nullable: true
+      readOnly: true
     EnvironmentVariableSecret:
       description: Details of the secret and key use to populate the environment variable
       properties:
@@ -22743,6 +22762,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -22753,6 +22774,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -22933,6 +22956,8 @@ components:
         compute:
           nullable: true
           properties:
+            computeMode:
+              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:
@@ -22943,6 +22968,8 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
@@ -23276,6 +23303,8 @@ components:
           $ref: '#/components/schemas/GpuMemoryPortionRequest'
         gpuPortionRequest:
           $ref: '#/components/schemas/GpuPortionRequest'
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestType'
         largeShmRequest:
@@ -23706,6 +23735,31 @@ components:
           $ref: '#/components/schemas/ItemRules'
       nullable: true
       type: object
+    GpuComputeModeOptions:
+      properties:
+        options:
+          description: Limit the permitted values for gpuComputeMode to a given set of values.
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/GpuComputeMode'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+      nullable: true
+      type: object
+    GpuComputeModeRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/GpuComputeModeOptions'
+      nullable: true
+      type: object
     GpuRequestOptions:
       properties:
         options:
@@ -23763,6 +23817,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/NumberRules'
           deprecated: true
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeModeRules'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestRules'
         largeShmRequest:
@@ -25849,6 +25905,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryLimit'
                 cpuMemoryRequest:
                   $ref: '#/components/schemas/CpuMemoryRequest'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -26055,6 +26113,8 @@ components:
                   $ref: '#/components/schemas/QuantityRules'
                 cpuMemoryRequest:
                   $ref: '#/components/schemas/QuantityRules'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeModeRules'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/IntegerRules'
                 gpuMemoryLimit:
@@ -30515,6 +30575,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -30525,6 +30587,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -30664,6 +30728,8 @@ components:
         compute:
           nullable: true
           properties:
+            computeMode:
+              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:
@@ -30674,6 +30740,8 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
@@ -30768,6 +30836,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -30778,6 +30848,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -30929,6 +31001,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -30939,6 +31013,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -31145,6 +31221,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -31155,6 +31233,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -31296,6 +31376,8 @@ components:
                 compute:
                   nullable: true
                   properties:
+                    computeMode:
+                      $ref: '#/components/schemas/ComputeMode'
                     cpuCoreLimit:
                       $ref: '#/components/schemas/CpuCoreLimit'
                     cpuCoreRequest:
@@ -31306,6 +31388,8 @@ components:
                       $ref: '#/components/schemas/CpuMemoryRequest'
                     extendedResources:
                       $ref: '#/components/schemas/ExtendedResources'
+                    gpuComputeMode:
+                      $ref: '#/components/schemas/GpuComputeMode'
                     gpuDevicesRequest:
                       $ref: '#/components/schemas/GpuDevicesRequest'
                     gpuMemoryLimit:
@@ -31580,6 +31664,8 @@ components:
         compute:
           nullable: true
           properties:
+            computeMode:
+              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:
@@ -31590,6 +31676,8 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
@@ -31781,6 +31869,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -31791,6 +31881,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -32040,6 +32132,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -32050,6 +32144,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -32232,6 +32328,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -32242,6 +32340,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -32459,6 +32559,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -32469,6 +32571,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
@@ -32633,6 +32737,8 @@ components:
         compute:
           nullable: true
           properties:
+            computeMode:
+              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:
@@ -32643,6 +32749,8 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
@@ -34151,6 +34259,8 @@ components:
             compute:
               nullable: true
               properties:
+                computeMode:
+                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -34159,6 +34269,8 @@ components:
                   $ref: '#/components/schemas/CpuMemoryLimit'
                 cpuMemoryRequest:
                   $ref: '#/components/schemas/CpuMemoryRequest'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:

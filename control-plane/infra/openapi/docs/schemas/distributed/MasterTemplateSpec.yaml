@@ -19,6 +19,8 @@ properties:
   compute:
     nullable: true
     properties:
+      computeMode:
+        $ref: ../workloads_spec/compute/ComputeMode.yaml
       cpuCoreLimit:
         $ref: ../workloads_spec/compute/CpuCoreLimit.yaml
       cpuCoreRequest:
@@ -29,6 +31,8 @@ properties:
         $ref: ../workloads_spec/compute/CpuMemoryRequest.yaml
       extendedResources:
         $ref: ../workloads_spec/compute/ExtendedResources.yaml
+      gpuComputeMode:
+        $ref: ../workloads_spec/compute/GpuComputeMode.yaml
       gpuDevicesRequest:
         $ref: ../workloads_spec/compute/GpuDevicesRequest.yaml
       gpuMemoryLimit:

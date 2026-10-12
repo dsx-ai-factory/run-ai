@@ -93,6 +93,7 @@ docs/ComplianceIssues.md
 docs/ComplianceIssuesComplianceIssuesInner.md
 docs/ComplianceIssuesV2.md
 docs/ComplianceIssuesV2ComplianceIssuesInner.md
+docs/ComputeMode.md
 docs/ConcurrencyHardLimitField.md
 docs/Condition.md
 docs/ConfigMap.md
@@ -246,6 +247,10 @@ docs/GitRules.md
 docs/GitSecretRef.md
 docs/GitsDefaults.md
 docs/GitsRules.md
+docs/GpuComputeMode.md
+docs/GpuComputeModeOptions.md
+docs/GpuComputeModeOptionsOptionsInner.md
+docs/GpuComputeModeRules.md
 docs/GpuOverProvisioningSetting.md
 docs/GpuRequestOptions.md
 docs/GpuRequestOptionsOptionsInner.md
@@ -699,6 +704,7 @@ model_compliance_issues.go
 model_compliance_issues_compliance_issues_inner.go
 model_compliance_issues_v2.go
 model_compliance_issues_v2_compliance_issues_inner.go
+model_compute_mode.go
 model_concurrency_hard_limit_field.go
 model_condition.go
 model_config_map.go
@@ -849,6 +855,10 @@ model_git_rules.go
 model_git_secret_ref.go
 model_gits_defaults.go
 model_gits_rules.go
+model_gpu_compute_mode.go
+model_gpu_compute_mode_options.go
+model_gpu_compute_mode_options_options_inner.go
+model_gpu_compute_mode_rules.go
 model_gpu_over_provisioning_setting.go
 model_gpu_request_options.go
 model_gpu_request_options_options_inner.go

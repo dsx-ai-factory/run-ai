@@ -2259,6 +2259,20 @@ export interface ComplianceIssuesV2ComplianceIssuesInner {
     'rule'?: PolicyRuleEnum | null;
 }
 /**
+ * Effective GPU compute sharing mode saved when the workload was submitted. This describes the submitted configuration, not observed GPU hardware state. Present for GPU workloads; ignored in requests.
+ * @export
+ * @enum {string}
+ */
+
+export const ComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type ComputeMode = typeof ComputeMode[keyof typeof ComputeMode];
+
+
+/**
  * 
  * @export
  * @interface ConcurrencyHardLimitField
@@ -8971,6 +8985,89 @@ export interface GitsRules {
      * @memberof GitsRules
      */
     'instances'?: ItemRules | null;
+}
+/**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeOptions
+ */
+export interface GpuComputeModeOptions {
+    /**
+     * Limit the permitted values for gpuComputeMode to a given set of values.
+     * @type {Array<GpuComputeModeOptionsOptionsInner>}
+     * @memberof GpuComputeModeOptions
+     */
+    'options'?: Array<GpuComputeModeOptionsOptionsInner> | null;
+}
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeOptionsOptionsInner
+ */
+export interface GpuComputeModeOptionsOptionsInner {
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof GpuComputeModeOptionsOptionsInner
+     */
+    'value': GpuComputeMode | null;
+    /**
+     * Textual description of the value
+     * @type {string}
+     * @memberof GpuComputeModeOptionsOptionsInner
+     */
+    'displayed'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeRules
+ */
+export interface GpuComputeModeRules {
+    /**
+     * 
+     * @type {SourceOfRule}
+     * @memberof GpuComputeModeRules
+     */
+    'sourceOfRule'?: SourceOfRule | null;
+    /**
+     * Whether the field is mandatory, default to false.
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'required'?: boolean | null;
+    /**
+     * Whether the value of the field is editable, default to true
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'canEdit'?: boolean | null;
+    /**
+     * Blocks the field to prevent workloads from specifying any value for it.
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'blocked'?: boolean | null;
+    /**
+     * Limit the permitted values for gpuComputeMode to a given set of values.
+     * @type {Array<GpuComputeModeOptionsOptionsInner>}
+     * @memberof GpuComputeModeRules
+     */
+    'options'?: Array<GpuComputeModeOptionsOptionsInner> | null;
 }
 /**
  * 
@@ -16718,6 +16815,12 @@ export interface SupersetDefaultsAllOfCompute {
     'gpuPortionRequest'?: number | null;
     /**
      * 
+     * @type {GpuComputeMode}
+     * @memberof SupersetDefaultsAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
+     * 
      * @type {GpuRequestType}
      * @memberof SupersetDefaultsAllOfCompute
      */
@@ -17521,6 +17624,12 @@ export interface SupersetRulesAllOfCompute {
      * @deprecated
      */
     'gpuPortionRequest'?: SupersetRulesAllOfComputeGpuPortionLimit;
+    /**
+     * 
+     * @type {GpuComputeModeRules}
+     * @memberof SupersetRulesAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeModeRules | null;
     /**
      * 
      * @type {GpuRequestRules}
@@ -25729,6 +25838,12 @@ export interface WorkspaceSpecSpecAllOf {
  */
 export interface WorkspaceSpecSpecAllOfCompute {
     /**
+     * 
+     * @type {ComputeMode}
+     * @memberof WorkspaceSpecSpecAllOfCompute
+     */
+    'computeMode'?: ComputeMode | null;
+    /**
      * Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
      * @type {number}
      * @memberof WorkspaceSpecSpecAllOfCompute
@@ -25758,6 +25873,12 @@ export interface WorkspaceSpecSpecAllOfCompute {
      * @memberof WorkspaceSpecSpecAllOfCompute
      */
     'extendedResources'?: Array<ExtendedResource> | null;
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof WorkspaceSpecSpecAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
     /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}

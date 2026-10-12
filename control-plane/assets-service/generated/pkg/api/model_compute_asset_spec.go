@@ -56,6 +56,11 @@ type ComputeAssetSpec struct {
 	ExtendedResources *[]ExtendedResource `json:"extendedResources,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty"`
+	GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty" gorm:"-"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuDevicesRequest *int32 `json:"gpuDevicesRequest,omitempty"`
@@ -179,6 +184,17 @@ func AssertComputeAssetSpecConstraints(obj ComputeAssetSpec) error {
 			}
 		}
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.GpuComputeMode != nil {
+		if okValue := obj.GpuComputeMode.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "GpuComputeMode", Value: string(*obj.GpuComputeMode)}
+		}
+	}
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuDevicesRequest != nil && *obj.GpuDevicesRequest < 0 {
 		return &ParsingError{Param: "GpuDevicesRequest", Err: errors.New(errMsgMinValueConstraint)}
 	}

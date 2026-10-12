@@ -85,6 +85,11 @@ type SupersetRulesAllOfCompute struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuComputeMode *GpuComputeModeRules `json:"gpuComputeMode,omitempty"`
+	GpuComputeMode *GpuComputeModeRules `json:"gpuComputeMode,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuRequestType *GpuRequestRules `json:"gpuRequestType,omitempty"`
 	GpuRequestType *GpuRequestRules `json:"gpuRequestType,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -154,6 +159,11 @@ func AssertSupersetRulesAllOfComputeRequired(obj SupersetRulesAllOfCompute) erro
 	}
 	if obj.GpuPortionRequest != nil {
 		if err := AssertNumberRulesRequired(*obj.GpuPortionRequest); err != nil {
+			return err
+		}
+	}
+	if obj.GpuComputeMode != nil {
+		if err := AssertGpuComputeModeRulesRequired(*obj.GpuComputeMode); err != nil {
 			return err
 		}
 	}
@@ -289,6 +299,16 @@ func AssertSupersetRulesAllOfComputeConstraints(obj SupersetRulesAllOfCompute) e
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuPortionRequest != nil {
 		if err := AssertNumberRulesConstraints(*obj.GpuPortionRequest); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuComputeMode != nil {
+		if err := AssertGpuComputeModeRulesConstraints(*obj.GpuComputeMode); err != nil {
 			return err
 		}
 	}

@@ -126,6 +126,7 @@ pkg/api/model_compute_asset.go
 pkg/api/model_compute_asset_spec.go
 pkg/api/model_compute_creation_request.go
 pkg/api/model_compute_list_response.go
+pkg/api/model_compute_mode.go
 pkg/api/model_compute_update_request.go
 pkg/api/model_concurrency_hard_limit_field.go
 pkg/api/model_config_map.go
@@ -242,6 +243,7 @@ pkg/api/model_git_rules.go
 pkg/api/model_git_secret_ref.go
 pkg/api/model_git_update_request.go
 pkg/api/model_gits_rules.go
+pkg/api/model_gpu_compute_mode.go
 pkg/api/model_gpu_request_type.go
 pkg/api/model_history_record.go
 pkg/api/model_history_record_meta.go

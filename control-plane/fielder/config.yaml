@@ -1908,6 +1908,63 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
+  gpuComputeMode:
+    name: compute.gpuComputeMode
+    variants:
+      - spec: compute/GpuComputeMode.yaml
+        defaults: compute/GpuComputeMode.yaml
+        rules: compute/GpuComputeModeRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  computeMode:
+    name: compute.computeMode
+    variants:
+      - spec: compute/ComputeMode.yaml
+        targets:
+          - SupersetSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - NimServiceSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
   gpuMemoryPortionRequest:
     name: compute.gpuMemoryPortionRequest
     variants:

@@ -354,6 +354,20 @@ export interface ComplianceIssuesV2ComplianceIssuesInner {
     'rule'?: PolicyRuleEnum | null;
 }
 /**
+ * Effective GPU compute sharing mode saved when the workload was submitted. This describes the submitted configuration, not observed GPU hardware state. Present for GPU workloads; ignored in requests.
+ * @export
+ * @enum {string}
+ */
+
+export const ComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type ComputeMode = typeof ComputeMode[keyof typeof ComputeMode];
+
+
+/**
  * The desired phase of the workload.
  * @export
  * @enum {string}
@@ -587,6 +601,20 @@ export interface GetYamlSubmissionValue {
      */
     'enabled'?: boolean | null;
 }
+/**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
 /**
  * Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.
  * @export
@@ -1302,6 +1330,12 @@ export interface NimServiceSpecAllOfAutoscaling {
  */
 export interface NimServiceSpecAllOfCompute {
     /**
+     * 
+     * @type {ComputeMode}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'computeMode'?: ComputeMode | null;
+    /**
      * Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
@@ -1325,6 +1359,12 @@ export interface NimServiceSpecAllOfCompute {
      * @memberof NimServiceSpecAllOfCompute
      */
     'cpuMemoryRequest'?: string | null;
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
     /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}

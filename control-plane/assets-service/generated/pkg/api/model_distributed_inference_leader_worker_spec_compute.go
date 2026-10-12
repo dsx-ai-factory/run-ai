@@ -26,6 +26,11 @@ var dummyDistributedInferenceLeaderWorkerSpecCompute = runaihttp.AssertPattern
 
 type DistributedInferenceLeaderWorkerSpecCompute struct {
 
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ComputeMode *ComputeMode `json:"computeMode,omitempty"`
+	ComputeMode *ComputeMode `json:"computeMode,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//CpuCoreLimit *float64 `json:"cpuCoreLimit,omitempty"`
@@ -54,6 +59,11 @@ type DistributedInferenceLeaderWorkerSpecCompute struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ExtendedResources *[]ExtendedResource `json:"extendedResources,omitempty"`
 	ExtendedResources *[]ExtendedResource `json:"extendedResources,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty"`
+	GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty" gorm:"-"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
@@ -126,6 +136,17 @@ func AssertDistributedInferenceLeaderWorkerSpecComputeRequired(obj DistributedIn
 
 // AssertDistributedInferenceLeaderWorkerSpecComputeConstraints checks if the values respects the defined constraints
 func AssertDistributedInferenceLeaderWorkerSpecComputeConstraints(obj DistributedInferenceLeaderWorkerSpecCompute) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.ComputeMode != nil {
+		if okValue := obj.ComputeMode.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "ComputeMode", Value: string(*obj.ComputeMode)}
+		}
+	}
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.CpuCoreLimit != nil && *obj.CpuCoreLimit < 0 {
 		return &ParsingError{Param: "CpuCoreLimit", Err: errors.New(errMsgMinValueConstraint)}
 	}
@@ -179,6 +200,17 @@ func AssertDistributedInferenceLeaderWorkerSpecComputeConstraints(obj Distribute
 			}
 		}
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if obj.GpuComputeMode != nil {
+		if okValue := obj.GpuComputeMode.IsValid(); !okValue {
+			return &UnsupportedValueError{Field: "GpuComputeMode", Value: string(*obj.GpuComputeMode)}
+		}
+	}
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuDevicesRequest != nil && *obj.GpuDevicesRequest < 0 {
 		return &ParsingError{Param: "GpuDevicesRequest", Err: errors.New(errMsgMinValueConstraint)}
 	}
