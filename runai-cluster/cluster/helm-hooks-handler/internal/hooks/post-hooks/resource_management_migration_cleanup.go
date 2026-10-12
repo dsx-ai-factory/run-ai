@@ -455,10 +455,9 @@ func clearLegacyFinalizers(ctx context.Context, k8sClient client.Client, obj cli
 	logger.Info("Clearing finalizers on legacy "+kindStr, "name", obj.GetName(), "finalizers", obj.GetFinalizers())
 	patch := client.MergeFrom(obj.DeepCopyObject().(client.Object))
 	obj.SetFinalizers(nil)
-	if err := k8sClient.Patch(ctx, obj, patch); err != nil && !apierrors.IsNotFound(err) && !meta.IsNoMatchError(err) {
-		return fmt.Errorf("failed to clear finalizers on legacy %s %q: %w", kindStr, obj.GetName(), err)
-	}
-	return nil
+	return retryLegacyOperation(ctx, obj, kindStr, "clear finalizers on", logger, func(ctx context.Context) error {
+		return k8sClient.Patch(ctx, obj, patch)
+	})
 }
 
 // deleteCRD deletes the named CRD, tolerating a CRD that is already gone or whose

@@ -1,8 +1,8 @@
 # Overview
 
-NVIDIA Run:ai is a Kubernetes-native platform for efficient GPU resource management and AI workload orchestration. It runs on customer-managed infrastructure: the hardware, Kubernetes cluster, and network that the organization owns and operates. NVIDIA Run:ai delivers the software that manages and orchestrates the GPUs; the customer provides everything it sits on.
+NVIDIA Run:ai is a Kubernetes-native platform for efficient GPU resource management and AI workload orchestration. It runs on your own infrastructure: the hardware, Kubernetes cluster, and network that you own and operate. NVIDIA Run:ai delivers the software that manages and orchestrates the GPUs; you provide everything it sits on.
 
-This page explains the platform components, the setup lifecycle, and what to understand before installing - deployment models, shared responsibility, installation options, and installation paths.
+This page explains the platform components, the installation lifecycle, and what to understand before installing - deployment models, shared responsibility, installation options, and installation paths.
 
 <Note>
 
@@ -21,9 +21,9 @@ NVIDIA Run:ai is made up of two components, both installed on a Kubernetes clust
 
 Every installation includes at least one NVIDIA Run:ai control plane and one NVIDIA Run:ai cluster. In a typical deployment, both are installed on the same Kubernetes cluster. As your environment grows, you can connect additional NVIDIA Run:ai clusters to the same control plane. See [Deployment Model](#deployment-model).
 
-<img src="../assets/self-hosted.svg" alt="NVIDIA Run:ai self-hosted deployment: Run:ai Control Plane and one or more Run:ai Clusters running on the customer's Kubernetes cluster(s), cloud or on-prem" width="480" />
+<img src="../assets/self-hosted.svg" alt="NVIDIA Run:ai self-hosted deployment: Run:ai Control Plane and one or more Run:ai Clusters running on your Kubernetes cluster(s), cloud or on-prem" width="480" />
 
-## Setup Lifecycle
+## Installation Lifecycle
 
 Setting up NVIDIA Run:ai follows a three-phase lifecycle that reflects the natural progression from planning through ongoing operations.
 
@@ -38,7 +38,7 @@ Day 0 covers the planning and preparation before installing NVIDIA Run:ai on you
 * Review prerequisites required for your environment, such as the GPU Operator and Prometheus
 * Enable external access for administrators and users to reach the NVIDIA Run:ai control plane and clusters
 
-### Day 1: Installation and Configuration
+### Day 1: Setup
 
 Day 1 gets NVIDIA Run:ai running on your Kubernetes cluster and covers the infrastructure configuration that makes it production-ready for your environment. Which configurations apply depends on your environment and workload needs. Configuration is performed after installation and is typically done once, though it may be revisited as your environment evolves.
 
@@ -63,7 +63,7 @@ Day 2 covers the ongoing operational tasks that keep NVIDIA Run:ai healthy and y
 
 Upgrades are a lifecycle event that can occur at any phase and are not bound to a specific day. To upgrade NVIDIA Run:ai, see [Upgrade](upgrade/plan-the-upgrade.md).
 
-## Understanding Installation
+## Understanding the Installation
 
 ### Deployment Model
 
@@ -79,30 +79,30 @@ The NVIDIA Run:ai control plane and NVIDIA Run:ai clusters can be deployed acros
 
 ### Shared Responsibility
 
-NVIDIA Run:ai operates under a shared responsibility model. NVIDIA provides and manages the NVIDIA Run:ai software, while the customer provides and operates the underlying infrastructure. This distinction defines which components the customer prepares and operates, and which are delivered and maintained as part of the NVIDIA Run:ai platform.
+NVIDIA Run:ai operates under a shared responsibility model. NVIDIA provides and manages the NVIDIA Run:ai software, while you provide and operate the underlying infrastructure. This distinction defines which components you prepare and operate, and which are delivered and maintained as part of the NVIDIA Run:ai platform.
 
 Since you own the infrastructure, you can apply OS and Kubernetes security patches and hardening independently, without coordinating with NVIDIA, provided the environment stays within the [support matrix](support-matrix.md) and the permissions, connectivity, and configuration that NVIDIA Run:ai requires remain intact.
 
 | Category                  | Components                                                                                                       | Owner    |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------- |
 | Platform software         | NVIDIA Run:ai images and Helm charts                                                                             | NVIDIA   |
-| Third-party services      | Keycloak, Traefik, Valkey, NATS, and others                                                                      | Customer |
-| Hardware                  | Control plane system nodes, cluster system nodes, worker nodes                                                   | Customer |
-| Kubernetes infrastructure | OS, Kubernetes distribution, container runtime, storage class, shared storage                                   | Customer |
-| Networking                | Load balancer, ingress controller, FQDN, DNS, TLS certificates                                                   | Customer |
-| Prerequisites             | GPU Operator, Network Operator, Prometheus                                                                       | Customer |
+| Third-party services      | Keycloak, Traefik, Valkey, NATS, and others                                                                      | User     |
+| Hardware                  | Control plane system nodes, cluster system nodes, worker nodes                                                   | User     |
+| Kubernetes infrastructure | OS, Kubernetes distribution, container runtime, storage class, shared storage                                   | User     |
+| Networking                | Load balancer, ingress controller, FQDN, DNS, TLS certificates                                                   | User     |
+| Prerequisites             | GPU Operator, Network Operator, Prometheus                                                                       | User     |
 
 <Note>
 
 **Note**
 
-When using the recommended [guided installer](installation/guided-installation/README.md#what-the-installer-does), several customer-owned prerequisites in this table are set up for you. When installing manually via Helm, all customer-owned items must be in place before the Helm charts are applied. Third-party services are the exception: they are deployed by the NVIDIA Run:ai Helm charts in both installation paths and do not need to be installed beforehand.
+When using the recommended [guided installer](installation/guided-installation/README.md#what-the-installer-does), several prerequisites that you own in this table are set up for you. When installing manually via Helm, all items that you own must be in place before the Helm charts are applied. Third-party services are the exception: they are deployed by the NVIDIA Run:ai Helm charts in both installation paths and do not need to be installed beforehand.
 
 </Note>
 
 ### Installation Options
 
-NVIDIA Run:ai is an open source platform, with the NVIDIA Run:ai Support-Entitled Release available as a supported version of the same platform. Both share the same installation model and support both connected and air-gapped environments. NVIDIA Run:ai Support-Entitled requires an NGC API key to pull platform images and Helm charts.
+NVIDIA Run:ai is an open source platform, with the NVIDIA Run:ai Support-Entitled Release available as a supported version of the same platform. Both share the same installation model and support connected and air-gapped environments. NVIDIA Run:ai Support-Entitled requires an NGC API key to pull platform images and Helm charts.
 
 | Type                            | Description                                          | NGC API Key Required |
 | ------------------------------- | ----------------------------------------------------- | --------------------- |
@@ -156,7 +156,7 @@ Understanding where installation artifacts come from helps you plan network acce
 
 ### What an Installation Includes
 
-An NVIDIA Run:ai installation relies on several categories of software and infrastructure. Some components are installed and managed by NVIDIA Run:ai, while others are customer-provided prerequisites or optional components that enable specific platform capabilities. For a detailed breakdown of ownership responsibilities, see [Shared Responsibility](#shared-responsibility).
+An NVIDIA Run:ai installation relies on several categories of software and infrastructure. Some components are installed and managed by NVIDIA Run:ai, while others are prerequisites that you provide or optional components that enable specific platform capabilities. For a detailed breakdown of ownership responsibilities, see [Shared Responsibility](#shared-responsibility).
 
 * **Infrastructure you provide** - The hardware, operating system, Kubernetes distribution, networking, and storage that host NVIDIA Run:ai. These components must be in place before installation begins. See [System Requirements](system-requirements/README.md).
 
