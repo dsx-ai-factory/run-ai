@@ -18859,7 +18859,6 @@ Components:
   github.com/prometheus/common v0.67.5
   github.com/prometheus/common v0.70.1
   github.com/prometheus/common v0.71.0
-  github.com/prometheus/common v0.72.0
   github.com/prometheus/common v0.72.1
   github.com/prometheus/procfs v0.20.1
   github.com/prometheus/procfs v0.21.1
@@ -35346,7 +35345,6 @@ Components:
   github.com/prometheus/common v0.67.5
   github.com/prometheus/common v0.70.1
   github.com/prometheus/common v0.71.0
-  github.com/prometheus/common v0.72.0
   github.com/prometheus/common v0.72.1
 
 Common libraries shared by Prometheus Go components.
