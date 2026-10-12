@@ -157,7 +157,7 @@ func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32,
 	result, actionError := dao.ListRcts(ctx, dao.RctListParams{
 		Offset:             offset,
 		Limit:              limit,
-		QueryParams:        rbacQueryParams,
+		RbacQueryParams:    rbacQueryParams,
 		Filters:            filters,
 		IncludeAncestors:   includeAncestors,
 		IncludeDescendants: includeDescendants,

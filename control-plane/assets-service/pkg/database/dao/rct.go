@@ -60,12 +60,12 @@ type RctOptions struct {
 // RctListParams bundles the parsed inputs of the RCT list query. Filters holds
 // the generic filterBy predicates already parsed by queryapi (including the
 // scope anchors, which ListRcts extracts and turns into scope-hierarchy SQL).
-// QueryParams carries the RBAC allow-lists (via query_types.ApplyRbacRules) and
+// RbacQueryParams carries the RBAC allow-lists (via query_types.ApplyRbacRules) and
 // is applied by GetAssetMeta independently of the scope anchor.
 type RctListParams struct {
 	Offset             int32
 	Limit              int32
-	QueryParams        *query_types.QueryParams
+	RbacQueryParams    *query_types.QueryParams
 	Filters            []queryapi.Filter
 	IncludeAncestors   bool
 	IncludeDescendants bool
@@ -124,7 +124,7 @@ func ListRcts(ctx context.Context, params RctListParams) (*api.RctListResponse, 
 		return nil, scopeErr
 	}
 
-	result, err := GetAssetMeta(ctx, runaidb.DB().WithContext(ctx), query, params.QueryParams, assetsSpecJoin())
+	result, err := GetAssetMeta(ctx, runaidb.DB().WithContext(ctx), query, params.RbacQueryParams, assetsSpecJoin())
 	if err != nil {
 		return nil, err
 	}
