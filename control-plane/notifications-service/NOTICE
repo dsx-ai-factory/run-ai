@@ -104,7 +104,7 @@ Dependencies
 | `github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil` | v1.25.0 | BSD-3-Clause | https://github.com/prometheus/client_golang/blob/v1.25.0/internal/github.com/golang/gddo/LICENSE |
 | `github.com/prometheus/client_golang/prometheus` | v1.25.0 | Apache-2.0 | https://github.com/prometheus/client_golang/blob/v1.25.0/LICENSE |
 | `github.com/prometheus/client_model/go` | v0.6.3 | Apache-2.0 | https://github.com/prometheus/client_model/blob/v0.6.3/LICENSE |
-| `github.com/prometheus/common` | v0.72.0 | Apache-2.0 | https://github.com/prometheus/common/blob/v0.72.0/LICENSE |
+| `github.com/prometheus/common` | v0.72.1 | Apache-2.0 | https://github.com/prometheus/common/blob/v0.72.1/LICENSE |
 | `github.com/prometheus/procfs` | v0.22.0 | Apache-2.0 | https://github.com/prometheus/procfs/blob/v0.22.0/LICENSE |
 | `github.com/rs/zerolog` | v1.35.1 | MIT | https://github.com/rs/zerolog/blob/v1.35.1/LICENSE |
 | `github.com/sagikazarmark/locafero` | v0.12.0 | MIT | https://github.com/sagikazarmark/locafero/blob/v0.12.0/LICENSE |
@@ -125,14 +125,14 @@ Dependencies
 | `go.uber.org/zap` | v1.28.0 | MIT | https://pkg.go.dev/go.uber.org/zap@v1.28.0?tab=licenses |
 | `go.yaml.in/yaml/v2` | v2.4.4 | Apache-2.0 | https://pkg.go.dev/go.yaml.in/yaml/v2@v2.4.4?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.5 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.5?tab=licenses |
-| `golang.org/x/crypto/sha3` | v0.57.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.57.0?tab=licenses |
+| `golang.org/x/crypto/sha3` | v0.58.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.58.0?tab=licenses |
 | `golang.org/x/exp` | v0.0.0-20261011100332-faecfb24eb49 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261011100332-faecfb24eb49?tab=licenses |
-| `golang.org/x/net` | v0.59.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.59.0?tab=licenses |
+| `golang.org/x/net` | v0.61.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.61.0?tab=licenses |
 | `golang.org/x/oauth2` | v0.37.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/oauth2@v0.37.0?tab=licenses |
 | `golang.org/x/sync` | v0.24.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.24.0?tab=licenses |
-| `golang.org/x/sys` | v0.48.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.48.0?tab=licenses |
-| `golang.org/x/term` | v0.46.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/term@v0.46.0?tab=licenses |
-| `golang.org/x/text` | v0.42.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.42.0?tab=licenses |
+| `golang.org/x/sys` | v0.49.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.49.0?tab=licenses |
+| `golang.org/x/term` | v0.47.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/term@v0.47.0?tab=licenses |
+| `golang.org/x/text` | v0.43.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.43.0?tab=licenses |
 | `golang.org/x/time/rate` | v0.15.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/time@v0.15.0?tab=licenses |
 | `gomodules.xyz/jsonpatch/v2` | v2.5.0 | Apache-2.0 | https://pkg.go.dev/gomodules.xyz/jsonpatch/v2@v2.5.0?tab=licenses |
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
@@ -4881,7 +4881,7 @@ SoundCloud Ltd. (http://soundcloud.com/).
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/prometheus/common` v0.72.0
+  - `github.com/prometheus/common` v0.72.1
 --------------------------------------------------------------------------------
 
 Common libraries shared by Prometheus Go components.
