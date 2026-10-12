@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/audit-service
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/Rican7/retry v0.3.1
