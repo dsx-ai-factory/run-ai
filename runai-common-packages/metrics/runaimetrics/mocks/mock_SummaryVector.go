@@ -18,10 +18,19 @@ func NewMockSummaryVector(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockSummaryVector {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockSummaryVector{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -97,14 +106,20 @@ type MockSummaryVector_WithLabels_Call struct {
 }
 
 // WithLabels is a helper method to define mock.On call
-//   - labels
-func (_e *MockSummaryVector_Expecter) WithLabels(labels interface{}) *MockSummaryVector_WithLabels_Call {
+//   - labels map[string]string
+func (_e *MockSummaryVector_Expecter) WithLabels(labels any) *MockSummaryVector_WithLabels_Call {
 	return &MockSummaryVector_WithLabels_Call{Call: _e.mock.On("WithLabels", labels)}
 }
 
 func (_c *MockSummaryVector_WithLabels_Call) Run(run func(labels map[string]string)) *MockSummaryVector_WithLabels_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(map[string]string))
+		var arg0 map[string]string
+		if args[0] != nil {
+			arg0 = args[0].(map[string]string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

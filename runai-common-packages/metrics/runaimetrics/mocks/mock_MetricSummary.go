@@ -17,10 +17,19 @@ func NewMockMetricSummary(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMetricSummary {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMetricSummary{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -50,14 +59,20 @@ type MockMetricSummary_Observe_Call struct {
 }
 
 // Observe is a helper method to define mock.On call
-//   - value
-func (_e *MockMetricSummary_Expecter) Observe(value interface{}) *MockMetricSummary_Observe_Call {
+//   - value float64
+func (_e *MockMetricSummary_Expecter) Observe(value any) *MockMetricSummary_Observe_Call {
 	return &MockMetricSummary_Observe_Call{Call: _e.mock.On("Observe", value)}
 }
 
 func (_c *MockMetricSummary_Observe_Call) Run(run func(value float64)) *MockMetricSummary_Observe_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(float64))
+		var arg0 float64
+		if args[0] != nil {
+			arg0 = args[0].(float64)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
