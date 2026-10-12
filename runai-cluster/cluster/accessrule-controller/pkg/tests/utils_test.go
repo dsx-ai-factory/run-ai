@@ -46,7 +46,6 @@ func getExpectedSubjectForAccessRule(accessRule *v1alpha1.AccessRule) rbacv1.Sub
 		accessRule.Spec.SubjectType == v1alpha1.ServiceAccountSubject {
 		subject.Kind = "User"
 	} else if accessRule.Spec.SubjectType == v1alpha1.GroupSubject {
-		// we only support types - so if not user or service-account, it's a group
 		subject.Kind = "Group"
 	}
 

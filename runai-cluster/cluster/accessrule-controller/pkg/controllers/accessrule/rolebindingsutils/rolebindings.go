@@ -107,18 +107,12 @@ func subjectNameForAccessRule(accessRule *v1alpha1.AccessRule) string {
 	return accessRule.Spec.SubjectId
 }
 
-// GetSubjectKind maps an access rule subject type to the RBAC subject kind. Unknown subject types (for example a
-// stale rule that still carries the removed "app" type) yield an empty kind: the API server rejects the binding
-// instead of silently binding it as the wrong kind, and the next sync rewrites the rule.
 func GetSubjectKind(subjectType v1alpha1.AccessRuleSubjectType) string {
 	switch subjectType {
 	case v1alpha1.UserSubject, v1alpha1.ServiceAccountSubject:
 		return UserKind
-	case v1alpha1.GroupSubject, v1alpha1.AllAuthenticatedUsersSubject:
-		// group and all-authenticated-users both bind as a Kubernetes Group
-		return GroupKind
 	default:
-		return ""
+		return GroupKind
 	}
 }
 
