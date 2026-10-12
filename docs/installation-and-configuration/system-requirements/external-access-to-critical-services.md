@@ -85,6 +85,20 @@ NVIDIA Run:ai deploys the following third-party services as part of installation
 | oauth2-proxy  | Workload access authentication      | NVIDIA Run:ai cluster system nodes  | docker.io / quay.io | 443  |
 | git-sync      | Git data source sync                | NVIDIA Run:ai cluster system nodes  | registry.k8s.io      | 443  |
 
+#### Gov-Ready
+
+For a [Gov-ready installation](gov-ready-third-party-services.md), the following services are pulled from Docker Hub as hardened images. You provide Docker Hub credentials to pull them.
+
+| Name          | Description                                    | Source                                   | Destination | Port |
+| ------------- | ----------------------------------------------- | ----------------------------------------- | ----------- | ---- |
+| Keycloak      | Identity federation and SSO service             | NVIDIA Run:ai control plane system nodes | docker.io   | 443  |
+| PostgreSQL    | Client image that waits for the database        | NVIDIA Run:ai control plane system nodes | docker.io   | 443  |
+| Traefik       | API gateway                                     | NVIDIA Run:ai control plane system nodes | docker.io   | 443  |
+| NATS          | Message broker                                  | NVIDIA Run:ai control plane system nodes | docker.io   | 443  |
+| Thanos        | Long-term metrics storage                       | NVIDIA Run:ai control plane system nodes | docker.io   | 443  |
+| Valkey        | Workload cache                                  | NVIDIA Run:ai cluster system nodes       | docker.io   | 443  |
+| git-sync      | Git data source sync                            | NVIDIA Run:ai cluster system nodes       | docker.io   | 443  |
+
 ### Prerequisite and Feature Registries
 
 NVIDIA Run:ai requires additional prerequisite and feature components to be installed on the cluster, such as the GPU Operator and Prometheus Operator. These components are pulled from the following registries:

@@ -15,6 +15,7 @@ packages:
     interfaces:
       AuditLogsAPI: {}
       HealthAPI: {}
+      InternalAuditLogsAPI: {}
   github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/write:
     interfaces:
       writer:

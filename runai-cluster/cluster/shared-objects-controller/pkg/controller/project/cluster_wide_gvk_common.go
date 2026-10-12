@@ -19,6 +19,7 @@ import (
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/rs/zerolog/log"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -65,6 +66,15 @@ type ObjectInspector interface {
 	AreEqual(left, right client.Object) bool
 }
 
+// immutableSpecInspector is the opt-in extension for kinds whose Spec the
+// apiserver treats as immutable (e.g. ResourceClaimTemplate). The shared
+// handler checks for this interface at the Update site and routes those
+// kinds through delete-and-recreate instead of calling Client.Update,
+// which the apiserver would reject.
+type immutableSpecInspector interface {
+	IsSpecImmutable() bool
+}
+
 type ObjectConfig struct {
 	ScopeWideLabel         string
 	AdditionalCallback     AdditionalCallbackFn
@@ -76,9 +86,10 @@ type AdditionalCallbackFn func(
 	ctx context.Context, namespace string, objectsReplicatedInNamespaceNames, unreferencedObjectNames []string) error
 
 type ClusterWideReplicatorGVKConfig struct {
-	ClusterWideSecrets    bool
-	ClusterWidePvcs       bool
-	ClusterWideConfigMaps bool
+	ClusterWideSecrets                bool
+	ClusterWidePvcs                   bool
+	ClusterWideConfigMaps             bool
+	ClusterWideResourceClaimTemplates bool
 }
 
 func NewClusterWideGVKCommon(
@@ -198,6 +209,8 @@ func (handler *ClusterWideGVKCommon) ShouldHandleExisting(ctx context.Context, o
 		return true
 	case *corev1.PersistentVolumeClaim:
 		return true
+	case *resourcev1.ResourceClaimTemplate:
+		return true
 	}
 	log.Ctx(ctx).Error().Msgf("unsupported type")
 	return false
@@ -211,6 +224,8 @@ func (handler *ClusterWideGVKCommon) DeepCopySpec(ctx context.Context, from, to 
 		handler.typeToObjectInspector[configmapType].DeepCopySpec(from, to)
 	case *corev1.PersistentVolumeClaim:
 		handler.typeToObjectInspector[pvcType].DeepCopySpec(from, to)
+	case *resourcev1.ResourceClaimTemplate:
+		handler.typeToObjectInspector[rctType].DeepCopySpec(from, to)
 	default:
 		log.Ctx(ctx).Error().Msgf("unsupported type")
 	}
@@ -224,9 +239,60 @@ func (handler *ClusterWideGVKCommon) AreEqual(ctx context.Context, left, right c
 		return handler.typeToObjectInspector[configmapType].AreEqual(left, right)
 	case *corev1.PersistentVolumeClaim:
 		return handler.typeToObjectInspector[pvcType].AreEqual(left, right)
+	case *resourcev1.ResourceClaimTemplate:
+		return handler.typeToObjectInspector[rctType].AreEqual(left, right)
 	}
 	log.Ctx(ctx).Error().Msgf("unsupported type")
 	return false
+}
+
+// IsSpecImmutable reports whether the handler for the given object's kind
+// has requires the delete-and-recreate flow. Used by the shared
+// ClusterWideReplicatedResourceHandler to pick the right code path for
+// kinds whose Spec the apiserver treats as immutable.
+func (handler *ClusterWideGVKCommon) IsSpecImmutable(object client.Object) bool {
+	var inspector ObjectInspector
+	switch object.(type) {
+	case *corev1.Secret:
+		inspector = handler.typeToObjectInspector[secretType]
+	case *corev1.ConfigMap:
+		inspector = handler.typeToObjectInspector[configmapType]
+	case *corev1.PersistentVolumeClaim:
+		inspector = handler.typeToObjectInspector[pvcType]
+	case *resourcev1.ResourceClaimTemplate:
+		inspector = handler.typeToObjectInspector[rctType]
+	}
+	if im, ok := inspector.(immutableSpecInspector); ok {
+		return im.IsSpecImmutable()
+	}
+	return false
+}
+
+// IsManagedMetadataDiffers reports whether reconciling `existing` toward
+// `new` would change any managed metadata — run.ai/ labels, run.ai/
+// annotations, or OwnerReferences. Used by kinds whose AreEqual ignores
+// metadata (RCT) so metadata-only drift still gets caught and reconciled
+// via an in-place Update rather than a delete-and-recreate.
+func (handler *ClusterWideGVKCommon) IsManagedMetadataDiffers(existing, new client.Object) bool {
+	if existing == nil || new == nil {
+		return existing != new
+	}
+
+	beforeLabels := cloneStringMap(existing.GetLabels())
+	afterLabels := cloneStringMap(existing.GetLabels())
+	copyRunaiLabels(new.GetLabels(), &afterLabels)
+	if !reflect.DeepEqual(beforeLabels, afterLabels) {
+		return true
+	}
+
+	beforeAnnotations := cloneStringMap(existing.GetAnnotations())
+	afterAnnotations := cloneStringMap(existing.GetAnnotations())
+	copyRunaiAnnotations(new.GetAnnotations(), &afterAnnotations)
+	if !reflect.DeepEqual(beforeAnnotations, afterAnnotations) {
+		return true
+	}
+
+	return !reflect.DeepEqual(existing.GetOwnerReferences(), new.GetOwnerReferences())
 }
 
 // PreserveImmutableFields preserves immutable fields from the existing object to the new object
@@ -265,6 +331,12 @@ func (handler *ClusterWideGVKCommon) buildGVKObjectConfig(config *ClusterWideRep
 
 	if config.ClusterWideConfigMaps {
 		if err := handler.buildConfigMapConfig(); err != nil {
+			return err
+		}
+	}
+
+	if config.ClusterWideResourceClaimTemplates {
+		if err := handler.buildRctConfig(); err != nil {
 			return err
 		}
 	}

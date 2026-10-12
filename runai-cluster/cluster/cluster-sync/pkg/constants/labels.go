@@ -17,7 +17,7 @@ const (
 	LabelServiceId         string = "serving.knative.dev/serviceUID"
 	LabelInferenceworkload string = "run.ai/inferenceworkload"
 
-	AnnotationUser            string = "user"
+	AnnotationUser string = "user"
 
 	IngressJobType string = "ingress"
 

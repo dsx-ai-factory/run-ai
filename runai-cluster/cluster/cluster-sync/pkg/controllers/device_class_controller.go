@@ -7,20 +7,15 @@ package controllers
 
 import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers"
 	resourcev1 "k8s.io/api/resource/v1"
 
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 )
-
-// deviceClassesResyncKey is a constant key used to coalesce DeviceClass change events into a
-// single full-set re-sync (the tracker only accepts the complete set, so per-object keys add
-// no value and would only cause a startup storm of redundant syncs).
-var deviceClassesResyncKey = client.ObjectKey{Name: "device-classes"}
 
 func AddDeviceClassHandlerToCache(backendClient *backendclient.BackendClient, cachedClient cachedclient.CachedClient) {
 	deviceClassInformer := cachedClient.GetInformer(cachedclient.DeviceClassType)
@@ -37,10 +32,8 @@ func AddDeviceClassHandlerToCache(backendClient *backendclient.BackendClient, ca
 
 	_, err := deviceClassInformer.AddEventHandler(cache.FilteringResourceEventHandler{
 		FilterFunc: func(obj any) bool {
-			// Unwrap DeletedFinalStateUnknown tombstones so missed deletions still
-			// reach DeleteFunc and trigger the coalesced full-set resync; without
-			// this the informer would silently drop the tombstone here and the
-			// tracker would keep the stale DeviceClass row until the next event.
+			// Unwrap DeletedFinalStateUnknown tombstones so a missed deletion still
+			// reaches DeleteFunc, which is where the per-item DELETE is issued.
 			switch filteredObject(obj).(type) {
 			case *resourcev1.DeviceClass:
 				return backendClient.IsRunaiBackendAvailable()
@@ -49,14 +42,22 @@ func AddDeviceClassHandlerToCache(backendClient *backendclient.BackendClient, ca
 			}
 		},
 		Handler: cache.ResourceEventHandlerFuncs{
-			AddFunc: func(_ any) {
-				rateLimitedController.AddRateLimited(deviceClassesResyncKey)
+			AddFunc: func(obj any) {
+				object := obj.(*resourcev1.DeviceClass)
+				genericControllerErrorHandler(deviceClassHandler.HandleDeviceClassAdd(object),
+					constants.AddOperation, "deviceClass", object)
 			},
-			UpdateFunc: func(_ any, _ any) {
-				rateLimitedController.AddRateLimited(deviceClassesResyncKey)
+			DeleteFunc: func(obj any) {
+				object, ok := deletedObject[*resourcev1.DeviceClass](obj)
+				if !ok {
+					return
+				}
+				rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
+				genericControllerErrorHandler(deviceClassHandler.HandleDeviceClassDelete(object),
+					constants.DeleteOperation, "deviceClass", object)
 			},
-			DeleteFunc: func(_ any) {
-				rateLimitedController.AddRateLimited(deviceClassesResyncKey)
+			UpdateFunc: func(_ any, newObj any) {
+				rateLimitedController.AddRateLimited(objectKeyFromObject(newObj.(*resourcev1.DeviceClass)))
 			},
 		},
 	})

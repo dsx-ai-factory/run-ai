@@ -352,7 +352,7 @@ var _ = Describe("Evaluation API tests", Ordered, func() {
 
 		resourceTypes := []api.ResourceType{
 			api.RESOURCETYPE_USERS,
-			api.RESOURCETYPE_APPS,
+			api.RESOURCETYPE_SERVICE_ACCOUNT,
 			api.RESOURCETYPE_EVENTS_HISTORY,
 		}
 

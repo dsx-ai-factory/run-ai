@@ -8,3 +8,12 @@ packages:
     interfaces:
       IPolicyClient: {}
       IPolicyExternalClient: {}
+  github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      HealthAPI: {}
+      PolicyAPI: {}
+      SpecMappingAPI: {}
+      SynchronizationAPI: {}

@@ -28,12 +28,14 @@ The following apply to each tenant cluster.
 
 | Component                            | Supported Versions   |
 | ------------------------------------- | -------------------- |
-| Knative Serving                       | 1.21 - 1.23          |
+| Knative Serving<sup>3</sup>                | 1.21 - 1.23          |
 | Kubeflow Training Operator            | 1.9.4                |
 | MPI Operator                          | 0.6.0 - 0.8.2         |
 | Leader-Worker Set (LWS)               | 0.7.0 - 0.10.0       |
 | NIM Operator                          | 3.1.x                |
-| Dynamo Operator                        | 1.4.x                |
+| Dynamo Operator                        | 1.5.x                |
+
+<sup>3</sup> On OpenShift, Knative is installed through the OpenShift Serverless operator, which supports Knative 1.17 only.
 
 ## Third-Party Service Versions
 
@@ -46,8 +48,8 @@ Each NVIDIA Run:ai release is tested and validated against a single minor versio
 | Traefik      | NVIDIA Run:ai control plane | 3.7               |
 | NATS         | NVIDIA Run:ai control plane | 2.11.8            |
 | Valkey       | NVIDIA Run:ai cluster       | 9.0.4             |
-| oauth2-proxy | NVIDIA Run:ai cluster       | v7.15.4           |
-| git-sync     | NVIDIA Run:ai cluster       | v4.7.0            |
+| oauth2-proxy | NVIDIA Run:ai cluster       | 7.15.4            |
+| git-sync     | NVIDIA Run:ai cluster       | 4.7.0             |
 
 ## Supported NVIDIA GPUs
 

@@ -208,10 +208,42 @@ func (c *K8SObjectTrackerClient) SyncStorageClass(ctx context.Context, clusterId
 		}).ClusterId(clusterId).Execute()
 }
 
+func (c *K8SObjectTrackerClient) CreateDeviceClass(ctx context.Context, deviceClass openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error) {
+	return c.ApiClient.DeviceClassesAPI.CreateDeviceClass(ctx).DeviceClass(deviceClass).Execute()
+}
+
+func (c *K8SObjectTrackerClient) UpdateDeviceClass(ctx context.Context, deviceClass openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error) {
+	return c.ApiClient.DeviceClassesAPI.UpdateDeviceClass(ctx).DeviceClass(deviceClass).Execute()
+}
+
+func (c *K8SObjectTrackerClient) DeleteDeviceClass(ctx context.Context, clusterId string, name string) (*http.Response, error) {
+	return c.ApiClient.DeviceClassesAPI.DeleteDeviceClass(ctx).ClusterId(clusterId).Name(name).Execute()
+}
+
 func (c *K8SObjectTrackerClient) SyncDeviceClass(ctx context.Context, clusterId string, deviceClasses []openapi.DeviceClass) (*openapi.DeviceClasses, *http.Response, error) {
 	return c.ApiClient.DeviceClassesAPI.SyncDeviceClass(ctx).DeviceClasses(
 		openapi.DeviceClasses{
 			Items: deviceClasses,
+		}).ClusterId(clusterId).Execute()
+}
+
+func (c *K8SObjectTrackerClient) CreateResourceClaimTemplate(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error) {
+	return c.ApiClient.ResourceClaimTemplatesAPI.CreateResourceClaimTemplate(ctx).ClusterId(clusterId).ResourceClaimTemplate(rct).Execute()
+}
+
+func (c *K8SObjectTrackerClient) UpdateResourceClaimTemplate(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error) {
+	return c.ApiClient.ResourceClaimTemplatesAPI.UpdateResourceClaimTemplate(ctx).ClusterId(clusterId).ResourceClaimTemplate(rct).Execute()
+}
+
+func (c *K8SObjectTrackerClient) DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeType openapi.ResourceScopeType, scopeId string, name string) (*http.Response, error) {
+	return c.ApiClient.ResourceClaimTemplatesAPI.DeleteResourceClaimTemplate(ctx).
+		ClusterId(clusterId).ScopeType(scopeType).ScopeId(scopeId).Name(name).Execute()
+}
+
+func (c *K8SObjectTrackerClient) SyncResourceClaimTemplates(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error) {
+	return c.ApiClient.ResourceClaimTemplatesAPI.SyncResourceClaimTemplates(ctx).ResourceClaimTemplates(
+		openapi.ResourceClaimTemplates{
+			Items: rcts,
 		}).ClusterId(clusterId).Execute()
 }
 

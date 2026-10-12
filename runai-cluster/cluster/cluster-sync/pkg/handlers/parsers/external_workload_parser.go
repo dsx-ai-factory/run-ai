@@ -616,6 +616,13 @@ func (p *WorkloadParser) overrideFromWorkloadRunner(
 	// Keep EWI's phase when ewi-status is set; else fall back to the wlr phase.
 	if !ewiStatusSet(externalWorkload) && wlr.Status.Phase != "" {
 		workloadSyncFields.Phase = p.getApiPhase(string(wlr.Status.Phase))
+		// Admission failures are recorded as critical WLR issues; expose their description to the user.
+		for _, issue := range wlr.Status.Issues {
+			if issue.IsCritical && issue.Description != "" {
+				workloadSyncFields.PhaseMessage = ptr.To(issue.Description)
+				break
+			}
+		}
 	}
 
 	// Register the runner as a child so its events join to this workload.

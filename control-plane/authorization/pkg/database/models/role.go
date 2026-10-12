@@ -20,7 +20,7 @@ type Role struct {
 	Common                  `gorm:"embedded"`
 	ID                      uint             `gorm:"primarykey"`
 	Name                    string           `gorm:"not null"`
-	Permissions             []*Permission    `gorm:"constraint:OnDelete:CASCADE;"`
+	Permissions             []*Permission    `gorm:"-"`
 	Description             string           `gorm:"not null"`
 	AccessRules             []*AccessRule    `gorm:"constraint:OnDelete:CASCADE;"`
 	InternalOnly            bool             `gorm:"default:false"`

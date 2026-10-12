@@ -11,6 +11,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/access"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/aiapplications"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/clusters"
+	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/computeresources"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/credentials"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/identity"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/metrics"
@@ -26,6 +27,7 @@ func Register(r *runaimcp.Registry, client *runaiclient.Client) {
 	access.Register(r, client)
 	aiapplications.Register(r, client)
 	clusters.Register(r, client)
+	computeresources.Register(r, client)
 	credentials.Register(r, client)
 	metrics.Register(r, client)
 	orgunits.Register(r, client)

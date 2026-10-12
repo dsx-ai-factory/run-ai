@@ -18,6 +18,60 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type ngcTagsRoundTripper func(*http.Request) (*http.Response, error)
+
+func (f ngcTagsRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
+func TestSendNgcTagsRequest(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		image   string
+		apiKey  string
+		wantURL string
+	}{
+		{
+			name:    "authenticated team image",
+			image:   "nim/nvidia/nemotron-3-super-120b-a12b",
+			apiKey:  "<test-api-key>",
+			wantURL: "https://api.ngc.nvidia.com/v2/org/nim/team/nvidia/repos/nemotron-3-super-120b-a12b/images",
+		},
+		{
+			name:    "authenticated org image",
+			image:   "nvidia/pytorch",
+			apiKey:  "<test-api-key>",
+			wantURL: "https://api.ngc.nvidia.com/v2/org/nvidia/repos/pytorch/images",
+		},
+		{
+			name:    "guest team image",
+			image:   "nim/nvidia/nemotron-3-super-120b-a12b",
+			wantURL: "https://api.ngc.nvidia.com/v2/repos/nim/nvidia/nemotron-3-super-120b-a12b/images",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client := &ngcClient{httpClient: &http.Client{Transport: ngcTagsRoundTripper(func(req *http.Request) (*http.Response, error) {
+				assert.Equal(t, http.MethodGet, req.Method)
+				assert.Equal(t, tc.wantURL, req.URL.String())
+				if tc.apiKey == "" {
+					assert.Empty(t, req.Header.Get("Authorization"))
+				} else {
+					assert.Equal(t, "Bearer "+tc.apiKey, req.Header.Get("Authorization"))
+				}
+				response := httptest.NewRecorder()
+				response.Header().Set("Content-Type", "application/json")
+				_, err := response.WriteString(`{"images":[{"tag":"latest"},{"tag":"2.0.13"}],"requestStatus":{"statusCode":"SUCCESS"}}`)
+				require.NoError(t, err)
+				return response.Result(), nil
+			})}}
+
+			tags, err := client.sendNgcTagsRequest(context.Background(), tc.image, tc.apiKey)
+			require.NoError(t, err)
+			assert.Equal(t, []string{"latest", "2.0.13"}, tags)
+		})
+	}
+}
+
 func TestSendNgcImagesRequestSearchesImageIdentifierAndPaginates(t *testing.T) {
 	var (
 		mu      sync.Mutex

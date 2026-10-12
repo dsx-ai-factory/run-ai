@@ -1,0 +1,18 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/pkg/client/generated:
+    config:
+      dir: mocks
+      include-auto-generated: true
+    interfaces:
+      EmailAPI: {}
+      HealthAPI: {}
+      NotificationChannelsAPI: {}
+      NotificationStateAPI: {}
+      NotificationTypesAPI: {}
+      SlackAPI: {}
+      SubscriptionsAPI: {}

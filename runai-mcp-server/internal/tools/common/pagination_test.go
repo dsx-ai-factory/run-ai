@@ -6,6 +6,7 @@
 package common
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -60,6 +61,21 @@ func TestPaginate(t *testing.T) {
 
 	t.Run("offset past end is empty and non-nil", func(t *testing.T) {
 		page, hasMore, next := Paginate(items, 99, 2)
+		assert.NotNil(t, page)
+		assert.Empty(t, page)
+		assert.False(t, hasMore)
+		assert.Zero(t, next)
+	})
+
+	t.Run("negative offset starts at zero", func(t *testing.T) {
+		page, hasMore, next := Paginate(items, -1, 2)
+		assert.Equal(t, []int{0, 1}, page)
+		assert.True(t, hasMore)
+		assert.Equal(t, int32(2), next)
+	})
+
+	t.Run("maximum offset cannot overflow", func(t *testing.T) {
+		page, hasMore, next := Paginate(items, math.MaxInt32, MaxLimit)
 		assert.NotNil(t, page)
 		assert.Empty(t, page)
 		assert.False(t, hasMore)

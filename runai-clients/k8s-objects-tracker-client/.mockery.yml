@@ -15,6 +15,7 @@ packages:
     interfaces:
       ClusterObjectsStatusAPI: {}
       ConfigMapsAPI: {}
+      DeviceClassesAPI: {}
       HealthAPI: {}
       PVCsAPI: {}
       SecretsAPI: {}

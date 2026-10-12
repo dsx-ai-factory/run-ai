@@ -74,7 +74,6 @@ func (cr *ClientsReconciler) reconcileDefaultClients(ctx context.Context, realm 
 	clients := []realm_client.Client{
 		realm_client.NewAdminUiClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
 		realm_client.NewRunaiCliClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
-		realm_client.NewRunaiClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
 		realm_client.NewRunaiServiceAccountClient(utils.RunaiInstallerClientId, tenantId, nil, realm_client.ClientTypeInstaller),
 		realm_client.NewCLIClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
 		realm_client.NewTokenExchangeClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
@@ -86,6 +85,11 @@ func (cr *ClientsReconciler) reconcileDefaultClients(ctx context.Context, realm 
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reconcile default client %s in realm %s: %v", client.GetClientID(), realm, err)
 			return err
 		}
+	}
+
+	if err := cr.clientReconcilerHelper.DeleteClientIfExists(ctx, realm, utils.RUNAI_CLIENT_ID); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete deprecated client %s in realm %s: %v", utils.RUNAI_CLIENT_ID, realm, err)
+		return err
 	}
 	return nil
 }

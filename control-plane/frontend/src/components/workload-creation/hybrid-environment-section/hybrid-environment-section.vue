@@ -31,6 +31,7 @@
       :is-required="requiredFields?.image"
       :tooltip-text="isLinked ? linkedDisableText : undefined"
       :support-authenticated-ngc="supportAuthenticatedNgc"
+      :authenticated-only="authenticatedNgcOnly"
       :scope-id="scopeId"
       :scope-type="scopeType"
       :cluster-id="clusterId"
@@ -202,6 +203,7 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: false,
     },
+    authenticatedNgcOnly: { type: Boolean, default: false },
     isDistributedInference: {
       type: Boolean as PropType<boolean>,
       default: false,

@@ -11,6 +11,14 @@ Complete the [System Requirements](../../system-requirements/README.md) section 
 * [Third-Party Services](../../system-requirements/third-party-services.md) - The third-party services deployed as part of the installation.
 * [External Access to Critical Services](../../system-requirements/external-access-to-critical-services.md) - The inbound and outbound connectivity required to reach those services and NVIDIA registries.
 
+<Note>
+
+**Gov-ready**
+
+For a Gov-ready installation, also review [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) and the [Gov-ready outbound access](../../system-requirements/external-access-to-critical-services.md#gov-ready) to Docker Hub, which replace the standard third-party services images.
+
+</Note>
+
 Your [deployment model](../../system-requirements/deployment-model.md) determines how the installation steps are applied. In a same-cluster deployment, the control plane and NVIDIA Run:ai cluster are installed on the same Kubernetes cluster. In a multi-cluster deployment, control plane setup is completed once, and cluster setup is repeated for each NVIDIA Run:ai cluster.
 
 ## General Setup
@@ -45,9 +53,9 @@ Helm 4 defaults to [server-side apply](https://helm.sh/docs/overview/#server-sid
 
 NVIDIA Run:ai Support-Entitled Release installations require an NGC Personal Key to authenticate to the NVIDIA Run:ai container registry (`nvcr.io`), for connected installs. Generate a Personal Key from the [NGC Personal Keys](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#ngc-api-keys) page.
 
-Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password. Use this key to create the `runai-reg-creds` secret described in [Software Artifacts](#software-artifacts) below.
+Personal Keys begin with `nvapi-`. NGC authenticates using the literal username `$oauthtoken` with the key as the password. The Personal Key is used during installation, to pull the NVIDIA Run:ai container images. Use this key to create the `runai-reg-creds` secret described in [Software Artifacts](#software-artifacts) below.
 
-For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. Pass the resulting key as `telemetryService.telemetryAuth.token` during installation, or reference a secret you create yourself beforehand via `telemetryService.telemetryAuth.existingSecret`/`secretKey`. Create the `runai-backend` namespace first, as described in [Control Plane Namespace](#control-plane-namespace), then create the secret:
+For connected installs, NVIDIA Run:ai's telemetry for Support-Entitled Release installations is not associated with your organization by default. To associate it with your NCA ID, generate an [NGC Service API Key](https://docs.nvidia.com/ngc/latest/ngc-catalog-user-guide.html#generating-a-service-api-key). In the **Service** field, select both **NVIDIA Run:ai Self-Hosted** and **NGC Catalog**. The Personal Key is used during installation. The Service API Key is used at runtime, after installation, by the NVIDIA Run:ai control plane to report telemetry. Pass the resulting key as `telemetryService.telemetryAuth.token` during installation, or reference a secret you create yourself beforehand via `telemetryService.telemetryAuth.existingSecret`/`secretKey`. Create the `runai-backend` namespace first, as described in [Control Plane Namespace](#control-plane-namespace), then create the secret:
 
 ```bash
 kubectl create secret generic <SECRET_NAME> \
@@ -365,7 +373,7 @@ This section applies only to NVIDIA Run:ai Support-Entitled Release installation
 
 </Note>
 
-For Support-Entitled Release, you must create a Kubernetes secret for registry access. NVIDIA Run:ai container images are hosted in the NVIDIA NGC container registry under `nvidia/runai`. Using the NGC Personal Key from [Registry Credentials](#registry-credentials) above, create the required secret:
+For Support-Entitled Release, you must create a Kubernetes secret for registry access. NVIDIA Run:ai container images are hosted in the NVIDIA NGC container registry under `nvidia/runai-oss`. Using the NGC Personal Key from [Registry Credentials](#registry-credentials) above, create the required secret:
 
 ```bash
 kubectl create secret docker-registry runai-reg-creds \
@@ -384,6 +392,14 @@ Creating this secret alone does not configure the control plane to use it - you 
 
 </Note>
 
+<Note>
+
+**Gov-ready**
+
+A Gov-ready installation also pulls the hardened third-party images from Docker Hub, which requires a separate Docker Hub access token and image pull secret in the `runai-backend` and `runai` namespaces. Refer to [Docker Hub Credentials](../../system-requirements/gov-ready-third-party-services.md#docker-hub-credentials) for how to create them and reference them in the Helm values.
+
+</Note>
+
 </Accordion>
 
 <Accordion title="Air-gapped">
@@ -398,23 +414,23 @@ Packing happens on a separate connected machine - any machine with outbound inte
 
 On that connected machine, download the `runai-installer` binary and use its `airgap pack` command to build a single tarball containing every image your release needs - NVIDIA Run:ai platform images and third-party service images (PostgreSQL, Keycloak, and others) alike. See [Third-Party Services](../../system-requirements/third-party-services.md#image-registry).
 
-1. Download the `runai-installer` binary for your operating system and CPU architecture, on each machine you run the installer from:
+1. Download the `runai-installer` binary for your operating system and CPU architecture, on each machine you run the installer from. Replace `<VERSION>` with the NVIDIA Run:ai version you are installing, for example `3.0.17`:
 
    ```bash
    # Linux, AMD64 (x86_64)
-   curl -LO <release-url>/runai-installer-linux-amd64
+   curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-linux-amd64
    chmod +x runai-installer-linux-amd64
 
    # Linux, ARM64
-   curl -LO <release-url>/runai-installer-linux-arm64
+   curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-linux-arm64
    chmod +x runai-installer-linux-arm64
 
    # macOS, AMD64 (Intel)
-   curl -LO <release-url>/runai-installer-darwin-amd64
+   curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-darwin-amd64
    chmod +x runai-installer-darwin-amd64
 
    # macOS, ARM64 (Apple Silicon)
-   curl -LO <release-url>/runai-installer-darwin-arm64
+   curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-darwin-arm64
    chmod +x runai-installer-darwin-arm64
    ```
 
@@ -423,6 +439,7 @@ On that connected machine, download the `runai-installer` binary and use its `ai
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
    - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
+   - Third-party services - Add an entry to `imageOverrides` for each hardened third-party image, and an entry to `registryAuth` for `docker.io` with your Docker Hub credentials. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the full example. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```bash
    cat > airgap-pack.yaml <<'EOF'
@@ -434,11 +451,13 @@ On that connected machine, download the `runai-installer` binary and use its `ai
    imageOverrides:
      - name: keycloak
        source: <your-registry>/keycloak:<tag>
+     # Gov-ready: add an entry for each hardened image (keycloak, postgres, traefik, nats, thanos, valkey, git-sync)
 
    registryAuth:
      - registry: <your-registry-host>
        username: <username>
        passwordPath: <path-to-registry-password>
+     # Gov-ready: add an entry for docker.io with your Docker Hub credentials
    EOF
 
    ./runai-installer airgap pack \
@@ -501,7 +520,7 @@ This section applies only to NVIDIA Run:ai Support-Entitled Release installation
 
 </Note>
 
-For Support-Entitled Release, you must create a Kubernetes secret for registry access. NVIDIA Run:ai container images are hosted in the NVIDIA NGC container registry under `nvidia/runai`. Using the NGC Personal Key from [Registry Credentials](#registry-credentials) above, create the required secret:
+For Support-Entitled Release, you must create a Kubernetes secret for registry access. NVIDIA Run:ai container images are hosted in the NVIDIA NGC container registry under `nvidia/runai-oss`. Using the NGC Personal Key from [Registry Credentials](#registry-credentials) above, create the required secret:
 
 ```bash
 oc create secret docker-registry runai-reg-creds \
@@ -520,6 +539,14 @@ Creating this secret alone does not configure the control plane to use it - you 
 
 </Note>
 
+<Note>
+
+**Gov-ready**
+
+A Gov-ready installation also pulls the hardened third-party images from Docker Hub, which requires a separate Docker Hub access token and image pull secret in the `runai-backend` and `runai` namespaces. Refer to [Docker Hub Credentials](../../system-requirements/gov-ready-third-party-services.md#docker-hub-credentials) for how to create them and reference them in the Helm values.
+
+</Note>
+
 </Accordion>
 
 <Accordion title="Air-gapped">
@@ -534,23 +561,23 @@ Packing happens on a separate connected machine - any machine with outbound inte
 
 On that connected machine, download the `runai-installer` binary and use its `airgap pack` command to build a single tarball containing every image your release needs - NVIDIA Run:ai platform images and third-party service images (PostgreSQL, Keycloak, and others) alike. See [Third-Party Services](../../system-requirements/third-party-services.md#image-registry).
 
-1. Download the `runai-installer` binary for your operating system and CPU architecture, on each machine you run the installer from:
+1. Download the `runai-installer` binary for your operating system and CPU architecture, on each machine you run the installer from. Replace `<VERSION>` with the NVIDIA Run:ai version you are installing, for example `3.0.17`:
 
    ```bash
    # Linux, AMD64 (x86_64)
-   curl -LO <release-url>/runai-installer-linux-amd64
+   curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-linux-amd64
    chmod +x runai-installer-linux-amd64
 
    # Linux, ARM64
-   curl -LO <release-url>/runai-installer-linux-arm64
+   curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-linux-arm64
    chmod +x runai-installer-linux-arm64
 
    # macOS, AMD64 (Intel)
-   curl -LO <release-url>/runai-installer-darwin-amd64
+   curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-darwin-amd64
    chmod +x runai-installer-darwin-amd64
 
    # macOS, ARM64 (Apple Silicon)
-   curl -LO <release-url>/runai-installer-darwin-arm64
+   curl -LO https://github.com/dsx-ai-factory/run-ai/releases/download/<VERSION>/runai-installer-darwin-arm64
    chmod +x runai-installer-darwin-arm64
    ```
 
@@ -559,6 +586,7 @@ On that connected machine, download the `runai-installer` binary and use its `ai
    - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
    - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../guided-installation/configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
    - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
+   - Third-party services - Add an entry to `imageOverrides` for each hardened third-party image, and an entry to `registryAuth` for `docker.io` with your Docker Hub credentials. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the full example. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
    ```bash
    cat > airgap-pack.yaml <<'EOF'
@@ -570,11 +598,13 @@ On that connected machine, download the `runai-installer` binary and use its `ai
    imageOverrides:
      - name: keycloak
        source: <your-registry>/keycloak:<tag>
+     # Gov-ready: add an entry for each hardened image (keycloak, postgres, traefik, nats, thanos, valkey, git-sync)
 
    registryAuth:
      - registry: <your-registry-host>
        username: <username>
        passwordPath: <path-to-registry-password>
+     # Gov-ready: add an entry for docker.io with your Docker Hub credentials
    EOF
 
    ./runai-installer airgap pack \

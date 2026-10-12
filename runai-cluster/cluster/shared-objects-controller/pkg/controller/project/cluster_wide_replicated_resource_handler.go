@@ -177,7 +177,7 @@ func (handler *ClusterWideReplicatedResourceHandler) createNamespacedObjectIfNee
 		return nil, fmt.Errorf("failed to parse existingNamespacedClusterWideObject to client.Object")
 	}
 
-	err = handler.Client.Get(ctx,
+	err = handler.Get(ctx,
 		client.ObjectKey{Namespace: namespace, Name: clusterWideObject.GetName()},
 		existingNamespacedObject,
 	)
@@ -220,8 +220,38 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 	handler.clusterWideGVKCommon.PreserveImmutableFields(existingNamespacedObject, newNamespacedObject)
 
 	if handler.clusterWideGVKCommon.AreEqual(ctx, newNamespacedObject, existingNamespacedObject) {
+		// Spec-immutable kinds (RCT) whose AreEqual ignores metadata still
+		// need managed-metadata drift reconciled in place — UID stays stable.
+		if handler.clusterWideGVKCommon.IsSpecImmutable(existingNamespacedObject) &&
+			handler.clusterWideGVKCommon.IsManagedMetadataDiffers(existingNamespacedObject, newNamespacedObject) {
+			return handler.reconcileManagedMetadata(ctx, existingNamespacedObject, newNamespacedObject, gvk, namespace)
+		}
 		log.Ctx(ctx).Debug().Msgf("Object already exists in Namespace and no changes were detected. gvk %s, object %s, namespace %s",
 			gvk.String(), existingNamespacedObject.GetName(), namespace)
+		return nil
+	}
+
+	// Kinds whose Spec the apiserver treats as immutable might need to be re-created.(today: RCT on
+	// This produces one "unreferenced-then-replicated" annotation cycle, which is fine —
+	// the per-destination `clone.run.ai/<ns>` annotation is still set
+	// by createObjectsUnderNamespace on the recreate pass.
+	if handler.clusterWideGVKCommon.IsSpecImmutable(existingNamespacedObject) {
+		log.Ctx(ctx).Info().Msgf("Object exists in Namespace and spec diverges on an immutable field, deleting so it will be re-created from source. gvk %s, object %s, namespace %s",
+			gvk.String(), existingNamespacedObject.GetName(), namespace)
+		if delErr := handler.Delete(ctx, existingNamespacedObject); delErr != nil && !errors.IsNotFound(delErr) {
+			log.Ctx(ctx).Error().Msgf("Failed deleting object before recreate. gvk %s, object %s, namespace %s. error: %s",
+				gvk.String(), existingNamespacedObject.GetName(), namespace, delErr.Error())
+			return delErr
+		}
+		if createErr := handler.Create(ctx, newNamespacedObject); createErr != nil {
+			// Not tolerating AlreadyExists: usually means the old replica is
+			// still terminating, and swallowing it would leave no replacement
+			// until an unrelated event re-enqueues the project. Returning the
+			// error lets the controller retry.
+			log.Ctx(ctx).Error().Msgf("Failed creating object after delete-for-recreate. gvk %s, object %s, namespace %s. error: %s",
+				gvk.String(), newNamespacedObject.GetName(), namespace, createErr.Error())
+			return createErr
+		}
 		return nil
 	}
 
@@ -232,7 +262,7 @@ func (handler *ClusterWideReplicatedResourceHandler) handleExisting(
 	handler.updateExistingWithNewObject(ctx, existingNamespacedObject, newNamespacedObject)
 	handler.clusterWideGVKCommon.PreserveImmutableFields(immutableFieldsBackup, existingNamespacedObject)
 
-	err = handler.Client.Update(ctx, existingNamespacedObject)
+	err = handler.Update(ctx, existingNamespacedObject)
 	if err != nil {
 		log.Ctx(ctx).Error().Msgf("Failed updating object. gvk %s, object %s, namespace %s. error: %s",
 			gvk.String(), existingNamespacedObject.GetName(), namespace, err.Error())
@@ -254,7 +284,7 @@ func (handler *ClusterWideReplicatedResourceHandler) handleNonExisting(
 		return nil, err
 	}
 
-	err = handler.Client.Create(ctx, newNamespacedObject)
+	err = handler.Create(ctx, newNamespacedObject)
 	if err != nil && !errors.IsAlreadyExists(err) {
 		log.Ctx(ctx).Error().Msgf("Failed to create namespaced Object for Project. project %s, namespace %s, gvk %s, object %s. error: %s",
 			project.Name, namespace, gvk.String(), clusterWideObject.GetName(), err.Error())
@@ -288,7 +318,7 @@ func (handler *ClusterWideReplicatedResourceHandler) deleteObjects(
 	for _, objectToDelete := range unreferencedObjects {
 		log.Ctx(ctx).Info().Msgf("Deleting unreferenced object. gvk %s, object %s, namespace %s",
 			gvk.String(), objectToDelete.GetName(), objectToDelete.GetNamespace())
-		innerErr := handler.Client.Delete(ctx, objectToDelete)
+		innerErr := handler.Delete(ctx, objectToDelete)
 		if innerErr != nil {
 			log.Ctx(ctx).Error().Msgf("Failed to delete unreferenced object. gvk %s, object %s, namespace %s. error: %s",
 				gvk.String(), objectToDelete.GetName(), objectToDelete.GetNamespace(), innerErr.Error())
@@ -332,6 +362,34 @@ func (handler *ClusterWideReplicatedResourceHandler) createNamespacedObjectFromE
 
 	handler.clusterWideGVKCommon.DeepCopySpec(ctx, clusterWideObject, newObject)
 	return newObject, nil
+}
+
+// reconcileManagedMetadata copies run.ai-prefixed labels/annotations and
+// OwnerReferences from newObj onto existingObj and issues an in-place
+// Update, leaving the spec (and the UID) untouched.
+func (handler *ClusterWideReplicatedResourceHandler) reconcileManagedMetadata(
+	ctx context.Context, existingObj, newObj client.Object,
+	gvk schema.GroupVersionKind, namespace string,
+) error {
+	log.Ctx(ctx).Info().Msgf("Object exists in Namespace with equivalent spec but divergent managed metadata, updating metadata in place. gvk %s, object %s, namespace %s",
+		gvk.String(), existingObj.GetName(), namespace)
+
+	existingObjLabels := existingObj.GetLabels()
+	copyRunaiLabels(newObj.GetLabels(), &existingObjLabels)
+	existingObj.SetLabels(existingObjLabels)
+
+	existingObjAnnotations := existingObj.GetAnnotations()
+	copyRunaiAnnotations(newObj.GetAnnotations(), &existingObjAnnotations)
+	existingObj.SetAnnotations(existingObjAnnotations)
+
+	existingObj.SetOwnerReferences(newObj.GetOwnerReferences())
+
+	if err := handler.Update(ctx, existingObj); err != nil {
+		log.Ctx(ctx).Error().Msgf("Failed updating managed metadata on object. gvk %s, object %s, namespace %s. error: %s",
+			gvk.String(), existingObj.GetName(), namespace, err.Error())
+		return err
+	}
+	return nil
 }
 
 func (handler *ClusterWideReplicatedResourceHandler) updateExistingWithNewObject(ctx context.Context, existingObj, newObj client.Object) {
@@ -393,7 +451,7 @@ func (handler *ClusterWideReplicatedResourceHandler) patchAnnotations(ctx contex
 		return err
 	}
 	patch := client.RawPatch(types.MergePatchType, metadata)
-	return handler.Client.Patch(ctx, obj, patch)
+	return handler.Patch(ctx, obj, patch)
 }
 
 func getUnreferencedObjects(
@@ -443,36 +501,64 @@ func getObjectsNames(objects interface{}) ([]string, bool) {
 	return names, ok
 }
 
-func copyRunaiLabels(from map[string]string, to *map[string]string) {
-	if from == nil || to == nil {
+func cloneStringMap(src map[string]string) map[string]string {
+	if src == nil {
+		return nil
+	}
+	dst := make(map[string]string, len(src))
+	for k, v := range src {
+		dst[k] = v
+	}
+	return dst
+}
+
+func isManagedLabelKey(key string) bool {
+	return strings.HasPrefix(key, "runai/") || strings.HasPrefix(key, "run.ai/")
+}
+
+func isManagedAnnotationKey(key string) bool {
+	return strings.HasPrefix(key, "run.ai/") || strings.HasPrefix(key, "attributes.run.ai/")
+}
+
+// reconcileManagedKeys makes `to` carry exactly the managed keys that
+// `from` carries: present ones are copied, keys matching isManaged on
+// `to` but absent from `from` are removed. Non-managed keys on `to` are
+// left alone so user-set / replica-specific metadata survives.
+func reconcileManagedKeys(from map[string]string, to *map[string]string, isManaged func(string) bool) {
+	if to == nil {
 		return
 	}
-
+	if *to == nil && len(from) == 0 {
+		return
+	}
 	if *to == nil {
 		*to = map[string]string{}
 	}
-
 	for key, value := range from {
-		if strings.HasPrefix(key, "runai/") || strings.HasPrefix(key, "run.ai/") {
+		if isManaged(key) {
 			(*to)[key] = value
+		}
+	}
+	for key := range *to {
+		if !isManaged(key) {
+			continue
+		}
+		if _, present := from[key]; !present {
+			delete(*to, key)
 		}
 	}
 }
 
+// copyRunaiLabels mirrors the source's run.ai-prefixed labels onto `to`,
+// including removing managed keys that no longer exist on the source.
+func copyRunaiLabels(from map[string]string, to *map[string]string) {
+	reconcileManagedKeys(from, to, isManagedLabelKey)
+}
+
+// copyRunaiAnnotations mirrors the source's run.ai-prefixed annotations
+// onto `to`, including removing managed keys that no longer exist on the source.
 func copyRunaiAnnotations(from map[string]string, to *map[string]string) {
-	if from == nil || to == nil {
-		return
-	}
-
-	if *to == nil {
-		*to = map[string]string{}
-	}
-
-	for key, value := range from {
-		if strings.HasPrefix(key, "run.ai/") || strings.HasPrefix(key, "attributes.run.ai/") {
-			(*to)[key] = value
-		}
-	}
+	reconcileManagedKeys(from, to, isManagedAnnotationKey)
 }
 
 func IsManuallyOverridden(meta metav1.Object) bool {
