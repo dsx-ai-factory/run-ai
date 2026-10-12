@@ -656,7 +656,7 @@ func TestSuiteRunMeasuresEveryRoundWithAFakeSession(t *testing.T) {
 	if err != nil || section.Failed {
 		t.Fatalf("two clean rounds must pass: %v / %+v", err, section)
 	}
-	for _, key := range []string{"p90_ms@2", "p90_ms@3", "throughput_per_sec@3"} {
+	for _, key := range []string{"p50_ms@2", "p90_ms@2", "max_ms@2", "p50_ms@3", "p90_ms@3", "max_ms@3"} {
 		if _, present := section.Metrics[key]; !present {
 			t.Fatalf("%s missing from %v", key, section.Metrics)
 		}
