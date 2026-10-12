@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/identity-manager
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
