@@ -5,7 +5,5 @@ include ../../../build/makefile/runai-cluster.mk
 include ../../../build/makefile/index.mk
 DOCKER_WORK_DIR=${DOCKER_WORK_DIR_CLUSTER}
 
-# Library module (no image). The Makefile exists for the shared targets,
-# e.g. `make generate-mocks-local`, which regenerates the mocks configured in
-# .mockery.yml.
+# Library module (no image). The Makefile provides shared Go tooling targets.
 SERVICE_NAME=workload-controller

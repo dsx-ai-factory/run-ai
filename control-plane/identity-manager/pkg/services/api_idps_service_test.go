@@ -321,6 +321,37 @@ func TestCreateIdp_SamlHappyFlow(t *testing.T) {
 	assert.Equal(t, idpAlias, res.Alias)
 }
 
+func TestCreateIdp_ConfigUrlError(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error"))
+
+	request := api.IdpCreationRequest{
+		Type:     api.IdpCreationRequestTypeEnum(models.SAML),
+		Name:     idpAlias,
+		SamlData: &api.SamlCreationData{MetadataXmlUrl: URL, MetadataXmlType: utils.Url},
+	}
+	response, err := testSubject.CreateIdp(ctx, request, "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusInternalServerError, response.Code)
+}
+
+func TestCreateIdp_ConfigFileError(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error"))
+
+	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusInternalServerError, response.Code)
+}
+
 func TestDeleteIdp_HappyFlow(t *testing.T) {
 	assert.Nil(t, nil)
 	MocksList, testSubject, ctx := initIdpServiceTests(t)
