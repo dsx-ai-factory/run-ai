@@ -175,6 +175,9 @@ func AssertNimServiceDefaultsAllOfComputeConstraints(obj NimServiceDefaultsAllOf
 	if obj.GpuMemoryPortionRequest != nil && *obj.GpuMemoryPortionRequest < 0 {
 		return &ParsingError{Param: "GpuMemoryPortionRequest", Err: errors.New(errMsgMinValueConstraint)}
 	}
+	if obj.GpuMemoryPortionRequest != nil && *obj.GpuMemoryPortionRequest > 1 {
+		return &ParsingError{Param: "GpuMemoryPortionRequest", Err: errors.New(errMsgMaxValueConstraint)}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

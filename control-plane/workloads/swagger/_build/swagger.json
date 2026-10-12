@@ -12889,6 +12889,7 @@
         "example": 0.5,
         "nullable": true,
         "minimum": 0,
+        "maximum": 1,
         "x-gorm-ignore": true
       },
       "GpuMemoryRequest": {

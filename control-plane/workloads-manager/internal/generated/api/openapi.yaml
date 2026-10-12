@@ -5356,6 +5356,7 @@ components:
         \ 1. Required when gpuRequestType is portion."
       example: 0.5
       format: double
+      maximum: 1
       minimum: 0
       nullable: true
       type: number
@@ -8098,6 +8099,7 @@ components:
             \ and 1. Required when gpuRequestType is portion."
           example: 0.5
           format: double
+          maximum: 1
           minimum: 0
           nullable: true
           type: number
