@@ -114,7 +114,6 @@ Class | Method | HTTP request | Description
  - [ComplianceIssuesComplianceIssuesInner](docs/ComplianceIssuesComplianceIssuesInner.md)
  - [ComplianceIssuesV2](docs/ComplianceIssuesV2.md)
  - [ComplianceIssuesV2ComplianceIssuesInner](docs/ComplianceIssuesV2ComplianceIssuesInner.md)
- - [ComputeMode](docs/ComputeMode.md)
  - [DesiredPhase](docs/DesiredPhase.md)
  - [EnvironmentVariable](docs/EnvironmentVariable.md)
  - [EnvironmentVariableConfigMap](docs/EnvironmentVariableConfigMap.md)

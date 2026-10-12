@@ -8634,14 +8634,6 @@ components:
       nullable: true
       example: python
       pattern: .*
-    ComputeMode:
-      description: Effective GPU compute sharing mode saved when the workload was submitted. This describes the submitted configuration, not observed GPU hardware state. Present for GPU workloads; ignored in requests.
-      type: string
-      enum:
-        - time-slicing
-        - sm-sharing
-      nullable: true
-      readOnly: true
     CpuCoreLimit:
       description: Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
       format: double
@@ -10151,8 +10143,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -10455,8 +10445,6 @@ components:
         compute:
           nullable: true
           properties:
-            computeMode:
-              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:
@@ -10989,8 +10977,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -11191,8 +11177,6 @@ components:
         compute:
           nullable: true
           properties:
-            computeMode:
-              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:
@@ -11428,8 +11412,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -11598,8 +11580,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -11983,8 +11963,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -12139,8 +12117,6 @@ components:
                 compute:
                   nullable: true
                   properties:
-                    computeMode:
-                      $ref: '#/components/schemas/ComputeMode'
                     cpuCoreLimit:
                       $ref: '#/components/schemas/CpuCoreLimit'
                     cpuCoreRequest:
@@ -12599,8 +12575,6 @@ components:
         compute:
           nullable: true
           properties:
-            computeMode:
-              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:
@@ -12833,8 +12807,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -13103,8 +13075,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -13303,8 +13273,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -13540,8 +13508,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -13718,8 +13684,6 @@ components:
         compute:
           nullable: true
           properties:
-            computeMode:
-              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:

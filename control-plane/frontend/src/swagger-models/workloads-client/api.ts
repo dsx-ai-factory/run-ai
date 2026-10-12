@@ -2259,20 +2259,6 @@ export interface ComplianceIssuesV2ComplianceIssuesInner {
     'rule'?: PolicyRuleEnum | null;
 }
 /**
- * Effective GPU compute sharing mode saved when the workload was submitted. This describes the submitted configuration, not observed GPU hardware state. Present for GPU workloads; ignored in requests.
- * @export
- * @enum {string}
- */
-
-export const ComputeMode = {
-    TimeSlicing: 'time-slicing',
-    SmSharing: 'sm-sharing'
-} as const;
-
-export type ComputeMode = typeof ComputeMode[keyof typeof ComputeMode];
-
-
-/**
  * 
  * @export
  * @interface ConcurrencyHardLimitField
@@ -25837,12 +25823,6 @@ export interface WorkspaceSpecSpecAllOf {
  * @interface WorkspaceSpecSpecAllOfCompute
  */
 export interface WorkspaceSpecSpecAllOfCompute {
-    /**
-     * 
-     * @type {ComputeMode}
-     * @memberof WorkspaceSpecSpecAllOfCompute
-     */
-    'computeMode'?: ComputeMode | null;
     /**
      * Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
      * @type {number}

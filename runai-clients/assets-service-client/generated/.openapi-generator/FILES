@@ -103,7 +103,6 @@ docs/ComputeAsset.md
 docs/ComputeAssetSpec.md
 docs/ComputeCreationRequest.md
 docs/ComputeListResponse.md
-docs/ComputeMode.md
 docs/ComputeUpdateRequest.md
 docs/ConcurrencyHardLimitField.md
 docs/ConfigMap.md
@@ -568,7 +567,6 @@ model_compute_asset.go
 model_compute_asset_spec.go
 model_compute_creation_request.go
 model_compute_list_response.go
-model_compute_mode.go
 model_compute_update_request.go
 model_concurrency_hard_limit_field.go
 model_config_map.go

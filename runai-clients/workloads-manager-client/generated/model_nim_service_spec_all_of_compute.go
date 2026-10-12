@@ -22,7 +22,6 @@ var _ MappedNullable = &NimServiceSpecAllOfCompute{}
 
 // NimServiceSpecAllOfCompute struct for NimServiceSpecAllOfCompute
 type NimServiceSpecAllOfCompute struct {
-	ComputeMode NullableComputeMode `json:"computeMode,omitempty"`
 	// Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
 	CpuCoreLimit NullableFloat64 `json:"cpuCoreLimit,omitempty"`
 	// CPU units to allocate for the created workload (0.5, 1, .etc). The workload will receive at least this amount of CPU. Note that the workload will not be scheduled unless the system can guarantee this amount of CPUs to the workload.
@@ -66,49 +65,6 @@ func NewNimServiceSpecAllOfCompute() *NimServiceSpecAllOfCompute {
 func NewNimServiceSpecAllOfComputeWithDefaults() *NimServiceSpecAllOfCompute {
 	this := NimServiceSpecAllOfCompute{}
 	return &this
-}
-
-// GetComputeMode returns the ComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *NimServiceSpecAllOfCompute) GetComputeMode() ComputeMode {
-	if o == nil || IsNil(o.ComputeMode.Get()) {
-		var ret ComputeMode
-		return ret
-	}
-	return *o.ComputeMode.Get()
-}
-
-// GetComputeModeOk returns a tuple with the ComputeMode field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NimServiceSpecAllOfCompute) GetComputeModeOk() (*ComputeMode, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.ComputeMode.Get(), o.ComputeMode.IsSet()
-}
-
-// HasComputeMode returns a boolean if a field has been set.
-func (o *NimServiceSpecAllOfCompute) HasComputeMode() bool {
-	if o != nil && o.ComputeMode.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetComputeMode gets a reference to the given NullableComputeMode and assigns it to the ComputeMode field.
-func (o *NimServiceSpecAllOfCompute) SetComputeMode(v ComputeMode) {
-	o.ComputeMode.Set(&v)
-}
-
-// SetComputeModeNil sets the value for ComputeMode to be an explicit nil
-func (o *NimServiceSpecAllOfCompute) SetComputeModeNil() {
-	o.ComputeMode.Set(nil)
-}
-
-// UnsetComputeMode ensures that no value is present for ComputeMode, not even an explicit nil
-func (o *NimServiceSpecAllOfCompute) UnsetComputeMode() {
-	o.ComputeMode.Unset()
 }
 
 // GetCpuCoreLimit returns the CpuCoreLimit field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -686,9 +642,6 @@ func (o NimServiceSpecAllOfCompute) MarshalJSON() ([]byte, error) {
 
 func (o NimServiceSpecAllOfCompute) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.ComputeMode.IsSet() {
-		toSerialize["computeMode"] = o.ComputeMode.Get()
-	}
 	if o.CpuCoreLimit.IsSet() {
 		toSerialize["cpuCoreLimit"] = o.CpuCoreLimit.Get()
 	}

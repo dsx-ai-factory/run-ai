@@ -290,7 +290,6 @@ Class | Method | HTTP request | Description
  - [ComputeAssetSpec](docs/ComputeAssetSpec.md)
  - [ComputeCreationRequest](docs/ComputeCreationRequest.md)
  - [ComputeListResponse](docs/ComputeListResponse.md)
- - [ComputeMode](docs/ComputeMode.md)
  - [ComputeUpdateRequest](docs/ComputeUpdateRequest.md)
  - [ConcurrencyHardLimitField](docs/ConcurrencyHardLimitField.md)
  - [ConfigMap](docs/ConfigMap.md)

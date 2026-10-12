@@ -26,8 +26,6 @@ allOf:
     compute:
       nullable: true
       properties:
-        computeMode:
-          $ref: ../workloads_spec/compute/ComputeMode.yaml
         cpuCoreLimit:
           $ref: ../workloads_spec/compute/CpuCoreLimit.yaml
         cpuCoreRequest:

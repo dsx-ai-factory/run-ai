@@ -24,7 +24,6 @@ docs/ComplianceIssues.md
 docs/ComplianceIssuesComplianceIssuesInner.md
 docs/ComplianceIssuesV2.md
 docs/ComplianceIssuesV2ComplianceIssuesInner.md
-docs/ComputeMode.md
 docs/DesiredPhase.md
 docs/EnvironmentVariable.md
 docs/EnvironmentVariableConfigMap.md
@@ -141,7 +140,6 @@ model_compliance_issues.go
 model_compliance_issues_compliance_issues_inner.go
 model_compliance_issues_v2.go
 model_compliance_issues_v2_compliance_issues_inner.go
-model_compute_mode.go
 model_desired_phase.go
 model_environment_variable.go
 model_environment_variable_config_map.go

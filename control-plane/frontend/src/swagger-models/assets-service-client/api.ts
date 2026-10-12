@@ -2442,20 +2442,6 @@ export interface ComputeListResponse {
     'entries': Array<ComputeAsset>;
 }
 /**
- * Effective GPU compute sharing mode saved when the workload was submitted. This describes the submitted configuration, not observed GPU hardware state. Present for GPU workloads; ignored in requests.
- * @export
- * @enum {string}
- */
-
-export const ComputeMode = {
-    TimeSlicing: 'time-slicing',
-    SmSharing: 'sm-sharing'
-} as const;
-
-export type ComputeMode = typeof ComputeMode[keyof typeof ComputeMode];
-
-
-/**
  * 
  * @export
  * @interface ComputeUpdateRequest
@@ -4694,12 +4680,6 @@ export interface DistributedInferenceLeaderWorkerSpec {
  * @interface DistributedInferenceLeaderWorkerSpecCompute
  */
 export interface DistributedInferenceLeaderWorkerSpecCompute {
-    /**
-     * 
-     * @type {ComputeMode}
-     * @memberof DistributedInferenceLeaderWorkerSpecCompute
-     */
-    'computeMode'?: ComputeMode | null;
     /**
      * Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
      * @type {number}

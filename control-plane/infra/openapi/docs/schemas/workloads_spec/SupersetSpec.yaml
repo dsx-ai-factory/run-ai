@@ -28,8 +28,6 @@ allOf:
     compute:
       nullable: true
       properties:
-        computeMode:
-          $ref: ./compute/ComputeMode.yaml
         cpuCoreLimit:
           $ref: ./compute/CpuCoreLimit.yaml
         cpuCoreRequest:

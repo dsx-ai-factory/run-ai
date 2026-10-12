@@ -58903,16 +58903,6 @@ components:
       - projectId
       - workloadType
       type: object
-    ComputeMode:
-      description: "Effective GPU compute sharing mode saved when the workload was\
-        \ submitted. This describes the submitted configuration, not observed GPU\
-        \ hardware state. Present for GPU workloads; ignored in requests."
-      enum:
-      - time-slicing
-      - sm-sharing
-      nullable: true
-      readOnly: true
-      type: string
     EnvironmentVariableSecret:
       description: Details of the secret and key use to populate the environment variable
       example:
@@ -60446,7 +60436,6 @@ components:
           gpuMemoryRequest: 10M
           gpuMemoryPortionLimit: 0.5
           gpuPortionRequest: 0.5
-          computeMode: time-slicing
           gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           largeShmRequest: false
@@ -61905,7 +61894,6 @@ components:
           gpuMemoryRequest: 10M
           gpuMemoryPortionLimit: 0.5
           gpuPortionRequest: 0.5
-          computeMode: time-slicing
           gpuComputeMode: time-slicing
           gpuMemoryPortionRequest: 0.5
           largeShmRequest: false
@@ -62679,7 +62667,6 @@ components:
             gpuMemoryRequest: 10M
             gpuMemoryPortionLimit: 0.5
             gpuPortionRequest: 0.5
-            computeMode: time-slicing
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             largeShmRequest: false
@@ -64094,7 +64081,6 @@ components:
             gpuMemoryRequest: 10M
             gpuMemoryPortionLimit: 0.5
             gpuPortionRequest: 0.5
-            computeMode: time-slicing
             gpuComputeMode: time-slicing
             gpuMemoryPortionRequest: 0.5
             largeShmRequest: false
@@ -65439,7 +65425,6 @@ components:
         gpuMemoryRequest: 10M
         gpuMemoryPortionLimit: 0.5
         gpuPortionRequest: 0.5
-        computeMode: time-slicing
         gpuComputeMode: time-slicing
         gpuMemoryPortionRequest: 0.5
         largeShmRequest: false
@@ -65447,8 +65432,6 @@ components:
         gpuPortionLimit: 0.5
       nullable: true
       properties:
-        computeMode:
-          $ref: '#/components/schemas/ComputeMode'
         cpuCoreLimit:
           description: "Limitations on the number of CPUs consumed by the workload\
             \ (0.5, 1, .etc). The system guarantees that this workload will not be\

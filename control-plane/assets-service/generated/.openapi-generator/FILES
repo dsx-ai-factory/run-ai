@@ -126,7 +126,6 @@ pkg/api/model_compute_asset.go
 pkg/api/model_compute_asset_spec.go
 pkg/api/model_compute_creation_request.go
 pkg/api/model_compute_list_response.go
-pkg/api/model_compute_mode.go
 pkg/api/model_compute_update_request.go
 pkg/api/model_concurrency_hard_limit_field.go
 pkg/api/model_config_map.go

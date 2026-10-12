@@ -29,7 +29,6 @@ pkg/api/model_compliance_issues.go
 pkg/api/model_compliance_issues_compliance_issues_inner.go
 pkg/api/model_compliance_issues_v2.go
 pkg/api/model_compliance_issues_v2_compliance_issues_inner.go
-pkg/api/model_compute_mode.go
 pkg/api/model_desired_phase.go
 pkg/api/model_environment_variable.go
 pkg/api/model_environment_variable_config_map.go

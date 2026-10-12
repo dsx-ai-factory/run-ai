@@ -1945,26 +1945,6 @@ fields:
           - DinfLeaderWorkerDefaults
           - DinfLeaderWorkerRules
           - AssetsComputeSpec
-  computeMode:
-    name: compute.computeMode
-    variants:
-      - spec: compute/ComputeMode.yaml
-        targets:
-          - SupersetSpec
-          - TrainingSpec
-          - TrainingTemplateSpec
-          - WorkspaceSpec
-          - WorkspaceTemplateSpec
-          - DistributedSpec
-          - DistributedTemplateSpec
-          - MasterSpec
-          - MasterTemplateSpec
-          - InferenceSpec
-          - InferenceTemplateSpec
-          - InferenceUpdateSpec
-          - NimServiceSpec
-          - DinfLeaderWorkerSpec
-          - DinfLeaderWorkerTemplateSpec
   gpuMemoryPortionRequest:
     name: compute.gpuMemoryPortionRequest
     variants:

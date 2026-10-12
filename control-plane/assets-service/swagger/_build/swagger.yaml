@@ -10297,14 +10297,6 @@ components:
           $ref: '#/components/schemas/WorkloadType'
         masterSameAsWorker:
           type: boolean
-    ComputeMode:
-      description: Effective GPU compute sharing mode saved when the workload was submitted. This describes the submitted configuration, not observed GPU hardware state. Present for GPU workloads; ignored in requests.
-      type: string
-      enum:
-        - time-slicing
-        - sm-sharing
-      nullable: true
-      readOnly: true
     EnvironmentVariableSecret:
       description: Details of the secret and key use to populate the environment variable
       properties:
@@ -10539,8 +10531,6 @@ components:
         compute:
           nullable: true
           properties:
-            computeMode:
-              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:
@@ -11289,8 +11279,6 @@ components:
             compute:
               nullable: true
               properties:
-                computeMode:
-                  $ref: '#/components/schemas/ComputeMode'
                 cpuCoreLimit:
                   $ref: '#/components/schemas/CpuCoreLimit'
                 cpuCoreRequest:
@@ -11487,8 +11475,6 @@ components:
         compute:
           nullable: true
           properties:
-            computeMode:
-              $ref: '#/components/schemas/ComputeMode'
             cpuCoreLimit:
               $ref: '#/components/schemas/CpuCoreLimit'
             cpuCoreRequest:

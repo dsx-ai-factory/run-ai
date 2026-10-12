@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**ComputeMode** | Pointer to [**NullableComputeMode**](ComputeMode.md) |  | [optional] 
 **CpuCoreLimit** | Pointer to **NullableFloat64** | Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs. | [optional] 
 **CpuCoreRequest** | Pointer to **NullableFloat64** | CPU units to allocate for the created workload (0.5, 1, .etc). The workload will receive at least this amount of CPU. Note that the workload will not be scheduled unless the system can guarantee this amount of CPUs to the workload. | [optional] 
 **CpuMemoryLimit** | Pointer to **NullableString** | Limitations on the CPU memory to allocate for this workload (1G, 20M, .etc). The system guarantees that this workload will not be able to consume more than this amount of memory. The workload will receive an error when trying to allocate more memory than this limit. | [optional] 
@@ -40,41 +39,6 @@ NewDistributedInferenceLeaderWorkerSpecComputeWithDefaults instantiates a new Di
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetComputeMode
-
-`func (o *DistributedInferenceLeaderWorkerSpecCompute) GetComputeMode() ComputeMode`
-
-GetComputeMode returns the ComputeMode field if non-nil, zero value otherwise.
-
-### GetComputeModeOk
-
-`func (o *DistributedInferenceLeaderWorkerSpecCompute) GetComputeModeOk() (*ComputeMode, bool)`
-
-GetComputeModeOk returns a tuple with the ComputeMode field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetComputeMode
-
-`func (o *DistributedInferenceLeaderWorkerSpecCompute) SetComputeMode(v ComputeMode)`
-
-SetComputeMode sets ComputeMode field to given value.
-
-### HasComputeMode
-
-`func (o *DistributedInferenceLeaderWorkerSpecCompute) HasComputeMode() bool`
-
-HasComputeMode returns a boolean if a field has been set.
-
-### SetComputeModeNil
-
-`func (o *DistributedInferenceLeaderWorkerSpecCompute) SetComputeModeNil(b bool)`
-
- SetComputeModeNil sets the value for ComputeMode to be an explicit nil
-
-### UnsetComputeMode
-`func (o *DistributedInferenceLeaderWorkerSpecCompute) UnsetComputeMode()`
-
-UnsetComputeMode ensures that no value is present for ComputeMode, not even an explicit nil
 ### GetCpuCoreLimit
 
 `func (o *DistributedInferenceLeaderWorkerSpecCompute) GetCpuCoreLimit() float64`
