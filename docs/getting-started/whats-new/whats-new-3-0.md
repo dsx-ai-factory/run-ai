@@ -30,6 +30,7 @@ NVIDIA Run:ai uses life cycle labels to indicate the maturity and stability of f
 * **GPU fractions on NVIDIA CUDA** - GPU memory fractions and dynamic GPU memory fractions are now powered by the standard NVIDIA CUDA implementation, replacing the previous proprietary GPU sharing engine. This makes the capability part of the standard NVIDIA stack, with broader compatibility and long-term maintenance by NVIDIA. Existing GPU fraction workloads require additional migration steps when upgrading to v3.0. See [Upgrade to 3.0](#upgrade-to-30) for upgrade considerations. <Badge intent="tip" minimal outlined>From cluster v3.0 onward</Badge>
   * **GPU compute modes** - Workloads using GPU memory fractions can use either time-slicing or the new sm-sharing mode. Time-slicing remains the default, while sm-sharing allows workloads to run concurrently on separate streaming multiprocessors. Both modes are supported with GPU memory fractions and dynamic GPU memory fractions. Refer to [GPU Compute Modes](../../platform-management/runai-scheduler/resource-optimization/compute-modes.md) for more details.
   * **GPU memory fractions** - GPU memory fractions and dynamic GPU memory fractions continue to support static and burstable GPU memory allocation with the CUDA-based implementation. Refer to [GPU Memory Fractions](../../platform-management/runai-scheduler/resource-optimization/memory-fractions.md) and [Dynamic GPU Memory Fractions](../../platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md) for more details.
+  * **Missing prerequisites indication** - The [Clusters](../../installation-and-configuration/operations/clusters.md) and [Nodes](../../platform-management/aiinitiatives/resources/nodes.md) pages show a Missing prerequisites status when the prerequisites for GPU fractions are not met, such as a GPU Operator version below the minimum on a cluster or an unsupported CUDA driver version on a node.
 
 ### AI Applications
 
@@ -108,7 +109,7 @@ NVIDIA Run:ai v3.0 updates supported versions across Kubernetes distributions, N
 
 * **NVIDIA GPU Operator 26.7.1** - The maximum supported version is now 26.7.1. With GPU Operator 26.7, the DRA driver is installed by the GPU Operator instead of separately.
 * **NVIDIA NIM Operator 3.1.x** - Version 3.1.x is now supported.
-* **NVIDIA Dynamo Operator 1.4.x** - Version 1.4.x is now supported.
+* **NVIDIA Dynamo Operator 1.5.x** - Version 1.5.x is now supported.
 * **Prometheus / Kube-Prometheus Stack 3.13.1 / 88.6.5** - The minimum supported versions are now 3.13.1 and 88.6.5.
 * **Knative Serving 1.23** - The maximum supported version is now 1.23.
 * **Kubeflow Training Operator 1.9.4** - Version 1.9.4 is now supported.
@@ -130,7 +131,7 @@ The [Installation and Configuration](../../installation-and-configuration/overvi
   * **External Access to Critical Services** - The former Network Requirements content has been reorganized under this page. It covers the external connectivity NVIDIA Run:ai requires, including access to NGC, upstream registries, control plane and cluster communication, and other external services.
 * **Manual Helm installation flow reorganized** - The Manual Helm installation now starts with a single Preparations page that brings together setup tasks that were previously spread across preparation, control plane system requirements, and cluster system requirements. This includes NVIDIA Run:ai registry credentials, TLS certificates, namespaces, and other installation prerequisites. The flow then continues to Prerequisites and Features, followed by the control plane and cluster installation procedures. Upgrade content has been moved out of the Helm installation flow into a separate Upgrade section.
 * **Prerequisites and Features are now separate from System Requirements** - Workload- and environment-specific components that previously appeared under cluster system requirements are now documented under Prerequisites and Features, including the GPU Operator, Prometheus, Network Operator, and components required for supported workload types.
-* **Aligned to the Day 0, Day 1, and Day 2 lifecycle** - The new structure follows the setup lifecycle:
+* **Aligned to the Day 0, Day 1, and Day 2 lifecycle** - The new structure follows the installation lifecycle:
   * **Day 0: Planning** - Plan the deployment and prepare the Kubernetes cluster and surrounding infrastructure required before installing NVIDIA Run:ai.
-  * **Day 1: Installation and Configuration** - Install NVIDIA Run:ai using Guided Installation or Manual Helm, then configure the platform for the environment.
+  * **Day 1: Setup** - Install NVIDIA Run:ai using Guided Installation or Manual Helm, then configure the platform for the environment.
   * **Day 2: Operations** - Perform ongoing operational tasks such as cluster management, scaling, high availability, node maintenance, backup and restore, monitoring, and logging.
