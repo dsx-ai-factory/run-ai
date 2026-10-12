@@ -22,37 +22,28 @@ var (
 	targetClient orm.DB
 )
 
-func Init(c *migrator_config.ConfigData) (orm.DB, orm.DB, orm.DB, error) {
+func Init(c *migrator_config.ConfigData) error {
 	conf = c
 	targetClient = runaidb.DB()
 	if targetClient == nil {
-		return nil, nil, nil, fmt.Errorf("database is not initialized")
+		return fmt.Errorf("database is not initialized")
 	}
 
 	var err error
 	sourceClient, err = runaidb.NewDB(conf.SchemaSource)
 	if err != nil {
-		return nil, nil, nil, err
+		return err
 	}
 	globalClient, err = runaidb.NewDB("")
 	if err != nil {
-		return nil, nil, nil, err
-	}
-	if err := autoMigrates(); err != nil {
-		return nil, nil, nil, err
-	}
-
-	return sourceClient, targetClient, globalClient, nil
-}
-
-func autoMigrates() error {
-	err := targetClient.Actual().AutoMigrate(&models.ClustersMigrationControl{})
-	if err != nil {
-		logging.Errorf("Failed to run clusters migration control auto-migrate: %v", err)
 		return err
 	}
 
-	err = targetClient.Actual().AutoMigrate(&models.NodepoolSystemSettingsMigrationControl{})
+	return autoMigrates()
+}
+
+func autoMigrates() error {
+	err := targetClient.Actual().AutoMigrate(&models.NodepoolSystemSettingsMigrationControl{})
 	if err != nil {
 		logging.Errorf("Failed to run nodepool system settings migration control auto-migrate: %v", err)
 		return err

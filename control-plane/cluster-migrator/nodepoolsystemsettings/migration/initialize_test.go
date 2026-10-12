@@ -39,9 +39,8 @@ func TestApi(t *ginkgoTesting.T) {
 	t.Cleanup(func() { _ = runaidb.Close() })
 
 	conf.ShouldMarkCompleted = true
-	_, _, _, err = database.Init(conf)
-	require.NoError(t, err)
-	database.SetupTables(conf, true)
+	require.NoError(t, database.Init(conf))
+	database.SetupTables(conf)
 
 	RunSpecs(t, "Migration tests")
 }
