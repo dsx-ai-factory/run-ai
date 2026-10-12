@@ -15,7 +15,7 @@ The support matrix outlines the verified compatibility standards for NVIDIA Run:
 
 <sup>1</sup> GPU Operator 26.7.1 is required to use GPU fractions, alongside CUDA driver r615 or later. GPU Operator 26.7.1 does not default to CUDA driver r615, so the driver version must be set explicitly. See [GPU Memory Fractions](../platform-management/runai-scheduler/resource-optimization/memory-fractions.md#prerequisites).
 
-<sup>2</sup> Applies to GPU Operator 25.10 - 26.3, where the DRA driver is installed separately. For GPU Operator 26.7, the DRA driver is installed by the GPU Operator.
+<sup>2</sup> Applies to a separately installed DRA driver, used when the GPU Operator runs in `ClusterPolicy` mode (the default). With GPU Operator 26.7 in `GPUCluster` mode, the GPU Operator deploys the DRA driver itself. See [NVIDIA Dynamic Resource Allocation (DRA) Driver](installation/guided-installation/prerequisites-and-features.md#nvidia-dynamic-resource-allocation-dra-driver).
 
 ### Features
 

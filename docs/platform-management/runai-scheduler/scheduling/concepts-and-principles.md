@@ -223,7 +223,7 @@ A translation layer in the Scheduler translates legacy extended-resource request
 
 Workloads that request extended resources and workloads that submit DRA claims can run in the same cluster when extended-resource translation is enabled. Translation requires all of the following:
 
-* The NVIDIA DRA driver, installed through the NVIDIA GPU Operator.
+* The NVIDIA DRA driver, deployed by the NVIDIA GPU Operator when it runs in `GPUCluster` mode (GPU Operator 26.7). In this mode, the GPU Operator does not deploy the device plugin, so workloads that request `nvidia.com/gpu` depend on translation.
 * A `DeviceClass` that sets `spec.extendedResourceName` to the extended resource name in use, for example `nvidia.com/gpu`. The GPU Operator creates the `gpu.nvidia.com` `DeviceClass` but does not set this field, so the legacy name requires a separate `DeviceClass` created by the administrator.
 * Kubernetes support for the DRA extended resource feature, which is generally available from Kubernetes 1.37.
 * NVIDIA Run:ai v3.0 or later, which provides the Scheduler side of the translation.
