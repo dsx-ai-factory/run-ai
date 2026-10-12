@@ -171,7 +171,26 @@ The Network Operator must be installed and configured as follows:
 
 ### NVIDIA Dynamic Resource Allocation (DRA) Driver
 
-When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html) is required to enable Dynamic Resource Allocation at the Kubernetes level. To install, follow the instructions in [Configure and Helm-install the driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#configure-and-helm-install-the-driver). The DRA driver is installed with the GPU Operator. For air-gapped installations, follow the air-gapped instructions in the [NVIDIA GPU Operator](#nvidia-gpu-operator) section.
+When deploying on clusters with Multi-Node NVLink (e.g. GB200), the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/26.7/dra-intro-install.html) is required. For air-gapped installations, follow the air-gapped instructions in the [NVIDIA GPU Operator](#nvidia-gpu-operator) section.
+
+How the DRA driver is installed depends on the GPU Operator mode. A cluster runs in one mode only:
+
+* **`ClusterPolicy` mode (default)** - GPUs are exposed through the NVIDIA device plugin. Install the DRA driver separately. Refer to [Support Matrix](../../support-matrix.md) for the supported DRA driver versions.
+* **`GPUCluster` mode (GPU Operator 26.7, new installations only)** - The GPU Operator deploys the DRA driver, which replaces the device plugin.
+
+For details, refer to [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/26.7/dra-intro-install.html) and, on OpenShift, [Installing the NVIDIA GPU Operator with DRA on OpenShift](https://docs.nvidia.com/datacenter/cloud-native/openshift/26.7/dra-gpu-ocp.html).
+
+<Warning>
+
+**Important**
+
+NVIDIA Run:ai limitations in `GPUCluster` mode:
+
+* GPU fractions are not supported.
+* NVIDIA Run:ai shows each node's GPU model, count, and memory only when GPU Feature Discovery is deployed separately. See [Deploying gpu-feature-discovery in standalone mode](https://github.com/NVIDIA/k8s-device-plugin#deploying-gpu-feature-discovery-in-standalone-mode).
+* Workloads that request `nvidia.com/gpu` require [extended-resource translation](../../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#extended-resource-translation), which requires Kubernetes 1.37 or later.
+
+</Warning>
 
 After the DRA driver is installed, update the cluster configuration using the `anyworkload-controller.GPUNetworkAccelerationEnabled` flag to enable GPU network acceleration. This triggers an update of the NVIDIA Run:ai `anyworkload-controller` deployment and restarts the controller. For details on how to configure this value using Helm or `runaiconfig`, see [Advanced cluster configurations](../../configuration/cluster-config.md).
 
